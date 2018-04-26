@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -191,8 +190,7 @@ public class RefactoringPipeline {
 	 */
 	public List<ICompilationUnit> prepareRefactoring(List<ICompilationUnit> compilationUnits, IProgressMonitor monitor)
 			throws RefactoringException {
-		WorkingCopyDecorator wcd = new WorkingCopyDecorator();
-		WorkingCopyOwner workingCopyOwner = wcd.createWorkingCopyOwner();
+
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		try {
@@ -241,7 +239,7 @@ public class RefactoringPipeline {
 					}
 
 
-					createRefactoringState(compilationUnit, containingErrorList, workingCopyOwner);
+					createRefactoringState(compilationUnit, containingErrorList);
 
 					/*
 					 * If cancel is pressed on progress monitor, abort all and
@@ -289,10 +287,9 @@ public class RefactoringPipeline {
 	public List<ICompilationUnit> createRefactoringStates(List<ICompilationUnit> compilationUnits)
 			throws JavaModelException {
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
-		WorkingCopyDecorator wcd = new WorkingCopyDecorator();
-		WorkingCopyOwner workingCopyOwner = wcd.createWorkingCopyOwner();
+
 		for (ICompilationUnit compilationUnit : compilationUnits) {
-			createRefactoringState(compilationUnit, containingErrorList, workingCopyOwner);
+			createRefactoringState(compilationUnit, containingErrorList);
 		}
 
 		return containingErrorList;
@@ -312,13 +309,13 @@ public class RefactoringPipeline {
 	 *            error
 	 * @throws JavaModelException
 	 */
-	public void createRefactoringState(ICompilationUnit compilationUnit, List<ICompilationUnit> containingErrorList, WorkingCopyOwner wcOwner)
+	public void createRefactoringState(ICompilationUnit compilationUnit, List<ICompilationUnit> containingErrorList)
 			throws JavaModelException {
-		ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(wcOwner, null);
-		IProblemRequestor problemRequestor = wcOwner.getProblemRequestor(workingCopy);
+		ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(WorkingCopyOwnerDecorator.OWNER, null);
+		IProblemRequestor problemRequestor = WorkingCopyOwnerDecorator.OWNER.getProblemRequestor(workingCopy);
 		List<IProblem> problems = ((ProblemRequestor) problemRequestor).getProblems();
 		if (problems.isEmpty()) {
-			refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, wcOwner));
+			refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, WorkingCopyOwnerDecorator.OWNER));
 		} else {
 			String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors,
 					compilationUnit.getElementName(),
@@ -411,6 +408,7 @@ public class RefactoringPipeline {
 	 *            rule for which unselection of units was made
 	 * @throws RuleException
 	 */
+	@SuppressWarnings("deprecation") // see SIM-878
 	public void doAdditionalRefactoring(List<ICompilationUnit> changedCompilationUnits,
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> currentRule, IProgressMonitor monitor)
 			throws RuleException {
@@ -445,7 +443,11 @@ public class RefactoringPipeline {
 					} else if (!refactoringState.getIgnoredRules()
 						.contains(refactoringRule)) {
 						try {
-							refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, astRoot, false);
+							boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, astRoot, false);
+							if(hasChanges) {
+								astRoot = refactoringState.getWorkingCopy().reconcile(AST.JLS8, true, null, null);
+							}
+							
 						} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 							logger.error(e.getMessage(), e);
 							notWorkingRules.add(new NotWorkingRuleModel(refactoringRule.getRuleDescription()
@@ -479,6 +481,7 @@ public class RefactoringPipeline {
 	 *            rule for which working copy is selected
 	 * @throws RuleException
 	 */
+	@SuppressWarnings("deprecation") // see SIM-878
 	public void refactoringForCurrent(ICompilationUnit newSelection,
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> currentRule) throws RuleException {
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
@@ -502,7 +505,10 @@ public class RefactoringPipeline {
 				}
 				if (!refactoringState.getIgnoredRules()
 					.contains(refactoringRule)) {
-					refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, astRoot, false);
+					boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, astRoot, false);
+					if(hasChanges) {
+						astRoot = refactoringState.getWorkingCopy().reconcile(AST.JLS8, true, null, null);
+					}
 				}
 
 			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
@@ -566,7 +572,6 @@ public class RefactoringPipeline {
 	 */
 	public void clearStates() {
 		refactoringStates.forEach(RefactoringState::discardWorkingCopy);
-		
 		refactoringStates.clear();
 		initialSource.clear();
 	}

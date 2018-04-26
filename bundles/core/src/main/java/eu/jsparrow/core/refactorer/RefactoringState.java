@@ -6,14 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
-import org.eclipse.jdt.internal.core.JavaModelManager;
-import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
@@ -177,8 +172,6 @@ public class RefactoringState {
 	 */
 	public void discardWorkingCopy() {
 		try {
-			Owner owner = (Owner) workingCopy.getOwner();
-			owner.clearRecordedProblems();
 			workingCopy.discardWorkingCopy();
 			workingCopy.close();
 			original.close();
@@ -231,7 +224,8 @@ public class RefactoringState {
 	 */
 	public void resetWorkingCopy() {
 		try {
-			this.workingCopy = original.getWorkingCopy(null);
+			workingCopy.discardWorkingCopy();
+			this.workingCopy = original.getWorkingCopy(workingCopyOwner, null);
 			changes.clear();
 		} catch (JavaModelException e) {
 			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_reset_working_copy, workingCopy.getPath()
