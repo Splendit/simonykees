@@ -1,7 +1,6 @@
 package eu.jsparrow.ui.wizard.impl;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -134,7 +133,6 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 * disabled elements.
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public void moveAllToRight() {
 		Set<Object> currentPosibilities = filterPosibilitiesByName();
 		currentPosibilities.stream()
@@ -198,28 +196,24 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 * @param applicable
 	 *            Set to fill with all possible elements from all groups
 	 */
-	@SuppressWarnings("unchecked")
 	protected void addAllItems(final Set<Object> applicable) {
 		applicable.addAll(rules);
 		if (removeDisabled) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
 			currentPosibilities.stream()
-				.filter(posibility -> !((RefactoringRule) posibility)
-					.isEnabled())
+				.filter(posibility -> !((RefactoringRule) posibility).isEnabled())
 				.forEach(applicable::remove);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void removeDisabledPosibilities(boolean doit) {
 		removeDisabled = doit;
 		if (doit) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
 			currentPosibilities.stream()
-				.filter(posibility -> !((RefactoringRule) posibility)
-					.isEnabled())
+				.filter(posibility -> !((RefactoringRule) posibility).isEnabled())
 				.forEach(posibilities::remove);
 		} else {
 			posibilities.clear();
@@ -230,25 +224,18 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		notifyListeners();
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<RefactoringRule> getSelectionAsList() {
-		List<RefactoringRule> rules = selection.stream()
+		List<RefactoringRule> rulesList = selection.stream()
 			.map(object -> (RefactoringRule) object)
 			.collect(Collectors.toList());
-		Collections.sort(rules, new Comparator<RefactoringRule>() {
-			@Override
-			public int compare(RefactoringRule o1,
-					RefactoringRule o2) {
-				return Integer.compare(indexOfRuleInSortedList(o1), indexOfRuleInSortedList(o2));
-			}
-		});
+		Collections.sort(rulesList,
+				(o1, o2) -> Integer.compare(indexOfRuleInSortedList(o1), indexOfRuleInSortedList(o2)));
 		return rulesList;
 
 	}
 
 	private int indexOfRuleInSortedList(RefactoringRule searchedRule) {
-		final List<RefactoringRule> sortedRules = RulesContainer
-			.getAllRules(false);
+		final List<RefactoringRule> sortedRules = RulesContainer.getAllRules(false);
 		for (int i = 0; i < sortedRules.size(); i++) {
 			if (sortedRules.get(i)
 				.getRuleDescription()
@@ -305,7 +292,6 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		posibilities.addAll(filteredPosibilities);
 	}
 
-	@SuppressWarnings("unchecked")
 	public void selectFromProfile(final String profileId) {
 		currentProfileId = profileId;
 		moveAllToLeft();
@@ -320,7 +306,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 			optionalProfile.ifPresent(profile -> currentPosibilities.stream()
 				.filter(posibility -> profile.containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
 						// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
-							((RefactoringRule) posibility).getId()))
+						((RefactoringRule) posibility).getId()))
 				.forEach(posibility -> {
 					if (((RefactoringRule) posibility).isEnabled()) {
 						selection.add(posibility);
