@@ -28,14 +28,4 @@ public interface LicenseService {
 	 */
 	public void checkIn(LicenseModel model) throws ValidationException;
 
-	/**
-	 * Validate the given key and secret. This method is used if we don't know
-	 * if we have a floating or node locked license yet.
-	 * 
-	 * @param key the key to validate
-	 * @param secret the secret to validate
-	 * @return a license validation result
-	 * @throws ValidationException if the validate could not be performed
-	 */
-	public LicenseValidationResult verifyKey(String key, String secret) throws ValidationException;
 }

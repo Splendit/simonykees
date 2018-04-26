@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -14,6 +15,8 @@
 	<description>jSparrow UI Plugin</description>
 
 	<properties>
+		<ui.properties.destinationFile>src/main/resources/ui.properties</ui.properties.destinationFile>
+		<ui.properties.sourceFile></ui.properties.sourceFile>
 		<proguard.extra.options>
 			-libraryjars
 			${project.basedir}/../license.api/target/eu.jsparrow.license.api-${project.version}_proguard_base.jar
@@ -25,4 +28,61 @@
 			${project.basedir}/../core/target/eu.jsparrow.core-${project.version}_proguard_base.jar
 		</proguard.extra.options>
 	</properties>
+
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>ui.properties</include>
+				</includes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>com.coderplus.maven.plugins</groupId>
+				<artifactId>copy-rename-maven-plugin</artifactId>
+				<version>1.0.1</version>
+				<executions>
+					<execution>
+						<id>copy-properties</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<overWrite>true</overWrite>
+							<sourceFile>${ui.properties.sourceFile}</sourceFile>
+							<destinationFile>${ui.properties.destinationFile}</destinationFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<profiles>
+		<profile>
+			<id>test</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<ui.properties.sourceFile>src/main/resources/ui.test.properties</ui.properties.sourceFile>
+			</properties>
+
+		</profile>
+		<profile>
+			<id>production</id>
+			<activation>
+				<property>
+					<name>production</name>
+				</property>
+			</activation>
+			<properties>
+				<ui.properties.sourceFile>src/main/resources/ui.prod.properties</ui.properties.sourceFile>
+			</properties>
+		</profile>
+
+	</profiles>
 </project>

@@ -31,13 +31,13 @@ public class NetlicensingValidationParametersFactoryTest {
 	public void createFloatingCheckInParameters() {
 		String expectedSessionId = "secret";
 		String expectedAction = "checkIn";
-		NetlicensingLicenseModel model = new NetlicensingLicenseModel("key", expectedSessionId, LicenseType.FLOATING,
-				"name", expireDate);
+		NetlicensingLicenseModel model = new NetlicensingLicenseModel("key", expectedSessionId, "product", "module",
+				LicenseType.FLOATING, "name", expireDate);
 
 		ValidationParameters parameters = parametersFactory.createFloatingCheckInParameters(model);
 
 		Map<String, String> map = parameters
-			.getProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER);
+			.getProductModuleValidationParameters(model.getModuleNr());
 		assertTrue(map.containsKey("sessionId"));
 		assertTrue(map.containsKey("action"));
 		assertTrue(expectedSessionId.equals(map.get("sessionId")));
@@ -49,13 +49,13 @@ public class NetlicensingValidationParametersFactoryTest {
 
 		String expectedSecret = "secret";
 		String expectedName = "name";
-		NetlicensingLicenseModel model = new NetlicensingLicenseModel("key", expectedSecret, LicenseType.NODE_LOCKED,
-				expectedName, expireDate);
+		NetlicensingLicenseModel model = new NetlicensingLicenseModel("key", expectedSecret, "product", "module",
+				LicenseType.NODE_LOCKED, expectedName, expireDate);
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 
 		assertEquals(expectedSecret, parameters.getLicenseeSecret());
-		assertEquals(NetlicensingProperties.LICENSE_PRODUCT_NUMBER, parameters.getProductNumber());
+		assertEquals(model.getProductNr(), parameters.getProductNumber());
 		assertEquals(expectedName, parameters.getLicenseeName());
 	}
 
@@ -64,13 +64,13 @@ public class NetlicensingValidationParametersFactoryTest {
 		String expectedSessionId = "secret";
 		String expectedAction = "checkOut";
 
-		NetlicensingLicenseModel model = new NetlicensingLicenseModel("key", expectedSessionId, LicenseType.FLOATING,
-				"name", expireDate);
+		NetlicensingLicenseModel model = new NetlicensingLicenseModel("key", expectedSessionId, "product", "module",
+				LicenseType.FLOATING, "name", expireDate);
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 
 		Map<String, String> map = parameters
-			.getProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER);
+			.getProductModuleValidationParameters(model.getModuleNr());
 		assertTrue(map.containsKey("sessionId"));
 		assertTrue(map.containsKey("action"));
 		assertTrue(expectedSessionId.equals(map.get("sessionId")));

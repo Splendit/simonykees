@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -15,6 +16,8 @@
 
 	<properties>
 		<snakeyaml.version>1.18</snakeyaml.version>
+		<standalone.properties.destinationFile>src/main/resources/standalone.properties</standalone.properties.destinationFile>
+		<standalone.properties.sourceFile></standalone.properties.sourceFile>
 		<proguard.extra.options>
 			-libraryjars
 			${project.basedir}/../license.api/target/eu.jsparrow.license.api-${project.version}_proguard_base.jar
@@ -28,9 +31,17 @@
 	</properties>
 
 
-
-
 	<build>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>standalone.properties</include>
+				</includes>
+			</resource>
+		</resources>
+
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -59,7 +70,27 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+
 		<plugins>
+			<plugin>
+				<groupId>com.coderplus.maven.plugins</groupId>
+				<artifactId>copy-rename-maven-plugin</artifactId>
+				<version>1.0.1</version>
+				<executions>
+					<execution>
+						<id>copy-properties</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<overWrite>true</overWrite>
+							<sourceFile>${standalone.properties.sourceFile}</sourceFile>
+							<destinationFile>${standalone.properties.destinationFile}</destinationFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -96,8 +127,31 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>test</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<standalone.properties.sourceFile>src/main/resources/standalone.test.properties</standalone.properties.sourceFile>
+			</properties>
+
+		</profile>
+		<profile>
+			<id>production</id>
+			<activation>
+				<property>
+					<name>production</name>
+				</property>
+			</activation>
+			<properties>
+				<standalone.properties.sourceFile>src/main/resources/standalone.prod.properties</standalone.properties.sourceFile>
+			</properties>
+		</profile>
+
+	</profiles>
 </project>

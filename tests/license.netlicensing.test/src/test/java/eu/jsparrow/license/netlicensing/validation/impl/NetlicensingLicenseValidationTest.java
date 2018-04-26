@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -44,7 +45,8 @@ public class NetlicensingLicenseValidationTest {
 
 	@Test
 	public void validate_withInvalidCache_shouldSendRequestAndSaveToCache() throws ValidationException {
-		NetlicensingValidationResult validationResult = new NetlicensingValidationResult(model.getType(), null, true, null, null);
+		NetlicensingValidationResult validationResult = new NetlicensingValidationResult(model.getType(), null, true,
+				null, null);
 		ValidationParameters validationParameters = new ValidationParameters();
 
 		when(cache.get(any())).thenReturn(null);
@@ -58,9 +60,35 @@ public class NetlicensingLicenseValidationTest {
 	}
 
 	@Test
+	public void validate_withUnknownLicenseType_shouldSendRequestToGetLicenseType() throws ValidationException {
+		NetlicensingValidationResult intermediateValidationResult = new NetlicensingValidationResult(
+				LicenseType.NODE_LOCKED, "newKey", false, null, null);
+		ValidationParameters validationParameters = new ValidationParameters();
+		NetlicensingValidationResult finalValidationResult = new NetlicensingValidationResult(LicenseType.NODE_LOCKED,
+				"newKey", false, null, null);
+
+		model = NetlicensingLicenseModelFactory.create(LicenseType.NONE);
+		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
+
+		when(cache.get(any())).thenReturn(null);
+		when(parametersFactory.createVerifyParameters(any())).thenReturn(validationParameters);
+		when(parametersFactory.createValidationParameters(any())).thenReturn(validationParameters);
+
+		when(request.send(any(), any())).thenReturn(intermediateValidationResult)
+			.thenReturn(finalValidationResult);
+
+		netlicensingValidation.validate();
+
+		ArgumentCaptor<NetlicensingLicenseModel> argument = ArgumentCaptor.forClass(NetlicensingLicenseModel.class);
+		verify(parametersFactory).createValidationParameters(argument.capture());
+		assertEquals(LicenseType.NODE_LOCKED, argument.getValue()
+			.getType());
+	}
+
+	@Test
 	public void validate_withValidCache_shouldGetLastResultFromCache() throws ValidationException {
 		LicenseValidationResult expected = new LicenseValidationResult(null, null, false, null, null);
-		
+
 		when(cache.get(eq(model.getKey()))).thenReturn(expected);
 
 		LicenseValidationResult result = netlicensingValidation.validate();

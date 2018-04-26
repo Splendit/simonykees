@@ -1,6 +1,9 @@
 package eu.jsparrow.standalone;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
+import java.util.Properties;
 import java.util.Random;
 
 import org.osgi.service.component.annotations.Component;
@@ -28,7 +31,6 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 	@Reference(cardinality = ReferenceCardinality.MANDATORY)
 	private LicenseModelFactoryService factoryService;
 
-	private LicenseValidationResult result = null;
 	private Random random = new Random(System.currentTimeMillis());
 	private LicenseModel model;
 
@@ -41,15 +43,19 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 			return false;
 		}
 
+		LicenseValidationResult result = null;
 		try {
-			model = factoryService.createNewFloatingModel(key, sessionId);
+			Properties properties = loadProperties();
+			String productNr = properties.getProperty("license.productNr");
+			String moduleNr = properties.getProperty("license.moduleNr");
+
+			model = factoryService.createNewFloatingModel(key, sessionId, productNr, moduleNr);
 			result = licenseService.validate(model);
-		} catch (ValidationException e) {
+		} catch (ValidationException | IOException e) {
 			logger.debug("Licensing Error:", e); //$NON-NLS-1$
 			logger.error("Licensing Error: {}", e.getMessage()); //$NON-NLS-1$
 			return false;
 		}
-
 		if (result.getLicenseType() != LicenseType.FLOATING) {
 			logger.error("Unsupported License Type"); //$NON-NLS-1$
 			return false;
@@ -62,6 +68,16 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 
 		logger.error(result.getDetail());
 		return false;
+	}
+
+	private Properties loadProperties() throws IOException {
+		Properties properties = new Properties();
+		try (InputStream input = getClass().getClassLoader()
+			.getResourceAsStream("standalone.properties")) {
+			properties.load(input);
+		}
+		return properties;
+
 	}
 
 	@Override

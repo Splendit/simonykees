@@ -1,8 +1,11 @@
 package eu.jsparrow.ui.util;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Properties;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
@@ -36,6 +39,8 @@ import oshi.hardware.HardwareAbstractionLayer;
  */
 public class LicenseUtil implements LicenseUtilService {
 
+	
+	
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
@@ -50,7 +55,7 @@ public class LicenseUtil implements LicenseUtilService {
 	private LicenseValidationResult result = null;
 
 	private Scheduler scheduler;
-
+	
 	private LicenseUtil() {
 		scheduler = new Scheduler(this);
 		scheduler.start();
@@ -112,22 +117,18 @@ public class LicenseUtil implements LicenseUtilService {
 		LicenseValidationResult validationResult;
 		LicenseModel model;
 		try {
-			validationResult = licenseService.verifyKey(key, secret);
 			String name = createNameFromHardware();
-			/*
-			 * The validation result can only be trusted when the validation
-			 * request is based on a license model. The verify step is only used
-			 * for finding out the license model.
-			 */
-			model = factoryService.createNewModel(key, secret, validationResult.getLicenseType(), name,
-					validationResult.getExpirationDate());
+			Properties properties = loadProperties();
+			String productNr = properties.getProperty("license.productNr");
+			String moduleNr = properties.getProperty("license.moduleNr");
+			model = factoryService.createNewModel(key, secret, productNr,
+					moduleNr, LicenseType.NONE, name, null);
 			validationResult = licenseService.validate(model);
-		} catch (ValidationException e) {
+		} catch (ValidationException | IOException e) {
 			logger.error("Could not validate license", e); //$NON-NLS-1$
 			return new LicenseUpdateResult(false,
 					NLS.bind(Messages.UpdateLicenseDialog_error_couldNotValidate, e.getMessage()));
 		}
-
 		if (!validationResult.isValid()) {
 			logger.warn("License with key '{}' is not valid. License not saved.", key); //$NON-NLS-1$
 			return new LicenseUpdateResult(false, NLS.bind(Messages.UpdateLicenseDialog_error_licenseInvalid, key));
@@ -224,6 +225,15 @@ public class LicenseUtil implements LicenseUtilService {
 			logger.warn("Error while reading the host name", e); //$NON-NLS-1$
 			return ""; //$NON-NLS-1$
 		}
+	}
+	
+	private Properties loadProperties() throws IOException  {
+		Properties properties = new Properties();
+		try(InputStream input = getClass().getClassLoader().getResourceAsStream("ui.properties")){
+			properties.load(input);
+		}
+		return properties;
+		
 	}
 
 	/**

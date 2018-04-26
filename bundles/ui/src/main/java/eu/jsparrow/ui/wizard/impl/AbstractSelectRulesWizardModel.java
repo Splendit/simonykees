@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
+import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 import eu.jsparrow.ui.wizard.IValueChangeListener;
 import eu.jsparrow.ui.wizard.IWizardPageModel;
 
@@ -240,7 +242,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 				return Integer.compare(indexOfRuleInSortedList(o1), indexOfRuleInSortedList(o2));
 			}
 		});
-		return rules;
+		return rulesList;
 
 	}
 
@@ -249,8 +251,10 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 			.getAllRules(false);
 		for (int i = 0; i < sortedRules.size(); i++) {
 			if (sortedRules.get(i)
-				.getRuleDescription().getName()
-				.equals(searchedRule.getRuleDescription().getName())) {
+				.getRuleDescription()
+				.getName()
+				.equals(searchedRule.getRuleDescription()
+					.getName())) {
 				return i;
 			}
 		}
@@ -310,10 +314,12 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 				&& !StringUtils.isEmpty(currentProfileId)) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
-			currentPosibilities.stream()
-				.filter(posibility -> SimonykeesPreferenceManager.getProfileFromName(currentProfileId)
-					.containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
-							// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
+			Optional<SimonykeesProfile> optionalProfile = SimonykeesPreferenceManager
+				.getProfileFromName(currentProfileId);
+
+			optionalProfile.ifPresent(profile -> currentPosibilities.stream()
+				.filter(posibility -> profile.containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
+						// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
 							((RefactoringRule) posibility).getId()))
 				.forEach(posibility -> {
 					if (((RefactoringRule) posibility).isEnabled()) {
@@ -322,7 +328,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 					} else {
 						unapplicableRules.add(posibility);
 					}
-				});
+				}));
 		}
 
 		setChanged(true);

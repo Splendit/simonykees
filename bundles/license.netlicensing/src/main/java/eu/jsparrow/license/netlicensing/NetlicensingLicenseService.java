@@ -47,12 +47,4 @@ public class NetlicensingLicenseService implements LicenseService {
 		validation.checkIn();
 	}
 
-	@Override
-	public LicenseValidationResult verifyKey(String key, String secret) throws ValidationException {
-		logger.debug("Validating {}", key);
-		ResponseEvaluator responseEvaluator = new ResponseEvaluator(key);
-		NetlicensingValidationRequest request = new NetlicensingValidationRequest(responseEvaluator);
-		NetlicensingValidationParametersFactory parameterFactory = new NetlicensingValidationParametersFactory();
-		return request.send(key, parameterFactory.createVerifyParameters(secret));
-	}
 }
