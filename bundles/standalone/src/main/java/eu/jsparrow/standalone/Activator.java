@@ -116,6 +116,11 @@ public class Activator implements BundleActivator {
 			case LIST_RULES_SHORT:
 				listRulesUtil.listRulesShort();
 				break;
+			case LICENSE_INFO:
+				injectDependencies(context);
+				String key = getLicenseKey(context);
+				licenseService.licenseInfo(key);
+				break;
 			case TEST:
 				break;
 			}
@@ -219,7 +224,7 @@ public class Activator implements BundleActivator {
 			System.setProperty(key, exitMessage);
 		}
 	}
-	
+
 	private String getLicenseKey(BundleContext context) {
 		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
 		YAMLStandaloneConfig yamlStandaloneConfig = null;
