@@ -30,6 +30,10 @@ public class SimonykeesPreferenceManager {
 
 	private static SimonykeesProfile defaultProfile = new DefaultProfile();
 	private static SimonykeesProfile emptyProfile = new EmptyProfile();
+	
+	private SimonykeesPreferenceManager() {
+		// Hide default constructor
+	}
 
 	public static String getDefaultProfileList() {
 		StringBuilder sb = new StringBuilder();
@@ -168,7 +172,7 @@ public class SimonykeesPreferenceManager {
 	public static String getStringFromProfiles() {
 		List<String> profilesAsString = new ArrayList<>();
 		profiles.stream()
-			.map((profile) -> profile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER
+			.map(profile -> profile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER
 					+ StringUtils.join(profile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER))
 			.forEach(profilesAsString::add);
 		return flattenArray(profilesAsString);

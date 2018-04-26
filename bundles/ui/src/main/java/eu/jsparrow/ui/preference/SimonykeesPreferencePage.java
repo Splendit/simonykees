@@ -527,7 +527,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 					}
 					SimonykeesPreferenceManager.addProfile(profile.getName(), profile.getRules());
 					importedProfileCount++;
-					logger.info("profile added: " + profile); //$NON-NLS-1$
+					logger.info("profile added: {}", profile); //$NON-NLS-1$
 
 				}
 			}

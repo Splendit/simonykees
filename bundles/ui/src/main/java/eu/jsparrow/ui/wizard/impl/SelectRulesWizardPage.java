@@ -47,10 +47,10 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private static final String CUSTOM_PROFILE = Messages.SelectRulesWizardPage_CustomProfileLabel;
 
-	private Label selectProfileLabel;
+
 	private Combo selectProfileCombo;
 
-	private Label nameFilterLabel;
+
 	private Text nameFilterText;
 
 	private Composite tagsComposite;
@@ -81,7 +81,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		gridLayout.horizontalSpacing = 3;
 		filterComposite.setLayout(gridLayout);
 
-		nameFilterLabel = new Label(filterComposite, SWT.NONE);
+		Label nameFilterLabel = new Label(filterComposite, SWT.NONE);
 		nameFilterLabel.setText(Messages.SelectRulesWizardPage_filterByName);
 
 		nameFilterText = new Text(filterComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
@@ -148,8 +148,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 				// nothing
 			}
 		});
-
-		selectProfileLabel = new Label(filterComposite, SWT.NONE);
+		
+		Label selectProfileLabel = new Label(filterComposite, SWT.NONE);
 		selectProfileLabel.setText(Messages.SelectRulesWizardPage_selectProfile);
 		gridData = new GridData(GridData.END, GridData.CENTER, true, false);
 		selectProfileLabel.setLayoutData(gridData);

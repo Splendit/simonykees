@@ -23,8 +23,6 @@ import eu.jsparrow.ui.wizard.impl.AbstractSelectRulesWizardPage;
  */
 public class ConfigureProfileWizard extends Wizard {
 
-	private AbstractSelectRulesWizardPage page;
-	private ConfigureProfileSelectRulesWizardPageControler controler;
 	private ConfigureProfileSelectRulesWIzardPageModel model;
 
 	private String profileId;
@@ -50,8 +48,8 @@ public class ConfigureProfileWizard extends Wizard {
 	@Override
 	public void addPages() {
 		model = new ConfigureProfileSelectRulesWIzardPageModel(rules, profileId);
-		controler = new ConfigureProfileSelectRulesWizardPageControler(model);
-		page = new ConfigureProfileSelectRulesWizardPage(model, controler, profileId);
+		ConfigureProfileSelectRulesWizardPageControler controler = new ConfigureProfileSelectRulesWizardPageControler(model);
+		ConfigureProfileSelectRulesWizardPage page = new ConfigureProfileSelectRulesWizardPage(model, controler, profileId);
 		addPage(page);
 	}
 
@@ -59,7 +57,7 @@ public class ConfigureProfileWizard extends Wizard {
 	public boolean performFinish() {
 		int index = SimonykeesPreferenceManager.getProfiles()
 			.indexOf(SimonykeesPreferenceManager.getProfileFromName(profileId));
-		String name = ((ConfigureProfileSelectRulesWIzardPageModel) model).getName();
+		String name = model.getName();
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ruleIds = model.getSelectionAsList();
 		if (index >= 0) {
 			SimonykeesPreferenceManager.updateProfile(index, name, ruleIds.stream()
