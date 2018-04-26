@@ -20,6 +20,7 @@ import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -70,14 +71,14 @@ public class RefactoringInvokerTest {
 		}
 
 		@Override
-		protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules(
+		protected List<RefactoringRule> getProjectRules(
 				StandaloneConfig config) {
 			return Collections.emptyList();
 		}
 
 		@Override
-		protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules(YAMLConfig config,
-				List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
+		protected List<RefactoringRule> getSelectedRules(YAMLConfig config,
+				List<RefactoringRule> projectRules) throws YAMLConfigException {
 			return Collections.singletonList(new CodeFormatterRule());
 		}
 

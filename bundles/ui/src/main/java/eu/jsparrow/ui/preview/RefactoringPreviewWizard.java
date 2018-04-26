@@ -19,6 +19,7 @@ import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
@@ -260,7 +261,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 *            for which working copy is checked
 	 */
 	public void imediatelyUpdateForSelected(ICompilationUnit newSelection,
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+			RefactoringRule rule) {
 		try {
 			refactoringPipeline.refactoringForCurrent(newSelection, rule);
 		} catch (RuleException exception) {

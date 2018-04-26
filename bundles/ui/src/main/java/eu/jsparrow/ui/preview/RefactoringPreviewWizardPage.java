@@ -38,8 +38,8 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.RefactoringRuleInterface;
 import eu.jsparrow.rules.common.statistics.FileChangeCount;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
@@ -70,7 +70,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private IChangePreviewViewer currentPreviewViewer;
 	private CheckboxTableViewer viewer;
 	private Map<ICompilationUnit, DocumentChange> changesForRule;
-	private RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule;
+	private RefactoringRule rule;
 
 	private RefactoringPreviewWizardPageModel model;
 	/*
@@ -91,7 +91,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule,
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, RefactoringPreviewWizardModel wizardModel) {
+			RefactoringRule rule, RefactoringPreviewWizardModel wizardModel) {
 		super(rule.getRuleDescription()
 			.getName());
 
@@ -427,7 +427,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		unselectedChange.clear();
 	}
 
-	public RefactoringRule<? extends AbstractASTRewriteASTVisitor> getRule() {
+	public RefactoringRule getRule() {
 		return rule;
 	}
 
@@ -512,7 +512,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	}
 
 	private void clearCounterForChangedFile(ICompilationUnit newSelection) {
-		for (RefactoringRuleInterface changedFileRule : wizardModel.getChangedFilesPerRule()
+		for (RefactoringRule changedFileRule : wizardModel.getChangedFilesPerRule()
 			.keySet()) {
 			if (wizardModel.getFilesForRule(changedFileRule)
 				.contains(newSelection.getHandleIdentifier())) {

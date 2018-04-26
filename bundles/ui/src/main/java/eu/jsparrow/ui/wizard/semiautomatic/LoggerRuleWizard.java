@@ -22,7 +22,6 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.util.ResourceHelper;
@@ -50,7 +49,7 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 	private RefactoringPipeline refactoringPipeline;
 
 	public LoggerRuleWizard(IJavaProject selectedJavaProjekt,
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, RefactoringPipeline refactoringPipeline) {
+			RefactoringRule rule, RefactoringPipeline refactoringPipeline) {
 		super();
 		this.selectedJavaProjekt = selectedJavaProjekt;
 		this.refactoringPipeline = refactoringPipeline;
@@ -89,7 +88,7 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 			.getSimpleName(), selectedJavaProjekt.getElementName());
 		logger.info(bind);
 
-		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
+		final List<RefactoringRule> rules = Arrays.asList(rule);
 		refactoringPipeline.setRules(rules);
 
 		Rectangle rectangle = Display.getCurrent()

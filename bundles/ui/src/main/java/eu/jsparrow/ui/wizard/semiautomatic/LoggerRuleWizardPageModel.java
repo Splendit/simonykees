@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.wizard.IValueChangeListener;
@@ -41,7 +42,7 @@ public class LoggerRuleWizardPageModel {
 
 	private static final String NO_SEVERITY_LEVEL = Messages.LoggerRuleWizardPageModel_noSeverityLevel;
 
-	public LoggerRuleWizardPageModel(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+	public LoggerRuleWizardPageModel(RefactoringRule rule) {
 		this.rule = (StandardLoggerRule) rule;
 
 		currentSelectionMap.putAll(this.rule.getDefaultOptions());

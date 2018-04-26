@@ -7,7 +7,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachIfWrapperToFilterASTVisitor;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
@@ -17,7 +17,7 @@ import eu.jsparrow.rules.common.Tag;
  * @author Matthias Webhofer
  * @since 1.2
  */
-public class LambdaForEachIfWrapperToFilterRule extends RefactoringRule<LambdaForEachIfWrapperToFilterASTVisitor> {
+public class LambdaForEachIfWrapperToFilterRule extends RefactoringRuleImpl<LambdaForEachIfWrapperToFilterASTVisitor> {
 
 	public LambdaForEachIfWrapperToFilterRule() {
 		super();

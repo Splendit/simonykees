@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.jsparrow.rules.common.RefactoringRuleInterface;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.ASTRewriteEvent;
 import eu.jsparrow.rules.common.visitor.ASTRewriteVisitorListener;
 
 /**
  * A {@link ASTRewriteVisitorListener} that simply increases a counter when
- * notified. Used in {@link RefactoringRule} in order to count how often a
+ * notified. Used in {@link RefactoringRuleImpl} in order to count how often a
  * specific rule has been used.
  * 
  * @author Hans-Jörg Schrödl, Matthias Webhofer
@@ -18,7 +19,7 @@ import eu.jsparrow.rules.common.visitor.ASTRewriteVisitorListener;
  */
 public class RuleApplicationCount implements ASTRewriteVisitorListener {
 
-	private static final Map<RefactoringRuleInterface, RuleApplicationCount> applicationCounters = new HashMap<>();
+	private static final Map<RefactoringRule, RuleApplicationCount> applicationCounters = new HashMap<>();
 
 	private Map<String, FileChangeCount> changesPerCompilationUnit = new HashMap<>();
 
@@ -42,7 +43,7 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 	 *            rule to get the application count for
 	 * @return the application count for a given rule
 	 */
-	public static RuleApplicationCount getFor(RefactoringRuleInterface rule) {
+	public static RuleApplicationCount getFor(RefactoringRule rule) {
 		applicationCounters.putIfAbsent(rule, new RuleApplicationCount());
 		return applicationCounters.get(rule);
 	}

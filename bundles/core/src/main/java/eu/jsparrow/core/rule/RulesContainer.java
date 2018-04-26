@@ -59,6 +59,7 @@ import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.rules.api.RuleService;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -100,13 +101,13 @@ public class RulesContainer {
 	 * certain order. The execution order of each rule is determined by the
 	 * position of each rule in this {@link List}.
 	 * 
-	 * @return a List of {@link RefactoringRule} with all used Rules is
+	 * @return a List of {@link RefactoringRuleImpl} with all used Rules is
 	 *         returned.
 	 */
-	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules(boolean isStandalone) {
+	public static List<RefactoringRule> getAllRules(boolean isStandalone) {
 		List<RuleService> services = getExternalRuleServices();
 
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new LinkedList<>();
+		List<RefactoringRule> rules = new LinkedList<>();
 		rules.addAll(Arrays.asList(
 				/*
 				 * Coding conventions
@@ -149,9 +150,9 @@ public class RulesContainer {
 		return rules;
 	}
 
-	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRulesForProject(
+	public static List<RefactoringRule> getRulesForProject(
 			IJavaProject selectedJavaProjekt, boolean isStandalone) {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result = getAllRules(isStandalone);
+		List<RefactoringRule> result = getAllRules(isStandalone);
 		result.stream()
 			.forEach(rule -> rule.calculateEnabledForProject(selectedJavaProjekt));
 		return result;

@@ -12,6 +12,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
@@ -37,7 +38,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 	private String currentProfileId = Messages.SelectRulesWizardPage_EmptyProfileLabel;
 
-	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+	private final List<RefactoringRule> rules;
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
 
@@ -53,7 +54,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 */
 	private boolean movedToRight = false;
 
-	public AbstractSelectRulesWizardModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+	public AbstractSelectRulesWizardModel(List<RefactoringRule> rules) {
 		this.rules = rules;
 		addAllItems(allPosibilities);
 		addAllItems(posibilities);
@@ -116,7 +117,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public void moveToRight(IStructuredSelection selectedElements) {
 		selectedElements.toList()
 			.stream()
-			.filter(posibility -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled())
+			.filter(posibility -> ((RefactoringRule) posibility).isEnabled())
 			.forEach(posibility -> {
 				selection.add(posibility);
 				posibilities.remove(posibility);
@@ -137,7 +138,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public void moveAllToRight() {
 		Set<Object> currentPosibilities = filterPosibilitiesByName();
 		currentPosibilities.stream()
-			.filter(posibility -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled())
+			.filter(posibility -> ((RefactoringRule) posibility).isEnabled())
 			.forEach(posibility -> {
 				selection.add(posibility);
 				posibilities.remove(posibility);
@@ -204,7 +205,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
 			currentPosibilities.stream()
-				.filter(posibility -> !((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility)
+				.filter(posibility -> !((RefactoringRule) posibility)
 					.isEnabled())
 				.forEach(applicable::remove);
 		}
@@ -217,7 +218,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
 			currentPosibilities.stream()
-				.filter(posibility -> !((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility)
+				.filter(posibility -> !((RefactoringRule) posibility)
 					.isEnabled())
 				.forEach(posibilities::remove);
 		} else {
@@ -230,14 +231,14 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectionAsList() {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = selection.stream()
-			.map(object -> (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object)
+	public List<RefactoringRule> getSelectionAsList() {
+		List<RefactoringRule> rules = selection.stream()
+			.map(object -> (RefactoringRule) object)
 			.collect(Collectors.toList());
-		Collections.sort(rules, new Comparator<RefactoringRule<? extends AbstractASTRewriteASTVisitor>>() {
+		Collections.sort(rules, new Comparator<RefactoringRule>() {
 			@Override
-			public int compare(RefactoringRule<? extends AbstractASTRewriteASTVisitor> o1,
-					RefactoringRule<? extends AbstractASTRewriteASTVisitor> o2) {
+			public int compare(RefactoringRule o1,
+					RefactoringRule o2) {
 				return Integer.compare(indexOfRuleInSortedList(o1), indexOfRuleInSortedList(o2));
 			}
 		});
@@ -245,8 +246,8 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 	}
 
-	private int indexOfRuleInSortedList(RefactoringRule<? extends AbstractASTRewriteASTVisitor> searchedRule) {
-		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> sortedRules = RulesContainer
+	private int indexOfRuleInSortedList(RefactoringRule searchedRule) {
+		final List<RefactoringRule> sortedRules = RulesContainer
 			.getAllRules(false);
 		for (int i = 0; i < sortedRules.size(); i++) {
 			if (sortedRules.get(i)
@@ -315,9 +316,9 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 				.filter(posibility -> SimonykeesPreferenceManager.getProfileFromName(currentProfileId)
 					.containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
 							// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
-							((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getId()))
+							((RefactoringRule) posibility).getId()))
 				.forEach(posibility -> {
-					if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
+					if (((RefactoringRule) posibility).isEnabled()) {
 						selection.add(posibility);
 						posibilities.remove(posibility);
 					} else {

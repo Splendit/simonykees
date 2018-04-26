@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -60,12 +61,12 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	private SelectRulesWizardPageModel model;
 
 	private final List<IJavaElement> javaElements;
-	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+	private final List<RefactoringRule> rules;
 
 	private RefactoringPipeline refactoringPipeline;
 
 	public SelectRulesWizard(List<IJavaElement> javaElements, RefactoringPipeline refactoringPipeline,
-			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+			List<RefactoringRule> rules) {
 		super();
 		this.javaElements = javaElements;
 		this.refactoringPipeline = refactoringPipeline;
@@ -108,7 +109,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 					.getElementName());
 		logger.info(message);
 
-		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = model.getSelectionAsList();
+		final List<RefactoringRule> selectedRules = model.getSelectionAsList();
 
 		refactoringPipeline.setRules(selectedRules);
 		refactoringPipeline.updateInitialSourceMap();

@@ -9,6 +9,7 @@ import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
@@ -26,7 +27,7 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 		return changedFiles;
 	}
 
-	public RefactoringPreviewWizardPageModel(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
+	public RefactoringPreviewWizardPageModel(RefactoringRule rule,
 			Map<ICompilationUnit, DocumentChange> changes) {
 		setIssuesFixed(RuleApplicationCount.getFor(rule).toInt());
 		setTimeSaved(EliminatedTechnicalDebt.get(rule));

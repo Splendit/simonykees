@@ -2,6 +2,7 @@ package eu.jsparrow.rules.api;
 
 import java.util.List;
 
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -14,6 +15,6 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 public interface RuleService {
 
-	List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> loadRules();
+	List<RefactoringRule> loadRules();
 
 }

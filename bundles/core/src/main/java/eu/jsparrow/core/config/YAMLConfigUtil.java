@@ -24,6 +24,7 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -133,10 +134,10 @@ public class YAMLConfigUtil {
 	 * @return a list of rules to be applied on the project
 	 * @throws YAMLConfigException
 	 */
-	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRulesFromConfig(
-			YAMLConfig config, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules)
+	public static List<RefactoringRule> getSelectedRulesFromConfig(
+			YAMLConfig config, List<RefactoringRule> projectRules)
 			throws YAMLConfigException {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result;
+		List<RefactoringRule> result;
 
 		String selectedProfile = config.getSelectedProfile();
 		if (selectedProfile != null && !selectedProfile.isEmpty()) {
@@ -148,7 +149,7 @@ public class YAMLConfigUtil {
 					.findFirst();
 
 				if (configProfile.isPresent()) {
-					List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> profileRules = getConfigRules(
+					List<RefactoringRule> profileRules = getConfigRules(
 							configProfile.get()
 								.getRules());
 
@@ -167,7 +168,7 @@ public class YAMLConfigUtil {
 				throw new YAMLConfigException(exceptionMessage);
 			}
 		} else { // use all rules from config file
-			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = getConfigRules(
+			List<RefactoringRule> configSelectedRules = getConfigRules(
 					config.getRules());
 
 			result = projectRules.stream()
@@ -184,18 +185,18 @@ public class YAMLConfigUtil {
 	 * 
 	 * @param configRules
 	 *            rule IDs
-	 * @return list of rules ({@link RefactoringRule})
+	 * @return list of rules ({@link RefactoringRuleImpl})
 	 * @throws YAMLConfigException
 	 *             is thrown if a given rule ID does not exist
 	 */
-	private static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getConfigRules(
+	private static List<RefactoringRule> getConfigRules(
 			List<String> configRules) throws YAMLConfigException {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules(true);
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = new LinkedList<>();
+		List<RefactoringRule> rules = RulesContainer.getAllRules(true);
+		List<RefactoringRule> configSelectedRules = new LinkedList<>();
 		List<String> nonExistentRules = new LinkedList<>();
 
 		for (String configRule : configRules) {
-			Optional<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> currentRule = rules.stream()
+			Optional<RefactoringRule> currentRule = rules.stream()
 				.filter(rule -> rule.getId()
 					.equals(configRule))
 				.findFirst();
@@ -216,8 +217,8 @@ public class YAMLConfigUtil {
 	}
 
 	private static boolean isRuleExistent(String ruleId, boolean isStandalone) {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules(isStandalone);
-		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : rules) {
+		List<RefactoringRule> rules = RulesContainer.getAllRules(isStandalone);
+		for (RefactoringRule rule : rules) {
 			if (rule.getId()
 				.equals(ruleId)) {
 				return true;

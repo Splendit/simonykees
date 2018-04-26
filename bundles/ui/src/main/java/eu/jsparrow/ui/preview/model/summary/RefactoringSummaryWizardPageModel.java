@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
-import eu.jsparrow.rules.common.RefactoringRuleInterface;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.preview.model.BaseModel;
@@ -132,7 +132,7 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 			});
 	}
 
-	private int getApplicationTimesForRule(RefactoringRuleInterface rule) {
+	private int getApplicationTimesForRule(RefactoringRule rule) {
 		return RuleApplicationCount.getFor(rule)
 			.getApplicationsForFiles(wizardModel.getFilesForRule(rule));
 	}

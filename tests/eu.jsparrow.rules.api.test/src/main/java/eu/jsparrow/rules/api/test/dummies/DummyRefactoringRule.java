@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 
 /**
@@ -13,7 +13,7 @@ import eu.jsparrow.rules.common.RuleDescription;
  * @since 2.5.0
  */
 @SuppressWarnings("nls")
-public class DummyRefactoringRule extends RefactoringRule<DummyVisitor> {
+public class DummyRefactoringRule extends RefactoringRuleImpl<DummyVisitor> {
 
 	public DummyRefactoringRule() {
 		super();
