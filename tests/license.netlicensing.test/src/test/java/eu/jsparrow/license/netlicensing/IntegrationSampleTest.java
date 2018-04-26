@@ -2,12 +2,12 @@ package eu.jsparrow.license.netlicensing;
 
 import java.time.ZonedDateTime;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.exception.PersistenceException;
 
+@Ignore
 public class IntegrationSampleTest {
 
 	private NetlicensingLicensePersistenceService persistenceService;
