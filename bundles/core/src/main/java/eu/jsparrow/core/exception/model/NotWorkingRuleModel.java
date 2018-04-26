@@ -7,7 +7,7 @@ import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 
 /**
- * Information we need when reporting that a {@link RefactoringRuleImpl} cannot be
+ * Information we need when reporting that a {@link RefactoringRule} cannot be
  * applied to a {@link RefactoringState}.
  * 
  * @author Ludwig Werzowa

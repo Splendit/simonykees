@@ -19,8 +19,8 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 
 /**
  * Manages the transformation state of one {@link ICompilationUnit} and offers
- * capabilities to apply or undo {@link RefactoringRuleImpl}s, as well as storing
- * the corresponding {@link DocumentChange}s for each {@link RefactoringRuleImpl}.
+ * capabilities to apply or undo {@link RefactoringRule}s, as well as storing
+ * the corresponding {@link DocumentChange}s for each {@link RefactoringRule}.
  * 
  * @author Ludwig Werzowa, Andreja Sambolec
  * @since 1.2
@@ -57,7 +57,7 @@ public class RefactoringState {
 	 * Returns a specific {@link DocumentChange} related to one rule.
 	 * 
 	 * @param rules
-	 *            {@link RefactoringRuleImpl} for which {@link DocumentChange}s
+	 *            {@link RefactoringRule} for which {@link DocumentChange}s
 	 *            should be returned
 	 * @return the corresponding {@link DocumentChange} to a rule or null
 	 */
@@ -89,11 +89,11 @@ public class RefactoringState {
 	}
 
 	/**
-	 * Applies a given {@link RefactoringRuleImpl}s to the working copy. Changes to
+	 * Applies a given {@link RefactoringRule}s to the working copy. Changes to
 	 * the working copy are <b>not</b> committed yet.
 	 * 
 	 * @param rule
-	 *            {@link RefactoringRuleImpl} to be applied
+	 *            {@link RefactoringRule} to be applied
 	 * @throws JavaModelException
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.

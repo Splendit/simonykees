@@ -100,7 +100,7 @@ public class RulesContainer {
 	 * certain order. The execution order of each rule is determined by the
 	 * position of each rule in this {@link List}.
 	 * 
-	 * @return a List of {@link RefactoringRuleImpl} with all used Rules is
+	 * @return a List of {@link RefactoringRule} with all used Rules is
 	 *         returned.
 	 */
 	public static List<RefactoringRule> getAllRules(boolean isStandalone) {

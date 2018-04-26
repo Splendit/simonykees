@@ -184,7 +184,7 @@ public class YAMLConfigUtil {
 	 * 
 	 * @param configRules
 	 *            rule IDs
-	 * @return list of rules ({@link RefactoringRuleImpl})
+	 * @return list of rules ({@link RefactoringRule})
 	 * @throws YAMLConfigException
 	 *             is thrown if a given rule ID does not exist
 	 */

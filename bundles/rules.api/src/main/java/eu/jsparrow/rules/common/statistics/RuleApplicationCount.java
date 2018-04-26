@@ -11,7 +11,7 @@ import eu.jsparrow.rules.common.visitor.ASTRewriteVisitorListener;
 
 /**
  * A {@link ASTRewriteVisitorListener} that simply increases a counter when
- * notified. Used in {@link RefactoringRuleImpl} in order to count how often a
+ * notified. Used in {@link RefactoringRule} in order to count how often a
  * specific rule has been used.
  * 
  * @author Hans-Jörg Schrödl, Matthias Webhofer

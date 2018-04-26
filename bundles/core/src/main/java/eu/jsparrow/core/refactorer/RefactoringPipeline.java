@@ -34,7 +34,7 @@ import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
- * This class manages the selected {@link RefactoringRuleImpl}s and the selected
+ * This class manages the selected {@link RefactoringRule}s and the selected
  * {@link IJavaElement}s and offers functionality to apply the first to the
  * latter.
  * 
@@ -152,7 +152,7 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * Check if any {@link RefactoringRuleImpl} lead to changes in any
+	 * Check if any {@link RefactoringRule} lead to changes in any
 	 * {@link RefactoringState}.
 	 * 
 	 * @return
@@ -321,7 +321,7 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * Apply {@link RefactoringRuleImpl}s to the working copies of each
+	 * Apply {@link RefactoringRule}s to the working copies of each
 	 * {@link RefactoringState}. Changes are <b>not</b> yet committed.
 	 * <p>
 	 * All rules that throw an exception are collected and thrown as a
@@ -334,7 +334,7 @@ public class RefactoringPipeline {
 	 *             if no working copies were found to apply
 	 *             {@link RefactoringRule}s to
 	 * @throws RuleException
-	 *             if the {@link RefactoringRuleImpl} could no be initialised or not
+	 *             if the {@link RefactoringRule} could no be initialised or not
 	 *             applied
 	 * 
 	 * @since 1.2
@@ -558,13 +558,13 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * Adds a {@link RefactoringRuleImpl} to all {@link RefactoringState}s.
+	 * Adds a {@link RefactoringRule} to all {@link RefactoringState}s.
 	 * <p>
 	 * If an Exception occurs while applying a rule to a state, the combination
 	 * of rule and state is added to the "not working rules" list and the
 	 * refactoring continues.
 	 * <p>
-	 * This functionality used to be in the {@link RefactoringRuleImpl}.
+	 * This functionality used to be in the {@link RefactoringRule}.
 	 * 
 	 * @param rule
 	 *            {@link RefactoringRule} to apply to all
