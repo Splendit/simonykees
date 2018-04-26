@@ -35,7 +35,6 @@ import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 @SuppressWarnings("nls")
 public class RenamingTestHelper {
@@ -114,7 +113,7 @@ public class RenamingTestHelper {
 	 */
 	public static List<ICompilationUnit> applyRenamingRule(FieldDeclarationASTVisitor referencesVisitor,
 			String prerulePackageName) throws Exception {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new ArrayList<>();
+		List<RefactoringRule> rules = new ArrayList<>();
 		PublicFieldsRenamingRule rule = new PublicFieldsRenamingRule(referencesVisitor.getFieldMetaData(),
 				referencesVisitor.getUnmodifiableFieldMetaData());
 		rules.add(rule);

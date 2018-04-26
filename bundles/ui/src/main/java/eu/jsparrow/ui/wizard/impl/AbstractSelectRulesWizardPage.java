@@ -330,7 +330,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		table.setLabelProvider(new TableLabelProvider());
 		table.setComparator(new ViewerComparator() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				RefactoringRule rule1 = (RefactoringRule) e1;
 				RefactoringRule rule2 = (RefactoringRule) e2;
@@ -559,7 +558,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		descriptionStyledText.setLineBullet(requirementsBulletingStartLine, 2, bullet0);
 	}
 
-	@SuppressWarnings("unchecked")
 	private boolean selectionContainsEnabledEntry(List<Object> selection) {
 		return selection.stream()
 			.anyMatch(object -> ((RefactoringRule) object).isEnabled());

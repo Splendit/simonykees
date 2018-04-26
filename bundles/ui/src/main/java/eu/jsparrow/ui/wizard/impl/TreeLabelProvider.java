@@ -25,7 +25,6 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 
 	private ResourceManager resourceManager;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public String getText(Object element) {
 		String s;
@@ -37,7 +36,6 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 		return s;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof RefactoringRuleImpl<?>) {
@@ -52,7 +50,6 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 		return super.getImage(element);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Color getForeground(Object element) {
 		if (element instanceof RefactoringRuleImpl<?>) {
@@ -64,7 +61,6 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Color getBackground(Object element) {
 		if (element instanceof RefactoringRuleImpl<?>) {

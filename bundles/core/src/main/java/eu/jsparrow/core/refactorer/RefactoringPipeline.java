@@ -30,7 +30,6 @@ import eu.jsparrow.core.exception.model.NotWorkingRuleModel;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
@@ -94,17 +93,6 @@ public class RefactoringPipeline {
 
 		this.rules = rules;
 		this.refactoringStates = new ArrayList<>();
-	}
-
-	/**
-	 * FIXME SIM-748 added to suppress check for syntax errors on test mode
-	 * 
-	 * @param rules
-	 * @param testmode
-	 */
-	public RefactoringPipeline(List<RefactoringRule> rules, boolean testmode) {
-		this(rules);
-		this.testmode = testmode;
 	}
 
 	public List<RefactoringRule> getRules() {
@@ -440,9 +428,9 @@ public class RefactoringPipeline {
 
 		for (RefactoringState refactoringState : changedRefactoringStates) {
 			CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
-			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ignoredRules = refactoringState
+			List<RefactoringRule> ignoredRules = refactoringState
 				.getIgnoredRules();
-			for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : rules) {
+			for (RefactoringRule rule : rules) {
 				subMonitor.subTask(rule.getRuleDescription()
 					.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 				if (rule.equals(currentRule)) {
@@ -490,8 +478,8 @@ public class RefactoringPipeline {
 		refactoringState.resetWorkingCopy();
 
 		CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ignoredRules = refactoringState.getIgnoredRules();
-		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
+		List<RefactoringRule> ignoredRules = refactoringState.getIgnoredRules();
+		for (RefactoringRule refactoringRule : rules) {
 
 			if (refactoringRule.equals(currentRule)) {
 				refactoringState.removeRuleFromIgnoredRules(currentRule);
@@ -581,7 +569,7 @@ public class RefactoringPipeline {
 			.setWorkRemaining(refactoringStates.size());
 
 		CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
-		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : rules) {
+		for (RefactoringRule rule : rules) {
 			subMonitor.subTask(rule.getRuleDescription()
 				.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 
@@ -602,7 +590,7 @@ public class RefactoringPipeline {
 	@SuppressWarnings("deprecation") // see SIM-878
 	private CompilationUnit applyToRefactoringState(RefactoringState refactoringState,
 			List<NotWorkingRuleModel> returnListNotWorkingRules, CompilationUnit astRoot,
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, boolean initialApply) {
+			RefactoringRule rule, boolean initialApply) {
 
 		try {
 			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, astRoot, initialApply);

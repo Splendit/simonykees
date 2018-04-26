@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 
 /**
@@ -111,7 +110,7 @@ public class RefactoringState {
 	 * @param rule
 	 *            {@link RefactoringRule} to be applied
 	 * @param astRoot
-	 *            TODO
+	 *            the compilation unit for applying the rule to
 	 * @return true if there was any change, false otherwise
 	 * @throws JavaModelException
 	 *             if this element does not exist or if an exception occurs
@@ -121,7 +120,7 @@ public class RefactoringState {
 	 *             is not present and the reflective construction fails.
 	 * @throws RefactoringException
 	 */
-	public boolean addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
+	public boolean addRuleAndGenerateDocumentChanges(RefactoringRule rule,
 			CompilationUnit astRoot, boolean initialApply)
 			throws JavaModelException, ReflectiveOperationException, RefactoringException {
 		DocumentChange documentChange = rule.applyRule(workingCopy, astRoot);
@@ -225,7 +224,7 @@ public class RefactoringState {
 	public void resetWorkingCopy() {
 		try {
 			workingCopy.discardWorkingCopy();
-			this.workingCopy = original.getWorkingCopy(workingCopyOwner, null);
+			workingCopy = original.getWorkingCopy(workingCopyOwner, null);
 			changes.clear();
 		} catch (JavaModelException e) {
 			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_reset_working_copy, workingCopy.getPath()

@@ -53,7 +53,6 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	 * @return Set containing searched string.
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public Set<Object> filterPosibilitiesByName() {
 		return super.getPosibilities().stream()
 			.filter(object -> StringUtils
@@ -63,7 +62,6 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void filterPosibilitiesByTags() {
 		if (!appliedTags.isEmpty()) {
 			Set<Object> currentPossibilities = getPosibilities();

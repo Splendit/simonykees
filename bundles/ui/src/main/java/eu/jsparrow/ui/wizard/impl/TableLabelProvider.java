@@ -23,7 +23,6 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 
 	@Override
 	public String getColumnText(Object element, int columnIndex) {
-		@SuppressWarnings("unchecked")
 		RefactoringRule rule = (RefactoringRule) element;
 		switch (columnIndex) {
 		case 0:
