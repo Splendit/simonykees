@@ -65,7 +65,6 @@ public class RefactoringPipeline {
 	private Map<RefactoringState, String> initialSource = new HashMap<>();
 
 	private boolean multipleProjects = false;
-	
 
 	/**
 	 * Constructor without parameters, used to create RefactoringPipeline before
@@ -238,7 +237,6 @@ public class RefactoringPipeline {
 						return Collections.emptyList();
 					}
 
-
 					createRefactoringState(compilationUnit, containingErrorList);
 
 					/*
@@ -318,8 +316,7 @@ public class RefactoringPipeline {
 			refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, WorkingCopyOwnerDecorator.OWNER));
 		} else {
 			String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors,
-					compilationUnit.getElementName(),
-			problems.get(0));
+					compilationUnit.getElementName(), problems.get(0));
 			logger.info(loggerInfo);
 			containingErrorList.add(compilationUnit);
 		}
@@ -408,7 +405,6 @@ public class RefactoringPipeline {
 	 *            rule for which unselection of units was made
 	 * @throws RuleException
 	 */
-	@SuppressWarnings("deprecation") // see SIM-878
 	public void doAdditionalRefactoring(List<ICompilationUnit> changedCompilationUnits,
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> currentRule, IProgressMonitor monitor)
 			throws RuleException {
@@ -424,41 +420,30 @@ public class RefactoringPipeline {
 			.setWorkRemaining(rules.size() * changedCompilationUnits.size());
 		subMonitor.setTaskName(""); //$NON-NLS-1$
 
-		refactoringStates.stream()
+		List<RefactoringState> changedRefactoringStates = refactoringStates.stream()
 			.filter(refactoringState -> changedCompilationUnits.stream()
 				.anyMatch(unit -> unit.getElementName()
 					.equals(refactoringState.getWorkingCopyName())))
-			.forEach(RefactoringState::resetWorkingCopy);
+			.collect(Collectors.toList());
 
-		for (RefactoringState refactoringState : refactoringStates) {
-			if (changedCompilationUnits.stream()
-				.anyMatch(unit -> unit.getElementName()
-					.equals(refactoringState.getWorkingCopyName()))) {
-				CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
-				for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
-					subMonitor.subTask(refactoringRule.getRuleDescription()
-						.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
-					if (refactoringRule.equals(currentRule)) {
-						refactoringState.addRuleToIgnoredRules(currentRule);
-					} else if (!refactoringState.getIgnoredRules()
-						.contains(refactoringRule)) {
-						try {
-							boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, astRoot, false);
-							if(hasChanges) {
-								astRoot = refactoringState.getWorkingCopy().reconcile(AST.JLS8, true, null, null);
-							}
-							
-						} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
-							logger.error(e.getMessage(), e);
-							notWorkingRules.add(new NotWorkingRuleModel(refactoringRule.getRuleDescription()
-								.getName(), refactoringState.getWorkingCopyName()));
-						}
-					}
-					if (subMonitor.isCanceled()) {
-						return;
-					} else {
-						subMonitor.worked(1);
-					}
+		changedRefactoringStates.forEach(RefactoringState::resetWorkingCopy);
+
+		for (RefactoringState refactoringState : changedRefactoringStates) {
+			CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
+			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ignoredRules = refactoringState
+				.getIgnoredRules();
+			for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : rules) {
+				subMonitor.subTask(rule.getRuleDescription()
+					.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
+				if (rule.equals(currentRule)) {
+					refactoringState.addRuleToIgnoredRules(currentRule);
+				} else if (!ignoredRules.contains(rule)) {
+					astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, rule, false);
+				}
+				if (subMonitor.isCanceled()) {
+					return;
+				} else {
+					subMonitor.worked(1);
 				}
 			}
 		}
@@ -481,7 +466,6 @@ public class RefactoringPipeline {
 	 *            rule for which working copy is selected
 	 * @throws RuleException
 	 */
-	@SuppressWarnings("deprecation") // see SIM-878
 	public void refactoringForCurrent(ICompilationUnit newSelection,
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> currentRule) throws RuleException {
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
@@ -496,25 +480,14 @@ public class RefactoringPipeline {
 		refactoringState.resetWorkingCopy();
 
 		CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
-
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ignoredRules = refactoringState.getIgnoredRules();
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
-			try {
 
-				if (refactoringRule.equals(currentRule)) {
-					refactoringState.removeRuleFromIgnoredRules(currentRule);
-				}
-				if (!refactoringState.getIgnoredRules()
-					.contains(refactoringRule)) {
-					boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, astRoot, false);
-					if(hasChanges) {
-						astRoot = refactoringState.getWorkingCopy().reconcile(AST.JLS8, true, null, null);
-					}
-				}
-
-			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
-				logger.error(e.getMessage(), e);
-				notWorkingRules.add(new NotWorkingRuleModel(refactoringRule.getRuleDescription()
-					.getName(), refactoringState.getWorkingCopyName()));
+			if (refactoringRule.equals(currentRule)) {
+				refactoringState.removeRuleFromIgnoredRules(currentRule);
+			}
+			if (!ignoredRules.contains(refactoringRule)) {
+				astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, refactoringRule, false);
 			}
 		}
 
@@ -591,7 +564,6 @@ public class RefactoringPipeline {
 	 * @param returnListNotWorkingRules
 	 *            rules that throw an exception are added to this list
 	 */
-	@SuppressWarnings("deprecation") // see SIM-878
 	private void applyRulesToRefactoringState(RefactoringState refactoringState, IProgressMonitor subMonitor,
 			List<NotWorkingRuleModel> returnListNotWorkingRules) {
 
@@ -603,17 +575,7 @@ public class RefactoringPipeline {
 			subMonitor.subTask(rule.getRuleDescription()
 				.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 
-			try {
-				boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, astRoot, true);
-				if (hasChanges) {
-					astRoot = refactoringState.getWorkingCopy()
-						.reconcile(AST.JLS8, true, null, null);
-				}
-			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
-				logger.error(e.getMessage(), e);
-				returnListNotWorkingRules.add(new NotWorkingRuleModel(rule.getRuleDescription()
-					.getName(), refactoringState.getWorkingCopyName()));
-			}
+			astRoot = applyToRefactoringState(refactoringState, returnListNotWorkingRules, astRoot, rule, true);
 
 			/*
 			 * If cancel is pressed on progress monitor, abort all and return,
@@ -625,6 +587,25 @@ public class RefactoringPipeline {
 				monitor.worked(1);
 			}
 		}
+	}
+
+	@SuppressWarnings("deprecation") // see SIM-878
+	private CompilationUnit applyToRefactoringState(RefactoringState refactoringState,
+			List<NotWorkingRuleModel> returnListNotWorkingRules, CompilationUnit astRoot,
+			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, boolean initialApply) {
+
+		try {
+			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, astRoot, initialApply);
+			if (hasChanges) {
+				ICompilationUnit workingCopy = refactoringState.getWorkingCopy();
+				astRoot = workingCopy.reconcile(AST.JLS8, true, null, null);
+			}
+		} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
+			logger.error(e.getMessage(), e);
+			returnListNotWorkingRules.add(new NotWorkingRuleModel(rule.getRuleDescription()
+				.getName(), refactoringState.getWorkingCopyName()));
+		}
+		return astRoot;
 	}
 
 	public void updateInitialSourceMap() {

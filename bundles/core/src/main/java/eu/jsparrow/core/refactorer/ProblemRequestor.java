@@ -6,6 +6,10 @@ import java.util.List;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.compiler.IProblem;
 
+/**
+ * An implementation of {@link IProblemRequestor} which is used by {@link WorkingCopyOwnerDecorator}.
+ *
+ */
 public	class ProblemRequestor implements IProblemRequestor {
 
 	private List<IProblem> problems = new ArrayList<>();
@@ -40,5 +44,4 @@ public	class ProblemRequestor implements IProblemRequestor {
 		problems.clear();
 		
 	}
-
 }
