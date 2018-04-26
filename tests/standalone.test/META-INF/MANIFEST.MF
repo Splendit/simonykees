@@ -9,4 +9,5 @@ Bundle-Vendor: Splendit IT-Consulting GmbH
 Require-Bundle: org.junit;bundle-version="4.12.0",
  org.eclipse.jdt.junit4.runtime;bundle-version="1.1.0",
  org.mockito;bundle-version="1.8.4",
- org.hamcrest;bundle-version="1.1.0"
+ org.hamcrest;bundle-version="1.1.0",
+ eu.jsparrow.rules.api

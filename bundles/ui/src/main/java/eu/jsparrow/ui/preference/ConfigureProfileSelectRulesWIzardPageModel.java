@@ -9,7 +9,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.wizard.impl.AbstractSelectRulesWizardModel;
 
 /**
@@ -27,7 +26,7 @@ public class ConfigureProfileSelectRulesWIzardPageModel extends AbstractSelectRu
 	private String newName;
 
 	public ConfigureProfileSelectRulesWIzardPageModel(
-			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules, String profileId) {
+			List<RefactoringRule> rules, String profileId) {
 		super(rules);
 		this.name = profileId;
 		this.newName = name;

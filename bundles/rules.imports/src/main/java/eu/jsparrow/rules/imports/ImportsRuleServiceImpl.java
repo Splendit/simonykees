@@ -6,6 +6,7 @@ import java.util.List;
 import org.osgi.service.component.annotations.Component;
 
 import eu.jsparrow.rules.api.RuleService;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -19,7 +20,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 public class ImportsRuleServiceImpl implements RuleService {
 
 	@Override
-	public List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> loadRules() {
+	public List<RefactoringRule> loadRules() {
 		return Collections.singletonList(new OrganiseImportsRule());
 	}
 

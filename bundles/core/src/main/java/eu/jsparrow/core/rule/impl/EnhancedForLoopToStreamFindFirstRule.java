@@ -7,7 +7,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamFindFirstASTVisitor;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
@@ -18,7 +18,7 @@ import eu.jsparrow.rules.common.Tag;
  * @since 2.1.1
  *
  */
-public class EnhancedForLoopToStreamFindFirstRule extends RefactoringRule<EnhancedForLoopToStreamFindFirstASTVisitor> {
+public class EnhancedForLoopToStreamFindFirstRule extends RefactoringRuleImpl<EnhancedForLoopToStreamFindFirstASTVisitor> {
 
 	public EnhancedForLoopToStreamFindFirstRule() {
 		super();

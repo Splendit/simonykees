@@ -7,7 +7,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
@@ -17,7 +17,7 @@ import eu.jsparrow.rules.common.Tag;
  * @author Martin Huter
  * @since 2.1.0
  */
-public class UseIsEmptyOnCollectionsRule extends RefactoringRule<UseIsEmptyOnCollectionsASTVisitor> {
+public class UseIsEmptyOnCollectionsRule extends RefactoringRuleImpl<UseIsEmptyOnCollectionsASTVisitor> {
 
 	public UseIsEmptyOnCollectionsRule() {
 		super();

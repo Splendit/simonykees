@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
-import eu.jsparrow.rules.common.RefactoringRuleInterface;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 
@@ -19,7 +19,7 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
  * @author Hans-Jörg Schrödl
  *
  */
-public class DummyRule implements RefactoringRuleInterface {
+public class DummyRule implements RefactoringRule {
 
 	@Override
 	public JavaVersion getRequiredJavaVersion() {

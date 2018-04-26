@@ -12,7 +12,6 @@ import com.google.common.base.Splitter;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * 
@@ -43,7 +42,7 @@ public class ListRulesUtil {
 	 *            rules should be printed
 	 */
 	public String listRules(String ruleId) {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules = getAllRulesFilteredById(ruleId);
+		List<RefactoringRule> allRules = getAllRulesFilteredById(ruleId);
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n"); //$NON-NLS-1$
@@ -91,7 +90,7 @@ public class ListRulesUtil {
 	 * writes a table with each rule's ID and name to the logger
 	 */
 	public String listRulesShort() {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules = getAllRules();
+		List<RefactoringRule> allRules = getAllRules();
 		Optional<Integer> maxWordLength = getMaxWordLength(allRules);
 
 		StringBuilder sb = new StringBuilder();
@@ -132,12 +131,12 @@ public class ListRulesUtil {
 		return result;
 	}
 
-	List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules() {
+	List<RefactoringRule> getAllRules() {
 		return getAllRulesFilteredById(null);
 	}
 
-	List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRulesFilteredById(String ruleId) {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules;
+	List<RefactoringRule> getAllRulesFilteredById(String ruleId) {
+		List<RefactoringRule> allRules;
 
 		if (ruleId != null) {
 			List<String> ruleIds = Splitter.on(",") //$NON-NLS-1$
@@ -155,7 +154,7 @@ public class ListRulesUtil {
 		return allRules;
 	}
 
-	Optional<Integer> getMaxWordLength(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules) {
+	Optional<Integer> getMaxWordLength(List<RefactoringRule> allRules) {
 		return allRules.stream()
 			.map(rule -> rule.getId()
 				.length())
@@ -173,7 +172,7 @@ public class ListRulesUtil {
 		return sb.toString();
 	}
 
-	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRulesFromContainer() {
+	protected List<RefactoringRule> getAllRulesFromContainer() {
 		return RulesContainer.getAllRules(true);
 	}
 }

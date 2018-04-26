@@ -7,7 +7,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.visitor.impl.EnumsWithoutEqualsASTVisitor;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
@@ -17,7 +17,7 @@ import eu.jsparrow.rules.common.Tag;
  * @author Hans-Jörg Schrödl
  * @since 2.1.1
  */
-public class EnumsWithoutEqualsRule extends RefactoringRule<EnumsWithoutEqualsASTVisitor> {
+public class EnumsWithoutEqualsRule extends RefactoringRuleImpl<EnumsWithoutEqualsASTVisitor> {
 
 	public EnumsWithoutEqualsRule() {
 		super();

@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
