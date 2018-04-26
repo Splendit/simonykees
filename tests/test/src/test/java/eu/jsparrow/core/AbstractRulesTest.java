@@ -34,11 +34,9 @@ import org.junit.BeforeClass;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Base class for Rule Tests.

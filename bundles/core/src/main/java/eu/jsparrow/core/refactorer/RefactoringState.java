@@ -13,10 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.ExceptionMessages;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.exception.RefactoringException;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Manages the transformation state of one {@link ICompilationUnit} and offers

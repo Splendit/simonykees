@@ -25,10 +25,8 @@ import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Testing the renaming of the public fields which are directly referenced

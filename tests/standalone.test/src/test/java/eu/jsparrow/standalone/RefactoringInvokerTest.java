@@ -20,9 +20,7 @@ import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * test class for {@link RefactoringInvoker}

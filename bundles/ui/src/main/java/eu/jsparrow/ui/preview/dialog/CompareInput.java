@@ -7,6 +7,7 @@ import org.eclipse.compare.structuremergeviewer.Differencer;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.preview.RefactoringSummaryWizardPage;
 
 /**
  * This class is used to create input for compare preview on

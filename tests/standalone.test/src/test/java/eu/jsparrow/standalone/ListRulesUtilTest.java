@@ -15,10 +15,9 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * test class for {@link ListRulesUtil}

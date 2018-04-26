@@ -12,9 +12,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.wizard.IValueChangeListener;
 import eu.jsparrow.ui.wizard.IWizardPageModel;

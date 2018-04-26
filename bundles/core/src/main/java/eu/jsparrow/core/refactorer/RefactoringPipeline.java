@@ -27,12 +27,11 @@ import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.exception.model.NotWorkingRuleModel;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * This class manages the selected {@link RefactoringRuleImpl}s and the selected
