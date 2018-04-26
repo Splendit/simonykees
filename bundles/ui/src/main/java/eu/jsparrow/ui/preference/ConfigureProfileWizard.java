@@ -11,7 +11,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 import eu.jsparrow.ui.util.ResourceHelper;
 
@@ -31,7 +30,7 @@ public class ConfigureProfileWizard extends Wizard {
 
 	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
 
-	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+	private final List<RefactoringRule> rules;
 
 	public ConfigureProfileWizard(String profileId, boolean isProfileSetAsDefault) {
 		super();
@@ -59,7 +58,7 @@ public class ConfigureProfileWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		String name = model.getName();
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ruleIds = model.getSelectionAsList();
+		List<RefactoringRule> ruleIds = model.getSelectionAsList();
 
 		Optional<SimonykeesProfile> optionalProfile = SimonykeesPreferenceManager.getProfileFromName(profileId);
 

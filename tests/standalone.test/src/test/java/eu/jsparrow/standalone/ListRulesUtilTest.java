@@ -16,8 +16,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * test class for {@link ListRulesUtil}
@@ -29,14 +29,14 @@ public class ListRulesUtilTest {
 
 	private ListRulesUtil listRulesUtil;
 
-	private RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule1;
+	private RefactoringRule rule1;
 
-	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+	private List<RefactoringRule> rules;
 
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() {
-		rule1 = mock(RefactoringRule.class);
+		rule1 = mock(RefactoringRuleImpl.class);
 
 		rules = new LinkedList<>();
 		rules.add(rule1);
@@ -108,7 +108,7 @@ public class ListRulesUtilTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void getAllRulesFilteredById_noRuleIdProvided_shouldReturnAllRules() {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = listRulesUtil
+		List<RefactoringRule> rules = listRulesUtil
 			.getAllRulesFilteredById(null);
 
 		assertThat(rules, contains(rule1));
@@ -117,7 +117,7 @@ public class ListRulesUtilTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void getAllRulesFilteredById_ruleIdProvided_shouldReturnFilteredRules() {
-		RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule2 = addExtraRule();
+		RefactoringRule rule2 = addExtraRule();
 
 		String rule1id = "rule1"; //$NON-NLS-1$
 		String rule2id = "rule2"; //$NON-NLS-1$
@@ -127,7 +127,7 @@ public class ListRulesUtilTest {
 		when(rule1.getId()).thenReturn(rule1id);
 		when(rule2.getId()).thenReturn(rule2id);
 
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = listRulesUtil
+		List<RefactoringRule> rules = listRulesUtil
 			.getAllRulesFilteredById(ruleId);
 
 		assertThat(rules, contains(rule1));
@@ -135,9 +135,9 @@ public class ListRulesUtilTest {
 
 	@Test
 	public void getMaxWordLength() {
-		RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule2 = addExtraRule();
+		RefactoringRule rule2 = addExtraRule();
 
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = listRulesUtil.getAllRulesFromContainer();
+		List<RefactoringRule> rules = listRulesUtil.getAllRulesFromContainer();
 
 		String rule1id = "rule1"; //$NON-NLS-1$
 		String rule2id = "rule22"; //$NON-NLS-1$
@@ -159,9 +159,8 @@ public class ListRulesUtilTest {
 		assertThat(whitespace, equalToIgnoringWhiteSpace("")); //$NON-NLS-1$
 	}
 
-	@SuppressWarnings("unchecked")
-	private RefactoringRule<? extends AbstractASTRewriteASTVisitor> addExtraRule() {
-		RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule = mock(RefactoringRule.class);
+	private RefactoringRule addExtraRule() {
+		RefactoringRule rule = mock(RefactoringRuleImpl.class);
 
 		rules.add(rule);
 
@@ -170,7 +169,7 @@ public class ListRulesUtilTest {
 
 	class TestableListRulesUtil extends ListRulesUtil {
 		@Override
-		protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRulesFromContainer() {
+		protected List<RefactoringRule> getAllRulesFromContainer() {
 			return rules;
 		}
 	}

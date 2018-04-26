@@ -7,7 +7,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.visitor.impl.DateDeprecatedASTVisitor;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
@@ -18,7 +18,7 @@ import eu.jsparrow.rules.common.Tag;
  * @since 2.5
  *
  */
-public class DateDeprecatedRule extends RefactoringRule<DateDeprecatedASTVisitor> {
+public class DateDeprecatedRule extends RefactoringRuleImpl<DateDeprecatedASTVisitor> {
 
 	public DateDeprecatedRule() {
 		this.visitorClass = DateDeprecatedASTVisitor.class;

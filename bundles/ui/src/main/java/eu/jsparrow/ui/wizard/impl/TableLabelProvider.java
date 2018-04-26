@@ -6,7 +6,6 @@ import org.eclipse.swt.graphics.Image;
 
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Label provider for right view in select rules wizard
@@ -25,7 +24,7 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 	@Override
 	public String getColumnText(Object element, int columnIndex) {
 		@SuppressWarnings("unchecked")
-		RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) element;
+		RefactoringRule rule = (RefactoringRule) element;
 		switch (columnIndex) {
 		case 0:
 			return rule.getRuleDescription().getName();

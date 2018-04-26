@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import eu.jsparrow.core.refactorer.RefactoringState;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 
 /**
  * Information we need when reporting that a {@link RefactoringRule} cannot be

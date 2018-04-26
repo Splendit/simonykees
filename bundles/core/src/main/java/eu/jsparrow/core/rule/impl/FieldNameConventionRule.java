@@ -7,7 +7,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.visitor.renaming.FieldNameConventionASTVisitor;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
@@ -18,7 +18,7 @@ import eu.jsparrow.rules.common.Tag;
  * @since 1.2
  *
  */
-public class FieldNameConventionRule extends RefactoringRule<FieldNameConventionASTVisitor> {
+public class FieldNameConventionRule extends RefactoringRuleImpl<FieldNameConventionASTVisitor> {
 
 	public FieldNameConventionRule() {
 		super();

@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.DiamondOperatorASTVisitor;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
@@ -25,7 +25,7 @@ import eu.jsparrow.rules.common.util.PropertyUtil;
  * @since 1.0
  *
  */
-public class DiamondOperatorRule extends RefactoringRule<DiamondOperatorASTVisitor> {
+public class DiamondOperatorRule extends RefactoringRuleImpl<DiamondOperatorASTVisitor> {
 
 	private JavaVersion javaVersion;
 

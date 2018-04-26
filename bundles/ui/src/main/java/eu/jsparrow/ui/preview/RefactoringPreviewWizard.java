@@ -8,7 +8,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.wizard.*;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -22,7 +24,6 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
@@ -260,7 +261,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 *            for which working copy is checked
 	 */
 	public void imediatelyUpdateForSelected(ICompilationUnit newSelection,
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+			RefactoringRule rule) {
 		try {
 			refactoringPipeline.refactoringForCurrent(newSelection, rule);
 		} catch (RuleException exception) {

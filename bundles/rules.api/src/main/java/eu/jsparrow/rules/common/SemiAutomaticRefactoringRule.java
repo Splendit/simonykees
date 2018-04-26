@@ -14,7 +14,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @param <T>
  *            type of the visitor that creates the changes for this rule.
  */
-public abstract class SemiAutomaticRefactoringRule<T extends AbstractASTRewriteASTVisitor> extends RefactoringRule<T> {
+public abstract class SemiAutomaticRefactoringRule<T extends AbstractASTRewriteASTVisitor> extends RefactoringRuleImpl<T> {
 
 	public SemiAutomaticRefactoringRule() {
 		super();

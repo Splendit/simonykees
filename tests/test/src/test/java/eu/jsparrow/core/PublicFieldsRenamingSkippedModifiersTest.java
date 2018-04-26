@@ -21,7 +21,6 @@ import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 @RunWith(Parameterized.class)
 @SuppressWarnings("nls")
@@ -78,7 +77,7 @@ public class PublicFieldsRenamingSkippedModifiersTest extends AbstractRulesTest 
 
 	@Override
 	protected String processFile(String fileName, String content,
-			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
+			List<RefactoringRule> rules) throws Exception {
 		setPrerulePackage(PRERULE_RENAMING_PACKAGE_NAME);
 		return super.processFile(fileName, content, rules);
 	}

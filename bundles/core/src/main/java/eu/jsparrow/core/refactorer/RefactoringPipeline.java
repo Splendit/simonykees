@@ -28,11 +28,10 @@ import eu.jsparrow.core.exception.model.NotWorkingRuleModel;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.RefactoringRuleInterface;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * This class manages the selected {@link RefactoringRule}s and the selected
@@ -56,7 +55,7 @@ public class RefactoringPipeline {
 	/**
 	 * List of selected rules.
 	 */
-	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+	private List<RefactoringRule> rules;
 
 	/**
 	 * Holder map for original source code, used for summary page
@@ -77,10 +76,10 @@ public class RefactoringPipeline {
 	 * Stores the selected rules.
 	 * 
 	 * @param rules
-	 *            {@link List} of {@link RefactoringRuleInterface}s to apply to
+	 *            {@link List} of {@link RefactoringRule}s to apply to
 	 *            the selected {@link IJavaElement}s
 	 */
-	public RefactoringPipeline(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+	public RefactoringPipeline(List<RefactoringRule> rules) {
 
 		/*
 		 * Note: We cannot immediately call prepareRefactoring because we need
@@ -102,12 +101,12 @@ public class RefactoringPipeline {
 	 * @param rules
 	 * @param testmode
 	 */
-	public RefactoringPipeline(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules, boolean testmode) {
+	public RefactoringPipeline(List<RefactoringRule> rules, boolean testmode) {
 		this(rules);
 		this.testmode = testmode;
 	}
 
-	public List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRules() {
+	public List<RefactoringRule> getRules() {
 		return rules;
 	}
 
@@ -118,12 +117,12 @@ public class RefactoringPipeline {
 	 * @param rules
 	 *            selected rules
 	 */
-	public void setRules(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+	public void setRules(List<RefactoringRule> rules) {
 		this.rules = rules;
 	}
 
 	public Map<ICompilationUnit, DocumentChange> getChangesForRule(
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+			RefactoringRule rule) {
 		Map<ICompilationUnit, DocumentChange> currentChanges = new HashMap<>();
 
 		refactoringStates.forEach(refactoringState -> {
@@ -333,7 +332,7 @@ public class RefactoringPipeline {
 	 * 
 	 * @throws RefactoringException
 	 *             if no working copies were found to apply
-	 *             {@link RefactoringRuleInterface}s to
+	 *             {@link RefactoringRule}s to
 	 * @throws RuleException
 	 *             if the {@link RefactoringRule} could no be initialised or not
 	 *             applied
@@ -364,7 +363,7 @@ public class RefactoringPipeline {
 		subMonitor.setTaskName(""); //$NON-NLS-1$
 
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
-		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
+		for (RefactoringRule refactoringRule : rules) {
 
 			subMonitor.subTask(refactoringRule.getRuleDescription()
 				.getName());
@@ -394,7 +393,7 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * Apply {@link RefactoringRuleInterface}s to the working copies with
+	 * Apply {@link RefactoringRule}s to the working copies with
 	 * changed check state of each {@link RefactoringState}
 	 * 
 	 * @param changedCompilationUnits
@@ -404,7 +403,7 @@ public class RefactoringPipeline {
 	 * @throws RuleException
 	 */
 	public void doAdditionalRefactoring(List<ICompilationUnit> changedCompilationUnits,
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> currentRule, IProgressMonitor monitor)
+			RefactoringRule currentRule, IProgressMonitor monitor)
 			throws RuleException {
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 
@@ -424,7 +423,7 @@ public class RefactoringPipeline {
 					.equals(refactoringState.getWorkingCopyName())))
 			.forEach(RefactoringState::resetWorkingCopy);
 
-		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
+		for (RefactoringRule refactoringRule : rules) {
 			for (RefactoringState refactoringState : refactoringStates) {
 				if (changedCompilationUnits.stream()
 					.anyMatch(unit -> unit.getElementName()
@@ -471,7 +470,7 @@ public class RefactoringPipeline {
 	 * @throws RuleException
 	 */
 	public void refactoringForCurrent(ICompilationUnit newSelection,
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> currentRule) throws RuleException {
+			RefactoringRule currentRule) throws RuleException {
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 
 		// get the correct RefactoringState
@@ -483,7 +482,7 @@ public class RefactoringPipeline {
 
 		refactoringState.resetWorkingCopy();
 
-		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
+		for (RefactoringRule refactoringRule : rules) {
 			try {
 
 				if (refactoringRule.equals(currentRule)) {
@@ -568,13 +567,13 @@ public class RefactoringPipeline {
 	 * This functionality used to be in the {@link RefactoringRule}.
 	 * 
 	 * @param rule
-	 *            {@link RefactoringRuleInterface} to apply to all
+	 *            {@link RefactoringRule} to apply to all
 	 *            {@link RefactoringState} instances
 	 * @param subMonitor
 	 * @param returnListNotWorkingRules
 	 *            rules that throw an exception are added to this list
 	 */
-	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
+	private void applyRuleToAllStates(RefactoringRule rule,
 			IProgressMonitor subMonitor, List<NotWorkingRuleModel> returnListNotWorkingRules) {
 
 		SubMonitor monitor = SubMonitor.convert(subMonitor)
