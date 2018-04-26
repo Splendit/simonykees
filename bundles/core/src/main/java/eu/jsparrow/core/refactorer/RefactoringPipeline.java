@@ -66,6 +66,7 @@ public class RefactoringPipeline {
 	private Map<RefactoringState, String> initialSource = new HashMap<>();
 
 	private boolean multipleProjects = false;
+	
 
 	/**
 	 * Constructor without parameters, used to create RefactoringPipeline before
@@ -190,7 +191,8 @@ public class RefactoringPipeline {
 	 */
 	public List<ICompilationUnit> prepareRefactoring(List<ICompilationUnit> compilationUnits, IProgressMonitor monitor)
 			throws RefactoringException {
-
+		WorkingCopyDecorator wcd = new WorkingCopyDecorator();
+		WorkingCopyOwner workingCopyOwner = wcd.createWorkingCopyOwner();
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		try {
@@ -238,7 +240,8 @@ public class RefactoringPipeline {
 						return Collections.emptyList();
 					}
 
-					createRefactoringState(compilationUnit, containingErrorList);
+
+					createRefactoringState(compilationUnit, containingErrorList, workingCopyOwner);
 
 					/*
 					 * If cancel is pressed on progress monitor, abort all and
@@ -286,9 +289,10 @@ public class RefactoringPipeline {
 	public List<ICompilationUnit> createRefactoringStates(List<ICompilationUnit> compilationUnits)
 			throws JavaModelException {
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
-
+		WorkingCopyDecorator wcd = new WorkingCopyDecorator();
+		WorkingCopyOwner workingCopyOwner = wcd.createWorkingCopyOwner();
 		for (ICompilationUnit compilationUnit : compilationUnits) {
-			createRefactoringState(compilationUnit, containingErrorList);
+			createRefactoringState(compilationUnit, containingErrorList, workingCopyOwner);
 		}
 
 		return containingErrorList;
@@ -308,18 +312,17 @@ public class RefactoringPipeline {
 	 *            error
 	 * @throws JavaModelException
 	 */
-	public void createRefactoringState(ICompilationUnit compilationUnit, List<ICompilationUnit> containingErrorList)
+	public void createRefactoringState(ICompilationUnit compilationUnit, List<ICompilationUnit> containingErrorList, WorkingCopyOwner wcOwner)
 			throws JavaModelException {
-		final ProblemRequestor problemRequestor = new ProblemRequestor();
-		final WorkingCopyOwner wcOwner = createWorkingCopyOwner(problemRequestor);
-
 		ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(wcOwner, null);
-		if (((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.isEmpty()) {
+		IProblemRequestor problemRequestor = wcOwner.getProblemRequestor(workingCopy);
+		List<IProblem> problems = ((ProblemRequestor) problemRequestor).getProblems();
+		if (problems.isEmpty()) {
 			refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, wcOwner));
 		} else {
 			String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors,
 					compilationUnit.getElementName(),
-					((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.get(0));
+			problems.get(0));
 			logger.info(loggerInfo);
 			containingErrorList.add(compilationUnit);
 		}
@@ -563,7 +566,9 @@ public class RefactoringPipeline {
 	 */
 	public void clearStates() {
 		refactoringStates.forEach(RefactoringState::discardWorkingCopy);
+		
 		refactoringStates.clear();
+		initialSource.clear();
 	}
 
 	/**
@@ -657,44 +662,6 @@ public class RefactoringPipeline {
 	 */
 	public List<RefactoringState> getRefactoringStates() {
 		return refactoringStates;
-	}
-
-	private WorkingCopyOwner createWorkingCopyOwner(ProblemRequestor problemRequestor) {
-		return new WorkingCopyOwner() {
-
-			@Override
-			public IProblemRequestor getProblemRequestor(ICompilationUnit unit) {
-				return problemRequestor;
-			}
-		};
-	}
-
-	private class ProblemRequestor implements IProblemRequestor {
-
-		private List<IProblem> problems = new ArrayList<>();
-
-		@Override
-		public void acceptProblem(IProblem problem) {
-			if (problem.isError()) {
-				problems.add(problem);
-			}
-		}
-
-		@Override
-		public void beginReporting() {
-			// not used
-		}
-
-		@Override
-		public void endReporting() {
-			// not used
-		}
-
-		@Override
-		public boolean isActive() {
-			return true;
-		}
-
 	}
 
 }

@@ -1,12 +1,15 @@
 package eu.jsparrow.ui.wizard.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -90,6 +93,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	@Override
 	public boolean performCancel() {
 		Activator.setRunning(false);
+		refactoringPipeline.clearStates();
 		return super.performCancel();
 	}
 
@@ -204,6 +208,12 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 							super.buttonPressed(buttonId);
 						}
 					}
+					
+					@Override
+					protected void cancelPressed() {
+						previewWizard.performCancel();
+						super.cancelPressed();
+					}
 
 					private void summaryButtonPressed() {
 						if (getCurrentPage() instanceof RefactoringPreviewWizardPage) {
@@ -216,7 +226,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);
-				dialog.open();
+				dialog.open();				
 			});
 	}
 

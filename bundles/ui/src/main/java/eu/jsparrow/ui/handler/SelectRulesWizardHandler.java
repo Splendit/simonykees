@@ -9,7 +9,10 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -52,9 +55,9 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 public class SelectRulesWizardHandler extends AbstractHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
-	
+
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
-	
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
@@ -65,11 +68,11 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 			Activator.setRunning(true);
 
 			final Shell shell = HandlerUtil.getActiveShell(event);
-			if(!licenseUtil.checkAtStartUp(shell)) {
+			if (!licenseUtil.checkAtStartUp(shell)) {
 				Activator.setRunning(false);
 				return null;
 			}
-			
+
 			List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
 			if (!selectedJavaElements.isEmpty()) {
 				IJavaProject selectedJavaProjekt = selectedJavaElements.get(0)
@@ -77,12 +80,11 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 
 				if (null != selectedJavaProjekt) {
 
-					RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
-
 					Job job = new Job(Messages.ProgressMonitor_verifying_project_information) {
 
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
+							RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 
 							try {
 								List<ICompilationUnit> compilationUnits = new LinkedList<>();
@@ -150,6 +152,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	 */
 	private void synchronizeWithUIShowSelectRulesWizard(ExecutionEvent event, RefactoringPipeline refactoringPipeline,
 			List<IJavaElement> selectedJavaElements, IJavaProject selectedJavaProjekt) {
+
 		Display.getDefault()
 			.asyncExec(() -> {
 				Shell shell = PlatformUI.getWorkbench()
@@ -200,6 +203,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 				dialog.create();
 				dialog.open();
 			});
+
 	}
 
 	/**
