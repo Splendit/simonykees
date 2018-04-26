@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.preference;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,8 +12,8 @@ import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 import eu.jsparrow.ui.util.ResourceHelper;
-import eu.jsparrow.ui.wizard.impl.AbstractSelectRulesWizardPage;
 
 /**
  * Wizard for selecting rules when creating new profile in preferences page
@@ -23,20 +24,20 @@ import eu.jsparrow.ui.wizard.impl.AbstractSelectRulesWizardPage;
  */
 public class ConfigureProfileWizard extends Wizard {
 
-	private AbstractSelectRulesWizardPage page;
-	private ConfigureProfileSelectRulesWizardPageControler controler;
 	private ConfigureProfileSelectRulesWIzardPageModel model;
 
 	private String profileId;
-	
+	private boolean isProfileSetAsDefault = false;
+
 	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
 
 	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
-	public ConfigureProfileWizard(String profileId) {
+	public ConfigureProfileWizard(String profileId, boolean isProfileSetAsDefault) {
 		super();
 		this.rules = RulesContainer.getAllRules(false);
 		this.profileId = profileId;
+		this.isProfileSetAsDefault = isProfileSetAsDefault;
 		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
 	}
 
@@ -48,26 +49,32 @@ public class ConfigureProfileWizard extends Wizard {
 	@Override
 	public void addPages() {
 		model = new ConfigureProfileSelectRulesWIzardPageModel(rules, profileId);
-		controler = new ConfigureProfileSelectRulesWizardPageControler(model);
-		page = new ConfigureProfileSelectRulesWizardPage(model, controler, profileId);
+		ConfigureProfileSelectRulesWizardPageControler controler = new ConfigureProfileSelectRulesWizardPageControler(
+				model);
+		ConfigureProfileSelectRulesWizardPage page = new ConfigureProfileSelectRulesWizardPage(model, controler,
+				profileId);
 		addPage(page);
 	}
 
 	@Override
 	public boolean performFinish() {
-		int index = SimonykeesPreferenceManager.getProfiles()
-			.indexOf(SimonykeesPreferenceManager.getProfileFromName(profileId));
-		String name = ((ConfigureProfileSelectRulesWIzardPageModel) model).getName();
+		String name = model.getName();
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ruleIds = model.getSelectionAsList();
-		if (index >= 0) {
+
+		Optional<SimonykeesProfile> optionalProfile = SimonykeesPreferenceManager.getProfileFromName(profileId);
+
+		if (optionalProfile.isPresent()) {
+			int index = SimonykeesPreferenceManager.getProfiles()
+				.indexOf(optionalProfile.get());
 			SimonykeesPreferenceManager.updateProfile(index, name, ruleIds.stream()
 				.map(RefactoringRule::getId)
-				.collect(Collectors.toList()));
+				.collect(Collectors.toList()), isProfileSetAsDefault);
 		} else {
 			SimonykeesPreferenceManager.addProfile(name, ruleIds.stream()
 				.map(RefactoringRule::getId)
 				.collect(Collectors.toList()));
 		}
+
 		return true;
 	}
 
