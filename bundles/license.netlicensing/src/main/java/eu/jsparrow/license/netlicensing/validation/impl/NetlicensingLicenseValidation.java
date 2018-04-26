@@ -56,6 +56,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 			logger.debug("Found existing result {}", result); //$NON-NLS-1$
 			return result;
 		}
+
 		/*
 		 * If no license type is defined we need to send one validation call
 		 * first to get the license type. We need to do this because
@@ -63,7 +64,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		 * license types.
 		 */
 		if (model.getType() == LicenseType.NONE) {
-			setModelTypeByRequest();
+			updateModelType();
 		}
 		ValidationParameters validationParameters = parametersFactory.createValidationParameters(model);
 		NetlicensingValidationResult licensingValidationResult = validationRequest.send(licenseeNumber,
@@ -75,9 +76,14 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		return licensingValidationResult;
 	}
 
-	private void setModelTypeByRequest() throws ValidationException {
+	private void updateModelType() throws ValidationException {
 		LicenseValidationResult result = validationRequest.send(model.getKey(),
 				parametersFactory.createVerifyParameters(model));
+		/*
+		 * The validation result contains the actual license type so we update
+		 * the license model with the license type so the next request will
+		 * return a validation result specific to this license type.
+		 */
 		model = new NetlicensingLicenseModel(model.getKey(), model.getSecret(), model.getProductNr(),
 				model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate());
 
