@@ -7,7 +7,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.visitor.impl.RemoveNewStringConstructorASTVisitor;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
@@ -17,7 +17,7 @@ import eu.jsparrow.rules.common.Tag;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class RemoveNewStringConstructorRule extends RefactoringRule<RemoveNewStringConstructorASTVisitor> {
+public class RemoveNewStringConstructorRule extends RefactoringRuleImpl<RemoveNewStringConstructorASTVisitor> {
 
 	public RemoveNewStringConstructorRule() {
 		super();

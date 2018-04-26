@@ -12,7 +12,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 
 /**
  * Label provider for left view in select rules wizard
@@ -29,8 +29,8 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 	@Override
 	public String getText(Object element) {
 		String s;
-		if (element instanceof RefactoringRule<?>) {
-			s = ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) element).getRuleDescription().getName();
+		if (element instanceof RefactoringRuleImpl<?>) {
+			s = ((RefactoringRule) element).getRuleDescription().getName();
 		} else {
 			s = (String) element;
 		}
@@ -40,8 +40,8 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Image getImage(Object element) {
-		if (element instanceof RefactoringRule<?>) {
-			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) element).isEnabled()) {
+		if (element instanceof RefactoringRuleImpl<?>) {
+			if (((RefactoringRule) element).isEnabled()) {
 				// without icon
 			} else {
 				// info icon that rule is disabled, explanation appears in
@@ -55,8 +55,8 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Color getForeground(Object element) {
-		if (element instanceof RefactoringRule<?>) {
-			if (!((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) element).isEnabled()) {
+		if (element instanceof RefactoringRuleImpl<?>) {
+			if (!((RefactoringRule) element).isEnabled()) {
 				return Display.getDefault()
 					.getSystemColor(SWT.COLOR_TITLE_INACTIVE_FOREGROUND);
 			}
@@ -67,8 +67,8 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Color getBackground(Object element) {
-		if (element instanceof RefactoringRule<?>) {
-			if (!((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) element).isEnabled()) {
+		if (element instanceof RefactoringRuleImpl<?>) {
+			if (!((RefactoringRule) element).isEnabled()) {
 				return Display.getDefault()
 					.getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND);
 			}

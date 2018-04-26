@@ -16,7 +16,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.statistics.FileChangeCount;
@@ -36,7 +36,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 0.9.2
  *
  */
-public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
+public class CodeFormatterRule extends RefactoringRuleImpl<AbstractASTRewriteASTVisitor> {
 
 	public CodeFormatterRule() {
 		this.visitorClass = AbstractASTRewriteASTVisitor.class;

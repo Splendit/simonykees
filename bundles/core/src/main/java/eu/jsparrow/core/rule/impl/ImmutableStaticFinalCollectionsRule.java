@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.ImmutableStaticFinalCollectionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
@@ -20,7 +20,7 @@ import eu.jsparrow.rules.common.util.PropertyUtil;
  * @author Matthias Webhofer
  * @since 2.1.1
  */
-public class ImmutableStaticFinalCollectionsRule extends RefactoringRule<ImmutableStaticFinalCollectionsASTVisitor> {
+public class ImmutableStaticFinalCollectionsRule extends RefactoringRuleImpl<ImmutableStaticFinalCollectionsASTVisitor> {
 
 	private JavaVersion javaVersion;
 

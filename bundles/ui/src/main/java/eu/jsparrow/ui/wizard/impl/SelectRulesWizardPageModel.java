@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.Tag;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Model for Wizard page for selecting rules when applying rules to selected
@@ -27,7 +26,7 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 
 	private final Set<String> appliedTags = new HashSet<>();
 
-	public SelectRulesWizardPageModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+	public SelectRulesWizardPageModel(List<RefactoringRule> rules) {
 		super(rules);
 
 		tags = Tag.getAllTags();
@@ -58,7 +57,7 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	public Set<Object> filterPosibilitiesByName() {
 		return super.getPosibilities().stream()
 			.filter(object -> StringUtils
-				.contains(((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).getRuleDescription().getName()
+				.contains(((RefactoringRule) object).getRuleDescription().getName()
 					.toLowerCase(), nameFilter))
 			.collect(Collectors.toSet());
 	}
@@ -69,14 +68,14 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 		if (!appliedTags.isEmpty()) {
 			Set<Object> currentPossibilities = getPosibilities();
 			setPosibilitiesFilteredByTag(currentPossibilities.stream()
-				.filter(object -> containsTag((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object))
+				.filter(object -> containsTag((RefactoringRule) object))
 				.collect(Collectors.toSet()));
 		} else {
 			addAllItems(getPosibilities());
 		}
 	}
 
-	private boolean containsTag(RefactoringRule<? extends AbstractASTRewriteASTVisitor> object) {
+	private boolean containsTag(RefactoringRule object) {
 		for (String tag : appliedTags) {
 			if (null != Tag.getTageForName(tag)) {
 				if (object.getRuleDescription().getTags()

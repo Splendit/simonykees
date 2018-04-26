@@ -28,7 +28,6 @@ import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * 
@@ -82,8 +81,8 @@ public class RefactoringInvoker {
 
 		YAMLConfig config = getConfiguration(context, standaloneConfig.getProjectId());
 
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = getProjectRules(standaloneConfig);
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRules(config,
+		List<RefactoringRule> projectRules = getProjectRules(standaloneConfig);
+		List<RefactoringRule> selectedRules = getSelectedRules(config,
 				projectRules);
 		if (selectedRules != null && !selectedRules.isEmpty()) {
 			// Create refactoring pipeline and set rules
@@ -241,14 +240,14 @@ public class RefactoringInvoker {
 		return paths;
 	}
 
-	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules(
+	protected List<RefactoringRule> getProjectRules(
 			StandaloneConfig standaloneConfig) {
 		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
 		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
 	}
 
-	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules(YAMLConfig config,
-			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
+	protected List<RefactoringRule> getSelectedRules(YAMLConfig config,
+			List<RefactoringRule> projectRules) throws YAMLConfigException {
 		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
 		return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
 	}

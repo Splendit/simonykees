@@ -22,7 +22,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.PublicFieldsRenamingASTVisitor;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
@@ -34,7 +34,7 @@ import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
  * @since 2.3.0
  *
  */
-public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenamingASTVisitor> {
+public class PublicFieldsRenamingRule extends RefactoringRuleImpl<PublicFieldsRenamingASTVisitor> {
 
 	private List<FieldMetaData> metaData;
 	private List<FieldMetaData> todosMetaData;

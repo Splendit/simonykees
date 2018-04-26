@@ -3,7 +3,7 @@ package eu.jsparrow.rules.common.statistics;
 import java.time.Duration;
 import java.util.List;
 
-import eu.jsparrow.rules.common.RefactoringRuleInterface;
+import eu.jsparrow.rules.common.RefactoringRule;
 
 
 /**
@@ -26,13 +26,13 @@ public class EliminatedTechnicalDebt {
 	 *            the rule used for the calculation
 	 * @return the eliminated technical debt as {@link Duration}.
 	 */
-	public static Duration get(RefactoringRuleInterface rule) {
+	public static Duration get(RefactoringRule rule) {
 		return get(rule, RuleApplicationCount.getFor(rule)
 			.toInt());
 	}
 
 	/**
-	 * Gets the technical debt for a specific {@link RefactoringRuleInterface}
+	 * Gets the technical debt for a specific {@link RefactoringRule}
 	 * by multiplying with a given count.
 	 * 
 	 * @param rule
@@ -41,7 +41,7 @@ public class EliminatedTechnicalDebt {
 	 *            times rule was applied
 	 * @return the eliminated technical debt as duration
 	 */
-	public static Duration get(RefactoringRuleInterface rule, int applicationCount) {
+	public static Duration get(RefactoringRule rule, int applicationCount) {
 		return rule.getRuleDescription()
 			.getRemediationCost()
 			.multipliedBy(applicationCount);
@@ -54,7 +54,7 @@ public class EliminatedTechnicalDebt {
 	 *            debts to sum up.
 	 * @return the sum of the technical debts as duration.
 	 */
-	public static Duration getTotalFor(List<? extends RefactoringRuleInterface> list) {
+	public static Duration getTotalFor(List<? extends RefactoringRule> list) {
 		return list.stream()
 			.map(EliminatedTechnicalDebt::get)
 			.reduce(Duration.ZERO, (x, y) -> x.plus(y));

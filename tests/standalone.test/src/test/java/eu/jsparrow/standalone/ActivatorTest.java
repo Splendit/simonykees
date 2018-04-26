@@ -79,7 +79,17 @@ public class ActivatorTest {
 
 		verify(listRulesUtil).listRulesShort();
 	}
+	
+	@Test
+	public void start_withLicenseInfo_invokesLicenseInfo() throws Exception {
+		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LICENSE_INFO"); //$NON-NLS-1$
+		when(context.getBundles()).thenReturn(new Bundle[] {});
 
+		activator.start(context);
+
+		verify(licenseService).licenseInfo(anyString());
+	}
+	
 	@Test
 	public void start_withListRulesWithSelectedId_invokesListSelectedId() throws Exception {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LIST_RULES"); //$NON-NLS-1$

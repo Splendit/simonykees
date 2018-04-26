@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -145,11 +146,11 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			String currentSelectedProfile = SimonykeesPreferenceManager.getCurrentProfileId();
 			String currentProfileId = SimonykeesPreferenceManager.getAllProfileIds()
 				.get(i);
-			SimonykeesProfile currentProfile = SimonykeesPreferenceManager.getProfileFromName(currentProfileId);
+			Optional<SimonykeesProfile> currentProfile = SimonykeesPreferenceManager
+				.getProfileFromName(currentProfileId);
 
-			String itemText = currentProfileId
-					+ (currentProfile.isBuiltInProfile() ? Messages.SimonykeesPreferencePage_profilesBuiltInSuffix
-							: ""); //$NON-NLS-1$
+			String itemText = currentProfileId + (currentProfile.isPresent() && currentProfile.get()
+				.isBuiltInProfile() ? Messages.SimonykeesPreferencePage_profilesBuiltInSuffix : ""); //$NON-NLS-1$
 			TableItem item = new TableItem(profilesTable, SWT.NONE);
 
 			item.setText(1, itemText);
@@ -174,27 +175,29 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 		int selectionCount = profilesTable.getSelectionCount();
 		if (selectionCount == 1) {
-			SimonykeesProfile profile = SimonykeesPreferenceManager
+			Optional<SimonykeesProfile> optionalProfile = SimonykeesPreferenceManager
 				.getProfileFromName(SimonykeesPreferenceManager.getAllProfileIds()
 					.get(profilesTable.getSelectionIndex()));
 			String currentProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
 
-			if (currentProfileId.equals(profile.getProfileName())) {
-				setDefaultProfileButton.setEnabled(false);
-			} else {
-				setDefaultProfileButton.setEnabled(true);
-			}
+			optionalProfile.ifPresent(profile -> {
+				if (currentProfileId.equals(profile.getProfileName())) {
+					setDefaultProfileButton.setEnabled(false);
+				} else {
+					setDefaultProfileButton.setEnabled(true);
+				}
 
-			editProfileButton.setEnabled(true);
-			exportProfileButton.setEnabled(true);
-
-			if (profile.isBuiltInProfile()) {
-				editProfileButton.setEnabled(false);
-				removeProfileButton.setEnabled(false);
-			} else {
 				editProfileButton.setEnabled(true);
-				removeProfileButton.setEnabled(true);
-			}
+				exportProfileButton.setEnabled(true);
+
+				if (profile.isBuiltInProfile()) {
+					editProfileButton.setEnabled(false);
+					removeProfileButton.setEnabled(false);
+				} else {
+					editProfileButton.setEnabled(true);
+					removeProfileButton.setEnabled(true);
+				}
+			});
 		} else if (selectionCount > 1) {
 			setDefaultProfileButton.setEnabled(false);
 			editProfileButton.setEnabled(false);
@@ -305,17 +308,19 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	private void removeSelectedProfiles() {
 		List<String> profilesToDelete = new LinkedList<>();
 		for (int index : profilesTable.getSelectionIndices()) {
-			SimonykeesProfile profile = SimonykeesPreferenceManager
+			Optional<SimonykeesProfile> optionalProfile = SimonykeesPreferenceManager
 				.getProfileFromName(SimonykeesPreferenceManager.getAllProfileIds()
 					.get(index));
-			if (!profile.isBuiltInProfile()) {
-				if (profile.getProfileName()
-					.equals(SimonykeesPreferenceManager.getCurrentProfileId())) {
-					SimonykeesPreferenceManager
-						.setCurrentProfileId(SimonykeesPreferenceManager.getDefaultProfileName());
-				}
-				profilesToDelete.add(profile.getProfileName());
-			}
+
+			optionalProfile.filter(profile -> !profile.isBuiltInProfile())
+				.ifPresent(profile -> {
+					if (profile.getProfileName()
+						.equals(SimonykeesPreferenceManager.getCurrentProfileId())) {
+						SimonykeesPreferenceManager
+							.setCurrentProfileId(SimonykeesPreferenceManager.getDefaultProfileName());
+					}
+					profilesToDelete.add(profile.getProfileName());
+				});
 		}
 
 		profilesToDelete.forEach(SimonykeesPreferenceManager::removeProfile);
@@ -325,7 +330,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	}
 
 	public void handleButtonClickedListener(String profileId) {
-		final WizardDialog dialog = new WizardDialog(getShell(), new ConfigureProfileWizard(profileId)) {
+		String currentDefaultProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
+		final WizardDialog dialog = new WizardDialog(getShell(),
+				new ConfigureProfileWizard(profileId, profileId.equals(currentDefaultProfileId))) {
 			/*
 			 * Removed unnecessary empty space on the bottom of the wizard
 			 * intended for ProgressMonitor that is not used
@@ -474,14 +481,16 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 				List<String> currentProfileNames = SimonykeesPreferenceManager.getAllProfileIds();
 				ProfileImportMode mode = ProfileImportMode.IMPORT;
 
-				SimonykeesProfile currentProfile = SimonykeesPreferenceManager.getProfileFromName(profile.getName());
+				Optional<SimonykeesProfile> optCurrentProfile = SimonykeesPreferenceManager
+					.getProfileFromName(profile.getName());
 				// prevent the default profile from being replaced
-				if (currentProfile != null && currentProfile.isBuiltInProfile()) {
-					logger.error(Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable);
-					SimonykeesMessageDialog.openMessageDialog(getShell(),
-							Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable, MessageDialog.ERROR);
-					return;
-				}
+				optCurrentProfile.filter(SimonykeesProfile::isBuiltInProfile)
+					.ifPresent(currentProfile -> {
+						logger.error(Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable);
+						SimonykeesMessageDialog.openMessageDialog(getShell(),
+								Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable, MessageDialog.ERROR);
+						return;
+					});
 
 				// check if the profile already exists
 				if (currentProfileNames.contains(profile.getName())) {
@@ -517,8 +526,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 					if (!nonExistentRules.isEmpty()) {
 						String nonExistentRulesMessage = NLS.bind(Messages.SimonykeesPreferencePage_profileAndName,
 								profile.getName()) + "\n" //$NON-NLS-1$
-								+ NLS.bind(Messages.Activator_standalone_RulesDoNotExist,
-										nonExistentRules.toString());
+								+ NLS.bind(Messages.Activator_standalone_RulesDoNotExist, nonExistentRules.toString());
 						SimonykeesMessageDialog.openMessageDialog(getShell(), nonExistentRulesMessage,
 								MessageDialog.INFORMATION);
 						profile.getRules()
@@ -526,7 +534,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 					}
 					SimonykeesPreferenceManager.addProfile(profile.getName(), profile.getRules());
 					importedProfileCount++;
-					logger.info("profile added: " + profile); //$NON-NLS-1$
+					logger.info("profile added: {}", profile); //$NON-NLS-1$
 
 				}
 			}
@@ -579,14 +587,16 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			for (int i : indices) {
 				String id = SimonykeesPreferenceManager.getAllProfileIds()
 					.get(i);
-				SimonykeesProfile profile = SimonykeesPreferenceManager.getProfileFromName(id);
+				Optional<SimonykeesProfile> optProfile = SimonykeesPreferenceManager.getProfileFromName(id);
 
-				YAMLProfile yamlProfile = new YAMLProfile();
-				yamlProfile.setName(id);
-				yamlProfile.setRules(profile.getEnabledRuleIds());
+				optProfile.ifPresent(profile -> {
+					YAMLProfile yamlProfile = new YAMLProfile();
+					yamlProfile.setName(id);
+					yamlProfile.setRules(profile.getEnabledRuleIds());
 
-				config.getProfiles()
-					.add(yamlProfile);
+					config.getProfiles()
+						.add(yamlProfile);
+				});
 			}
 			try {
 				YAMLConfigUtil.exportConfig(config, file);

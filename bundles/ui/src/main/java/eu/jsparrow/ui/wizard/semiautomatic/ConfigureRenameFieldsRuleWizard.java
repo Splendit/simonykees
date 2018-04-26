@@ -36,7 +36,6 @@ import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizard;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizardPage;
@@ -274,7 +273,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 		}
 
 		renameFieldsRule = new PublicFieldsRenamingRule(metadata, todosMetadata);
-		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(renameFieldsRule);
+		final List<RefactoringRule> rules = Arrays.asList(renameFieldsRule);
 
 		refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(rules);
