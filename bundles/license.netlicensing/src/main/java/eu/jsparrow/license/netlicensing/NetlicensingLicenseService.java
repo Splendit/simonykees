@@ -12,9 +12,6 @@ import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidation;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidationFactory;
-import eu.jsparrow.license.netlicensing.validation.impl.NetlicensingValidationParametersFactory;
-import eu.jsparrow.license.netlicensing.validation.impl.NetlicensingValidationRequest;
-import eu.jsparrow.license.netlicensing.validation.impl.ResponseEvaluator;
 
 /**
  * Implementor of {@link LicenseService} using <a href="http://www.netlicensing.io">NetLicensing</a>

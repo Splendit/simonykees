@@ -54,7 +54,6 @@ public class Messages extends NLS {
 	public static String BuyLicenseDialog_reason6;
 	public static String BuyLicenseDialog_reason7;
 	public static String BuyLicenseDialog_reasonsLabel;
-
 	public static String BuyLicenseDialog_TitleMessage_LicenseHasExpired;
 	public static String StartDialog_alwaysShowIntroText;
 	public static String StartDialog_appreciationLabel;
@@ -381,6 +380,9 @@ public class Messages extends NLS {
 	public static String StandaloneConfig_RevertClasspath;
 	public static String StandaloneConfig_SetProjectLocation;
 	public static String StandaloneConfig_UseExistingProjectDescription;
+	public static String StandaloneLicenseUtil_expirationDate;
+	public static String StandaloneLicenseUtil_isValid;
+	public static String StandaloneLicenseUtil_licenseType;
 	public static String StandardLoggerRule_description;
 	public static String StandardLoggerRule_name;
 	public static String StatementLambdaToExpressionRule_description;
