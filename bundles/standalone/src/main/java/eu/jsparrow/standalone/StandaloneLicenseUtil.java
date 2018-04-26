@@ -73,7 +73,7 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 		logger.error(result.getDetail());
 		return false;
 	}
-	
+
 	@Override
 	public void licenseInfo(String key) {
 		String sessionId = Integer.toString(random.nextInt());
@@ -82,7 +82,7 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 			logger.error("No License Key has been specified."); //$NON-NLS-1$
 			return;
 		}
-		
+
 		LicenseValidationResult result = null;
 		try {
 			Properties properties = loadProperties();
@@ -96,11 +96,11 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 			logger.error("Licensing Error: {}", e.getMessage()); //$NON-NLS-1$
 			return;
 		}
-		
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n"); //$NON-NLS-1$
 		sb.append(LINE_SEPARATOR_EQUAL);
-		
+
 		sb.append(Messages.StandaloneLicenseUtil_licenseType);
 		sb.append(result.getLicenseType());
 		sb.append("\n"); //$NON-NLS-1$
