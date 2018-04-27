@@ -64,7 +64,7 @@ public abstract class AbstractRulesTest {
 	}
 
 	@AfterClass
-	public static void classTearDown() throws Exception {
+	public static void classTearDown() {
 		root = null;
 		javaVersion = JavaCore.VERSION_1_8;
 	}

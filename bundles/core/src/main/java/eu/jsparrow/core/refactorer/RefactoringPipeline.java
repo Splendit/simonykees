@@ -587,19 +587,20 @@ public class RefactoringPipeline {
 	private CompilationUnit applyToRefactoringState(RefactoringState refactoringState,
 			List<NotWorkingRuleModel> returnListNotWorkingRules, CompilationUnit astRoot, RefactoringRule rule,
 			boolean initialApply) {
+		CompilationUnit newAstRoot = astRoot;
 
 		try {
-			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, astRoot, initialApply);
+			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, newAstRoot, initialApply);
 			if (hasChanges) {
 				ICompilationUnit workingCopy = refactoringState.getWorkingCopy();
-				astRoot = workingCopy.reconcile(AST.JLS8, true, null, null);
+				newAstRoot = workingCopy.reconcile(AST.JLS8, true, null, null);
 			}
 		} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 			logger.error(e.getMessage(), e);
 			returnListNotWorkingRules.add(new NotWorkingRuleModel(rule.getRuleDescription()
 				.getName(), refactoringState.getWorkingCopyName()));
 		}
-		return astRoot;
+		return newAstRoot;
 	}
 
 	public void updateInitialSourceMap() {

@@ -104,11 +104,11 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 									Activator.setRunning(false);
 									return Status.CANCEL_STATUS;
 								} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
-									synchronizeWithUIShowCompilationErrorMessage(containingErrorList, event,
+									synchronizeWithUIShowCompilationErrorMessage(containingErrorList,
 											refactoringPipeline, selectedJavaElements, selectedJavaProjekt);
 								} else {
-									synchronizeWithUIShowSelectRulesWizard(event, refactoringPipeline,
-											selectedJavaElements, selectedJavaProjekt);
+									synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, selectedJavaElements,
+											selectedJavaProjekt);
 								}
 
 							} catch (RefactoringException e) {
@@ -147,7 +147,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	/**
 	 * Method used to open SelectRulesWizard from non UI thread
 	 */
-	private void synchronizeWithUIShowSelectRulesWizard(ExecutionEvent event, RefactoringPipeline refactoringPipeline,
+	private void synchronizeWithUIShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
 			List<IJavaElement> selectedJavaElements, IJavaProject selectedJavaProjekt) {
 
 		Display.getDefault()
@@ -209,7 +209,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	 * errors.
 	 */
 	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList,
-			ExecutionEvent event, RefactoringPipeline refactoringPipeline, List<IJavaElement> selectedJavaElements,
+			RefactoringPipeline refactoringPipeline, List<IJavaElement> selectedJavaElements,
 			IJavaProject selectedJavaProjekt) {
 		Display.getDefault()
 			.asyncExec(() -> {
@@ -222,7 +222,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 				dialog.open();
 				if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
 					if (refactoringPipeline.hasRefactoringStates()) {
-						synchronizeWithUIShowSelectRulesWizard(event, refactoringPipeline, selectedJavaElements,
+						synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, selectedJavaElements,
 								selectedJavaProjekt);
 					} else {
 						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitDialog();
