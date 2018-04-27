@@ -16,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 
 /**
@@ -33,10 +32,9 @@ public class ListRulesUtilTest {
 
 	private List<RefactoringRule> rules;
 
-	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() {
-		rule1 = mock(RefactoringRuleImpl.class);
+		rule1 = mock(RefactoringRule.class);
 
 		rules = new LinkedList<>();
 		rules.add(rule1);
@@ -105,7 +103,6 @@ public class ListRulesUtilTest {
 		assertThat(output, containsString(rule1Name));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void getAllRulesFilteredById_noRuleIdProvided_shouldReturnAllRules() {
 		List<RefactoringRule> rules = listRulesUtil
@@ -114,7 +111,6 @@ public class ListRulesUtilTest {
 		assertThat(rules, contains(rule1));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void getAllRulesFilteredById_ruleIdProvided_shouldReturnFilteredRules() {
 		RefactoringRule rule2 = addExtraRule();
@@ -160,7 +156,7 @@ public class ListRulesUtilTest {
 	}
 
 	private RefactoringRule addExtraRule() {
-		RefactoringRule rule = mock(RefactoringRuleImpl.class);
+		RefactoringRule rule = mock(RefactoringRule.class);
 
 		rules.add(rule);
 
