@@ -20,12 +20,12 @@ public class NetlicensingLicenseModelFactoryService implements LicenseModelFacto
 		return new DemoLicenseModel(expirationDate);
 	}
 
-	public LicenseModel createNewNodeLockedModel(String key, String secret, String productNr, String moduleNr) {
-		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.NODE_LOCKED);
+	public LicenseModel createNewNodeLockedModel(String key, String secret, String productNr, String moduleNr, String validationBaseUrl) {
+		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.NODE_LOCKED, validationBaseUrl);
 	}
 
-	public LicenseModel createNewFloatingModel(String key, String secret, String productNr, String moduleNr) {
-		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.FLOATING);
+	public LicenseModel createNewFloatingModel(String key, String secret, String productNr, String moduleNr, String validationBaseUrl) {
+		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.FLOATING, validationBaseUrl);
 	}
 
 	public LicenseModel createNewModel(String key, String secret, String productNr, String moduleNr, LicenseType type,

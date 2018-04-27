@@ -93,10 +93,7 @@ public class Activator implements BundleActivator {
 					injectDependencies(context);
 					String key = getLicenseKey(context);
 					String agentUrl = getAgentUrl(context);
-					if (!agentUrl.isEmpty()) {
-						// TODO provide license service agent url if not empty
-					}
-					if (licenseService.validate(key) || devModeEnabled) {
+					if (licenseService.validate(key, agentUrl) || devModeEnabled) {
 						refactoringInvoker.startRefactoring(context, new RefactoringPipeline());
 					} else {
 						String message = Messages.StandaloneActivator_noValidLicenseFound;
@@ -125,10 +122,7 @@ public class Activator implements BundleActivator {
 				injectDependencies(context);
 				String key = getLicenseKey(context);
 				String agentUrl = getAgentUrl(context);
-				if (!agentUrl.isEmpty()) {
-					// TODO provide license service agent url if not empty
-				}
-				licenseService.licenseInfo(key);
+				licenseService.licenseInfo(key, agentUrl);
 				break;
 			case TEST:
 				break;

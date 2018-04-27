@@ -35,7 +35,18 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		this.model = model;
 		this.licenseCache = new NetlicensingLicenseCache();
 		this.parametersFactory = new NetlicensingValidationParametersFactory();
-		this.validationRequest = new NetlicensingValidationRequest(new ResponseEvaluator(model.getKey()));
+		this.validationRequest = createValidationRequest(model);
+	}
+
+	private NetlicensingValidationRequest createValidationRequest(NetlicensingLicenseModel model) {
+		String validationBaseUrl = model.getValidationBaseUrl();
+		String licenseeNr = model.getKey();
+		ResponseEvaluator responseEvaluator = new ResponseEvaluator(licenseeNr);
+		if(validationBaseUrl != null && !validationBaseUrl.isEmpty()) {		
+			return new NetlicensingValidationRequest(responseEvaluator, validationBaseUrl);
+		} else {
+			return new NetlicensingValidationRequest(responseEvaluator);
+		}
 	}
 
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model, NetlicensingLicenseCache cache,
@@ -85,7 +96,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		 * return a validation result specific to this license type.
 		 */
 		model = new NetlicensingLicenseModel(model.getKey(), model.getSecret(), model.getProductNr(),
-				model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate());
+				model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate(), model.getValidationBaseUrl());
 
 	}
 

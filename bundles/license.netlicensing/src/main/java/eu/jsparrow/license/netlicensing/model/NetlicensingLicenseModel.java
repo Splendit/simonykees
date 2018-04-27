@@ -19,6 +19,7 @@ public class NetlicensingLicenseModel implements LicenseModel {
 	private String moduleNr;
 	private LicenseType type;
 	private ZonedDateTime expireDate;
+	private String validationBaseUrl;
 
 	public NetlicensingLicenseModel(String key, String secret, String productNr, String moduleNr, LicenseType type) {
 		this.type = type;
@@ -28,11 +29,23 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		this.moduleNr = moduleNr;
 	}
 
-	public NetlicensingLicenseModel(String key, String secret, String productNr, String moduleNr, LicenseType type, String name, 
-			ZonedDateTime expireDate) {
+	public NetlicensingLicenseModel(String key, String secret, String productNr, String moduleNr, LicenseType type,
+			String validationBaseUrl) {
+		this(key, secret, productNr, moduleNr, type);
+		this.validationBaseUrl = validationBaseUrl;
+	}
+	
+	public NetlicensingLicenseModel(String key, String secret, String productNr, String moduleNr, LicenseType type,
+			String name, ZonedDateTime expireDate) {
 		this(key, secret, productNr, moduleNr, type);
 		this.name = name;
 		this.expireDate = expireDate;
+	}
+	
+	public NetlicensingLicenseModel(String key, String secret, String productNr, String moduleNr, LicenseType type,
+			String name, ZonedDateTime expireDate, String validationBaseUrl) {
+		this(key, secret, productNr, moduleNr, type, name, expireDate);
+		this.validationBaseUrl = validationBaseUrl;
 	}
 
 	public String getKey() {
@@ -62,12 +75,15 @@ public class NetlicensingLicenseModel implements LicenseModel {
 	public String getModuleNr() {
 		return moduleNr;
 	}
-	
+
+	public String getValidationBaseUrl() {
+		return validationBaseUrl;
+	}
+
 	@Override
 	public String toString() {
 		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", secret=" + secret + ", productNr=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				+ productNr + ", moduleNr=" + moduleNr + ", type=" + type + ", expireDate=" + expireDate + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
-
 
 }

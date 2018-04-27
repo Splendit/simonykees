@@ -39,7 +39,7 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 	private static final String LINE_SEPARATOR_HIPHEN = "--------------------------------------------------------------------------------\n"; //$NON-NLS-1$
 
 	@Override
-	public boolean validate(String key) {
+	public boolean validate(String key, String validationBaseUrl) {
 		String sessionId = Integer.toString(random.nextInt());
 
 		if (key == null || key.isEmpty()) {
@@ -53,7 +53,7 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
 			String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
 
-			model = factoryService.createNewFloatingModel(key, sessionId, productNr, moduleNr);
+			model = factoryService.createNewFloatingModel(key, sessionId, productNr, moduleNr, validationBaseUrl);
 			result = licenseService.validate(model);
 		} catch (ValidationException | IOException e) {
 			logger.debug("Licensing Error:", e); //$NON-NLS-1$
@@ -75,7 +75,7 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 	}
 
 	@Override
-	public void licenseInfo(String key) {
+	public void licenseInfo(String key, String validationBaseUrl) {
 		String sessionId = Integer.toString(random.nextInt());
 
 		if (key == null || key.isEmpty()) {
@@ -89,7 +89,7 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
 			String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
 
-			model = factoryService.createNewFloatingModel(key, sessionId, productNr, moduleNr);
+			model = factoryService.createNewFloatingModel(key, sessionId, productNr, moduleNr, validationBaseUrl);
 			result = licenseService.validate(model);
 		} catch (ValidationException | IOException e) {
 			logger.debug("Licensing Error:", e); //$NON-NLS-1$

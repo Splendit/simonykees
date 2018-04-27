@@ -13,13 +13,14 @@ import eu.jsparrow.license.api.exception.ValidationException;
 
 /**
  * Allows for setting up the connection to NetLicensing API and sending
- * validation requests. Makes use of {@link ResponseEvaluator} to construct
- * the validation result. 
+ * validation requests. Makes use of {@link ResponseEvaluator} to construct the
+ * validation result.
  *
  */
 public class NetlicensingValidationRequest {
 
-	static final String VALIDATION_BASE_URL = "https://go.netlicensing.io/core/v2/rest"; //$NON-NLS-1$
+	private static final String DEFAULT_VALIDATION_BASE_URL = "https://go.netlicensing.io/core/v2"; //$NON-NLS-1$
+	private static final String BASE_URL_SUFFIX = "/rest"; //$NON-NLS-1$
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
@@ -31,9 +32,12 @@ public class NetlicensingValidationRequest {
 	private LicenseeServiceWrapper licenseeService;
 
 	public NetlicensingValidationRequest(ResponseEvaluator responseEvaluator) {
-		this(responseEvaluator, new LicenseeServiceWrapper());
-		this.restApiContext = createAPIContextCall();
+		this(responseEvaluator, DEFAULT_VALIDATION_BASE_URL);
+	}
 
+	public NetlicensingValidationRequest(ResponseEvaluator responseEvaluator, String validationBaseUrl) {
+		this(responseEvaluator, new LicenseeServiceWrapper());
+		this.restApiContext = createAPIContextCall(validationBaseUrl + BASE_URL_SUFFIX);
 	}
 
 	public NetlicensingValidationRequest(ResponseEvaluator responseEvaluator, LicenseeServiceWrapper licenseeService) {
@@ -58,9 +62,9 @@ public class NetlicensingValidationRequest {
 		}
 	}
 
-	private Context createAPIContextCall() {
+	private Context createAPIContextCall(String validationBaseUrl) {
 		Context context = new Context();
-		context.setBaseUrl(VALIDATION_BASE_URL);
+		context.setBaseUrl(validationBaseUrl);
 		context.setSecurityMode(SecurityMode.APIKEY_IDENTIFICATION);
 		context.setApiKey(NetlicensingProperties.API_KEY);
 		return context;
