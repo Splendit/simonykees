@@ -87,7 +87,7 @@ public class ActivatorTest {
 
 		activator.start(context);
 
-		verify(licenseService).licenseInfo(anyString(), "");//$NON-NLS-1$
+		verify(licenseService).licenseInfo(anyString(), anyString());
 	}
 
 	@Test
@@ -106,7 +106,7 @@ public class ActivatorTest {
 	public void start_withRefactorAndValidLicense_invokesRefactoringInvoker() throws Exception {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("REFACTOR"); //$NON-NLS-1$
 		when(context.getBundles()).thenReturn(new Bundle[] {});
-		when(licenseService.validate(anyString(), "")).thenReturn(true);//$NON-NLS-1$
+		when(licenseService.validate(anyString(), anyString())).thenReturn(true);
 
 		activator.start(context);
 
@@ -117,7 +117,7 @@ public class ActivatorTest {
 	public void start_withRefactorAndInvalidLicense_refactoringInvokerNotInvoked() throws Exception {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("REFACTOR"); //$NON-NLS-1$
 		when(context.getBundles()).thenReturn(new Bundle[] {});
-		when(licenseService.validate(anyString(), "")).thenReturn(false);//$NON-NLS-1$
+		when(licenseService.validate(anyString(), anyString())).thenReturn(false);
 
 		activator.start(context);
 
