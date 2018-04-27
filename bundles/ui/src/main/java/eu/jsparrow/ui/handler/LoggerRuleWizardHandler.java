@@ -91,7 +91,7 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 										loggerRule.getAvailableLoggerType()))) {
 							RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 
-							Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+							Job job = new Job(Messages.ProgressMonitor_verifying_project_information) {
 
 								@Override
 								protected IStatus run(IProgressMonitor monitor) {

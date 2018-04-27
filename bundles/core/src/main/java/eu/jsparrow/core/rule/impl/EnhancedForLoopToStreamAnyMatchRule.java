@@ -18,7 +18,8 @@ import eu.jsparrow.rules.common.Tag;
  * @since 2.1.1
  *
  */
-public class EnhancedForLoopToStreamAnyMatchRule extends RefactoringRuleImpl<EnhancedForLoopToStreamAnyMatchASTVisitor> {
+public class EnhancedForLoopToStreamAnyMatchRule
+		extends RefactoringRuleImpl<EnhancedForLoopToStreamAnyMatchASTVisitor> {
 
 	public EnhancedForLoopToStreamAnyMatchRule() {
 		super();

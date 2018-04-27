@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * Keeps the names of the variables declared in a scope. 
+ * Keeps the names of the variables declared in a scope.
  * 
  * @author Ardit Ymeri
  * @since 2.5
@@ -28,7 +28,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 public class LiveVariableScope {
 	private Map<AbstractTypeDeclaration, List<String>> fieldNames = new HashMap<>();
 	private Map<ASTNode, List<String>> localVariableNames = new HashMap<>();
-	
+
 	/**
 	 * The scope is either of the:
 	 * 
@@ -61,8 +61,7 @@ public class LiveVariableScope {
 
 		return Optional.empty();
 	}
-	
-	
+
 	/**
 	 * Populates {@link #localVariableNames} and {@link #fieldNames} with the
 	 * variable declarations occurring in the given scope. The scope node is
@@ -108,7 +107,7 @@ public class LiveVariableScope {
 		List<String> names = ASTNodeUtil.findFieldNames(typeDeclaration);
 		fieldNames.put(typeDeclaration, names);
 	}
-	
+
 	/**
 	 * Checks whether the given identifier matches the values in
 	 * {@link #fieldNames} or {@link #localVariableNames}.
@@ -125,7 +124,7 @@ public class LiveVariableScope {
 					.stream()
 					.anyMatch(names -> names.contains(name));
 	}
-	
+
 	/**
 	 * Adds the given variable name in the {@link #localVariableNames}
 	 * 
@@ -142,14 +141,13 @@ public class LiveVariableScope {
 		storedLocalNames.add(calendarName);
 		localVariableNames.put(scope, storedLocalNames);
 	}
-	
+
 	public void clearLocalVariablesScope(ASTNode scope) {
 		localVariableNames.remove(scope);
 	}
-	
+
 	public void clearFieldScope(AbstractTypeDeclaration node) {
 		fieldNames.remove(node);
 	}
 
 }
-

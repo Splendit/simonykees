@@ -36,5 +36,5 @@ public class RefactoringPreviewWizardModel extends BaseModel {
 		changedFilesPerRule.get(rule)
 			.add(compilationUnitHandle);
 	}
-	
+
 }

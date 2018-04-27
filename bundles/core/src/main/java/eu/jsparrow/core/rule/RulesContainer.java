@@ -60,7 +60,6 @@ import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 
 /**
  * {@link RulesContainer} is a HelperClass that holds a static list of all
@@ -149,8 +148,7 @@ public class RulesContainer {
 		return rules;
 	}
 
-	public static List<RefactoringRule> getRulesForProject(
-			IJavaProject selectedJavaProjekt, boolean isStandalone) {
+	public static List<RefactoringRule> getRulesForProject(IJavaProject selectedJavaProjekt, boolean isStandalone) {
 		List<RefactoringRule> result = getAllRules(isStandalone);
 		result.stream()
 			.forEach(rule -> rule.calculateEnabledForProject(selectedJavaProjekt));

@@ -102,8 +102,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
-	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule,
-			RefactoringRule rule, RefactoringPreviewWizardModel wizardModel) {
+	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule, RefactoringRule rule,
+			RefactoringPreviewWizardModel wizardModel) {
 		super(rule.getRuleDescription()
 			.getName());
 

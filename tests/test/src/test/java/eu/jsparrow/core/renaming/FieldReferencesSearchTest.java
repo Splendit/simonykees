@@ -1,10 +1,9 @@
-package eu.jsparrow.core;
+package eu.jsparrow.core.renaming;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,17 +12,18 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.junit.Before;
 import org.junit.Test;
 
+import eu.jsparrow.core.AbstractRulesTest;
 import eu.jsparrow.core.visitor.renaming.FieldReferencesSearch;
 import eu.jsparrow.core.visitor.renaming.ReferenceSearchMatch;
 
 @SuppressWarnings("nls")
-public class FieldReferencesSearchTest extends AbstractRulesTest {
+public class FieldReferencesSearchTest extends AbstractRulesTest  {
 	
 	private static final String ROOT_PACKAGE_NAME = "eu.jsparrow.core";
 	private static final String CORE_PACKAGE = "package " + ROOT_PACKAGE_NAME + ";";
@@ -95,21 +95,23 @@ public class FieldReferencesSearchTest extends AbstractRulesTest {
 	private IPackageFragment packageFragment;
 	
 	@Before
-	public void setUpCompilationUnits() throws JavaModelException {
+	public void setUpCompilationUnits() throws Exception {
+		IPackageFragmentRoot root = AbstractRulesTest.createRootPackageFragment();
 		packageFragment = root.createPackageFragment(ROOT_PACKAGE_NAME, true, null);
 	}
 	
 	@Test
-	public void findReferences() throws JavaModelException, IOException {
+	public void findReferences() throws Exception {
 
-		List<CompilationUnit> compilationUnits = loadCompilationUnits(packageFragment, compilationUnitNameContents);
+		List<CompilationUnit> compilationUnits = RenamingTestHelper
+				.loadCompilationUnitsFromString(packageFragment, compilationUnitNameContents);
 		/*
 		 * Having a FieldDeclarationASTVisitor and a field with unsafe type name
 		 * (i.e. having a $ in its name).
 		 */
 
 		FieldReferencesSearch searchEngine = new FieldReferencesSearch(new IJavaElement[] { packageFragment });
-		VariableDeclarationFragment fragment = findFieldDeclarations(compilationUnits).stream()
+		VariableDeclarationFragment fragment = RenamingTestHelper.findFieldDeclarations(compilationUnits).stream()
 			.filter(f -> "notAnInstance_ofBad_class".equals(f.getName().getIdentifier()))
 			.findFirst().orElse(null);
 		assertNotNull(fragment);
@@ -128,16 +130,17 @@ public class FieldReferencesSearchTest extends AbstractRulesTest {
 	}
 	
 	@Test
-	public void findReferences_typeHavingDollarSign() throws JavaModelException, IOException {
+	public void findReferences_typeHavingDollarSign() throws Exception {
 
-		List<CompilationUnit> compilationUnits = loadCompilationUnits(packageFragment, compilationUnitNameContents); 
+		List<CompilationUnit> compilationUnits = RenamingTestHelper
+				.loadCompilationUnitsFromString(packageFragment, compilationUnitNameContents); 
 		/*
 		 * Having a FieldDeclarationASTVisitor and a field with 
 		 * unsafe type name (i.e. having a $ in its name).
 		 */
 		
 		FieldReferencesSearch searchEngine = new FieldReferencesSearch(new IJavaElement[] { packageFragment });
-		VariableDeclarationFragment fragment = findFieldDeclarations(compilationUnits).stream()
+		VariableDeclarationFragment fragment = RenamingTestHelper.findFieldDeclarations(compilationUnits).stream()
 				.filter(f -> "bad_class_name".equals(f.getName().getIdentifier()))
 				.findFirst()
 				.orElse(null);
@@ -159,9 +162,10 @@ public class FieldReferencesSearchTest extends AbstractRulesTest {
 	}
 	
 	@Test
-	public void referencesOfFields_anonymousClasses() throws JavaModelException, IOException {
+	public void referencesOfFields_anonymousClasses() throws Exception {
 		
-		List<CompilationUnit> compilationUntis = loadCompilationUnits(packageFragment, compilationUnitHavingAnonymousClasses);
+		List<CompilationUnit> compilationUntis = RenamingTestHelper
+				.loadCompilationUnitsFromString(packageFragment, compilationUnitHavingAnonymousClasses);
 		/*
 		 * Having loaded two anonymous classes of the same type, both declaring
 		 * a field with the same name

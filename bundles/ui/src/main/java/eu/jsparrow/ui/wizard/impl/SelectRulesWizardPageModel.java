@@ -53,17 +53,15 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	 * @return Set containing searched string.
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public Set<Object> filterPosibilitiesByName() {
 		return super.getPosibilities().stream()
-			.filter(object -> StringUtils
-				.contains(((RefactoringRule) object).getRuleDescription().getName()
-					.toLowerCase(), nameFilter))
+			.filter(object -> StringUtils.contains(((RefactoringRule) object).getRuleDescription()
+				.getName()
+				.toLowerCase(), nameFilter))
 			.collect(Collectors.toSet());
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void filterPosibilitiesByTags() {
 		if (!appliedTags.isEmpty()) {
 			Set<Object> currentPossibilities = getPosibilities();
@@ -78,11 +76,13 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	private boolean containsTag(RefactoringRule object) {
 		for (String tag : appliedTags) {
 			if (null != Tag.getTageForName(tag)) {
-				if (object.getRuleDescription().getTags()
+				if (object.getRuleDescription()
+					.getTags()
 					.contains(Tag.getTageForName(tag))) {
 					return true;
 				}
-			} else if (StringUtils.contains(object.getRuleDescription().getName()
+			} else if (StringUtils.contains(object.getRuleDescription()
+				.getName()
 				.toLowerCase(), tag)) {
 				return true;
 			}
