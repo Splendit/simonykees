@@ -17,6 +17,12 @@ import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 @SuppressWarnings("nls")
 public class NetlicensingValidationParametersFactoryTest {
 
+	private static final String ACTION = "action";
+	private static final String SECRET = "secret";
+	private static final String SESSION_ID = "sessionId";
+	private static final String MODULE = "module";
+	private static final String PRODUCT = "product";
+
 	private NetlicensingValidationParametersFactory parametersFactory;
 	private ZonedDateTime expireDate;
 
@@ -29,26 +35,26 @@ public class NetlicensingValidationParametersFactoryTest {
 
 	@Test
 	public void createFloatingCheckInParameters() {
-		String expectedSessionId = "secret";
+		String expectedSessionId = SECRET;
 		String expectedAction = "checkIn";
-		NetlicensingLicenseModel model = new NetlicensingLicenseModel("key", expectedSessionId, "product", "module",
+		NetlicensingLicenseModel model = new NetlicensingLicenseModel("key", expectedSessionId, PRODUCT, MODULE,
 				LicenseType.FLOATING, "name", expireDate);
 
 		ValidationParameters parameters = parametersFactory.createFloatingCheckInParameters(model);
 
 		Map<String, String> map = parameters.getProductModuleValidationParameters(model.getModuleNr());
-		assertTrue(map.containsKey("sessionId"));
-		assertTrue(map.containsKey("action"));
-		assertTrue(expectedSessionId.equals(map.get("sessionId")));
-		assertTrue(expectedAction.equals(map.get("action")));
+		assertTrue(map.containsKey(SESSION_ID));
+		assertTrue(map.containsKey(ACTION));
+		assertTrue(expectedSessionId.equals(map.get(SESSION_ID)));
+		assertTrue(expectedAction.equals(map.get(ACTION)));
 	}
 
 	@Test
 	public void createValidationParameters_nodeLockedLicense() {
 
-		String expectedSecret = "secret";
+		String expectedSecret = SECRET;
 		String expectedName = "name";
-		NetlicensingLicenseModel model = new NetlicensingLicenseModel("key", expectedSecret, "product", "module",
+		NetlicensingLicenseModel model = new NetlicensingLicenseModel("key", expectedSecret, PRODUCT, MODULE,
 				LicenseType.NODE_LOCKED, expectedName, expireDate);
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
@@ -60,19 +66,19 @@ public class NetlicensingValidationParametersFactoryTest {
 
 	@Test
 	public void createValidationParameters_floatingLicense() {
-		String expectedSessionId = "secret";
+		String expectedSessionId = SECRET;
 		String expectedAction = "checkOut";
 
-		NetlicensingLicenseModel model = new NetlicensingLicenseModel("key", expectedSessionId, "product", "module",
+		NetlicensingLicenseModel model = new NetlicensingLicenseModel("key", expectedSessionId, PRODUCT, MODULE,
 				LicenseType.FLOATING, "name", expireDate);
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 
 		Map<String, String> map = parameters.getProductModuleValidationParameters(model.getModuleNr());
-		assertTrue(map.containsKey("sessionId"));
-		assertTrue(map.containsKey("action"));
-		assertTrue(expectedSessionId.equals(map.get("sessionId")));
-		assertTrue(expectedAction.equals(map.get("action")));
+		assertTrue(map.containsKey(SESSION_ID));
+		assertTrue(map.containsKey(ACTION));
+		assertTrue(expectedSessionId.equals(map.get(SESSION_ID)));
+		assertTrue(expectedAction.equals(map.get(ACTION)));
 	}
 
 }

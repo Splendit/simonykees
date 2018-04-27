@@ -26,6 +26,8 @@ import eu.jsparrow.rules.common.RuleDescription;
  */
 public class ListRulesUtilTest {
 
+	private static final String RULE1_NAME = "rule1"; //$NON-NLS-1$
+
 	private ListRulesUtil listRulesUtil;
 
 	private RefactoringRule rule1;
@@ -44,7 +46,7 @@ public class ListRulesUtilTest {
 
 	@Test
 	public void listRules_noRulesSelected_shouldReturnNoRulesAvailable() {
-		String rule1id = "rule1"; //$NON-NLS-1$
+		String rule1id = RULE1_NAME;
 		String ruleId = "nonExistingRule"; //$NON-NLS-1$
 		String expectedResult = "No rules available!"; //$NON-NLS-1$
 
@@ -57,7 +59,7 @@ public class ListRulesUtilTest {
 
 	@Test
 	public void listRules_allRulesSelected_shouldReturnRulesDescription() {
-		String rule1id = "rule1"; //$NON-NLS-1$
+		String rule1id = RULE1_NAME;
 		String rule1Name = "Rule 1"; //$NON-NLS-1$
 		String rule1Description = "Rule 1 Description"; //$NON-NLS-1$
 
@@ -88,7 +90,7 @@ public class ListRulesUtilTest {
 
 	@Test
 	public void listRulesShort_rulesAreAvailable() {
-		String rule1id = "rule1"; //$NON-NLS-1$
+		String rule1id = RULE1_NAME;
 		String rule1Name = "Rule 1"; //$NON-NLS-1$
 
 		RuleDescription ruleDescription1 = mock(RuleDescription.class);
@@ -105,17 +107,16 @@ public class ListRulesUtilTest {
 
 	@Test
 	public void getAllRulesFilteredById_noRuleIdProvided_shouldReturnAllRules() {
-		List<RefactoringRule> rules = listRulesUtil
-			.getAllRulesFilteredById(null);
+		List<RefactoringRule> testRules = listRulesUtil.getAllRulesFilteredById(null);
 
-		assertThat(rules, contains(rule1));
+		assertThat(testRules, contains(rule1));
 	}
 
 	@Test
 	public void getAllRulesFilteredById_ruleIdProvided_shouldReturnFilteredRules() {
 		RefactoringRule rule2 = addExtraRule();
 
-		String rule1id = "rule1"; //$NON-NLS-1$
+		String rule1id = RULE1_NAME;
 		String rule2id = "rule2"; //$NON-NLS-1$
 
 		String ruleId = rule1id + ",,"; //$NON-NLS-1$
@@ -123,8 +124,7 @@ public class ListRulesUtilTest {
 		when(rule1.getId()).thenReturn(rule1id);
 		when(rule2.getId()).thenReturn(rule2id);
 
-		List<RefactoringRule> rules = listRulesUtil
-			.getAllRulesFilteredById(ruleId);
+		List<RefactoringRule> rules = listRulesUtil.getAllRulesFilteredById(ruleId);
 
 		assertThat(rules, contains(rule1));
 	}
@@ -135,7 +135,7 @@ public class ListRulesUtilTest {
 
 		List<RefactoringRule> rules = listRulesUtil.getAllRulesFromContainer();
 
-		String rule1id = "rule1"; //$NON-NLS-1$
+		String rule1id = RULE1_NAME;
 		String rule2id = "rule22"; //$NON-NLS-1$
 
 		when(rule1.getId()).thenReturn(rule1id);
