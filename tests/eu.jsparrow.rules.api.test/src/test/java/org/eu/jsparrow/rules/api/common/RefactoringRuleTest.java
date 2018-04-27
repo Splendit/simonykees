@@ -17,7 +17,6 @@ import eu.jsparrow.jdtunit.util.CompilationUnitBuilder;
 import eu.jsparrow.jdtunit.util.JavaProjectBuilder;
 import eu.jsparrow.jdtunit.util.PackageFragmentBuilder;
 import eu.jsparrow.rules.api.test.dummies.DummyRefactoringRule;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
@@ -29,7 +28,7 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
 @SuppressWarnings("nls")
 public class RefactoringRuleTest {
 
-	private RefactoringRuleImpl<?> rule;
+	private RefactoringRule rule;
 
 	private IJavaProject project;
 

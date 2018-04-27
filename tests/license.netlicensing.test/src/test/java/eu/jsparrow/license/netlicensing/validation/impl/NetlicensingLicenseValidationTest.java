@@ -62,10 +62,10 @@ public class NetlicensingLicenseValidationTest {
 	@Test
 	public void validate_withUnknownLicenseType_shouldSendRequestToGetLicenseType() throws ValidationException {
 		NetlicensingValidationResult intermediateValidationResult = new NetlicensingValidationResult(
-				LicenseType.NODE_LOCKED, "newKey", false, null, null);
+				LicenseType.NODE_LOCKED, "newKey", false, null, null); //$NON-NLS-1$
 		ValidationParameters validationParameters = new ValidationParameters();
 		NetlicensingValidationResult finalValidationResult = new NetlicensingValidationResult(LicenseType.NODE_LOCKED,
-				"newKey", false, null, null);
+				"newKey", false, null, null); //$NON-NLS-1$
 
 		model = NetlicensingLicenseModelFactory.create(LicenseType.NONE);
 		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);

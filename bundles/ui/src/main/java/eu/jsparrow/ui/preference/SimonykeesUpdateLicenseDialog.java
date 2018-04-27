@@ -133,7 +133,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				BusyIndicator.showWhile(Display.getDefault(), () -> {
-					
+
 					LicenseUpdateResult result = licenseUtil.update(licenseKey);
 					if (!result.wasSuccessful()) {
 						updatedLabel.setImage(scaledCloseRedIconImage);
@@ -142,7 +142,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 					} else {
 						updatedLabel.setImage(scaledTickmarkGreenIconImage);
 						updatedIconLabel.setImage(scaledJSparrowImageActive);
-						
+
 					}
 					updatedLabel.setText(result.getDetailMessage());
 					updatedLabel.setVisible(true);
@@ -177,7 +177,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 		updatedIconLabel.setImage(scaledJSparrowImageActive);
 		updatedIconLabel.setVisible(true);
-		
+
 		updatedLabel = new CLabel(container, SWT.NONE);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
 		gridData.verticalIndent = 5;

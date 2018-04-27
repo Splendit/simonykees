@@ -48,8 +48,8 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 
 	private RefactoringPipeline refactoringPipeline;
 
-	public LoggerRuleWizard(IJavaProject selectedJavaProjekt,
-			RefactoringRule rule, RefactoringPipeline refactoringPipeline) {
+	public LoggerRuleWizard(IJavaProject selectedJavaProjekt, RefactoringRule rule,
+			RefactoringPipeline refactoringPipeline) {
 		super();
 		this.selectedJavaProjekt = selectedJavaProjekt;
 		this.refactoringPipeline = refactoringPipeline;

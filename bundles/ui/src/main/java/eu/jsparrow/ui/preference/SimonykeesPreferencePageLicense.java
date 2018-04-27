@@ -192,8 +192,8 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		}
 	}
 
-	private String getLicenseModelString(LicenseValidationResult result) {		
-		if(result.getLicenseType() != LicenseType.DEMO && !result.isValid()) {
+	private String getLicenseModelString(LicenseValidationResult result) {
+		if (result.getLicenseType() != LicenseType.DEMO && !result.isValid()) {
 			return ""; //$NON-NLS-1$
 		}
 
@@ -206,8 +206,8 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_under_key_label);
 			licenseModelString.append(result.getKey());
 			licenseModelString.append(". "); //$NON-NLS-1$
-		} 
-		
+		}
+
 		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 		licenseModelString.append(result.getExpirationDate()

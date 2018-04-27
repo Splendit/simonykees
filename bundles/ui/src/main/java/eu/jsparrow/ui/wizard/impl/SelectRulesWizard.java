@@ -204,7 +204,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 							super.buttonPressed(buttonId);
 						}
 					}
-					
+
 					@Override
 					protected void cancelPressed() {
 						previewWizard.performCancel();
@@ -222,7 +222,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);
-				dialog.open();				
+				dialog.open();
 			});
 	}
 

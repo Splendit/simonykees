@@ -39,8 +39,6 @@ import oshi.hardware.HardwareAbstractionLayer;
  */
 public class LicenseUtil implements LicenseUtilService {
 
-	
-	
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
@@ -55,7 +53,7 @@ public class LicenseUtil implements LicenseUtilService {
 	private LicenseValidationResult result = null;
 
 	private Scheduler scheduler;
-	
+
 	private LicenseUtil() {
 		scheduler = new Scheduler(this);
 		scheduler.start();
@@ -119,10 +117,9 @@ public class LicenseUtil implements LicenseUtilService {
 		try {
 			String name = createNameFromHardware();
 			Properties properties = loadProperties();
-			String productNr = properties.getProperty("license.productNr");
-			String moduleNr = properties.getProperty("license.moduleNr");
-			model = factoryService.createNewModel(key, secret, productNr,
-					moduleNr, LicenseType.NONE, name, null);
+			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
+			String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
+			model = factoryService.createNewModel(key, secret, productNr, moduleNr, LicenseType.NONE, name, null);
 			validationResult = licenseService.validate(model);
 		} catch (ValidationException | IOException e) {
 			logger.error("Could not validate license", e); //$NON-NLS-1$
@@ -226,14 +223,15 @@ public class LicenseUtil implements LicenseUtilService {
 			return ""; //$NON-NLS-1$
 		}
 	}
-	
-	private Properties loadProperties() throws IOException  {
+
+	private Properties loadProperties() throws IOException {
 		Properties properties = new Properties();
-		try(InputStream input = getClass().getClassLoader().getResourceAsStream("ui.properties")){
+		try (InputStream input = getClass().getClassLoader()
+			.getResourceAsStream("ui.properties")) { //$NON-NLS-1$
 			properties.load(input);
 		}
 		return properties;
-		
+
 	}
 
 	/**

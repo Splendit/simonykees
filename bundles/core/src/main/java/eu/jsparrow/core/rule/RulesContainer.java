@@ -148,8 +148,7 @@ public class RulesContainer {
 		return rules;
 	}
 
-	public static List<RefactoringRule> getRulesForProject(
-			IJavaProject selectedJavaProjekt, boolean isStandalone) {
+	public static List<RefactoringRule> getRulesForProject(IJavaProject selectedJavaProjekt, boolean isStandalone) {
 		List<RefactoringRule> result = getAllRules(isStandalone);
 		result.stream()
 			.forEach(rule -> rule.calculateEnabledForProject(selectedJavaProjekt));

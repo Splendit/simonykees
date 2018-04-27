@@ -108,8 +108,7 @@ public abstract class AbstractRulesTest {
 		return data;
 	}
 
-	protected String processFile(String fileName, String content,
-			List<RefactoringRule> rules) throws Exception {
+	protected String processFile(String fileName, String content, List<RefactoringRule> rules) throws Exception {
 
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 

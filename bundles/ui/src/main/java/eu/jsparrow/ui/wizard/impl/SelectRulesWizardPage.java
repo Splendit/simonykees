@@ -201,7 +201,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	private void initializeGroupFilterCombo() {
 		String currentProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
 
-		if (!SimonykeesPreferenceManager.getProfileFromName(currentProfileId).isPresent()) {
+		if (!SimonykeesPreferenceManager.getProfileFromName(currentProfileId)
+			.isPresent()) {
 			String log = NLS.bind(Messages.SelectRulesWizardPage_profileDoesNotExist, currentProfileId);
 			logger.warn(log);
 

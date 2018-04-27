@@ -76,8 +76,8 @@ public class RefactoringPipeline {
 	 * Stores the selected rules.
 	 * 
 	 * @param rules
-	 *            {@link List} of {@link RefactoringRule}s to apply to
-	 *            the selected {@link IJavaElement}s
+	 *            {@link List} of {@link RefactoringRule}s to apply to the
+	 *            selected {@link IJavaElement}s
 	 */
 	public RefactoringPipeline(List<RefactoringRule> rules) {
 
@@ -110,8 +110,7 @@ public class RefactoringPipeline {
 		this.rules = rules;
 	}
 
-	public Map<ICompilationUnit, DocumentChange> getChangesForRule(
-			RefactoringRule rule) {
+	public Map<ICompilationUnit, DocumentChange> getChangesForRule(RefactoringRule rule) {
 		Map<ICompilationUnit, DocumentChange> currentChanges = new HashMap<>();
 
 		refactoringStates.forEach(refactoringState -> {
@@ -394,8 +393,8 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * Apply {@link RefactoringRule}s to the working copies with
-	 * changed check state of each {@link RefactoringState}
+	 * Apply {@link RefactoringRule}s to the working copies with changed check
+	 * state of each {@link RefactoringState}
 	 * 
 	 * @param changedCompilationUnits
 	 *            unselected compilation units
@@ -403,9 +402,8 @@ public class RefactoringPipeline {
 	 *            rule for which unselection of units was made
 	 * @throws RuleException
 	 */
-	public void doAdditionalRefactoring(List<ICompilationUnit> changedCompilationUnits,
-			RefactoringRule currentRule, IProgressMonitor monitor)
-			throws RuleException {
+	public void doAdditionalRefactoring(List<ICompilationUnit> changedCompilationUnits, RefactoringRule currentRule,
+			IProgressMonitor monitor) throws RuleException {
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 
 		/*
@@ -428,8 +426,7 @@ public class RefactoringPipeline {
 
 		for (RefactoringState refactoringState : changedRefactoringStates) {
 			CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
-			List<RefactoringRule> ignoredRules = refactoringState
-				.getIgnoredRules();
+			List<RefactoringRule> ignoredRules = refactoringState.getIgnoredRules();
 			for (RefactoringRule rule : rules) {
 				subMonitor.subTask(rule.getRuleDescription()
 					.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
@@ -464,8 +461,7 @@ public class RefactoringPipeline {
 	 *            rule for which working copy is selected
 	 * @throws RuleException
 	 */
-	public void refactoringForCurrent(ICompilationUnit newSelection,
-			RefactoringRule currentRule) throws RuleException {
+	public void refactoringForCurrent(ICompilationUnit newSelection, RefactoringRule currentRule) throws RuleException {
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 
 		// get the correct RefactoringState
@@ -589,8 +585,8 @@ public class RefactoringPipeline {
 
 	@SuppressWarnings("deprecation") // see SIM-878
 	private CompilationUnit applyToRefactoringState(RefactoringState refactoringState,
-			List<NotWorkingRuleModel> returnListNotWorkingRules, CompilationUnit astRoot,
-			RefactoringRule rule, boolean initialApply) {
+			List<NotWorkingRuleModel> returnListNotWorkingRules, CompilationUnit astRoot, RefactoringRule rule,
+			boolean initialApply) {
 
 		try {
 			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, astRoot, initialApply);

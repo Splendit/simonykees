@@ -327,6 +327,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				return list.toArray();
 			}
 		});
+
 		table.setLabelProvider(new TableLabelProvider());
 		table.setComparator(new ViewerComparator() {
 			@Override
