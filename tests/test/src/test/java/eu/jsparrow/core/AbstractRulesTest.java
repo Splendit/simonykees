@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -168,7 +167,7 @@ public abstract class AbstractRulesTest {
 		return visitor.getFieldsInAnonymousClasses();
 	}
 
-	public static IPackageFragmentRoot createRootPackageFragment() throws Exception, JavaModelException, IOException {
+	public static IPackageFragmentRoot createRootPackageFragment() throws Exception {
 		IPackageFragmentRoot root = RulesTestUtil.getPackageFragementRoot(javaVersion);
 		String packageString = "eu.jsparrow.sample.utilities"; //$NON-NLS-1$
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);

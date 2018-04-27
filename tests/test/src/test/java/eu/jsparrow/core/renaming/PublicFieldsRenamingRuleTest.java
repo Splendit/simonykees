@@ -31,7 +31,7 @@ public class PublicFieldsRenamingRuleTest {
 		FieldDeclarationASTVisitor referencesVisitor = findFieldsToBeRenamed(PRERULE_RENAMING_PACKAGE,
 				PRERULE_DIRECTORY, true, false, false, false, false);
 
-		List<ICompilationUnit> compilationUnits = applyRenamingRule(referencesVisitor, PRERULE_RENAMING_PACKAGE);
+		List<ICompilationUnit> compilationUnits = applyRenamingRule(referencesVisitor);
 
 		List<String> actual = calculateActual(compilationUnits, PRERULE_RENAMING_PACKAGE, postRulePackage);
 		assertMatch(expected, actual);
@@ -46,7 +46,7 @@ public class PublicFieldsRenamingRuleTest {
 		FieldDeclarationASTVisitor referencesVisitor = findFieldsToBeRenamed(PRERULE_RENAMING_PACKAGE,
 				PRERULE_DIRECTORY, true, true, true, false, true);
 
-		List<ICompilationUnit> compilationUnits = applyRenamingRule(referencesVisitor, PRERULE_RENAMING_PACKAGE);
+		List<ICompilationUnit> compilationUnits = applyRenamingRule(referencesVisitor);
 
 		List<String> actual = calculateActual(compilationUnits, PRERULE_RENAMING_PACKAGE, postRulePackage);
 		assertMatch(expectedList, actual);

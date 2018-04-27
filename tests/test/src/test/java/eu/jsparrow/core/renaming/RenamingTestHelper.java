@@ -29,15 +29,24 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.AbstractRulesTest;
+import eu.jsparrow.core.exception.ReconcileException;
+import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 @SuppressWarnings("nls")
 public class RenamingTestHelper {
+
+	private RenamingTestHelper() {
+		/*
+		 * Hiding the default constructor.
+		 */
+	}
 
 	/**
 	 * Loads the compilation units in the provided package and finds the fields
@@ -104,15 +113,15 @@ public class RenamingTestHelper {
 	 * @param referencesVisitor
 	 *            containing information about the fields to be renamed and
 	 *            their references
-	 * @param prerulePackageName
-	 *            package containing the original files
 	 * @return the list of the modified compilation units after applying the
 	 *         rule.
-	 * @throws Exception
+	 * @throws RefactoringException
+	 * @throws RuleException
+	 * @throws ReconcileException
 	 *             if the rule cannot be applied.
 	 */
-	public static List<ICompilationUnit> applyRenamingRule(FieldDeclarationASTVisitor referencesVisitor,
-			String prerulePackageName) throws Exception {
+	public static List<ICompilationUnit> applyRenamingRule(FieldDeclarationASTVisitor referencesVisitor)
+			throws RefactoringException, RuleException, ReconcileException {
 		List<RefactoringRule> rules = new ArrayList<>();
 		PublicFieldsRenamingRule rule = new PublicFieldsRenamingRule(referencesVisitor.getFieldMetaData(),
 				referencesVisitor.getUnmodifiableFieldMetaData());
@@ -168,11 +177,11 @@ public class RenamingTestHelper {
 	 * @param compilationUnitNameContents
 	 *            contents of the compilation units to be created
 	 * @return list of the constructed compilation units.
-	 * @throws Exception
+	 * @throws JavaModelException
 	 *             if the compilation unit cannot be created
 	 */
 	public static List<CompilationUnit> loadCompilationUnitsFromString(IPackageFragment packageFragment,
-			Map<String, String> compilationUnitNameContents) throws Exception {
+			Map<String, String> compilationUnitNameContents) throws JavaModelException {
 
 		List<ICompilationUnit> iCompilationUnits = new ArrayList<>();
 		for (Map.Entry<String, String> entry : compilationUnitNameContents.entrySet()) {
@@ -183,7 +192,16 @@ public class RenamingTestHelper {
 			.collect(Collectors.toList());
 	}
 
-	static List<VariableDeclarationFragment> findFieldDeclarations(List<CompilationUnit> compilationUnits) {
+	/**
+	 * Collects the {@link VariableDeclarationFragment}s of the fields declared
+	 * in the top-level type declarations of the provided list of compilation
+	 * units.
+	 * 
+	 * @param compilationUnits
+	 *            a list of {@link CompilationUnit}.
+	 * @return the list of the collected {@link VariableDeclarationFragment}s.
+	 */
+	public static List<VariableDeclarationFragment> findFieldDeclarations(List<CompilationUnit> compilationUnits) {
 		return compilationUnits.stream()
 			.flatMap(cu -> convertToTypedList(cu.types(), TypeDeclaration.class).stream())
 			.flatMap(type -> convertToTypedList(type.bodyDeclarations(), FieldDeclaration.class).stream())
@@ -200,7 +218,7 @@ public class RenamingTestHelper {
 	 * @param actual
 	 *            actual values
 	 */
-	static void assertMatch(List<String> expected, List<String> actual) {
+	public static void assertMatch(List<String> expected, List<String> actual) {
 		String sortedExpected = expected.stream()
 			.sorted()
 			.collect(Collectors.joining("\n"));
@@ -210,7 +228,21 @@ public class RenamingTestHelper {
 		assertEquals(sortedExpected, sortedActual);
 	}
 
-	static List<String> calculateActual(List<ICompilationUnit> compilationUnits, String prerulePackageName,
+	/**
+	 * Puts the sources of the given compilation units into a list of strings.
+	 * Replaces the package prerule package declaration with the postrule one.
+	 * 
+	 * @param compilationUnits
+	 *            list of {@link CompilationUnit}s.
+	 * @param prerulePackageName
+	 *            the prerule package declaration to be replaced
+	 * @param postRulePackageName
+	 *            the new package declaration
+	 * @return list of sources of the compilation units with the replaced
+	 *         package declaration.
+	 * @throws JavaModelException
+	 */
+	public static List<String> calculateActual(List<ICompilationUnit> compilationUnits, String prerulePackageName,
 			String postRulePackageName) throws JavaModelException {
 		List<String> actual = new ArrayList<>();
 		for (ICompilationUnit icu : compilationUnits) {
