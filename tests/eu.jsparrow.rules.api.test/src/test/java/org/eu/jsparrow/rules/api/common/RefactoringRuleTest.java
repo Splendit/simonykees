@@ -17,7 +17,8 @@ import eu.jsparrow.jdtunit.util.CompilationUnitBuilder;
 import eu.jsparrow.jdtunit.util.JavaProjectBuilder;
 import eu.jsparrow.jdtunit.util.PackageFragmentBuilder;
 import eu.jsparrow.rules.api.test.dummies.DummyRefactoringRule;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
  * 
@@ -27,7 +28,7 @@ import eu.jsparrow.rules.common.RefactoringRuleImpl;
 @SuppressWarnings("nls")
 public class RefactoringRuleTest {
 
-	private RefactoringRuleImpl<?> rule;
+	private RefactoringRule rule;
 
 	private IJavaProject project;
 
@@ -69,7 +70,7 @@ public class RefactoringRuleTest {
 		ICompilationUnit workingCopy = new CompilationUnitBuilder(fragment).setContent("")
 			.build();
 
-		DocumentChange result = rule.applyRule(workingCopy);
+		DocumentChange result = rule.applyRule(workingCopy, RefactoringUtil.parse(workingCopy));
 
 		assertNull(result);
 	}

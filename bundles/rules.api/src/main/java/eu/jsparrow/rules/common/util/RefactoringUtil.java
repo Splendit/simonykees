@@ -94,7 +94,7 @@ public final class RefactoringUtil {
 	 * @since 0.9
 	 */
 	public static CompilationUnit parse(ICompilationUnit compilationUnit) {
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings("deprecation") // see ticket SIM-878
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
 		astParser.setKind(ASTParser.K_COMPILATION_UNIT);
 		astParser.setSource(compilationUnit);

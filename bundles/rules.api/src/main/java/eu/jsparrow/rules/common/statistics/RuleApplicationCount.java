@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.visitor.ASTRewriteEvent;
 import eu.jsparrow.rules.common.visitor.ASTRewriteVisitorListener;
 

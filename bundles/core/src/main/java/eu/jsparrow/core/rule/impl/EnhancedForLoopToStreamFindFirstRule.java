@@ -18,7 +18,8 @@ import eu.jsparrow.rules.common.Tag;
  * @since 2.1.1
  *
  */
-public class EnhancedForLoopToStreamFindFirstRule extends RefactoringRuleImpl<EnhancedForLoopToStreamFindFirstASTVisitor> {
+public class EnhancedForLoopToStreamFindFirstRule
+		extends RefactoringRuleImpl<EnhancedForLoopToStreamFindFirstASTVisitor> {
 
 	public EnhancedForLoopToStreamFindFirstRule() {
 		super();

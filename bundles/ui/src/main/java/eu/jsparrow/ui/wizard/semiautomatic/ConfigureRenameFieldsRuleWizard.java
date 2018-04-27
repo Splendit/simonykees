@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorFactory;
@@ -125,7 +124,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 			.getSimpleName(), selectedJavaProjekt.getElementName());
 		logger.info(message);
 
-		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+		Job job = new Job(Messages.ProgressMonitor_searching_for_references) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -140,7 +139,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
-				SubMonitor child = subMonitor.split(40);
+				SubMonitor child = subMonitor.split(70);
 				child.setWorkRemaining(selectedJavaElements.size());
 				child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
 				int prepareStatus = FieldDeclarationVisitorFactory.prepareRenaming(selectedJavaElements,
@@ -155,10 +154,11 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 					return Status.CANCEL_STATUS;
 				}
 
-				SubMonitor childSecondPart = subMonitor.split(50);
-				childSecondPart.setWorkRemaining(100);
+				SubMonitor childSecondPart = subMonitor.split(30);
+				childSecondPart.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
 
 				searchScopeAndPrepareRefactoringStates(childSecondPart, visitor);
+
 				if (!canRefactor) {
 					return Status.CANCEL_STATUS;
 				}
@@ -200,7 +200,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 	 * @return Job which does refactoring on collected refactoring states.
 	 */
 	private Job startRefactoringJob() {
-		Job refactorJob = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+		Job refactorJob = new Job(Messages.ProgressMonitor_calculating_possible_refactorings) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -278,29 +278,23 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 		refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(rules);
 
-		SubMonitor child = subMonitor.split(80);
-		child.setWorkRemaining(targetCompilationUnits.size());
-		child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
-		List<RefactoringState> refactoringStates = new ArrayList<>();
-		for (ICompilationUnit compilationUnit : targetCompilationUnits) {
-			try {
-				refactoringStates.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
-			} catch (JavaModelException e) {
-				logger.error(e.getMessage(), e);
-				WizardMessageDialog.synchronizeWithUIShowInfo(
-						new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-								ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
-				canRefactor = false;
-				return;
-			}
-			if (child.isCanceled()) {
-				return;
-			} else {
-				child.worked(1);
-			}
-		}
+		subMonitor.setWorkRemaining(targetCompilationUnits.size());
 
-		refactoringPipeline.setRefactoringStates(refactoringStates);
+		try {
+			refactoringPipeline.createRefactoringStates(targetCompilationUnits);
+		} catch (JavaModelException e) {
+			logger.error(e.getMessage(), e);
+			WizardMessageDialog.synchronizeWithUIShowInfo(
+					new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+							ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
+			canRefactor = false;
+			return;
+		}
+		if (subMonitor.isCanceled()) {
+			return;
+		} else {
+			subMonitor.worked(1);
+		}
 		refactoringPipeline.updateInitialSourceMap();
 	}
 

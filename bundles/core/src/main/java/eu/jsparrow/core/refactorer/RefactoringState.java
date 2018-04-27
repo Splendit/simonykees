@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
@@ -14,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 
 /**
@@ -33,15 +34,19 @@ public class RefactoringState {
 
 	private ICompilationUnit workingCopy;
 
+	private WorkingCopyOwner workingCopyOwner;
+
 	private Map<RefactoringRule, DocumentChange> initialChanges = new HashMap<>();
 
 	private Map<RefactoringRule, DocumentChange> changes = new HashMap<>();
 
 	private List<RefactoringRule> ignoredRules = new ArrayList<>();
 
-	public RefactoringState(ICompilationUnit original, ICompilationUnit workingCopy) {
+	public RefactoringState(ICompilationUnit original, ICompilationUnit workingCopy,
+			WorkingCopyOwner workingCopyOwner) {
 		this.original = original;
 		this.workingCopy = workingCopy;
+		this.workingCopyOwner = workingCopyOwner;
 	}
 
 	/**
@@ -89,11 +94,24 @@ public class RefactoringState {
 	}
 
 	/**
+	 * Returns the working copy owner ({@link WorkingCopyOwner}) for this
+	 * {@link RefactoringState}.
+	 * 
+	 * @return the working copy owner related to this instances working copy
+	 */
+	public WorkingCopyOwner getworkingCopyOwner() {
+		return workingCopyOwner;
+	}
+
+	/**
 	 * Applies a given {@link RefactoringRule}s to the working copy. Changes to
 	 * the working copy are <b>not</b> committed yet.
 	 * 
 	 * @param rule
 	 *            {@link RefactoringRule} to be applied
+	 * @param astRoot
+	 *            the compilation unit for applying the rule to
+	 * @return true if there was any change, false otherwise
 	 * @throws JavaModelException
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
@@ -102,19 +120,21 @@ public class RefactoringState {
 	 *             is not present and the reflective construction fails.
 	 * @throws RefactoringException
 	 */
-	public void addRuleAndGenerateDocumentChanges(RefactoringRule rule,
-			boolean initialApply) throws JavaModelException, ReflectiveOperationException, RefactoringException {
-
-		DocumentChange documentChange = rule.applyRule(workingCopy);
+	public boolean addRuleAndGenerateDocumentChanges(RefactoringRule rule,
+			CompilationUnit astRoot, boolean initialApply)
+			throws JavaModelException, ReflectiveOperationException, RefactoringException {
+		DocumentChange documentChange = rule.applyRule(workingCopy, astRoot);
 		if (documentChange != null) {
 			changes.put(rule, documentChange);
 			if (initialApply) {
 				initialChanges.put(rule, documentChange);
 			}
+			return true;
 		} else {
 			String message = NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getRuleDescription()
 				.getName(), workingCopy.getElementName());
 			logger.trace(message);
+			return false;
 		}
 
 	}
@@ -203,7 +223,8 @@ public class RefactoringState {
 	 */
 	public void resetWorkingCopy() {
 		try {
-			this.workingCopy = original.getWorkingCopy(null);
+			workingCopy.discardWorkingCopy();
+			workingCopy = original.getWorkingCopy(workingCopyOwner, null);
 			changes.clear();
 		} catch (JavaModelException e) {
 			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_reset_working_copy, workingCopy.getPath()

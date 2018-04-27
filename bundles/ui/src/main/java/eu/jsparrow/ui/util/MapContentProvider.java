@@ -6,18 +6,18 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 
-
 /**
- * {@link IStructuredContentProvider} for {@link Map}. Used for {@link TableViewer}.
- * Taken from {@link http://pinnau.blogspot.co.at/2015/08/jface-tableviewer-with-javautilmap-input.html}
+ * {@link IStructuredContentProvider} for {@link Map}. Used for
+ * {@link TableViewer}. Taken from
+ * {@link http://pinnau.blogspot.co.at/2015/08/jface-tableviewer-with-javautilmap-input.html}
  * 
  */
 public class MapContentProvider implements IStructuredContentProvider {
 
 	private static MapContentProvider instance;
-	
+
 	public static MapContentProvider getInstance() {
-		synchronized(ArrayContentProvider.class) {
+		synchronized (ArrayContentProvider.class) {
 			if (instance == null) {
 				instance = new MapContentProvider();
 			}

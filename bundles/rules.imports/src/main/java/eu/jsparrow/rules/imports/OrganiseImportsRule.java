@@ -56,7 +56,7 @@ public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteA
 	}
 
 	@Override
-	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy, CompilationUnit astRoot)
 			throws ReflectiveOperationException, JavaModelException {
 
 		try {
@@ -92,7 +92,6 @@ public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteA
 					edit.copy());
 
 			workingCopy.applyTextEdit(edit, null);
-			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
 
 		}
 

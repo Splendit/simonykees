@@ -1,4 +1,4 @@
-package eu.jsparrow.core;
+package eu.jsparrow.core.renaming;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -12,16 +12,18 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.junit.Before;
 import org.junit.Test;
 
+import eu.jsparrow.core.AbstractRulesTest;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 
 @SuppressWarnings("nls")
-public class FieldDeclarationVisitorTest extends AbstractRulesTest {
+public class FieldDeclarationVisitorTest {
 	
 	private static final String ROOT_PACKAGE_NAME = "eu.jsparrow.core";
 	private static final String CORE_PACKAGE = "package " + ROOT_PACKAGE_NAME + ";";
@@ -63,9 +65,10 @@ public class FieldDeclarationVisitorTest extends AbstractRulesTest {
 	private List<CompilationUnit> compilationUnits;
 	
 	@Before
-	public void setUpCompilationUnits() throws JavaModelException, IOException {
+	public void setUpCompilationUnits() throws Exception {
+		IPackageFragmentRoot root = AbstractRulesTest.createRootPackageFragment();
 		packageFragment = root.createPackageFragment(ROOT_PACKAGE_NAME, true, null);
-		compilationUnits = loadCompilationUnits(packageFragment, compilationUnitNameContents);
+		compilationUnits = RenamingTestHelper.loadCompilationUnitsFromString(packageFragment, compilationUnitNameContents);
 	}
 	
 	@Test

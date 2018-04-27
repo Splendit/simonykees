@@ -123,14 +123,15 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 	 * project.
 	 * 
 	 */
-	public final DocumentChange applyRule(ICompilationUnit workingCopy)
+	@Override
+	public final DocumentChange applyRule(ICompilationUnit workingCopy, CompilationUnit astRoot)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 
 		String bind = NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.getRuleDescription()
 			.getName(), workingCopy.getElementName());
 		logger.trace(bind);
 
-		return applyRuleImpl(workingCopy);
+		return applyRuleImpl(workingCopy, astRoot);
 	}
 
 	/**
@@ -142,10 +143,8 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 	 * @throws JavaModelException
 	 * @throws RefactoringException
 	 */
-	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy, CompilationUnit astRoot)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
-
-		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
 
 		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 
@@ -174,8 +173,6 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 					document, edits.copy());
 
 			workingCopy.applyTextEdit(edits, null);
-
-			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
 
 			return documentChange;
 		} else {

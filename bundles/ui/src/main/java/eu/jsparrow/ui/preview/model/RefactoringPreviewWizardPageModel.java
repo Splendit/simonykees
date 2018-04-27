@@ -25,9 +25,9 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 		return changedFiles;
 	}
 
-	public RefactoringPreviewWizardPageModel(RefactoringRule rule,
-			Map<ICompilationUnit, DocumentChange> changes) {
-		setIssuesFixed(RuleApplicationCount.getFor(rule).toInt());
+	public RefactoringPreviewWizardPageModel(RefactoringRule rule, Map<ICompilationUnit, DocumentChange> changes) {
+		setIssuesFixed(RuleApplicationCount.getFor(rule)
+			.toInt());
 		setTimeSaved(EliminatedTechnicalDebt.get(rule));
 		changedFiles.addAll(changes.entrySet()
 			.stream()

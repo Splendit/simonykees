@@ -1,6 +1,5 @@
 package eu.jsparrow.core;
 
-import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -11,8 +10,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -22,12 +19,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -36,7 +31,6 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
  * Base class for Rule Tests.
@@ -65,20 +59,12 @@ public abstract class AbstractRulesTest {
 	@BeforeClass
 	public static void classSetUp() throws Exception {
 		if (root == null) {
-			root = RulesTestUtil.getPackageFragementRoot(javaVersion);
-			String packageString = "eu.jsparrow.sample.utilities"; //$NON-NLS-1$
-			IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
-			for (Path utilityPath : loadUtilityClasses(UTILITY_DIRECTORY)) {
-				String utilityClassName = utilityPath.getFileName()
-					.toString();
-				String utilitySource = new String(Files.readAllBytes(utilityPath), StandardCharsets.UTF_8);
-				packageFragment.createCompilationUnit(utilityClassName, utilitySource, true, null);
-			}
+			root = createRootPackageFragment();
 		}
 	}
 
 	@AfterClass
-	public static void classTearDown() throws Exception {
+	public static void classTearDown() {
 		root = null;
 		javaVersion = JavaCore.VERSION_1_8;
 	}
@@ -110,7 +96,7 @@ public abstract class AbstractRulesTest {
 		return data;
 	}
 
-	protected static List<Path> loadUtilityClasses(String utilityDirectory) throws IOException {
+	public static List<Path> loadUtilityClasses(String utilityDirectory) throws IOException {
 		List<Path> data = new ArrayList<>();
 
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(utilityDirectory), "*.java")) { //$NON-NLS-1$
@@ -122,8 +108,7 @@ public abstract class AbstractRulesTest {
 		return data;
 	}
 
-	protected String processFile(String fileName, String content,
-			List<RefactoringRule> rules) throws Exception {
+	protected String processFile(String fileName, String content, List<RefactoringRule> rules) throws Exception {
 
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 
@@ -132,7 +117,7 @@ public abstract class AbstractRulesTest {
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
 		compilationUnits.add(compilationUnit);
 
-		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules, true);
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules);
 
 		/*
 		 * A default progress monitor implementation, used just for testing
@@ -172,18 +157,6 @@ public abstract class AbstractRulesTest {
 		packageString = prerulePackage;
 	}
 
-	protected List<CompilationUnit> loadCompilationUnits(IPackageFragment packageFragment,
-			Map<String, String> compilationUnitNameContents) throws JavaModelException, IOException {
-
-		List<ICompilationUnit> iCompilationUnits = new ArrayList<>();
-		for (Map.Entry<String, String> entry : compilationUnitNameContents.entrySet()) {
-			iCompilationUnits.add(packageFragment.createCompilationUnit(entry.getKey(), entry.getValue(), true, null));
-		}
-		return iCompilationUnits.stream()
-			.map(RefactoringUtil::parse)
-			.collect(Collectors.toList());
-	}
-
 	protected List<VariableDeclarationFragment> findDeclarationsInAnonymousClass(
 			List<CompilationUnit> compilationUntis) {
 		AnonymousClassFieldsVisitor visitor = new AnonymousClassFieldsVisitor();
@@ -193,13 +166,17 @@ public abstract class AbstractRulesTest {
 		return visitor.getFieldsInAnonymousClasses();
 	}
 
-	protected List<VariableDeclarationFragment> findFieldDeclarations(List<CompilationUnit> compilationUnits) {
-		return compilationUnits.stream()
-			.flatMap(cu -> convertToTypedList(cu.types(), TypeDeclaration.class).stream())
-			.flatMap(type -> convertToTypedList(type.bodyDeclarations(), FieldDeclaration.class).stream())
-			.flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
-				.stream())
-			.collect(Collectors.toList());
+	public static IPackageFragmentRoot createRootPackageFragment() throws Exception {
+		IPackageFragmentRoot root = RulesTestUtil.getPackageFragementRoot(javaVersion);
+		String packageString = "eu.jsparrow.sample.utilities"; //$NON-NLS-1$
+		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
+		for (Path utilityPath : loadUtilityClasses(UTILITY_DIRECTORY)) {
+			String utilityClassName = utilityPath.getFileName()
+				.toString();
+			String utilitySource = new String(Files.readAllBytes(utilityPath), StandardCharsets.UTF_8);
+			packageFragment.createCompilationUnit(utilityClassName, utilitySource, true, null);
+		}
+		return root;
 	}
 
 	class AnonymousClassFieldsVisitor extends ASTVisitor {

@@ -25,7 +25,6 @@ import org.yaml.snakeyaml.representer.Representer;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
 
 /**
  * This class provides useful methods to deal with YAML configuration. the used
@@ -106,7 +105,7 @@ public class YAMLConfigUtil {
 			Yaml yaml = new Yaml(representer, options);
 			yaml.dump(config, fw);
 
-			logger.info("config file exported to " + file.getAbsolutePath()); //$NON-NLS-1$
+			logger.info("config file exported to {}", file.getAbsolutePath()); //$NON-NLS-1$
 		} catch (IOException e) {
 			throw new YAMLConfigException(e.getMessage(), e);
 		}
@@ -133,9 +132,8 @@ public class YAMLConfigUtil {
 	 * @return a list of rules to be applied on the project
 	 * @throws YAMLConfigException
 	 */
-	public static List<RefactoringRule> getSelectedRulesFromConfig(
-			YAMLConfig config, List<RefactoringRule> projectRules)
-			throws YAMLConfigException {
+	public static List<RefactoringRule> getSelectedRulesFromConfig(YAMLConfig config,
+			List<RefactoringRule> projectRules) throws YAMLConfigException {
 		List<RefactoringRule> result;
 
 		String selectedProfile = config.getSelectedProfile();
@@ -148,9 +146,8 @@ public class YAMLConfigUtil {
 					.findFirst();
 
 				if (configProfile.isPresent()) {
-					List<RefactoringRule> profileRules = getConfigRules(
-							configProfile.get()
-								.getRules());
+					List<RefactoringRule> profileRules = getConfigRules(configProfile.get()
+						.getRules());
 
 					result = projectRules.stream()
 						.filter(RefactoringRule::isEnabled)
@@ -167,8 +164,7 @@ public class YAMLConfigUtil {
 				throw new YAMLConfigException(exceptionMessage);
 			}
 		} else { // use all rules from config file
-			List<RefactoringRule> configSelectedRules = getConfigRules(
-					config.getRules());
+			List<RefactoringRule> configSelectedRules = getConfigRules(config.getRules());
 
 			result = projectRules.stream()
 				.filter(RefactoringRule::isEnabled)
@@ -188,8 +184,7 @@ public class YAMLConfigUtil {
 	 * @throws YAMLConfigException
 	 *             is thrown if a given rule ID does not exist
 	 */
-	private static List<RefactoringRule> getConfigRules(
-			List<String> configRules) throws YAMLConfigException {
+	private static List<RefactoringRule> getConfigRules(List<String> configRules) throws YAMLConfigException {
 		List<RefactoringRule> rules = RulesContainer.getAllRules(true);
 		List<RefactoringRule> configSelectedRules = new LinkedList<>();
 		List<String> nonExistentRules = new LinkedList<>();
@@ -258,7 +253,7 @@ public class YAMLConfigUtil {
 		YAMLConfig config = null;
 		if (configFilePath != null && !configFilePath.isEmpty()) {
 			File configFile = new File(configFilePath);
-			if (configFile != null && configFile.exists() && !configFile.isDirectory()) {
+			if (configFile.exists() && !configFile.isDirectory()) {
 				String configFileExtension = StringUtils.substringAfterLast(configFile.getAbsolutePath(), "."); //$NON-NLS-1$
 				if ("yml".equalsIgnoreCase(configFileExtension) //$NON-NLS-1$
 						|| "yaml".equalsIgnoreCase(configFileExtension)) { //$NON-NLS-1$

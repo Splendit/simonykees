@@ -20,7 +20,8 @@ import eu.jsparrow.rules.common.util.PropertyUtil;
  * @author Matthias Webhofer
  * @since 2.1.1
  */
-public class ImmutableStaticFinalCollectionsRule extends RefactoringRuleImpl<ImmutableStaticFinalCollectionsASTVisitor> {
+public class ImmutableStaticFinalCollectionsRule
+		extends RefactoringRuleImpl<ImmutableStaticFinalCollectionsASTVisitor> {
 
 	private JavaVersion javaVersion;
 
@@ -37,7 +38,7 @@ public class ImmutableStaticFinalCollectionsRule extends RefactoringRuleImpl<Imm
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_2;
 	}
-	
+
 	/**
 	 * Stores java compiler compliance level.
 	 */

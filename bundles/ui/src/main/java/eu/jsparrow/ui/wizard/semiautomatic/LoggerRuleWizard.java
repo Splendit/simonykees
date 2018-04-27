@@ -48,8 +48,8 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 
 	private RefactoringPipeline refactoringPipeline;
 
-	public LoggerRuleWizard(IJavaProject selectedJavaProjekt,
-			RefactoringRule rule, RefactoringPipeline refactoringPipeline) {
+	public LoggerRuleWizard(IJavaProject selectedJavaProjekt, RefactoringRule rule,
+			RefactoringPipeline refactoringPipeline) {
 		super();
 		this.selectedJavaProjekt = selectedJavaProjekt;
 		this.refactoringPipeline = refactoringPipeline;
@@ -96,7 +96,7 @@ public class LoggerRuleWizard extends AbstractRuleWizard {
 			.getBounds();
 		rule.activateOptions(model.getCurrentSelectionMap());
 
-		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+		Job job = new Job(Messages.ProgressMonitor_calculating_possible_refactorings) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

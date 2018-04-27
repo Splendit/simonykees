@@ -260,8 +260,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 * @param rule
 	 *            for which working copy is checked
 	 */
-	public void imediatelyUpdateForSelected(ICompilationUnit newSelection,
-			RefactoringRule rule) {
+	public void imediatelyUpdateForSelected(ICompilationUnit newSelection, RefactoringRule rule) {
 		try {
 			refactoringPipeline.refactoringForCurrent(newSelection, rule);
 		} catch (RuleException exception) {

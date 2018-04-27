@@ -101,7 +101,12 @@ public class RefactoringInvoker {
 
 			logger.debug(Messages.Activator_debug_createRefactoringStates);
 
-			refactoringPipeline.createRefactoringStates(compUnits);
+			try {
+				refactoringPipeline.createRefactoringStates(compUnits);
+			} catch (JavaModelException jme) {
+				logger.debug(jme.getMessage(), jme);
+				logger.error(jme.getMessage());
+			}
 
 			loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates,
 					refactoringPipeline.getRefactoringStates()

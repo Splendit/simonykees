@@ -34,14 +34,14 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		this(key, secret, productNr, moduleNr, type);
 		this.validationBaseUrl = validationBaseUrl;
 	}
-	
+
 	public NetlicensingLicenseModel(String key, String secret, String productNr, String moduleNr, LicenseType type,
 			String name, ZonedDateTime expireDate) {
 		this(key, secret, productNr, moduleNr, type);
 		this.name = name;
 		this.expireDate = expireDate;
 	}
-	
+
 	public NetlicensingLicenseModel(String key, String secret, String productNr, String moduleNr, LicenseType type,
 			String name, ZonedDateTime expireDate, String validationBaseUrl) {
 		this(key, secret, productNr, moduleNr, type, name, expireDate);

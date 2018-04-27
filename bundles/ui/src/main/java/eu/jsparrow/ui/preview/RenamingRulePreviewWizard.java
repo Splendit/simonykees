@@ -1,7 +1,6 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
@@ -175,13 +173,19 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	private IRunnableWithProgress createRecalculationJob() {
 		return monitor -> {
-
-			List<RefactoringState> refactoringStates = new ArrayList<>();
-			if (!createRefactoringStates(refactoringStates)) {
+			try {
+				/*
+				 * Create refactoring states for all compilation units from
+				 * targetCompilationUnits list
+				 */
+				refactoringPipeline.createRefactoringStates(targetCompilationUnits);
+			} catch (JavaModelException e) {
+				logger.error(e.getMessage(), e);
+				WizardMessageDialog.synchronizeWithUIShowInfo(
+						new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+								ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
 				return;
 			}
-
-			refactoringPipeline.setRefactoringStates(refactoringStates);
 			refactoringPipeline.updateInitialSourceMap();
 			try {
 				refactoringPipeline.doRefactoring(monitor);
@@ -198,28 +202,6 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				monitor.done();
 			}
 		};
-	}
-
-	/**
-	 * Creates refactoring states for all compilation units from
-	 * targetCompilationUnits list
-	 * 
-	 * @param refactoringStates
-	 *            result list containing all created refactoring states
-	 * @return false if exception occurred, true otherwise
-	 */
-	private boolean createRefactoringStates(List<RefactoringState> refactoringStates) {
-		for (ICompilationUnit compilationUnit : targetCompilationUnits) {
-			try {
-				refactoringStates.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
-			} catch (JavaModelException e) {
-				WizardMessageDialog.synchronizeWithUIShowInfo(
-						new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-								ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
-				return false;
-			}
-		}
-		return true;
 	}
 
 	@Override

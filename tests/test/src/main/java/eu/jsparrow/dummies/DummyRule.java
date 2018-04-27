@@ -6,6 +6,7 @@ import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -47,7 +48,7 @@ public class DummyRule implements RefactoringRule {
 	}
 
 	@Override
-	public DocumentChange applyRule(ICompilationUnit workingCopy)
+	public DocumentChange applyRule(ICompilationUnit workingCopy, CompilationUnit astRoot)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 		return null;
 	}
