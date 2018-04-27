@@ -43,6 +43,7 @@ public class Activator implements BundleActivator {
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 	private static final String DEV_MODE_KEY = "dev.mode.enabled"; //$NON-NLS-1$
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
+	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
 	private static final String EQUINOX_DS_BUNDLE_NAME = "org.eclipse.equinox.ds"; //$NON-NLS-1$
 
@@ -91,6 +92,10 @@ public class Activator implements BundleActivator {
 				try {
 					injectDependencies(context);
 					String key = getLicenseKey(context);
+					String agentUrl = getAgentUrl(context);
+					if (!agentUrl.isEmpty()) {
+						// TODO provide license service agent url if not empty
+					}
 					if (licenseService.validate(key) || devModeEnabled) {
 						refactoringInvoker.startRefactoring(context, new RefactoringPipeline());
 					} else {
@@ -119,6 +124,10 @@ public class Activator implements BundleActivator {
 			case LICENSE_INFO:
 				injectDependencies(context);
 				String key = getLicenseKey(context);
+				String agentUrl = getAgentUrl(context);
+				if (!agentUrl.isEmpty()) {
+					// TODO provide license service agent url if not empty
+				}
 				licenseService.licenseInfo(key);
 				break;
 			case TEST:
@@ -244,5 +253,27 @@ public class Activator implements BundleActivator {
 			licenseKey = cmdlineLicenseKey;
 		}
 		return licenseKey;
+	}
+
+	private String getAgentUrl(BundleContext context) {
+		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
+		YAMLStandaloneConfig yamlStandaloneConfig = null;
+		try {
+			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
+		} catch (YAMLStandaloneConfigException e) {
+			logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
+		}
+
+		String url = ""; //$NON-NLS-1$
+		if (yamlStandaloneConfig != null) {
+			url = yamlStandaloneConfig.getUrl();
+		}
+
+		String cmdlineIp = context.getProperty(AGENT_URL);
+		if (cmdlineIp != null) {
+			logger.info(Messages.RefactoringInvoker_OverridingConfigWithCommandLine);
+			url = cmdlineIp;
+		}
+		return url;
 	}
 }

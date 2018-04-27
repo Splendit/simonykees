@@ -20,9 +20,11 @@ import org.yaml.snakeyaml.error.YAMLException;
 public class YAMLStandaloneConfig {
 
 	private String key;
+	private String url;
 
 	public YAMLStandaloneConfig() {
 		key = ""; //$NON-NLS-1$
+		url = ""; //$NON-NLS-1$
 	}
 
 	public void setKey(String key) {
@@ -31,6 +33,14 @@ public class YAMLStandaloneConfig {
 
 	public String getKey() {
 		return key;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	public static YAMLStandaloneConfig load(File file) throws YAMLStandaloneConfigException {
