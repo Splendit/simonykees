@@ -229,14 +229,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private String getLicenseKey(BundleContext context) {
-		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
-		YAMLStandaloneConfig yamlStandaloneConfig = null;
-		try {
-			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
-		} catch (YAMLStandaloneConfigException e) {
-			logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
-		}
-
+		YAMLStandaloneConfig yamlStandaloneConfig= tryLoadStandaloneConfig(context);
 		String licenseKey = ""; //$NON-NLS-1$
 		if (yamlStandaloneConfig != null) {
 			licenseKey = yamlStandaloneConfig.getKey();
@@ -250,14 +243,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private String getAgentUrl(BundleContext context) {
-		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
-		YAMLStandaloneConfig yamlStandaloneConfig = null;
-		try {
-			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
-		} catch (YAMLStandaloneConfigException e) {
-			logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
-		}
-
+		YAMLStandaloneConfig yamlStandaloneConfig= tryLoadStandaloneConfig(context);
 		String url = ""; //$NON-NLS-1$
 		if (yamlStandaloneConfig != null) {
 			url = yamlStandaloneConfig.getUrl();
@@ -269,5 +255,17 @@ public class Activator implements BundleActivator {
 			url = cmdlineIp;
 		}
 		return url;
+	}
+	
+	private YAMLStandaloneConfig tryLoadStandaloneConfig(BundleContext context) {
+		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
+		YAMLStandaloneConfig yamlStandaloneConfig = null;
+		try {
+			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
+		} catch (YAMLStandaloneConfigException e) {
+			logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
+		}
+		return yamlStandaloneConfig;
+
 	}
 }

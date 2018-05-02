@@ -40,24 +40,13 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 
 	@Override
 	public boolean validate(String key, String validationBaseUrl) {
-		String sessionId = Integer.toString(random.nextInt());
-
 		if (key == null || key.isEmpty()) {
 			logger.error("No License Key has been specified."); //$NON-NLS-1$
 			return false;
 		}
 
-		LicenseValidationResult result = null;
-		try {
-			Properties properties = loadProperties();
-			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
-			String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
-
-			model = factoryService.createNewFloatingModel(key, sessionId, productNr, moduleNr, validationBaseUrl);
-			result = licenseService.validate(model);
-		} catch (ValidationException | IOException e) {
-			logger.debug("Licensing Error:", e); //$NON-NLS-1$
-			logger.error("Licensing Error: {}", e.getMessage()); //$NON-NLS-1$
+		LicenseValidationResult result = tryGetValidationResult(key, validationBaseUrl);
+		if (result == null) {
 			return false;
 		}
 		if (result.getLicenseType() != LicenseType.FLOATING) {
@@ -76,24 +65,15 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 
 	@Override
 	public void licenseInfo(String key, String validationBaseUrl) {
-		String sessionId = Integer.toString(random.nextInt());
 
 		if (key == null || key.isEmpty()) {
 			logger.error("No License Key has been specified."); //$NON-NLS-1$
 			return;
 		}
 
-		LicenseValidationResult result = null;
-		try {
-			Properties properties = loadProperties();
-			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
-			String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
-
-			model = factoryService.createNewFloatingModel(key, sessionId, productNr, moduleNr, validationBaseUrl);
-			result = licenseService.validate(model);
-		} catch (ValidationException | IOException e) {
-			logger.debug("Licensing Error:", e); //$NON-NLS-1$
-			logger.error("Licensing Error: {}", e.getMessage()); //$NON-NLS-1$
+		
+		LicenseValidationResult result = tryGetValidationResult(key, validationBaseUrl);
+		if(result == null) { 
 			return;
 		}
 
@@ -116,6 +96,24 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 
 		String info = sb.toString();
 		logger.info(info);
+	}
+
+	private LicenseValidationResult tryGetValidationResult(String key, String validationBaseUrl) {
+		String sessionId = Integer.toString(random.nextInt());
+		LicenseValidationResult result = null;
+		try {
+			Properties properties = loadProperties();
+			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
+			String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
+
+			model = factoryService.createNewFloatingModel(key, sessionId, productNr, moduleNr, validationBaseUrl);
+			result = licenseService.validate(model);
+		} catch (ValidationException | IOException e) {
+			logger.debug("Licensing Error:", e); //$NON-NLS-1$
+			logger.error("Licensing Error: {}", e.getMessage()); //$NON-NLS-1$
+			return null;
+		}
+		return result;
 	}
 
 	private Properties loadProperties() throws IOException {
