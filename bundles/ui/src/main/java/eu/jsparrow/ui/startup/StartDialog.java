@@ -451,12 +451,7 @@ public class StartDialog extends Dialog {
 	@Override
 	protected void okPressed() {
 		if (!StringUtils.isEmpty(ratingText) || !StringUtils.isEmpty(feedbackText)) {
-			try {
-				sendPost();
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-			}
-
+			sendPost();
 		}
 		super.okPressed();
 	}
@@ -467,42 +462,48 @@ public class StartDialog extends Dialog {
 	 * 
 	 * @throws Exception
 	 */
-	private void sendPost() throws IOException {
+	private void sendPost() {
 
-		String googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSfu0RgpPC40rgPi6A0e92JaALDF5TsC7hkSW0_zK2aDhgLSJQ/formResponse"; //$NON-NLS-1$
-		URL obj = new URL(googleFormUrl);
-		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		new Thread(() -> {
+			try {
+				String googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSfu0RgpPC40rgPi6A0e92JaALDF5TsC7hkSW0_zK2aDhgLSJQ/formResponse"; //$NON-NLS-1$
+				URL obj = new URL(googleFormUrl);
+				HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
-		// add reuqest header
-		con.setRequestMethod("POST"); //$NON-NLS-1$
+				// add reuqest header
+				con.setRequestMethod("POST"); //$NON-NLS-1$
 
-		String urlParameters = ""; //$NON-NLS-1$
-		if (!StringUtils.isEmpty(ratingText)) {
-			urlParameters += "entry.1293318463=" + ratingText; //$NON-NLS-1$
-		}
-		if (!StringUtils.isEmpty(feedbackText)) {
-			if (!StringUtils.isEmpty(ratingText)) {
-				urlParameters += "&"; //$NON-NLS-1$
+				String urlParameters = ""; //$NON-NLS-1$
+				if (!StringUtils.isEmpty(ratingText)) {
+					urlParameters += "entry.1293318463=" + ratingText; //$NON-NLS-1$
+				}
+				if (!StringUtils.isEmpty(feedbackText)) {
+					if (!StringUtils.isEmpty(ratingText)) {
+						urlParameters += "&"; //$NON-NLS-1$
+					}
+					urlParameters += "entry.112902755=" + feedbackText; //$NON-NLS-1$
+				}
+
+				// Send post request
+				con.setDoOutput(true);
+				DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+				wr.writeBytes(urlParameters);
+				wr.flush();
+				wr.close();
+
+				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String inputLine;
+				StringBuilder response = new StringBuilder();
+
+				while ((inputLine = in.readLine()) != null) {
+					response.append(inputLine);
+				}
+
+				in.close();
+			} catch (IOException ioe) {
+				logger.error(ioe.getMessage(), ioe);
 			}
-			urlParameters += "entry.112902755=" + feedbackText; //$NON-NLS-1$
-		}
-
-		// Send post request
-		con.setDoOutput(true);
-		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-		wr.writeBytes(urlParameters);
-		wr.flush();
-		wr.close();
-
-		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-		String inputLine;
-		StringBuilder response = new StringBuilder();
-
-		while ((inputLine = in.readLine()) != null) {
-			response.append(inputLine);
-		}
-		in.close();
-
+		}).start();
 	}
 
 	/**
