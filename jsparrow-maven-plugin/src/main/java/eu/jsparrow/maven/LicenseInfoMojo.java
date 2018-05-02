@@ -41,6 +41,9 @@ public class LicenseInfoMojo extends AbstractMojo {
 	@Parameter(property = "license")
 	private String license;
 
+	@Parameter(property = "url")
+	private String url;
+
 	/**
 	 * MOJO entry point. Starts equinox with the given configuration
 	 */
@@ -53,7 +56,7 @@ public class LicenseInfoMojo extends AbstractMojo {
 
 		try {
 
-			MavenParameters config = new MavenParameters(project, log, configFile, null, mode, license);
+			MavenParameters config = new MavenParameters(project, log, configFile, null, mode, license, url);
 
 			boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
 			if (!adapterLoadad) {

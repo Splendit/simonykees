@@ -60,6 +60,7 @@ public class MavenAdapter {
 	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	private static final String LOCK_FILE_NAME = "lock"; //$NON-NLS-1$
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
+	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 	private static final String DEV_MODE_KEY = "dev.mode.enabled"; //$NON-NLS-1$
 
 	private Log log;
@@ -212,6 +213,7 @@ public class MavenAdapter {
 			.orElse("")); //$NON-NLS-1$
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 		configuration.put(LICENSE_KEY, config.getLicense());
+		configuration.put(AGENT_URL, config.getUrl());
 		config.getRuleId()
 			.ifPresent(ruleId -> configuration.put(LIST_RULES_SELECTED_ID, ruleId));
 		configuration.put(DEV_MODE_KEY, Boolean.toString(config.isDevMode()));

@@ -25,6 +25,7 @@ public class YAMLStandaloneConfigTest {
 		config = YAMLStandaloneConfig.load(new File("src/test/resources/standalone-config.yaml")); //$NON-NLS-1$
 
 		assertEquals("Test123", config.getKey());
+		assertEquals("http://localhost:8080", config.getUrl());
 	}
 
 }

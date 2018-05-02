@@ -26,14 +26,16 @@ public class MavenParameters {
 	private boolean useDefaultConfig;
 	private String ruleId;
 	private String license;
+	private String url;
 	private boolean devMode;
 
 	public MavenParameters(MavenProject project, Log log, File defaultYamlFile, MavenSession mavenSession, String mode,
-			String license) {
+			String license, String url) {
 		this(project, log, mode);
 		this.defaultYamlFile = defaultYamlFile;
 		this.mavenSession = mavenSession;
 		this.license = license;
+		this.url = url;
 	}
 
 	public MavenParameters(MavenProject project, Log log, String mode) {
@@ -97,6 +99,10 @@ public class MavenParameters {
 
 	public String getLicense() {
 		return license;
+	}
+
+	public String getUrl() {
+		return url;
 	}
 
 	public boolean isDevMode() {

@@ -44,6 +44,8 @@ public class MavenAdapterTest {
 		final MavenParameters config = mock(MavenParameters.class);
 		when(config.getUseDefaultConfig()).thenReturn(Optional.empty());
 		when(config.getMode()).thenReturn(""); //$NON-NLS-1$
+		when(config.getLicense()).thenReturn(""); //$NON-NLS-1$
+		when(config.getUrl()).thenReturn(""); //$NON-NLS-1$
 		when(config.getProfile()).thenReturn(Optional.empty());
 		when(config.getRuleId()).thenReturn(Optional.empty());
 
@@ -51,6 +53,8 @@ public class MavenAdapterTest {
 
 		verify(config).getUseDefaultConfig();
 		verify(config).getMode();
+		verify(config).getLicense();
+		verify(config).getUrl();
 		verify(config).getProfile();
 	}
 

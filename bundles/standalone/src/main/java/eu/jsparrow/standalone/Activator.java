@@ -43,6 +43,7 @@ public class Activator implements BundleActivator {
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 	private static final String DEV_MODE_KEY = "dev.mode.enabled"; //$NON-NLS-1$
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
+	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
 	private static final String EQUINOX_DS_BUNDLE_NAME = "org.eclipse.equinox.ds"; //$NON-NLS-1$
 
@@ -91,7 +92,8 @@ public class Activator implements BundleActivator {
 				try {
 					injectDependencies(context);
 					String key = getLicenseKey(context);
-					if (licenseService.validate(key) || devModeEnabled) {
+					String agentUrl = getAgentUrl(context);
+					if (licenseService.validate(key, agentUrl) || devModeEnabled) {
 						refactoringInvoker.startRefactoring(context, new RefactoringPipeline());
 					} else {
 						String message = Messages.StandaloneActivator_noValidLicenseFound;
@@ -119,7 +121,8 @@ public class Activator implements BundleActivator {
 			case LICENSE_INFO:
 				injectDependencies(context);
 				String key = getLicenseKey(context);
-				licenseService.licenseInfo(key);
+				String agentUrl = getAgentUrl(context);
+				licenseService.licenseInfo(key, agentUrl);
 				break;
 			case TEST:
 				break;
@@ -226,14 +229,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private String getLicenseKey(BundleContext context) {
-		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
-		YAMLStandaloneConfig yamlStandaloneConfig = null;
-		try {
-			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
-		} catch (YAMLStandaloneConfigException e) {
-			logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
-		}
-
+		YAMLStandaloneConfig yamlStandaloneConfig= tryLoadStandaloneConfig(context);
 		String licenseKey = ""; //$NON-NLS-1$
 		if (yamlStandaloneConfig != null) {
 			licenseKey = yamlStandaloneConfig.getKey();
@@ -244,5 +240,32 @@ public class Activator implements BundleActivator {
 			licenseKey = cmdlineLicenseKey;
 		}
 		return licenseKey;
+	}
+
+	private String getAgentUrl(BundleContext context) {
+		YAMLStandaloneConfig yamlStandaloneConfig= tryLoadStandaloneConfig(context);
+		String url = ""; //$NON-NLS-1$
+		if (yamlStandaloneConfig != null) {
+			url = yamlStandaloneConfig.getUrl();
+		}
+
+		String cmdlineIp = context.getProperty(AGENT_URL);
+		if (cmdlineIp != null) {
+			logger.info(Messages.RefactoringInvoker_OverridingConfigWithCommandLine);
+			url = cmdlineIp;
+		}
+		return url;
+	}
+	
+	private YAMLStandaloneConfig tryLoadStandaloneConfig(BundleContext context) {
+		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
+		YAMLStandaloneConfig yamlStandaloneConfig = null;
+		try {
+			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
+		} catch (YAMLStandaloneConfigException e) {
+			logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
+		}
+		return yamlStandaloneConfig;
+
 	}
 }
