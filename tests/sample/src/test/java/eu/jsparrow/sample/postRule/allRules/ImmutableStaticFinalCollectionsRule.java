@@ -91,7 +91,7 @@ public class ImmutableStaticFinalCollectionsRule {
 
 	public static final List<String> CONSTANT_LIST_4 = new LinkedList<>();
 
-	private static List<String> constantList5 = new LinkedList<>();
+	private static List<String> CONSTANT_LIST_5 = new LinkedList<>();
 
 	static {
 		CONSTANT_LIST_2.add("foo");
@@ -101,7 +101,7 @@ public class ImmutableStaticFinalCollectionsRule {
 
 	private static final List<String> CONSTANT_LIST_3 = new LinkedList<>();
 
-	private final List<String> constantList6 = new LinkedList<>();
+	private final List<String> CONSTANT_LIST_6 = new LinkedList<>();
 
 	public void test() {
 		CONSTANT_LIST_3.add("foo");
