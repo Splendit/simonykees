@@ -10,6 +10,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,6 +40,7 @@ public class MavenAdapter {
 	public static final String DOT = "."; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_ARTIFACT_ID = "maven-compiler-plugin"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME = "source"; //$NON-NLS-1$
+	private static final String MAVEN_COMPILER_PLUGIN_PROPERTY_SOURCE_NAME = "maven.compiler.source"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION = "1.5"; //$NON-NLS-1$
 
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
@@ -501,6 +503,22 @@ public class MavenAdapter {
 	private String getCompilerCompliance(MavenProject project) {
 		List<Plugin> buildPlugins = project.getBuildPlugins();
 
+		String sourceFromPlugin = getCompilerComplienceFromCompilerPlugin(buildPlugins);
+		if(!sourceFromPlugin.isEmpty()) {
+			return sourceFromPlugin;
+		}
+		
+		Properties projectProperties = project.getProperties();
+
+		String sourceProperty = projectProperties.getProperty(MAVEN_COMPILER_PLUGIN_PROPERTY_SOURCE_NAME); 
+		if (null != sourceProperty) {
+			return sourceProperty;
+		}
+		
+		return MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION;
+	}
+
+	private String getCompilerComplienceFromCompilerPlugin(List<Plugin> buildPlugins) {
 		for (Plugin plugin : buildPlugins) {
 			if (MAVEN_COMPILER_PLUGIN_ARTIFACT_ID.equals(plugin.getArtifactId())) {
 				Xpp3Dom pluginConfig = (Xpp3Dom) plugin.getConfiguration();
@@ -514,7 +532,6 @@ public class MavenAdapter {
 				break;
 			}
 		}
-
-		return MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION;
+		return ""; //$NON-NLS-1$
 	}
 }
