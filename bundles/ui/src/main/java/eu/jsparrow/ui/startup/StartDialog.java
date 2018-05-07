@@ -74,15 +74,9 @@ public class StartDialog extends Dialog {
 	private static final String IMG_HAPPY_ICON = "icons/happy.png"; //$NON-NLS-1$
 	private static final String IMG_INLOVE_ICON = "icons/extrahappy.png"; //$NON-NLS-1$
 
-	private Composite leftComposite;
-	private Composite rightComposite;
-
 	private Bundle bundle;
 
 	private Image jSparrowImageActive;
-
-	private Image jSparrowImageScreenshot;
-	private Label screenshotLabel;
 
 	private Font titleFont;
 	private Font paragraphTitleFont;
@@ -146,8 +140,8 @@ public class StartDialog extends Dialog {
 		GridLayout layout = new GridLayout(2, false);
 		container.setLayout(layout);
 
-		leftComposite = new Composite(container, SWT.NONE);
-		rightComposite = new Composite(container, SWT.NONE);
+		Composite leftComposite = new Composite(container, SWT.NONE);
+		Composite rightComposite = new Composite(container, SWT.NONE);
 
 		createLeftComposite(leftComposite);
 		createRightComposite(rightComposite);
@@ -170,7 +164,7 @@ public class StartDialog extends Dialog {
 		IPath iPathScreenshot = new Path(IMG_PATH_SCREENSHOT);
 		URL urlScreenshot = FileLocator.find(bundle, iPathScreenshot, new HashMap<>());
 		ImageDescriptor imageDescScreenshot = ImageDescriptor.createFromURL(urlScreenshot);
-		jSparrowImageScreenshot = imageDescScreenshot.createImage();
+		Image jSparrowImageScreenshot = imageDescScreenshot.createImage();
 
 		Label welcomeLabel = new Label(parent, SWT.NONE);
 		welcomeLabel.setText(Messages.StartDialog_welcomeLabel);
@@ -238,7 +232,7 @@ public class StartDialog extends Dialog {
 		quickStartClickLabel.setLayoutData(gridData);
 		quickStartClickLabel.setText(Messages.StartDialog_quickStartClickLabel);
 
-		screenshotLabel = new Label(parent, SWT.NONE);
+		Label screenshotLabel = new Label(parent, SWT.NONE);
 		screenshotLabel.setImage(jSparrowImageScreenshot);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
 		gridData.verticalIndent = 4;
@@ -404,7 +398,6 @@ public class StartDialog extends Dialog {
 			Rectangle r1 = t.getClientArea();
 			Rectangle r2 = t.computeTrim(r1.x, r1.y, r1.width, r1.height);
 			Point p = t.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			// t.getHorizontalBar().setVisible(r2.width <= p.x);
 			t.getVerticalBar()
 				.setVisible(r2.height <= p.y);
 			if (event.type == SWT.Modify) {
