@@ -466,37 +466,55 @@ public class StartDialog extends Dialog {
 				// add reuqest header
 				con.setRequestMethod("POST"); //$NON-NLS-1$
 
-				String urlParameters = ""; //$NON-NLS-1$
-				if (!StringUtils.isEmpty(ratingText)) {
-					urlParameters += "entry.1293318463=" + ratingText; //$NON-NLS-1$
-				}
-				if (!StringUtils.isEmpty(feedbackText)) {
-					if (!StringUtils.isEmpty(ratingText)) {
-						urlParameters += "&"; //$NON-NLS-1$
-					}
-					urlParameters += "entry.112902755=" + feedbackText; //$NON-NLS-1$
-				}
+				String urlParameters = this.getGoogleFormURLParameters();
 
-				// Send post request
-				con.setDoOutput(true);
-				DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-				wr.writeBytes(urlParameters);
-				wr.flush();
-				wr.close();
+				this.sendGoogleFormPostRequest(con, urlParameters);
 
-				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-				String inputLine;
-				StringBuilder response = new StringBuilder();
+				String response = this.getGoogleFormPostResponse(con);
+				logger.debug(response);
 
-				while ((inputLine = in.readLine()) != null) {
-					response.append(inputLine);
-				}
-
-				in.close();
 			} catch (IOException ioe) {
 				logger.error(ioe.getMessage(), ioe);
 			}
 		}).start();
+	}
+
+	private void sendGoogleFormPostRequest(HttpURLConnection connection, String urlParameters) throws IOException {
+		connection.setDoOutput(true);
+		try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
+			wr.writeBytes(urlParameters);
+			wr.flush();
+		}
+	}
+
+	private String getGoogleFormPostResponse(HttpURLConnection connection) throws IOException {
+
+		StringBuilder response = new StringBuilder();
+		try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+			String inputLine;
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+		}
+
+		return response.toString();
+	}
+
+	private String getGoogleFormURLParameters() {
+		String urlParameters = ""; //$NON-NLS-1$
+
+		if (!StringUtils.isEmpty(ratingText)) {
+			urlParameters += "entry.1293318463=" + ratingText; //$NON-NLS-1$
+		}
+		if (!StringUtils.isEmpty(feedbackText)) {
+			if (!StringUtils.isEmpty(ratingText)) {
+				urlParameters += "&"; //$NON-NLS-1$
+			}
+			urlParameters += "entry.112902755=" + feedbackText; //$NON-NLS-1$
+		}
+
+		return urlParameters;
 	}
 
 	/**
