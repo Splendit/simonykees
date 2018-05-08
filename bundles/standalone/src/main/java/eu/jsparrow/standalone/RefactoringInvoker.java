@@ -234,8 +234,8 @@ public class RefactoringInvoker {
 	 * Loads a new {@link StandaloneConfig} with the properties found in
 	 * {@link BundleContext}
 	 * 
-	 * @param context
-	 * @throws StandAloneException 
+	 * @param context the bundle context configuration
+	 * @throws StandAloneException if an instance of the {@link StandaloneConfig} cannot be created. 
 	 */
 	protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) throws StandAloneException {
 
