@@ -28,6 +28,7 @@ import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.standalone.exceptions.StandAloneException;
 
 /**
  * 
@@ -72,11 +73,12 @@ public class RefactoringInvoker {
 	 *             if an exception occurs when creating an eclipse java project.
 	 * @throws IOException
 	 *             if the standalone configuration cannot be loaded
+	 * @throws StandAloneException
 	 * @throws RefactoringException
 	 *             if there are no sources to apply the refactoring to
 	 */
 	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
-			throws YAMLConfigException, CoreException, MavenInvocationException, IOException, RefactoringException {
+			throws StandAloneException {
 
 		List<StandaloneConfig> configs = loadStandaloneConfig(context);
 		setStandaloneConfigurations(configs);
@@ -96,17 +98,11 @@ public class RefactoringInvoker {
 	 * @param moduleConfigurations
 	 *            the list of the {@link StandaloneConfig} for the projects to
 	 *            be refactored.
-	 * @throws YAMLConfigException
-	 *             if the yaml configuration file cannot be loaded
-	 * @throws JavaModelException
-	 *             if the contents of the compilation units cannot be loaded
-	 *             during the 'prepare refactoring' phase.
-	 * @throws RefactoringException
-	 *             if there are no sources to apply the refactoring to
+	 *            
+	 * @throws StandAloneException
 	 */
 	private void computeRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline,
-			List<StandaloneConfig> moduleConfigurations)
-			throws YAMLConfigException, JavaModelException, RefactoringException {
+			List<StandaloneConfig> moduleConfigurations) throws StandAloneException {
 
 		for (StandaloneConfig standaloneConfig : moduleConfigurations) {
 			String loggerInfo;
@@ -130,7 +126,11 @@ public class RefactoringInvoker {
 				logger.debug(loggerInfo);
 
 				logger.debug(Messages.Activator_debug_createRefactoringStates);
-				refactoringPipeline.createRefactoringStates(compUnits);
+				try {
+					refactoringPipeline.createRefactoringStates(compUnits);
+				} catch (JavaModelException e1) {
+					throw new StandAloneException(e1.getMessage(), e1);
+				}
 
 				loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates,
 						refactoringPipeline.getRefactoringStates()
@@ -144,6 +144,8 @@ public class RefactoringInvoker {
 				} catch (RuleException e) {
 					logger.debug(e.getMessage(), e);
 					logger.error(e.getMessage());
+				} catch (RefactoringException e) {
+					throw new StandAloneException(e.getMessage(), e);
 				}
 
 				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
@@ -189,9 +191,10 @@ public class RefactoringInvoker {
 	 * 
 	 * @param context
 	 * @return the read configuration
+	 * @throws StandAloneException
 	 * @throws YAMLConfigException
 	 */
-	private YAMLConfig getConfiguration(BundleContext context, String projectId) throws YAMLConfigException {
+	private YAMLConfig getConfiguration(BundleContext context, String projectId) throws StandAloneException {
 
 		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
 
@@ -232,12 +235,9 @@ public class RefactoringInvoker {
 	 * {@link BundleContext}
 	 * 
 	 * @param context
-	 * @throws CoreException
-	 * @throws MavenInvocationException
-	 * @throws IOException
+	 * @throws StandAloneException 
 	 */
-	protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context)
-			throws CoreException, MavenInvocationException, IOException {
+	protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) throws StandAloneException {
 
 		Map<String, String> projectPaths = findAllProjectPaths(context);
 		String mavenHome = context.getProperty(MAVEN_HOME_KEY);
@@ -247,8 +247,12 @@ public class RefactoringInvoker {
 			String id = entry.getKey();
 			String path = entry.getValue();
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
-			StandaloneConfig standaloneConfig = new StandaloneConfig(id, path, compilerCompliance, mavenHome);
-			configs.add(standaloneConfig);
+			try {
+				StandaloneConfig standaloneConfig = new StandaloneConfig(id, path, compilerCompliance, mavenHome);
+				configs.add(standaloneConfig);
+			} catch (CoreException | MavenInvocationException | IOException e) {
+				throw new StandAloneException(e.getMessage(), e);
+			}
 		}
 		return configs;
 
@@ -272,13 +276,21 @@ public class RefactoringInvoker {
 	}
 
 	protected List<RefactoringRule> getSelectedRules(YAMLConfig config, List<RefactoringRule> projectRules)
-			throws YAMLConfigException {
+			throws StandAloneException {
 		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
-		return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
+		try {
+			return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
+		} catch (YAMLConfigException e) {
+			throw new StandAloneException(e.getMessage(), e);
+		}
 	}
 
-	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws YAMLConfigException {
-		return YAMLConfigUtil.readConfig(configFilePath, profile);
+	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws StandAloneException {
+		try {
+			return YAMLConfigUtil.readConfig(configFilePath, profile);
+		} catch (YAMLConfigException e) {
+			throw new StandAloneException(e.getMessage(), e);
+		}
 	}
 
 	protected IJavaProject getJavaProject(StandaloneConfig standaloneConfig) {

@@ -5,9 +5,7 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 
-import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -21,11 +19,10 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.logging.LoggingUtil;
-import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.standalone.exceptions.StandAloneException;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -102,8 +99,7 @@ public class Activator implements BundleActivator {
 						setExitErrorMessage(context, message);
 						return;
 					}
-				} catch (YAMLConfigException | CoreException | MavenInvocationException | IOException
-						| RefactoringException e) {
+				} catch (StandAloneException e) {
 					logger.debug(e.getMessage(), e);
 					logger.error(e.getMessage());
 					setExitErrorMessage(context, e.getMessage());
