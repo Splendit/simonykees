@@ -7,11 +7,11 @@ import eu.jsparrow.rules.common.exception.SimonykeesException;
  * interrupted due to a checked exception.
  *
  */
-public class StandAloneException extends SimonykeesException {
+public class StandaloneException extends SimonykeesException {
 
 	private static final long serialVersionUID = 5168002168077506405L;
 
-	public StandAloneException(String message, Throwable cause) {
+	public StandaloneException(String message, Throwable cause) {
 		super(message, cause);
 	}
 

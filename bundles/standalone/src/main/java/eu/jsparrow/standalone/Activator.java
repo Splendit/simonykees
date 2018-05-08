@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.logging.LoggingUtil;
-import eu.jsparrow.standalone.exceptions.StandAloneException;
+import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -99,7 +99,7 @@ public class Activator implements BundleActivator {
 						setExitErrorMessage(context, message);
 						return;
 					}
-				} catch (StandAloneException e) {
+				} catch (StandaloneException e) {
 					logger.debug(e.getMessage(), e);
 					logger.error(e.getMessage());
 					setExitErrorMessage(context, e.getMessage());

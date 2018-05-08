@@ -22,12 +22,12 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
 import eu.jsparrow.core.config.YAMLConfig;
-import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
  * test class for {@link RefactoringInvoker}
@@ -63,7 +63,7 @@ public class RefactoringInvokerTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expected = JavaModelException.class)
+	@Test(expected = StandaloneException.class)
 	public void startRefactoring_exceptinsInCreateRefactoringState_shouldNotCommit() throws Exception {
 		BundleContext context = mock(BundleContext.class);
 		RefactoringPipeline refactoringPipeline = mock(RefactoringPipeline.class);
@@ -78,7 +78,7 @@ public class RefactoringInvokerTest {
 		verify(refactoringPipeline, never()).commitRefactoring();
 	}
 
-	@Test(expected = RefactoringException.class)
+	@Test(expected = StandaloneException.class)
 	public void startRefactoring_exceptinsInDoRefactoring_shouldNotCommit() throws Exception {
 		BundleContext context = mock(BundleContext.class);
 		RefactoringPipeline refactoringPipeline = mock(RefactoringPipeline.class);
@@ -111,7 +111,7 @@ public class RefactoringInvokerTest {
 	class TestableRefactoringInvoker extends RefactoringInvoker {
 
 		@Override
-		protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws YAMLConfigException {
+		protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws StandaloneException {
 			return new YAMLConfig();
 		}
 
@@ -128,7 +128,7 @@ public class RefactoringInvokerTest {
 
 		@Override
 		protected List<RefactoringRule> getSelectedRules(YAMLConfig config, List<RefactoringRule> projectRules)
-				throws YAMLConfigException {
+				throws StandaloneException {
 			return Collections.singletonList(new CodeFormatterRule());
 		}
 
