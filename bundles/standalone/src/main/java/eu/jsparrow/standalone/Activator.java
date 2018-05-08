@@ -231,7 +231,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private String getLicenseKey(BundleContext context) {
-		YAMLStandaloneConfig yamlStandaloneConfig = tryLoadStandaloneConfig(context);
+		YAMLStandaloneConfig yamlStandaloneConfig = tryLoadStandaloneConfig();
 		String licenseKey = ""; //$NON-NLS-1$
 		if (yamlStandaloneConfig != null) {
 			licenseKey = yamlStandaloneConfig.getKey();
@@ -245,7 +245,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private String getAgentUrl(BundleContext context) {
-		YAMLStandaloneConfig yamlStandaloneConfig = tryLoadStandaloneConfig(context);
+		YAMLStandaloneConfig yamlStandaloneConfig = tryLoadStandaloneConfig();
 		String url = ""; //$NON-NLS-1$
 		if (yamlStandaloneConfig != null) {
 			url = yamlStandaloneConfig.getUrl();
@@ -259,7 +259,7 @@ public class Activator implements BundleActivator {
 		return url;
 	}
 
-	private YAMLStandaloneConfig tryLoadStandaloneConfig(BundleContext context) {
+	private YAMLStandaloneConfig tryLoadStandaloneConfig() {
 		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
 		YAMLStandaloneConfig yamlStandaloneConfig = null;
 		try {
