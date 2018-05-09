@@ -146,6 +146,18 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		commitChanges();
 		return true;
 	}
+	
+	@Override
+	public boolean performCancel() {
+		refactoringPipeline.clearStates();
+		return super.performCancel();
+	}
+
+	@Override
+	public void dispose() {
+		refactoringPipeline.clearStates();
+		super.dispose();
+	}
 
 	/**
 	 * Checks if license if valid. If it is, changes are committed, otherwise
