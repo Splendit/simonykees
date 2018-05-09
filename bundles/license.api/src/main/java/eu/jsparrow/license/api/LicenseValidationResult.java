@@ -15,7 +15,8 @@ public class LicenseValidationResult {
 	private String key;
 	private ZonedDateTime expirationDate;
 
-	public LicenseValidationResult(LicenseType licenseType, String key, boolean valid, String detail, ZonedDateTime expirationDate) {
+	public LicenseValidationResult(LicenseType licenseType, String key, boolean valid, String detail,
+			ZonedDateTime expirationDate) {
 		this.licenseType = licenseType;
 		this.key = key;
 		this.valid = valid;
@@ -38,11 +39,11 @@ public class LicenseValidationResult {
 	public void setLicenseType(LicenseType model) {
 		this.licenseType = model;
 	}
-	
+
 	public String getKey() {
 		return key;
 	}
-	
+
 	public ZonedDateTime getExpirationDate() {
 		return this.expirationDate;
 	}
