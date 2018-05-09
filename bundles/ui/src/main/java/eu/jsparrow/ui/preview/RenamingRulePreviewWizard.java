@@ -144,16 +144,13 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public boolean performFinish() {
 		
-		IWizardPage[] pages = getPages();
-		for(IWizardPage page : pages) {
-			if(page instanceof RenamingRulePreviewWizardPage) {
-				RenamingRulePreviewWizardPage renamePreviewPage = (RenamingRulePreviewWizardPage)page;
-				if(renamePreviewPage.isRecalculateNeeded()) {
-					performRecalculation(getContainer());
-					renamePreviewPage.clearNewSelections();
-				}
-			}
+		IWizardContainer container = getContainer();
+		if (container == null) {
+			return true;
 		}
+
+		IWizardPage currentPage = container.getCurrentPage();
+		updateViewsOnNavigation(currentPage);
 		
 		commitChanges();
 		return true;
