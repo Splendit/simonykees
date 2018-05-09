@@ -143,6 +143,18 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	@Override
 	public boolean performFinish() {
+		
+		IWizardPage[] pages = getPages();
+		for(IWizardPage page : pages) {
+			if(page instanceof RenamingRulePreviewWizardPage) {
+				RenamingRulePreviewWizardPage renamePreviewPage = (RenamingRulePreviewWizardPage)page;
+				if(renamePreviewPage.isRecalculateNeeded()) {
+					performRecalculation(getContainer());
+					renamePreviewPage.clearNewSelections();
+				}
+			}
+		}
+		
 		commitChanges();
 		return true;
 	}
@@ -190,6 +202,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				 * Create refactoring states for all compilation units from
 				 * targetCompilationUnits list
 				 */
+				refactoringPipeline.clearStates();
 				refactoringPipeline.createRefactoringStates(targetCompilationUnits);
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
