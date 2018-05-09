@@ -143,6 +143,15 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	@Override
 	public boolean performFinish() {
+		
+		IWizardContainer container = getContainer();
+		if (container == null) {
+			return true;
+		}
+
+		IWizardPage currentPage = container.getCurrentPage();
+		updateViewsOnNavigation(currentPage);
+		
 		commitChanges();
 		return true;
 	}
@@ -190,6 +199,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				 * Create refactoring states for all compilation units from
 				 * targetCompilationUnits list
 				 */
+				refactoringPipeline.clearStates();
 				refactoringPipeline.createRefactoringStates(targetCompilationUnits);
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
