@@ -74,11 +74,12 @@ public class DependencyManager {
 		File projectBaseDir = project.getBasedir();
 		String projectPath = projectBaseDir.getAbsolutePath();
 		request.setPomFile(new File(projectPath + File.separator + "pom.xml")); //$NON-NLS-1$
-		List<String> goals = Collections.singletonList(DEPENDENCY_PLUGIN_ID + ":" + COPY_DEPENDENCIES_GOAL + " "); //$NON-NLS-1$ , //$NON-NLS-2$
+		List<String> goals = Collections.singletonList("clean package " + DEPENDENCY_PLUGIN_ID + ":" + COPY_DEPENDENCIES_GOAL + " "); //$NON-NLS-1$ , //$NON-NLS-2$
 		request.setGoals(goals);
 		String outputDirectoryPath = System.getProperty(MavenAdapter.USER_DIR) + File.separator
-				+ OUTPUT_DIRECTORY_PREFIX + MavenAdapter.DOT + suffix;
+				+ OUTPUT_DIRECTORY_PREFIX + MavenAdapter.DOT + suffix + File.separator + "\\${project.name}";
 		props.setProperty(OUTPUT_DIRECTORY_OPTION_KEY, outputDirectoryPath);
+		props.setProperty("skipTests", "true"); 
 		request.setProperties(props);
 	}
 

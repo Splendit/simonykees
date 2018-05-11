@@ -140,10 +140,6 @@ public class StandaloneAdapter {
 		}
 
 		mavenAdapterInstance.addProjectConfiguration(project, configFile);
-		DependencyManager dependencyManagerInstance = getDependencyManagerInstance();
-		EmbeddedMaven embeddedMavenInstance = getEmbeddedMavenInstance();
-		dependencyManagerInstance.extractAndCopyDependencies(project, embeddedMavenInstance.getMavenHome(),
-				mavenAdapterInstance.findProjectIdentifier(project));
 	}
 
 	/**
@@ -196,5 +192,28 @@ public class StandaloneAdapter {
 
 	protected EmbeddedMaven getEmbeddedMavenInstance() {
 		return embeddedMaven;
+	}
+
+	public void copyDependencies(MavenProject parentProject, Log log) {
+		MavenAdapter mavenAdapterInstance = getMavenAdapterInstance();
+		if (mavenAdapterInstance == null) {
+			log.error(Messages.StandaloneAdapter_mavenAdapterInstanceNotCreated);
+			return;
+		}
+
+		DependencyManager dependencyManagerInstance = getDependencyManagerInstance();
+		EmbeddedMaven embeddedMavenInstance = getEmbeddedMavenInstance();
+		dependencyManagerInstance.extractAndCopyDependencies(parentProject, embeddedMavenInstance.getMavenHome(),
+				mavenAdapterInstance.findProjectIdentifier(parentProject));
+	}
+	
+	public void setRootProjectPomPath(String rootProjectPomPath, Log log) {
+		MavenAdapter mavenAdapterInstance = getMavenAdapterInstance();
+		if (mavenAdapterInstance == null) {
+			log.error(Messages.StandaloneAdapter_mavenAdapterInstanceNotCreated);
+			return;
+		}
+
+		mavenAdapterInstance.setRootProjectPomPath(rootProjectPomPath);
 	}
 }

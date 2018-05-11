@@ -54,6 +54,7 @@ public class MavenAdapter {
 	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
 	private static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
+	private static final String ROOT_PROJECT_POM_PATH = "ROOT.PROJECT.POM.PATH"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area"; //$NON-NLS-1$
 	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
@@ -533,5 +534,9 @@ public class MavenAdapter {
 			}
 		}
 		return ""; //$NON-NLS-1$
+	}
+
+	public void setRootProjectPomPath(String rootProjectPomPath) {
+		configuration.put(ROOT_PROJECT_POM_PATH, rootProjectPomPath);
 	}
 }

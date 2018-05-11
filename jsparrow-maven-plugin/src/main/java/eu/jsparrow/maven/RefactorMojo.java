@@ -85,7 +85,8 @@ public class RefactorMojo extends AbstractMojo {
 		String mode = StandaloneMode.REFACTOR.name();
 		try {
 			if (!serviceInstance.isAdapterInitialized()) {
-				MavenParameters config = new MavenParameters(project, log, configFile, mavenSession, mode, license, url);
+				MavenParameters config = new MavenParameters(project, log, configFile, mavenSession, mode, license,
+						url);
 				config.setMavenHome(mavenHome);
 				config.setProfile(profile);
 				config.setUseDefaultConfig(useDefaultConfig);
@@ -99,6 +100,9 @@ public class RefactorMojo extends AbstractMojo {
 			serviceInstance.addProjectConfiguration(project, log, configFile);
 			if (serviceInstance.allProjectsLoaded()) {
 				log.info(Messages.RefactorMojo_allProjectsLoaded);
+				MavenProject parent = findRootProject();
+				serviceInstance.copyDependencies(parent, log);
+				serviceInstance.setRootProjectPomPath(parent.getBasedir().getAbsolutePath() + File.separator + "pom.xml", log);
 				serviceInstance.startStandaloneBundle(log);
 			}
 
@@ -107,5 +111,14 @@ public class RefactorMojo extends AbstractMojo {
 			log.error(e1.getMessage());
 		}
 
+	}
+
+	// if doesn't work, try with get execution root directory
+	private MavenProject findRootProject() {
+		return mavenSession.getProjects()
+			.stream()
+			.filter(project -> null == project.getParent())
+			.findFirst()
+			.orElse(null);
 	}
 }
