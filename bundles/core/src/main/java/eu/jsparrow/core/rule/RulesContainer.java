@@ -26,7 +26,6 @@ import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamFindFirstRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamForEachRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamSumRule;
 import eu.jsparrow.core.rule.impl.EnumsWithoutEqualsRule;
-import eu.jsparrow.core.rule.impl.FieldNameConventionRule;
 import eu.jsparrow.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import eu.jsparrow.core.rule.impl.ForToForEachRule;
 import eu.jsparrow.core.rule.impl.FunctionalInterfaceRule;
@@ -113,7 +112,7 @@ public class RulesContainer {
 				new TryWithResourceRule(), new MultiCatchRule(), new FunctionalInterfaceRule(),
 				new CollectionRemoveAllRule(), new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
-				new BracketsToControlRule(), new FieldNameConventionRule(), new MultiVariableDeclarationLineRule(),
+				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(),
 				new EnumsWithoutEqualsRule(), new ReImplementingInterfaceRule(), new PutIfAbsentRule(),
 				new DateDeprecatedRule(),
 

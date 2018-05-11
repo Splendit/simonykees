@@ -223,22 +223,15 @@ public class BundleStarter {
 	}
 
 	/**
-	 * Creates a new shutdown hook for stopping equinox
+	 * shuts down the equinox framework and cleans all generated files
 	 * 
-	 * @return
-	 * 
+	 * @param mavenAdapter
 	 */
-	public Thread createShutdownHook(MavenAdapter mavenAdapter) {
-		return new Thread() {
-			@Override
-			public void run() {
-				super.run();
-				shutdownFramework();
-				if (!mavenAdapter.isJsparrowRunningFlag()) {
-					mavenAdapter.cleanUp();
-				}
-			}
-		};
+	public void shutdown(MavenAdapter mavenAdapter) {
+		shutdownFramework();
+		if (!mavenAdapter.isJsparrowRunningFlag()) {
+			mavenAdapter.cleanUp();
+		}
 	}
 
 	public boolean isStandaloneStarted() {

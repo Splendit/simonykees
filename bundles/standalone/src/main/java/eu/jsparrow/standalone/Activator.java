@@ -5,9 +5,7 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 
-import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -21,10 +19,10 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.logging.LoggingUtil;
+import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -101,10 +99,10 @@ public class Activator implements BundleActivator {
 						setExitErrorMessage(context, message);
 						return;
 					}
-				} catch (YAMLConfigException | CoreException | MavenInvocationException | IOException yce) {
-					logger.debug(yce.getMessage(), yce);
-					logger.error(yce.getMessage());
-					setExitErrorMessage(context, yce.getMessage());
+				} catch (StandaloneException e) {
+					logger.debug(e.getMessage(), e);
+					logger.error(e.getMessage());
+					setExitErrorMessage(context, e.getMessage());
 					return;
 				}
 				break;
@@ -229,7 +227,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private String getLicenseKey(BundleContext context) {
-		YAMLStandaloneConfig yamlStandaloneConfig= tryLoadStandaloneConfig(context);
+		YAMLStandaloneConfig yamlStandaloneConfig = tryLoadStandaloneConfig();
 		String licenseKey = ""; //$NON-NLS-1$
 		if (yamlStandaloneConfig != null) {
 			licenseKey = yamlStandaloneConfig.getKey();
@@ -243,7 +241,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private String getAgentUrl(BundleContext context) {
-		YAMLStandaloneConfig yamlStandaloneConfig= tryLoadStandaloneConfig(context);
+		YAMLStandaloneConfig yamlStandaloneConfig = tryLoadStandaloneConfig();
 		String url = ""; //$NON-NLS-1$
 		if (yamlStandaloneConfig != null) {
 			url = yamlStandaloneConfig.getUrl();
@@ -256,8 +254,8 @@ public class Activator implements BundleActivator {
 		}
 		return url;
 	}
-	
-	private YAMLStandaloneConfig tryLoadStandaloneConfig(BundleContext context) {
+
+	private YAMLStandaloneConfig tryLoadStandaloneConfig() {
 		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
 		YAMLStandaloneConfig yamlStandaloneConfig = null;
 		try {

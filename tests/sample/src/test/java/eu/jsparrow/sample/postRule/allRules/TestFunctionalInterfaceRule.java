@@ -12,22 +12,22 @@ public class TestFunctionalInterfaceRule {
 
 	private static Logger log = LoggerFactory.getLogger(TestFunctionalInterfaceRule.class);
 
-	private final String finalStringField;
-	private final String notInitializedField;
+	private final String FINAL_STRING_FIELD;
+	private final String NOT_INITIALIZED_FIELD;
 
 	private AFunctionalInterface usingUnDeclaredField = new AFunctionalInterface() {
 		@Override
 		public void method(int a) {
-			String s = finalInitializedStringField;
+			String s = FINAL_INITIALIZED_STRING_FIELD;
 		}
 	};
 
-	private final String finalInitializedStringField = "initialized";
+	private final String FINAL_INITIALIZED_STRING_FIELD = "initialized";
 
 	private AFunctionalInterface usingUnInitializedField = new AFunctionalInterface() {
 		@Override
 		public void method(int a) {
-			String s = finalStringField;
+			String s = FINAL_STRING_FIELD;
 		}
 	};
 
@@ -35,7 +35,7 @@ public class TestFunctionalInterfaceRule {
 		/*
 		 * Using initialized field
 		 */
-		String s = finalInitializedStringField;
+		String s = FINAL_INITIALIZED_STRING_FIELD;
 	};
 
 	private AFunctionalInterface usingWildcardsInBody = new AFunctionalInterface() {
@@ -68,14 +68,14 @@ public class TestFunctionalInterfaceRule {
 
 			@Override
 			public void method(int a) {
-				String sthToLog = a + finalStringField;
+				String sthToLog = a + FINAL_STRING_FIELD;
 
 			}
 		};
-		finalStringField = "irritating";
+		FINAL_STRING_FIELD = "irritating";
 
 		AFunctionalInterface foo2 = (int a) -> {
-			String sthToLog = a + finalStringField;
+			String sthToLog = a + FINAL_STRING_FIELD;
 
 		};
 
@@ -88,33 +88,33 @@ public class TestFunctionalInterfaceRule {
 			AFunctionalInterface foo4 = new AFunctionalInterface() {
 				@Override
 				public void method(int a) {
-					String sthToLog = a + notInitializedField;
+					String sthToLog = a + NOT_INITIALIZED_FIELD;
 				}
 			};
 		} else {
 			AFunctionalInterface foo5 = new AFunctionalInterface() {
 				@Override
 				public void method(int a) {
-					String sthToLog = a + notInitializedField;
+					String sthToLog = a + NOT_INITIALIZED_FIELD;
 				}
 			};
 		}
 
 		if (foo != null) {
-			notInitializedField = "";
+			NOT_INITIALIZED_FIELD = "";
 			AFunctionalInterface inNestedBlock = (int a) -> {
-				String sthToLog = a + notInitializedField;
+				String sthToLog = a + NOT_INITIALIZED_FIELD;
 
 			};
 		} else {
-			notInitializedField = "";
+			NOT_INITIALIZED_FIELD = "";
 		}
 
 	}
 
 	public void usingUnassignedFieldInMethod() {
 		AFunctionalInterface foo2 = (int a) -> {
-			String sthToLog = a + finalStringField;
+			String sthToLog = a + FINAL_STRING_FIELD;
 
 		};
 	}

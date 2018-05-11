@@ -24,6 +24,7 @@ public class StandaloneAdapter {
 	private MavenAdapter mavenAdapter;
 	private EmbeddedMaven embeddedMaven;
 	private DependencyManager dependencyManager;
+	private BundleStarter bundleStarter;
 
 	protected StandaloneAdapter() {
 		/*
@@ -79,6 +80,9 @@ public class StandaloneAdapter {
 			log.error(NLS.bind(Messages.StandaloneAdapter_jSparrowAlreadyRunning, projectId));
 			return false;
 		}
+
+		addShutDownHook(adapterInstance);
+
 		adapterInstance.prepareWorkingDirectory();
 		configuration.getMavenSession()
 			.ifPresent(adapterInstance::storeProjects);
@@ -153,8 +157,7 @@ public class StandaloneAdapter {
 			return;
 		}
 		Map<String, String> bundleConfiguration = mavenAdapterInstance.getConfiguration();
-		BundleStarter bundleStarter = createNewBundleStarter(log);
-		addShutDownHook(mavenAdapterInstance, bundleStarter);
+		bundleStarter = createNewBundleStarter(log);
 
 		bundleStarter.runStandalone(bundleConfiguration);
 	}
@@ -173,9 +176,15 @@ public class StandaloneAdapter {
 		return adapterInstance.allProjectConfigurationLoaded();
 	}
 
-	protected void addShutDownHook(MavenAdapter mavenAdapterInstance, BundleStarter bundleStarter) {
+	protected void addShutDownHook(MavenAdapter mavenAdapterInstance) {
 		Runtime.getRuntime()
-			.addShutdownHook(bundleStarter.createShutdownHook(mavenAdapterInstance));
+			.addShutdownHook(new Thread(() -> {
+				if (bundleStarter != null) {
+					bundleStarter.shutdown(mavenAdapterInstance);
+				} else if (mavenAdapterInstance != null && !mavenAdapterInstance.isJsparrowRunningFlag()) {
+					mavenAdapterInstance.cleanUp();
+				}
+			}));
 	}
 
 	protected BundleStarter createNewBundleStarter(Log log) {

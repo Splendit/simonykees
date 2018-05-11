@@ -303,6 +303,8 @@ public class RefactoringPipeline {
 	 *            list containing all {@link ICompilationUnit}s with compilation
 	 *            error
 	 * @throws JavaModelException
+	 *             if the content of the provided {@link ICompilationUnit}
+	 *             cannot be determined.
 	 */
 	public void createRefactoringState(ICompilationUnit compilationUnit, List<ICompilationUnit> containingErrorList)
 			throws JavaModelException {
