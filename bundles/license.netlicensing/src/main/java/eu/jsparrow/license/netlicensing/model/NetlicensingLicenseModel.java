@@ -2,6 +2,8 @@ package eu.jsparrow.license.netlicensing.model;
 
 import java.time.ZonedDateTime;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.LicenseType;
 
@@ -82,8 +84,7 @@ public class NetlicensingLicenseModel implements LicenseModel {
 
 	@Override
 	public String toString() {
-		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", secret=" + secret + ", productNr=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				+ productNr + ", moduleNr=" + moduleNr + ", type=" + type + ", expireDate=" + expireDate + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		return ReflectionToStringBuilder.toString(this);
 	}
 
 }
