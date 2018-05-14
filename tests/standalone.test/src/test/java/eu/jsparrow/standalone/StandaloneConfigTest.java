@@ -117,7 +117,7 @@ public class StandaloneConfigTest {
 
 		standaloneConfig.getProjectDescription();
 
-		verify(mavenInvoker).invoke(eq(ECLIPSE), eq(ECLIPSE), eq(null));
+		verify(mavenInvoker).invoke(eq("clean package " + ECLIPSE + ":" + ECLIPSE));
 		assertTrue(standaloneConfig.isDescriptionGenerated());
 	}
 
@@ -325,7 +325,7 @@ public class StandaloneConfigTest {
 
 		public TestableStandaloneConfig(String id, String path, String compilerCompliance, boolean testMode)
 				throws Exception {
-			super("", path, compilerCompliance, "", testMode); //$NON-NLS-1$ , //$NON-NLS-2$
+			super("", path, compilerCompliance, testMode); //$NON-NLS-1$ , //$NON-NLS-2$
 		}
 
 		@Override
@@ -397,9 +397,5 @@ public class StandaloneConfigTest {
 			return classpathEntry;
 		}
 
-		@Override
-		protected MavenInvoker getMavenInvoker() {
-			return mavenInvoker;
-		}
 	}
 }

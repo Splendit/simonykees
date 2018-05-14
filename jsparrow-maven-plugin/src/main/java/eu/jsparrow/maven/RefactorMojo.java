@@ -27,7 +27,7 @@ import eu.jsparrow.maven.i18n.Messages;
  * @since 2.2.1
  *
  */
-@Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, requiresProject = true)
+@Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
 public class RefactorMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${session}")
@@ -96,29 +96,21 @@ public class RefactorMojo extends AbstractMojo {
 				if (!adapterLoadad) {
 					throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
 				}
+				serviceInstance.copyDependencies(project, log);
+				serviceInstance.setRootProjectPomPath(project.getBasedir()
+					.getAbsolutePath() + File.separator + "pom.xml", log);
 			}
-			serviceInstance.addProjectConfiguration(project, log, configFile);
-			if (serviceInstance.allProjectsLoaded()) {
-				log.info(Messages.RefactorMojo_allProjectsLoaded);
-				MavenProject parent = findRootProject();
-				serviceInstance.copyDependencies(parent, log);
-				serviceInstance.setRootProjectPomPath(parent.getBasedir().getAbsolutePath() + File.separator + "pom.xml", log);
-				serviceInstance.startStandaloneBundle(log);
+
+			for (MavenProject mavenProject : mavenSession.getAllProjects()) {
+				serviceInstance.addProjectConfiguration(mavenProject, log, configFile);
 			}
+			log.info(Messages.RefactorMojo_allProjectsLoaded);
+			serviceInstance.startStandaloneBundle(log);
 
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());
 		}
 
-	}
-
-	// if doesn't work, try with get execution root directory
-	private MavenProject findRootProject() {
-		return mavenSession.getProjects()
-			.stream()
-			.filter(project -> null == project.getParent())
-			.findFirst()
-			.orElse(null);
 	}
 }

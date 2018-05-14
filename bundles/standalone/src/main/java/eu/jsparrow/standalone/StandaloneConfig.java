@@ -52,7 +52,6 @@ public class StandaloneConfig {
 
 	private String path;
 	private String compilerCompliance;
-	private String mavenHome;
 
 	private boolean descriptionGenerated = false;
 	private boolean cleanUpAlreadyDone = false;
@@ -66,7 +65,6 @@ public class StandaloneConfig {
 
 	private IClasspathEntry[] oldEntries;
 
-	private MavenInvoker mavenInovker;
 	private String projectId;
 
 	/**
@@ -77,24 +75,20 @@ public class StandaloneConfig {
 	 *            to the folder of the project
 	 * @param compilerCompliance
 	 *            java version of the project (i.e. "1.8" or "9")
-	 * @param mavenHome
-	 *            path to the maven home directory
 	 * @throws CoreException
 	 * @throws MavenInvocationException
 	 * @throws IOException
 	 */
-	public StandaloneConfig(String id, String path, String compilerCompliance, String mavenHome)
-			throws CoreException, MavenInvocationException, IOException {
-		this(id, path, compilerCompliance, mavenHome, false);
+	public StandaloneConfig(String id, String path, String compilerCompliance)
+			throws CoreException {
+		this(id, path, compilerCompliance, false);
 	}
 
-	public StandaloneConfig(String id, String path, String compilerCompliance, String mavenHome, boolean testMode)
-			throws CoreException, MavenInvocationException, IOException {
+	public StandaloneConfig(String id, String path, String compilerCompliance, boolean testMode)
+			throws CoreException {
 		this.projectId = id;
 		this.path = path;
 		this.compilerCompliance = compilerCompliance;
-		this.mavenHome = mavenHome;
-		this.mavenInovker = getMavenInvoker();
 
 		if (!testMode) {
 			setUp();
@@ -109,7 +103,7 @@ public class StandaloneConfig {
 	 * @throws MavenInvocationException
 	 * @throws IOException
 	 */
-	public void setUp() throws CoreException, MavenInvocationException, IOException {
+	public void setUp() throws CoreException {
 		IProjectDescription projectDescription = getProjectDescription();
 		IProject project = this.initProject(projectDescription);
 		this.initJavaProject(project);
@@ -128,18 +122,18 @@ public class StandaloneConfig {
 	 * @throws MavenInvocationException
 	 * @throws IOException
 	 */
-	IProjectDescription getProjectDescription() throws CoreException, MavenInvocationException, IOException {
+	IProjectDescription getProjectDescription() throws CoreException {
 		IWorkspace workspace = getWorkspace();
 
 		IProjectDescription description = null;
 
-		boolean invokeMavenEclipsePlugin = prepareEclipseMavenPlugin();
-
-		if (invokeMavenEclipsePlugin) {
-			logger.debug(Messages.StandaloneConfig_executeMavenEclipseEclipseGoal);
-			mavenInovker.invoke(ECLIPSE_MAVEN_NAME, ECLIPSE_MAVEN_NAME, null);
-			descriptionGenerated = true;
-		}
+//		boolean invokeMavenEclipsePlugin = prepareEclipseMavenPlugin();
+//
+//		if (invokeMavenEclipsePlugin) {
+//			logger.debug(Messages.StandaloneConfig_executeMavenEclipseEclipseGoal);
+//			mavenInovker.invoke(ECLIPSE_MAVEN_NAME, ECLIPSE_MAVEN_NAME, null);
+//			descriptionGenerated = true;
+//		}
 
 		logger.debug(Messages.StandaloneConfig_UseExistingProjectDescription);
 
@@ -342,7 +336,7 @@ public class StandaloneConfig {
 		if (!cleanUpAlreadyDone) {
 			logger.debug(Messages.StandaloneConfig_debug_cleanUp);
 			if (descriptionGenerated) {
-				mavenInovker.invoke(ECLIPSE_MAVEN_NAME, ECLIPSE_CLEAN_GOAL, null);
+//				mavenInovker.invoke(ECLIPSE_MAVEN_NAME, ECLIPSE_CLEAN_GOAL, null);
 
 				String loggerInfo;
 
@@ -452,12 +446,6 @@ public class StandaloneConfig {
 
 	protected boolean isDescriptionGenerated() {
 		return descriptionGenerated;
-	}
-
-	protected MavenInvoker getMavenInvoker() {
-		File mavenHomeFile = new File(this.mavenHome);
-		File pomFile = new File(getPomFilePath());
-		return new MavenInvoker(mavenHomeFile, pomFile);
 	}
 
 	/**

@@ -45,26 +45,26 @@ public class MavenInvokerTest {
 		mavenInvoker = new TestableMavenInvoker(mavenHome, pomFile);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Test
-	public void invoke() throws Exception {
-		String plugin = ECLIPSE;
-		String goal = CLEAN;
-		String goalString = plugin + ":" + goal;
-
-		mavenInvoker.invoke(plugin, goal, null);
-
-		verify(invocationRequest).setPomFile(eq(pomFile));
-
-		ArgumentCaptor<List> goalsCaptor = ArgumentCaptor.forClass(List.class);
-		verify(invocationRequest).setGoals(goalsCaptor.capture());
-		assertTrue(goalsCaptor.getValue()
-			.get(0)
-			.equals(goalString));
-
-		verify(invoker).setMavenHome(eq(mavenHome));
-		verify(invoker).execute(eq(invocationRequest));
-	}
+//	@SuppressWarnings({ "unchecked", "rawtypes" })
+//	@Test
+//	public void invoke() throws Exception {
+//		String plugin = ECLIPSE;
+//		String goal = CLEAN;
+//		String goalString = plugin + ":" + goal;
+//
+//		mavenInvoker.invoke(plugin, goal, null);
+//
+//		verify(invocationRequest).setPomFile(eq(pomFile));
+//
+//		ArgumentCaptor<List> goalsCaptor = ArgumentCaptor.forClass(List.class);
+//		verify(invocationRequest).setGoals(goalsCaptor.capture());
+//		assertTrue(goalsCaptor.getValue()
+//			.get(0)
+//			.equals(goalString));
+//
+//		verify(invoker).setMavenHome(eq(mavenHome));
+//		verify(invoker).execute(eq(invocationRequest));
+//	}
 
 	@Test
 	public void createGoalsString_pluginGoalVersionProvided_shouldReturnGoalString() {

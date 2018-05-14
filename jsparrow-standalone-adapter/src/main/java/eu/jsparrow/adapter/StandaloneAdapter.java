@@ -162,6 +162,7 @@ public class StandaloneAdapter {
 		bundleStarter.runStandalone(bundleConfiguration);
 	}
 
+	// TODO remove
 	/**
 	 * @return if the configuration of all projects in the session are loaded;
 	 */

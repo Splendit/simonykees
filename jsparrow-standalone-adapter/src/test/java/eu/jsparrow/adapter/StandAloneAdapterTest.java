@@ -15,9 +15,11 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.BundleException;
 
+@Ignore
 public class StandAloneAdapterTest {
 
 	private StandaloneAdapter standaloneAdapter;

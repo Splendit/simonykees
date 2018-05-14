@@ -37,13 +37,11 @@ public class MavenInvoker {
 	 * @param version
 	 * @throws MavenInvocationException
 	 */
-	public void invoke(String plugin, String goal, String version) throws MavenInvocationException {
-		String goalString = this.createGoalsString(plugin, goal, version);
-
+	public void invoke(String goal) throws MavenInvocationException {
 		InvocationRequest request = getDefaultInvocationRequest();
 		request.setBatchMode(true);
 		request.setPomFile(pomFile);
-		request.setGoals(Collections.singletonList(goalString));
+		request.setGoals(Collections.singletonList(goal));
 
 		invoker.setMavenHome(mavenHome);
 		invoker.execute(request);

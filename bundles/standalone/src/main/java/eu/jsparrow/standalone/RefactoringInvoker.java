@@ -51,11 +51,15 @@ public class RefactoringInvoker {
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
+	private static final String ECLIPSE_MAVEN_NAME = "eclipse"; //$NON-NLS-1$
+	private static final String ECLIPSE_CLEAN_GOAL = "clean"; //$NON-NLS-1$
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
+	private MavenInvoker mavenInovker;
+
 	public RefactoringInvoker() {
-		prepareWorkingDirectory();
+		prepareWorkingDirectory();		
 	}
 
 	/**
@@ -81,10 +85,27 @@ public class RefactoringInvoker {
 	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
 			throws StandaloneException {
 
+		configureEclipseProject(context);
+		
 		List<StandaloneConfig> configs = loadStandaloneConfig(context);
 		setStandaloneConfigurations(configs);
 		computeRefactoring(context, refactoringPipeline, configs);
 		commitChanges(refactoringPipeline);
+	}
+
+	private void configureEclipseProject(BundleContext context) throws StandaloneException {
+		String mavenHome = context.getProperty(MAVEN_HOME_KEY);
+		String rootProjectPomPath = context.getProperty(ROOT_PROJECT_POM_PATH);
+		
+		this.mavenInovker = createMavenInvoker(mavenHome, rootProjectPomPath);
+		
+		logger.debug(Messages.StandaloneConfig_executeMavenEclipseEclipseGoal);
+		try {
+			mavenInovker.invoke("clean package " + ECLIPSE_MAVEN_NAME + ":" + ECLIPSE_MAVEN_NAME);
+		} catch (MavenInvocationException e) {
+			throw new StandaloneException(e.getMessage(), e);
+		}
+
 	}
 
 	/**
@@ -177,14 +198,14 @@ public class RefactoringInvoker {
 	 * @throws IOException
 	 */
 	public void cleanUp() throws IOException {
-		try {
-			for (StandaloneConfig standaloneConfig : standaloneConfigs) {
-				standaloneConfig.cleanUp();
-			}
-		} catch (JavaModelException | MavenInvocationException e) {
-			logger.debug(e.getMessage(), e);
-			logger.error(e.getMessage());
-		}
+//		try {
+//			for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+////				standaloneConfig.cleanUp();
+//			}
+//		} catch (JavaModelException | MavenInvocationException e) {
+//			logger.debug(e.getMessage(), e);
+//			logger.error(e.getMessage());
+//		}
 	}
 
 	/**
@@ -241,7 +262,6 @@ public class RefactoringInvoker {
 	protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) throws StandaloneException {
 
 		Map<String, String> projectPaths = findAllProjectPaths(context);
-		String mavenHome = context.getProperty(MAVEN_HOME_KEY);
 
 		List<StandaloneConfig> configs = new ArrayList<>();
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
@@ -249,9 +269,9 @@ public class RefactoringInvoker {
 			String path = entry.getValue();
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
 			try {
-				StandaloneConfig standaloneConfig = new StandaloneConfig(id, path, compilerCompliance, mavenHome);
+				StandaloneConfig standaloneConfig = new StandaloneConfig(id, path, compilerCompliance);
 				configs.add(standaloneConfig);
-			} catch (CoreException | MavenInvocationException | IOException e) {
+			} catch (CoreException e) {
 				throw new StandaloneException(e.getMessage(), e);
 			}
 		}
@@ -300,6 +320,12 @@ public class RefactoringInvoker {
 
 	private void setStandaloneConfigurations(List<StandaloneConfig> configs) {
 		this.standaloneConfigs = configs;
+	}
+
+	protected MavenInvoker createMavenInvoker(String mavenHome, String pomFilePath) {
+		File mavenHomeFile = new File(mavenHome);
+		File pomFile = new File(pomFilePath);
+		return new MavenInvoker(mavenHomeFile, pomFile);
 	}
 
 }
