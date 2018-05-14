@@ -1,0 +1,36 @@
+package eu.jsparrow.license.netlicensing;
+
+import java.time.ZonedDateTime;
+
+import org.osgi.service.component.annotations.Component;
+
+import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicenseModelFactoryService;
+import eu.jsparrow.license.api.LicenseType;
+import eu.jsparrow.license.netlicensing.model.*;
+
+@Component
+public class NetlicensingLicenseModelFactoryService implements LicenseModelFactoryService {
+
+	public LicenseModel createDemoLicenseModel() {
+		return new DemoLicenseModel();
+	}
+
+	public LicenseModel createDemoLicenseModel(ZonedDateTime expirationDate) {
+		return new DemoLicenseModel(expirationDate);
+	}
+
+	public LicenseModel createNewNodeLockedModel(String key, String secret, String productNr, String moduleNr, String validationBaseUrl) {
+		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.NODE_LOCKED, validationBaseUrl);
+	}
+
+	public LicenseModel createNewFloatingModel(String key, String secret, String productNr, String moduleNr, String validationBaseUrl) {
+		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.FLOATING, validationBaseUrl);
+	}
+
+	public LicenseModel createNewModel(String key, String secret, String productNr, String moduleNr, LicenseType type,
+			String name, ZonedDateTime expireDate) {
+		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, type, name, expireDate);
+	}
+
+}

@@ -15,9 +15,7 @@ timestamps {
 			def backupOrigin = 'git@github.com:Splendit/simonykees.git'
 			// jenkins git ssh credentials
 			def sshCredentials = '7f15bb8a-a1db-4cdf-978f-3ae5983400b6'
-			// directory path to which all generated mapping files should be copied
-			def externalMappingFilesDirectory = "/var/services/mappingfiles"			
-			
+
 			stage('Preparation') { // for display purposes
 				checkout scm
 			}
@@ -31,12 +29,33 @@ timestamps {
 					}
 				}
 			}
+
 			
-			stage('Maven Compile') {
+			stage('Compile Eclipse Plugin') {
 				def mvnCommand = 'clean verify -DskipTests'
 				sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
 			}
 			
+			stage('Compile Maven Plugin'){
+			   def mvnCommand = 'clean install -DskipTests' 
+			   def pluginResourcePath = 'src/main/resources'
+			   def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'
+               dir('jsparrow-standalone-adapter'){
+			   	 sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
+			   }			   
+			   def manifest = 'manifest.standalone'
+			   def manifestContent = sh(script: 'ls ${jSparrowTargetPath}', returnStdout: true)
+			   
+			   dir('jsparrow-maven-plugin/${pluginResourcePath}'){
+			     writeFile file: '${manifest}', text: '${manifestContent}'
+			   }
+			   dir('jsparrow-maven-plugin'){
+			      sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
+			   }
+			}
+			
+	
+	
 			wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, debug: true, screen: '1366x768x24', shutdownWithBuild: true, timeout: 10]) {
 			// X virtual framebuffer (virtual X window display) is needed for plugin tests
 			// wrap([$class: 'Xvfb']) {
@@ -66,7 +85,7 @@ timestamps {
 			
 			if ( env.BRANCH_NAME == 'develop' ) {
 				// run sonarqube analysis, server configuration takes place in jenkins config
-				stage('SonarQube analysis') {
+				stage('SonarQube Analysis') {
 					withSonarQubeEnv('SonarQube Server'){
      						sh 'mvn sonar:sonar'
 					}
@@ -78,9 +97,17 @@ timestamps {
 				// skipping tests, because integration tests have passed already
 				// -B batch mode for clean output (otherwise upload status will spam the console)
 				def mvnCommand = 'clean deploy -DskipTests -B'
-				stage('Deploy and Tag') {
-					sh "'${mvnHome}/bin/mvn' ${mvnCommand} -P${env.BRANCH_NAME}-test-noProguard"	
-					
+				stage('Deploy Eclipse Plugin') {
+					sh "'${mvnHome}/bin/mvn' ${mvnCommand} -P${env.BRANCH_NAME}-test-noProguard"					
+				}
+				
+				stage('Deploy Maven Plugin'){
+					dir('jsparrow-maven-plugin'){
+					  sh "'${mvnHome}/bin/mvn' ${mvnCommand}"	
+					}
+				}
+				
+				stage('Tag') {
 					// tag build in repository
 					sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
 							// first parameter is the dir, second parameter is the subdirectory and optional
@@ -88,25 +115,25 @@ timestamps {
 						sh("git push $backupOrigin --tags")
 					}
 				}
-					
+
 				// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
 				// grep returns result with an \n therefore we need to trim
-				def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu.jsparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-				def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu.jsparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-				stage('Deploy obfuscation') {
-						def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
+				def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu.jsparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" releng/site/target/p2content.xml").trim()
+				def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu.jsparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" releng/site/target/p2content.xml").trim()
+				stage('Deploy Obfuscation') {
+					def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
 					sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
-					copyMappingFiles("${buildNumber}_test", externalMappingFilesDirectory)
+					uploadMappingFiles("${buildNumber}_test")
 				}
 				if ( env.BRANCH_NAME == 'master') {
-						stage('Deploy production') {
+					stage('Deploy Production') {
 						def mvnOptions = "-Dproduction -DforceContextQualifier=${qualifier}_noProguard"
 						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-noProguard"
 					}
 					stage('Deploy production, obfuscation') {
 							def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
 						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-proguard"
-						copyMappingFiles(buildNumber, externalMappingFilesDirectory)
+						uploadMappingFiles(buildNumber)
 					}
 				}
 			} else if ( env.BRANCH_NAME.startsWith('release') ) {
@@ -116,7 +143,7 @@ timestamps {
 				// -B batch mode for clean output (otherwise upload status will spam the console)
 				def mvnCommand = 'clean deploy -DskipTests -B -Dproguard'
 
-				stage('Deploy test obfuscation') {
+				stage('Deploy Test Obfuscation') {
 						sh "'${mvnHome}/bin/mvn' ${mvnCommand} -PreleaseCandidate"
 				}
 				
@@ -169,14 +196,14 @@ def notifyBuild(String buildStatus) {
 	}
 }
 
-def copyMappingFiles(String buildNumber, String mappingFilesDirectory) {
-	def statusCode = sh(returnStatus: true, script: "./copyMappingFiles.sh ./ ${mappingFilesDirectory} ${buildNumber}")
+def uploadMappingFiles(String directory) {
+	def statusCode = sh(returnStatus: true, script: "./uploadMappingFiles.sh ./ ${directory}")
 	if (statusCode != 0) {
-		println("copying mapping files FAILED! Error Code: ${statusCode}")
+		println("Uploading mapping files FAILED! Error Code: ${statusCode}")
 		currentBuild.result = "UNSTABLE"
 	}
 	else {
-		println("copying mapping files SUCCEEDED!")
+		println("Uploading mapping files SUCCEEDED!")
 		currentBuild.result = "SUCCESS"
 	}
 }
