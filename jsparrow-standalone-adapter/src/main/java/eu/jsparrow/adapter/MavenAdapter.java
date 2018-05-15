@@ -1,18 +1,17 @@
 package eu.jsparrow.adapter;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -72,7 +71,7 @@ public class MavenAdapter {
 	private MavenProject rootProject;
 	private File directory;
 
-	private Map<String, Boolean> sessionProjects = new HashMap<>();
+	private Set<String> sessionProjects;
 
 	private boolean jsparrowAlreadyRunningError = false;
 	private File defaultYamlFile;
@@ -85,7 +84,7 @@ public class MavenAdapter {
 	public MavenAdapter(MavenProject rootProject, Log log) {
 		setRootProject(rootProject);
 		this.log = log;
-		this.sessionProjects = new HashMap<>();
+		this.sessionProjects = new HashSet<>();
 	}
 
 	/**
@@ -99,9 +98,6 @@ public class MavenAdapter {
 	 * <li>compiler compliance java version of the project</li>
 	 * </ul>
 	 * 
-	 * Updates the {@link #sessionProjects} to indicate that the related
-	 * configurations for the given project are stored.
-	 * 
 	 * <b>Note:</b> if the project represents and aggregate project, then no
 	 * configuration is stored. Only the cofiguration of child projects need to
 	 * be stored.
@@ -113,8 +109,6 @@ public class MavenAdapter {
 	 */
 	public void addProjectConfiguration(MavenProject project, File configFile) {
 		log.info(String.format(Messages.MavenAdapter_addingProjectConfiguration, project.getName()));
-
-		markProjectConfigurationCompleted(project);
 
 		if (isAggregateProject(project)) {
 			return;
@@ -224,11 +218,6 @@ public class MavenAdapter {
 
 	private void addConfigurationKeyValue(String key, String value) {
 		this.configuration.put(key, value);
-	}
-
-	private void markProjectConfigurationCompleted(MavenProject project) {
-		String projectIdentifier = findProjectIdentifier(project);
-		sessionProjects.put(projectIdentifier, true);
 	}
 
 	/**
@@ -344,7 +333,6 @@ public class MavenAdapter {
 	 * @return if the resulting content of the lock file is empty.
 	 */
 	private boolean cleanLockFile() {
-		Set<String> sessionIds = sessionProjects.keySet();
 		Path path = Paths.get(calculateJsparrowLockFilePath());
 
 		if (!path.toFile()
@@ -354,7 +342,7 @@ public class MavenAdapter {
 
 		String remainingContent = ""; //$NON-NLS-1$
 		try (Stream<String> linesStream = Files.lines(path)) {
-			remainingContent = linesStream.filter(id -> !sessionIds.contains(id))
+			remainingContent = linesStream.filter(id -> !sessionProjects.contains(id))
 				.collect(Collectors.joining("\n")) //$NON-NLS-1$
 				.trim();
 
@@ -394,20 +382,15 @@ public class MavenAdapter {
 	}
 
 	private boolean isSessionRelated(String file) {
-		return sessionProjects.keySet()
-			.stream()
+		return sessionProjects.stream()
 			.anyMatch(file::contains);
-	}
-
-	public boolean allProjectConfigurationLoaded() {
-		return !this.sessionProjects.containsValue(Boolean.FALSE);
 	}
 
 	public void storeProjects(MavenSession mavenSession2) {
 		List<MavenProject> allProjects = mavenSession2.getAllProjects();
 		this.sessionProjects = allProjects.stream()
 			.map(this::findProjectIdentifier)
-			.collect(Collectors.toMap(Function.identity(), id -> false));
+			.collect(Collectors.toSet());
 	}
 
 	/**
@@ -417,10 +400,9 @@ public class MavenAdapter {
 	 * lock file.
 	 */
 	public synchronized void lockProjects() {
-		Set<String> projectIds = sessionProjects.keySet();
 		String lockFilePath = calculateJsparrowLockFilePath();
 		Path path = Paths.get(lockFilePath);
-		String conntent = projectIds.stream()
+		String conntent = sessionProjects.stream()
 			.collect(Collectors.joining("\n", "\n", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		try {
@@ -505,17 +487,17 @@ public class MavenAdapter {
 		List<Plugin> buildPlugins = project.getBuildPlugins();
 
 		String sourceFromPlugin = getCompilerComplienceFromCompilerPlugin(buildPlugins);
-		if(!sourceFromPlugin.isEmpty()) {
+		if (!sourceFromPlugin.isEmpty()) {
 			return sourceFromPlugin;
 		}
-		
+
 		Properties projectProperties = project.getProperties();
 
-		String sourceProperty = projectProperties.getProperty(MAVEN_COMPILER_PLUGIN_PROPERTY_SOURCE_NAME); 
+		String sourceProperty = projectProperties.getProperty(MAVEN_COMPILER_PLUGIN_PROPERTY_SOURCE_NAME);
 		if (null != sourceProperty) {
 			return sourceProperty;
 		}
-		
+
 		return MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION;
 	}
 

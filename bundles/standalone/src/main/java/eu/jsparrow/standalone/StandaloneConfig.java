@@ -66,6 +66,7 @@ public class StandaloneConfig {
 	private IClasspathEntry[] oldEntries;
 
 	private String projectId;
+	private String projectName;
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
@@ -79,13 +80,14 @@ public class StandaloneConfig {
 	 * @throws MavenInvocationException
 	 * @throws IOException
 	 */
-	public StandaloneConfig(String id, String path, String compilerCompliance)
+	public StandaloneConfig(String id, String projectName, String path, String compilerCompliance)
 			throws CoreException {
-		this(id, path, compilerCompliance, false);
+		this(id, projectName, path, compilerCompliance, false);
 	}
 
-	public StandaloneConfig(String id, String path, String compilerCompliance, boolean testMode)
+	public StandaloneConfig(String id, String projectName, String path, String compilerCompliance, boolean testMode)
 			throws CoreException {
+		this.projectName = projectName;
 		this.projectId = id;
 		this.path = path;
 		this.compilerCompliance = compilerCompliance;
@@ -422,9 +424,11 @@ public class StandaloneConfig {
 	}
 
 	protected File getMavenDependencyFolder() {
+		
+		
 
 		return new File(System.getProperty(USER_DIR) + File.separator
-				+ DEPENDENCIES_FOLDER_CONSTANT + DOT + getProjectId());
+				+ DEPENDENCIES_FOLDER_CONSTANT + File.separator + getProjectName());
 	}
 
 	protected IClasspathEntry createLibraryClasspathEntry(String jarPath) {
@@ -476,6 +480,10 @@ public class StandaloneConfig {
 
 	public String getProjectId() {
 		return this.projectId;
+	}
+	
+	public String getProjectName() {
+		return projectName;
 	}
 
 }

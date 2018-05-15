@@ -268,8 +268,9 @@ public class RefactoringInvoker {
 			String id = entry.getKey();
 			String path = entry.getValue();
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
+			String projectName = context.getProperty(PROJECT_NAME + DOT + id);
 			try {
-				StandaloneConfig standaloneConfig = new StandaloneConfig(id, path, compilerCompliance);
+				StandaloneConfig standaloneConfig = new StandaloneConfig(id, projectName, path, compilerCompliance);
 				configs.add(standaloneConfig);
 			} catch (CoreException e) {
 				throw new StandaloneException(e.getMessage(), e);

@@ -110,35 +110,10 @@ public class StandAloneAdapterTest {
 		Log log = mock(Log.class);
 
 		when(embeddedMaven.getMavenHome()).thenReturn("maven-home"); //$NON-NLS-1$
-		when(mavenAdapter.allProjectConfigurationLoaded()).thenReturn(false);
 		when(mavenAdapter.findProjectIdentifier(project)).thenReturn("projectId"); //$NON-NLS-1$
 		standaloneAdapter.addProjectConfiguration(project, log, configFile);
 
 		verify(dependencyManager).extractAndCopyDependencies(project, "maven-home", "projectId"); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	@Test
-	public void allProjectsLoaded_shouldReturnTrue() {
-		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
-
-		when(mavenAdapter.allProjectConfigurationLoaded()).thenReturn(true);
-		boolean actual = standaloneAdapter.allProjectsLoaded();
-
-		assertTrue(actual);
-	}
-
-	@Test
-	public void allProjectsLoaded_shouldReturnFalse() {
-		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
-		when(mavenAdapter.allProjectConfigurationLoaded()).thenReturn(false);
-		boolean actual = standaloneAdapter.allProjectsLoaded();
-		assertFalse(actual);
-	}
-
-	@Test
-	public void allProjectsLoaded_missingState_shouldReturnFalse() {
-		boolean actual = standaloneAdapter.allProjectsLoaded();
-		assertFalse(actual);
 	}
 
 	@Test

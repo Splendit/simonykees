@@ -162,21 +162,6 @@ public class StandaloneAdapter {
 		bundleStarter.runStandalone(bundleConfiguration);
 	}
 
-	// TODO remove
-	/**
-	 * @return if the configuration of all projects in the session are loaded;
-	 */
-	public boolean allProjectsLoaded() {
-
-		MavenAdapter adapterInstance = getMavenAdapterInstance();
-
-		if (adapterInstance == null) {
-			return false;
-		}
-
-		return adapterInstance.allProjectConfigurationLoaded();
-	}
-
 	protected void addShutDownHook(MavenAdapter mavenAdapterInstance) {
 		Runtime.getRuntime()
 			.addShutdownHook(new Thread(() -> {
