@@ -53,6 +53,7 @@ public class RefactoringInvoker {
 	private static final String DOT = "."; //$NON-NLS-1$
 	private static final String ECLIPSE_MAVEN_NAME = "eclipse"; //$NON-NLS-1$
 	private static final String ECLIPSE_CLEAN_GOAL = "clean"; //$NON-NLS-1$
+	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
@@ -101,7 +102,7 @@ public class RefactoringInvoker {
 		
 		logger.debug(Messages.StandaloneConfig_executeMavenEclipseEclipseGoal);
 		try {
-			mavenInovker.invoke("clean package " + ECLIPSE_MAVEN_NAME + ":" + ECLIPSE_MAVEN_NAME);
+			mavenInovker.invoke("package " + ECLIPSE_MAVEN_NAME + ":" + ECLIPSE_MAVEN_NAME + " -DskipTests");
 		} catch (MavenInvocationException e) {
 			throw new StandaloneException(e.getMessage(), e);
 		}
