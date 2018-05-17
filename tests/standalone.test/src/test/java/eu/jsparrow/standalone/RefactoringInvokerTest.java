@@ -117,7 +117,11 @@ public class RefactoringInvokerTest {
 
 		@Override
 		protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) {
-			standaloneConfigs = Arrays.asList(mock(StandaloneConfig.class));
+			IJavaProject javaProject = mock(IJavaProject.class);
+			when(javaProject.getElementName()).thenReturn("projectName");
+			StandaloneConfig standaloneConfig = mock(StandaloneConfig.class);
+			when(standaloneConfig.getJavaProject()).thenReturn(javaProject);
+			standaloneConfigs = Arrays.asList(standaloneConfig);
 			return standaloneConfigs;
 		}
 
@@ -130,11 +134,6 @@ public class RefactoringInvokerTest {
 		protected List<RefactoringRule> getSelectedRules(YAMLConfig config, List<RefactoringRule> projectRules)
 				throws StandaloneException {
 			return Collections.singletonList(new CodeFormatterRule());
-		}
-
-		@Override
-		protected IJavaProject getJavaProject(StandaloneConfig standaloneConfig) {
-			return javaProject;
 		}
 	}
 }

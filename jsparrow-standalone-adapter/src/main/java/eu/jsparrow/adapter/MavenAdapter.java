@@ -118,11 +118,13 @@ public class MavenAdapter {
 		String projectPath = baseDir.getAbsolutePath();
 		String projcetName = project.getName();
 		String projectIdentifier = findProjectIdentifier(project);
+		String artifactId = project.getArtifactId();
 
+		project.getBuild().getOutputDirectory();
 		String allIdentifiers = getAllProjectIdentifiers();
 		addConfigurationKeyValue(ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
 		addConfigurationKeyValue(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
-		addConfigurationKeyValue(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, projcetName);
+		addConfigurationKeyValue(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, artifactId);
 		String yamlFilePath = findYamlFilePath(project, configFile);
 		log.info(Messages.MavenAdapter_jSparrowConfigurationFile + yamlFilePath);
 		addConfigurationKeyValue(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);

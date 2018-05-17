@@ -78,7 +78,7 @@ public class DependencyManager {
 			.singletonList("clean package " + DEPENDENCY_PLUGIN_ID + ":" + COPY_DEPENDENCIES_GOAL + " "); //$NON-NLS-1$ , //$NON-NLS-2$ //$NON-NLS-3$
 		request.setGoals(goals);
 		String outputDirectoryPath = System.getProperty(MavenAdapter.USER_DIR) + File.separator
-				+ OUTPUT_DIRECTORY_PREFIX + File.separator + "\\${project.name}"; //$NON-NLS-1$
+				+ OUTPUT_DIRECTORY_PREFIX + File.separator + "\\${project.artifactId}"; //$NON-NLS-1$
 		props.setProperty(OUTPUT_DIRECTORY_OPTION_KEY, outputDirectoryPath);
 		props.setProperty("skipTests", "true"); //$NON-NLS-1$ , //$NON-NLS-2$
 		request.setProperties(props);

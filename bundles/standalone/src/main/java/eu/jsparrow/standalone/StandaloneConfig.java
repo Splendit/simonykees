@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.eclipse.core.resources.IProject;
@@ -15,6 +16,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -23,6 +25,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,33 +43,29 @@ public class StandaloneConfig {
 
 	private static final Logger logger = LoggerFactory.getLogger(StandaloneConfig.class);
 
-	private static final String ECLIPSE_MAVEN_NAME = "eclipse"; //$NON-NLS-1$
-	private static final String ECLIPSE_CLEAN_GOAL = "clean"; //$NON-NLS-1$
-	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
+	private static final String DEPENDENCIES_FOLDER = "deps"; //$NON-NLS-1$
 	private static final String PROJECT_FILE_NAME = ".project"; //$NON-NLS-1$
 	private static final String CLASSPATH_FILE_NAME = ".classpath"; //$NON-NLS-1$
 	private static final String SETTINGS_DIRECTORY_NAME = ".settings"; //$NON-NLS-1$
 	private static final String TEMP_FILE_EXTENSION = ".tmp"; //$NON-NLS-1$
-	private static final String DOT = "."; //$NON-NLS-1$
-	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$	
+	private static final String MAVEN_NATURE_ID = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
+	private static final String ECLIPSE_PLUGIN_NATURE_ID = "org.eclipse.pde.PluginNature"; //$NON-NLS-1$
+	private static final String DEFAULT_SOURCE_FOLDER_PATH = "src/main/java"; //$NON-NLS-1$
+	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
 
 	private String path;
 	private String compilerCompliance;
-
 	private boolean descriptionGenerated = false;
 	private boolean cleanUpAlreadyDone = false;
 	private boolean existingProjectFileMoved = false;
 	private boolean existingClasspathFileMoved = false;
 	private boolean existingSettingsDirectoryMoved = false;
-
 	private IJavaProject javaProject = null;
-
-	private List<ICompilationUnit> compUnits = new ArrayList<>();
-
+	private List<ICompilationUnit> compilationUnits = new ArrayList<>();
 	private IClasspathEntry[] oldEntries;
-
 	private String projectId;
-	private String projectName;
+	private String artifactId;
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
@@ -85,9 +84,9 @@ public class StandaloneConfig {
 		this(id, projectName, path, compilerCompliance, false);
 	}
 
-	public StandaloneConfig(String id, String projectName, String path, String compilerCompliance, boolean testMode)
+	public StandaloneConfig(String id, String artifactId, String path, String compilerCompliance, boolean testMode)
 			throws CoreException {
-		this.projectName = projectName;
+		this.artifactId = artifactId;
 		this.projectId = id;
 		this.path = path;
 		this.compilerCompliance = compilerCompliance;
@@ -107,42 +106,43 @@ public class StandaloneConfig {
 	 */
 	public void setUp() throws CoreException {
 		IProjectDescription projectDescription = getProjectDescription();
-		IProject project = this.initProject(projectDescription);
-		this.initJavaProject(project);
+		IProject project = initProject(projectDescription);
+		this.javaProject =  initJavaProject(project);
 		List<IClasspathEntry> mavenClasspathEntries = collectMavenDependenciesAsClasspathEntries();
-		this.addToClasspath(mavenClasspathEntries);
-		compUnits = getCompilationUnits();
+		mavenClasspathEntries = addProjectSourceConfigurations(mavenClasspathEntries);
+		addToClasspath(mavenClasspathEntries);
+		compilationUnits = findProjectCompilationUnits();
+	}
+
+	private List<IClasspathEntry> addProjectSourceConfigurations(List<IClasspathEntry> classpathEntries) {
+		// FIXME: read the source colder form the bundle configuration
+		IPath sourcePath = javaProject.getPath().append(DEFAULT_SOURCE_FOLDER_PATH); 
+		classpathEntries.add(JavaCore.newSourceEntry(sourcePath));
+		classpathEntries.add(JavaCore.newContainerEntry(new Path(JavaRuntime.JRE_CONTAINER)));
+
+		// remove duplicated source entries and return
+		return classpathEntries.stream()
+			.filter(entry -> entry.getEntryKind() != IClasspathEntry.CPE_SOURCE || !entry.getPath()
+				.toString()
+				.isEmpty())
+			.collect(Collectors.toList());
 	}
 
 	/**
 	 * if a project description already exists, it is already an eclipse project
 	 * and the project description gets loaded. otherwise an Eclipse project is
 	 * temporarily created by using the maven eclipse plugin.
+	 * FIXME: update docs
 	 * 
 	 * @return a project description for an eclipse project
-	 * @throws CoreException
-	 * @throws MavenInvocationException
-	 * @throws IOException
 	 */
-	IProjectDescription getProjectDescription() throws CoreException {
+	IProjectDescription getProjectDescription() {
 		IWorkspace workspace = getWorkspace();
 
-		IProjectDescription description = null;
-
-//		boolean invokeMavenEclipsePlugin = prepareEclipseMavenPlugin();
-//
-//		if (invokeMavenEclipsePlugin) {
-//			logger.debug(Messages.StandaloneConfig_executeMavenEclipseEclipseGoal);
-//			mavenInovker.invoke(ECLIPSE_MAVEN_NAME, ECLIPSE_MAVEN_NAME, null);
-//			descriptionGenerated = true;
-//		}
-
-		logger.debug(Messages.StandaloneConfig_UseExistingProjectDescription);
-
-		File descriptionFile = getProjectDescriptionFile();
-		String descriptionFilePathValue = descriptionFile.getAbsolutePath();
-		Path descriptionFilePath = new Path(descriptionFilePathValue);
-		description = workspace.loadProjectDescription(descriptionFilePath);
+		logger.debug(Messages.StandaloneConfig_UseExistingProjectDescription); //FIXME: update logging message
+		IProjectDescription description = workspace.newProjectDescription(getArtifactId());
+		description.setLocation(new Path(path));
+		description.setNatureIds(new String[] { MAVEN_NATURE_ID, ECLIPSE_PLUGIN_NATURE_ID, JavaCore.NATURE_ID });
 
 		return description;
 	}
@@ -234,19 +234,18 @@ public class StandaloneConfig {
 	IJavaProject initJavaProject(IProject project) throws JavaModelException {
 		logger.debug(Messages.StandaloneConfig_debug_createJavaProject);
 
-		javaProject = createJavaProject(project);
-
+		IJavaProject iJavaProject = createJavaProject(project);
 		// set compiler compliance level from the project
-		javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, compilerCompliance);
-		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, compilerCompliance);
-		javaProject.setOption(JavaCore.COMPILER_SOURCE, compilerCompliance);
+		iJavaProject.setOption(JavaCore.COMPILER_COMPLIANCE, compilerCompliance);
+		iJavaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, compilerCompliance);
+		iJavaProject.setOption(JavaCore.COMPILER_SOURCE, compilerCompliance);
 
 		String loggerInfo = NLS.bind(Messages.StandaloneConfig_CompilerComplianceSetTo, compilerCompliance);
 		logger.debug(loggerInfo);
 
-		javaProject.open(new NullProgressMonitor());
+		iJavaProject.open(new NullProgressMonitor());
 
-		return javaProject;
+		return iJavaProject;
 	}
 
 	/**
@@ -256,7 +255,7 @@ public class StandaloneConfig {
 	 * @return list of {@link ICompilationUnit}s on project
 	 * @throws JavaModelException
 	 */
-	List<ICompilationUnit> getCompilationUnits() throws JavaModelException {
+	List<ICompilationUnit> findProjectCompilationUnits() throws JavaModelException {
 		List<ICompilationUnit> units = new ArrayList<>();
 
 		logger.debug(Messages.StandaloneConfig_collectCompilationUnits);
@@ -286,13 +285,24 @@ public class StandaloneConfig {
 
 		if (null != listOfFiles) {
 			logger.debug(Messages.StandaloneConfig_CreateClasspathEntriesForDependencies);
-			for (File file : listOfFiles) {
+			collectedEntries = createClasspathEntries(listOfFiles);
+		}
+
+		return collectedEntries;
+	}
+
+	protected List<IClasspathEntry> createClasspathEntries(File[] listOfFiles) {
+		List<IClasspathEntry> collectedEntries = new ArrayList<>();
+		for (File file : listOfFiles) {
+			if(file.isDirectory()) {
+				List<IClasspathEntry> entries = createClasspathEntries(file.listFiles());
+				collectedEntries.addAll(entries);
+			} else {
 				String jarPath = file.toString();
 				IClasspathEntry jarEntry = createLibraryClasspathEntry(jarPath);
 				collectedEntries.add(jarEntry);
 			}
 		}
-
 		return collectedEntries;
 	}
 
@@ -314,12 +324,15 @@ public class StandaloneConfig {
 			IClasspathEntry[] newEntries;
 
 			if (oldEntries.length != 0) {
-				Set<IClasspathEntry> set = new HashSet<>(Arrays.asList(oldEntries));
+				Set<IClasspathEntry> set = new HashSet<>();
 				set.addAll(classpathEntries);
+
 				newEntries = set.toArray(new IClasspathEntry[set.size()]);
 			} else {
 				newEntries = classpathEntries.toArray(new IClasspathEntry[classpathEntries.size()]);
 			}
+			
+			
 
 			javaProject.setRawClasspath(newEntries, null);
 		}
@@ -334,11 +347,11 @@ public class StandaloneConfig {
 	 * @throws IOException
 	 * @throws MavenInvocationException
 	 */
-	public void cleanUp() throws JavaModelException, MavenInvocationException, IOException {
+	public void cleanUp() throws JavaModelException, IOException {
 		if (!cleanUpAlreadyDone) {
 			logger.debug(Messages.StandaloneConfig_debug_cleanUp);
+			
 			if (descriptionGenerated) {
-//				mavenInovker.invoke(ECLIPSE_MAVEN_NAME, ECLIPSE_CLEAN_GOAL, null);
 
 				String loggerInfo;
 
@@ -364,6 +377,29 @@ public class StandaloneConfig {
 			}
 			cleanUpAlreadyDone = true;
 		}
+	}
+	
+	public void cleanEclipseProjectFiles() throws IOException {
+		logger.debug(Messages.StandaloneConfig_debug_cleanUp);
+		Files.deleteIfExists(getProjectDescriptionFile().toPath());
+		Files.deleteIfExists(getClasspathFileFile().toPath());
+		Files.deleteIfExists(getSettingsDirectoryFile().toPath());
+		File settings = getSettingsDirectoryFile();
+		removeDirectory(settings);
+	}
+	
+	public void removeDirectory(File directory) throws IOException {
+		if(!directory.isDirectory()) {
+			Files.delete(directory.toPath());
+		}
+		for(File file : directory.listFiles()) {
+			if(file.isDirectory()) {
+				removeDirectory(file);
+			} else {				
+				Files.delete(file.toPath());
+			}
+		}
+		Files.delete(directory.toPath());
 	}
 
 	private void revertClasspath() throws JavaModelException {
@@ -411,7 +447,7 @@ public class StandaloneConfig {
 	}
 
 	protected String getPomFilePath() {
-		return path + File.separator + "pom.xml"; //$NON-NLS-1$
+		return path + File.separator + POM_FILE_NAME;
 	}
 
 	protected IProject getProject(IWorkspace workspace, String name) {
@@ -424,11 +460,9 @@ public class StandaloneConfig {
 	}
 
 	protected File getMavenDependencyFolder() {
-		
-		
-
-		return new File(System.getProperty(USER_DIR) + File.separator
-				+ DEPENDENCIES_FOLDER_CONSTANT + File.separator + getProjectName());
+		String dependenciesPath = System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER
+				+ File.separator + getArtifactId();
+		return new File(dependenciesPath);
 	}
 
 	protected IClasspathEntry createLibraryClasspathEntry(String jarPath) {
@@ -458,8 +492,8 @@ public class StandaloneConfig {
 	 * 
 	 * @return list of {@link ICompilationUnit}s collected from the project
 	 */
-	public List<ICompilationUnit> getCompUnits() {
-		return compUnits;
+	public List<ICompilationUnit> getICompilationUnits() {
+		return compilationUnits;
 	}
 
 	protected void moveFile(File src, File dest) throws IOException {
@@ -481,9 +515,9 @@ public class StandaloneConfig {
 	public String getProjectId() {
 		return this.projectId;
 	}
-	
-	public String getProjectName() {
-		return projectName;
+
+	public String getArtifactId() {
+		return artifactId;
 	}
 
 }

@@ -101,26 +101,15 @@ public class StandaloneConfigTest {
 	public void getProjectDescription_mavenNotInvoked_projectDescriptionLoaded() throws Exception {
 		callSuperPrepareEclipseMavenPlugin = false;
 		prepareEclipseMavenPluginReturnValue = false;
+		
+		when(workspace.newProjectDescription(any(String.class))).thenReturn(projectDescription);
 
 		when(projectFile.getAbsolutePath()).thenReturn("/jsparrow-test"); //$NON-NLS-1$
 
 		standaloneConfig.getProjectDescription();
-
-		verify(workspace).loadProjectDescription(any(IPath.class));
-	}
-
-	@Ignore
-	@Test
-	public void getProjectDescription_mavenInvoked_projectDescriptionCreated() throws Exception {
-		callSuperPrepareEclipseMavenPlugin = false;
-		prepareEclipseMavenPluginReturnValue = true;
-
-		when(projectFile.getAbsolutePath()).thenReturn("/jsparrow-test"); //$NON-NLS-1$
-
-		standaloneConfig.getProjectDescription();
-
-		verify(mavenInvoker).invoke(eq("clean package " + ECLIPSE + ":" + ECLIPSE + " -DskipTests"));
-		assertTrue(standaloneConfig.isDescriptionGenerated());
+		
+		verify(projectDescription).setLocation(any(IPath.class));
+		verify(projectDescription).setNatureIds(any());
 	}
 
 	@Test
@@ -231,7 +220,7 @@ public class StandaloneConfigTest {
 		standaloneConfig.setJavaProject(javaProject);
 		when(javaProject.getPackageFragments()).thenReturn(new IPackageFragment[] {});
 
-		List<ICompilationUnit> units = standaloneConfig.getCompilationUnits();
+		List<ICompilationUnit> units = standaloneConfig.findProjectCompilationUnits();
 
 		assertTrue(units.isEmpty());
 	}
@@ -246,7 +235,7 @@ public class StandaloneConfigTest {
 		when(packageFragment.containsJavaResources()).thenReturn(true);
 		when(packageFragment.getCompilationUnits()).thenReturn(new ICompilationUnit[] { compilationUnit });
 
-		List<ICompilationUnit> units = standaloneConfig.getCompilationUnits();
+		List<ICompilationUnit> units = standaloneConfig.findProjectCompilationUnits();
 
 		verify(packageFragment).open(any());
 		assertFalse(units.isEmpty());
