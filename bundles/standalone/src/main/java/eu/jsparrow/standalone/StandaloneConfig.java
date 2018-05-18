@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.maven.shared.invoker.MavenInvocationException;
+import org.eclipse.core.internal.events.BuildCommand;
+import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
@@ -37,6 +39,7 @@ import eu.jsparrow.i18n.Messages;
  * @author Andreja Sambolec, Matthias Webhofer
  * @since 2.1.1
  */
+@SuppressWarnings("restriction")
 public class StandaloneConfig {
 
 	private static final Logger logger = LoggerFactory.getLogger(StandaloneConfig.class);
@@ -125,6 +128,14 @@ public class StandaloneConfig {
 		IProjectDescription description = workspace.newProjectDescription(getArtifactId());
 		description.setLocation(new Path(path));
 		description.setNatureIds(natureIds);
+
+		ICommand[] commands = description.getBuildSpec();
+		List<ICommand> commandList = Arrays.asList(commands);
+		ICommand build = new BuildCommand();
+		build.setBuilderName("org.eclipse.m2e.core.maven2Builder"); //$NON-NLS-1$
+		List<ICommand> modList = new ArrayList<>(commandList);
+		modList.add(build);
+		description.setBuildSpec(modList.toArray(new ICommand[] {}));
 
 		return description;
 	}

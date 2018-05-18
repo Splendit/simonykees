@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
@@ -90,7 +91,7 @@ public class StandaloneConfigTest {
 	public void getProjectDescription_projectDescriptionLoaded() throws Exception {
 
 		when(workspace.newProjectDescription(any(String.class))).thenReturn(projectDescription);
-
+		when(projectDescription.getBuildSpec()).thenReturn(new ICommand[] {});
 		when(projectFile.getAbsolutePath()).thenReturn("/jsparrow-test"); //$NON-NLS-1$
 
 		standaloneConfig.getProjectDescription();

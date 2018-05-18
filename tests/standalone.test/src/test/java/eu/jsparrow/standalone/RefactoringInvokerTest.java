@@ -92,7 +92,7 @@ public class RefactoringInvokerTest {
 
 		verify(refactoringPipeline, never()).commitRefactoring();
 	}
-	
+
 	@Test
 	public void startRefactoring_RuleExceptinsInDoRefactoring_shouldCommit() throws Exception {
 		BundleContext context = mock(BundleContext.class);
@@ -118,7 +118,7 @@ public class RefactoringInvokerTest {
 		@Override
 		protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) {
 			IJavaProject javaProject = mock(IJavaProject.class);
-			when(javaProject.getElementName()).thenReturn("projectName");
+			when(javaProject.getElementName()).thenReturn("projectName");//$NON-NLS-1$
 			StandaloneConfig standaloneConfig = mock(StandaloneConfig.class);
 			when(standaloneConfig.getJavaProject()).thenReturn(javaProject);
 			standaloneConfigs = Arrays.asList(standaloneConfig);
