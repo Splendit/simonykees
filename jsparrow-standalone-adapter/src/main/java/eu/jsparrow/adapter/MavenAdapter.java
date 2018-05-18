@@ -142,7 +142,7 @@ public class MavenAdapter {
 	}
 
 	private String findNatureIds(MavenProject project) {
-		if(project.getPackaging().equals("eclipse-plugin")) {
+		if(project.getPackaging().equals("eclipse-plugin")) { //$NON-NLS-1$
 			return ECLIPSE_PLUGIN_PROJECT_NATURE_IDS;
 		} else {
 			return MAVEN_PROJECT_NATURE_IDS; 

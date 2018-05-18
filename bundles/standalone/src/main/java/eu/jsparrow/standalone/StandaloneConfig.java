@@ -358,10 +358,10 @@ public class StandaloneConfig {
 
 	public void cleanEclipseProjectFiles() throws IOException {
 		logger.debug(Messages.StandaloneConfig_debug_cleanUp);
-		Files.deleteIfExists(getClasspathFileFile().toPath());
-		Files.deleteIfExists(getProjectDescriptionFile().toPath());
 		File settings = getSettingsDirectoryFile();
 		removeDirectory(settings);
+		Files.deleteIfExists(getClasspathFileFile().toPath());
+		Files.deleteIfExists(getProjectDescriptionFile().toPath());
 	}
 
 	public void removeDirectory(File directory) throws IOException {
