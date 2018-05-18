@@ -46,8 +46,11 @@ public class RefactoringInvoker {
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
+	private static final String SOURCE_FOLDER = "SOURCE.FOLDER"; //$NON-NLS-1$
+	private static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
 	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
+	
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
@@ -245,8 +248,11 @@ public class RefactoringInvoker {
 			String path = entry.getValue();
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
 			String projectName = context.getProperty(PROJECT_NAME + DOT + id);
+			String sourceFolder = context.getProperty(SOURCE_FOLDER);
+			String[] natureIds = findNatureIds(context, id);
 			try {
-				StandaloneConfig standaloneConfig = new StandaloneConfig(id, projectName, path, compilerCompliance);
+				StandaloneConfig standaloneConfig = new StandaloneConfig(id, projectName, path, compilerCompliance,
+						sourceFolder, natureIds);
 				configs.add(standaloneConfig);
 			} catch (CoreException e) {
 				throw new StandaloneException(e.getMessage(), e);
@@ -254,6 +260,11 @@ public class RefactoringInvoker {
 		}
 		return configs;
 
+	}
+
+	protected String[] findNatureIds(BundleContext context, String id) {
+		return context.getProperty(NATURE_IDS + DOT + id)
+			.split(","); //$NON-NLS-1$
 	}
 
 	private Map<String, String> findAllProjectPaths(BundleContext context) {

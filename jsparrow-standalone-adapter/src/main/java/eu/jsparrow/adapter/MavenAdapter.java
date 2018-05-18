@@ -64,6 +64,9 @@ public class MavenAdapter {
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 	private static final String DEV_MODE_KEY = "dev.mode.enabled"; //$NON-NLS-1$
+	private static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
+	private static final String SOURCE_FOLDER = "SOURCE.FOLDER"; //$NON-NLS-1$
+	private static final String DEFAULT_SOURCE_FOLDER_PATH = "src/main/java"; //$NON-NLS-1$
 
 	private Log log;
 
@@ -75,6 +78,12 @@ public class MavenAdapter {
 
 	private boolean jsparrowAlreadyRunningError = false;
 	private File defaultYamlFile;
+	
+	private static final String MAVEN_NATURE_ID = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
+	private static final String ECLIPSE_PLUGIN_NATURE_ID = "org.eclipse.pde.PluginNature"; //$NON-NLS-1$
+	private static final String JAVA_NATURE_ID = "org.eclipse.jdt.core.javanature"; //$NON-NLS-1$
+	private static final String ECLIPSE_PLUGIN_PROJECT_NATURE_IDS = MAVEN_NATURE_ID + "," + ECLIPSE_PLUGIN_NATURE_ID + "," + JAVA_NATURE_ID;//$NON-NLS-1$, //$NON-NLS-2$
+	private static final String MAVEN_PROJECT_NATURE_IDS =  MAVEN_NATURE_ID + "," + JAVA_NATURE_ID; //$NON-NLS-1$
 
 	public MavenAdapter(MavenProject rootProject, Log log, File defaultYamlFile) {
 		this(rootProject, log);
@@ -116,7 +125,6 @@ public class MavenAdapter {
 
 		File baseDir = project.getBasedir();
 		String projectPath = baseDir.getAbsolutePath();
-		String projcetName = project.getName();
 		String projectIdentifier = findProjectIdentifier(project);
 		String artifactId = project.getArtifactId();
 
@@ -129,6 +137,16 @@ public class MavenAdapter {
 		log.info(Messages.MavenAdapter_jSparrowConfigurationFile + yamlFilePath);
 		addConfigurationKeyValue(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
 		addConfigurationKeyValue(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
+		addConfigurationKeyValue(NATURE_IDS + DOT + projectIdentifier, findNatureIds(project));
+		
+	}
+
+	private String findNatureIds(MavenProject project) {
+		if(project.getPackaging().equals("eclipse-plugin")) {
+			return ECLIPSE_PLUGIN_PROJECT_NATURE_IDS;
+		} else {
+			return MAVEN_PROJECT_NATURE_IDS; 
+		}
 	}
 
 	/**
@@ -197,6 +215,7 @@ public class MavenAdapter {
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
+		configuration.put(SOURCE_FOLDER, DEFAULT_SOURCE_FOLDER_PATH);
 
 		/*
 		 * This is solution B from this article:
