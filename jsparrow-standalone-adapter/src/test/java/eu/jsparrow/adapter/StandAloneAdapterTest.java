@@ -15,11 +15,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.BundleException;
 
-@Ignore
 public class StandAloneAdapterTest {
 
 	private StandaloneAdapter standaloneAdapter;
@@ -112,8 +110,8 @@ public class StandAloneAdapterTest {
 		when(embeddedMaven.getMavenHome()).thenReturn("maven-home"); //$NON-NLS-1$
 		when(mavenAdapter.findProjectIdentifier(project)).thenReturn("projectId"); //$NON-NLS-1$
 		standaloneAdapter.addProjectConfiguration(project, log, configFile);
-
-		verify(dependencyManager).extractAndCopyDependencies(project, "maven-home", "projectId"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		verify(mavenAdapter).addProjectConfiguration(project, configFile);
 	}
 
 	@Test
