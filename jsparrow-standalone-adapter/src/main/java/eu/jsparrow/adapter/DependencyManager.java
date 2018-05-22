@@ -29,6 +29,7 @@ public class DependencyManager {
 	private static final String OUTPUT_DIRECTORY_PREFIX = "deps"; //$NON-NLS-1$
 	private static final String DEPENDENCY_PLUGIN_ID = "dependency"; //$NON-NLS-1$
 	private static final String COPY_DEPENDENCIES_GOAL = "copy-dependencies"; //$NON-NLS-1$
+	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
 
 	private Log log;
 
@@ -40,12 +41,12 @@ public class DependencyManager {
 	 * Executes maven goal copy-dependencies on the project to copy all resolved
 	 * needed dependencies to the temp folder for use from bundles.
 	 */
-	public void extractAndCopyDependencies(MavenProject project, String mavenHome, String outputDirectorySuffix) {
+	public void extractAndCopyDependencies(MavenProject project, String mavenHome) {
 		log.debug(Messages.DependencyManager_extractAndCopyDependencies);
 
 		final InvocationRequest request = new DefaultInvocationRequest();
 		final Properties props = new Properties();
-		prepareDefaultRequest(project, request, props, outputDirectorySuffix);
+		prepareDefaultRequest(project, request, props);
 		final Invoker invoker = new DefaultInvoker();
 		invokeMaven(invoker, request, mavenHome);
 	}
@@ -66,16 +67,14 @@ public class DependencyManager {
 	 *            the {@link InvocationRequest} to be updated.
 	 * @param props
 	 *            properties to be added to the invocation request.
-	 * @param suffix
-	 *            a suffix of the output directory name
 	 */
-	protected void prepareDefaultRequest(MavenProject project, InvocationRequest request, Properties props,
-			String suffix) {
+	protected void prepareDefaultRequest(MavenProject project, InvocationRequest request, Properties props) {
 		File projectBaseDir = project.getBasedir();
 		String projectPath = projectBaseDir.getAbsolutePath();
-		request.setPomFile(new File(projectPath + File.separator + "pom.xml")); //$NON-NLS-1$
-		List<String> goals = Collections
-			.singletonList("clean package " + DEPENDENCY_PLUGIN_ID + ":" + COPY_DEPENDENCIES_GOAL + " "); //$NON-NLS-1$ , //$NON-NLS-2$ //$NON-NLS-3$
+		request.setPomFile(new File(projectPath + File.separator + POM_FILE_NAME));
+		String cleanPackageCopyDependencies = String.format("clean package %s:%s ", DEPENDENCY_PLUGIN_ID, //$NON-NLS-1$
+				COPY_DEPENDENCIES_GOAL);
+		List<String> goals = Collections.singletonList(cleanPackageCopyDependencies);
 		request.setGoals(goals);
 		String outputDirectoryPath = System.getProperty(MavenAdapter.USER_DIR) + File.separator
 				+ OUTPUT_DIRECTORY_PREFIX + File.separator + "\\${project.artifactId}"; //$NON-NLS-1$

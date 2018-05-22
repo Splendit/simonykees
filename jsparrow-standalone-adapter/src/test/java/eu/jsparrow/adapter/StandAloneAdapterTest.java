@@ -152,7 +152,7 @@ public class StandAloneAdapterTest {
 		
 		standaloneAdapter.copyDependencies(rootProject, log);
 		
-		verify(dependencyManager).extractAndCopyDependencies(rootProject, mavenHome, rootIdentifier);
+		verify(dependencyManager).extractAndCopyDependencies(rootProject, mavenHome);
 	}
 	
 	@Test
@@ -162,7 +162,7 @@ public class StandAloneAdapterTest {
 		
 		standaloneAdapter.copyDependencies(rootProject, log);
 		
-		verify(dependencyManager, never()).extractAndCopyDependencies(any(MavenProject.class), any(String.class), any(String.class));
+		verify(dependencyManager, never()).extractAndCopyDependencies(any(MavenProject.class), any(String.class));
 	}
 
 	class TestableStandaloneAdapter extends StandaloneAdapter {

@@ -78,12 +78,13 @@ public class MavenAdapter {
 
 	private boolean jsparrowAlreadyRunningError = false;
 	private File defaultYamlFile;
-	
+
 	private static final String MAVEN_NATURE_ID = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
 	private static final String ECLIPSE_PLUGIN_NATURE_ID = "org.eclipse.pde.PluginNature"; //$NON-NLS-1$
 	private static final String JAVA_NATURE_ID = "org.eclipse.jdt.core.javanature"; //$NON-NLS-1$
-	private static final String ECLIPSE_PLUGIN_PROJECT_NATURE_IDS = MAVEN_NATURE_ID + "," + ECLIPSE_PLUGIN_NATURE_ID + "," + JAVA_NATURE_ID;//$NON-NLS-1$, //$NON-NLS-2$
-	private static final String MAVEN_PROJECT_NATURE_IDS =  MAVEN_NATURE_ID + "," + JAVA_NATURE_ID; //$NON-NLS-1$
+	private static final String ECLIPSE_PLUGIN_PROJECT_NATURE_IDS = String.format("%s,%s,%s", MAVEN_NATURE_ID, //$NON-NLS-1$
+			ECLIPSE_PLUGIN_NATURE_ID, JAVA_NATURE_ID);
+	private static final String MAVEN_PROJECT_NATURE_IDS = MAVEN_NATURE_ID + "," + JAVA_NATURE_ID; //$NON-NLS-1$
 
 	public MavenAdapter(MavenProject rootProject, Log log, File defaultYamlFile) {
 		this(rootProject, log);
@@ -128,7 +129,6 @@ public class MavenAdapter {
 		String projectIdentifier = findProjectIdentifier(project);
 		String artifactId = project.getArtifactId();
 
-		project.getBuild().getOutputDirectory();
 		String allIdentifiers = getAllProjectIdentifiers();
 		addConfigurationKeyValue(ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
 		addConfigurationKeyValue(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
@@ -138,14 +138,15 @@ public class MavenAdapter {
 		addConfigurationKeyValue(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
 		addConfigurationKeyValue(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
 		addConfigurationKeyValue(NATURE_IDS + DOT + projectIdentifier, findNatureIds(project));
-		
+
 	}
 
 	private String findNatureIds(MavenProject project) {
-		if(project.getPackaging().equals("eclipse-plugin")) { //$NON-NLS-1$
+		if (project.getPackaging()
+			.equals("eclipse-plugin")) { //$NON-NLS-1$
 			return ECLIPSE_PLUGIN_PROJECT_NATURE_IDS;
 		} else {
-			return MAVEN_PROJECT_NATURE_IDS; 
+			return MAVEN_PROJECT_NATURE_IDS;
 		}
 	}
 

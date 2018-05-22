@@ -42,7 +42,7 @@ public class DependencyManagerTest {
 		when(project.getBasedir()).thenReturn(projectBaseDir);
 		when(projectBaseDir.getAbsolutePath()).thenReturn(baseDirPath);
 
-		dependencyManager.prepareDefaultRequest(project, request, props, "suffix");
+		dependencyManager.prepareDefaultRequest(project, request, props);
 
 		ArgumentCaptor<File> fileCaptor = ArgumentCaptor.forClass(File.class);
 		verify(request).setPomFile(fileCaptor.capture());
