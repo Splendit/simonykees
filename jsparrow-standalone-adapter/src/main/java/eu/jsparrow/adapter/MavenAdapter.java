@@ -35,6 +35,11 @@ import eu.jsparrow.adapter.i18n.Messages;
  */
 public class MavenAdapter {
 
+	/**
+	 * The following constants represent some keys in the BundleContext. Any
+	 * change here must be reflected also in
+	 * {@link eu.jsparrow.standalone.RefactoringInvoker}.
+	 */
 	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	public static final String DOT = "."; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_ARTIFACT_ID = "maven-compiler-plugin"; //$NON-NLS-1$

@@ -36,7 +36,10 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
 public class RefactoringInvoker {
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringInvoker.class);
 
-	// CONSTANTS
+	/**
+	 * The following constants represent some keys in the BundleContext and they must
+	 * match with the ones in {@link eu.jsparrow.adapter.MavenAdapter}
+	 */
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
@@ -48,9 +51,9 @@ public class RefactoringInvoker {
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
 	private static final String SOURCE_FOLDER = "SOURCE.FOLDER"; //$NON-NLS-1$
 	private static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
-	private static final String DOT = "."; //$NON-NLS-1$
 	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
-	
+
+	private static final String DOT = "."; //$NON-NLS-1$
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
@@ -68,13 +71,14 @@ public class RefactoringInvoker {
 	 * @throws StandaloneException
 	 *             if an exception occurs during refactoring. Reasons include:
 	 *             <ul>
-	 *             	<li>The yaml configuration file cannot be found</li>
-	 *             	<li>The eclipse project cannot be created from the
-	 *             	sources</li>
-	 *             	<li>The list of refactoring states cannot be created in the
-	 *             	{@link RefactoringPipeline}</li>
-	 *             	<li>A {@link RefactoringException} is thrown while computing
-	 *             	refactoring <li>
+	 *             <li>The yaml configuration file cannot be found</li>
+	 *             <li>The eclipse project cannot be created from the
+	 *             sources</li>
+	 *             <li>The list of refactoring states cannot be created in the
+	 *             {@link RefactoringPipeline}</li>
+	 *             <li>A {@link RefactoringException} is thrown while computing
+	 *             refactoring
+	 *             <li>
 	 *             <li>All source files contain compilation errors</li>
 	 *             <ul>
 	 */
@@ -149,9 +153,8 @@ public class RefactoringInvoker {
 					throw new StandaloneException(e.getMessage(), e);
 				}
 
-				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
-						standaloneConfig.getJavaProject().getElementName(),
-						refactoringPipeline.getRulesWithChangesAsString());
+				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, standaloneConfig.getJavaProject()
+					.getElementName(), refactoringPipeline.getRulesWithChangesAsString());
 				logger.info(loggerInfo);
 
 			} else {
@@ -168,7 +171,7 @@ public class RefactoringInvoker {
 		} catch (RefactoringException | ReconcileException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
-			throw new StandaloneException("Can not commit refatoring", e);  //$NON-NLS-1$
+			throw new StandaloneException("Can not commit refatoring", e); //$NON-NLS-1$
 		}
 	}
 
