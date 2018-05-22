@@ -6,7 +6,7 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "eu.jsparrow.adapter.i18n.messages"; //$NON-NLS-1$
 
 	public static String Adapter_embededMavenVersionDetected;
-	
+
 	public static String BundleStarter_equinoxStopped;
 
 	public static String BundleStarter_loadOsgiBundles;
@@ -40,8 +40,6 @@ public class Messages extends NLS {
 	public static String StandaloneAdapter_creatingAdapterInstance;
 
 	public static String StandaloneAdapter_jSparrowAlreadyRunning;
-
-	public static String StandaloneAdapter_mavenAdapterInstanceNotCreated;
 
 	static {
 		// initialize resource bundle
