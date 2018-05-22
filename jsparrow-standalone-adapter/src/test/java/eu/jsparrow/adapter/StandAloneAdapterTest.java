@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 
 import java.io.File;
 import java.util.Map;
@@ -137,6 +138,31 @@ public class StandAloneAdapterTest {
 		standaloneAdapter.startStandaloneBundle(log);
 
 		verify(bundleStarter).runStandalone(configuration);
+	}
+	
+	@Test
+	public void copyDependencies() {
+		String mavenHome = "maven-home"; //$NON-NLS-1$
+		String rootIdentifier = "root-identifier"; //$NON-NLS-1$
+		MavenProject rootProject = mock(MavenProject.class);
+		Log log = mock(Log.class);
+		when(embeddedMaven.getMavenHome()).thenReturn(mavenHome); 
+		when(mavenAdapter.findProjectIdentifier(rootProject)).thenReturn(rootIdentifier);
+		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
+		
+		standaloneAdapter.copyDependencies(rootProject, log);
+		
+		verify(dependencyManager).extractAndCopyDependencies(rootProject, mavenHome, rootIdentifier);
+	}
+	
+	@Test
+	public void copyDependencies_noStateSet() {
+		MavenProject rootProject = mock(MavenProject.class);
+		Log log = mock(Log.class);
+		
+		standaloneAdapter.copyDependencies(rootProject, log);
+		
+		verify(dependencyManager, never()).extractAndCopyDependencies(any(MavenProject.class), any(String.class), any(String.class));
 	}
 
 	class TestableStandaloneAdapter extends StandaloneAdapter {
