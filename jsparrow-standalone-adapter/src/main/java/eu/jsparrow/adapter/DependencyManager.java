@@ -26,6 +26,13 @@ import eu.jsparrow.adapter.i18n.Messages;
 public class DependencyManager {
 
 	protected static final String OUTPUT_DIRECTORY_OPTION_KEY = "outputDirectory"; //$NON-NLS-1$
+	/**
+	 * The output directory name must match with the one expected by
+	 * {@link eu.jsparrow.standalone.StandaloneConfig}. The full path used in
+	 * {@link #prepareDefaultRequest(MavenProject, InvocationRequest, Properties)}
+	 * must also match with the one used in
+	 * {@code StandaloneConfig::getMavenDependencyFolder}.
+	 */
 	private static final String OUTPUT_DIRECTORY_PREFIX = "deps"; //$NON-NLS-1$
 	private static final String DEPENDENCY_PLUGIN_ID = "dependency"; //$NON-NLS-1$
 	private static final String COPY_DEPENDENCIES_GOAL = "copy-dependencies"; //$NON-NLS-1$
@@ -54,12 +61,14 @@ public class DependencyManager {
 	/**
 	 * Sets the pom file, goals and properties to the provided
 	 * {@link InvocationRequest} for running:
-	 * {@code mvn depedency:copy-dependencies outputDirectory=[user.dir]/deps.[suffix]}.
+	 * {@code mvn clean package depedency:copy-dependencies outputDirectory=[user.dir]/deps/[artifactId] -DskipTests}.
 	 * 
 	 * @see <a href=
 	 *      "https://maven.apache.org/plugins/maven-dependency-plugin/copy-dependencies-mojo.html">
 	 *      Apache Maven Dependency Plugin </a>.
 	 * 
+	 *      The output directory must match with the one used in
+	 *      {@link eu.jsparrow.standalone.StandaloneConfig#getMavenDependencyFolder}.
 	 * 
 	 * @param project
 	 *            the project to take the pom file from.

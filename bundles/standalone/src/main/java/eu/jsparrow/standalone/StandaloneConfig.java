@@ -44,6 +44,10 @@ public class StandaloneConfig {
 
 	private static final Logger logger = LoggerFactory.getLogger(StandaloneConfig.class);
 
+	/**
+	 * The dependencies folder name must match with the one declared in
+	 * {@link eu.jsparrow.adapter.DependencyManger#OUTPUT_DIRECTORY_PREFIX}.
+	 */
 	private static final String DEPENDENCIES_FOLDER = "deps"; //$NON-NLS-1$
 	private static final String PROJECT_FILE_NAME = ".project"; //$NON-NLS-1$
 	private static final String CLASSPATH_FILE_NAME = ".classpath"; //$NON-NLS-1$
@@ -440,6 +444,12 @@ public class StandaloneConfig {
 		return JavaCore.create(project);
 	}
 
+	/**
+	 * The full path of the dependencies folder must match with the one used in
+	 * {@link eu.jsparrow.adapter.DependencyManager#prepareDefaultRequest}.
+	 * 
+	 * @return the directory with the dependencies.
+	 */
 	protected File getMavenDependencyFolder() {
 		String dependenciesPath = System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER + File.separator
 				+ getProjectName();
