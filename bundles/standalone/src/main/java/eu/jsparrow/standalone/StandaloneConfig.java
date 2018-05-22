@@ -62,7 +62,7 @@ public class StandaloneConfig {
 	private IJavaProject javaProject = null;
 	private List<ICompilationUnit> compilationUnits = new ArrayList<>();
 	private String projectId;
-	private String artifactId;
+	private String projectName;
 	private String sourceFolder;
 	private String[] natureIds;
 
@@ -83,9 +83,9 @@ public class StandaloneConfig {
 		this(id, projectName, path, compilerCompliance, sourceFolder, natureIds, false);
 	}
 
-	public StandaloneConfig(String id, String artifactId, String path, String compilerCompliance, String sourceFolder,
+	public StandaloneConfig(String id, String projectName, String path, String compilerCompliance, String sourceFolder,
 			String[] natureIds, boolean testMode) throws CoreException {
-		this.artifactId = artifactId;
+		this.projectName = projectName;
 		this.projectId = id;
 		this.path = path;
 		this.compilerCompliance = compilerCompliance;
@@ -117,7 +117,7 @@ public class StandaloneConfig {
 
 	/**
 	 * Creates a project description on the workspace using the
-	 * {@link #getArtifactId()} as a project name
+	 * {@link #getProjectName()} as a project name
 	 * 
 	 * @return a project description for an eclipse project
 	 */
@@ -125,7 +125,7 @@ public class StandaloneConfig {
 		IWorkspace workspace = getWorkspace();
 
 		logger.debug("Creating project description for {} ", path); //$NON-NLS-1$
-		IProjectDescription description = workspace.newProjectDescription(getArtifactId());
+		IProjectDescription description = workspace.newProjectDescription(getProjectName());
 		description.setLocation(new Path(path));
 		description.setNatureIds(natureIds);
 
@@ -442,7 +442,7 @@ public class StandaloneConfig {
 
 	protected File getMavenDependencyFolder() {
 		String dependenciesPath = System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER + File.separator
-				+ getArtifactId();
+				+ getProjectName();
 		return new File(dependenciesPath);
 	}
 
@@ -497,8 +497,8 @@ public class StandaloneConfig {
 		return this.projectId;
 	}
 
-	public String getArtifactId() {
-		return artifactId;
+	public String getProjectName() {
+		return projectName;
 	}
 
 }
