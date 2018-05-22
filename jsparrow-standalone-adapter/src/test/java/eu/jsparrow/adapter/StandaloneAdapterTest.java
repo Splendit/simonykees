@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleException;
 
-public class StandAloneAdapterTest {
+public class StandaloneAdapterTest {
 
 	private StandaloneAdapter standaloneAdapter;
 	private EmbeddedMaven embeddedMaven;
