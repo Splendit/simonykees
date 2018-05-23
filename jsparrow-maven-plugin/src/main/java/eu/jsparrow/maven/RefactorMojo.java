@@ -27,8 +27,10 @@ import eu.jsparrow.maven.i18n.Messages;
  * @since 2.2.1
  *
  */
-@Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, requiresProject = true)
+@Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
 public class RefactorMojo extends AbstractMojo {
+	
+	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
 
 	@Parameter(defaultValue = "${session}")
 	private MavenSession mavenSession;
@@ -85,7 +87,8 @@ public class RefactorMojo extends AbstractMojo {
 		String mode = StandaloneMode.REFACTOR.name();
 		try {
 			if (!serviceInstance.isAdapterInitialized()) {
-				MavenParameters config = new MavenParameters(project, log, configFile, mavenSession, mode, license, url);
+				MavenParameters config = new MavenParameters(project, log, configFile, mavenSession, mode, license,
+						url);
 				config.setMavenHome(mavenHome);
 				config.setProfile(profile);
 				config.setUseDefaultConfig(useDefaultConfig);
@@ -95,12 +98,16 @@ public class RefactorMojo extends AbstractMojo {
 				if (!adapterLoadad) {
 					throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
 				}
+				serviceInstance.copyDependencies(project, log);
+				serviceInstance.setRootProjectPomPath(project.getBasedir()
+					.getAbsolutePath() + File.separator + POM_FILE_NAME, log);
 			}
-			serviceInstance.addProjectConfiguration(project, log, configFile);
-			if (serviceInstance.allProjectsLoaded()) {
-				log.info(Messages.RefactorMojo_allProjectsLoaded);
-				serviceInstance.startStandaloneBundle(log);
+
+			for (MavenProject mavenProject : mavenSession.getAllProjects()) {
+				serviceInstance.addProjectConfiguration(mavenProject, log, configFile);
 			}
+			log.info(Messages.RefactorMojo_allProjectsLoaded);
+			serviceInstance.startStandaloneBundle(log);
 
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);

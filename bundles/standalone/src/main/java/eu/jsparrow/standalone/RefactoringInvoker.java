@@ -7,11 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
@@ -38,7 +36,10 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
 public class RefactoringInvoker {
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringInvoker.class);
 
-	// CONSTANTS
+	/**
+	 * The following constants represent some keys in the BundleContext and they must
+	 * match with the ones in {@link eu.jsparrow.adapter.MavenAdapter}
+	 */
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
@@ -46,9 +47,12 @@ public class RefactoringInvoker {
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
-	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
+	private static final String SOURCE_FOLDER = "SOURCE.FOLDER"; //$NON-NLS-1$
+	private static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
+	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
+
 	private static final String DOT = "."; //$NON-NLS-1$
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
@@ -64,18 +68,19 @@ public class RefactoringInvoker {
 	 *            the bundle context configuration
 	 * @param refactoringPipeline
 	 *            an instance of the {@link RefactoringPipeline}
-	 * @throws YAMLConfigException
-	 *             if the yaml configuration file cannot be loaded
-	 * @throws MavenInvocationException
-	 *             if the maven invoker for the {@link StandaloneConfig} cannot
-	 *             be created.
-	 * @throws CoreException
-	 *             if an exception occurs when creating an eclipse java project.
-	 * @throws IOException
-	 *             if the standalone configuration cannot be loaded
 	 * @throws StandaloneException
-	 * @throws RefactoringException
-	 *             if there are no sources to apply the refactoring to
+	 *             if an exception occurs during refactoring. Reasons include:
+	 *             <ul>
+	 *             <li>The yaml configuration file cannot be found</li>
+	 *             <li>The eclipse project cannot be created from the
+	 *             sources</li>
+	 *             <li>The list of refactoring states cannot be created in the
+	 *             {@link RefactoringPipeline}</li>
+	 *             <li>A {@link RefactoringException} is thrown while computing
+	 *             refactoring
+	 *             <li>
+	 *             <li>All source files contain compilation errors</li>
+	 *             <ul>
 	 */
 	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
 			throws StandaloneException {
@@ -98,7 +103,7 @@ public class RefactoringInvoker {
 	 * @param moduleConfigurations
 	 *            the list of the {@link StandaloneConfig} for the projects to
 	 *            be refactored.
-	 *            
+	 * 
 	 * @throws StandaloneException
 	 */
 	private void computeRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline,
@@ -120,7 +125,7 @@ public class RefactoringInvoker {
 
 				logger.info(Messages.Activator_debug_collectCompilationUnits);
 
-				List<ICompilationUnit> compUnits = standaloneConfig.getCompUnits();
+				List<ICompilationUnit> compUnits = standaloneConfig.getICompilationUnits();
 
 				loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compUnits.size());
 				logger.debug(loggerInfo);
@@ -148,9 +153,8 @@ public class RefactoringInvoker {
 					throw new StandaloneException(e.getMessage(), e);
 				}
 
-				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
-						getJavaProject(standaloneConfig).getElementName(),
-						refactoringPipeline.getRulesWithChangesAsString());
+				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, standaloneConfig.getJavaProject()
+					.getElementName(), refactoringPipeline.getRulesWithChangesAsString());
 				logger.info(loggerInfo);
 
 			} else {
@@ -159,7 +163,7 @@ public class RefactoringInvoker {
 		}
 	}
 
-	protected void commitChanges(RefactoringPipeline refactoringPipeline) {
+	protected void commitChanges(RefactoringPipeline refactoringPipeline) throws StandaloneException {
 		// Commit refactoring
 		try {
 			logger.info(Messages.Activator_debug_commitRefactoring);
@@ -167,6 +171,7 @@ public class RefactoringInvoker {
 		} catch (RefactoringException | ReconcileException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
+			throw new StandaloneException("Can not commit refatoring", e); //$NON-NLS-1$
 		}
 	}
 
@@ -176,13 +181,9 @@ public class RefactoringInvoker {
 	 * @throws IOException
 	 */
 	public void cleanUp() throws IOException {
-		try {
-			for (StandaloneConfig standaloneConfig : standaloneConfigs) {
-				standaloneConfig.cleanUp();
-			}
-		} catch (JavaModelException | MavenInvocationException e) {
-			logger.debug(e.getMessage(), e);
-			logger.error(e.getMessage());
+
+		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+			standaloneConfig.cleanEclipseProjectFiles();
 		}
 	}
 
@@ -234,28 +235,39 @@ public class RefactoringInvoker {
 	 * Loads a new {@link StandaloneConfig} with the properties found in
 	 * {@link BundleContext}
 	 * 
-	 * @param context the bundle context configuration
-	 * @throws StandaloneException if an instance of the {@link StandaloneConfig} cannot be created. 
+	 * @param context
+	 *            the bundle context configuration
+	 * @throws StandaloneException
+	 *             if an instance of the {@link StandaloneConfig} cannot be
+	 *             created.
 	 */
 	protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) throws StandaloneException {
 
 		Map<String, String> projectPaths = findAllProjectPaths(context);
-		String mavenHome = context.getProperty(MAVEN_HOME_KEY);
 
 		List<StandaloneConfig> configs = new ArrayList<>();
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
 			String id = entry.getKey();
 			String path = entry.getValue();
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
+			String projectName = context.getProperty(PROJECT_NAME + DOT + id);
+			String sourceFolder = context.getProperty(SOURCE_FOLDER);
+			String[] natureIds = findNatureIds(context, id);
 			try {
-				StandaloneConfig standaloneConfig = new StandaloneConfig(id, path, compilerCompliance, mavenHome);
+				StandaloneConfig standaloneConfig = new StandaloneConfig(id, projectName, path, compilerCompliance,
+						sourceFolder, natureIds);
 				configs.add(standaloneConfig);
-			} catch (CoreException | MavenInvocationException | IOException e) {
+			} catch (CoreException e) {
 				throw new StandaloneException(e.getMessage(), e);
 			}
 		}
 		return configs;
 
+	}
+
+	protected String[] findNatureIds(BundleContext context, String id) {
+		return context.getProperty(NATURE_IDS + DOT + id)
+			.split(","); //$NON-NLS-1$
 	}
 
 	private Map<String, String> findAllProjectPaths(BundleContext context) {
@@ -291,10 +303,6 @@ public class RefactoringInvoker {
 		} catch (YAMLConfigException e) {
 			throw new StandaloneException(e.getMessage(), e);
 		}
-	}
-
-	protected IJavaProject getJavaProject(StandaloneConfig standaloneConfig) {
-		return standaloneConfig.getJavaProject();
 	}
 
 	private void setStandaloneConfigurations(List<StandaloneConfig> configs) {

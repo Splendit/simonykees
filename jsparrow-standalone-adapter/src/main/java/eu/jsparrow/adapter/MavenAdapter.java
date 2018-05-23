@@ -1,17 +1,17 @@
 package eu.jsparrow.adapter;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,10 +35,16 @@ import eu.jsparrow.adapter.i18n.Messages;
  */
 public class MavenAdapter {
 
+	/**
+	 * The following constants represent some keys in the BundleContext. Any
+	 * change here must be reflected also in
+	 * {@link eu.jsparrow.standalone.RefactoringInvoker}.
+	 */
 	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	public static final String DOT = "."; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_ARTIFACT_ID = "maven-compiler-plugin"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME = "source"; //$NON-NLS-1$
+	private static final String MAVEN_COMPILER_PLUGIN_PROPERTY_SOURCE_NAME = "maven.compiler.source"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION = "1.5"; //$NON-NLS-1$
 
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
@@ -52,6 +58,7 @@ public class MavenAdapter {
 	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
 	private static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
+	private static final String ROOT_PROJECT_POM_PATH = "ROOT.PROJECT.POM.PATH"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area"; //$NON-NLS-1$
 	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
@@ -62,6 +69,9 @@ public class MavenAdapter {
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 	private static final String DEV_MODE_KEY = "dev.mode.enabled"; //$NON-NLS-1$
+	private static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
+	private static final String SOURCE_FOLDER = "SOURCE.FOLDER"; //$NON-NLS-1$
+	private static final String DEFAULT_SOURCE_FOLDER_PATH = "src/main/java"; //$NON-NLS-1$
 
 	private Log log;
 
@@ -69,10 +79,17 @@ public class MavenAdapter {
 	private MavenProject rootProject;
 	private File directory;
 
-	private Map<String, Boolean> sessionProjects = new HashMap<>();
+	private Set<String> sessionProjects;
 
 	private boolean jsparrowAlreadyRunningError = false;
 	private File defaultYamlFile;
+
+	private static final String MAVEN_NATURE_ID = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
+	private static final String ECLIPSE_PLUGIN_NATURE_ID = "org.eclipse.pde.PluginNature"; //$NON-NLS-1$
+	private static final String JAVA_NATURE_ID = "org.eclipse.jdt.core.javanature"; //$NON-NLS-1$
+	private static final String ECLIPSE_PLUGIN_PROJECT_NATURE_IDS = String.format("%s,%s,%s", MAVEN_NATURE_ID, //$NON-NLS-1$
+			ECLIPSE_PLUGIN_NATURE_ID, JAVA_NATURE_ID);
+	private static final String MAVEN_PROJECT_NATURE_IDS = MAVEN_NATURE_ID + "," + JAVA_NATURE_ID; //$NON-NLS-1$
 
 	public MavenAdapter(MavenProject rootProject, Log log, File defaultYamlFile) {
 		this(rootProject, log);
@@ -82,7 +99,7 @@ public class MavenAdapter {
 	public MavenAdapter(MavenProject rootProject, Log log) {
 		setRootProject(rootProject);
 		this.log = log;
-		this.sessionProjects = new HashMap<>();
+		this.sessionProjects = new HashSet<>();
 	}
 
 	/**
@@ -96,9 +113,6 @@ public class MavenAdapter {
 	 * <li>compiler compliance java version of the project</li>
 	 * </ul>
 	 * 
-	 * Updates the {@link #sessionProjects} to indicate that the related
-	 * configurations for the given project are stored.
-	 * 
 	 * <b>Note:</b> if the project represents and aggregate project, then no
 	 * configuration is stored. Only the cofiguration of child projects need to
 	 * be stored.
@@ -111,25 +125,34 @@ public class MavenAdapter {
 	public void addProjectConfiguration(MavenProject project, File configFile) {
 		log.info(String.format(Messages.MavenAdapter_addingProjectConfiguration, project.getName()));
 
-		markProjectConfigurationCompleted(project);
-
 		if (isAggregateProject(project)) {
 			return;
 		}
 
 		File baseDir = project.getBasedir();
 		String projectPath = baseDir.getAbsolutePath();
-		String projcetName = project.getName();
 		String projectIdentifier = findProjectIdentifier(project);
+		String artifactId = project.getArtifactId();
 
 		String allIdentifiers = getAllProjectIdentifiers();
 		addConfigurationKeyValue(ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
 		addConfigurationKeyValue(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
-		addConfigurationKeyValue(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, projcetName);
+		addConfigurationKeyValue(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, artifactId);
 		String yamlFilePath = findYamlFilePath(project, configFile);
 		log.info(Messages.MavenAdapter_jSparrowConfigurationFile + yamlFilePath);
 		addConfigurationKeyValue(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
 		addConfigurationKeyValue(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
+		addConfigurationKeyValue(NATURE_IDS + DOT + projectIdentifier, findNatureIds(project));
+
+	}
+
+	private String findNatureIds(MavenProject project) {
+		if (project.getPackaging()
+			.equals("eclipse-plugin")) { //$NON-NLS-1$
+			return ECLIPSE_PLUGIN_PROJECT_NATURE_IDS;
+		} else {
+			return MAVEN_PROJECT_NATURE_IDS;
+		}
 	}
 
 	/**
@@ -198,6 +221,7 @@ public class MavenAdapter {
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
+		configuration.put(SOURCE_FOLDER, DEFAULT_SOURCE_FOLDER_PATH);
 
 		/*
 		 * This is solution B from this article:
@@ -221,11 +245,6 @@ public class MavenAdapter {
 
 	private void addConfigurationKeyValue(String key, String value) {
 		this.configuration.put(key, value);
-	}
-
-	private void markProjectConfigurationCompleted(MavenProject project) {
-		String projectIdentifier = findProjectIdentifier(project);
-		sessionProjects.put(projectIdentifier, true);
 	}
 
 	/**
@@ -341,7 +360,6 @@ public class MavenAdapter {
 	 * @return if the resulting content of the lock file is empty.
 	 */
 	private boolean cleanLockFile() {
-		Set<String> sessionIds = sessionProjects.keySet();
 		Path path = Paths.get(calculateJsparrowLockFilePath());
 
 		if (!path.toFile()
@@ -351,7 +369,7 @@ public class MavenAdapter {
 
 		String remainingContent = ""; //$NON-NLS-1$
 		try (Stream<String> linesStream = Files.lines(path)) {
-			remainingContent = linesStream.filter(id -> !sessionIds.contains(id))
+			remainingContent = linesStream.filter(id -> !sessionProjects.contains(id))
 				.collect(Collectors.joining("\n")) //$NON-NLS-1$
 				.trim();
 
@@ -391,20 +409,15 @@ public class MavenAdapter {
 	}
 
 	private boolean isSessionRelated(String file) {
-		return sessionProjects.keySet()
-			.stream()
+		return sessionProjects.stream()
 			.anyMatch(file::contains);
-	}
-
-	public boolean allProjectConfigurationLoaded() {
-		return !this.sessionProjects.containsValue(Boolean.FALSE);
 	}
 
 	public void storeProjects(MavenSession mavenSession2) {
 		List<MavenProject> allProjects = mavenSession2.getAllProjects();
 		this.sessionProjects = allProjects.stream()
 			.map(this::findProjectIdentifier)
-			.collect(Collectors.toMap(Function.identity(), id -> false));
+			.collect(Collectors.toSet());
 	}
 
 	/**
@@ -414,10 +427,9 @@ public class MavenAdapter {
 	 * lock file.
 	 */
 	public synchronized void lockProjects() {
-		Set<String> projectIds = sessionProjects.keySet();
 		String lockFilePath = calculateJsparrowLockFilePath();
 		Path path = Paths.get(lockFilePath);
-		String conntent = projectIds.stream()
+		String conntent = sessionProjects.stream()
 			.collect(Collectors.joining("\n", "\n", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		try {
@@ -501,6 +513,22 @@ public class MavenAdapter {
 	private String getCompilerCompliance(MavenProject project) {
 		List<Plugin> buildPlugins = project.getBuildPlugins();
 
+		String sourceFromPlugin = getCompilerComplienceFromCompilerPlugin(buildPlugins);
+		if (!sourceFromPlugin.isEmpty()) {
+			return sourceFromPlugin;
+		}
+
+		Properties projectProperties = project.getProperties();
+
+		String sourceProperty = projectProperties.getProperty(MAVEN_COMPILER_PLUGIN_PROPERTY_SOURCE_NAME);
+		if (null != sourceProperty) {
+			return sourceProperty;
+		}
+
+		return MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION;
+	}
+
+	private String getCompilerComplienceFromCompilerPlugin(List<Plugin> buildPlugins) {
 		for (Plugin plugin : buildPlugins) {
 			if (MAVEN_COMPILER_PLUGIN_ARTIFACT_ID.equals(plugin.getArtifactId())) {
 				Xpp3Dom pluginConfig = (Xpp3Dom) plugin.getConfiguration();
@@ -514,7 +542,10 @@ public class MavenAdapter {
 				break;
 			}
 		}
+		return ""; //$NON-NLS-1$
+	}
 
-		return MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION;
+	public void setRootProjectPomPath(String rootProjectPomPath) {
+		configuration.put(ROOT_PROJECT_POM_PATH, rootProjectPomPath);
 	}
 }

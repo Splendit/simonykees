@@ -3,9 +3,10 @@ package eu.jsparrow.adapter;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 
 import java.io.File;
 import java.util.Map;
@@ -18,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleException;
 
-public class StandAloneAdapterTest {
+public class StandaloneAdapterTest {
 
 	private StandaloneAdapter standaloneAdapter;
 	private EmbeddedMaven embeddedMaven;
@@ -108,35 +109,10 @@ public class StandAloneAdapterTest {
 		Log log = mock(Log.class);
 
 		when(embeddedMaven.getMavenHome()).thenReturn("maven-home"); //$NON-NLS-1$
-		when(mavenAdapter.allProjectConfigurationLoaded()).thenReturn(false);
 		when(mavenAdapter.findProjectIdentifier(project)).thenReturn("projectId"); //$NON-NLS-1$
 		standaloneAdapter.addProjectConfiguration(project, log, configFile);
-
-		verify(dependencyManager).extractAndCopyDependencies(project, "maven-home", "projectId"); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	@Test
-	public void allProjectsLoaded_shouldReturnTrue() {
-		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
-
-		when(mavenAdapter.allProjectConfigurationLoaded()).thenReturn(true);
-		boolean actual = standaloneAdapter.allProjectsLoaded();
-
-		assertTrue(actual);
-	}
-
-	@Test
-	public void allProjectsLoaded_shouldReturnFalse() {
-		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
-		when(mavenAdapter.allProjectConfigurationLoaded()).thenReturn(false);
-		boolean actual = standaloneAdapter.allProjectsLoaded();
-		assertFalse(actual);
-	}
-
-	@Test
-	public void allProjectsLoaded_missingState_shouldReturnFalse() {
-		boolean actual = standaloneAdapter.allProjectsLoaded();
-		assertFalse(actual);
+		
+		verify(mavenAdapter).addProjectConfiguration(project, configFile);
 	}
 
 	@Test
@@ -162,6 +138,31 @@ public class StandAloneAdapterTest {
 		standaloneAdapter.startStandaloneBundle(log);
 
 		verify(bundleStarter).runStandalone(configuration);
+	}
+	
+	@Test
+	public void copyDependencies() {
+		String mavenHome = "maven-home"; //$NON-NLS-1$
+		String rootIdentifier = "root-identifier"; //$NON-NLS-1$
+		MavenProject rootProject = mock(MavenProject.class);
+		Log log = mock(Log.class);
+		when(embeddedMaven.getMavenHome()).thenReturn(mavenHome); 
+		when(mavenAdapter.findProjectIdentifier(rootProject)).thenReturn(rootIdentifier);
+		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
+		
+		standaloneAdapter.copyDependencies(rootProject, log);
+		
+		verify(dependencyManager).extractAndCopyDependencies(rootProject, mavenHome);
+	}
+	
+	@Test
+	public void copyDependencies_noStateSet() {
+		MavenProject rootProject = mock(MavenProject.class);
+		Log log = mock(Log.class);
+		
+		standaloneAdapter.copyDependencies(rootProject, log);
+		
+		verify(dependencyManager, never()).extractAndCopyDependencies(any(MavenProject.class), any(String.class));
 	}
 
 	class TestableStandaloneAdapter extends StandaloneAdapter {
