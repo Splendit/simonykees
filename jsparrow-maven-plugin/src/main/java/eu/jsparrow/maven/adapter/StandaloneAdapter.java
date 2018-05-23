@@ -20,11 +20,16 @@ import eu.jsparrow.maven.i18n.Messages;
  *
  */
 public class StandaloneAdapter {
+	
+	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
 
 	private MavenAdapter mavenAdapter;
-	private EmbeddedMaven embeddedMaven;
-	private DependencyManager dependencyManager;
 	private BundleStarter bundleStarter;
+	private MavenParameters parameters;
+	
+	public StandaloneAdapter(MavenParameters parameters) {
+		this.parameters = parameters;
+	}
 
 	/**
 	 * Creates instances of {@link MavenAdapter}, {@link EmbeddedMaven} and
@@ -36,7 +41,7 @@ public class StandaloneAdapter {
 	 *         successfully, or {@code false} otherwise.
 	 * @throws InterruptedException
 	 */
-	public synchronized boolean lazyLoadMavenAdapter(MavenParameters configuration, MavenProject project, Log log) throws InterruptedException {
+	public boolean lazyLoadMavenAdapter(MavenProject project, Log log) throws InterruptedException {
 
 		if (mavenAdapter != null) {
 			log.warn(Messages.StandaloneAdapter_adapterInstanceAlreadyCreated);
@@ -44,7 +49,7 @@ public class StandaloneAdapter {
 		}
 
 		log.debug(Messages.StandaloneAdapter_creatingAdapterInstance);
-		Optional<File> defaultYamlFile = configuration.getDefaultYamlFile();
+		Optional<File> defaultYamlFile = parameters.getDefaultYamlFile();
 		if (defaultYamlFile.isPresent()) {
 			mavenAdapter = createMavenAdapterInstance(defaultYamlFile.get(), log, project);
 		} else {
@@ -57,38 +62,17 @@ public class StandaloneAdapter {
 			log.error(NLS.bind(Messages.StandaloneAdapter_jSparrowAlreadyRunning, projectId));
 			return false;
 		}
-
+		
 		addShutDownHook(mavenAdapter);
 
 		mavenAdapter.prepareWorkingDirectory();
-		configuration.getMavenSession()
-			.ifPresent(mavenAdapter::storeProjects);
+		parameters.getMavenSession().ifPresent(mavenAdapter::storeProjects);
 		mavenAdapter.lockProjects();
-
-		EmbeddedMaven embeddedMavenInstance = createEmbeddedMavenInstance(configuration, log);
-		embeddedMavenInstance.prepareMaven();
-		mavenAdapter.addInitialConfiguration(configuration, embeddedMavenInstance.getMavenHome());
-		DependencyManager dependencyManagerInstance = createDependencyManagerInstance(log);
-
-		setState(mavenAdapter, embeddedMavenInstance, dependencyManagerInstance);
+		mavenAdapter.addInitialConfiguration(parameters);
+		mavenAdapter.setRootProjectPomPath(project.getBasedir()
+				.getAbsolutePath() + File.separator + POM_FILE_NAME);
+		
 		return true;
-	}
-
-	protected void setState(MavenAdapter adapterInstance, EmbeddedMaven embeddedMavenInstance,
-			DependencyManager dependencyManagerInstance) {
-		this.mavenAdapter = adapterInstance;
-		this.embeddedMaven = embeddedMavenInstance;
-		this.dependencyManager = dependencyManagerInstance;
-
-	}
-
-	protected DependencyManager createDependencyManagerInstance(Log log) {
-		return new DependencyManager(log);
-	}
-
-	protected EmbeddedMaven createEmbeddedMavenInstance(MavenParameters configuration, Log log) {
-		return new EmbeddedMaven(log, configuration.getMavenHome()
-			.orElse("")); //$NON-NLS-1$
 	}
 
 	protected MavenAdapter createMavenAdapterInstance(File defaultYamlFile, Log log, MavenProject project) {
@@ -97,10 +81,6 @@ public class StandaloneAdapter {
 
 	protected MavenAdapter createMavenAdapterInstance(Log log, MavenProject project) {
 		return new MavenAdapter(project, log);
-	}
-
-	protected void setMavenAdapter(MavenAdapter mavenAdapter2) {
-		this.mavenAdapter = mavenAdapter2;
 	}
 
 	/**
@@ -117,7 +97,6 @@ public class StandaloneAdapter {
 		if (!isMavenAdapterInitialized(log)) {
 			return;
 		}
-
 		mavenAdapter.addProjectConfiguration(project, configFile);
 	}
 
@@ -131,7 +110,6 @@ public class StandaloneAdapter {
 		}
 		Map<String, String> bundleConfiguration = mavenAdapter.getConfiguration();
 		bundleStarter = createNewBundleStarter(log);
-
 		bundleStarter.runStandalone(bundleConfiguration);
 	}
 
@@ -150,31 +128,12 @@ public class StandaloneAdapter {
 		return new BundleStarter(log);
 	}
 
-	protected DependencyManager getDependencyManagerInstance() {
-		return dependencyManager;
-	}
-
-	protected EmbeddedMaven getEmbeddedMavenInstance() {
-		return embeddedMaven;
-	}
-
 	public void copyDependencies(MavenProject parentProject, Log log) {
-
-		DependencyManager dependencyManagerInstance = getDependencyManagerInstance();
-		if (dependencyManagerInstance == null) {
-			log.error("Maven dependency manager is not created"); //$NON-NLS-1$
-			return;
-		}
-		EmbeddedMaven embeddedMavenInstance = getEmbeddedMavenInstance();
-		dependencyManagerInstance.extractAndCopyDependencies(parentProject, embeddedMavenInstance.getMavenHome());
-	}
-
-	public void setRootProjectPomPath(String rootProjectPomPath, Log log) {
-		if (!isMavenAdapterInitialized(log)) {
-			return;
-		}
-
-		mavenAdapter.setRootProjectPomPath(rootProjectPomPath);
+		DependencyManager dependencyManagerInstance = new DependencyManager(log);
+		String mavenHome = parameters.getMavenHome().orElse(""); //$NON-NLS-1$
+		EmbeddedMaven embeddedMaven = new EmbeddedMaven(log, mavenHome);
+		embeddedMaven.prepareMaven();
+		dependencyManagerInstance.extractAndCopyDependencies(parentProject, embeddedMaven.getMavenHome());
 	}
 	
 	private boolean isMavenAdapterInitialized(Log log) {

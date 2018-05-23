@@ -29,8 +29,6 @@ import eu.jsparrow.maven.i18n.Messages;
  */
 @Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
 public class RefactorMojo extends AbstractMojo {
-	
-	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
 
 	@Parameter(defaultValue = "${session}")
 	private MavenSession mavenSession;
@@ -84,17 +82,16 @@ public class RefactorMojo extends AbstractMojo {
 
 		Log log = getLog();
 		String mode = StandaloneMode.REFACTOR.name();
-		StandaloneAdapter standaloneAdapter = new StandaloneAdapter();
+
 		MavenParameters config = new MavenParameters(configFile, mavenSession, mode, license, url, mavenHome, profile, useDefaultConfig, devMode);
 		
 		try {
-			boolean adapterLoadad = standaloneAdapter.lazyLoadMavenAdapter(config, project, log);
+			StandaloneAdapter standaloneAdapter = new StandaloneAdapter(config);
+			boolean adapterLoadad = standaloneAdapter.lazyLoadMavenAdapter(project, log);
 			if (!adapterLoadad) {
 				throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
 			}
 			standaloneAdapter.copyDependencies(project, log);
-			standaloneAdapter.setRootProjectPomPath(project.getBasedir()
-				.getAbsolutePath() + File.separator + POM_FILE_NAME, log);
 
 			for (MavenProject mavenProject : mavenSession.getAllProjects()) {
 				standaloneAdapter.addProjectConfiguration(mavenProject, log, configFile);
@@ -106,6 +103,5 @@ public class RefactorMojo extends AbstractMojo {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());
 		}
-
 	}
 }

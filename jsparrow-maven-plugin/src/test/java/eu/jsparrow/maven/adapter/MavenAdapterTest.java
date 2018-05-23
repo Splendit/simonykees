@@ -49,7 +49,7 @@ public class MavenAdapterTest {
 		when(config.getProfile()).thenReturn(Optional.empty());
 		when(config.getRuleId()).thenReturn(Optional.empty());
 
-		mavenAdapter.addInitialConfiguration(config, ""); //$NON-NLS-1$
+		mavenAdapter.addInitialConfiguration(config); //$NON-NLS-1$
 
 		verify(config).getUseDefaultConfig();
 		verify(config).getMode();

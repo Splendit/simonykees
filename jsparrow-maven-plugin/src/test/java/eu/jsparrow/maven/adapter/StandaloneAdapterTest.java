@@ -29,7 +29,7 @@ public class StandaloneAdapterTest {
 
 	@Before
 	public void setUp() {
-		standaloneAdapter = new TestableStandaloneAdapter();
+		standaloneAdapter = new TestableStandaloneAdapter(mock(MavenParameters.class));
 		embeddedMaven = mock(EmbeddedMaven.class);
 		dependencyManager = mock(DependencyManager.class);
 		mavenAdapter = mock(MavenAdapter.class);
@@ -48,7 +48,7 @@ public class StandaloneAdapterTest {
 		when(configuration.getMavenSession()).thenReturn(Optional.empty());
 		when(mavenAdapter.isJsparrowStarted(project)).thenReturn(false);
 
-		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(configuration, project, log);
+		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(project, log);
 
 		assertTrue(expected);
 	}
@@ -61,8 +61,7 @@ public class StandaloneAdapterTest {
 		Log log = mock(Log.class);
 
 		when(mavenAdapter.isJsparrowStarted(project)).thenReturn(false);
-		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
-		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(configuration, project, log);
+		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(project, log);
 
 		assertTrue(expected);
 	}
@@ -78,7 +77,7 @@ public class StandaloneAdapterTest {
 		when(configuration.getDefaultYamlFile()).thenReturn(Optional.of(file));
 		when(mavenAdapter.isJsparrowStarted(project)).thenReturn(true);
 
-		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(configuration, project, log);
+		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(project, log);
 
 		assertFalse(expected);
 	}
@@ -98,7 +97,6 @@ public class StandaloneAdapterTest {
 
 	@Test
 	public void addProjectConfiguration() throws MojoExecutionException, BundleException, InterruptedException {
-		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
 		File configFile = mock(File.class);
 		MavenProject project = mock(MavenProject.class);
 		Log log = mock(Log.class);
@@ -123,7 +121,6 @@ public class StandaloneAdapterTest {
 
 	@Test
 	public void startStandaloneBundle() throws MojoExecutionException, BundleException, InterruptedException {
-		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
 
 		@SuppressWarnings("unchecked")
 		Map<String, String> configuration = mock(Map.class);
@@ -143,7 +140,6 @@ public class StandaloneAdapterTest {
 		Log log = mock(Log.class);
 		when(embeddedMaven.getMavenHome()).thenReturn(mavenHome); 
 		when(mavenAdapter.findProjectIdentifier(rootProject)).thenReturn(rootIdentifier);
-		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
 		
 		standaloneAdapter.copyDependencies(rootProject, log);
 		
@@ -162,14 +158,16 @@ public class StandaloneAdapterTest {
 
 	class TestableStandaloneAdapter extends StandaloneAdapter {
 
+		public TestableStandaloneAdapter(MavenParameters parameters) {
+			super(parameters);
+		}
+
+
 		@Override
 		protected MavenAdapter createMavenAdapterInstance(File file, Log log, MavenProject project) {
 			return mavenAdapter;
 		}
 
-		protected EmbeddedMaven createEmbeddedMavenInstance(MavenParameters configuration, Log log) {
-			return embeddedMaven;
-		}
 
 		@Override
 		protected BundleStarter createNewBundleStarter(Log log) {
