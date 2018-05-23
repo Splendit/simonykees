@@ -21,7 +21,7 @@ main(){
   # Check if the neccessary tools are installed
   check_preconditions
   # clean up if the script fails for some reason
-  #trap clean INT TERM EXIT
+  trap clean INT TERM EXIT
   
   printf "Starting jSparrow Maven Plugin installation...\n"
 
@@ -154,7 +154,7 @@ function print_success() {
 
 The jSparrow Maven Plugin was installed successfully!
 
-Copy the following snippet into your projects pom.xml:
+Copy the following snippet into your project's pom.xml:
 
 <plugin>
     <groupId>eu.jsparrow</groupId>
