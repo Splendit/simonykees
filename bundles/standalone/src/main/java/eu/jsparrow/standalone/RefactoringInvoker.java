@@ -179,11 +179,12 @@ public class RefactoringInvoker {
 	 * cleans classpath and temp directory
 	 * 
 	 * @throws IOException
+	 * @throws CoreException 
 	 */
-	public void cleanUp() throws IOException {
+	public void cleanUp() throws IOException, CoreException {
 
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
-			standaloneConfig.cleanEclipseProjectFiles();
+			standaloneConfig.revertEclipseProjectFiles();
 		}
 	}
 
@@ -257,7 +258,7 @@ public class RefactoringInvoker {
 				StandaloneConfig standaloneConfig = new StandaloneConfig(id, projectName, path, compilerCompliance,
 						sourceFolder, natureIds);
 				configs.add(standaloneConfig);
-			} catch (CoreException e) {
+			} catch (CoreException | IOException e) {
 				throw new StandaloneException(e.getMessage(), e);
 			}
 		}

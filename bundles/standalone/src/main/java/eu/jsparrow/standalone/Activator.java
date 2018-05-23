@@ -6,6 +6,7 @@ import java.io.IOException;
 import javax.inject.Inject;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -155,7 +156,7 @@ public class Activator implements BundleActivator {
 			licenseService.stop();
 			try {
 				refactoringInvoker.cleanUp();
-			} catch (IOException e) {
+			} catch (IOException | CoreException e) {
 				logger.debug(e.getMessage(), e);
 				logger.error(e.getMessage());
 				setExitErrorMessage(context, e.getMessage());
@@ -171,7 +172,7 @@ public class Activator implements BundleActivator {
 				licenseService.stop();
 				try {
 					refactoringInvoker.cleanUp();
-				} catch (IOException e) {
+				} catch (IOException | CoreException e) {
 					logger.debug(e.getMessage(), e);
 					logger.error(e.getMessage());
 					setExitErrorMessage(context, e.getMessage());
