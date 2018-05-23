@@ -11,8 +11,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
-import eu.jsparrow.adapter.MavenParameters;
-import eu.jsparrow.adapter.StandaloneAdapter;
+import eu.jsparrow.maven.adapter.MavenParameters;
+import eu.jsparrow.maven.adapter.StandaloneAdapter;
 import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.i18n.Messages;
 
