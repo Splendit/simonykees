@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class takes a folder and searches for a YAML configuration file within. 
+ * This class takes a folder and searches for a YAML configuration file within.
  * 
  * @since 2.6.0
  */
@@ -30,12 +30,16 @@ public class ConfigFinder {
 
 		if (Files.exists(filePath)) {
 			try {
-				// we always get the first match
+				/*
+				 * We always get the first match, sorted so it's always the
+				 * same. "CONFIG.YAML" would always be found first.
+				 */
 				match = Files.list(filePath)
 					.map(file -> file.getFileName()
 						.toString())
 					.filter(name -> CONFIG_FILE_NAME_PATTERN.matcher(name)
 						.matches())
+					.sorted()
 					.findFirst();
 
 				if (match.isPresent()) {

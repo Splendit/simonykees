@@ -1,5 +1,6 @@
 package eu.jsparrow.standalone;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -90,7 +92,8 @@ public class ConfigFinderTest {
 
 		@Parameters(name = "{index}: Using invalid input ({0})")
 		public static String[] data() {
-			return new String[] { "_config.yml", "config.yamll", "Config.YAL", "CONFIGYML", "c_onfig.yml" };
+			return new String[] { "_config.yml", "config.yamll", "Config.YAL", "CONFIGYML", "c_onfig.yml", "config.xml",
+					"random.yml" };
 		}
 
 		@Parameter
@@ -145,6 +148,30 @@ public class ConfigFinderTest {
 
 			verify(mockLogger, times(1)).debug(anyString(), eq(invalidFolderPath));
 		}
-		
+
+		@Test
+		public void getYAMLFilePath_multipleMatches_firstMatchReturned() throws IOException {
+			String firstMatch = "CONFIG.YAML";
+
+			folder.newFile(firstMatch);
+			folder.newFile("config.yaml");
+			folder.newFile("config.yml");
+			folder.newFile("Config.yaml");
+			folder.newFile("Config.yml");
+			folder.newFile("COnfig.yml");
+
+			String absolutePathFirstMatch = String.format("%s/%s", folder.getRoot()
+				.getAbsolutePath(), firstMatch);
+
+			Path path = Paths.get(folder.getRoot()
+				.getAbsolutePath());
+
+			Optional<String> configFile = configFinder.getYAMLFilePath(path);
+
+			assertEquals(
+					String.format("First valid config file '%s' should be found and not '%s'", firstMatch,
+							StringUtils.substringAfterLast(configFile.get(), "/")),
+					absolutePathFirstMatch, configFile.get());
+		}
 	}
 }
