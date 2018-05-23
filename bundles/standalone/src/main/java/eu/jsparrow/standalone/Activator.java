@@ -2,6 +2,11 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -44,6 +49,10 @@ public class Activator implements BundleActivator {
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
 	private static final String EQUINOX_DS_BUNDLE_NAME = "org.eclipse.equinox.ds"; //$NON-NLS-1$
+
+	// allows the file name to be config.yml or config.yaml, case insensitive
+	private static final Pattern CONFIG_FILE_NAME_PATTERN = Pattern
+		.compile("^[Cc][Oo][Nn][Ff][Ii][Gg]\\.[Yy][Aa]{0,1}[Mm][Ll]$"); //$NON-NLS-1$
 
 	private RefactoringInvoker refactoringInvoker;
 	ListRulesUtil listRulesUtil;
@@ -256,14 +265,55 @@ public class Activator implements BundleActivator {
 	}
 
 	private YAMLStandaloneConfig tryLoadStandaloneConfig() {
-		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
-		YAMLStandaloneConfig yamlStandaloneConfig = null;
-		try {
-			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
-		} catch (YAMLStandaloneConfigException e) {
-			logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
-		}
-		return yamlStandaloneConfig;
+		String filePath = String.format("%s/.config/jsparrow-standalone/", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
 
+		YAMLStandaloneConfig yamlStandaloneConfig = null;
+
+		Optional<String> configFile = getYAMLFilePath(Paths.get(filePath));
+		if (configFile.isPresent()) {
+			try {
+				yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(configFile.get()));
+			} catch (YAMLStandaloneConfigException e) {
+				logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
+			}
+		} else {
+			logger.info("No config.yaml file found in '{}'", filePath); //$NON-NLS-1$
+		}
+
+		return yamlStandaloneConfig;
+	}
+
+	private Optional<String> getYAMLFilePath(Path filePath) {
+
+		Optional<String> match = Optional.empty();
+
+		if (Files.exists(filePath)) {
+			try {
+				// we always get the first match
+				match = Files.list(filePath)
+					.map(file -> file.getFileName()
+						.toString())
+					.filter(name -> CONFIG_FILE_NAME_PATTERN.matcher(name)
+						.matches())
+					.findFirst();
+
+				if (match.isPresent()) {
+					match = match.map(fileName -> String.format("%s/%s", filePath, fileName)); //$NON-NLS-1$
+				} else {
+					logger.debug("No matching config file found in directory: '{}'", filePath.toString()); //$NON-NLS-1$
+				}
+
+			} catch (IOException e) {
+				/*
+				 * The IOException means that the directory does not exist. This
+				 * is not an error case for us.
+				 */
+				logger.debug("Unable to list files in directory: '{}'", filePath.toString()); //$NON-NLS-1$
+			}
+		} else {
+			logger.debug("Directory does not exist: '{}'", filePath.toString()); //$NON-NLS-1$
+		}
+
+		return match;
 	}
 }
