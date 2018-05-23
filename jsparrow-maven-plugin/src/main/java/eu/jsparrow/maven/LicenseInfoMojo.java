@@ -56,9 +56,9 @@ public class LicenseInfoMojo extends AbstractMojo {
 
 		try {
 
-			MavenParameters config = new MavenParameters(project, log, configFile, null, mode, license, url);
+			MavenParameters config = new MavenParameters(configFile, null, mode, license, url);
 
-			boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
+			boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config, project, log);
 			if (!adapterLoadad) {
 				throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
 			}

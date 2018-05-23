@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.Optional;
 
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
 
 /**
  * A class for wrapping the parameters injected in the maven plugin.
@@ -16,8 +14,6 @@ import org.apache.maven.project.MavenProject;
  */
 public class MavenParameters {
 
-	private Log log;
-	private MavenProject project;
 	private File defaultYamlFile;
 	private MavenSession mavenSession;
 	private String mavenHome;
@@ -29,18 +25,24 @@ public class MavenParameters {
 	private String url;
 	private boolean devMode;
 
-	public MavenParameters(MavenProject project, Log log, File defaultYamlFile, MavenSession mavenSession, String mode,
-			String license, String url) {
-		this(project, log, mode);
+	public MavenParameters(File defaultYamlFile, MavenSession mavenSession, String mode, String license, String url,
+			String mavenHome, String profile, boolean useDefault, boolean devMode) {
+		this(defaultYamlFile, mavenSession, mode, license, url);
+		setMavenHome(mavenHome);
+		setProfile(profile);
+		setUseDefaultConfig(useDefault);
+		setDevMode(devMode);
+	}
+
+	public MavenParameters(File defaultYamlFile, MavenSession mavenSession, String mode, String license, String url) {
+		this(mode);
 		this.defaultYamlFile = defaultYamlFile;
 		this.mavenSession = mavenSession;
 		this.license = license;
 		this.url = url;
 	}
 
-	public MavenParameters(MavenProject project, Log log, String mode) {
-		this.project = project;
-		this.log = log;
+	public MavenParameters(String mode) {
 		this.mode = mode;
 	}
 
@@ -58,14 +60,6 @@ public class MavenParameters {
 
 	public void setRuleId(String ruleId) {
 		this.ruleId = ruleId;
-	}
-
-	public Log getLog() {
-		return log;
-	}
-
-	public MavenProject getProject() {
-		return project;
 	}
 
 	public Optional<File> getDefaultYamlFile() {

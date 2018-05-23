@@ -88,28 +88,19 @@ public class RefactorMojo extends AbstractMojo {
 		MavenParameters config = new MavenParameters(configFile, mavenSession, mode, license, url, mavenHome, profile, useDefaultConfig, devMode);
 		
 		try {
-			if (!serviceInstance.isAdapterInitialized()) {
-				MavenParameters config = new MavenParameters(project, log, configFile, mavenSession, mode, license,
-						url);
-				config.setMavenHome(mavenHome);
-				config.setProfile(profile);
-				config.setUseDefaultConfig(useDefaultConfig);
-				config.setDevMode(devMode);
-
-				boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
-				if (!adapterLoadad) {
-					throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
-				}
-				serviceInstance.copyDependencies(project, log);
-				serviceInstance.setRootProjectPomPath(project.getBasedir()
-					.getAbsolutePath() + File.separator + POM_FILE_NAME, log);
+			boolean adapterLoadad = standaloneAdapter.lazyLoadMavenAdapter(config, project, log);
+			if (!adapterLoadad) {
+				throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
 			}
+			standaloneAdapter.copyDependencies(project, log);
+			standaloneAdapter.setRootProjectPomPath(project.getBasedir()
+				.getAbsolutePath() + File.separator + POM_FILE_NAME, log);
 
 			for (MavenProject mavenProject : mavenSession.getAllProjects()) {
-				serviceInstance.addProjectConfiguration(mavenProject, log, configFile);
+				standaloneAdapter.addProjectConfiguration(mavenProject, log, configFile);
 			}
 			log.info(Messages.RefactorMojo_allProjectsLoaded);
-			serviceInstance.startStandaloneBundle(log);
+			standaloneAdapter.startStandaloneBundle(log);
 
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);

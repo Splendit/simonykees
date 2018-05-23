@@ -55,10 +55,10 @@ public class ListAllRulesMojo extends AbstractMojo {
 
 		try {
 
-			MavenParameters config = new MavenParameters(project, log, mode);
+			MavenParameters config = new MavenParameters(mode);
 			config.setRuleId(ruleId);
 
-			boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
+			boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config, project, log);
 			if (!adapterLoadad) {
 				throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
 			}

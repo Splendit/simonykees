@@ -159,7 +159,7 @@ public class MavenAdapter {
 	 * Finds the path of the corresponding yaml configuration file of the
 	 * project. If the provided yamlFile exists, its path is immediately
 	 * returned. Otherwise, finds the yaml file in the closest ancestor until
-	 * reaching the {@link rootProject}.
+	 * reaching the {@link #rootProject}.
 	 * 
 	 * @param project
 	 *            the project to find the configuration file for.
@@ -177,6 +177,7 @@ public class MavenAdapter {
 				break;
 			}
 			File parentBaseDir = parent.getBasedir();
+
 			Path parentYamlPath = joinPaths(yamlFile, parentBaseDir);
 			if (parentYamlPath.toFile()
 				.exists()) {

@@ -44,13 +44,11 @@ public class StandaloneAdapterTest {
 		Log log = mock(Log.class);
 		File file = mock(File.class);
 
-		when(configuration.getLog()).thenReturn(log);
-		when(configuration.getProject()).thenReturn(project);
 		when(configuration.getDefaultYamlFile()).thenReturn(Optional.of(file));
 		when(configuration.getMavenSession()).thenReturn(Optional.empty());
 		when(mavenAdapter.isJsparrowStarted(project)).thenReturn(false);
 
-		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(configuration);
+		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(configuration, project, log);
 
 		assertTrue(expected);
 	}
@@ -62,10 +60,9 @@ public class StandaloneAdapterTest {
 		MavenProject project = mock(MavenProject.class);
 		Log log = mock(Log.class);
 
-		when(configuration.getLog()).thenReturn(log);
 		when(mavenAdapter.isJsparrowStarted(project)).thenReturn(false);
 		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
-		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(configuration);
+		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(configuration, project, log);
 
 		assertTrue(expected);
 	}
@@ -78,12 +75,10 @@ public class StandaloneAdapterTest {
 		Log log = mock(Log.class);
 		File file = mock(File.class);
 
-		when(configuration.getLog()).thenReturn(log);
-		when(configuration.getProject()).thenReturn(project);
 		when(configuration.getDefaultYamlFile()).thenReturn(Optional.of(file));
 		when(mavenAdapter.isJsparrowStarted(project)).thenReturn(true);
 
-		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(configuration);
+		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(configuration, project, log);
 
 		assertFalse(expected);
 	}
