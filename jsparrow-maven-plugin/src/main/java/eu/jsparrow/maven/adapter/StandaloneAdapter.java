@@ -26,25 +26,6 @@ public class StandaloneAdapter {
 	private DependencyManager dependencyManager;
 	private BundleStarter bundleStarter;
 
-	protected StandaloneAdapter() {
-		/*
-		 * Hiding the public constructor
-		 */
-	}
-
-	private static StandaloneAdapter standaloneAdapter;
-
-	public static synchronized StandaloneAdapter getInstance() {
-		if (standaloneAdapter == null) {
-			standaloneAdapter = new StandaloneAdapter();
-		}
-		return standaloneAdapter;
-	}
-
-	public synchronized boolean isAdapterInitialized() {
-		return mavenAdapter != null;
-	}
-
 	/**
 	 * Creates instances of {@link MavenAdapter}, {@link EmbeddedMaven} and
 	 * {@link DependencyManager} and sets the state of this object.
@@ -55,8 +36,7 @@ public class StandaloneAdapter {
 	 *         successfully, or {@code false} otherwise.
 	 * @throws InterruptedException
 	 */
-	public synchronized boolean lazyLoadMavenAdapter(MavenParameters configuration) throws InterruptedException {
-		Log log = configuration.getLog();
+	public synchronized boolean lazyLoadMavenAdapter(MavenParameters configuration, MavenProject project, Log log) throws InterruptedException {
 
 		if (mavenAdapter != null) {
 			log.warn(Messages.StandaloneAdapter_adapterInstanceAlreadyCreated);
@@ -64,7 +44,6 @@ public class StandaloneAdapter {
 		}
 
 		log.debug(Messages.StandaloneAdapter_creatingAdapterInstance);
-		MavenProject project = configuration.getProject();
 		Optional<File> defaultYamlFile = configuration.getDefaultYamlFile();
 		if (defaultYamlFile.isPresent()) {
 			mavenAdapter = createMavenAdapterInstance(defaultYamlFile.get(), log, project);

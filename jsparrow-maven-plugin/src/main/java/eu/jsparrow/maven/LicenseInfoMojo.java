@@ -51,7 +51,7 @@ public class LicenseInfoMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		Log log = getLog();
-		StandaloneAdapter serviceInstance = StandaloneAdapter.getInstance();
+		StandaloneAdapter serviceInstance = new StandaloneAdapter();
 		String mode = StandaloneMode.LICENSE_INFO.name();
 
 		try {

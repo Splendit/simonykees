@@ -83,8 +83,10 @@ public class RefactorMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 
 		Log log = getLog();
-		StandaloneAdapter serviceInstance = StandaloneAdapter.getInstance();
 		String mode = StandaloneMode.REFACTOR.name();
+		StandaloneAdapter standaloneAdapter = new StandaloneAdapter();
+		MavenParameters config = new MavenParameters(configFile, mavenSession, mode, license, url, mavenHome, profile, useDefaultConfig, devMode);
+		
 		try {
 			if (!serviceInstance.isAdapterInitialized()) {
 				MavenParameters config = new MavenParameters(project, log, configFile, mavenSession, mode, license,

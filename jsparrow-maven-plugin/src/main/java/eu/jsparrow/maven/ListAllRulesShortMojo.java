@@ -43,7 +43,7 @@ public class ListAllRulesShortMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		Log log = getLog();
-		StandaloneAdapter serviceInstance = StandaloneAdapter.getInstance();
+		StandaloneAdapter serviceInstance = new StandaloneAdapter();
 		String mode = StandaloneMode.LIST_RULES_SHORT.name();
 
 		try {
