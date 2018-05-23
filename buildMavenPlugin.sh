@@ -38,25 +38,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# build jsparrow-standalone-adapter  and install it to the .m2 repo
-echo "Building jsparrow-standalone-adapter"
-
-cd jsparrow-standalone-adapter
-
-if [ $TEST = true ]; then
-  mvn clean install
-else
-  mvn clean install -DskipTests
-fi
-
-# check maven result and exit if necessary
-if [ $? -ne 0 ]; then
-  echo "maven on jsparrow-standalone-adapter failed!"
-  exit 5
-fi
-
-cd ..
-
 # create jsparrow maven plugin resource directory if it doesn't exist
 if [ ! -d $PLUGIN_RESOURCES_PATH ]; then
     mkdir -p $PLUGIN_RESOURCES_PATH
@@ -86,13 +67,6 @@ echo "Creating $MANIFEST_FILE_NAME"
 
 # list the contents of the build jsparrow plugins and redirect it to the necessary manifest.standalone in the maven plugins
 ls $JSPARROW_TARGET_PATH > $PLUGIN_RESOURCES_PATH/$MANIFEST_FILE_NAME
-
-# build and instlal the jsparrow-standalone-adapter
-cd jsparrow-standalone-adapter
-
-mvn clean install
-
-cd ..
 
 # build and install the jsparrow-maven-plugin
 cd jsparrow-maven-plugin
