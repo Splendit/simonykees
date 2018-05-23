@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -37,8 +38,8 @@ public class RefactoringInvoker {
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringInvoker.class);
 
 	/**
-	 * The following constants represent some keys in the BundleContext and they must
-	 * match with the ones in {@link eu.jsparrow.adapter.MavenAdapter}
+	 * The following constants represent some keys in the BundleContext and they
+	 * must match with the ones in {@link eu.jsparrow.adapter.MavenAdapter}
 	 */
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
@@ -176,10 +177,12 @@ public class RefactoringInvoker {
 	}
 
 	/**
-	 * cleans classpath and temp directory
+	 * Reverts eclipse files for all projects if they were previously existing
 	 * 
 	 * @throws IOException
-	 * @throws CoreException 
+	 *             if reverting eclipse project files fails for some reason
+	 * @throws CoreException
+	 *             if closing {@link IProject} fails
 	 */
 	public void cleanUp() throws IOException, CoreException {
 

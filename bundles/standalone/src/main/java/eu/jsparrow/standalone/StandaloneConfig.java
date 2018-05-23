@@ -149,10 +149,9 @@ public class StandaloneConfig {
 	}
 
 	/**
-	 * this method checks if the eclipse:eclipse maven plugin should be executed
-	 * to convert the current project to an eclipse project and prepares it
-	 * accordingly by renaming any existing .project and .classpath files and
-	 * the .settings directory temporarily.
+	 * this method prepares projects for creating an eclipse project accordingly
+	 * by renaming any existing .project and .classpath files and the .settings
+	 * directory temporarily.
 	 * 
 	 * @throws IOException
 	 */
@@ -161,34 +160,30 @@ public class StandaloneConfig {
 		File classpathFile = getClasspathFileFile();
 		File settingsDirectory = getSettingsDirectoryFile();
 
-		if (!projectDescription.exists() && !classpathFile.exists() && !settingsDirectory.exists()) {
-			return;
-		} else {
-			String loggerInfo;
+		String loggerInfo;
 
-			if (projectDescription.exists()) {
-				moveFile(projectDescription, getProjectDescriptionRenameFile());
-				existingProjectFileMoved = true;
+		if (projectDescription.exists()) {
+			moveFile(projectDescription, getProjectDescriptionRenameFile());
+			existingProjectFileMoved = true;
 
-				loggerInfo = NLS.bind(Messages.StandaloneConfig_fileBackupDone, PROJECT_FILE_NAME);
-				logger.debug(loggerInfo);
-			}
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileBackupDone, PROJECT_FILE_NAME);
+			logger.debug(loggerInfo);
+		}
 
-			if (classpathFile.exists()) {
-				moveFile(classpathFile, getClasspathFileRenameFile());
-				existingClasspathFileMoved = true;
+		if (classpathFile.exists()) {
+			moveFile(classpathFile, getClasspathFileRenameFile());
+			existingClasspathFileMoved = true;
 
-				loggerInfo = NLS.bind(Messages.StandaloneConfig_fileBackupDone, CLASSPATH_FILE_NAME);
-				logger.debug(loggerInfo);
-			}
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileBackupDone, CLASSPATH_FILE_NAME);
+			logger.debug(loggerInfo);
+		}
 
-			if (settingsDirectory.exists()) {
-				moveFile(settingsDirectory, getSettingsDirectoryRenameFile());
-				existingSettingsDirectoryMoved = true;
+		if (settingsDirectory.exists()) {
+			moveFile(settingsDirectory, getSettingsDirectoryRenameFile());
+			existingSettingsDirectoryMoved = true;
 
-				loggerInfo = NLS.bind(Messages.StandaloneConfig_directoryBackupDone, SETTINGS_DIRECTORY_NAME);
-				logger.debug(loggerInfo);
-			}
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_directoryBackupDone, SETTINGS_DIRECTORY_NAME);
+			logger.debug(loggerInfo);
 		}
 	}
 
