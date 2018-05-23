@@ -26,24 +26,27 @@ import org.mockito.Mock;
 import org.slf4j.Logger;
 
 /**
+ * The {@link ConfigFinderTest} uses mocking, as well as parameterized and
+ * non-parameterized tests to test the {@link ConfigFinder} class.
+ * 
  * @since 2.6.0
  */
 @RunWith(Enclosed.class)
 @SuppressWarnings("nls")
 public class ConfigFinderTest {
-	
+
 	/**
-	 * Base setup used for all other inner classes. 
+	 * Base setup used for all other inner classes.
 	 */
 	public static abstract class ConfigFinderBaseTest {
 		ConfigFinder configFinder;
-		
+
 		@Mock
 		Logger mockLogger;
-		
+
 		@Rule
 		public TemporaryFolder folder = new TemporaryFolder();
-		
+
 		@Before
 		public void setUp() {
 			initMocks(this);
@@ -53,19 +56,19 @@ public class ConfigFinderTest {
 	}
 
 	/**
-	 * Parameterized tests for valid config file names. 
+	 * Parameterized tests for valid config file names.
 	 */
 	@RunWith(Parameterized.class)
 	public static class ParameterizedValidTests extends ConfigFinderBaseTest {
-		
+
 		@Parameters(name = "{index}: Using valid input ({0})")
 		public static String[] data() {
-		    return new String[] { "config.yml", "config.yaml", "Config.YAML", "CONFIG.YML" };
+			return new String[] { "config.yml", "config.yaml", "Config.YAML", "CONFIG.YML" };
 		}
-		
+
 		@Parameter
 		public String configFileName;
-		
+
 		@Test
 		public void getYAMLFilePath_validConfigFile_isPresentTrue() throws IOException {
 			folder.newFile(configFileName);
@@ -78,21 +81,21 @@ public class ConfigFinderTest {
 			assertTrue(String.format("Valid config file '%s' should be found", configFileName), configFile.isPresent());
 		}
 	}
-	
+
 	/**
-	 * Parameterized tests for invalid config file names. 
+	 * Parameterized tests for invalid config file names.
 	 */
 	@RunWith(Parameterized.class)
 	public static class ParameterizedInvalidTests extends ConfigFinderBaseTest {
-		
+
 		@Parameters(name = "{index}: Using invalid input ({0})")
 		public static String[] data() {
-		    return new String[] { "_config.yml", "config.yamll", "Config.YAL", "CONFIGYML", "c_onfig.yml" };
+			return new String[] { "_config.yml", "config.yamll", "Config.YAL", "CONFIGYML", "c_onfig.yml" };
 		}
-		
+
 		@Parameter
 		public String configFileName;
-		
+
 		@Test
 		public void getYAMLFilePath_invalidConfigFile_isPresentFalse() throws IOException {
 			folder.newFile(configFileName);
@@ -108,12 +111,12 @@ public class ConfigFinderTest {
 	}
 
 	/**
-	 * One-time non-parameterized tests. 
+	 * One-time non-parameterized tests.
 	 */
 	public static class NonParameterizedTests extends ConfigFinderBaseTest {
 
 		@Test
-		public void getYAMLFilePath_noConfigFile_isPresentFalse() throws IOException {
+		public void getYAMLFilePath_noConfigFile_isPresentFalse() {
 			Path path = Paths.get(folder.getRoot()
 				.getAbsolutePath());
 
@@ -123,7 +126,7 @@ public class ConfigFinderTest {
 		}
 
 		@Test
-		public void getYAMLFilePath_invalidPath_isPresentFalse() throws IOException {
+		public void getYAMLFilePath_invalidPath_isPresentFalse() {
 			String invalidFolderPath = "/thatdoesnotexist/forreal";
 			Path path = Paths.get(invalidFolderPath);
 
@@ -134,7 +137,7 @@ public class ConfigFinderTest {
 		}
 
 		@Test
-		public void getYAMLFilePath_invalidPath_logDebug() throws IOException {
+		public void getYAMLFilePath_invalidPath_logDebug() {
 			String invalidFolderPath = "/thatdoesnotexist/forreal";
 			Path path = Paths.get(invalidFolderPath);
 
@@ -142,5 +145,6 @@ public class ConfigFinderTest {
 
 			verify(mockLogger, times(1)).debug(anyString(), eq(invalidFolderPath));
 		}
+		
 	}
 }
