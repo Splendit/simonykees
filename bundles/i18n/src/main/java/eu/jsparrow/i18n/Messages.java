@@ -374,7 +374,6 @@ public class Messages extends NLS {
 	public static String StandaloneConfig_debug_createWorkspace;
 	public static String StandaloneConfig_directoryBackupDone;
 	public static String StandaloneConfig_directoryRestoreDone;
-	public static String StandaloneConfig_executeMavenEclipseEclipseGoal;
 	public static String StandaloneConfig_fileBackupDone;
 	public static String StandaloneConfig_fileRestoreDone;
 	public static String StandaloneConfig_projectDescriptionDoesNotExist;
