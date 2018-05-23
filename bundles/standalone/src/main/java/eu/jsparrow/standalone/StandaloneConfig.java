@@ -63,6 +63,7 @@ public class StandaloneConfig {
 	private boolean existingProjectFileMoved = false;
 	private boolean existingClasspathFileMoved = false;
 	private boolean existingSettingsDirectoryMoved = false;
+	private IProject project = null;
 	private IJavaProject javaProject = null;
 	private List<ICompilationUnit> compilationUnits = new ArrayList<>();
 	private String projectId;
@@ -83,12 +84,12 @@ public class StandaloneConfig {
 	 * @throws IOException
 	 */
 	public StandaloneConfig(String id, String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds) throws CoreException {
+			String[] natureIds) throws CoreException, IOException {
 		this(id, projectName, path, compilerCompliance, sourceFolder, natureIds, false);
 	}
 
 	public StandaloneConfig(String id, String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds, boolean testMode) throws CoreException {
+			String[] natureIds, boolean testMode) throws CoreException, IOException {
 		this.projectName = projectName;
 		this.projectId = id;
 		this.path = path;
@@ -109,9 +110,9 @@ public class StandaloneConfig {
 	 * @throws MavenInvocationException
 	 * @throws IOException
 	 */
-	public void setUp() throws CoreException {
+	public void setUp() throws CoreException, IOException {
 		IProjectDescription projectDescription = getProjectDescription();
-		IProject project = initProject(projectDescription);
+		project = initProject(projectDescription);
 		this.javaProject = initJavaProject(project);
 		List<IClasspathEntry> mavenClasspathEntries = collectMavenDependenciesAsClasspathEntries();
 		mavenClasspathEntries = addProjectSourceConfigurations(mavenClasspathEntries);
@@ -124,9 +125,12 @@ public class StandaloneConfig {
 	 * {@link #getProjectName()} as a project name
 	 * 
 	 * @return a project description for an eclipse project
+	 * @throws IOException
 	 */
-	IProjectDescription getProjectDescription() {
+	IProjectDescription getProjectDescription() throws IOException {
 		IWorkspace workspace = getWorkspace();
+
+		backupExistingEclipseFiles();
 
 		logger.debug("Creating project description for {} ", path); //$NON-NLS-1$
 		IProjectDescription description = workspace.newProjectDescription(getProjectName());
@@ -145,54 +149,42 @@ public class StandaloneConfig {
 	}
 
 	/**
-	 * this method checks if the eclipse:eclipse maven plugin should be executed
-	 * to convert the current project to an eclipse project and prepares it
-	 * accordingly by renaming any existing .project and .classpath files and
-	 * the .settings directory temporarily.
+	 * this method prepares projects for creating an eclipse project accordingly
+	 * by renaming any existing .project and .classpath files and the .settings
+	 * directory temporarily.
 	 * 
-	 * @return true, if the elcipse:eclipse maven plugin should be executed,
-	 *         false otherwise
 	 * @throws IOException
 	 */
-	protected boolean prepareEclipseMavenPlugin() throws IOException {
+	protected void backupExistingEclipseFiles() throws IOException {
 		File projectDescription = getProjectDescriptionFile();
 		File classpathFile = getClasspathFileFile();
 		File settingsDirectory = getSettingsDirectoryFile();
 
-		if (!projectDescription.exists() && !classpathFile.exists() && !settingsDirectory.exists()) {
-			return true;
-		} else if (projectDescription.exists() && classpathFile.exists() && settingsDirectory.exists()) {
-			return false;
-		} else {
-			String loggerInfo;
+		String loggerInfo;
 
-			if (projectDescription.exists()) {
-				moveFile(projectDescription, getProjectDescriptionRenameFile());
-				existingProjectFileMoved = true;
+		if (projectDescription.exists()) {
+			moveFile(projectDescription, getProjectDescriptionRenameFile());
+			existingProjectFileMoved = true;
 
-				loggerInfo = NLS.bind(Messages.StandaloneConfig_fileBackupDone, PROJECT_FILE_NAME);
-				logger.debug(loggerInfo);
-			}
-
-			if (classpathFile.exists()) {
-				moveFile(classpathFile, getClasspathFileRenameFile());
-				existingClasspathFileMoved = true;
-
-				loggerInfo = NLS.bind(Messages.StandaloneConfig_fileBackupDone, CLASSPATH_FILE_NAME);
-				logger.debug(loggerInfo);
-			}
-
-			if (settingsDirectory.exists()) {
-				moveFile(settingsDirectory, getSettingsDirectoryRenameFile());
-				existingSettingsDirectoryMoved = true;
-
-				loggerInfo = NLS.bind(Messages.StandaloneConfig_directoryBackupDone, SETTINGS_DIRECTORY_NAME);
-				logger.debug(loggerInfo);
-			}
-
-			return true;
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileBackupDone, PROJECT_FILE_NAME);
+			logger.debug(loggerInfo);
 		}
 
+		if (classpathFile.exists()) {
+			moveFile(classpathFile, getClasspathFileRenameFile());
+			existingClasspathFileMoved = true;
+
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileBackupDone, CLASSPATH_FILE_NAME);
+			logger.debug(loggerInfo);
+		}
+
+		if (settingsDirectory.exists()) {
+			moveFile(settingsDirectory, getSettingsDirectoryRenameFile());
+			existingSettingsDirectoryMoved = true;
+
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_directoryBackupDone, SETTINGS_DIRECTORY_NAME);
+			logger.debug(loggerInfo);
+		}
 	}
 
 	/**
@@ -206,17 +198,17 @@ public class StandaloneConfig {
 	IProject initProject(IProjectDescription description) throws CoreException {
 		IWorkspace workspace = getWorkspace();
 
-		IProject project = getProject(workspace, description.getName());
-		project.create(description, new NullProgressMonitor());
+		IProject iproject = getProject(workspace, description.getName());
+		iproject.create(description, new NullProgressMonitor());
 
 		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createProject, description.getName());
 		logger.debug(loggerInfo);
 
-		project.open(new NullProgressMonitor());
+		iproject.open(new NullProgressMonitor());
 
 		logger.debug(Messages.StandaloneConfig_debug_createdProject);
 
-		return project;
+		return iproject;
 	}
 
 	/**
@@ -337,46 +329,52 @@ public class StandaloneConfig {
 	}
 
 	/**
-	 * On stop, checks if the maven eclipse plugin's eclipse goal has been used
-	 * to generate a temporary eclipse project and reverts it by using the
-	 * eclipse maven plugin's clean goal.
+	 * On stop, checks if eclipse project files were existing and backed up
+	 * before refactoring and reverts them.
 	 * 
-	 * @throws JavaModelException
 	 * @throws IOException
-	 * @throws MavenInvocationException
 	 */
-	public void cleanUp() throws IOException {
-		if (!cleanUpAlreadyDone) {
-			logger.debug(Messages.StandaloneConfig_debug_cleanUp);
+	private void restoreExistingEclipseFiles() throws IOException {
+		logger.debug(Messages.StandaloneConfig_debug_cleanUp);
 
-			String loggerInfo;
-			if (existingProjectFileMoved) {
-				Files.move(getProjectDescriptionRenameFile().toPath(), getProjectDescriptionFile().toPath());
-				loggerInfo = NLS.bind(Messages.StandaloneConfig_fileRestoreDone, PROJECT_FILE_NAME);
-				logger.debug(loggerInfo);
-			}
-
-			if (existingClasspathFileMoved) {
-				Files.move(getClasspathFileRenameFile().toPath(), getClasspathFileFile().toPath());
-				loggerInfo = NLS.bind(Messages.StandaloneConfig_fileRestoreDone, CLASSPATH_FILE_NAME);
-				logger.debug(loggerInfo);
-			}
-
-			if (existingSettingsDirectoryMoved) {
-				Files.move(getSettingsDirectoryRenameFile().toPath(), getSettingsDirectoryFile().toPath());
-				loggerInfo = NLS.bind(Messages.StandaloneConfig_directoryRestoreDone, SETTINGS_DIRECTORY_NAME);
-				logger.debug(loggerInfo);
-			}
-			cleanUpAlreadyDone = true;
+		String loggerInfo;
+		if (existingProjectFileMoved) {
+			Files.move(getProjectDescriptionRenameFile().toPath(), getProjectDescriptionFile().toPath());
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileRestoreDone, PROJECT_FILE_NAME);
+			logger.debug(loggerInfo);
 		}
+
+		if (existingClasspathFileMoved) {
+			Files.move(getClasspathFileRenameFile().toPath(), getClasspathFileFile().toPath());
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileRestoreDone, CLASSPATH_FILE_NAME);
+			logger.debug(loggerInfo);
+		}
+
+		if (existingSettingsDirectoryMoved) {
+			Files.move(getSettingsDirectoryRenameFile().toPath(), getSettingsDirectoryFile().toPath());
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_directoryRestoreDone, SETTINGS_DIRECTORY_NAME);
+			logger.debug(loggerInfo);
+		}
+		cleanUpAlreadyDone = true;
 	}
 
-	public void cleanEclipseProjectFiles() throws IOException {
+	private void deleteCreatedEclipseProjectFiles() throws IOException, CoreException {
 		logger.debug(Messages.StandaloneConfig_debug_cleanUp);
+
+		project.close(new NullProgressMonitor());
+
 		File settings = getSettingsDirectoryFile();
 		removeDirectory(settings);
 		Files.deleteIfExists(getClasspathFileFile().toPath());
 		Files.deleteIfExists(getProjectDescriptionFile().toPath());
+
+	}
+
+	public void revertEclipseProjectFiles() throws IOException, CoreException {
+		if (!cleanUpAlreadyDone) {
+			deleteCreatedEclipseProjectFiles();
+			restoreExistingEclipseFiles();
+		}
 	}
 
 	public void removeDirectory(File directory) throws IOException {
