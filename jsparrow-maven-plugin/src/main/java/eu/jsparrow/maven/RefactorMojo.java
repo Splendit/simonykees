@@ -18,7 +18,6 @@ import org.osgi.framework.BundleException;
 import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.StandaloneAdapter;
 import eu.jsparrow.maven.enums.StandaloneMode;
-import eu.jsparrow.maven.i18n.Messages;
 
 /**
  * Starts Equinox framework and headless version of jSparrow Eclipse plugin.
@@ -82,23 +81,11 @@ public class RefactorMojo extends AbstractMojo {
 
 		Log log = getLog();
 		String mode = StandaloneMode.REFACTOR.name();
-
-		MavenParameters config = new MavenParameters(configFile, mavenSession, mode, license, url, mavenHome, profile, useDefaultConfig, devMode);
+		MavenParameters config = new MavenParameters(mode, license, url, profile, useDefaultConfig, devMode);		
+		StandaloneAdapter standaloneAdapter = new StandaloneAdapter();
 		
 		try {
-			StandaloneAdapter standaloneAdapter = new StandaloneAdapter(config);
-			boolean adapterLoadad = standaloneAdapter.lazyLoadMavenAdapter(project, log);
-			if (!adapterLoadad) {
-				throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
-			}
-			standaloneAdapter.copyDependencies(project, log);
-
-			for (MavenProject mavenProject : mavenSession.getAllProjects()) {
-				standaloneAdapter.addProjectConfiguration(mavenProject, log, configFile);
-			}
-			log.info(Messages.RefactorMojo_allProjectsLoaded);
-			standaloneAdapter.startStandaloneBundle(log);
-
+			standaloneAdapter.loadStandalone(project, config, mavenSession.getAllProjects(), configFile, log, mavenHome);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());

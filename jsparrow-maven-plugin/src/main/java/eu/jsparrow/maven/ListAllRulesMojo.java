@@ -12,7 +12,6 @@ import org.osgi.framework.BundleException;
 import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.StandaloneAdapter;
 import eu.jsparrow.maven.enums.StandaloneMode;
-import eu.jsparrow.maven.i18n.Messages;
 
 /**
  * This MOJO lists all rules with id, name and description. By specifying
@@ -53,18 +52,10 @@ public class ListAllRulesMojo extends AbstractMojo {
 
 		String mode = StandaloneMode.LIST_RULES.name();
 
+		StandaloneAdapter serviceInstance = new StandaloneAdapter();
+		MavenParameters config = new MavenParameters(mode);
 		try {
-			MavenParameters config = new MavenParameters(mode);
-			config.setRuleId(ruleId);
-			StandaloneAdapter serviceInstance = new StandaloneAdapter(config);
-			boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(project, log);
-
-			if (!adapterLoadad) {
-				throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
-			}
-
-			serviceInstance.startStandaloneBundle(log);
-
+			serviceInstance.loadStandalone(project, config, log);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());

@@ -1,9 +1,6 @@
 package eu.jsparrow.maven.adapter;
 
-import java.io.File;
 import java.util.Optional;
-
-import org.apache.maven.execution.MavenSession;
 
 /**
  * A class for wrapping the parameters injected in the maven plugin.
@@ -14,9 +11,6 @@ import org.apache.maven.execution.MavenSession;
  */
 public class MavenParameters {
 
-	private File defaultYamlFile;
-	private MavenSession mavenSession;
-	private String mavenHome;
 	private String profile;
 	private String mode;
 	private boolean useDefaultConfig;
@@ -25,19 +19,16 @@ public class MavenParameters {
 	private String url;
 	private boolean devMode;
 
-	public MavenParameters(File defaultYamlFile, MavenSession mavenSession, String mode, String license, String url,
-			String mavenHome, String profile, boolean useDefault, boolean devMode) {
-		this(defaultYamlFile, mavenSession, mode, license, url);
-		setMavenHome(mavenHome);
-		setProfile(profile);
-		setUseDefaultConfig(useDefault);
-		setDevMode(devMode);
+	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault,
+			boolean devMode) {
+		this(mode, license, url);
+		this.profile = profile;
+		this.useDefaultConfig = useDefault;
+		this.devMode = devMode;
 	}
 
-	public MavenParameters(File defaultYamlFile, MavenSession mavenSession, String mode, String license, String url) {
+	public MavenParameters(String mode, String license, String url) {
 		this(mode);
-		this.defaultYamlFile = defaultYamlFile;
-		this.mavenSession = mavenSession;
 		this.license = license;
 		this.url = url;
 	}
@@ -46,32 +37,8 @@ public class MavenParameters {
 		this.mode = mode;
 	}
 
-	public void setProfile(String profile) {
-		this.profile = profile;
-	}
-
-	public void setUseDefaultConfig(boolean useDefaultConfig) {
-		this.useDefaultConfig = useDefaultConfig;
-	}
-
-	public void setMavenHome(String mavenHome) {
-		this.mavenHome = mavenHome;
-	}
-
 	public void setRuleId(String ruleId) {
 		this.ruleId = ruleId;
-	}
-
-	public Optional<File> getDefaultYamlFile() {
-		return Optional.ofNullable(defaultYamlFile);
-	}
-
-	public Optional<MavenSession> getMavenSession() {
-		return Optional.ofNullable(mavenSession);
-	}
-
-	public Optional<String> getMavenHome() {
-		return Optional.ofNullable(mavenHome);
 	}
 
 	public Optional<String> getProfile() {
@@ -101,10 +68,6 @@ public class MavenParameters {
 
 	public boolean isDevMode() {
 		return devMode;
-	}
-
-	public void setDevMode(boolean devMode) {
-		this.devMode = devMode;
 	}
 
 }

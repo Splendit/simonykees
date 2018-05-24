@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -58,7 +57,6 @@ public class MavenAdapter {
 	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
 	private static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
-	private static final String ROOT_PROJECT_POM_PATH = "ROOT.PROJECT.POM.PATH"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area"; //$NON-NLS-1$
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
@@ -411,8 +409,7 @@ public class MavenAdapter {
 			.anyMatch(file::contains);
 	}
 
-	public void storeProjects(MavenSession mavenSession2) {
-		List<MavenProject> allProjects = mavenSession2.getAllProjects();
+	public void setProjectIds(List<MavenProject> allProjects) {
 		this.sessionProjects = allProjects.stream()
 			.map(this::findProjectIdentifier)
 			.collect(Collectors.toSet());
@@ -541,9 +538,5 @@ public class MavenAdapter {
 			}
 		}
 		return ""; //$NON-NLS-1$
-	}
-
-	public void setRootProjectPomPath(String rootProjectPomPath) {
-		configuration.put(ROOT_PROJECT_POM_PATH, rootProjectPomPath);
 	}
 }
