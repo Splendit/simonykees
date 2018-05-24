@@ -28,8 +28,9 @@ public class ConfigFinder {
 
 		Optional<String> match = Optional.empty();
 
-		if (Files.exists(filePath)) {
 			try {
+		if (filePath.toFile()
+			.exists()) {
 				/*
 				 * We always get the first match, sorted so it's always the
 				 * same. "CONFIG.YAML" would always be found first.
