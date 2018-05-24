@@ -38,24 +38,26 @@ timestamps {
 			
 			stage('Compile Maven Plugin'){
 			   def mvnCommand = 'clean install -DskipTests' 
-			   def pluginResourcePath = 'src/main/resources'
+			   def pluginResourcePath = 'jsparrow-maven-plugin/src/main/resources'
 			   def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'
                dir('jsparrow-standalone-adapter'){
 			   	 sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
 			   }			   
 			   def manifest = 'manifest.standalone'
-			   def manifestContent = sh(script: 'ls ${jSparrowTargetPath}', returnStdout: true)
+			   def manifestContent = sh(script: 'ls $jSparrowTargetPath', returnStdout: true)
 			   
-			   dir('jsparrow-maven-plugin/${pluginResourcePath}'){
+			   dir('jsparrow-maven-plugin/src/main/resources'){
 			     writeFile file: '${manifest}', text: '${manifestContent}'
 			   }
+			 
+			   // Copy required dependencies into plugin resource folder
+			   sh("cp ${jSparrowTargetPath}/* ${pluginResourcePath}")
+
 			   dir('jsparrow-maven-plugin'){
 			      sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
 			   }
 			}
 			
-	
-	
 			wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, debug: true, screen: '1366x768x24', shutdownWithBuild: true, timeout: 10]) {
 			// X virtual framebuffer (virtual X window display) is needed for plugin tests
 			// wrap([$class: 'Xvfb']) {
