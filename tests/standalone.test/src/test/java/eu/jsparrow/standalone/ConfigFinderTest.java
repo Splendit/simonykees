@@ -151,27 +151,30 @@ public class ConfigFinderTest {
 
 		@Test
 		public void getYAMLFilePath_multipleMatches_firstMatchReturned() throws IOException {
-			String firstMatch = "CONFIG.YAML";
+			String expectedFirstMatch = "CONFIG.YAML";
 
-			folder.newFile(firstMatch);
+			folder.newFile(expectedFirstMatch);
 			folder.newFile("config.yaml");
 			folder.newFile("config.yml");
 			folder.newFile("Config.yaml");
 			folder.newFile("Config.yml");
 			folder.newFile("COnfig.yml");
 
-			String absolutePathFirstMatch = String.format("%s/%s", folder.getRoot()
-				.getAbsolutePath(), firstMatch);
+			String absolutePathExpectedFirstMatch = String.format("%s/%s", folder.getRoot()
+				.getAbsolutePath(), expectedFirstMatch);
 
 			Path path = Paths.get(folder.getRoot()
 				.getAbsolutePath());
 
 			Optional<String> configFile = configFinder.getYAMLFilePath(path);
 
-			assertEquals(
-					String.format("First valid config file '%s' should be found and not '%s'", firstMatch,
-							StringUtils.substringAfterLast(configFile.get(), "/")),
-					absolutePathFirstMatch, configFile.get());
+			String configFileName = "<empty>";
+			if (configFile.isPresent()) {
+				configFileName = StringUtils.substringAfterLast(configFile.get(), "/");
+			}
+
+			assertEquals(String.format("Expected the first valid config file to be '%s' and not '%s'",
+					expectedFirstMatch, configFileName), absolutePathExpectedFirstMatch, configFile.get());
 		}
 	}
 }
