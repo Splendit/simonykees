@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.maven.model.Plugin;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
@@ -97,6 +98,30 @@ public class MavenAdapter {
 		setRootProject(rootProject);
 		this.log = log;
 		this.sessionProjects = new HashSet<>();
+	}
+
+	public void setUp(MavenParameters parameters, List<MavenProject> projects)
+			throws InterruptedException, MojoExecutionException {
+
+		if (isJsparrowStarted(rootProject)) {
+			setJsparrowRunningFlag();
+			log.error(NLS.bind(Messages.StandaloneAdapter_jSparrowAlreadyRunning, rootProject.getArtifactId()));
+			throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
+		}
+
+		setUp(parameters);
+		setProjectIds(projects);
+		lockProjects();
+		
+		for (MavenProject mavenProject : projects) {
+			addProjectConfiguration(mavenProject, defaultYamlFile);
+		}
+		log.info(Messages.RefactorMojo_allProjectsLoaded);
+	}
+	
+	public void setUp(MavenParameters parameters) throws InterruptedException {
+		prepareWorkingDirectory();
+		addInitialConfiguration(parameters);
 	}
 
 	/**

@@ -9,6 +9,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
+import eu.jsparrow.maven.adapter.BundleStarter;
+import eu.jsparrow.maven.adapter.MavenAdapter;
 import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.StandaloneAdapter;
 import eu.jsparrow.maven.enums.StandaloneMode;
@@ -52,10 +54,13 @@ public class ListAllRulesMojo extends AbstractMojo {
 
 		String mode = StandaloneMode.LIST_RULES.name();
 
-		StandaloneAdapter serviceInstance = new StandaloneAdapter();
-		MavenParameters config = new MavenParameters(mode);
+		MavenParameters parameters = new MavenParameters(mode);
+		parameters.setRuleId(ruleId);
+		StandaloneAdapter serviceInstance = new StandaloneAdapter(project, new BundleStarter(log));
+		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		try {
-			serviceInstance.loadStandalone(project, config, log);
+			mavenAdapter.setUp(parameters);
+			serviceInstance.loadStandalone(mavenAdapter);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());

@@ -15,8 +15,8 @@ public class MavenParameters {
 	private String mode;
 	private boolean useDefaultConfig;
 	private String ruleId;
-	private String license;
-	private String url;
+	private String license = "";
+	private String url = "";
 	private boolean devMode;
 
 	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault,

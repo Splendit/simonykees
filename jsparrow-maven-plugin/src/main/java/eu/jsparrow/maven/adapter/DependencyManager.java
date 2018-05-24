@@ -26,6 +26,7 @@ import eu.jsparrow.maven.i18n.Messages;
 public class DependencyManager {
 
 	protected static final String OUTPUT_DIRECTORY_OPTION_KEY = "outputDirectory"; //$NON-NLS-1$
+
 	/**
 	 * The output directory name must match with the one expected by
 	 * {@link eu.jsparrow.standalone.StandaloneConfig}. The full path used in
@@ -39,23 +40,25 @@ public class DependencyManager {
 	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
 
 	private Log log;
+	private EmbeddedMaven embeddedMaven;
 
-	public DependencyManager(Log log) {
+	public DependencyManager(Log log, EmbeddedMaven embeddedMaven) {
 		this.log = log;
+		this.embeddedMaven = embeddedMaven;
 	}
 
 	/**
 	 * Executes maven goal copy-dependencies on the project to copy all resolved
 	 * needed dependencies to the temp folder for use from bundles.
 	 */
-	public void extractAndCopyDependencies(MavenProject project, String mavenHome) {
+	public void extractAndCopyDependencies(MavenProject project) {
 		log.debug(Messages.DependencyManager_extractAndCopyDependencies);
-
 		final InvocationRequest request = new DefaultInvocationRequest();
 		final Properties props = new Properties();
 		prepareDefaultRequest(project, request, props);
 		final Invoker invoker = new DefaultInvoker();
-		invokeMaven(invoker, request, mavenHome);
+		embeddedMaven.prepareMaven();
+		invokeMaven(invoker, request, embeddedMaven.getMavenHome());
 	}
 
 	/**

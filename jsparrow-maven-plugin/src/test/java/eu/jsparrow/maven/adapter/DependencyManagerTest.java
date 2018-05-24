@@ -22,12 +22,16 @@ import org.mockito.ArgumentCaptor;
 public class DependencyManagerTest {
 
 	private Log log;
+	private EmbeddedMaven embeddedMaven;
 	private DependencyManager dependencyManager;
+	
 
 	@Before
 	public void setUp() {
 		log = mock(Log.class);
-		dependencyManager = new DependencyManager(log);
+		embeddedMaven = mock(EmbeddedMaven.class);
+		
+		dependencyManager = new DependencyManager(log, embeddedMaven);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
