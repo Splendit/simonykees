@@ -1,13 +1,13 @@
 #!/bin/bash
 
 readonly TMP_DIR="/tmp/jmpInstall"
-readonly TMP_ZIP="${TMP_DIR}/jsparrow-maven-plugin.tar.gz"
+readonly TMP_JAR="${TMP_DIR}/jsparrow-maven-plugin.jar"
 
 # Parameters
 VERBOSE=0
 VERSION="0.5.0-SNAPSHOT"
 URL=
-ZIP_FILE=
+JAR_FILE=
 WORK_DIR=$(pwd)
 
 
@@ -28,17 +28,17 @@ main(){
   # create temporary directory
   setup_tmp_dir
   
-  # Download tar file
-  if [[ -n ${ZIP_FILE} ]]; then
-    move_zip
+  if [[ -n ${JAR_FILE} ]]; then
+    move_jar
   else
     download
   fi
 
   # unzip archive
-  unzip
+  extract_pom
   # install from archive
   install 
+
   print_success 
 }
 
@@ -59,7 +59,7 @@ function setup_tmp_dir(){
 }
 
 function parse_arguments(){
-  while getopts ":hlv:u:z:" o; do
+  while getopts ":hlv:j:z:" o; do
     case "${o}" in
       l)
         VERBOSE=1
@@ -67,8 +67,8 @@ function parse_arguments(){
       u)
         URL=${OPTARG}
         ;;
-      z)
-        ZIP_FILE=${OPTARG}
+      j)
+        JAR_FILE=${OPTARG}
         ;;
       v)
         VERSION=${OPTARG}
@@ -89,58 +89,63 @@ function parse_arguments(){
   shift $((OPTIND-1))
 
   # Url and Zip are mutually exclusive
-  if [[ -n ${URL} ]] && [[ -n ${ZIP_FILE} ]]; then
+  if [[ -n ${URL} ]] && [[ -n ${JAR_FILE} ]]; then
      printf "Invalid argument. You must not specify both download link and zip file.\nRun './install -h' for usage.\n"
     exit 1
   fi
   
   # Must specify at least one
-  if [[ -z ${URL} ]] && [[ -z ${ZIP_FILE} ]]; then
+  if [[ -z ${URL} ]] && [[ -z ${JAR_FILE} ]]; then
     printf "Invalid argument. You must specify either a download link or a zip file.\nRun './install -h' for usage.\n"
     exit 1
   fi
   
 }
 
-function move_zip() {
+function move_jar() {
   printf "\nMoving archive to temporary folder...\n"
-  if [[ ! -f "${ZIP_FILE}" ]]; then
-    printf "The specified file ${ZIP_FILE} does not exist. Aborting.\n"
+  if [[ ! -f "${JAR_FILE}" ]]; then
+    printf "The specified file ${JAR_FILE} does not exist. Aborting.\n"
     exit 1;
   else
-    cp ${ZIP_FILE} ${TMP_ZIP}
+    cp ${JAR_FILE} ${TMP_JAR}
   fi
 }
 
 function download() {
   # Download fresh maven plugin if it doesnt exist
-
   if  [[ ! -f "${zipPath}" ]]; then
     printf "\nDownloading jSparrow Maven Plugin archive to temporary directory...\n"
     wget $( (( VERBOSE == 0 )) && printf %s "-q" ) \
       --show-progress \
       "${URL}" \
-      -O "${TMP_ZIP}"
+      -O "${TMP_JAR}"
     rc=$?; if [[ $rc != 0 ]]; then echo "Failed to download achive from ${URL}, aborting"; exit $rc; fi
   else
     printf "\nExisting archive file found, skipping download.\n"
   fi
 }
 
-function unzip(){
-  printf "\nUnpacking jSparrow Maven Plugin from achive...\n"
+function extract_pom() {
+  printf "\nExtracting pom.xml...\n"
+  local pomFile="META-INF/maven/eu.jsparrow/jsparrow-maven-plugin/pom.xml"
+  cd ${TMP_DIR}
+  jar \
+    $( (( VERBOSE == 1 )) && printf %s "-vxf" ) \
+    $( (( VERBOSE == 0 )) && printf %s "-xf" ) \
+    ${TMP_JAR}
+  rc=$?; if [[ $rc != 0 ]]; then echo "Failed to extract ${TMP_JAR}, aborting"; exit $rc; fi
   
-  tar $( (( VERBOSE == 1 )) && printf %s "-vzxf" ) \
-    $( (( VERBOSE == 0 )) && printf %s "-zxf" ) \
-    ${TMP_ZIP} \
-    -C ${TMP_DIR}
-  rc=$?; if [[ $rc != 0 ]]; then echo "Failed to unpack archive, exiting";  exit $rc; fi
-  
+  mv "${pomFile}" "pom.xml"
+  rc=$?; if [[ $rc != 0 ]]; then echo "Failed to find pom.xml, aborting"; exit $rc; fi
+
+  cd "${HOME_DIR}"
 }
+
 
 function install(){
   printf "\nInstalling jSparrow Maven Plugin...\n"
-  local jarFile="${TMP_DIR}/jsparrow-maven-plugin-${VERSION}.jar"
+  local jarFile="${TMP_DIR}/jsparrow-maven-plugin.jar"
   local pomFile="${TMP_DIR}/pom.xml"
   mvn install:install-file \
     $( (( VERBOSE == 0 )) && printf %s "-q" )  \
@@ -179,8 +184,8 @@ Install the jSparrow Maven Plugin from the distribution archive.
 
 Options: 
   -l        Enable verbose mode
-  -z file   Specify a local file as distribution archive. Mutually exclusive with -u. 
-  -u url    Specify an url to download the distribution archive from. Mutally exclusive with -z.
+  -j file   Specify a local jar file to install. Mutually exclusive with -u. 
+  -u url    Specify an url to download the distribution archive from. Mutally exclusive with -j.
   -v ver    Specify the version of the jSparrow Maven Plugin that you want to install. 
   -h        Display usage information. 
 EOF
