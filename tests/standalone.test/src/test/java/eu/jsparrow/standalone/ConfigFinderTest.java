@@ -40,7 +40,7 @@ public class ConfigFinderTest {
 	/**
 	 * Base setup used for all other inner classes.
 	 */
-	public static abstract class ConfigFinderBaseTest {
+	public abstract static class ConfigFinderBaseTest {
 		ConfigFinder configFinder;
 
 		@Mock
