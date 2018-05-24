@@ -21,8 +21,8 @@ public class ConfigFinder {
 		.lookupClass());
 
 	// allows the file name to be config.yml or config.yaml, case insensitive
-	private static final Pattern CONFIG_FILE_NAME_PATTERN = Pattern
-		.compile("^[Cc][Oo][Nn][Ff][Ii][Gg]\\.[Yy][Aa]{0,1}[Mm][Ll]$"); //$NON-NLS-1$
+	private static final Pattern CONFIG_FILE_NAME_PATTERN = Pattern.compile("^config\\.y[a]{0,1}ml$", //$NON-NLS-1$
+			Pattern.CASE_INSENSITIVE);
 
 	public Optional<String> getYAMLFilePath(Path filePath) {
 
