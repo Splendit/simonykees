@@ -93,7 +93,7 @@ public class ConfigFinderTest {
 		@Parameters(name = "{index}: Using invalid input ({0})")
 		public static String[] data() {
 			return new String[] { "_config.yml", "config.yamll", "Config.YAL", "CONFIGYML", "c_onfig.yml", "config.xml",
-					"random.yml" };
+					"random.yml", "config:yml" };
 		}
 
 		@Parameter
