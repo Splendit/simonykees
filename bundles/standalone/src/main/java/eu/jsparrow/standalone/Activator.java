@@ -2,6 +2,8 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -257,14 +259,23 @@ public class Activator implements BundleActivator {
 	}
 
 	private YAMLStandaloneConfig tryLoadStandaloneConfig() {
-		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
-		YAMLStandaloneConfig yamlStandaloneConfig = null;
-		try {
-			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
-		} catch (YAMLStandaloneConfigException e) {
-			logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
-		}
-		return yamlStandaloneConfig;
+		String filePath = String.format("%s/.config/jsparrow-standalone/", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
 
+		YAMLStandaloneConfig yamlStandaloneConfig = null;
+		
+		Optional<String> configFile = new ConfigFinder().getYAMLFilePath(Paths.get(filePath));
+		if (configFile.isPresent()) {
+			try {
+				yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(configFile.get()));
+			} catch (YAMLStandaloneConfigException e) {
+				logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
+			}
+		} else {
+			logger.info("No config.yaml file found in '{}'", filePath); //$NON-NLS-1$
+		}
+
+		return yamlStandaloneConfig;
 	}
+
+	
 }
