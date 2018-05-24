@@ -193,7 +193,7 @@ EOF
 
 function setup_output () {
   # Pretty much from here:
-  # https://serverfault.com/questions/414810/sh-conditional-redirectio://serverfault.com/questions/414810/sh-conditional-redirection
+  # https://serverfault.com/a/414845
   exec 6>/dev/null
   if [[ $VERBOSE -eq 1 ]]; then
     exec 6>&1
