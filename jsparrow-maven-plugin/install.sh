@@ -58,9 +58,9 @@ function setup_tmp_dir(){
 }
 
 function parse_arguments(){
-  while getopts ":hlv:j:u:" o; do
+  while getopts ":hxv:j:u:" o; do
     case "${o}" in
-      l)
+      x)
         VERBOSE=1
         ;;
       u)
@@ -183,7 +183,7 @@ Usage: ./install [OPTIONS]
 Install the jSparrow Maven Plugin from the distribution archive.
 
 Options: 
-  -l        Enable verbose mode
+  -x        Enable verbose mode
   -j file   Specify a local jar file to install. Mutually exclusive with -u. 
   -u url    Specify an url to download the distribution archive from. Mutally exclusive with -j.
   -v ver    Specify the version of the jSparrow Maven Plugin that you want to install. 
