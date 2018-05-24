@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,16 +29,15 @@ public class ConfigFinder {
 
 		Optional<String> match = Optional.empty();
 
-			try {
 		if (filePath.toFile()
 			.exists()) {
+			try (Stream<Path> fileList = Files.list(filePath)) {
 				/*
 				 * We always get the first match, sorted so it's always the
 				 * same. "CONFIG.YAML" would always be found first.
 				 */
-				match = Files.list(filePath)
-					.map(file -> file.getFileName()
-						.toString())
+				match = fileList.map(file -> file.getFileName()
+					.toString())
 					.filter(name -> CONFIG_FILE_NAME_PATTERN.matcher(name)
 						.matches())
 					.sorted()
