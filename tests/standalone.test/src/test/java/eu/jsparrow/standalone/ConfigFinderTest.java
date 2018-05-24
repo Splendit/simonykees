@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -151,30 +152,28 @@ public class ConfigFinderTest {
 
 		@Test
 		public void getYAMLFilePath_multipleMatches_firstMatchReturned() throws IOException {
-			String expectedFirstMatch = "CONFIG.YAML";
+			String expectedFirstFileName = "CONFIG.YAML";
 
-			folder.newFile(expectedFirstMatch);
+			File expectedFirstFile = folder.newFile(expectedFirstFileName);
 			folder.newFile("config.yaml");
 			folder.newFile("config.yml");
 			folder.newFile("Config.yaml");
 			folder.newFile("Config.yml");
 			folder.newFile("COnfig.yml");
 
-			String absolutePathExpectedFirstMatch = String.format("%s/%s", folder.getRoot()
-				.getAbsolutePath(), expectedFirstMatch);
-
 			Path path = Paths.get(folder.getRoot()
 				.getAbsolutePath());
 
 			Optional<String> configFile = configFinder.getYAMLFilePath(path);
 
+			// configFileName is used for a nicer assert message exclusively
 			String configFileName = "<empty>";
 			if (configFile.isPresent()) {
 				configFileName = StringUtils.substringAfterLast(configFile.get(), "/");
 			}
 
 			assertEquals(String.format("Expected the first valid config file to be '%s' and not '%s'",
-					expectedFirstMatch, configFileName), absolutePathExpectedFirstMatch, configFile.get());
+					expectedFirstFileName, configFileName), expectedFirstFile.getAbsolutePath(), configFile.get());
 		}
 	}
 }
