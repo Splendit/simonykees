@@ -12,22 +12,21 @@ WORK_DIR=$(pwd)
 
 
 main(){
-  # We are doing fancy things with verbose mode
-  setup_output
-
-  # getopt goes here, later maybe
   parse_arguments "$@"
+
+  printf "Starting jSparrow Maven Plugin installation...\n"
+  
+  # Enable logging 
+  setup_output
 
   # Check if the neccessary tools are installed
   check_preconditions
-  # clean up if the script fails for some reason
+  # Clean up if the script fails for some reason
   trap clean INT TERM EXIT
-  
-  printf "Starting jSparrow Maven Plugin installation...\n"
 
   # create temporary directory
   setup_tmp_dir
-  
+
   if [[ -n ${JAR_FILE} ]]; then
     move_jar
   else
@@ -59,7 +58,7 @@ function setup_tmp_dir(){
 }
 
 function parse_arguments(){
-  while getopts ":hlv:j:z:" o; do
+  while getopts ":hlv:j:u:" o; do
     case "${o}" in
       l)
         VERBOSE=1
@@ -90,13 +89,13 @@ function parse_arguments(){
 
   # Url and Zip are mutually exclusive
   if [[ -n ${URL} ]] && [[ -n ${JAR_FILE} ]]; then
-     printf "Invalid argument. You must not specify both download link and zip file.\nRun './install -h' for usage.\n"
+     printf "Invalid argument. You must not specify both download link and jar file.\nRun './install -h' for usage.\n"
     exit 1
   fi
   
   # Must specify at least one
   if [[ -z ${URL} ]] && [[ -z ${JAR_FILE} ]]; then
-    printf "Invalid argument. You must specify either a download link or a zip file.\nRun './install -h' for usage.\n"
+    printf "Invalid argument. You must specify either a download link or a jar file.\nRun './install -h' for usage.\n"
     exit 1
   fi
   
@@ -135,7 +134,7 @@ function extract_pom() {
     $( (( VERBOSE == 0 )) && printf %s "-xf" ) \
     ${TMP_JAR}
   rc=$?; if [[ $rc != 0 ]]; then echo "Failed to extract ${TMP_JAR}, aborting"; exit $rc; fi
-  
+ 
   mv "${pomFile}" "pom.xml"
   rc=$?; if [[ $rc != 0 ]]; then echo "Failed to find pom.xml, aborting"; exit $rc; fi
 
@@ -172,6 +171,7 @@ EOF
 }
 
 function clean(){
+  log "\nCleanup, removing temporary directory\n"
   rm -rf ${TMP_DIR}
 }
 
