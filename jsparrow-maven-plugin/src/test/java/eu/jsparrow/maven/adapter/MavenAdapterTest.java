@@ -1,40 +1,65 @@
 package eu.jsparrow.maven.adapter;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 @SuppressWarnings("nls")
 public class MavenAdapterTest {
 
 	private MavenProject project;
 	private Log log;
-
-	private File workingDirectory;
-
 	private MavenAdapter mavenAdapter;
 	private Path path;
+	private WorkingDirectory workingDirectory;
+	private String groupId = "group-id";
+	private String artifactId = "artifact-id";
+	Properties properties;
+	private File jsparrowTemDirectory;
+	private File jsparrowYml;
+	
+	@Rule
+	public TemporaryFolder directory = new TemporaryFolder();
 
 	@Before
-	public void setUp() {
+	public void setUp() throws IOException {
 		project = mock(MavenProject.class);
 		log = mock(Log.class);
-		workingDirectory = mock(File.class);
 		path = mock(Path.class);
-
+		workingDirectory = mock(WorkingDirectory.class);
 		mavenAdapter = new TestableMavenAdapter(project, log);
+
+		jsparrowTemDirectory = directory.newFolder("temp_jSparrow");
+		File projectBaseDir = directory.newFolder("project_base_dir");
+		jsparrowYml = new File(projectBaseDir.getPath() + File.separator + "jsparrow.yml");
+		
+		when(project.getGroupId()).thenReturn(groupId);
+		when(project.getArtifactId()).thenReturn(artifactId);
+		when(project.getBasedir()).thenReturn(projectBaseDir);
+		properties = mock(Properties.class);
+		when(project.getProperties()).thenReturn(properties);
+		
+		
 	}
 
 	@Test
@@ -55,29 +80,30 @@ public class MavenAdapterTest {
 		verify(config).getUrl();
 		verify(config).getProfile();
 	}
-
-	@Test(expected = InterruptedException.class)
-	public void prepareWorkingDirectory_directoryDoesNotExistAndMkdirsNotWorking() throws Exception {
-		when(workingDirectory.exists()).thenReturn(false);
-		when(workingDirectory.mkdirs()).thenReturn(false);
-
-		mavenAdapter.prepareWorkingDirectory();
-
-		assertTrue(false);
-	}
+	
+	  @Test(expected = InterruptedException.class) 
+	  public void prepareWorkingDirectory_directoryDoesNotExistAndMkdirsNotWorking() throws Exception { 
+		jsparrowTemDirectory = mock(File.class);
+	    when(jsparrowTemDirectory.exists()).thenReturn(false); 
+	    when(jsparrowTemDirectory.mkdirs()).thenReturn(false); 
+	 
+	    mavenAdapter.prepareWorkingDirectory(); 
+	 
+	    assertTrue(false); 
+	  } 
 
 	@Test
 	public void prepareWorkingDirectory_directoryDoesNotExistAndMkdirsIsWorking() throws Exception {
 
 		String absolutePath = "somePath";
-
-		when(workingDirectory.exists()).thenReturn(false);
-		when(workingDirectory.mkdirs()).thenReturn(true);
-		when(workingDirectory.getAbsolutePath()).thenReturn(absolutePath);
+		jsparrowTemDirectory = mock(File.class);
+		when(jsparrowTemDirectory.exists()).thenReturn(false);
+		when(jsparrowTemDirectory.mkdirs()).thenReturn(true);
+		when(jsparrowTemDirectory.getAbsolutePath()).thenReturn(absolutePath);
 
 		mavenAdapter.prepareWorkingDirectory();
 
-		verify(workingDirectory).getAbsolutePath();
+		verify(jsparrowTemDirectory).getAbsolutePath();
 		assertTrue(mavenAdapter.getConfiguration()
 			.getOrDefault("osgi.instance.area", "asdf") //$NON-NLS-1$ //$NON-NLS-2$
 			.equals(absolutePath));
@@ -132,6 +158,49 @@ public class MavenAdapterTest {
 		String actual = mavenAdapter.joinWithComma("project.one.id", "project.two.id");
 		assertTrue(expected.equals(actual));
 	}
+	
+	@Test
+	public void setUp_listOfProjects() throws Exception {
+		String expectedCompilerSource = "expectedCompilerSource";
+		MavenParameters mavenParameters = new MavenParameters("list-rules");
+
+		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(false);
+		when(project.getPackaging()).thenReturn("jar");
+		when(path.toFile()).thenReturn(jsparrowYml);
+		when(properties.getProperty("maven.compiler.source")).thenReturn(expectedCompilerSource);
+		
+		mavenAdapter.setUp(mavenParameters, Collections.singletonList(project), jsparrowYml);
+		
+		Map<String, String> configurations = mavenAdapter.getConfiguration();
+		assertTrue(configurations.containsKey("NATURE.IDS." + groupId + "." + artifactId));
+	}
+	
+	@Test(expected = MojoExecutionException.class)
+	public void setUp_jsparrowAlreadyRunning() throws Exception {
+		MavenParameters mavenParameters = new MavenParameters("list-rules");
+
+		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(true);
+		
+		mavenAdapter.setUp(mavenParameters, Collections.singletonList(project), jsparrowYml);
+		
+	    assertTrue(false); 
+	}
+	
+	@Test
+	public void setUp_initialConfiguration() throws InterruptedException {
+		String expectedUrl = "https://localhost:8081";
+		String expectedLicenseKey = "license-key";
+		String expectedMode = "list-rules";
+		MavenParameters mavenParameters = new MavenParameters(expectedMode, expectedLicenseKey, expectedUrl);
+		
+		mavenAdapter.setUp(mavenParameters);
+		
+		Map<String, String> configuration = mavenAdapter.getConfiguration();
+		assertTrue(configuration.containsKey("URL"));
+		assertEquals(expectedUrl, configuration.getOrDefault("URL", ""));
+		assertEquals(expectedLicenseKey, configuration.getOrDefault("LICENSE", ""));
+		assertEquals(expectedMode, configuration.getOrDefault("STANDALONE.MODE", expectedMode));
+	}
 
 	class TestableMavenAdapter extends MavenAdapter {
 
@@ -139,17 +208,24 @@ public class MavenAdapterTest {
 			super(project, log);
 		}
 
-		protected File createWorkingDirectory() {
-			return workingDirectory;
+		@Override
+		protected File createJsparrowTempDirectory() {
+			return jsparrowTemDirectory;
 		}
 
-		protected Path joinPaths(File parent, File child) {
+		@Override
+		protected Path joinPaths(File parent, String child) {
 			return path;
 		}
 
+		@Override
 		protected void setSystemProperty(String key, String value) {
 
 		}
-
+		
+		@Override
+		protected WorkingDirectory createWorkingDirectory(File directory) {
+			return workingDirectory;
+		}
 	}
 }

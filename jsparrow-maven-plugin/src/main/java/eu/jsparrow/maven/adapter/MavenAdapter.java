@@ -95,7 +95,9 @@ public class MavenAdapter {
 		workingDirectoryWatcher.lockProjects();
 
 		for (MavenProject mavenProject : projects) {
-			addProjectConfiguration(mavenProject, defaultYamlFile);
+			if(!isAggregateProject(mavenProject)) {				
+				addProjectConfiguration(mavenProject, defaultYamlFile);
+			}
 		}
 		log.info(Messages.RefactorMojo_allProjectsLoaded);
 		return workingDirectoryWatcher;
@@ -129,10 +131,6 @@ public class MavenAdapter {
 	private void addProjectConfiguration(MavenProject project, File configFile) {
 		log.info(String.format(Messages.MavenAdapter_addingProjectConfiguration, project.getName()));
 
-		if (isAggregateProject(project)) {
-			return;
-		}
-
 		File baseDir = project.getBasedir();
 		String projectPath = baseDir.getAbsolutePath();
 		String projectIdentifier = findProjectIdentifier(project);
@@ -142,7 +140,7 @@ public class MavenAdapter {
 		configuration.put(ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
 		configuration.put(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
 		configuration.put(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, artifactId);
-		String yamlFilePath = findYamlFilePath(project, configFile);
+		String yamlFilePath = findYamlFilePath(project, configFile.getName());
 		log.info(Messages.MavenAdapter_jSparrowConfigurationFile + yamlFilePath);
 		configuration.put(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
 		configuration.put(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
@@ -171,7 +169,7 @@ public class MavenAdapter {
 	 *            expected yaml file
 	 * @return the path of the corresponding yaml file
 	 */
-	protected String findYamlFilePath(MavenProject project, File yamlFile) {
+	protected String findYamlFilePath(MavenProject project, String yamlFile) {
 		File projectYamlFile = joinPaths(project.getBasedir(), yamlFile).toFile();
 		if (projectYamlFile.exists()) {
 			return projectYamlFile.getAbsolutePath();
@@ -183,17 +181,18 @@ public class MavenAdapter {
 			}
 			File parentBaseDir = parent.getBasedir();
 
-			Path parentYamlPath = joinPaths(yamlFile, parentBaseDir);
+			Path parentYamlPath = joinPaths(parentBaseDir, yamlFile);
 			if (parentYamlPath.toFile()
 				.exists()) {
 				return parentYamlPath.toString();
 			}
 		}
-		return yamlFile.getAbsolutePath();
+		return joinPaths(rootProject.getBasedir(), yamlFile).toString();
 	}
 
-	protected Path joinPaths(File yamlFile, File parentBaseDir) {
-		return Paths.get(parentBaseDir.getAbsolutePath(), yamlFile.getPath());
+	protected Path joinPaths(File parentBaseDir, String yamlFile) {
+		String baseDir = parentBaseDir.getAbsolutePath();
+		return Paths.get(parentBaseDir.getAbsolutePath(), yamlFile);
 	}
 
 	/**
@@ -270,7 +269,7 @@ public class MavenAdapter {
 	 */
 	public WorkingDirectory prepareWorkingDirectory() throws InterruptedException {
 
-		File directory = createWorkingDirectory();
+		File directory = createJsparrowTempDirectory();
 
 		if (directory.exists() || directory.mkdirs()) {
 			String directoryAbsolutePath = directory.getAbsolutePath();
@@ -282,6 +281,10 @@ public class MavenAdapter {
 		} else {
 			throw new InterruptedException(Messages.MavenAdapter_couldnotCreateTempFolder);
 		}
+		return createWorkingDirectory(directory);
+	}
+
+	protected WorkingDirectory createWorkingDirectory(File directory) {
 		return new WorkingDirectory(directory, sessionProjects, log);
 	}
 
@@ -289,7 +292,7 @@ public class MavenAdapter {
 		System.setProperty(key, directoryAbsolutePath);
 	}
 
-	protected File createWorkingDirectory() {
+	protected File createJsparrowTempDirectory() {
 		return new File(WorkingDirectory.calculateJsparrowTempFolderPath()).getAbsoluteFile();
 	}
 
