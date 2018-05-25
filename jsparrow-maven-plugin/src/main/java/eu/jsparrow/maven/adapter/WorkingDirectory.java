@@ -41,7 +41,7 @@ public class WorkingDirectory {
 		}
 
 		try {
-			deleteSessionRelatedFiles(directory);
+			deleteSessionRelatedFiles();
 			boolean emptyLockFile = cleanLockFile();
 			if (emptyLockFile) {
 				deleteChildren(directory);
@@ -61,22 +61,22 @@ public class WorkingDirectory {
 	 *            the file representing the parent directory containing session
 	 *            related files.
 	 */
-	private void deleteSessionRelatedFiles(File parentDirectory) {
-		String[] children = parentDirectory.list();
+	private void deleteSessionRelatedFiles() {
+		String[] children = directory.list();
 		if (children == null) {
 			return;
 		}
 
 		for (String file : children) {
 			if (isSessionRelated(file)) {
-				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
+				File currentFile = new File(directory.getAbsolutePath(), file);
 				deleteChildren(currentFile);
 				deleteIfExists(currentFile);
 			}
 		}
 	}
 
-	protected void deleteIfExists(File currentFile) {
+	private void deleteIfExists(File currentFile) {
 		try {
 			Files.deleteIfExists(currentFile.toPath());
 		} catch (IOException e) {
