@@ -174,7 +174,7 @@ public class MavenAdapter {
 	protected String findYamlFilePath(MavenProject project, File yamlFile) {
 		File projectYamlFile = joinPaths(project.getBasedir(), yamlFile).toFile();
 		if (projectYamlFile.exists()) {
-			return yamlFile.getAbsolutePath();
+			return projectYamlFile.getAbsolutePath();
 		}
 		MavenProject parent = project;
 		while ((parent = parent.getParent()) != null) {

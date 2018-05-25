@@ -17,7 +17,6 @@ import org.osgi.framework.BundleException;
 
 import eu.jsparrow.maven.adapter.BundleStarter;
 import eu.jsparrow.maven.adapter.DependencyManager;
-import eu.jsparrow.maven.adapter.EmbeddedMaven;
 import eu.jsparrow.maven.adapter.MavenAdapter;
 import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.StandaloneLoader;
@@ -87,12 +86,11 @@ public class RefactorMojo extends AbstractMojo {
 		Log log = getLog();
 		MavenParameters parameters = new MavenParameters(StandaloneMode.REFACTOR.name(), license, url, profile, useDefaultConfig, devMode);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
-		EmbeddedMaven embeddedMaven = new EmbeddedMaven(log, mavenHome);
 		
 		try {
 			WorkingDirectory workingDir = mavenAdapter.setUp(parameters, mavenSession.getAllProjects(), configFile);
 			StandaloneLoader loader = new StandaloneLoader(project, new BundleStarter(workingDir, log));
-			loader.loadStandalone(mavenAdapter, new DependencyManager(log, embeddedMaven));
+			loader.loadStandalone(mavenAdapter, new DependencyManager(log, mavenHome));
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());
