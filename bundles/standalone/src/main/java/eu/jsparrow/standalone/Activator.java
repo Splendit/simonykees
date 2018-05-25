@@ -2,10 +2,13 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -155,7 +158,7 @@ public class Activator implements BundleActivator {
 			licenseService.stop();
 			try {
 				refactoringInvoker.cleanUp();
-			} catch (IOException e) {
+			} catch (IOException | CoreException e) {
 				logger.debug(e.getMessage(), e);
 				logger.error(e.getMessage());
 				setExitErrorMessage(context, e.getMessage());
@@ -171,7 +174,7 @@ public class Activator implements BundleActivator {
 				licenseService.stop();
 				try {
 					refactoringInvoker.cleanUp();
-				} catch (IOException e) {
+				} catch (IOException | CoreException e) {
 					logger.debug(e.getMessage(), e);
 					logger.error(e.getMessage());
 					setExitErrorMessage(context, e.getMessage());
@@ -256,14 +259,23 @@ public class Activator implements BundleActivator {
 	}
 
 	private YAMLStandaloneConfig tryLoadStandaloneConfig() {
-		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
-		YAMLStandaloneConfig yamlStandaloneConfig = null;
-		try {
-			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
-		} catch (YAMLStandaloneConfigException e) {
-			logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
-		}
-		return yamlStandaloneConfig;
+		String filePath = String.format("%s/.config/jsparrow-standalone/", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
 
+		YAMLStandaloneConfig yamlStandaloneConfig = null;
+		
+		Optional<String> configFile = new ConfigFinder().getYAMLFilePath(Paths.get(filePath));
+		if (configFile.isPresent()) {
+			try {
+				yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(configFile.get()));
+			} catch (YAMLStandaloneConfigException e) {
+				logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
+			}
+		} else {
+			logger.info("No config.yaml file found in '{}'", filePath); //$NON-NLS-1$
+		}
+
+		return yamlStandaloneConfig;
 	}
+
+	
 }
