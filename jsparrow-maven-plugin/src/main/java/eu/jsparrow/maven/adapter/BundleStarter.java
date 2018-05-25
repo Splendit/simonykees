@@ -42,9 +42,11 @@ public class BundleStarter {
 	private Log log;
 	private boolean standaloneStarted = false;
 	private long standaloneBundleID;
+	private WorkingDirectory workingDirectoryWatcher;
 
-	public BundleStarter(Log log) {
+	public BundleStarter(WorkingDirectory workingDirectoryWatcher, Log log) {
 		this.log = log;
+		this.workingDirectoryWatcher = workingDirectoryWatcher;
 		standaloneBundleID = 0;
 	}
 
@@ -231,11 +233,15 @@ public class BundleStarter {
 	public void shutdown(MavenAdapter mavenAdapter) {
 		shutdownFramework();
 		if (!mavenAdapter.isJsparrowRunningFlag()) {
-			mavenAdapter.cleanUp();
+			workingDirectoryWatcher.cleanUp();
 		}
 	}
 
 	public boolean isStandaloneStarted() {
 		return this.standaloneStarted;
+	}
+	
+	public WorkingDirectory getWorkingDirectoryWatcher() {
+		return this.workingDirectoryWatcher;
 	}
 }

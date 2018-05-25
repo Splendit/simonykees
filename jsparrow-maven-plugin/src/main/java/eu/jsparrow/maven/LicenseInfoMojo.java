@@ -15,6 +15,7 @@ import eu.jsparrow.maven.adapter.BundleStarter;
 import eu.jsparrow.maven.adapter.MavenAdapter;
 import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.StandaloneAdapter;
+import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
 /**
@@ -55,9 +56,9 @@ public class LicenseInfoMojo extends AbstractMojo {
 		String mode = StandaloneMode.LICENSE_INFO.name();
 		MavenParameters parameters = new MavenParameters(mode, license, url);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
-		StandaloneAdapter serviceInstance = new StandaloneAdapter(project, new BundleStarter(log));
 		try {
-			mavenAdapter.setUp(parameters);
+			WorkingDirectory workingDir = mavenAdapter.setUp(parameters);
+			StandaloneAdapter serviceInstance = new StandaloneAdapter(project, new BundleStarter(workingDir, log));
 			serviceInstance.loadStandalone(mavenAdapter);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);

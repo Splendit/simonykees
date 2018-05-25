@@ -45,7 +45,7 @@ public class EmbeddedMaven {
 	 * location.
 	 */
 	public String prepareMaven() {
-		String jsarrowTempPath = MavenAdapter.calculateJsparrowTempFolderPath();
+		String jsarrowTempPath = WorkingDirectory.calculateJsparrowTempFolderPath();
 		String newMavenHome = null;
 		String home = getMavenHome();
 		if (null != home && !home.isEmpty() && !home.endsWith("EMBEDDED")) { //$NON-NLS-1$

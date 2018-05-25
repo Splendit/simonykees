@@ -21,6 +21,7 @@ import eu.jsparrow.maven.adapter.EmbeddedMaven;
 import eu.jsparrow.maven.adapter.MavenAdapter;
 import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.StandaloneAdapter;
+import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
 /**
@@ -84,14 +85,13 @@ public class RefactorMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 
 		Log log = getLog();
-		String mode = StandaloneMode.REFACTOR.name();
-		MavenParameters parameters = new MavenParameters(mode, license, url, profile, useDefaultConfig, devMode);
-		MavenAdapter mavenAdapter = new MavenAdapter(project, log, configFile);
-		StandaloneAdapter standaloneAdapter = new StandaloneAdapter(project, new BundleStarter(log));
-		
+		MavenParameters parameters = new MavenParameters(StandaloneMode.REFACTOR.name(), license, url, profile, useDefaultConfig, devMode);
+		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		EmbeddedMaven embeddedMaven = new EmbeddedMaven(log, mavenHome);
+		
 		try {
-			mavenAdapter.setUp(parameters, mavenSession.getAllProjects());
+			WorkingDirectory workingDir = mavenAdapter.setUp(parameters, mavenSession.getAllProjects(), configFile);
+			StandaloneAdapter standaloneAdapter = new StandaloneAdapter(project, new BundleStarter(workingDir, log));
 			standaloneAdapter.loadStandalone(mavenAdapter, new DependencyManager(log, embeddedMaven));
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);

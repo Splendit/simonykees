@@ -41,7 +41,8 @@ public class StandaloneAdapter {
 				if (bundleStarter != null) {
 					bundleStarter.shutdown(mavenAdapterInstance);
 				} else if (mavenAdapterInstance != null && !mavenAdapterInstance.isJsparrowRunningFlag()) {
-					mavenAdapterInstance.cleanUp();
+					WorkingDirectory workingDir = bundleStarter.getWorkingDirectoryWatcher();
+					workingDir.cleanUp();
 				}
 			}));
 	}

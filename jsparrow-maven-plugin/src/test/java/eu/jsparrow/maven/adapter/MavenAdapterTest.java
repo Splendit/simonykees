@@ -21,7 +21,6 @@ public class MavenAdapterTest {
 
 	private MavenProject project;
 	private Log log;
-	private File defaultYamlConfig;
 
 	private File workingDirectory;
 
@@ -32,11 +31,10 @@ public class MavenAdapterTest {
 	public void setUp() {
 		project = mock(MavenProject.class);
 		log = mock(Log.class);
-		defaultYamlConfig = mock(File.class);
 		workingDirectory = mock(File.class);
 		path = mock(Path.class);
 
-		mavenAdapter = new TestableMavenAdapter(project, log, defaultYamlConfig);
+		mavenAdapter = new TestableMavenAdapter(project, log);
 	}
 
 	@Test
@@ -134,25 +132,6 @@ public class MavenAdapterTest {
 	}
 
 	@Test
-	public void findYamlFilePath_parentIsRootProject_shouldReturnFilePath() {
-		MavenProject project = mock(MavenProject.class);
-		File yamlFile = mock(File.class);
-		File parentYmlFile = mock(File.class);
-
-		String expectedPath = "parent/dir/file.yml";
-
-		mavenAdapter.setRootProject(project);
-		mavenAdapter.setDefaultYamlFile(parentYmlFile);
-		when(yamlFile.exists()).thenReturn(false);
-		when(project.getParent()).thenReturn(project);
-		when(yamlFile.getPath()).thenReturn("file.yml");
-		when(parentYmlFile.getAbsolutePath()).thenReturn(expectedPath);
-
-		String actualPath = mavenAdapter.findYamlFilePath(project, yamlFile);
-		assertTrue(actualPath.equals(expectedPath));
-	}
-
-	@Test
 	public void isAggregateProject_hasPomPckage() {
 		MavenProject project = mock(MavenProject.class);
 		when(project.getPackaging()).thenReturn("pom");
@@ -191,8 +170,8 @@ public class MavenAdapterTest {
 
 	class TestableMavenAdapter extends MavenAdapter {
 
-		public TestableMavenAdapter(MavenProject project, Log log, File defaultYamlFile) {
-			super(project, log, defaultYamlFile);
+		public TestableMavenAdapter(MavenProject project, Log log) {
+			super(project, log);
 		}
 
 		protected File createWorkingDirectory() {
