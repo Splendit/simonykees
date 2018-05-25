@@ -119,7 +119,7 @@ public class DependencyManager {
 			log.error(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * If maven home from parameter is usable, use it, otherwise extract maven
 	 * from resources to temp folder, set execute rights and use its maven home
@@ -142,7 +142,7 @@ public class DependencyManager {
 			log.debug(e.getMessage(), e);
 			log.error(e.getMessage());
 		}
-		
+
 		return defaultMavenHome;
 	}
 

@@ -30,7 +30,7 @@ public class StandaloneLoader {
 
 	public void loadStandalone(MavenAdapter mavenAdapter)
 			throws InterruptedException, MojoExecutionException, BundleException {
-		
+
 		addShutDownHook(mavenAdapter);
 		bundleStarter.runStandalone(mavenAdapter.getConfiguration());
 	}

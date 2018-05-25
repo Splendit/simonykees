@@ -21,7 +21,6 @@ import org.osgi.framework.launch.FrameworkFactory;
 
 import eu.jsparrow.maven.i18n.Messages;
 
-
 /**
  * A class containing functionalities for starting/stopping the equinox
  * framework, and loading/starting OSGi bundles.
@@ -240,7 +239,7 @@ public class BundleStarter {
 	public boolean isStandaloneStarted() {
 		return this.standaloneStarted;
 	}
-	
+
 	public WorkingDirectory getWorkingDirectoryWatcher() {
 		return this.workingDirectoryWatcher;
 	}

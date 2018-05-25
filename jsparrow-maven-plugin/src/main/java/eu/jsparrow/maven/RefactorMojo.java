@@ -84,9 +84,10 @@ public class RefactorMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 
 		Log log = getLog();
-		MavenParameters parameters = new MavenParameters(StandaloneMode.REFACTOR.name(), license, url, profile, useDefaultConfig, devMode);
+		String mode = StandaloneMode.REFACTOR.name();
+		MavenParameters parameters = new MavenParameters(mode, license, url, profile, useDefaultConfig, devMode);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
-		
+
 		try {
 			WorkingDirectory workingDir = mavenAdapter.setUp(parameters, mavenSession.getAllProjects(), configFile);
 			StandaloneLoader loader = new StandaloneLoader(project, new BundleStarter(workingDir, log));
@@ -96,5 +97,5 @@ public class RefactorMojo extends AbstractMojo {
 			log.error(e1.getMessage());
 		}
 	}
-	
+
 }

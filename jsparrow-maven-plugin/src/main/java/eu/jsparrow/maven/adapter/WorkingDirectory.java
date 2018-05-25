@@ -15,46 +15,44 @@ import org.apache.maven.plugin.logging.Log;
 import eu.jsparrow.maven.i18n.Messages;
 
 public class WorkingDirectory {
-	
+
 	private static final String LOCK_FILE_NAME = "lock"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 
-	private File workingDirectory;
+	private File directory;
 	private Set<String> sessionRelatedProjects;
 	private Log log;
 
 	public WorkingDirectory(File workingDirectory, Set<String> sessionRelatedProjects, Log log) {
-		this.workingDirectory = workingDirectory;
+		this.directory = workingDirectory;
 		this.sessionRelatedProjects = sessionRelatedProjects;
 		this.log = log;
 	}
 
 	/**
 	 * Cleans classpath and temp directory
-	 * 
-	 * @throws IOException
 	 */
 	public void cleanUp() {
 
 		// CLEAN
-		if (workingDirectory == null || !workingDirectory.exists()) {
+		if (directory == null || !directory.exists()) {
 			return;
 		}
 
 		try {
-			deleteSessionRelatedFiles(workingDirectory);
+			deleteSessionRelatedFiles(directory);
 			boolean emptyLockFile = cleanLockFile();
 			if (emptyLockFile) {
-				deleteChildren(workingDirectory);
-				Files.deleteIfExists(workingDirectory.toPath());
+				deleteChildren(directory);
+				Files.deleteIfExists(directory.toPath());
 			}
 		} catch (IOException e) {
 			log.debug(e.getMessage(), e);
 			log.error(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Deletes the children files related to the projects on the current
 	 * session.
@@ -86,7 +84,7 @@ public class WorkingDirectory {
 			log.error(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Removes the lines in the lock file that are related to the projects of
 	 * the given session.
@@ -120,7 +118,7 @@ public class WorkingDirectory {
 
 		return false;
 	}
-	
+
 	/**
 	 * Recursively deletes all sub-folders from received folder.
 	 * 
@@ -141,13 +139,12 @@ public class WorkingDirectory {
 			}
 		}
 	}
-	
-	
+
 	private boolean isSessionRelated(String file) {
 		return sessionRelatedProjects.stream()
 			.anyMatch(file::contains);
 	}
-	
+
 	/**
 	 * Checks whether the lock file contains the id of the given project.
 	 * 
@@ -171,8 +168,7 @@ public class WorkingDirectory {
 
 		return false;
 	}
-	
-	
+
 	/**
 	 * Appends the project id-s of the current session in the lock file. Creates
 	 * the lock file it does not exist. Uses
@@ -195,7 +191,7 @@ public class WorkingDirectory {
 	protected String calculateJsparrowLockFilePath() {
 		return calculateJsparrowTempFolderPath() + File.separator + LOCK_FILE_NAME;
 	}
-	
+
 	public static String calculateJsparrowTempFolderPath() {
 		String file = System.getProperty(JAVA_TMP);
 		return file + File.separator + JSPARROW_TEMP_FOLDER;
