@@ -11,9 +11,9 @@ import org.apache.maven.project.MavenProject;
 import org.junit.Before;
 import org.junit.Test;
 
-public class StandaloneAdapterTest {
+public class StandaloneLoaderTest {
 
-	private StandaloneAdapter standaloneAdapter;
+	private StandaloneLoader standaloneLoader;
 	private MavenProject project;
 	private BundleStarter bundleStarter;
 
@@ -21,7 +21,7 @@ public class StandaloneAdapterTest {
 	public void setUp() {
 		project = mock(MavenProject.class);
 		bundleStarter = mock(BundleStarter.class);
-		standaloneAdapter = new StandaloneAdapter(project, bundleStarter);
+		standaloneLoader = new StandaloneLoader(project, bundleStarter);
 	}
 	
 	@Test
@@ -31,7 +31,7 @@ public class StandaloneAdapterTest {
 		DependencyManager dependencyManager = mock(DependencyManager.class);
 		when(mavenAdapter.getConfiguration()).thenReturn(configuration);
 		
-		standaloneAdapter.loadStandalone(mavenAdapter, dependencyManager);
+		standaloneLoader.loadStandalone(mavenAdapter, dependencyManager);
 
 		verify(bundleStarter).runStandalone(configuration);
 	}
@@ -42,7 +42,7 @@ public class StandaloneAdapterTest {
 		MavenAdapter mavenAdapter = mock(MavenAdapter.class);
 		when(mavenAdapter.getConfiguration()).thenReturn(configuration);
 		
-		standaloneAdapter.loadStandalone(mavenAdapter);
+		standaloneLoader.loadStandalone(mavenAdapter);
 
 		verify(bundleStarter).runStandalone(configuration);
 	}

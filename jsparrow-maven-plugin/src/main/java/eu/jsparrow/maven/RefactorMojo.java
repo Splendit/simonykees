@@ -20,7 +20,7 @@ import eu.jsparrow.maven.adapter.DependencyManager;
 import eu.jsparrow.maven.adapter.EmbeddedMaven;
 import eu.jsparrow.maven.adapter.MavenAdapter;
 import eu.jsparrow.maven.adapter.MavenParameters;
-import eu.jsparrow.maven.adapter.StandaloneAdapter;
+import eu.jsparrow.maven.adapter.StandaloneLoader;
 import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
@@ -91,8 +91,8 @@ public class RefactorMojo extends AbstractMojo {
 		
 		try {
 			WorkingDirectory workingDir = mavenAdapter.setUp(parameters, mavenSession.getAllProjects(), configFile);
-			StandaloneAdapter standaloneAdapter = new StandaloneAdapter(project, new BundleStarter(workingDir, log));
-			standaloneAdapter.loadStandalone(mavenAdapter, new DependencyManager(log, embeddedMaven));
+			StandaloneLoader loader = new StandaloneLoader(project, new BundleStarter(workingDir, log));
+			loader.loadStandalone(mavenAdapter, new DependencyManager(log, embeddedMaven));
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());

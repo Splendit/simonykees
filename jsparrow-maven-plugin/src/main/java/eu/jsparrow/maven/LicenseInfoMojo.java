@@ -14,7 +14,7 @@ import org.osgi.framework.BundleException;
 import eu.jsparrow.maven.adapter.BundleStarter;
 import eu.jsparrow.maven.adapter.MavenAdapter;
 import eu.jsparrow.maven.adapter.MavenParameters;
-import eu.jsparrow.maven.adapter.StandaloneAdapter;
+import eu.jsparrow.maven.adapter.StandaloneLoader;
 import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
@@ -58,8 +58,8 @@ public class LicenseInfoMojo extends AbstractMojo {
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		try {
 			WorkingDirectory workingDir = mavenAdapter.setUp(parameters);
-			StandaloneAdapter serviceInstance = new StandaloneAdapter(project, new BundleStarter(workingDir, log));
-			serviceInstance.loadStandalone(mavenAdapter);
+			StandaloneLoader loader = new StandaloneLoader(project, new BundleStarter(workingDir, log));
+			loader.loadStandalone(mavenAdapter);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());

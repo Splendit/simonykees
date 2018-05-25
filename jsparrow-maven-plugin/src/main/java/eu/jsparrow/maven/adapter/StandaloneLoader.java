@@ -11,12 +11,12 @@ import org.osgi.framework.BundleException;
  * @since 2.5.0
  *
  */
-public class StandaloneAdapter {
+public class StandaloneLoader {
 
 	private BundleStarter bundleStarter;
 	private MavenProject rootProject;
 
-	public StandaloneAdapter(MavenProject rootProject, BundleStarter bundleStarter) {
+	public StandaloneLoader(MavenProject rootProject, BundleStarter bundleStarter) {
 		this.rootProject = rootProject;
 		this.bundleStarter = bundleStarter;
 	}
