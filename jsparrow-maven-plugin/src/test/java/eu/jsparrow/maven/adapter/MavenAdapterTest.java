@@ -97,41 +97,6 @@ public class MavenAdapterTest {
 	}
 
 	@Test
-	public void findYamlFilePath_yamlFileExists_shouldReturnFilePath() {
-		File yamlFile = mock(File.class);
-		String expectedPath = "default/file/exists";
-
-		when(yamlFile.exists()).thenReturn(true);
-		when(yamlFile.getAbsolutePath()).thenReturn(expectedPath);
-
-		String actualPath = mavenAdapter.findYamlFilePath(null, yamlFile);
-
-		assertTrue(actualPath.equals(expectedPath));
-	}
-
-	@Test
-	public void findYamlFilePath_yamlFileDoesntExists_shouldReturnParentFilePath() {
-		MavenProject project = mock(MavenProject.class);
-		File yamlFile = mock(File.class);
-		File parentBaseDir = mock(File.class);
-		File parentYmlFile = mock(File.class);
-
-		String expectedPath = "parent/dir/file.yml";
-
-		when(yamlFile.exists()).thenReturn(false);
-		when(project.getParent()).thenReturn(project);
-		when(project.getBasedir()).thenReturn(parentBaseDir);
-		when(parentBaseDir.getAbsolutePath()).thenReturn("parent/dir");
-		when(yamlFile.getPath()).thenReturn("file.yml");
-		when(path.toFile()).thenReturn(parentYmlFile);
-		when(path.toString()).thenReturn(expectedPath);
-		when(parentYmlFile.exists()).thenReturn(true);
-
-		String actualPath = mavenAdapter.findYamlFilePath(project, yamlFile);
-		assertTrue(actualPath.equals(expectedPath));
-	}
-
-	@Test
 	public void isAggregateProject_hasPomPckage() {
 		MavenProject project = mock(MavenProject.class);
 		when(project.getPackaging()).thenReturn("pom");
