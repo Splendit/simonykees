@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Optional;
@@ -14,7 +15,9 @@ import java.util.Optional;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 @SuppressWarnings("nls")
 public class MavenAdapterTest {
@@ -27,6 +30,9 @@ public class MavenAdapterTest {
 
 	private MavenAdapter mavenAdapter;
 	private Path path;
+
+	@Rule
+	public TemporaryFolder folder = new TemporaryFolder();
 
 	@Before
 	public void setUp() {
@@ -48,6 +54,7 @@ public class MavenAdapterTest {
 		when(config.getUrl()).thenReturn(""); //$NON-NLS-1$
 		when(config.getProfile()).thenReturn(Optional.empty());
 		when(config.getRuleId()).thenReturn(Optional.empty());
+		when(config.getDefaultYamlFile()).thenReturn(Optional.empty());
 
 		mavenAdapter.addInitialConfiguration(config, ""); //$NON-NLS-1$
 
@@ -99,54 +106,49 @@ public class MavenAdapterTest {
 	}
 
 	@Test
-	public void findYamlFilePath_yamlFileExists_shouldReturnFilePath() {
-		File yamlFile = mock(File.class);
-		String expectedPath = "default/file/exists";
+	public void findYamlFilePath_yamlFileExists_shouldReturnFilePath() throws IOException {
+		MavenProject project = mock(MavenProject.class);
+		File yamlFile = folder.newFile("file.yaml");
 
-		when(yamlFile.exists()).thenReturn(true);
-		when(yamlFile.getAbsolutePath()).thenReturn(expectedPath);
+		when(project.getBasedir()).thenReturn(folder.getRoot());
 
-		String actualPath = mavenAdapter.findYamlFilePath(null, yamlFile);
+		String actualPath = mavenAdapter.findYamlFilePath(project, yamlFile);
 
+		String expectedPath = yamlFile.getAbsolutePath();
 		assertTrue(actualPath.equals(expectedPath));
 	}
 
 	@Test
-	public void findYamlFilePath_yamlFileDoesntExists_shouldReturnParentFilePath() {
+	public void findYamlFilePath_yamlFileDoesntExists_shouldReturnParentFilePath() throws IOException {
 		MavenProject project = mock(MavenProject.class);
-		File yamlFile = mock(File.class);
-		File parentBaseDir = mock(File.class);
-		File parentYmlFile = mock(File.class);
+		File yamlFile = folder.newFile("file.yaml");
+		File baseDir = mock(File.class);
+		MavenProject parentProject = mock(MavenProject.class);
 
-		String expectedPath = "parent/dir/file.yml";
+		String expectedPath = yamlFile.getAbsolutePath();
 
-		when(yamlFile.exists()).thenReturn(false);
-		when(project.getParent()).thenReturn(project);
-		when(project.getBasedir()).thenReturn(parentBaseDir);
-		when(parentBaseDir.getAbsolutePath()).thenReturn("parent/dir");
-		when(yamlFile.getPath()).thenReturn("file.yml");
-		when(path.toFile()).thenReturn(parentYmlFile);
-		when(path.toString()).thenReturn(expectedPath);
-		when(parentYmlFile.exists()).thenReturn(true);
+		when(project.getBasedir()).thenReturn(baseDir);
+		when(project.getParent()).thenReturn(parentProject);
+		when(parentProject.getBasedir()).thenReturn(folder.getRoot());
 
 		String actualPath = mavenAdapter.findYamlFilePath(project, yamlFile);
 		assertTrue(actualPath.equals(expectedPath));
 	}
 
 	@Test
-	public void findYamlFilePath_parentIsRootProject_shouldReturnFilePath() {
+	public void findYamlFilePath_parentIsRootProject_shouldReturnFilePath() throws IOException {
 		MavenProject project = mock(MavenProject.class);
 		File yamlFile = mock(File.class);
-		File parentYmlFile = mock(File.class);
+		File parentYmlFile = folder.newFile("file.yaml");
 
-		String expectedPath = "parent/dir/file.yml";
+		String expectedPath = parentYmlFile.getAbsolutePath();
 
 		mavenAdapter.setRootProject(project);
 		mavenAdapter.setDefaultYamlFile(parentYmlFile);
+		when(project.getBasedir()).thenReturn(mock(File.class));
 		when(yamlFile.exists()).thenReturn(false);
 		when(project.getParent()).thenReturn(project);
-		when(yamlFile.getPath()).thenReturn("file.yml");
-		when(parentYmlFile.getAbsolutePath()).thenReturn(expectedPath);
+		when(yamlFile.getName()).thenReturn("file.yml");
 
 		String actualPath = mavenAdapter.findYamlFilePath(project, yamlFile);
 		assertTrue(actualPath.equals(expectedPath));

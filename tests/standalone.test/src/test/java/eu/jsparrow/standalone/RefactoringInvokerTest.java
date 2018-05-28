@@ -57,7 +57,7 @@ public class RefactoringInvokerTest {
 
 		refactoringInvoker.startRefactoring(context, refactoringPipeline);
 
-		verify(refactoringPipeline).createRefactoringStates(anyList());
+		verify(refactoringPipeline).createRefactoringStates(anyList(), anyList(), anyList());
 		verify(refactoringPipeline).doRefactoring(any(NullProgressMonitor.class));
 		verify(refactoringPipeline).commitRefactoring();
 	}
@@ -70,7 +70,7 @@ public class RefactoringInvokerTest {
 
 		when(javaProject.getElementName()).thenReturn(""); //$NON-NLS-1$
 		when(refactoringPipeline.getRulesWithChangesAsString()).thenReturn(""); //$NON-NLS-1$
-		when(refactoringPipeline.createRefactoringStates(anyList()))
+		when(refactoringPipeline.createRefactoringStates(anyList(), anyList(), anyList()))
 			.thenThrow(new JavaModelException(new CoreException(Status.CANCEL_STATUS)));
 
 		refactoringInvoker.startRefactoring(context, refactoringPipeline);
@@ -116,13 +116,12 @@ public class RefactoringInvokerTest {
 		}
 
 		@Override
-		protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) {
+		protected void loadStandaloneConfig(BundleContext context) {
 			IJavaProject javaProject = mock(IJavaProject.class);
 			when(javaProject.getElementName()).thenReturn("projectName");//$NON-NLS-1$
 			StandaloneConfig standaloneConfig = mock(StandaloneConfig.class);
 			when(standaloneConfig.getJavaProject()).thenReturn(javaProject);
 			standaloneConfigs = Arrays.asList(standaloneConfig);
-			return standaloneConfigs;
 		}
 
 		@Override

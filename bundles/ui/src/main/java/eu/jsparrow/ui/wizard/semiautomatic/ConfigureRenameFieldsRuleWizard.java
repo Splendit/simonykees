@@ -281,7 +281,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 		subMonitor.setWorkRemaining(targetCompilationUnits.size());
 
 		try {
-			refactoringPipeline.createRefactoringStates(targetCompilationUnits);
+			refactoringPipeline.createRefactoringStates(targetCompilationUnits, new ArrayList<>(), new ArrayList<>());
 		} catch (JavaModelException e) {
 			logger.error(e.getMessage(), e);
 			WizardMessageDialog.synchronizeWithUIShowInfo(

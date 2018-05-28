@@ -21,19 +21,23 @@ public class YAMLConfig {
 	 * this list holds all specified profiles (see {@link YAMLProfile}
 	 */
 	private List<YAMLProfile> profiles;
-
+	
 	private String selectedProfile;
+
+	private YAMLExcludes excludes;
 
 	public YAMLConfig() {
 		this.rules = new LinkedList<>();
 		this.profiles = new LinkedList<>();
 		this.selectedProfile = ""; //$NON-NLS-1$
+		this.excludes = new YAMLExcludes();
 	}
 
-	public YAMLConfig(List<String> rules, List<YAMLProfile> profiles, String defaultProfile) {
+	public YAMLConfig(List<String> rules, List<YAMLProfile> profiles, String defaultProfile, YAMLExcludes excludes) {
 		this.rules = rules;
 		this.profiles = profiles;
 		this.selectedProfile = defaultProfile;
+		this.excludes = excludes;
 	}
 
 	/**
@@ -106,6 +110,14 @@ public class YAMLConfig {
 
 	public void setSelectedProfile(String defaultProfile) {
 		this.selectedProfile = defaultProfile;
+	}
+	
+	public YAMLExcludes getExcludes() {
+		return excludes;
+	}
+	
+	public void setExcludes(YAMLExcludes excludes) {
+		this.excludes = excludes;
 	}
 
 	@SuppressWarnings("nls")

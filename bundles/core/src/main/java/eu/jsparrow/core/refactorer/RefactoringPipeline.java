@@ -279,12 +279,16 @@ public class RefactoringPipeline {
 	 * @return list of {@link ICompilationUnit}s that contain compilation error
 	 * @throws JavaModelException
 	 */
-	public List<ICompilationUnit> createRefactoringStates(List<ICompilationUnit> compilationUnits)
-			throws JavaModelException {
+	public List<ICompilationUnit> createRefactoringStates(List<ICompilationUnit> compilationUnits,
+			List<String> excludedPackages, List<String> excludedClasses) throws JavaModelException {
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		for (ICompilationUnit compilationUnit : compilationUnits) {
-			createRefactoringState(compilationUnit, containingErrorList);
+			String cuPackage = compilationUnit.getPackageDeclarations()[0].getElementName();
+			if (!excludedPackages.contains(cuPackage)
+					&& !excludedClasses.contains(cuPackage + "." + compilationUnit.getElementName())) { //$NON-NLS-1$
+				createRefactoringState(compilationUnit, containingErrorList);
+			}
 		}
 
 		return containingErrorList;
