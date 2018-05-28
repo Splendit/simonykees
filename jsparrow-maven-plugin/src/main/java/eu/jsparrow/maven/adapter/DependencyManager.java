@@ -132,7 +132,7 @@ public class DependencyManager {
 			return defaultMavenHome;
 		}
 
-		log.debug(Messages.Adapter_embededMavenVersionDetected);
+		log.debug(Messages.DependecyManager_embededMavenVersionDetected);
 		String tempZipPath = jsarrowTempPath + File.separator + "maven"; //$NON-NLS-1$
 		try (InputStream mavenZipInputStream = getMavenZipInputStream()) {
 			mavenHomeUnzipped += tempZipPath;
@@ -158,7 +158,7 @@ public class DependencyManager {
 	 * @throws IOException
 	 */
 	private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-		String loggerInfo = NLS.bind(Messages.EmbeddedMaven_fileUnzip, filePath);
+		String loggerInfo = NLS.bind(Messages.DependencyManager_fileUnzip, filePath);
 		log.debug(loggerInfo);
 
 		try (FileOutputStream fos = new FileOutputStream(filePath);
@@ -203,7 +203,7 @@ public class DependencyManager {
 			destDir.mkdir();
 		}
 
-		String loggerInfo = NLS.bind(Messages.EmbeddedMaven_unzipTemporaryMavenInstallation, destDir.toString());
+		String loggerInfo = NLS.bind(Messages.DependencyManager_unzipTemporaryMavenInstallation, destDir.toString());
 		log.debug(loggerInfo);
 
 		ZipInputStream zipIn = new ZipInputStream(zipInputStream);
@@ -220,7 +220,7 @@ public class DependencyManager {
 				// if the entry is a directory, make the directory
 				File dir = new File(filePath);
 				dir.mkdir();
-				log.debug(NLS.bind(Messages.EmbeddedMaven_createDir, dir.getAbsoluteFile()));
+				log.debug(NLS.bind(Messages.DependencyManager_createDir, dir.getAbsoluteFile()));
 			}
 			zipIn.closeEntry();
 			entry = zipIn.getNextEntry();

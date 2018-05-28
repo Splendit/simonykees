@@ -89,8 +89,8 @@ public class MavenAdapter {
 		String rootProjectIdentifier = findProjectIdentifier(rootProject);
 		if (workingDirectoryWatcher.isJsparrowStarted(rootProjectIdentifier)) {
 			jsparrowAlreadyRunningError = true;
-			log.error(NLS.bind(Messages.StandaloneAdapter_jSparrowAlreadyRunning, rootProject.getArtifactId()));
-			throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
+			log.error(NLS.bind(Messages.MavenAdapter_jSparrowAlreadyRunning, rootProject.getArtifactId()));
+			throw new MojoExecutionException(Messages.MavenAdapter_jSparrowIsAlreadyRunning);
 		}
 		workingDirectoryWatcher.lockProjects();
 
@@ -99,7 +99,7 @@ public class MavenAdapter {
 				addProjectConfiguration(mavenProject, defaultYamlFile);
 			}
 		}
-		log.info(Messages.RefactorMojo_allProjectsLoaded);
+		log.info(Messages.MavenAdapter_allProjectsLoaded);
 		return workingDirectoryWatcher;
 	}
 
@@ -191,7 +191,6 @@ public class MavenAdapter {
 	}
 
 	protected Path joinPaths(File parentBaseDir, String yamlFile) {
-		String baseDir = parentBaseDir.getAbsolutePath();
 		return Paths.get(parentBaseDir.getAbsolutePath(), yamlFile);
 	}
 

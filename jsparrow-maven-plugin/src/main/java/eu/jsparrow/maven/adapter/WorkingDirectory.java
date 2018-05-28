@@ -106,14 +106,14 @@ public class WorkingDirectory {
 				.trim();
 
 		} catch (IOException e) {
-			log.warn(Messages.MavenAdapter_cannotReadJSparrowLockFile, e);
+			log.warn(Messages.WorkingDirectory_cannotReadJSparrowLockFile, e);
 		}
 
 		try {
 			Files.write(path, remainingContent.getBytes());
 			return remainingContent.isEmpty();
 		} catch (IOException e) {
-			log.warn(Messages.MavenAdapter_cannotWriteToJSparrowLockFile, e);
+			log.warn(Messages.WorkingDirectory_cannotWriteToJSparrowLockFile, e);
 		}
 
 		return false;
@@ -163,7 +163,7 @@ public class WorkingDirectory {
 		try (Stream<String> linesStream = Files.lines(path)) {
 			return linesStream.anyMatch(projectId::equals);
 		} catch (IOException e) {
-			log.warn(Messages.MavenAdapter_cannotReadJSparrowLockFile, e);
+			log.warn(Messages.WorkingDirectory_cannotReadJSparrowLockFile, e);
 		}
 
 		return false;
@@ -184,7 +184,7 @@ public class WorkingDirectory {
 		try {
 			Files.write(path, conntent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
-			log.warn(Messages.MavenAdapter_cannotWriteToJSparrowLockFile, e);
+			log.warn(Messages.WorkingDirectory_cannotWriteToJSparrowLockFile, e);
 		}
 	}
 
