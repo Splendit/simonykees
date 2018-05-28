@@ -81,6 +81,25 @@ public class MavenAdapter {
 		this.sessionProjects = new HashSet<>();
 	}
 
+	/**
+	 * Creates a map with the required configurations for starting the equinox
+	 * framework based on the provided {@link MavenParameter}. Additionally,
+	 * adds the all projects related information to the configuration map.
+	 * 
+	 * @param parameters
+	 *            a set of parameters provided from the mojo.
+	 * @param projects
+	 *            the list of all projects in the current session
+	 * @param defaultYamlFile
+	 *            the default {@code jsparrow.yml} file.
+	 * @return an instance of {@link WorkingDirectory} for managing the working
+	 *         directory of the equinox.
+	 * @throws InterruptedException
+	 *             if the working directory cannot be created
+	 * @throws MojoExecutionException
+	 *             if jSparrow is already started in the root project of the
+	 *             current session.
+	 */
 	public WorkingDirectory setUp(MavenParameters parameters, List<MavenProject> projects, File defaultYamlFile)
 			throws InterruptedException, MojoExecutionException {
 
@@ -95,7 +114,7 @@ public class MavenAdapter {
 		workingDirectoryWatcher.lockProjects();
 
 		for (MavenProject mavenProject : projects) {
-			if(!isAggregateProject(mavenProject)) {				
+			if (!isAggregateProject(mavenProject)) {
 				addProjectConfiguration(mavenProject, defaultYamlFile);
 			}
 		}
@@ -103,6 +122,17 @@ public class MavenAdapter {
 		return workingDirectoryWatcher;
 	}
 
+	/**
+	 * Creates a map with the required configurations for starting the equinox
+	 * framework based on the provided {@link MavenParameter}.
+	 * 
+	 * @param parameters
+	 *            a set of parameters provided from the mojo.
+	 * @return an instance of {@link WorkingDirectory} for managing the working
+	 *         directory of the equinox.
+	 * @throws InterruptedException
+	 *             if the working directory cannot be created
+	 */
 	public WorkingDirectory setUp(MavenParameters parameters) throws InterruptedException {
 		addInitialConfiguration(parameters);
 		return prepareWorkingDirectory();
@@ -219,7 +249,7 @@ public class MavenAdapter {
 		return configuration.getOrDefault(ALL_PROJECT_IDENTIFIERS, ""); //$NON-NLS-1$
 	}
 
-	public void addInitialConfiguration(MavenParameters config) {
+	void addInitialConfiguration(MavenParameters config) {
 		boolean useDefaultConfig = config.getUseDefaultConfig()
 			.orElse(false);
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);

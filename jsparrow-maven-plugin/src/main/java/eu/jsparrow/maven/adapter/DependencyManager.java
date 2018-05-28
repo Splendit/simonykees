@@ -28,7 +28,7 @@ import org.eclipse.osgi.util.NLS;
 import eu.jsparrow.maven.i18n.Messages;
 
 /**
- * Contains functionalities for running {@code mvn dependency:copy-dependencies}
+ * Contains functionalities for running the {@code dependency:copy-dependencies}
  * plugin.
  * 
  * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
@@ -38,6 +38,7 @@ import eu.jsparrow.maven.i18n.Messages;
 public class DependencyManager {
 
 	protected static final String OUTPUT_DIRECTORY_OPTION_KEY = "outputDirectory"; //$NON-NLS-1$
+	private static final String MAVEN_ZIP_FILE = "apache-maven-3.5.2-bin.zip"; //$NON-NLS-1$
 	private static final int BUFFER_SIZE = 4096;
 
 	/**
@@ -62,10 +63,15 @@ public class DependencyManager {
 	}
 
 	/**
-	 * Executes maven goal copy-dependencies on the project to copy all resolved
-	 * needed dependencies to the temp folder for use from bundles.
+	 * Invokes the {@code dependency:copy-dependencies} plugin on the
+	 * {@code package} phase against the descriptor file of the provided maven
+	 * project. The path of the output directory is
+	 * {@code [user.dir]/deps/[artifactId]}.
+	 * 
+	 * @param project
+	 *            the maven project whose dependencies are to be copied.
 	 */
-	public void extractAndCopyDependencies(MavenProject project) {
+	public void copyDependencies(MavenProject project) {
 		log.debug(Messages.DependencyManager_extractAndCopyDependencies);
 		final InvocationRequest request = new DefaultInvocationRequest();
 		final Properties props = new Properties();
@@ -80,12 +86,12 @@ public class DependencyManager {
 	 * {@link InvocationRequest} for running:
 	 * {@code mvn clean package depedency:copy-dependencies outputDirectory=[user.dir]/deps/[artifactId] -DskipTests}.
 	 * 
+	 * The output directory must match with the one used in
+	 * {@link eu.jsparrow.standalone.StandaloneConfig#getMavenDependencyFolder}.
+	 * 
 	 * @see <a href=
 	 *      "https://maven.apache.org/plugins/maven-dependency-plugin/copy-dependencies-mojo.html">
 	 *      Apache Maven Dependency Plugin </a>.
-	 * 
-	 *      The output directory must match with the one used in
-	 *      {@link eu.jsparrow.standalone.StandaloneConfig#getMavenDependencyFolder}.
 	 * 
 	 * @param project
 	 *            the project to take the pom file from.
@@ -109,7 +115,7 @@ public class DependencyManager {
 		request.setProperties(props);
 	}
 
-	protected void invokeMaven(Invoker invoker, InvocationRequest request, String preparedMavenHome) {
+	private void invokeMaven(Invoker invoker, InvocationRequest request, String preparedMavenHome) {
 		invoker.setMavenHome(new File(preparedMavenHome));
 
 		try {
@@ -147,7 +153,7 @@ public class DependencyManager {
 	}
 
 	protected InputStream getMavenZipInputStream() {
-		return getClass().getResourceAsStream("/apache-maven-3.5.2-bin.zip"); //$NON-NLS-1$
+		return getClass().getResourceAsStream(File.separator + MAVEN_ZIP_FILE);
 	}
 
 	/**

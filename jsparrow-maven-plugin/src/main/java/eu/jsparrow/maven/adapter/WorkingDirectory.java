@@ -14,6 +14,11 @@ import org.apache.maven.plugin.logging.Log;
 
 import eu.jsparrow.maven.i18n.Messages;
 
+/**
+ * Provides functionalities for cleaning the working directory and checking on
+ * which projects the standalone is already running.
+ *
+ */
 public class WorkingDirectory {
 
 	private static final String LOCK_FILE_NAME = "lock"; //$NON-NLS-1$

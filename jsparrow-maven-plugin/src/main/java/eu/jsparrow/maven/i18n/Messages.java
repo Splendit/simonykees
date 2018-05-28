@@ -41,7 +41,7 @@ public class Messages extends NLS {
 	public static String StandaloneAdapter_creatingAdapterInstance;
 
 	public static String MavenAdapter_jSparrowAlreadyRunning;
-	
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
