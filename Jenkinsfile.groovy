@@ -39,10 +39,7 @@ timestamps {
 			stage('Compile Maven Plugin'){
 			   def mvnCommand = 'clean install -DskipTests' 
 			   def pluginResourcePath = 'jsparrow-maven-plugin/src/main/resources'
-			   def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'
-               dir('jsparrow-standalone-adapter'){
-			   	 sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
-			   }			   
+			   def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'			   
 			   def manifest = 'manifest.standalone'
 			   def manifestContent = sh(script: 'ls $jSparrowTargetPath', returnStdout: true)
 			   
