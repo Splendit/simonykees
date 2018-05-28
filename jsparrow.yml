@@ -66,3 +66,13 @@ rules:
   - StringBuildingLoop
   - LambdaToMethodReference
   - CodeFormatter
+
+excludes:
+    excludeModules:
+      - eu.jsparrow.core
+    excludePackages:
+      - eu.jsparrow.core
+      - eu.jsparrow.core.rule
+    excludeClasses:
+      - eu.jsparrow.core.Activator.java
+      - eu.jsparrow.core.builder.NodeBuilder.java
