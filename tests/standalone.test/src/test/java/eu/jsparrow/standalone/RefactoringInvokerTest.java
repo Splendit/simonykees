@@ -57,7 +57,7 @@ public class RefactoringInvokerTest {
 
 		refactoringInvoker.startRefactoring(context, refactoringPipeline);
 
-		verify(refactoringPipeline).createRefactoringStates(anyList(), anyList(), anyList());
+		verify(refactoringPipeline).createRefactoringStates(anyList());
 		verify(refactoringPipeline).doRefactoring(any(NullProgressMonitor.class));
 		verify(refactoringPipeline).commitRefactoring();
 	}
@@ -70,7 +70,7 @@ public class RefactoringInvokerTest {
 
 		when(javaProject.getElementName()).thenReturn(""); //$NON-NLS-1$
 		when(refactoringPipeline.getRulesWithChangesAsString()).thenReturn(""); //$NON-NLS-1$
-		when(refactoringPipeline.createRefactoringStates(anyList(), anyList(), anyList()))
+		when(refactoringPipeline.createRefactoringStates(anyList()))
 			.thenThrow(new JavaModelException(new CoreException(Status.CANCEL_STATUS)));
 
 		refactoringInvoker.startRefactoring(context, refactoringPipeline);
