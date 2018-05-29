@@ -1,7 +1,6 @@
 package eu.jsparrow.standalone;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -12,21 +11,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
 import eu.jsparrow.core.config.YAMLConfig;
-import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
@@ -39,11 +32,17 @@ public class RefactoringInvokerTest {
 
 	private IJavaProject javaProject;
 	private RefactoringInvoker refactoringInvoker;
+	private StandaloneConfig standaloneConfig;
 
 	@Before
 	public void setUp() {
 		javaProject = mock(IJavaProject.class);
 		refactoringInvoker = new TestableRefactoringInvoker();
+		
+		IJavaProject javaProject = mock(IJavaProject.class);
+		when(javaProject.getElementName()).thenReturn("projectName");//$NON-NLS-1$
+		standaloneConfig = mock(StandaloneConfig.class);
+		when(standaloneConfig.getJavaProject()).thenReturn(javaProject);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -55,57 +54,36 @@ public class RefactoringInvokerTest {
 		when(javaProject.getElementName()).thenReturn(""); //$NON-NLS-1$
 		when(refactoringPipeline.getRulesWithChangesAsString()).thenReturn(""); //$NON-NLS-1$
 
-		refactoringInvoker.startRefactoring(context, refactoringPipeline);
+		refactoringInvoker.startRefactoring(context);
 
-		verify(refactoringPipeline).createRefactoringStates(anyList());
-		verify(refactoringPipeline).doRefactoring(any(NullProgressMonitor.class));
-		verify(refactoringPipeline).commitRefactoring();
+		verify(standaloneConfig).createRefactoringStates();
+		verify(standaloneConfig).computeRefactoring(any(List.class));
+		verify(standaloneConfig).commitRefactoring();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test(expected = StandaloneException.class)
 	public void startRefactoring_exceptinsInCreateRefactoringState_shouldNotCommit() throws Exception {
 		BundleContext context = mock(BundleContext.class);
-		RefactoringPipeline refactoringPipeline = mock(RefactoringPipeline.class);
 
-		when(javaProject.getElementName()).thenReturn(""); //$NON-NLS-1$
-		when(refactoringPipeline.getRulesWithChangesAsString()).thenReturn(""); //$NON-NLS-1$
-		when(refactoringPipeline.createRefactoringStates(anyList()))
-			.thenThrow(new JavaModelException(new CoreException(Status.CANCEL_STATUS)));
+		doThrow(StandaloneException.class).when(standaloneConfig)
+			.createRefactoringStates();
 
-		refactoringInvoker.startRefactoring(context, refactoringPipeline);
+		refactoringInvoker.startRefactoring(context);
 
-		verify(refactoringPipeline, never()).commitRefactoring();
+		verify(standaloneConfig, never()).computeRefactoring(any(List.class));
+		verify(standaloneConfig, never()).commitRefactoring();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test(expected = StandaloneException.class)
 	public void startRefactoring_exceptinsInDoRefactoring_shouldNotCommit() throws Exception {
 		BundleContext context = mock(BundleContext.class);
-		RefactoringPipeline refactoringPipeline = mock(RefactoringPipeline.class);
+		doThrow(StandaloneException.class).when(standaloneConfig).computeRefactoring(any(List.class));
 
-		when(javaProject.getElementName()).thenReturn(""); //$NON-NLS-1$
-		when(refactoringPipeline.getRulesWithChangesAsString()).thenReturn(""); //$NON-NLS-1$
-		doThrow(RefactoringException.class).when(refactoringPipeline)
-			.doRefactoring(any(NullProgressMonitor.class));
+		refactoringInvoker.startRefactoring(context);
 
-		refactoringInvoker.startRefactoring(context, refactoringPipeline);
-
-		verify(refactoringPipeline, never()).commitRefactoring();
-	}
-
-	@Test
-	public void startRefactoring_RuleExceptinsInDoRefactoring_shouldCommit() throws Exception {
-		BundleContext context = mock(BundleContext.class);
-		RefactoringPipeline refactoringPipeline = mock(RefactoringPipeline.class);
-
-		when(javaProject.getElementName()).thenReturn(""); //$NON-NLS-1$
-		when(refactoringPipeline.getRulesWithChangesAsString()).thenReturn(""); //$NON-NLS-1$
-		doThrow(RuleException.class).when(refactoringPipeline)
-			.doRefactoring(any(NullProgressMonitor.class));
-
-		refactoringInvoker.startRefactoring(context, refactoringPipeline);
-
-		verify(refactoringPipeline).commitRefactoring();
+		verify(standaloneConfig, never()).commitRefactoring();
 	}
 
 	class TestableRefactoringInvoker extends RefactoringInvoker {
@@ -117,10 +95,6 @@ public class RefactoringInvokerTest {
 
 		@Override
 		protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) {
-			IJavaProject javaProject = mock(IJavaProject.class);
-			when(javaProject.getElementName()).thenReturn("projectName");//$NON-NLS-1$
-			StandaloneConfig standaloneConfig = mock(StandaloneConfig.class);
-			when(standaloneConfig.getJavaProject()).thenReturn(javaProject);
 			standaloneConfigs = Arrays.asList(standaloneConfig);
 			return standaloneConfigs;
 		}

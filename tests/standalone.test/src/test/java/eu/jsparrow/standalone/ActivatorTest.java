@@ -110,7 +110,7 @@ public class ActivatorTest {
 
 		activator.start(context);
 
-		verify(refactoringInvoker).startRefactoring(any(), any(RefactoringPipeline.class));
+		verify(refactoringInvoker).startRefactoring(any());
 	}
 
 	@Test
@@ -121,7 +121,7 @@ public class ActivatorTest {
 
 		activator.start(context);
 
-		verify(refactoringInvoker, never()).startRefactoring(any(), any(RefactoringPipeline.class));
+		verify(refactoringInvoker, never()).startRefactoring(any());
 	}
 
 	@Test
