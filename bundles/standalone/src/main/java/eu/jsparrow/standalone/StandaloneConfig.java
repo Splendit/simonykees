@@ -76,7 +76,7 @@ public class StandaloneConfig {
 	private String projectName;
 	private String sourceFolder;
 	private String[] natureIds;
-	private RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
+	protected RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
@@ -452,7 +452,7 @@ public class StandaloneConfig {
 		}
 	}
 
-	private boolean hasRefactoringStates() {
+	protected boolean hasRefactoringStates() {
 		if (refactoringPipeline.getRefactoringStates()
 			.isEmpty()) {
 			logger.debug("No refactoring states on {} ", project.getName());
@@ -558,6 +558,10 @@ public class StandaloneConfig {
 
 	protected void setJavaProject(IJavaProject javaProject) {
 		this.javaProject = javaProject;
+	}
+	
+	protected void setProject(IProject project) {
+		this.project = project;
 	}
 
 	protected boolean isDescriptionGenerated() {

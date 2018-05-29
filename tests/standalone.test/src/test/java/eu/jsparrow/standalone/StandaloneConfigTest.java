@@ -4,7 +4,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -21,15 +23,22 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
  * test class for {@link StandaloneConfig}
@@ -55,6 +64,8 @@ public class StandaloneConfigTest {
 	private File mavenDepsFolder;
 	private IClasspathEntry classpathEntry;
 	private StandaloneConfig standaloneConfig;
+	private RefactoringPipeline pipeline;
+	private boolean hasRefactoringStates;
 
 	@BeforeClass
 	public static void setUpClass() throws IOException {
@@ -84,7 +95,9 @@ public class StandaloneConfigTest {
 		javaProject = mock(IJavaProject.class);
 		mavenDepsFolder = mock(File.class);
 		classpathEntry = mock(IClasspathEntry.class);
+		pipeline = mock(RefactoringPipeline.class);
 		standaloneConfig = new TestableStandaloneConfig("id", path.toString(), "1.8", true); //$NON-NLS-1$ , //$NON-NLS-2$
+		hasRefactoringStates = true;
 	}
 
 	@Test
@@ -113,6 +126,7 @@ public class StandaloneConfigTest {
 		String javaVersion = "1.8"; //$NON-NLS-1$
 
 		when(javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true)).thenReturn(javaVersion);
+		when(project.isOpen()).thenReturn(true);
 
 		standaloneConfig.initJavaProject(project);
 
@@ -185,6 +199,70 @@ public class StandaloneConfigTest {
 
 		verifyZeroInteractions(javaProject);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Test(expected = StandaloneException.class)
+	public void createRefactoringStates_shouldThrowStandaloneException() throws Exception {
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
+		when(pipeline.createRefactoringStates(any(List.class))).thenThrow(JavaModelException.class);
+		
+		standaloneConfig.createRefactoringStates();
+		
+		assertTrue(false);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void computeRefactoring_emptyRefactoringStates() throws Exception {
+		hasRefactoringStates = false;
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
+		List<RefactoringRule> rules = mock(List.class);
+
+		standaloneConfig.computeRefactoring(rules);
+		
+		verify(pipeline, never()).doRefactoring(any(IProgressMonitor.class));
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test(expected = StandaloneException.class)
+	public void computeRefactoring_shouldThrowStandaloneException() throws Exception {
+		hasRefactoringStates = true;
+		List<RefactoringRule> rules = mock(List.class);
+		when(rules.size()).thenReturn(0);
+		when(rules.toString()).thenReturn("i-am-hungry-now"); //$NON-NLS-1$
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
+		doThrow(RefactoringException.class).when(pipeline).doRefactoring(any(IProgressMonitor.class));
+		
+		standaloneConfig.computeRefactoring(rules);
+		
+		assertTrue(false);
+	}
+	
+	@Test
+	public void commitrefactoring_emptyRefactoringStates() throws Exception {
+		hasRefactoringStates = false;
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
+		
+		standaloneConfig.commitRefactoring();
+		
+		verify(pipeline, never()).commitRefactoring();
+	}
+
+	@Test(expected = StandaloneException.class)
+	public void commitChanges_shouldThrowStandaloneException() throws Exception {
+		hasRefactoringStates = true;
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
+		doThrow(RefactoringException.class).when(pipeline).commitRefactoring();
+		
+		standaloneConfig.commitRefactoring();
+		
+		assertTrue(false);
+	}
 
 	class TestableStandaloneConfig extends StandaloneConfig {
 
@@ -195,6 +273,7 @@ public class StandaloneConfigTest {
 		public TestableStandaloneConfig(String id, String path, String compilerCompliance, boolean testMode)
 				throws Exception {
 			super("projectId", "projectName", path, compilerCompliance, "", new String[] {}, testMode); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			super.refactoringPipeline = pipeline;
 		}
 
 		@Override
@@ -250,6 +329,11 @@ public class StandaloneConfigTest {
 		@Override
 		protected IClasspathEntry createLibraryClasspathEntry(String jarPath) {
 			return classpathEntry;
+		}
+		
+		@Override
+		protected boolean hasRefactoringStates() {
+			return hasRefactoringStates;
 		}
 
 	}

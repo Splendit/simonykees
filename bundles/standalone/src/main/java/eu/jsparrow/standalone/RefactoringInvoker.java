@@ -121,7 +121,6 @@ public class RefactoringInvoker {
 			if(aboard) {
 				throw new StandaloneException("Aboard detected");
 			}
-
 			standaloneConfig.createRefactoringStates();
 		}
 	}
