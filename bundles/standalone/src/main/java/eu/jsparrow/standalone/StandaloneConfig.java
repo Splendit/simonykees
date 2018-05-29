@@ -30,7 +30,13 @@ import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.exception.ReconcileException;
+import eu.jsparrow.core.exception.RuleException;
+import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
  * Class that contains all configuration needed to run headless version of
@@ -70,6 +76,7 @@ public class StandaloneConfig {
 	private String projectName;
 	private String sourceFolder;
 	private String[] natureIds;
+	private RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
@@ -82,14 +89,15 @@ public class StandaloneConfig {
 	 * @throws CoreException
 	 * @throws MavenInvocationException
 	 * @throws IOException
+	 * @throws StandaloneException 
 	 */
 	public StandaloneConfig(String id, String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds) throws CoreException, IOException {
+			String[] natureIds) throws CoreException, IOException, StandaloneException {
 		this(id, projectName, path, compilerCompliance, sourceFolder, natureIds, false);
 	}
 
 	public StandaloneConfig(String id, String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds, boolean testMode) throws CoreException, IOException {
+			String[] natureIds, boolean testMode) throws CoreException, IOException, StandaloneException {
 		this.projectName = projectName;
 		this.projectId = id;
 		this.path = path;
@@ -109,8 +117,9 @@ public class StandaloneConfig {
 	 * @throws CoreException
 	 * @throws MavenInvocationException
 	 * @throws IOException
+	 * @throws StandaloneException 
 	 */
-	public void setUp() throws CoreException, IOException {
+	public void setUp() throws CoreException, IOException, StandaloneException {
 		IProjectDescription projectDescription = getProjectDescription();
 		project = initProject(projectDescription);
 		this.javaProject = initJavaProject(project);
@@ -219,10 +228,15 @@ public class StandaloneConfig {
 	 *            project to convert in a java project
 	 * @return a java project
 	 * @throws JavaModelException
+	 * @throws StandaloneException 
 	 */
-	IJavaProject initJavaProject(IProject project) throws JavaModelException {
+	IJavaProject initJavaProject(IProject project) throws JavaModelException, StandaloneException {
 		logger.debug(Messages.StandaloneConfig_debug_createJavaProject);
 
+		if(!project.isOpen()) {
+			throw new StandaloneException("Cannot create java project.");
+		}
+		
 		IJavaProject iJavaProject = createJavaProject(project);
 		// set compiler compliance level from the project
 		iJavaProject.setOption(JavaCore.COMPILER_COMPLIANCE, compilerCompliance);
@@ -319,7 +333,6 @@ public class StandaloneConfig {
 	 * @throws JavaModelException
 	 */
 	void addToClasspath(List<IClasspathEntry> classpathEntries) throws JavaModelException {
-
 		logger.debug(Messages.StandaloneConfig_ConfigureClasspath);
 
 		if (!classpathEntries.isEmpty()) {
@@ -335,7 +348,6 @@ public class StandaloneConfig {
 	 * @throws IOException
 	 */
 	private void restoreExistingEclipseFiles() throws IOException {
-		logger.debug(Messages.StandaloneConfig_debug_cleanUp);
 
 		String loggerInfo;
 		if (existingProjectFileMoved) {
@@ -359,7 +371,8 @@ public class StandaloneConfig {
 	}
 
 	private void deleteCreatedEclipseProjectFiles() throws IOException, CoreException {
-		logger.debug(Messages.StandaloneConfig_debug_cleanUp);
+		String debugInfo = NLS.bind(Messages.StandaloneConfig_debug_cleanUp, project.getName());
+		logger.debug(debugInfo);
 
 		project.close(new NullProgressMonitor());
 
@@ -377,6 +390,84 @@ public class StandaloneConfig {
 		}
 	}
 
+	public void createRefactoringStates() throws StandaloneException {
+		
+		String loggerInfo = NLS.bind(Messages.Activator_debug_collectCompilationUnits, project.getName());
+		logger.info(loggerInfo);
+
+		loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compilationUnits.size());
+		logger.debug(loggerInfo);
+
+		logger.debug(Messages.Activator_debug_createRefactoringStates);
+		try {
+			refactoringPipeline.createRefactoringStates(compilationUnits);
+		} catch (JavaModelException e1) {
+			logger.debug("Cannot create refactoring states on {}", project.getName());
+			throw new StandaloneException(e1.getMessage(), e1);
+		}
+
+		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates()
+			.size());
+
+		logger.debug(loggerInfo);
+	}
+
+	public void computeRefactoring(List<RefactoringRule> rules) throws StandaloneException {
+		if (!hasRefactoringStates()) {
+			return;
+		}
+
+		String loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, rules.size(), rules.toString());
+		logger.info(loggerInfo);
+
+		refactoringPipeline.setRules(rules);
+		String logInfo = NLS.bind(Messages.Activator_debug_startRefactoring, project.getName());
+		logger.info(logInfo);
+		try {
+			refactoringPipeline.doRefactoring(new NullProgressMonitor());
+			loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, javaProject.getElementName(),
+					refactoringPipeline.getRulesWithChangesAsString());
+			logger.info(loggerInfo);
+		} catch (RuleException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+		} catch (RefactoringException e) {
+			logger.debug("Cannot compute refactoring on {}.", project.getName());
+			throw new StandaloneException(e.getMessage(), e);
+		}
+	}
+
+	public void commitRefactoring() throws StandaloneException {
+		if (!hasRefactoringStates()) {
+			return;
+		}
+		// Commit refactoring
+		String logInfo = NLS.bind(Messages.Activator_debug_commitRefactoring, project.getName());
+		logger.info(logInfo);
+		try {
+			refactoringPipeline.commitRefactoring();
+		} catch (RefactoringException | ReconcileException e) {
+			logger.debug("Cannot commit refactoring on {}", project.getName());
+			throw new StandaloneException("Can not commit refatoring", e); //$NON-NLS-1$
+		}
+	}
+
+	private boolean hasRefactoringStates() {
+		if (refactoringPipeline.getRefactoringStates()
+			.isEmpty()) {
+			logger.debug("No refactoring states on {} ", project.getName());
+			return false;
+		}
+		return true;
+	}
+
+	public void clearPipeline() {
+		refactoringPipeline.setRules(new ArrayList<>());
+		refactoringPipeline.clearStates();
+	}
+
+	/*** HELPER METHODS ***/
+
 	public void removeDirectory(File directory) throws IOException {
 		if (!directory.isDirectory()) {
 			Files.delete(directory.toPath());
@@ -386,13 +477,11 @@ public class StandaloneConfig {
 			if (file.isDirectory()) {
 				removeDirectory(file);
 			} else {
-				Files.delete(file.toPath());
+				Files.deleteIfExists(file.toPath());
 			}
 		}
 		Files.delete(directory.toPath());
 	}
-
-	/*** HELPER METHODS ***/
 
 	protected IWorkspace getWorkspace() {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();

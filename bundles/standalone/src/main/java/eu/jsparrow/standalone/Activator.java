@@ -22,7 +22,6 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.logging.LoggingUtil;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
@@ -95,7 +94,7 @@ public class Activator implements BundleActivator {
 					String key = getLicenseKey(context);
 					String agentUrl = getAgentUrl(context);
 					if (licenseService.validate(key, agentUrl) || devModeEnabled) {
-						refactoringInvoker.startRefactoring(context, new RefactoringPipeline());
+						refactoringInvoker.startRefactoring(context);
 					} else {
 						String message = Messages.StandaloneActivator_noValidLicenseFound;
 						logger.error(message);
@@ -106,6 +105,7 @@ public class Activator implements BundleActivator {
 					logger.debug(e.getMessage(), e);
 					logger.error(e.getMessage());
 					setExitErrorMessage(context, e.getMessage());
+					onStop();
 					return;
 				}
 				break;
@@ -156,16 +156,23 @@ public class Activator implements BundleActivator {
 			logger.error(e.getMessage());
 		} finally {
 			licenseService.stop();
-			try {
-				refactoringInvoker.cleanUp();
-			} catch (IOException | CoreException e) {
-				logger.debug(e.getMessage(), e);
-				logger.error(e.getMessage());
-				setExitErrorMessage(context, e.getMessage());
-			}
+			String message = onStop();
+			setExitErrorMessage(context, message);
 		}
 
 		logger.info(Messages.Activator_stop);
+	}
+
+	private String onStop() {
+
+		try {
+			refactoringInvoker.cleanUp();
+		} catch (IOException | CoreException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+			return e.getMessage();
+		}
+		return ""; //$NON-NLS-1$
 	}
 
 	private void registerShutdownHook(BundleContext context) {

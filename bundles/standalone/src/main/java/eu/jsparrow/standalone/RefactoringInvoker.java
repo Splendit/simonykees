@@ -9,9 +9,6 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -20,8 +17,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
-import eu.jsparrow.core.exception.ReconcileException;
-import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
@@ -55,6 +50,7 @@ public class RefactoringInvoker {
 	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
 
 	private static final String DOT = "."; //$NON-NLS-1$
+	private boolean aboard = false;
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
@@ -83,96 +79,61 @@ public class RefactoringInvoker {
 	 *             <li>All source files contain compilation errors</li>
 	 *             <ul>
 	 */
-	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
-			throws StandaloneException {
+	public void startRefactoring(BundleContext context) throws StandaloneException {
 
 		List<StandaloneConfig> configs = loadStandaloneConfig(context);
 		setStandaloneConfigurations(configs);
-		computeRefactoring(context, refactoringPipeline, configs);
-		commitChanges(refactoringPipeline);
+		prepareRefactoring();
+		doRefactoring(context);
+		commitChanges();
 	}
 
-	/**
-	 * Prepares the refactoring states and computes the refacotring for the
-	 * projects contained in the provided list of
-	 * {@link StandaloneConfig}uratios. Does NOT commit the refactoring.
-	 * 
-	 * @param context
-	 *            the bundle context configuration
-	 * @param refactoringPipeline
-	 *            an instance of the {@link RefactoringPipeline}
-	 * @param moduleConfigurations
-	 *            the list of the {@link StandaloneConfig} for the projects to
-	 *            be refactored.
-	 * 
-	 * @throws StandaloneException
-	 */
-	private void computeRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline,
-			List<StandaloneConfig> moduleConfigurations) throws StandaloneException {
+	private void doRefactoring(BundleContext context) throws StandaloneException {
 
-		for (StandaloneConfig standaloneConfig : moduleConfigurations) {
-			String loggerInfo;
+		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+			if (aboard) {
+				logger.info("Aboard detected on {} ", standaloneConfig.getProjectName());
+				throw new StandaloneException("Aboard detected");
+			}
 			YAMLConfig config = getConfiguration(context, standaloneConfig.getProjectId());
 
 			List<RefactoringRule> projectRules = getProjectRules(standaloneConfig);
 			List<RefactoringRule> selectedRules = getSelectedRules(config, projectRules);
-			if (selectedRules != null && !selectedRules.isEmpty()) {
-				// Create refactoring pipeline and set rules
-				refactoringPipeline.setRules(selectedRules);
-
-				loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
-						selectedRules.toString());
-				logger.info(loggerInfo);
-
-				logger.info(Messages.Activator_debug_collectCompilationUnits);
-
-				List<ICompilationUnit> compUnits = standaloneConfig.getICompilationUnits();
-
-				loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compUnits.size());
-				logger.debug(loggerInfo);
-
-				logger.debug(Messages.Activator_debug_createRefactoringStates);
-				try {
-					refactoringPipeline.createRefactoringStates(compUnits);
-				} catch (JavaModelException e1) {
-					throw new StandaloneException(e1.getMessage(), e1);
-				}
-
-				loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates,
-						refactoringPipeline.getRefactoringStates()
-							.size());
-				logger.debug(loggerInfo);
-
-				// Do refactoring
-				logger.info(Messages.Activator_debug_startRefactoring);
-				try {
-					refactoringPipeline.doRefactoring(new NullProgressMonitor());
-				} catch (RuleException e) {
-					logger.debug(e.getMessage(), e);
-					logger.error(e.getMessage());
-				} catch (RefactoringException e) {
-					throw new StandaloneException(e.getMessage(), e);
-				}
-
-				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, standaloneConfig.getJavaProject()
-					.getElementName(), refactoringPipeline.getRulesWithChangesAsString());
-				logger.info(loggerInfo);
-
+			if(!selectedRules.isEmpty()) {				
+				standaloneConfig.computeRefactoring(selectedRules);
 			} else {
 				logger.info(Messages.Activator_standalone_noRulesSelected);
 			}
 		}
 	}
 
-	protected void commitChanges(RefactoringPipeline refactoringPipeline) throws StandaloneException {
-		// Commit refactoring
-		try {
-			logger.info(Messages.Activator_debug_commitRefactoring);
-			refactoringPipeline.commitRefactoring();
-		} catch (RefactoringException | ReconcileException e) {
-			logger.debug(e.getMessage(), e);
-			logger.error(e.getMessage());
-			throw new StandaloneException("Can not commit refatoring", e); //$NON-NLS-1$
+	/**
+	 * Prepares the refactoring states and computes the refacotring for the
+	 * projects contained in the provided list of
+	 * {@link StandaloneConfig}uratios. Does NOT commit the refactoring.
+	 * @param refactoringPipeline
+	 *            an instance of the {@link RefactoringPipeline}
+	 * 
+	 * @throws StandaloneException
+	 */
+	private void prepareRefactoring() throws StandaloneException {
+		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+			if(aboard) {
+				throw new StandaloneException("Aboard detected");
+			}
+
+			standaloneConfig.createRefactoringStates();
+		}
+	}
+
+	protected void commitChanges() throws StandaloneException {
+		if (aboard) {
+			logger.info("Aboard detected before commiting refactoring ");
+			throw new StandaloneException("Aboard detected");
+		}
+
+		for (StandaloneConfig config : standaloneConfigs) {
+			config.commitRefactoring();
 		}
 	}
 
@@ -185,8 +146,9 @@ public class RefactoringInvoker {
 	 *             if closing {@link IProject} fails
 	 */
 	public void cleanUp() throws IOException, CoreException {
-
+		aboard = true;
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+			standaloneConfig.clearPipeline();
 			standaloneConfig.revertEclipseProjectFiles();
 		}
 	}
