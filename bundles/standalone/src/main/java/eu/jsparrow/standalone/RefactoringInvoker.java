@@ -275,6 +275,10 @@ public class RefactoringInvoker {
 				throw new StandaloneException(e.getMessage(), e);
 			}
 		}
+		
+		if (standaloneConfigs.isEmpty()) {
+			throw new StandaloneException(Messages.RefactoringInvoker_error_allModulesExcluded); 
+		}
 	}
 
 	protected String[] findNatureIds(BundleContext context, String id) {

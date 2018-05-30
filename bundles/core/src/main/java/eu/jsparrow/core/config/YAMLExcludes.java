@@ -3,12 +3,16 @@ package eu.jsparrow.core.config;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * model class for excludes data
+ * 
+ */
 public class YAMLExcludes {
 
 	private List<String> excludeModules = new LinkedList<>();
 
 	private List<String> excludePackages = new LinkedList<>();
-	
+
 	private List<String> excludeClasses = new LinkedList<>();
 
 	public List<String> getExcludeModules() {
@@ -18,7 +22,7 @@ public class YAMLExcludes {
 	public void setExcludeModules(List<String> excludeModules) {
 		this.excludeModules = excludeModules;
 	}
-	
+
 	public List<String> getExcludePackages() {
 		return excludePackages;
 	}
@@ -26,7 +30,7 @@ public class YAMLExcludes {
 	public void setExcludePackages(List<String> excludePackages) {
 		this.excludePackages = excludePackages;
 	}
-	
+
 	public List<String> getExcludeClasses() {
 		return excludeClasses;
 	}
@@ -34,10 +38,11 @@ public class YAMLExcludes {
 	public void setExcludeClasses(List<String> excludeClasses) {
 		this.excludeClasses = excludeClasses;
 	}
-	
+
 	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
-		return "YAMLExcludes [excludeModules=" + excludeModules + ", excludePackages=" + excludePackages + ", excludeClasses=" + excludeClasses + "]";
+		return "YAMLExcludes [excludeModules=" + excludeModules + ", excludePackages=" + excludePackages
+				+ ", excludeClasses=" + excludeClasses + "]";
 	}
 }
