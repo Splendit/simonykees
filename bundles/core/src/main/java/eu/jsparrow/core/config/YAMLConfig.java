@@ -123,7 +123,7 @@ public class YAMLConfig {
 	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
-		return "YAMLConfig [rules=" + rules + ", profiles=" + profiles + ", defaultProfile=" + selectedProfile + "]";
+		return "YAMLConfig [rules=" + rules + ", profiles=" + profiles + ", defaultProfile=" + selectedProfile + ", " + excludes.toString() + "]";
 	}
 
 }

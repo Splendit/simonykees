@@ -177,7 +177,7 @@ public class RefactoringInvoker {
 							&& !excludes.getExcludeClasses()
 								.contains(cuPackage + "." + compUnit.getElementName()); //$NON-NLS-1$
 				} catch (JavaModelException e) {
-					logger.debug(e.getMessage(), e);
+					logger.warn("Error occurred while trying to get package declarations", e); //$NON-NLS-1$
 					return false;
 				}
 			})
@@ -192,7 +192,7 @@ public class RefactoringInvoker {
 		} catch (RefactoringException | ReconcileException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
-			throw new StandaloneException("Can not commit refatoring", e); //$NON-NLS-1$
+			throw new StandaloneException("Can not commit refactoring", e); //$NON-NLS-1$
 		}
 	}
 
@@ -278,7 +278,7 @@ public class RefactoringInvoker {
 				excludedModules = rootYamlConfig.getExcludes()
 					.getExcludeModules();
 			} catch (YAMLConfigException e) {
-				throw new StandaloneException(e.getMessage(), e);
+				throw new StandaloneException("Error occured while reading root yaml configuration file", e); //$NON-NLS-1$
 			}
 		}
 

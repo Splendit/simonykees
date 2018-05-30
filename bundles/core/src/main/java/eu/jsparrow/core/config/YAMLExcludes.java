@@ -5,28 +5,13 @@ import java.util.List;
 
 public class YAMLExcludes {
 
-	private List<String> excludeModules;
+	private List<String> excludeModules = new LinkedList<>();
 
-	private List<String> excludePackages;
+	private List<String> excludePackages = new LinkedList<>();
 	
-	private List<String> excludeClasses;
+	private List<String> excludeClasses = new LinkedList<>();
 
-	public YAMLExcludes() {
-		excludeModules = new LinkedList<>();
-		excludePackages = new LinkedList<>();
-		excludeClasses = new LinkedList<>();
-	}
-	
-	public YAMLExcludes(List<String> excludeModules, List<String> excludePackages, List<String> excludeClasses) {
-		this.excludeModules = excludeModules;
-		this.excludePackages = excludePackages;
-		this.excludeClasses = excludeClasses;
-	}
-	
 	public List<String> getExcludeModules() {
-		if (excludeModules == null) {
-			excludeModules = new LinkedList<>();
-		}
 		return excludeModules;
 	}
 
@@ -35,9 +20,6 @@ public class YAMLExcludes {
 	}
 	
 	public List<String> getExcludePackages() {
-		if (excludePackages == null) {
-			excludePackages = new LinkedList<>();
-		}
 		return excludePackages;
 	}
 
@@ -46,9 +28,6 @@ public class YAMLExcludes {
 	}
 	
 	public List<String> getExcludeClasses() {
-		if (excludeClasses == null) {
-			excludeClasses = new LinkedList<>();
-		}
 		return excludeClasses;
 	}
 
