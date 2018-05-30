@@ -124,9 +124,10 @@ public class RefactoringInvoker {
 				logger.info(loggerInfo);
 
 				logger.debug(Messages.Activator_debug_createRefactoringStates);
-				
+
 				try {
-					CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(standaloneConfig, config.getExcludes());
+					CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(standaloneConfig,
+							config.getExcludes());
 					refactoringPipeline.createRefactoringStates(compilationUnitProvider.getFilteredCompilationUnits());
 				} catch (JavaModelException e1) {
 					throw new StandaloneException(e1.getMessage(), e1);
@@ -262,7 +263,11 @@ public class RefactoringInvoker {
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
 			String projectName = context.getProperty(PROJECT_NAME + DOT + id);
 			if (excludedModules.contains(projectName)) {
-				// skip adding StandaloneConfig for excluded module
+				/*
+				 * Skip adding StandaloneConfig for excluded module. Checks if
+				 * name matches and excludes only that package, but not possible
+				 * sub-packages / packages that start with the same string.
+				 */
 				continue;
 			}
 			String sourceFolder = context.getProperty(SOURCE_FOLDER);
@@ -275,9 +280,9 @@ public class RefactoringInvoker {
 				throw new StandaloneException(e.getMessage(), e);
 			}
 		}
-		
+
 		if (standaloneConfigs.isEmpty()) {
-			throw new StandaloneException(Messages.RefactoringInvoker_error_allModulesExcluded); 
+			throw new StandaloneException(Messages.RefactoringInvoker_error_allModulesExcluded);
 		}
 	}
 
