@@ -81,11 +81,10 @@ public class RefactoringInvoker {
 	 *             <ul>
 	 */
 	public void startRefactoring(BundleContext context) throws StandaloneException {
-		List<StandaloneConfig> configs = loadStandaloneConfig(context);
-		setStandaloneConfigurations(configs);
+		loadStandaloneConfig(context);
 		prepareRefactoring();
-		doRefactoring(context);
-		commitChanges();
+		computeRefactoring(context);
+		commitRefactoring();
 	}
 
 	/**
@@ -100,14 +99,19 @@ public class RefactoringInvoker {
 	 */
 	private void prepareRefactoring() throws StandaloneException {
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
-			String loggInfo = String.format("Aboard detected while preparing refactoring on %s ", //$NON-NLS-1$
+			String aboardMessage = String.format("Aboard detected while preparing refactoring on %s ", //$NON-NLS-1$
 					standaloneConfig.getProjectName());
-			verifyAboardFlag(loggInfo);
-			standaloneConfig.createRefactoringStates();
+			verifyAboardFlag(aboardMessage);
+			try {
+				standaloneConfig.createRefactoringStates();
+			} catch (ConcurrentModificationException e) {
+				String message = aboard ? aboardMessage : e.getMessage();
+				throw new StandaloneException(message);
+			}
 		}
 	}
 
-	private void doRefactoring(BundleContext context) throws StandaloneException {
+	private void computeRefactoring(BundleContext context) throws StandaloneException {
 
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
 			String aboardMessage = String.format("Aboard detected while computing refactoring on %s ", //$NON-NLS-1$
@@ -130,7 +134,7 @@ public class RefactoringInvoker {
 		}
 	}
 
-	private void commitChanges() throws StandaloneException {
+	private void commitRefactoring() throws StandaloneException {
 		String loggInfo = "Aboard detected before commiting refactoring "; //$NON-NLS-1$
 		verifyAboardFlag(loggInfo);
 
@@ -157,6 +161,7 @@ public class RefactoringInvoker {
 	public void cleanUp() throws IOException, CoreException {
 		aboard = true;
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+			standaloneConfig.setAboardFlag();
 			standaloneConfig.clearPipeline();
 			standaloneConfig.revertEclipseProjectFiles();
 		}
@@ -216,28 +221,29 @@ public class RefactoringInvoker {
 	 *             if an instance of the {@link StandaloneConfig} cannot be
 	 *             created.
 	 */
-	protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) throws StandaloneException {
+	protected void loadStandaloneConfig(BundleContext context) throws StandaloneException {
 
 		Map<String, String> projectPaths = findAllProjectPaths(context);
-
-		List<StandaloneConfig> configs = new ArrayList<>();
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
+			String aboardMessage = "Aboard detected while loading standalone configuration "; //$NON-NLS-1$
+			verifyAboardFlag(aboardMessage);
 			String id = entry.getKey();
 			String path = entry.getValue();
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
 			String projectName = context.getProperty(PROJECT_NAME + DOT + id);
 			String sourceFolder = context.getProperty(SOURCE_FOLDER);
 			String[] natureIds = findNatureIds(context, id);
+			StandaloneConfig standaloneConfig;
 			try {
-				StandaloneConfig standaloneConfig = new StandaloneConfig(id, projectName, path, compilerCompliance,
-						sourceFolder, natureIds);
-				configs.add(standaloneConfig);
-			} catch (CoreException | IOException e) {
-				throw new StandaloneException(e.getMessage(), e);
-			}
-		}
-		return configs;
+				standaloneConfig = new StandaloneConfig(id, projectName, path, compilerCompliance, sourceFolder,
+						natureIds);
 
+			} catch (CoreException | IOException | RuntimeException e) {
+				String message = aboard ? aboardMessage : e.getMessage();
+				throw new StandaloneException(message, e);
+			}
+			standaloneConfigs.add(standaloneConfig);
+		}
 	}
 
 	protected String[] findNatureIds(BundleContext context, String id) {
@@ -279,9 +285,4 @@ public class RefactoringInvoker {
 			throw new StandaloneException(e.getMessage(), e);
 		}
 	}
-
-	private void setStandaloneConfigurations(List<StandaloneConfig> configs) {
-		this.standaloneConfigs = configs;
-	}
-
 }

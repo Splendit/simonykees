@@ -77,6 +77,7 @@ public class StandaloneConfig {
 	private String sourceFolder;
 	private String[] natureIds;
 	protected RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
+	private boolean aboard = false;
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
@@ -399,11 +400,18 @@ public class StandaloneConfig {
 		logger.debug(loggerInfo);
 
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
-		try {
-			refactoringPipeline.createRefactoringStates(compilationUnits);
-		} catch (JavaModelException e1) {
-			String message = String.format("Cannot create refactoring states on %s", project.getName()); //$NON-NLS-1$
-			throw new StandaloneException(message, e1);
+		List<ICompilationUnit> containingErrors = new ArrayList<>();
+		String abordMessage = "Aboard detected while creating refactoring states "; //$NON-NLS-1$
+		for(ICompilationUnit icu : compilationUnits) {
+			if(aboard) {
+				throw new StandaloneException(abordMessage);
+			}
+			try {
+				refactoringPipeline.createRefactoringState(icu, containingErrors);
+			} catch (JavaModelException e) {
+				String message = String.format("Cannot create refactoring states on %s ", project.getName()); //$NON-NLS-1$
+				throw new StandaloneException(message, e);
+			}
 		}
 
 		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates()
@@ -600,4 +608,7 @@ public class StandaloneConfig {
 		return projectName;
 	}
 
+	public void setAboardFlag() {
+		this.aboard = true;
+	}
 }

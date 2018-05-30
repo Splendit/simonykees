@@ -94,9 +94,8 @@ public class RefactoringInvokerTest {
 		}
 
 		@Override
-		protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) {
-			standaloneConfigs = Arrays.asList(standaloneConfig);
-			return standaloneConfigs;
+		protected void loadStandaloneConfig(BundleContext context) {
+			super.standaloneConfigs = Arrays.asList(standaloneConfig);
 		}
 
 		@Override
