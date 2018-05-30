@@ -89,7 +89,7 @@ public class StandaloneConfig {
 	 * @throws CoreException
 	 * @throws MavenInvocationException
 	 * @throws IOException
-	 * @throws StandaloneException 
+	 * @throws StandaloneException
 	 */
 	public StandaloneConfig(String id, String projectName, String path, String compilerCompliance, String sourceFolder,
 			String[] natureIds) throws CoreException, IOException, StandaloneException {
@@ -117,7 +117,7 @@ public class StandaloneConfig {
 	 * @throws CoreException
 	 * @throws MavenInvocationException
 	 * @throws IOException
-	 * @throws StandaloneException 
+	 * @throws StandaloneException
 	 */
 	public void setUp() throws CoreException, IOException, StandaloneException {
 		IProjectDescription projectDescription = getProjectDescription();
@@ -228,15 +228,15 @@ public class StandaloneConfig {
 	 *            project to convert in a java project
 	 * @return a java project
 	 * @throws JavaModelException
-	 * @throws StandaloneException 
+	 * @throws StandaloneException
 	 */
 	IJavaProject initJavaProject(IProject project) throws JavaModelException, StandaloneException {
 		logger.debug(Messages.StandaloneConfig_debug_createJavaProject);
 
-		if(!project.isOpen()) {
-			throw new StandaloneException("Cannot create java project.");
+		if (!project.isOpen()) {
+			throw new StandaloneException("Cannot create java project. Project is not open"); //$NON-NLS-1$
 		}
-		
+
 		IJavaProject iJavaProject = createJavaProject(project);
 		// set compiler compliance level from the project
 		iJavaProject.setOption(JavaCore.COMPILER_COMPLIANCE, compilerCompliance);
@@ -391,7 +391,7 @@ public class StandaloneConfig {
 	}
 
 	public void createRefactoringStates() throws StandaloneException {
-		
+
 		String loggerInfo = NLS.bind(Messages.Activator_debug_collectCompilationUnits, project.getName());
 		logger.info(loggerInfo);
 
@@ -402,8 +402,8 @@ public class StandaloneConfig {
 		try {
 			refactoringPipeline.createRefactoringStates(compilationUnits);
 		} catch (JavaModelException e1) {
-			logger.debug("Cannot create refactoring states on {}", project.getName());
-			throw new StandaloneException(e1.getMessage(), e1);
+			String message = String.format("Cannot create refactoring states on %s", project.getName()); //$NON-NLS-1$
+			throw new StandaloneException(message, e1);
 		}
 
 		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates()
@@ -432,8 +432,8 @@ public class StandaloneConfig {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
 		} catch (RefactoringException e) {
-			logger.debug("Cannot compute refactoring on {}.", project.getName());
-			throw new StandaloneException(e.getMessage(), e);
+			String message = String.format("Cannot compute refactoring on %s.", project.getName()); //$NON-NLS-1$
+			throw new StandaloneException(message, e);
 		}
 	}
 
@@ -441,21 +441,19 @@ public class StandaloneConfig {
 		if (!hasRefactoringStates()) {
 			return;
 		}
-		// Commit refactoring
 		String logInfo = NLS.bind(Messages.Activator_debug_commitRefactoring, project.getName());
 		logger.info(logInfo);
 		try {
 			refactoringPipeline.commitRefactoring();
 		} catch (RefactoringException | ReconcileException e) {
-			logger.debug("Cannot commit refactoring on {}", project.getName());
-			throw new StandaloneException("Can not commit refatoring", e); //$NON-NLS-1$
+			throw new StandaloneException(String.format("Cannot commit refactoring on %s", project.getName()), e); //$NON-NLS-1$
 		}
 	}
 
 	protected boolean hasRefactoringStates() {
 		if (refactoringPipeline.getRefactoringStates()
 			.isEmpty()) {
-			logger.debug("No refactoring states on {} ", project.getName());
+			logger.debug("No refactoring states on {} ", project.getName()); //$NON-NLS-1$
 			return false;
 		}
 		return true;
@@ -559,7 +557,7 @@ public class StandaloneConfig {
 	protected void setJavaProject(IJavaProject javaProject) {
 		this.javaProject = javaProject;
 	}
-	
+
 	protected void setProject(IProject project) {
 		this.project = project;
 	}

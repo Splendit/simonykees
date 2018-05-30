@@ -3,6 +3,7 @@ package eu.jsparrow.standalone;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,6 @@ public class RefactoringInvoker {
 	 *             <ul>
 	 */
 	public void startRefactoring(BundleContext context) throws StandaloneException {
-
 		List<StandaloneConfig> configs = loadStandaloneConfig(context);
 		setStandaloneConfigurations(configs);
 		prepareRefactoring();
@@ -88,29 +88,11 @@ public class RefactoringInvoker {
 		commitChanges();
 	}
 
-	private void doRefactoring(BundleContext context) throws StandaloneException {
-
-		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
-			if (aboard) {
-				logger.info("Aboard detected on {} ", standaloneConfig.getProjectName());
-				throw new StandaloneException("Aboard detected");
-			}
-			YAMLConfig config = getConfiguration(context, standaloneConfig.getProjectId());
-
-			List<RefactoringRule> projectRules = getProjectRules(standaloneConfig);
-			List<RefactoringRule> selectedRules = getSelectedRules(config, projectRules);
-			if(!selectedRules.isEmpty()) {				
-				standaloneConfig.computeRefactoring(selectedRules);
-			} else {
-				logger.info(Messages.Activator_standalone_noRulesSelected);
-			}
-		}
-	}
-
 	/**
 	 * Prepares the refactoring states and computes the refacotring for the
 	 * projects contained in the provided list of
 	 * {@link StandaloneConfig}uratios. Does NOT commit the refactoring.
+	 * 
 	 * @param refactoringPipeline
 	 *            an instance of the {@link RefactoringPipeline}
 	 * 
@@ -118,21 +100,49 @@ public class RefactoringInvoker {
 	 */
 	private void prepareRefactoring() throws StandaloneException {
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
-			if(aboard) {
-				throw new StandaloneException("Aboard detected");
-			}
+			String loggInfo = String.format("Aboard detected while preparing refactoring on %s ", //$NON-NLS-1$
+					standaloneConfig.getProjectName());
+			verifyAboardFlag(loggInfo);
 			standaloneConfig.createRefactoringStates();
 		}
 	}
 
-	protected void commitChanges() throws StandaloneException {
-		if (aboard) {
-			logger.info("Aboard detected before commiting refactoring ");
-			throw new StandaloneException("Aboard detected");
+	private void doRefactoring(BundleContext context) throws StandaloneException {
+
+		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+			String aboardMessage = String.format("Aboard detected while computing refactoring on %s ", //$NON-NLS-1$
+					standaloneConfig.getProjectName());
+			verifyAboardFlag(aboardMessage);
+			YAMLConfig config = getConfiguration(context, standaloneConfig.getProjectId());
+
+			List<RefactoringRule> projectRules = getProjectRules(standaloneConfig);
+			List<RefactoringRule> selectedRules = getSelectedRules(config, projectRules);
+			if (!selectedRules.isEmpty()) {
+				try {
+					standaloneConfig.computeRefactoring(selectedRules);
+				} catch (ConcurrentModificationException e) {
+					String message = aboard ? aboardMessage : e.getMessage();
+					throw new StandaloneException(message);
+				}
+			} else {
+				logger.info(Messages.Activator_standalone_noRulesSelected);
+			}
 		}
+	}
+
+	private void commitChanges() throws StandaloneException {
+		String loggInfo = "Aboard detected before commiting refactoring "; //$NON-NLS-1$
+		verifyAboardFlag(loggInfo);
 
 		for (StandaloneConfig config : standaloneConfigs) {
 			config.commitRefactoring();
+		}
+	}
+
+	private void verifyAboardFlag(String logInfo) throws StandaloneException {
+		if (aboard) {
+			logger.info(logInfo);
+			throw new StandaloneException(logInfo);
 		}
 	}
 

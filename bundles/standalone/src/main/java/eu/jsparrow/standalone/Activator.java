@@ -105,7 +105,6 @@ public class Activator implements BundleActivator {
 					logger.debug(e.getMessage(), e);
 					logger.error(e.getMessage());
 					setExitErrorMessage(context, e.getMessage());
-					onStop();
 					return;
 				}
 				break;
@@ -155,39 +154,26 @@ public class Activator implements BundleActivator {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
 		} finally {
-			licenseService.stop();
-			String message = onStop();
-			setExitErrorMessage(context, message);
+			cleanUp(context);
 		}
 
 		logger.info(Messages.Activator_stop);
 	}
 
-	private String onStop() {
+	private void registerShutdownHook(BundleContext context) {
+		Runtime.getRuntime()
+			.addShutdownHook(new Thread(() -> cleanUp(context)));
+	}
 
+	private void cleanUp(BundleContext context) {
+		licenseService.stop();
 		try {
 			refactoringInvoker.cleanUp();
 		} catch (IOException | CoreException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
-			return e.getMessage();
+			setExitErrorMessage(context, e.getMessage());
 		}
-		return ""; //$NON-NLS-1$
-	}
-
-	private void registerShutdownHook(BundleContext context) {
-		Runtime.getRuntime()
-			.addShutdownHook(new Thread(() -> {
-				licenseService.stop();
-				try {
-					refactoringInvoker.cleanUp();
-				} catch (IOException | CoreException e) {
-					logger.debug(e.getMessage(), e);
-					logger.error(e.getMessage());
-					setExitErrorMessage(context, e.getMessage());
-					return;
-				}
-			}));
 	}
 
 	private void startDeclarativeServices(BundleContext context) throws BundleException {
@@ -269,7 +255,7 @@ public class Activator implements BundleActivator {
 		String filePath = String.format("%s/.config/jsparrow-standalone/", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		YAMLStandaloneConfig yamlStandaloneConfig = null;
-		
+
 		Optional<String> configFile = new ConfigFinder().getYAMLFilePath(Paths.get(filePath));
 		if (configFile.isPresent()) {
 			try {
@@ -284,5 +270,4 @@ public class Activator implements BundleActivator {
 		return yamlStandaloneConfig;
 	}
 
-	
 }
