@@ -13,6 +13,7 @@ import eu.jsparrow.maven.adapter.BundleStarter;
 import eu.jsparrow.maven.adapter.MavenAdapter;
 import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.StandaloneLoader;
+import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
 /**
@@ -48,14 +49,22 @@ public class ListAllRulesShortMojo extends AbstractMojo {
 		String mode = StandaloneMode.LIST_RULES_SHORT.name();
 		MavenParameters parameters = new MavenParameters(mode);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
-
+		BundleStarter bundleStarter = new BundleStarter(log);
 		try {
-			mavenAdapter.setUp(parameters);
-			StandaloneLoader loader = new StandaloneLoader(project, new BundleStarter(log));
+			WorkingDirectory workingDir = mavenAdapter.setUp(parameters);
+			addShutdownHook(bundleStarter, workingDir);
+			StandaloneLoader loader = new StandaloneLoader(project, bundleStarter);
 			loader.loadStandalone(mavenAdapter);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());
 		}
+	}
+	
+	private void addShutdownHook(BundleStarter starter, WorkingDirectory workingDirectory) {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			starter.shutdownFramework();
+			workingDirectory.cleanUp();
+		}));
 	}
 }

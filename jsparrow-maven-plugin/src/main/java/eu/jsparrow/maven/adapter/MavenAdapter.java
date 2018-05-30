@@ -100,18 +100,18 @@ public class MavenAdapter {
 	 *             if jSparrow is already started in the root project of the
 	 *             current session.
 	 */
-	public void setUp(MavenParameters parameters, List<MavenProject> projects, File defaultYamlFile)
+	public WorkingDirectory setUp(MavenParameters parameters, List<MavenProject> projects, File defaultYamlFile)
 			throws InterruptedException, MojoExecutionException {
 
 		setProjectIds(projects);
-		WorkingDirectory workingDirectoryWatcher = setUp(parameters);
+		WorkingDirectory workingDirectory = setUp(parameters);
 		String rootProjectIdentifier = findProjectIdentifier(rootProject);
-		if (workingDirectoryWatcher.isJsparrowStarted(rootProjectIdentifier)) {
+		if (workingDirectory.isJsparrowStarted(rootProjectIdentifier)) {
 			jsparrowAlreadyRunningError = true;
 			log.error(NLS.bind(Messages.MavenAdapter_jSparrowAlreadyRunning, rootProject.getArtifactId()));
 			throw new MojoExecutionException(Messages.MavenAdapter_jSparrowIsAlreadyRunning);
 		}
-		workingDirectoryWatcher.lockProjects();
+		workingDirectory.lockProjects();
 
 		for (MavenProject mavenProject : projects) {
 			if (!isAggregateProject(mavenProject)) {
@@ -119,6 +119,7 @@ public class MavenAdapter {
 			}
 		}
 		log.info(Messages.MavenAdapter_allProjectsLoaded);
+		return workingDirectory;
 	}
 
 	/**
@@ -134,19 +135,7 @@ public class MavenAdapter {
 	 */
 	public WorkingDirectory setUp(MavenParameters parameters) throws InterruptedException {
 		addInitialConfiguration(parameters);
-		WorkingDirectory workingDir = prepareWorkingDirectory();
-		addShutdownHook(workingDir);
-		return workingDir;
-	}
-
-	private void addShutdownHook(WorkingDirectory workingDir) {
-		Runtime.getRuntime()
-		.addShutdownHook(new Thread(() -> {
-			if(!isJsparrowRunningFlag()) {
-				workingDir.cleanUp();
-			}
-		}));
-		
+		return prepareWorkingDirectory();
 	}
 
 	/**

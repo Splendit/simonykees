@@ -21,6 +21,7 @@ import eu.jsparrow.maven.adapter.DependencyManager;
 import eu.jsparrow.maven.adapter.MavenAdapter;
 import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.StandaloneLoader;
+import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
 /**
@@ -91,14 +92,24 @@ public class RefactorMojo extends AbstractMojo {
 		List<MavenProject> projects = mavenSession.getAllProjects();
 		
 		try {
-			mavenAdapter.setUp(parameters, projects, configFile);
+			WorkingDirectory workingDirectory = mavenAdapter.setUp(parameters, projects, configFile);
 			BundleStarter bundleStarter = new BundleStarter(log);
+			addShutdownHook(bundleStarter, workingDirectory, mavenAdapter.isJsparrowRunningFlag());
 			StandaloneLoader loader = new StandaloneLoader(project, bundleStarter);
 			loader.loadStandalone(mavenAdapter, dependencyManager);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());
 		}
+	}
+	
+	private void addShutdownHook(BundleStarter starter, WorkingDirectory workingDirectory, boolean jsSparrowStartedFlag) {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			starter.shutdownFramework();
+			if(!jsSparrowStartedFlag) {
+				workingDirectory.cleanUp();
+			}
+		}));
 	}
 
 }

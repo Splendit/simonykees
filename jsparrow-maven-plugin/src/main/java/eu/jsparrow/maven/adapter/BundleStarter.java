@@ -45,7 +45,6 @@ public class BundleStarter {
 	public BundleStarter(Log log) {
 		this.log = log;
 		standaloneBundleID = 0;
-		addShutDownHook();
 	}
 
 	/**
@@ -181,11 +180,9 @@ public class BundleStarter {
 	 * Shuts down the standalone bundle and equinox
 	 */
 	public void shutdownFramework() {
-		if (null != this.getFramework() && null != this.getFramework()
-			.getBundleContext()) {
+		if (null != framework && null != framework.getBundleContext()) {
 			try {
-				Bundle standaloneBundle = this.getFramework()
-					.getBundleContext()
+				Bundle standaloneBundle = framework.getBundleContext()
 					.getBundle(this.getStandaloneBundleID());
 				if (standaloneBundle.getState() == Bundle.ACTIVE) {
 					standaloneBundle.stop();
@@ -225,11 +222,5 @@ public class BundleStarter {
 
 	public boolean isStandaloneStarted() {
 		return this.standaloneStarted;
-	}
-
-	public void addShutDownHook() {
-		Thread hook = new Thread(this::shutdownFramework);
-		Runtime.getRuntime()
-			.addShutdownHook(hook);
 	}
 }
