@@ -30,7 +30,6 @@ import org.osgi.framework.Constants;
 public class BundleStarterTest {
 
 	private Log log;
-	private WorkingDirectory workingDir;
 
 	private BundleContext bundleContext;
 	private InputStream bundleInputStream;
@@ -44,13 +43,12 @@ public class BundleStarterTest {
 	@Before
 	public void setUp() {
 		log = mock(Log.class);
-		workingDir = mock(WorkingDirectory.class);
 		bundleContext = mock(BundleContext.class);
 		bundleInputStream = mock(InputStream.class);
 		bundleBufferedReader = mock(BufferedReader.class);
 		resourceInputStream = mock(InputStream.class);
 
-		bundleStarter = new TestableBundleStarter(workingDir, log);
+		bundleStarter = new TestableBundleStarter(log);
 	}
 
 	@Test
@@ -158,8 +156,8 @@ public class BundleStarterTest {
 
 	class TestableBundleStarter extends BundleStarter {
 
-		public TestableBundleStarter(WorkingDirectory workingDir, Log log) {
-			super(workingDir, log);
+		public TestableBundleStarter(Log log) {
+			super(log);
 		}
 
 		@Override

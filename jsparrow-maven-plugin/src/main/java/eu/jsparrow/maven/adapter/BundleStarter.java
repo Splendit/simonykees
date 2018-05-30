@@ -41,12 +41,11 @@ public class BundleStarter {
 	private Log log;
 	private boolean standaloneStarted = false;
 	private long standaloneBundleID;
-	private WorkingDirectory workingDirectory;
 
-	public BundleStarter(WorkingDirectory workingDirectory, Log log) {
+	public BundleStarter(Log log) {
 		this.log = log;
-		this.workingDirectory = workingDirectory;
 		standaloneBundleID = 0;
+		addShutDownHook();
 	}
 
 	/**
@@ -224,23 +223,13 @@ public class BundleStarter {
 		return new BufferedReader(new InputStreamReader(is));
 	}
 
-	/**
-	 * shuts down the equinox framework and cleans all generated files
-	 * 
-	 * @param mavenAdapter
-	 */
-	public void shutdown(MavenAdapter mavenAdapter) {
-		shutdownFramework();
-		if (!mavenAdapter.isJsparrowRunningFlag()) {
-			workingDirectory.cleanUp();
-		}
-	}
-
 	public boolean isStandaloneStarted() {
 		return this.standaloneStarted;
 	}
 
-	public WorkingDirectory getWorkingDirectoryWatcher() {
-		return this.workingDirectory;
+	public void addShutDownHook() {
+		Thread hook = new Thread(this::shutdownFramework);
+		Runtime.getRuntime()
+			.addShutdownHook(hook);
 	}
 }

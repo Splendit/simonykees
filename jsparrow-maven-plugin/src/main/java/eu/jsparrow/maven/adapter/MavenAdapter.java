@@ -100,7 +100,7 @@ public class MavenAdapter {
 	 *             if jSparrow is already started in the root project of the
 	 *             current session.
 	 */
-	public WorkingDirectory setUp(MavenParameters parameters, List<MavenProject> projects, File defaultYamlFile)
+	public void setUp(MavenParameters parameters, List<MavenProject> projects, File defaultYamlFile)
 			throws InterruptedException, MojoExecutionException {
 
 		setProjectIds(projects);
@@ -119,7 +119,6 @@ public class MavenAdapter {
 			}
 		}
 		log.info(Messages.MavenAdapter_allProjectsLoaded);
-		return workingDirectoryWatcher;
 	}
 
 	/**
@@ -135,7 +134,19 @@ public class MavenAdapter {
 	 */
 	public WorkingDirectory setUp(MavenParameters parameters) throws InterruptedException {
 		addInitialConfiguration(parameters);
-		return prepareWorkingDirectory();
+		WorkingDirectory workingDir = prepareWorkingDirectory();
+		addShutdownHook(workingDir);
+		return workingDir;
+	}
+
+	private void addShutdownHook(WorkingDirectory workingDir) {
+		Runtime.getRuntime()
+		.addShutdownHook(new Thread(() -> {
+			if(!isJsparrowRunningFlag()) {
+				workingDir.cleanUp();
+			}
+		}));
+		
 	}
 
 	/**

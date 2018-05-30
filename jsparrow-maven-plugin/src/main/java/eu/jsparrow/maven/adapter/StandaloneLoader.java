@@ -38,7 +38,7 @@ public class StandaloneLoader {
 	 */
 	public void loadStandalone(MavenAdapter mavenAdapter, DependencyManager dependencyManager)
 			throws InterruptedException, MojoExecutionException, BundleException {
-
+		
 		dependencyManager.copyDependencies(rootProject);
 		loadStandalone(mavenAdapter);
 	}
@@ -59,20 +59,6 @@ public class StandaloneLoader {
 	 */
 	public void loadStandalone(MavenAdapter mavenAdapter)
 			throws InterruptedException, MojoExecutionException, BundleException {
-
-		addShutDownHook(mavenAdapter);
 		bundleStarter.runStandalone(mavenAdapter.getConfiguration());
-	}
-
-	private void addShutDownHook(MavenAdapter mavenAdapterInstance) {
-		Runtime.getRuntime()
-			.addShutdownHook(new Thread(() -> {
-				if (bundleStarter != null) {
-					bundleStarter.shutdown(mavenAdapterInstance);
-				} else if (mavenAdapterInstance != null && !mavenAdapterInstance.isJsparrowRunningFlag()) {
-					WorkingDirectory workingDir = bundleStarter.getWorkingDirectoryWatcher();
-					workingDir.cleanUp();
-				}
-			}));
 	}
 }
