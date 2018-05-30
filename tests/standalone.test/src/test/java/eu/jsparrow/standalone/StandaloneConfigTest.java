@@ -66,11 +66,11 @@ public class StandaloneConfigTest {
 	private StandaloneConfig standaloneConfig;
 	private RefactoringPipeline pipeline;
 	private boolean hasRefactoringStates;
+	private ICompilationUnit iCompilationUnit;
 
 	@BeforeClass
 	public static void setUpClass() throws IOException {
 		path = Files.createTempDirectory("jsparrow-standlaone-test-"); //$NON-NLS-1$
-
 	}
 
 	@AfterClass
@@ -96,6 +96,7 @@ public class StandaloneConfigTest {
 		mavenDepsFolder = mock(File.class);
 		classpathEntry = mock(IClasspathEntry.class);
 		pipeline = mock(RefactoringPipeline.class);
+		iCompilationUnit = mock(ICompilationUnit.class);
 		standaloneConfig = new TestableStandaloneConfig("id", path.toString(), "1.8", true); //$NON-NLS-1$ , //$NON-NLS-2$
 		hasRefactoringStates = true;
 	}
@@ -199,19 +200,31 @@ public class StandaloneConfigTest {
 
 		verifyZeroInteractions(javaProject);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test(expected = StandaloneException.class)
 	public void createRefactoringStates_shouldThrowStandaloneException() throws Exception {
 		standaloneConfig.setProject(project);
 		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
-		when(pipeline.createRefactoringStates(any(List.class))).thenThrow(JavaModelException.class);
-		
+		doThrow(JavaModelException.class).when(pipeline)
+			.createRefactoringState(any(ICompilationUnit.class), any(List.class));
+
 		standaloneConfig.createRefactoringStates();
-		
+
 		assertTrue(false);
 	}
-	
+
+	@Test(expected = StandaloneException.class)
+	public void createRefactoringStates_aboardFlag_shouldThrowStandaloneException() throws Exception {
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
+		standaloneConfig.setAboardFlag();
+
+		standaloneConfig.createRefactoringStates();
+
+		assertTrue(false);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void computeRefactoring_emptyRefactoringStates() throws Exception {
@@ -221,10 +234,10 @@ public class StandaloneConfigTest {
 		List<RefactoringRule> rules = mock(List.class);
 
 		standaloneConfig.computeRefactoring(rules);
-		
+
 		verify(pipeline, never()).doRefactoring(any(IProgressMonitor.class));
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test(expected = StandaloneException.class)
 	public void computeRefactoring_shouldThrowStandaloneException() throws Exception {
@@ -234,21 +247,22 @@ public class StandaloneConfigTest {
 		when(rules.toString()).thenReturn("i-am-hungry-now"); //$NON-NLS-1$
 		standaloneConfig.setProject(project);
 		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
-		doThrow(RefactoringException.class).when(pipeline).doRefactoring(any(IProgressMonitor.class));
-		
+		doThrow(RefactoringException.class).when(pipeline)
+			.doRefactoring(any(IProgressMonitor.class));
+
 		standaloneConfig.computeRefactoring(rules);
-		
+
 		assertTrue(false);
 	}
-	
+
 	@Test
 	public void commitrefactoring_emptyRefactoringStates() throws Exception {
 		hasRefactoringStates = false;
 		standaloneConfig.setProject(project);
 		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
-		
+
 		standaloneConfig.commitRefactoring();
-		
+
 		verify(pipeline, never()).commitRefactoring();
 	}
 
@@ -257,10 +271,11 @@ public class StandaloneConfigTest {
 		hasRefactoringStates = true;
 		standaloneConfig.setProject(project);
 		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
-		doThrow(RefactoringException.class).when(pipeline).commitRefactoring();
-		
+		doThrow(RefactoringException.class).when(pipeline)
+			.commitRefactoring();
+
 		standaloneConfig.commitRefactoring();
-		
+
 		assertTrue(false);
 	}
 
@@ -274,6 +289,7 @@ public class StandaloneConfigTest {
 				throws Exception {
 			super("projectId", "projectName", path, compilerCompliance, "", new String[] {}, testMode); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			super.refactoringPipeline = pipeline;
+			super.compilationUnits.add(iCompilationUnit);
 		}
 
 		@Override
@@ -330,7 +346,7 @@ public class StandaloneConfigTest {
 		protected IClasspathEntry createLibraryClasspathEntry(String jarPath) {
 			return classpathEntry;
 		}
-		
+
 		@Override
 		protected boolean hasRefactoringStates() {
 			return hasRefactoringStates;

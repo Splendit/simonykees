@@ -71,7 +71,7 @@ public class StandaloneConfig {
 	private boolean existingSettingsDirectoryMoved = false;
 	private IProject project = null;
 	private IJavaProject javaProject = null;
-	private List<ICompilationUnit> compilationUnits = new ArrayList<>();
+	protected List<ICompilationUnit> compilationUnits = new ArrayList<>();
 	private String projectId;
 	private String projectName;
 	private String sourceFolder;
@@ -402,8 +402,8 @@ public class StandaloneConfig {
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		List<ICompilationUnit> containingErrors = new ArrayList<>();
 		String abordMessage = "Aboard detected while creating refactoring states "; //$NON-NLS-1$
-		for(ICompilationUnit icu : compilationUnits) {
-			if(aboard) {
+		for (ICompilationUnit icu : compilationUnits) {
+			if (aboard) {
 				throw new StandaloneException(abordMessage);
 			}
 			try {
