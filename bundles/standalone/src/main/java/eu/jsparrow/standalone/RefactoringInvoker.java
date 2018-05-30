@@ -6,12 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
@@ -21,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
-import eu.jsparrow.core.config.YAMLExcludes;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
@@ -126,17 +123,11 @@ public class RefactoringInvoker {
 						selectedRules.toString());
 				logger.info(loggerInfo);
 
-				logger.info(Messages.Activator_debug_collectCompilationUnits);
-
-				List<ICompilationUnit> compUnits = standaloneConfig.getICompilationUnits();
-
-				loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compUnits.size());
-				logger.debug(loggerInfo);
-
 				logger.debug(Messages.Activator_debug_createRefactoringStates);
+				
 				try {
-					compUnits = filterExcludedUnits(config.getExcludes(), compUnits);
-					refactoringPipeline.createRefactoringStates(compUnits);
+					CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(standaloneConfig, config.getExcludes());
+					refactoringPipeline.createRefactoringStates(compilationUnitProvider.getFilteredCompilationUnits());
 				} catch (JavaModelException e1) {
 					throw new StandaloneException(e1.getMessage(), e1);
 				}
@@ -165,23 +156,6 @@ public class RefactoringInvoker {
 				logger.info(Messages.Activator_standalone_noRulesSelected);
 			}
 		}
-	}
-
-	private List<ICompilationUnit> filterExcludedUnits(YAMLExcludes excludes, List<ICompilationUnit> compUnits) {
-		return compUnits.stream()
-			.filter(compUnit -> {
-				try {
-					String cuPackage = compUnit.getPackageDeclarations()[0].getElementName();
-					return !excludes.getExcludePackages()
-						.contains(cuPackage)
-							&& !excludes.getExcludeClasses()
-								.contains(cuPackage + "." + compUnit.getElementName()); //$NON-NLS-1$
-				} catch (JavaModelException e) {
-					logger.warn("Error occurred while trying to get package declarations", e); //$NON-NLS-1$
-					return false;
-				}
-			})
-			.collect(Collectors.toList());
 	}
 
 	protected void commitChanges(RefactoringPipeline refactoringPipeline) throws StandaloneException {
