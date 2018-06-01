@@ -52,16 +52,14 @@ public class ListAllRulesMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		Log log = getLog();
-
 		String mode = StandaloneMode.LIST_RULES.name();
-
 		MavenParameters parameters = new MavenParameters(mode);
 		parameters.setRuleId(ruleId);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		BundleStarter starter = new BundleStarter(log);
+		StandaloneLoader loader = new StandaloneLoader(project, starter);
 		try {
 			WorkingDirectory workingDir = mavenAdapter.setUp(parameters);
-			StandaloneLoader loader = new StandaloneLoader(project, starter);
 			addShutdownHook(starter, workingDir);
 			loader.loadStandalone(mavenAdapter);
 		} catch (BundleException | InterruptedException e1) {

@@ -50,10 +50,10 @@ public class ListAllRulesShortMojo extends AbstractMojo {
 		MavenParameters parameters = new MavenParameters(mode);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		BundleStarter bundleStarter = new BundleStarter(log);
+		StandaloneLoader loader = new StandaloneLoader(project, bundleStarter);
 		try {
 			WorkingDirectory workingDir = mavenAdapter.setUp(parameters);
 			addShutdownHook(bundleStarter, workingDir);
-			StandaloneLoader loader = new StandaloneLoader(project, bundleStarter);
 			loader.loadStandalone(mavenAdapter);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);

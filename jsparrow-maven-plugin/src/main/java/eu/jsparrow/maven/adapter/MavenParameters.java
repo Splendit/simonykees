@@ -11,9 +11,9 @@ import java.util.Optional;
  */
 public class MavenParameters {
 
-	private String profile;
+	private String profile = ""; //$NON-NLS-1$
 	private String mode;
-	private boolean useDefaultConfig;
+	private boolean useDefaultConfig = false;
 	private String ruleId;
 	private String license = ""; //$NON-NLS-1$
 	private String url = ""; //$NON-NLS-1$
@@ -41,16 +41,16 @@ public class MavenParameters {
 		this.ruleId = ruleId;
 	}
 
-	public Optional<String> getProfile() {
-		return Optional.ofNullable(profile);
+	public String getProfile() {
+		return profile;
 	}
 
 	public String getMode() {
 		return mode;
 	}
 
-	public Optional<Boolean> getUseDefaultConfig() {
-		return Optional.ofNullable(useDefaultConfig);
+	public boolean getUseDefaultConfig() {
+		return useDefaultConfig;
 	}
 
 	public Optional<String> getRuleId() {

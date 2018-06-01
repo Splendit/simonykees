@@ -35,7 +35,7 @@ public class RefactoringInvoker {
 
 	/**
 	 * The following constants represent some keys in the BundleContext and they
-	 * must match with the ones in {@link eu.jsparrow.adapter.MavenAdapter}
+	 * must match with the ones in {@link eu.jsparrow.adapter.ConfigurationKeys}
 	 */
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$

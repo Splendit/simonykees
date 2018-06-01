@@ -108,7 +108,7 @@ public class DependencyManager {
 				COPY_DEPENDENCIES_GOAL);
 		List<String> goals = Collections.singletonList(cleanPackageCopyDependencies);
 		request.setGoals(goals);
-		String outputDirectoryPath = System.getProperty(MavenAdapter.USER_DIR) + File.separator
+		String outputDirectoryPath = System.getProperty(ConfigurationKeys.USER_DIR) + File.separator
 				+ OUTPUT_DIRECTORY_PREFIX + File.separator + "\\${project.artifactId}"; //$NON-NLS-1$
 		props.setProperty(OUTPUT_DIRECTORY_OPTION_KEY, outputDirectoryPath);
 		props.setProperty("skipTests", "true"); //$NON-NLS-1$ , //$NON-NLS-2$

@@ -65,11 +65,11 @@ public class MavenAdapterTest {
 	@Test
 	public void prepareConfiguration_additionalConfigurationNotNull() throws Exception {
 		final MavenParameters config = mock(MavenParameters.class);
-		when(config.getUseDefaultConfig()).thenReturn(Optional.empty());
+		when(config.getUseDefaultConfig()).thenReturn(false);
 		when(config.getMode()).thenReturn(""); //$NON-NLS-1$
 		when(config.getLicense()).thenReturn(""); //$NON-NLS-1$
 		when(config.getUrl()).thenReturn(""); //$NON-NLS-1$
-		when(config.getProfile()).thenReturn(Optional.empty());
+		when(config.getProfile()).thenReturn(""); //$NON-NLS-1$
 		when(config.getRuleId()).thenReturn(Optional.empty());
 
 		mavenAdapter.addInitialConfiguration(config); //$NON-NLS-1$

@@ -31,43 +31,7 @@ import eu.jsparrow.maven.i18n.Messages;
  */
 public class MavenAdapter {
 
-	/**
-	 * The following constants represent some keys in the BundleContext. Any
-	 * change here must be reflected also in
-	 * {@link eu.jsparrow.standalone.RefactoringInvoker}.
-	 */
-	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	public static final String DOT = "."; //$NON-NLS-1$
-	private static final String MAVEN_COMPILER_PLUGIN_ARTIFACT_ID = "maven-compiler-plugin"; //$NON-NLS-1$
-	private static final String MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME = "source"; //$NON-NLS-1$
-	private static final String MAVEN_COMPILER_PLUGIN_PROPERTY_SOURCE_NAME = "maven.compiler.source"; //$NON-NLS-1$
-	private static final String MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION = "1.5"; //$NON-NLS-1$
-	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
-	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
-	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
-	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
-	private static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default"; //$NON-NLS-1$
-	private static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache"; //$NON-NLS-1$
-	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
-	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
-	private static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
-	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area"; //$NON-NLS-1$
-	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
-	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
-	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
-	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
-	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
-	private static final String DEV_MODE_KEY = "dev.mode.enabled"; //$NON-NLS-1$
-	private static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
-	private static final String SOURCE_FOLDER = "SOURCE.FOLDER"; //$NON-NLS-1$
-	private static final String DEFAULT_SOURCE_FOLDER_PATH = "src/main/java"; //$NON-NLS-1$
-
-	private static final String MAVEN_NATURE_ID = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
-	private static final String ECLIPSE_PLUGIN_NATURE_ID = "org.eclipse.pde.PluginNature"; //$NON-NLS-1$
-	private static final String JAVA_NATURE_ID = "org.eclipse.jdt.core.javanature"; //$NON-NLS-1$
-	private static final String ECLIPSE_PLUGIN_PROJECT_NATURE_IDS = String.format("%s,%s,%s", MAVEN_NATURE_ID, //$NON-NLS-1$
-			ECLIPSE_PLUGIN_NATURE_ID, JAVA_NATURE_ID);
-	private static final String MAVEN_PROJECT_NATURE_IDS = MAVEN_NATURE_ID + "," + JAVA_NATURE_ID; //$NON-NLS-1$
 
 	private Log log;
 	private Map<String, String> configuration = new HashMap<>();
@@ -150,7 +114,7 @@ public class MavenAdapter {
 	 * </ul>
 	 * 
 	 * <b>Note:</b> if the project represents and aggregate project, then no
-	 * configuration is stored. Only the cofiguration of child projects need to
+	 * configuration is stored. Only the configuration of child projects need to
 	 * be stored.
 	 * 
 	 * @param project
@@ -167,23 +131,24 @@ public class MavenAdapter {
 		String artifactId = project.getArtifactId();
 
 		String allIdentifiers = getAllProjectIdentifiers();
-		configuration.put(ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
-		configuration.put(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
-		configuration.put(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, artifactId);
+		configuration.put(ConfigurationKeys.ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
+		configuration.put(ConfigurationKeys.PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
+		configuration.put(ConfigurationKeys.PROJECT_NAME_CONSTANT + DOT + projectIdentifier, artifactId);
 		String yamlFilePath = findYamlFilePath(project, configFile.getName());
 		log.info(Messages.MavenAdapter_jSparrowConfigurationFile + yamlFilePath);
-		configuration.put(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
-		configuration.put(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
-		configuration.put(NATURE_IDS + DOT + projectIdentifier, findNatureIds(project));
+		configuration.put(ConfigurationKeys.CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
+		configuration.put(ConfigurationKeys.PROJECT_JAVA_VERSION + DOT + projectIdentifier,
+				getCompilerCompliance(project));
+		configuration.put(ConfigurationKeys.NATURE_IDS + DOT + projectIdentifier, findNatureIds(project));
 
 	}
 
 	private String findNatureIds(MavenProject project) {
 		if (project.getPackaging()
 			.equals("eclipse-plugin")) { //$NON-NLS-1$
-			return ECLIPSE_PLUGIN_PROJECT_NATURE_IDS;
+			return ConfigurationKeys.ECLIPSE_PLUGIN_PROJECT_NATURE_IDS;
 		} else {
-			return MAVEN_PROJECT_NATURE_IDS;
+			return ConfigurationKeys.MAVEN_PROJECT_NATURE_IDS;
 		}
 	}
 
@@ -246,16 +211,16 @@ public class MavenAdapter {
 	}
 
 	private String getAllProjectIdentifiers() {
-		return configuration.getOrDefault(ALL_PROJECT_IDENTIFIERS, ""); //$NON-NLS-1$
+		return configuration.getOrDefault(ConfigurationKeys.ALL_PROJECT_IDENTIFIERS, ""); //$NON-NLS-1$
 	}
 
 	void addInitialConfiguration(MavenParameters config) {
-		boolean useDefaultConfig = config.getUseDefaultConfig()
-			.orElse(false);
+		boolean useDefaultConfig = config.getUseDefaultConfig();
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
-		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
-		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
-		configuration.put(SOURCE_FOLDER, DEFAULT_SOURCE_FOLDER_PATH);
+		configuration.put(Constants.FRAMEWORK_STORAGE, ConfigurationKeys.FRAMEWORK_STORAGE_VALUE);
+		configuration.put(ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT,
+				System.getProperty(ConfigurationKeys.USER_DIR));
+		configuration.put(ConfigurationKeys.SOURCE_FOLDER, ConfigurationKeys.DEFAULT_SOURCE_FOLDER_PATH);
 
 		/*
 		 * This is solution B from this article:
@@ -263,16 +228,15 @@ public class MavenAdapter {
 		 * osgi/
 		 */
 		configuration.put(Constants.FRAMEWORK_BOOTDELEGATION, "javax.*,org.xml.*"); //$NON-NLS-1$
-		configuration.put(DEBUG_ENABLED, Boolean.toString(log.isDebugEnabled()));
-		configuration.put(STANDALONE_MODE_KEY, config.getMode());
-		configuration.put(SELECTED_PROFILE, config.getProfile()
-			.orElse("")); //$NON-NLS-1$
-		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
-		configuration.put(LICENSE_KEY, config.getLicense());
-		configuration.put(AGENT_URL, config.getUrl());
+		configuration.put(ConfigurationKeys.DEBUG_ENABLED, Boolean.toString(log.isDebugEnabled()));
+		configuration.put(ConfigurationKeys.STANDALONE_MODE_KEY, config.getMode());
+		configuration.put(ConfigurationKeys.SELECTED_PROFILE, config.getProfile());
+		configuration.put(ConfigurationKeys.USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
+		configuration.put(ConfigurationKeys.LICENSE_KEY, config.getLicense());
+		configuration.put(ConfigurationKeys.AGENT_URL, config.getUrl());
 		config.getRuleId()
-			.ifPresent(ruleId -> configuration.put(LIST_RULES_SELECTED_ID, ruleId));
-		configuration.put(DEV_MODE_KEY, Boolean.toString(config.isDevMode()));
+			.ifPresent(ruleId -> configuration.put(ConfigurationKeys.LIST_RULES_SELECTED_ID, ruleId));
+		configuration.put(ConfigurationKeys.DEV_MODE_KEY, Boolean.toString(config.isDevMode()));
 	}
 
 	/**
@@ -302,8 +266,8 @@ public class MavenAdapter {
 
 		if (directory.exists() || directory.mkdirs()) {
 			String directoryAbsolutePath = directory.getAbsolutePath();
-			setSystemProperty(USER_DIR, directoryAbsolutePath);
-			configuration.put(OSGI_INSTANCE_AREA_CONSTANT, directoryAbsolutePath);
+			setSystemProperty(ConfigurationKeys.USER_DIR, directoryAbsolutePath);
+			configuration.put(ConfigurationKeys.OSGI_INSTANCE_AREA_CONSTANT, directoryAbsolutePath);
 
 			String loggerInfo = NLS.bind(Messages.MavenAdapter_setUserDir, directoryAbsolutePath);
 			log.info(loggerInfo);
@@ -358,21 +322,22 @@ public class MavenAdapter {
 
 		Properties projectProperties = project.getProperties();
 
-		String sourceProperty = projectProperties.getProperty(MAVEN_COMPILER_PLUGIN_PROPERTY_SOURCE_NAME);
+		String sourceProperty = projectProperties
+			.getProperty(ConfigurationKeys.MAVEN_COMPILER_PLUGIN_PROPERTY_SOURCE_NAME);
 		if (null != sourceProperty) {
 			return sourceProperty;
 		}
 
-		return MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION;
+		return ConfigurationKeys.MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION;
 	}
 
 	private String getCompilerComplienceFromCompilerPlugin(List<Plugin> buildPlugins) {
 		for (Plugin plugin : buildPlugins) {
-			if (MAVEN_COMPILER_PLUGIN_ARTIFACT_ID.equals(plugin.getArtifactId())) {
+			if (ConfigurationKeys.MAVEN_COMPILER_PLUGIN_ARTIFACT_ID.equals(plugin.getArtifactId())) {
 				Xpp3Dom pluginConfig = (Xpp3Dom) plugin.getConfiguration();
 				if (pluginConfig != null) {
 					for (Xpp3Dom child : pluginConfig.getChildren()) {
-						if (MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME.equals(child.getName())) {
+						if (ConfigurationKeys.MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME.equals(child.getName())) {
 							return child.getValue();
 						}
 					}

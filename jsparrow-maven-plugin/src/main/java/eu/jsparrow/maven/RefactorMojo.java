@@ -90,26 +90,44 @@ public class RefactorMojo extends AbstractMojo {
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		DependencyManager dependencyManager = new DependencyManager(log, mavenHome);
 		List<MavenProject> projects = mavenSession.getAllProjects();
-		
+		BundleStarter bundleStarter = new BundleStarter(log);
+		StandaloneLoader loader = new StandaloneLoader(project, bundleStarter);
+
 		try {
 			WorkingDirectory workingDirectory = mavenAdapter.setUp(parameters, projects, configFile);
-			BundleStarter bundleStarter = new BundleStarter(log);
 			addShutdownHook(bundleStarter, workingDirectory, mavenAdapter.isJsparrowRunningFlag());
-			StandaloneLoader loader = new StandaloneLoader(project, bundleStarter);
 			loader.loadStandalone(mavenAdapter, dependencyManager);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());
 		}
 	}
-	
-	private void addShutdownHook(BundleStarter starter, WorkingDirectory workingDirectory, boolean jsSparrowStartedFlag) {
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			starter.shutdownFramework();
-			if(!jsSparrowStartedFlag) {
-				workingDirectory.cleanUp();
-			}
-		}));
+
+	/**
+	 * Registers a hook which is executed either when the program exits or the
+	 * virtual machine is terminated in response to a user interrupt.
+	 * <b>Note:</b> The equinox framework must be shut down before the working
+	 * directory is cleared.
+	 * 
+	 * @param starter
+	 *            the instance of {@link BundleStarter} which is responsible for
+	 *            starting/shutting down the equinox framework.
+	 * @param workingDirectory
+	 *            an instance of {@link WorkingDirectory} which is responsible
+	 *            for reading/cleaning the working directory.
+	 * @param jSparrowStartedFlag
+	 *            an indicator whether jSparrow already started flag has been
+	 *            raised.
+	 */
+	private void addShutdownHook(BundleStarter starter, WorkingDirectory workingDirectory,
+			boolean jSparrowStartedFlag) {
+		Runtime.getRuntime()
+			.addShutdownHook(new Thread(() -> {
+				starter.shutdownFramework();
+				if (!jSparrowStartedFlag) {
+					workingDirectory.cleanUp();
+				}
+			}));
 	}
 
 }
