@@ -41,10 +41,10 @@ timestamps {
 			   def pluginResourcePath = 'jsparrow-maven-plugin/src/main/resources'
 			   def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'			   
 			   def manifest = 'manifest.standalone'
-			   def manifestContent = sh(script: 'ls $jSparrowTargetPath', returnStdout: true)
+			   def manifestContent = sh(script: "ls $jSparrowTargetPath", returnStdout: true)
 			   
 			   dir('jsparrow-maven-plugin/src/main/resources'){
-			     writeFile file: '${manifest}', text: '${manifestContent}'
+			     writeFile file: "${manifest}", text: "${manifestContent}"
 			   }
 			 
 			   // Copy required dependencies into plugin resource folder
