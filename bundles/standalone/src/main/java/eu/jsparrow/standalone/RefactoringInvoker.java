@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
@@ -21,9 +20,7 @@ import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
@@ -86,19 +83,23 @@ public class RefactoringInvoker {
 	public void startRefactoring(BundleContext context) throws StandaloneException {
 		loadStandaloneConfig(context);
 		prepareRefactoring();
-		computeRefactoring(context);
+		computeRefactoring();
 		commitRefactoring();
 	}
 
 	/**
-	 * Prepares the refactoring states and computes the refacotring for the
-	 * projects contained in the provided list of
-	 * {@link StandaloneConfig}uratios. Does NOT commit the refactoring.
-	 * 
-	 * @param refactoringPipeline
-	 *            an instance of the {@link RefactoringPipeline}
+	 * Prepares the refactoring states for each {@link StandaloneConfig} on the
+	 * {@link #standaloneConfigs}.
 	 * 
 	 * @throws StandaloneException
+	 *             reasons include:
+	 *             <ul>
+	 *             <li>A {@link JavaModelException} is thrown while creating a
+	 *             refactoring state</li>
+	 *             <li>A user aboard was detected</li>
+	 *             <li>A {@link ConcurrentModificationException} was thrown
+	 *             while canceling the execution</li>
+	 *             </ul>
 	 */
 	private void prepareRefactoring() throws StandaloneException {
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
@@ -114,26 +115,19 @@ public class RefactoringInvoker {
 		}
 	}
 
-	private void computeRefactoring(BundleContext context) throws StandaloneException {
+	private void computeRefactoring() throws StandaloneException {
 
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
 			String aboardMessage = String.format("Aboard detected while computing refactoring on %s ", //$NON-NLS-1$
 					standaloneConfig.getProjectName());
 			verifyAboardFlag(aboardMessage);
-			YAMLConfig config = getConfiguration(context, standaloneConfig.getProjectId());
-
-			List<RefactoringRule> projectRules = getProjectRules(standaloneConfig);
-			List<RefactoringRule> selectedRules = getSelectedRules(config, projectRules);
-			if (!selectedRules.isEmpty()) {
-				try {
-					standaloneConfig.computeRefactoring(selectedRules);
-				} catch (ConcurrentModificationException e) {
-					String message = aboard ? aboardMessage : e.getMessage();
-					throw new StandaloneException(message);
-				}
-			} else {
-				logger.info(Messages.Activator_standalone_noRulesSelected);
+			try {
+				standaloneConfig.computeRefactoring();
+			} catch (ConcurrentModificationException e) {
+				String message = aboard ? aboardMessage : e.getMessage();
+				throw new StandaloneException(message);
 			}
+
 		}
 	}
 
@@ -258,16 +252,17 @@ public class RefactoringInvoker {
 			}
 			String sourceFolder = context.getProperty(SOURCE_FOLDER);
 			String[] natureIds = findNatureIds(context, id);
-			StandaloneConfig standaloneConfig;
 			try {
-				standaloneConfig = new StandaloneConfig(id, projectName, path, compilerCompliance, sourceFolder,
-						natureIds);
+				YAMLConfig config = getConfiguration(context, id);
+				StandaloneConfig standaloneConfig = new StandaloneConfig(projectName, path, compilerCompliance, sourceFolder,
+						natureIds, config);
+				standaloneConfigs.add(standaloneConfig);
 
 			} catch (CoreException | IOException | RuntimeException e) {
 				String message = aboard ? aboardMessage : e.getMessage();
 				throw new StandaloneException(message, e);
 			}
-			standaloneConfigs.add(standaloneConfig);
+
 		}
 
 		if (standaloneConfigs.isEmpty()) {
@@ -290,21 +285,6 @@ public class RefactoringInvoker {
 			paths.put(id, path);
 		}
 		return paths;
-	}
-
-	protected List<RefactoringRule> getProjectRules(StandaloneConfig standaloneConfig) {
-		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
-		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
-	}
-
-	protected List<RefactoringRule> getSelectedRules(YAMLConfig config, List<RefactoringRule> projectRules)
-			throws StandaloneException {
-		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
-		try {
-			return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
-		} catch (YAMLConfigException e) {
-			throw new StandaloneException(e.getMessage(), e);
-		}
 	}
 
 	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws StandaloneException {

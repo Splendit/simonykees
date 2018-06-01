@@ -32,6 +32,8 @@ import eu.jsparrow.maven.i18n.Messages;
 public class MavenAdapter {
 
 	public static final String DOT = "."; //$NON-NLS-1$
+	
+	private static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
 
 	private Log log;
 	private Map<String, String> configuration = new HashMap<>();
@@ -75,8 +77,8 @@ public class MavenAdapter {
 			log.error(NLS.bind(Messages.MavenAdapter_jSparrowAlreadyRunning, rootProject.getArtifactId()));
 			throw new MojoExecutionException(Messages.MavenAdapter_jSparrowIsAlreadyRunning);
 		}
+		configuration.put(ROOT_CONFIG_PATH, defaultYamlFile.getAbsolutePath());
 		workingDirectory.lockProjects();
-
 		for (MavenProject mavenProject : projects) {
 			if (!isAggregateProject(mavenProject)) {
 				addProjectConfiguration(mavenProject, defaultYamlFile);
@@ -119,10 +121,10 @@ public class MavenAdapter {
 	 * 
 	 * @param project
 	 *            the maven project to store the configuration for
-	 * @param configFile
+	 * @param defaultYamlFile
 	 *            the expected jsparrow.yml file
 	 */
-	private void addProjectConfiguration(MavenProject project, File configFile) {
+	private void addProjectConfiguration(MavenProject project, File defaultYamlFile) {
 		log.info(String.format(Messages.MavenAdapter_addingProjectConfiguration, project.getName()));
 
 		File baseDir = project.getBasedir();
@@ -134,7 +136,7 @@ public class MavenAdapter {
 		configuration.put(ConfigurationKeys.ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
 		configuration.put(ConfigurationKeys.PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
 		configuration.put(ConfigurationKeys.PROJECT_NAME_CONSTANT + DOT + projectIdentifier, artifactId);
-		String yamlFilePath = findYamlFilePath(project, configFile.getName());
+		String yamlFilePath = findYamlFilePath(project, defaultYamlFile);
 		log.info(Messages.MavenAdapter_jSparrowConfigurationFile + yamlFilePath);
 		configuration.put(ConfigurationKeys.CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
 		configuration.put(ConfigurationKeys.PROJECT_JAVA_VERSION + DOT + projectIdentifier,
@@ -160,33 +162,36 @@ public class MavenAdapter {
 	 * 
 	 * @param project
 	 *            the project to find the configuration file for.
-	 * @param yamlFile
+	 * @param defaultYamlFile
 	 *            expected yaml file
 	 * @return the path of the corresponding yaml file
 	 */
-	protected String findYamlFilePath(MavenProject project, String yamlFile) {
-		File projectYamlFile = joinPaths(project.getBasedir(), yamlFile).toFile();
-		if (projectYamlFile.exists()) {
-			return projectYamlFile.getAbsolutePath();
+	protected String findYamlFilePath(MavenProject project, File defaultYamlFile) {
+		String yamlFileName = defaultYamlFile.getName();
+		File baseDir = project.getBasedir();
+		Path yamlPath = joinPaths(yamlFileName, baseDir);
+		if (yamlPath.toFile()
+			.exists()) {
+			return yamlPath.toString();
 		}
+
 		MavenProject parent = project;
 		while ((parent = parent.getParent()) != null) {
 			if (parent == rootProject) {
 				break;
 			}
 			File parentBaseDir = parent.getBasedir();
-
-			Path parentYamlPath = joinPaths(parentBaseDir, yamlFile);
+			Path parentYamlPath = joinPaths(yamlFileName, parentBaseDir);
 			if (parentYamlPath.toFile()
 				.exists()) {
 				return parentYamlPath.toString();
 			}
 		}
-		return joinPaths(rootProject.getBasedir(), yamlFile).toString();
+		return defaultYamlFile.getAbsolutePath();
 	}
 
-	protected Path joinPaths(File parentBaseDir, String yamlFile) {
-		return Paths.get(parentBaseDir.getAbsolutePath(), yamlFile);
+	protected Path joinPaths(String yamlFileName, File parentBaseDir) {
+		return Paths.get(parentBaseDir.getAbsolutePath(), yamlFileName);
 	}
 
 	/**

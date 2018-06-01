@@ -30,9 +30,13 @@ import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.config.YAMLConfig;
+import eu.jsparrow.core.config.YAMLConfigException;
+import eu.jsparrow.core.config.YAMLConfigUtil;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -72,43 +76,38 @@ public class StandaloneConfig {
 	private IProject project = null;
 	private IJavaProject javaProject = null;
 	protected List<ICompilationUnit> compilationUnits = new ArrayList<>();
-	private String projectId;
 	private String projectName;
 	private String sourceFolder;
 	private String[] natureIds;
 	protected RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private boolean aboard = false;
+	private YAMLConfig config;
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
 	 * compilation units.
-	 * 
 	 * @param path
 	 *            to the folder of the project
 	 * @param compilerCompliance
 	 *            java version of the project (i.e. "1.8" or "9")
+	 * @param config
+	 *            the Yaml file corresponding to the current project
+	 * 
 	 * @throws CoreException
 	 * @throws MavenInvocationException
 	 * @throws IOException
 	 * @throws StandaloneException
 	 */
-	public StandaloneConfig(String id, String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds) throws CoreException, IOException, StandaloneException {
-		this(id, projectName, path, compilerCompliance, sourceFolder, natureIds, false);
-	}
+	public StandaloneConfig(String projectName, String path, String compilerCompliance, String sourceFolder, String[] natureIds,
+			YAMLConfig config) throws CoreException, IOException, StandaloneException {
 
-	public StandaloneConfig(String id, String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds, boolean testMode) throws CoreException, IOException, StandaloneException {
 		this.projectName = projectName;
-		this.projectId = id;
 		this.path = path;
 		this.compilerCompliance = compilerCompliance;
 		this.sourceFolder = sourceFolder;
 		this.natureIds = natureIds;
-
-		if (!testMode) {
-			setUp();
-		}
+		this.config = config;
+		setUp();
 	}
 
 	/**
@@ -123,7 +122,7 @@ public class StandaloneConfig {
 	public void setUp() throws CoreException, IOException, StandaloneException {
 		IProjectDescription projectDescription = getProjectDescription();
 		project = initProject(projectDescription);
-		this.javaProject = initJavaProject(project);
+		javaProject = initJavaProject(project);
 		List<IClasspathEntry> mavenClasspathEntries = collectMavenDependenciesAsClasspathEntries();
 		mavenClasspathEntries = addProjectSourceConfigurations(mavenClasspathEntries);
 		addToClasspath(mavenClasspathEntries);
@@ -402,7 +401,8 @@ public class StandaloneConfig {
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		List<ICompilationUnit> containingErrors = new ArrayList<>();
 		String abordMessage = "Aboard detected while creating refactoring states "; //$NON-NLS-1$
-		for (ICompilationUnit icu : compilationUnits) {
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(this, config.getExcludes());
+		for (ICompilationUnit icu : compilationUnitProvider.getFilteredCompilationUnits()) {
 			if (aboard) {
 				throw new StandaloneException(abordMessage);
 			}
@@ -420,10 +420,13 @@ public class StandaloneConfig {
 		logger.debug(loggerInfo);
 	}
 
-	public void computeRefactoring(List<RefactoringRule> rules) throws StandaloneException {
+	public void computeRefactoring() throws StandaloneException {
 		if (!hasRefactoringStates()) {
 			return;
 		}
+
+		List<RefactoringRule> projectRules = getProjectRules();
+		List<RefactoringRule> rules = getSelectedRules(projectRules);
 
 		String loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, rules.size(), rules.toString());
 		logger.info(loggerInfo);
@@ -431,18 +434,38 @@ public class StandaloneConfig {
 		refactoringPipeline.setRules(rules);
 		String logInfo = NLS.bind(Messages.Activator_debug_startRefactoring, project.getName());
 		logger.info(logInfo);
-		try {
-			refactoringPipeline.doRefactoring(new NullProgressMonitor());
-			loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, javaProject.getElementName(),
-					refactoringPipeline.getRulesWithChangesAsString());
-			logger.info(loggerInfo);
-		} catch (RuleException e) {
-			logger.debug(e.getMessage(), e);
-			logger.error(e.getMessage());
-		} catch (RefactoringException e) {
-			String message = String.format("Cannot compute refactoring on %s.", project.getName()); //$NON-NLS-1$
-			throw new StandaloneException(message, e);
+
+		if (rules.isEmpty()) {
+			try {
+				refactoringPipeline.doRefactoring(new NullProgressMonitor());
+				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, javaProject.getElementName(),
+						refactoringPipeline.getRulesWithChangesAsString());
+				logger.info(loggerInfo);
+			} catch (RuleException e) {
+				logger.debug(e.getMessage(), e);
+				logger.error(e.getMessage());
+			} catch (RefactoringException e) {
+				String message = String.format("Cannot compute refactoring on %s.", project.getName()); //$NON-NLS-1$
+				throw new StandaloneException(message, e);
+			}
+		} else {
+			logger.info(Messages.Activator_standalone_noRulesSelected);
 		}
+	}
+
+	protected List<RefactoringRule> getSelectedRules(List<RefactoringRule> projectRules)
+			throws StandaloneException {
+		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
+		try {
+			return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
+		} catch (YAMLConfigException e) {
+			throw new StandaloneException(e.getMessage(), e);
+		}
+	}
+
+	protected List<RefactoringRule> getProjectRules() {
+		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
+		return RulesContainer.getRulesForProject(getJavaProject(), true);
 	}
 
 	public void commitRefactoring() throws StandaloneException {
@@ -598,10 +621,6 @@ public class StandaloneConfig {
 
 	protected boolean isExistingSettingsDirectoryMoved() {
 		return existingSettingsDirectoryMoved;
-	}
-
-	public String getProjectId() {
-		return this.projectId;
 	}
 
 	public String getProjectName() {
