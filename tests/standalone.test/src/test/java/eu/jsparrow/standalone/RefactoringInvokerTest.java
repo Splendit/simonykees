@@ -116,13 +116,12 @@ public class RefactoringInvokerTest {
 		}
 
 		@Override
-		protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) {
+		protected void loadStandaloneConfig(BundleContext context) {
 			IJavaProject javaProject = mock(IJavaProject.class);
 			when(javaProject.getElementName()).thenReturn("projectName");//$NON-NLS-1$
 			StandaloneConfig standaloneConfig = mock(StandaloneConfig.class);
 			when(standaloneConfig.getJavaProject()).thenReturn(javaProject);
 			standaloneConfigs = Arrays.asList(standaloneConfig);
-			return standaloneConfigs;
 		}
 
 		@Override

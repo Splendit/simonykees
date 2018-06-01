@@ -14,5 +14,9 @@ public class StandaloneException extends SimonykeesException {
 	public StandaloneException(String message, Throwable cause) {
 		super(message, cause);
 	}
+	
+	public StandaloneException(String message) {
+		super(message);
+	}
 
 }

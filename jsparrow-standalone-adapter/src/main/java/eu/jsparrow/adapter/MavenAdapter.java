@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,6 +50,7 @@ public class MavenAdapter {
 
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
+	private static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
 
@@ -168,16 +170,21 @@ public class MavenAdapter {
 	 * @return the path of the corresponding yaml file
 	 */
 	protected String findYamlFilePath(MavenProject project, File yamlFile) {
-		if (yamlFile.exists()) {
-			return yamlFile.getAbsolutePath();
+		String yamlFileName = yamlFile.getName();
+		File baseDir = project.getBasedir();
+		Path yamlPath = joinPaths(yamlFileName, baseDir);
+		if (yamlPath.toFile()
+			.exists()) {
+			return yamlPath.toString();
 		}
+
 		MavenProject parent = project;
 		while ((parent = parent.getParent()) != null) {
 			if (parent == getRootProject()) {
 				break;
 			}
 			File parentBaseDir = parent.getBasedir();
-			Path parentYamlPath = joinPaths(yamlFile, parentBaseDir);
+			Path parentYamlPath = joinPaths(yamlFileName, parentBaseDir);
 			if (parentYamlPath.toFile()
 				.exists()) {
 				return parentYamlPath.toString();
@@ -186,8 +193,8 @@ public class MavenAdapter {
 		return getDefaultYamlFile().getAbsolutePath();
 	}
 
-	protected Path joinPaths(File yamlFile, File parentBaseDir) {
-		return Paths.get(parentBaseDir.getAbsolutePath(), yamlFile.getPath());
+	protected Path joinPaths(String yamlFileName, File parentBaseDir) {
+		return Paths.get(parentBaseDir.getAbsolutePath(), yamlFileName);
 	}
 
 	/**
@@ -236,6 +243,13 @@ public class MavenAdapter {
 		configuration.put(SELECTED_PROFILE, config.getProfile()
 			.orElse("")); //$NON-NLS-1$
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
+		Optional<File> defaultYamlFileValue = config.getDefaultYamlFile();
+		if (defaultYamlFileValue.isPresent()) {
+			configuration.put(ROOT_CONFIG_PATH, defaultYamlFileValue.get()
+				.getAbsolutePath());
+		} else {
+			configuration.put(ROOT_CONFIG_PATH, ""); //$NON-NLS-1$
+		}
 		configuration.put(LICENSE_KEY, config.getLicense());
 		configuration.put(AGENT_URL, config.getUrl());
 		config.getRuleId()

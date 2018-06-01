@@ -10,7 +10,6 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
@@ -49,6 +48,7 @@ public class RefactoringInvoker {
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
+	private static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
 	private static final String SOURCE_FOLDER = "SOURCE.FOLDER"; //$NON-NLS-1$
 	private static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
@@ -86,9 +86,8 @@ public class RefactoringInvoker {
 	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
 			throws StandaloneException {
 
-		List<StandaloneConfig> configs = loadStandaloneConfig(context);
-		setStandaloneConfigurations(configs);
-		computeRefactoring(context, refactoringPipeline, configs);
+		loadStandaloneConfig(context);
+		computeRefactoring(context, refactoringPipeline, standaloneConfigs);
 		commitChanges(refactoringPipeline);
 	}
 
@@ -124,16 +123,12 @@ public class RefactoringInvoker {
 						selectedRules.toString());
 				logger.info(loggerInfo);
 
-				logger.info(Messages.Activator_debug_collectCompilationUnits);
-
-				List<ICompilationUnit> compUnits = standaloneConfig.getICompilationUnits();
-
-				loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compUnits.size());
-				logger.debug(loggerInfo);
-
 				logger.debug(Messages.Activator_debug_createRefactoringStates);
+
 				try {
-					refactoringPipeline.createRefactoringStates(compUnits);
+					CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(standaloneConfig,
+							config.getExcludes());
+					refactoringPipeline.createRefactoringStates(compilationUnitProvider.getFilteredCompilationUnits());
 				} catch (JavaModelException e1) {
 					throw new StandaloneException(e1.getMessage(), e1);
 				}
@@ -172,7 +167,7 @@ public class RefactoringInvoker {
 		} catch (RefactoringException | ReconcileException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
-			throw new StandaloneException("Can not commit refatoring", e); //$NON-NLS-1$
+			throw new StandaloneException("Can not commit refactoring", e); //$NON-NLS-1$
 		}
 	}
 
@@ -245,28 +240,50 @@ public class RefactoringInvoker {
 	 *             if an instance of the {@link StandaloneConfig} cannot be
 	 *             created.
 	 */
-	protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) throws StandaloneException {
+	protected void loadStandaloneConfig(BundleContext context) throws StandaloneException {
 
 		Map<String, String> projectPaths = findAllProjectPaths(context);
 
-		List<StandaloneConfig> configs = new ArrayList<>();
+		List<String> excludedModules = new ArrayList<>();
+		String rootProjectConfig = context.getProperty(ROOT_CONFIG_PATH);
+		if (!rootProjectConfig.isEmpty()) {
+			String profile = context.getProperty(SELECTED_PROFILE);
+			try {
+				YAMLConfig rootYamlConfig = YAMLConfigUtil.readConfig(rootProjectConfig, profile);
+				excludedModules = rootYamlConfig.getExcludes()
+					.getExcludeModules();
+			} catch (YAMLConfigException e) {
+				throw new StandaloneException("Error occured while reading root yaml configuration file", e); //$NON-NLS-1$
+			}
+		}
+
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
 			String id = entry.getKey();
 			String path = entry.getValue();
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
 			String projectName = context.getProperty(PROJECT_NAME + DOT + id);
+			if (excludedModules.contains(projectName)) {
+				/*
+				 * Skip adding StandaloneConfig for excluded module. Checks if
+				 * name matches and excludes only that package, but not possible
+				 * sub-packages / packages that start with the same string.
+				 */
+				continue;
+			}
 			String sourceFolder = context.getProperty(SOURCE_FOLDER);
 			String[] natureIds = findNatureIds(context, id);
 			try {
 				StandaloneConfig standaloneConfig = new StandaloneConfig(id, projectName, path, compilerCompliance,
 						sourceFolder, natureIds);
-				configs.add(standaloneConfig);
+				standaloneConfigs.add(standaloneConfig);
 			} catch (CoreException | IOException e) {
 				throw new StandaloneException(e.getMessage(), e);
 			}
 		}
-		return configs;
 
+		if (standaloneConfigs.isEmpty()) {
+			throw new StandaloneException(Messages.RefactoringInvoker_error_allModulesExcluded);
+		}
 	}
 
 	protected String[] findNatureIds(BundleContext context, String id) {
@@ -308,9 +325,4 @@ public class RefactoringInvoker {
 			throw new StandaloneException(e.getMessage(), e);
 		}
 	}
-
-	private void setStandaloneConfigurations(List<StandaloneConfig> configs) {
-		this.standaloneConfigs = configs;
-	}
-
 }
