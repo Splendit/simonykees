@@ -23,25 +23,25 @@ public class StandaloneLoaderTest {
 		bundleStarter = mock(BundleStarter.class);
 		standaloneLoader = new StandaloneLoader(project, bundleStarter);
 	}
-	
+
 	@Test
 	public void loadStandalone_refactoringMode() throws Exception {
 		Map<String, String> configuration = new HashMap<>();
 		MavenAdapter mavenAdapter = mock(MavenAdapter.class);
 		DependencyManager dependencyManager = mock(DependencyManager.class);
 		when(mavenAdapter.getConfiguration()).thenReturn(configuration);
-		
+
 		standaloneLoader.loadStandalone(mavenAdapter, dependencyManager);
 
 		verify(bundleStarter).runStandalone(configuration);
 	}
-	
+
 	@Test
 	public void loadStandalone_listMode() throws Exception {
 		Map<String, String> configuration = new HashMap<>();
 		MavenAdapter mavenAdapter = mock(MavenAdapter.class);
 		when(mavenAdapter.getConfiguration()).thenReturn(configuration);
-		
+
 		standaloneLoader.loadStandalone(mavenAdapter);
 
 		verify(bundleStarter).runStandalone(configuration);

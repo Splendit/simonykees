@@ -41,36 +41,36 @@ public class WorkingDirectoryTest {
 		jsparrowTempFolder = temporaryDirectory.newFolder("temp_jsparrow");
 		workingDirectory = new TestableWorkingDirectory(jsparrowTempFolder, sessionProjectIds, log);
 	}
-	
+
 	@Test
 	public void cleanUp_onlyRootIdInLock_shouldDeleteTempFolder() throws IOException {
 		writeToLockFile(rootProjectId);
-		
+
 		workingDirectory.cleanUp();
-		
+
 		assertFalse(jsparrowTempFolder.exists());
 	}
-	
+
 	@Test
 	public void cleanUp_multipleProjectsInLock_shouldNotDeleteTempFolder() throws IOException {
 		writeToLockFile(rootProjectId + "\n" + "another-project-id");
-		
+
 		workingDirectory.cleanUp();
-		
+
 		assertTrue(jsparrowTempFolder.exists());
 	}
-	
+
 	@Test
 	public void cleanUp_multipleProjectsInLock_shouldDeleteProjectRelatedFiles() throws IOException {
 		writeToLockFile(rootProjectId + "\n" + "another-project-id");
 		File projectRelated = new File(jsparrowTempFolder.getPath() + File.separator + "deps." + rootProjectId);
 		projectRelated.createNewFile();
-		
+
 		workingDirectory.cleanUp();
-		
+
 		assertTrue(jsparrowTempFolder.exists());
 		assertFalse(Files.exists(projectRelated.toPath()));
-		
+
 	}
 
 	@Test
@@ -96,8 +96,6 @@ public class WorkingDirectoryTest {
 		assertTrue(runningOnRoot);
 	}
 
-
-	
 	@Test
 	public void isJsparrowRunning_shouldReturnFalse() throws IOException {
 		String newProjectId = "new-project-id";
@@ -107,7 +105,7 @@ public class WorkingDirectoryTest {
 
 		assertFalse(runningOnRoot);
 	}
-	
+
 	@Test
 	public void isJsparrowRunning_emptyLockFile_shouldReturnFalse() throws IOException {
 		String newProjectId = "new-project-id";
@@ -121,7 +119,7 @@ public class WorkingDirectoryTest {
 		Files.write(Paths.get(workingDirectory.calculateJsparrowLockFilePath()), content.getBytes(),
 				StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 	}
-	
+
 	class TestableWorkingDirectory extends WorkingDirectory {
 
 		public TestableWorkingDirectory(File workingDirectory, Set<String> sessionRelatedProjects, Log log) {

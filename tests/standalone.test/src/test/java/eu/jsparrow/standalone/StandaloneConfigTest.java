@@ -35,7 +35,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
@@ -67,6 +69,7 @@ public class StandaloneConfigTest {
 	private RefactoringPipeline pipeline;
 	private boolean hasRefactoringStates;
 	private ICompilationUnit iCompilationUnit;
+	private YAMLConfig config;
 
 	@BeforeClass
 	public static void setUpClass() throws IOException {
@@ -97,7 +100,9 @@ public class StandaloneConfigTest {
 		classpathEntry = mock(IClasspathEntry.class);
 		pipeline = mock(RefactoringPipeline.class);
 		iCompilationUnit = mock(ICompilationUnit.class);
-		standaloneConfig = new TestableStandaloneConfig("id", path.toString(), "1.8", true); //$NON-NLS-1$ , //$NON-NLS-2$
+		config = mock(YAMLConfig.class);
+
+		standaloneConfig = new TestableStandaloneConfig("id", path.toString(), "1.8"); //$NON-NLS-1$ , //$NON-NLS-2$
 		hasRefactoringStates = true;
 	}
 
@@ -225,32 +230,26 @@ public class StandaloneConfigTest {
 		assertTrue(false);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void computeRefactoring_emptyRefactoringStates() throws Exception {
 		hasRefactoringStates = false;
 		standaloneConfig.setProject(project);
 		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
-		List<RefactoringRule> rules = mock(List.class);
 
-		standaloneConfig.computeRefactoring(rules);
+		standaloneConfig.computeRefactoring();
 
 		verify(pipeline, never()).doRefactoring(any(IProgressMonitor.class));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test(expected = StandaloneException.class)
 	public void computeRefactoring_shouldThrowStandaloneException() throws Exception {
 		hasRefactoringStates = true;
-		List<RefactoringRule> rules = mock(List.class);
-		when(rules.size()).thenReturn(0);
-		when(rules.toString()).thenReturn("i-am-hungry-now"); //$NON-NLS-1$
 		standaloneConfig.setProject(project);
 		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
 		doThrow(RefactoringException.class).when(pipeline)
 			.doRefactoring(any(IProgressMonitor.class));
 
-		standaloneConfig.computeRefactoring(rules);
+		standaloneConfig.computeRefactoring();
 
 		assertTrue(false);
 	}
@@ -282,14 +281,14 @@ public class StandaloneConfigTest {
 	class TestableStandaloneConfig extends StandaloneConfig {
 
 		public TestableStandaloneConfig(String id, String path, String compilerCompliance) throws Exception {
-			this(id, path, compilerCompliance, false);
-		}
-
-		public TestableStandaloneConfig(String id, String path, String compilerCompliance, boolean testMode)
-				throws Exception {
-			super("projectId", "projectName", path, compilerCompliance, "", new String[] {}, testMode); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			super("projectName", path, compilerCompliance, "", new String[] {}, config); //$NON-NLS-1$ //$NON-NLS-2$
 			super.refactoringPipeline = pipeline;
 			super.compilationUnits.add(iCompilationUnit);
+		}
+
+		@Override
+		public void setUp() {
+
 		}
 
 		@Override
@@ -350,6 +349,17 @@ public class StandaloneConfigTest {
 		@Override
 		protected boolean hasRefactoringStates() {
 			return hasRefactoringStates;
+		}
+
+		@Override
+		protected List<RefactoringRule> getProjectRules() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		protected List<RefactoringRule> getSelectedRules(List<RefactoringRule> projectRules)
+				throws StandaloneException {
+			return Collections.singletonList(new CodeFormatterRule());
 		}
 
 	}

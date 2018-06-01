@@ -40,7 +40,6 @@ public class DependencyManagerTest {
 
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
-	
 
 	@Before
 	public void setUp() {
@@ -77,7 +76,7 @@ public class DependencyManagerTest {
 
 		verify(request).setProperties(eq(props));
 	}
-	
+
 	@Test
 	public void unzip_isFile() throws Exception {
 		File zipInputStream = createDummyZip("test.txt", false);
@@ -112,7 +111,7 @@ public class DependencyManagerTest {
 	public void prepareMaven_shouldReturnExistingMavenHome() {
 		String expectedMavenHome = "expected/maven/home";
 		dependencyManager = new TestableDependencyManager(log, expectedMavenHome);
-		
+
 		String actualMavenHome = dependencyManager.prepareMavenHome();
 
 		assertTrue(expectedMavenHome.equals(actualMavenHome));
@@ -147,8 +146,7 @@ public class DependencyManagerTest {
 		out.close();
 		return file;
 	}
-	
-	
+
 	class TestableDependencyManager extends DependencyManager {
 
 		public TestableDependencyManager(Log log, String mavenHome) {

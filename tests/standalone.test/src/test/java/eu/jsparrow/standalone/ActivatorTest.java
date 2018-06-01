@@ -19,8 +19,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-import eu.jsparrow.core.refactorer.RefactoringPipeline;
-
 /**
  * test class for {@link Activator}
  * 

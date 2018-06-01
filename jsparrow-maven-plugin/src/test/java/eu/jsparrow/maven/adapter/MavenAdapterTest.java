@@ -37,7 +37,8 @@ public class MavenAdapterTest {
 	Properties properties;
 	private File jsparrowTemDirectory;
 	private File jsparrowYml;
-	
+	private File projectBaseDir;
+
 	@Rule
 	public TemporaryFolder directory = new TemporaryFolder();
 
@@ -50,16 +51,16 @@ public class MavenAdapterTest {
 		mavenAdapter = new TestableMavenAdapter(project, log);
 
 		jsparrowTemDirectory = directory.newFolder("temp_jSparrow");
-		File projectBaseDir = directory.newFolder("project_base_dir");
+		projectBaseDir = directory.newFolder("project_base_dir");
 		jsparrowYml = new File(projectBaseDir.getPath() + File.separator + "jsparrow.yml");
-		
+		jsparrowYml.createNewFile();
+
 		when(project.getGroupId()).thenReturn(groupId);
 		when(project.getArtifactId()).thenReturn(artifactId);
 		when(project.getBasedir()).thenReturn(projectBaseDir);
 		properties = mock(Properties.class);
 		when(project.getProperties()).thenReturn(properties);
-		
-		
+
 	}
 
 	@Test
@@ -72,7 +73,7 @@ public class MavenAdapterTest {
 		when(config.getProfile()).thenReturn(""); //$NON-NLS-1$
 		when(config.getRuleId()).thenReturn(Optional.empty());
 
-		mavenAdapter.addInitialConfiguration(config); //$NON-NLS-1$
+		mavenAdapter.addInitialConfiguration(config); // $NON-NLS-1$
 
 		verify(config).getUseDefaultConfig();
 		verify(config).getMode();
@@ -80,17 +81,17 @@ public class MavenAdapterTest {
 		verify(config).getUrl();
 		verify(config).getProfile();
 	}
-	
-	  @Test(expected = InterruptedException.class) 
-	  public void prepareWorkingDirectory_directoryDoesNotExistAndMkdirsNotWorking() throws Exception { 
+
+	@Test(expected = InterruptedException.class)
+	public void prepareWorkingDirectory_directoryDoesNotExistAndMkdirsNotWorking() throws Exception {
 		jsparrowTemDirectory = mock(File.class);
-	    when(jsparrowTemDirectory.exists()).thenReturn(false); 
-	    when(jsparrowTemDirectory.mkdirs()).thenReturn(false); 
-	 
-	    mavenAdapter.prepareWorkingDirectory(); 
-	 
-	    assertTrue(false); 
-	  } 
+		when(jsparrowTemDirectory.exists()).thenReturn(false);
+		when(jsparrowTemDirectory.mkdirs()).thenReturn(false);
+
+		mavenAdapter.prepareWorkingDirectory();
+
+		assertTrue(false);
+	}
 
 	@Test
 	public void prepareWorkingDirectory_directoryDoesNotExistAndMkdirsIsWorking() throws Exception {
@@ -120,6 +121,49 @@ public class MavenAdapterTest {
 		String actualValue = mavenAdapter.findProjectIdentifier(mavenProject);
 		assertTrue(expectedProjectId.equals(actualValue));
 
+	}
+
+	@Test
+	public void findYamlFilePath_yamlFileExists_shouldReturnFilePath() throws IOException {
+
+		String expectedPath = jsparrowYml.getAbsolutePath();
+		when(path.toFile()).thenReturn(jsparrowYml);
+		String actualPath = mavenAdapter.findYamlFilePath(project, jsparrowYml);
+
+		assertTrue(actualPath.equals(expectedPath));
+	}
+
+	@Test
+	public void findYamlFilePath_parentIsRootProject_shouldReturnRootYamlFilePath() throws IOException {
+		MavenProject childProject = mock(MavenProject.class);
+		String expectedPath = jsparrowYml.getAbsolutePath();
+		File childBaseDir = directory.newFolder("project_base_dir" + File.separator + "child_Base_Dir");
+		when(childProject.getBasedir()).thenReturn(childBaseDir);
+		when(childProject.getParent()).thenReturn(project);
+		when(path.toFile()).thenReturn(jsparrowYml);
+
+		String actualPath = mavenAdapter.findYamlFilePath(childProject, jsparrowYml);
+
+		assertTrue(actualPath.equals(expectedPath));
+	}
+
+	@Test
+	public void findYamlFilePath_parentIsNotRoot_shouldReturnParentFilePath() throws IOException {
+		MavenProject child = mock(MavenProject.class);
+		MavenProject parent = mock(MavenProject.class);
+		File parentBaseDir = directory.newFolder("parent-folder");
+		File parentYamlFile = new File(parentBaseDir.getAbsolutePath() + File.separator + "file.yaml");
+		parentYamlFile.createNewFile();
+		File childBaseDir = directory.newFolder("parent-folder" + File.separator + "child-folder");
+		String expectedPath = parentYamlFile.getAbsolutePath();
+		when(path.toFile()).thenReturn(jsparrowYml);
+		when(parent.getBasedir()).thenReturn(parentBaseDir);
+		when(child.getParent()).thenReturn(parent);
+		when(child.getBasedir()).thenReturn(childBaseDir);
+
+		String actualPath = mavenAdapter.findYamlFilePath(child, parentYamlFile);
+
+		assertTrue(actualPath.equals(expectedPath));
 	}
 
 	@Test
@@ -158,7 +202,7 @@ public class MavenAdapterTest {
 		String actual = mavenAdapter.joinWithComma("project.one.id", "project.two.id");
 		assertTrue(expected.equals(actual));
 	}
-	
+
 	@Test
 	public void setUp_listOfProjects() throws Exception {
 		String expectedCompilerSource = "expectedCompilerSource";
@@ -168,33 +212,33 @@ public class MavenAdapterTest {
 		when(project.getPackaging()).thenReturn("jar");
 		when(path.toFile()).thenReturn(jsparrowYml);
 		when(properties.getProperty("maven.compiler.source")).thenReturn(expectedCompilerSource);
-		
+
 		mavenAdapter.setUp(mavenParameters, Collections.singletonList(project), jsparrowYml);
-		
+
 		Map<String, String> configurations = mavenAdapter.getConfiguration();
 		assertTrue(configurations.containsKey("NATURE.IDS." + groupId + "." + artifactId));
 	}
-	
+
 	@Test(expected = MojoExecutionException.class)
 	public void setUp_jsparrowAlreadyRunning() throws Exception {
 		MavenParameters mavenParameters = new MavenParameters("list-rules");
 
 		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(true);
-		
+
 		mavenAdapter.setUp(mavenParameters, Collections.singletonList(project), jsparrowYml);
-		
-	    assertTrue(false); 
+
+		assertTrue(false);
 	}
-	
+
 	@Test
 	public void setUp_initialConfiguration() throws InterruptedException {
 		String expectedUrl = "https://localhost:8081";
 		String expectedLicenseKey = "license-key";
 		String expectedMode = "list-rules";
 		MavenParameters mavenParameters = new MavenParameters(expectedMode, expectedLicenseKey, expectedUrl);
-		
+
 		mavenAdapter.setUp(mavenParameters);
-		
+
 		Map<String, String> configuration = mavenAdapter.getConfiguration();
 		assertTrue(configuration.containsKey("URL"));
 		assertEquals(expectedUrl, configuration.getOrDefault("URL", ""));
@@ -214,15 +258,10 @@ public class MavenAdapterTest {
 		}
 
 		@Override
-		protected Path joinPaths(File parent, String child) {
-			return path;
-		}
-
-		@Override
 		protected void setSystemProperty(String key, String value) {
 
 		}
-		
+
 		@Override
 		protected WorkingDirectory createWorkingDirectory(File directory) {
 			return workingDirectory;
