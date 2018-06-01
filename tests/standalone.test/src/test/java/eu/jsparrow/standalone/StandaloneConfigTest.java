@@ -36,6 +36,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import eu.jsparrow.core.config.YAMLConfig;
+import eu.jsparrow.core.config.YAMLExcludes;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -68,7 +69,7 @@ public class StandaloneConfigTest {
 	private StandaloneConfig standaloneConfig;
 	private RefactoringPipeline pipeline;
 	private boolean hasRefactoringStates;
-	private ICompilationUnit iCompilationUnit;
+	private CompilationUnitProvider iCompilationUnitsProvider;
 	private YAMLConfig config;
 
 	@BeforeClass
@@ -99,7 +100,7 @@ public class StandaloneConfigTest {
 		mavenDepsFolder = mock(File.class);
 		classpathEntry = mock(IClasspathEntry.class);
 		pipeline = mock(RefactoringPipeline.class);
-		iCompilationUnit = mock(ICompilationUnit.class);
+
 		config = mock(YAMLConfig.class);
 
 		standaloneConfig = new TestableStandaloneConfig("id", path.toString(), "1.8"); //$NON-NLS-1$ , //$NON-NLS-2$
@@ -224,6 +225,10 @@ public class StandaloneConfigTest {
 		standaloneConfig.setProject(project);
 		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
 		standaloneConfig.setAboardFlag();
+		YAMLExcludes excludes = mock(YAMLExcludes.class);
+		when(excludes.getExcludeClasses()).thenReturn(Collections.emptyList());
+		when(excludes.getExcludePackages()).thenReturn(Collections.emptyList());
+		when(config.getExcludes()).thenReturn(excludes);
 
 		standaloneConfig.createRefactoringStates();
 
@@ -283,12 +288,16 @@ public class StandaloneConfigTest {
 		public TestableStandaloneConfig(String id, String path, String compilerCompliance) throws Exception {
 			super("projectName", path, compilerCompliance, "", new String[] {}, config); //$NON-NLS-1$ //$NON-NLS-2$
 			super.refactoringPipeline = pipeline;
-			super.compilationUnits.add(iCompilationUnit);
+
 		}
 
 		@Override
 		public void setUp() {
-
+			ICompilationUnit iCompilationUnit = mock(ICompilationUnit.class);
+			iCompilationUnitsProvider = mock(CompilationUnitProvider.class);
+			when(iCompilationUnitsProvider.getFilteredCompilationUnits())
+				.thenReturn(Collections.singletonList(iCompilationUnit));
+			super.compilationUnitsProvider = iCompilationUnitsProvider;
 		}
 
 		@Override
@@ -353,7 +362,7 @@ public class StandaloneConfigTest {
 
 		@Override
 		protected List<RefactoringRule> getProjectRules() {
-			return Collections.emptyList();
+			return Collections.singletonList(new CodeFormatterRule());
 		}
 
 		@Override

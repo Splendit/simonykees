@@ -75,13 +75,13 @@ public class StandaloneConfig {
 	private boolean existingSettingsDirectoryMoved = false;
 	private IProject project = null;
 	private IJavaProject javaProject = null;
-	protected List<ICompilationUnit> compilationUnits = new ArrayList<>();
+	protected CompilationUnitProvider compilationUnitsProvider;
 	private String projectName;
 	private String sourceFolder;
 	private String[] natureIds;
 	protected RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private boolean aboard = false;
-	private YAMLConfig config;
+	private YAMLConfig yamlConfig;
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
@@ -90,7 +90,7 @@ public class StandaloneConfig {
 	 *            to the folder of the project
 	 * @param compilerCompliance
 	 *            java version of the project (i.e. "1.8" or "9")
-	 * @param config
+	 * @param yamlConfig
 	 *            the Yaml file corresponding to the current project
 	 * 
 	 * @throws CoreException
@@ -99,14 +99,14 @@ public class StandaloneConfig {
 	 * @throws StandaloneException
 	 */
 	public StandaloneConfig(String projectName, String path, String compilerCompliance, String sourceFolder, String[] natureIds,
-			YAMLConfig config) throws CoreException, IOException, StandaloneException {
+			YAMLConfig yamlConfig) throws CoreException, IOException, StandaloneException {
 
 		this.projectName = projectName;
 		this.path = path;
 		this.compilerCompliance = compilerCompliance;
 		this.sourceFolder = sourceFolder;
 		this.natureIds = natureIds;
-		this.config = config;
+		this.yamlConfig = yamlConfig;
 		setUp();
 	}
 
@@ -126,7 +126,8 @@ public class StandaloneConfig {
 		List<IClasspathEntry> mavenClasspathEntries = collectMavenDependenciesAsClasspathEntries();
 		mavenClasspathEntries = addProjectSourceConfigurations(mavenClasspathEntries);
 		addToClasspath(mavenClasspathEntries);
-		compilationUnits = findProjectCompilationUnits();
+		List<ICompilationUnit> compilationUnits = findProjectCompilationUnits();
+		compilationUnitsProvider = new CompilationUnitProvider(compilationUnits, yamlConfig.getExcludes());
 	}
 
 	/**
@@ -395,14 +396,14 @@ public class StandaloneConfig {
 		String loggerInfo = NLS.bind(Messages.Activator_debug_collectCompilationUnits, project.getName());
 		logger.info(loggerInfo);
 
+		List<ICompilationUnit> compilationUnits = compilationUnitsProvider.getFilteredCompilationUnits();
 		loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compilationUnits.size());
 		logger.debug(loggerInfo);
 
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		List<ICompilationUnit> containingErrors = new ArrayList<>();
 		String abordMessage = "Aboard detected while creating refactoring states "; //$NON-NLS-1$
-		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(this, config.getExcludes());
-		for (ICompilationUnit icu : compilationUnitProvider.getFilteredCompilationUnits()) {
+		for (ICompilationUnit icu : compilationUnits) {
 			if (aboard) {
 				throw new StandaloneException(abordMessage);
 			}
@@ -435,7 +436,7 @@ public class StandaloneConfig {
 		String logInfo = NLS.bind(Messages.Activator_debug_startRefactoring, project.getName());
 		logger.info(logInfo);
 
-		if (rules.isEmpty()) {
+		if (!rules.isEmpty()) {
 			try {
 				refactoringPipeline.doRefactoring(new NullProgressMonitor());
 				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, javaProject.getElementName(),
@@ -457,7 +458,7 @@ public class StandaloneConfig {
 			throws StandaloneException {
 		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
 		try {
-			return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
+			return YAMLConfigUtil.getSelectedRulesFromConfig(yamlConfig, projectRules);
 		} catch (YAMLConfigException e) {
 			throw new StandaloneException(e.getMessage(), e);
 		}
@@ -595,16 +596,6 @@ public class StandaloneConfig {
 
 	protected boolean isDescriptionGenerated() {
 		return descriptionGenerated;
-	}
-
-	/**
-	 * Getter method for list of {@link ICompilationUnit}s collected from the
-	 * project.
-	 * 
-	 * @return list of {@link ICompilationUnit}s collected from the project
-	 */
-	public List<ICompilationUnit> getICompilationUnits() {
-		return compilationUnits;
 	}
 
 	protected void moveFile(File src, File dest) throws IOException {
