@@ -23,6 +23,7 @@ public class ConfigurationKeys {
 	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
 	public static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area"; //$NON-NLS-1$
 	public static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
+	public static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
 	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	public static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	public static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$

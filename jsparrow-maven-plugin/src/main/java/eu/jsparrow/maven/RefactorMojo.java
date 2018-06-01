@@ -94,7 +94,7 @@ public class RefactorMojo extends AbstractMojo {
 		StandaloneLoader loader = new StandaloneLoader(project, bundleStarter);
 
 		try {
-			WorkingDirectory workingDirectory = mavenAdapter.setUp(parameters, projects, configFile);
+			WorkingDirectory workingDirectory = mavenAdapter.setUpConfiguration(parameters, projects, configFile);
 			addShutdownHook(bundleStarter, workingDirectory, mavenAdapter.isJsparrowRunningFlag());
 			loader.loadStandalone(mavenAdapter, dependencyManager);
 		} catch (BundleException | InterruptedException e1) {

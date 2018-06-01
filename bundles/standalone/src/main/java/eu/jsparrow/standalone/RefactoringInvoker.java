@@ -258,7 +258,7 @@ public class RefactoringInvoker {
 						natureIds, config);
 				standaloneConfigs.add(standaloneConfig);
 
-			} catch (CoreException | IOException | RuntimeException e) {
+			} catch (CoreException | RuntimeException e) {
 				String message = aboard ? aboardMessage : e.getMessage();
 				throw new StandaloneException(message, e);
 			}

@@ -59,7 +59,7 @@ public class ListAllRulesMojo extends AbstractMojo {
 		BundleStarter starter = new BundleStarter(log);
 		StandaloneLoader loader = new StandaloneLoader(project, starter);
 		try {
-			WorkingDirectory workingDir = mavenAdapter.setUp(parameters);
+			WorkingDirectory workingDir = mavenAdapter.setUpConfiguration(parameters);
 			addShutdownHook(starter, workingDir);
 			loader.loadStandalone(mavenAdapter);
 		} catch (BundleException | InterruptedException e1) {

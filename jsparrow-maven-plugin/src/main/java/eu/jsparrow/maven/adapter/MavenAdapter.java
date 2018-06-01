@@ -32,8 +32,6 @@ import eu.jsparrow.maven.i18n.Messages;
 public class MavenAdapter {
 
 	public static final String DOT = "."; //$NON-NLS-1$
-	
-	private static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
 
 	private Log log;
 	private Map<String, String> configuration = new HashMap<>();
@@ -59,25 +57,25 @@ public class MavenAdapter {
 	 * @param defaultYamlFile
 	 *            the default {@code jsparrow.yml} file.
 	 * @return an instance of {@link WorkingDirectory} for managing the working
-	 *         directory of the equinox.
+	 *         directory of the equinox framework.
 	 * @throws InterruptedException
 	 *             if the working directory cannot be created
 	 * @throws MojoExecutionException
 	 *             if jSparrow is already started in the root project of the
 	 *             current session.
 	 */
-	public WorkingDirectory setUp(MavenParameters parameters, List<MavenProject> projects, File defaultYamlFile)
+	public WorkingDirectory setUpConfiguration(MavenParameters parameters, List<MavenProject> projects, File defaultYamlFile)
 			throws InterruptedException, MojoExecutionException {
 
 		setProjectIds(projects);
-		WorkingDirectory workingDirectory = setUp(parameters);
+		WorkingDirectory workingDirectory = setUpConfiguration(parameters);
 		String rootProjectIdentifier = findProjectIdentifier(rootProject);
 		if (workingDirectory.isJsparrowStarted(rootProjectIdentifier)) {
 			jsparrowAlreadyRunningError = true;
 			log.error(NLS.bind(Messages.MavenAdapter_jSparrowAlreadyRunning, rootProject.getArtifactId()));
 			throw new MojoExecutionException(Messages.MavenAdapter_jSparrowIsAlreadyRunning);
 		}
-		configuration.put(ROOT_CONFIG_PATH, defaultYamlFile.getAbsolutePath());
+		configuration.put(ConfigurationKeys.ROOT_CONFIG_PATH, defaultYamlFile.getAbsolutePath());
 		workingDirectory.lockProjects();
 		for (MavenProject mavenProject : projects) {
 			if (!isAggregateProject(mavenProject)) {
@@ -99,7 +97,7 @@ public class MavenAdapter {
 	 * @throws InterruptedException
 	 *             if the working directory cannot be created
 	 */
-	public WorkingDirectory setUp(MavenParameters parameters) throws InterruptedException {
+	public WorkingDirectory setUpConfiguration(MavenParameters parameters) throws InterruptedException {
 		addInitialConfiguration(parameters);
 		return prepareWorkingDirectory();
 	}
@@ -114,10 +112,6 @@ public class MavenAdapter {
 	 * <li>yml file path</li>
 	 * <li>compiler compliance java version of the project</li>
 	 * </ul>
-	 * 
-	 * <b>Note:</b> if the project represents and aggregate project, then no
-	 * configuration is stored. Only the configuration of child projects need to
-	 * be stored.
 	 * 
 	 * @param project
 	 *            the maven project to store the configuration for
@@ -163,7 +157,7 @@ public class MavenAdapter {
 	 * @param project
 	 *            the project to find the configuration file for.
 	 * @param defaultYamlFile
-	 *            expected yaml file
+	 *            the default yaml file if one on the project base directory does not exist
 	 * @return the path of the corresponding yaml file
 	 */
 	protected String findYamlFilePath(MavenProject project, File defaultYamlFile) {

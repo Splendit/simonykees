@@ -213,7 +213,7 @@ public class MavenAdapterTest {
 		when(path.toFile()).thenReturn(jsparrowYml);
 		when(properties.getProperty("maven.compiler.source")).thenReturn(expectedCompilerSource);
 
-		mavenAdapter.setUp(mavenParameters, Collections.singletonList(project), jsparrowYml);
+		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml);
 
 		Map<String, String> configurations = mavenAdapter.getConfiguration();
 		assertTrue(configurations.containsKey("NATURE.IDS." + groupId + "." + artifactId));
@@ -225,7 +225,7 @@ public class MavenAdapterTest {
 
 		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(true);
 
-		mavenAdapter.setUp(mavenParameters, Collections.singletonList(project), jsparrowYml);
+		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml);
 
 		assertTrue(false);
 	}
@@ -237,7 +237,7 @@ public class MavenAdapterTest {
 		String expectedMode = "list-rules";
 		MavenParameters mavenParameters = new MavenParameters(expectedMode, expectedLicenseKey, expectedUrl);
 
-		mavenAdapter.setUp(mavenParameters);
+		mavenAdapter.setUpConfiguration(mavenParameters);
 
 		Map<String, String> configuration = mavenAdapter.getConfiguration();
 		assertTrue(configuration.containsKey("URL"));

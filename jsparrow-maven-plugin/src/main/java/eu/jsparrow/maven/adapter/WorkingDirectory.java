@@ -61,10 +61,6 @@ public class WorkingDirectory {
 	/**
 	 * Deletes the children files related to the projects on the current
 	 * session.
-	 * 
-	 * @param parentDirectory
-	 *            the file representing the parent directory containing session
-	 *            related files.
 	 */
 	private void deleteSessionRelatedFiles() {
 		String[] children = directory.list();
@@ -155,7 +151,7 @@ public class WorkingDirectory {
 	 * 
 	 * @param mavenProject
 	 *            a maven project to be checked.
-	 * @return {@code true}if the lock file contains the project id, or
+	 * @return {@code true} if the lock file contains the project id, or
 	 *         {@code false} otherwise.
 	 */
 	public boolean isJsparrowStarted(String projectId) {
