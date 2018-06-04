@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -511,8 +512,12 @@ public class StandaloneConfig {
 	}
 
 	public void clearPipeline() {
-		refactoringPipeline.setRules(new ArrayList<>());
-		refactoringPipeline.clearStates();
+			refactoringPipeline.setRules(new ArrayList<>());
+		try {			
+			refactoringPipeline.clearStates();
+		} catch (ConcurrentModificationException e) {
+			logger.debug("Cannot clear refactoring states on {} ", getProjectName()); //$NON-NLS-1$
+		}
 	}
 
 	/*** HELPER METHODS ***/
