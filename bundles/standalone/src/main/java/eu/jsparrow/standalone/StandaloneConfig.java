@@ -372,19 +372,19 @@ public class StandaloneConfig {
 	private void restoreExistingEclipseFiles() throws IOException {
 
 		String loggerInfo;
-		if (existingProjectFileMoved) {
+		if (isExistingProjectFileMoved()) {
 			Files.move(getProjectDescriptionRenameFile().toPath(), getProjectDescriptionFile().toPath());
 			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileRestoreDone, PROJECT_FILE_NAME);
 			logger.debug(loggerInfo);
 		}
 
-		if (existingClasspathFileMoved) {
+		if (isExistingClasspathFileMoved()) {
 			Files.move(getClasspathFileRenameFile().toPath(), getClasspathFileFile().toPath());
 			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileRestoreDone, CLASSPATH_FILE_NAME);
 			logger.debug(loggerInfo);
 		}
 
-		if (existingSettingsDirectoryMoved) {
+		if (isExistingSettingsDirectoryMoved()) {
 			Files.move(getSettingsDirectoryRenameFile().toPath(), getSettingsDirectoryFile().toPath());
 			loggerInfo = NLS.bind(Messages.StandaloneConfig_directoryRestoreDone, SETTINGS_DIRECTORY_NAME);
 			logger.debug(loggerInfo);
