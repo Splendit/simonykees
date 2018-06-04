@@ -5,6 +5,7 @@ package eu.jsparrow.maven.adapter;
  * change here must be reflected also in
  * {@link eu.jsparrow.standalone.RefactoringInvoker}.
  *
+ * @since 2.6.0
  */
 public class ConfigurationKeys {
 

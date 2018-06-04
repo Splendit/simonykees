@@ -64,8 +64,8 @@ public class MavenAdapter {
 	 *             if jSparrow is already started in the root project of the
 	 *             current session.
 	 */
-	public WorkingDirectory setUpConfiguration(MavenParameters parameters, List<MavenProject> projects, File defaultYamlFile)
-			throws InterruptedException, MojoExecutionException {
+	public WorkingDirectory setUpConfiguration(MavenParameters parameters, List<MavenProject> projects,
+			File defaultYamlFile) throws InterruptedException, MojoExecutionException {
 
 		setProjectIds(projects);
 		WorkingDirectory workingDirectory = setUpConfiguration(parameters);
@@ -157,7 +157,8 @@ public class MavenAdapter {
 	 * @param project
 	 *            the project to find the configuration file for.
 	 * @param defaultYamlFile
-	 *            the default yaml file if one on the project base directory does not exist
+	 *            the default yaml file if one on the project base directory
+	 *            does not exist
 	 * @return the path of the corresponding yaml file
 	 */
 	protected String findYamlFilePath(MavenProject project, File defaultYamlFile) {
@@ -308,6 +309,11 @@ public class MavenAdapter {
 	 * version is 1.5 by default (as stated in the documentation of
 	 * maven-compiler-plugin:
 	 * https://maven.apache.org/plugins/maven-compiler-plugin/).
+	 * 
+	 * Note: This setting determines, which rules can be applied by default. We
+	 * must use the same default version as Maven. Otherwise Maven would compile
+	 * the sources with Java 1.5 anyways and our rules for 1.6 and above would
+	 * result in compilation errors.
 	 * 
 	 * @return the project's java version
 	 */

@@ -51,6 +51,8 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
  */
 public class StandaloneConfigTest {
 
+	private static final String PROJECT_NAME = "project-name"; //$NON-NLS-1$
+
 	private static Path path;
 
 	private File projectFile;
@@ -211,7 +213,7 @@ public class StandaloneConfigTest {
 	@Test(expected = StandaloneException.class)
 	public void createRefactoringStates_shouldThrowStandaloneException() throws Exception {
 		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
+		when(project.getName()).thenReturn(PROJECT_NAME);
 		doThrow(JavaModelException.class).when(pipeline)
 			.createRefactoringState(any(ICompilationUnit.class), any(List.class));
 
@@ -223,7 +225,7 @@ public class StandaloneConfigTest {
 	@Test(expected = StandaloneException.class)
 	public void createRefactoringStates_aboardFlag_shouldThrowStandaloneException() throws Exception {
 		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
+		when(project.getName()).thenReturn(PROJECT_NAME);
 		standaloneConfig.setAboardFlag();
 		YAMLExcludes excludes = mock(YAMLExcludes.class);
 		when(excludes.getExcludeClasses()).thenReturn(Collections.emptyList());
@@ -239,7 +241,7 @@ public class StandaloneConfigTest {
 	public void computeRefactoring_emptyRefactoringStates() throws Exception {
 		hasRefactoringStates = false;
 		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
+		when(project.getName()).thenReturn(PROJECT_NAME);
 
 		standaloneConfig.computeRefactoring();
 
@@ -250,7 +252,7 @@ public class StandaloneConfigTest {
 	public void computeRefactoring_shouldThrowStandaloneException() throws Exception {
 		hasRefactoringStates = true;
 		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
+		when(project.getName()).thenReturn(PROJECT_NAME);
 		doThrow(RefactoringException.class).when(pipeline)
 			.doRefactoring(any(IProgressMonitor.class));
 
@@ -263,7 +265,7 @@ public class StandaloneConfigTest {
 	public void commitrefactoring_emptyRefactoringStates() throws Exception {
 		hasRefactoringStates = false;
 		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
+		when(project.getName()).thenReturn(PROJECT_NAME);
 
 		standaloneConfig.commitRefactoring();
 
@@ -274,7 +276,7 @@ public class StandaloneConfigTest {
 	public void commitChanges_shouldThrowStandaloneException() throws Exception {
 		hasRefactoringStates = true;
 		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn("project-name"); //$NON-NLS-1$
+		when(project.getName()).thenReturn(PROJECT_NAME);
 		doThrow(RefactoringException.class).when(pipeline)
 			.commitRefactoring();
 
