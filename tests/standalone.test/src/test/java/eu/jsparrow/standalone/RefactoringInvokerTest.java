@@ -25,17 +25,16 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
  */
 public class RefactoringInvokerTest {
 
-	private IJavaProject javaProject;
 	private RefactoringInvoker refactoringInvoker;
 	private StandaloneConfig standaloneConfig;
 
 	@Before
 	public void setUp() {
-		javaProject = mock(IJavaProject.class);
 		refactoringInvoker = new TestableRefactoringInvoker();
 
 		IJavaProject javaProject = mock(IJavaProject.class);
-		when(javaProject.getElementName()).thenReturn("projectName");//$NON-NLS-1$
+		when(javaProject.getElementName()).thenReturn("projectName"); //$NON-NLS-1$
+
 		standaloneConfig = mock(StandaloneConfig.class);
 		when(standaloneConfig.getJavaProject()).thenReturn(javaProject);
 	}
@@ -45,6 +44,7 @@ public class RefactoringInvokerTest {
 		BundleContext context = mock(BundleContext.class);
 		RefactoringPipeline refactoringPipeline = mock(RefactoringPipeline.class);
 
+		IJavaProject javaProject = mock(IJavaProject.class);
 		when(javaProject.getElementName()).thenReturn(""); //$NON-NLS-1$
 		when(refactoringPipeline.getRulesWithChangesAsString()).thenReturn(""); //$NON-NLS-1$
 
