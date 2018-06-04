@@ -18,6 +18,7 @@ import eu.jsparrow.maven.i18n.Messages;
  * Provides functionalities for cleaning the working directory and checking on
  * which projects the standalone is already running.
  *
+ * @since 2.6.0
  */
 public class WorkingDirectory {
 
