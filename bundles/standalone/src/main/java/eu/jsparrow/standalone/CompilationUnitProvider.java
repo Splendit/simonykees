@@ -10,6 +10,13 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLExcludes;
 
+/**
+ * Provides functionalities for filtering out {@link ICompilationUnit}s that are
+ * excluded in the yaml configuration file.
+ * 
+ * @since 2.6.0
+ *
+ */
 public class CompilationUnitProvider {
 
 	private List<ICompilationUnit> compilationUnits;
@@ -18,11 +25,29 @@ public class CompilationUnitProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(CompilationUnitProvider.class);
 
+	/**
+	 * Creates an instance of {@link CompilationUnitProvider} from the list of all
+	 * {@link ICompilationUnit} of a project and an instance of {@link YAMLExcludes}
+	 * which contains the modules, packages and the classes that should not 
+	 * be refactored. 
+	 * 
+	 * @param compilationUnits
+	 *            list of the {@link ICompilationUnit}s of a project
+	 * @param excludes
+	 *            an instance of {@link YAMLExcludes} representing the modules,
+	 *            packages and classes that should be excluded from refactoring.
+	 */
 	public CompilationUnitProvider(List<ICompilationUnit> compilationUnits, YAMLExcludes excludes) {
 		this.compilationUnits = compilationUnits;
 		this.excludes = excludes;
 	}
 
+	/**
+	 * Finds the list of {@link ICompilationUnit}s from {@link #compilationUnits} that 
+	 * are allowed to be refactored. 
+	 * 
+	 * @return the list of compilation units that allowed to be refactored. 
+	 */
 	public List<ICompilationUnit> getFilteredCompilationUnits() {
 
 		return compilationUnits.stream()
