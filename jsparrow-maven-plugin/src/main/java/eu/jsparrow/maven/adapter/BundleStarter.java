@@ -1,4 +1,4 @@
-package eu.jsparrow.adapter;
+package eu.jsparrow.maven.adapter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
-import eu.jsparrow.adapter.i18n.Messages;
+import eu.jsparrow.maven.i18n.Messages;
 
 /**
  * A class containing functionalities for starting/stopping the equinox
@@ -180,11 +180,9 @@ public class BundleStarter {
 	 * Shuts down the standalone bundle and equinox
 	 */
 	public void shutdownFramework() {
-		if (null != this.getFramework() && null != this.getFramework()
-			.getBundleContext()) {
+		if (null != framework && null != framework.getBundleContext()) {
 			try {
-				Bundle standaloneBundle = this.getFramework()
-					.getBundleContext()
+				Bundle standaloneBundle = framework.getBundleContext()
 					.getBundle(this.getStandaloneBundleID());
 				if (standaloneBundle.getState() == Bundle.ACTIVE) {
 					standaloneBundle.stop();
@@ -220,18 +218,6 @@ public class BundleStarter {
 
 	protected BufferedReader getBufferedReaderFromInputStream(InputStream is) {
 		return new BufferedReader(new InputStreamReader(is));
-	}
-
-	/**
-	 * shuts down the equinox framework and cleans all generated files
-	 * 
-	 * @param mavenAdapter
-	 */
-	public void shutdown(MavenAdapter mavenAdapter) {
-		shutdownFramework();
-		if (!mavenAdapter.isJsparrowRunningFlag()) {
-			mavenAdapter.cleanUp();
-		}
 	}
 
 	public boolean isStandaloneStarted() {

@@ -22,7 +22,6 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.logging.LoggingUtil;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
@@ -75,64 +74,64 @@ public class Activator implements BundleActivator {
 		}
 
 		LoggingUtil.configureLogger(debugEnabled);
-
 		startDeclarativeServices(context);
-
 		logger.info(Messages.Activator_start);
-
 		registerShutdownHook(context);
-
-		String modeName = context.getProperty(STANDALONE_MODE_KEY);
-		if (modeName != null && !modeName.isEmpty()) {
-
-			StandaloneMode mode = StandaloneMode.valueOf(modeName);
-			String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID_KEY);
-
-			switch (mode) {
-			case REFACTOR:
-				try {
-					injectDependencies(context);
-					String key = getLicenseKey(context);
-					String agentUrl = getAgentUrl(context);
-					if (licenseService.validate(key, agentUrl) || devModeEnabled) {
-						refactoringInvoker.startRefactoring(context, new RefactoringPipeline());
-					} else {
-						String message = Messages.StandaloneActivator_noValidLicenseFound;
-						logger.error(message);
-						setExitErrorMessage(context, message);
-						return;
-					}
-				} catch (StandaloneException e) {
-					logger.debug(e.getMessage(), e);
-					logger.error(e.getMessage());
-					setExitErrorMessage(context, e.getMessage());
-					return;
-				}
-				break;
-			case LIST_RULES:
-				if (listRulesId != null && !listRulesId.isEmpty()) {
-					listRulesUtil.listRules(listRulesId);
-				} else {
-					listRulesUtil.listRules();
-				}
-				break;
-			case LIST_RULES_SHORT:
-				listRulesUtil.listRulesShort();
-				break;
-			case LICENSE_INFO:
-				injectDependencies(context);
-				String key = getLicenseKey(context);
-				String agentUrl = getAgentUrl(context);
-				licenseService.licenseInfo(key, agentUrl);
-				break;
-			case TEST:
-				break;
-			}
-		} else {
+		StandaloneMode mode = parseMode(context);
+		String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID_KEY);
+		switch (mode) {
+		case REFACTOR:
+			refactor(context, devModeEnabled);
+			break;
+		case LIST_RULES:
+			listRules(listRulesId);
+			break;
+		case LIST_RULES_SHORT:
+			listRulesUtil.listRulesShort();
+			break;
+		case LICENSE_INFO:
+			pritntLicenseInfo(context);
+			break;
+		case TEST:
+			break;
+		default:
 			String errorMsg = "No mode has been selected!"; //$NON-NLS-1$
 			logger.error(errorMsg);
 			setExitErrorMessage(context, errorMsg);
-			return;
+		}
+	}
+
+	private void pritntLicenseInfo(BundleContext context) {
+		injectDependencies(context);
+		String key = getLicenseKey(context);
+		String agentUrl = getAgentUrl(context);
+		licenseService.licenseInfo(key, agentUrl);
+	}
+
+	private void listRules(String listRulesId) {
+		if (listRulesId != null && !listRulesId.isEmpty()) {
+			listRulesUtil.listRules(listRulesId);
+		} else {
+			listRulesUtil.listRules();
+		}
+	}
+
+	private void refactor(BundleContext context, boolean devModeEnabled) {
+		try {
+			injectDependencies(context);
+			String key = getLicenseKey(context);
+			String agentUrl = getAgentUrl(context);
+			if (licenseService.validate(key, agentUrl) || devModeEnabled) {
+				refactoringInvoker.startRefactoring(context);
+			} else {
+				String message = Messages.StandaloneActivator_noValidLicenseFound;
+				logger.error(message);
+				setExitErrorMessage(context, message);
+			}
+		} catch (StandaloneException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+			setExitErrorMessage(context, e.getMessage());
 		}
 	}
 
@@ -155,14 +154,7 @@ public class Activator implements BundleActivator {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
 		} finally {
-			licenseService.stop();
-			try {
-				refactoringInvoker.cleanUp();
-			} catch (IOException | CoreException e) {
-				logger.debug(e.getMessage(), e);
-				logger.error(e.getMessage());
-				setExitErrorMessage(context, e.getMessage());
-			}
+			cleanUp(context);
 		}
 
 		logger.info(Messages.Activator_stop);
@@ -170,17 +162,26 @@ public class Activator implements BundleActivator {
 
 	private void registerShutdownHook(BundleContext context) {
 		Runtime.getRuntime()
-			.addShutdownHook(new Thread(() -> {
-				licenseService.stop();
-				try {
-					refactoringInvoker.cleanUp();
-				} catch (IOException | CoreException e) {
-					logger.debug(e.getMessage(), e);
-					logger.error(e.getMessage());
-					setExitErrorMessage(context, e.getMessage());
-					return;
-				}
-			}));
+			.addShutdownHook(new Thread(() -> cleanUp(context)));
+	}
+
+	private void cleanUp(BundleContext context) {
+		StandaloneMode mode = parseMode(context);
+		if (mode == StandaloneMode.REFACTOR || mode == StandaloneMode.LICENSE_INFO) {
+			licenseService.stop();
+		}
+		try {
+			refactoringInvoker.cleanUp();
+		} catch (IOException | CoreException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+			setExitErrorMessage(context, e.getMessage());
+		}
+	}
+
+	private StandaloneMode parseMode(BundleContext context) {
+		String value = context.getProperty(STANDALONE_MODE_KEY);
+		return StandaloneMode.fromString(value);
 	}
 
 	private void startDeclarativeServices(BundleContext context) throws BundleException {
@@ -262,7 +263,7 @@ public class Activator implements BundleActivator {
 		String filePath = String.format("%s/.config/jsparrow-standalone/", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		YAMLStandaloneConfig yamlStandaloneConfig = null;
-		
+
 		Optional<String> configFile = new ConfigFinder().getYAMLFilePath(Paths.get(filePath));
 		if (configFile.isPresent()) {
 			try {
@@ -277,5 +278,4 @@ public class Activator implements BundleActivator {
 		return yamlStandaloneConfig;
 	}
 
-	
 }

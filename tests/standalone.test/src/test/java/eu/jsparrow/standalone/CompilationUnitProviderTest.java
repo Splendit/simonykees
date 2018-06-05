@@ -32,12 +32,8 @@ public class CompilationUnitProviderTest {
 
 		excludes.setExcludeClasses(Collections.singletonList("eu.jsparrow.test.ExcludedClass.java"));
 
-		StandaloneConfig standaloneConfig = mock(StandaloneConfig.class);
-
-		compilationUnitProvider = new CompilationUnitProvider(standaloneConfig, excludes);
-
 		compUnitMock = mock(ICompilationUnit.class);
-		when(standaloneConfig.getICompilationUnits()).thenReturn(Collections.singletonList(compUnitMock));
+		compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes);
 
 		packageDeclarationMock = mock(IPackageDeclaration.class);
 

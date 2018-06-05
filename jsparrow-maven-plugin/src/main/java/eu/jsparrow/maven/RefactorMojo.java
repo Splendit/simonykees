@@ -1,6 +1,7 @@
 package eu.jsparrow.maven;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -15,10 +16,13 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
-import eu.jsparrow.adapter.MavenParameters;
-import eu.jsparrow.adapter.StandaloneAdapter;
+import eu.jsparrow.maven.adapter.BundleStarter;
+import eu.jsparrow.maven.adapter.DependencyManager;
+import eu.jsparrow.maven.adapter.MavenAdapter;
+import eu.jsparrow.maven.adapter.MavenParameters;
+import eu.jsparrow.maven.adapter.StandaloneLoader;
+import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
-import eu.jsparrow.maven.i18n.Messages;
 
 /**
  * Starts Equinox framework and headless version of jSparrow Eclipse plugin.
@@ -29,8 +33,6 @@ import eu.jsparrow.maven.i18n.Messages;
  */
 @Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
 public class RefactorMojo extends AbstractMojo {
-	
-	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
 
 	@Parameter(defaultValue = "${session}")
 	private MavenSession mavenSession;
@@ -83,36 +85,49 @@ public class RefactorMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 
 		Log log = getLog();
-		StandaloneAdapter serviceInstance = StandaloneAdapter.getInstance();
 		String mode = StandaloneMode.REFACTOR.name();
+		MavenParameters parameters = new MavenParameters(mode, license, url, profile, useDefaultConfig, devMode);
+		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
+		DependencyManager dependencyManager = new DependencyManager(log, mavenHome);
+		List<MavenProject> projects = mavenSession.getAllProjects();
+		BundleStarter bundleStarter = new BundleStarter(log);
+		StandaloneLoader loader = new StandaloneLoader(project, bundleStarter);
+
 		try {
-			if (!serviceInstance.isAdapterInitialized()) {
-				MavenParameters config = new MavenParameters(project, log, configFile, mavenSession, mode, license,
-						url);
-				config.setMavenHome(mavenHome);
-				config.setProfile(profile);
-				config.setUseDefaultConfig(useDefaultConfig);
-				config.setDevMode(devMode);
-
-				boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
-				if (!adapterLoadad) {
-					throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
-				}
-				serviceInstance.copyDependencies(project, log);
-				serviceInstance.setRootProjectPomPath(project.getBasedir()
-					.getAbsolutePath() + File.separator + POM_FILE_NAME, log);
-			}
-
-			for (MavenProject mavenProject : mavenSession.getAllProjects()) {
-				serviceInstance.addProjectConfiguration(mavenProject, log, configFile);
-			}
-			log.info(Messages.RefactorMojo_allProjectsLoaded);
-			serviceInstance.startStandaloneBundle(log);
-
+			WorkingDirectory workingDirectory = mavenAdapter.setUpConfiguration(parameters, projects, configFile);
+			addShutdownHook(bundleStarter, workingDirectory, mavenAdapter.isJsparrowRunningFlag());
+			loader.loadStandalone(mavenAdapter, dependencyManager);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());
 		}
-
 	}
+
+	/**
+	 * Registers a hook which is executed either when the program exits or the
+	 * virtual machine is terminated in response to a user interrupt.
+	 * <b>Note:</b> The equinox framework must be shut down before the working
+	 * directory is cleared.
+	 * 
+	 * @param starter
+	 *            the instance of {@link BundleStarter} which is responsible for
+	 *            starting/shutting down the equinox framework.
+	 * @param workingDirectory
+	 *            an instance of {@link WorkingDirectory} which is responsible
+	 *            for reading/cleaning the working directory.
+	 * @param jSparrowStartedFlag
+	 *            an indicator whether jSparrow already started flag has been
+	 *            raised.
+	 */
+	private void addShutdownHook(BundleStarter starter, WorkingDirectory workingDirectory,
+			boolean jSparrowStartedFlag) {
+		Runtime.getRuntime()
+			.addShutdownHook(new Thread(() -> {
+				starter.shutdownFramework();
+				if (!jSparrowStartedFlag) {
+					workingDirectory.cleanUp();
+				}
+			}));
+	}
+
 }

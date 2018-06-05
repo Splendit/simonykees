@@ -1,4 +1,4 @@
-package eu.jsparrow.adapter;
+package eu.jsparrow.maven.adapter;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

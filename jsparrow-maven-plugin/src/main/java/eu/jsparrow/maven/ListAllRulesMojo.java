@@ -9,10 +9,12 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
-import eu.jsparrow.adapter.MavenParameters;
-import eu.jsparrow.adapter.StandaloneAdapter;
+import eu.jsparrow.maven.adapter.BundleStarter;
+import eu.jsparrow.maven.adapter.MavenAdapter;
+import eu.jsparrow.maven.adapter.MavenParameters;
+import eu.jsparrow.maven.adapter.StandaloneLoader;
+import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
-import eu.jsparrow.maven.i18n.Messages;
 
 /**
  * This MOJO lists all rules with id, name and description. By specifying
@@ -50,24 +52,26 @@ public class ListAllRulesMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		Log log = getLog();
-		StandaloneAdapter serviceInstance = StandaloneAdapter.getInstance();
 		String mode = StandaloneMode.LIST_RULES.name();
-
+		MavenParameters parameters = new MavenParameters(mode);
+		parameters.setRuleId(ruleId);
+		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
+		BundleStarter starter = new BundleStarter(log);
+		StandaloneLoader loader = new StandaloneLoader(project, starter);
 		try {
-
-			MavenParameters config = new MavenParameters(project, log, mode);
-			config.setRuleId(ruleId);
-
-			boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
-			if (!adapterLoadad) {
-				throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
-			}
-
-			serviceInstance.startStandaloneBundle(log);
-
+			WorkingDirectory workingDir = mavenAdapter.setUpConfiguration(parameters);
+			addShutdownHook(starter, workingDir);
+			loader.loadStandalone(mavenAdapter);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());
 		}
+	}
+	
+	private void addShutdownHook(BundleStarter starter, WorkingDirectory workingDirectory) {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			starter.shutdownFramework();
+			workingDirectory.cleanUp();
+		}));
 	}
 }

@@ -19,8 +19,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-import eu.jsparrow.core.refactorer.RefactoringPipeline;
-
 /**
  * test class for {@link Activator}
  * 
@@ -110,7 +108,7 @@ public class ActivatorTest {
 
 		activator.start(context);
 
-		verify(refactoringInvoker).startRefactoring(any(), any(RefactoringPipeline.class));
+		verify(refactoringInvoker).startRefactoring(any());
 	}
 
 	@Test
@@ -121,7 +119,7 @@ public class ActivatorTest {
 
 		activator.start(context);
 
-		verify(refactoringInvoker, never()).startRefactoring(any(), any(RefactoringPipeline.class));
+		verify(refactoringInvoker, never()).startRefactoring(any());
 	}
 
 	@Test

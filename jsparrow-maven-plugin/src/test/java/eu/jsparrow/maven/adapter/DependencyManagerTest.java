@@ -1,10 +1,14 @@
-package eu.jsparrow.adapter;
+package eu.jsparrow.maven.adapter;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,37 +17,71 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.invoker.InvocationRequest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.ArgumentCaptor;
 
-@SuppressWarnings("nls")
-public class EmbeddedMavenTest {
+@SuppressWarnings({ "nls" })
+public class DependencyManagerTest {
 
 	private Log log;
-	private EmbeddedMaven embeddedMaven;
+	private DependencyManager dependencyManager;
 	private InputStream inputStream;
 
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		log = mock(Log.class);
-		embeddedMaven = new TestableEmbeddedMaven(log, "mavenHome");
+		dependencyManager = new TestableDependencyManager(log, "mavenHome");
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void prepareDefaultRequest() {
+		InvocationRequest request = mock(InvocationRequest.class);
+		Properties props = mock(Properties.class);
+		MavenProject project = mock(MavenProject.class);
+		File projectBaseDir = mock(File.class);
+		String baseDirPath = "project/base/directory";
+
+		when(project.getBasedir()).thenReturn(projectBaseDir);
+		when(projectBaseDir.getAbsolutePath()).thenReturn(baseDirPath);
+
+		dependencyManager.prepareDefaultRequest(project, request, props);
+
+		ArgumentCaptor<File> fileCaptor = ArgumentCaptor.forClass(File.class);
+		verify(request).setPomFile(fileCaptor.capture());
+		assertTrue(fileCaptor.getValue()
+			.getAbsolutePath()
+			.endsWith("pom.xml"));
+
+		ArgumentCaptor<List> goalsCaptor = ArgumentCaptor.forClass(List.class);
+		verify(request).setGoals(goalsCaptor.capture());
+		assertTrue(goalsCaptor.getValue()
+			.size() == 1);
+
+		verify(props).setProperty(eq(DependencyManager.OUTPUT_DIRECTORY_OPTION_KEY), anyString());
+
+		verify(request).setProperties(eq(props));
 	}
 
 	@Test
 	public void unzip_isFile() throws Exception {
 		File zipInputStream = createDummyZip("test.txt", false);
 
-		embeddedMaven.unzip(new FileInputStream(zipInputStream), folder.getRoot()
+		dependencyManager.unzip(new FileInputStream(zipInputStream), folder.getRoot()
 			.getAbsolutePath());
 
 		List<String> fileList = Files.list(folder.getRoot()
@@ -58,7 +96,7 @@ public class EmbeddedMavenTest {
 	public void unzip_isDirectoryTrue() throws Exception {
 		File zipInputStream = createDummyZip("test/", true);
 
-		embeddedMaven.unzip(new FileInputStream(zipInputStream), folder.getRoot()
+		dependencyManager.unzip(new FileInputStream(zipInputStream), folder.getRoot()
 			.getAbsolutePath());
 
 		List<String> fileList = Files.list(folder.getRoot()
@@ -72,9 +110,9 @@ public class EmbeddedMavenTest {
 	@Test
 	public void prepareMaven_shouldReturnExistingMavenHome() {
 		String expectedMavenHome = "expected/maven/home";
-		embeddedMaven.setMavenHome(expectedMavenHome);
+		dependencyManager = new TestableDependencyManager(log, expectedMavenHome);
 
-		String actualMavenHome = embeddedMaven.prepareMaven();
+		String actualMavenHome = dependencyManager.prepareMavenHome();
 
 		assertTrue(expectedMavenHome.equals(actualMavenHome));
 	}
@@ -82,10 +120,10 @@ public class EmbeddedMavenTest {
 	@Test
 	public void prepareMaven_shouldReturnNewMavenHome() throws Exception {
 		String providedMavenHome = "expected/maven/home/EMBEDDED";
-		embeddedMaven.setMavenHome(providedMavenHome);
+		dependencyManager = new TestableDependencyManager(log, providedMavenHome);
 		File zipInputStream = createDummyZip("/newmaven/", true);
 		inputStream = new FileInputStream(zipInputStream);
-		String actualMavenHome = embeddedMaven.prepareMaven();
+		String actualMavenHome = dependencyManager.prepareMavenHome();
 
 		assertFalse(actualMavenHome.equals(providedMavenHome));
 	}
@@ -109,9 +147,9 @@ public class EmbeddedMavenTest {
 		return file;
 	}
 
-	class TestableEmbeddedMaven extends EmbeddedMaven {
+	class TestableDependencyManager extends DependencyManager {
 
-		public TestableEmbeddedMaven(Log log, String mavenHome) {
+		public TestableDependencyManager(Log log, String mavenHome) {
 			super(log, mavenHome);
 		}
 

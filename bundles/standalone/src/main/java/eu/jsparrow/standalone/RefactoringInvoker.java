@@ -3,13 +3,13 @@ package eu.jsparrow.standalone;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
@@ -19,12 +19,8 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
-import eu.jsparrow.core.exception.ReconcileException;
-import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
@@ -38,7 +34,7 @@ public class RefactoringInvoker {
 
 	/**
 	 * The following constants represent some keys in the BundleContext and they
-	 * must match with the ones in {@link eu.jsparrow.adapter.MavenAdapter}
+	 * must match with the ones in {@link eu.jsparrow.adapter.ConfigurationKeys}
 	 */
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
@@ -55,6 +51,7 @@ public class RefactoringInvoker {
 	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
 
 	private static final String DOT = "."; //$NON-NLS-1$
+	private boolean aboard = false;
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
@@ -83,91 +80,70 @@ public class RefactoringInvoker {
 	 *             <li>All source files contain compilation errors</li>
 	 *             <ul>
 	 */
-	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
-			throws StandaloneException {
-
+	public void startRefactoring(BundleContext context) throws StandaloneException {
 		loadStandaloneConfig(context);
-		computeRefactoring(context, refactoringPipeline, standaloneConfigs);
-		commitChanges(refactoringPipeline);
+		prepareRefactoring();
+		computeRefactoring();
+		commitRefactoring();
 	}
 
 	/**
-	 * Prepares the refactoring states and computes the refacotring for the
-	 * projects contained in the provided list of
-	 * {@link StandaloneConfig}uratios. Does NOT commit the refactoring.
-	 * 
-	 * @param context
-	 *            the bundle context configuration
-	 * @param refactoringPipeline
-	 *            an instance of the {@link RefactoringPipeline}
-	 * @param moduleConfigurations
-	 *            the list of the {@link StandaloneConfig} for the projects to
-	 *            be refactored.
+	 * Prepares the refactoring states for each {@link StandaloneConfig} on the
+	 * {@link #standaloneConfigs}.
 	 * 
 	 * @throws StandaloneException
+	 *             reasons include:
+	 *             <ul>
+	 *             <li>A {@link JavaModelException} is thrown while creating a
+	 *             refactoring state</li>
+	 *             <li>A user aboard was detected</li>
+	 *             <li>A {@link ConcurrentModificationException} was thrown
+	 *             while canceling the execution</li>
+	 *             </ul>
 	 */
-	private void computeRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline,
-			List<StandaloneConfig> moduleConfigurations) throws StandaloneException {
-
-		for (StandaloneConfig standaloneConfig : moduleConfigurations) {
-			String loggerInfo;
-			YAMLConfig config = getConfiguration(context, standaloneConfig.getProjectId());
-
-			List<RefactoringRule> projectRules = getProjectRules(standaloneConfig);
-			List<RefactoringRule> selectedRules = getSelectedRules(config, projectRules);
-			if (selectedRules != null && !selectedRules.isEmpty()) {
-				// Create refactoring pipeline and set rules
-				refactoringPipeline.setRules(selectedRules);
-
-				loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
-						selectedRules.toString());
-				logger.info(loggerInfo);
-
-				logger.debug(Messages.Activator_debug_createRefactoringStates);
-
-				try {
-					CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(standaloneConfig,
-							config.getExcludes());
-					refactoringPipeline.createRefactoringStates(compilationUnitProvider.getFilteredCompilationUnits());
-				} catch (JavaModelException e1) {
-					throw new StandaloneException(e1.getMessage(), e1);
-				}
-
-				loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates,
-						refactoringPipeline.getRefactoringStates()
-							.size());
-				logger.debug(loggerInfo);
-
-				// Do refactoring
-				logger.info(Messages.Activator_debug_startRefactoring);
-				try {
-					refactoringPipeline.doRefactoring(new NullProgressMonitor());
-				} catch (RuleException e) {
-					logger.debug(e.getMessage(), e);
-					logger.error(e.getMessage());
-				} catch (RefactoringException e) {
-					throw new StandaloneException(e.getMessage(), e);
-				}
-
-				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, standaloneConfig.getJavaProject()
-					.getElementName(), refactoringPipeline.getRulesWithChangesAsString());
-				logger.info(loggerInfo);
-
-			} else {
-				logger.info(Messages.Activator_standalone_noRulesSelected);
+	private void prepareRefactoring() throws StandaloneException {
+		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+			String aboardMessage = String.format("Aboard detected while preparing refactoring on %s ", //$NON-NLS-1$
+					standaloneConfig.getProjectName());
+			verifyAboardFlag(aboardMessage);
+			try {
+				standaloneConfig.createRefactoringStates();
+			} catch (ConcurrentModificationException e) {
+				String message = aboard ? aboardMessage : e.getMessage();
+				throw new StandaloneException(message);
 			}
 		}
 	}
 
-	protected void commitChanges(RefactoringPipeline refactoringPipeline) throws StandaloneException {
-		// Commit refactoring
-		try {
-			logger.info(Messages.Activator_debug_commitRefactoring);
-			refactoringPipeline.commitRefactoring();
-		} catch (RefactoringException | ReconcileException e) {
-			logger.debug(e.getMessage(), e);
-			logger.error(e.getMessage());
-			throw new StandaloneException("Can not commit refactoring", e); //$NON-NLS-1$
+	private void computeRefactoring() throws StandaloneException {
+
+		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+			String aboardMessage = String.format("Aboard detected while computing refactoring on %s ", //$NON-NLS-1$
+					standaloneConfig.getProjectName());
+			verifyAboardFlag(aboardMessage);
+			try {
+				standaloneConfig.computeRefactoring();
+			} catch (ConcurrentModificationException e) {
+				String message = aboard ? aboardMessage : e.getMessage();
+				throw new StandaloneException(message);
+			}
+
+		}
+	}
+
+	private void commitRefactoring() throws StandaloneException {
+		String loggInfo = "Aboard detected before commiting refactoring "; //$NON-NLS-1$
+		verifyAboardFlag(loggInfo);
+
+		for (StandaloneConfig config : standaloneConfigs) {
+			config.commitRefactoring();
+		}
+	}
+
+	private void verifyAboardFlag(String logInfo) throws StandaloneException {
+		if (aboard) {
+			logger.info(logInfo);
+			throw new StandaloneException(logInfo);
 		}
 	}
 
@@ -180,8 +156,10 @@ public class RefactoringInvoker {
 	 *             if closing {@link IProject} fails
 	 */
 	public void cleanUp() throws IOException, CoreException {
-
+		aboard = true;
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+			standaloneConfig.setAboardFlag();
+			standaloneConfig.clearPipeline();
 			standaloneConfig.revertEclipseProjectFiles();
 		}
 	}
@@ -258,6 +236,8 @@ public class RefactoringInvoker {
 		}
 
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
+			String aboardMessage = "Aboard detected while loading standalone configuration "; //$NON-NLS-1$
+			verifyAboardFlag(aboardMessage);
 			String id = entry.getKey();
 			String path = entry.getValue();
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
@@ -273,12 +253,16 @@ public class RefactoringInvoker {
 			String sourceFolder = context.getProperty(SOURCE_FOLDER);
 			String[] natureIds = findNatureIds(context, id);
 			try {
-				StandaloneConfig standaloneConfig = new StandaloneConfig(id, projectName, path, compilerCompliance,
-						sourceFolder, natureIds);
+				YAMLConfig config = getConfiguration(context, id);
+				StandaloneConfig standaloneConfig = new StandaloneConfig(projectName, path, compilerCompliance, sourceFolder,
+						natureIds, config);
 				standaloneConfigs.add(standaloneConfig);
-			} catch (CoreException | IOException e) {
-				throw new StandaloneException(e.getMessage(), e);
+
+			} catch (CoreException | RuntimeException e) {
+				String message = aboard ? aboardMessage : e.getMessage();
+				throw new StandaloneException(message, e);
 			}
+
 		}
 
 		if (standaloneConfigs.isEmpty()) {
@@ -301,21 +285,6 @@ public class RefactoringInvoker {
 			paths.put(id, path);
 		}
 		return paths;
-	}
-
-	protected List<RefactoringRule> getProjectRules(StandaloneConfig standaloneConfig) {
-		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
-		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
-	}
-
-	protected List<RefactoringRule> getSelectedRules(YAMLConfig config, List<RefactoringRule> projectRules)
-			throws StandaloneException {
-		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
-		try {
-			return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
-		} catch (YAMLConfigException e) {
-			throw new StandaloneException(e.getMessage(), e);
-		}
 	}
 
 	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws StandaloneException {
