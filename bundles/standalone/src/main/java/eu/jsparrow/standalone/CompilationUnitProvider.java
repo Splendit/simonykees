@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,11 @@ public class CompilationUnitProvider {
 
 	private boolean isIncludedForRefactoring(ICompilationUnit compUnit) {
 		try {
-			String cuPackage = compUnit.getPackageDeclarations()[0].getElementName();
+			IPackageDeclaration[] packageDeclarations = compUnit.getPackageDeclarations();
+			String cuPackage = ""; //$NON-NLS-1$
+			if(packageDeclarations.length != 0) {
+				cuPackage = packageDeclarations[0].getElementName();
+			}
 			return !excludes.getExcludePackages()
 				.contains(cuPackage)
 					&& !excludes.getExcludeClasses()
