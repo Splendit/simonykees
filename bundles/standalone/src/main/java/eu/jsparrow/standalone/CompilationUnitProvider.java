@@ -26,10 +26,10 @@ public class CompilationUnitProvider {
 	private static final Logger logger = LoggerFactory.getLogger(CompilationUnitProvider.class);
 
 	/**
-	 * Creates an instance of {@link CompilationUnitProvider} from the list of all
-	 * {@link ICompilationUnit} of a project and an instance of {@link YAMLExcludes}
-	 * which contains the modules, packages and the classes that should not 
-	 * be refactored. 
+	 * Creates an instance of {@link CompilationUnitProvider} from the list of
+	 * all {@link ICompilationUnit} of a project and an instance of
+	 * {@link YAMLExcludes} which contains the modules, packages and the classes
+	 * that should not be refactored.
 	 * 
 	 * @param compilationUnits
 	 *            list of the {@link ICompilationUnit}s of a project
@@ -43,10 +43,10 @@ public class CompilationUnitProvider {
 	}
 
 	/**
-	 * Finds the list of {@link ICompilationUnit}s from {@link #compilationUnits} that 
-	 * are allowed to be refactored. 
+	 * Finds the list of {@link ICompilationUnit}s from
+	 * {@link #compilationUnits} that are allowed to be refactored.
 	 * 
-	 * @return the list of compilation units that allowed to be refactored. 
+	 * @return the list of compilation units that allowed to be refactored.
 	 */
 	public List<ICompilationUnit> getFilteredCompilationUnits() {
 
