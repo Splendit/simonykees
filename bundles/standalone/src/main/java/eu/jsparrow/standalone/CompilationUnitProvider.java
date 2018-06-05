@@ -51,22 +51,32 @@ public class CompilationUnitProvider {
 	 */
 	public List<ICompilationUnit> getFilteredCompilationUnits() {
 
+		List<String> excludedPackages = excludes.getExcludePackages()
+			.stream()
+			/*
+			 * We do not allow to exclude the root package
+			 */
+			.filter(packageName -> !packageName.isEmpty())
+			.collect(Collectors.toList());
+
+		List<String> exludedClasses = excludes.getExcludeClasses();
+
 		return compilationUnits.stream()
-			.filter(this::isIncludedForRefactoring)
+			.filter(compilationUnit -> isIncludedForRefactoring(compilationUnit, excludedPackages, exludedClasses))
 			.collect(Collectors.toList());
 	}
 
-	private boolean isIncludedForRefactoring(ICompilationUnit compUnit) {
+	private boolean isIncludedForRefactoring(ICompilationUnit compUnit, List<String> exludedPackages,
+			List<String> exluededClasses) {
 		try {
 			IPackageDeclaration[] packageDeclarations = compUnit.getPackageDeclarations();
-			String cuPackage = ""; //$NON-NLS-1$
-			if(packageDeclarations.length != 0) {
-				cuPackage = packageDeclarations[0].getElementName();
+			String packageName = ""; //$NON-NLS-1$
+			String className = compUnit.getElementName();
+			if (packageDeclarations.length != 0) {
+				packageName = packageDeclarations[0].getElementName();
+				className = packageName + "." + className; //$NON-NLS-1$
 			}
-			return !excludes.getExcludePackages()
-				.contains(cuPackage)
-					&& !excludes.getExcludeClasses()
-						.contains(cuPackage + "." + compUnit.getElementName()); //$NON-NLS-1$
+			return !exludedPackages.contains(packageName) && !exluededClasses.contains(className);
 		} catch (JavaModelException e) {
 			logger.warn("Error occurred while trying to get package declarations", e); //$NON-NLS-1$
 			return false;
