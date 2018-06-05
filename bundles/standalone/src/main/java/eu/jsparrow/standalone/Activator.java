@@ -96,6 +96,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private void pritntLicenseInfo(BundleContext context) {
+		licenseService = getStandaloneLicenseUtilService();
 		String key = getLicenseKey(context);
 		String agentUrl = getAgentUrl(context);
 		licenseService.licenseInfo(key, agentUrl);
@@ -113,6 +114,7 @@ public class Activator implements BundleActivator {
 		try {
 			String key = getLicenseKey(context);
 			String agentUrl = getAgentUrl(context);
+			licenseService = getStandaloneLicenseUtilService();
 			if (licenseService.validate(key, agentUrl) || devModeEnabled) {
 				refactoringInvoker.startRefactoring(context);
 			} else {
@@ -154,7 +156,7 @@ public class Activator implements BundleActivator {
 
 	private void cleanUp(BundleContext context) {
 		StandaloneMode mode = parseMode(context);
-		if (mode == StandaloneMode.REFACTOR || mode == StandaloneMode.LICENSE_INFO) {
+		if (licenseService != null && (mode == StandaloneMode.REFACTOR || mode == StandaloneMode.LICENSE_INFO)) {
 			licenseService.stop();
 		}
 		try {
@@ -265,4 +267,7 @@ public class Activator implements BundleActivator {
 		return yamlStandaloneConfig;
 	}
 
+	StandaloneLicenseUtilService getStandaloneLicenseUtilService() {
+		return StandaloneLicenseUtil.get();
+	}
 }
