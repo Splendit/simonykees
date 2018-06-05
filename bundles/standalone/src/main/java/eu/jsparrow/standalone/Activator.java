@@ -5,13 +5,8 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.EclipseContextFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
@@ -50,7 +45,6 @@ public class Activator implements BundleActivator {
 	private RefactoringInvoker refactoringInvoker;
 	ListRulesUtil listRulesUtil;
 
-	@Inject
 	StandaloneLicenseUtilService licenseService;
 
 	public Activator() {
@@ -102,7 +96,6 @@ public class Activator implements BundleActivator {
 	}
 
 	private void pritntLicenseInfo(BundleContext context) {
-		injectDependencies(context);
 		String key = getLicenseKey(context);
 		String agentUrl = getAgentUrl(context);
 		licenseService.licenseInfo(key, agentUrl);
@@ -118,7 +111,6 @@ public class Activator implements BundleActivator {
 
 	private void refactor(BundleContext context, boolean devModeEnabled) {
 		try {
-			injectDependencies(context);
 			String key = getLicenseKey(context);
 			String agentUrl = getAgentUrl(context);
 			if (licenseService.validate(key, agentUrl) || devModeEnabled) {
@@ -133,11 +125,6 @@ public class Activator implements BundleActivator {
 			logger.error(e.getMessage());
 			setExitErrorMessage(context, e.getMessage());
 		}
-	}
-
-	void injectDependencies(BundleContext context) {
-		IEclipseContext eclipseContext = EclipseContextFactory.getServiceContext(context);
-		ContextInjectionFactory.inject(this, eclipseContext);
 	}
 
 	@Override
