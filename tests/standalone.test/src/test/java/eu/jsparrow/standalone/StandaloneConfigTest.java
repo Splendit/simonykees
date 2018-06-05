@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -37,6 +38,7 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.Mockito;
 
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLExcludes;
@@ -84,8 +86,7 @@ public class StandaloneConfigTest {
 	private boolean existingProjectFileMoved = false;
 	private boolean existingClasspathFileMoved = false;
 	private boolean existingSettingsDirectoryMoved = false;
-	
-	
+
 	@Rule
 	public TemporaryFolder directory = new TemporaryFolder();
 	private File baseDir;
@@ -107,7 +108,7 @@ public class StandaloneConfigTest {
 		baseDir = directory.newFolder(PROJECT_ROOT_DIR);
 		projectFile = directory.newFile(PROJECT_ROOT_DIR + File.separator + DOT_PROJECT);
 		classpathFile = directory.newFile(PROJECT_ROOT_DIR + File.separator + DOT_CLASSPATH);
-		settingsDirFile = directory.newFolder(PROJECT_ROOT_DIR,  DOT_SETTINGS);
+		settingsDirFile = directory.newFolder(PROJECT_ROOT_DIR, DOT_SETTINGS);
 		projectFileTmp = new File(baseDir.getPath() + File.separator + DOT_PROJECT + DOT_TEMP);
 		classpathFileTmp = new File(baseDir.getPath() + File.separator + DOT_CLASSPATH + DOT_TEMP);
 		settingsDirFileTmp = new File(baseDir.getPath() + File.separator + DOT_SETTINGS + DOT_TEMP);
@@ -128,7 +129,7 @@ public class StandaloneConfigTest {
 
 	@Test
 	public void getProjectDescription_projectDescriptionLoaded() throws Exception {
-		
+
 		when(workspace.newProjectDescription(any(String.class))).thenReturn(projectDescription);
 		when(projectDescription.getBuildSpec()).thenReturn(new ICommand[] {});
 
@@ -160,6 +161,18 @@ public class StandaloneConfigTest {
 		verify(javaProject).setOption(eq(JavaCore.COMPILER_SOURCE), eq(javaVersion));
 
 		verify(javaProject).open(any());
+	}
+	
+	@Test(expected = StandaloneException.class)
+	public void initJavaProject_iProjectNotOpen_shouldThrowException() throws StandaloneException {
+		String javaVersion = "1.8"; //$NON-NLS-1$
+
+		when(javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true)).thenReturn(javaVersion);
+		when(project.isOpen()).thenReturn(false);
+
+		standaloneConfig.initJavaProject(project);
+		
+		assertTrue(false);
 	}
 
 	@Test
@@ -254,6 +267,19 @@ public class StandaloneConfigTest {
 	}
 
 	@Test
+	public void computeRefactoring_shouldCallDoRefactoring() throws Exception {
+		hasRefactoringStates = true;
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn(PROJECT_NAME);
+		when(javaProject.getElementName()).thenReturn(PROJECT_NAME);
+		when(pipeline.getRulesWithChangesAsString()).thenReturn("changes-as-string"); //$NON-NLS-1$
+
+		standaloneConfig.computeRefactoring();
+
+		verify(pipeline).doRefactoring(any(NullProgressMonitor.class));
+	}
+
+	@Test
 	public void computeRefactoring_emptyRefactoringStates() throws Exception {
 		hasRefactoringStates = false;
 		standaloneConfig.setProject(project);
@@ -304,40 +330,40 @@ public class StandaloneConfigTest {
 	@Test
 	public void backupExistingEclipseFiles_dotProjectExists() throws StandaloneException, IOException {
 
-		projectFileTmp = new File (baseDir.getPath() + File.separator + DOT_PROJECT + DOT_TEMP);
-		classpathFile = new File (baseDir.getPath() + File.separator + DOT_CLASSPATH);
-		settingsDirFile = new File (baseDir.getPath(),  DOT_SETTINGS);
-	
+		projectFileTmp = new File(baseDir.getPath() + File.separator + DOT_PROJECT + DOT_TEMP);
+		classpathFile = new File(baseDir.getPath() + File.separator + DOT_CLASSPATH);
+		settingsDirFile = new File(baseDir.getPath(), DOT_SETTINGS);
+
 		standaloneConfig.backupExistingEclipseFiles();
-		
+
 		assertTrue(Files.exists(projectFileTmp.toPath()));
-		
+
 	}
-	
+
 	@Test
 	public void backupExistingEclipseFiles_dotClasspathExists() throws StandaloneException, IOException {
-		classpathFileTmp = new File (baseDir.getPath() + File.separator + DOT_CLASSPATH + DOT_TEMP);
-		projectFile = new File (baseDir.getPath() + File.separator + DOT_PROJECT);
-		settingsDirFile = new File (baseDir.getPath(),  DOT_SETTINGS);
-	
+		classpathFileTmp = new File(baseDir.getPath() + File.separator + DOT_CLASSPATH + DOT_TEMP);
+		projectFile = new File(baseDir.getPath() + File.separator + DOT_PROJECT);
+		settingsDirFile = new File(baseDir.getPath(), DOT_SETTINGS);
+
 		standaloneConfig.backupExistingEclipseFiles();
-		
+
 		assertTrue(Files.exists(classpathFileTmp.toPath()));
-		
+
 	}
-	
+
 	@Test
 	public void backupExistingEclipseFiles_dotSettingsExists() throws StandaloneException, IOException {
-		projectFile = new File (baseDir.getPath() + File.separator + DOT_PROJECT);
-		classpathFile = new File (baseDir.getPath() + File.separator + DOT_CLASSPATH);
-		settingsDirFileTmp = new File (baseDir.getPath() + File.separator + DOT_SETTINGS + DOT_TEMP);
-	
+		projectFile = new File(baseDir.getPath() + File.separator + DOT_PROJECT);
+		classpathFile = new File(baseDir.getPath() + File.separator + DOT_CLASSPATH);
+		settingsDirFileTmp = new File(baseDir.getPath() + File.separator + DOT_SETTINGS + DOT_TEMP);
+
 		standaloneConfig.backupExistingEclipseFiles();
-		
+
 		assertTrue(Files.exists(settingsDirFileTmp.toPath()));
-		
+
 	}
-	
+
 	@Test
 	public void restoreExistingEclipseFiles_projectFileMoved() throws IOException, CoreException {
 		existingProjectFileMoved = true;
@@ -345,35 +371,35 @@ public class StandaloneConfigTest {
 		when(project.getName()).thenReturn(PROJECT_NAME);
 
 		projectFileTmp = directory.newFile(PROJECT_ROOT_DIR + File.separator + DOT_PROJECT + DOT_TEMP);
-		
+
 		standaloneConfig.revertEclipseProjectFiles();
-		
+
 		assertTrue(projectFile.exists());
 		assertFalse(projectFileTmp.exists());
 	}
-	
+
 	@Test
 	public void restoreExistingEclipseFiles_classPathFileMoved() throws IOException, CoreException {
 		existingClasspathFileMoved = true;
 		standaloneConfig.setProject(project);
 		when(project.getName()).thenReturn(PROJECT_NAME);
 		classpathFileTmp = directory.newFile(PROJECT_ROOT_DIR + File.separator + DOT_PROJECT + DOT_TEMP);
-		
+
 		standaloneConfig.revertEclipseProjectFiles();
-		
+
 		assertTrue(classpathFile.exists());
 		assertFalse(classpathFileTmp.exists());
 	}
-	
+
 	@Test
 	public void restoreExistingEclipseFiles_settingsFolderMoved() throws IOException, CoreException {
 		existingSettingsDirectoryMoved = true;
 		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn(PROJECT_NAME);	
+		when(project.getName()).thenReturn(PROJECT_NAME);
 		settingsDirFileTmp = directory.newFolder(PROJECT_ROOT_DIR, DOT_SETTINGS + DOT_TEMP);
-		
+
 		standaloneConfig.revertEclipseProjectFiles();
-		
+
 		assertTrue(settingsDirFile.exists());
 		assertFalse(settingsDirFileTmp.exists());
 	}
@@ -465,7 +491,7 @@ public class StandaloneConfigTest {
 				throws StandaloneException {
 			return Collections.singletonList(new CodeFormatterRule());
 		}
-		
+
 		@Override
 		protected boolean isExistingProjectFileMoved() {
 			return existingProjectFileMoved;

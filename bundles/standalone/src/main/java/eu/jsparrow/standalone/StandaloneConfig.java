@@ -460,7 +460,7 @@ public class StandaloneConfig {
 		if (!rules.isEmpty()) {
 			try {
 				refactoringPipeline.doRefactoring(new NullProgressMonitor());
-				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, javaProject.getElementName(),
+				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, project.getName(),
 						refactoringPipeline.getRulesWithChangesAsString());
 				logger.info(loggerInfo);
 			} catch (RuleException e) {
