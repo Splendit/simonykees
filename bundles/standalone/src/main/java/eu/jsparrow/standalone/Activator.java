@@ -47,6 +47,8 @@ public class Activator implements BundleActivator {
 
 	StandaloneLicenseUtilService licenseService;
 
+	private static BundleContext bundleContext;
+
 	public Activator() {
 		this(new RefactoringInvoker(), new ListRulesUtil());
 	}
@@ -58,6 +60,8 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
+		bundleContext = context;
+
 		boolean debugEnabled = false;
 		boolean devModeEnabled = Boolean.parseBoolean(context.getProperty(DEV_MODE_KEY));
 		if (devModeEnabled) {
@@ -265,6 +269,10 @@ public class Activator implements BundleActivator {
 		}
 
 		return yamlStandaloneConfig;
+	}
+
+	public static BundleContext getBundleContext() {
+		return bundleContext;
 	}
 
 	StandaloneLicenseUtilService getStandaloneLicenseUtilService() {
