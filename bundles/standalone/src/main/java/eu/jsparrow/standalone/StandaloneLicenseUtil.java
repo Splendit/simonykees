@@ -89,9 +89,8 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 			return;
 		}
 
-		
 		LicenseValidationResult result = tryGetValidationResult(key, validationBaseUrl);
-		if(result == null) { 
+		if (result == null) {
 			return;
 		}
 
