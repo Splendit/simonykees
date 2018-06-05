@@ -6,9 +6,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.Properties;
 import java.util.Random;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,16 +18,15 @@ import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
 
-@Component
 public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	@Reference(cardinality = ReferenceCardinality.MANDATORY)
-	private LicenseService licenseService;
+	ServiceReference<LicenseService> licenseReference;
+	ServiceReference<LicenseModelFactoryService> factoryReference;
 
-	@Reference(cardinality = ReferenceCardinality.MANDATORY)
+	private LicenseService licenseService;
 	private LicenseModelFactoryService factoryService;
 
 	private Random random = new Random(System.currentTimeMillis());
@@ -37,6 +34,27 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 
 	private static final String LINE_SEPARATOR_EQUAL = "================================================================================\n"; //$NON-NLS-1$
 	private static final String LINE_SEPARATOR_HIPHEN = "--------------------------------------------------------------------------------\n"; //$NON-NLS-1$
+
+	private static StandaloneLicenseUtil instance;
+
+	public static StandaloneLicenseUtil get() {
+		if (instance == null) {
+			instance = new StandaloneLicenseUtil();
+		}
+		return instance;
+	}
+
+	private StandaloneLicenseUtil() {
+		licenseReference = Activator.getBundleContext()
+			.getServiceReference(LicenseService.class);
+		licenseService = Activator.getBundleContext()
+			.getService(licenseReference);
+
+		factoryReference = Activator.getBundleContext()
+			.getServiceReference(LicenseModelFactoryService.class);
+		factoryService = Activator.getBundleContext()
+			.getService(factoryReference);
+	}
 
 	@Override
 	public boolean validate(String key, String validationBaseUrl) {
