@@ -26,5 +26,4 @@ Bundle-ClassPath: lib/plexus-utils.jar,
  lib/maven-invoker.jar,
  lib/snakeyaml.jar,
  .
-Service-Component: OSGI-INF/eu.jsparrow.standalone.StandaloneLicenseUtil.xml
 Import-Package: org.eclipse.jdt.launching
