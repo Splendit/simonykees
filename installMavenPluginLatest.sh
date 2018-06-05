@@ -13,7 +13,16 @@ EOF
 }
 
 function installUrl() {
-  jsparrow-maven-plugin/install.sh -u "http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-maven-plugin-develop/eu/jsparrow/jsparrow-maven-plugin/$MAVEN_PLUGIN_VERSION/jsparrow-maven-plugin-$MAVEN_PLUGIN_VERSION.jar"
+  # get the latest url and use it (since wget creates tmp files, we switch directory)
+  local url=`(cd /tmp \
+            && wget --spider -r --no-parent "http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-maven-plugin-develop/eu/jsparrow/jsparrow-maven-plugin/$MAVEN_PLUGIN_VERSION/") 2>&1 \
+            | egrep ".jar$" \
+            | grep -v SNAPSHOT.jar \
+            | sed 's/--.*--  //' \
+            | sort \
+            | tail -1`
+
+  jsparrow-maven-plugin/install.sh -u $url
 }
 
 function installJar() {
