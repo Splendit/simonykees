@@ -138,12 +138,11 @@ public class ActivatorTest {
 
 		public TestableActivator() {
 			super(ActivatorTest.this.refactoringInvoker, ActivatorTest.this.listRulesUtil);
-			this.licenseService = ActivatorTest.this.licenseService;
 		}
 
 		@Override
-		void injectDependencies(BundleContext context) {
-			return;
+		StandaloneLicenseUtilService getStandaloneLicenseUtilService() {
+			return ActivatorTest.this.licenseService;
 		}
 	}
 }
