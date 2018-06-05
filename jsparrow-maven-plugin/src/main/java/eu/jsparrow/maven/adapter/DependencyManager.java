@@ -38,11 +38,18 @@ import eu.jsparrow.maven.i18n.Messages;
 public class DependencyManager {
 
 	protected static final String OUTPUT_DIRECTORY_OPTION_KEY = "outputDirectory"; //$NON-NLS-1$
+
 	/**
 	 * The {@link Invoker} does not work properly if the maven home points to an
 	 * embedded maven. For this use case, we provide a new maven installation by
 	 * extracting the following zip file to the jSparrow temporary directory.
-	 * This zip file should be present in the resources directory of the project. 
+	 * This zip file should be present in the resources directory of the
+	 * project.
+	 * 
+	 * By default, Eclipse uses an embedded Maven (IntelliJ does not for
+	 * instance). Using the jsparrow-maven-plugin within Eclipse with the
+	 * default Maven configuration should be the only time where this gets
+	 * relevant.
 	 */
 	private static final String MAVEN_ZIP_FILE = "apache-maven-3.5.2-bin.zip"; //$NON-NLS-1$
 	private static final int BUFFER_SIZE = 4096;
