@@ -67,7 +67,7 @@ public class CompilationUnitProvider {
 	}
 
 	private boolean isIncludedForRefactoring(ICompilationUnit compUnit, List<String> exludedPackages,
-			List<String> exluededClasses) {
+			List<String> exludedClasses) {
 		try {
 			IPackageDeclaration[] packageDeclarations = compUnit.getPackageDeclarations();
 			String packageName = ""; //$NON-NLS-1$
@@ -76,7 +76,7 @@ public class CompilationUnitProvider {
 				packageName = packageDeclarations[0].getElementName();
 				className = packageName + "." + className; //$NON-NLS-1$
 			}
-			return !exludedPackages.contains(packageName) && !exluededClasses.contains(className);
+			return !exludedPackages.contains(packageName) && !exludedClasses.contains(className);
 		} catch (JavaModelException e) {
 			logger.warn("Error occurred while trying to get package declarations", e); //$NON-NLS-1$
 			return false;
