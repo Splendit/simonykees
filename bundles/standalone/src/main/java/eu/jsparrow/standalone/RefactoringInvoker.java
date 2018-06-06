@@ -3,10 +3,12 @@ package eu.jsparrow.standalone;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -19,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
+import eu.jsparrow.core.config.YAMLExcludes;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -185,7 +188,7 @@ public class RefactoringInvoker {
 	 */
 	private YAMLConfig getConfiguration(BundleContext context, String projectId) throws StandaloneException {
 
-		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
+		boolean useDefaultConfig = parseUseDefaultConfiguration(context);
 
 		if (!useDefaultConfig) {
 			String configFilePath = context.getProperty(CONFIG_FILE_PATH + DOT + projectId);
@@ -210,6 +213,11 @@ public class RefactoringInvoker {
 		}
 	}
 
+	private boolean parseUseDefaultConfiguration(BundleContext context) {
+		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
+		return useDefaultConfig;
+	}
+
 	private void prepareWorkingDirectory() {
 		String file = System.getProperty(JAVA_TMP);
 		File directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
@@ -232,19 +240,7 @@ public class RefactoringInvoker {
 	protected void loadStandaloneConfig(BundleContext context) throws StandaloneException {
 
 		Map<String, String> projectPaths = findAllProjectPaths(context);
-
-		List<String> excludedModules = new ArrayList<>();
-		String rootProjectConfig = context.getProperty(ROOT_CONFIG_PATH);
-		if (!rootProjectConfig.isEmpty()) {
-			String profile = context.getProperty(SELECTED_PROFILE);
-			try {
-				YAMLConfig rootYamlConfig = YAMLConfigUtil.readConfig(rootProjectConfig, profile);
-				excludedModules = rootYamlConfig.getExcludes()
-					.getExcludeModules();
-			} catch (YAMLConfigException e) {
-				throw new StandaloneException("Error occured while reading root yaml configuration file", e); //$NON-NLS-1$
-			}
-		}
+		List<String> excludedModules = findExcluededModules(context);
 
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
 			String aboardMessage = "Aboard detected while loading standalone configuration "; //$NON-NLS-1$
@@ -273,11 +269,41 @@ public class RefactoringInvoker {
 				String message = aboard ? aboardMessage : e.getMessage();
 				throw new StandaloneException(message, e);
 			}
-
 		}
 
 		if (standaloneConfigs.isEmpty()) {
 			throw new StandaloneException(Messages.RefactoringInvoker_error_allModulesExcluded);
+		}
+	}
+
+	private List<String> findExcluededModules(BundleContext context) throws StandaloneException {
+		boolean useDefaultConfig = parseUseDefaultConfiguration(context);
+		String logInfo;
+		if (useDefaultConfig) {
+			/*
+			 * No modules are excluded with the default configuration
+			 */
+			logInfo = "No excluded modules. Using the default configuration."; //$NON-NLS-1$
+			logger.debug(logInfo);
+			return Collections.emptyList();
+		}
+
+		String rootProjectConfig = context.getProperty(ROOT_CONFIG_PATH);
+		if (rootProjectConfig.isEmpty()) {
+			logInfo = "Cannot find excluded modules. The root yml file path is not provided"; //$NON-NLS-1$
+			logger.debug(logInfo); 
+			return Collections.emptyList();
+		}
+		String profile = context.getProperty(SELECTED_PROFILE);
+		try {
+			YAMLConfig rootYamlConfig = YAMLConfigUtil.readConfig(rootProjectConfig, profile);
+			YAMLExcludes excludes = rootYamlConfig.getExcludes();
+			List<String> excludedModules = excludes.getExcludeModules();
+			String commaSeparated = excludedModules.stream().collect(Collectors.joining("\n", ",\n", "."));   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			logger.debug(" {} excluded modules: {}", excludedModules.size(), commaSeparated); //$NON-NLS-1$
+			return excludedModules;
+		} catch (YAMLConfigException e) {
+			throw new StandaloneException("Error occured while reading the root yaml configuration file", e); //$NON-NLS-1$
 		}
 	}
 
