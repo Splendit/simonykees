@@ -159,8 +159,19 @@ public class RefactoringInvoker {
 		aboard = true;
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
 			standaloneConfig.setAboardFlag();
-			standaloneConfig.clearPipeline();
-			standaloneConfig.revertEclipseProjectFiles();
+			try {
+				standaloneConfig.clearPipeline();
+			} catch (RuntimeException e) {
+				/*
+				 * Unpredicted runtime exceptions may be thrown while cleaning
+				 * the pipeline. But the eclipse files must be reverted anyway.
+				 * 
+				 */
+				logger.debug("Cannot clear refactoring states on {} ", standaloneConfig.getProjectName(), e); //$NON-NLS-1$
+				throw e;
+			} finally {
+				standaloneConfig.revertEclipseProjectFiles();
+			}
 		}
 	}
 
@@ -254,8 +265,8 @@ public class RefactoringInvoker {
 			String[] natureIds = findNatureIds(context, id);
 			try {
 				YAMLConfig config = getConfiguration(context, id);
-				StandaloneConfig standaloneConfig = new StandaloneConfig(projectName, path, compilerCompliance, sourceFolder,
-						natureIds, config);
+				StandaloneConfig standaloneConfig = new StandaloneConfig(projectName, path, compilerCompliance,
+						sourceFolder, natureIds, config);
 				standaloneConfigs.add(standaloneConfig);
 
 			} catch (CoreException | RuntimeException e) {

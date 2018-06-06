@@ -1,9 +1,11 @@
 package eu.jsparrow.standalone;
 
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,22 +48,42 @@ public class CompilationUnitProvider {
 	 * Finds the list of {@link ICompilationUnit}s from
 	 * {@link #compilationUnits} that are allowed to be refactored.
 	 * 
-	 * @return the list of compilation units that allowed to be refactored.
+	 * @return the list of compilation units that are allowed to be refactored.
 	 */
 	public List<ICompilationUnit> getFilteredCompilationUnits() {
 
+		Collector<CharSequence, ?, String> collector = Collectors.joining("\n", ",\n", "."); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+
+		List<String> excludedPackages = excludes.getExcludePackages();
+		String logInfo = excludedPackages.stream()
+			.collect(collector);
+		logger.debug("Exclueded packages: {} ", logInfo); //$NON-NLS-1$
+
+		List<String> exludedClasses = excludes.getExcludeClasses();
+		logInfo = exludedClasses.stream()
+			.collect(collector);
+		logger.debug("Excluded classes: {} ", logInfo); //$NON-NLS-1$
+
 		return compilationUnits.stream()
-			.filter(this::isIncludedForRefactoring)
+			.filter(compilationUnit -> isIncludedForRefactoring(compilationUnit, excludedPackages, exludedClasses))
 			.collect(Collectors.toList());
 	}
 
-	private boolean isIncludedForRefactoring(ICompilationUnit compUnit) {
+	private boolean isIncludedForRefactoring(ICompilationUnit compUnit, List<String> exludedPackages,
+			List<String> exludedClasses) {
 		try {
-			String cuPackage = compUnit.getPackageDeclarations()[0].getElementName();
-			return !excludes.getExcludePackages()
-				.contains(cuPackage)
-					&& !excludes.getExcludeClasses()
-						.contains(cuPackage + "." + compUnit.getElementName()); //$NON-NLS-1$
+			IPackageDeclaration[] packageDeclarations = compUnit.getPackageDeclarations();
+			String packageName = ""; //$NON-NLS-1$
+			String className = compUnit.getElementName();
+			if (packageDeclarations.length != 0) {
+				packageName = packageDeclarations[0].getElementName();
+				className = packageName + "." + className; //$NON-NLS-1$
+			}
+			boolean isIncluded = !exludedPackages.contains(packageName) && !exludedClasses.contains(className);
+			if (!isIncluded) {
+				logger.debug("Excluding compilation unit {}", className); //$NON-NLS-1$
+			}
+			return isIncluded;
 		} catch (JavaModelException e) {
 			logger.warn("Error occurred while trying to get package declarations", e); //$NON-NLS-1$
 			return false;

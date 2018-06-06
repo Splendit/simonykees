@@ -1,6 +1,7 @@
 package eu.jsparrow.standalone;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -47,6 +48,15 @@ public class CompilationUnitProviderTest {
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
 		assertTrue(compilationUnits.isEmpty());
+	}
+	
+	@Test
+	public void getFilteredCompilationUnits_classWithoutPackageDeclaration_shouldNotBeIgnored() throws JavaModelException {
+		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] {});
+
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+
+		assertFalse(compilationUnits.isEmpty());
 	}
 
 	@Test
