@@ -1,6 +1,7 @@
 package eu.jsparrow.standalone;
 
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -47,19 +48,21 @@ public class CompilationUnitProvider {
 	 * Finds the list of {@link ICompilationUnit}s from
 	 * {@link #compilationUnits} that are allowed to be refactored.
 	 * 
-	 * @return the list of compilation units that allowed to be refactored.
+	 * @return the list of compilation units that are allowed to be refactored.
 	 */
 	public List<ICompilationUnit> getFilteredCompilationUnits() {
 
-		List<String> excludedPackages = excludes.getExcludePackages()
-			.stream()
-			/*
-			 * We do not allow to exclude the root package
-			 */
-			.filter(packageName -> !packageName.isEmpty())
-			.collect(Collectors.toList());
-
+		Collector<CharSequence, ?, String> collector = Collectors.joining("\n", ",\n", "."); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		
+		List<String> excludedPackages = excludes.getExcludePackages();
+		String logInfo = excludedPackages.stream()
+			.collect(collector);
+		logger.debug("Exclueded packages: {} ", logInfo); //$NON-NLS-1$
+		
 		List<String> exludedClasses = excludes.getExcludeClasses();
+		logInfo = exludedClasses.stream()
+			.collect(collector);
+		logger.debug("Excluded classes: {} ", logInfo); //$NON-NLS-1$
 
 		return compilationUnits.stream()
 			.filter(compilationUnit -> isIncludedForRefactoring(compilationUnit, excludedPackages, exludedClasses))
