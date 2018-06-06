@@ -214,7 +214,8 @@ public class RefactoringInvoker {
 	}
 
 	private boolean parseUseDefaultConfiguration(BundleContext context) {
-		return Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
+		String useDefaultConfigValue = context.getProperty(USE_DEFAULT_CONFIGURATION);
+		return Boolean.parseBoolean(useDefaultConfigValue);
 	}
 
 	private void prepareWorkingDirectory() {
@@ -290,7 +291,7 @@ public class RefactoringInvoker {
 		String rootProjectConfig = context.getProperty(ROOT_CONFIG_PATH);
 		if (rootProjectConfig.isEmpty()) {
 			logInfo = "Cannot find excluded modules. The root yml file path is not provided"; //$NON-NLS-1$
-			logger.debug(logInfo); 
+			logger.debug(logInfo);
 			return Collections.emptyList();
 		}
 		String profile = context.getProperty(SELECTED_PROFILE);
@@ -298,8 +299,13 @@ public class RefactoringInvoker {
 			YAMLConfig rootYamlConfig = YAMLConfigUtil.readConfig(rootProjectConfig, profile);
 			YAMLExcludes excludes = rootYamlConfig.getExcludes();
 			List<String> excludedModules = excludes.getExcludeModules();
-			String commaSeparated = excludedModules.stream().collect(Collectors.joining("\n", ",\n", "."));   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-			logger.debug(" {} excluded modules: {}", excludedModules.size(), commaSeparated); //$NON-NLS-1$
+			if (!excludedModules.isEmpty()) {
+				logInfo = excludedModules.stream()
+					.collect(Collectors.joining("\n", ",\n", ".")); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			} else {
+				logInfo = "No excluded modules were found."; //$NON-NLS-1$
+			}
+			logger.debug(logInfo);
 			return excludedModules;
 		} catch (YAMLConfigException e) {
 			throw new StandaloneException("Error occured while reading the root yaml configuration file", e); //$NON-NLS-1$
