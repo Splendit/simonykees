@@ -53,12 +53,12 @@ public class CompilationUnitProvider {
 	public List<ICompilationUnit> getFilteredCompilationUnits() {
 
 		Collector<CharSequence, ?, String> collector = Collectors.joining("\n", ",\n", "."); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		
+
 		List<String> excludedPackages = excludes.getExcludePackages();
 		String logInfo = excludedPackages.stream()
 			.collect(collector);
 		logger.debug("Exclueded packages: {} ", logInfo); //$NON-NLS-1$
-		
+
 		List<String> exludedClasses = excludes.getExcludeClasses();
 		logInfo = exludedClasses.stream()
 			.collect(collector);
@@ -79,7 +79,11 @@ public class CompilationUnitProvider {
 				packageName = packageDeclarations[0].getElementName();
 				className = packageName + "." + className; //$NON-NLS-1$
 			}
-			return !exludedPackages.contains(packageName) && !exludedClasses.contains(className);
+			boolean isIncluded = !exludedPackages.contains(packageName) && !exludedClasses.contains(className);
+			if (!isIncluded) {
+				logger.debug("Excluding compilation unit {}", className); //$NON-NLS-1$
+			}
+			return isIncluded;
 		} catch (JavaModelException e) {
 			logger.warn("Error occurred while trying to get package declarations", e); //$NON-NLS-1$
 			return false;
