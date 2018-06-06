@@ -41,7 +41,6 @@ public class Activator implements BundleActivator {
 	private static final String LIST_RULES_SELECTED_ID_KEY = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
-	private static final String DEV_MODE_KEY = "dev.mode.enabled"; //$NON-NLS-1$
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
@@ -64,16 +63,10 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
-		boolean debugEnabled = false;
-		boolean devModeEnabled = Boolean.parseBoolean(context.getProperty(DEV_MODE_KEY));
-		if (devModeEnabled) {
-			debugEnabled = true;
-			logger.warn("DEV MODE ENABLED"); //$NON-NLS-1$
-		} else {
-			debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
-		}
 
+		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
 		LoggingUtil.configureLogger(debugEnabled);
+
 		startDeclarativeServices(context);
 		logger.info(Messages.Activator_start);
 		registerShutdownHook(context);
@@ -81,7 +74,7 @@ public class Activator implements BundleActivator {
 		String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID_KEY);
 		switch (mode) {
 		case REFACTOR:
-			refactor(context, devModeEnabled);
+			refactor(context);
 			break;
 		case LIST_RULES:
 			listRules(listRulesId);
@@ -116,12 +109,12 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	private void refactor(BundleContext context, boolean devModeEnabled) {
+	private void refactor(BundleContext context) {
 		try {
 			injectDependencies(context);
 			String key = getLicenseKey(context);
 			String agentUrl = getAgentUrl(context);
-			if (licenseService.validate(key, agentUrl) || devModeEnabled) {
+			if (licenseService.validate(key, agentUrl)) {
 				refactoringInvoker.startRefactoring(context);
 			} else {
 				String message = Messages.StandaloneActivator_noValidLicenseFound;
