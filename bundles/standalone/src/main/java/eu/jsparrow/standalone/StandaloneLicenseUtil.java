@@ -6,6 +6,8 @@ import java.lang.invoke.MethodHandles;
 import java.util.Properties;
 import java.util.Random;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,15 +47,14 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 	}
 
 	private StandaloneLicenseUtil() {
-		licenseReference = Activator.getBundleContext()
-			.getServiceReference(LicenseService.class);
-		licenseService = Activator.getBundleContext()
-			.getService(licenseReference);
+		BundleContext bundleContext = FrameworkUtil.getBundle(getClass())
+			.getBundleContext();
 
-		factoryReference = Activator.getBundleContext()
-			.getServiceReference(LicenseModelFactoryService.class);
-		factoryService = Activator.getBundleContext()
-			.getService(factoryReference);
+		licenseReference = bundleContext.getServiceReference(LicenseService.class);
+		licenseService = bundleContext.getService(licenseReference);
+
+		factoryReference = bundleContext.getServiceReference(LicenseModelFactoryService.class);
+		factoryService = bundleContext.getService(factoryReference);
 	}
 
 	@Override
