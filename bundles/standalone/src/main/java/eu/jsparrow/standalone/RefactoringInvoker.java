@@ -300,8 +300,8 @@ public class RefactoringInvoker {
 			YAMLExcludes excludes = rootYamlConfig.getExcludes();
 			List<String> excludedModules = excludes.getExcludeModules();
 			if (!excludedModules.isEmpty()) {
-				logInfo = excludedModules.stream()
-					.collect(Collectors.joining("\n", ",\n", ".")); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+				logInfo = String.format("Excluded modules: %s ", excludedModules.stream() //$NON-NLS-1$
+					.collect(Collectors.joining(","))); //$NON-NLS-1$
 			} else {
 				logInfo = "No excluded modules were found."; //$NON-NLS-1$
 			}

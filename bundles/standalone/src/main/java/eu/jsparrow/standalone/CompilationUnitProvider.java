@@ -52,7 +52,7 @@ public class CompilationUnitProvider {
 	 */
 	public List<ICompilationUnit> getFilteredCompilationUnits() {
 
-		Collector<CharSequence, ?, String> collector = Collectors.joining("\n", ",\n", "."); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		Collector<CharSequence, ?, String> collector = Collectors.joining(","); //$NON-NLS-1$
 
 		List<String> excludedPackages = excludes.getExcludePackages();
 		String logInfo = excludedPackages.stream()
