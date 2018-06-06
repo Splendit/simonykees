@@ -75,9 +75,6 @@ public class RefactorMojo extends AbstractMojo {
 	@Parameter(property = "url")
 	private String url;
 
-	@Parameter(property = "devMode")
-	private boolean devMode;
-
 	/**
 	 * MOJO entry point. Registers shutdown hook for clean up and starts equinox
 	 * with the given configuration
@@ -86,7 +83,7 @@ public class RefactorMojo extends AbstractMojo {
 
 		Log log = getLog();
 		String mode = StandaloneMode.REFACTOR.name();
-		MavenParameters parameters = new MavenParameters(mode, license, url, profile, useDefaultConfig, devMode);
+		MavenParameters parameters = new MavenParameters(mode, license, url, profile, useDefaultConfig);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		DependencyManager dependencyManager = new DependencyManager(log, mavenHome);
 		List<MavenProject> projects = mavenSession.getAllProjects();
