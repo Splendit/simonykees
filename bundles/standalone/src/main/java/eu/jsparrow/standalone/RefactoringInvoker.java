@@ -214,8 +214,7 @@ public class RefactoringInvoker {
 	}
 
 	private boolean parseUseDefaultConfiguration(BundleContext context) {
-		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
-		return useDefaultConfig;
+		return Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
 	}
 
 	private void prepareWorkingDirectory() {
