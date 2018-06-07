@@ -236,7 +236,6 @@ public class MavenAdapter {
 		configuration.put(ConfigurationKeys.AGENT_URL, config.getUrl());
 		config.getRuleId()
 			.ifPresent(ruleId -> configuration.put(ConfigurationKeys.LIST_RULES_SELECTED_ID, ruleId));
-		configuration.put(ConfigurationKeys.DEV_MODE_KEY, Boolean.toString(config.isDevMode()));
 	}
 
 	/**

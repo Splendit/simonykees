@@ -29,7 +29,6 @@ public class ConfigurationKeys {
 	public static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	public static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	public static final String AGENT_URL = "URL"; //$NON-NLS-1$
-	public static final String DEV_MODE_KEY = "dev.mode.enabled"; //$NON-NLS-1$
 	public static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
 	public static final String SOURCE_FOLDER = "SOURCE.FOLDER"; //$NON-NLS-1$
 	public static final String DEFAULT_SOURCE_FOLDER_PATH = "src/main/java"; //$NON-NLS-1$

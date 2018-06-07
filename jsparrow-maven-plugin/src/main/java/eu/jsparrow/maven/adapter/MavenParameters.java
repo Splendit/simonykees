@@ -17,14 +17,11 @@ public class MavenParameters {
 	private String ruleId;
 	private String license = ""; //$NON-NLS-1$
 	private String url = ""; //$NON-NLS-1$
-	private boolean devMode;
 
-	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault,
-			boolean devMode) {
+	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault) {
 		this(mode, license, url);
 		this.profile = profile;
 		this.useDefaultConfig = useDefault;
-		this.devMode = devMode;
 	}
 
 	public MavenParameters(String mode, String license, String url) {
@@ -64,10 +61,6 @@ public class MavenParameters {
 
 	public String getUrl() {
 		return url;
-	}
-
-	public boolean isDevMode() {
-		return devMode;
 	}
 
 }
