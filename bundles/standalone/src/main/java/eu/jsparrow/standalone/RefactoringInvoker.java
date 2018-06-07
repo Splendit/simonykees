@@ -49,9 +49,9 @@ public class RefactoringInvoker {
 	private static final String SOURCE_FOLDER = "SOURCE.FOLDER"; //$NON-NLS-1$
 	private static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
 	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
-
 	private static final String DOT = "."; //$NON-NLS-1$
-	private boolean aboard = false;
+
+	private boolean abort = false;
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
@@ -96,20 +96,20 @@ public class RefactoringInvoker {
 	 *             <ul>
 	 *             <li>A {@link JavaModelException} is thrown while creating a
 	 *             refactoring state</li>
-	 *             <li>A user aboard was detected</li>
+	 *             <li>A user abort was detected</li>
 	 *             <li>A {@link ConcurrentModificationException} was thrown
 	 *             while canceling the execution</li>
 	 *             </ul>
 	 */
 	private void prepareRefactoring() throws StandaloneException {
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
-			String aboardMessage = String.format("Aboard detected while preparing refactoring on %s ", //$NON-NLS-1$
+			String abortMessage = String.format("Abort detected while preparing refactoring on %s ", //$NON-NLS-1$
 					standaloneConfig.getProjectName());
-			verifyAboardFlag(aboardMessage);
+			verifyAbortFlag(abortMessage);
 			try {
 				standaloneConfig.createRefactoringStates();
 			} catch (ConcurrentModificationException e) {
-				String message = aboard ? aboardMessage : e.getMessage();
+				String message = abort ? abortMessage : e.getMessage();
 				throw new StandaloneException(message);
 			}
 		}
@@ -118,13 +118,13 @@ public class RefactoringInvoker {
 	private void computeRefactoring() throws StandaloneException {
 
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
-			String aboardMessage = String.format("Aboard detected while computing refactoring on %s ", //$NON-NLS-1$
+			String abortMessage = String.format("abort detected while computing refactoring on %s ", //$NON-NLS-1$
 					standaloneConfig.getProjectName());
-			verifyAboardFlag(aboardMessage);
+			verifyAbortFlag(abortMessage);
 			try {
 				standaloneConfig.computeRefactoring();
 			} catch (ConcurrentModificationException e) {
-				String message = aboard ? aboardMessage : e.getMessage();
+				String message = abort ? abortMessage : e.getMessage();
 				throw new StandaloneException(message);
 			}
 
@@ -132,16 +132,16 @@ public class RefactoringInvoker {
 	}
 
 	private void commitRefactoring() throws StandaloneException {
-		String loggInfo = "Aboard detected before commiting refactoring "; //$NON-NLS-1$
-		verifyAboardFlag(loggInfo);
+		String loggInfo = "Abort detected before commiting refactoring "; //$NON-NLS-1$
+		verifyAbortFlag(loggInfo);
 
 		for (StandaloneConfig config : standaloneConfigs) {
 			config.commitRefactoring();
 		}
 	}
 
-	private void verifyAboardFlag(String logInfo) throws StandaloneException {
-		if (aboard) {
+	private void verifyAbortFlag(String logInfo) throws StandaloneException {
+		if (abort) {
 			logger.info(logInfo);
 			throw new StandaloneException(logInfo);
 		}
@@ -156,9 +156,9 @@ public class RefactoringInvoker {
 	 *             if closing {@link IProject} fails
 	 */
 	public void cleanUp() throws IOException, CoreException {
-		aboard = true;
+		abort = true;
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
-			standaloneConfig.setAboardFlag();
+			standaloneConfig.setAbortFlag();
 			try {
 				standaloneConfig.clearPipeline();
 			} catch (RuntimeException e) {
@@ -185,7 +185,7 @@ public class RefactoringInvoker {
 	 */
 	private YAMLConfig getConfiguration(BundleContext context, String projectId) throws StandaloneException {
 
-		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
+		boolean useDefaultConfig = parseUseDefaultConfiguration(context);
 
 		if (!useDefaultConfig) {
 			String configFilePath = context.getProperty(CONFIG_FILE_PATH + DOT + projectId);
@@ -208,6 +208,11 @@ public class RefactoringInvoker {
 
 			return YAMLConfig.getDefaultConfig();
 		}
+	}
+
+	private boolean parseUseDefaultConfiguration(BundleContext context) {
+		String useDefaultConfigValue = context.getProperty(USE_DEFAULT_CONFIGURATION);
+		return Boolean.parseBoolean(useDefaultConfigValue);
 	}
 
 	private void prepareWorkingDirectory() {
@@ -233,22 +238,12 @@ public class RefactoringInvoker {
 
 		Map<String, String> projectPaths = findAllProjectPaths(context);
 
-		List<String> excludedModules = new ArrayList<>();
-		String rootProjectConfig = context.getProperty(ROOT_CONFIG_PATH);
-		if (!rootProjectConfig.isEmpty()) {
-			String profile = context.getProperty(SELECTED_PROFILE);
-			try {
-				YAMLConfig rootYamlConfig = YAMLConfigUtil.readConfig(rootProjectConfig, profile);
-				excludedModules = rootYamlConfig.getExcludes()
-					.getExcludeModules();
-			} catch (YAMLConfigException e) {
-				throw new StandaloneException("Error occured while reading root yaml configuration file", e); //$NON-NLS-1$
-			}
-		}
+		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
+				context.getProperty(ROOT_CONFIG_PATH), context.getProperty(SELECTED_PROFILE)).get();
 
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
-			String aboardMessage = "Aboard detected while loading standalone configuration "; //$NON-NLS-1$
-			verifyAboardFlag(aboardMessage);
+			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
+			verifyAbortFlag(abortMessage);
 			String id = entry.getKey();
 			String path = entry.getValue();
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
@@ -270,10 +265,9 @@ public class RefactoringInvoker {
 				standaloneConfigs.add(standaloneConfig);
 
 			} catch (CoreException | RuntimeException e) {
-				String message = aboard ? aboardMessage : e.getMessage();
+				String message = abort ? abortMessage : e.getMessage();
 				throw new StandaloneException(message, e);
 			}
-
 		}
 
 		if (standaloneConfigs.isEmpty()) {

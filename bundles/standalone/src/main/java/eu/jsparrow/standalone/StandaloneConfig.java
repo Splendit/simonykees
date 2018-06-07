@@ -643,7 +643,7 @@ public class StandaloneConfig {
 		return projectName;
 	}
 
-	public void setAboardFlag() {
+	public void setAbortFlag() {
 		this.aboard = true;
 	}
 }
