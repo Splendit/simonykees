@@ -254,7 +254,7 @@ public class StandaloneConfigTest {
 	public void createRefactoringStates_aboardFlag_shouldThrowStandaloneException() throws Exception {
 		standaloneConfig.setProject(project);
 		when(project.getName()).thenReturn(PROJECT_NAME);
-		standaloneConfig.setAboardFlag();
+		standaloneConfig.setAbortFlag();
 		YAMLExcludes excludes = mock(YAMLExcludes.class);
 		when(excludes.getExcludeClasses()).thenReturn(Collections.emptyList());
 		when(excludes.getExcludePackages()).thenReturn(Collections.emptyList());
