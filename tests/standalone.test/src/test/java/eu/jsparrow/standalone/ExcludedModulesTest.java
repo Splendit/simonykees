@@ -16,6 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
+@SuppressWarnings("nls")
 @RunWith(MockitoJUnitRunner.class)
 public class ExcludedModulesTest {
 
