@@ -3,18 +3,21 @@
 
 function printUsage {
   echo -e "\tUsage:"
-  echo -e "\t\t$0 [-t]"
+  echo -e "\t\t$0 [-t][-p]"
   echo -e "\n\tParameters:"
   echo -e "\t\t-t\t\trun tests while building"
+  echo -e "\t\t-p\t\tenable proguard build"
 }
 
 TEST=false
+PROGUARD=false
 
 # parse arguments
-while getopts :t option
+while getopts ":tp" option
 do
   case "${option}" in
     t) TEST=true;;
+    p) PROGUARD=true;;
     ?) printUsage;;
   esac
 done
@@ -25,12 +28,18 @@ MANIFEST_FILE_NAME="manifest.standalone"
 
 echo "Building jSparrow"
 
-# build jsparrow without tests
-if [ $TEST = true ]; then
-  mvn clean verify
-else
-  mvn clean verify -DskipTests
+PARAMETERS=
+
+if [ $TEST = false ]; then
+  PARAMETERS="$PARAMETERS -DskipTests"
 fi
+
+if [ $PROGUARD = true ]; then
+  PARAMETERS="$PARAMETERS -Dproguard"
+fi
+
+# build jsparrow
+mvn clean verify $PARAMETERS
 
 # check maven result and exit if necessary
 if [ $? -ne 0 ]; then
@@ -73,11 +82,7 @@ cd jsparrow-maven-plugin
 
 echo "Building jSparrow Maven Plugin"
 
-if [ $TEST = true ]; then
-  mvn clean install
-else
-  mvn clean install -DskipTests
-fi
+mvn clean install $PARAMETERS
 
 if [ $? -ne 0 ]; then
   echo "maven on jSparrow maven plugin failed!"
