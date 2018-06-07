@@ -20,6 +20,9 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
 @RunWith(MockitoJUnitRunner.class)
 public class ExcludedModulesTest {
 
+	private static final String SELECTED_PROFILE = "selectedProfile";
+	private static final String SOME_PROJECT = "someProject";
+
 	private ExcludedModules excludedModules;
 
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -27,7 +30,7 @@ public class ExcludedModulesTest {
 
 	@Test
 	public void get_useDefaultConfig_shouldReturnEmptyExclusions() throws StandaloneException {
-		excludedModules = new TestableExcludedModules(true, "someProject", "selectedProfile");
+		excludedModules = new TestableExcludedModules(true, SOME_PROJECT, SELECTED_PROFILE);
 
 		List<String> result = excludedModules.get();
 
@@ -36,7 +39,7 @@ public class ExcludedModulesTest {
 
 	@Test
 	public void get_withEmptyRootConfig_shouldReturnEmptyExclusions() throws StandaloneException {
-		excludedModules = new TestableExcludedModules(false, "", "selectedProfile");
+		excludedModules = new TestableExcludedModules(false, "", SELECTED_PROFILE);
 
 		List<String> result = excludedModules.get();
 
@@ -45,8 +48,8 @@ public class ExcludedModulesTest {
 
 	@Test
 	public void get_withValidProfile_shouldReturnExlusionsFromConfig() throws StandaloneException {
-		excludedModules = new TestableExcludedModules(false, "someProject", "selectedProfile");
-		List<String> exclusionsFromConfig = Collections.singletonList("exludedModule"); 
+		excludedModules = new TestableExcludedModules(false, SOME_PROJECT, SELECTED_PROFILE);
+		List<String> exclusionsFromConfig = Collections.singletonList("exludedModule");
 		when(yamlConfigStub.getExcludes()
 			.getExcludeModules()).thenReturn(exclusionsFromConfig);
 
@@ -54,7 +57,7 @@ public class ExcludedModulesTest {
 
 		assertEquals(exclusionsFromConfig, result);
 	}
-	
+
 	private class TestableExcludedModules extends ExcludedModules {
 
 		public TestableExcludedModules(Boolean useDefaultConfig, String rootProjectConfig, String selectedProfile) {
