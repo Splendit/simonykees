@@ -2,6 +2,7 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
@@ -242,11 +243,11 @@ public class Activator implements BundleActivator {
 	}
 
 	private YAMLStandaloneConfig tryLoadStandaloneConfig() {
-		String filePath = String.format("%s/.config/jsparrow-standalone/", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
+		Path filePath = Paths.get(System.getProperty("user.home"), ".config", "jsparrow-standalone"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		YAMLStandaloneConfig yamlStandaloneConfig = null;
 
-		Optional<String> configFile = new ConfigFinder().getYAMLFilePath(Paths.get(filePath));
+		Optional<String> configFile = new ConfigFinder().getYAMLFilePath(filePath);
 		if (configFile.isPresent()) {
 			try {
 				yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(configFile.get()));
