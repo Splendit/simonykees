@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
@@ -192,4 +193,36 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>develop-test-noProguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/548d804f-80df-4217-b3ea-a99abbfb9356</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+
+		<profile>
+			<id>master-production-proguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/e5cf8f39-6432-4de7-8388-8b8780bceecc</url>
+				</repository>
+			</distributionManagement>
+                      </profile>
+
+		<profile>
+			<id>releaseCandidate</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/37371f5a-b22a-4707-b3f0-965be2da46c4</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+	</profiles>
+
 </project>
