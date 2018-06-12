@@ -129,6 +129,7 @@ public class StandaloneConfig {
 	protected void setUp() throws CoreException, StandaloneException {
 		IProjectDescription projectDescription = getProjectDescription();
 		project = initProject(projectDescription);
+
 		javaProject = initJavaProject(project);
 		List<IClasspathEntry> mavenClasspathEntries = collectMavenDependenciesAsClasspathEntries();
 		mavenClasspathEntries = addProjectSourceConfigurations(mavenClasspathEntries);
@@ -217,6 +218,7 @@ public class StandaloneConfig {
 		IWorkspace workspace = getWorkspace();
 
 		IProject iproject = getProject(workspace, description.getName());
+
 		try {
 			iproject.create(description, new NullProgressMonitor());
 		} catch (CoreException e) {
@@ -228,6 +230,12 @@ public class StandaloneConfig {
 
 		try {
 			iproject.open(new NullProgressMonitor());
+			/*
+			 * This here is very important. Related to SIM-1155. If you remove
+			 * this line, the jSparrow maven plugin will no longer be able to
+			 * handle umlauts.
+			 */
+			iproject.setDefaultCharset("UTF-8", new NullProgressMonitor());
 		} catch (CoreException e) {
 			throw new StandaloneException("Project cannot be opened", e); //$NON-NLS-1$
 		}
