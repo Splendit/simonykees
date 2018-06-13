@@ -35,23 +35,23 @@ timestamps {
 				sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
 			}
 			
-			stage('Compile Maven Plugin'){
-			   def mvnCommand = 'clean install -DskipTests' 
-			   def pluginResourcePath = 'jsparrow-maven-plugin/src/main/resources'
-			   def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'			   
-			   def manifest = 'manifest.standalone'
-			   def manifestContent = sh(script: "ls $jSparrowTargetPath", returnStdout: true)
-			   
-			   dir('jsparrow-maven-plugin/src/main/resources'){
-			     writeFile file: "${manifest}", text: "${manifestContent}"
-			   }
-			 
-			   // Copy required dependencies into plugin resource folder
-			   sh("cp ${jSparrowTargetPath}/* ${pluginResourcePath}")
+			stage('Compile Maven Plugin') {
+				def mvnCommand = 'clean install -DskipTests' 
+				def pluginResourcePath = 'jsparrow-maven-plugin/src/main/resources'
+				def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'
+				def manifest = 'manifest.standalone'
+				def manifestContent = sh(script: "ls $jSparrowTargetPath", returnStdout: true)
+			
+				dir('jsparrow-maven-plugin/src/main/resources') {
+					writeFile file: "${manifest}", text: "${manifestContent}"
+				}
 
-			   dir('jsparrow-maven-plugin'){
-			      sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
-			   }
+				// Copy required dependencies into plugin resource folder
+				sh("cp ${jSparrowTargetPath}/* ${pluginResourcePath}")
+
+				dir('jsparrow-maven-plugin') {
+					sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
+				}
 			}
 			
 			wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, debug: true, screen: '1366x768x24', shutdownWithBuild: true, timeout: 10]) {
@@ -84,11 +84,11 @@ timestamps {
 			if ( env.BRANCH_NAME == 'develop' ) {
 				// run sonarqube analysis, server configuration takes place in jenkins config
 				stage('SonarQube Analysis') {
-					withSonarQubeEnv('SonarQube Server'){
-     						sh 'mvn sonar:sonar'
+					withSonarQubeEnv('SonarQube Server') {
+ 						sh 'mvn sonar:sonar'
 					}
-  				}
-  			}
+				}
+			}
 			
 			// master and develop builds get deployed to packagedrone (see pom.xml) and tagged (see tag-deployment.sh)
 			if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
@@ -103,7 +103,7 @@ timestamps {
 					// BEWARE: a JMP deployment takes the previously built artifacts. 
 					// make sure those previous artifacts have the correct qualifiers (production / proguard / etc.)
 					stage('Deploy JMP'){
-						dir('jsparrow-maven-plugin'){
+						dir('jsparrow-maven-plugin') {
 							sh "'${mvnHome}/bin/mvn' ${mvnCommand} -Pdevelop-test-noProguard"
 						}
 					}
@@ -142,9 +142,9 @@ timestamps {
 
 					// BEWARE: a JMP deployment takes the previously built artifacts. 
 					// make sure those previous artifacts have the correct qualifiers (production / proguard / etc.)
-					stage('Deploy JMP Production Obfuscation'){
+					stage('Deploy JMP Production Obfuscation') {
 						def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
-						dir('jsparrow-maven-plugin'){
+						dir('jsparrow-maven-plugin') {
 							sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -Pmaster-production-proguard"
 						}
 					}
