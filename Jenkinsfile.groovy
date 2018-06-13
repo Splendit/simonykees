@@ -99,9 +99,13 @@ timestamps {
 					sh "'${mvnHome}/bin/mvn' ${mvnCommand} -P${env.BRANCH_NAME}-test-noProguard"					
 				}
 				
-				stage('Deploy Maven Plugin'){
-					dir('jsparrow-maven-plugin'){
-					  sh "'${mvnHome}/bin/mvn' ${mvnCommand}"	
+				if (env.BRANCH_NAME == 'develop') {
+					// BEWARE: a JMP deployment takes the previously built artifacts. 
+					// make sure those previous artifacts have the correct qualifiers (production / proguard / etc.)
+					stage('Deploy JMP'){
+						dir('jsparrow-maven-plugin'){
+							sh "'${mvnHome}/bin/mvn' ${mvnCommand} -Pdevelop-test-noProguard"
+						}
 					}
 				}
 				
@@ -130,10 +134,19 @@ timestamps {
 						def mvnOptions = "-Dproduction -DforceContextQualifier=${qualifier}_noProguard"
 						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-noProguard"
 					}
-					stage('Deploy production, obfuscation') {
-							def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
+					stage('Deploy Production Obfuscation') {
+						def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
 						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-proguard"
 						uploadMappingFiles(buildNumber)
+					}
+
+					// BEWARE: a JMP deployment takes the previously built artifacts. 
+					// make sure those previous artifacts have the correct qualifiers (production / proguard / etc.)
+					stage('Deploy JMP Production Obfuscation'){
+						def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
+						dir('jsparrow-maven-plugin'){
+							sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -Pmaster-production-proguard"
+						}
 					}
 				}
 
@@ -145,7 +158,15 @@ timestamps {
 				def mvnCommand = 'clean deploy -DskipTests -B -Dproguard'
 
 				stage('Deploy Test Obfuscation') {
-						sh "'${mvnHome}/bin/mvn' ${mvnCommand} -PreleaseCandidate"
+					sh "'${mvnHome}/bin/mvn' ${mvnCommand} -PreleaseCandidate"
+				}
+
+				// BEWARE: a JMP deployment takes the previously built artifacts. 
+				// make sure those previous artifacts have the correct qualifiers (production / proguard / etc.)
+				stage('Deploy JMP Test Obfuscation'){
+					dir('jsparrow-maven-plugin'){
+						sh "'${mvnHome}/bin/mvn' ${mvnCommand} -PreleaseCandidate"	
+					}
 				}
 				
 			}
