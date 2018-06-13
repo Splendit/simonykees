@@ -25,7 +25,7 @@ import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
 /**
- * Starts Equinox framework and headless version of jSparrow Eclipse plugin.
+ * Runs jSparrow on the Maven project.
  * 
  * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
  * @since 2.2.1
@@ -34,56 +34,53 @@ import eu.jsparrow.maven.enums.StandaloneMode;
 @Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
 public class RefactorMojo extends AbstractMojo {
 
-	@Parameter(defaultValue = "${session}")
+	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession mavenSession;
 
 	@Component
 	private BuildPluginManager pluginManager;
 
-	/**
-	 * Maven project on which plugin goal is executed
-	 */
-	@Parameter(defaultValue = "${project}", required = true)
+	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
 
-	/**
-	 * Value of maven home environment variable
-	 */
-	@Parameter(defaultValue = "${maven.home}")
+	@Parameter(defaultValue = "${maven.home}", readonly = true)
 	private String mavenHome;
 
 	/**
-	 * path to the configuration file. defaults to jsparrow.yml in the current
-	 * directory.
+	 * Path to the configuration file. 
 	 */
 	@Parameter(defaultValue = "jsparrow.yml", property = "configFile")
 	private File configFile;
 
 	/**
-	 * selected profile. overrides the settings in the configuration file, if
-	 * set by user.
+	 * Selected profile. Overrides the settings in the configuration file.
 	 */
 	@Parameter(defaultValue = "", property = "profile")
 	private String profile;
 
+	/**
+	 * Use this parameter to use the default configuration. 
+	 */
 	@Parameter(property = "defaultConfiguration")
-	protected boolean useDefaultConfig;
+	protected boolean defaultConfiguration;
 
+	/**
+	 * Specify the license key to use. 
+	 */
 	@Parameter(property = "license")
 	private String license;
 
+	/**
+	 * Specify the license server to use. 
+	 */
 	@Parameter(property = "url")
 	private String url;
 
-	/**
-	 * MOJO entry point. Registers shutdown hook for clean up and starts equinox
-	 * with the given configuration
-	 */
 	public void execute() throws MojoExecutionException {
 
 		Log log = getLog();
 		String mode = StandaloneMode.REFACTOR.name();
-		MavenParameters parameters = new MavenParameters(mode, license, url, profile, useDefaultConfig);
+		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		DependencyManager dependencyManager = new DependencyManager(log, mavenHome);
 		List<MavenProject> projects = mavenSession.getAllProjects();

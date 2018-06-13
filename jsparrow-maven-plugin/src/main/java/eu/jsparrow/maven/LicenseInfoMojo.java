@@ -1,7 +1,5 @@
 package eu.jsparrow.maven;
 
-import java.io.File;
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -19,7 +17,7 @@ import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
 /**
- * This MOJO prints all rules with name and id in a table.
+ * Check validity of the given license.  
  * 
  * @author Matthias Webhofer
  * @since 2.3.0
@@ -27,28 +25,21 @@ import eu.jsparrow.maven.enums.StandaloneMode;
 @Mojo(name = "license-info", aggregator = true)
 public class LicenseInfoMojo extends AbstractMojo {
 
-	/**
-	 * Maven project on which plugin goal is executed
-	 */
-	@Parameter(defaultValue = "${project}", required = true)
+	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
 
 	/**
-	 * path to the configuration file. defaults to jsparrow.yml in the current
-	 * directory.
+	 * The license key to validate.
 	 */
-	@Parameter(defaultValue = "jsparrow.yml", property = "configFile")
-	private File configFile;
-
 	@Parameter(property = "license")
 	private String license;
 
+	/**
+	 * The URL to the license server to use. 
+	 */
 	@Parameter(property = "url")
 	private String url;
 
-	/**
-	 * MOJO entry point. Starts equinox with the given configuration
-	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
