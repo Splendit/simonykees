@@ -6,18 +6,21 @@ function printUsage {
   echo -e "\t\t$0 [-t][-p]"
   echo -e "\n\tParameters:"
   echo -e "\t\t-t\t\trun tests while building"
-  echo -e "\t\t-p\t\tenable proguard build"
+  echo -e "\t\t-p\t\tenable proguard obfuscated build"
+  echo -e "\t\t-p\t\tuse productive values for netlicensing"
 }
 
 TEST=false
-PROGUARD=false
+OBFUSCATION=false
+PRODUCTION=false 
 
 # parse arguments
-while getopts ":tp" option
+while getopts ":top" option
 do
   case "${option}" in
     t) TEST=true;;
-    p) PROGUARD=true;;
+    o) OBFUSCATION=true;;
+    p) PRODUCTION=true;;
     ?) printUsage;;
   esac
 done
@@ -34,8 +37,12 @@ if [ $TEST = false ]; then
   PARAMETERS="$PARAMETERS -DskipTests"
 fi
 
-if [ $PROGUARD = true ]; then
+if [ $OBFUSCATION = true ]; then
   PARAMETERS="$PARAMETERS -Dproguard"
+fi
+
+if [ $PRODUCTION = true ]; then
+  PARAMETERS="$PARAMETERS -Dproduction"
 fi
 
 # build jsparrow
