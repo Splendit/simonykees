@@ -35,19 +35,10 @@ timestamps {
 				sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
 			}
 			
+			// this only tests whether or not the sources compile. 
+			// see deployMavenPluginWithDependencies for a full build that includes copying dependencies. 
 			stage('Compile Maven Plugin') {
 				def mvnCommand = 'clean install -DskipTests' 
-				def pluginResourcePath = 'jsparrow-maven-plugin/src/main/resources'
-				def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'
-				def manifest = 'manifest.standalone'
-				def manifestContent = sh(script: "ls $jSparrowTargetPath", returnStdout: true)
-			
-				dir('jsparrow-maven-plugin/src/main/resources') {
-					writeFile file: "${manifest}", text: "${manifestContent}"
-				}
-
-				// Copy required dependencies into plugin resource folder
-				sh("cp ${jSparrowTargetPath}/* ${pluginResourcePath}")
 
 				dir('jsparrow-maven-plugin') {
 					sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
@@ -100,12 +91,8 @@ timestamps {
 				}
 				
 				if (env.BRANCH_NAME == 'develop') {
-					// BEWARE: a JMP deployment takes the previously built artifacts. 
-					// make sure those previous artifacts have the correct qualifiers (production / proguard / etc.)
 					stage('Deploy JMP'){
-						dir('jsparrow-maven-plugin') {
-							sh "'${mvnHome}/bin/mvn' ${mvnCommand} -Pdevelop-test-noProguard"
-						}
+						deployMavenPluginWithDependencies("-Pdevelop-test-noProguard")
 					}
 				}
 				
@@ -140,13 +127,9 @@ timestamps {
 						uploadMappingFiles(buildNumber)
 					}
 
-					// BEWARE: a JMP deployment takes the previously built artifacts. 
-					// make sure those previous artifacts have the correct qualifiers (production / proguard / etc.)
 					stage('Deploy JMP Production Obfuscation') {
-						def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
-						dir('jsparrow-maven-plugin') {
-							sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -Pmaster-production-proguard"
-						}
+						def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier} -Pmaster-production-proguard"
+						deployMavenPluginWithDependencies("${mvnOptions}")
 					}
 				}
 
@@ -155,18 +138,15 @@ timestamps {
 
 				// skipping tests, because integration tests have passed already
 				// -B batch mode for clean output (otherwise upload status will spam the console)
-				def mvnCommand = 'clean deploy -DskipTests -B -Dproguard'
+				def mvnCommand = 'clean deploy -B'
+				def mvnOptions = '-DskipTests -Dproguard -PreleaseCandidate'
 
 				stage('Deploy Test Obfuscation') {
-					sh "'${mvnHome}/bin/mvn' ${mvnCommand} -PreleaseCandidate"
+					sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions}"
 				}
 
-				// BEWARE: a JMP deployment takes the previously built artifacts. 
-				// make sure those previous artifacts have the correct qualifiers (production / proguard / etc.)
 				stage('Deploy JMP Test Obfuscation'){
-					dir('jsparrow-maven-plugin'){
-						sh "'${mvnHome}/bin/mvn' ${mvnCommand} -PreleaseCandidate"	
-					}
+					deployMavenPluginWithDependencies("${mvnOptions}")
 				}
 				
 			}
@@ -181,6 +161,27 @@ timestamps {
 		}
 		
 		step([$class: 'StashNotifier']) // Notifies the Stash Instance of the build result
+	}
+}
+
+// this has to be executed before a deployment of the jSparrow Maven Plugin
+def deployMavenPluginWithDependencies(String mvnOptions) {
+
+	def mvnCommand = 'clean deploy -DskipTests' 
+	def pluginResourcePath = 'jsparrow-maven-plugin/src/main/resources'
+	def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'
+	def manifest = 'manifest.standalone'
+	def manifestContent = sh(script: "ls $jSparrowTargetPath", returnStdout: true)
+
+	dir('jsparrow-maven-plugin/src/main/resources') {
+		writeFile file: "${manifest}", text: "${manifestContent}"
+	}
+
+	// Copy required dependencies into plugin resource folder
+	sh("cp ${jSparrowTargetPath}/* ${pluginResourcePath}")
+
+	dir('jsparrow-maven-plugin') {
+		sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions}"
 	}
 }
 	
