@@ -2,6 +2,7 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -235,7 +236,7 @@ public class StandaloneConfig {
 			 * this line, the jSparrow maven plugin will no longer be able to
 			 * handle umlauts.
 			 */
-			iproject.setDefaultCharset("UTF-8", new NullProgressMonitor());
+			iproject.setDefaultCharset(StandardCharsets.UTF_8.name(), new NullProgressMonitor());
 		} catch (CoreException e) {
 			throw new StandaloneException("Project cannot be opened", e); //$NON-NLS-1$
 		}
