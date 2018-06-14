@@ -1,6 +1,7 @@
 package eu.jsparrow.maven.adapter;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,11 +47,21 @@ public class WorkingDirectory {
 			return;
 		}
 
-		deleteSessionRelatedFiles();
 		boolean emptyLockFile = cleanLockFile();
 		if (emptyLockFile) {
 			deleteOnExit(directory);
 			deleteChildren(directory);
+		} else {
+			deleteSessionRelatedDependencies();
+		}
+	}
+
+	private void deleteSessionRelatedDependencies() {
+		FilenameFilter fileNameFilter = (File file, String name) -> DependencyManager.OUTPUT_DIRECTORY_PREFIX
+			.equals(name);
+		File[] deps = directory.listFiles(fileNameFilter);
+		for (File depsDirectory : deps) {
+			deleteSessionRelatedFiles(depsDirectory);
 		}
 	}
 
@@ -58,7 +69,8 @@ public class WorkingDirectory {
 	 * Deletes the children files related to the projects on the current
 	 * session.
 	 */
-	private void deleteSessionRelatedFiles() {
+	private void deleteSessionRelatedFiles(File directory) {
+		deleteOnExit(directory);
 		String[] children = directory.list();
 		if (children == null) {
 			return;
@@ -134,7 +146,7 @@ public class WorkingDirectory {
 
 	private boolean isSessionRelated(String file) {
 		return sessionRelatedProjects.stream()
-			.anyMatch(file::contains);
+			.anyMatch(s -> s.contains(file));
 	}
 
 	/**

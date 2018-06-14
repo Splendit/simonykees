@@ -61,7 +61,7 @@ public class DependencyManager {
 	 * must also match with the one used in
 	 * {@code StandaloneConfig::getMavenDependencyFolder}.
 	 */
-	private static final String OUTPUT_DIRECTORY_PREFIX = "deps"; //$NON-NLS-1$
+	public static final String OUTPUT_DIRECTORY_PREFIX = "deps"; //$NON-NLS-1$
 	private static final String DEPENDENCY_PLUGIN_ID = "dependency"; //$NON-NLS-1$
 	private static final String COPY_DEPENDENCIES_GOAL = "copy-dependencies"; //$NON-NLS-1$
 	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
