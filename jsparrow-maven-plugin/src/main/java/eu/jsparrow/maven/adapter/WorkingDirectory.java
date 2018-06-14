@@ -46,16 +46,11 @@ public class WorkingDirectory {
 			return;
 		}
 
-		try {
-			deleteSessionRelatedFiles();
-			boolean emptyLockFile = cleanLockFile();
-			if (emptyLockFile) {
-				deleteChildren(directory);
-				Files.deleteIfExists(directory.toPath());
-			}
-		} catch (IOException e) {
-			log.debug(e.getMessage(), e);
-			log.error(e.getMessage());
+		deleteSessionRelatedFiles();
+		boolean emptyLockFile = cleanLockFile();
+		if (emptyLockFile) {
+			deleteOnExit(directory);
+			deleteChildren(directory);
 		}
 	}
 
@@ -72,19 +67,14 @@ public class WorkingDirectory {
 		for (String file : children) {
 			if (isSessionRelated(file)) {
 				File currentFile = new File(directory.getAbsolutePath(), file);
+				deleteOnExit(currentFile);
 				deleteChildren(currentFile);
-				deleteIfExists(currentFile);
 			}
 		}
 	}
 
-	private void deleteIfExists(File currentFile) {
-		try {
-			Files.deleteIfExists(currentFile.toPath());
-		} catch (IOException e) {
-			log.debug(e.getMessage(), e);
-			log.error(e.getMessage());
-		}
+	private void deleteOnExit(File file) {
+		file.deleteOnExit();
 	}
 
 	/**
@@ -133,11 +123,11 @@ public class WorkingDirectory {
 		if (children != null) {
 			for (String file : children) {
 				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
+				deleteOnExit(currentFile);
 				if (currentFile.isDirectory()) {
 					deleteChildren(currentFile);
 				}
 
-				deleteIfExists(currentFile);
 			}
 		}
 	}
