@@ -49,6 +49,10 @@ public class WorkingDirectory {
 
 		boolean emptyLockFile = cleanLockFile();
 		if (emptyLockFile) {
+			/*
+			 * request deleting the parent directory first because the deletion
+			 * is performed in reversed order.
+			 */
 			deleteOnExit(directory);
 			deleteChildren(directory);
 		} else {
@@ -93,6 +97,11 @@ public class WorkingDirectory {
 	 *            file to be deleted
 	 */
 	private void deleteOnExit(File file) {
+		/*
+		 * On windows, some of the osgi related files could not be deleted as
+		 * they were still being used. Therefore, the File::deleteOnExit is used
+		 * instead of Files.deleteIfExist.
+		 */
 		file.deleteOnExit();
 	}
 
