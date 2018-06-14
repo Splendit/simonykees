@@ -85,6 +85,13 @@ public class WorkingDirectory {
 		}
 	}
 
+	/**
+	 * Request the file to be deleted when the virtual machine terminates. Files
+	 * are deleted in reversed order that they were requested.
+	 * 
+	 * @param file
+	 *            file to be deleted
+	 */
 	private void deleteOnExit(File file) {
 		file.deleteOnExit();
 	}
