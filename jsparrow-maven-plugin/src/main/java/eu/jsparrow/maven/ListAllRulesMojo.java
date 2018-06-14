@@ -17,8 +17,7 @@ import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
 /**
- * This MOJO lists all rules with id, name and description. By specifying
- * {@code -Drule=<ruleId>} only the information about this rule is printed.
+ * Lists all rules with ID, name and description. 
  * 
  * @author Matthias Webhofer
  * @since 2.3.0
@@ -26,35 +25,23 @@ import eu.jsparrow.maven.enums.StandaloneMode;
 @Mojo(name = "list-rules", aggregator = true)
 public class ListAllRulesMojo extends AbstractMojo {
 
-	/**
-	 * Maven project on which plugin goal is executed
-	 */
-	@Parameter(defaultValue = "${project}", required = true)
+
+	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
 
 	/**
-	 * Value of maven home environment variable
-	 */
-	@Parameter(defaultValue = "${maven.home}", required = true)
-	private String mavenHome;
-
-	/**
-	 * if set, only the rule with the given id will be listed
+	 * Specify a rule by ID to receive detailed information on. 
 	 */
 	@Parameter(property = "rules")
-	private String ruleId;
+	private String rules;
 
-	/**
-	 * MOJO entry point. Registers shutdown hook for clean up and starts equinox
-	 * with the given configuration
-	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		Log log = getLog();
 		String mode = StandaloneMode.LIST_RULES.name();
 		MavenParameters parameters = new MavenParameters(mode);
-		parameters.setRuleId(ruleId);
+		parameters.setRuleId(rules);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		BundleStarter starter = new BundleStarter(log);
 		StandaloneLoader loader = new StandaloneLoader(project, starter);
