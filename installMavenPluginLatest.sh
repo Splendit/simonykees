@@ -1,7 +1,5 @@
 #!/bin/bash
 
-MAVEN_PLUGIN_VERSION="0.5.0-SNAPSHOT"
-
 BASE_URL_DEVELOP="http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-maven-plugin-develop-test-noProguard"
 BASE_URL_RELEASE_CANDIDATE="http://packagedrone-vm-01.splendit.loc:8080/maven/jSparrow-maven-plugin-release-candidate"
 BASE_URL_MASTER="http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-maven-plugin-master-production-proguard"
@@ -26,7 +24,7 @@ function installUrl() {
 
   # get the latest url and use it (since wget creates tmp files, we switch directory)
   local url=`(cd /tmp \
-            && wget --spider -r --no-parent "$baseUrl/eu/jsparrow/jsparrow-maven-plugin/$MAVEN_PLUGIN_VERSION/") 2>&1 \
+            && wget --spider -r --no-parent "$baseUrl/") 2>&1 \
             | egrep ".jar$" \
             | grep -v SNAPSHOT.jar \
             | sed 's/--.*--  //' \
