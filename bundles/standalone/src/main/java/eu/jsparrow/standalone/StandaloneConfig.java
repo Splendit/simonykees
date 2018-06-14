@@ -444,6 +444,8 @@ public class StandaloneConfig {
 
 	public void computeRefactoring() throws StandaloneException {
 		if (!hasRefactoringStates()) {
+			String loggerInfo = NLS.bind(Messages.StandaloneConfig_noRefactoringStates,getProjectName());
+			logger.info(loggerInfo);
 			return;
 		}
 
@@ -454,10 +456,10 @@ public class StandaloneConfig {
 		logger.info(loggerInfo);
 
 		refactoringPipeline.setRules(rules);
-		String logInfo = NLS.bind(Messages.Activator_debug_startRefactoring, project.getName());
-		logger.info(logInfo);
 
 		if (!rules.isEmpty()) {
+			String logInfo = NLS.bind(Messages.Activator_debug_startRefactoring, project.getName());
+			logger.info(logInfo);
 			try {
 				refactoringPipeline.doRefactoring(new NullProgressMonitor());
 				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, project.getName(),

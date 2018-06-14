@@ -378,6 +378,8 @@ public class Messages extends NLS {
 	public static String StandaloneConfig_directoryRestoreDone;
 	public static String StandaloneConfig_fileBackupDone;
 	public static String StandaloneConfig_fileRestoreDone;
+
+	public static String StandaloneConfig_noRefactoringStates;
 	public static String StandaloneConfig_projectDescriptionDoesNotExist;
 	public static String StandaloneConfig_projectIsNotAnEclipseProjectAndCouldNotConvert;
 	public static String StandaloneConfig_RevertClasspath;
@@ -423,6 +425,8 @@ public class Messages extends NLS {
 	public static String PutIfAbsentRule_description;
 	public static String PutIfAbsentRule_name;
 	public static String YAMLConfigUtil_providedPathNotLeadingToYAMLConfig;
+
+	public static String YAMLConfigUtil_rulesWithUnsatisfiedRequirements;
 
 	static {
 		// initialize resource bundle
