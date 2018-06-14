@@ -7,12 +7,15 @@ import static org.mockito.Mockito.mock;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Before;
@@ -26,7 +29,8 @@ public class WorkingDirectoryTest {
 	private static final String LOCK_FILE_NAME = "lock";
 
 	private WorkingDirectory workingDirectory;
-	private String rootProjectId = "group-id.artifact-id";
+	private String artifactId = "artifact-id";
+	private String rootProjectId = "group-id." + artifactId;
 
 	private File jsparrowTempFolder;
 
@@ -48,7 +52,7 @@ public class WorkingDirectoryTest {
 
 		workingDirectory.cleanUp();
 
-		assertFalse(jsparrowTempFolder.exists());
+		assertTrue(readLockFile().isEmpty());
 	}
 
 	@Test
@@ -57,13 +61,15 @@ public class WorkingDirectoryTest {
 
 		workingDirectory.cleanUp();
 
-		assertTrue(jsparrowTempFolder.exists());
+		assertFalse(readLockFile().isEmpty());
 	}
 
 	@Test
 	public void cleanUp_multipleProjectsInLock_shouldDeleteProjectRelatedFiles() throws IOException {
 		writeToLockFile(rootProjectId + "\n" + "another-project-id");
-		File projectRelated = new File(jsparrowTempFolder.getPath() + File.separator + "deps." + rootProjectId);
+
+		File deps = temporaryDirectory.newFolder("temp_jsparrow" + File.separator + "deps");
+		File projectRelated = new File(deps.getPath() + File.separator + artifactId);
 		projectRelated.createNewFile();
 
 		workingDirectory.cleanUp();
@@ -118,6 +124,17 @@ public class WorkingDirectoryTest {
 	private void writeToLockFile(String content) throws IOException {
 		Files.write(Paths.get(workingDirectory.calculateJsparrowLockFilePath()), content.getBytes(),
 				StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+	}
+
+	private List<String> readLockFile() throws IOException {
+		List<String> content = new ArrayList<>();
+		Path path = Paths.get(workingDirectory.calculateJsparrowLockFilePath());
+		try (Stream<String> lines = Files.lines(path)) {
+			content = lines.map(String::trim)
+				.filter(s -> !s.isEmpty())
+				.collect(Collectors.toList());
+		}
+		return content;
 	}
 
 	class TestableWorkingDirectory extends WorkingDirectory {

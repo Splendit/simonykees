@@ -54,7 +54,7 @@ public class WorkingDirectory {
 			 * is performed in reversed order.
 			 */
 			deleteOnExit(directory);
-			deleteChildren(directory);
+			deleteChildrenOnExit(directory);
 		} else {
 			deleteSessionRelatedDependencies();
 		}
@@ -74,7 +74,6 @@ public class WorkingDirectory {
 	 * session.
 	 */
 	private void deleteSessionRelatedFiles(File directory) {
-		deleteOnExit(directory);
 		String[] children = directory.list();
 		if (children == null) {
 			return;
@@ -83,9 +82,30 @@ public class WorkingDirectory {
 		for (String file : children) {
 			if (isSessionRelated(file)) {
 				File currentFile = new File(directory.getAbsolutePath(), file);
-				deleteOnExit(currentFile);
-				deleteChildren(currentFile);
+				deleteFolderIfExists(currentFile);
+
 			}
+		}
+
+		if (directory.list().length == 0) {
+			deleteIfExist(directory);
+		}
+	}
+
+	private void deleteFolderIfExists(File currentFile) {
+		if (currentFile.isDirectory()) {
+			for (File file : currentFile.listFiles()) {
+				deleteFolderIfExists(file);
+			}
+		}
+		deleteIfExist(currentFile);
+	}
+
+	private void deleteIfExist(File file) {
+		try {
+			Files.deleteIfExists(file.toPath());
+		} catch (IOException e) {
+			log.warn(String.format("Cannot delete file %s ", file)); //$NON-NLS-1$
 		}
 	}
 
@@ -144,16 +164,15 @@ public class WorkingDirectory {
 	 * 
 	 * @param parentDirectory
 	 *            directory which content is to be deleted
-	 * @throws IOException
 	 */
-	private void deleteChildren(File parentDirectory) {
+	private void deleteChildrenOnExit(File parentDirectory) {
 		String[] children = parentDirectory.list();
 		if (children != null) {
 			for (String file : children) {
 				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
 				deleteOnExit(currentFile);
 				if (currentFile.isDirectory()) {
-					deleteChildren(currentFile);
+					deleteChildrenOnExit(currentFile);
 				}
 
 			}
