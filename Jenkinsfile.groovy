@@ -167,6 +167,10 @@ timestamps {
 // this has to be executed before a deployment of the jSparrow Maven Plugin
 def deployMavenPluginWithDependencies(String mvnOptions) {
 
+	// variable for maven home
+	// this is a duplication from above. feel free to refactor.
+	def mvnHome = tool 'mvn system'
+
 	def mvnCommand = 'clean deploy -DskipTests' 
 	def pluginResourcePath = 'jsparrow-maven-plugin/src/main/resources'
 	def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'
