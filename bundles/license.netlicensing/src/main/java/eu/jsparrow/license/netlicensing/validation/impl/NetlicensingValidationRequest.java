@@ -2,6 +2,7 @@ package eu.jsparrow.license.netlicensing.validation.impl;
 
 import java.lang.invoke.MethodHandles;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,8 @@ public class NetlicensingValidationRequest {
 
 	public NetlicensingValidationResult send(String key, ValidationParameters validationParameters)
 			throws ValidationException {
-		logger.debug("Sending netlicensing request with key '{}' and {}", key, validationParameters); //$NON-NLS-1$
+		String shortKey = StringUtils.abbreviate(key, 6);
+		logger.debug("Sending netlicensing request with key '{}' and {}", shortKey, validationParameters); //$NON-NLS-1$
 		try {
 			ValidationResult netLicensingResponse = licenseeService.validate(restApiContext, key, validationParameters);
 			return responseEvaluator.evaluateResult(netLicensingResponse);

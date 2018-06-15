@@ -2,10 +2,10 @@ package eu.jsparrow.license.netlicensing.model;
 
 import java.time.ZonedDateTime;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.LicenseType;
+import eu.jsparrow.license.api.util.AnnotationToStringBuilder;
+import eu.jsparrow.license.api.util.Shorten;
 
 /**
  * Implementor of {@link LicenseModel} that represents a NetLicensing license.
@@ -14,7 +14,9 @@ public class NetlicensingLicenseModel implements LicenseModel {
 
 	private static final long serialVersionUID = 7047162817207967199L;
 
+	@Shorten
 	private String key;
+
 	private String name;
 	private String secret;
 	private String productNr;
@@ -84,7 +86,7 @@ public class NetlicensingLicenseModel implements LicenseModel {
 
 	@Override
 	public String toString() {
-		return ReflectionToStringBuilder.toString(this);
+		return new AnnotationToStringBuilder(this).toString();
 	}
 
 }
