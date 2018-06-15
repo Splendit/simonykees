@@ -453,20 +453,23 @@ public class StandaloneConfig {
 
 	public void computeRefactoring() throws StandaloneException {
 		if (!hasRefactoringStates()) {
+			String loggerInfo = NLS.bind(Messages.StandaloneConfig_noRefactoringStates, project.getName());
+			logger.info(loggerInfo);
 			return;
 		}
 
 		List<RefactoringRule> projectRules = getProjectRules();
 		List<RefactoringRule> rules = getSelectedRules(projectRules);
 
-		String loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, rules.size(), rules.toString());
-		logger.info(loggerInfo);
-
 		refactoringPipeline.setRules(rules);
-		String logInfo = NLS.bind(Messages.Activator_debug_startRefactoring, project.getName());
-		logger.info(logInfo);
 
 		if (!rules.isEmpty()) {
+
+			String loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, rules.size(), rules.toString());
+			logger.info(loggerInfo);
+
+			loggerInfo = NLS.bind(Messages.Activator_debug_startRefactoring, project.getName());
+			logger.info(loggerInfo);
 			try {
 				refactoringPipeline.doRefactoring(new NullProgressMonitor());
 				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, project.getName(),
