@@ -26,7 +26,8 @@ public class WorkingDirectoryTest {
 	private static final String LOCK_FILE_NAME = "lock";
 
 	private WorkingDirectory workingDirectory;
-	private String rootProjectId = "group-id.artifact-id";
+	private String artifactId = "artifact-id";
+	private String rootProjectId = "group-id." + artifactId;
 
 	private File jsparrowTempFolder;
 
@@ -43,30 +44,32 @@ public class WorkingDirectoryTest {
 	}
 
 	@Test
-	public void cleanUp_onlyRootIdInLock_shouldDeleteTempFolder() throws IOException {
+	public void cleanUp_onlyRootIdInLock_shouldDeleteAllContentOfLockFile() throws IOException {
 		writeToLockFile(rootProjectId);
 
 		workingDirectory.cleanUp();
 
-		assertFalse(jsparrowTempFolder.exists());
+		assertTrue(isEmptyLockFile());
 	}
 
 	@Test
-	public void cleanUp_multipleProjectsInLock_shouldNotDeleteTempFolder() throws IOException {
+	public void cleanUp_multipleProjectsInLock_shouldNotDeleteAllContentsOfLockFile() throws IOException {
 		writeToLockFile(rootProjectId + "\n" + "another-project-id");
 
 		workingDirectory.cleanUp();
 
-		assertTrue(jsparrowTempFolder.exists());
+		assertFalse(isEmptyLockFile());
 	}
 
 	@Test
 	public void cleanUp_multipleProjectsInLock_shouldDeleteProjectRelatedFiles() throws IOException {
 		writeToLockFile(rootProjectId + "\n" + "another-project-id");
-		File projectRelated = new File(jsparrowTempFolder.getPath() + File.separator + "deps." + rootProjectId);
+
+		File deps = temporaryDirectory.newFolder("temp_jsparrow" + File.separator + "deps");
+		File projectRelated = new File(deps.getPath() + File.separator + artifactId);
 		projectRelated.createNewFile();
 
-		workingDirectory.cleanUp();
+		workingDirectory.cleanUp("deps");
 
 		assertTrue(jsparrowTempFolder.exists());
 		assertFalse(Files.exists(projectRelated.toPath()));
@@ -118,6 +121,11 @@ public class WorkingDirectoryTest {
 	private void writeToLockFile(String content) throws IOException {
 		Files.write(Paths.get(workingDirectory.calculateJsparrowLockFilePath()), content.getBytes(),
 				StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+	}
+
+	private boolean isEmptyLockFile() throws IOException {
+		String lockFilePath = workingDirectory.calculateJsparrowLockFilePath();
+		return new File(lockFilePath).length() == 0;
 	}
 
 	class TestableWorkingDirectory extends WorkingDirectory {

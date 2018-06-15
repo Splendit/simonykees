@@ -100,7 +100,8 @@ public class RefactorMojo extends AbstractMojo {
 
 		try {
 			WorkingDirectory workingDirectory = mavenAdapter.setUpConfiguration(parameters, projects, configFile);
-			addShutdownHook(bundleStarter, workingDirectory, mavenAdapter.isJsparrowRunningFlag());
+			addShutdownHook(bundleStarter, workingDirectory, dependencyManager.getOutputFolderName(),
+					mavenAdapter.isJsparrowRunningFlag());
 			loader.loadStandalone(mavenAdapter, dependencyManager);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
@@ -120,17 +121,20 @@ public class RefactorMojo extends AbstractMojo {
 	 * @param workingDirectory
 	 *            an instance of {@link WorkingDirectory} which is responsible
 	 *            for reading/cleaning the working directory.
+	 * @param dependenciesFolderName
+	 *            the name of the folder containing the copied dependencies
 	 * @param jSparrowStartedFlag
 	 *            an indicator whether jSparrow already started flag has been
 	 *            raised.
 	 */
 	private void addShutdownHook(BundleStarter starter, WorkingDirectory workingDirectory,
-			boolean jSparrowStartedFlag) {
+			String dependenciesFolderName, boolean jSparrowStartedFlag) {
+
 		Runtime.getRuntime()
 			.addShutdownHook(new Thread(() -> {
 				starter.shutdownFramework();
 				if (!jSparrowStartedFlag) {
-					workingDirectory.cleanUp();
+					workingDirectory.cleanUp(dependenciesFolderName);
 				}
 			}));
 	}
