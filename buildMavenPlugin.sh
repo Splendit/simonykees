@@ -1,24 +1,29 @@
 #!/bin/bash
 ## bash script for building the jsparrow-maven-plugins
 
-function printUsage {
-  echo -e "\tUsage:"
-  echo -e "\t\t$0 [-t][-p]"
-  echo -e "\n\tParameters:"
-  echo -e "\t\t-t\t\trun tests while building"
-  echo -e "\t\t-p\t\tenable proguard build"
+function usage() {
+   cat <<EOF
+Usage: $0 [-t] [-o] [-p]
+where:
+    -t run tests while building (will not apply if -o is selected as well)
+    -o enable proguard obfuscated build
+    -p use productive values for netlicensing
+EOF
+   exit 0
 }
 
 TEST=false
-PROGUARD=false
+OBFUSCATION=false
+PRODUCTION=false 
 
 # parse arguments
-while getopts ":tp" option
+while getopts ":top" option
 do
   case "${option}" in
     t) TEST=true;;
-    p) PROGUARD=true;;
-    ?) printUsage;;
+    o) OBFUSCATION=true;;
+    p) PRODUCTION=true;;
+    ?) usage;;
   esac
 done
 
@@ -34,8 +39,12 @@ if [ $TEST = false ]; then
   PARAMETERS="$PARAMETERS -DskipTests"
 fi
 
-if [ $PROGUARD = true ]; then
+if [ $OBFUSCATION = true ]; then
   PARAMETERS="$PARAMETERS -Dproguard"
+fi
+
+if [ $PRODUCTION = true ]; then
+  PARAMETERS="$PARAMETERS -Dproduction"
 fi
 
 # build jsparrow
