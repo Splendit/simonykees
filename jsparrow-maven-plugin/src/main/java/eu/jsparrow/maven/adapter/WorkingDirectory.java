@@ -38,7 +38,9 @@ public class WorkingDirectory {
 	}
 
 	/**
-	 * Cleans classpath and temp directory
+	 * Cleans the lock file and deletes the working directory. If the resulting
+	 * lock file is empty, deletes the entire working directory and its
+	 * contents.
 	 */
 	public void cleanUp() {
 
@@ -59,6 +61,15 @@ public class WorkingDirectory {
 		deleteChildrenOnExit(directory);
 	}
 
+	/**
+	 * Cleans the lock file, removes the copied dependencies related to the
+	 * current session. If the resulting lock file is empty, deletes the entire
+	 * working directory and its contents.
+	 * 
+	 * @param dependenciesFolderName
+	 *            the name of the directory containing the copied dependencies
+	 *            to be removed
+	 */
 	public void cleanUp(String dependenciesFolderName) {
 		cleanUp();
 		deleteSessionRelatedDependencies(dependenciesFolderName);
