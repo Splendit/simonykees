@@ -15,6 +15,7 @@ import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.StandaloneLoader;
 import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
+import eu.jsparrow.maven.i18n.Messages;
 
 /**
  * Check validity of the given license.  
@@ -24,6 +25,9 @@ import eu.jsparrow.maven.enums.StandaloneMode;
  */
 @Mojo(name = "license-info", aggregator = true)
 public class LicenseInfoMojo extends AbstractMojo {
+
+	private static final String JAVA_VERSION_PROPERTY_CONSTANT = "java.version"; //$NON-NLS-1$
+	private static final String JAVA_VERSION_1_8 = "1.8"; //$NON-NLS-1$
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
@@ -42,8 +46,15 @@ public class LicenseInfoMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
+		Log log = getLog();		
 
-		Log log = getLog();
+		// With version 1.0.0 of jSparrow Maven Plugin, only JDK 8 is supported.
+		String javaVersion = System.getProperty(JAVA_VERSION_PROPERTY_CONSTANT);
+		if (!javaVersion.startsWith(JAVA_VERSION_1_8)) {
+			log.warn(Messages.RefactorMojo_suportJDK8);
+			throw new MojoExecutionException(Messages.RefactorMojo_suportJDK8);
+		}
+
 		String mode = StandaloneMode.LICENSE_INFO.name();
 		MavenParameters parameters = new MavenParameters(mode, license, url);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
