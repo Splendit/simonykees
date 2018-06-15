@@ -23,6 +23,7 @@ import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.StandaloneLoader;
 import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
+import eu.jsparrow.maven.i18n.Messages;
 
 /**
  * Runs jSparrow on the Maven project.
@@ -33,6 +34,9 @@ import eu.jsparrow.maven.enums.StandaloneMode;
  */
 @Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
 public class RefactorMojo extends AbstractMojo {
+
+	private static final String JAVA_VERSION_PROPERTY_CONSTANT = "java.version"; //$NON-NLS-1$
+	private static final String JAVA_VERSION_1_8 = "1.8"; //$NON-NLS-1$
 
 	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession mavenSession;
@@ -77,8 +81,15 @@ public class RefactorMojo extends AbstractMojo {
 	private String url;
 
 	public void execute() throws MojoExecutionException {
-
 		Log log = getLog();
+
+		// With version 1.0.0 of jSparrow Maven Plugin, only JDK 8 is supported.
+		String javaVersion = System.getProperty(JAVA_VERSION_PROPERTY_CONSTANT);
+		if (!javaVersion.startsWith(JAVA_VERSION_1_8)) {
+			log.warn(Messages.RefactorMojo_supportJDK8);
+			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8);
+		}
+
 		String mode = StandaloneMode.REFACTOR.name();
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
