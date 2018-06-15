@@ -7,15 +7,12 @@ import static org.mockito.Mockito.mock;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Before;
@@ -47,21 +44,21 @@ public class WorkingDirectoryTest {
 	}
 
 	@Test
-	public void cleanUp_onlyRootIdInLock_shouldDeleteTempFolder() throws IOException {
+	public void cleanUp_onlyRootIdInLock_shouldDeleteAllContentOfLockFile() throws IOException {
 		writeToLockFile(rootProjectId);
 
 		workingDirectory.cleanUp();
 
-		assertTrue(readLockFile().isEmpty());
+		assertTrue(isEmptyLockFile());
 	}
 
 	@Test
-	public void cleanUp_multipleProjectsInLock_shouldNotDeleteTempFolder() throws IOException {
+	public void cleanUp_multipleProjectsInLock_shouldNotDeleteAllContentsOfLockFile() throws IOException {
 		writeToLockFile(rootProjectId + "\n" + "another-project-id");
 
 		workingDirectory.cleanUp();
 
-		assertFalse(readLockFile().isEmpty());
+		assertFalse(isEmptyLockFile());
 	}
 
 	@Test
@@ -72,7 +69,7 @@ public class WorkingDirectoryTest {
 		File projectRelated = new File(deps.getPath() + File.separator + artifactId);
 		projectRelated.createNewFile();
 
-		workingDirectory.cleanUp();
+		workingDirectory.cleanUp("deps");
 
 		assertTrue(jsparrowTempFolder.exists());
 		assertFalse(Files.exists(projectRelated.toPath()));
@@ -126,15 +123,9 @@ public class WorkingDirectoryTest {
 				StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 	}
 
-	private List<String> readLockFile() throws IOException {
-		List<String> content = new ArrayList<>();
-		Path path = Paths.get(workingDirectory.calculateJsparrowLockFilePath());
-		try (Stream<String> lines = Files.lines(path)) {
-			content = lines.map(String::trim)
-				.filter(s -> !s.isEmpty())
-				.collect(Collectors.toList());
-		}
-		return content;
+	private boolean isEmptyLockFile() throws IOException {
+		String lockFilePath = workingDirectory.calculateJsparrowLockFilePath();
+		return new File(lockFilePath).length() == 0;
 	}
 
 	class TestableWorkingDirectory extends WorkingDirectory {

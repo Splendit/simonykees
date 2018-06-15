@@ -61,7 +61,7 @@ public class DependencyManager {
 	 * must also match with the one used in
 	 * {@code StandaloneConfig::getMavenDependencyFolder}.
 	 */
-	public static final String OUTPUT_DIRECTORY_PREFIX = "deps"; //$NON-NLS-1$
+	private static final String OUTPUT_DIRECTORY_NAME = "deps"; //$NON-NLS-1$
 	private static final String DEPENDENCY_PLUGIN_ID = "dependency"; //$NON-NLS-1$
 	private static final String COPY_DEPENDENCIES_GOAL = "copy-dependencies"; //$NON-NLS-1$
 	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
@@ -122,7 +122,7 @@ public class DependencyManager {
 		List<String> goals = Collections.singletonList(cleanPackageCopyDependencies);
 		request.setGoals(goals);
 		String outputDirectoryPath = System.getProperty(ConfigurationKeys.USER_DIR) + File.separator
-				+ OUTPUT_DIRECTORY_PREFIX + File.separator + "\\${project.artifactId}"; //$NON-NLS-1$
+				+ OUTPUT_DIRECTORY_NAME + File.separator + "\\${project.artifactId}"; //$NON-NLS-1$
 		props.setProperty(OUTPUT_DIRECTORY_OPTION_KEY, outputDirectoryPath);
 		props.setProperty("skipTests", "true"); //$NON-NLS-1$ , //$NON-NLS-2$
 		request.setProperties(props);
@@ -245,5 +245,9 @@ public class DependencyManager {
 			entry = zipIn.getNextEntry();
 		}
 		zipIn.close();
+	}
+
+	public String getOutputFolderName() {
+		return OUTPUT_DIRECTORY_NAME;
 	}
 }

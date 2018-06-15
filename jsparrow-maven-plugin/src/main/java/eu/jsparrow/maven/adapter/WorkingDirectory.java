@@ -42,27 +42,30 @@ public class WorkingDirectory {
 	 */
 	public void cleanUp() {
 
-		// CLEAN
-		if (directory == null || !directory.exists()) {
+		boolean emptyLockFile = cleanLockFile();
+		if (!emptyLockFile) {
 			return;
 		}
 
-		boolean emptyLockFile = cleanLockFile();
-		if (emptyLockFile) {
-			/*
-			 * request deleting the parent directory first because the deletion
-			 * is performed in reversed order.
-			 */
-			deleteOnExit(directory);
-			deleteChildrenOnExit(directory);
-		} else {
-			deleteSessionRelatedDependencies();
-		}
+		/*
+		 * Since we use File::deleteOnExit to remove the contents of directory,
+		 * the files are not immediately removed, but the requests for deleting
+		 * files are registered only to be executed when the virtual machine
+		 * terminates. The execution is performed in reversed order, therefore
+		 * the request for deleting parent directory should be registered before
+		 * the one for deleting its children.
+		 */
+		deleteOnExit(directory);
+		deleteChildrenOnExit(directory);
 	}
 
-	private void deleteSessionRelatedDependencies() {
-		FilenameFilter fileNameFilter = (File file, String name) -> DependencyManager.OUTPUT_DIRECTORY_PREFIX
-			.equals(name);
+	public void cleanUp(String dependenciesFolderName) {
+		cleanUp();
+		deleteSessionRelatedDependencies(dependenciesFolderName);
+	}
+
+	private void deleteSessionRelatedDependencies(String dependenciesFolderName) {
+		FilenameFilter fileNameFilter = (File file, String name) -> dependenciesFolderName.equals(name);
 		File[] deps = directory.listFiles(fileNameFilter);
 		for (File depsDirectory : deps) {
 			deleteSessionRelatedFiles(depsDirectory);
