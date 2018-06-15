@@ -12,7 +12,7 @@ Execute
 	
 ## missing dependencies in eclipse ##
 
-Read instructions at: https://confluence.splendit.loc/display/Tutorials/Eclipse
+Read instructions at: [Eclipse](https://confluence.splendit.loc/display/Tutorials/Eclipse)
 
 ## build ##
 
@@ -56,7 +56,7 @@ The profile is executed without tests by default, because they are not working w
 	
 ## manual packagedrone deployment ##
 
-Please read instructions at: https://confluence.splendit.loc/display/SIM/Setup+a+Package+Drone+channel+for+manual+deployment
+Please read instructions at: [Package Drone and manual deployment](https://confluence.splendit.loc/display/SIM/Package+Drone+and+manual+deployment)
 
 ## faster builds ##
 
