@@ -83,12 +83,11 @@ public class WorkingDirectory {
 			if (isSessionRelated(file)) {
 				File currentFile = new File(directory.getAbsolutePath(), file);
 				deleteFolderIfExists(currentFile);
-
 			}
 		}
 
 		if (directory.list().length == 0) {
-			deleteIfExist(directory);
+			deleteIfExists(directory);
 		}
 	}
 
@@ -98,10 +97,10 @@ public class WorkingDirectory {
 				deleteFolderIfExists(file);
 			}
 		}
-		deleteIfExist(currentFile);
+		deleteIfExists(currentFile);
 	}
 
-	private void deleteIfExist(File file) {
+	private void deleteIfExists(File file) {
 		try {
 			Files.deleteIfExists(file.toPath());
 		} catch (IOException e) {
@@ -110,17 +109,17 @@ public class WorkingDirectory {
 	}
 
 	/**
-	 * Request the file to be deleted when the virtual machine terminates. Files
-	 * are deleted in reversed order that they were requested.
+	 * Requests the file to be deleted when the virtual machine terminates.
+	 * Files are deleted in reversed order that they were requested.
 	 * 
 	 * @param file
 	 *            file to be deleted
 	 */
 	private void deleteOnExit(File file) {
 		/*
-		 * On windows, some of the osgi related files could not be deleted as
-		 * they were still being used. Therefore, the File::deleteOnExit is used
-		 * instead of Files.deleteIfExist.
+		 * On windows, some of the osgi related files could not be deleted
+		 * because they were still being used by other processes. Therefore, the
+		 * File::deleteOnExit is used instead of Files.deleteIfExist.
 		 */
 		file.deleteOnExit();
 	}
