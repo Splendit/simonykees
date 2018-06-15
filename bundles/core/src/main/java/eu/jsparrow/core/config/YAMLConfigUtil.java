@@ -138,28 +138,22 @@ public class YAMLConfigUtil {
 
 		String selectedProfile = config.getSelectedProfile();
 		if (selectedProfile != null && !selectedProfile.isEmpty()) {
-			if (checkProfileExistence(config, selectedProfile)) {
-				Optional<YAMLProfile> configProfile = config.getProfiles()
-					.stream()
-					.filter(profile -> profile.getName()
-						.equals(selectedProfile))
-					.findFirst();
+			Optional<YAMLProfile> configProfile = config.getProfiles()
+				.stream()
+				.filter(profile -> profile.getName()
+					.equals(selectedProfile))
+				.findFirst();
 
-				if (configProfile.isPresent()) {
-					List<RefactoringRule> profileRules = getConfigRules(configProfile.get()
-						.getRules());
+			if (configProfile.isPresent()) {
+				List<RefactoringRule> profileRules = getConfigRules(configProfile.get()
+					.getRules());
 
-					result = projectRules.stream()
-						.filter(RefactoringRule::isEnabled)
-						.filter(profileRules::contains)
-						.collect(Collectors.toList());
+				result = projectRules.stream()
+					.filter(RefactoringRule::isEnabled)
+					.filter(profileRules::contains)
+					.collect(Collectors.toList());
 
-					logSelectedRulesWithUnsatisfiedDeps(projectRules, profileRules);
-				} else {
-					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
-							selectedProfile);
-					throw new YAMLConfigException(exceptionMessage);
-				}
+				logSelectedRulesWithUnsatisfiedDeps(projectRules, profileRules);
 			} else {
 				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
 						selectedProfile);
@@ -172,14 +166,15 @@ public class YAMLConfigUtil {
 				.filter(RefactoringRule::isEnabled)
 				.filter(configSelectedRules::contains)
 				.collect(Collectors.toList());
-			
+
 			logSelectedRulesWithUnsatisfiedDeps(projectRules, configSelectedRules);
 		}
 
 		return result;
 	}
 
-	private static void logSelectedRulesWithUnsatisfiedDeps(List<RefactoringRule> projectRules, List<RefactoringRule> selectedRules) {
+	private static void logSelectedRulesWithUnsatisfiedDeps(List<RefactoringRule> projectRules,
+			List<RefactoringRule> selectedRules) {
 		List<RefactoringRule> unsatisfiedRules = projectRules.stream()
 			.filter(rule -> !rule.isEnabled())
 			.filter(selectedRules::contains)
