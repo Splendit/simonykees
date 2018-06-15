@@ -72,6 +72,9 @@ public class WorkingDirectory {
 	/**
 	 * Deletes the children files related to the projects on the current
 	 * session.
+	 * 
+	 * @param directory
+	 *            the directory containing the copied dependencies
 	 */
 	private void deleteSessionRelatedFiles(File directory) {
 		String[] children = directory.list();
@@ -104,7 +107,7 @@ public class WorkingDirectory {
 		try {
 			Files.deleteIfExists(file.toPath());
 		} catch (IOException e) {
-			log.warn(String.format("Cannot delete file %s ", file)); //$NON-NLS-1$
+			log.warn(String.format("Cannot delete file %s ", file), e); //$NON-NLS-1$
 		}
 	}
 
@@ -112,12 +115,14 @@ public class WorkingDirectory {
 	 * Requests the file to be deleted when the virtual machine terminates.
 	 * Files are deleted in reversed order that they were requested.
 	 * 
+	 * @see {@link File#deleteOnExit()}
+	 * 
 	 * @param file
 	 *            file to be deleted
 	 */
 	private void deleteOnExit(File file) {
 		/*
-		 * On windows, some of the osgi related files could not be deleted
+		 * On windows, some of the OSGi related files could not be deleted
 		 * because they were still being used by other processes. Therefore, the
 		 * File::deleteOnExit is used instead of Files.deleteIfExist.
 		 */
@@ -166,14 +171,14 @@ public class WorkingDirectory {
 	 */
 	private void deleteChildrenOnExit(File parentDirectory) {
 		String[] children = parentDirectory.list();
-		if (children != null) {
-			for (String file : children) {
-				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-				deleteOnExit(currentFile);
-				if (currentFile.isDirectory()) {
-					deleteChildrenOnExit(currentFile);
-				}
-
+		if (children == null) {
+			return;
+		}
+		for (String file : children) {
+			File currentFile = new File(parentDirectory.getAbsolutePath(), file);
+			deleteOnExit(currentFile);
+			if (currentFile.isDirectory()) {
+				deleteChildrenOnExit(currentFile);
 			}
 		}
 	}
