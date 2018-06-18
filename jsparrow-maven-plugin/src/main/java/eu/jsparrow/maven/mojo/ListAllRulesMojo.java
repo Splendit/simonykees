@@ -1,4 +1,4 @@
-package eu.jsparrow.maven;
+package eu.jsparrow.maven.mojo;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -17,30 +17,37 @@ import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
 /**
- * Prints all rules with their name and ID in a table.
+ * Lists all rules with ID, name and description. 
  * 
  * @author Matthias Webhofer
  * @since 2.3.0
  */
-@Mojo(name = "list-rules-short", aggregator = true)
-public class ListAllRulesShortMojo extends AbstractMojo {
+@Mojo(name = "list-rules", aggregator = true)
+public class ListAllRulesMojo extends AbstractMojo {
+
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
+
+	/**
+	 * Specify a rule by ID to receive detailed information on. 
+	 */
+	@Parameter(property = "rules")
+	private String rules;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		Log log = getLog();
-
-		String mode = StandaloneMode.LIST_RULES_SHORT.name();
+		String mode = StandaloneMode.LIST_RULES.name();
 		MavenParameters parameters = new MavenParameters(mode);
+		parameters.setRuleId(rules);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
-		BundleStarter bundleStarter = new BundleStarter(log);
-		StandaloneLoader loader = new StandaloneLoader(project, bundleStarter);
+		BundleStarter starter = new BundleStarter(log);
+		StandaloneLoader loader = new StandaloneLoader(project, starter);
 		try {
 			WorkingDirectory workingDir = mavenAdapter.setUpConfiguration(parameters);
-			addShutdownHook(bundleStarter, workingDir);
+			addShutdownHook(starter, workingDir);
 			loader.loadStandalone(mavenAdapter);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);

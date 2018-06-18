@@ -1,4 +1,4 @@
-package eu.jsparrow.maven;
+package eu.jsparrow.maven.mojo;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -15,54 +15,32 @@ import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.StandaloneLoader;
 import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
-import eu.jsparrow.maven.i18n.Messages;
 
 /**
- * Check validity of the given license.  
+ * Prints all rules with their name and ID in a table.
  * 
  * @author Matthias Webhofer
  * @since 2.3.0
  */
-@Mojo(name = "license-info", aggregator = true)
-public class LicenseInfoMojo extends AbstractMojo {
-
-	private static final String JAVA_VERSION_PROPERTY_CONSTANT = "java.version"; //$NON-NLS-1$
-	private static final String JAVA_VERSION_1_8 = "1.8"; //$NON-NLS-1$
+@Mojo(name = "list-rules-short", aggregator = true)
+public class ListAllRulesShortMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
 
-	/**
-	 * The license key to validate.
-	 */
-	@Parameter(property = "license")
-	private String license;
-
-	/**
-	 * The URL to the license server to use. 
-	 */
-	@Parameter(property = "url")
-	private String url;
-
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		Log log = getLog();		
 
-		// With version 1.0.0 of jSparrow Maven Plugin, only JDK 8 is supported.
-		String javaVersion = System.getProperty(JAVA_VERSION_PROPERTY_CONSTANT);
-		if (!javaVersion.startsWith(JAVA_VERSION_1_8)) {
-			log.warn(Messages.RefactorMojo_supportJDK8);
-			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8);
-		}
+		Log log = getLog();
 
-		String mode = StandaloneMode.LICENSE_INFO.name();
-		MavenParameters parameters = new MavenParameters(mode, license, url);
+		String mode = StandaloneMode.LIST_RULES_SHORT.name();
+		MavenParameters parameters = new MavenParameters(mode);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
-		BundleStarter starter = new BundleStarter(log);
-		StandaloneLoader loader = new StandaloneLoader(project, starter);
+		BundleStarter bundleStarter = new BundleStarter(log);
+		StandaloneLoader loader = new StandaloneLoader(project, bundleStarter);
 		try {
 			WorkingDirectory workingDir = mavenAdapter.setUpConfiguration(parameters);
-			addShutdownHook(starter, workingDir);
+			addShutdownHook(bundleStarter, workingDir);
 			loader.loadStandalone(mavenAdapter);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);

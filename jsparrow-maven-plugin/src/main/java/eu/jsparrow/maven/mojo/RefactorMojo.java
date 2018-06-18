@@ -1,4 +1,4 @@
-package eu.jsparrow.maven;
+package eu.jsparrow.maven.mojo;
 
 import java.io.File;
 import java.util.List;
