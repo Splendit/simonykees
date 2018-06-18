@@ -95,6 +95,7 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		 * instead
 		 */
 		return (new AnnotationToStringBuilder(this) {
+			@Override
 			protected boolean accept(Field f) {
 				return super.accept(f) && !f.getName()
 					.equals("secret"); //$NON-NLS-1$
