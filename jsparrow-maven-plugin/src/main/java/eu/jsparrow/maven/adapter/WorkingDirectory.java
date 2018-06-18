@@ -1,6 +1,7 @@
 package eu.jsparrow.maven.adapter;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,33 +38,59 @@ public class WorkingDirectory {
 	}
 
 	/**
-	 * Cleans classpath and temp directory
+	 * Cleans the lock file and deletes the working directory. If the resulting
+	 * lock file is empty, deletes the entire working directory and its
+	 * contents.
 	 */
 	public void cleanUp() {
 
-		// CLEAN
-		if (directory == null || !directory.exists()) {
+		boolean emptyLockFile = cleanLockFile();
+		if (!emptyLockFile) {
 			return;
 		}
 
-		try {
-			deleteSessionRelatedFiles();
-			boolean emptyLockFile = cleanLockFile();
-			if (emptyLockFile) {
-				deleteChildren(directory);
-				Files.deleteIfExists(directory.toPath());
-			}
-		} catch (IOException e) {
-			log.debug(e.getMessage(), e);
-			log.error(e.getMessage());
+		/*
+		 * Since we use File::deleteOnExit to remove the contents of directory,
+		 * the files are not immediately removed, but the requests for deleting
+		 * files are registered only to be executed when the virtual machine
+		 * terminates. The execution is performed in reversed order, therefore
+		 * the request for deleting parent directory should be registered before
+		 * the one for deleting its children.
+		 */
+		deleteOnExit(directory);
+		deleteChildrenOnExit(directory);
+	}
+
+	/**
+	 * Cleans the lock file, removes the copied dependencies related to the
+	 * current session. If the resulting lock file is empty, deletes the entire
+	 * working directory and its contents.
+	 * 
+	 * @param dependenciesFolderName
+	 *            the name of the directory containing the copied dependencies
+	 *            to be removed
+	 */
+	public void cleanUp(String dependenciesFolderName) {
+		cleanUp();
+		deleteSessionRelatedDependencies(dependenciesFolderName);
+	}
+
+	private void deleteSessionRelatedDependencies(String dependenciesFolderName) {
+		FilenameFilter fileNameFilter = (File file, String name) -> dependenciesFolderName.equals(name);
+		File[] deps = directory.listFiles(fileNameFilter);
+		for (File depsDirectory : deps) {
+			deleteSessionRelatedFiles(depsDirectory);
 		}
 	}
 
 	/**
 	 * Deletes the children files related to the projects on the current
 	 * session.
+	 * 
+	 * @param directory
+	 *            the directory containing the copied dependencies
 	 */
-	private void deleteSessionRelatedFiles() {
+	private void deleteSessionRelatedFiles(File directory) {
 		String[] children = directory.list();
 		if (children == null) {
 			return;
@@ -72,19 +99,48 @@ public class WorkingDirectory {
 		for (String file : children) {
 			if (isSessionRelated(file)) {
 				File currentFile = new File(directory.getAbsolutePath(), file);
-				deleteChildren(currentFile);
-				deleteIfExists(currentFile);
+				deleteFolderIfExists(currentFile);
 			}
+		}
+
+		if (directory.list().length == 0) {
+			deleteIfExists(directory);
 		}
 	}
 
-	private void deleteIfExists(File currentFile) {
-		try {
-			Files.deleteIfExists(currentFile.toPath());
-		} catch (IOException e) {
-			log.debug(e.getMessage(), e);
-			log.error(e.getMessage());
+	private void deleteFolderIfExists(File currentFile) {
+		if (currentFile.isDirectory()) {
+			for (File file : currentFile.listFiles()) {
+				deleteFolderIfExists(file);
+			}
 		}
+		deleteIfExists(currentFile);
+	}
+
+	private void deleteIfExists(File file) {
+		try {
+			Files.deleteIfExists(file.toPath());
+		} catch (IOException e) {
+			log.warn(String.format("Cannot delete file %s ", file), e); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * Requests the file to be deleted when the virtual machine terminates.
+	 * Files are deleted in reversed order that they were requested.
+	 * 
+	 * @see {@link File#deleteOnExit()}
+	 * 
+	 * @param file
+	 *            file to be deleted
+	 */
+	private void deleteOnExit(File file) {
+		/*
+		 * On windows, some of the OSGi related files could not be deleted
+		 * because they were still being used by other processes. Therefore, the
+		 * File::deleteOnExit is used instead of Files.deleteIfExist.
+		 */
+		file.deleteOnExit();
 	}
 
 	/**
@@ -126,25 +182,24 @@ public class WorkingDirectory {
 	 * 
 	 * @param parentDirectory
 	 *            directory which content is to be deleted
-	 * @throws IOException
 	 */
-	private void deleteChildren(File parentDirectory) {
+	private void deleteChildrenOnExit(File parentDirectory) {
 		String[] children = parentDirectory.list();
-		if (children != null) {
-			for (String file : children) {
-				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-				if (currentFile.isDirectory()) {
-					deleteChildren(currentFile);
-				}
-
-				deleteIfExists(currentFile);
+		if (children == null) {
+			return;
+		}
+		for (String file : children) {
+			File currentFile = new File(parentDirectory.getAbsolutePath(), file);
+			deleteOnExit(currentFile);
+			if (currentFile.isDirectory()) {
+				deleteChildrenOnExit(currentFile);
 			}
 		}
 	}
 
 	private boolean isSessionRelated(String file) {
 		return sessionRelatedProjects.stream()
-			.anyMatch(file::contains);
+			.anyMatch(s -> s.contains(file));
 	}
 
 	/**
