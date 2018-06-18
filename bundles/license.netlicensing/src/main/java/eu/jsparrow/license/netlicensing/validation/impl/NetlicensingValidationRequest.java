@@ -49,7 +49,7 @@ public class NetlicensingValidationRequest {
 	public NetlicensingValidationResult send(String key, ValidationParameters validationParameters)
 			throws ValidationException {
 		String shortKey = StringUtils.abbreviate(key, 6);
-		logger.debug("Sending netlicensing request with key '{}' and {}", shortKey, validationParameters); //$NON-NLS-1$
+		logger.debug("Sending netlicensing request with key '{}'", shortKey); //$NON-NLS-1$
 		try {
 			ValidationResult netLicensingResponse = licenseeService.validate(restApiContext, key, validationParameters);
 			return responseEvaluator.evaluateResult(netLicensingResponse);

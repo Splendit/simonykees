@@ -55,7 +55,7 @@ public class SecureStoragePersistence implements LicensePersistence {
 	}
 
 	private void saveToSecureStorage(byte[] data) throws PersistenceException {
-		logger.debug("Saving data '{}' to secure storage", data); //$NON-NLS-1$
+		logger.debug("Saving data to secure storage"); //$NON-NLS-1$
 		ISecurePreferences simonykeesNode = securePreferences.node(SECURE_PREFERENCES_KEY);
 		simonykeesNode.clear();
 		try {

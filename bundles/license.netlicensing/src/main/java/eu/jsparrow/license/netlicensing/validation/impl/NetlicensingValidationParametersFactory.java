@@ -48,7 +48,6 @@ public class NetlicensingValidationParametersFactory {
 		}
 		parameters.setProductNumber(model.getProductNr());
 		parameters.setLicenseeName(model.getName());
-		logger.debug("Returning parameters {}", parameters); //$NON-NLS-1$
 		return parameters;
 	}
 
