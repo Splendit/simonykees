@@ -1,11 +1,12 @@
 package eu.jsparrow.license.netlicensing.model;
 
+import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
-
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.LicenseType;
+import eu.jsparrow.license.api.util.AnnotationToStringBuilder;
+import eu.jsparrow.license.api.util.Shorten;
 
 /**
  * Implementor of {@link LicenseModel} that represents a NetLicensing license.
@@ -14,11 +15,16 @@ public class NetlicensingLicenseModel implements LicenseModel {
 
 	private static final long serialVersionUID = 7047162817207967199L;
 
+	private String secret; // excluded in toString
+
+	@Shorten
 	private String key;
-	private String name;
-	private String secret;
+	@Shorten
 	private String productNr;
+	@Shorten
 	private String moduleNr;
+
+	private String name;
 	private LicenseType type;
 	private ZonedDateTime expireDate;
 	private String validationBaseUrl;
@@ -84,7 +90,17 @@ public class NetlicensingLicenseModel implements LicenseModel {
 
 	@Override
 	public String toString() {
-		return ReflectionToStringBuilder.toString(this);
+		/*
+		 * with commons lang 3.5 the ToStringExclude Annotation could be used
+		 * instead
+		 */
+		return (new AnnotationToStringBuilder(this) {
+			@Override
+			protected boolean accept(Field f) {
+				return super.accept(f) && !f.getName()
+					.equals("secret"); //$NON-NLS-1$
+			}
+		}).toString();
 	}
 
 }

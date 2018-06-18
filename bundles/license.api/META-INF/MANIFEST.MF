@@ -6,6 +6,7 @@ Bundle-Version: 2.6.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.apache.commons.lang3;bundle-version="[3.1.0,4.0.0)"
 Export-Package: eu.jsparrow.license.api,
- eu.jsparrow.license.api.exception
+ eu.jsparrow.license.api.exception,
+ eu.jsparrow.license.api.util
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Splendit IT-Consulting GmbH
