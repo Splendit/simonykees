@@ -269,7 +269,7 @@ public class MavenAdapter {
 			configuration.put(ConfigurationKeys.OSGI_INSTANCE_AREA_CONSTANT, directoryAbsolutePath);
 
 			String loggerInfo = NLS.bind(Messages.MavenAdapter_setUserDir, directoryAbsolutePath);
-			log.info(loggerInfo);
+			log.debug(loggerInfo);
 		} else {
 			throw new InterruptedException(Messages.MavenAdapter_couldnotCreateTempFolder);
 		}
