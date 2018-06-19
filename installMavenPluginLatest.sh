@@ -8,7 +8,7 @@ BASE_DIRECTORY_JAR="jsparrow-maven-plugin/target"
 
 function usage() {
    cat <<EOF
-Usage: $0 (-u|-j)
+Usage: $0 (-j|-d|-r|-m)
 where:
     -j install the maven plugin that is already locally built
     -d install the latest develop version from packagedrone
