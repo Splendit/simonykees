@@ -1,6 +1,8 @@
 package eu.jsparrow.standalone;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -24,6 +26,9 @@ public class CompilationUnitProvider {
 	private List<ICompilationUnit> compilationUnits;
 
 	private YAMLExcludes excludes;
+
+	private Set<String> usedExcludedPackages = new HashSet<>();
+	private Set<String> usedExcludedClasses = new HashSet<>();
 
 	private static final Logger logger = LoggerFactory.getLogger(CompilationUnitProvider.class);
 
@@ -79,9 +84,17 @@ public class CompilationUnitProvider {
 				packageName = packageDeclarations[0].getElementName();
 				className = packageName + "." + className; //$NON-NLS-1$
 			}
-			boolean isIncluded = !exludedPackages.contains(packageName) && !exludedClasses.contains(className);
+			boolean isExcludedPackage = exludedPackages.contains(packageName);
+			boolean isExcludedClass = exludedClasses.contains(className);
+			boolean isIncluded = !isExcludedPackage && !isExcludedClass;
 			if (!isIncluded) {
 				logger.debug("Excluding compilation unit {}", className); //$NON-NLS-1$
+				if (isExcludedPackage) {
+					usedExcludedPackages.add(packageName);
+				}
+				if (isExcludedClass) {
+					usedExcludedClasses.add(className);
+				}
 			}
 			return isIncluded;
 		} catch (JavaModelException e) {
@@ -90,4 +103,32 @@ public class CompilationUnitProvider {
 		}
 	}
 
+	/**
+	 * Filters all excluded classes defined in yaml file with class names that
+	 * occurred at least once in list of compilation units
+	 * 
+	 * @return classes defined in excludes section of yaml file that did not
+	 *         occur in project
+	 */
+	public Set<String> getUnusedExcludedClasses() {
+		return excludes.getExcludeClasses()
+			.stream()
+			.filter(excludedClass -> !usedExcludedClasses.contains(excludedClass))
+			.collect(Collectors.toSet());
+	}
+
+	/**
+	 * Filters all excluded packages defined in yaml file with package names
+	 * that occurred at least once as package declaration in list of compilation
+	 * units
+	 * 
+	 * @return packages defined in excludes section of yaml file that did not
+	 *         occur in project
+	 */
+	public Set<String> getUnusedExcludedPackages() {
+		return excludes.getExcludePackages()
+			.stream()
+			.filter(excludedPackage -> !usedExcludedPackages.contains(excludedPackage))
+			.collect(Collectors.toSet());
+	}
 }
