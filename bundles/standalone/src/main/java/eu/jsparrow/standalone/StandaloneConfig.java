@@ -241,8 +241,6 @@ public class StandaloneConfig {
 			throw new StandaloneException("Project cannot be opened", e); //$NON-NLS-1$
 		}
 
-		logger.debug(Messages.StandaloneConfig_debug_createdProject);
-
 		return iproject;
 	}
 
@@ -546,14 +544,7 @@ public class StandaloneConfig {
 	}
 
 	protected IWorkspace getWorkspace() {
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-
-		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createWorkspace, workspace.getRoot()
-			.getLocation()
-			.toString());
-		logger.debug(loggerInfo);
-
-		return workspace;
+		return ResourcesPlugin.getWorkspace();
 	}
 
 	protected File getProjectDescriptionFile() {
