@@ -57,7 +57,7 @@ public class CompilationUnitProvider {
 		List<String> excludedPackages = excludes.getExcludePackages();
 		String logInfo = excludedPackages.stream()
 			.collect(collector);
-		logger.debug("Exclueded packages: {} ", logInfo); //$NON-NLS-1$
+		logger.debug("Excluded packages: {} ", logInfo); //$NON-NLS-1$
 
 		List<String> exludedClasses = excludes.getExcludeClasses();
 		logInfo = exludedClasses.stream()
