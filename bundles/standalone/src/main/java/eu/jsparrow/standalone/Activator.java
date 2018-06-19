@@ -9,7 +9,6 @@ import java.util.Optional;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
-import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -171,15 +170,7 @@ public class Activator implements BundleActivator {
 		for (Bundle b : context.getBundles()) {
 			if (b.getSymbolicName()
 				.startsWith(EQUINOX_DS_BUNDLE_NAME)) {
-
-				String loggerInfo = NLS.bind(Messages.StandaloneActivator_startingBundle, b.getSymbolicName(),
-						b.getState());
-				logger.debug(loggerInfo);
-
 				b.start();
-
-				loggerInfo = NLS.bind(Messages.StandaloneActivator_bundleStarted, b.getSymbolicName(), b.getState());
-				logger.debug(loggerInfo);
 			}
 		}
 	}
@@ -243,7 +234,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private YAMLStandaloneConfig tryLoadStandaloneConfig() {
-		Path filePath = Paths.get(System.getProperty("user.home"), ".config", "jsparrow-standalone"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path filePath = Paths.get(System.getProperty("user.home"), ".config", "jsparrow-standalone"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		YAMLStandaloneConfig yamlStandaloneConfig = null;
 
