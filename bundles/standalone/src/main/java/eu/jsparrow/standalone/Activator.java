@@ -234,7 +234,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private YAMLStandaloneConfig tryLoadStandaloneConfig() {
-		Path filePath = Paths.get(System.getProperty("user.home"), ".config", "jsparrow-standalone"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path filePath = Paths.get(System.getProperty("user.home"), ".config", "jsparrow-standalone"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		YAMLStandaloneConfig yamlStandaloneConfig = null;
 
