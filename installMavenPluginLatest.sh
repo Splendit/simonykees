@@ -4,9 +4,11 @@ BASE_URL_DEVELOP="http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSpa
 BASE_URL_RELEASE_CANDIDATE="http://packagedrone-vm-01.splendit.loc:8080/maven/jSparrow-maven-plugin-release-candidate"
 BASE_URL_MASTER="http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-maven-plugin-master-production-proguard"
 
+BASE_DIRECTORY_JAR="jsparrow-maven-plugin/target"
+
 function usage() {
    cat <<EOF
-Usage: $0 (-u|-j)
+Usage: $0 (-j|-d|-r|-m)
 where:
     -j install the maven plugin that is already locally built
     -d install the latest develop version from packagedrone
@@ -43,11 +45,16 @@ function installUrl() {
 }
 
 function installJar() {
-
-  local jarPath="jsparrow-maven-plugin/target/jsparrow-maven-plugin-$MAVEN_PLUGIN_VERSION.jar"
-  printf "Installing the jSparrow Maven Plugin using the following local path: '%s'\n\n" $jarPath
-
-  jsparrow-maven-plugin/install.sh -j $jarPath
+  
+  if [[ -d $BASE_DIRECTORY_JAR ]]
+    then
+    # finds the path of the jar in target, independent of version or whether or not it is a SNAPSHOT build. Ignores proguard_base jars. 
+    local jarPath=`find $BASE_DIRECTORY_JAR -regex "$BASE_DIRECTORY_JAR/jsparrow-maven-plugin-[0-9]+\.[0-9]+\.[0-9]+[-]*[A-Z]*\.jar"`
+    printf "Installing the jSparrow Maven Plugin using the following local path: '%s'\n\n" $jarPath
+    jsparrow-maven-plugin/install.sh -j $jarPath
+  else
+    echo "Directory does not exist: '$BASE_DIRECTORY_JAR'"
+  fi
 
 }
 
