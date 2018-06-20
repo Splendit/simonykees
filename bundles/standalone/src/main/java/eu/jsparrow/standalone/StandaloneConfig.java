@@ -430,10 +430,10 @@ public class StandaloneConfig {
 
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		List<ICompilationUnit> containingErrors = new ArrayList<>();
-		String abordMessage = "Abort detected while creating refactoring states "; //$NON-NLS-1$
 		for (ICompilationUnit icu : compilationUnits) {
 			if (abort) {
-				throw new StandaloneException(abordMessage);
+				String abortMessage = "Abort detected while creating refactoring states "; //$NON-NLS-1$
+				throw new StandaloneException(abortMessage);
 			}
 			try {
 				refactoringPipeline.createRefactoringState(icu, containingErrors);
