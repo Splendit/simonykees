@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,8 @@ public class NetlicensingLicenseCache {
 	 *            the validation result to save.
 	 */
 	public void updateCache(String key, NetlicensingValidationResult newValidationResult) {
-		logger.debug("Updating cache with key {} and validation result {}", key, newValidationResult); //$NON-NLS-1$
+		String shortKey = StringUtils.abbreviate(key, 6);
+		logger.debug("Updating cache with key {} and validation result {}", shortKey, newValidationResult); //$NON-NLS-1$
 		NetlicensingValidationResult entry = entries.putIfAbsent(key, newValidationResult);
 		if (entry == null) {
 			logger.debug("Adding new entry {}", newValidationResult); //$NON-NLS-1$
@@ -51,14 +53,15 @@ public class NetlicensingLicenseCache {
 	 *         validation result for this key otherwise.
 	 */
 	public LicenseValidationResult get(String key) {
-		logger.debug("Retrieving item with key {}", key); //$NON-NLS-1$
+		String shortKey = StringUtils.abbreviate(key, 6);
+		logger.debug("Retrieving result with key {}",  shortKey); //$NON-NLS-1$
 		NetlicensingValidationResult entry = entries.get(key);
 		if (entry == null) {
-			logger.debug("No item found"); //$NON-NLS-1$
+			logger.debug("No results found"); //$NON-NLS-1$
 			return null;
 		}
 		if (entry.isExpired()) {
-			logger.debug("Expired item found"); //$NON-NLS-1$
+			logger.debug("Expired result found"); //$NON-NLS-1$
 			return null;
 		}
 		return entry;

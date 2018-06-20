@@ -29,33 +29,22 @@ timestamps {
 					}
 				}
 			}
-
 			
 			stage('Compile Eclipse Plugin') {
 				def mvnCommand = 'clean verify -DskipTests'
 				sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
 			}
 			
-			stage('Compile Maven Plugin'){
-			   def mvnCommand = 'clean install -DskipTests' 
-			   def pluginResourcePath = 'src/main/resources'
-			   def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'
-               dir('jsparrow-standalone-adapter'){
-			   	 sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
-			   }			   
-			   def manifest = 'manifest.standalone'
-			   def manifestContent = sh(script: 'ls ${jSparrowTargetPath}', returnStdout: true)
-			   
-			   dir('jsparrow-maven-plugin/${pluginResourcePath}'){
-			     writeFile file: '${manifest}', text: '${manifestContent}'
-			   }
-			   dir('jsparrow-maven-plugin'){
-			      sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
-			   }
+			// this only tests whether or not the sources compile. 
+			// see deployMavenPluginWithDependencies for a full build that includes copying dependencies. 
+			stage('Compile Maven Plugin') {
+				def mvnCommand = 'clean install -DskipTests' 
+
+				dir('jsparrow-maven-plugin') {
+					sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
+				}
 			}
 			
-	
-	
 			wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, debug: true, screen: '1366x768x24', shutdownWithBuild: true, timeout: 10]) {
 			// X virtual framebuffer (virtual X window display) is needed for plugin tests
 			// wrap([$class: 'Xvfb']) {
@@ -86,11 +75,11 @@ timestamps {
 			if ( env.BRANCH_NAME == 'develop' ) {
 				// run sonarqube analysis, server configuration takes place in jenkins config
 				stage('SonarQube Analysis') {
-					withSonarQubeEnv('SonarQube Server'){
-     						sh 'mvn sonar:sonar'
+					withSonarQubeEnv('SonarQube Server') {
+ 						sh 'mvn sonar:sonar'
 					}
-  				}
-  			}
+				}
+			}
 			
 			// master and develop builds get deployed to packagedrone (see pom.xml) and tagged (see tag-deployment.sh)
 			if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
@@ -101,9 +90,9 @@ timestamps {
 					sh "'${mvnHome}/bin/mvn' ${mvnCommand} -P${env.BRANCH_NAME}-test-noProguard"					
 				}
 				
-				stage('Deploy Maven Plugin'){
-					dir('jsparrow-maven-plugin'){
-					  sh "'${mvnHome}/bin/mvn' ${mvnCommand}"	
+				if (env.BRANCH_NAME == 'develop') {
+					stage('Deploy JMP'){
+						deployMavenPluginWithDependencies("-Pdevelop-test-noProguard")
 					}
 				}
 				
@@ -120,34 +109,48 @@ timestamps {
 				// grep returns result with an \n therefore we need to trim
 				def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu.jsparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" releng/site/target/p2content.xml").trim()
 				def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu.jsparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" releng/site/target/p2content.xml").trim()
+				
 				stage('Deploy Obfuscation') {
 					def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
 					sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
 					uploadMappingFiles("${buildNumber}_test")
 				}
+
 				if ( env.BRANCH_NAME == 'master') {
 					stage('Deploy Production') {
 						def mvnOptions = "-Dproduction -DforceContextQualifier=${qualifier}_noProguard"
 						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-noProguard"
 					}
-					stage('Deploy production, obfuscation') {
-							def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
+					stage('Deploy Production Obfuscation') {
+						def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
 						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-proguard"
 						uploadMappingFiles(buildNumber)
 					}
+
+					stage('Deploy JMP Production Obfuscation') {
+						def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier} -Pmaster-production-proguard"
+						deployMavenPluginWithDependencies("${mvnOptions}")
+					}
 				}
+
 			} else if ( env.BRANCH_NAME.startsWith('release') ) {
-			// for release branches ("release candidates") we just create a proguard test version and do not push to github
+				// for release branches ("release candidates") we just create a proguard test version and do not push to github
 
 				// skipping tests, because integration tests have passed already
 				// -B batch mode for clean output (otherwise upload status will spam the console)
-				def mvnCommand = 'clean deploy -DskipTests -B -Dproguard'
+				def mvnCommand = 'clean deploy -B'
+				def mvnOptions = '-DskipTests -Dproguard -PreleaseCandidate'
 
 				stage('Deploy Test Obfuscation') {
-						sh "'${mvnHome}/bin/mvn' ${mvnCommand} -PreleaseCandidate"
+					sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions}"
+				}
+
+				stage('Deploy JMP Test Obfuscation'){
+					deployMavenPluginWithDependencies("${mvnOptions}")
 				}
 				
 			}
+
 		} catch (e) {
 			// If there was an exception thrown, the build failed
 			currentBuild.result = "FAILURE"
@@ -158,6 +161,31 @@ timestamps {
 		}
 		
 		step([$class: 'StashNotifier']) // Notifies the Stash Instance of the build result
+	}
+}
+
+// this has to be executed before a deployment of the jSparrow Maven Plugin
+def deployMavenPluginWithDependencies(String mvnOptions) {
+
+	// variable for maven home
+	// this is a duplication from above. feel free to refactor.
+	def mvnHome = tool 'mvn system'
+
+	def mvnCommand = 'clean deploy -DskipTests' 
+	def pluginResourcePath = 'jsparrow-maven-plugin/src/main/resources'
+	def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'
+	def manifest = 'manifest.standalone'
+	def manifestContent = sh(script: "ls $jSparrowTargetPath", returnStdout: true)
+
+	dir('jsparrow-maven-plugin/src/main/resources') {
+		writeFile file: "${manifest}", text: "${manifestContent}"
+	}
+
+	// Copy required dependencies into plugin resource folder
+	sh("cp ${jSparrowTargetPath}/* ${pluginResourcePath}")
+
+	dir('jsparrow-maven-plugin') {
+		sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions}"
 	}
 }
 	

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" name="eu.jsparrow.standalone.StandaloneLicenseUtil">
-   <service>
-      <provide interface="eu.jsparrow.standalone.StandaloneLicenseUtilService"/>
-   </service>
-   <reference cardinality="1..1" field="factoryService" interface="eu.jsparrow.license.api.LicenseModelFactoryService" name="factoryService"/>
-   <reference cardinality="1..1" field="licenseService" interface="eu.jsparrow.license.api.LicenseService" name="licenseService"/>
-   <implementation class="eu.jsparrow.standalone.StandaloneLicenseUtil"/>
-</scr:component>
