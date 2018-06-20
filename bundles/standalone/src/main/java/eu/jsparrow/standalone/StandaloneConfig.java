@@ -82,7 +82,7 @@ public class StandaloneConfig {
 	private String sourceFolder;
 	private String[] natureIds;
 	protected RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
-	private boolean aboard = false;
+	private boolean abort = false;
 	private YAMLConfig yamlConfig;
 
 	/**
@@ -434,10 +434,10 @@ public class StandaloneConfig {
 
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		List<ICompilationUnit> containingErrors = new ArrayList<>();
-		String abordMessage = "Aboard detected while creating refactoring states "; //$NON-NLS-1$
 		for (ICompilationUnit icu : compilationUnits) {
-			if (aboard) {
-				throw new StandaloneException(abordMessage);
+			if (abort) {
+				String abortMessage = "Abort detected while creating refactoring states "; //$NON-NLS-1$
+				throw new StandaloneException(abortMessage);
 			}
 			try {
 				refactoringPipeline.createRefactoringState(icu, containingErrors);
@@ -670,6 +670,6 @@ public class StandaloneConfig {
 	}
 
 	public void setAbortFlag() {
-		this.aboard = true;
+		this.abort = true;
 	}
 }

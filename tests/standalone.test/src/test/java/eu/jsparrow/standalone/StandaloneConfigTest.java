@@ -251,7 +251,7 @@ public class StandaloneConfigTest {
 	}
 
 	@Test(expected = StandaloneException.class)
-	public void createRefactoringStates_aboardFlag_shouldThrowStandaloneException() throws Exception {
+	public void createRefactoringStates_abortFlag_shouldThrowStandaloneException() throws Exception {
 		standaloneConfig.setProject(project);
 		when(project.getName()).thenReturn(PROJECT_NAME);
 		standaloneConfig.setAbortFlag();
