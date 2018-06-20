@@ -378,6 +378,8 @@ public class Messages extends NLS {
 	public static String StandaloneConfig_projectIsNotAnEclipseProjectAndCouldNotConvert;
 	public static String StandaloneConfig_RevertClasspath;
 	public static String StandaloneConfig_SetProjectLocation;
+	public static String StandaloneConfig_unusedClassExcludesWarning;
+	public static String StandaloneConfig_unusedPackageExcludesWarning;
 	public static String StandaloneLicenseUtil_expirationDate;
 	public static String StandaloneLicenseUtil_isValid;
 	public static String StandaloneLicenseUtil_licenseType;

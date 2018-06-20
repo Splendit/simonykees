@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.internal.events.BuildCommand;
@@ -428,6 +430,8 @@ public class StandaloneConfig {
 		loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compilationUnits.size());
 		logger.debug(loggerInfo);
 
+		logUnusedexcludes();
+
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		List<ICompilationUnit> containingErrors = new ArrayList<>();
 		String abordMessage = "Aboard detected while creating refactoring states "; //$NON-NLS-1$
@@ -447,6 +451,25 @@ public class StandaloneConfig {
 			.size());
 
 		logger.debug(loggerInfo);
+	}
+
+	private void logUnusedexcludes() {
+		String loggerInfo;
+		Collector<CharSequence, ?, String> collector = Collectors.joining(", "); //$NON-NLS-1$
+
+		Set<String> unusedExcludedPackages = compilationUnitsProvider.getUnusedExcludedPackages();
+		if (!unusedExcludedPackages.isEmpty()) {
+			loggerInfo = unusedExcludedPackages.stream()
+				.collect(collector);
+			logger.warn(Messages.StandaloneConfig_unusedPackageExcludesWarning, loggerInfo);
+		}
+
+		Set<String> unusedExcludedClasses = compilationUnitsProvider.getUnusedExcludedClasses();
+		if (!unusedExcludedClasses.isEmpty()) {
+			loggerInfo = unusedExcludedClasses.stream()
+				.collect(collector);
+			logger.warn(Messages.StandaloneConfig_unusedClassExcludesWarning, loggerInfo);
+		}
 	}
 
 	public void computeRefactoring() throws StandaloneException {
