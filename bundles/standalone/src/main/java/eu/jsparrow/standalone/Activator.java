@@ -1,10 +1,14 @@
 package eu.jsparrow.standalone;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -62,7 +66,9 @@ public class Activator implements BundleActivator {
 		LoggingUtil.configureLogger(debugEnabled);
 
 		startDeclarativeServices(context);
-		logger.info(Messages.Activator_start);
+		// Put both together because it looks nicer
+		String startMessage = String.format("%s %n %s", Messages.Activator_start, loadBanner());
+		logger.info(startMessage);
 		registerShutdownHook(context);
 		StandaloneMode mode = parseMode(context);
 		String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID_KEY);
@@ -77,7 +83,7 @@ public class Activator implements BundleActivator {
 			listRulesUtil.listRulesShort();
 			break;
 		case LICENSE_INFO:
-			pritntLicenseInfo(context);
+			printLicenseInfo(context);
 			break;
 		case TEST:
 			break;
@@ -88,7 +94,34 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	private void pritntLicenseInfo(BundleContext context) {
+	@Override
+	public void stop(BundleContext context) {
+		try {
+			/* Unregister as a save participant */
+			if (ResourcesPlugin.getWorkspace() != null) {
+				ResourcesPlugin.getWorkspace()
+					.forgetSavedTree(PLUGIN_ID);
+				ResourcesPlugin.getWorkspace()
+					.removeSaveParticipant(PLUGIN_ID);
+			}
+		} catch (Exception e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+		} finally {
+			cleanUp(context);
+		}
+
+		logger.info(Messages.Activator_stop);
+	}
+	
+	private String loadBanner() {
+		InputStream in = getClass().getResourceAsStream("/banner.txt");
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		return reader.lines()
+			.collect(Collectors.joining("\n"));
+	}
+
+	private void printLicenseInfo(BundleContext context) {
 		licenseService = getStandaloneLicenseUtilService();
 		String key = getLicenseKey(context);
 		String agentUrl = getAgentUrl(context);
@@ -122,25 +155,6 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	@Override
-	public void stop(BundleContext context) {
-		try {
-			/* Unregister as a save participant */
-			if (ResourcesPlugin.getWorkspace() != null) {
-				ResourcesPlugin.getWorkspace()
-					.forgetSavedTree(PLUGIN_ID);
-				ResourcesPlugin.getWorkspace()
-					.removeSaveParticipant(PLUGIN_ID);
-			}
-		} catch (Exception e) {
-			logger.debug(e.getMessage(), e);
-			logger.error(e.getMessage());
-		} finally {
-			cleanUp(context);
-		}
-
-		logger.info(Messages.Activator_stop);
-	}
 
 	private void registerShutdownHook(BundleContext context) {
 		Runtime.getRuntime()
