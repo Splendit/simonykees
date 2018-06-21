@@ -38,6 +38,7 @@
 				<directory>src/main/resources</directory>
 				<includes>
 					<include>standalone.properties</include>
+					<include>banner.txt</include>
 				</includes>
 			</resource>
 		</resources>
