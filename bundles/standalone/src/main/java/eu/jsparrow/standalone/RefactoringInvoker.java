@@ -176,12 +176,23 @@ public class RefactoringInvoker {
 	}
 
 	/**
-	 * gets the configuration from the given path in context
+	 * Gets the configuration for the provided project from the given path in
+	 * the bundle's context
 	 * 
 	 * @param context
-	 * @return the read configuration
+	 *            the {@link BundleContext} within the equinox framework
+	 * @param projectId
+	 *            the project to find the configuration for
+	 * @return the {@link YAMLConfig} corresponding to the project with the
+	 *         given projectId
 	 * @throws StandaloneException
-	 * @throws YAMLConfigException
+	 *             if the configuration file cannot be read or is inconsistent.
+	 *             Reasons include:
+	 *             <ul>
+	 *             <li>The selected profile in the {@link BundleContext} does
+	 *             not match any of the declared profiles in the configuration
+	 *             file.</li>
+	 *             </ul>
 	 */
 	private YAMLConfig getConfiguration(BundleContext context, String projectId) throws StandaloneException {
 
@@ -239,7 +250,7 @@ public class RefactoringInvoker {
 		Map<String, String> projectPaths = findAllProjectPaths(context);
 
 		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
-				context.getProperty(ROOT_CONFIG_PATH), context.getProperty(SELECTED_PROFILE)).get();
+				context.getProperty(ROOT_CONFIG_PATH)).get();
 
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
@@ -292,9 +303,34 @@ public class RefactoringInvoker {
 		return paths;
 	}
 
+	/**
+	 * Reads the yml configuration file in the provided path and sets the given
+	 * profile as selected if it exists.
+	 * 
+	 * @param configFilePath
+	 *            path to the yml/yaml file
+	 * @param profile
+	 *            the desired selected profile
+	 * @return the parsed {@link YAMLConfig} file.
+	 * @throws StandaloneException
+	 *             if the configuration file could not be read or the provided
+	 *             profile does not exist.
+	 */
 	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws StandaloneException {
 		try {
-			return YAMLConfigUtil.readConfig(configFilePath, profile);
+			YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath);
+
+			if (profile != null && !profile.isEmpty()) {
+				if (YAMLConfigUtil.checkProfileExistence(config, profile)) {
+					config.setSelectedProfile(profile);
+				} else {
+					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
+							profile);
+					throw new StandaloneException(exceptionMessage);
+				}
+			}
+
+			return config;
 		} catch (YAMLConfigException e) {
 			throw new StandaloneException(e.getMessage(), e);
 		}

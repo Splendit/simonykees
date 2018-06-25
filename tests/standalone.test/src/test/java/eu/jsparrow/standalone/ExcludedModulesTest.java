@@ -20,7 +20,6 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
 @RunWith(MockitoJUnitRunner.class)
 public class ExcludedModulesTest {
 
-	private static final String SELECTED_PROFILE = "selectedProfile";
 	private static final String SOME_PROJECT = "someProject";
 
 	private ExcludedModules excludedModules;
@@ -30,7 +29,7 @@ public class ExcludedModulesTest {
 
 	@Test
 	public void get_useDefaultConfig_shouldReturnEmptyExclusions() throws StandaloneException {
-		excludedModules = new TestableExcludedModules(true, SOME_PROJECT, SELECTED_PROFILE);
+		excludedModules = new TestableExcludedModules(true, SOME_PROJECT);
 
 		List<String> result = excludedModules.get();
 
@@ -39,7 +38,7 @@ public class ExcludedModulesTest {
 
 	@Test
 	public void get_withEmptyRootConfig_shouldReturnEmptyExclusions() throws StandaloneException {
-		excludedModules = new TestableExcludedModules(false, "", SELECTED_PROFILE);
+		excludedModules = new TestableExcludedModules(false, "");
 
 		List<String> result = excludedModules.get();
 
@@ -48,7 +47,7 @@ public class ExcludedModulesTest {
 
 	@Test
 	public void get_withValidProfile_shouldReturnExlusionsFromConfig() throws StandaloneException {
-		excludedModules = new TestableExcludedModules(false, SOME_PROJECT, SELECTED_PROFILE);
+		excludedModules = new TestableExcludedModules(false, SOME_PROJECT);
 		List<String> exclusionsFromConfig = Collections.singletonList("exludedModule");
 		when(yamlConfigStub.getExcludes()
 			.getExcludeModules()).thenReturn(exclusionsFromConfig);
@@ -60,12 +59,12 @@ public class ExcludedModulesTest {
 
 	private class TestableExcludedModules extends ExcludedModules {
 
-		public TestableExcludedModules(Boolean useDefaultConfig, String rootProjectConfig, String selectedProfile) {
-			super(useDefaultConfig, rootProjectConfig, selectedProfile);
+		public TestableExcludedModules(Boolean useDefaultConfig, String rootProjectConfig) {
+			super(useDefaultConfig, rootProjectConfig);
 		}
 
 		@Override
-		protected YAMLConfig getRootYamlConfig(String rootProjectConfig, String selectedProfile)
+		protected YAMLConfig getRootYamlConfig(String rootProjectConfig)
 				throws StandaloneException {
 			return yamlConfigStub;
 		}

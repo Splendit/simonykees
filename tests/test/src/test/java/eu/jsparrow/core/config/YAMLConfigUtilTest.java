@@ -89,19 +89,19 @@ public class YAMLConfigUtilTest {
 
 	@Test(expected = YAMLConfigException.class)
 	public void readConfig_InvalidProfile_ShouldThrowException() throws YAMLConfigException {
-		YAMLConfigUtil.readConfig("file", "INVALID");
+		YAMLConfigUtil.readConfig("file");
 	}
 
 	@Test(expected = YAMLConfigException.class)
 	public void readConfig_NonExistentFileWithoutProfile_ShouldThrowException() throws YAMLConfigException {
-		YAMLConfig config = YAMLConfigUtil.readConfig("file", null);
+		YAMLConfig config = YAMLConfigUtil.readConfig("file");
 
 		assertEquals("default", config.getSelectedProfile());
 	}
 
 	@Test
 	public void readConfig_ExistingFileWithoutProfile_ShouldUseDefaultProfile() throws YAMLConfigException {
-		YAMLConfig config = YAMLConfigUtil.readConfig(String.join("/", RESOURCE_DIRECTORY, "valid.yaml"), null);
+		YAMLConfig config = YAMLConfigUtil.readConfig(String.join("/", RESOURCE_DIRECTORY, "valid.yaml"));
 
 		assertEquals("aaa", config.getProfiles()
 			.get(0)

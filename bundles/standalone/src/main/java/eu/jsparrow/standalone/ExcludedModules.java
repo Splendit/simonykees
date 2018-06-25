@@ -20,15 +20,12 @@ public class ExcludedModules {
 		.lookupClass());
 
 	private boolean useDefaultConfig;
-
 	private String rootProjectConfig;
 
-	private String selectedProfile;
 
-	public ExcludedModules(Boolean useDefaultConfig, String rootProjectConfig, String selectedProfile) {
+	public ExcludedModules(Boolean useDefaultConfig, String rootProjectConfig) {
 		this.useDefaultConfig = useDefaultConfig;
 		this.rootProjectConfig = rootProjectConfig;
-		this.selectedProfile = selectedProfile;
 	}
 
 	public List<String> get() throws StandaloneException {
@@ -49,7 +46,7 @@ public class ExcludedModules {
 			return Collections.emptyList();
 		}
 
-		YAMLConfig rootYamlConfig = getRootYamlConfig(rootProjectConfig, selectedProfile);
+		YAMLConfig rootYamlConfig = getRootYamlConfig(rootProjectConfig);
 		YAMLExcludes excludes = rootYamlConfig.getExcludes();
 		List<String> excludedModules = excludes.getExcludeModules();
 		if (!excludedModules.isEmpty()) {
