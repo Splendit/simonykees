@@ -46,7 +46,7 @@ public class ExcludedModulesTest {
 	}
 
 	@Test
-	public void get_withValidProfile_shouldReturnExlusionsFromConfig() throws StandaloneException {
+	public void get_withValidYmlConfig_shouldReturnExlusionsFromConfig() throws StandaloneException {
 		excludedModules = new TestableExcludedModules(false, SOME_PROJECT);
 		List<String> exclusionsFromConfig = Collections.singletonList("exludedModule");
 		when(yamlConfigStub.getExcludes()
@@ -55,6 +55,18 @@ public class ExcludedModulesTest {
 		List<String> result = excludedModules.get();
 
 		assertEquals(exclusionsFromConfig, result);
+	}
+	
+	@Test
+	public void get_withValidYmlConfig_shouldReturnEmptyExlusionsList() throws StandaloneException {
+		excludedModules = new TestableExcludedModules(false, SOME_PROJECT);
+		List<String> exclusionsFromConfig = Collections.emptyList();
+		when(yamlConfigStub.getExcludes()
+			.getExcludeModules()).thenReturn(exclusionsFromConfig);
+
+		List<String> result = excludedModules.get();
+
+		assertTrue(result.isEmpty());
 	}
 
 	private class TestableExcludedModules extends ExcludedModules {
