@@ -63,13 +63,13 @@ public class ExcludedModules {
 
 	}
 
-	protected YAMLConfig getRootYamlConfig(String rootProjectConfig, String selectedProfile)
+	protected YAMLConfig getRootYamlConfig(String rootProjectConfig)
 			throws StandaloneException {
 		YAMLConfig rootYamlConfig;
 		try {
-			rootYamlConfig = YAMLConfigUtil.readConfig(rootProjectConfig, selectedProfile);
+			rootYamlConfig = YAMLConfigUtil.readConfig(rootProjectConfig);
 		} catch (YAMLConfigException e) {
-			throw new StandaloneException("Error occured while reading the root yaml configuration file", e); //$NON-NLS-1$
+			throw new StandaloneException(e.getMessage(), e);
 		}
 		return rootYamlConfig;
 	}
