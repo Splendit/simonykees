@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ public class YAMLConfigUtilTest {
 
 	// For testing file operations refer to file in the resources directory
 	private static final String RESOURCE_DIRECTORY = "src/test/resources/eu/jsparrow/core/config";
+	private static final String PROFILE_NAME = "profile-name";
 
 	File exportFile;
 
@@ -43,8 +45,8 @@ public class YAMLConfigUtilTest {
 	}
 
 	@After
-	public void tearDown() {
-		if (!exportFile.delete()) {
+	public void tearDown() throws IOException {
+		if (!Files.deleteIfExists(exportFile.toPath())) {
 			String loggerError = NLS.bind(Messages.Activator_couldNotDeleteFileWithPath, exportFile.getAbsolutePath());
 			logger.error(loggerError);
 		}
@@ -118,12 +120,11 @@ public class YAMLConfigUtilTest {
 
 	@Test
 	public void updateProfile_shouldSetSelectedProfile() throws YAMLConfigException {
-		String profileName1 = "profile-name-1"; //$NON-NLS-1$
 		String profileName2 = "profile-name-2"; //$NON-NLS-1$
 		YAMLConfig yamlConfig = new YAMLConfig();
-		yamlConfig.setSelectedProfile(profileName1);
+		yamlConfig.setSelectedProfile(PROFILE_NAME);
 		yamlConfig.setProfiles(
-				Arrays.asList(new YAMLProfile(profileName1, emptyList()), new YAMLProfile(profileName2, emptyList())));
+				Arrays.asList(new YAMLProfile(PROFILE_NAME, emptyList()), new YAMLProfile(profileName2, emptyList())));
 
 		YAMLConfigUtil.updateSelectedProfile(yamlConfig, profileName2);
 
@@ -132,9 +133,8 @@ public class YAMLConfigUtilTest {
 
 	@Test
 	public void updateProfile_NonExistingProflie_shouldThrowException() throws YAMLConfigException {
-		String profileName = "profile-name"; //$NON-NLS-1$
 		YAMLConfig yamlConfig = new YAMLConfig();
-		yamlConfig.setProfiles(singletonList(new YAMLProfile(profileName, emptyList())));
+		yamlConfig.setProfiles(singletonList(new YAMLProfile(PROFILE_NAME, emptyList())));
 
 		expectedException.expect(YAMLConfigException.class);
 		expectedException.expectMessage("Profile [INVALID] does not exist"); //$NON-NLS-1$
@@ -144,24 +144,22 @@ public class YAMLConfigUtilTest {
 
 	@Test
 	public void updateProfile_EmptyProfile_shouldNotUpdate() throws YAMLConfigException {
-		String profileName = "profile-name"; //$NON-NLS-1$
 		YAMLConfig yamlConfig = new YAMLConfig();
-		yamlConfig.setSelectedProfile(profileName);
+		yamlConfig.setSelectedProfile(PROFILE_NAME);
 
 		YAMLConfigUtil.updateSelectedProfile(yamlConfig, ""); //$NON-NLS-1$
 
-		assertEquals(profileName, yamlConfig.getSelectedProfile());
+		assertEquals(PROFILE_NAME, yamlConfig.getSelectedProfile());
 	}
 
 	@Test
 	public void updateProfile_NullProfile_shouldNotUpdate() throws YAMLConfigException {
-		String profileName = "profile-name"; //$NON-NLS-1$
 		YAMLConfig yamlConfig = new YAMLConfig();
-		yamlConfig.setSelectedProfile(profileName);
+		yamlConfig.setSelectedProfile(PROFILE_NAME);
 
 		YAMLConfigUtil.updateSelectedProfile(yamlConfig, null); // $NON-NLS-1$
 
-		assertEquals(profileName, yamlConfig.getSelectedProfile());
+		assertEquals(PROFILE_NAME, yamlConfig.getSelectedProfile());
 	}
 
 	private File loadResource(String resource) {
