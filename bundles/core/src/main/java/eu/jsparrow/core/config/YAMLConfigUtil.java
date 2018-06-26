@@ -293,4 +293,29 @@ public class YAMLConfigUtil {
 			.anyMatch(configProfile -> configProfile.getName()
 				.equals(profile));
 	}
+	
+	/**
+	 * Updates the selected profile of the configuration.
+	 * 
+	 * @param config
+	 *            the {@link YAMLConfig} to be updated
+	 * @param profile
+	 *            the selected profile name
+	 * 
+	 * @throws YAMLConfigException
+	 *             if the provided profile does not exist.
+	 */
+	public static void updateSelectedProfile(YAMLConfig config, String profile) throws YAMLConfigException {
+		if (profile == null || profile.isEmpty()) {
+			return;
+		}
+
+		if (YAMLConfigUtil.checkProfileExistence(config, profile)) {
+			config.setSelectedProfile(profile);
+		} else {
+			String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, profile);
+			throw new YAMLConfigException(exceptionMessage);
+		}
+
+	}
 }

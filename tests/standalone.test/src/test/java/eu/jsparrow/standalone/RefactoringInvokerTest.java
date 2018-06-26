@@ -1,5 +1,7 @@
 package eu.jsparrow.standalone;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -7,13 +9,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.osgi.framework.BundleContext;
 
 import eu.jsparrow.core.config.YAMLConfig;
+import eu.jsparrow.core.config.YAMLProfile;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
@@ -27,6 +33,9 @@ public class RefactoringInvokerTest {
 
 	private RefactoringInvoker refactoringInvoker;
 	private StandaloneConfig standaloneConfig;
+
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
 
 	@Before
 	public void setUp() {
@@ -55,34 +64,60 @@ public class RefactoringInvokerTest {
 		verify(standaloneConfig).commitRefactoring();
 	}
 
-	@Test(expected = StandaloneException.class)
+	@Test
 	public void startRefactoring_exceptinsInCreateRefactoringState_shouldNotCommit() throws Exception {
 		BundleContext context = mock(BundleContext.class);
 
 		doThrow(StandaloneException.class).when(standaloneConfig)
 			.createRefactoringStates();
 
+		expectedException.expect(StandaloneException.class);
 		refactoringInvoker.startRefactoring(context);
 
 		verify(standaloneConfig, never()).computeRefactoring();
 		verify(standaloneConfig, never()).commitRefactoring();
 	}
 
-	@Test(expected = StandaloneException.class)
+	@Test
 	public void startRefactoring_exceptinsInDoRefactoring_shouldNotCommit() throws Exception {
 		BundleContext context = mock(BundleContext.class);
 		doThrow(StandaloneException.class).when(standaloneConfig)
 			.computeRefactoring();
 
+		expectedException.expect(StandaloneException.class);
 		refactoringInvoker.startRefactoring(context);
 
 		verify(standaloneConfig, never()).commitRefactoring();
 	}
 
+	@Test
+	public void updateProfile_shouldSetSelectedProfile() throws StandaloneException {
+		String profileName = "profile-name"; //$NON-NLS-1$
+		YAMLConfig yamlConfig = new YAMLConfig();
+		yamlConfig.setProfiles(Collections.singletonList(new YAMLProfile(profileName, Collections.emptyList())));
+
+		refactoringInvoker.updateSelectedProfile(yamlConfig, profileName);
+
+		assertEquals(profileName, yamlConfig.getSelectedProfile());
+	}
+
+	@Test
+	public void updateProfile_NonExistingProflie_shouldThrowException() throws StandaloneException {
+		String profileName = "profile-name"; //$NON-NLS-1$
+		YAMLConfig yamlConfig = new YAMLConfig();
+		yamlConfig.setProfiles(Collections.singletonList(new YAMLProfile(profileName, Collections.emptyList())));
+
+		expectedException.expect(StandaloneException.class);
+		expectedException.expectMessage("Profile [INVALID] does not exist"); //$NON-NLS-1$
+		refactoringInvoker.updateSelectedProfile(yamlConfig, "INVALID"); //$NON-NLS-1$
+
+		assertTrue(false);
+	}
+
 	class TestableRefactoringInvoker extends RefactoringInvoker {
 
 		@Override
-		protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws StandaloneException {
+		protected YAMLConfig getYamlConfig(String configFilePath) throws StandaloneException {
 			return new YAMLConfig();
 		}
 

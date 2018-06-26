@@ -1,5 +1,7 @@
 package eu.jsparrow.core.config;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -9,11 +11,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.eclipse.osgi.util.NLS;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +33,9 @@ public class YAMLConfigUtilTest {
 	private static final String RESOURCE_DIRECTORY = "src/test/resources/eu/jsparrow/core/config";
 
 	File exportFile;
+
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
 
 	@Before
 	public void setUp() throws IOException {
@@ -48,8 +56,10 @@ public class YAMLConfigUtilTest {
 		assertNotNull(config);
 	}
 
-	@Test(expected = YAMLConfigException.class)
+	@Test
 	public void loadConfiguration_LoadInvalidYAML_ShouldThrowException() throws YAMLConfigException {
+		expectedException.expect(YAMLConfigException.class);
+
 		YAMLConfig config = YAMLConfigUtil.loadConfiguration(loadResource("invalid.yaml"));
 		assertNotNull(config);
 	}
@@ -62,18 +72,19 @@ public class YAMLConfigUtilTest {
 		assertNotEquals(0, exportFile.length());
 	}
 
-	@Test(expected = YAMLConfigException.class)
+	@Test
 	public void exportConfig_ToNonWritableFile_ShouldThrowException() throws YAMLConfigException {
 		YAMLConfig config = new YAMLConfig();
 		assertTrue(exportFile.setWritable(false));
+		expectedException.expect(YAMLConfigException.class);
 		YAMLConfigUtil.exportConfig(config, exportFile);
 	}
 
-	@Test(expected = YAMLConfigException.class)
+	@Test
 	public void getSelectedRulesFromConfig_InvalidSelectedProfile_ShouldThrowException() throws YAMLConfigException {
 		YAMLConfig config = new YAMLConfig();
 		config.setSelectedProfile("INVALID");
-
+		expectedException.expect(YAMLConfigException.class);
 		YAMLConfigUtil.getSelectedRulesFromConfig(config, new ArrayList<>());
 	}
 
@@ -87,25 +98,70 @@ public class YAMLConfigUtilTest {
 		YAMLConfigUtil.getSelectedRulesFromConfig(config, new ArrayList<>());
 	}
 
-	@Test(expected = YAMLConfigException.class)
-	public void readConfig_InvalidProfile_ShouldThrowException() throws YAMLConfigException {
-		YAMLConfigUtil.readConfig("file");
-	}
-
-	@Test(expected = YAMLConfigException.class)
-	public void readConfig_NonExistentFileWithoutProfile_ShouldThrowException() throws YAMLConfigException {
+	@Test
+	public void readConfig_NonExistentFile_ShouldThrowException() throws YAMLConfigException {
+		expectedException.expect(YAMLConfigException.class);
+		expectedException.expectMessage(
+				"The provided path (file) does not lead to a YAML configuration file! (File extension must be *.yml or *.yaml)");
 		YAMLConfig config = YAMLConfigUtil.readConfig("file");
-
 		assertEquals("default", config.getSelectedProfile());
 	}
 
 	@Test
-	public void readConfig_ExistingFileWithoutProfile_ShouldUseDefaultProfile() throws YAMLConfigException {
+	public void readConfig_ExistingFile_ShouldUseDefaultProfile() throws YAMLConfigException {
 		YAMLConfig config = YAMLConfigUtil.readConfig(String.join("/", RESOURCE_DIRECTORY, "valid.yaml"));
 
 		assertEquals("aaa", config.getProfiles()
 			.get(0)
 			.getName());
+	}
+
+	@Test
+	public void updateProfile_shouldSetSelectedProfile() throws YAMLConfigException {
+		String profileName1 = "profile-name-1"; //$NON-NLS-1$
+		String profileName2 = "profile-name-2"; //$NON-NLS-1$
+		YAMLConfig yamlConfig = new YAMLConfig();
+		yamlConfig.setSelectedProfile(profileName1);
+		yamlConfig.setProfiles(
+				Arrays.asList(new YAMLProfile(profileName1, emptyList()), new YAMLProfile(profileName2, emptyList())));
+
+		YAMLConfigUtil.updateSelectedProfile(yamlConfig, profileName2);
+
+		assertEquals(profileName2, yamlConfig.getSelectedProfile());
+	}
+
+	@Test
+	public void updateProfile_NonExistingProflie_shouldThrowException() throws YAMLConfigException {
+		String profileName = "profile-name"; //$NON-NLS-1$
+		YAMLConfig yamlConfig = new YAMLConfig();
+		yamlConfig.setProfiles(singletonList(new YAMLProfile(profileName, emptyList())));
+
+		expectedException.expect(YAMLConfigException.class);
+		expectedException.expectMessage("Profile [INVALID] does not exist"); //$NON-NLS-1$
+
+		YAMLConfigUtil.updateSelectedProfile(yamlConfig, "INVALID"); //$NON-NLS-1$
+	}
+
+	@Test
+	public void updateProfile_EmptyProfile_shouldNotUpdate() throws YAMLConfigException {
+		String profileName = "profile-name"; //$NON-NLS-1$
+		YAMLConfig yamlConfig = new YAMLConfig();
+		yamlConfig.setSelectedProfile(profileName);
+
+		YAMLConfigUtil.updateSelectedProfile(yamlConfig, ""); //$NON-NLS-1$
+
+		assertEquals(profileName, yamlConfig.getSelectedProfile());
+	}
+
+	@Test
+	public void updateProfile_NullProfile_shouldNotUpdate() throws YAMLConfigException {
+		String profileName = "profile-name"; //$NON-NLS-1$
+		YAMLConfig yamlConfig = new YAMLConfig();
+		yamlConfig.setSelectedProfile(profileName);
+
+		YAMLConfigUtil.updateSelectedProfile(yamlConfig, null); // $NON-NLS-1$
+
+		assertEquals(profileName, yamlConfig.getSelectedProfile());
 	}
 
 	private File loadResource(String resource) {

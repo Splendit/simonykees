@@ -205,7 +205,8 @@ public class RefactoringInvoker {
 			String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
 			logger.info(loggerInfo);
 
-			YAMLConfig config = getYamlConfig(configFilePath, profile);
+			YAMLConfig config = getYamlConfig(configFilePath);
+			updateSelectedProfile(config, profile);
 
 			String selectedProfile = config.getSelectedProfile();
 
@@ -304,35 +305,39 @@ public class RefactoringInvoker {
 	}
 
 	/**
-	 * Reads the yml configuration file in the provided path and sets the given
-	 * profile as selected if it exists.
+	 * Reads the yml configuration file in the provided path.
 	 * 
 	 * @param configFilePath
 	 *            path to the yml/yaml file
-	 * @param profile
-	 *            the desired selected profile
 	 * @return the parsed {@link YAMLConfig} file.
 	 * @throws StandaloneException
-	 *             if the configuration file could not be read or the provided
-	 *             profile does not exist.
+	 *             if the configuration file could not be read
 	 */
-	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws StandaloneException {
+	protected YAMLConfig getYamlConfig(String configFilePath) throws StandaloneException {
 		try {
-			YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath);
-
-			if (profile != null && !profile.isEmpty()) {
-				if (YAMLConfigUtil.checkProfileExistence(config, profile)) {
-					config.setSelectedProfile(profile);
-				} else {
-					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
-							profile);
-					throw new StandaloneException(exceptionMessage);
-				}
-			}
-
-			return config;
+			return YAMLConfigUtil.readConfig(configFilePath);
 		} catch (YAMLConfigException e) {
 			throw new StandaloneException(e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * Updates the selected profile of the configuration.
+	 * 
+	 * @param config
+	 *            the {@link YAMLConfig} to be updated
+	 * @param profile
+	 *            the selected profile name
+	 * 
+	 * @throws StandaloneException
+	 *             if the provided profile does not exist.
+	 */
+	protected void updateSelectedProfile(YAMLConfig config, String profile) throws StandaloneException {
+		try {
+			YAMLConfigUtil.updateSelectedProfile(config, profile);
+		} catch (YAMLConfigException e) {
+			throw new StandaloneException(e.getMessage(), e);
+		}
+
 	}
 }
