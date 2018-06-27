@@ -176,12 +176,23 @@ public class RefactoringInvoker {
 	}
 
 	/**
-	 * gets the configuration from the given path in context
+	 * Gets the configuration for the provided project from the given path in
+	 * the bundle's context
 	 * 
 	 * @param context
-	 * @return the read configuration
+	 *            the {@link BundleContext} within the equinox framework
+	 * @param projectId
+	 *            the project to find the configuration for
+	 * @return the {@link YAMLConfig} corresponding to the project with the
+	 *         given projectId
 	 * @throws StandaloneException
-	 * @throws YAMLConfigException
+	 *             if the configuration file cannot be read or is inconsistent.
+	 *             Reasons include:
+	 *             <ul>
+	 *             <li>The selected profile in the {@link BundleContext} does
+	 *             not match any of the declared profiles in the configuration
+	 *             file.</li>
+	 *             </ul>
 	 */
 	private YAMLConfig getConfiguration(BundleContext context, String projectId) throws StandaloneException {
 
@@ -194,7 +205,8 @@ public class RefactoringInvoker {
 			String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
 			logger.info(loggerInfo);
 
-			YAMLConfig config = getYamlConfig(configFilePath, profile);
+			YAMLConfig config = getYamlConfig(configFilePath);
+			updateSelectedProfile(config, profile);
 
 			String selectedProfile = config.getSelectedProfile();
 
@@ -239,7 +251,7 @@ public class RefactoringInvoker {
 		Map<String, String> projectPaths = findAllProjectPaths(context);
 
 		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
-				context.getProperty(ROOT_CONFIG_PATH), context.getProperty(SELECTED_PROFILE)).get();
+				context.getProperty(ROOT_CONFIG_PATH)).get();
 
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
@@ -292,11 +304,40 @@ public class RefactoringInvoker {
 		return paths;
 	}
 
-	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws StandaloneException {
+	/**
+	 * Reads the yml configuration file in the provided path.
+	 * 
+	 * @param configFilePath
+	 *            path to the yml/yaml file
+	 * @return the parsed {@link YAMLConfig} file.
+	 * @throws StandaloneException
+	 *             if the configuration file could not be read
+	 */
+	protected YAMLConfig getYamlConfig(String configFilePath) throws StandaloneException {
 		try {
-			return YAMLConfigUtil.readConfig(configFilePath, profile);
+			return YAMLConfigUtil.readConfig(configFilePath);
 		} catch (YAMLConfigException e) {
 			throw new StandaloneException(e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * Updates the selected profile of the configuration.
+	 * 
+	 * @param config
+	 *            the {@link YAMLConfig} to be updated
+	 * @param profile
+	 *            the selected profile name
+	 * 
+	 * @throws StandaloneException
+	 *             if the provided profile does not exist.
+	 */
+	protected void updateSelectedProfile(YAMLConfig config, String profile) throws StandaloneException {
+		try {
+			YAMLConfigUtil.updateSelectedProfile(config, profile);
+		} catch (YAMLConfigException e) {
+			throw new StandaloneException(e.getMessage(), e);
+		}
+
 	}
 }

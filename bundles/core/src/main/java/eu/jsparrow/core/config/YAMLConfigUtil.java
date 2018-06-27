@@ -247,21 +247,16 @@ public class YAMLConfigUtil {
 	}
 
 	/**
-	 * reads the configuration file and modifies it according to maven flags. if
-	 * no configuration file is specified the default configuration will be
-	 * used. if a profile is chosen via maven flags there is a check if the
-	 * profile exists.
+	 * reads the configuration file with the provided path. if no configuration
+	 * file is specified the default configuration will be used.
 	 * 
 	 * @param configFilePath
 	 *            path to the configuration file
-	 * @param profile
-	 *            selected profile
-	 * @return jsparrow configuration
+	 * @return jSparrow configuration
 	 * @throws YAMLConfigException
-	 *             if an error occurs during loading of the file or if the
-	 *             profile does not exist
+	 *             if an error occurs while loading of the file
 	 */
-	public static YAMLConfig readConfig(String configFilePath, String profile) throws YAMLConfigException {
+	public static YAMLConfig readConfig(String configFilePath) throws YAMLConfigException {
 		YAMLConfig config = null;
 		if (configFilePath != null && !configFilePath.isEmpty()) {
 			File configFile = new File(configFilePath);
@@ -280,15 +275,6 @@ public class YAMLConfigUtil {
 			throw new YAMLConfigException(exceptionMessage);
 		}
 
-		if (profile != null && !profile.isEmpty()) {
-			if (checkProfileExistence(config, profile)) {
-				config.setSelectedProfile(profile);
-			} else {
-				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, profile);
-				throw new YAMLConfigException(exceptionMessage);
-			}
-		}
-
 		return config;
 	}
 
@@ -301,10 +287,35 @@ public class YAMLConfigUtil {
 	 *            selected profile
 	 * @return true, if the profile exists, false otherwise
 	 */
-	private static boolean checkProfileExistence(YAMLConfig config, String profile) {
+	public static boolean checkProfileExistence(YAMLConfig config, String profile) {
 		return config.getProfiles()
 			.stream()
 			.anyMatch(configProfile -> configProfile.getName()
 				.equals(profile));
+	}
+	
+	/**
+	 * Updates the selected profile of the configuration.
+	 * 
+	 * @param config
+	 *            the {@link YAMLConfig} to be updated
+	 * @param profile
+	 *            the selected profile name
+	 * 
+	 * @throws YAMLConfigException
+	 *             if the provided profile does not exist.
+	 */
+	public static void updateSelectedProfile(YAMLConfig config, String profile) throws YAMLConfigException {
+		if (profile == null || profile.isEmpty()) {
+			return;
+		}
+
+		if (YAMLConfigUtil.checkProfileExistence(config, profile)) {
+			config.setSelectedProfile(profile);
+		} else {
+			String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, profile);
+			throw new YAMLConfigException(exceptionMessage);
+		}
+
 	}
 }
