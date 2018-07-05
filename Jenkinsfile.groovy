@@ -108,10 +108,15 @@ timestamps {
 				}
 				
 				stage('Tag') {
+					def subdirectory = "main"
+					if (env.BRANCH_NAME == 'master-jmp') {
+						subdirectory = "jmp"
+					}
+
 					// tag build in repository
 					sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
 							// first parameter is the dir, second parameter is the subdirectory and optional
-						sh("./tag-deployment.sh $env.BRANCH_NAME main")
+						sh("./tag-deployment.sh $env.BRANCH_NAME $subdirectory")
 						sh("git push $backupOrigin --tags")
 					}
 				}
