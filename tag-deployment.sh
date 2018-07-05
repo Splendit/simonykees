@@ -5,13 +5,10 @@
 # first parameter is required and has to be develop or master and results in the directory of the tag
 # second parameter is optional and allows to set a subdirector for the tag
 
-# prefix definition for develop
-if [ "$1" == "develop" ]; then dir=$1/; fi
+# prefix definition for develop, master and master-jmp
+if [ "$1" == "develop" ] || [ "$1" == "master" ] || [ "$1" == "master-jmp" ]; then dir=$1/; fi
 
-# prefix definition for master
-if [ "$1" == "master" ]; then dir=$1/; fi
 if [ -z ${dir+x} ]; then echo "Executed with wrong argument '$1' or argument is unset"; exit 1; fi
-
 
 # second parameter is the sub directory
 if [ -n ${2+x} ]; then subdir="$2"/; fi
