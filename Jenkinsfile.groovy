@@ -20,7 +20,7 @@ timestamps {
 				checkout scm
 			}
 			
-			if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
+			if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'master-jmp' || env.BRANCH_NAME == 'develop' ) {
 				stage('Push to Github') {
 					println "Pushing to GitHub..."
 					sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
@@ -93,7 +93,7 @@ timestamps {
   			}
 			
 			// master and develop builds get deployed to packagedrone (see pom.xml) and tagged (see tag-deployment.sh)
-			if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
+			if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'master-jmp' || env.BRANCH_NAME == 'develop' ) {
 				// skipping tests, because integration tests have passed already
 				// -B batch mode for clean output (otherwise upload status will spam the console)
 				def mvnCommand = 'clean deploy -DskipTests -B'
