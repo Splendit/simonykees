@@ -183,7 +183,7 @@ void compileMavenPlugin() {
 		def mvnCommand = 'clean install -DskipTests'
 
 		dir('jsparrow-maven-plugin') {
-			sh "'${mvnBin()}/bin/mvn' ${mvnCommand}"
+			sh "'${mvnBin()}' ${mvnCommand}"
 		}
 	}
 }
@@ -201,14 +201,14 @@ void runIntegrationTests() {
 			def mvnCommand = 'clean verify -fae -Dsurefire.rerunFailingTestsCount=2'
 
 			// def mvnCommand = 'surefire:test -fae -Dsurefire.rerunFailingTestsCount=2'
-			def statusCode = sh(returnStatus: true, script: "'${mvnBin()}/bin/mvn' ${mvnCommand}")
+			def statusCode = sh(returnStatus: true, script: "'${mvnBin()}' ${mvnCommand}")
 
 			// in case of failing tests, there will be 'repeats' number of reruns
 			int i = 0
 			int repeats = 1
 			while (statusCode != 0 && i < repeats) {
 				def rerunTests = 'clean verify -fae'
-				statusCode = sh(returnStatus: true, script: "'${mvnBin()}/bin/mvn' ${rerunTests}")
+				statusCode = sh(returnStatus: true, script: "'${mvnBin()}' ${rerunTests}")
 				i = i + 1
 			}
 
