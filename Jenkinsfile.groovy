@@ -122,12 +122,13 @@ void runSonarQubeAnalysis() {
 	}
 }
 
-void tagCommit() {
+void tagCommit(def branchName, String subdirectory) {
+
 	stage('Tag Commit') {
 		// tag build in repository
 		sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
 			// first parameter is the dir, second parameter is the subdirectory and optional
-			sh("./tag-deployment.sh $env.BRANCH_NAME main")
+			sh("./tag-deployment.sh $branchName $subdirectory")
 			sh("git push $backupOrigin --tags")
 		}
 	}
@@ -228,7 +229,7 @@ timestamps {
 					uploadMappingFile(profile)
 					deployMavenPlugin(profile, timestamp)
 
-					tagCommit()
+					tagCommit(env.BRANCH_NAME, "main")
 					break
 				case "master":
 					runStandardSteps()
@@ -255,7 +256,7 @@ timestamps {
 					deployEclipsePlugin(profile, timestamp)
 					deployMavenPlugin(profile, timestamp)
 
-					tagCommit()
+					tagCommit(env.BRANCH_NAME, "main")
 					break
 				case "master-jmp":
 					runStandardSteps()
@@ -263,10 +264,10 @@ timestamps {
 					// deploy production proguard
 					Profile profile = Profile.MASTER_PRODUCTION_PROGUARD
 					buildEclipsePlugin(profile, timestamp) // only build, no deploy
-					// TODO upload mapping files?
+					uploadMappingFile(profile)
 					deployMavenPlugin(profile, timestamp)
 
-					tagCommit()
+					tagCommit("master", "jmp")
 					break
 				case "release":
 					runStandardSteps()
