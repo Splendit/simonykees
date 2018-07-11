@@ -43,11 +43,12 @@ timestamps {
 
 			String timestamp = new Date().format("yyyyMMdd-HHmm", TimeZone.getTimeZone('UTC'))
 
+			checkout()
+
 			// we split at the slash. this is only relevant for the release branch.
 			switch (env.BRANCH_NAME.tokenize("/")[0]) {
 				case "develop":
 
-					checkout()
 					pushToGithub()
 
 					runStandardSteps()
@@ -69,7 +70,6 @@ timestamps {
 					break
 				case "master":
 
-					checkout()
 					pushToGithub()
 
 					runStandardSteps()
@@ -100,7 +100,6 @@ timestamps {
 					break
 				case "master-jmp":
 
-					checkout()
 					pushToGithub()
 
 					runStandardSteps()
@@ -115,8 +114,6 @@ timestamps {
 					break
 				case "release":
 
-					checkout()
-
 					runStandardSteps()
 
 					// deploy test proguard
@@ -126,8 +123,6 @@ timestamps {
 
 					break
 				default:
-
-					checkout()
 
 					runStandardSteps()
 
@@ -165,6 +160,12 @@ void pushToGithub() {
 			sh("git push $backupOrigin HEAD:$env.BRANCH_NAME")
 		}
 	}
+}
+
+void runStandardSteps() {
+	compileEclipsePlugin()
+	compileMavenPlugin()
+	runIntegrationTests()
 }
 
 void compileEclipsePlugin() {
@@ -304,12 +305,6 @@ void uploadMappingFile(Profile profile) {
 	stage ("Upload Mapping Files") {
 		uploadMappingFiles(directory)
 	}
-}
-
-void runStandardSteps() {
-	compileEclipsePlugin()
-	compileMavenPlugin()
-	runIntegrationTests()
 }
 
 def setTestStatus(testStatus) {
