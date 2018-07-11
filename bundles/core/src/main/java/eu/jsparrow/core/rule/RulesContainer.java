@@ -38,6 +38,7 @@ import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
+import eu.jsparrow.core.rule.impl.OptionalIfPresentRule;
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
@@ -132,6 +133,10 @@ public class RulesContainer {
 				new LambdaForEachCollectRule(), new LambdaForEachMapRule(), new FlatMapInsteadOfNestedLoopsRule(),
 				new EnhancedForLoopToStreamAnyMatchRule(), new EnhancedForLoopToStreamFindFirstRule(),
 				new EnhancedForLoopToStreamSumRule(), new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
+				/*
+				 * Optionals
+				 */
+				new OptionalIfPresentRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen
