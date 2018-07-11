@@ -179,14 +179,13 @@ void compileEclipsePlugin() {
  * see deployMavenPluginWithDependencies for a full build that includes copying dependencies
  */
 void compileMavenPlugin() {
-	ncies.
-			stage('Compile Maven Plugin') {
-				def mvnCommand = 'clean install -DskipTests'
+	stage('Compile Maven Plugin') {
+		def mvnCommand = 'clean install -DskipTests'
 
-				dir('jsparrow-maven-plugin') {
-					sh "'${mvnBin()}/bin/mvn' ${mvnCommand}"
-				}
-			}
+		dir('jsparrow-maven-plugin') {
+			sh "'${mvnBin()}/bin/mvn' ${mvnCommand}"
+		}
+	}
 }
 
 /**
