@@ -46,6 +46,10 @@ timestamps {
 			// we split at the slash. this is only relevant for the release branch.
 			switch (env.BRANCH_NAME.tokenize("/")[0]) {
 				case "develop":
+
+					checkout()
+					pushToGithub()
+
 					runStandardSteps()
 
 					runSonarQubeAnalysis()
@@ -64,6 +68,10 @@ timestamps {
 					tagCommit(env.BRANCH_NAME, "main")
 					break
 				case "master":
+
+					checkout()
+					pushToGithub()
+
 					runStandardSteps()
 
 					// deploy production proguard
@@ -91,6 +99,10 @@ timestamps {
 					tagCommit(env.BRANCH_NAME, "main")
 					break
 				case "master-jmp":
+
+					checkout()
+					pushToGithub()
+
 					runStandardSteps()
 
 					// deploy production proguard
@@ -102,6 +114,9 @@ timestamps {
 					tagCommit("master", "jmp")
 					break
 				case "release":
+
+					checkout()
+
 					runStandardSteps()
 
 					// deploy test proguard
@@ -111,6 +126,9 @@ timestamps {
 
 					break
 				default:
+
+					checkout()
+
 					runStandardSteps()
 
 					break
@@ -290,8 +308,6 @@ void uploadMappingFile(Profile profile) {
 }
 
 void runStandardSteps() {
-	checkout()
-	pushToGithub()
 	compileEclipsePlugin()
 	compileMavenPlugin()
 	runIntegrationTests()
