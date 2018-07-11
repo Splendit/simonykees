@@ -22,6 +22,9 @@
 		
 		<!-- eclipse plugin -->
 		<module>feature</module>
+
+		<!-- eclipse plugin -->
+		<module>feature.rules.import</module>
 	</modules>
 
 </project>

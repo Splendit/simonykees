@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="eu.jsparrow.rules.import.feature"
+      label="jSparrow Third-party Dependencies"
+      version="2.5.0.qualifier"
+      provider-name="Splendit IT-Consulting GmbH">
+
+   <description url="https://jsparrow.eu/knowledge-base/">
+      %description
+   </description>
+
+   <copyright url="https://jsparrow.eu/jsparrow-software-download-terms-conditions/">
+      %copyright
+   </copyright>
+
+   <url>
+      <update label="jSparrow Update Site" url="http://update.jsparrow.eu"/>
+   </url>
+
+   <plugin
+         id="eu.jsparrow.rules.imports"
+         download-size="0"
+         install-size="0"
+         version="2.5.0.20180514-1249"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.rules.imports"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
