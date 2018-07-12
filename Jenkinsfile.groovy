@@ -236,11 +236,18 @@ void runIntegrationTests() {
  */
 void runSonarQubeAnalysis() {
 
-	stage('SonarQube Analysis') {
-		withSonarQubeEnv('SonarQube Server') {
-			sh 'mvn sonar:sonar'
+	def stageName = "SonarQube Analysis"
+
+	if (isLiveEnvironment()) {
+		stage(stageName) {
+			withSonarQubeEnv('SonarQube Server') {
+				sh 'mvn sonar:sonar'
+			}
 		}
+	} else {
+		mockStage(stageName)
 	}
+
 }
 
 void tagCommit(def branchName, String subdirectory) {
