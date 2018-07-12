@@ -21,13 +21,6 @@
          id="eu.jsparrow.rules.imports"
          download-size="0"
          install-size="0"
-         version="2.5.0.20180514-1249"
-         unpack="false"/>
-
-   <plugin
-         id="eu.jsparrow.rules.imports"
-         download-size="0"
-         install-size="0"
          version="0.0.0"
          unpack="false"/>
 

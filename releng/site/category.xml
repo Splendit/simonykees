@@ -9,4 +9,5 @@
          Eclipse plugins by Splendit IT-Consulting GmbH
       </description>
    </category-def>
+   <repository-reference location="http://packagedrone-vm-01.splendit.loc:8080/p2/jenkins-jSparrow-develop-test-noProguard/" enabled="true" />
 </site>

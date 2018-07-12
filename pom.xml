@@ -169,10 +169,15 @@
 
 	<repositories>
 		<repository>
-			<id>neon</id>
+			<id>oxygen</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/eclipse/updates/4.7</url>
 		</repository>
+			<repository>
+				<id>photon</id>
+				<layout>p2</layout>
+				<url>http://download.eclipse.org/eclipse/updates/4.8</url>
+            </repository>
 		<repository>
 			<id>netlicensing</id>
 			<layout>p2</layout>

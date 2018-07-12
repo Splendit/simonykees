@@ -9,9 +9,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation;
+import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.core.search.TypeNameMatch;
-import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -38,7 +38,6 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  *
  */
 
-@SuppressWarnings("restriction")
 public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteASTVisitor> {
 
 	public OrganiseImportsRule() {
