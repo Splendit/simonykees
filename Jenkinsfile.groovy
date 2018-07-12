@@ -316,7 +316,7 @@ def setTestStatus(testStatus) {
 }
 
 
-def notifyBuild(String buildStatus) {
+def notifyBuild(def buildStatus) {
 	// send to email only if buildStatus is UNSTABLE or FAILED
 	if (buildStatus == 'FAILURE' || buildStatus == 'UNSTABLE') {
 		jobName = env.JOB_NAME.replace("%2F", "/")
