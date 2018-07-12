@@ -22,7 +22,7 @@ enum Profile {
 	MASTER_PRODUCTION_noPROGUARD("-Dproduction -Pmaster-production-noProguard", "_noProguard"),
 	MASTER_TEST_PROGUARD("-Dproguard -Pmaster-test-proguard", "_test"),
 	MASTER_TEST_noPROGUARD("-Pmaster-test-noProguard", "_noProguard_test"),
-	DEVELOP_TEST_PROGUARD("-Dproguard -Pdevelop-test-proguard", "_noProguard_test"),
+	DEVELOP_TEST_PROGUARD("-Dproguard -Pdevelop-test-proguard", "_test"),
 	DEVELOP_TEST_noPROGUARD("-Pdevelop-test-noProguard", "_noProguard_test"),
 	RELEASE_TEST_PROGUARD("-Dproguard -PreleaseCandidate", "_test");
 
@@ -70,7 +70,6 @@ timestamps {
 					profile = Profile.DEVELOP_TEST_PROGUARD
 					deployEclipsePlugin(profile, timestamp)
 					uploadMappingFile(profile)
-					deployMavenPlugin(profile, timestamp)
 
 					tagCommit(env.BRANCH_NAME, "main")
 					break
