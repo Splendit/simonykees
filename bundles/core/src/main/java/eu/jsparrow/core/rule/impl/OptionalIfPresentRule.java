@@ -14,7 +14,6 @@ import eu.jsparrow.rules.common.Tag;
 public class OptionalIfPresentRule extends RefactoringRuleImpl<OptionalIfPresentASTVisitor> {
 
 	public OptionalIfPresentRule() {
-		super();
 		this.visitorClass = OptionalIfPresentASTVisitor.class;
 		this.id = "OptionalIfPresent"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.OptionalIfPresentRule_name,

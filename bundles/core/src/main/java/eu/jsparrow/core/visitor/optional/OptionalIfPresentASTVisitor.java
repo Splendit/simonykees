@@ -5,7 +5,9 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
@@ -19,6 +21,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.visitor.sub.EffectivelyFinalVisitor;
 import eu.jsparrow.core.visitor.sub.LiveVariableScope;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -150,12 +153,35 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		AST ast = astRewrite.getAST();
 		LambdaExpression lambdaExpression = ast.newLambdaExpression();
 		SimpleName parameter = ast.newSimpleName(identifier);
+		VariableDeclarationFragment parameterDeclaration = ast.newVariableDeclarationFragment();
+		parameterDeclaration.setName(parameter);
 
-		lambdaExpression.setBody(astRewrite.createCopyTarget(body));
+		ASTNode lambdaBody = unwrapBody(body);
+
+		lambdaExpression.setParentheses(false);
+		lambdaExpression.setBody(astRewrite.createCopyTarget(lambdaBody));
 		lambdaExpression.parameters()
-			.add(parameter);
+			.add(parameterDeclaration);
 
 		return lambdaExpression;
+	}
+
+	private ASTNode unwrapBody(Statement body) {
+		ASTNode lambdaBody = body;
+		if (ASTNode.BLOCK == body.getNodeType()) {
+			Block block = (Block) body;
+			List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
+			if (statements.size() == 1) {
+				Statement singleBodyStatement = statements.get(0);
+				if (ASTNode.EXPRESSION_STATEMENT == singleBodyStatement.getNodeType()) {
+					ExpressionStatement expressionStatement = (ExpressionStatement) singleBodyStatement;
+					lambdaBody = expressionStatement.getExpression();
+				}
+			}
+		} else if (ASTNode.EXPRESSION_STATEMENT == body.getNodeType()) {
+			lambdaBody = ((ExpressionStatement) body).getExpression();
+		}
+		return lambdaBody;
 	}
 
 	private Statement createLambdaExpressionBody(Statement thenStatement, List<MethodInvocation> getExpressions,
@@ -179,7 +205,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		ASTNode enclosingScope = scope.findEnclosingScope(thenStatement)
 			.orElse(null);
 		if (enclosingScope == null) {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		scope.lazyLoadScopeNames(enclosingScope);
 

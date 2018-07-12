@@ -7,7 +7,7 @@ public class OptionalIfPresentRule {
 	public void defaultUseCase(Optional<String> input) {
 		input.ifPresent(value -> System.out.println(value));
 	}
-
+	
 	public void skipWhenMultipleExpressionsInIf(Optional<String> input) {
 		boolean beTrue = true;
 		if (input.isPresent() && beTrue) {
