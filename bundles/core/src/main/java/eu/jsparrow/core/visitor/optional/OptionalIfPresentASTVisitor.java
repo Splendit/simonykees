@@ -1,7 +1,6 @@
 package eu.jsparrow.core.visitor.optional;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
@@ -71,8 +70,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		// Find the optional expression
 		Expression optional = methodInvocation.getExpression();
-
-		List<Expression> getExpressions = findGetExpressions(thenStatement, optional);
+		List<MethodInvocation> getExpressions = findGetExpressions(thenStatement, optional);
 		if (getExpressions.isEmpty()) {
 			return true;
 		}
@@ -157,13 +155,13 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		return lambdaExpression;
 	}
 
-	private Statement createLambdaExpressionBody(Statement thenStatement, List<Expression> getExpressions,
+	private Statement createLambdaExpressionBody(Statement thenStatement, List<MethodInvocation> getExpressions,
 			String identifier) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	private String findParameterName(Statement thenStatement, List<Expression> getExpressions) {
+	private String findParameterName(Statement thenStatement, List<MethodInvocation> getExpressions) {
 		return getExpressions.stream()
 			.filter(e -> e.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY)
 			.map(ASTNode::getParent)
@@ -191,8 +189,10 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		return newName;
 	}
 
-	private List<Expression> findGetExpressions(Statement thenStatement, Expression optional) {
-		return null;
+	private List<MethodInvocation> findGetExpressions(Statement thenStatement, Expression optional) {
+		OptionalGetVisitor visitor = new OptionalGetVisitor(optional);
+		thenStatement.accept(visitor);
+		return visitor.getInvocations();
 	}
 
 	private boolean containsReturnStatement(Statement thenStatement) {

@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -43,7 +42,7 @@ public class LiveVariableScope {
 	 * @return an optional of any of the nodes mentioned above, or an empty
 	 *         optional otherwise
 	 */
-	public Optional<ASTNode> findEnclosingScope(ClassInstanceCreation node) {
+	public Optional<ASTNode> findEnclosingScope(ASTNode node) {
 		Initializer initalizer = ASTNodeUtil.getSpecificAncestor(node, Initializer.class);
 		if (initalizer != null) {
 			return Optional.of(initalizer);
@@ -63,7 +62,7 @@ public class LiveVariableScope {
 	}
 
 	/**
-	 * Populates {@link #localVariableNames} and {@link #fieldNames} with the
+	 * Populates maps {@link #localVariableNames} and {@link #fieldNames} with the
 	 * variable declarations occurring in the given scope. The scope node is
 	 * used as a key in both cases. Nothing happens if the maps already contain
 	 * the scope key. If the scope represents a {@link TypeDeclaration} then
