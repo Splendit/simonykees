@@ -5,6 +5,9 @@
 
 // add timestaps to the "Console Output" of Jenkins
 
+// should production steps be executed?
+def isLiveEnvironment() { false }
+
 // gets the maven home
 def mvnBin() { "${tool 'mvn system'}/bin/mvn" }
 
@@ -153,12 +156,18 @@ void pushToGithub() {
 	// defines the backup repository to push to
 	def backupOrigin = 'git@github.com:Splendit/simonykees.git'
 
-	stage('Push to Github') {
-		println "Pushing to GitHub..."
-		sshagent([sshCredentials()]) { //key id of ssh-rsa key in remote repository within jenkins
-			// pushing the repository to github
-			sh("git push $backupOrigin HEAD:$env.BRANCH_NAME")
+	def stageName = "Push to Github"
+
+	if (isLiveEnvironment()) {
+		stage(stageName) {
+			println "Pushing to GitHub..."
+			sshagent([sshCredentials()]) { //key id of ssh-rsa key in remote repository within jenkins
+				// pushing the repository to github
+				sh("git push $backupOrigin HEAD:$env.BRANCH_NAME")
+			}
 		}
+	} else {
+		mockStage(stageName)
 	}
 }
 
@@ -259,9 +268,16 @@ void deployEclipsePlugin(Profile profile, String timestamp) {
 
 	def mvnCommand = "clean deploy -DskipTests -B ${profile.mvnOptions(timestamp)}"
 
-	stage("Eclipse Deploy: ${profile.formattedName()}") {
-		sh "'${mvnBin()}' $mvnCommand"
+	def stageName = "Eclipse Deploy: ${profile.formattedName()}"
+
+	if (isLiveEnvironment()) {
+		stage(stageName) {
+			sh "'${mvnBin()}' $mvnCommand"
+		}
+	} else {
+		mockStage(stageName)
 	}
+
 }
 
 /**
@@ -282,17 +298,30 @@ void deployMavenPlugin(Profile profile, String timestamp) {
 	def manifest = 'manifest.standalone'
 	def manifestContent = sh(script: "ls $jSparrowTargetPath", returnStdout: true)
 
-	stage("JMP Deploy: ${profile.formattedName()}") {
-		dir('jsparrow-maven-plugin/src/main/resources') {
-			writeFile file: "${manifest}", text: "${manifestContent}"
-		}
+	def stageName = "JMP Deploy: ${profile.formattedName()}"
 
-		// Copy required dependencies into plugin resource folder
-		sh("cp ${jSparrowTargetPath}/* ${pluginResourcePath}")
+	if (isLiveEnvironment()) {
+		stage(stageName) {
+			dir('jsparrow-maven-plugin/src/main/resources') {
+				writeFile file: "${manifest}", text: "${manifestContent}"
+			}
 
-		dir('jsparrow-maven-plugin') {
-			sh "'${mvnBin()}' ${mvnCommand}"
+			// Copy required dependencies into plugin resource folder
+			sh("cp ${jSparrowTargetPath}/* ${pluginResourcePath}")
+
+			dir('jsparrow-maven-plugin') {
+				sh "'${mvnBin()}' ${mvnCommand}"
+			}
 		}
+	} else {
+		mockStage(stageName)
+	}
+
+}
+
+void mockStage(String stageName) {
+	stage("MOCK: $stageName") {
+		println "Stage '$stageName' got called but will not be executed"
 	}
 }
 
@@ -302,8 +331,14 @@ void uploadMappingFile(Profile profile) {
 	def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu.jsparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" releng/site/target/p2content.xml").trim()
 	def directory = "${buildNumber}${profile.qualifier}"
 
-	stage ("Upload Mapping Files") {
-		uploadMappingFiles(directory)
+	def stageName = "Upload Mapping Files"
+
+	if (isLiveEnvironment()) {
+		stage(stageName) {
+			uploadMappingFiles(directory)
+		}
+	} else {
+		mockStage(stageName)
 	}
 }
 
