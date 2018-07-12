@@ -30,7 +30,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String OPTIONAL_FULLY_QUALIFIED_NAME = java.util.Optional.class.getName();
 	private static final String IS_PRESENT = "isPresent"; //$NON-NLS-1$
 	private static final String IF_PRESENT = "ifPresent"; //$NON-NLS-1$
-	private static final String DEFAULT_LAMBDA_PARAMETER_NAME = "value";
+	private static final String DEFAULT_LAMBDA_PARAMETER_NAME = "value"; //$NON-NLS-1$
 
 	private LiveVariableScope scope = new LiveVariableScope();
 
@@ -69,15 +69,6 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		Statement thenStatement = ifStatement.getThenStatement();
-		// remove VariableDeclarationStatement, take name from it and use it as
-		// consumer in ifPresent and the rest statements in expression field.
-
-		// Find the optional expression
-		Expression optional = methodInvocation.getExpression();
-		List<MethodInvocation> getExpressions = findGetExpressions(thenStatement, optional);
-		if (getExpressions.isEmpty()) {
-			return true;
-		}
 
 		// Check thenStatement for non-effectively final variables
 		boolean hasNonEfectivellyFinalVariable = containsNonEffectivelyFinal(thenStatement);
@@ -90,6 +81,13 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		 */
 		boolean hasReturnStatement = containsReturnStatement(thenStatement);
 		if (hasReturnStatement) {
+			return true;
+		}
+		
+		// Find the optional expression
+		Expression optional = methodInvocation.getExpression();
+		List<MethodInvocation> getExpressions = findGetExpressions(thenStatement, optional);
+		if (getExpressions.isEmpty()) {
 			return true;
 		}
 

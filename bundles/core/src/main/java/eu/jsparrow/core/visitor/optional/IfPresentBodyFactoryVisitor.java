@@ -58,10 +58,12 @@ public class IfPresentBodyFactoryVisitor extends ASTVisitor {
 			List<VariableDeclarationFragment> fragments = ASTNodeUtil
 				.convertToTypedList(declarationStatement.fragments(), VariableDeclarationFragment.class);
 			if (fragments.size() == 1) {
+				astRewrite.remove(declarationStatement, null); //TODO find a better workaround
 				declarationStatement.delete();
 				return;
 			}
 		}
+		astRewrite.remove(initializer, null); //TODO find a better workaround
 		initializer.delete();
 	}
 }
