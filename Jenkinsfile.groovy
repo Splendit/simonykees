@@ -14,6 +14,9 @@ def mvnBin() { "${tool 'mvn system'}/bin/mvn" }
 // jenkins git ssh credentials
 static def sshCredentials() { '7f15bb8a-a1db-4cdf-978f-3ae5983400b6' }
 
+// defines the backup repository to push to
+static def backupOrigin() { 'git@github.com:Splendit/simonykees.git' }
+
 enum Profile {
 	MASTER_PRODUCTION_PROGUARD("-Dproduction -Dproguard -Pmaster-production-proguard", ""),
 	MASTER_PRODUCTION_noPROGUARD("-Dproduction -Pmaster-production-noProguard", "_noProguard"),
@@ -153,8 +156,6 @@ void checkout() {
 }
 
 void pushToGithub() {
-	// defines the backup repository to push to
-	def backupOrigin = 'git@github.com:Splendit/simonykees.git'
 
 	def stageName = "Push to Github"
 
@@ -163,7 +164,7 @@ void pushToGithub() {
 			println "Pushing to GitHub..."
 			sshagent([sshCredentials()]) { //key id of ssh-rsa key in remote repository within jenkins
 				// pushing the repository to github
-				sh("git push $backupOrigin HEAD:$env.BRANCH_NAME")
+				sh("git push $backupOrigin() HEAD:$env.BRANCH_NAME")
 			}
 		}
 	} else {
@@ -252,13 +253,25 @@ void runSonarQubeAnalysis() {
 
 void tagCommit(def branchName, String subdirectory) {
 
-	stage('Tag Commit') {
+	stage('Tag Commit (Bitbucket)') {
 		// tag build in repository
 		sshagent([sshCredentials()]) { //key id of ssh-rsa key in remote repository within jenkins
 			// first parameter is the dir, second parameter is the subdirectory and optional
 			sh("./tag-deployment.sh $branchName $subdirectory")
-			sh("git push $backupOrigin --tags")
 		}
+	}
+
+	def stageName = "Tag Commit (GitHub)"
+
+	if (isLiveEnvironment()) {
+		stage(stageName) {
+			// push tags to github
+			sshagent([sshCredentials()]) { //key id of ssh-rsa key in remote repository within jenkins
+				sh("git push $backupOrigin() --tags")
+			}
+		}
+	} else {
+		mockStage(stageName)
 	}
 }
 
