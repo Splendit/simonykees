@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import eu.jsparrow.core.visitor.impl.OptionalIfPresentASTVisitor;
+import eu.jsparrow.core.visitor.optional.OptionalIfPresentASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;

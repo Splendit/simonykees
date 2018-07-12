@@ -1,18 +1,24 @@
-package eu.jsparrow.core.visitor.impl;
+package eu.jsparrow.core.visitor.optional;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -21,6 +27,9 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String OPTIONAL_FULLY_QUALIFIED_NAME = java.util.Optional.class.getName();
 	private static final String IS_PRESENT = "isPresent"; //$NON-NLS-1$
 	private static final String IF_PRESENT = "ifPresent"; //$NON-NLS-1$
+	private static final String DEFAULT_LAMBDA_PARAMETER_NAME = "value";
+
+	private LiveVariableScope scope = new LiveVariableScope();
 
 	/**
 	 * Looks for occurrences of optional.isPresent() where the following
@@ -73,7 +82,8 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (hasNonEfectivellyFinalVariable) {
 			return true;
 		}
-		// Check thenStatement for 'return', 'break' or 'continue' statements.
+		// Check thenStatement for 'return', throw, 'break' or 'continue'
+		// statements.
 		boolean hasReturnStatement = containsReturnStatement(thenStatement);
 		if (hasReturnStatement) {
 
@@ -81,6 +91,9 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		// Find parameter name
 		String identifier = findParameterName(thenStatement, getExpressions);
+		if(identifier.isEmpty()) {
+			return true;
+		}
 
 		// Create a lambda expression with parameter and body
 		Statement body = createLambdaExpressionBody(thenStatement, getExpressions, identifier);
@@ -96,6 +109,27 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		// Remember to save comments at each step
 
 		return true;
+	}
+
+	@Override
+	public void endVisit(TypeDeclaration typeDeclaration) {
+		this.scope.clearLocalVariablesScope(typeDeclaration);
+		this.scope.clearFieldScope(typeDeclaration);
+	}
+
+	@Override
+	public void endVisit(MethodDeclaration methodDeclaration) {
+		this.scope.clearLocalVariablesScope(methodDeclaration);
+	}
+
+	@Override
+	public void endVisit(FieldDeclaration fieldDeclaration) {
+		this.scope.clearLocalVariablesScope(fieldDeclaration);
+	}
+
+	@Override
+	public void endVisit(Initializer initializer) {
+		this.scope.clearLocalVariablesScope(initializer);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -130,28 +164,38 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private String findParameterName(Statement thenStatement, List<Expression> getExpressions) {
-		String preferedIdentifier = getExpressions.stream()
+		return getExpressions.stream()
 			.filter(e -> e.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY)
 			.map(ASTNode::getParent)
 			.map(fragment -> ((VariableDeclarationFragment) fragment).getName())
 			.map(SimpleName::getIdentifier)
 			.findFirst()
-			.orElse("");
-		if(!preferedIdentifier.isEmpty()) {
-			return preferedIdentifier;
+			.orElse(computeUniqueIdentifier(thenStatement));
+	}
+
+	private String computeUniqueIdentifier(Statement thenStatement) {
+		ASTNode enclosingScope = scope.findEnclosingScope(thenStatement)
+			.orElse(null);
+		if (enclosingScope == null) {
+			return "";
 		}
-		
-		// TODO: find an identifier which is not visible in the scope of thenStatement
-		return null;
+		scope.lazyLoadScopeNames(enclosingScope);
+
+		String newName = DEFAULT_LAMBDA_PARAMETER_NAME;
+		int suffix = 1;
+		while (scope.isInScope(newName)) {
+			newName = DEFAULT_LAMBDA_PARAMETER_NAME + suffix;
+			suffix++;
+		}
+		scope.storeIntroducedName(enclosingScope, newName);
+		return newName;
 	}
 
 	private List<Expression> findGetExpressions(Statement thenStatement, Expression optional) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	private boolean containsReturnStatement(Statement thenStatement) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
