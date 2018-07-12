@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.visitor.sub.EffectivelyFinalVisitor;
 import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -84,12 +85,12 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		// statements.
 		boolean hasReturnStatement = containsReturnStatement(thenStatement);
 		if (hasReturnStatement) {
-
+			return true;
 		}
 
 		// Find parameter name
 		String identifier = findParameterName(thenStatement, getExpressions);
-		if(identifier.isEmpty()) {
+		if (identifier.isEmpty()) {
 			return true;
 		}
 
@@ -196,12 +197,14 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private boolean containsReturnStatement(Statement thenStatement) {
+		//TODO 
 		return false;
 	}
 
 	private boolean containsNonEffectivelyFinal(Statement thenStatement) {
-		// TODO Auto-generated method stub
-		return false;
+		EffectivelyFinalVisitor visitor = new EffectivelyFinalVisitor();
+		thenStatement.accept(visitor);
+		return visitor.containsNonEffectivelyFinalVariable();
 	}
 
 	private boolean isIsPresentMethod(MethodInvocation methodInvocation) {

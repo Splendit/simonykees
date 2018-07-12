@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.loop.stream;
+package eu.jsparrow.core.visitor.sub;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * @since 2.1.1
  *
  */
-class EffectivelyFinalVisitor extends ASTVisitor {
+public class EffectivelyFinalVisitor extends ASTVisitor {
 
 	private boolean containsNonfinalVar = false;
 
