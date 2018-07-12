@@ -84,23 +84,19 @@ timestamps {
 					Profile profile = Profile.MASTER_PRODUCTION_PROGUARD
 					deployEclipsePlugin(profile, timestamp)
 					uploadMappingFile(profile)
-					deployMavenPlugin(profile, timestamp)
 
 					// deploy production noProguard
 					profile = Profile.MASTER_PRODUCTION_noPROGUARD
 					deployEclipsePlugin(profile, timestamp)
-					deployMavenPlugin(profile, timestamp)
 
 					// deploy test proguard
 					profile = Profile.MASTER_TEST_PROGUARD
 					deployEclipsePlugin(profile, timestamp)
 					uploadMappingFile(profile)
-					deployMavenPlugin(profile, timestamp)
 
 					// deploy test noProguard
 					profile = Profile.MASTER_TEST_noPROGUARD
 					deployEclipsePlugin(profile, timestamp)
-					deployMavenPlugin(profile, timestamp)
 
 					tagCommit(env.BRANCH_NAME, "main")
 					break
