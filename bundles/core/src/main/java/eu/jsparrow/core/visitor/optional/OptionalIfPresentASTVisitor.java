@@ -197,8 +197,9 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private boolean containsReturnStatement(Statement thenStatement) {
-		//TODO 
-		return false;
+		FlowBreakersVisitor visitor = new FlowBreakersVisitor();
+		thenStatement.accept(visitor);
+		return visitor.hasFlowBreakerStatement();
 	}
 
 	private boolean containsNonEffectivelyFinal(Statement thenStatement) {
