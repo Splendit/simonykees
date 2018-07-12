@@ -81,8 +81,10 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (hasNonEfectivellyFinalVariable) {
 			return true;
 		}
-		// Check thenStatement for 'return', throw, 'break' or 'continue'
-		// statements.
+		/*
+		 * Check thenStatement for 'return', throw, 'break' or 'continue'
+		 * statements. TODO: Check for methods that throw exceptions.
+		 */
 		boolean hasReturnStatement = containsReturnStatement(thenStatement);
 		if (hasReturnStatement) {
 			return true;
@@ -149,7 +151,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		LambdaExpression lambdaExpression = ast.newLambdaExpression();
 		SimpleName parameter = ast.newSimpleName(identifier);
 
-		lambdaExpression.setBody(body);
+		lambdaExpression.setBody(astRewrite.createCopyTarget(body));
 		lambdaExpression.parameters()
 			.add(parameter);
 
@@ -158,8 +160,9 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private Statement createLambdaExpressionBody(Statement thenStatement, List<MethodInvocation> getExpressions,
 			String identifier) {
-		// TODO Auto-generated method stub
-		return null;
+		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(getExpressions, identifier, astRewrite);
+		thenStatement.accept(visitor);
+		return thenStatement;
 	}
 
 	private String findParameterName(Statement thenStatement, List<MethodInvocation> getExpressions) {
