@@ -1,13 +1,77 @@
 package eu.jsparrow.sample.preRule;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @SuppressWarnings("nls")
 public class OptionalIfPresentRule {
-	
+
 	private final String value2 = "";
+
+	{
+		Optional<String> input = Optional.empty();
+		if (input.isPresent()) {
+			String value = input.get();
+			System.out.println(value);
+		}
+	}
+
+	public void singleIfBlockBody_shouldTransform(Optional<String> input) {
+		if (input.isPresent()) {
+			String value = input.get();
+			if (true) {
+				System.out.println(value);
+			}
+		}
+	}
+
+	public void singleIfStatementBody_shouldTransform(Optional<String> input) {
+		if (input.isPresent())
+			if (true) {
+				String value = input.get();
+				System.out.println(value);
+			}
+	}
+
+	public void multipleInitialiyers_shouldTransform(Optional<String> input) {
+		if (input.isPresent()) {
+			String value = input.get(), second = "";
+			System.out.println(value);
+			System.out.println(second);
+		}
+	}
+
+	public void getExpressionNotPresent_shouldNotTransform(Optional<String> input) {
+		if (input.isPresent()) {
+			String value = "";
+			System.out.println(value);
+		}
+	}
+
+	public void getWithArgument_shouldNotTransform(Optional<String> input, List<String> users) {
+		if (input.isPresent()) {
+			String value = users.get(0);
+			System.out.println(value);
+		}
+	}
+
+	public void getWithNullExpression_shouldNotTransform(Optional<String> input) {
+		if (input.isPresent()) {
+			String value = "";
+			get();
+			System.out.println(value);
+		}
+	}
+
+	public void throwingCheckedException_shouldNotTransform(Optional<String> input) throws Exception {
+		if (input.isPresent()) {
+			String value = input.get();
+			System.out.println(value);
+			throwSomething();
+		}
+	}
 
 	public void defaultUseCase_shouldTransform(Optional<String> input) {
 		if (input.isPresent()) {
@@ -47,7 +111,7 @@ public class OptionalIfPresentRule {
 			}
 		}
 	}
-	
+
 	public void multipleOptionals_shouldTransform(Optional<String> input) {
 		Optional<String> user = Optional.ofNullable("user-name");
 		if (input.isPresent()) {
@@ -68,28 +132,28 @@ public class OptionalIfPresentRule {
 	public void avoidExternalNameConflicts_shouldTransform() {
 		String value = "I could crash with the lambda parameter";
 		Optional<String> user = Optional.ofNullable(value);
-		if(user.isPresent()) {
+		if (user.isPresent()) {
 			System.out.println(user.get());
 		}
 	}
-	
+
 	public void avoidInternalNameConflicts_shouldTransform() {
 		Optional<String> user = Optional.ofNullable("John Snow");
-		if(user.isPresent()) {
+		if (user.isPresent()) {
 			String value = "I could crash with the lambda parameter";
 			System.out.println(value + ":" + user.get());
 		}
 	}
-	
+
 	public void avoidShadowingFields_shouldTransform() {
 		Optional<String> user = Optional.ofNullable("John Snow");
-		if(user.isPresent()) {
+		if (user.isPresent()) {
 			System.out.println(value2 + ":" + user.get());
 			String value2 = user.get();
 			System.out.println(value2);
 		}
 	}
-	
+
 	public void fakeOptional_shouldNotTransform(IoNonSonoOpzionale input) {
 		if (input.isPresent()) {
 			String value = input.get();
@@ -155,7 +219,7 @@ public class OptionalIfPresentRule {
 			}
 		}
 	}
-	
+
 	public void throwStatementInBody_shouldNotTransform(List<String> users) {
 		for (String user : users) {
 			Optional<String> name = findUserName(user);
@@ -164,8 +228,29 @@ public class OptionalIfPresentRule {
 				System.out.println(value);
 				if (value.isEmpty()) {
 					throw new NoSuchElementException();
+				} else {
+					System.out.println(value);
 				}
 			}
+		}
+	}
+
+	public void clashingWithPropertyOnQualifiedName_shouldTransform(Optional<String> input) {
+		final IoNonSonoOpzionale user = new IoNonSonoOpzionale();
+		if (input.isPresent()) {
+			String value = input.get();
+			user.value.length();
+			System.out.println(value);
+		}
+	}
+
+	final String field = "";
+
+	public void clashingWithFieldAccess_shouldTransform(Optional<String> input) {
+		if (input.isPresent()) {
+			String field = input.get();
+			this.field.length();
+			System.out.println(field);
 		}
 	}
 
@@ -173,8 +258,16 @@ public class OptionalIfPresentRule {
 		return Optional.empty();
 	}
 
+	private void throwSomething() throws FileNotFoundException {
+
+	}
+
+	private void get() {
+
+	}
+
 	class IoNonSonoOpzionale {
-		public String value;
+		final public String value = "";
 
 		public boolean isPresent() {
 			return false;

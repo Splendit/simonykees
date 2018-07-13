@@ -1,13 +1,73 @@
 package eu.jsparrow.sample.postRule.optionalIfPresent;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @SuppressWarnings("nls")
 public class OptionalIfPresentRule {
-	
+
 	private final String value2 = "";
+	
+	{
+		Optional<String> input = Optional.empty();
+		input.ifPresent(value -> System.out.println(value));
+	}
+
+	public void singleIfBlockBody_shouldTransform(Optional<String> input) {
+		input.ifPresent(value -> {
+			if (true) {
+				System.out.println(value);
+			}
+		});
+	}
+	
+	public void singleIfStatementBody_shouldTransform2(Optional<String> input) {
+		input.ifPresent(value -> {
+			if (true) {
+				System.out.println(value);
+			}
+		});
+	}
+
+	public void multipleInitialiyers_shouldTransform(Optional<String> input) {
+		input.ifPresent(value -> {
+			String second = "";
+			System.out.println(value);
+			System.out.println(second);
+		});
+	}
+
+	public void getExpressionNotPresent_shouldNotTransform(Optional<String> input) {
+		if (input.isPresent()) {
+			String value = "";
+			System.out.println(value);
+		}
+	}
+
+	public void getWithArgument_shouldNotTransform(Optional<String> input, List<String> users) {
+		if (input.isPresent()) {
+			String value = users.get(0);
+			System.out.println(value);
+		}
+	}
+
+	public void getWithNullExpression_shouldNotTransform(Optional<String> input) {
+		if (input.isPresent()) {
+			String value = "";
+			get();
+			System.out.println(value);
+		}
+	}
+
+	public void throwingCheckedException_shouldNotTransform(Optional<String> input) throws Exception {
+		if (input.isPresent()) {
+			String value = input.get();
+			System.out.println(value);
+			throwSomething();
+		}
+	}
 
 	public void defaultUseCase_shouldTransform(Optional<String> input) {
 		input.ifPresent(value -> System.out.println(value));
@@ -38,7 +98,7 @@ public class OptionalIfPresentRule {
 			}
 		});
 	}
-	
+
 	public void multipleOptionals_shouldTransform(Optional<String> input) {
 		Optional<String> user = Optional.ofNullable("user-name");
 		input.ifPresent(value -> {
@@ -59,7 +119,7 @@ public class OptionalIfPresentRule {
 		Optional<String> user = Optional.ofNullable(value);
 		user.ifPresent(value1 -> System.out.println(value1));
 	}
-	
+
 	public void avoidInternalNameConflicts_shouldTransform() {
 		Optional<String> user = Optional.ofNullable("John Snow");
 		user.ifPresent(value1 -> {
@@ -67,7 +127,7 @@ public class OptionalIfPresentRule {
 			System.out.println(value + ":" + value1);
 		});
 	}
-	
+
 	public void avoidShadowingFields_shouldTransform() {
 		Optional<String> user = Optional.ofNullable("John Snow");
 		user.ifPresent(value2 -> {
@@ -75,7 +135,7 @@ public class OptionalIfPresentRule {
 			System.out.println(value2);
 		});
 	}
-	
+
 	public void fakeOptional_shouldNotTransform(IoNonSonoOpzionale input) {
 		if (input.isPresent()) {
 			String value = input.get();
@@ -141,7 +201,7 @@ public class OptionalIfPresentRule {
 			}
 		}
 	}
-	
+
 	public void throwStatementInBody_shouldNotTransform(List<String> users) {
 		for (String user : users) {
 			Optional<String> name = findUserName(user);
@@ -150,17 +210,44 @@ public class OptionalIfPresentRule {
 				System.out.println(value);
 				if (value.isEmpty()) {
 					throw new NoSuchElementException();
+				} else {
+					System.out.println(value);
 				}
 			}
 		}
+	}
+
+	public void clashingWithPropertyOnQualifiedName_shouldTransform(Optional<String> input) {
+		final IoNonSonoOpzionale user = new IoNonSonoOpzionale();
+		input.ifPresent(value -> {
+			user.value.length();
+			System.out.println(value);
+		});
+	}
+
+	final String field = "";
+
+	public void clashingWithFieldAccess_shouldTransform(Optional<String> input) {
+		input.ifPresent(field -> {
+			this.field.length();
+			System.out.println(field);
+		});
 	}
 
 	private Optional<String> findUserName(String user) {
 		return Optional.empty();
 	}
 
+	private void throwSomething() throws FileNotFoundException {
+
+	}
+
+	private void get() {
+
+	}
+
 	class IoNonSonoOpzionale {
-		public String value;
+		final public String value = "";
 
 		public boolean isPresent() {
 			return false;

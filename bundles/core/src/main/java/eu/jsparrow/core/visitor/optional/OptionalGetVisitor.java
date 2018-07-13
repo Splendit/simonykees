@@ -98,10 +98,6 @@ public class OptionalGetVisitor extends ASTVisitor {
 		return getInvocations;
 	}
 
-	public List<SimpleName> getAssignedWithGet() {
-		return assignedWithGet;
-	}
-	
 	public List<SimpleName> getReferencesToBeRenamed() {
 		return references;
 	}
