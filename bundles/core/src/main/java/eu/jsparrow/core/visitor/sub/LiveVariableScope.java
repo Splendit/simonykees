@@ -129,15 +129,15 @@ public class LiveVariableScope {
 	 * 
 	 * @param scope
 	 *            key
-	 * @param calendarName
+	 * @param name
 	 *            value
 	 */
-	public void storeIntroducedName(ASTNode scope, String calendarName) {
+	public void addName(ASTNode scope, String name) {
 		List<String> storedLocalNames = localVariableNames.get(scope);
 		if (storedLocalNames == null) {
 			storedLocalNames = new ArrayList<>();
 		}
-		storedLocalNames.add(calendarName);
+		storedLocalNames.add(name);
 		localVariableNames.put(scope, storedLocalNames);
 	}
 

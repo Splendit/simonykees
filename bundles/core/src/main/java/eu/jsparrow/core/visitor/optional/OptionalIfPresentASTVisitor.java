@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.optional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
@@ -22,6 +23,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import eu.jsparrow.core.visitor.sub.EffectivelyFinalVisitor;
 import eu.jsparrow.core.visitor.sub.LiveVariableScope;
+import eu.jsparrow.core.visitor.sub.ReferencedFieldsVisitor;
 import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -224,12 +226,16 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private String findParameterName(Statement thenStatement, List<MethodInvocation> getExpressions) {
+		List<String> referencedFields = findAllReferencedFields(thenStatement).stream()
+			.map(SimpleName::getIdentifier)
+			.collect(Collectors.toList());
 		return getExpressions.stream()
 			.filter(e -> e.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY)
 			.map(ASTNode::getParent)
 			.map(fragment -> ((VariableDeclarationFragment) fragment).getName())
 			.map(SimpleName::getIdentifier)
 			.findFirst()
+			.filter(name -> !referencedFields.contains(name))
 			.orElse(computeUniqueIdentifier(thenStatement));
 	}
 
@@ -247,8 +253,14 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 			newName = DEFAULT_LAMBDA_PARAMETER_NAME + suffix;
 			suffix++;
 		}
-		scope.storeIntroducedName(enclosingScope, newName);
+
 		return newName;
+	}
+
+	private List<SimpleName> findAllReferencedFields(Statement thenStatement) {
+		ReferencedFieldsVisitor visitor = new ReferencedFieldsVisitor();
+		thenStatement.accept(visitor);
+		return visitor.getReferencedVariables();
 	}
 
 	private boolean containsReturnStatement(Statement thenStatement) {

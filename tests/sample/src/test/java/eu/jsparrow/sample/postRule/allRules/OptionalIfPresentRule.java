@@ -75,9 +75,9 @@ public class OptionalIfPresentRule {
 
 	public void avoidShadowingFields_shouldTransform() {
 		Optional<String> user = Optional.ofNullable("John Snow");
-		user.ifPresent(value2 -> {
-			logger.info(value2 + ":" + value2);
-			logger.info(value2);
+		user.ifPresent(value -> {
+			logger.info(value2 + ":" + value);
+			logger.info(value);
 		});
 	}
 

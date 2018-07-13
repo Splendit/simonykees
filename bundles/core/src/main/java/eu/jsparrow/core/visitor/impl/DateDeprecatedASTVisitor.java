@@ -182,7 +182,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 				TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertAfter(initializer, fieldDeclaration, null);
 		astRewrite.replace(fragment, astRewrite.createCopyTarget(dateName), null);
-		this.scope.storeIntroducedName(fieldDeclaration, calendarName);
+		this.scope.addName(fieldDeclaration, calendarName);
 		onRewrite();
 		CommentRewriter commentRewriter = getCommentRewriter();
 		List<Comment> relatedComments = commentRewriter.findRelatedComments(node);
@@ -233,7 +233,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		}
 
 		onRewrite();
-		this.scope.storeIntroducedName(scope, calendarName);
+		this.scope.addName(scope, calendarName);
 	}
 
 	/**
