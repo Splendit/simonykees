@@ -111,6 +111,18 @@ public class OptionalIfPresentRule {
 			}
 		}
 	}
+	
+	public void multipleGetConflictingNames_shouldTransform(Optional<String> input, int i) {
+		if (input.isPresent()) {
+			if(i == 0) {
+				String value = input.get();
+				System.out.println(value);
+			} else {
+				String value = input.get();
+				System.out.println(value + i);
+			}
+		}
+	}
 
 	public void multipleOptionals_shouldTransform(Optional<String> input) {
 		Optional<String> user = Optional.ofNullable("user-name");

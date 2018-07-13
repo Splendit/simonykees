@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.optional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,12 +20,13 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.visitor.sub.EffectivelyFinalVisitor;
 import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.core.visitor.sub.ReferencedFieldsVisitor;
 import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
+import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -114,11 +116,10 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 			return true;
 		}
 
-		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(getExpressions,
-				optionalGetVisitor.getReferencesToBeRenamed(), identifier, astRewrite);
+		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(getExpressions, identifier, astRewrite);
 		thenStatement.accept(visitor);
 		Statement body = thenStatement;
-		ASTNode lambdaBody = unwrapBody(body, visitor.getRemovedNodes());
+		ASTNode lambdaBody = unwrapBody(body);
 
 		LambdaExpression lambda = createLambdaExpression(lambdaBody, identifier);
 
@@ -182,11 +183,12 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		lambdaExpression.parameters()
 			.add(parameterDeclaration);
 		int bodyNodeType = lambdaBody.getNodeType();
-		if(ASTNode.BLOCK == bodyNodeType || lambdaBody instanceof Expression ) {
+		if (ASTNode.BLOCK == bodyNodeType || lambdaBody instanceof Expression) {
 			lambdaExpression.setBody(astRewrite.createCopyTarget(lambdaBody));
 		} else {
 			Block newBlock = ast.newBlock();
-			newBlock.statements().add(astRewrite.createCopyTarget(lambdaBody));
+			newBlock.statements()
+				.add(astRewrite.createCopyTarget(lambdaBody));
 			lambdaExpression.setBody(newBlock);
 		}
 
@@ -200,21 +202,10 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 	 * 
 	 * @param body
 	 *            the node to be transformed
-	 * @param removedNodes
-	 *            list of nodes registered to be removed by the
-	 *            {@link ASTRewrite}.
 	 * @return the unwrapped {@link Expression} if the body consist of one
 	 *         {@link ExpressionStatement} or the unchanged body otherwise.
 	 */
-	private ASTNode unwrapBody(Statement body, List<ASTNode> removedNodes) {
-
-		/*
-		 * A workaround to help with finding out how many statements remain in
-		 * the body.
-		 */
-		for (ASTNode node : removedNodes) {
-			node.delete();
-		}
+	private ASTNode unwrapBody(Statement body) {
 
 		ASTNode lambdaBody = body;
 		if (ASTNode.BLOCK == body.getNodeType()) {
@@ -237,14 +228,62 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		List<String> referencedFields = findAllReferencedFields(thenStatement).stream()
 			.map(SimpleName::getIdentifier)
 			.collect(Collectors.toList());
-		return getExpressions.stream()
+
+		Optional<SimpleName> identifier = getExpressions.stream()
 			.filter(e -> e.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY)
 			.map(ASTNode::getParent)
 			.map(fragment -> ((VariableDeclarationFragment) fragment).getName())
-			.map(SimpleName::getIdentifier)
 			.findFirst()
-			.filter(name -> !referencedFields.contains(name))
+			.filter(name -> !referencedFields.contains(name.getIdentifier()));
+
+		String name = identifier.map(SimpleName::getIdentifier)
+			.orElse(""); //$NON-NLS-1$
+		if (countDeclaredVariables(thenStatement, name) > 1) {
+			return computeUniqueIdentifier(thenStatement);
+		}
+
+		identifier.ifPresent(this::safeDeleteInitializer);
+		return identifier.map(SimpleName::getIdentifier)
 			.orElse(computeUniqueIdentifier(thenStatement));
+	}
+
+	private long countDeclaredVariables(Statement thenStatement, String name) {
+		VariableDeclarationsVisitor visitor = new VariableDeclarationsVisitor();
+		thenStatement.accept(visitor);
+		return visitor.getVariableDeclarationNames()
+			.stream()
+			.map(SimpleName::getIdentifier)
+			.filter(name::equals)
+			.count();
+	}
+
+	private void safeDeleteInitializer(SimpleName name) {
+
+		if (VariableDeclarationFragment.NAME_PROPERTY != name.getLocationInParent()) {
+			return;
+		}
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment) name.getParent();
+
+		Expression initializer = fragment.getInitializer();
+		if (initializer == null) {
+			return;
+		}
+
+		if (VariableDeclarationStatement.FRAGMENTS_PROPERTY != fragment.getLocationInParent()) {
+			return;
+		}
+
+		VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) fragment.getParent();
+		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(declarationStatement.fragments(),
+				VariableDeclarationFragment.class);
+		if (fragments.size() == 1) {
+			astRewrite.remove(declarationStatement, null);
+			declarationStatement.delete();
+			return;
+		}
+
+		astRewrite.remove(fragment, null);
+		fragment.delete();
 	}
 
 	private String computeUniqueIdentifier(Statement thenStatement) {

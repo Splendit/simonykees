@@ -96,10 +96,23 @@ public class OptionalIfPresentRule {
 
 	public void multipleGet_shouldTransform(Optional<String> input) {
 		input.ifPresent(value -> {
+			String value2 = value;
 			logger.info(value);
-			logger.info(value);
-			if (!StringUtils.isEmpty(value) && !StringUtils.isEmpty(value)) {
-				logger.info(value + value);
+			logger.info(value2);
+			if (!StringUtils.isEmpty(value) && !StringUtils.isEmpty(value2)) {
+				logger.info(value + value2);
+			}
+		});
+	}
+
+	public void multipleGetConflictingNames_shouldTransform(Optional<String> input, int i) {
+		input.ifPresent(value1 -> {
+			if (i == 0) {
+				String value = value1;
+				logger.info(value);
+			} else {
+				String value = value1;
+				logger.info(value + i);
 			}
 		});
 	}
@@ -110,11 +123,12 @@ public class OptionalIfPresentRule {
 			// this is a field access - should not be renamed
 			logger.info(value2);
 			// this is a local declaration - should be removed
+			String value2 = value;
 			String value3 = user.get();
 			logger.info(value);
-			logger.info(value);
-			if (!StringUtils.isEmpty(value) && !StringUtils.isEmpty(value)) {
-				logger.info(value + value + ":" + value3);
+			logger.info(value2);
+			if (!StringUtils.isEmpty(value) && !StringUtils.isEmpty(value2)) {
+				logger.info(value + value2 + ":" + value3);
 			}
 		});
 	}
@@ -137,7 +151,8 @@ public class OptionalIfPresentRule {
 		Optional<String> user = Optional.ofNullable("John Snow");
 		user.ifPresent(value -> {
 			logger.info(value2 + ":" + value);
-			logger.info(value);
+			String value2 = value;
+			logger.info(value2);
 		});
 	}
 
@@ -225,8 +240,9 @@ public class OptionalIfPresentRule {
 	public void clashingWithPropertyOnQualifiedName_shouldTransform(Optional<String> input) {
 		final IoNonSonoOpzionale user = new IoNonSonoOpzionale();
 		input.ifPresent(value1 -> {
+			String value = value1;
 			user.value.length();
-			logger.info(value1);
+			logger.info(value);
 		});
 	}
 
@@ -256,8 +272,9 @@ public class OptionalIfPresentRule {
 
 		public void clashingWithFieldAccess_shouldTransform(Optional<String> input) {
 			input.ifPresent(value1 -> {
+				String value = value1;
 				this.value.length();
-				logger1.info(value1);
+				logger1.info(value);
 			});
 		}
 	}

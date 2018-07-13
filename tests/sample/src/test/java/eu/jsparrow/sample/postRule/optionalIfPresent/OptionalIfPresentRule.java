@@ -91,10 +91,23 @@ public class OptionalIfPresentRule {
 
 	public void multipleGet_shouldTransform(Optional<String> input) {
 		input.ifPresent(value -> {
+			String value2 = value;
 			System.out.println(value);
-			System.out.println(value);
-			if (!value.isEmpty() && !value.isEmpty()) {
-				System.out.println(value + value);
+			System.out.println(value2);
+			if (!value.isEmpty() && !value2.isEmpty()) {
+				System.out.println(value + value2);
+			}
+		});
+	}
+	
+	public void multipleGetConflictingNames_shouldTransform(Optional<String> input, int i) {
+		input.ifPresent(value1 -> {
+			if(i == 0) {
+				String value = value1;
+				System.out.println(value);
+			} else {
+				String value = value1;
+				System.out.println(value + i);
 			}
 		});
 	}
@@ -105,11 +118,12 @@ public class OptionalIfPresentRule {
 			// this is a field access - should not be renamed
 			System.out.println(value2);
 			// this is a local declaration - should be removed
+			String value2 = value;
 			String value3 = user.get();
 			System.out.println(value);
-			System.out.println(value);
-			if (!value.isEmpty() && !value.isEmpty()) {
-				System.out.println(value + value + ":" + value3);
+			System.out.println(value2);
+			if (!value.isEmpty() && !value2.isEmpty()) {
+				System.out.println(value + value2 + ":" + value3);
 			}
 		});
 	}
@@ -132,7 +146,8 @@ public class OptionalIfPresentRule {
 		Optional<String> user = Optional.ofNullable("John Snow");
 		user.ifPresent(value -> {
 			System.out.println(value2 + ":" + value);
-			System.out.println(value);
+			String value2 = value;
+			System.out.println(value2);
 		});
 	}
 
@@ -220,8 +235,9 @@ public class OptionalIfPresentRule {
 	public void clashingWithPropertyOnQualifiedName_shouldTransform(Optional<String> input) {
 		final IoNonSonoOpzionale user = new IoNonSonoOpzionale();
 		input.ifPresent(value1 -> {
+			String value = value1;
 			user.value.length();
-			System.out.println(value1);
+			System.out.println(value);
 		});
 	}
 
@@ -250,8 +266,9 @@ public class OptionalIfPresentRule {
 		
 		public void clashingWithFieldAccess_shouldTransform(Optional<String> input) {
 			input.ifPresent(value1 -> {
+				String value = value1;
 				this.value.length();
-				System.out.println(value1);
+				System.out.println(value);
 			});
 		}
 	}
