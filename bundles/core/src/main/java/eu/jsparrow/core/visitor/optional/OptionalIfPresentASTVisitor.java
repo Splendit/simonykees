@@ -49,7 +49,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 	 * 
 	 * If all conditions are met the entire if-statement is replaced with a call
 	 * to optional.ifPresent(..) where the expression matches the previous
-	 * expression statement in than branch and the consumer match the previous
+	 * expression statement in then branch and the consumer match the previous
 	 * Type of VariableDeclarationStatement.
 	 * 
 	 */
@@ -96,7 +96,11 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		// Find the optional expression
 		Expression optional = methodInvocation.getExpression();
-		List<MethodInvocation> getExpressions = findGetExpressions(thenStatement, optional);
+
+		OptionalGetVisitor optionalGetVisitor = new OptionalGetVisitor(optional);
+		thenStatement.accept(optionalGetVisitor);
+
+		List<MethodInvocation> getExpressions = optionalGetVisitor.getInvocations();
 		if (getExpressions.isEmpty()) {
 			return true;
 		}
@@ -107,11 +111,18 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 			return true;
 		}
 
-		// Create a lambda expression with parameter and body
-		LambdaExpression lambda = createLambdaExpression(thenStatement, getExpressions, identifier);
+		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(getExpressions,
+				optionalGetVisitor.getReferencesToBeRenamed(), identifier, astRewrite);
+		thenStatement.accept(visitor);
+		Statement body = thenStatement;
+		ASTNode lambdaBody = unwrapBody(body, visitor.getRemovedNodes());
 
-		// Create the new statement optional.ifPresent with the name of the
-		// optional and ifPresent method invocation
+		LambdaExpression lambda = createLambdaExpression(lambdaBody, identifier);
+
+		/*
+		 * Create a lambda expression with parameter and body optional and
+		 * ifPresent method invocation
+		 */
 		Statement optionalIfPresent = createOptionalIfPresentStatement(optional, lambda);
 
 		// Replace the if statement with the new optiona.ifPresent statement
@@ -156,20 +167,13 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	@SuppressWarnings("unchecked")
-	private LambdaExpression createLambdaExpression(Statement thenStatement, List<MethodInvocation> getExpressions,
-			String identifier) {
-
-		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(getExpressions, identifier, astRewrite);
-		thenStatement.accept(visitor);
-		Statement body = thenStatement;
+	private LambdaExpression createLambdaExpression(ASTNode lambdaBody, String identifier) {
 
 		AST ast = astRewrite.getAST();
 		LambdaExpression lambdaExpression = ast.newLambdaExpression();
 		SimpleName parameter = ast.newSimpleName(identifier);
 		VariableDeclarationFragment parameterDeclaration = ast.newVariableDeclarationFragment();
 		parameterDeclaration.setName(parameter);
-
-		ASTNode lambdaBody = unwrapBody(body, visitor.getRemovedNodes());
 
 		lambdaExpression.setParentheses(false);
 		lambdaExpression.setBody(astRewrite.createCopyTarget(lambdaBody));
@@ -181,21 +185,22 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	/**
 	 * Converts the body into an {@link Expression} if it consists a single
-	 * {@link ExpressionStatement}.
-. 	 * <b>ATTENTION:</b> deletes all nodes in {@code removedNodes}!
+	 * {@link ExpressionStatement}. . * <b>ATTENTION:</b> deletes all nodes in
+	 * {@code removedNodes}!
 	 * 
 	 * @param body
 	 *            the node to be transformed
 	 * @param removedNodes
 	 *            list of nodes registered to be removed by the
 	 *            {@link ASTRewrite}.
-	 * @return the unwrapped {@link Expression} if the body consist of one {@link ExpressionStatement} or the 
-	 * unchanged body otherwise.
+	 * @return the unwrapped {@link Expression} if the body consist of one
+	 *         {@link ExpressionStatement} or the unchanged body otherwise.
 	 */
 	private ASTNode unwrapBody(Statement body, List<ASTNode> removedNodes) {
 
 		/*
-		 * A workaround to help with finding out how many statements remain in the body. 
+		 * A workaround to help with finding out how many statements remain in
+		 * the body.
 		 */
 		for (ASTNode node : removedNodes) {
 			node.delete();
@@ -244,12 +249,6 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 		scope.storeIntroducedName(enclosingScope, newName);
 		return newName;
-	}
-
-	private List<MethodInvocation> findGetExpressions(Statement thenStatement, Expression optional) {
-		OptionalGetVisitor visitor = new OptionalGetVisitor(optional);
-		thenStatement.accept(visitor);
-		return visitor.getInvocations();
 	}
 
 	private boolean containsReturnStatement(Statement thenStatement) {

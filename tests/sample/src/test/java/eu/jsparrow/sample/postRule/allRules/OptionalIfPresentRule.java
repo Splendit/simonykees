@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 public class OptionalIfPresentRule {
 
 	private static final Logger logger = LoggerFactory.getLogger(OptionalIfPresentRule.class);
+	private final String value2 = "";
 
 	public void defaultUseCase_shouldTransform(Optional<String> input) {
 		input.ifPresent(value -> logger.info(value));
@@ -31,6 +32,31 @@ public class OptionalIfPresentRule {
 	public void singleBodyStatement_shouldTransform(Optional<String> input) {
 		input.ifPresent(value -> logger.info(value));
 		logger.info("I'm out!");
+	}
+
+	public void multipleGet_shouldTransform(Optional<String> input) {
+		input.ifPresent(value -> {
+			logger.info(value);
+			logger.info(value);
+			if (!StringUtils.isEmpty(value) && !StringUtils.isEmpty(value)) {
+				logger.info(value + value);
+			}
+		});
+	}
+
+	public void multipleOptionals_shouldTransform(Optional<String> input) {
+		Optional<String> user = Optional.ofNullable("user-name");
+		input.ifPresent(value -> {
+			// this is a field access - should not be renamed
+			logger.info(value2);
+			// this is a local declaration - should be removed
+			String value3 = user.get();
+			logger.info(value);
+			logger.info(value);
+			if (!StringUtils.isEmpty(value) && !StringUtils.isEmpty(value)) {
+				logger.info(value + value + ":" + value3);
+			}
+		});
 	}
 
 	public void fakeOptional_shouldNotTransform(IoNonSonoOpzionale input) {
@@ -117,6 +143,8 @@ public class OptionalIfPresentRule {
 	}
 
 	class IoNonSonoOpzionale {
+		public String value;
+
 		public boolean isPresent() {
 			return false;
 		}

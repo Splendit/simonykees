@@ -20,12 +20,14 @@ public class IfPresentBodyFactoryVisitor extends ASTVisitor {
 	private String parameterName;
 	private ASTRewrite astRewrite;
 	private List<ASTNode> removedNodes = new ArrayList<>();
+	private List<SimpleName> toBeRenamed;
 
-	public IfPresentBodyFactoryVisitor(List<MethodInvocation> getInvocations, String parameterName,
+	public IfPresentBodyFactoryVisitor(List<MethodInvocation> getInvocations, List<SimpleName> toBeRenamed, String parameterName,
 			ASTRewrite astRewrite) {
 		this.getInvocations = getInvocations;
 		this.parameterName = parameterName;
 		this.astRewrite = astRewrite;
+		this.toBeRenamed = toBeRenamed;
 	}
 
 	@Override
@@ -52,6 +54,16 @@ public class IfPresentBodyFactoryVisitor extends ASTVisitor {
 			astRewrite.replace(methodInvocation, simpleName, null);
 		}
 
+		return true;
+	}
+	
+	@Override
+	public boolean visit(SimpleName simpleName) {
+		if(toBeRenamed.contains(simpleName)) {
+			AST ast = simpleName.getAST();
+			SimpleName newName = ast.newSimpleName(parameterName);
+			astRewrite.replace(simpleName, newName, null);
+		}
 		return true;
 	}
 
