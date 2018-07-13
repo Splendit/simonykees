@@ -64,6 +64,31 @@ public class OptionalIfPresentRule {
 			}
 		}
 	}
+
+	public void avoidExternalNameConflicts_shouldTransform() {
+		String value = "I could crash with the lambda parameter";
+		Optional<String> user = Optional.ofNullable(value);
+		if(user.isPresent()) {
+			System.out.println(user.get());
+		}
+	}
+	
+	public void avoidInternalNameConflicts_shouldTransform() {
+		Optional<String> user = Optional.ofNullable("John Snow");
+		if(user.isPresent()) {
+			String value = "I could crash with the lambda parameter";
+			System.out.println(value + ":" + user.get());
+		}
+	}
+	
+	public void avoidShadowingFields_shouldTransform() {
+		Optional<String> user = Optional.ofNullable("John Snow");
+		if(user.isPresent()) {
+			System.out.println(value2 + ":" + user.get());
+			String value2 = user.get();
+			System.out.println(value2);
+		}
+	}
 	
 	public void fakeOptional_shouldNotTransform(IoNonSonoOpzionale input) {
 		if (input.isPresent()) {
