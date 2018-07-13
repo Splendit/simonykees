@@ -1,5 +1,6 @@
 package eu.jsparrow.sample.postRule.allRules;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -13,6 +14,65 @@ public class OptionalIfPresentRule {
 
 	private static final Logger logger = LoggerFactory.getLogger(OptionalIfPresentRule.class);
 	private final String value2 = "";
+
+	{
+		Optional<String> input = Optional.empty();
+		input.ifPresent(value -> logger.info(value));
+	}
+
+	public void singleIfBlockBody_shouldTransform(Optional<String> input) {
+		input.ifPresent(value -> {
+			if (true) {
+				logger.info(value);
+			}
+		});
+	}
+
+	public void singleIfStatementBody_shouldTransform(Optional<String> input) {
+		input.ifPresent(value -> {
+			if (true) {
+				logger.info(value);
+			}
+		});
+	}
+
+	public void multipleInitialiyers_shouldTransform(Optional<String> input) {
+		input.ifPresent(value -> {
+			String second = "";
+			logger.info(value);
+			logger.info(second);
+		});
+	}
+
+	public void getExpressionNotPresent_shouldNotTransform(Optional<String> input) {
+		if (input.isPresent()) {
+			String value = "";
+			logger.info(value);
+		}
+	}
+
+	public void getWithArgument_shouldNotTransform(Optional<String> input, List<String> users) {
+		if (input.isPresent()) {
+			String value = users.get(0);
+			logger.info(value);
+		}
+	}
+
+	public void getWithNullExpression_shouldNotTransform(Optional<String> input) {
+		if (input.isPresent()) {
+			String value = "";
+			get();
+			logger.info(value);
+		}
+	}
+
+	public void throwingCheckedException_shouldNotTransform(Optional<String> input) throws Exception {
+		if (input.isPresent()) {
+			String value = input.get();
+			logger.info(value);
+			throwSomething();
+		}
+	}
 
 	public void defaultUseCase_shouldTransform(Optional<String> input) {
 		input.ifPresent(value -> logger.info(value));
@@ -155,17 +215,36 @@ public class OptionalIfPresentRule {
 				logger.info(value);
 				if (StringUtils.isEmpty(value)) {
 					throw new NoSuchElementException();
+				} else {
+					logger.info(value);
 				}
 			}
 		}
+	}
+
+	public void clashingWithPropertyOnQualifiedName_shouldTransform(Optional<String> input) {
+		final IoNonSonoOpzionale user = new IoNonSonoOpzionale();
+		input.ifPresent(value1 -> {
+			user.value.length();
+			logger.info(value1);
+		});
 	}
 
 	private Optional<String> findUserName(String user) {
 		return Optional.empty();
 	}
 
+	private void throwSomething() throws FileNotFoundException {
+
+	}
+
+	private void get() {
+
+	}
+
 	class IoNonSonoOpzionale {
-		public String value;
+		private final Logger logger1 = LoggerFactory.getLogger(IoNonSonoOpzionale.class);
+		final public String value = "";
 
 		public boolean isPresent() {
 			return false;
@@ -173,6 +252,13 @@ public class OptionalIfPresentRule {
 
 		public String get() {
 			return "";
+		}
+
+		public void clashingWithFieldAccess_shouldTransform(Optional<String> input) {
+			input.ifPresent(value1 -> {
+				this.value.length();
+				logger1.info(value1);
+			});
 		}
 	}
 

@@ -9,7 +9,7 @@ import java.util.Optional;
 public class OptionalIfPresentRule {
 
 	private final String value2 = "";
-	
+
 	{
 		Optional<String> input = Optional.empty();
 		input.ifPresent(value -> System.out.println(value));
@@ -22,8 +22,8 @@ public class OptionalIfPresentRule {
 			}
 		});
 	}
-	
-	public void singleIfStatementBody_shouldTransform2(Optional<String> input) {
+
+	public void singleIfStatementBody_shouldTransform(Optional<String> input) {
 		input.ifPresent(value -> {
 			if (true) {
 				System.out.println(value);
@@ -219,18 +219,9 @@ public class OptionalIfPresentRule {
 
 	public void clashingWithPropertyOnQualifiedName_shouldTransform(Optional<String> input) {
 		final IoNonSonoOpzionale user = new IoNonSonoOpzionale();
-		input.ifPresent(value -> {
+		input.ifPresent(value1 -> {
 			user.value.length();
-			System.out.println(value);
-		});
-	}
-
-	final String field = "";
-
-	public void clashingWithFieldAccess_shouldTransform(Optional<String> input) {
-		input.ifPresent(field -> {
-			this.field.length();
-			System.out.println(field);
+			System.out.println(value1);
 		});
 	}
 
@@ -255,6 +246,13 @@ public class OptionalIfPresentRule {
 
 		public String get() {
 			return "";
+		}
+		
+		public void clashingWithFieldAccess_shouldTransform(Optional<String> input) {
+			input.ifPresent(value1 -> {
+				this.value.length();
+				System.out.println(value1);
+			});
 		}
 	}
 

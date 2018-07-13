@@ -244,16 +244,6 @@ public class OptionalIfPresentRule {
 		}
 	}
 
-	final String field = "";
-
-	public void clashingWithFieldAccess_shouldTransform(Optional<String> input) {
-		if (input.isPresent()) {
-			String field = input.get();
-			this.field.length();
-			System.out.println(field);
-		}
-	}
-
 	private Optional<String> findUserName(String user) {
 		return Optional.empty();
 	}
@@ -275,6 +265,14 @@ public class OptionalIfPresentRule {
 
 		public String get() {
 			return "";
+		}
+		
+		public void clashingWithFieldAccess_shouldTransform(Optional<String> input) {
+			if (input.isPresent()) {
+				String value = input.get();
+				this.value.length();
+				System.out.println(value);
+			}
 		}
 	}
 

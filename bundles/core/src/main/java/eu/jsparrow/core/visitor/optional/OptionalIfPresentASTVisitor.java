@@ -79,6 +79,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (hasNonEfectivellyFinalVariable) {
 			return true;
 		}
+
 		/*
 		 * Check thenStatement for 'return', throw, 'break' or 'continue'
 		 * statements.
@@ -178,9 +179,16 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		parameterDeclaration.setName(parameter);
 
 		lambdaExpression.setParentheses(false);
-		lambdaExpression.setBody(astRewrite.createCopyTarget(lambdaBody));
 		lambdaExpression.parameters()
 			.add(parameterDeclaration);
+		int bodyNodeType = lambdaBody.getNodeType();
+		if(ASTNode.BLOCK == bodyNodeType || lambdaBody instanceof Expression ) {
+			lambdaExpression.setBody(astRewrite.createCopyTarget(lambdaBody));
+		} else {
+			Block newBlock = ast.newBlock();
+			newBlock.statements().add(astRewrite.createCopyTarget(lambdaBody));
+			lambdaExpression.setBody(newBlock);
+		}
 
 		return lambdaExpression;
 	}
