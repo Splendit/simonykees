@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.loop.stream;
+package eu.jsparrow.core.visitor.sub;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 
+import eu.jsparrow.core.visitor.loop.stream.StreamForEachCheckValidStatementASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;

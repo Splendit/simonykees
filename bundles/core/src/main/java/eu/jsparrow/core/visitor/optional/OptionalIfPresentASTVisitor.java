@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.visitor.sub.EffectivelyFinalVisitor;
 import eu.jsparrow.core.visitor.sub.LiveVariableScope;
+import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -77,13 +78,21 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 		/*
 		 * Check thenStatement for 'return', throw, 'break' or 'continue'
-		 * statements. TODO: Check for methods that throw exceptions.
+		 * statements.
 		 */
 		boolean hasReturnStatement = containsReturnStatement(thenStatement);
 		if (hasReturnStatement) {
 			return true;
 		}
-		
+
+		/*
+		 * Check for unhandled exceptions
+		 */
+		boolean hasUnhandledException = containsUnhandledException(thenStatement);
+		if (hasUnhandledException) {
+			return true;
+		}
+
 		// Find the optional expression
 		Expression optional = methodInvocation.getExpression();
 		List<MethodInvocation> getExpressions = findGetExpressions(thenStatement, optional);
@@ -227,6 +236,12 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		FlowBreakersVisitor visitor = new FlowBreakersVisitor();
 		thenStatement.accept(visitor);
 		return visitor.hasFlowBreakerStatement();
+	}
+
+	private boolean containsUnhandledException(Statement thenStatement) {
+		UnhandledExceptionVisitor visitor = new UnhandledExceptionVisitor();
+		thenStatement.accept(visitor);
+		return visitor.throwsException();
 	}
 
 	private boolean containsNonEffectivelyFinal(Statement thenStatement) {

@@ -13,7 +13,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 public class OptionalGetVisitor extends ASTVisitor {
 
-	private static final String GET = "get";
+	private static final String GET = "get"; //$NON-NLS-1$
 
 	private Expression optional;
 	private List<MethodInvocation> getInvocations = new ArrayList<>();
