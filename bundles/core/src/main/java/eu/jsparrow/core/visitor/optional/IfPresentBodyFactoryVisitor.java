@@ -1,8 +1,10 @@
 package eu.jsparrow.core.visitor.optional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -17,6 +19,7 @@ public class IfPresentBodyFactoryVisitor extends ASTVisitor {
 	private List<MethodInvocation> getInvocations;
 	private String parameterName;
 	private ASTRewrite astRewrite;
+	private List<ASTNode> removedNodes = new ArrayList<>();
 
 	public IfPresentBodyFactoryVisitor(List<MethodInvocation> getInvocations, String parameterName,
 			ASTRewrite astRewrite) {
@@ -58,12 +61,16 @@ public class IfPresentBodyFactoryVisitor extends ASTVisitor {
 			List<VariableDeclarationFragment> fragments = ASTNodeUtil
 				.convertToTypedList(declarationStatement.fragments(), VariableDeclarationFragment.class);
 			if (fragments.size() == 1) {
-				astRewrite.remove(declarationStatement, null); //TODO find a better workaround
-				declarationStatement.delete();
+				astRewrite.remove(declarationStatement, null);
+				removedNodes.add(declarationStatement);
 				return;
 			}
 		}
-		astRewrite.remove(initializer, null); //TODO find a better workaround
-		initializer.delete();
+		astRewrite.remove(initializer, null);
+		removedNodes.add(initializer);
+	}
+	
+	public List<ASTNode> getRemovedNodes() {
+		return removedNodes;
 	}
 }

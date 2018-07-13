@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import eu.jsparrow.core.visitor.sub.EffectivelyFinalVisitor;
 import eu.jsparrow.core.visitor.sub.LiveVariableScope;
@@ -107,8 +108,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		// Create a lambda expression with parameter and body
-		Statement body = createLambdaExpressionBody(thenStatement, getExpressions, identifier);
-		LambdaExpression lambda = createLambdaExpression(identifier, body);
+		LambdaExpression lambda = createLambdaExpression(thenStatement, getExpressions, identifier);
 
 		// Create the new statement optional.ifPresent with the name of the
 		// optional and ifPresent method invocation
@@ -156,14 +156,20 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	@SuppressWarnings("unchecked")
-	private LambdaExpression createLambdaExpression(String identifier, Statement body) {
+	private LambdaExpression createLambdaExpression(Statement thenStatement, List<MethodInvocation> getExpressions,
+			String identifier) {
+
+		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(getExpressions, identifier, astRewrite);
+		thenStatement.accept(visitor);
+		Statement body = thenStatement;
+
 		AST ast = astRewrite.getAST();
 		LambdaExpression lambdaExpression = ast.newLambdaExpression();
 		SimpleName parameter = ast.newSimpleName(identifier);
 		VariableDeclarationFragment parameterDeclaration = ast.newVariableDeclarationFragment();
 		parameterDeclaration.setName(parameter);
 
-		ASTNode lambdaBody = unwrapBody(body);
+		ASTNode lambdaBody = unwrapBody(body, visitor.getRemovedNodes());
 
 		lambdaExpression.setParentheses(false);
 		lambdaExpression.setBody(astRewrite.createCopyTarget(lambdaBody));
@@ -173,7 +179,28 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		return lambdaExpression;
 	}
 
-	private ASTNode unwrapBody(Statement body) {
+	/**
+	 * Converts the body into an {@link Expression} if it consists a single
+	 * {@link ExpressionStatement}.
+. 	 * <b>ATTENTION:</b> deletes all nodes in {@code removedNodes}!
+	 * 
+	 * @param body
+	 *            the node to be transformed
+	 * @param removedNodes
+	 *            list of nodes registered to be removed by the
+	 *            {@link ASTRewrite}.
+	 * @return the unwrapped {@link Expression} if the body consist of one {@link ExpressionStatement} or the 
+	 * unchanged body otherwise.
+	 */
+	private ASTNode unwrapBody(Statement body, List<ASTNode> removedNodes) {
+
+		/*
+		 * A workaround to help with finding out how many statements remain in the body. 
+		 */
+		for (ASTNode node : removedNodes) {
+			node.delete();
+		}
+
 		ASTNode lambdaBody = body;
 		if (ASTNode.BLOCK == body.getNodeType()) {
 			Block block = (Block) body;
@@ -189,13 +216,6 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 			lambdaBody = ((ExpressionStatement) body).getExpression();
 		}
 		return lambdaBody;
-	}
-
-	private Statement createLambdaExpressionBody(Statement thenStatement, List<MethodInvocation> getExpressions,
-			String identifier) {
-		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(getExpressions, identifier, astRewrite);
-		thenStatement.accept(visitor);
-		return thenStatement;
 	}
 
 	private String findParameterName(Statement thenStatement, List<MethodInvocation> getExpressions) {
