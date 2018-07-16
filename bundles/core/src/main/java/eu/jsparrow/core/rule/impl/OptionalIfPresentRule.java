@@ -18,7 +18,7 @@ public class OptionalIfPresentRule extends RefactoringRuleImpl<OptionalIfPresent
 		this.id = "OptionalIfPresent"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.OptionalIfPresentRule_name,
 				Messages.OptionalIfPresentRule_description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_8));
+				Arrays.asList(Tag.JAVA_1_8, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.LAMBDA));
 	}
 
 	@Override
