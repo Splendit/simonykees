@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jsparrow :: rules imports
 Bundle-SymbolicName: eu.jsparrow.rules.imports
-Bundle-Version: 2.5.0.qualifier
+Bundle-Version: 2.5.1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Require-Bundle: eu.jsparrow.logging,
