@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jsparrow::rules.api
 Bundle-SymbolicName: eu.jsparrow.rules.api
-Bundle-Version: 2.5.1
+Bundle-Version: 2.5.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Export-Package: eu.jsparrow.rules.api,
