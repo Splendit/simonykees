@@ -18,12 +18,72 @@ public class OptionalIfPresentRule {
 		}
 	}
 
-	public void singleIfBlockBody_shouldTransform(Optional<String> input) {
+	public void default_comment(Optional<String> input) {
+		if (input.isPresent()) {
+			String value = input.get(); //comment after value initialization
+			System.out.println(value);
+		} 
+	}
+	
+	public void default_comment1(Optional<String> input) {
+		if (input.isPresent()) { // comment after isPresent
+			String value = input.get();
+			System.out.println(value);
+		} 
+	}
+	
+	public void default_comment2(Optional<String> input) {
+		//comment above isPresent
 		if (input.isPresent()) {
 			String value = input.get();
+			System.out.println(value);
+		} 
+	}
+
+	public void default_comment3(Optional<String> input) {
+		//comment unconnected
+		
+		if (input.isPresent()) {
+			String value = input.get();
+			System.out.println(value);
+		} 
+	}
+
+	public void default_comment4(Optional<String> input) {
+		if (input.isPresent()) {
+			//comment under isPresent
+			String value = input.get();
+			System.out.println(value);
+		} 
+	}
+	
+	public void default_comment5(Optional<String> input) {
+		if (input.isPresent()) {
+			String value = input.get();
+			//comment under value initialization
+			System.out.println(value);
+		} 
+	}
+	
+	public void default_comment6(Optional<String> input) {
+		if (input.isPresent()) {
+			String value = input.get();
+			System.out.println(value);
+			//comment at the end of isPresent block
+		} 
+	}
+
+	public void singleIfBlockBody_shouldTransform(Optional<String> input) {
+		// comment before isPresent
+		if (input.isPresent()) { // comment after isPresent
+			// comment under isPresent
+			String value = input.get();
+			// comment under value initialization
 			if (true) {
+				// comment inside inner if
 				System.out.println(value);
 			}
+			// comment at the end of isPresent block
 		}
 	}
 
@@ -37,6 +97,7 @@ public class OptionalIfPresentRule {
 
 	public void multipleInitialiyers_shouldTransform(Optional<String> input) {
 		if (input.isPresent()) {
+			// comment under isPresent
 			String value = input.get(), second = "";
 			System.out.println(value);
 			System.out.println(second);
@@ -59,6 +120,7 @@ public class OptionalIfPresentRule {
 
 	public void getWithNullExpression_shouldNotTransform(Optional<String> input) {
 		if (input.isPresent()) {
+			// comment under isPresent
 			String value = "";
 			get();
 			System.out.println(value);
@@ -66,6 +128,7 @@ public class OptionalIfPresentRule {
 	}
 
 	public void throwingCheckedException_shouldNotTransform(Optional<String> input) throws Exception {
+		// comment before isPresent
 		if (input.isPresent()) {
 			String value = input.get();
 			System.out.println(value);

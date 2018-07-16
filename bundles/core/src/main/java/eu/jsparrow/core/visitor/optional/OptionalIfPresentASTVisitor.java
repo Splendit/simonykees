@@ -133,6 +133,11 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(ifStatement, optionalIfPresent, null);
 
 		// Remember to save comments at each step
+		if(lambdaBody instanceof Expression) {
+			getCommentRewriter().saveRelatedComments(ifStatement);
+		} else {
+			getCommentRewriter().saveLeadingComment(ifStatement);
+		}
 
 		return true;
 	}

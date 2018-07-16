@@ -20,11 +20,52 @@ public class OptionalIfPresentRule {
 		input.ifPresent(value -> logger.info(value));
 	}
 
+	public void default_comment(Optional<String> input) {
+		// comment after value initialization
+		input.ifPresent(value -> logger.info(value));
+	}
+
+	public void default_comment1(Optional<String> input) {
+		// comment after isPresent
+		input.ifPresent(value -> logger.info(value));
+	}
+
+	public void default_comment2(Optional<String> input) {
+		// comment above isPresent
+		input.ifPresent(value -> logger.info(value));
+	}
+
+	public void default_comment3(Optional<String> input) {
+		// comment unconnected
+
+		input.ifPresent(value -> logger.info(value));
+	}
+
+	public void default_comment4(Optional<String> input) {
+		// comment under isPresent
+		input.ifPresent(value -> logger.info(value));
+	}
+
+	public void default_comment5(Optional<String> input) {
+		// comment under value initialization
+		input.ifPresent(value -> logger.info(value));
+	}
+
+	public void default_comment6(Optional<String> input) {
+		// comment at the end of isPresent block
+		input.ifPresent(value -> logger.info(value));
+	}
+
 	public void singleIfBlockBody_shouldTransform(Optional<String> input) {
-		input.ifPresent(value -> {
+		// comment before isPresent
+		input.ifPresent(value -> { // comment after isPresent
+			// comment under isPresent
+			// comment under value initialization
 			if (true) {
+				// comment inside inner if
 				logger.info(value);
 			}
+			// comment at the end of isPresent block
 		});
 	}
 
@@ -38,6 +79,7 @@ public class OptionalIfPresentRule {
 
 	public void multipleInitialiyers_shouldTransform(Optional<String> input) {
 		input.ifPresent(value -> {
+			// comment under isPresent
 			String second = "";
 			logger.info(value);
 			logger.info(second);
@@ -60,6 +102,7 @@ public class OptionalIfPresentRule {
 
 	public void getWithNullExpression_shouldNotTransform(Optional<String> input) {
 		if (input.isPresent()) {
+			// comment under isPresent
 			String value = "";
 			get();
 			logger.info(value);
@@ -67,6 +110,7 @@ public class OptionalIfPresentRule {
 	}
 
 	public void throwingCheckedException_shouldNotTransform(Optional<String> input) throws Exception {
+		// comment before isPresent
 		if (input.isPresent()) {
 			String value = input.get();
 			logger.info(value);
