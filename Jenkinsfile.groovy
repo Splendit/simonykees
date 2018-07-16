@@ -5,8 +5,14 @@
 
 // add timestaps to the "Console Output" of Jenkins
 
-// should production steps be executed?
-def isLiveEnvironment() { false }
+/*
+ * Should production steps be executed?
+ * This changes whether or not deploy steps etc. are executed. 
+ * This only changes something on non-feature branches. 
+ *
+ * TODO: Automatically setting this flag will be done in SIM-1191
+ */
+def isLiveEnvironment() { true }
 
 // gets the maven home
 def mvnBin() { "${tool 'mvn system'}/bin/mvn" }
