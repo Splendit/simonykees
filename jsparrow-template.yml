@@ -34,7 +34,6 @@ rules:
   - SerialVersionUID
   - RearrangeClassMembers
   - BracketsToControl
-  - FieldNameConvention
   - MultiVariableDeclarationLine
   - EnumsWithoutEquals
   - ReImplementingInterface
