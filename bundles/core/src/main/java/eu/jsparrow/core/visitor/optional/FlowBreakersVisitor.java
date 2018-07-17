@@ -7,6 +7,13 @@ import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
+/**
+ * A visitor for checking if {@link ASTNode} contains any of flow control
+ * statements (return, break, continue, throw).
+ * 
+ * @since 2.6
+ *
+ */
 public class FlowBreakersVisitor extends ASTVisitor {
 
 	private boolean hasReturn = false;

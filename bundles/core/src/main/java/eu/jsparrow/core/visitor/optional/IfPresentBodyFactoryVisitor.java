@@ -8,6 +8,13 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+/**
+ * A visitor for replacing the Optional.get method invocation with the parameter
+ * of the lambda expression of Optional.ifPresent.
+ * 
+ * @since 2.6
+ *
+ */
 public class IfPresentBodyFactoryVisitor extends ASTVisitor {
 
 	private List<MethodInvocation> getInvocations;

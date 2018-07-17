@@ -16,6 +16,14 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * A visitor for checking if get method is called on Optional to get value of it
+ * inside than-statement. Used to replace usage of Optional.isPresent combined
+ * with Optional.get with Optional.IfPresent method.
+ * 
+ * @since 2.6
+ *
+ */
 public class OptionalGetVisitor extends ASTVisitor {
 
 	private static final String GET = "get"; //$NON-NLS-1$
@@ -81,13 +89,13 @@ public class OptionalGetVisitor extends ASTVisitor {
 		boolean matchedAssignedWithGet = assignedWithGet.stream()
 			.map(SimpleName::getIdentifier)
 			.anyMatch(identifier::equals);
-		
+
 		if (!matchedAssignedWithGet) {
 			return false;
 		}
-		
+
 		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
-		if(FieldAccess.NAME_PROPERTY == locationInParent) {
+		if (FieldAccess.NAME_PROPERTY == locationInParent) {
 			return false;
 		}
 
@@ -96,9 +104,5 @@ public class OptionalGetVisitor extends ASTVisitor {
 
 	public List<MethodInvocation> getInvocations() {
 		return getInvocations;
-	}
-
-	public List<SimpleName> getReferencesToBeRenamed() {
-		return references;
 	}
 }

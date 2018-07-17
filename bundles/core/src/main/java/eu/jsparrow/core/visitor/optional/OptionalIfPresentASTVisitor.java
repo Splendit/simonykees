@@ -31,6 +31,13 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Usage of Optional.isPresent combined with Optional.get should be replaced
+ * with Optional.IfPresent method wherever possible.
+ * 
+ * @since 2.6
+ *
+ */
 public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String OPTIONAL_FULLY_QUALIFIED_NAME = java.util.Optional.class.getName();
@@ -133,7 +140,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(ifStatement, optionalIfPresent, null);
 
 		// Remember to save comments at each step
-		if(lambdaBody instanceof Expression) {
+		if (lambdaBody instanceof Expression) {
 			getCommentRewriter().saveRelatedComments(ifStatement);
 		} else {
 			getCommentRewriter().saveLeadingComment(ifStatement);
