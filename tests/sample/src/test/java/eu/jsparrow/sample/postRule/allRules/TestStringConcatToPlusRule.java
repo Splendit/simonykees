@@ -45,7 +45,7 @@ public class TestStringConcatToPlusRule {
 		return input // I don't want to break anything
 			. // save me
 			concat("abc" // don't break the semicolon
-		);
+			);
 	}
 
 	public String testConcatWithVariable(String input, String param) {

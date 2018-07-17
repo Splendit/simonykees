@@ -16,7 +16,7 @@ public class StringLiteralEqualityCheckRule {
 
 		boolean swap = input // don't break the semicolon
 			.equals("input" // don't break the line
-		);
+			);
 		return swap;
 	}
 
@@ -66,7 +66,7 @@ public class StringLiteralEqualityCheckRule {
 				// please dont loose me
 				foo // comparing equality with a copy of init value
 					.equals("cornerCaseWithCommentsInBetween" // I may be useful
-				);
+					);
 
 		return swap;
 	}
