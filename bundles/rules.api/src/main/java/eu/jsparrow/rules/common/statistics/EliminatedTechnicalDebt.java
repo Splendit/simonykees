@@ -57,6 +57,6 @@ public class EliminatedTechnicalDebt {
 	public static Duration getTotalFor(List<? extends RefactoringRule> list) {
 		return list.stream()
 			.map(EliminatedTechnicalDebt::get)
-			.reduce(Duration.ZERO, (x, y) -> x.plus(y));
+			.reduce(Duration.ZERO, Duration::plus);
 	}
 }

@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * converts lambda expressions to method references of the form
@@ -209,7 +210,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 								.map(var -> var.resolveBinding()
 									.getType())
 								.collect(Collectors.toList());
-							if (typeNameStr != null && !typeNameStr.isEmpty()
+							if (typeNameStr != null && !StringUtils.isEmpty(typeNameStr)
 									&& !isAmbiguousMethodReference(methodInvocation, ambTypes)) {
 
 								Name typeName = astRewrite.getAST()
@@ -380,7 +381,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			String qualifiedName = binding.getErasure()
 				.getQualifiedName();
 			int outerTypeStartingIndex = qualifiedName.lastIndexOf(outerTypeName);
-			typeNameStr = qualifiedName.substring(outerTypeStartingIndex);
+			typeNameStr = StringUtils.substring(qualifiedName, outerTypeStartingIndex);
 			newImports.add(declaringClassErasure.getQualifiedName());
 		} else if (qualifiedNameNeeded(binding)) {
 			typeNameStr = binding.getErasure()

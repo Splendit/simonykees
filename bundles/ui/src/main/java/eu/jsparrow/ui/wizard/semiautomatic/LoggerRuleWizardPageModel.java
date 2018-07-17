@@ -25,20 +25,23 @@ import eu.jsparrow.ui.wizard.IValueChangeListener;
  */
 public class LoggerRuleWizardPageModel {
 
+	private static final String NO_SEVERITY_LEVEL = Messages.LoggerRuleWizardPageModel_noSeverityLevel;
+
 	private StandardLoggerRule rule;
 
 	private Map<String, String> currentSelectionMap = new HashMap<>();
 
 	Map<String, Integer> systemOutReplaceOptions = new LinkedHashMap<>();
+
 	Map<String, Integer> systemErrReplaceOptions = new LinkedHashMap<>();
+
 	Map<String, Integer> printStackTraceReplaceOptions = new LinkedHashMap<>();
+
 	Map<String, Integer> missingLogInsertOptions = new LinkedHashMap<>();
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
 
 	private String selectionStatus = ""; //$NON-NLS-1$
-
-	private static final String NO_SEVERITY_LEVEL = Messages.LoggerRuleWizardPageModel_noSeverityLevel;
 
 	public LoggerRuleWizardPageModel(RefactoringRule rule) {
 		this.rule = (StandardLoggerRule) rule;

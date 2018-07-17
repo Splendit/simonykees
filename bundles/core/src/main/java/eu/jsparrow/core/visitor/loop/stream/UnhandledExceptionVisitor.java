@@ -38,13 +38,7 @@ public class UnhandledExceptionVisitor extends AbstractASTRewriteASTVisitor {
 		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class)
 			.stream()
 			.map(catchClause -> catchClause.getException()
-				.resolveBinding())
-			.forEach(exceptionVariableBinding -> {
-				if (exceptionVariableBinding != null) {
-					currentHandledExceptionsTypes.add(exceptionVariableBinding.getType()
-						.getQualifiedName());
-				}
-			});
+				.resolveBinding()).filter(exceptionVariableBinding -> exceptionVariableBinding != null).forEach(exceptionVariableBinding -> currentHandledExceptionsTypes.add(exceptionVariableBinding.getType().getQualifiedName()));
 		return true;
 	}
 
@@ -53,13 +47,7 @@ public class UnhandledExceptionVisitor extends AbstractASTRewriteASTVisitor {
 		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class)
 			.stream()
 			.map(catchClause -> catchClause.getException()
-				.resolveBinding())
-			.forEach(exceptionVariableBinding -> {
-				if (exceptionVariableBinding != null) {
-					currentHandledExceptionsTypes.remove(exceptionVariableBinding.getType()
-						.getQualifiedName());
-				}
-			});
+				.resolveBinding()).filter(exceptionVariableBinding -> exceptionVariableBinding != null).forEach(exceptionVariableBinding -> currentHandledExceptionsTypes.remove(exceptionVariableBinding.getType().getQualifiedName()));
 	}
 
 	@Override

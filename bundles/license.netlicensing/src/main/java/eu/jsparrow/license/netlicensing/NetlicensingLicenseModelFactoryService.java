@@ -12,22 +12,27 @@ import eu.jsparrow.license.netlicensing.model.*;
 @Component
 public class NetlicensingLicenseModelFactoryService implements LicenseModelFactoryService {
 
+	@Override
 	public LicenseModel createDemoLicenseModel() {
 		return new DemoLicenseModel();
 	}
 
+	@Override
 	public LicenseModel createDemoLicenseModel(ZonedDateTime expirationDate) {
 		return new DemoLicenseModel(expirationDate);
 	}
 
+	@Override
 	public LicenseModel createNewNodeLockedModel(String key, String secret, String productNr, String moduleNr, String validationBaseUrl) {
 		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.NODE_LOCKED, validationBaseUrl);
 	}
 
+	@Override
 	public LicenseModel createNewFloatingModel(String key, String secret, String productNr, String moduleNr, String validationBaseUrl) {
 		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.FLOATING, validationBaseUrl);
 	}
 
+	@Override
 	public LicenseModel createNewModel(String key, String secret, String productNr, String moduleNr, LicenseType type,
 			String name, ZonedDateTime expireDate) {
 		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, type, name, expireDate);

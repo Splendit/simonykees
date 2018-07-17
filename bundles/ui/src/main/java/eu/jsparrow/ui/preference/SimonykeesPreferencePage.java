@@ -59,13 +59,6 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	private Font font;
 
-	private enum ProfileImportMode {
-		SKIP,
-		RENAME,
-		REPLACE,
-		IMPORT,
-	}
-
 	public SimonykeesPreferencePage() {
 		super(GRID);
 		setPreferenceStore(Activator.getDefault()
@@ -657,5 +650,12 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		}
 
 		return newProfileName;
+	}
+
+	private enum ProfileImportMode {
+		SKIP,
+		RENAME,
+		REPLACE,
+		IMPORT,
 	}
 }

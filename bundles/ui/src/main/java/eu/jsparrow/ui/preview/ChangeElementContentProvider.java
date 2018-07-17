@@ -31,6 +31,7 @@ public class ChangeElementContentProvider implements ITreeContentProvider {
 	 * 
 	 * @see ITreeContentProvider#getParent
 	 */
+	@Override
 	public Object getParent(Object element) {
 		return ((DocumentChangeWrapper) element).getParent();
 	}
@@ -40,6 +41,7 @@ public class ChangeElementContentProvider implements ITreeContentProvider {
 	 * 
 	 * @see ITreeContentProvider#hasChildren
 	 */
+	@Override
 	public boolean hasChildren(Object element) {
 		Object[] children = getChildren(element);
 		return children != null && children.length > 0;
@@ -50,6 +52,7 @@ public class ChangeElementContentProvider implements ITreeContentProvider {
 	 * 
 	 * @see ITreeContentProvider#getElements
 	 */
+	@Override
 	public Object[] getElements(Object element) {
 		if (element instanceof DocumentChangeWrapper[]) {
 			Arrays.asList((DocumentChangeWrapper[]) element)

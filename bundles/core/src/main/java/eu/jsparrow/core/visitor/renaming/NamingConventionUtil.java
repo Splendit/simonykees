@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A utility class containing functionalities that check/generates identifiers
@@ -70,7 +71,7 @@ public class NamingConventionUtil {
 
 		List<String> partsList = Arrays.asList(parts)
 			.stream()
-			.filter(s -> !s.isEmpty())
+			.filter(s -> !StringUtils.isEmpty(s))
 			.collect(Collectors.toList());
 
 		if (partsList.isEmpty()) {
@@ -81,14 +82,14 @@ public class NamingConventionUtil {
 
 		// the prefix has to start with lower case
 		String prefix = partsList.remove(0);
-		String lowerCasePrefix = prefix.toLowerCase();
+		String lowerCasePrefix = StringUtils.lowerCase(prefix);
 
 		// convert the other parts to Title case.
 		String suffix = partsList.stream()
-			.filter(s -> !s.isEmpty())
+			.filter(s -> !StringUtils.isEmpty(s))
 			.map(String::toLowerCase)
-			.map(input -> input.substring(0, 1)
-				.toUpperCase() + input.substring(1))
+			.map(input -> StringUtils
+				.upperCase(input.substring(0, 1)) + StringUtils.substring(input, 1))
 			.collect(Collectors.joining());
 
 		// the final identifier
@@ -101,7 +102,7 @@ public class NamingConventionUtil {
 		}
 
 		return Optional.ofNullable(newName)
-			.filter(s -> !s.isEmpty());
+			.filter(s -> !StringUtils.isEmpty(s));
 	}
 	
 	public static Optional<String> generateNewIdentifier(String identifier, boolean upperCaseAfterDollar,

@@ -55,9 +55,8 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	@Override
 	public Set<Object> filterPosibilitiesByName() {
 		return super.getPosibilities().stream()
-			.filter(object -> StringUtils.contains(((RefactoringRule) object).getRuleDescription()
-				.getName()
-				.toLowerCase(), nameFilter))
+			.filter(object -> StringUtils.contains(StringUtils
+				.lowerCase(((RefactoringRule) object).getRuleDescription().getName()), nameFilter))
 			.collect(Collectors.toSet());
 	}
 
@@ -81,9 +80,8 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 					.contains(Tag.getTageForName(tag))) {
 					return true;
 				}
-			} else if (StringUtils.contains(object.getRuleDescription()
-				.getName()
-				.toLowerCase(), tag)) {
+			} else if (StringUtils.contains(StringUtils
+				.lowerCase(object.getRuleDescription().getName()), tag)) {
 				return true;
 			}
 		}

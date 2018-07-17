@@ -86,8 +86,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	 */
 	private void convertChangesToDocumentChangeWrappers() {
 		changesWrapperList = new ArrayList<>();
-		for (Map.Entry<FieldMetaData, Map<ICompilationUnit, DocumentChange>> entry : changes.entrySet()) {
-			FieldMetaData fieldData = entry.getKey();
+		changes.entrySet().stream().map(Map.Entry::getKey).forEach(fieldData -> {
 			Map<ICompilationUnit, DocumentChange> changesForField = changes.get(fieldData);
 			if (!changesForField.isEmpty()) {
 				DocumentChange parent = null;
@@ -104,7 +103,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 							changesForField, parent);
 				}
 			}
-		}
+		});
 		if (!changesWrapperList.isEmpty()) {
 			this.selectedDocWrapper = changesWrapperList.get(0);
 		}
@@ -120,14 +119,13 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	private void createDocumentChangeWrapperChildren(FieldMetaData fieldData, Document originalDocument,
 			Map<ICompilationUnit, DocumentChange> changesForField, DocumentChange parent) {
 		DocumentChangeWrapper dcw = new DocumentChangeWrapper(parent, null, originalDocument, fieldData);
-		for (Map.Entry<ICompilationUnit, DocumentChange> entry : changesForField.entrySet()) {
-			ICompilationUnit iCompilationUnit = entry.getKey();
+		changesForField.entrySet().stream().map(Map.Entry::getKey).forEach(iCompilationUnit -> {
 			if (!(fieldData.getDeclarationPath()).equals(iCompilationUnit.getPath())) {
 				DocumentChange document = changesForField.get(iCompilationUnit);
 				dcw.addChild(document, iCompilationUnit.getElementName(),
 						this.originalDocuments.get(iCompilationUnit.getPath()));
 			}
-		}
+		});
 
 		changesWrapperList.add(dcw);
 	}
