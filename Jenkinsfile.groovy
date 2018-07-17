@@ -165,7 +165,7 @@ void pushToGithub() {
 			println "Pushing to GitHub..."
 			sshagent([sshCredentials()]) { //key id of ssh-rsa key in remote repository within jenkins
 				// pushing the repository to github
-				sh("git push $backupOrigin() HEAD:$env.BRANCH_NAME")
+				sh("git push ${backupOrigin()} HEAD:$env.BRANCH_NAME")
 			}
 		}
 	} else {
@@ -268,7 +268,7 @@ void tagCommit(def branchName, String subdirectory) {
 		stage(stageName) {
 			// push tags to github
 			sshagent([sshCredentials()]) { //key id of ssh-rsa key in remote repository within jenkins
-				sh("git push $backupOrigin() --tags")
+				sh("git push ${backupOrigin()} --tags")
 			}
 		}
 	} else {
