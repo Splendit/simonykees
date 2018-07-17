@@ -10,6 +10,8 @@ import java.util.Properties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +25,6 @@ import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
-import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import oshi.SystemInfo;
@@ -57,18 +58,20 @@ public class LicenseUtil implements LicenseUtilService {
 	private LicenseUtil() {
 		scheduler = new Scheduler(this);
 		scheduler.start();
-		ServiceReference<LicenseService> licenseReference = Activator.getBundleContext()
-			.getServiceReference(LicenseService.class);
-		licenseService = Activator.getBundleContext()
-			.getService(licenseReference);
-		ServiceReference<LicensePersistenceService> persistenceReference = Activator.getBundleContext()
+
+		BundleContext bundleContext = FrameworkUtil.getBundle(getClass())
+			.getBundleContext();
+
+		ServiceReference<LicenseService> licenseReference = bundleContext.getServiceReference(LicenseService.class);
+		licenseService = bundleContext.getService(licenseReference);
+
+		ServiceReference<LicensePersistenceService> persistenceReference = bundleContext
 			.getServiceReference(LicensePersistenceService.class);
-		persistenceService = Activator.getBundleContext()
-			.getService(persistenceReference);
-		ServiceReference<LicenseModelFactoryService> factoryReference = Activator.getBundleContext()
+		persistenceService = bundleContext.getService(persistenceReference);
+
+		ServiceReference<LicenseModelFactoryService> factoryReference = bundleContext
 			.getServiceReference(LicenseModelFactoryService.class);
-		factoryService = Activator.getBundleContext()
-			.getService(factoryReference);
+		factoryService = bundleContext.getService(factoryReference);
 	}
 
 	public static LicenseUtil get() {

@@ -1,26 +1,27 @@
 package eu.jsparrow.standalone;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.osgi.framework.BundleContext;
 
 import eu.jsparrow.core.config.YAMLConfig;
-import eu.jsparrow.core.config.YAMLConfigException;
+import eu.jsparrow.core.config.YAMLProfile;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.impl.CodeFormatterRule;
-import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
  * test class for {@link RefactoringInvoker}
@@ -30,59 +31,99 @@ import eu.jsparrow.rules.common.RefactoringRule;
  */
 public class RefactoringInvokerTest {
 
-	private IJavaProject javaProject;
 	private RefactoringInvoker refactoringInvoker;
+	private StandaloneConfig standaloneConfig;
+
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
 
 	@Before
 	public void setUp() {
-		javaProject = mock(IJavaProject.class);
 		refactoringInvoker = new TestableRefactoringInvoker();
+
+		IJavaProject javaProject = mock(IJavaProject.class);
+		when(javaProject.getElementName()).thenReturn("projectName"); //$NON-NLS-1$
+
+		standaloneConfig = mock(StandaloneConfig.class);
+		when(standaloneConfig.getJavaProject()).thenReturn(javaProject);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void startRefactoring() throws Exception {
 		BundleContext context = mock(BundleContext.class);
 		RefactoringPipeline refactoringPipeline = mock(RefactoringPipeline.class);
 
+		IJavaProject javaProject = mock(IJavaProject.class);
 		when(javaProject.getElementName()).thenReturn(""); //$NON-NLS-1$
 		when(refactoringPipeline.getRulesWithChangesAsString()).thenReturn(""); //$NON-NLS-1$
 
-		refactoringInvoker.startRefactoring(context, refactoringPipeline);
+		refactoringInvoker.startRefactoring(context);
 
-		verify(refactoringPipeline).createRefactoringStates(anyList());
-		verify(refactoringPipeline).doRefactoring(any(NullProgressMonitor.class));
-		verify(refactoringPipeline).commitRefactoring();
+		verify(standaloneConfig).createRefactoringStates();
+		verify(standaloneConfig).computeRefactoring();
+		verify(standaloneConfig).commitRefactoring();
+	}
+
+	@Test
+	public void startRefactoring_exceptinsInCreateRefactoringState_shouldNotCommit() throws Exception {
+		BundleContext context = mock(BundleContext.class);
+
+		doThrow(StandaloneException.class).when(standaloneConfig)
+			.createRefactoringStates();
+
+		expectedException.expect(StandaloneException.class);
+		refactoringInvoker.startRefactoring(context);
+
+		verify(standaloneConfig, never()).computeRefactoring();
+		verify(standaloneConfig, never()).commitRefactoring();
+	}
+
+	@Test
+	public void startRefactoring_exceptinsInDoRefactoring_shouldNotCommit() throws Exception {
+		BundleContext context = mock(BundleContext.class);
+		doThrow(StandaloneException.class).when(standaloneConfig)
+			.computeRefactoring();
+
+		expectedException.expect(StandaloneException.class);
+		refactoringInvoker.startRefactoring(context);
+
+		verify(standaloneConfig, never()).commitRefactoring();
+	}
+
+	@Test
+	public void updateProfile_shouldSetSelectedProfile() throws StandaloneException {
+		String profileName = "profile-name"; //$NON-NLS-1$
+		YAMLConfig yamlConfig = new YAMLConfig();
+		yamlConfig.setProfiles(Collections.singletonList(new YAMLProfile(profileName, Collections.emptyList())));
+
+		refactoringInvoker.updateSelectedProfile(yamlConfig, profileName);
+
+		assertEquals(profileName, yamlConfig.getSelectedProfile());
+	}
+
+	@Test
+	public void updateProfile_NonExistingProflie_shouldThrowException() throws StandaloneException {
+		String profileName = "profile-name"; //$NON-NLS-1$
+		YAMLConfig yamlConfig = new YAMLConfig();
+		yamlConfig.setProfiles(Collections.singletonList(new YAMLProfile(profileName, Collections.emptyList())));
+
+		expectedException.expect(StandaloneException.class);
+		expectedException.expectMessage("Profile [INVALID] does not exist"); //$NON-NLS-1$
+		refactoringInvoker.updateSelectedProfile(yamlConfig, "INVALID"); //$NON-NLS-1$
+
+		assertTrue(false);
 	}
 
 	class TestableRefactoringInvoker extends RefactoringInvoker {
 
 		@Override
-		protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws YAMLConfigException {
+		protected YAMLConfig getYamlConfig(String configFilePath) throws StandaloneException {
 			return new YAMLConfig();
 		}
 
 		@Override
-		protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) {
-			standaloneConfigs = Arrays.asList(mock(StandaloneConfig.class));
-			return standaloneConfigs;
-		}
-
-		@Override
-		protected List<RefactoringRule> getProjectRules(
-				StandaloneConfig config) {
-			return Collections.emptyList();
-		}
-
-		@Override
-		protected List<RefactoringRule> getSelectedRules(YAMLConfig config,
-				List<RefactoringRule> projectRules) throws YAMLConfigException {
-			return Collections.singletonList(new CodeFormatterRule());
-		}
-
-		@Override
-		protected IJavaProject getJavaProject(StandaloneConfig standaloneConfig) {
-			return javaProject;
+		protected void loadStandaloneConfig(BundleContext context) {
+			super.standaloneConfigs = Arrays.asList(standaloneConfig);
 		}
 	}
 }

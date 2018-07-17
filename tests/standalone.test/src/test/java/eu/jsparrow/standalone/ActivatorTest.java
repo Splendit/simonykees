@@ -19,8 +19,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-import eu.jsparrow.core.refactorer.RefactoringPipeline;
-
 /**
  * test class for {@link Activator}
  * 
@@ -110,7 +108,7 @@ public class ActivatorTest {
 
 		activator.start(context);
 
-		verify(refactoringInvoker).startRefactoring(any(), any(RefactoringPipeline.class));
+		verify(refactoringInvoker).startRefactoring(any());
 	}
 
 	@Test
@@ -121,7 +119,7 @@ public class ActivatorTest {
 
 		activator.start(context);
 
-		verify(refactoringInvoker, never()).startRefactoring(any(), any(RefactoringPipeline.class));
+		verify(refactoringInvoker, never()).startRefactoring(any());
 	}
 
 	@Test
@@ -140,12 +138,11 @@ public class ActivatorTest {
 
 		public TestableActivator() {
 			super(ActivatorTest.this.refactoringInvoker, ActivatorTest.this.listRulesUtil);
-			this.licenseService = ActivatorTest.this.licenseService;
 		}
 
 		@Override
-		void injectDependencies(BundleContext context) {
-			return;
+		StandaloneLicenseUtilService getStandaloneLicenseUtilService() {
+			return ActivatorTest.this.licenseService;
 		}
 	}
 }

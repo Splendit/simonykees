@@ -66,3 +66,16 @@ rules:
   - StringBuildingLoop
   - LambdaToMethodReference
   - CodeFormatter
+
+# define modules, classes and packages that you don't want to apply refactoring to
+# excluded modules could only be defined on parent project and those modules are then entirely ignored
+# if modul project has it's own yaml file, it overrides entire configuration from parent project yaml configuration if module wasn't excluded in parent yaml
+excludes:
+    excludeModules:
+      - eu.jsparrow.core
+    excludePackages:
+      - eu.jsparrow.core
+      - eu.jsparrow.core.rule
+    excludeClasses:
+      - eu.jsparrow.core.Activator.java
+      - eu.jsparrow.core.builder.NodeBuilder.java

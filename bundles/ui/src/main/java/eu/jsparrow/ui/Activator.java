@@ -36,8 +36,6 @@ public class Activator extends AbstractUIPlugin {
 	// Flag is jSparrow is already running
 	private static boolean running = false;
 
-	private static BundleContext bundleContext;
-
 	private static IEclipseContext eclipseContext;
 
 	private long loggingBundleID = 0;
@@ -59,7 +57,6 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		bundleContext = context;
 
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
@@ -114,7 +111,6 @@ public class Activator extends AbstractUIPlugin {
 		logger.info(Messages.Activator_stop);
 
 		plugin = null;
-		bundleContext = null;
 
 		// stop test fragment pseudo-activator
 		if (testFragmentActivator != null) {
@@ -157,10 +153,6 @@ public class Activator extends AbstractUIPlugin {
 
 	public static void setRunning(boolean isRunning) {
 		running = isRunning;
-	}
-
-	public static BundleContext getBundleContext() {
-		return bundleContext;
 	}
 
 	public static IEclipseContext getEclipseContext() {

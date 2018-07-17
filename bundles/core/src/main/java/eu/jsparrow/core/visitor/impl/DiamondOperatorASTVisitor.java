@@ -21,10 +21,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -42,8 +39,6 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  *
  */
 public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
-
-	private static final Logger logger = LoggerFactory.getLogger(DiamondOperatorASTVisitor.class);
 
 	private JavaVersion compilerCompliance;
 
@@ -307,7 +302,6 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private void replaceWithDiamond(ParameterizedType parameterizedType, List<Type> rhsTypeArguments) {
 		// removing type arguments in new class instance creation
-		logger.debug(Messages.DiamondOperatorASTVisitor_using_diamond_operator);
 		ListRewrite typeArgumentsListRewrite = astRewrite.getListRewrite(parameterizedType,
 				ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
 		Statement statement = ASTNodeUtil.getSpecificAncestor(parameterizedType, Statement.class);

@@ -41,19 +41,18 @@ public class ResponseEvaluator {
 	}
 
 	public NetlicensingValidationResult evaluateResult(ValidationResult response) throws ValidationException {
-		logger.debug("Evaluating {}", response); //$NON-NLS-1$
+		logger.debug("Evaluating validation result"); //$NON-NLS-1$
 		parser.parseValidationResult(response);
 
 		SubscriptionResponse subscription = parser.getSubscription();
 
-		logger.debug("Received subscription {}", subscription); //$NON-NLS-1$
 		if (subscription == null) {
 			throw new ValidationException(ExceptionMessages.Netlicensing_validationError_noSubscriptionReceived);
 		}
 
 		if (subscription.isValid()) {
 			return evaluateNonExpiredLicense();
-		} 
+		}
 		return evaluateExpiredLicense();
 	}
 
@@ -150,7 +149,7 @@ public class ResponseEvaluator {
 	private NetlicensingValidationResult createValidationResult(LicenseType licenseType, boolean valid,
 			ZonedDateTime expireDate, ZonedDateTime offlineExpire, StatusDetail statusInfo) {
 		logger.debug(
-				"Creating validation result with type={}, valid={}, expireDate={}, offlineExpire={},statusInfo ={}", //$NON-NLS-1$
+				"Creating validation result with type={}, valid={}, expireDate={}, offlineExpire={}, statusInfo={}", //$NON-NLS-1$
 				licenseType, valid, expireDate, offlineExpire, statusInfo);
 
 		return new NetlicensingValidationResult(licenseType, key, valid, statusInfo.getUserMessage(), expireDate,

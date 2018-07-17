@@ -1,21 +1,29 @@
 #!/bin/bash
 ## bash script for building the jsparrow-maven-plugins
 
-function printUsage {
-  echo -e "\tUsage:"
-  echo -e "\t\t$0 [-t]"
-  echo -e "\n\tParameters:"
-  echo -e "\t\t-t\t\trun tests while building"
+function usage() {
+   cat <<EOF
+Usage: $0 [-t] [-o] [-p]
+where:
+    -t run tests while building (will not apply if -o is selected as well)
+    -o enable proguard obfuscated build
+    -p use productive values for netlicensing
+EOF
+   exit 0
 }
 
 TEST=false
+OBFUSCATION=false
+PRODUCTION=false 
 
 # parse arguments
-while getopts :t option
+while getopts ":top" option
 do
   case "${option}" in
     t) TEST=true;;
-    ?) printUsage;;
+    o) OBFUSCATION=true;;
+    p) PRODUCTION=true;;
+    ?) usage;;
   esac
 done
 
@@ -25,37 +33,28 @@ MANIFEST_FILE_NAME="manifest.standalone"
 
 echo "Building jSparrow"
 
-# build jsparrow without tests
-if [ $TEST = true ]; then
-  mvn clean verify
-else
-  mvn clean verify -DskipTests
+PARAMETERS=
+
+if [ $TEST = false ]; then
+  PARAMETERS="$PARAMETERS -DskipTests"
 fi
+
+if [ $OBFUSCATION = true ]; then
+  PARAMETERS="$PARAMETERS -Dproguard"
+fi
+
+if [ $PRODUCTION = true ]; then
+  PARAMETERS="$PARAMETERS -Dproduction"
+fi
+
+# build jsparrow
+mvn clean verify $PARAMETERS
 
 # check maven result and exit if necessary
 if [ $? -ne 0 ]; then
   echo "maven on jsparrow failed!"
   exit 1
 fi
-
-# build jsparrow-standalone-adapter  and install it to the .m2 repo
-echo "Building jsparrow-standalone-adapter"
-
-cd jsparrow-standalone-adapter
-
-if [ $TEST = true ]; then
-  mvn clean install
-else
-  mvn clean install -DskipTests
-fi
-
-# check maven result and exit if necessary
-if [ $? -ne 0 ]; then
-  echo "maven on jsparrow-standalone-adapter failed!"
-  exit 5
-fi
-
-cd ..
 
 # create jsparrow maven plugin resource directory if it doesn't exist
 if [ ! -d $PLUGIN_RESOURCES_PATH ]; then
@@ -87,23 +86,12 @@ echo "Creating $MANIFEST_FILE_NAME"
 # list the contents of the build jsparrow plugins and redirect it to the necessary manifest.standalone in the maven plugins
 ls $JSPARROW_TARGET_PATH > $PLUGIN_RESOURCES_PATH/$MANIFEST_FILE_NAME
 
-# build and instlal the jsparrow-standalone-adapter
-cd jsparrow-standalone-adapter
-
-mvn clean install
-
-cd ..
-
 # build and install the jsparrow-maven-plugin
 cd jsparrow-maven-plugin
 
 echo "Building jSparrow Maven Plugin"
 
-if [ $TEST = true ]; then
-  mvn clean install
-else
-  mvn clean install -DskipTests
-fi
+mvn clean install $PARAMETERS
 
 if [ $? -ne 0 ]; then
   echo "maven on jSparrow maven plugin failed!"
@@ -113,7 +101,7 @@ fi
 echo
 echo "Plugin dependency to copy:"
 
-# geh the artifact version of the jsparrow-maven-plugin
+# get the artifact version of the jsparrow-maven-plugin
 MVN_VERSION=$(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:1.3.1:exec)
 
 cat <<EOF
