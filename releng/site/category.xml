@@ -4,7 +4,7 @@
       <category name="splendit"/>
    </feature>
    <feature url="features/eu.jsparrow.3rd.party.feature_0.0.0.jar" id="eu.jsparrow.3rd.party.feature" version="0.0.0"/>
-   <feature url="features/eu.jsparrow.rules.import.feature_0.0.0.qualifier.jar" id="eu.jsparrow.rules.import.feature" version="0.0.0.qualifier"/>
+   <feature url="features/eu.jsparrow.rules.import.feature_0.0.0.jar" id="eu.jsparrow.rules.import.feature" version="0.0.0"/>
    <category-def name="splendit" label="splendit">
       <description>
          Eclipse plugins by Splendit IT-Consulting GmbH
