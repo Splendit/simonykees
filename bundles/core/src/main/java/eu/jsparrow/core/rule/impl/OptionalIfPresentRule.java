@@ -11,6 +11,11 @@ import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
+/**
+ * @see OptionalIfPresentASTVisitor 
+ * 
+ * @since 2.6
+ */
 public class OptionalIfPresentRule extends RefactoringRuleImpl<OptionalIfPresentASTVisitor> {
 
 	public OptionalIfPresentRule() {
