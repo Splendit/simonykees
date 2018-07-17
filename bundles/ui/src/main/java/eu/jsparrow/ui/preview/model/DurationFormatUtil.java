@@ -8,10 +8,6 @@ import eu.jsparrow.i18n.Messages;
 
 public class DurationFormatUtil {
 
-	private DurationFormatUtil() {
-		// Hide default constructor
-	}
-
 	private static final String DAYS = Messages.DurationFormatUtil_Days;
 
 	private static final String HOURS = Messages.DurationFormatUtil_Hours;
@@ -19,6 +15,10 @@ public class DurationFormatUtil {
 	private static final String MINUTES = Messages.DurationFormatUtil_Minutes;
 
 	private static final String SECONDS = Messages.DurationFormatUtil_Seconds;
+
+	private DurationFormatUtil() {
+		// Hide default constructor
+	}
 
 	/**
 	 * <p>

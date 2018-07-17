@@ -91,11 +91,11 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 		table.setLayout(new GridLayout());
 		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		table.setLayoutData(gridData);
-		for (String fieldType : model.getFieldTypeOptions()) {
+		model.getFieldTypeOptions().forEach(fieldType -> {
 			TableItem item = new TableItem(table, SWT.NONE);
 			item.setText(fieldType);
 			item.setChecked(true);
-		}
+		});
 
 		table.addListener(SWT.Selection, event -> {
 			if (event.detail == SWT.CHECK) {
@@ -125,7 +125,7 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		scopesGroup.setLayoutData(gridData);
 
-		for (String scopeType : model.getSearchScopeOptions()) {
+		model.getSearchScopeOptions().forEach(scopeType -> {
 			Button button = new Button(scopesGroup, SWT.RADIO);
 			button.setText(scopeType);
 			button.addSelectionListener(new SelectionAdapter() {
@@ -135,7 +135,7 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 					controler.searchScopeSelectionChanged(((Button) e.getSource()).getText());
 				}
 			});
-		}
+		});
 		((Button) scopesGroup.getChildren()[0]).setSelection(true);
 		controler.searchScopeSelectionChanged(((Button) scopesGroup.getChildren()[0]).getText());
 	}
@@ -156,7 +156,7 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		underscoreGroup.setLayoutData(gridData);
 		underscoreGroup.setText(Messages.RenameFieldsRuleWizardPage_underscoreReplacementLabelText);
-		for (String underscoreReplacement : model.getUnderscoreReplacementOptions()) {
+		model.getUnderscoreReplacementOptions().forEach(underscoreReplacement -> {
 			Button button = new Button(underscoreGroup, SWT.RADIO);
 			button.setText(underscoreReplacement);
 			button.addSelectionListener(new SelectionAdapter() {
@@ -166,7 +166,7 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 					controler.underscoreReplacementSelectionChanged(((Button) e.getSource()).getText());
 				}
 			});
-		}
+		});
 		((Button) underscoreGroup.getChildren()[0]).setSelection(true);
 		controler.underscoreReplacementSelectionChanged(((Button) underscoreGroup.getChildren()[0]).getText());
 
@@ -175,7 +175,7 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		dollarSingGroup.setLayoutData(gridData);
 		dollarSingGroup.setText(Messages.RenameFieldsRuleWizardPage_dollarSignReplacementLabelText);
-		for (String dollarReplacement : model.getDollarSignReplacementOptions()) {
+		model.getDollarSignReplacementOptions().forEach(dollarReplacement -> {
 			Button button = new Button(dollarSingGroup, SWT.RADIO);
 			button.setText(dollarReplacement);
 			button.addSelectionListener(new SelectionAdapter() {
@@ -185,7 +185,7 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 					controler.dollarReplacementSelectionChanged(((Button) e.getSource()).getText());
 				}
 			});
-		}
+		});
 		((Button) dollarSingGroup.getChildren()[0]).setSelection(true);
 		controler.dollarReplacementSelectionChanged(((Button) dollarSingGroup.getChildren()[0]).getText());
 	}

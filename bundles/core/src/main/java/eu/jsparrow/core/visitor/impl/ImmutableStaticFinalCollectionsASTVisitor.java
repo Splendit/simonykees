@@ -87,11 +87,6 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	private Map<String, String> methodNames = new HashMap<>();
 	private Map<String, Expression> initializersToReplace = new HashMap<>();
 	private JavaVersion javaVersion;
-
-	public ImmutableStaticFinalCollectionsASTVisitor(JavaVersion javaVersion) {
-		this.javaVersion = javaVersion;
-	}
-
 	// allowed method names
 	@SuppressWarnings("nls")
 	private List<String> collectionNonModifingMethods = Arrays.asList(
@@ -126,6 +121,10 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 			// SortedSet
 
 			"first", "last");
+
+	public ImmutableStaticFinalCollectionsASTVisitor(JavaVersion javaVersion) {
+		this.javaVersion = javaVersion;
+	}
 
 	/*** VISITORS ***/
 
@@ -261,8 +260,6 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 		super.endVisit(compilationUnitNode);
 	}
 
-	/*** PRIVATE HELPER METHODS ***/
-
 	/**
 	 * creates the new {@link MethodInvocation} with the given name and the
 	 * given initializer as an argument
@@ -326,4 +323,6 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 
 		return methodName;
 	}
+
+	/*** PRIVATE HELPER METHODS ***/
 }

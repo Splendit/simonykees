@@ -23,12 +23,13 @@ import eu.jsparrow.ui.util.ResourceHelper;
  */
 public class ConfigureProfileWizard extends Wizard {
 
+	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
+
 	private ConfigureProfileSelectRulesWIzardPageModel model;
 
 	private String profileId;
-	private boolean isProfileSetAsDefault = false;
 
-	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
+	private boolean isProfileSetAsDefault = false;
 
 	private final List<RefactoringRule> rules;
 

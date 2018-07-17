@@ -304,7 +304,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 	private void createAndShowPreviewWizard() {
 
 		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
-		for (FieldMetaData data : metadata) {
+		metadata.forEach(data -> {
 			Map<ICompilationUnit, DocumentChange> docsChanges;
 			try {
 				docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
@@ -312,7 +312,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 			} catch (JavaModelException e) {
 				logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
 			}
-		}
+		});
 
 		synchronizeWithUIShowRefactoringPreviewWizard(changes);
 	}

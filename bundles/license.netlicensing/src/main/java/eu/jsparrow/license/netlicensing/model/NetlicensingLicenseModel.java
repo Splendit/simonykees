@@ -64,6 +64,7 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		return name;
 	}
 
+	@Override
 	public ZonedDateTime getExpirationDate() {
 		return expireDate;
 	}
@@ -72,6 +73,7 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		return secret;
 	}
 
+	@Override
 	public LicenseType getType() {
 		return this.type;
 	}

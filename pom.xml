@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -147,9 +148,10 @@
 		<jsparrow.qualifier.noProguard></jsparrow.qualifier.noProguard>
 		<jsparrow.qualifier.production></jsparrow.qualifier.production>
 		<jsparrow.qualifier.tycho>${jsparrow.qualifier.quotes}${jsparrow.qualifier.noProguard}${jsparrow.qualifier.production}${jsparrow.qualifier.quotes}</jsparrow.qualifier.tycho>
-		
-		<!-- is not referenced with keystore.directory because sonar plugin runs outside of the maven lifecycle. 
-		 Works because currently because every source module is two layers deeper than the parent -->
+
+		<!-- is not referenced with keystore.directory because sonar plugin runs 
+			outside of the maven lifecycle. Works because currently because every source 
+			module is two layers deeper than the parent -->
 		<sonar.jacoco.reportPaths>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.reportPaths>
 		<sonar.junit.reportPaths>${project.basedir}/target/surefire-reports</sonar.junit.reportPaths>
 		<sonar.coverage.exclusions>**/jsparrow/ui/**/*</sonar.coverage.exclusions>
@@ -194,6 +196,15 @@
 			<url>http://download.eclipse.org/mylyn/releases/latest/</url>
 		</repository>
 	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>jsparrow-maven-plugin</id>
+			<name>jsparrow maven plugin</name>
+			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-maven-plugin-develop-test-noProguard/</url>
+			<layout>default</layout>
+		</pluginRepository>
+	</pluginRepositories>
 
 	<!-- don't manage simonykees.samples -->
 	<dependencyManagement>
@@ -259,6 +270,12 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>eu.jsparrow</groupId>
+				<artifactId>jsparrow-maven-plugin</artifactId>
+				<version>1.1.0-20180627.130616-1</version>
+			</plugin>
+
 			<plugin>
 				<!-- https://github.com/jdcasey/directory-maven-plugin#directory-of-goal -->
 				<groupId>org.commonjava.maven.plugins</groupId>

@@ -524,15 +524,10 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	}
 
 	private void clearCounterForChangedFile(ICompilationUnit newSelection) {
-		for (RefactoringRule changedFileRule : wizardModel.getChangedFilesPerRule()
-			.keySet()) {
-			if (wizardModel.getFilesForRule(changedFileRule)
-				.contains(newSelection.getHandleIdentifier())) {
-				FileChangeCount count = RuleApplicationCount.getFor(changedFileRule)
-					.getApplicationsForFile(newSelection.getHandleIdentifier());
-				count.clear();
-			}
-		}
+		wizardModel.getChangedFilesPerRule()
+			.keySet().stream().filter(changedFileRule -> wizardModel.getFilesForRule(changedFileRule)
+			.contains(newSelection.getHandleIdentifier())).map(changedFileRule -> RuleApplicationCount.getFor(changedFileRule)
+			.getApplicationsForFile(newSelection.getHandleIdentifier())).forEach(FileChangeCount::clear);
 	}
 
 }

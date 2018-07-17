@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A visitor that searches for fields that do not comply with the naming
@@ -146,7 +147,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.returnTypedList(fieldDeclaration.fragments(),
 				VariableDeclarationFragment.class);
-		for (VariableDeclarationFragment fragment : fragments) {
+		fragments.forEach(fragment -> {
 			SimpleName fragmentName = fragment.getName();
 			if (!NamingConventionUtil.isComplyingWithConventions(fragmentName.getIdentifier())) {
 				boolean upperCaseAfterDollar = getUpperCaseAfterDollar();
@@ -172,7 +173,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 					unmodifiableFields.add(unmodifiableFieldDdata);
 				}
 			}
-		}
+		});
 		return true;
 	}
 
@@ -183,7 +184,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 			return false;
 		}
 		String typeName = binding.getName();
-		return !typeName.contains("$"); //$NON-NLS-1$
+		return !StringUtils.contains(typeName, "$"); //$NON-NLS-1$
 
 	}
 
