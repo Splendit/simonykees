@@ -10,19 +10,6 @@
 
 	<artifactId>eu.jsparrow.rules.import.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<name>jSparrow :: 3rd party feature</name>
-	<description>jSparrow 3rd Party Feature</description>
-
-	<scm>
-		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/feature</url>
-	</scm>
-	
-	<repositories>
-		<repository>
-			<id>jenkins-jSparrow-master-production-proguard</id>
-			<layout>p2</layout>
-			<url>http://packagedrone-vm-01.splendit.loc:8080/p2/jenkins-jSparrow-master-production-proguard/</url>
-		</repository>
-	</repositories>
-	
+	<name>jSparrow :: rules import feature</name>
+	<description>jSparrow rules import feature</description>
 </project>
