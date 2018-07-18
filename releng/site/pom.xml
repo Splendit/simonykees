@@ -14,10 +14,6 @@
 	<name>jSparrow :: update site</name>
 	<description>jSparrow Update Site</description>
 
-	<scm>
-		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/site</url>
-	</scm>
-
 	<properties>
 		<!-- skipping install and deployment of non-site modules -->
 		<maven.deploy.skip>false</maven.deploy.skip>
@@ -32,42 +28,52 @@
 					<includeAllDependencies>false</includeAllDependencies>
 				</configuration>
 			</plugin>
-			<!-- workaround https://bugs.eclipse.org/bugs/show_bug.cgi?id=453708 -->
-			<plugin>
-				<groupId>org.jboss.tools.tycho-plugins</groupId>
-				<artifactId>repository-utils</artifactId>
-				<version>1.1.0</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>generate-repository-facade</goal>
-						</goals>
-						<configuration>
-							<associateSites>
-								<associateSite>http://packagedrone-vm-01.splendit.loc:8080/p2/jenkins-jSparrow-develop-test-noProguard/</associateSite>
-							</associateSites>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
-	
-	<pluginRepositories>  
-        <pluginRepository>  
-          <id>jboss-public-repository-group</id>  
-          <name>JBoss Public Maven Repository Group</name>  
-          <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>  
-          <layout>default</layout>  
-          <releases>  
-            <enabled>true</enabled>  
-            <updatePolicy>never</updatePolicy>  
-          </releases>  
-          <snapshots>  
-            <enabled>true</enabled>  
-            <updatePolicy>never</updatePolicy>  
-          </snapshots>  
-        </pluginRepository>  
-      </pluginRepositories>
+	<profiles>
+		<profile>
+			<id>master-production-proguard</id>
+			<build>
+				<plugins>
+					<!-- workaround https://bugs.eclipse.org/bugs/show_bug.cgi?id=453708 -->
+					<plugin>
+						<groupId>org.jboss.tools.tycho-plugins</groupId>
+						<artifactId>repository-utils</artifactId>
+						<version>1.1.0</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>generate-repository-facade</goal>
+								</goals>
+								<configuration>
+									<associateSites>
+										<associateSite>http://dependencies.sparrow.eu/</associateSite>
+									</associateSites>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<pluginRepositories>
+		<!-- repository for repository-utils -->
+		<pluginRepository>
+			<id>jboss-public-repository-group</id>
+			<name>JBoss Public Maven Repository Group</name>
+			<url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+			<layout>default</layout>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
 </project>
