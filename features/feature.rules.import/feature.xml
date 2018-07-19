@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="eu.jsparrow.rules.import.feature"
-      label="jSparrow Third-party Dependencies"
+      label="jSparrow Rules Import Feature"
       version="2.5.1.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
