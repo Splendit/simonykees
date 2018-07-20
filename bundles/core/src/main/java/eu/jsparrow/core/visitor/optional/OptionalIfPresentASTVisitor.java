@@ -93,7 +93,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		 * Check thenStatement for 'return', throw, 'break' or 'continue'
 		 * statements.
 		 */
-		boolean hasReturnStatement = containsReturnStatement(thenStatement);
+		boolean hasReturnStatement = containsFlowControlStatement(thenStatement);
 		if (hasReturnStatement) {
 			return true;
 		}
@@ -322,7 +322,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		return visitor.getReferencedVariables();
 	}
 
-	private boolean containsReturnStatement(Statement thenStatement) {
+	private boolean containsFlowControlStatement(Statement thenStatement) {
 		FlowBreakersVisitor visitor = new FlowBreakersVisitor();
 		thenStatement.accept(visitor);
 		return visitor.hasFlowBreakerStatement();

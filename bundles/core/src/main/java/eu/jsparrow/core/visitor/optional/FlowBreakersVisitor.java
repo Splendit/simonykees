@@ -33,7 +33,7 @@ public class FlowBreakersVisitor extends ASTVisitor {
 	}
 
 	@Override
-	public boolean visit(ThrowStatement thrwoStatement) {
+	public boolean visit(ThrowStatement throwStatement) {
 		hasThrow = true;
 		return false;
 	}

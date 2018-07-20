@@ -126,6 +126,10 @@ public class RulesContainer {
 				new StringConcatToPlusRule(), new UseIsEmptyOnCollectionsRule(), new ArithmethicAssignmentRule(),
 				new StringBufferToBuilderRule(), new PrimitiveObjectUseEqualsRule(),
 				/*
+				 * Optionals
+				 */
+				new OptionalIfPresentRule(),
+				/*
 				 * Loops and streams
 				 */
 				new WhileToForEachRule(), new ForToForEachRule(), new EnhancedForLoopToStreamForEachRule(),
@@ -133,10 +137,6 @@ public class RulesContainer {
 				new LambdaForEachCollectRule(), new LambdaForEachMapRule(), new FlatMapInsteadOfNestedLoopsRule(),
 				new EnhancedForLoopToStreamAnyMatchRule(), new EnhancedForLoopToStreamFindFirstRule(),
 				new EnhancedForLoopToStreamSumRule(), new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
-				/*
-				 * Optionals
-				 */
-				new OptionalIfPresentRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen
