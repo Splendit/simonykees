@@ -17,43 +17,43 @@ public class OptionalIfPresentRule {
 
 	{
 		Optional<String> input = Optional.empty();
-		input.ifPresent(value -> logger.info(value));
+		input.ifPresent(logger::info);
 	}
 
 	public void default_comment(Optional<String> input) {
 		// comment after value initialization
-		input.ifPresent(value -> logger.info(value));
+		input.ifPresent(logger::info);
 	}
 
 	public void default_comment1(Optional<String> input) {
 		// comment after isPresent
-		input.ifPresent(value -> logger.info(value));
+		input.ifPresent(logger::info);
 	}
 
 	public void default_comment2(Optional<String> input) {
 		// comment above isPresent
-		input.ifPresent(value -> logger.info(value));
+		input.ifPresent(logger::info);
 	}
 
 	public void default_comment3(Optional<String> input) {
 		// comment unconnected
 
-		input.ifPresent(value -> logger.info(value));
+		input.ifPresent(logger::info);
 	}
 
 	public void default_comment4(Optional<String> input) {
 		// comment under isPresent
-		input.ifPresent(value -> logger.info(value));
+		input.ifPresent(logger::info);
 	}
 
 	public void default_comment5(Optional<String> input) {
 		// comment under value initialization
-		input.ifPresent(value -> logger.info(value));
+		input.ifPresent(logger::info);
 	}
 
 	public void default_comment6(Optional<String> input) {
 		// comment at the end of isPresent block
-		input.ifPresent(value -> logger.info(value));
+		input.ifPresent(logger::info);
 	}
 
 	public void singleIfBlockBody_shouldTransform(Optional<String> input) {
@@ -119,7 +119,7 @@ public class OptionalIfPresentRule {
 	}
 
 	public void defaultUseCase_shouldTransform(Optional<String> input) {
-		input.ifPresent(value -> logger.info(value));
+		input.ifPresent(logger::info);
 	}
 
 	public void multipleBodyStatements_shouldTransform(Optional<String> input) {
@@ -130,11 +130,11 @@ public class OptionalIfPresentRule {
 	}
 
 	public void missingDeclarationFragment_shouldTransform(Optional<String> input) {
-		input.ifPresent(value -> logger.info(value));
+		input.ifPresent(logger::info);
 	}
 
 	public void singleBodyStatement_shouldTransform(Optional<String> input) {
-		input.ifPresent(value -> logger.info(value));
+		input.ifPresent(logger::info);
 		logger.info("I'm out!");
 	}
 
@@ -180,7 +180,7 @@ public class OptionalIfPresentRule {
 	public void avoidExternalNameConflicts_shouldTransform() {
 		String value = "I could crash with the lambda parameter";
 		Optional<String> user = Optional.ofNullable(value);
-		user.ifPresent(value1 -> logger.info(value1));
+		user.ifPresent(logger::info);
 	}
 
 	public void avoidInternalNameConflicts_shouldTransform() {

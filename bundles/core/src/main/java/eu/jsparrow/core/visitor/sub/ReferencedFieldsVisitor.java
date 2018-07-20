@@ -8,6 +8,11 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+/**
+ * A visitor for finding the references of the provided field.
+ * 
+ * @since 2.6.0
+ */
 public class ReferencedFieldsVisitor extends ASTVisitor {
 
 	private List<SimpleName> referencedNames = new ArrayList<>();
@@ -20,12 +25,11 @@ public class ReferencedFieldsVisitor extends ASTVisitor {
 		}
 
 		IJavaElement javaElement = binding.getJavaElement();
-		if(javaElement == null) {
+		if (javaElement == null) {
 			return false;
 		}
-		
-		
-		if (IJavaElement.FIELD == javaElement.getElementType()) {		
+
+		if (IJavaElement.FIELD == javaElement.getElementType()) {
 			referencedNames.add(simpleName);
 		}
 
