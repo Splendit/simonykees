@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 /**
- * A visitor for finding the references of the provided field.
+ * A visitor for finding all the referenced {@link IJavaElement#FIELD}s.
  * 
  * @since 2.6.0
  */

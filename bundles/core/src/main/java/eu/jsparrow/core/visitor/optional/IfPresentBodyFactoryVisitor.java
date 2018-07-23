@@ -1,6 +1,8 @@
 package eu.jsparrow.core.visitor.optional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -9,8 +11,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 /**
- * A visitor for replacing the Optional.get method invocation with the parameter
- * of the lambda expression of Optional.ifPresent.
+ * A visitor for replacing the {@link Optional#get()} method invocation with the parameter
+ * of the lambda expression of {@link Optional#ifPresent(Consumer)}.
  * 
  * @since 2.6
  *

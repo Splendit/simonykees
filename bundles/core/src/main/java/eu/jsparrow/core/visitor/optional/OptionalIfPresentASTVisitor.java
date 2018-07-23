@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.optional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
@@ -32,8 +33,9 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * Usage of Optional.isPresent combined with Optional.get should be replaced
- * with Optional.IfPresent method wherever possible.
+ * Usages of {@link Optional#isPresent()} combined with {@link Optional#get()}
+ * should be replaced with {@link Optional#ifPresent(Consumer)} method wherever
+ * possible.
  * 
  * @since 2.6
  *
@@ -126,7 +128,8 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 			return true;
 		}
 
-		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(nonDiscardedGetExpressions, identifier, astRewrite);
+		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(nonDiscardedGetExpressions, identifier,
+				astRewrite);
 		thenStatement.accept(visitor);
 		Statement body = thenStatement;
 		ASTNode lambdaBody = unwrapBody(body);
