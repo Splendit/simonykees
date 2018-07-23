@@ -148,6 +148,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		// Replace the if statement with the new optiona.ifPresent statement
 		astRewrite.replace(ifStatement, optionalIfPresent, null);
+		onRewrite();
 
 		CommentRewriter commentRewriter = getCommentRewriter();
 
