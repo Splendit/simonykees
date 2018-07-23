@@ -133,6 +133,13 @@ public class OptionalIfPresentRule {
 		input/* 4 */.ifPresent(logger::info);
 	}
 
+	public void nestedOptionalIsPresent_shouldTransform(Optional<String> input) {
+		input.ifPresent(value -> {
+			logger.info(value);
+			input.ifPresent(logger::info);
+		});
+	}
+
 	public void singleIfStatementBody_shouldTransform(Optional<String> input) {
 		input.ifPresent(value -> {
 			if (true) {

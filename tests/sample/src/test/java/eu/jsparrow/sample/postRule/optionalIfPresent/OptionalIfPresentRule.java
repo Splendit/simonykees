@@ -125,6 +125,13 @@ public class OptionalIfPresentRule {
 		/* 26 */
 		input/* 4 */.ifPresent(value -> System.out.println(/* 21 */value/* 22 */));
 	}
+	
+	public void nestedOptionalIsPresent_shouldTransform(Optional<String> input) {
+		input.ifPresent(value -> {
+			System.out.println(value);
+			input.ifPresent(value2 -> System.out.println(value2));
+		}); 
+	}
 
 	public void singleIfStatementBody_shouldTransform(Optional<String> input) {
 		input.ifPresent(value -> {
