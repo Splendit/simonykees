@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import eu.jsparrow.core.visitor.sub.EffectivelyFinalVisitor;
 import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.core.visitor.sub.ReferencedFieldsVisitor;
 import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
@@ -112,7 +111,6 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		// Find the optional expression
 		Expression optional = methodInvocation.getExpression();
-
 		OptionalGetVisitor optionalGetVisitor = new OptionalGetVisitor(optional);
 		thenStatement.accept(optionalGetVisitor);
 
@@ -133,9 +131,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(nonDiscardedGetExpressions, identifier,
 				astRewrite);
 		thenStatement.accept(visitor);
-		Statement body = thenStatement;
-		ASTNode lambdaBody = unwrapBody(body);
-
+		ASTNode lambdaBody = unwrapBody(thenStatement);
 		LambdaExpression lambda = createLambdaExpression(lambdaBody, identifier);
 
 		/*
@@ -147,10 +143,8 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		// Replace the if statement with the new optiona.ifPresent statement
 		astRewrite.replace(ifStatement, optionalIfPresent, null);
 		onRewrite();
-
 		saveComments(methodInvocation, ifStatement, lambdaBody, removedNodes);
 		removedNodes.clear();
-
 		return true;
 	}
 
@@ -352,9 +346,9 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private boolean containsNonEffectivelyFinal(Statement thenStatement) {
-		EffectivelyFinalVisitor visitor = new EffectivelyFinalVisitor();
+		ExternalNonEffectivelyFinalReferencesVisitor visitor = new ExternalNonEffectivelyFinalReferencesVisitor();
 		thenStatement.accept(visitor);
-		return visitor.containsNonEffectivelyFinalVariable();
+		return visitor.containsReferencesToExternalNonFinalVariables();
 	}
 
 	private boolean isIsPresentMethod(MethodInvocation methodInvocation) {

@@ -386,6 +386,20 @@ public class OptionalIfPresentRule {
 			String myVar = input.get();
 		}
 	}
+	
+	public void internalNonFinalVariables_shouldTransform() {
+		Optional<String> input = findUserName("");
+		if (input.isPresent()) {
+			  for (int i = 0; i < 15; i++) {
+			    if (true) {
+			      System.out.println("Test");
+			    } else {
+			      String value = input.get();
+			      System.out.println("Test");
+			    }
+			  }
+			}
+	}
 
 	private Optional<String> findUserName(String user) {
 		return Optional.empty();
