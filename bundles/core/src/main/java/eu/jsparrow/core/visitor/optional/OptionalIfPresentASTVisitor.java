@@ -113,17 +113,20 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		thenStatement.accept(optionalGetVisitor);
 
 		List<MethodInvocation> getExpressions = optionalGetVisitor.getInvocations();
-		if (getExpressions.isEmpty()) {
+		List<MethodInvocation> nonDiscardedGetExpressions = getExpressions.stream()
+			.filter(get -> !isDiscardedMethodInvocation(get))
+			.collect(Collectors.toList());
+		if (nonDiscardedGetExpressions.isEmpty()) {
 			return true;
 		}
 
 		// Find parameter name
-		String identifier = findParameterName(thenStatement, getExpressions);
+		String identifier = findParameterName(thenStatement, nonDiscardedGetExpressions);
 		if (identifier.isEmpty()) {
 			return true;
 		}
 
-		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(getExpressions, identifier, astRewrite);
+		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(nonDiscardedGetExpressions, identifier, astRewrite);
 		thenStatement.accept(visitor);
 		Statement body = thenStatement;
 		ASTNode lambdaBody = unwrapBody(body);
@@ -147,6 +150,10 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return true;
+	}
+
+	private boolean isDiscardedMethodInvocation(MethodInvocation methodInvocation) {
+		return ExpressionStatement.EXPRESSION_PROPERTY == methodInvocation.getLocationInParent();
 	}
 
 	@Override

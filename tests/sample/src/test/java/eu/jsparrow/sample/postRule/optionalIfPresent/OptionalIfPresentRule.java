@@ -284,6 +284,28 @@ public class OptionalIfPresentRule {
 			System.out.println(value);
 		});
 	}
+	
+	public void discardedSingleOptionalGet_shouldNotTransform() {
+		Optional<String> input = findUserName("");
+		if (input.isPresent()) {
+			input.get();
+			String myVar = "somewar";
+		}
+	}
+	
+	public void discardedOptionalGet_shouldTransform() {
+		Optional<String> input = findUserName("");
+		input.ifPresent(myVar -> {
+			input.get();
+			findUserName(myVar);
+		});
+	}
+	
+	public void unusedAssignmentWithOptionalGet_shouldTransform() {
+		Optional<String> input = findUserName("");
+		input.ifPresent(myVar -> {
+		});
+	}
 
 	private Optional<String> findUserName(String user) {
 		return Optional.empty();
