@@ -8,9 +8,8 @@
 		<version>2.5.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>eu.jsparrow.feature</artifactId>
+	<artifactId>eu.jsparrow.rules.import.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<name>jSparrow :: feature</name>
-	<description>jSparrow Feature</description>
-
+	<name>jSparrow :: rules import feature</name>
+	<description>jSparrow rules import feature</description>
 </project>

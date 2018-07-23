@@ -5,17 +5,21 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
+import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation;
+import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.core.search.TypeNameMatch;
-import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.osgi.service.prefs.BackingStoreException;
+import org.osgi.service.prefs.Preferences;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
@@ -38,7 +42,6 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  *
  */
 
-@SuppressWarnings("restriction")
 public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteASTVisitor> {
 
 	public OrganiseImportsRule() {
@@ -77,6 +80,7 @@ public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteA
 
 		OrganizeImportsOperation importsOperation = new OrganizeImportsOperation(workingCopy, astRoot, false, true,
 				true, query);
+		setUpOrganizeImportsConstants();
 		TextEdit edit = importsOperation.createTextEdit(null);
 
 		DocumentChange documentChange = null;
@@ -84,7 +88,7 @@ public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteA
 		if (!hasAmbiguity[0] && importsOperation.getParseError() == null && edit != null
 				&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
 			FileChangeCount count = RuleApplicationCount.getFor(this)
-				.getApplicationsForFile(workingCopy.getHandleIdentifier());
+					.getApplicationsForFile(workingCopy.getHandleIdentifier());
 			count.clear();
 			count.update();
 			Document document = new Document(workingCopy.getSource());
@@ -97,6 +101,32 @@ public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteA
 
 		return documentChange;
 
+	}
+
+	/**
+	 * if the JavaManipulation.PreferenceNodeId if not set. In Photon the Organize
+	 * imports was extracted but not clean separated from jdt.ui but the constants
+	 * remained there.
+	 * 
+	 * Workaround to have the access to the default values that are set within
+	 * eclipse
+	 * 
+	 * TODO: better solution when adding the rule to jsparrow maven plugin
+	 */
+	private void setUpOrganizeImportsConstants() {
+		if (JavaManipulation.getPreferenceNodeId() == null) {
+			Preferences preferences = InstanceScope.INSTANCE.getNode("eu.jsparrow.manipulation");
+			preferences.put("org.eclipse.jdt.ui.importorder", "java;javax;org;com");
+			preferences.put("org.eclipse.jdt.ui.ondemandthreshold", "99");
+			preferences.put("org.eclipse.jdt.ui.staticondemandthreshold", "99");
+			try {
+				// forces the application to save the preferences
+				preferences.flush();
+			} catch (BackingStoreException e) {
+				e.printStackTrace();
+			}
+			JavaManipulation.setPreferenceNodeId("eu.jsparrow.manipulation");
+		}
 	}
 
 }
