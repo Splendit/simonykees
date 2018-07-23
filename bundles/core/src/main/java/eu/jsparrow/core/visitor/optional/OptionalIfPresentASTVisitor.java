@@ -1,14 +1,16 @@
 package eu.jsparrow.core.visitor.optional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -31,6 +33,7 @@ import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * Usages of {@link Optional#isPresent()} combined with {@link Optional#get()}
@@ -48,6 +51,7 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String DEFAULT_LAMBDA_PARAMETER_NAME = "value"; //$NON-NLS-1$
 
 	private LiveVariableScope scope = new LiveVariableScope();
+	private List<Comment> initializerComments = new ArrayList<>();
 
 	/**
 	 * Looks for occurrences of optional.isPresent() where the following
@@ -145,14 +149,69 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		// Replace the if statement with the new optiona.ifPresent statement
 		astRewrite.replace(ifStatement, optionalIfPresent, null);
 
+		CommentRewriter commentRewriter = getCommentRewriter();
+
 		// Remember to save comments at each step
 		if (lambdaBody instanceof Expression) {
-			getCommentRewriter().saveRelatedComments(ifStatement);
+			List<Comment> lostComments = findRelatedSingleBodyExpressionComments(ifStatement, lambdaBody);
+			commentRewriter.saveBeforeStatement(ifStatement, lostComments);
 		} else {
-			getCommentRewriter().saveLeadingComment(ifStatement);
+			commentRewriter.saveLeadingComment(ifStatement);
+
+			// comments occurring between if keyword and the condition
+			List<Comment> ifKeywordRelatedComments = findIfKeywordRelatedComments(ifStatement);
+			commentRewriter.saveBeforeStatement(ifStatement, ifKeywordRelatedComments);
+
+			// comments occurring in optional.isPresent() invocation
+			List<Comment> conditionComments = findConditionComments(methodInvocation);
+			commentRewriter.saveBeforeStatement(ifStatement, conditionComments);
+			// comments occurring in the removed variable declaration
+			commentRewriter.saveBeforeStatement(ifStatement, initializerComments);
+
 		}
 
+		initializerComments.clear();
+
 		return true;
+	}
+
+	private List<Comment> findRelatedSingleBodyExpressionComments(IfStatement ifStatement, ASTNode lambdaBody) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> allComments = commentRewriter.findRelatedComments(ifStatement);
+		List<Comment> remainingComments = commentRewriter.findRelatedComments(lambdaBody);
+		allComments.removeAll(remainingComments);
+		return allComments;
+	}
+
+	private List<Comment> findConditionComments(MethodInvocation methodInvocation) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> allConditionComments = commentRewriter.findRelatedComments(methodInvocation);
+		Expression expression = methodInvocation.getExpression();
+		List<Comment> leadingExpressionComments = commentRewriter.findRelatedComments(expression);
+		allConditionComments.removeAll(leadingExpressionComments);
+
+		return allConditionComments;
+	}
+
+	private List<Comment> findIfKeywordRelatedComments(IfStatement ifStatement) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> allComments = commentRewriter.findInternalComments(ifStatement);
+		List<Comment> thenStatementComments = commentRewriter.findRelatedComments(ifStatement.getThenStatement());
+		List<Comment> expressionComments = commentRewriter.findRelatedComments(ifStatement.getExpression());
+		List<Comment> elseExpressionComments = new ArrayList<>();
+		Statement elseStatement = ifStatement.getElseStatement();
+		if (elseStatement != null) {
+			elseExpressionComments.addAll(commentRewriter.findRelatedComments(elseStatement));
+		}
+
+		List<Comment> comments = new ArrayList<>();
+
+		comments.addAll(allComments);
+		comments.removeAll(thenStatementComments);
+		comments.removeAll(expressionComments);
+		comments.removeAll(elseExpressionComments);
+
+		return comments;
 	}
 
 	private boolean isDiscardedMethodInvocation(MethodInvocation methodInvocation) {
@@ -298,13 +357,16 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 		VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) fragment.getParent();
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(declarationStatement.fragments(),
 				VariableDeclarationFragment.class);
+		CommentRewriter commentRewriter = getCommentRewriter();
 		if (fragments.size() == 1) {
+			initializerComments.addAll(commentRewriter.findInternalComments(declarationStatement));
 			astRewrite.remove(declarationStatement, null);
 			declarationStatement.delete();
 			return;
 		}
 
 		astRewrite.remove(fragment, null);
+		initializerComments.addAll(commentRewriter.findInternalComments(fragment));
 		fragment.delete();
 	}
 

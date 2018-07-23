@@ -86,6 +86,39 @@ public class OptionalIfPresentRule {
 			// comment at the end of isPresent block
 		}
 	}
+	
+	public void singleIfBlockBody_savingComments_shouldTransform(Optional<String> input) {
+		// leading comment
+		if /* 1 */ ( /* 2 */input /* 3 */. /* 4 */isPresent/*  5 */(/* 6 */)/* 7 */)/* 8 */ {/* 9.1 */
+			/*9.2  */
+			String /* 10 */ value /* 11 */ =  /* 12 */ input/* 13 */./* 14 */get/* 15 */(/* 16 */)/* 17 */;/* 18 */
+			/* 19 */
+			if /* 20 */ ( /* 21 */ true /* 22 */) /* 23 */ { /* 24 */
+				/* 25 */
+				System/* 26 */.out./* 27 */println(value);/* 28 */
+				/* 29 */
+			}/* 30 */
+			
+			/* 31 */
+		}/* 32 */
+		/* 33 */
+	}
+	
+	public void defaultUseCase_savingComments_shouldTransform(Optional<String> input) {
+		/*
+		 * Comment 25 is still being lost...
+		 */
+		
+		/* 1 */
+		if /* 2 */ (/* 3 */input/* 4 */./* 5 */isPresent(/* 6 */)/* 7 */)/* 8 */ {/* 9 */
+			/* 10 */
+			String /* 11 */ value /* 12 */ = /* 13 */ input/* 14 */./* 15 */get/* 16 */ (/* 17 */)/* 18 */;/* 19 */
+			/* 20 */
+			System.out.println(/* 21 */value/* 22 */);/* 23 */
+			/* 24 */
+		}/* 25 */
+		/* 26 */
+	}
 
 	public void singleIfStatementBody_shouldTransform(Optional<String> input) {
 		if (input.isPresent())
