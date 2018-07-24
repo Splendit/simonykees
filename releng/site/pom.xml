@@ -36,6 +36,19 @@
 			<build>
 				<plugins>
 					<!-- workaround https://bugs.eclipse.org/bugs/show_bug.cgi?id=453708 -->
+					<!-- tycho is not able to process additional repository property of 
+						category.xml -->
+					<!-- this plugin adds a additional repository to the category.xml -->
+
+					<!-- this is currently required to give our released plugin an adition 
+						update site for the legacy rules.imports bundle which supports eclipse version 
+						prior to photon -->
+
+					<!-- dependencies.jsparrow.eu will host the 2.5.1 release of the version 
+						which contains the legacy rules.imports bundle artifact -->
+
+					<!-- all development test builds have access to the legacy bundle from 
+						their package-drone channel -->
 					<plugin>
 						<groupId>org.jboss.tools.tycho-plugins</groupId>
 						<artifactId>repository-utils</artifactId>
