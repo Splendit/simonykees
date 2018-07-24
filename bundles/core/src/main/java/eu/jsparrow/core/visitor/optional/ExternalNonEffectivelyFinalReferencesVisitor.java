@@ -11,33 +11,39 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+/**
+ * A visitor for finding references to non-effectively final variables whose
+ * declaration occurs outside the {@link ASTNode} being visited.
+ * 
+ * @since 2.6.0
+ */
 public class ExternalNonEffectivelyFinalReferencesVisitor extends ASTVisitor {
-	
+
 	private List<String> declarations = new ArrayList<>();
-	
+
 	private boolean containsExternalNonFinalVariable = false;
-	
+
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		return !containsExternalNonFinalVariable;
 	}
-	
+
 	public boolean containsReferencesToExternalNonFinalVariables() {
 		return containsExternalNonFinalVariable;
 	}
-	
+
 	@Override
 	public boolean visit(SimpleName name) {
-		
-		if(name.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
+
+		if (name.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
 			declarations.add(name.getIdentifier());
 			return false;
 		}
-		
-		if(declarations.contains(name.getIdentifier())) {
+
+		if (declarations.contains(name.getIdentifier())) {
 			return false;
 		}
-		
+
 		IBinding binding = name.resolveBinding();
 		if (binding != null && IBinding.VARIABLE == binding.getKind() && binding instanceof IVariableBinding) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
@@ -45,7 +51,7 @@ public class ExternalNonEffectivelyFinalReferencesVisitor extends ASTVisitor {
 				this.containsExternalNonFinalVariable = true;
 			}
 		}
-		
+
 		return true;
 	}
 }
