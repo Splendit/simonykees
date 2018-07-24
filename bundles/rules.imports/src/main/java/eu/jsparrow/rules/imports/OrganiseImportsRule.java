@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation.IChooseImportQuery;
@@ -88,7 +89,7 @@ public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteA
 		if (!hasAmbiguity[0] && importsOperation.getParseError() == null && edit != null
 				&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
 			FileChangeCount count = RuleApplicationCount.getFor(this)
-					.getApplicationsForFile(workingCopy.getHandleIdentifier());
+				.getApplicationsForFile(workingCopy.getHandleIdentifier());
 			count.clear();
 			count.update();
 			Document document = new Document(workingCopy.getSource());
@@ -104,21 +105,21 @@ public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteA
 	}
 
 	/**
-	 * if the JavaManipulation.PreferenceNodeId if not set. In Photon the Organize
-	 * imports was extracted but not clean separated from jdt.ui but the constants
-	 * remained there.
+	 * If the JavaManipulation.PreferenceNodeId if not set. In Photon the
+	 * previously internal Organize imports functionality was extracted, but not
+	 * cleanly separated from jdt.ui, where constants remained.
 	 * 
-	 * Workaround to have the access to the default values that are set within
-	 * eclipse
+	 * This is a workaround to have the access to the default values that are
+	 * set within Eclipse
 	 * 
-	 * TODO: better solution when adding the rule to jsparrow maven plugin
+	 * TODO: find a better solution when adding the rule to the JMP
 	 */
 	private void setUpOrganizeImportsConstants() {
 		if (JavaManipulation.getPreferenceNodeId() == null) {
 			Preferences preferences = InstanceScope.INSTANCE.getNode("eu.jsparrow.manipulation");
-			preferences.put("org.eclipse.jdt.ui.importorder", "java;javax;org;com");
-			preferences.put("org.eclipse.jdt.ui.ondemandthreshold", "99");
-			preferences.put("org.eclipse.jdt.ui.staticondemandthreshold", "99");
+			preferences.put(CodeStyleConfiguration.ORGIMPORTS_IMPORTORDER, "java;javax;org;com");
+			preferences.put(CodeStyleConfiguration.ORGIMPORTS_ONDEMANDTHRESHOLD, "99");
+			preferences.put(CodeStyleConfiguration.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD, "99");
 			try {
 				// forces the application to save the preferences
 				preferences.flush();
