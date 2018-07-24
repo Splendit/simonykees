@@ -595,7 +595,7 @@ public class RefactoringPipeline {
 			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, newAstRoot, initialApply);
 			if (hasChanges) {
 				ICompilationUnit workingCopy = refactoringState.getWorkingCopy();
-				newAstRoot = workingCopy.reconcile(AST.JLS8, true, null, null);
+				newAstRoot = workingCopy.reconcile(AST.JLS10, true, null, null);
 			}
 		} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 			logger.error(e.getMessage(), e);

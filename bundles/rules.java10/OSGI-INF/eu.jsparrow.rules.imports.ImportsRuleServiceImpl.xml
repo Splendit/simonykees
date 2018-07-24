@@ -3,5 +3,5 @@
    <service>
       <provide interface="eu.jsparrow.rules.api.RuleService"/>
    </service>
-   <implementation class="eu.jsparrow.rules.java10.IMPL_TODO"/>
+   <implementation class="eu.jsparrow.rules.java10.ImportsRuleServiceImpl"/>
 </scr:component>

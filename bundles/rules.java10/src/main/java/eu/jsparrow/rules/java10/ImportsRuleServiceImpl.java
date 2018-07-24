@@ -20,7 +20,7 @@ public class ImportsRuleServiceImpl implements RuleService {
 
 	@Override
 	public List<RefactoringRule> loadRules() {
-		return Collections.singletonList(null);
+		return Collections.singletonList(new LocalVariableTypeInferenceRule());
 	}
 
 }

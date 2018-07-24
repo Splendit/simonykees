@@ -39,6 +39,9 @@ public class PropertyUtil {
 		if ("9".equals(version) || "1.9".equals(version)) { //$NON-NLS-1$//$NON-NLS-2$
 			version = "1.8"; //$NON-NLS-1$
 		}
+		if ("10".equals(version) || "1.10".equals(version)) { //$NON-NLS-1$//$NON-NLS-2$
+			version = "1.8"; //$NON-NLS-1$
+		}
 		String enumRepresentation = convertCompilerComplianceToEnumRepresentation(version);
 		JavaVersion usedJavaVersion = JavaVersion.JAVA_1_1;
 		try {
