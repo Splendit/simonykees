@@ -48,7 +48,7 @@ public class ExcludedModules {
 		try {
 			rootYamlConfig = getRootYamlConfig(rootProjectConfig);
 		} catch (YAMLConfigException e) {
-			logger.warn("Cannot find excluded modules. The provided file {} cannot be read", rootProjectConfig);
+			logger.warn("Cannot find excluded modules. The provided file {} cannot be read", rootProjectConfig); //$NON-NLS-1$
 			return Collections.emptyList();
 		}
 
