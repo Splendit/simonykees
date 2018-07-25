@@ -1,5 +1,6 @@
 package eu.jsparrow.standalone;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -43,21 +44,21 @@ public class ExcludedModulesTest {
 
 		assertTrue("Exlusions should be empty", result.isEmpty());
 	}
-	
+
 	@Test
-	public void get_withValidYmlConfig_shouldReturnEmptyExlusionsList() throws StandaloneException {
+	public void get_withValidYmlConfig_shouldReturnExlusionsFromConfig() throws StandaloneException {
 		excludedModules = new TestableExcludedModules(false, SOME_PROJECT);
-		List<String> exclusionsFromConfig = Collections.emptyList();
+		List<String> exclusionsFromConfig = Collections.singletonList("exludedModule");
 		when(yamlConfigStub.getExcludes()
 			.getExcludeModules()).thenReturn(exclusionsFromConfig);
 
 		List<String> result = excludedModules.get();
 
-		assertTrue(result.isEmpty());
+		assertEquals(exclusionsFromConfig, result);
 	}
-	
+
 	@Test
-	public void get_withInvalidYmlConfig_shouldReturnEmptyExlusionsList() throws StandaloneException {
+	public void get_withValidYmlConfig_shouldReturnEmptyExlusionsList() throws StandaloneException {
 		excludedModules = new TestableExcludedModules(false, SOME_PROJECT);
 		List<String> exclusionsFromConfig = Collections.emptyList();
 		when(yamlConfigStub.getExcludes()
