@@ -285,24 +285,4 @@ public class RefactoringInvoker {
 		}
 		return paths;
 	}
-
-	/**
-	 * Updates the selected profile of the configuration.
-	 * 
-	 * @param config
-	 *            the {@link YAMLConfig} to be updated
-	 * @param profile
-	 *            the selected profile name
-	 * 
-	 * @throws StandaloneException
-	 *             if the provided profile does not exist.
-	 */
-	protected void updateSelectedProfile(YAMLConfig config, String profile) throws StandaloneException {
-		try {
-			YAMLConfigUtil.updateSelectedProfile(config, profile);
-		} catch (YAMLConfigException e) {
-			throw new StandaloneException(e.getMessage(), e);
-		}
-
-	}
 }
