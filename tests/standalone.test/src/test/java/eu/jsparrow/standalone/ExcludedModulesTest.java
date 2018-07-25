@@ -1,6 +1,5 @@
 package eu.jsparrow.standalone;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -44,21 +43,21 @@ public class ExcludedModulesTest {
 
 		assertTrue("Exlusions should be empty", result.isEmpty());
 	}
-
+	
 	@Test
-	public void get_withValidYmlConfig_shouldReturnExlusionsFromConfig() throws StandaloneException {
+	public void get_withValidYmlConfig_shouldReturnEmptyExlusionsList() throws StandaloneException {
 		excludedModules = new TestableExcludedModules(false, SOME_PROJECT);
-		List<String> exclusionsFromConfig = Collections.singletonList("exludedModule");
+		List<String> exclusionsFromConfig = Collections.emptyList();
 		when(yamlConfigStub.getExcludes()
 			.getExcludeModules()).thenReturn(exclusionsFromConfig);
 
 		List<String> result = excludedModules.get();
 
-		assertEquals(exclusionsFromConfig, result);
+		assertTrue(result.isEmpty());
 	}
 	
 	@Test
-	public void get_withValidYmlConfig_shouldReturnEmptyExlusionsList() throws StandaloneException {
+	public void get_withInvalidYmlConfig_shouldReturnEmptyExlusionsList() throws StandaloneException {
 		excludedModules = new TestableExcludedModules(false, SOME_PROJECT);
 		List<String> exclusionsFromConfig = Collections.emptyList();
 		when(yamlConfigStub.getExcludes()
@@ -76,8 +75,7 @@ public class ExcludedModulesTest {
 		}
 
 		@Override
-		protected YAMLConfig getRootYamlConfig(String rootProjectConfig)
-				throws StandaloneException {
+		protected YAMLConfig getRootYamlConfig(String rootProjectConfig) {
 			return yamlConfigStub;
 		}
 	}

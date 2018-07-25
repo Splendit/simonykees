@@ -184,10 +184,10 @@ public class RefactoringInvoker {
 	 * @param projectId
 	 *            the project to find the configuration for
 	 * @return the {@link YAMLConfig} corresponding to the project with the
-	 *         given projectId
+	 *         given projectId or the default configuration if the yml file
+	 *         cannot be found.
 	 * @throws StandaloneException
-	 *             if the configuration file cannot be read or is inconsistent.
-	 *             Reasons include:
+	 *             if the configuration is inconsistent. Reasons include:
 	 *             <ul>
 	 *             <li>The selected profile in the {@link BundleContext} does
 	 *             not match any of the declared profiles in the configuration
@@ -198,28 +198,35 @@ public class RefactoringInvoker {
 
 		boolean useDefaultConfig = parseUseDefaultConfiguration(context);
 
-		if (!useDefaultConfig) {
-			String configFilePath = context.getProperty(CONFIG_FILE_PATH + DOT + projectId);
-			String profile = context.getProperty(SELECTED_PROFILE);
-
-			String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
-			logger.info(loggerInfo);
-
-			YAMLConfig config = getYamlConfig(configFilePath);
-			updateSelectedProfile(config, profile);
-
-			String selectedProfile = config.getSelectedProfile();
-
-			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
-					(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
-			logger.info(loggerInfo);
-
-			return config;
-		} else {
-			logger.info(Messages.Activator_standalone_UsingDefaultConfiguration);
-
+		if (useDefaultConfig) {
 			return YAMLConfig.getDefaultConfig();
 		}
+
+		String configFilePath = context.getProperty(CONFIG_FILE_PATH + DOT + projectId);
+		String profile = context.getProperty(SELECTED_PROFILE);
+
+		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
+		logger.info(loggerInfo);
+
+		YAMLConfig config;
+		try {
+			config = getYamlConfig(configFilePath);
+		} catch (YAMLConfigException e) {
+			logger.warn("Cannot read the provided configuration file {}. Loading the default configuration.",
+					configFilePath);
+			return YAMLConfig.getDefaultConfig();
+		}
+
+		updateSelectedProfile(config, profile);
+
+		String selectedProfile = config.getSelectedProfile();
+
+		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
+				(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
+		logger.info(loggerInfo);
+
+		return config;
+
 	}
 
 	private boolean parseUseDefaultConfiguration(BundleContext context) {
@@ -313,12 +320,8 @@ public class RefactoringInvoker {
 	 * @throws StandaloneException
 	 *             if the configuration file could not be read
 	 */
-	protected YAMLConfig getYamlConfig(String configFilePath) throws StandaloneException {
-		try {
-			return YAMLConfigUtil.readConfig(configFilePath);
-		} catch (YAMLConfigException e) {
-			throw new StandaloneException(e.getMessage(), e);
-		}
+	protected YAMLConfig getYamlConfig(String configFilePath) throws YAMLConfigException {
+		return YAMLConfigUtil.readConfig(configFilePath);
 	}
 
 	/**

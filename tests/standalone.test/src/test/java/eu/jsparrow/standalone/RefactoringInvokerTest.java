@@ -117,7 +117,7 @@ public class RefactoringInvokerTest {
 	class TestableRefactoringInvoker extends RefactoringInvoker {
 
 		@Override
-		protected YAMLConfig getYamlConfig(String configFilePath) throws StandaloneException {
+		protected YAMLConfig getYamlConfig(String configFilePath) {
 			return new YAMLConfig();
 		}
 

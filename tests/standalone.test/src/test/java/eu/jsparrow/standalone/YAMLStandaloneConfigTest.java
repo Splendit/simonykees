@@ -8,7 +8,6 @@ import java.io.File;
 
 import org.junit.Test;
 
-@SuppressWarnings("nls")
 public class YAMLStandaloneConfigTest {
 
 	private YAMLStandaloneConfig config;
