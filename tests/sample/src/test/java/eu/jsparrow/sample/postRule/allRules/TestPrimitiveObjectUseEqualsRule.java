@@ -43,7 +43,7 @@ public class TestPrimitiveObjectUseEqualsRule {
 
 		if (a // save comments
 			.equals(b // save comments
-		)) {
+			)) {
 		}
 	}
 

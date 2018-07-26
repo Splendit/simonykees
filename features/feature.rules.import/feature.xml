@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="eu.jsparrow.3rd.party.feature"
-      label="jSparrow Third-party Dependencies"
+      id="eu.jsparrow.rules.import.feature"
+      label="jSparrow Rules Import Feature"
       version="2.5.2.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
@@ -18,23 +18,10 @@
    </url>
 
    <plugin
-         id="com.github.oshi.core"
+         id="eu.jsparrow.rules.imports"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
-   <plugin
-         id="com.labs64.netlicensing.client"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.lang3"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 </feature>
