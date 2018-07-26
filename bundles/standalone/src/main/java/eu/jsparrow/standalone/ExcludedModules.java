@@ -12,7 +12,6 @@ import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
 import eu.jsparrow.core.config.YAMLExcludes;
-import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 public class ExcludedModules {
 
@@ -22,13 +21,12 @@ public class ExcludedModules {
 	private boolean useDefaultConfig;
 	private String rootProjectConfig;
 
-
 	public ExcludedModules(Boolean useDefaultConfig, String rootProjectConfig) {
 		this.useDefaultConfig = useDefaultConfig;
 		this.rootProjectConfig = rootProjectConfig;
 	}
 
-	public List<String> get() throws StandaloneException {
+	public List<String> get() {
 
 		String logInfo;
 		if (useDefaultConfig) {
@@ -46,7 +44,14 @@ public class ExcludedModules {
 			return Collections.emptyList();
 		}
 
-		YAMLConfig rootYamlConfig = getRootYamlConfig(rootProjectConfig);
+		YAMLConfig rootYamlConfig;
+		try {
+			rootYamlConfig = getRootYamlConfig(rootProjectConfig);
+		} catch (YAMLConfigException e) {
+			logger.warn("Cannot find excluded modules. The provided file {} cannot be read", rootProjectConfig); //$NON-NLS-1$
+			return Collections.emptyList();
+		}
+
 		YAMLExcludes excludes = rootYamlConfig.getExcludes();
 		List<String> excludedModules = excludes.getExcludeModules();
 		if (!excludedModules.isEmpty()) {
@@ -60,15 +65,8 @@ public class ExcludedModules {
 
 	}
 
-	protected YAMLConfig getRootYamlConfig(String rootProjectConfig)
-			throws StandaloneException {
-		YAMLConfig rootYamlConfig;
-		try {
-			rootYamlConfig = YAMLConfigUtil.readConfig(rootProjectConfig);
-		} catch (YAMLConfigException e) {
-			throw new StandaloneException(e.getMessage(), e);
-		}
-		return rootYamlConfig;
+	protected YAMLConfig getRootYamlConfig(String rootProjectConfig) throws YAMLConfigException {
+		return YAMLConfigUtil.readConfig(rootProjectConfig);
 	}
 
 }

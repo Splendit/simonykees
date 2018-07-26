@@ -11,7 +11,6 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +51,7 @@ public class RefactoringInvoker {
 	private static final String DOT = "."; //$NON-NLS-1$
 
 	private boolean abort = false;
+	private YAMLConfigurationWrapper yamlConfigurationWrapper = new YAMLConfigurationWrapper();
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
@@ -176,50 +176,32 @@ public class RefactoringInvoker {
 	}
 
 	/**
-	 * Gets the configuration for the provided project from the given path in
-	 * the bundle's context
+	 * Gets the configuration for the provided project.
 	 * 
 	 * @param context
 	 *            the {@link BundleContext} within the equinox framework
 	 * @param projectId
 	 *            the project to find the configuration for
 	 * @return the {@link YAMLConfig} corresponding to the project with the
-	 *         given projectId
+	 *         given projectId or the default configuration if the yml file
+	 *         cannot be found.
 	 * @throws StandaloneException
-	 *             if the configuration file cannot be read or is inconsistent.
-	 *             Reasons include:
-	 *             <ul>
-	 *             <li>The selected profile in the {@link BundleContext} does
-	 *             not match any of the declared profiles in the configuration
-	 *             file.</li>
-	 *             </ul>
+	 *             if the yaml configuration is inconsistent 
+	 *             
+	 * @see YAMLConfigurationWrapper#readConfiguration(String, String)
 	 */
 	private YAMLConfig getConfiguration(BundleContext context, String projectId) throws StandaloneException {
 
 		boolean useDefaultConfig = parseUseDefaultConfiguration(context);
 
-		if (!useDefaultConfig) {
-			String configFilePath = context.getProperty(CONFIG_FILE_PATH + DOT + projectId);
-			String profile = context.getProperty(SELECTED_PROFILE);
-
-			String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
-			logger.info(loggerInfo);
-
-			YAMLConfig config = getYamlConfig(configFilePath);
-			updateSelectedProfile(config, profile);
-
-			String selectedProfile = config.getSelectedProfile();
-
-			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
-					(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
-			logger.info(loggerInfo);
-
-			return config;
-		} else {
-			logger.info(Messages.Activator_standalone_UsingDefaultConfiguration);
-
-			return YAMLConfig.getDefaultConfig();
+		if (useDefaultConfig) {
+			return yamlConfigurationWrapper.getDefaultYamlConfig();
 		}
+
+		String configFilePath = context.getProperty(CONFIG_FILE_PATH + DOT + projectId);
+		String profile = context.getProperty(SELECTED_PROFILE);
+		
+		return yamlConfigurationWrapper.readConfiguration(configFilePath, profile);
 	}
 
 	private boolean parseUseDefaultConfiguration(BundleContext context) {
@@ -302,42 +284,5 @@ public class RefactoringInvoker {
 			paths.put(id, path);
 		}
 		return paths;
-	}
-
-	/**
-	 * Reads the yml configuration file in the provided path.
-	 * 
-	 * @param configFilePath
-	 *            path to the yml/yaml file
-	 * @return the parsed {@link YAMLConfig} file.
-	 * @throws StandaloneException
-	 *             if the configuration file could not be read
-	 */
-	protected YAMLConfig getYamlConfig(String configFilePath) throws StandaloneException {
-		try {
-			return YAMLConfigUtil.readConfig(configFilePath);
-		} catch (YAMLConfigException e) {
-			throw new StandaloneException(e.getMessage(), e);
-		}
-	}
-
-	/**
-	 * Updates the selected profile of the configuration.
-	 * 
-	 * @param config
-	 *            the {@link YAMLConfig} to be updated
-	 * @param profile
-	 *            the selected profile name
-	 * 
-	 * @throws StandaloneException
-	 *             if the provided profile does not exist.
-	 */
-	protected void updateSelectedProfile(YAMLConfig config, String profile) throws StandaloneException {
-		try {
-			YAMLConfigUtil.updateSelectedProfile(config, profile);
-		} catch (YAMLConfigException e) {
-			throw new StandaloneException(e.getMessage(), e);
-		}
-
 	}
 }
