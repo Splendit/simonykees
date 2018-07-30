@@ -11,6 +11,11 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
+/**
+ * A utility class for extracting information from a {@link MavenProject}.
+ * 
+ * @since 1.1.0
+ */
 public class MavenProjectUtil {
 
 	private MavenProjectUtil() {
@@ -105,6 +110,16 @@ public class MavenProjectUtil {
 		return ""; //$NON-NLS-1$
 	}
 
+	/**
+	 * Finds the path of the source folder of the given maven project. If no
+	 * source directory is defined in the project's build, then the default
+	 * {@value ConfigurationKeys#DEFAULT_SOURCE_FOLDER_PATH}.
+	 * 
+	 * @param mavenProject
+	 *            an instance of {@link MavenProject}.
+	 * @return the relative path w.r.t the absolute path of project's root
+	 *         folder.
+	 */
 	public static String findSourceDirectory(MavenProject mavenProject) {
 		Build build = mavenProject.getBuild();
 		if (build != null) {
