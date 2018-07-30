@@ -126,6 +126,7 @@ public class MavenAdapter {
 		String projectPath = baseDir.getAbsolutePath();
 		String projectIdentifier = findProjectIdentifier(project);
 		String artifactId = project.getArtifactId();
+		String sourcePath = findSourceDirectory(project);
 
 		String allIdentifiers = getAllProjectIdentifiers();
 		configuration.put(ConfigurationKeys.ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
@@ -137,6 +138,7 @@ public class MavenAdapter {
 		configuration.put(ConfigurationKeys.PROJECT_JAVA_VERSION + DOT + projectIdentifier,
 				getCompilerCompliance(project));
 		configuration.put(ConfigurationKeys.NATURE_IDS + DOT + projectIdentifier, findNatureIds(project));
+		configuration.put(ConfigurationKeys.SOURCE_FOLDER + DOT + projectIdentifier, sourcePath);
 
 	}
 
@@ -217,12 +219,10 @@ public class MavenAdapter {
 
 	void addInitialConfiguration(MavenParameters config) {
 		boolean useDefaultConfig = config.getUseDefaultConfig();
-		String sourceDirectory = findSourceDirectory();
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, ConfigurationKeys.FRAMEWORK_STORAGE_VALUE);
 		configuration.put(ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT,
 				System.getProperty(ConfigurationKeys.USER_DIR));
-		configuration.put(ConfigurationKeys.SOURCE_FOLDER, sourceDirectory);
 
 		/*
 		 * This is solution B from this article:
@@ -240,17 +240,23 @@ public class MavenAdapter {
 			.ifPresent(ruleId -> configuration.put(ConfigurationKeys.LIST_RULES_SELECTED_ID, ruleId));
 	}
 
-	private String findSourceDirectory() {
-		Build build = rootProject.getBuild();
+	private String findSourceDirectory(MavenProject mavenProject) {
+		Build build = mavenProject.getBuild();
 		String sourceDirectory = build.getSourceDirectory();
-		if (sourceDirectory == null) {
-			return ConfigurationKeys.DEFAULT_SOURCE_FOLDER_PATH;
+
+		if (sourceDirectory != null) {
+			File projectDirectory = mavenProject.getBasedir();
+			Path sourceAbsolutePath = Paths.get(sourceDirectory);
+			Path projectAbsolutePath = projectDirectory.toPath();
+			Path relativePath = projectAbsolutePath.relativize(sourceAbsolutePath);
+			return relativePath.toString();
 		}
-		File projectDirectory = rootProject.getBasedir();
-		Path sourceAbsolutePath = Paths.get(sourceDirectory);
-		Path projectAbsolutePath = projectDirectory.toPath();
-		Path relativePath = projectAbsolutePath.relativize(sourceAbsolutePath);
-		return relativePath.toString();
+
+		MavenProject parent = mavenProject.getParent();
+		if (parent != null) {
+			return findSourceDirectory(parent);
+		}
+		return ConfigurationKeys.DEFAULT_SOURCE_FOLDER_PATH;
 	}
 
 	/**
