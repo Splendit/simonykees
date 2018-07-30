@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.maven.model.Build;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -216,11 +217,12 @@ public class MavenAdapter {
 
 	void addInitialConfiguration(MavenParameters config) {
 		boolean useDefaultConfig = config.getUseDefaultConfig();
+		String sourceDirectory = findSourceDirectory();
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, ConfigurationKeys.FRAMEWORK_STORAGE_VALUE);
 		configuration.put(ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT,
 				System.getProperty(ConfigurationKeys.USER_DIR));
-		configuration.put(ConfigurationKeys.SOURCE_FOLDER, ConfigurationKeys.DEFAULT_SOURCE_FOLDER_PATH);
+		configuration.put(ConfigurationKeys.SOURCE_FOLDER, sourceDirectory);
 
 		/*
 		 * This is solution B from this article:
@@ -236,6 +238,19 @@ public class MavenAdapter {
 		configuration.put(ConfigurationKeys.AGENT_URL, config.getUrl());
 		config.getRuleId()
 			.ifPresent(ruleId -> configuration.put(ConfigurationKeys.LIST_RULES_SELECTED_ID, ruleId));
+	}
+
+	private String findSourceDirectory() {
+		Build build = rootProject.getBuild();
+		String sourceDirectory = build.getSourceDirectory();
+		if (sourceDirectory == null) {
+			return ConfigurationKeys.DEFAULT_SOURCE_FOLDER_PATH;
+		}
+		File projectDirectory = rootProject.getBasedir();
+		Path sourceAbsolutePath = Paths.get(sourceDirectory);
+		Path projectAbsolutePath = projectDirectory.toPath();
+		Path relativePath = projectAbsolutePath.relativize(sourceAbsolutePath);
+		return relativePath.toString();
 	}
 
 	/**
