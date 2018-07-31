@@ -1,7 +1,6 @@
 package eu.jsparrow.maven.adapter;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -111,19 +110,6 @@ public class MavenAdapterTest {
 	}
 
 	@Test
-	public void findProjectIdentifier_groupAndArtifactId() {
-		String expectedProjectId = "group.id.artifact.id";
-		MavenProject mavenProject = mock(MavenProject.class);
-
-		when(mavenProject.getGroupId()).thenReturn("group.id");
-		when(mavenProject.getArtifactId()).thenReturn("artifact.id");
-
-		String actualValue = mavenAdapter.findProjectIdentifier(mavenProject);
-		assertTrue(expectedProjectId.equals(actualValue));
-
-	}
-
-	@Test
 	public void findYamlFilePath_yamlFileExists_shouldReturnFilePath() throws IOException {
 
 		String expectedPath = jsparrowYml.getAbsolutePath();
@@ -164,29 +150,6 @@ public class MavenAdapterTest {
 		String actualPath = mavenAdapter.findYamlFilePath(child, parentYamlFile);
 
 		assertTrue(actualPath.equals(expectedPath));
-	}
-
-	@Test
-	public void isAggregateProject_hasPomPckage() {
-		MavenProject project = mock(MavenProject.class);
-		when(project.getPackaging()).thenReturn("pom");
-		assertTrue(mavenAdapter.isAggregateProject(project));
-	}
-
-	@Test
-	public void isAggregateProject_hasListOfModules() {
-		MavenProject project = mock(MavenProject.class);
-		when(project.getPackaging()).thenReturn("");
-		when(project.getModules()).thenReturn(Collections.singletonList("module"));
-		assertTrue(mavenAdapter.isAggregateProject(project));
-	}
-
-	@Test
-	public void isAggregateProject_shouldReturnFalse_jarPackagingNoModules() {
-		MavenProject project = mock(MavenProject.class);
-		when(project.getPackaging()).thenReturn("jar");
-		when(project.getModules()).thenReturn(Collections.emptyList());
-		assertFalse(mavenAdapter.isAggregateProject(project));
 	}
 
 	@Test
