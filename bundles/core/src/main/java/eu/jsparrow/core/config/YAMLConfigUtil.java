@@ -62,7 +62,7 @@ public class YAMLConfigUtil {
 			 * compile time thing. see exportConfig method.
 			 */
 			TypeDescription rootTypeDescription = new TypeDescription(YAMLConfig.class, CONFIG_TAG);
-			rootTypeDescription.putListPropertyType("profiles", YAMLProfile.class); //$NON-NLS-1$
+			rootTypeDescription.addPropertyParameters("profiles", YAMLProfile.class); //$NON-NLS-1$
 
 			/*
 			 * the constructor is used for the configuration of snakeyaml
