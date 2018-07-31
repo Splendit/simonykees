@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -44,10 +45,10 @@ public class YAMLConfigurationWrapperTest {
 	@Test
 	public void readConfiguration_invalidExistingYamlFile_shouldReturnDefaultConfiguration()
 			throws StandaloneException {
-		YAMLConfig ymlConfig = yamlConfigurationWrapper.readConfiguration(loadResource("invalid.yaml").getPath(),
-				"profile");
+		expectedException.expect(StandaloneException.class);
+		yamlConfigurationWrapper.readConfiguration(loadResource("invalid.yaml").getPath(), "profile");
 
-		assertThat(ymlConfig, hasProperty("selectedProfile", equalTo("default")));
+		fail("StandaloneException expected, but no exception has been thrown.");
 	}
 
 	@Test
