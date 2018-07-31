@@ -15,6 +15,7 @@ import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -70,7 +71,10 @@ public class YAMLConfigUtil {
 			Constructor constructor = new Constructor(YAMLConfig.class);
 			constructor.addTypeDescription(rootTypeDescription);
 
-			Yaml yaml = new Yaml(constructor);
+			LoaderOptions loaderOptions = new LoaderOptions();
+			loaderOptions.setAllowDuplicateKeys(false);
+
+			Yaml yaml = new Yaml(constructor, new Representer(), new DumperOptions(), loaderOptions);
 
 			config = yaml.loadAs(fis, YAMLConfig.class);
 		} catch (YAMLException | IOException e) {
@@ -293,7 +297,7 @@ public class YAMLConfigUtil {
 			.anyMatch(configProfile -> configProfile.getName()
 				.equals(profile));
 	}
-	
+
 	/**
 	 * Updates the selected profile of the configuration.
 	 * 
