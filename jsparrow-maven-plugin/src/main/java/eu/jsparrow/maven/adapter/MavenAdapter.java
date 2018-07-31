@@ -7,15 +7,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Constants;
 
@@ -69,7 +66,7 @@ public class MavenAdapter {
 
 		setProjectIds(projects);
 		WorkingDirectory workingDirectory = setUpConfiguration(parameters);
-		String rootProjectIdentifier = findProjectIdentifier(rootProject);
+		String rootProjectIdentifier = MavenProjectUtil.findProjectIdentifier(rootProject);
 		if (workingDirectory.isJsparrowStarted(rootProjectIdentifier)) {
 			jsparrowAlreadyRunningError = true;
 			log.error(NLS.bind(Messages.MavenAdapter_jSparrowAlreadyRunning, rootProject.getArtifactId()));
@@ -78,7 +75,7 @@ public class MavenAdapter {
 		configuration.put(ConfigurationKeys.ROOT_CONFIG_PATH, defaultYamlFile.getAbsolutePath());
 		workingDirectory.lockProjects();
 		for (MavenProject mavenProject : projects) {
-			if (!isAggregateProject(mavenProject)) {
+			if (!MavenProjectUtil.isAggregateProject(mavenProject)) {
 				addProjectConfiguration(mavenProject, defaultYamlFile);
 			}
 		}
@@ -123,8 +120,9 @@ public class MavenAdapter {
 
 		File baseDir = project.getBasedir();
 		String projectPath = baseDir.getAbsolutePath();
-		String projectIdentifier = findProjectIdentifier(project);
+		String projectIdentifier = MavenProjectUtil.findProjectIdentifier(project);
 		String artifactId = project.getArtifactId();
+		String sourcePath = MavenProjectUtil.findSourceDirectory(project);
 
 		String allIdentifiers = getAllProjectIdentifiers();
 		configuration.put(ConfigurationKeys.ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
@@ -134,18 +132,10 @@ public class MavenAdapter {
 		log.info(Messages.MavenAdapter_jSparrowConfigurationFile + yamlFilePath);
 		configuration.put(ConfigurationKeys.CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
 		configuration.put(ConfigurationKeys.PROJECT_JAVA_VERSION + DOT + projectIdentifier,
-				getCompilerCompliance(project));
-		configuration.put(ConfigurationKeys.NATURE_IDS + DOT + projectIdentifier, findNatureIds(project));
+				MavenProjectUtil.getCompilerCompliance(project));
+		configuration.put(ConfigurationKeys.NATURE_IDS + DOT + projectIdentifier, MavenProjectUtil.findNatureIds(project));
+		configuration.put(ConfigurationKeys.SOURCE_FOLDER + DOT + projectIdentifier, sourcePath);
 
-	}
-
-	private String findNatureIds(MavenProject project) {
-		if (project.getPackaging()
-			.equals("eclipse-plugin")) { //$NON-NLS-1$
-			return ConfigurationKeys.ECLIPSE_PLUGIN_PROJECT_NATURE_IDS;
-		} else {
-			return ConfigurationKeys.MAVEN_PROJECT_NATURE_IDS;
-		}
 	}
 
 	/**
@@ -189,20 +179,6 @@ public class MavenAdapter {
 		return Paths.get(parentBaseDir.getAbsolutePath(), yamlFileName);
 	}
 
-	/**
-	 * Checks whether the given projects represents an aggregation of projects.
-	 * 
-	 * @param project
-	 *            the maven project to be checked.
-	 * @return if the packaging of the project is {@code pom} or the list of
-	 *         modules is not empty
-	 */
-	protected boolean isAggregateProject(MavenProject project) {
-		List<String> modules = project.getModules();
-		String packaging = project.getPackaging();
-		return "pom".equalsIgnoreCase(packaging) || !modules.isEmpty(); //$NON-NLS-1$
-	}
-
 	protected String joinWithComma(String left, String right) {
 		if (left.isEmpty()) {
 			return right;
@@ -220,7 +196,6 @@ public class MavenAdapter {
 		configuration.put(Constants.FRAMEWORK_STORAGE, ConfigurationKeys.FRAMEWORK_STORAGE_VALUE);
 		configuration.put(ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT,
 				System.getProperty(ConfigurationKeys.USER_DIR));
-		configuration.put(ConfigurationKeys.SOURCE_FOLDER, ConfigurationKeys.DEFAULT_SOURCE_FOLDER_PATH);
 
 		/*
 		 * This is solution B from this article:
@@ -236,19 +211,6 @@ public class MavenAdapter {
 		configuration.put(ConfigurationKeys.AGENT_URL, config.getUrl());
 		config.getRuleId()
 			.ifPresent(ruleId -> configuration.put(ConfigurationKeys.LIST_RULES_SELECTED_ID, ruleId));
-	}
-
-	/**
-	 * Concatenates the groupId and the artifactId of the project.
-	 * 
-	 * @param mavenProject
-	 *            project to generate identifier for.
-	 * @return the computed identifier.
-	 */
-	public String findProjectIdentifier(MavenProject mavenProject) {
-		String groupId = mavenProject.getGroupId();
-		String artifactId = mavenProject.getArtifactId();
-		return groupId + DOT + artifactId;
 	}
 
 	/**
@@ -290,7 +252,7 @@ public class MavenAdapter {
 
 	public void setProjectIds(List<MavenProject> allProjects) {
 		this.sessionProjects = allProjects.stream()
-			.map(this::findProjectIdentifier)
+			.map(MavenProjectUtil::findProjectIdentifier)
 			.collect(Collectors.toSet());
 	}
 
@@ -300,55 +262,5 @@ public class MavenAdapter {
 
 	public Map<String, String> getConfiguration() {
 		return configuration;
-	}
-
-	/**
-	 * Reads the current java source version from the maven-compiler-plugin
-	 * configuration in the pom.xml. If no configuration is found, the java
-	 * version is 1.5 by default (as stated in the documentation of
-	 * maven-compiler-plugin:
-	 * https://maven.apache.org/plugins/maven-compiler-plugin/).
-	 * 
-	 * Note: This setting determines, which rules can be applied by default. We
-	 * must use the same default version as Maven. Otherwise Maven would compile
-	 * the sources with Java 1.5 anyways and our rules for 1.6 and above would
-	 * result in compilation errors.
-	 * 
-	 * @return the project's java version
-	 */
-	private String getCompilerCompliance(MavenProject project) {
-		List<Plugin> buildPlugins = project.getBuildPlugins();
-
-		String sourceFromPlugin = getCompilerComplienceFromCompilerPlugin(buildPlugins);
-		if (!sourceFromPlugin.isEmpty()) {
-			return sourceFromPlugin;
-		}
-
-		Properties projectProperties = project.getProperties();
-
-		String sourceProperty = projectProperties
-			.getProperty(ConfigurationKeys.MAVEN_COMPILER_PLUGIN_PROPERTY_SOURCE_NAME);
-		if (null != sourceProperty) {
-			return sourceProperty;
-		}
-
-		return ConfigurationKeys.MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION;
-	}
-
-	private String getCompilerComplienceFromCompilerPlugin(List<Plugin> buildPlugins) {
-		for (Plugin plugin : buildPlugins) {
-			if (ConfigurationKeys.MAVEN_COMPILER_PLUGIN_ARTIFACT_ID.equals(plugin.getArtifactId())) {
-				Xpp3Dom pluginConfig = (Xpp3Dom) plugin.getConfiguration();
-				if (pluginConfig != null) {
-					for (Xpp3Dom child : pluginConfig.getChildren()) {
-						if (ConfigurationKeys.MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME.equals(child.getName())) {
-							return child.getValue();
-						}
-					}
-				}
-				break;
-			}
-		}
-		return ""; //$NON-NLS-1$
 	}
 }

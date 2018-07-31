@@ -16,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
-import eu.jsparrow.core.config.YAMLConfigException;
-import eu.jsparrow.core.config.YAMLConfigUtil;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -250,7 +248,7 @@ public class RefactoringInvoker {
 				 */
 				continue;
 			}
-			String sourceFolder = context.getProperty(SOURCE_FOLDER);
+			String sourceFolder = context.getProperty(SOURCE_FOLDER + DOT + id);
 			String[] natureIds = findNatureIds(context, id);
 			try {
 				YAMLConfig config = getConfiguration(context, id);
