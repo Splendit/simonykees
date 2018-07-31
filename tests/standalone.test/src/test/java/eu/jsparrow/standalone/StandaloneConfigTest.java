@@ -4,7 +4,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -16,20 +18,34 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+import org.junit.rules.TemporaryFolder;
+
+import eu.jsparrow.core.config.YAMLConfig;
+import eu.jsparrow.core.config.YAMLExcludes;
+import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.rule.impl.CodeFormatterRule;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
  * test class for {@link StandaloneConfig}
@@ -39,9 +55,11 @@ import org.mockito.ArgumentCaptor;
  */
 public class StandaloneConfigTest {
 
-	private boolean callSuperPrepareEclipseMavenPlugin = false;
-	private boolean prepareEclipseMavenPluginReturnValue = false;
-	private int moveFileCallCount;
+	private static final String PROJECT_NAME = "project-name"; //$NON-NLS-1$
+	private static final String DOT_PROJECT = ".project"; //$NON-NLS-1$
+	private static final String DOT_CLASSPATH = ".classpath"; //$NON-NLS-1$
+	private static final String DOT_SETTINGS = ".settings"; //$NON-NLS-1$
+	private static final String DOT_TEMP = ".tmp"; //$NON-NLS-1$
 
 	private static Path path;
 
@@ -59,14 +77,22 @@ public class StandaloneConfigTest {
 	private File mavenDepsFolder;
 	private IClasspathEntry classpathEntry;
 	private StandaloneConfig standaloneConfig;
-	private MavenInvoker mavenInvoker;
+	private RefactoringPipeline pipeline;
+	private boolean hasRefactoringStates;
+	private CompilationUnitProvider iCompilationUnitsProvider;
+	private YAMLConfig config;
+	private static final String PROJECT_ROOT_DIR = "project-root-dir"; //$NON-NLS-1$
+	private boolean existingProjectFileMoved = false;
+	private boolean existingClasspathFileMoved = false;
+	private boolean existingSettingsDirectoryMoved = false;
 
-	private static final String ECLIPSE = "eclipse"; //$NON-NLS-1$
+	@Rule
+	public TemporaryFolder directory = new TemporaryFolder();
+	private File baseDir;
 
 	@BeforeClass
 	public static void setUpClass() throws IOException {
 		path = Files.createTempDirectory("jsparrow-standlaone-test-"); //$NON-NLS-1$
-
 	}
 
 	@AfterClass
@@ -77,14 +103,14 @@ public class StandaloneConfigTest {
 
 	@Before
 	public void setUp() throws Exception {
-		moveFileCallCount = 0;
 
-		projectFile = mock(File.class);
-		projectFileTmp = mock(File.class);
-		classpathFile = mock(File.class);
-		classpathFileTmp = mock(File.class);
-		settingsDirFile = mock(File.class);
-		settingsDirFileTmp = mock(File.class);
+		baseDir = directory.newFolder(PROJECT_ROOT_DIR);
+		projectFile = directory.newFile(PROJECT_ROOT_DIR + File.separator + DOT_PROJECT);
+		classpathFile = directory.newFile(PROJECT_ROOT_DIR + File.separator + DOT_CLASSPATH);
+		settingsDirFile = directory.newFolder(PROJECT_ROOT_DIR, DOT_SETTINGS);
+		projectFileTmp = new File(baseDir.getPath() + File.separator + DOT_PROJECT + DOT_TEMP);
+		classpathFileTmp = new File(baseDir.getPath() + File.separator + DOT_CLASSPATH + DOT_TEMP);
+		settingsDirFileTmp = new File(baseDir.getPath() + File.separator + DOT_SETTINGS + DOT_TEMP);
 
 		workspace = mock(IWorkspace.class);
 		projectDescription = mock(IProjectDescription.class);
@@ -92,113 +118,24 @@ public class StandaloneConfigTest {
 		javaProject = mock(IJavaProject.class);
 		mavenDepsFolder = mock(File.class);
 		classpathEntry = mock(IClasspathEntry.class);
-		mavenInvoker = mock(MavenInvoker.class);
-		standaloneConfig = new TestableStandaloneConfig("id", path.toString(), "1.8", true); //$NON-NLS-1$ , //$NON-NLS-2$
+		pipeline = mock(RefactoringPipeline.class);
+
+		config = mock(YAMLConfig.class);
+
+		standaloneConfig = new TestableStandaloneConfig("id", path.toString(), "1.8"); //$NON-NLS-1$ , //$NON-NLS-2$
+		hasRefactoringStates = true;
 	}
 
 	@Test
-	public void getProjectDescription_mavenNotInvoked_projectDescriptionLoaded() throws Exception {
-		callSuperPrepareEclipseMavenPlugin = false;
-		prepareEclipseMavenPluginReturnValue = false;
+	public void getProjectDescription_projectDescriptionLoaded() throws Exception {
 
-		when(projectFile.getAbsolutePath()).thenReturn("/jsparrow-test"); //$NON-NLS-1$
+		when(workspace.newProjectDescription(any(String.class))).thenReturn(projectDescription);
+		when(projectDescription.getBuildSpec()).thenReturn(new ICommand[] {});
 
 		standaloneConfig.getProjectDescription();
 
-		verify(workspace).loadProjectDescription(any(IPath.class));
-	}
-
-	@Test
-	public void getProjectDescription_mavenInvoked_projectDescriptionCreated() throws Exception {
-		callSuperPrepareEclipseMavenPlugin = false;
-		prepareEclipseMavenPluginReturnValue = true;
-
-		when(projectFile.getAbsolutePath()).thenReturn("/jsparrow-test"); //$NON-NLS-1$
-
-		standaloneConfig.getProjectDescription();
-
-		verify(mavenInvoker).invoke(eq(ECLIPSE), eq(ECLIPSE), eq(null));
-		assertTrue(standaloneConfig.isDescriptionGenerated());
-	}
-
-	@Test
-	public void prepareEclipseMavenPlugin_projectClasspathSettingsExist_shouldReturnFalse() throws Exception {
-		callSuperPrepareEclipseMavenPlugin = true;
-
-		when(projectFile.exists()).thenReturn(true);
-		when(classpathFile.exists()).thenReturn(true);
-		when(settingsDirFile.exists()).thenReturn(true);
-
-		boolean result = standaloneConfig.prepareEclipseMavenPlugin();
-
-		assertFalse(result);
-	}
-
-	@Test
-	public void prepareEclipseMavenPlugin_projectClasspathSettingsDoNotExist_shouldReturnTrue() throws Exception {
-		callSuperPrepareEclipseMavenPlugin = true;
-
-		when(projectFile.exists()).thenReturn(false);
-		when(classpathFile.exists()).thenReturn(false);
-		when(settingsDirFile.exists()).thenReturn(false);
-
-		boolean result = standaloneConfig.prepareEclipseMavenPlugin();
-
-		assertTrue(result);
-	}
-
-	@Test
-	public void prepareEclipseMavenPlugin_projectExists_shouldReturnTrueAndFlagSet() throws Exception {
-		callSuperPrepareEclipseMavenPlugin = true;
-
-		when(projectFile.exists()).thenReturn(true);
-		when(classpathFile.exists()).thenReturn(false);
-		when(settingsDirFile.exists()).thenReturn(false);
-
-		boolean result = standaloneConfig.prepareEclipseMavenPlugin();
-
-		assertTrue(result);
-		assertTrue(standaloneConfig.isExistingProjectFileMoved());
-		assertFalse(standaloneConfig.isExistingClasspathFileMoved());
-		assertFalse(standaloneConfig.isExistingSettingsDirectoryMoved());
-
-		assertTrue(moveFileCallCount == 1);
-	}
-
-	@Test
-	public void prepareEclipseMavenPlugin_classpathExists_shouldReturnTrueAndFlagSet() throws Exception {
-		callSuperPrepareEclipseMavenPlugin = true;
-
-		when(projectFile.exists()).thenReturn(false);
-		when(classpathFile.exists()).thenReturn(true);
-		when(settingsDirFile.exists()).thenReturn(false);
-
-		boolean result = standaloneConfig.prepareEclipseMavenPlugin();
-
-		assertTrue(result);
-		assertFalse(standaloneConfig.isExistingProjectFileMoved());
-		assertTrue(standaloneConfig.isExistingClasspathFileMoved());
-		assertFalse(standaloneConfig.isExistingSettingsDirectoryMoved());
-
-		assertTrue(moveFileCallCount == 1);
-	}
-
-	@Test
-	public void prepareEclipseMavenPlugin_settingsExists_shouldReturnTrueAndFlagSet() throws Exception {
-		callSuperPrepareEclipseMavenPlugin = true;
-
-		when(projectFile.exists()).thenReturn(false);
-		when(classpathFile.exists()).thenReturn(false);
-		when(settingsDirFile.exists()).thenReturn(true);
-
-		boolean result = standaloneConfig.prepareEclipseMavenPlugin();
-
-		assertTrue(result);
-		assertFalse(standaloneConfig.isExistingProjectFileMoved());
-		assertFalse(standaloneConfig.isExistingClasspathFileMoved());
-		assertTrue(standaloneConfig.isExistingSettingsDirectoryMoved());
-
-		assertTrue(moveFileCallCount == 1);
+		verify(projectDescription).setLocation(any(IPath.class));
+		verify(projectDescription).setNatureIds(any());
 	}
 
 	@Test
@@ -214,6 +151,7 @@ public class StandaloneConfigTest {
 		String javaVersion = "1.8"; //$NON-NLS-1$
 
 		when(javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true)).thenReturn(javaVersion);
+		when(project.isOpen()).thenReturn(true);
 
 		standaloneConfig.initJavaProject(project);
 
@@ -223,13 +161,25 @@ public class StandaloneConfigTest {
 
 		verify(javaProject).open(any());
 	}
+	
+	@Test(expected = StandaloneException.class)
+	public void initJavaProject_iProjectNotOpen_shouldThrowException() throws StandaloneException {
+		String javaVersion = "1.8"; //$NON-NLS-1$
+
+		when(javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true)).thenReturn(javaVersion);
+		when(project.isOpen()).thenReturn(false);
+
+		standaloneConfig.initJavaProject(project);
+		
+		assertTrue(false);
+	}
 
 	@Test
 	public void getCompilationUnits_noCompilationUnitsExist_returnsEmptyList() throws Exception {
 		standaloneConfig.setJavaProject(javaProject);
 		when(javaProject.getPackageFragments()).thenReturn(new IPackageFragment[] {});
 
-		List<ICompilationUnit> units = standaloneConfig.getCompilationUnits();
+		List<ICompilationUnit> units = standaloneConfig.findProjectCompilationUnits();
 
 		assertTrue(units.isEmpty());
 	}
@@ -244,7 +194,7 @@ public class StandaloneConfigTest {
 		when(packageFragment.containsJavaResources()).thenReturn(true);
 		when(packageFragment.getCompilationUnits()).thenReturn(new ICompilationUnit[] { compilationUnit });
 
-		List<ICompilationUnit> units = standaloneConfig.getCompilationUnits();
+		List<ICompilationUnit> units = standaloneConfig.findProjectCompilationUnits();
 
 		verify(packageFragment).open(any());
 		assertFalse(units.isEmpty());
@@ -287,59 +237,187 @@ public class StandaloneConfigTest {
 		verifyZeroInteractions(javaProject);
 	}
 
-	@Test
-	public void addToClasspath_nonEmptyClasspathList_oldEntriesIsEmpty_setRawClasspathCalled() throws Exception {
-		standaloneConfig.setJavaProject(javaProject);
-		when(javaProject.getRawClasspath()).thenReturn(new IClasspathEntry[] {});
+	@SuppressWarnings("unchecked")
+	@Test(expected = StandaloneException.class)
+	public void createRefactoringStates_shouldThrowStandaloneException() throws Exception {
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn(PROJECT_NAME);
+		doThrow(JavaModelException.class).when(pipeline)
+			.createRefactoringState(any(ICompilationUnit.class), any(List.class));
 
-		standaloneConfig.addToClasspath(Collections.singletonList(classpathEntry));
+		standaloneConfig.createRefactoringStates();
 
-		verify(javaProject).getRawClasspath();
+		assertTrue(false);
+	}
 
-		ArgumentCaptor<IClasspathEntry[]> captor = ArgumentCaptor.forClass(IClasspathEntry[].class);
-		verify(javaProject).setRawClasspath(captor.capture(), any());
-		assertTrue(captor.getValue().length == 1);
+	@Test(expected = StandaloneException.class)
+	public void createRefactoringStates_abortFlag_shouldThrowStandaloneException() throws Exception {
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn(PROJECT_NAME);
+		standaloneConfig.setAbortFlag();
+		YAMLExcludes excludes = mock(YAMLExcludes.class);
+		when(excludes.getExcludeClasses()).thenReturn(Collections.emptyList());
+		when(excludes.getExcludePackages()).thenReturn(Collections.emptyList());
+		when(config.getExcludes()).thenReturn(excludes);
+
+		standaloneConfig.createRefactoringStates();
+
+		assertTrue(false);
 	}
 
 	@Test
-	public void addToClasspath_nonEmptyClasspathList_oldEntriesIsNotEmpty_setRawClasspathCalled() throws Exception {
-		IClasspathEntry oldEntry = mock(IClasspathEntry.class);
+	public void computeRefactoring_shouldCallDoRefactoring() throws Exception {
+		hasRefactoringStates = true;
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn(PROJECT_NAME);
+		when(javaProject.getElementName()).thenReturn(PROJECT_NAME);
+		when(pipeline.getRulesWithChangesAsString()).thenReturn("changes-as-string"); //$NON-NLS-1$
 
-		standaloneConfig.setJavaProject(javaProject);
-		when(javaProject.getRawClasspath()).thenReturn(new IClasspathEntry[] { oldEntry });
+		standaloneConfig.computeRefactoring();
 
-		standaloneConfig.addToClasspath(Collections.singletonList(classpathEntry));
+		verify(pipeline).doRefactoring(any(NullProgressMonitor.class));
+	}
 
-		verify(javaProject).getRawClasspath();
+	@Test
+	public void computeRefactoring_emptyRefactoringStates() throws Exception {
+		hasRefactoringStates = false;
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn(PROJECT_NAME);
 
-		ArgumentCaptor<IClasspathEntry[]> captor = ArgumentCaptor.forClass(IClasspathEntry[].class);
-		verify(javaProject).setRawClasspath(captor.capture(), any());
-		assertTrue(captor.getValue().length > 1);
+		standaloneConfig.computeRefactoring();
+
+		verify(pipeline, never()).doRefactoring(any(IProgressMonitor.class));
+	}
+
+	@Test(expected = StandaloneException.class)
+	public void computeRefactoring_shouldThrowStandaloneException() throws Exception {
+		hasRefactoringStates = true;
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn(PROJECT_NAME);
+		doThrow(RefactoringException.class).when(pipeline)
+			.doRefactoring(any(IProgressMonitor.class));
+
+		standaloneConfig.computeRefactoring();
+
+		assertTrue(false);
+	}
+
+	@Test
+	public void commitrefactoring_emptyRefactoringStates() throws Exception {
+		hasRefactoringStates = false;
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn(PROJECT_NAME);
+
+		standaloneConfig.commitRefactoring();
+
+		verify(pipeline, never()).commitRefactoring();
+	}
+
+	@Test(expected = StandaloneException.class)
+	public void commitChanges_shouldThrowStandaloneException() throws Exception {
+		hasRefactoringStates = true;
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn(PROJECT_NAME);
+		doThrow(RefactoringException.class).when(pipeline)
+			.commitRefactoring();
+
+		standaloneConfig.commitRefactoring();
+
+		assertTrue(false);
+	}
+
+	@Test
+	public void backupExistingEclipseFiles_dotProjectExists() throws StandaloneException, IOException {
+
+		projectFileTmp = new File(baseDir.getPath() + File.separator + DOT_PROJECT + DOT_TEMP);
+		classpathFile = new File(baseDir.getPath() + File.separator + DOT_CLASSPATH);
+		settingsDirFile = new File(baseDir.getPath(), DOT_SETTINGS);
+
+		standaloneConfig.backupExistingEclipseFiles();
+
+		assertTrue(Files.exists(projectFileTmp.toPath()));
+
+	}
+
+	@Test
+	public void backupExistingEclipseFiles_dotClasspathExists() throws StandaloneException, IOException {
+		classpathFileTmp = new File(baseDir.getPath() + File.separator + DOT_CLASSPATH + DOT_TEMP);
+		projectFile = new File(baseDir.getPath() + File.separator + DOT_PROJECT);
+		settingsDirFile = new File(baseDir.getPath(), DOT_SETTINGS);
+
+		standaloneConfig.backupExistingEclipseFiles();
+
+		assertTrue(Files.exists(classpathFileTmp.toPath()));
+
+	}
+
+	@Test
+	public void backupExistingEclipseFiles_dotSettingsExists() throws StandaloneException, IOException {
+		projectFile = new File(baseDir.getPath() + File.separator + DOT_PROJECT);
+		classpathFile = new File(baseDir.getPath() + File.separator + DOT_CLASSPATH);
+		settingsDirFileTmp = new File(baseDir.getPath() + File.separator + DOT_SETTINGS + DOT_TEMP);
+
+		standaloneConfig.backupExistingEclipseFiles();
+
+		assertTrue(Files.exists(settingsDirFileTmp.toPath()));
+
+	}
+
+	@Test
+	public void restoreExistingEclipseFiles_projectFileMoved() throws IOException, CoreException {
+		existingProjectFileMoved = true;
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn(PROJECT_NAME);
+
+		projectFileTmp = directory.newFile(PROJECT_ROOT_DIR + File.separator + DOT_PROJECT + DOT_TEMP);
+
+		standaloneConfig.revertEclipseProjectFiles();
+
+		assertTrue(projectFile.exists());
+		assertFalse(projectFileTmp.exists());
+	}
+
+	@Test
+	public void restoreExistingEclipseFiles_classPathFileMoved() throws IOException, CoreException {
+		existingClasspathFileMoved = true;
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn(PROJECT_NAME);
+		classpathFileTmp = directory.newFile(PROJECT_ROOT_DIR + File.separator + DOT_PROJECT + DOT_TEMP);
+
+		standaloneConfig.revertEclipseProjectFiles();
+
+		assertTrue(classpathFile.exists());
+		assertFalse(classpathFileTmp.exists());
+	}
+
+	@Test
+	public void restoreExistingEclipseFiles_settingsFolderMoved() throws IOException, CoreException {
+		existingSettingsDirectoryMoved = true;
+		standaloneConfig.setProject(project);
+		when(project.getName()).thenReturn(PROJECT_NAME);
+		settingsDirFileTmp = directory.newFolder(PROJECT_ROOT_DIR, DOT_SETTINGS + DOT_TEMP);
+
+		standaloneConfig.revertEclipseProjectFiles();
+
+		assertTrue(settingsDirFile.exists());
+		assertFalse(settingsDirFileTmp.exists());
 	}
 
 	class TestableStandaloneConfig extends StandaloneConfig {
 
 		public TestableStandaloneConfig(String id, String path, String compilerCompliance) throws Exception {
-			this(id, path, compilerCompliance, false);
-		}
+			super("projectName", path, compilerCompliance, "", new String[] {}, config); //$NON-NLS-1$ //$NON-NLS-2$
+			super.refactoringPipeline = pipeline;
 
-		public TestableStandaloneConfig(String id, String path, String compilerCompliance, boolean testMode)
-				throws Exception {
-			super("", path, compilerCompliance, "", testMode); //$NON-NLS-1$ , //$NON-NLS-2$
 		}
 
 		@Override
-		protected boolean prepareEclipseMavenPlugin() throws IOException {
-			if (callSuperPrepareEclipseMavenPlugin) {
-				return super.prepareEclipseMavenPlugin();
-			} else {
-				return prepareEclipseMavenPluginReturnValue;
-			}
-		}
-
-		@Override
-		protected void moveFile(File src, File dest) {
-			moveFileCallCount++;
+		public void setUp() {
+			ICompilationUnit iCompilationUnit = mock(ICompilationUnit.class);
+			iCompilationUnitsProvider = mock(CompilationUnitProvider.class);
+			when(iCompilationUnitsProvider.getFilteredCompilationUnits())
+				.thenReturn(Collections.singletonList(iCompilationUnit));
+			super.compilationUnitsProvider = iCompilationUnitsProvider;
 		}
 
 		@Override
@@ -398,8 +476,35 @@ public class StandaloneConfigTest {
 		}
 
 		@Override
-		protected MavenInvoker getMavenInvoker() {
-			return mavenInvoker;
+		protected boolean hasRefactoringStates() {
+			return hasRefactoringStates;
 		}
+
+		@Override
+		protected List<RefactoringRule> getProjectRules() {
+			return Collections.singletonList(new CodeFormatterRule());
+		}
+
+		@Override
+		protected List<RefactoringRule> getSelectedRules(List<RefactoringRule> projectRules)
+				throws StandaloneException {
+			return Collections.singletonList(new CodeFormatterRule());
+		}
+
+		@Override
+		protected boolean isExistingProjectFileMoved() {
+			return existingProjectFileMoved;
+		}
+
+		@Override
+		protected boolean isExistingClasspathFileMoved() {
+			return existingClasspathFileMoved;
+		}
+
+		@Override
+		protected boolean isExistingSettingsDirectoryMoved() {
+			return existingSettingsDirectoryMoved;
+		}
+
 	}
 }

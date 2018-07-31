@@ -108,11 +108,8 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		refactoringPipeline.getInitialSourceMap()
 			.entrySet()
 			.stream()
-			.filter(this::hasChanges)
-			.forEach(x -> {
-				RefactoringState state = x.getKey();
-				changedFiles.add(createModelFromRefactoringState(state));
-			});
+			.filter(this::hasChanges).map(Map.Entry::getKey)
+			.forEach(state -> changedFiles.add(createModelFromRefactoringState(state)));
 	}
 
 	private void addRuleTimes() {
@@ -182,7 +179,7 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	private void updateTimeSaved() {
 		Duration totalTimeSaved = ruleTimes.stream()
 			.map(RuleTimesModel::getTimeSavedDuration)
-			.reduce(Duration.ZERO, (x, y) -> x.plus(y));
+			.reduce(Duration.ZERO, Duration::plus);
 		setTimeSaved(totalTimeSaved);
 	}
 

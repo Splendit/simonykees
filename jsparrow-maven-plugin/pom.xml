@@ -1,18 +1,21 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<version>0.5.0-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<groupId>eu.jsparrow</groupId>
 	<artifactId>jsparrow-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-
+	<description>Run jSparrow on Maven projects. See https://jsparrow.eu/ for more information.</description>
 	<name>jSparrow Maven Plugin</name>
+	<url>https://jsparrow.eu/</url>
 
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<proguard.plugin.version>2.0.14</proguard.plugin.version>
 	</properties>
 
 	<distributionManagement>
@@ -142,15 +145,70 @@
 			<version>1.6</version>
 		</dependency>
 
-		<dependency>
-			<groupId>eu.jsparrow</groupId>
-			<artifactId>jsparrow-standalone-adapter</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
 	</dependencies>
 
 	<build>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.github.wvengen</groupId>
+					<artifactId>proguard-maven-plugin</artifactId>
+					<version>${proguard.plugin.version}</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>proguard</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<!-- used maven obfuscation library -->
+						<dependency>
+							<groupId>net.sf.proguard</groupId>
+							<artifactId>proguard-base</artifactId>
+							<version>6.0.1</version>
+							<scope>runtime</scope>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<obfuscate>true</obfuscate>
+						<!-- defines a proguard configuration that is loaded addition to the 
+							options and libs definition in the pom -->
+						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
+						<addMavenDescriptor>true</addMavenDescriptor>
+						<libs>
+							<lib>${java.home}/lib/rt.jar</lib>
+							<lib>${java.home}/lib/jsse.jar</lib>
+						</libs>
+						<options>
+							<!-- Default parameters -->
+							<option>
+								-useuniqueclassmembernames
+							</option>
+							<!-- Otherwise everything that is not used by an kept class would 
+								be thrown away -->
+							<option>
+								-dontshrink
+								-dontoptimize
+							</option>
+							<!-- The SourceFile attribute is required, because Oracle/Sun's Java 
+								virtual machine otherwise does not include line numbers in stack traces, 
+								which is what you really want -->
+							<!-- https://stackoverflow.com/a/6740226 -->
+							<option>
+								-renamesourcefileattribute SourceFile
+							</option>
+							<option>
+								-adaptresourcefilecontents **.xml
+							</option>
+						</options>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<resources>
 			<resource>
 				<directory>src/main/java</directory>
@@ -166,7 +224,15 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
-				<version>3.4</version>
+				<version>3.5.2</version>
+				<executions>
+					<execution>
+						<id>help-goal</id>
+						<goals>
+							<goal>helpmojo</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -198,4 +264,55 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+
+		<profile>
+			<id>proguard</id>
+			<activation>
+				<property>
+					<name>proguard</name>
+				</property>
+				<!-- <file> <exists>${basedir}/proguard.conf</exists> </file> -->
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.wvengen</groupId>
+						<artifactId>proguard-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>develop-test-noProguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/548d804f-80df-4217-b3ea-a99abbfb9356</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+
+		<profile>
+			<id>master-production-proguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/e5cf8f39-6432-4de7-8388-8b8780bceecc</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+
+		<profile>
+			<id>releaseCandidate</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/37371f5a-b22a-4707-b3f0-965be2da46c4</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+	</profiles>
+
 </project>

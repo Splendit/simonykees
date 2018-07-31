@@ -66,7 +66,7 @@ public class SimonykeesPreferenceManager {
 	}
 
 	public static void removeProfile(String name) {
-		getProfileFromName(name).ifPresent(profile -> profiles.remove(profile));
+		getProfileFromName(name).ifPresent(profiles::remove);
 	}
 
 	public static void updateProfile(int index, String name, List<String> ruleIds, boolean isSetAsDefault) {
@@ -154,9 +154,9 @@ public class SimonykeesPreferenceManager {
 		String[] profilesArray = parseString(getAllProfiles());
 		for (String profileInfo : profilesArray) {
 			String name = StringUtils.substring(profileInfo, 0,
-					profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER));
+					StringUtils.indexOf(profileInfo, SimonykeesPreferenceConstants.NAME_RULES_DELIMITER));
 			List<String> rules = Arrays.asList(StringUtils
-				.substring(profileInfo, profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
+				.substring(profileInfo, StringUtils.indexOf(profileInfo, SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
 				.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
 			if (name.equals(Messages.Profile_DefaultProfile_profileName)) {
 				profiles.add(defaultProfile);

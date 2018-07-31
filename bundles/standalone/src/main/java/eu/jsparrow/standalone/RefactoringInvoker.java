@@ -3,31 +3,23 @@ package eu.jsparrow.standalone;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.maven.shared.invoker.MavenInvocationException;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
-import eu.jsparrow.core.config.YAMLConfigException;
-import eu.jsparrow.core.config.YAMLConfigUtil;
-import eu.jsparrow.core.exception.ReconcileException;
-import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
  * 
@@ -37,7 +29,10 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 public class RefactoringInvoker {
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringInvoker.class);
 
-	// CONSTANTS
+	/**
+	 * The following constants represent some keys in the BundleContext and they
+	 * must match with the ones in {@link eu.jsparrow.adapter.ConfigurationKeys}
+	 */
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
@@ -45,10 +40,16 @@ public class RefactoringInvoker {
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
-	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
+	private static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
+	private static final String SOURCE_FOLDER = "SOURCE.FOLDER"; //$NON-NLS-1$
+	private static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
+	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
+
+	private boolean abort = false;
+	private YAMLConfigurationWrapper yamlConfigurationWrapper = new YAMLConfigurationWrapper();
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
@@ -60,136 +61,150 @@ public class RefactoringInvoker {
 	 * Prepare and start the refactoring process
 	 * 
 	 * @param context
-	 * @throws YAMLConfigException
-	 * @throws MavenInvocationException
-	 * @throws CoreException
-	 * @throws IOException
+	 *            the bundle context configuration
+	 * @param refactoringPipeline
+	 *            an instance of the {@link RefactoringPipeline}
+	 * @throws StandaloneException
+	 *             if an exception occurs during refactoring. Reasons include:
+	 *             <ul>
+	 *             <li>The yaml configuration file cannot be found</li>
+	 *             <li>The eclipse project cannot be created from the
+	 *             sources</li>
+	 *             <li>The list of refactoring states cannot be created in the
+	 *             {@link RefactoringPipeline}</li>
+	 *             <li>A {@link RefactoringException} is thrown while computing
+	 *             refactoring
+	 *             <li>
+	 *             <li>All source files contain compilation errors</li>
+	 *             <ul>
 	 */
-	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
-			throws YAMLConfigException, CoreException, MavenInvocationException, IOException {
+	public void startRefactoring(BundleContext context) throws StandaloneException {
+		loadStandaloneConfig(context);
+		prepareRefactoring();
+		computeRefactoring();
+		commitRefactoring();
+	}
 
-		List<StandaloneConfig> configs = loadStandaloneConfig(context);
-		setStandaloneConfigurations(configs);
-		for (StandaloneConfig config : configs) {
-			startRefactoring(context, refactoringPipeline, config);
+	/**
+	 * Prepares the refactoring states for each {@link StandaloneConfig} on the
+	 * {@link #standaloneConfigs}.
+	 * 
+	 * @throws StandaloneException
+	 *             reasons include:
+	 *             <ul>
+	 *             <li>A {@link JavaModelException} is thrown while creating a
+	 *             refactoring state</li>
+	 *             <li>A user abort was detected</li>
+	 *             <li>A {@link ConcurrentModificationException} was thrown
+	 *             while canceling the execution</li>
+	 *             </ul>
+	 */
+	private void prepareRefactoring() throws StandaloneException {
+		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+			String abortMessage = String.format("Abort detected while preparing refactoring on %s ", //$NON-NLS-1$
+					standaloneConfig.getProjectName());
+			verifyAbortFlag(abortMessage);
+			try {
+				standaloneConfig.createRefactoringStates();
+			} catch (ConcurrentModificationException e) {
+				String message = abort ? abortMessage : e.getMessage();
+				throw new StandaloneException(message);
+			}
 		}
 	}
 
-	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline,
-			StandaloneConfig standaloneConfig) throws YAMLConfigException {
-		String loggerInfo;
+	private void computeRefactoring() throws StandaloneException {
 
-		YAMLConfig config = getConfiguration(context, standaloneConfig.getProjectId());
-
-		List<RefactoringRule> projectRules = getProjectRules(standaloneConfig);
-		List<RefactoringRule> selectedRules = getSelectedRules(config,
-				projectRules);
-		if (selectedRules != null && !selectedRules.isEmpty()) {
-			// Create refactoring pipeline and set rules
-			refactoringPipeline.setRules(selectedRules);
-
-			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
-					selectedRules.toString());
-			logger.info(loggerInfo);
-
-			logger.info(Messages.Activator_debug_collectCompilationUnits);
-
-			List<ICompilationUnit> compUnits = standaloneConfig.getCompUnits();
-
-			loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compUnits.size());
-			logger.debug(loggerInfo);
-
-			logger.debug(Messages.Activator_debug_createRefactoringStates);
-
+		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+			String abortMessage = String.format("abort detected while computing refactoring on %s ", //$NON-NLS-1$
+					standaloneConfig.getProjectName());
+			verifyAbortFlag(abortMessage);
 			try {
-				refactoringPipeline.createRefactoringStates(compUnits);
-			} catch (JavaModelException jme) {
-				logger.debug(jme.getMessage(), jme);
-				logger.error(jme.getMessage());
+				standaloneConfig.computeRefactoring();
+			} catch (ConcurrentModificationException e) {
+				String message = abort ? abortMessage : e.getMessage();
+				throw new StandaloneException(message);
 			}
 
-			loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates,
-					refactoringPipeline.getRefactoringStates()
-						.size());
-			logger.debug(loggerInfo);
+		}
+	}
 
-			// Do refactoring
-			try {
-				logger.info(Messages.Activator_debug_startRefactoring);
-				refactoringPipeline.doRefactoring(new NullProgressMonitor());
-			} catch (RefactoringException | RuleException e) {
-				logger.debug(e.getMessage(), e);
-				logger.error(e.getMessage());
-				return;
-			}
+	private void commitRefactoring() throws StandaloneException {
+		String loggInfo = "Abort detected before commiting refactoring "; //$NON-NLS-1$
+		verifyAbortFlag(loggInfo);
 
-			loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
-					getJavaProject(standaloneConfig).getElementName(),
-					refactoringPipeline.getRulesWithChangesAsString());
-			logger.info(loggerInfo);
+		for (StandaloneConfig config : standaloneConfigs) {
+			config.commitRefactoring();
+		}
+	}
 
-			// Commit refactoring
-			try {
-				logger.info(Messages.Activator_debug_commitRefactoring);
-				refactoringPipeline.commitRefactoring();
-			} catch (RefactoringException | ReconcileException e) {
-				logger.debug(e.getMessage(), e);
-				logger.error(e.getMessage());
-				return;
-			}
-		} else {
-			logger.info(Messages.Activator_standalone_noRulesSelected);
+	private void verifyAbortFlag(String logInfo) throws StandaloneException {
+		if (abort) {
+			logger.info(logInfo);
+			throw new StandaloneException(logInfo);
 		}
 	}
 
 	/**
-	 * cleans classpath and temp directory
+	 * Reverts eclipse files for all projects if they were previously existing
 	 * 
 	 * @throws IOException
+	 *             if reverting eclipse project files fails for some reason
+	 * @throws CoreException
+	 *             if closing {@link IProject} fails
 	 */
-	public void cleanUp() throws IOException {
-		try {
-			for (StandaloneConfig standaloneConfig : standaloneConfigs) {
-				standaloneConfig.cleanUp();
+	public void cleanUp() throws IOException, CoreException {
+		abort = true;
+		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
+			standaloneConfig.setAbortFlag();
+			try {
+				standaloneConfig.clearPipeline();
+			} catch (RuntimeException e) {
+				/*
+				 * Unpredicted runtime exceptions may be thrown while cleaning
+				 * the pipeline. But the eclipse files must be reverted anyway.
+				 * 
+				 */
+				logger.debug("Cannot clear refactoring states on {} ", standaloneConfig.getProjectName(), e); //$NON-NLS-1$
+				throw e;
+			} finally {
+				standaloneConfig.revertEclipseProjectFiles();
 			}
-		} catch (JavaModelException | MavenInvocationException e) {
-			logger.debug(e.getMessage(), e);
-			logger.error(e.getMessage());
 		}
 	}
 
 	/**
-	 * gets the configuration from the given path in context
+	 * Gets the configuration for the provided project.
 	 * 
 	 * @param context
-	 * @return the read configuration
-	 * @throws YAMLConfigException
+	 *            the {@link BundleContext} within the equinox framework
+	 * @param projectId
+	 *            the project to find the configuration for
+	 * @return the {@link YAMLConfig} corresponding to the project with the
+	 *         given projectId or the default configuration if the yml file
+	 *         cannot be found.
+	 * @throws StandaloneException
+	 *             if the yaml configuration is inconsistent 
+	 *             
+	 * @see YAMLConfigurationWrapper#readConfiguration(String, String)
 	 */
-	private YAMLConfig getConfiguration(BundleContext context, String projectId) throws YAMLConfigException {
+	private YAMLConfig getConfiguration(BundleContext context, String projectId) throws StandaloneException {
 
-		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
+		boolean useDefaultConfig = parseUseDefaultConfiguration(context);
 
-		if (!useDefaultConfig) {
-			String configFilePath = context.getProperty(CONFIG_FILE_PATH + DOT + projectId);
-			String profile = context.getProperty(SELECTED_PROFILE);
-
-			String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
-			logger.info(loggerInfo);
-
-			YAMLConfig config = getYamlConfig(configFilePath, profile);
-
-			String selectedProfile = config.getSelectedProfile();
-
-			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
-					(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
-			logger.info(loggerInfo);
-
-			return config;
-		} else {
-			logger.info(Messages.Activator_standalone_UsingDefaultConfiguration);
-
-			return YAMLConfig.getDefaultConfig();
+		if (useDefaultConfig) {
+			return yamlConfigurationWrapper.getDefaultYamlConfig();
 		}
+
+		String configFilePath = context.getProperty(CONFIG_FILE_PATH + DOT + projectId);
+		String profile = context.getProperty(SELECTED_PROFILE);
+		
+		return yamlConfigurationWrapper.readConfiguration(configFilePath, profile);
+	}
+
+	private boolean parseUseDefaultConfiguration(BundleContext context) {
+		String useDefaultConfigValue = context.getProperty(USE_DEFAULT_CONFIGURATION);
+		return Boolean.parseBoolean(useDefaultConfigValue);
 	}
 
 	private void prepareWorkingDirectory() {
@@ -206,26 +221,55 @@ public class RefactoringInvoker {
 	 * {@link BundleContext}
 	 * 
 	 * @param context
-	 * @throws CoreException
-	 * @throws MavenInvocationException
-	 * @throws IOException
+	 *            the bundle context configuration
+	 * @throws StandaloneException
+	 *             if an instance of the {@link StandaloneConfig} cannot be
+	 *             created.
 	 */
-	protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context)
-			throws CoreException, MavenInvocationException, IOException {
+	protected void loadStandaloneConfig(BundleContext context) throws StandaloneException {
 
 		Map<String, String> projectPaths = findAllProjectPaths(context);
-		String mavenHome = context.getProperty(MAVEN_HOME_KEY);
 
-		List<StandaloneConfig> configs = new ArrayList<>();
+		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
+				context.getProperty(ROOT_CONFIG_PATH)).get();
+
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
+			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
+			verifyAbortFlag(abortMessage);
 			String id = entry.getKey();
 			String path = entry.getValue();
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
-			StandaloneConfig standaloneConfig = new StandaloneConfig(id, path, compilerCompliance, mavenHome);
-			configs.add(standaloneConfig);
-		}
-		return configs;
+			String projectName = context.getProperty(PROJECT_NAME + DOT + id);
+			if (excludedModules.contains(projectName)) {
+				/*
+				 * Skip adding StandaloneConfig for excluded module. Checks if
+				 * name matches and excludes only that package, but not possible
+				 * sub-packages / packages that start with the same string.
+				 */
+				continue;
+			}
+			String sourceFolder = context.getProperty(SOURCE_FOLDER + DOT + id);
+			String[] natureIds = findNatureIds(context, id);
+			try {
+				YAMLConfig config = getConfiguration(context, id);
+				StandaloneConfig standaloneConfig = new StandaloneConfig(projectName, path, compilerCompliance,
+						sourceFolder, natureIds, config);
+				standaloneConfigs.add(standaloneConfig);
 
+			} catch (CoreException | RuntimeException e) {
+				String message = abort ? abortMessage : e.getMessage();
+				throw new StandaloneException(message, e);
+			}
+		}
+
+		if (standaloneConfigs.isEmpty()) {
+			throw new StandaloneException(Messages.RefactoringInvoker_error_allModulesExcluded);
+		}
+	}
+
+	protected String[] findNatureIds(BundleContext context, String id) {
+		return context.getProperty(NATURE_IDS + DOT + id)
+			.split(","); //$NON-NLS-1$
 	}
 
 	private Map<String, String> findAllProjectPaths(BundleContext context) {
@@ -239,29 +283,4 @@ public class RefactoringInvoker {
 		}
 		return paths;
 	}
-
-	protected List<RefactoringRule> getProjectRules(
-			StandaloneConfig standaloneConfig) {
-		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
-		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
-	}
-
-	protected List<RefactoringRule> getSelectedRules(YAMLConfig config,
-			List<RefactoringRule> projectRules) throws YAMLConfigException {
-		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
-		return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
-	}
-
-	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws YAMLConfigException {
-		return YAMLConfigUtil.readConfig(configFilePath, profile);
-	}
-
-	protected IJavaProject getJavaProject(StandaloneConfig standaloneConfig) {
-		return standaloneConfig.getJavaProject();
-	}
-
-	private void setStandaloneConfigurations(List<StandaloneConfig> configs) {
-		this.standaloneConfigs = configs;
-	}
-
 }

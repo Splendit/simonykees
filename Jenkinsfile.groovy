@@ -312,7 +312,7 @@ void deployMavenPlugin(Profile profile, String timestamp) {
 	 * for the JMP -DforceContextQualifier will do nothing on master because there is no qualifier
 	 * (1.0.0 vs 1.0.0-SNAPSHOT -> SNAPSHOT will be replaced with the qualifier for the jar name)
 	 */
-	def mvnCommand = "clean deploy -DskipTests ${profile.mvnOptions(timestamp)}"
+	def mvnCommand = "clean deploy -DskipTests -B ${profile.mvnOptions(timestamp)}"
 
 	def pluginResourcePath = 'jsparrow-maven-plugin/src/main/resources'
 	def jSparrowTargetPath = 'releng/eu.jsparrow.product/target/repository/plugins'

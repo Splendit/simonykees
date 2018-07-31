@@ -34,6 +34,7 @@ public class ChangeElementLabelProvider extends LabelProvider implements IFontPr
 		}
 	}
 
+	@Override
 	public Font getFont(Object element) {
 		return JFaceResources.getFontRegistry()
 			.getItalic(JFaceResources.DIALOG_FONT);

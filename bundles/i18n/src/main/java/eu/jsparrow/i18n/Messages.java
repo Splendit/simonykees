@@ -211,6 +211,10 @@ public class Messages extends NLS {
 	public static String Netlicensing_persistenceError_failedtoLoad;
 	public static String Netlicensing_persistenceError_failedToSave;
 	public static String Netlicensing_validationResult_freeLicenseExpired0;
+	public static String OptionalIfPresentRule_description;
+
+	public static String OptionalIfPresentRule_name;
+
 	public static String OrganiseImportsRule_description;
 	public static String OrganiseImportsRule_name;
 	public static String OverrideAnnotationRule_description;
@@ -249,6 +253,7 @@ public class Messages extends NLS {
 	public static String RefactoringSummaryWizardPage_title;
 	public static String RefactoringSummaryWizardPage_warn_disableFinishWhenFree;
 	public static String RefactoringInvoker_ConfigContainsInvalidSyntax;
+	public static String RefactoringInvoker_error_allModulesExcluded;
 	public static String RefactoringInvoker_GetEnabledRulesForProject;
 	public static String RefactoringInvoker_GetSelectedRules;
 	public static String RefactoringInvoker_OverridingConfigWithCommandLine;
@@ -357,9 +362,7 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_title;
 	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
-	public static String StandaloneActivator_bundleStarted;
 	public static String StandaloneActivator_noValidLicenseFound;
-	public static String StandaloneActivator_startingBundle;
 	public static String StandaloneConfig_AddProjectNaturesToProjectDescription;
 	public static String StandaloneConfig_collectCompilationUnits;
 	public static String StandaloneConfig_CompilerComplianceSetTo;
@@ -368,20 +371,19 @@ public class Messages extends NLS {
 	public static String StandaloneConfig_CreateNewProjectDescription;
 	public static String StandaloneConfig_debug_cleanUp;
 	public static String StandaloneConfig_debug_collectDependencies;
-	public static String StandaloneConfig_debug_createdProject;
 	public static String StandaloneConfig_debug_createJavaProject;
 	public static String StandaloneConfig_debug_createProject;
-	public static String StandaloneConfig_debug_createWorkspace;
 	public static String StandaloneConfig_directoryBackupDone;
 	public static String StandaloneConfig_directoryRestoreDone;
-	public static String StandaloneConfig_executeMavenEclipseEclipseGoal;
 	public static String StandaloneConfig_fileBackupDone;
 	public static String StandaloneConfig_fileRestoreDone;
+	public static String StandaloneConfig_noRefactoringStates;
 	public static String StandaloneConfig_projectDescriptionDoesNotExist;
 	public static String StandaloneConfig_projectIsNotAnEclipseProjectAndCouldNotConvert;
 	public static String StandaloneConfig_RevertClasspath;
 	public static String StandaloneConfig_SetProjectLocation;
-	public static String StandaloneConfig_UseExistingProjectDescription;
+	public static String StandaloneConfig_unusedClassExcludesWarning;
+	public static String StandaloneConfig_unusedPackageExcludesWarning;
 	public static String StandaloneLicenseUtil_expirationDate;
 	public static String StandaloneLicenseUtil_isValid;
 	public static String StandaloneLicenseUtil_licenseType;
@@ -423,6 +425,7 @@ public class Messages extends NLS {
 	public static String PutIfAbsentRule_description;
 	public static String PutIfAbsentRule_name;
 	public static String YAMLConfigUtil_providedPathNotLeadingToYAMLConfig;
+	public static String YAMLConfigUtil_rulesWithUnsatisfiedRequirements;
 
 	static {
 		// initialize resource bundle

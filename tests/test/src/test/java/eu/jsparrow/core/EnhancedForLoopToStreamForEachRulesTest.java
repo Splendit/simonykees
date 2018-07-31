@@ -31,6 +31,7 @@ public class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
 
 	@Test
 	public void testTransformationWithDefaultFile() throws Exception {
+		loadUtilities();
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
 

@@ -65,9 +65,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	 * Notifies view to redraw all elements with new data.
 	 */
 	public void notifyListeners() {
-		for (IValueChangeListener listener : listeners) {
-			listener.valueChanged();
-		}
+		listeners.forEach(IValueChangeListener::valueChanged);
 	}
 
 	// GETTERS useb by Wizard page

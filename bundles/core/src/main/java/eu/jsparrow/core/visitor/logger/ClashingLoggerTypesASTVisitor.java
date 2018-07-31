@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 class ClashingLoggerTypesASTVisitor extends ASTVisitor {
 
 	private final StandardLoggerASTVisitor standardLoggerASTVisitor;
+	boolean clashingFound = false;
 
 	/**
 	 * @param standardLoggerASTVisitor
@@ -28,8 +29,6 @@ class ClashingLoggerTypesASTVisitor extends ASTVisitor {
 	ClashingLoggerTypesASTVisitor(StandardLoggerASTVisitor standardLoggerASTVisitor) {
 		this.standardLoggerASTVisitor = standardLoggerASTVisitor;
 	}
-
-	boolean clashingFound = false;
 
 	@Override
 	public boolean preVisit2(ASTNode node) {

@@ -233,8 +233,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		List<Comment> connectedComments = new ArrayList<>();
 		List<Comment> skippedComments = new ArrayList<>();
 		int key = 0;
-		for (int i = 0; i < statements.size(); i++) {
-			Statement statement = statements.get(i);
+		for (Statement statement : statements) {
 			List<Comment> ithStatementComments = commentRewriter.findRelatedComments(statement);
 			if (!stmsToBeRemoved.contains(statement)) {
 				if (bodyComments.containsKey(key)) {

@@ -11,9 +11,9 @@ public class DemoLicenseModel implements LicenseModel {
 
 	private static final long serialVersionUID = 5753428747671948588L;
 
-	private ZonedDateTime expirationDate;
-
 	private static final LicenseType TYPE = LicenseType.DEMO;
+
+	private ZonedDateTime expirationDate;
 
 	public DemoLicenseModel() {
 		expirationDate = ZonedDateTime.now().plusDays(5);
@@ -27,6 +27,7 @@ public class DemoLicenseModel implements LicenseModel {
 		this.expirationDate = expirationDate;
 	}
 
+	@Override
 	public ZonedDateTime getExpirationDate() {
 		return expirationDate;
 	}

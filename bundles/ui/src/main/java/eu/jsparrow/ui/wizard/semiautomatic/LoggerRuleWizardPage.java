@@ -367,10 +367,10 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		systemErrCombo.select(systemErrCombo.indexOf(selection.get(SYSTEM_ERR_PRINT_KEY)));
 		exceptionsCombo.select(exceptionsCombo.indexOf(selection.get(PRINT_STACKTRACE_KEY)));
 		logExceptionObjectButton.setSelection(Boolean.parseBoolean(selection.get(ATTACH_EXCEPTION_OBJECT)));
-		missingLogStatementButton.setSelection(!selection.get(MISSING_LOG_KEY)
-			.isEmpty());
-		printStackTraceButton.setSelection(!selection.get(PRINT_STACKTRACE_KEY)
-			.isEmpty());
+		missingLogStatementButton.setSelection(!StringUtils
+			.isEmpty(selection.get(MISSING_LOG_KEY)));
+		printStackTraceButton.setSelection(!StringUtils
+			.isEmpty(selection.get(PRINT_STACKTRACE_KEY)));
 		defaultForExceptionLogButton.setSelection(selection.get(SYSTEM_OUT_PRINT_EXCEPTION_KEY)
 			.equals(PRINT_STACKTRACE_KEY));
 	}

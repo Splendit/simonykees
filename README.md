@@ -12,7 +12,7 @@ Execute
 	
 ## missing dependencies in eclipse ##
 
-Read instructions at: https://confluence.splendit.loc/display/Tutorials/Eclipse
+Read instructions at: [Eclipse](https://confluence.splendit.loc/display/Tutorials/Eclipse)
 
 ## build ##
 
@@ -56,23 +56,7 @@ The profile is executed without tests by default, because they are not working w
 	
 ## manual packagedrone deployment ##
 
-To manually deploy to our test deployment channel on packagedrone, execute the following command:
-	
-	mvn clean deploy -DaltDeploymentRepository=pdrone.0c59cce1-cb2c-4942-8e44-465609fe2fdb::default::http://packagedrone-vm-01.splendit.loc:8080/maven/0c59cce1-cb2c-4942-8e44-465609fe2fdb
-	
-**NOTE:** make sure the configuration is added to settings.xml (a configured version can be downloaded at https://confluence.splendit.loc/display/Tutorials/DEV+PC):
-	
-	<server>
-		<id>pdrone.0c59cce1-cb2c-4942-8e44-465609fe2fdb</id>
-		<username>deploy</username>
-		<password>c8afacb01b3ce8171db24192e31b13eb60110a59b9b3f989cf9a6b3815aac496</password>
-	</server>
-	
-The deployed artifact can be seen at: http://packagedrone-vm-01.splendit.loc:8080/channel/0c59cce1-cb2c-4942-8e44-465609fe2fdb/view
-	
-The channel can be used as update site in Eclipse with the following URL:
-	
-	http://packagedrone-vm-01.splendit.loc:8080/p2/jSparrow-test-channel/
+Please read instructions at: [Package Drone and manual deployment](https://confluence.splendit.loc/display/SIM/Package+Drone+and+manual+deployment)
 
 ## faster builds ##
 
