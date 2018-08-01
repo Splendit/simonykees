@@ -49,7 +49,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	}
 	
 	@Test
-	public void visit_enhancedForLoopAlreadyVar_shouldNotReplace() throws Exception {
+	public void visit_varInEnhancedForLoop_shouldNotReplace() throws Exception {
 		String block = "for(var string : Arrays.asList(\"1\", \"2\", \"3\")) {}";
 
 		fixture.addImport("java.util.Arrays");
@@ -63,7 +63,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	}
 	
 	@Test
-	public void visit_enhancedForLoopWithArray_shouldReplace() throws Exception {
+	public void visit_arrayInEnhancedForLoop_shouldReplace() throws Exception {
 		String block = "String [] strings; strings = new String [] {\"\", \"\"}; for(String string : strings) {}";
 		String expectedBlockContent = "String [] strings; strings = new String [] {\"\", \"\"}; for(var string : strings) {}";
 
@@ -77,7 +77,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	}
 
 	@Test
-	public void visit_methodWithoutArguments_shouldReplace() throws Exception {
+	public void visit_rawTypes_shouldReplace() throws Exception {
 		fixture.addImport("java.util.HashMap");
 		String block = "HashMap map = new HashMap();";
 		fixture.addMethodBlock(block);
@@ -88,6 +88,36 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 		fixture.hasChanged();
 
 		Block expected = createBlock("var map = new HashMap();");
+		assertMatch(expected, fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_rawInitializer_shouldNotReplace() throws Exception {
+		fixture.addImport("java.util.HashMap");
+		String block = "HashMap<String, String> map = new HashMap();";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+		
+		fixture.hasChanged();
+
+		Block expected = createBlock(block);
+		assertMatch(expected, fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_rawDeclarationType_shouldNotReplace() throws Exception {
+		fixture.addImport("java.util.HashMap");
+		String block = "HashMap map = new HashMap<String, String>();";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+		
+		fixture.hasChanged();
+
+		Block expected = createBlock(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -117,7 +147,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	}
 	
 	@Test
-	public void visit_initializationHavingDiamond_shouldNotReplace() throws Exception {
+	public void visit_diamondInInitialization_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.HashMap");
 		String block = "HashMap<String, String> map = new HashMap<>();";
 		fixture.addMethodBlock(block);
@@ -130,7 +160,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	}
 	
 	@Test
-	public void visit_initializationHavingWildcard_shouldNotReplace() throws Exception {
+	public void visit_wildcardInInitialization_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.HashMap");
 		String block = "HashMap<Object, Object> map = new HashMap<?, ?>();";
 		fixture.addMethodBlock(block);
@@ -156,10 +186,26 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	}
 	
 	@Test 
-	public void visit_initializationWithSubType_shouldNotReplace() throws Exception {
+	public void visit_subTypeInitialization_shouldReplace() throws Exception {
 		fixture.addImport("java.util.HashMap");
 		fixture.addImport("java.util.Map");
 		String block = "Map<String, String> map = new HashMap<String, String>();";
+		String expectedContent = "var map = new HashMap<String, String>();";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		Block expectedBlock = createBlock(expectedContent);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
+	
+	@Test 
+	public void visit_incompatibleSiblingReInitialization_shouldNotReplace() throws Exception {
+		fixture.addImport("java.util.ArrayList");
+		fixture.addImport("java.util.LinkedList");
+		fixture.addImport("java.util.List");
+		String block = "int anotherVariable = 0; List<String> list = new ArrayList<String>(); list = new LinkedList<>(); anotherVariable = 1;";
 		fixture.addMethodBlock(block);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
@@ -187,7 +233,6 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	public void visit_simpleTypeWithoutInitialization_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.Date");
 		String block = "Date date; date = new Date();";
-
 		fixture.addMethodBlock(block);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
@@ -201,7 +246,6 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	public void visit_singleVariableDeclarationInCatchBlock_shouldNotReplace() throws Exception {
 		fixture.addImport("java.io.File");
 		String block = "try {new File(\"file.name\");} catch(NullPointerException e) {}";
-
 		fixture.addMethodBlock(block);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
