@@ -1,6 +1,6 @@
 package eu.jsparrow.standalone;
 
-import java.nio.file.Paths;
+import java.io.File;
 
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
@@ -105,9 +105,7 @@ public class YAMLConfigurationWrapper {
 	}
 
 	private boolean isYamlFilePresent(String configFilePath) {
-		return Paths.get(configFilePath)
-			.toFile()
-			.exists();
+		return new File(configFilePath).exists();
 	}
 
 }

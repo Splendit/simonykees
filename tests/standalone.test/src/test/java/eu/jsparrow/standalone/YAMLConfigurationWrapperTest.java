@@ -47,8 +47,6 @@ public class YAMLConfigurationWrapperTest {
 			throws StandaloneException {
 		expectedException.expect(StandaloneException.class);
 		yamlConfigurationWrapper.readConfiguration(loadResource("invalid.yaml").getPath(), "profile");
-
-		fail("StandaloneException expected, but no exception has been thrown.");
 	}
 
 	@Test
