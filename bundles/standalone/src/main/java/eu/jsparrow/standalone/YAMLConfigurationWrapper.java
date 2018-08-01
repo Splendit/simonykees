@@ -1,5 +1,7 @@
 package eu.jsparrow.standalone;
 
+import java.io.File;
+
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -43,10 +45,16 @@ public class YAMLConfigurationWrapper {
 	public YAMLConfig readConfiguration(String configFilePath, String profile) throws StandaloneException {
 
 		YAMLConfig config;
-		try {
-			config = getYamlConfig(configFilePath);
-		} catch (YAMLConfigException e) {
-			logger.warn("Cannot read the provided configuration file {}. Loading the default configuration.", //$NON-NLS-1$
+
+		if (isYamlFilePresent(configFilePath)) {
+			try {
+				config = getYamlConfig(configFilePath);
+			} catch (YAMLConfigException e) {
+				throw new StandaloneException(e.getMessage(), e);
+			}
+		} else {
+			logger.warn(
+					"No configuration file has been found at the given path [{}]. Loading the default configuration.", //$NON-NLS-1$
 					configFilePath);
 			return getDefaultYamlConfig();
 		}
@@ -94,6 +102,10 @@ public class YAMLConfigurationWrapper {
 
 	public YAMLConfig getDefaultYamlConfig() {
 		return YAMLConfig.getDefaultConfig();
+	}
+
+	private boolean isYamlFilePresent(String configFilePath) {
+		return new File(configFilePath).exists();
 	}
 
 }
