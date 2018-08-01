@@ -4,7 +4,6 @@ import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
 import org.eclipse.jdt.core.dom.Block;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import eu.jsparrow.rules.java10.LocalVariableTypeInferenceASTVisitor;
@@ -48,6 +47,34 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 		Block expectedBlock = createBlock(varDeclaration);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
+	
+	@Test
+	public void visit_enhancedForLoopAlreadyVar_shouldNotReplace() throws Exception {
+		String block = "for(var string : Arrays.asList(\"1\", \"2\", \"3\")) {}";
+
+		fixture.addImport("java.util.Arrays");
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		Block expectedBlock = createBlock(block);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_enhancedForLoopWithArray_shouldReplace() throws Exception {
+		String block = "String [] strings; strings = new String [] {\"\", \"\"}; for(String string : strings) {}";
+		String expectedBlockContent = "String [] strings; strings = new String [] {\"\", \"\"}; for(var string : strings) {}";
+
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		Block expectedBlock = createBlock(expectedBlockContent);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
 
 	@Test
 	public void visit_methodWithoutArguments_shouldReplace() throws Exception {
@@ -78,8 +105,8 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	
 	@Test
 	public void visit_alreadyVar_shouldNotReplace() throws Exception {
-		fixture.addImport("java.util.HashMap");
-		String block = "var map = new HashMap<String, String>();";
+		fixture.addImport("java.util.Date");
+		String block = "var map = new Date();";
 		fixture.addMethodBlock(block);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
@@ -90,7 +117,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	}
 	
 	@Test
-	public void visit_initizationHavingDiamond_shouldNotReplace() throws Exception {
+	public void visit_initializationHavingDiamond_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.HashMap");
 		String block = "HashMap<String, String> map = new HashMap<>();";
 		fixture.addMethodBlock(block);
@@ -103,7 +130,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	}
 	
 	@Test
-	public void visit_initizationHavingWildcard_shouldNotReplace() throws Exception {
+	public void visit_initializationHavingWildcard_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.HashMap");
 		String block = "HashMap<Object, Object> map = new HashMap<?, ?>();";
 		fixture.addMethodBlock(block);
@@ -115,9 +142,21 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 	
-	@Ignore
+	@Test
+	public void visit_multipleDeclarationFragments_shouldNotReplace() throws Exception {
+		fixture.addImport("java.util.HashMap");
+		String block = "HashMap<String, String> map1 = new HashMap<String, String>(), map2 = new HashMap<String, String>();";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		Block expectedBlock = createBlock(block);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
+	
 	@Test 
-	public void visit_initizationWithSubtype_shouldNotReplace() throws Exception {
+	public void visit_initializationWithSubType_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.HashMap");
 		fixture.addImport("java.util.Map");
 		String block = "Map<String, String> map = new HashMap<String, String>();";
@@ -131,7 +170,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	}
 	
 	@Test
-	public void visit_initizationWithWildcard_shouldNotReplace() throws Exception {
+	public void visit_initializationWithWildcard_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.HashMap");
 		fixture.addImport("java.util.Map");
 		String block = "Map<Object, Object> map = new HashMap<?,?>();";
