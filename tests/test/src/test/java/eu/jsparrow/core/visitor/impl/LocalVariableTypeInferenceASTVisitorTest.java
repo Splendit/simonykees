@@ -50,7 +50,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	}
 
 	@Test
-	public void visit_methodWithoutArguments_shouldNotReplace() throws Exception {
+	public void visit_methodWithoutArguments_shouldReplace() throws Exception {
 		fixture.addImport("java.util.HashMap");
 		String block = "HashMap map = new HashMap();";
 		fixture.addMethodBlock(block);
@@ -60,11 +60,35 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 		
 		fixture.hasChanged();
 
-		Block expected = createBlock(block);
+		Block expected = createBlock("var map = new HashMap();");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
-	@Ignore // avoid the build failure... is to be implemented
+	@Test
+	public void visit_primitiveType_shouldNotReplace() throws Exception {
+		String block = "int i = 0;";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		Block expectedBlock = createBlock(block);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_alreadyVar_shouldNotReplace() throws Exception {
+		fixture.addImport("java.util.HashMap");
+		String block = "var map = new HashMap<String, String>();";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		Block expectedBlock = createBlock(block);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
+	
 	@Test
 	public void visit_initizationHavingDiamond_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.HashMap");
@@ -91,7 +115,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 	
-	@Ignore // avoid the build failure... is to be implemented
+	@Ignore
 	@Test 
 	public void visit_initizationWithSubtype_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.HashMap");

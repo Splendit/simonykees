@@ -2,6 +2,7 @@ package eu.jsparrow.rules.java10;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -15,10 +16,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	private static final String VAR_KEY_WORD = "var"; //$NON-NLS-1$
 	CompilationUnit astRoot = null;
 
 	@Override
@@ -33,34 +36,30 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		super.visit(node);
 		this.astRoot = null;
 	}
-	
+
 	@Override
 	public boolean visit(VariableDeclarationStatement node) {
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(EnhancedForStatement enhancedForStatement) {
-		
+
 		SingleVariableDeclaration parameter = enhancedForStatement.getParameter();
 		Type type = parameter.getType();
 		SimpleName name = parameter.getName();
 		Expression initializer = enhancedForStatement.getExpression();
-		
-		if(type.isVar()) {
-			return true;
-		}
-		
-		boolean preconditionFullfilled = verifyPrecondition(initializer, name);
-		if(!preconditionFullfilled) {
-			return true;
-		}
-		
 
-		Type varType = createVarType(type);
-		astRewrite.replace(type, varType, null);
-		onRewrite();
-		
+		if (type.isVar()) {
+			return true;
+		}
+
+		boolean satisfiedPrecondition = verifyPrecondition(initializer, name);
+		if (!satisfiedPrecondition) {
+			return true;
+		}
+
+		replaceWithVarType(type);
 		return true;
 	}
 
@@ -68,13 +67,12 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 	public boolean visit(VariableDeclarationFragment node) {
 		Expression initializer = node.getInitializer();
 		SimpleName name = node.getName();
-		
+
 		boolean satisfiedPrecondition = verifyPrecondition(initializer, name);
-		if(!satisfiedPrecondition) {
+		if (!satisfiedPrecondition) {
 			return true;
 		}
-		
-		
+
 		Type type = null;
 		ASTNode parent = node.getParent();
 		if (parent instanceof VariableDeclarationStatement) {
@@ -82,87 +80,89 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		} else if (parent instanceof VariableDeclarationExpression) {
 			type = ((VariableDeclarationExpression) parent).getType();
 		}
-		
+
 		if (type == null || type.isVar()) {
 			return false;
 		}
-		
-		Type varType = createVarType(node);
+
+		replaceWithVarType(type);
+		return true;
+	}
+
+	private void replaceWithVarType(Type type) {
+		Type varType = createVarType(type);
 		astRewrite.replace(type, varType, null);
 		onRewrite();
-		
-		return true;
 	}
 
 	private Type createVarType(ASTNode node) {
 		AST ast = node.getAST();
-		SimpleName var = ast.newSimpleName("var");
-		Type varType = ast.newSimpleType(var);
-		return varType;
+		SimpleName var = ast.newSimpleName(VAR_KEY_WORD);
+		return ast.newSimpleType(var);
 	}
 
-	private boolean verifyPrecondition(Expression initializer, SimpleName name) {
-		if(initializer == null) {
+	private boolean verifyPrecondition(Expression initializer, SimpleName variableName) {
+		if (initializer == null) {
 			return false;
 		}
-		
-		if(ASTNode.LAMBDA_EXPRESSION == initializer.getNodeType()) {
+
+		if (ASTNode.LAMBDA_EXPRESSION == initializer.getNodeType()) {
 			return false;
 		}
-		
+
 		ITypeBinding initializerType = initializer.resolveTypeBinding();
-		if(initializerType == null || containsWildCard(initializerType)) {
+		if (initializerType == null || containsWildCard(initializerType)) {
 			return false;
 		}
-		
-		IBinding binding = name.resolveBinding();
-		if(binding == null) {
+
+		if (initializer.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+			ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) initializer;
+			if (ASTNodeUtil.containsDiamondOperator(classInstanceCreation)) {
+				return false;
+			}
+		}
+
+		IBinding binding = variableName.resolveBinding();
+		if (binding == null) {
 			return false;
 		}
-		
-		if(binding.getKind() != IBinding.VARIABLE) {
+
+		if (binding.getKind() != IBinding.VARIABLE) {
 			return false;
 		}
-		
+
 		IVariableBinding varBinding = (IVariableBinding) binding;
 		if (varBinding.isField() || varBinding.isParameter()) {
 			return false;
 		}
-		
+
 		ITypeBinding typeBinding = varBinding.getType();
 		if (typeBinding == null || typeBinding.isAnonymous() || typeBinding.isIntersectionType()
-				|| typeBinding.isWildcardType() || typeBinding.isRawType()) {
+				|| typeBinding.isWildcardType() || typeBinding.isPrimitive()) {
 			return false;
 		}
-		
-		if(!areRawCompatible(initializerType, typeBinding)) {
-			return false;
-		}
-		
-		return true;
+
+		return areRawCompatible(initializerType, typeBinding);
 	}
 
 	private boolean areRawCompatible(ITypeBinding initializerType, ITypeBinding declarationType) {
-		if(initializerType.isRawType() && declarationType.isRawType()) {
+		if (initializerType.isRawType() && declarationType.isRawType()) {
 			return true;
 		}
-		if(initializerType.isRawType()) {
+		if (initializerType.isRawType()) {
 			return false;
 		}
-		
-		if(declarationType.isRawType()) {
-			return false;
-		}
-		return true;
+
+		return !declarationType.isRawType();
 	}
 
 	private boolean containsWildCard(ITypeBinding initializerType) {
-		if(!initializerType.isParameterizedType()) {
+		if (!initializerType.isParameterizedType()) {
 			return false;
 		}
 		ITypeBinding[] typeArguments = initializerType.getTypeArguments();
-		for(ITypeBinding type : typeArguments) {
-			if(type.isWildcardType()) {
+		for (ITypeBinding type : typeArguments) {
+			if (type.isWildcardType()) {
 				return true;
 			}
 		}
