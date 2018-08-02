@@ -320,4 +320,16 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 		
 	}
+	
+	@Test
+	public void visit_2dArray_shouldTransform() throws Exception {
+		String block = "String names[][] = {}; for(String t[] : names) { }";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		Block expectedBlock = createBlock("String names[][] = {}; for(var t : names) { }");
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
 }

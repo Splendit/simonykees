@@ -70,6 +70,8 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		}
 
 		replaceWithVarType(type);
+		List<Dimension> dimensions = ASTNodeUtil.convertToTypedList(parameter.extraDimensions(), Dimension.class);
+		removeArrayDimensions(dimensions);
 		return true;
 	}
 
@@ -111,8 +113,11 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 			ASTNodeUtil.convertToTypedList(arrayType.dimensions(), Dimension.class)
 				.forEach(d -> astRewrite.remove(d, null));
 		}
-		ASTNodeUtil.convertToTypedList(node.extraDimensions(), Dimension.class)
-			.forEach(d -> astRewrite.remove(d, null));
+		removeArrayDimensions(ASTNodeUtil.convertToTypedList(node.extraDimensions(), Dimension.class));
+	}
+	
+	private void removeArrayDimensions(List<Dimension>dimensions) {
+		dimensions.forEach(dimension -> astRewrite.remove(dimension, null));
 	}
 
 	private boolean hasMultipleFragments(VariableDeclarationStatement declarationStatement) {
