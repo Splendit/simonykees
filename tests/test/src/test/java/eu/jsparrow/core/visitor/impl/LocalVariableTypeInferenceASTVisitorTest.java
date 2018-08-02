@@ -4,6 +4,7 @@ import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
 import org.eclipse.jdt.core.dom.Block;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import eu.jsparrow.rules.java10.LocalVariableTypeInferenceASTVisitor;
@@ -280,41 +281,43 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 	
-	/*
-	 * Just for testing
-	 */
+	@Ignore
+	@Test
+	public void visit_missingSpaceBetweenTypeAndName_shouldNotReplace() throws Exception {
+		fixture.addImport("java.util.List");
+		fixture.addImport("java.util.ArrayList");
+		String block = "List<String>name = new ArrayList<String>();";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		Block expectedBlock = createBlock(block);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
 	
-//	private void consumeListOfStrings(List<String> list) {
-//		var list2 = new ArrayList<>();
-//		for(var string : list2) {
-//			
-//		}
-//	}
-//	
-//	private void useListOfStrings() {
-//		List<String> list = new ArrayList<>();
-//		ArrayList<String> arrayList = new ArrayList<>();
-//		List<Object> objectsList = new ArrayList<>();
-//		List strings = new ArrayList<String>();
-//		strings.add(new Object());
-//		var rawList = new ArrayList();
-//		
-//		Predicate<String>  myPredicate = (String value) -> value.isEmpty();
-//		
-//		Object[] a = null;
-//		arrayList.toArray(a);
-//		
-//		var varList = new ArrayList<>();
-//		
-//		long b = 2L;
-//	
-//		
-//		
-//		consumeListOfStrings(list);
-//		consumeListOfStrings(arrayList);
-//		consumeListOfStrings(rawList);
-//		consumeListOfStrings(objectsList);
-//		
-//		list = new LinkedList<>();
-//	}
+	@Test
+	public void visit_arrayTypeWithDimensions_shouldTransform() throws Exception {
+		String block = "String []names[] = new String[][] {};";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		Block expectedBlock = createBlock("var names = new String[][]{};");
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+		
+	}
+	
+	@Test
+	public void visit_arrayInitializer_shouldNotTransform() throws Exception {
+		String block = "String []names[] = {{}};";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		Block expectedBlock = createBlock(block);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+		
+	}
 }

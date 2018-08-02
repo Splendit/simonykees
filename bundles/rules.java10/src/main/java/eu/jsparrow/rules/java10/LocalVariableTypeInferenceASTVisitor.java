@@ -5,15 +5,19 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -56,7 +60,6 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		SimpleName name = parameter.getName();
 		Expression loopExpression = enhancedForStatement.getExpression();
 
-
 		if (type.isVar()) {
 			return true;
 		}
@@ -72,24 +75,17 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 
 	@Override
 	public boolean visit(VariableDeclarationFragment node) {
-		if (VariableDeclarationStatement.FRAGMENTS_PROPERTY == node.getLocationInParent()) {
-			VariableDeclarationStatement parent = (VariableDeclarationStatement) node.getParent();
-			if (hasMultipleFragments(parent)) {
-				return true;
-			}
-		}
 		Expression initializer = node.getInitializer();
 		SimpleName name = node.getName();
-
-		boolean satisfiedPrecondition = verifyDeclarationPrecondition(initializer, name);
-		if (!satisfiedPrecondition) {
-			return true;
-		}
 
 		Type type = null;
 		ASTNode parent = node.getParent();
 		if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
-			type = ((VariableDeclarationStatement) parent).getType();
+			VariableDeclarationStatement statement = (VariableDeclarationStatement) parent;
+			if (hasMultipleFragments(statement)) {
+				return true;
+			}
+			type = statement.getType();
 		} else if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_EXPRESSION) {
 			type = ((VariableDeclarationExpression) parent).getType();
 		}
@@ -98,8 +94,25 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 			return false;
 		}
 
+		boolean satisfiedPrecondition = verifyDeclarationPrecondition(initializer, name);
+		if (!satisfiedPrecondition) {
+			return true;
+		}
+
+		removeArrayDimensions(node, type);
 		replaceWithVarType(type);
+
 		return true;
+	}
+
+	private void removeArrayDimensions(VariableDeclarationFragment node, Type type) {
+		if (type.isArrayType()) {
+			ArrayType arrayType = (ArrayType) type;
+			ASTNodeUtil.convertToTypedList(arrayType.dimensions(), Dimension.class)
+				.forEach(d -> astRewrite.remove(d, null));
+		}
+		ASTNodeUtil.convertToTypedList(node.extraDimensions(), Dimension.class)
+			.forEach(d -> astRewrite.remove(d, null));
 	}
 
 	private boolean hasMultipleFragments(VariableDeclarationStatement declarationStatement) {
@@ -129,8 +142,12 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 			return false;
 		}
 
+		if (ASTNode.ARRAY_INITIALIZER == initializer.getNodeType()) {
+			return false;
+		}
+
 		ITypeBinding initializerType = initializer.resolveTypeBinding();
-		if (initializerType == null || containsWildCard(initializerType)) {
+		if (initializerType == null || containsWildCard(initializerType) || isGeneric(initializer)) {
 			return false;
 		}
 
@@ -142,6 +159,22 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		}
 
 		return verifyTypeCompatibility(variableName, initializerType);
+	}
+
+	private boolean isGeneric(Expression initializer) {
+
+		if (initializer.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			MethodInvocation initializerMethod = (MethodInvocation) initializer;
+			IMethodBinding methodBinding = initializerMethod.resolveMethodBinding();
+			if (methodBinding == null) {
+				return true;
+			}
+			IMethodBinding methodDeclaration = methodBinding.getMethodDeclaration();
+			if (methodDeclaration == null || methodDeclaration.isGenericMethod()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean verifyTypeCompatibility(SimpleName variableName, ITypeBinding initializerType) {
@@ -162,6 +195,11 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		ITypeBinding typeBinding = varBinding.getType();
 		if (typeBinding == null || typeBinding.isAnonymous() || typeBinding.isIntersectionType()
 				|| typeBinding.isWildcardType() || typeBinding.isPrimitive()) {
+			return false;
+		}
+
+		if (typeBinding.isArray() && typeBinding.getElementType()
+			.isPrimitive()) {
 			return false;
 		}
 
@@ -196,7 +234,8 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		for (Assignment assignment : assignments) {
 			Expression rightHandSide = assignment.getRightHandSide();
 			ITypeBinding rightHandSideTypeBinding = rightHandSide.resolveTypeBinding();
-			if (!initializerType.isAssignmentCompatible(rightHandSideTypeBinding)) {
+
+			if (rightHandSideTypeBinding == null || !rightHandSideTypeBinding.isAssignmentCompatible(initializerType)) {
 				return false;
 			}
 		}
@@ -207,6 +246,9 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 	private boolean verifyLoopPrecondition(Expression loopExpression, SimpleName variableName) {
 
 		ITypeBinding expressionType = loopExpression.resolveTypeBinding();
+		if (expressionType == null) {
+			return false;
+		}
 
 		ITypeBinding initializerType = null;
 		if (expressionType.isParameterizedType()) {
