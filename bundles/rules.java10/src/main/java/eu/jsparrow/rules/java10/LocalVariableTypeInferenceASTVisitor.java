@@ -120,13 +120,13 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		}
 		removeArrayDimensions(ASTNodeUtil.convertToTypedList(node.extraDimensions(), Dimension.class));
 	}
-	
+
 	private void removeAndSaveComments(ASTNode node) {
 		astRewrite.remove(node, null);
 		getCommentRewriter().saveCommentsInParentStatement(node);
 	}
-	
-	private void removeArrayDimensions(List<Dimension>dimensions) {
+
+	private void removeArrayDimensions(List<Dimension> dimensions) {
 		dimensions.forEach(this::removeAndSaveComments);
 	}
 
@@ -160,9 +160,13 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		if (ASTNode.ARRAY_INITIALIZER == initializer.getNodeType()) {
 			return false;
 		}
-		
-		if(ASTNode.CONDITIONAL_EXPRESSION == initializer.getNodeType()) {
-			return false;
+
+		if (ASTNode.CONDITIONAL_EXPRESSION == initializer.getNodeType()) {
+			ConditionalExpression conditionalExpression = (ConditionalExpression) initializer;
+			Expression thenExpression = conditionalExpression.getThenExpression();
+			Expression elseExpression = conditionalExpression.getElseExpression();
+			return verifyDeclarationPrecondition(thenExpression, variableName)
+					&& verifyDeclarationPrecondition(elseExpression, variableName);
 		}
 
 		ITypeBinding initializerType = initializer.resolveTypeBinding();
@@ -175,8 +179,8 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 			if (ASTNodeUtil.containsDiamondOperator(classInstanceCreation)) {
 				return false;
 			}
-			
-			if(classInstanceCreation.getAnonymousClassDeclaration() != null) {
+
+			if (classInstanceCreation.getAnonymousClassDeclaration() != null) {
 				return false;
 			}
 		}

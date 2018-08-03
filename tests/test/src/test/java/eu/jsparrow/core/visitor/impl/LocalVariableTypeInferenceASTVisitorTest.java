@@ -349,6 +349,21 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	}
 	
 	@Test
+	public void visit_conditionalExpression_shouldTransform() throws Exception {
+		String block = "List<String> names = true ? new ArrayList<String>() : new LinkedList<String>();";
+		fixture.addImport("java.util.List");
+		fixture.addImport("java.util.ArrayList");
+		fixture.addImport("java.util.LinkedList");
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		Block expectedBlock = createBlock("var names = true ? new ArrayList<String>() : new LinkedList<String>();");
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
+	
+	@Test
 	public void visit_anonymousClasses_shouldNotTransform() throws Exception {
 		String block = "Runnable r = new Runnable() { @Override public void run() { }};";
 		fixture.addMethodBlock(block);
