@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -150,9 +151,13 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		if (ASTNode.ARRAY_INITIALIZER == initializer.getNodeType()) {
 			return false;
 		}
+		
+		if(ASTNode.CONDITIONAL_EXPRESSION == initializer.getNodeType()) {
+			return false;
+		}
 
 		ITypeBinding initializerType = initializer.resolveTypeBinding();
-		if (initializerType == null || containsWildCard(initializerType) || isGeneric(initializer)) {
+		if (initializerType == null || containsWildCard(initializerType) || isGenericMethod(initializer)) {
 			return false;
 		}
 
@@ -161,12 +166,16 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 			if (ASTNodeUtil.containsDiamondOperator(classInstanceCreation)) {
 				return false;
 			}
+			
+			if(classInstanceCreation.getAnonymousClassDeclaration() != null) {
+				return false;
+			}
 		}
 
 		return verifyTypeCompatibility(variableName, initializerType);
 	}
 
-	private boolean isGeneric(Expression initializer) {
+	private boolean isGenericMethod(Expression initializer) {
 
 		if (initializer.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation initializerMethod = (MethodInvocation) initializer;
