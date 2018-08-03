@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantRegistry;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -73,6 +74,8 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		replaceWithVarType(type);
 		List<Dimension> dimensions = ASTNodeUtil.convertToTypedList(parameter.extraDimensions(), Dimension.class);
 		removeArrayDimensions(dimensions);
+		onRewrite();
+		getCommentRewriter().saveCommentsInParentStatement(type);
 		return true;
 	}
 
@@ -104,7 +107,8 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 
 		removeArrayDimensions(node, type);
 		replaceWithVarType(type);
-
+		onRewrite();
+		getCommentRewriter().saveCommentsInParentStatement(type);
 		return true;
 	}
 
@@ -112,13 +116,18 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		if (type.isArrayType()) {
 			ArrayType arrayType = (ArrayType) type;
 			ASTNodeUtil.convertToTypedList(arrayType.dimensions(), Dimension.class)
-				.forEach(d -> astRewrite.remove(d, null));
+				.forEach(dimension -> astRewrite.remove(dimension, null));
 		}
 		removeArrayDimensions(ASTNodeUtil.convertToTypedList(node.extraDimensions(), Dimension.class));
 	}
 	
+	private void removeAndSaveComments(ASTNode node) {
+		astRewrite.remove(node, null);
+		getCommentRewriter().saveCommentsInParentStatement(node);
+	}
+	
 	private void removeArrayDimensions(List<Dimension>dimensions) {
-		dimensions.forEach(dimension -> astRewrite.remove(dimension, null));
+		dimensions.forEach(this::removeAndSaveComments);
 	}
 
 	private boolean hasMultipleFragments(VariableDeclarationStatement declarationStatement) {
