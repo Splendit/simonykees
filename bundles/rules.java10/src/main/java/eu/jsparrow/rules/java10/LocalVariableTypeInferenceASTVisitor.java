@@ -1,5 +1,7 @@
 package eu.jsparrow.rules.java10;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,11 +27,11 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantRegistry;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.VariableAssignmentVisitor;
 
 public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTVisitor {
@@ -234,7 +236,42 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 			return false;
 		}
 
+		if (isUsedInOverloadedMethod(variableName)) {
+			return false;
+		}
+
 		return areRawCompatible(initializerType, typeBinding);
+	}
+
+	private boolean isUsedInOverloadedMethod(SimpleName variableName) {
+		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(variableName);
+		Block block = ASTNodeUtil.getSpecificAncestor(variableName, Block.class);
+		block.accept(visitor);
+		List<SimpleName> usages = visitor.getUsages();
+		return usages.stream()
+			.filter(name -> name.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY)
+			.map(parameter -> MethodInvocation.class.cast(parameter.getParent()))
+			.anyMatch(methodInvocation -> isOverloaded(methodInvocation));
+	}
+
+	private boolean isOverloaded(MethodInvocation methodInvocation) {
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
+
+		ITypeBinding delcaringClass = methodBinding.getDeclaringClass();
+		List<IMethodBinding> inheritedMethods = ClassRelationUtil.findInheretedMethods(delcaringClass);
+		IMethodBinding[] declaredMethods = delcaringClass.getDeclaredMethods();
+		List<IMethodBinding> allmethods = new ArrayList<>();
+		allmethods.addAll(inheritedMethods);
+		allmethods.addAll(Arrays.asList(declaredMethods));
+		String identifier = methodInvocation.getName()
+			.getIdentifier();
+
+		return allmethods.stream()
+			.map(IMethodBinding::getName)
+			.anyMatch(identifier::equals);
 	}
 
 	private boolean isConvertibleToType(SimpleName variableName, ITypeBinding typeBinding,
