@@ -7,6 +7,7 @@
 
 import groovy.transform.Field
 
+// will be set to true if remote repository is our main repository
 @Field boolean isLiveEnvironment = false
 
 void setLiveEnvironment(def url) {
