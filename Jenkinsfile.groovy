@@ -24,10 +24,10 @@ def setLiveEnvironment(def url) {
 def mvnBin() { "${tool 'mvn system'}/bin/mvn" }
 
 // jenkins git ssh credentials
-static def sshCredentials() { '7f15bb8a-a1db-4cdf-978f-3ae5983400b6' }
+@Field final static def sshCredentials = '7f15bb8a-a1db-4cdf-978f-3ae5983400b6'
 
 // defines the backup repository to push to
-static def backupOrigin() { 'git@github.com:Splendit/simonykees.git' }
+@Field final static def backupOrigin = 'git@github.com:Splendit/simonykees.git'
 
 enum Profile {
 	MASTER_PRODUCTION_PROGUARD("-Dproduction -Dproguard -Pmaster-production-proguard", ""),
@@ -172,9 +172,9 @@ void pushToGithub() {
 	if (isLiveEnvironment) {
 		stage(stageName) {
 			println "Pushing to GitHub..."
-			sshagent([sshCredentials()]) { //key id of ssh-rsa key in remote repository within jenkins
+			sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
 				// pushing the repository to github
-				sh("git push ${backupOrigin()} HEAD:$env.BRANCH_NAME")
+				sh("git push $backupOrigin HEAD:$env.BRANCH_NAME")
 			}
 		}
 	} else {
@@ -265,7 +265,7 @@ void tagCommit(def branchName, String subdirectory) {
 
 	stage('Tag Commit (Bitbucket)') {
 		// tag build in repository
-		sshagent([sshCredentials()]) { //key id of ssh-rsa key in remote repository within jenkins
+		sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
 			// first parameter is the dir, second parameter is the subdirectory and optional
 			sh("./tag-deployment.sh $branchName $subdirectory")
 		}
@@ -276,8 +276,8 @@ void tagCommit(def branchName, String subdirectory) {
 	if (isLiveEnvironment) {
 		stage(stageName) {
 			// push tags to github
-			sshagent([sshCredentials()]) { //key id of ssh-rsa key in remote repository within jenkins
-				sh("git push ${backupOrigin()} --tags")
+			sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
+				sh("git push $backupOrigin --tags")
 			}
 		}
 	} else {
