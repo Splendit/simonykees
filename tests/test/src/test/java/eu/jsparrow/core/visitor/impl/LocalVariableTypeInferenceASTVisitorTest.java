@@ -280,8 +280,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 		Block expectedBlock = createBlock(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
-	
-	@Ignore
+
 	@Test
 	public void visit_missingSpaceBetweenTypeAndName_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.List");
@@ -291,7 +290,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
 		fixture.accept(visitor);
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = createBlock("var name = new ArrayList<String>();");
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 	

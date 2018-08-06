@@ -109,10 +109,39 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		}
 
 		removeArrayDimensions(node, type);
+		checkSpaces(type, name);
 		replaceWithVarType(type);
 		onRewrite();
 		getCommentRewriter().saveCommentsInParentStatement(type);
 		return true;
+	}
+
+	private void checkSpaces(Type type, SimpleName name) {
+		int typeEndingPosition = type.getStartPosition() + type.getLength();
+		int nameStartingPosition = name.getStartPosition();
+		if (nameStartingPosition != typeEndingPosition) {
+			return;
+		}
+
+		/*
+		 * There is no space between the type declaration and the variable name.
+		 * E.g. List<String>valuses = ...
+		 */
+		ASTNode parent = type.getParent();
+		if (parent.getNodeType() != ASTNode.VARIABLE_DECLARATION_STATEMENT) {
+			return;
+		}
+
+		/*
+		 * A work around to avoid converting List<String>values=... to
+		 * varvalues=....
+		 */
+		VariableDeclarationStatement statement = (VariableDeclarationStatement) parent;
+		VariableDeclarationStatement newStatement = (VariableDeclarationStatement) ASTNode.copySubtree(type.getAST(),
+				statement);
+		AST ast = newStatement.getAST();
+		newStatement.setType(ast.newSimpleType(ast.newSimpleName(VAR_KEY_WORD)));
+		astRewrite.replace(parent, newStatement, null);
 	}
 
 	private boolean verifyDeclarationPrecondition(Expression initializer, SimpleName variableName) {
@@ -120,11 +149,8 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 			return false;
 		}
 
-		if (ASTNode.LAMBDA_EXPRESSION == initializer.getNodeType()) {
-			return false;
-		}
-
-		if (ASTNode.ARRAY_INITIALIZER == initializer.getNodeType()) {
+		int initializerNodeType = initializer.getNodeType();
+		if (ASTNode.LAMBDA_EXPRESSION == initializerNodeType || ASTNode.ARRAY_INITIALIZER == initializerNodeType) {
 			return false;
 		}
 
@@ -157,7 +183,6 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 	}
 
 	private boolean verifyLoopPrecondition(Expression loopExpression, SimpleName variableName) {
-
 		ITypeBinding expressionType = loopExpression.resolveTypeBinding();
 		if (expressionType == null) {
 			return false;
