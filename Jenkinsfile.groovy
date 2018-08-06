@@ -9,13 +9,13 @@ import groovy.transform.Field
 
 @Field boolean isLiveEnvironment = false
 
-def setLiveEnvironment(def url) {
+void setLiveEnvironment(def url) {
 	def liveUrl = "ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git"
 	if(liveUrl == url ){
-    println "Life environment is enabled"
+    println "Live environment is enabled"
 		isLiveEnvironment = true
   }else{
-    println "Life environment is disabled"
+    println "Live environment is disabled"
 		isLiveEnvironment = false
   }
 }
