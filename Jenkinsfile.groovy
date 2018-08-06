@@ -5,14 +5,20 @@
 
 // add timestaps to the "Console Output" of Jenkins
 
-/*
- * Should production steps be executed?
- * This changes whether or not deploy steps etc. are executed. 
- * This only changes something on non-feature branches. 
- *
- * TODO: Automatically setting this flag will be done in SIM-1191
- */
-def isLiveEnvironment() { true }
+import groovy.transform.Field
+
+@Field boolean isLiveEnvironment = false
+
+def setLiveEnvironment(def url) {
+	def liveUrl = "ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git"
+	if(liveUrl == url ){
+    println "Life environment is enabled"
+		isLiveEnvironment = true
+  }else{
+    println "Life environment is disabled"
+		isLiveEnvironment = false
+  }
+}
 
 // gets the maven home
 def mvnBin() { "${tool 'mvn system'}/bin/mvn" }
@@ -153,6 +159,9 @@ timestamps {
 void checkout() {
 	stage('Preparation') { // for display purposes
 		checkout scm
+		// getting the remote url we are building from
+		def url = sh(returnStdout: true, script: 'git config remote.origin.url').trim()
+		setLiveEnvironment(url)
 	}
 }
 
@@ -160,7 +169,7 @@ void pushToGithub() {
 
 	def stageName = "Push to Github"
 
-	if (isLiveEnvironment()) {
+	if (isLiveEnvironment) {
 		stage(stageName) {
 			println "Pushing to GitHub..."
 			sshagent([sshCredentials()]) { //key id of ssh-rsa key in remote repository within jenkins
@@ -240,7 +249,7 @@ void runSonarQubeAnalysis() {
 
 	def stageName = "SonarQube Analysis"
 
-	if (isLiveEnvironment()) {
+	if (isLiveEnvironment) {
 		stage(stageName) {
 			withSonarQubeEnv('SonarQube Server') {
 				sh 'mvn sonar:sonar'
@@ -264,7 +273,7 @@ void tagCommit(def branchName, String subdirectory) {
 
 	def stageName = "Tag Commit (GitHub)"
 
-	if (isLiveEnvironment()) {
+	if (isLiveEnvironment) {
 		stage(stageName) {
 			// push tags to github
 			sshagent([sshCredentials()]) { //key id of ssh-rsa key in remote repository within jenkins
@@ -291,7 +300,7 @@ void deployEclipsePlugin(Profile profile, String timestamp) {
 
 	def stageName = "Eclipse Deploy: ${profile.formattedName()}"
 
-	if (isLiveEnvironment()) {
+	if (isLiveEnvironment) {
 		stage(stageName) {
 			sh "'${mvnBin()}' $mvnCommand"
 		}
@@ -321,7 +330,7 @@ void deployMavenPlugin(Profile profile, String timestamp) {
 
 	def stageName = "JMP Deploy: ${profile.formattedName()}"
 
-	if (isLiveEnvironment()) {
+	if (isLiveEnvironment) {
 		stage(stageName) {
 			dir('jsparrow-maven-plugin/src/main/resources') {
 				writeFile file: "${manifest}", text: "${manifestContent}"
@@ -354,7 +363,7 @@ void uploadMappingFile(Profile profile) {
 
 	def stageName = "Upload Mapping Files"
 
-	if (isLiveEnvironment()) {
+	if (isLiveEnvironment) {
 		stage(stageName) {
 			uploadMappingFiles(directory)
 		}
