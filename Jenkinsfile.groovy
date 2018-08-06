@@ -7,7 +7,13 @@
 
 import groovy.transform.Field
 
-// will be set to true if remote repository is our main repository
+/*
+ * Should production steps be executed?
+ * This changes whether or not deploy steps etc. are executed.
+ * This only changes something on non-feature branches.
+ *
+ * Will be set to true if remote repository is our main repository
+ */
 @Field boolean isLiveEnvironment = false
 
 void setLiveEnvironment(def url) {
