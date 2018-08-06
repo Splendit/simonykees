@@ -164,6 +164,10 @@ public class Messages extends NLS {
 	public static String ListRulesUtil_ID;
 	public static String ListRulesUtil_Name;
 	public static String ListRulesUtil_NoRulesAvailable;
+	public static String LocalVariableTypeInferenceRule_description;
+
+	public static String LocalVariableTypeInferenceRule_name;
+
 	public static String LoggerRuleWizard_title;
 	public static String LoggerRuleWizardHandler_info_supportedFrameworkFound;
 	public static String LoggerRuleWizardHandler_noLogger;

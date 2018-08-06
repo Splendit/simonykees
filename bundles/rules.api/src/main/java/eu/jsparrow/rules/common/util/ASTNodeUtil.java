@@ -1,6 +1,7 @@
 package eu.jsparrow.rules.common.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
@@ -39,7 +40,6 @@ import org.eclipse.jdt.core.dom.WildcardType;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 import eu.jsparrow.rules.common.visitor.helper.WildCardTypeASTVisitor;
 
-
 /**
  * A utility class for computing different properties of {@link ASTNode}s.
  * 
@@ -58,7 +58,8 @@ public class ASTNodeUtil {
 	}
 
 	/**
-	 * Finds the surrounding Node of the defined nodeType if there is one, otherwise returns null
+	 * Finds the surrounding Node of the defined nodeType if there is one,
+	 * otherwise returns null
 	 * 
 	 * @param node
 	 *            ASTNode where the backward search is started
@@ -560,7 +561,7 @@ public class ASTNodeUtil {
 		return parameterizedType.typeArguments()
 			.isEmpty();
 	}
-	
+
 	/**
 	 * Finds the name of all fields declared in the provided type.
 	 * 
@@ -578,5 +579,58 @@ public class ASTNodeUtil {
 				.collect(Collectors.toList()));
 		}
 		return names;
+	}
+
+	/**
+	 * Checks whether the given method is an overloaded one. Finds all methods
+	 * declared on the same class and the inherited methods, and verifies if
+	 * there is at least one other method with the same name.
+	 * 
+	 * @param methodInvocation
+	 *            the binding of the method to be checked.
+	 * 
+	 * @return {@code true} if the above condition is met or {@code false}
+	 *         otherwise.
+	 */
+	public static boolean isOverloaded(MethodInvocation methodInvocation) {
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
+
+		ITypeBinding delcaringClass = methodBinding.getDeclaringClass();
+		List<IMethodBinding> inheritedMethods = ClassRelationUtil.findInheretedMethods(delcaringClass);
+		IMethodBinding[] declaredMethods = delcaringClass.getDeclaredMethods();
+		List<IMethodBinding> allmethods = new ArrayList<>();
+		allmethods.addAll(inheritedMethods);
+		allmethods.addAll(Arrays.asList(declaredMethods));
+		String identifier = methodInvocation.getName()
+			.getIdentifier();
+
+		return allmethods.stream()
+			.map(IMethodBinding::getName)
+			.anyMatch(identifier::equals);
+	}
+
+	/**
+	 * Checks if the given {@link Expression} represents an invocation of a
+	 * generic method.
+	 * 
+	 * @param initializer
+	 *            a node representing a method invocation
+	 * @return if the above condition is met.
+	 */
+	public static boolean isGenericMethodInvocation(Expression initializer) {
+
+		if (initializer.getNodeType() != ASTNode.METHOD_INVOCATION) {
+			return false;
+		}
+		MethodInvocation initializerMethod = (MethodInvocation) initializer;
+		IMethodBinding methodBinding = initializerMethod.resolveMethodBinding();
+		if (methodBinding == null) {
+			return true;
+		}
+		IMethodBinding methodDeclaration = methodBinding.getMethodDeclaration();
+		return methodDeclaration != null && methodDeclaration.isGenericMethod();
 	}
 }

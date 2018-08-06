@@ -1,7 +1,5 @@
 package eu.jsparrow.rules.java10;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,13 +9,11 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -34,28 +30,33 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.VariableAssignmentVisitor;
 
+/**
+ * A visitor for replacing they types of local variable declarations with the
+ * {@value #VAR_KEY_WORD}. Covers also the declarations of the parameters on
+ * {@link EnhancedForStatement}s. For example, the following lines:
+ * <p/>
+ * 
+ * <pre>
+ * Order order = new Order("product");
+ * for (User user : userList) {
+ * 	consume(user);
+ * }
+ * </pre>
+ * 
+ * will be transformed to:
+ * 
+ * <pre>
+ * var order = new Order("product");
+ * for (var user : userList) {
+ * 	consume(user);
+ * }
+ * </pre>
+ * 
+ * @since 2.6.0
+ */
 public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String VAR_KEY_WORD = "var"; //$NON-NLS-1$
-	CompilationUnit astRoot = null;
-
-	@Override
-	public boolean visit(CompilationUnit node) {
-		super.visit(node);
-		this.astRoot = node;
-		return true;
-	}
-
-	@Override
-	public void endVisit(CompilationUnit node) {
-		super.visit(node);
-		this.astRoot = null;
-	}
-
-	@Override
-	public boolean visit(VariableDeclarationStatement node) {
-		return true;
-	}
 
 	@Override
 	public boolean visit(EnhancedForStatement enhancedForStatement) {
@@ -114,42 +115,6 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		return true;
 	}
 
-	private void removeArrayDimensions(VariableDeclarationFragment node, Type type) {
-		if (type.isArrayType()) {
-			ArrayType arrayType = (ArrayType) type;
-			ASTNodeUtil.convertToTypedList(arrayType.dimensions(), Dimension.class)
-				.forEach(dimension -> astRewrite.remove(dimension, null));
-		}
-		removeArrayDimensions(ASTNodeUtil.convertToTypedList(node.extraDimensions(), Dimension.class));
-	}
-
-	private void removeAndSaveComments(ASTNode node) {
-		astRewrite.remove(node, null);
-		getCommentRewriter().saveCommentsInParentStatement(node);
-	}
-
-	private void removeArrayDimensions(List<Dimension> dimensions) {
-		dimensions.forEach(this::removeAndSaveComments);
-	}
-
-	private boolean hasMultipleFragments(VariableDeclarationStatement declarationStatement) {
-		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(declarationStatement.fragments(),
-				VariableDeclarationFragment.class);
-		return fragments.size() != 1;
-	}
-
-	private void replaceWithVarType(Type type) {
-		Type varType = createVarType(type);
-		astRewrite.replace(type, varType, null);
-		onRewrite();
-	}
-
-	private Type createVarType(ASTNode node) {
-		AST ast = node.getAST();
-		SimpleName var = ast.newSimpleName(VAR_KEY_WORD);
-		return ast.newSimpleType(var);
-	}
-
 	private boolean verifyDeclarationPrecondition(Expression initializer, SimpleName variableName) {
 		if (initializer == null) {
 			return false;
@@ -172,7 +137,8 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		}
 
 		ITypeBinding initializerType = initializer.resolveTypeBinding();
-		if (initializerType == null || containsWildCard(initializerType) || isGenericMethod(initializer)) {
+		if (initializerType == null || containsWildCard(initializerType)
+				|| ASTNodeUtil.isGenericMethodInvocation(initializer)) {
 			return false;
 		}
 
@@ -190,20 +156,32 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		return verifyTypeCompatibility(variableName, initializerType);
 	}
 
-	private boolean isGenericMethod(Expression initializer) {
+	private boolean verifyLoopPrecondition(Expression loopExpression, SimpleName variableName) {
 
-		if (initializer.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			MethodInvocation initializerMethod = (MethodInvocation) initializer;
-			IMethodBinding methodBinding = initializerMethod.resolveMethodBinding();
-			if (methodBinding == null) {
-				return true;
-			}
-			IMethodBinding methodDeclaration = methodBinding.getMethodDeclaration();
-			if (methodDeclaration == null || methodDeclaration.isGenericMethod()) {
-				return true;
-			}
+		ITypeBinding expressionType = loopExpression.resolveTypeBinding();
+		if (expressionType == null) {
+			return false;
 		}
-		return false;
+
+		ITypeBinding initializerType = null;
+		if (expressionType.isParameterizedType()) {
+			ITypeBinding[] argumentTypes = expressionType.getTypeArguments();
+			if (argumentTypes != null && argumentTypes.length == 1) {
+				initializerType = argumentTypes[0];
+			}
+		} else if (expressionType.isArray()) {
+			initializerType = expressionType.getComponentType();
+		}
+
+		if (initializerType == null) {
+			return false;
+		}
+
+		if (containsWildCard(initializerType)) {
+			return false;
+		}
+
+		return verifyTypeCompatibility(variableName, initializerType);
 	}
 
 	private boolean verifyTypeCompatibility(SimpleName variableName, ITypeBinding initializerType) {
@@ -243,45 +221,14 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		return areRawCompatible(initializerType, typeBinding);
 	}
 
-	private boolean isUsedInOverloadedMethod(SimpleName variableName) {
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(variableName);
-		Block block = ASTNodeUtil.getSpecificAncestor(variableName, Block.class);
-		block.accept(visitor);
-		List<SimpleName> usages = visitor.getUsages();
-		return usages.stream()
-			.filter(name -> name.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY)
-			.map(parameter -> MethodInvocation.class.cast(parameter.getParent()))
-			.anyMatch(methodInvocation -> isOverloaded(methodInvocation));
-	}
-
-	private boolean isOverloaded(MethodInvocation methodInvocation) {
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		if (methodBinding == null) {
-			return false;
-		}
-
-		ITypeBinding delcaringClass = methodBinding.getDeclaringClass();
-		List<IMethodBinding> inheritedMethods = ClassRelationUtil.findInheretedMethods(delcaringClass);
-		IMethodBinding[] declaredMethods = delcaringClass.getDeclaredMethods();
-		List<IMethodBinding> allmethods = new ArrayList<>();
-		allmethods.addAll(inheritedMethods);
-		allmethods.addAll(Arrays.asList(declaredMethods));
-		String identifier = methodInvocation.getName()
-			.getIdentifier();
-
-		return allmethods.stream()
-			.map(IMethodBinding::getName)
-			.anyMatch(identifier::equals);
-	}
-
-	private boolean isConvertibleToType(SimpleName variableName, ITypeBinding typeBinding,
+	private boolean isConvertibleToType(SimpleName variableName, ITypeBinding variableTypeBinding,
 			ITypeBinding initializerType) {
 
-		if (ClassRelationUtil.compareITypeBinding(typeBinding, initializerType)) {
+		if (ClassRelationUtil.compareITypeBinding(variableTypeBinding, initializerType)) {
 			return true;
 		}
 
-		ITypeBinding typeBindingErasure = typeBinding.getErasure();
+		ITypeBinding typeBindingErasure = variableTypeBinding.getErasure();
 		if (!ClassRelationUtil.isInheritingContentOfTypes(initializerType,
 				Collections.singletonList(typeBindingErasure.getQualifiedName()))) {
 			return false;
@@ -307,32 +254,15 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		return true;
 	}
 
-	private boolean verifyLoopPrecondition(Expression loopExpression, SimpleName variableName) {
-
-		ITypeBinding expressionType = loopExpression.resolveTypeBinding();
-		if (expressionType == null) {
-			return false;
-		}
-
-		ITypeBinding initializerType = null;
-		if (expressionType.isParameterizedType()) {
-			ITypeBinding[] argumentTypes = expressionType.getTypeArguments();
-			if (argumentTypes != null && argumentTypes.length == 1) {
-				initializerType = argumentTypes[0];
-			}
-		} else if (expressionType.isArray()) {
-			initializerType = expressionType.getComponentType();
-		}
-
-		if (initializerType == null) {
-			return false;
-		}
-
-		if (containsWildCard(initializerType)) {
-			return false;
-		}
-
-		return verifyTypeCompatibility(variableName, initializerType);
+	private boolean isUsedInOverloadedMethod(SimpleName variableName) {
+		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(variableName);
+		Block block = ASTNodeUtil.getSpecificAncestor(variableName, Block.class);
+		block.accept(visitor);
+		List<SimpleName> usages = visitor.getUsages();
+		return usages.stream()
+			.filter(name -> name.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY)
+			.map(parameter -> MethodInvocation.class.cast(parameter.getParent()))
+			.anyMatch(ASTNodeUtil::isOverloaded);
 	}
 
 	private boolean areRawCompatible(ITypeBinding initializerType, ITypeBinding declarationType) {
@@ -357,5 +287,41 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 			}
 		}
 		return false;
+	}
+
+	private void removeArrayDimensions(VariableDeclarationFragment node, Type type) {
+		if (type.isArrayType()) {
+			ArrayType arrayType = (ArrayType) type;
+			ASTNodeUtil.convertToTypedList(arrayType.dimensions(), Dimension.class)
+				.forEach(dimension -> astRewrite.remove(dimension, null));
+		}
+		removeArrayDimensions(ASTNodeUtil.convertToTypedList(node.extraDimensions(), Dimension.class));
+	}
+
+	private void removeAndSaveComments(ASTNode node) {
+		astRewrite.remove(node, null);
+		getCommentRewriter().saveCommentsInParentStatement(node);
+	}
+
+	private void removeArrayDimensions(List<Dimension> dimensions) {
+		dimensions.forEach(this::removeAndSaveComments);
+	}
+
+	private boolean hasMultipleFragments(VariableDeclarationStatement declarationStatement) {
+		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(declarationStatement.fragments(),
+				VariableDeclarationFragment.class);
+		return fragments.size() != 1;
+	}
+
+	private void replaceWithVarType(Type type) {
+		Type varType = createVarType(type);
+		astRewrite.replace(type, varType, null);
+		onRewrite();
+	}
+
+	private Type createVarType(ASTNode node) {
+		AST ast = node.getAST();
+		SimpleName var = ast.newSimpleName(VAR_KEY_WORD);
+		return ast.newSimpleType(var);
 	}
 }
