@@ -134,7 +134,7 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 
 		/*
 		 * A work around to avoid converting List<String>values=... to
-		 * varvalues=....
+		 * varvalues=...
 		 */
 		VariableDeclarationStatement statement = (VariableDeclarationStatement) parent;
 		VariableDeclarationStatement newStatement = (VariableDeclarationStatement) ASTNode.copySubtree(type.getAST(),
@@ -209,6 +209,27 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		return verifyTypeCompatibility(variableName, initializerType);
 	}
 
+	/**
+	 * Checks whether it is possible to replace the type of a local variable
+	 * with the type of its initializer. Some reasons why this could lead to
+	 * problems include:
+	 * <ul>
+	 * <li>the variable is re-assigned with subtypes which are incompatible with
+	 * the initializer type</li>
+	 * <li>the variable is used as a parameter in overloaded methods
+	 * </li>
+	 * <li>raw types are used in initializer or declaration</li>
+	 * <li>the declaration type contains undefined types like wildcards,
+	 * intersection types, etc</li>
+	 * <ul>
+	 * 
+	 * @param variableName
+	 *            name of the variable to be checked
+	 * @param initializerType
+	 *            type of the variable initialzier
+	 * @return {@code true} if it is safe to replace the declaration type with
+	 *         the initializer type, or {@code false} otherwise.
+	 */
 	private boolean verifyTypeCompatibility(SimpleName variableName, ITypeBinding initializerType) {
 		IBinding binding = variableName.resolveBinding();
 		if (binding == null) {
@@ -235,7 +256,7 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 			return false;
 		}
 
-		if (!isConvertibleToType(variableName, typeBinding, initializerType)) {
+		if (!isReassignedWithDifferentSubtypes(variableName, typeBinding, initializerType)) {
 			return false;
 		}
 
@@ -246,7 +267,31 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		return areRawCompatible(initializerType, typeBinding);
 	}
 
-	private boolean isConvertibleToType(SimpleName variableName, ITypeBinding variableTypeBinding,
+	/**
+	 * Verifies if a variable is re-assigned to a value which is incompatible
+	 * with the type of the initializer. E.g.
+	 * 
+	 * <pre>
+	 * {
+	 * 	&#64;code
+	 * 	List<User> list = new ArrayList<>();
+	 * 	list = new LinkedList<>();
+	 * }
+	 * </pre>
+	 * 
+	 * Makes use of {@link VariableAssignmentVisitor} for finding all
+	 * assignments of the local variable.
+	 * 
+	 * @param variableName
+	 *            name of the variable to be checked.
+	 * @param variableTypeBinding
+	 *            the type binding of the variable to be checked.
+	 * @param initializerType
+	 *            the type of the variable initializer
+	 * @return {@code true} if it is safe to change the type of the variable to
+	 *         the type of its initializer, or {@code false} otherwise.
+	 */
+	private boolean isReassignedWithDifferentSubtypes(SimpleName variableName, ITypeBinding variableTypeBinding,
 			ITypeBinding initializerType) {
 
 		if (ClassRelationUtil.compareITypeBinding(variableTypeBinding, initializerType)) {
