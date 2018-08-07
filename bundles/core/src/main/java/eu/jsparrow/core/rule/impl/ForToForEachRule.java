@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.loop.fortoforeach.ForToForEachASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -29,8 +29,8 @@ public class ForToForEachRule extends RefactoringRuleImpl<ForToForEachASTVisitor
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_1_5;
+	protected String provideRequiredJavaVersion() {
+		return JavaCore.VERSION_1_5;
 	}
 
 }

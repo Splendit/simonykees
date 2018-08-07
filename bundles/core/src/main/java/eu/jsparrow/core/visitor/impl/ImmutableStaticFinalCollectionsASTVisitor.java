@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -86,7 +86,7 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	private Set<String> excludedNames = new HashSet<>();
 	private Map<String, String> methodNames = new HashMap<>();
 	private Map<String, Expression> initializersToReplace = new HashMap<>();
-	private JavaVersion javaVersion;
+	private String javaVersion;
 	// allowed method names
 	@SuppressWarnings("nls")
 	private List<String> collectionNonModifingMethods = Arrays.asList(
@@ -122,7 +122,7 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 
 			"first", "last");
 
-	public ImmutableStaticFinalCollectionsASTVisitor(JavaVersion javaVersion) {
+	public ImmutableStaticFinalCollectionsASTVisitor(String javaVersion) {
 		this.javaVersion = javaVersion;
 	}
 
@@ -175,7 +175,7 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 			return false;
 		}
 
-		if (this.javaVersion.atLeast(JavaVersion.JAVA_1_8)) {
+		if (JavaCore.compareJavaVersions(javaVersion, JavaCore.VERSION_1_8) >= 0) {
 			return true;
 		}
 

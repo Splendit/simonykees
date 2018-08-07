@@ -3,7 +3,6 @@ package eu.jsparrow.rules.java10;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -30,8 +29,8 @@ public class LocalVariableTypeInferenceRule extends RefactoringRuleImpl<LocalVar
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_1_1;
+	protected String provideRequiredJavaVersion() {
+		return JavaCore.VERSION_1_1;
 	}
 
 	@Override

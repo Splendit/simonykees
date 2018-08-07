@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -29,9 +29,9 @@ public class UseIsEmptyOnCollectionsRule extends RefactoringRuleImpl<UseIsEmptyO
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
+	protected String provideRequiredJavaVersion() {
 		// string 1.6, collection 1.2, map 1.2
-		return JavaVersion.JAVA_1_6;
+		return JavaCore.VERSION_1_6;
 	}
 
 }
