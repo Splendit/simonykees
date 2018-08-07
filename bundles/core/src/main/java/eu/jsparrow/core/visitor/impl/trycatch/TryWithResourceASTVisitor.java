@@ -50,7 +50,6 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String CLOSEABLE_FULLY_QUALIFIED_NAME = java.io.Closeable.class.getName();
 	static final String CLOSE = "close"; //$NON-NLS-1$
 
-	// TODO improvement for suppressed deprecation needed, see SIM-878
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(TryStatement node) {
@@ -127,7 +126,6 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		return true;
 	}
 
-	@SuppressWarnings("deprecation")
 	private void replaceTryStatement(TryStatement node, List<VariableDeclarationExpression> resourceList,
 			List<SimpleName> resourceNameList, List<VariableDeclarationFragment> toBeMovedToResources) {
 		// remove all close operations on the found resources
@@ -149,7 +147,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			astRewrite.replace(node, tryStatement, null);
 
 		} else {
-			ListRewrite listRewrite = astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY);
+			ListRewrite listRewrite = astRewrite.getListRewrite(node, TryStatement.RESOURCES2_PROPERTY);
 			resourceList.forEach(iteratorNode -> listRewrite.insertLast(iteratorNode, null));
 			TwrCloseStatementsASTVisitor visitor = new TwrCloseStatementsASTVisitor(closeInvocations);
 			node.accept(visitor);
