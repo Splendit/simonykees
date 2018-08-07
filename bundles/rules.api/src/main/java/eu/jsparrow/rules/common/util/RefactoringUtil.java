@@ -62,7 +62,7 @@ public final class RefactoringUtil {
 	private static List<IJavaElement> getSubPackages(IPackageFragment p) {
 		List<IJavaElement> result = new ArrayList<>();
 		List<IJavaElement> packages;
-		if (p.getParent() != null && p.getParent() instanceof IPackageFragmentRoot) {
+		if (p.getParent() instanceof IPackageFragmentRoot) {
 			IPackageFragmentRoot fragmentRoot = (IPackageFragmentRoot) p.getParent();
 			try {
 				packages = Arrays.asList(fragmentRoot.getChildren());
@@ -100,9 +100,9 @@ public final class RefactoringUtil {
 		astParser.setSource(compilationUnit);
 		astParser.setResolveBindings(true);
 		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_10);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_10);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_10);
 		astParser.setCompilerOptions(options);
 		return (CompilationUnit) astParser.createAST(null);
 	}
