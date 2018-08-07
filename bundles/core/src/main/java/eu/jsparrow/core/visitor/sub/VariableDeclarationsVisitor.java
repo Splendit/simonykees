@@ -15,22 +15,22 @@ import org.eclipse.jdt.core.dom.SimpleName;
  *
  */
 public class VariableDeclarationsVisitor extends ASTVisitor {
-	private List<SimpleName> variableDelcarations;
+	private List<SimpleName> variableDeclarations;
 
 	public VariableDeclarationsVisitor() {
-		variableDelcarations = new ArrayList<>();
+		variableDeclarations = new ArrayList<>();
 	}
 
 	@Override
 	public boolean visit(SimpleName simpleName) {
 		IBinding resolvedBinding = simpleName.resolveBinding();
 		if (resolvedBinding != null && resolvedBinding.getKind() == IBinding.VARIABLE && simpleName.isDeclaration()) {
-			variableDelcarations.add(simpleName);
+			variableDeclarations.add(simpleName);
 		}
 		return true;
 	}
 
 	public List<SimpleName> getVariableDeclarationNames() {
-		return variableDelcarations;
+		return variableDeclarations;
 	}
 }

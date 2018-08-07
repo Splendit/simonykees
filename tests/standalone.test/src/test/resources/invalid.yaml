@@ -1,0 +1,7 @@
+!jsparrow.config
+profiles:
+- BAD SYNTAX: aaa
+  rules:
+  - OrganiseImportsRule
+rules: []
+selectedProfile: ''

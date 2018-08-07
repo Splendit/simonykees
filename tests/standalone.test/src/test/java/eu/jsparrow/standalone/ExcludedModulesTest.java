@@ -56,7 +56,7 @@ public class ExcludedModulesTest {
 
 		assertEquals(exclusionsFromConfig, result);
 	}
-	
+
 	@Test
 	public void get_withValidYmlConfig_shouldReturnEmptyExlusionsList() throws StandaloneException {
 		excludedModules = new TestableExcludedModules(false, SOME_PROJECT);
@@ -76,8 +76,7 @@ public class ExcludedModulesTest {
 		}
 
 		@Override
-		protected YAMLConfig getRootYamlConfig(String rootProjectConfig)
-				throws StandaloneException {
+		protected YAMLConfig getRootYamlConfig(String rootProjectConfig) {
 			return yamlConfigStub;
 		}
 	}

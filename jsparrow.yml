@@ -54,4 +54,4 @@ excludes:
     excludePackages:
       - removeMeAfterNPEFix
     excludeClasses:
-      - removeMeAfterNPEFix
+      - eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPage.java

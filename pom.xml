@@ -171,20 +171,20 @@
 
 	<repositories>
 		<repository>
-			<id>neon</id>
-			<layout>p2</layout>
-			<url>http://download.eclipse.org/eclipse/updates/4.6</url>
-		</repository>
-		<repository>
 			<id>oxygen</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/eclipse/updates/4.7</url>
 		</repository>
 		<repository>
-			<id>photon</id>
+			<id>photon-updates</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/eclipse/updates/4.8</url>
 		</repository>
+		<repository>
+			<id>photon</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/releases/photon/</url>
+        </repository>
 		<repository>
 			<id>netlicensing</id>
 			<layout>p2</layout>
