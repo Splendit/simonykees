@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
+import org.osgi.framework.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,15 +95,12 @@ public final class RefactoringUtil {
 	 * @since 0.9
 	 */
 	public static CompilationUnit parse(ICompilationUnit compilationUnit) {
-		@SuppressWarnings("deprecation") // see ticket SIM-878
-		ASTParser astParser = ASTParser.newParser(AST.JLS10);
+		int astLevel = JdtVersionBindingUtil.findJLSLevel(JdtVersionBindingUtil.findCurrentJDTVersion());
+		ASTParser astParser = ASTParser.newParser(astLevel);
 		astParser.setKind(ASTParser.K_COMPILATION_UNIT);
 		astParser.setSource(compilationUnit);
 		astParser.setResolveBindings(true);
-		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_10);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_10);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_10);
+		Map<String, String> options = JdtVersionBindingUtil.findCompilerOptions(JdtVersionBindingUtil.findCurrentJDTVersion());
 		astParser.setCompilerOptions(options);
 		return (CompilationUnit) astParser.createAST(null);
 	}
