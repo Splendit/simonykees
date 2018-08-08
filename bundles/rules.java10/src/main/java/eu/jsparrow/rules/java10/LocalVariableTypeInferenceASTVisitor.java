@@ -31,7 +31,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.VariableAssignmentVisitor;
 
 /**
- * A visitor for replacing they types of local variable declarations with the
+ * A visitor for replacing the types of local variable declarations with
  * {@value #VAR_KEY_WORD}. Covers also the declarations of the parameters on
  * {@link EnhancedForStatement}s. For example, the following lines:
  * <p/>
@@ -164,7 +164,7 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 
 		ITypeBinding initializerType = initializer.resolveTypeBinding();
 		if (initializerType == null || containsWildCard(initializerType)
-				|| ASTNodeUtil.isGenericMethodInvocation(initializer)) {
+				|| ASTNodeUtil.isGenericMethodInvocation(initializer) || initializerType.isNullType()) {
 			return false;
 		}
 
@@ -216,8 +216,7 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 	 * <ul>
 	 * <li>the variable is re-assigned with subtypes which are incompatible with
 	 * the initializer type</li>
-	 * <li>the variable is used as a parameter in overloaded methods
-	 * </li>
+	 * <li>the variable is used as a parameter in overloaded methods</li>
 	 * <li>raw types are used in initializer or declaration</li>
 	 * <li>the declaration type contains undefined types like wildcards,
 	 * intersection types, etc</li>

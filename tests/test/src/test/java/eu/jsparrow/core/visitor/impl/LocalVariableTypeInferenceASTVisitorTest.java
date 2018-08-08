@@ -4,7 +4,6 @@ import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
 import org.eclipse.jdt.core.dom.Block;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import eu.jsparrow.rules.java10.LocalVariableTypeInferenceASTVisitor;
@@ -177,6 +176,18 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	public void visit_multipleDeclarationFragments_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.HashMap");
 		String block = "HashMap<String, String> map1 = new HashMap<String, String>(), map2 = new HashMap<String, String>();";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		Block expectedBlock = createBlock(block);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
+	
+	@Test 
+	public void visit_nullTypeInitialization_shouldReplace() throws Exception {
+		String block = "String nullValue = null;";
 		fixture.addMethodBlock(block);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		

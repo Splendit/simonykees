@@ -203,7 +203,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * Finds the comments in the body of the {@link TryStatement} and thier
+	 * Finds the comments in the body of the {@link TryStatement} and their
 	 * corresponding position in the {@link TryStatement} where the resource
 	 * declarations and the close invocations are removed.
 	 * 
