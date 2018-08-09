@@ -30,14 +30,7 @@ public class LocalVariableTypeInferenceRule extends RefactoringRuleImpl<LocalVar
 
 	@Override
 	protected String provideRequiredJavaVersion() {
-		return JavaCore.VERSION_1_1;
-	}
-
-	@Override
-	public boolean ruleSpecificImplementation(IJavaProject project) {
-		String compilerSource = project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true)
-				: JavaCore.getOption(JavaCore.COMPILER_SOURCE);
-		return JavaCore.compareJavaVersions(compilerSource, JavaCore.VERSION_10) >= 0;
+		return JavaCore.VERSION_10;
 	}
 
 }
