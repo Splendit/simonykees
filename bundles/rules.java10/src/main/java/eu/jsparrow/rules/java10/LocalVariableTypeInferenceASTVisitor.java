@@ -37,19 +37,23 @@ import eu.jsparrow.rules.common.visitor.helper.VariableAssignmentVisitor;
  * <p/>
  * 
  * <pre>
+ * <code>
  * Order order = new Order("product");
  * for (User user : userList) {
  * 	consume(user);
  * }
+ * </code>
  * </pre>
  * 
  * will be transformed to:
  * 
  * <pre>
+ * <code>
  * var order = new Order("product");
  * for (var user : userList) {
  * 	consume(user);
  * }
+ * </code>
  * </pre>
  * 
  * @since 2.6.0
