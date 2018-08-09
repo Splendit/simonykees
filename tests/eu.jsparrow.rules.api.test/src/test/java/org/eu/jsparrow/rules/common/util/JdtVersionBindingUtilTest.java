@@ -15,6 +15,7 @@ import org.osgi.framework.Version;
 
 import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
 
+@SuppressWarnings("nls")
 public class JdtVersionBindingUtilTest {
 
 	@Test
@@ -45,7 +46,7 @@ public class JdtVersionBindingUtilTest {
 		assertThat(options, allOf(hasEntry(JavaCore.COMPILER_COMPLIANCE, "10"),
 				hasEntry(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, "10"), hasEntry(JavaCore.COMPILER_SOURCE, "10")));
 	}
-	
+
 	@Test
 	public void test_findCompilerOptions_shouldReturnJava9() {
 		Version jdtVersion = createJDTVersion("3.13.0");
@@ -53,7 +54,7 @@ public class JdtVersionBindingUtilTest {
 		assertThat(options, allOf(hasEntry(JavaCore.COMPILER_COMPLIANCE, "9"),
 				hasEntry(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, "9"), hasEntry(JavaCore.COMPILER_SOURCE, "9")));
 	}
-	
+
 	@Test
 	public void test_findCompilerOptions_shouldReturnJava8() {
 		Version jdtVersion = createJDTVersion("3.12.0");
@@ -61,29 +62,31 @@ public class JdtVersionBindingUtilTest {
 		assertThat(options, allOf(hasEntry(JavaCore.COMPILER_COMPLIANCE, "1.8"),
 				hasEntry(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, "1.8"), hasEntry(JavaCore.COMPILER_SOURCE, "1.8")));
 	}
-	
+
+	@SuppressWarnings("deprecation")
 	@Test
 	public void findTryWithResourcesProperty_JLS8_shouldReturnResources() {
 		Version jdtVersion = createJDTVersion("3.12.0");
-		ChildListPropertyDescriptor structuralPropertyDescriptor = JdtVersionBindingUtil.findTryWithResourcesProperty(jdtVersion);
+		ChildListPropertyDescriptor structuralPropertyDescriptor = JdtVersionBindingUtil
+			.findTryWithResourcesProperty(jdtVersion);
 		assertEquals(TryStatement.RESOURCES_PROPERTY, structuralPropertyDescriptor);
 	}
-	
+
 	@Test
 	public void findTryWithResourcesProperty_JLS9_shouldReturnResources2() {
 		Version jdtVersion = createJDTVersion("3.13.0");
-		ChildListPropertyDescriptor structuralPropertyDescriptor = JdtVersionBindingUtil.findTryWithResourcesProperty(jdtVersion);
+		ChildListPropertyDescriptor structuralPropertyDescriptor = JdtVersionBindingUtil
+			.findTryWithResourcesProperty(jdtVersion);
 		assertEquals(TryStatement.RESOURCES2_PROPERTY, structuralPropertyDescriptor);
 	}
-	
+
 	@Test
 	public void findTryWithResourcesProperty_JLS10_shouldReturnResources2() {
 		Version jdtVersion = createJDTVersion("3.14.0");
-		ChildListPropertyDescriptor structuralPropertyDescriptor = JdtVersionBindingUtil.findTryWithResourcesProperty(jdtVersion);
+		ChildListPropertyDescriptor structuralPropertyDescriptor = JdtVersionBindingUtil
+			.findTryWithResourcesProperty(jdtVersion);
 		assertEquals(TryStatement.RESOURCES2_PROPERTY, structuralPropertyDescriptor);
 	}
-
-
 
 	private Version createJDTVersion(String version) {
 		return Version.parseVersion(version);
