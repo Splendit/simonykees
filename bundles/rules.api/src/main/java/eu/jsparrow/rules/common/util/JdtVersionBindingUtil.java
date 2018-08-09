@@ -12,7 +12,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
 /**
- * Contains functionality for finding the current jdt version.
+ * Contains functionality for finding the current JDT version.
  * 
  * @since 2.6.0
  *
@@ -35,9 +35,10 @@ public class JdtVersionBindingUtil {
 	 * Finds the version of the {@value #ORG_ECLIPSE_JDT} bundle on the current
 	 * {@link Platform}.
 	 * 
-	 * @return the {@link Version} of {@value #ORG_ECLIPSE_JDT} on the current
-	 *         platform or {@value #NEON_JDT_VERSION} if none is found since it
-	 *         corresponds to the least eclipse version that we support.
+	 * @return the {@link Version} of {@value #ORG_ECLIPSE_JDT} bundle on the
+	 *         current platform or {@value #NEON_JDT_VERSION} if none is found
+	 *         since it corresponds to the least eclipse version that we
+	 *         support.
 	 */
 	public static Version findCurrentJDTVersion() {
 		if (jdtBundle == null) {
@@ -78,7 +79,7 @@ public class JdtVersionBindingUtil {
 	 * @return options corresponding to {@link JavaCore#VERSION_10} if the JDT
 	 *         version corresponds to Photon; options corresponding to
 	 *         {@link JavaCore#VERSION_9} if the JDT version corresponds to
-	 *         Neon; or options corresponding to {@link JavaCore#VERSION_8} if
+	 *         Oxygen; or options corresponding to {@link JavaCore#VERSION_8} if
 	 *         the JDT version corresponds to Neon.
 	 */
 	public static Map<String, String> findCompilerOptions(Version jdtVersion) {
@@ -96,7 +97,7 @@ public class JdtVersionBindingUtil {
 	}
 
 	/**
-	 * Finds the resources property descriptior for {@link TryStatement}
+	 * Finds the resources property descriptior for the {@link TryStatement}
 	 * statement.
 	 * 
 	 * @param jdtVersion
