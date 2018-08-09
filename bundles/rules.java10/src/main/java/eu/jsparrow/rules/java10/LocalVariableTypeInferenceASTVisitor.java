@@ -77,7 +77,6 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		replaceWithVarType(type);
 		List<Dimension> dimensions = ASTNodeUtil.convertToTypedList(parameter.extraDimensions(), Dimension.class);
 		removeArrayDimensions(dimensions);
-		onRewrite();
 		getCommentRewriter().saveCommentsInParentStatement(type);
 		return true;
 	}
@@ -111,7 +110,6 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		removeArrayDimensions(node, type);
 		checkSpaces(type, name);
 		replaceWithVarType(type);
-		onRewrite();
 		getCommentRewriter().saveCommentsInParentStatement(type);
 		return true;
 	}
