@@ -3,7 +3,6 @@ package eu.jsparrow.rules.java10;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.i18n.Messages;
