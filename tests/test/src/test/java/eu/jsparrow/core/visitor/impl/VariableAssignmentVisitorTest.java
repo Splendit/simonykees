@@ -34,7 +34,7 @@ public class VariableAssignmentVisitorTest extends UsesJDTUnitFixture {
 
 	@Test
 	public void visit_noReAssignments_shouldReturnEmpty() throws Exception {
-		fixture.addMethodBlock("Date " + identifier + " = new Date();");
+		fixture.addMethodBlock(String.format("Date %s = new Date();", identifier));
 
 		fixture.accept(visitor);
 
@@ -45,8 +45,9 @@ public class VariableAssignmentVisitorTest extends UsesJDTUnitFixture {
 	@Test
 	public void visit_reassignment_shouldReturnNonEmptyList() throws Exception {
 		fixture.addImport(java.time.Instant.class.getName());
-		fixture.addMethodBlock("Date " + identifier + " = new Date();Instant now = Instant.now(); " + identifier
-				+ " = Date.from(now);");
+		String block = String.format("Date %s = new Date();Instant now = Instant.now(); %s = Date.from(now);",
+				identifier, identifier);
+		fixture.addMethodBlock(block);
 
 		fixture.accept(visitor);
 
@@ -57,22 +58,24 @@ public class VariableAssignmentVisitorTest extends UsesJDTUnitFixture {
 	@Test
 	public void visit_multipleStatementsNoReassignments_shouldReturnEmpty() throws Exception {
 		fixture.addImport(java.time.Instant.class.getName());
-		fixture.addMethodBlock("Date " + identifier
-				+ " = new Date();Instant now = Instant.now(); Instant then = Instant.now(); then = now; ");
+		String block = String.format(
+				"Date %s = new Date();Instant now = Instant.now(); Instant then = Instant.now(); then = now; ",
+				identifier);
+		fixture.addMethodBlock(block);
 
 		fixture.accept(visitor);
 
 		List<Assignment> assignments = visitor.getAssignments();
 		assertTrue(assignments.isEmpty());
 	}
-	
+
 	@Test
 	public void visit_multipleReassignment_shouldReturnNonEmptyList() throws Exception {
 		fixture.addImport(java.time.Instant.class.getName());
-		fixture.addMethodBlock("Date " + identifier + " = new Date();Instant now = Instant.now(); " + identifier
-				+ " = Date.from(now);" + identifier
-				+ " = null;" + identifier
-				+ " = Date.from(now);");
+		String block = String.format(
+				"Date %s = new Date();Instant now = Instant.now(); %s = Date.from(now); %s = null; %s = Date.from(now);",
+				identifier, identifier, identifier, identifier);
+		fixture.addMethodBlock(block);
 
 		fixture.accept(visitor);
 
