@@ -19,9 +19,13 @@ import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.java10.LocalVariableTypeInferenceRule;
 
 /**
- * TODO SIM-103 add class description
+ * Parameterized tests for applying all rules in
+ * {@link RulesContainer#getAllRules(boolean)} in the sample project.
+ * {@link LocalVariableTypeInferenceRule} is temporary skipped until we upgrade
+ * to Java 10.
  * 
  * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Ardit Ymeri
  * @since 0.9
