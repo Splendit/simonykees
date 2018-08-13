@@ -54,9 +54,19 @@ public class LibraryPrerequestsTest {
 	public static Collection<Object[]> data() throws Exception {
 		return Arrays.asList(new Object[][] {
 				{ Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+						"commons-lang3", "3.0")), true },
+				{ Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
 						"commons-lang3", "3.1")), true },
 				{ Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
-						"commons-lang3", "3.2.1")), false } });
+						"commons-lang3", "3.2.1")), true },
+				{ Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+						"commons-lang3", "3.3.1")), true },
+				{ Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+						"commons-lang3", "3.4")), true },
+				{ Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+						"commons-lang3", "3.5")), true },
+				{ Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+						"commons-lang3", "3.7")), true } });
 	}
 
 	@Test
