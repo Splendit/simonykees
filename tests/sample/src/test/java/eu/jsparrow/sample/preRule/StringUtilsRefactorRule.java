@@ -41,11 +41,14 @@ public class StringUtilsRefactorRule {
 
 	public boolean testStartWith(String testString) {
 		String sometimesExpectedString = "start";
-
+		testString.startsWith(sometimesExpectedString, 1);
 		return testString.startsWith(sometimesExpectedString);
 	}
 
 	public int testIndexOf(String testString) {
+		testString.indexOf(0);
+		testString.indexOf(4, 0);
+		testString.indexOf("e", 1);
 		return testString.indexOf("e");
 	}
 
@@ -145,14 +148,19 @@ public class StringUtilsRefactorRule {
 
 	public String testUpperCaseCornerCase(String testString) {
 		Locale l = Locale.GERMAN;
-
+		testString.toUpperCase();
 		return testString.toUpperCase(l);
 	}
 
 	public String testLowerCaseCornerCase(String testString) {
 		Locale l = Locale.GERMAN;
-
+		testString.toLowerCase();
 		return testString.toLowerCase(l);
+	}
+	
+	public String testSubstring(String testString) {
+		testString.substring(1);
+		return testString.substring(0, 1);
 	}
 
 	// Reproduces SIM-319
