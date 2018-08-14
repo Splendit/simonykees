@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -29,9 +30,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.osgi.framework.Version;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -50,7 +53,6 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String CLOSEABLE_FULLY_QUALIFIED_NAME = java.io.Closeable.class.getName();
 	static final String CLOSE = "close"; //$NON-NLS-1$
 
-	// TODO improvement for suppressed deprecation needed, see SIM-878
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(TryStatement node) {
@@ -127,7 +129,6 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		return true;
 	}
 
-	@SuppressWarnings("deprecation")
 	private void replaceTryStatement(TryStatement node, List<VariableDeclarationExpression> resourceList,
 			List<SimpleName> resourceNameList, List<VariableDeclarationFragment> toBeMovedToResources) {
 		// remove all close operations on the found resources
@@ -149,7 +150,9 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			astRewrite.replace(node, tryStatement, null);
 
 		} else {
-			ListRewrite listRewrite = astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY);
+			Version version = JdtVersionBindingUtil.findCurrentJDTVersion();
+			ChildListPropertyDescriptor resourcesProperty = JdtVersionBindingUtil.findTryWithResourcesProperty(version);
+			ListRewrite listRewrite = astRewrite.getListRewrite(node, resourcesProperty);
 			resourceList.forEach(iteratorNode -> listRewrite.insertLast(iteratorNode, null));
 			TwrCloseStatementsASTVisitor visitor = new TwrCloseStatementsASTVisitor(closeInvocations);
 			node.accept(visitor);
@@ -205,7 +208,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * Finds the comments in the body of the {@link TryStatement} and thier
+	 * Finds the comments in the body of the {@link TryStatement} and their
 	 * corresponding position in the {@link TryStatement} where the resource
 	 * declarations and the close invocations are removed.
 	 * 

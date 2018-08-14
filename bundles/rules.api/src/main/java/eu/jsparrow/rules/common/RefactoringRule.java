@@ -1,6 +1,5 @@
 package eu.jsparrow.rules.common;
 
-import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -12,7 +11,7 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 
 public interface RefactoringRule {
 
-	public JavaVersion getRequiredJavaVersion();
+	public String getRequiredJavaVersion();
 
 	public boolean isEnabled();
 

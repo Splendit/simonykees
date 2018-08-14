@@ -2,7 +2,7 @@ package eu.jsparrow.rules.api.test.dummies;
 
 import java.util.ArrayList;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
@@ -22,8 +22,8 @@ public class DummyRefactoringRule extends RefactoringRuleImpl<DummyVisitor> {
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_1_7;
+	protected String provideRequiredJavaVersion() {
+		return JavaCore.VERSION_1_7;
 	}
 
 }
