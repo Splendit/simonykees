@@ -55,7 +55,6 @@ public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> 
 	private List<String> supportedVersion;
 
 	public StringUtilsRule() {
-		super();
 		this.visitorClass = StringUtilsASTVisitor.class;
 		this.supportedVersion = Arrays.asList(VERSION_3_0, VERSION_3_0_1, VERSION_3_1, VERSION_3_2, VERSION_3_2_1,
 				VERSION_3_3, VERSION_3_3_1, VERSION_3_3_2, VERSION_3_4, VERSION_3_5, VERSION_3_6, VERSION_3_7);
