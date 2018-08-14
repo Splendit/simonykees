@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -65,12 +66,15 @@ public class RefactoringPipeline {
 
 	private boolean multipleProjects = false;
 
+	private WorkingCopyOwnerDecorator workingCopyOwner;
+
 	/**
 	 * Constructor without parameters, used to create RefactoringPipeline before
 	 * SelectRulesWizard is opened
 	 */
 	public RefactoringPipeline() {
 		this.refactoringStates = new ArrayList<>();
+		this.workingCopyOwner = new WorkingCopyOwnerDecorator();
 	}
 
 	/**
@@ -91,9 +95,8 @@ public class RefactoringPipeline {
 		 * outside of the Job. Plus we only know the list of rules when
 		 * finishing.
 		 */
-
+		this();
 		this.rules = rules;
-		this.refactoringStates = new ArrayList<>();
 	}
 
 	public List<RefactoringRule> getRules() {
@@ -309,11 +312,11 @@ public class RefactoringPipeline {
 	 */
 	public void createRefactoringState(ICompilationUnit compilationUnit, List<ICompilationUnit> containingErrorList)
 			throws JavaModelException {
-		ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(WorkingCopyOwnerDecorator.OWNER, null);
-		IProblemRequestor problemRequestor = WorkingCopyOwnerDecorator.OWNER.getProblemRequestor(workingCopy);
+		ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(workingCopyOwner, null);
+		IProblemRequestor problemRequestor = workingCopyOwner.getProblemRequestor(workingCopy);
 		List<IProblem> problems = ((ProblemRequestor) problemRequestor).getProblems();
 		if (problems.isEmpty()) {
-			refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, WorkingCopyOwnerDecorator.OWNER));
+			refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, workingCopyOwner));
 		} else {
 			String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors,
 					compilationUnit.getElementName(), problems.get(0));

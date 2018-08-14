@@ -10,8 +10,6 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
  */
 public class WorkingCopyOwnerDecorator extends WorkingCopyOwner {
 
-	public static final WorkingCopyOwnerDecorator OWNER = new WorkingCopyOwnerDecorator();
-
 	private ProblemRequestor requestor = new ProblemRequestor();
 
 	@Override
