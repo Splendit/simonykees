@@ -161,8 +161,8 @@ public class StringUtilsRefactorRule {
 	}
 	
 	public String testSubstring(String testString) {
-		StringUtils.substring(testString, 1);
-		return StringUtils.substring(testString, 0, 1);
+		StringUtils.substring(testString, 0);
+		return StringUtils.substring(testString, 0, 0);
 	}
 
 	// Reproduces SIM-319
