@@ -91,7 +91,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>2-2</id>
+						<id>2-1</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
