@@ -9,18 +9,26 @@ import java.util.List;
  */
 public class YAMLExcludes {
 
-	private List<String> excludeModules = new LinkedList<>();
+	private List<String> excludeModules;
 
-	private List<String> excludePackages = new LinkedList<>();
+	private List<String> excludePackages;
 
-	private List<String> excludeClasses = new LinkedList<>();
+	private List<String> excludeClasses;
 
+	public YAMLExcludes() {
+		excludeModules = new LinkedList<>();
+		excludePackages = new LinkedList<>();
+		excludeClasses = new LinkedList<>();
+	}
+	
 	public List<String> getExcludeModules() {
 		return excludeModules;
 	}
 
 	public void setExcludeModules(List<String> excludeModules) {
-		this.excludeModules = excludeModules;
+		if (null != excludeModules) {
+			this.excludeModules = excludeModules;
+		}
 	}
 
 	public List<String> getExcludePackages() {
@@ -28,7 +36,9 @@ public class YAMLExcludes {
 	}
 
 	public void setExcludePackages(List<String> excludePackages) {
-		this.excludePackages = excludePackages;
+		if (null != excludePackages) {
+			this.excludePackages = excludePackages;
+		}
 	}
 
 	public List<String> getExcludeClasses() {
@@ -36,7 +46,9 @@ public class YAMLExcludes {
 	}
 
 	public void setExcludeClasses(List<String> excludeClasses) {
-		this.excludeClasses = excludeClasses;
+		if (null != excludeClasses) {
+			this.excludeClasses = excludeClasses;
+		}
 	}
 
 	@SuppressWarnings("nls")

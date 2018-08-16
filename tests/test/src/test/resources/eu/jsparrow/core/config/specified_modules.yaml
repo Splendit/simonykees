@@ -1,0 +1,15 @@
+!jsparrow.config
+profiles:
+- name: aaa
+  rules:
+  - OrganiseImportsRule
+rules: []
+selectedProfile: ''
+
+excludes:
+  excludeModules:
+  - module
+  excludePackages:
+  - package
+  excludeClasses:
+  - class      
