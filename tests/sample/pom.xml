@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -50,6 +51,26 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>0</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.commons:commons-lang3:3.0</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>0-1</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.commons:commons-lang3:3.0.1</artifact>
+						</configuration>
+					</execution>
+					<execution>
 						<id>1</id>
 						<phase>package</phase>
 						<goals>
@@ -66,11 +87,11 @@
 							<goal>get</goal>
 						</goals>
 						<configuration>
-							<artifact>org.apache.commons:commons-lang3:3.4</artifact>
+							<artifact>org.apache.commons:commons-lang3:3.2</artifact>
 						</configuration>
 					</execution>
 					<execution>
-						<id>2-2</id>
+						<id>2-1</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -86,7 +107,27 @@
 							<goal>get</goal>
 						</goals>
 						<configuration>
-							<artifact>org.apache.logging.log4j:log4j-core:2.7</artifact>
+							<artifact>org.apache.commons:commons-lang3:3.3</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>3-1</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.commons:commons-lang3:3.3.1</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>3-2</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.commons:commons-lang3:3.3.2</artifact>
 						</configuration>
 					</execution>
 					<execution>
@@ -96,7 +137,7 @@
 							<goal>get</goal>
 						</goals>
 						<configuration>
-							<artifact>org.apache.logging.log4j:log4j-api:2.7</artifact>
+							<artifact>org.apache.commons:commons-lang3:3.4</artifact>
 						</configuration>
 					</execution>
 					<execution>
@@ -106,7 +147,7 @@
 							<goal>get</goal>
 						</goals>
 						<configuration>
-							<artifact>org.slf4j:slf4j-api:1.7.25</artifact>
+							<artifact>org.apache.commons:commons-lang3:3.5</artifact>
 						</configuration>
 					</execution>
 					<execution>
@@ -116,11 +157,61 @@
 							<goal>get</goal>
 						</goals>
 						<configuration>
-							<artifact>ch.qos.logback:logback-classic:1.2.3</artifact>
+							<artifact>org.apache.commons:commons-lang3:3.6</artifact>
 						</configuration>
 					</execution>
 					<execution>
 						<id>7</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.commons:commons-lang3:3.7</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>8</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.logging.log4j:log4j-core:2.7</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>9</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.logging.log4j:log4j-api:2.7</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>10</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.slf4j:slf4j-api:1.7.25</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>11</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>ch.qos.logback:logback-classic:1.2.3</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>12</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
