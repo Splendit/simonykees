@@ -3,7 +3,6 @@ package eu.jsparrow.core.rule.impl;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -38,16 +37,27 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> {
 
+	private static final String VERSION_3_0 = "3.0"; //$NON-NLS-1$
+	private static final String VERSION_3_0_1 = "3.0.1"; //$NON-NLS-1$
 	private static final String VERSION_3_1 = "3.1"; //$NON-NLS-1$
+	private static final String VERSION_3_2 = "3.2"; //$NON-NLS-1$
+	private static final String VERSION_3_2_1 = "3.2.1"; //$NON-NLS-1$
+	private static final String VERSION_3_3 = "3.3"; //$NON-NLS-1$
+	private static final String VERSION_3_3_1 = "3.3.1"; //$NON-NLS-1$
+	private static final String VERSION_3_3_2 = "3.3.2"; //$NON-NLS-1$
+	private static final String VERSION_3_4 = "3.4"; //$NON-NLS-1$
+	private static final String VERSION_3_5 = "3.5"; //$NON-NLS-1$
+	private static final String VERSION_3_6 = "3.6"; //$NON-NLS-1$
+	private static final String VERSION_3_7 = "3.7"; //$NON-NLS-1$
 
 	Logger logger = LoggerFactory.getLogger(StringUtilsRule.class);
 
-	private List<String> supportedVersion = new ArrayList<>();
+	private List<String> supportedVersion;
 
 	public StringUtilsRule() {
-		super();
 		this.visitorClass = StringUtilsASTVisitor.class;
-		this.supportedVersion.add(VERSION_3_1);
+		this.supportedVersion = Arrays.asList(VERSION_3_0, VERSION_3_0_1, VERSION_3_1, VERSION_3_2, VERSION_3_2_1,
+				VERSION_3_3, VERSION_3_3_1, VERSION_3_3_2, VERSION_3_4, VERSION_3_5, VERSION_3_6, VERSION_3_7);
 		this.id = "StringUtils"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.StringUtilsRule_name, Messages.StringUtilsRule_description,
 				Duration.ofMinutes(10), Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION));
@@ -67,7 +77,7 @@ public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> 
 
 				IPackageFragmentRoot commonsLangLib = getProject(classtype.getParent());
 				if (commonsLangLib != null) {
-					// file with path to libary jar
+					// file with path to library jar
 					File file = new File(commonsLangLib.getPath()
 						.toString());
 
@@ -110,14 +120,14 @@ public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> 
 					Name key = (Name) attribute;
 					String keyword = key.toString();
 					if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
-						return (supportedVersion.stream()
-							.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s))) ? true : false;
+						return supportedVersion.stream()
+							.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s));
 					}
 				}
 			}
 		} catch (IOException e) {
 			logger.debug("Jar Manifest load error in:", e); //$NON-NLS-1$
-			// Resolving version failed, rule cant be executed
+			// Resolving version failed, rule can't be executed
 		}
 		return false;
 	}
