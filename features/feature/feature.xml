@@ -2,7 +2,7 @@
 <feature
       id="eu.jsparrow.feature"
       label="jsparrow"
-      version="2.5.2.qualifier"
+      version="2.5.3.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
    <description url="https://jsparrow.eu/knowledge-base/">

@@ -1,7 +1,8 @@
-package eu.jsparrow.sample.preRule;
+package eu.jsparrow.sample.postRule.stringUtils;
 
 import java.util.Arrays;
 import java.util.Locale;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Martin Huter
@@ -12,13 +13,14 @@ import java.util.Locale;
 public class StringUtilsRefactorRule {
 
 	public boolean testEmpty(String testString) {
-		return  /* test */ testString // save me
-				.isEmpty() /* trailing comment */;
+		// save me
+		return  /* test */ StringUtils
+				.isEmpty(testString) /* trailing comment */;
 	}
 
 	public String testTrim(String testString) {
-		String val = /* test */testString.trim();
-		return testString.trim();
+		String val = /* test */StringUtils.trim(testString);
+		return StringUtils.trim(testString);
 	}
 
 	public boolean testEquals(String testString) {
@@ -30,32 +32,32 @@ public class StringUtilsRefactorRule {
 	public boolean testEqualsIgnoreCase(String testString) {
 		String sometimesExpectedString = testString.replaceAll("a", "b");
 
-		return testString.equalsIgnoreCase(sometimesExpectedString);
+		return StringUtils.equalsIgnoreCase(testString, sometimesExpectedString);
 	}
 
 	public boolean testEndsWith(String testString) {
 		String sometimesExpectedString = "With";
 
-		return testString.endsWith(sometimesExpectedString);
+		return StringUtils.endsWith(testString, sometimesExpectedString);
 	}
 
 	public boolean testStartWith(String testString) {
 		String sometimesExpectedString = "start";
 		testString.startsWith(sometimesExpectedString, 1);
-		return testString.startsWith(sometimesExpectedString);
+		return StringUtils.startsWith(testString, sometimesExpectedString);
 	}
 
 	public int testIndexOf(String testString) {
-		testString.indexOf(0);
-		testString.indexOf(4, 0);
-		testString.indexOf("e", 1);
-		return testString.indexOf("e");
+		StringUtils.indexOf(testString, 0);
+		StringUtils.indexOf(testString, 4, 0);
+		StringUtils.indexOf(testString, "e", 1);
+		return StringUtils.indexOf(testString, "e");
 	}
 
 	public boolean testContains(String testString) {
 		String sometimesExpectedString = "tain";
 
-		return testString.contains(sometimesExpectedString);
+		return StringUtils.contains(testString, sometimesExpectedString);
 	}
 
 	public String testReplace(String testString) {
@@ -63,11 +65,11 @@ public class StringUtilsRefactorRule {
 	}
 
 	public String testLowerCase(String testString) {
-		return testString.toLowerCase();
+		return StringUtils.lowerCase(testString);
 	}
 
 	public String testUpperCase(String testString) {
-		return testString.toUpperCase();
+		return StringUtils.upperCase(testString);
 	}
 
 	public String[] testSplit(String testString) {
@@ -95,7 +97,7 @@ public class StringUtilsRefactorRule {
 	}
 
 	private String complexSplit(String input, String splitSign, int limit) {
-		if (input.contains(splitSign)) {
+		if (StringUtils.contains(input, splitSign)) {
 			if ("?".equals(splitSign)) {
 				/*
 				 * We need to escape the "?" because otherwise there is the
@@ -148,25 +150,25 @@ public class StringUtilsRefactorRule {
 
 	public String testUpperCaseCornerCase(String testString) {
 		Locale l = Locale.GERMAN;
-		testString.toUpperCase();
-		return testString.toUpperCase(l);
+		StringUtils.upperCase(testString);
+		return StringUtils.upperCase(testString, l);
 	}
 
 	public String testLowerCaseCornerCase(String testString) {
 		Locale l = Locale.GERMAN;
-		testString.toLowerCase();
-		return testString.toLowerCase(l);
+		StringUtils.lowerCase(testString);
+		return StringUtils.lowerCase(testString, l);
 	}
 	
 	public String testSubstring(String testString) {
-		testString.substring(0);
-		return testString.substring(0, 0);
+		StringUtils.substring(testString, 0);
+		return StringUtils.substring(testString, 0, 0);
 	}
 
 	// Reproduces SIM-319
 	public String testNestedApplication(String testString) {
 		String url = "testString/generate-skus";
-		url = url.substring(0, url.indexOf("/generate-skus"));
+		url = StringUtils.substring(url, 0, StringUtils.indexOf(url, "/generate-skus"));
 		return testString;
 	}
 

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Core
 Bundle-SymbolicName: eu.jsparrow.core;singleton:=true
-Bundle-Version: 2.5.2.qualifier
+Bundle-Version: 2.5.3.qualifier
 Bundle-Activator: eu.jsparrow.core.Activator
 Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.i18n,
