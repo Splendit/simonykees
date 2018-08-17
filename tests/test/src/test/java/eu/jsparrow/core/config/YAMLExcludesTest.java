@@ -1,56 +1,73 @@
 package eu.jsparrow.core.config;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
 
 public class YAMLExcludesTest {
 
-	private static final String RESOURCE_DIRECTORY = "src/test/resources/eu/jsparrow/core/config";
 	private static final String MODULE_NAME = "module";
 	private static final String PACKAGE_NAME = "package";
 	private static final String CLASS_NAME = "class";
 
 	@Test
-	public void loadConfiguration_LoadFileWithSpecifiedExcludes_ShouldReturnListWithModules()
-			throws YAMLConfigException {
-		YAMLConfig config = YAMLConfigUtil.loadConfiguration(loadResource("specified_modules.yaml"));
+	public void setExcludeModules_notNullValue_ShouldReturnListWithModules() throws YAMLConfigException {
+		YAMLExcludes excludes = new YAMLExcludes();
+		excludes.setExcludeModules(Collections.singletonList(MODULE_NAME));
 
-		assertNotNull(config);
+		List<String> excludedModules = excludes.getExcludeModules();
 
-		List<String> excludedModules = config.getExcludes().getExcludeModules();
-		List<String> excludedPackages = config.getExcludes().getExcludePackages();
-		List<String> excludedClasses = config.getExcludes().getExcludeClasses();
-		assertTrue(!excludedModules.isEmpty());
 		assertEquals(MODULE_NAME, excludedModules.get(0));
-		assertTrue(!excludedPackages.isEmpty());
+	}
+
+	@Test
+	public void setExcludePackages_notNullValue_ShouldReturnListWithPackages() throws YAMLConfigException {
+		YAMLExcludes excludes = new YAMLExcludes();
+		excludes.setExcludePackages(Collections.singletonList(PACKAGE_NAME));
+
+		List<String> excludedPackages = excludes.getExcludePackages();
+
 		assertEquals(PACKAGE_NAME, excludedPackages.get(0));
-		assertTrue(!excludedClasses.isEmpty());
+	}
+
+	@Test
+	public void setExcludeClasses_notNullValue_ShouldReturnListWithPackages() throws YAMLConfigException {
+		YAMLExcludes excludes = new YAMLExcludes();
+		excludes.setExcludeClasses(Collections.singletonList(CLASS_NAME));
+
+		List<String> excludedClasses = excludes.getExcludeClasses();
+
 		assertEquals(CLASS_NAME, excludedClasses.get(0));
 	}
 
 	@Test
-	public void loadConfiguration_LoadFileWithEmptyExcludes_ShouldReturnEmptyListForEach() throws YAMLConfigException {
-		YAMLConfig config = YAMLConfigUtil.loadConfiguration(loadResource("empty_modules.yaml"));
+	public void setExcludeModules_nullValue_ShouldReturnEmptyList() throws YAMLConfigException {
+		YAMLExcludes excludes = new YAMLExcludes();
+		excludes.setExcludeModules(null);
 
-		assertNotNull(config);
-
-		List<String> excludedModules = config.getExcludes().getExcludeModules();
-		List<String> excludedPackages = config.getExcludes().getExcludePackages();
-		List<String> excludedClasses = config.getExcludes().getExcludeClasses();
+		List<String> excludedModules = excludes.getExcludeModules();
 		assertTrue(excludedModules.isEmpty());
-		assertTrue(excludedPackages.isEmpty());
-		assertTrue(excludedClasses.isEmpty());
-}
-
-	private File loadResource(String resource) {
-		return Paths.get(String.join("/", RESOURCE_DIRECTORY, resource)).toFile();
 	}
 
+	@Test
+	public void setExcludePackages_nullValue_ShouldReturnEmptyList() throws YAMLConfigException {
+		YAMLExcludes excludes = new YAMLExcludes();
+		excludes.setExcludePackages(null);
+
+		List<String> excludedPackages = excludes.getExcludePackages();
+		assertTrue(excludedPackages.isEmpty());
+	}
+
+	@Test
+	public void setExcludeClasses_nullValue_ShouldReturnEmptyList() throws YAMLConfigException {
+		YAMLExcludes excludes = new YAMLExcludes();
+		excludes.setExcludeClasses(null);
+
+		List<String> excludedClasses = excludes.getExcludeClasses();
+		assertTrue(excludedClasses.isEmpty());
+	}
 }

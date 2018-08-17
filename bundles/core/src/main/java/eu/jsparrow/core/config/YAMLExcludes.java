@@ -26,9 +26,10 @@ public class YAMLExcludes {
 	}
 
 	public void setExcludeModules(List<String> excludeModules) {
-		if (null != excludeModules) {
-			this.excludeModules = excludeModules;
+		if (null == excludeModules) {
+			return;
 		}
+		this.excludeModules = excludeModules;
 	}
 
 	public List<String> getExcludePackages() {
@@ -36,9 +37,10 @@ public class YAMLExcludes {
 	}
 
 	public void setExcludePackages(List<String> excludePackages) {
-		if (null != excludePackages) {
-			this.excludePackages = excludePackages;
+		if (null == excludePackages) {
+			return;
 		}
+		this.excludePackages = excludePackages;
 	}
 
 	public List<String> getExcludeClasses() {
@@ -46,9 +48,10 @@ public class YAMLExcludes {
 	}
 
 	public void setExcludeClasses(List<String> excludeClasses) {
-		if (null != excludeClasses) {
-			this.excludeClasses = excludeClasses;
+		if (null == excludeClasses) {
+			return;
 		}
+		this.excludeClasses = excludeClasses;
 	}
 
 	@SuppressWarnings("nls")
