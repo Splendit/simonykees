@@ -53,6 +53,9 @@ public class ExcludedModules {
 		}
 
 		YAMLExcludes excludes = rootYamlConfig.getExcludes();
+		if (null == excludes) {
+			return Collections.emptyList();
+		}
 		List<String> excludedModules = excludes.getExcludeModules();
 		if (!excludedModules.isEmpty()) {
 			logInfo = String.format("Excluded modules: %s ", excludedModules.stream() //$NON-NLS-1$
