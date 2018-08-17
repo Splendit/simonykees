@@ -41,6 +41,18 @@ public class CompilationUnitProviderTest {
 	}
 
 	@Test
+	public void getFilteredCompilationUnits_excludesIsNull_shouldReturnAllCompilationUnits() {
+		YAMLExcludes excludes = null;
+
+		ICompilationUnit compUnitMock = mock(ICompilationUnit.class);
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes);
+
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+
+		assertEquals(1, compilationUnits.size());
+	}
+
+	@Test
 	public void getFilteredCompilationUnits_classFromExcludedPackage_shouldBeIgnored() throws JavaModelException {
 		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
 		when(packageDeclarationMock.getElementName()).thenReturn("eu.jsparrow");
@@ -49,9 +61,10 @@ public class CompilationUnitProviderTest {
 
 		assertTrue(compilationUnits.isEmpty());
 	}
-	
+
 	@Test
-	public void getFilteredCompilationUnits_classWithoutPackageDeclaration_shouldNotBeIgnored() throws JavaModelException {
+	public void getFilteredCompilationUnits_classWithoutPackageDeclaration_shouldNotBeIgnored()
+			throws JavaModelException {
 		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] {});
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();

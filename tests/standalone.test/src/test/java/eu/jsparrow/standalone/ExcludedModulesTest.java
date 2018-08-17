@@ -26,7 +26,7 @@ public class ExcludedModulesTest {
 
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private YAMLConfig yamlConfigStub;
-
+	
 	@Test
 	public void get_useDefaultConfig_shouldReturnEmptyExclusions() throws StandaloneException {
 		excludedModules = new TestableExcludedModules(true, SOME_PROJECT);
@@ -63,6 +63,16 @@ public class ExcludedModulesTest {
 		List<String> exclusionsFromConfig = Collections.emptyList();
 		when(yamlConfigStub.getExcludes()
 			.getExcludeModules()).thenReturn(exclusionsFromConfig);
+
+		List<String> result = excludedModules.get();
+
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	public void get_WithEmptyExcludes_shouldReturnEmptyExlusionsList() {
+		excludedModules = new TestableExcludedModules(false, SOME_PROJECT);
+		when(yamlConfigStub.getExcludes()).thenReturn(null);
 
 		List<String> result = excludedModules.get();
 

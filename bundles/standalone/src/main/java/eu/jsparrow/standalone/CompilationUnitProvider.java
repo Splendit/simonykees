@@ -33,16 +33,15 @@ public class CompilationUnitProvider {
 	private static final Logger logger = LoggerFactory.getLogger(CompilationUnitProvider.class);
 
 	/**
-	 * Creates an instance of {@link CompilationUnitProvider} from the list of
-	 * all {@link ICompilationUnit} of a project and an instance of
-	 * {@link YAMLExcludes} which contains the modules, packages and the classes
-	 * that should not be refactored.
+	 * Creates an instance of {@link CompilationUnitProvider} from the list of all
+	 * {@link ICompilationUnit} of a project and an instance of {@link YAMLExcludes}
+	 * which contains the modules, packages and the classes that should not be
+	 * refactored.
 	 * 
-	 * @param compilationUnits
-	 *            list of the {@link ICompilationUnit}s of a project
-	 * @param excludes
-	 *            an instance of {@link YAMLExcludes} representing the modules,
-	 *            packages and classes that should be excluded from refactoring.
+	 * @param compilationUnits list of the {@link ICompilationUnit}s of a project
+	 * @param excludes         an instance of {@link YAMLExcludes} representing the
+	 *                         modules, packages and classes that should be excluded
+	 *                         from refactoring.
 	 */
 	public CompilationUnitProvider(List<ICompilationUnit> compilationUnits, YAMLExcludes excludes) {
 		this.compilationUnits = compilationUnits;
@@ -50,28 +49,30 @@ public class CompilationUnitProvider {
 	}
 
 	/**
-	 * Finds the list of {@link ICompilationUnit}s from
-	 * {@link #compilationUnits} that are allowed to be refactored.
+	 * Finds the list of {@link ICompilationUnit}s from {@link #compilationUnits}
+	 * that are allowed to be refactored.
 	 * 
 	 * @return the list of compilation units that are allowed to be refactored.
 	 */
 	public List<ICompilationUnit> getFilteredCompilationUnits() {
 
+		if (null == excludes) {
+			return compilationUnits;
+		}
+
 		Collector<CharSequence, ?, String> collector = Collectors.joining(","); //$NON-NLS-1$
 
 		List<String> excludedPackages = excludes.getExcludePackages();
-		String logInfo = excludedPackages.stream()
-			.collect(collector);
+		String logInfo = excludedPackages.stream().collect(collector);
 		logger.debug("Excluded packages: {} ", logInfo); //$NON-NLS-1$
 
 		List<String> exludedClasses = excludes.getExcludeClasses();
-		logInfo = exludedClasses.stream()
-			.collect(collector);
+		logInfo = exludedClasses.stream().collect(collector);
 		logger.debug("Excluded classes: {} ", logInfo); //$NON-NLS-1$
 
 		return compilationUnits.stream()
-			.filter(compilationUnit -> isIncludedForRefactoring(compilationUnit, excludedPackages, exludedClasses))
-			.collect(Collectors.toList());
+				.filter(compilationUnit -> isIncludedForRefactoring(compilationUnit, excludedPackages, exludedClasses))
+				.collect(Collectors.toList());
 	}
 
 	private boolean isIncludedForRefactoring(ICompilationUnit compUnit, List<String> exludedPackages,
@@ -107,28 +108,23 @@ public class CompilationUnitProvider {
 	 * Filters all excluded classes defined in yaml file with class names that
 	 * occurred at least once in list of compilation units
 	 * 
-	 * @return classes defined in excludes section of yaml file that did not
-	 *         occur in project
+	 * @return classes defined in excludes section of yaml file that did not occur
+	 *         in project
 	 */
 	public Set<String> getUnusedExcludedClasses() {
-		return excludes.getExcludeClasses()
-			.stream()
-			.filter(excludedClass -> !usedExcludedClasses.contains(excludedClass))
-			.collect(Collectors.toSet());
+		return excludes.getExcludeClasses().stream()
+				.filter(excludedClass -> !usedExcludedClasses.contains(excludedClass)).collect(Collectors.toSet());
 	}
 
 	/**
-	 * Filters all excluded packages defined in yaml file with package names
-	 * that occurred at least once as package declaration in list of compilation
-	 * units
+	 * Filters all excluded packages defined in yaml file with package names that
+	 * occurred at least once as package declaration in list of compilation units
 	 * 
-	 * @return packages defined in excludes section of yaml file that did not
-	 *         occur in project
+	 * @return packages defined in excludes section of yaml file that did not occur
+	 *         in project
 	 */
 	public Set<String> getUnusedExcludedPackages() {
-		return excludes.getExcludePackages()
-			.stream()
-			.filter(excludedPackage -> !usedExcludedPackages.contains(excludedPackage))
-			.collect(Collectors.toSet());
+		return excludes.getExcludePackages().stream()
+				.filter(excludedPackage -> !usedExcludedPackages.contains(excludedPackage)).collect(Collectors.toSet());
 	}
 }
