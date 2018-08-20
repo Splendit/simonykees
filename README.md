@@ -18,6 +18,10 @@ Read instructions at: [Eclipse](https://confluence.splendit.loc/display/Tutorial
 
     mvn clean verify -fae
 
+**Note (1):** Since 2.5.2 the installation for **neon** and **oxygen** requires the 2.5.1 bundle of the organize imports bundle. To support this the easiest way with a local build is to add **dependencies.jsparrow.eu** as an additional update site to eclipse.
+
+**Sidenote to (1):** If you install jsparrow from the packagedrone, this artifact should be resolved within the space of the packagedrone update site. Further if you install it from **update.jsparrow.eu** the referenced update site is within the update site of the artifact - this addition is only done if you build the artifact with proguard and production. For additional information see plugin configuration within *releng/site/pom.xml*
+
 ## version update ##
 
     mvn org.eclipse.tycho:tycho-versions-plugin:1.0.0:set-version -DnewVersion=<newVersion>
