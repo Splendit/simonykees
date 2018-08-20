@@ -600,7 +600,7 @@
 			<distributionManagement>
 				<repository>
 					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/a32ae4dc-cb4b-4e24-bd06-f9a8b70beccf</url>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-develop-test-noProguard</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -609,7 +609,7 @@
 			<distributionManagement>
 				<repository>
 					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/7a1744d9-a035-4a13-94a6-2cda46bb451c</url>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-develop-test-proguard</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -618,7 +618,7 @@
 			<distributionManagement>
 				<repository>
 					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/653a7028-10df-46ba-b767-fb84d9568e25</url>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-master-test-noProguard</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -627,7 +627,7 @@
 			<distributionManagement>
 				<repository>
 					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/01c6ea10-b7f6-44a5-8198-02d8d76f62d6</url>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-master-test-proguard</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -636,7 +636,7 @@
 			<distributionManagement>
 				<repository>
 					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/ba0aba2a-c2dc-4b08-afd9-75d16b083bc8</url>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-master-production-noProguard</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -645,7 +645,7 @@
 			<distributionManagement>
 				<repository>
 					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/60a872b9-167b-4a41-a1d3-f2d6ca0df79d</url>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-master-production-proguard</url>
 				</repository>
 			</distributionManagement>
 		</profile>
@@ -654,7 +654,7 @@
 			<distributionManagement>
 				<repository>
 					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/76310b5f-bf75-4782-bd20-c44376584fc5</url>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jSparrow-release-candidate</url>
 				</repository>
 			</distributionManagement>
 		</profile>
