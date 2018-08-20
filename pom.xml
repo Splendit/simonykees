@@ -98,6 +98,13 @@
 		<url>https://jenkins.splendit.loc/view/simonykees/</url>
 	</ciManagement>
 
+	<distributionManagement>
+		<repository>
+			<id>pdrone</id>
+			<url>${packagedrone.url.complete}</url>
+		</repository>
+	</distributionManagement>
+
 	<properties>
 
 		<!-- skipping install and deployment of non-site modules -->
@@ -160,6 +167,17 @@
 
 		<!-- Workaround for surefire-argline bug. Required to make Jacoco work -->
 		<test-argline>${tycho.test.jvmArgs} -Dfile.encoding=UTF-8</test-argline>
+
+		<!-- The packagedrone url has to be set differently for upload and download -->
+		<!-- Upload: used in distributionManagement for uploading to packagedrone -->
+		<!-- Download: used in releng/site to provide a p2 repository for version 
+			2.5.1 -->
+		<packagedrone.url.complete>${packagedrone.upload.prefix}${packagedrone.channel.suffix}</packagedrone.url.complete>
+		<packagedrone.upload.prefix>http://packagedrone-vm-01.splendit.loc:8080/maven/</packagedrone.upload.prefix>
+		<packagedrone.download.prefix>http://packagedrone-vm-01.splendit.loc:8080/p2/</packagedrone.download.prefix>
+		<!-- The packagedrone URL is set by activating certain profiles -->
+		<packagedrone.channel.suffix>not yet set (set by profile)</packagedrone.channel.suffix>
+
 	</properties>
 
 	<repositories>
@@ -177,7 +195,7 @@
 			<id>photon</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/releases/photon/</url>
-        </repository>
+		</repository>
 		<repository>
 			<id>netlicensing</id>
 			<layout>p2</layout>
@@ -588,68 +606,49 @@
 		</profile>
 
 		<!-- all deployment channels on packagedrone -->
+		<!-- we only set the channel url suffix here -->
+		<!-- Example: "jenkins-jSparrow-develop-test-noProguard" instead of "http://packagedrone-vm-01.splendit.loc:8080/p2/jenkins-jSparrow-develop-test-noProguard" -->
 		<profile>
 			<id>develop-test-noProguard</id>
-			<distributionManagement>
-				<repository>
-					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-develop-test-noProguard</url>
-				</repository>
-			</distributionManagement>
+			<properties>
+				<packagedrone.channel.suffix>jenkins-jSparrow-develop-test-noProguard</packagedrone.channel.suffix>
+			</properties>
 		</profile>
 		<profile>
 			<id>develop-test-proguard</id>
-			<distributionManagement>
-				<repository>
-					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-develop-test-proguard</url>
-				</repository>
-			</distributionManagement>
+			<properties>
+				<packagedrone.channel.suffix>jenkins-jSparrow-develop-test-proguard</packagedrone.channel.suffix>
+			</properties>
 		</profile>
 		<profile>
 			<id>master-test-noProguard</id>
-			<distributionManagement>
-				<repository>
-					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-master-test-noProguard</url>
-				</repository>
-			</distributionManagement>
+			<properties>
+				<packagedrone.channel.suffix>jenkins-jSparrow-master-test-noProguard</packagedrone.channel.suffix>
+			</properties>
 		</profile>
 		<profile>
 			<id>master-test-proguard</id>
-			<distributionManagement>
-				<repository>
-					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-master-test-proguard</url>
-				</repository>
-			</distributionManagement>
+			<properties>
+				<packagedrone.channel.suffix>jenkins-jSparrow-master-test-proguard</packagedrone.channel.suffix>
+			</properties>
 		</profile>
 		<profile>
 			<id>master-production-noProguard</id>
-			<distributionManagement>
-				<repository>
-					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-master-production-noProguard</url>
-				</repository>
-			</distributionManagement>
+			<properties>
+				<packagedrone.channel.suffix>jenkins-jSparrow-master-production-noProguard</packagedrone.channel.suffix>
+			</properties>
 		</profile>
 		<profile>
 			<id>master-production-proguard</id>
-			<distributionManagement>
-				<repository>
-					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-master-production-proguard</url>
-				</repository>
-			</distributionManagement>
+			<properties>
+				<packagedrone.channel.suffix>jenkins-jSparrow-master-production-proguard</packagedrone.channel.suffix>
+			</properties>
 		</profile>
 		<profile>
 			<id>releaseCandidate</id>
-			<distributionManagement>
-				<repository>
-					<id>pdrone</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jSparrow-release-candidate</url>
-				</repository>
-			</distributionManagement>
+			<properties>
+				<packagedrone.channel.suffix>jSparrow-release-candidate</packagedrone.channel.suffix>
+			</properties>
 		</profile>
 	</profiles>
 

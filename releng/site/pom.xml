@@ -17,6 +17,10 @@
 	<properties>
 		<!-- skipping install and deployment of non-site modules -->
 		<maven.deploy.skip>false</maven.deploy.skip>
+
+		<!-- Here we need the download url of the packagedrone channel -->
+		<!-- We override how the url is built in the root pom -->
+		<packagedrone.url.complete>${packagedrone.download.prefix}${packagedrone.channel.suffix}</packagedrone.url.complete>
 	</properties>
 
 	<build>
@@ -28,49 +32,56 @@
 					<includeAllDependencies>false</includeAllDependencies>
 				</configuration>
 			</plugin>
+
+			<!-- workaround https://bugs.eclipse.org/bugs/show_bug.cgi?id=453708 -->
+
+			<!-- tycho is not able to process additional repository properties of 
+				category.xml -->
+
+			<!-- this plugin adds an additional repository to the category.xml -->
+
+			<!-- this is currently required to give our released plugin an additional 
+				update site for the legacy rules.imports bundle, which supports eclipse versions 
+				prior to photon -->
+
+			<!-- http://dependencies.jsparrow.eu will host the 2.5.1 release of the 
+				version which contains the legacy rules.imports bundle artifact -->
+
+			<!-- contrary to productive builds, all development test builds have access 
+				to the legacy bundle from their package-drone channel -->
+			<plugin>
+				<groupId>org.jboss.tools.tycho-plugins</groupId>
+				<artifactId>repository-utils</artifactId>
+				<version>1.1.0</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>generate-repository-facade</goal>
+						</goals>
+						<configuration>
+							<associateSites>
+								<!-- Has been overridden -->
+								<associateSite>${packagedrone.url.complete}</associateSite>
+							</associateSites>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<profiles>
 		<profile>
+			<!-- Only for the production version we want a p2 url that is reachable 
+				from the outside -->
+			<!-- We override the configuration from the root pom (which will be used 
+				for all other profiles) -->
 			<id>master-production-proguard</id>
-			<build>
-				<plugins>
-					<!-- workaround https://bugs.eclipse.org/bugs/show_bug.cgi?id=453708 -->
-
-					<!-- tycho is not able to process additional repository properties of 
-						category.xml -->
-
-					<!-- this plugin adds an additional repository to the category.xml -->
-
-					<!-- this is currently required to give our released plugin an additional 
-						update site for the legacy rules.imports bundle, which supports eclipse versions 
-						prior to photon -->
-
-					<!-- http://dependencies.jsparrow.eu will host the 2.5.1 release of 
-						the version which contains the legacy rules.imports bundle artifact -->
-
-					<!-- contrary to productive builds, all development test builds have 
-						access to the legacy bundle from their package-drone channel -->
-					<plugin>
-						<groupId>org.jboss.tools.tycho-plugins</groupId>
-						<artifactId>repository-utils</artifactId>
-						<version>1.1.0</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>generate-repository-facade</goal>
-								</goals>
-								<configuration>
-									<associateSites>
-										<associateSite>http://dependencies.jsparrow.eu/</associateSite>
-									</associateSites>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
+			<properties>
+				<!-- Will be used to build the complete url -->
+				<packagedrone.download.prefix></packagedrone.download.prefix>
+				<packagedrone.channel.suffix>http://dependencies.jsparrow.eu</packagedrone.channel.suffix>
+			</properties>
 		</profile>
 	</profiles>
 
