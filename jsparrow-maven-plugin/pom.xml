@@ -18,13 +18,6 @@
 		<proguard.plugin.version>2.0.14</proguard.plugin.version>
 	</properties>
 
-	<distributionManagement>
-		<repository>
-			<id>pdrone</id>
-			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/548d804f-80df-4217-b3ea-a99abbfb9356</url>
-		</repository>
-	</distributionManagement>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.maven.plugin-testing</groupId>
