@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collector;
@@ -39,6 +40,7 @@ import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -479,9 +481,44 @@ public class StandaloneConfig {
 			return;
 		}
 
+		checkIfEnabledAndApplyRenamingRule();
+
+		// checkIfEnabledAndApplyLoggerRule();
+
+		applyRestOfTheRules();
+
+	}
+
+	private void checkIfEnabledAndApplyRenamingRule() throws StandaloneException {
+		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
+		if (!YAMLConfigUtil.isEnabledRenamingRule(yamlConfig)) {
+			return;
+		}
+		try {
+			PublicFieldsRenamingRule renamingRule = YAMLConfigUtil.getRenamingRule(yamlConfig);
+
+			prepareRenamingRule();
+
+			applyRules(Collections.singletonList(renamingRule));
+		} catch (YAMLConfigException e) {
+			throw new StandaloneException(e.getMessage(), e);
+		}
+	}
+
+	private void prepareRenamingRule() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void applyRestOfTheRules() throws StandaloneException {
 		List<RefactoringRule> projectRules = getProjectRules();
 		List<RefactoringRule> rules = getSelectedRules(projectRules);
 
+		applyRules(rules);
+	}
+
+	private void applyRules(List<RefactoringRule> rules) throws StandaloneException {
+		refactoringPipeline.clearRules();
 		refactoringPipeline.setRules(rules);
 
 		if (!rules.isEmpty()) {

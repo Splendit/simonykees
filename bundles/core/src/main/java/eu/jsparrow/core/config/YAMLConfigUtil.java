@@ -24,6 +24,7 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
 import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 
@@ -321,5 +322,31 @@ public class YAMLConfigUtil {
 			throw new YAMLConfigException(exceptionMessage);
 		}
 
+	}
+
+	/**
+	 * Checks if configuration for RenamingRule exists in provided YAMLConfig
+	 * 
+	 * @param yamlConfig
+	 *            YAML configuration for the project
+	 * @return true if RenamingRule configuration exists, false otherwise
+	 */
+	public static boolean isEnabledRenamingRule(YAMLConfig yamlConfig) {
+		return (null != yamlConfig.getYamlRenamingRule());
+	}
+
+	/**
+	 * 
+	 * @param yamlConfig
+	 * @return
+	 */
+	public static PublicFieldsRenamingRule getRenamingRule(YAMLConfig yamlConfig) throws YAMLConfigException {
+		YAMLRenamingRule yamlRenamingRule = yamlConfig.getYamlRenamingRule();
+
+		yamlRenamingRule.getFieldTypes();
+		yamlRenamingRule.getDollarReplacementOption();
+		yamlRenamingRule.getUnderscoreReplacementOption();
+
+		return null;
 	}
 }

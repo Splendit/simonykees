@@ -650,4 +650,8 @@ public class RefactoringPipeline {
 		return refactoringStates;
 	}
 
+	public void clearRules() {
+		rules.clear();
+	}
+
 }

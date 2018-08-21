@@ -25,6 +25,8 @@ public class YAMLConfig {
 	private String selectedProfile;
 
 	private YAMLExcludes excludes;
+	
+	private YAMLRenamingRule yamlRenamingRule;
 
 	public YAMLConfig() {
 		this.rules = new LinkedList<>();
@@ -118,6 +120,14 @@ public class YAMLConfig {
 	
 	public void setExcludes(YAMLExcludes excludes) {
 		this.excludes = excludes;
+	}
+
+	public YAMLRenamingRule getYamlRenamingRule() {
+		return yamlRenamingRule;
+	}
+
+	public void setYamlRenamingRule(YAMLRenamingRule yamlRenamingRule) {
+		this.yamlRenamingRule = yamlRenamingRule;
 	}
 
 	@SuppressWarnings("nls")
