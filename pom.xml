@@ -176,7 +176,8 @@
 		<packagedrone.upload.prefix>http://packagedrone-vm-01.splendit.loc:8080/maven/</packagedrone.upload.prefix>
 		<packagedrone.download.prefix>http://packagedrone-vm-01.splendit.loc:8080/p2/</packagedrone.download.prefix>
 		<!-- The packagedrone URL is set by activating certain profiles -->
-		<packagedrone.channel.suffix>not yet set (set by profile)</packagedrone.channel.suffix>
+		<!-- The (develop) test noProguard is used when no other profile is specified -->
+		<packagedrone.channel.suffix>jenkins-jSparrow-develop-test-noProguard</packagedrone.channel.suffix>
 
 	</properties>
 
