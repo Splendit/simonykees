@@ -92,5 +92,20 @@ public class FieldDeclarationVisitorFactory {
 
 		return Status.OK;
 	}
+	
+	public static int prepareRenaming(List<ICompilationUnit> selectedJavaElements, IJavaProject selectedJavaProjekt,
+			FieldDeclarationASTVisitor visitor) {
+		for (ICompilationUnit compilationUnit : selectedJavaElements) {
+			if (!compilationUnit.getJavaProject()
+				.equals(selectedJavaProjekt)) {
+				return Status.WARNING;
+			}
+
+			CompilationUnit cu = RefactoringUtil.parse(compilationUnit);
+			cu.accept(visitor);
+		}
+
+		return Status.OK;
+	}
 
 }

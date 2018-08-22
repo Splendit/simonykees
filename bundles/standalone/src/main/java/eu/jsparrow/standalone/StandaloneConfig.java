@@ -6,7 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -21,9 +24,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -35,10 +40,17 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
+import eu.jsparrow.core.config.YAMLExcludes;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorFactory;
+import eu.jsparrow.core.visitor.renaming.FieldMetaData;
+import eu.jsparrow.core.visitor.renaming.ReferenceSearchMatch;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -482,34 +494,116 @@ public class StandaloneConfig {
 		applyRules(getAllTheRules());
 	}
 
-	// private RefactoringRule configureLoggerRule() throws StandaloneException
-	// {
-	// try {
-	// return YAMLConfigUtil.configureLoggerRule(yamlConfig, javaProject);
-	// } catch (YAMLConfigException e) {
-	// throw new StandaloneException(e.getMessage(), e);
-	// }
-	//
-	// }
-	//
-	// private void checkIfEnabledAndApplyRenamingRule() throws
-	// StandaloneException {
-	// logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
-	// if (!YAMLConfigUtil.isEnabledRenamingRule(yamlConfig)) {
-	// return;
-	// }
-	// try {
-	// PublicFieldsRenamingRule renamingRule =
-	// YAMLConfigUtil.getRenamingRule(yamlConfig);
-	//
-	// prepareRenamingRule();
-	//
-	// applyRules(Collections.singletonList(renamingRule));
-	// } catch (YAMLConfigException e) {
-	// throw new StandaloneException(e.getMessage(), e);
-	// }
-	// }
+	private void checkIfEnabledAndApplyRenamingRule() throws StandaloneException {
+		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
+//		if (!YAMLConfigUtil.isEnabledRenamingRule(yamlConfig)) {
+//			return;
+//		}
+//		try {
 
+			List<ICompilationUnit> selectedJavaElements = // all compilation units of the project except for the excluded ones
+			refactoringPipeline.getRefactoringStates().stream().map(RefactoringState::getWorkingCopy).collect(Collectors.toList());
+			IJavaProject selectedJavaProjekt = this.javaProject;  // the current IJavaProject
+			IJavaProject iProject = this.javaProject; // the search scope. Should be broader than the current project. 
+			Map<String, Boolean> options =  // get the options from the renaming yml file
+			this.yamlConfig.getFieldRenamingOptions();
+			String modelSearchScope = "workspace"; // either workspace or project: Messages.RenameFieldsRuleWizardPageModel_scopeOption_project
+			FieldDeclarationASTVisitor visitor = FieldDeclarationVisitorFactory.visitorFactory(iProject, options,
+					modelSearchScope);
+			int status = FieldDeclarationVisitorFactory.prepareRenaming(selectedJavaElements, selectedJavaProjekt, visitor);
+			
+			if(status != 0) {
+				throw new StandaloneException("It is not safe to run the renaming rule");
+			}
+
+			List<FieldMetaData> metadata = visitor.getFieldMetaData();
+			List<FieldMetaData> filteredmetadata = new ArrayList<>();
+			
+			for(FieldMetaData md : metadata) {
+				if(!hasReferencesToExcludedFiles(md)) {
+					filteredmetadata.add(md);
+				}
+			}
+			
+			PublicFieldsRenamingRule renamingRule = new PublicFieldsRenamingRule(filteredmetadata, Collections.emptyList());
+
+			applyRules(Collections.singletonList(renamingRule));
+//		} catch (Exception e) {
+//			throw new StandaloneException(e.getMessage(), e);
+//		}
+	}
+
+	private boolean hasReferencesToExcludedFiles(FieldMetaData fieldMetaData) throws StandaloneException {
+		List<ICompilationUnit> compilationUnitsWithReferences = fieldMetaData.getReferences()
+				.stream()
+				.map(ReferenceSearchMatch::getICompilationUnit)
+				.collect(Collectors.toList());
+		
+		YAMLExcludes excludes = yamlConfig.getExcludes();
+		List<String> excludedClasses = excludes.getExcludeClasses();
+		List<String> excludedPackages = excludes.getExcludePackages();
+		
+		List<String> compilationUnitNames = new ArrayList<>();
+		
+		for(ICompilationUnit iCompilationUnit : compilationUnitsWithReferences) {
+			String name = computeCompilationUnitName(iCompilationUnit);
+			compilationUnitNames.add(name);
+		}
+		
+		Set<String> packages = new HashSet<>();
+		for(ICompilationUnit iCompilationUnit : compilationUnitsWithReferences) {
+			String packageName = computePackageName(iCompilationUnit);
+			packages.add(packageName);
+		}
+		
+		boolean hasReferencesOnExcludedClasses = excludedClasses.stream().anyMatch(compilationUnitNames::contains);
+		if(hasReferencesOnExcludedClasses) {
+			return true;
+		}
+		boolean hasReferencesOnExcludedPackages = excludedPackages.stream().anyMatch(packages::contains);
+		if(hasReferencesOnExcludedPackages) {
+			return true;
+		}
+		
+		String currentProjectName = this.javaProject.getElementName();
+		/*
+		 * TODO: this is not checking for excluded modules but for any moudle other than the current one. It odes not belong to this method
+		 */
+		return compilationUnitsWithReferences.stream().map(icu -> icu.getJavaProject().getElementName()).anyMatch(name -> !currentProjectName.equals(name));
+	}
+
+	private String computeCompilationUnitName(ICompilationUnit icu) throws StandaloneException {
+		/*
+		 * TODO: this is duplicated functionality. See: CompilationUnitProvider::isIncludedForRefactoring
+		 * Extract the common functionalities in a second class, or ... do sth.
+		 */
+		
+		String name = icu.getElementName();
+		String packageName = computePackageName(icu);
+		if(packageName.isEmpty()) {
+			return name;
+		}
+		return packageName + "." + name;
+	}
+	
+	private String computePackageName(ICompilationUnit icu) throws StandaloneException {
+		String packageName = "";
+		
+		IPackageDeclaration[] packages;
+		try {
+			packages = icu.getPackageDeclarations();
+		} catch (JavaModelException e) {
+			throw new StandaloneException(String.format("Cannot find package declaration of the compilation unit %s", icu.getElementName()));
+		}
+		
+		if(packages.length != 0) {
+			packageName = packages[0].getElementName();
+		}
+		
+		return packageName;
+	}
+	
+	private void applyRestOfTheRules() throws StandaloneException {
 	private List<RefactoringRule> getAllTheRules() throws StandaloneException {
 		List<RefactoringRule> projectRules = getProjectRules();
 		return getSelectedRules(projectRules);
@@ -553,6 +647,9 @@ public class StandaloneConfig {
 
 	protected List<RefactoringRule> getProjectRules() {
 		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
+		
+		
+		
 		return RulesContainer.getRulesForProject(getJavaProject(), true);
 	}
 
