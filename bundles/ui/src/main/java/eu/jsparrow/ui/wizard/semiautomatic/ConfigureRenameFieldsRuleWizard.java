@@ -29,8 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
-import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
-import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorFactory;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorWrapper;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
@@ -135,15 +134,16 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 				 * for references of the fields to be renamed.
 				 */
 				preRefactoring();
-				FieldDeclarationASTVisitor visitor = createVisitor();
+				FieldDeclarationVisitorWrapper visitorWrapper = new FieldDeclarationVisitorWrapper(selectedJavaProjekt,
+						model.getSearchScope());
 
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
 				SubMonitor child = subMonitor.split(70);
 				child.setWorkRemaining(selectedJavaElements.size());
 				child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
-				int prepareStatus = FieldDeclarationVisitorFactory.prepareRenaming(selectedJavaElements,
-						selectedJavaProjekt, visitor, child);
+
+				int prepareStatus = visitorWrapper.prepareRenaming(selectedJavaElements, model.getOptionsMap(), child);
 
 				if (IStatus.INFO == prepareStatus) {
 					WizardMessageDialog.synchronizeWithUIShowMultiprojectMessage();
@@ -157,7 +157,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 				SubMonitor childSecondPart = subMonitor.split(30);
 				childSecondPart.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
 
-				searchScopeAndPrepareRefactoringStates(childSecondPart, visitor);
+				searchScopeAndPrepareRefactoringStates(childSecondPart, visitorWrapper);
 
 				if (!canRefactor) {
 					return Status.CANCEL_STATUS;
@@ -236,37 +236,26 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 	}
 
 	/**
-	 * Creates {@link FieldDeclarationASTVisitor} and sets all options selected
-	 * by user from {@link ConfigureRenameFieldsRuleWizardPageModel}.
-	 * 
-	 * @return created and updated {@link FieldDeclarationASTVisitor}
-	 */
-	private FieldDeclarationASTVisitor createVisitor() {
-		Map<String, Boolean> options = model.getOptionsMap();
-		String modelSearchScope = model.getSearchScope();
-		return FieldDeclarationVisitorFactory.visitorFactory(selectedJavaProjekt, options, modelSearchScope);
-	}
-
-	/**
 	 * Collects target compilation units and creates refactoring states from
 	 * them.
 	 * 
 	 * @param subMonitor
 	 *            progress monitor
-	 * @param visitor
+	 * @param visitorWrapper
 	 *            {@link PublicFieldsRenamingRule} visitor
 	 */
-	private void searchScopeAndPrepareRefactoringStates(SubMonitor subMonitor, FieldDeclarationASTVisitor visitor) {
+	private void searchScopeAndPrepareRefactoringStates(SubMonitor subMonitor,
+			FieldDeclarationVisitorWrapper visitorWrapper) {
 
-		targetCompilationUnits = new ArrayList<>(visitor.getTargetIJavaElements());
+		targetCompilationUnits = new ArrayList<>(visitorWrapper.getTargetIJavaElements());
 		if (targetCompilationUnits.isEmpty()) {
 			WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
 			canRefactor = false;
 			return;
 		}
 
-		metadata = visitor.getFieldMetaData();
-		List<FieldMetaData> todosMetadata = visitor.getUnmodifiableFieldMetaData();
+		metadata = visitorWrapper.getFieldsMetaData();
+		List<FieldMetaData> todosMetadata = visitorWrapper.getUnmodifiableFieldsMetaData();
 
 		if (subMonitor.isCanceled()) {
 			return;

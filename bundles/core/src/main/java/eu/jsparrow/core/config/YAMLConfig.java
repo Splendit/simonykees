@@ -167,11 +167,11 @@ public class YAMLConfig {
 			options.put(fieldType, true);
 		}
 		
-		if("Upper".equals(dollarReplacement)) {
+		if("Upper".equals(dollarReplacement)) { //$NON-NLS-1$
 			options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_DOLLAR_SIGN, true);
 		}
 		
-		if("Upper".equals(underscoreReplacement)) {
+		if("Upper".equals(underscoreReplacement)) { //$NON-NLS-1$
 			options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_UNDERSCORE, true);
 		}
 		options.put(FieldDeclarationOptionKeys.ADD_COMMENT, addComments);
