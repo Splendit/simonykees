@@ -92,3 +92,27 @@ This usage of profiles would result in
 - Copying of the class file is done in the POM of the **license.netlicensing module**.
 - Default profile is **test**
 - Creating a test or production version has no bearing on obfuscation! 
+
+## Building for oxygen and neon
+
+For oxygen and neon we need the version 2.5.2 of the organize imports bundle. This is supplied by a packagedrone channel and can be activated as follows
+The bold profile is setting the remote channel
+
+### Test ###
+
+mvn clean verify
+
+### Production ###
+
+mvn clean verify -Dproduction **-Pmaster-production-noProguard**
+
+### Test 6 Proguard ###
+
+mvn clean verify -Dproguard **-PreleaseCandidate**
+
+**Note:** Is the most unstable channel and could have been reworked.
+
+### Production & Proguard ###
+
+mvn clean verify -Dproduction -Dproguard **-Pmaster-production-proguard**
+
