@@ -103,13 +103,13 @@ You can do so using the correct profiles during the build:
 # Non-obfuscated test builds require no profile specification to select the corresponding develop channel (by default, the develop-test-noProguard profile is selected)
 mvn clean verify
 # Obfuscated test builds may use a corresponding develop, master or release candidate profile
-mvn clean verify -Dproguard **-Pdevelop-test-proguard**
-mvn clean verify -Dproguard **-Pmaster-test-proguard**
-mvn clean verify -Dproguard **-PreleaseCandidate**
+mvn clean verify -Dproguard -Pdevelop-test-proguard
+mvn clean verify -Dproguard -Pmaster-test-proguard
+mvn clean verify -Dproguard -PreleaseCandidate
 # Non-obfuscated production builds should use the corresponding master profile
-mvn clean verify -Dproduction **-Pmaster-production-noProguard**
+mvn clean verify -Dproduction -Pmaster-production-noProguard
 # Obfuscated production builds should use the corresponding master profile
-mvn clean verify -Dproduction -Dproguard **-Pmaster-production-proguard**
+mvn clean verify -Dproduction -Dproguard -Pmaster-production-proguard
 ```
 
 **Note:** Jenkinsfile.groovy is a good reference for valid property / profile combinations. 
