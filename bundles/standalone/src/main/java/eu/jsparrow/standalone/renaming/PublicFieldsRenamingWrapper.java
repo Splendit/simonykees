@@ -26,6 +26,11 @@ public class PublicFieldsRenamingWrapper {
 		this.javaProject = javaProject;
 		this.visitorWrapper = new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE);
 	}
+	
+	protected PublicFieldsRenamingWrapper(IJavaProject javaProject, FieldDeclarationVisitorWrapper visitorWrapper) {
+		this.javaProject = javaProject;
+		this.visitorWrapper = visitorWrapper;
+	}
 
 	/**
 	 * 

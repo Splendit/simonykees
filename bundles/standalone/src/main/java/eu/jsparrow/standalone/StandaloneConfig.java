@@ -497,6 +497,7 @@ public class StandaloneConfig {
 		List<ICompilationUnit> iCompilationUnits = refactoringPipeline.getRefactoringStates()
 			.stream()
 			.map(RefactoringState::getWorkingCopy)
+			.map(ICompilationUnit::getPrimary)
 			.collect(Collectors.toList());
 		List<FieldMetaData> metaData = factory.findFields(iCompilationUnits, options);
 		return factory.createRule(metaData, compilationUnitsProvider);

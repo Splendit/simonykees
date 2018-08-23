@@ -167,4 +167,8 @@ public class PublicFieldsRenamingRule extends RefactoringRuleImpl<PublicFieldsRe
 
 		return documentChanges;
 	}
+	
+	public List<FieldMetaData> getMetaData() {
+		return this.metaData;
+	}
 }
