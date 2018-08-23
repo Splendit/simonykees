@@ -93,26 +93,23 @@ This usage of profiles would result in
 - Default profile is **test**
 - Creating a test or production version has no bearing on obfuscation! 
 
-## Building for oxygen and neon
+## Building for Oxygen and Neon
 
-For oxygen and neon we need the version 2.5.2 of the organize imports bundle. This is supplied by a packagedrone channel and can be activated as follows
-The bold profile is setting the remote channel
+In order to archive backwards compatibility with Oxygen and Neon, a specific version of the organize imports bundle is required when installing jSparrow in those IDEs. If you want to build a version to install it in Oxygen or Neon you will need to make sure the matching bundle is available by specifying a profile that corresponds with the selected properties. This is needed for the build to associate the correct Packagedrone channel. 
 
-### Test ###
+You can do so using the correct profiles during the build:
 
+```bash
+# Non-obfuscated test builds require no profile specification to select the corresponding develop channel (by default, the develop-test-noProguard profile is selected)
 mvn clean verify
-
-### Production ###
-
-mvn clean verify -Dproduction **-Pmaster-production-noProguard**
-
-### Test 6 Proguard ###
-
+# Obfuscated test builds may use a corresponding develop, master or release candidate profile
+mvn clean verify -Dproguard **-Pdevelop-test-proguard**
+mvn clean verify -Dproguard **-Pmaster-test-proguard**
 mvn clean verify -Dproguard **-PreleaseCandidate**
-
-**Note:** Is the most unstable channel and could have been reworked.
-
-### Production & Proguard ###
-
+# Non-obfuscated production builds should use the corresponding master profile
+mvn clean verify -Dproduction **-Pmaster-production-noProguard**
+# Obfuscated production builds should use the corresponding master profile
 mvn clean verify -Dproduction -Dproguard **-Pmaster-production-proguard**
+```
 
+**Note:** Jenkinsfile.groovy is a good reference for valid property / profile combinations. 
