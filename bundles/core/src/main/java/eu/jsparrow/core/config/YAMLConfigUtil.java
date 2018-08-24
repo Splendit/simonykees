@@ -348,31 +348,16 @@ public class YAMLConfigUtil {
 
 	}
 
+
 	/**
-	 * // * Checks if configuration for RenamingRule exists in provided
-	 * YAMLConfig // * // * @param yamlConfig // * YAML configuration for the
-	 * project // * @return true if RenamingRule configuration exists, false
-	 * otherwise //
+	 * 
+	 * @param yamlConfig
+	 * @return
 	 */
-	// public static boolean isEnabledRenamingRule(YAMLConfig yamlConfig) {
-	// return (null != yamlConfig.getRenamingRule());
-	// }
-	//
-	// /**
-	// *
-	// * @param yamlConfig
-	// * @return
-	// */
-	// public static PublicFieldsRenamingRule getRenamingRule(YAMLConfig
-	// yamlConfig) throws YAMLConfigException {
-	// YAMLRenamingRule yamlRenamingRule = getConfigForSelectedRenamingRule();
-	//
-	// yamlRenamingRule.getFieldTypes();
-	// yamlRenamingRule.getDollarReplacementOption();
-	// yamlRenamingRule.getUnderscoreReplacementOption();
-	//
-	// return null;
-	// }
+	 public static boolean isEnabledRenamingRule(YAMLConfig yamlConfig) {
+		 return null != yamlConfig.getRenamingRule();
+	 }
+
 
 	/**
 	 * 

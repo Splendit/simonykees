@@ -158,10 +158,10 @@ public class YAMLConfig {
 	}
 
 	public Map<String, Boolean> getFieldRenamingOptions() {
-		List<String> fieldTypes = yamlRenamingRule.getFieldTypes();
-		String dollarReplacement = yamlRenamingRule.getDollarReplacementOption();
-		String underscoreReplacement = yamlRenamingRule.getUnderscoreReplacementOption();
-		boolean addComments = yamlRenamingRule.isAddTodoComments();
+		List<String> fieldTypes = renamingRule.getFieldTypes();
+		String dollarReplacement = renamingRule.getDollarReplacementOption();
+		String underscoreReplacement = renamingRule.getUnderscoreReplacementOption();
+		boolean addComments = renamingRule.isAddTodoComments();
 		
 		Map<String, Boolean> options = new HashMap<>();
 		for(String fieldType : fieldTypes) {			

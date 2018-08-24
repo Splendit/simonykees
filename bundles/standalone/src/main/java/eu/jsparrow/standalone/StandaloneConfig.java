@@ -487,10 +487,21 @@ public class StandaloneConfig {
 			return;
 		}
 
-		applyRules(getAllTheRules());
-	}
+		List<RefactoringRule> rules = new ArrayList<>();
+
+		if(YAMLConfigUtil.isEnabledRenamingRule(yamlConfig) ) {
+			PublicFieldsRenamingRule renamingRule = setUpRenamingRule();
+			rules.add(renamingRule);
+		}
+		
 		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
-		rules.addAll(getSelectedRules(projectRules));
+		
+		
+		List<RefactoringRule> enabledRulesForThisProject = getProjectRules();
+		List<RefactoringRule> rulesOnSelectedProfile = getSelectedRules(enabledRulesForThisProject);
+		
+		rules.addAll(rulesOnSelectedProfile);
+	
 		applyRules(rules);
 	}
 
@@ -509,10 +520,6 @@ public class StandaloneConfig {
 			.collect(Collectors.toList());
 		List<FieldMetaData> metaData = factory.findFields(iCompilationUnits, options);
 		return factory.createRule(metaData, compilationUnitsProvider);
-	}
-
-	private boolean isRenamingRuleEnabled() {
-		return null != yamlConfig.getYamlRenamingRule();
 	}
 
 	private List<RefactoringRule> getAllTheRules() throws StandaloneException {
@@ -557,7 +564,6 @@ public class StandaloneConfig {
 
 	protected List<RefactoringRule> getProjectRules() {
 		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
-
 		return RulesContainer.getRulesForProject(getJavaProject(), true);
 	}
 
