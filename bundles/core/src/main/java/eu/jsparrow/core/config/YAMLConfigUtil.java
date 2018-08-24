@@ -4,16 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +21,6 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
 import eu.jsparrow.core.rule.RulesContainer;
-import eu.jsparrow.core.rule.impl.logger.LogLevelEnum;
-import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
-import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 
@@ -119,114 +110,6 @@ public class YAMLConfigUtil {
 		} catch (IOException e) {
 			throw new YAMLConfigException(e.getMessage(), e);
 		}
-	}
-
-	/**
-	 * this method selects the rules to be applied. for all rules it will be
-	 * checked if they are available in general and for the current project. if
-	 * a rule does not meet the criteria, it will be filtered.
-	 * 
-	 * <ul>
-	 * <li>the defaultProfile is checked and if it exists its rules will be
-	 * used</li>
-	 * <li>if no defaultProfile is set the rules in the rules-section of the
-	 * configuration file will be used</li>
-	 * <li>if the given defaultProfile is not specified or a selected rule does
-	 * not exist a {@link YAMLConfigException} will be thrown</li>
-	 * </ul>
-	 * 
-	 * @param config
-	 *            configuration
-	 * @param javaProject
-	 *            the current {@link IJavaElement}
-	 * @return a list of rules to be applied on the project
-	 * @throws YAMLConfigException
-	 */
-	public static List<RefactoringRule> getSelectedRulesFromConfig(YAMLConfig config,
-			List<RefactoringRule> projectRules) throws YAMLConfigException {
-		List<RefactoringRule> result;
-
-		String selectedProfile = config.getSelectedProfile();
-		YAMLLoggerRule yamlLoggerRule;
-		List<RefactoringRule> selectedRules;
-		if (selectedProfile != null && !selectedProfile.isEmpty()) {
-			String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
-					selectedProfile);
-			YAMLProfile configProfile = config.getProfiles()
-				.stream()
-				.filter(profile -> selectedProfile.equals(profile.getName()))
-				.findFirst()
-				.orElseThrow(() -> new YAMLConfigException(exceptionMessage));
-			selectedRules = getConfigRules(configProfile.getRules());
-			yamlLoggerRule = configProfile.getLoggerRule();
-
-		} else { // use all rules from config file
-			selectedRules = getConfigRules(config.getRules());
-			yamlLoggerRule = config.getLoggerRule();
-		}
-
-		result = projectRules.stream()
-			.filter(RefactoringRule::isEnabled)
-			.filter(selectedRules::contains)
-			.collect(Collectors.toList());
-
-		result.stream()
-			.filter(rule -> StandardLoggerRule.STANDARD_LOGGER_RULE_ID.equals(rule.getId()))
-			.findFirst()
-			.ifPresent(loggerRule -> configureLoggerRule(yamlLoggerRule, (StandardLoggerRule) loggerRule));
-
-		logSelectedRulesWithUnsatisfiedDeps(projectRules, selectedRules);
-
-		return result;
-	}
-
-	private static void logSelectedRulesWithUnsatisfiedDeps(List<RefactoringRule> projectRules,
-			List<RefactoringRule> selectedRules) {
-		List<RefactoringRule> unsatisfiedRules = projectRules.stream()
-			.filter(rule -> !rule.isEnabled())
-			.filter(selectedRules::contains)
-			.collect(Collectors.toList());
-
-		if (!unsatisfiedRules.isEmpty()) {
-			String loggerInfo = NLS.bind(Messages.YAMLConfigUtil_rulesWithUnsatisfiedRequirements,
-					unsatisfiedRules.toString());
-			logger.info(loggerInfo);
-		}
-	}
-
-	/**
-	 * this method takes a list of rule IDs and produces a list of rules
-	 * 
-	 * @param configRules
-	 *            rule IDs
-	 * @return list of rules ({@link RefactoringRule})
-	 * @throws YAMLConfigException
-	 *             is thrown if a given rule ID does not exist
-	 */
-	private static List<RefactoringRule> getConfigRules(List<String> configRules) throws YAMLConfigException {
-		List<RefactoringRule> rules = RulesContainer.getAllRules(true);
-		List<RefactoringRule> configSelectedRules = new LinkedList<>();
-		List<String> nonExistentRules = new LinkedList<>();
-
-		for (String configRule : configRules) {
-			Optional<RefactoringRule> currentRule = rules.stream()
-				.filter(rule -> rule.getId()
-					.equals(configRule))
-				.findFirst();
-			if (currentRule.isPresent()) {
-				configSelectedRules.add(currentRule.get());
-			} else {
-				nonExistentRules.add(configRule);
-			}
-		}
-
-		if (!nonExistentRules.isEmpty()) {
-			String exceptionMessage = NLS.bind(Messages.Activator_standalone_RulesDoNotExist,
-					nonExistentRules.toString());
-			throw new YAMLConfigException(exceptionMessage);
-		}
-
-		return configSelectedRules;
 	}
 
 	private static boolean isRuleExistent(String ruleId, boolean isStandalone) {
@@ -322,52 +205,6 @@ public class YAMLConfigUtil {
 		} else {
 			String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, profile);
 			throw new YAMLConfigException(exceptionMessage);
-		}
-
-	}
-
-	/**
-	 * 
-	 * @param yamlConfig
-	 * @return
-	 */
-	public static boolean isEnabledRenamingRule(YAMLConfig yamlConfig) {
-		return null != yamlConfig.getRenamingRule();
-	}
-
-	/**
-	 * 
-	 * @param yamlConfig
-	 * @return
-	 */
-	public static void configureLoggerRule(YAMLLoggerRule yamlLoggerRule, StandardLoggerRule loggerRule) {
-
-		if (null == yamlLoggerRule) {
-			loggerRule.activateDefaultOptions();
-			return;
-		}
-		Map<String, LogLevelEnum> selection = new HashMap<>();
-		selection.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, yamlLoggerRule.getSystemOutReplaceOption());
-		selection.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, yamlLoggerRule.getSystemErrReplaceOption());
-		selection.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY, yamlLoggerRule.getPrintStacktraceReplaceOption());
-		selection.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY,
-				yamlLoggerRule.getSystemOutPrintExceptionReplaceOption());
-		selection.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY,
-				yamlLoggerRule.getSystemErrPrintExceptionReplaceOption());
-		selection.put(StandardLoggerConstants.MISSING_LOG_KEY, yamlLoggerRule.getAddMissingLoggingStatement());
-
-		Map<String, String> selectionMap = selection.entrySet()
-			.stream()
-			.filter(map -> map.getValue() != null)
-			.collect(Collectors.toMap(Entry::getKey, map -> ((LogLevelEnum) map.getValue()).getLogLevel()));
-
-		if (null != yamlLoggerRule.getAttachExceptionObject()) {
-			selectionMap.put(StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT, yamlLoggerRule.getAttachExceptionObject()
-				.toString());
-		}
-
-		if (!selectionMap.isEmpty()) {
-			loggerRule.activateOptions(selectionMap);
 		}
 	}
 }

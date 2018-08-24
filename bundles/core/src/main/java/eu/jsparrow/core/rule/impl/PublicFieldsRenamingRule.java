@@ -38,12 +38,13 @@ public class PublicFieldsRenamingRule extends RefactoringRuleImpl<PublicFieldsRe
 
 	private List<FieldMetaData> metaData;
 	private List<FieldMetaData> todosMetaData;
+	public static final String PUBLIC_FIELDS_RENAMING_RULE_ID = "PublicFieldRenaming"; //$NON-NLS-1$
 
 	public PublicFieldsRenamingRule(List<FieldMetaData> metaData, List<FieldMetaData> todosMetaData) {
 		this.visitorClass = PublicFieldsRenamingASTVisitor.class;
 		this.metaData = metaData;
 		this.todosMetaData = todosMetaData;
-		this.id = "PublicFieldRenaming"; //$NON-NLS-1$
+		this.id = PUBLIC_FIELDS_RENAMING_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.PublicFieldsRenamingRule_name,
 				Messages.PublicFieldsRenamingRule_description, Duration.ofMinutes(15),
 				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY));

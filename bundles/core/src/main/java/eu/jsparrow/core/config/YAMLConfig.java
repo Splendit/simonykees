@@ -1,6 +1,5 @@
 package eu.jsparrow.core.config;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -156,28 +155,4 @@ public class YAMLConfig {
 		return "YAMLConfig [rules=" + rules + ", profiles=" + profiles + ", defaultProfile=" + selectedProfile + ", "
 				+ excludes.toString() + ", " + renamingRule.toString() + ", " + loggerRule.toString() + "]";
 	}
-
-	public Map<String, Boolean> getFieldRenamingOptions() {
-		List<String> fieldTypes = renamingRule.getFieldTypes();
-		String dollarReplacement = renamingRule.getDollarReplacementOption();
-		String underscoreReplacement = renamingRule.getUnderscoreReplacementOption();
-		boolean addComments = renamingRule.isAddTodoComments();
-		
-		Map<String, Boolean> options = new HashMap<>();
-		for(String fieldType : fieldTypes) {			
-			options.put(fieldType, true);
-		}
-		
-		if("Upper".equals(dollarReplacement)) { //$NON-NLS-1$
-			options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_DOLLAR_SIGN, true);
-		}
-		
-		if("Upper".equals(underscoreReplacement)) { //$NON-NLS-1$
-			options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_UNDERSCORE, true);
-		}
-		options.put(FieldDeclarationOptionKeys.ADD_COMMENT, addComments);
-		
-		return options;
-	}
-
 }

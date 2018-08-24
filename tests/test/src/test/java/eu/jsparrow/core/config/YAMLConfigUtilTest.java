@@ -83,24 +83,6 @@ public class YAMLConfigUtilTest {
 	}
 
 	@Test
-	public void getSelectedRulesFromConfig_InvalidSelectedProfile_ShouldThrowException() throws YAMLConfigException {
-		YAMLConfig config = new YAMLConfig();
-		config.setSelectedProfile("INVALID");
-		expectedException.expect(YAMLConfigException.class);
-		YAMLConfigUtil.getSelectedRulesFromConfig(config, new ArrayList<>());
-	}
-
-	@Test
-	public void getSelectedRulesFromConfig_WithoutProfileWithValidRules_ShouldReturnAllRules()
-			throws YAMLConfigException {
-		YAMLConfig config = new YAMLConfig();
-		config.getRules()
-			.add("TryWithResource");
-
-		YAMLConfigUtil.getSelectedRulesFromConfig(config, new ArrayList<>());
-	}
-
-	@Test
 	public void readConfig_NonExistentFile_ShouldThrowException() throws YAMLConfigException {
 		expectedException.expect(YAMLConfigException.class);
 		expectedException.expectMessage(

@@ -486,12 +486,6 @@ public class StandaloneConfigTest {
 		}
 
 		@Override
-		protected List<RefactoringRule> getSelectedRules(List<RefactoringRule> projectRules)
-				throws StandaloneException {
-			return Collections.singletonList(new CodeFormatterRule());
-		}
-
-		@Override
 		protected boolean isExistingProjectFileMoved() {
 			return existingProjectFileMoved;
 		}
@@ -505,6 +499,5 @@ public class StandaloneConfigTest {
 		protected boolean isExistingSettingsDirectoryMoved() {
 			return existingSettingsDirectoryMoved;
 		}
-
 	}
 }

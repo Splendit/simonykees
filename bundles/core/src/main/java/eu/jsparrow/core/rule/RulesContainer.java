@@ -108,10 +108,6 @@ public class RulesContainer {
 
 		List<RefactoringRule> rules = new LinkedList<>();
 		
-		if (isStandalone) {
-			rules.add(new StandardLoggerRule());
-		}
-		
 		rules.addAll(Arrays.asList(
 				/*
 				 * Coding conventions

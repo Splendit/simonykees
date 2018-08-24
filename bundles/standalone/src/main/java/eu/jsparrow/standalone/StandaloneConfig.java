@@ -34,14 +34,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
-import eu.jsparrow.core.config.YAMLConfigException;
-import eu.jsparrow.core.config.YAMLConfigUtil;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.Messages;
@@ -487,28 +486,34 @@ public class StandaloneConfig {
 			return;
 		}
 
+		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
+		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(yamlConfig, getProjectRules());
+
 		List<RefactoringRule> rules = new ArrayList<>();
 
-		if(YAMLConfigUtil.isEnabledRenamingRule(yamlConfig) ) {
-			PublicFieldsRenamingRule renamingRule = setUpRenamingRule();
+		if (ruleConfigurationWrapper.isSelectedRule(PublicFieldsRenamingRule.PUBLIC_FIELDS_RENAMING_RULE_ID)) {
+			Map<String, Boolean> options = ruleConfigurationWrapper.getFieldRenamingOptions();
+			PublicFieldsRenamingRule renamingRule = setUpRenamingRule(options);
 			rules.add(renamingRule);
 		}
-		
-		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
-		
-		
-		List<RefactoringRule> enabledRulesForThisProject = getProjectRules();
-		List<RefactoringRule> rulesOnSelectedProfile = getSelectedRules(enabledRulesForThisProject);
-		
-		rules.addAll(rulesOnSelectedProfile);
-	
+
+		if (ruleConfigurationWrapper.isSelectedRule(StandardLoggerRule.STANDARD_LOGGER_RULE_ID)) {
+			StandardLoggerRule loggerRule = ruleConfigurationWrapper
+				.configureLoggerRule(ruleConfigurationWrapper.getLoggerRuleConfiguration());
+			rules.add(loggerRule);
+		}
+
+		List<RefactoringRule> selectedAutomaticRules = ruleConfigurationWrapper.getSelectedAutomaticRules();
+		rules.addAll(selectedAutomaticRules);
+
 		applyRules(rules);
 	}
 
-	private PublicFieldsRenamingRule setUpRenamingRule() throws StandaloneException {
+	private PublicFieldsRenamingRule setUpRenamingRule(Map<String, Boolean> options)
+			throws StandaloneException {
 		PublicFieldsRenamingWrapper factory = new PublicFieldsRenamingWrapper(javaProject);
-		Map<String, Boolean> options = yamlConfig.getFieldRenamingOptions();
-		if(hasParent) {
+		
+		if (hasParent) {
 			options.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);
 			options.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, false);
 			options.put(FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS, false);
@@ -522,10 +527,6 @@ public class StandaloneConfig {
 		return factory.createRule(metaData, compilationUnitsProvider);
 	}
 
-	private List<RefactoringRule> getAllTheRules() throws StandaloneException {
-		List<RefactoringRule> projectRules = getProjectRules();
-		return getSelectedRules(projectRules);
-	}
 	private void applyRules(List<RefactoringRule> rules) throws StandaloneException {
 		refactoringPipeline.setRules(rules);
 
@@ -550,15 +551,6 @@ public class StandaloneConfig {
 			}
 		} else {
 			logger.info(Messages.Activator_standalone_noRulesSelected);
-		}
-	}
-
-	protected List<RefactoringRule> getSelectedRules(List<RefactoringRule> projectRules) throws StandaloneException {
-		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
-		try {
-			return YAMLConfigUtil.getSelectedRulesFromConfig(yamlConfig, projectRules);
-		} catch (YAMLConfigException e) {
-			throw new StandaloneException(e.getMessage(), e);
 		}
 	}
 
