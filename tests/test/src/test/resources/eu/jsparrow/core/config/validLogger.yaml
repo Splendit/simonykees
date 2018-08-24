@@ -1,0 +1,9 @@
+!jsparrow.config
+loggerRule:
+  systemOutReplaceOption: INFO
+  systemErrReplaceOption: ERROR
+  printStacktraceReplaceOption: ERROR
+  systemOutPrintExceptionReplaceOption: INFO
+  systemErrPrintExceptionReplaceOption: ERROR
+  newLoggingStatementOption: true
+  addMissingExceptionInLog: true

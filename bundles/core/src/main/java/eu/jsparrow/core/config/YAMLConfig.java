@@ -21,25 +21,32 @@ public class YAMLConfig {
 	 * this list holds all specified profiles (see {@link YAMLProfile}
 	 */
 	private List<YAMLProfile> profiles;
-	
+
 	private String selectedProfile;
 
 	private YAMLExcludes excludes;
-	
-	private YAMLRenamingRule yamlRenamingRule;
+
+	private YAMLRenamingRule renamingRule;
+
+	private YAMLLoggerRule loggerRule;
 
 	public YAMLConfig() {
 		this.rules = new LinkedList<>();
 		this.profiles = new LinkedList<>();
 		this.selectedProfile = ""; //$NON-NLS-1$
 		this.excludes = new YAMLExcludes();
+		this.renamingRule = new YAMLRenamingRule();
+		this.loggerRule = new YAMLLoggerRule();
 	}
 
-	public YAMLConfig(List<String> rules, List<YAMLProfile> profiles, String defaultProfile, YAMLExcludes excludes) {
+	public YAMLConfig(List<String> rules, List<YAMLProfile> profiles, String defaultProfile, YAMLExcludes excludes,
+			YAMLRenamingRule renamingRule, YAMLLoggerRule loggerRule) {
 		this.rules = rules;
 		this.profiles = profiles;
 		this.selectedProfile = defaultProfile;
 		this.excludes = excludes;
+		this.renamingRule = renamingRule;
+		this.loggerRule = loggerRule;
 	}
 
 	/**
@@ -113,27 +120,36 @@ public class YAMLConfig {
 	public void setSelectedProfile(String defaultProfile) {
 		this.selectedProfile = defaultProfile;
 	}
-	
+
 	public YAMLExcludes getExcludes() {
 		return excludes;
 	}
-	
+
 	public void setExcludes(YAMLExcludes excludes) {
 		this.excludes = excludes;
 	}
 
-	public YAMLRenamingRule getYamlRenamingRule() {
-		return yamlRenamingRule;
+	public YAMLRenamingRule getRenamingRule() {
+		return renamingRule;
 	}
 
-	public void setYamlRenamingRule(YAMLRenamingRule yamlRenamingRule) {
-		this.yamlRenamingRule = yamlRenamingRule;
+	public void setRenamingRule(YAMLRenamingRule renamingRule) {
+		this.renamingRule = renamingRule;
+	}
+
+	public YAMLLoggerRule getLoggerRule() {
+		return loggerRule;
+	}
+
+	public void setLoggerRule(YAMLLoggerRule loggerRule) {
+		this.loggerRule = loggerRule;
 	}
 
 	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
-		return "YAMLConfig [rules=" + rules + ", profiles=" + profiles + ", defaultProfile=" + selectedProfile + ", " + excludes.toString() + "]";
+		return "YAMLConfig [rules=" + rules + ", profiles=" + profiles + ", defaultProfile=" + selectedProfile + ", "
+				+ excludes.toString() + ", " + renamingRule.toString() + ", " + loggerRule.toString() + "]";
 	}
 
 }

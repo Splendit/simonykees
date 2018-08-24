@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -17,7 +16,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import eu.jsparrow.core.config.YAMLConfig;
+import eu.jsparrow.core.config.YAMLLoggerRule;
 import eu.jsparrow.core.config.YAMLProfile;
+import eu.jsparrow.core.config.YAMLRenamingRule;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 @SuppressWarnings("nls")
@@ -67,7 +68,8 @@ public class YAMLConfigurationWrapperTest {
 	public void updateProfile_shouldSetSelectedProfile() throws StandaloneException {
 		String profileName = "profile-name"; //$NON-NLS-1$
 		YAMLConfig yamlConfig = new YAMLConfig();
-		yamlConfig.setProfiles(Collections.singletonList(new YAMLProfile(profileName, Collections.emptyList())));
+		yamlConfig.setProfiles(Collections.singletonList(
+				new YAMLProfile(profileName, Collections.emptyList(), new YAMLRenamingRule(), new YAMLLoggerRule())));
 
 		yamlConfigurationWrapper.updateSelectedProfile(yamlConfig, profileName);
 
@@ -78,7 +80,8 @@ public class YAMLConfigurationWrapperTest {
 	public void updateProfile_NonExistingProflie_shouldThrowException() throws StandaloneException {
 		String profileName = "profile-name"; //$NON-NLS-1$
 		YAMLConfig yamlConfig = new YAMLConfig();
-		yamlConfig.setProfiles(Collections.singletonList(new YAMLProfile(profileName, Collections.emptyList())));
+		yamlConfig.setProfiles(Collections.singletonList(
+				new YAMLProfile(profileName, Collections.emptyList(), new YAMLRenamingRule(), new YAMLLoggerRule())));
 
 		expectedException.expect(StandaloneException.class);
 		expectedException.expectMessage("Profile [INVALID] does not exist");

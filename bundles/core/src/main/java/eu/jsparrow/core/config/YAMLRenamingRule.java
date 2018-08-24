@@ -3,6 +3,12 @@ package eu.jsparrow.core.config;
 import java.util.Arrays;
 import java.util.List;
 
+import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+
+/**
+ * Model class for {@link PublicFieldsRenamingRule} YAML data
+ *
+ */
 public class YAMLRenamingRule {
 
 	private List<String> fieldTypes;
@@ -59,4 +65,10 @@ public class YAMLRenamingRule {
 		this.addTodoComments = addTodoComments;
 	}
 
+	@Override
+	public String toString() {
+		return "YAMLRenamingRule [fieldTypes=" + fieldTypes + ", underscoreReplacementOption="
+				+ underscoreReplacementOption + ", dollarReplacementOption=" + dollarReplacementOption
+				+ ", addTodoComments=" + addTodoComments + "]";
+	}
 }

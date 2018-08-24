@@ -58,6 +58,7 @@ import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
 
@@ -106,6 +107,11 @@ public class RulesContainer {
 		List<RuleService> services = getExternalRuleServices();
 
 		List<RefactoringRule> rules = new LinkedList<>();
+		
+		if (isStandalone) {
+			rules.add(new StandardLoggerRule());
+		}
+		
 		rules.addAll(Arrays.asList(
 				/*
 				 * Coding conventions

@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,7 +26,8 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
 import eu.jsparrow.core.rule.RulesContainer;
-import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 
@@ -158,6 +161,16 @@ public class YAMLConfigUtil {
 					.filter(profileRules::contains)
 					.collect(Collectors.toList());
 
+				Optional<RefactoringRule> loggerRule = result.stream()
+					.filter(rule -> rule.getId()
+						.equals(StandardLoggerRule.STANDARD_LOGGER_RULE_ID))
+					.findFirst();
+				if (loggerRule.isPresent()) {
+					YAMLLoggerRule yamlLoggerRule = configProfile.get()
+						.getLoggerRule();
+					configureLoggerRule(yamlLoggerRule, (StandardLoggerRule) loggerRule.get());
+				}
+
 				logSelectedRulesWithUnsatisfiedDeps(projectRules, profileRules);
 			} else {
 				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
@@ -171,6 +184,15 @@ public class YAMLConfigUtil {
 				.filter(RefactoringRule::isEnabled)
 				.filter(configSelectedRules::contains)
 				.collect(Collectors.toList());
+
+			Optional<RefactoringRule> loggerRule = result.stream()
+				.filter(rule -> rule.getId()
+					.equals(StandardLoggerRule.STANDARD_LOGGER_RULE_ID))
+				.findFirst();
+			if (loggerRule.isPresent()) {
+				YAMLLoggerRule yamlLoggerRule = config.getLoggerRule();
+				configureLoggerRule(yamlLoggerRule, (StandardLoggerRule) loggerRule.get());
+			}
 
 			logSelectedRulesWithUnsatisfiedDeps(projectRules, configSelectedRules);
 		}
@@ -325,28 +347,78 @@ public class YAMLConfigUtil {
 	}
 
 	/**
-	 * Checks if configuration for RenamingRule exists in provided YAMLConfig
-	 * 
-	 * @param yamlConfig
-	 *            YAML configuration for the project
-	 * @return true if RenamingRule configuration exists, false otherwise
+	 * // * Checks if configuration for RenamingRule exists in provided
+	 * YAMLConfig // * // * @param yamlConfig // * YAML configuration for the
+	 * project // * @return true if RenamingRule configuration exists, false
+	 * otherwise //
 	 */
-	public static boolean isEnabledRenamingRule(YAMLConfig yamlConfig) {
-		return (null != yamlConfig.getYamlRenamingRule());
-	}
+	// public static boolean isEnabledRenamingRule(YAMLConfig yamlConfig) {
+	// return (null != yamlConfig.getRenamingRule());
+	// }
+	//
+	// /**
+	// *
+	// * @param yamlConfig
+	// * @return
+	// */
+	// public static PublicFieldsRenamingRule getRenamingRule(YAMLConfig
+	// yamlConfig) throws YAMLConfigException {
+	// YAMLRenamingRule yamlRenamingRule = getConfigForSelectedRenamingRule();
+	//
+	// yamlRenamingRule.getFieldTypes();
+	// yamlRenamingRule.getDollarReplacementOption();
+	// yamlRenamingRule.getUnderscoreReplacementOption();
+	//
+	// return null;
+	// }
 
 	/**
 	 * 
 	 * @param yamlConfig
 	 * @return
 	 */
-	public static PublicFieldsRenamingRule getRenamingRule(YAMLConfig yamlConfig) throws YAMLConfigException {
-		YAMLRenamingRule yamlRenamingRule = yamlConfig.getYamlRenamingRule();
+	public static void configureLoggerRule(YAMLLoggerRule yamlLoggerRule, StandardLoggerRule loggerRule) {
 
-		yamlRenamingRule.getFieldTypes();
-		yamlRenamingRule.getDollarReplacementOption();
-		yamlRenamingRule.getUnderscoreReplacementOption();
+		Map<String, String> selectionMap = new HashMap<>();
+		loggerRule.activateDefaultOptions();
 
-		return null;
+		if (null == yamlLoggerRule) {
+			return;
+		}
+		if (null != yamlLoggerRule.getSystemOutReplaceOption()) {
+			selectionMap.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, yamlLoggerRule.getSystemOutReplaceOption()
+				.getLogLevel());
+		}
+		if (null != yamlLoggerRule.getSystemErrReplaceOption()) {
+			selectionMap.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, yamlLoggerRule.getSystemErrReplaceOption()
+				.getLogLevel());
+		}
+		if (null != yamlLoggerRule.getPrintStacktraceReplaceOption()) {
+			selectionMap.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY,
+					yamlLoggerRule.getPrintStacktraceReplaceOption()
+						.getLogLevel());
+		}
+		if (null != yamlLoggerRule.getSystemOutPrintExceptionReplaceOption()) {
+			selectionMap.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY,
+					yamlLoggerRule.getSystemOutPrintExceptionReplaceOption()
+						.getLogLevel());
+		}
+		if (null != yamlLoggerRule.getSystemErrPrintExceptionReplaceOption()) {
+			selectionMap.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY,
+					yamlLoggerRule.getSystemErrPrintExceptionReplaceOption()
+						.getLogLevel());
+		}
+		if (null != yamlLoggerRule.getAddMissingLoggingStatement()) {
+			selectionMap.put(StandardLoggerConstants.MISSING_LOG_KEY, yamlLoggerRule.getAddMissingLoggingStatement()
+				.getLogLevel());
+		}
+		if (null != yamlLoggerRule.getAttachExceptionObject()) {
+			selectionMap.put(StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT, yamlLoggerRule.getAttachExceptionObject()
+				.toString());
+		}
+
+		if (!selectionMap.isEmpty()) {
+			loggerRule.activateOptions(selectionMap);
+		}
 	}
 }
