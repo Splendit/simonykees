@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,7 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
 import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.core.rule.impl.logger.LogLevelEnum;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
@@ -379,39 +381,25 @@ public class YAMLConfigUtil {
 	 */
 	public static void configureLoggerRule(YAMLLoggerRule yamlLoggerRule, StandardLoggerRule loggerRule) {
 
-		Map<String, String> selectionMap = new HashMap<>();
-		loggerRule.activateDefaultOptions();
-
 		if (null == yamlLoggerRule) {
+			loggerRule.activateDefaultOptions();
 			return;
 		}
-		if (null != yamlLoggerRule.getSystemOutReplaceOption()) {
-			selectionMap.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, yamlLoggerRule.getSystemOutReplaceOption()
-				.getLogLevel());
-		}
-		if (null != yamlLoggerRule.getSystemErrReplaceOption()) {
-			selectionMap.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, yamlLoggerRule.getSystemErrReplaceOption()
-				.getLogLevel());
-		}
-		if (null != yamlLoggerRule.getPrintStacktraceReplaceOption()) {
-			selectionMap.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY,
-					yamlLoggerRule.getPrintStacktraceReplaceOption()
-						.getLogLevel());
-		}
-		if (null != yamlLoggerRule.getSystemOutPrintExceptionReplaceOption()) {
-			selectionMap.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY,
-					yamlLoggerRule.getSystemOutPrintExceptionReplaceOption()
-						.getLogLevel());
-		}
-		if (null != yamlLoggerRule.getSystemErrPrintExceptionReplaceOption()) {
-			selectionMap.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY,
-					yamlLoggerRule.getSystemErrPrintExceptionReplaceOption()
-						.getLogLevel());
-		}
-		if (null != yamlLoggerRule.getAddMissingLoggingStatement()) {
-			selectionMap.put(StandardLoggerConstants.MISSING_LOG_KEY, yamlLoggerRule.getAddMissingLoggingStatement()
-				.getLogLevel());
-		}
+		Map<String, LogLevelEnum> selection = new HashMap<>();
+		selection.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, yamlLoggerRule.getSystemOutReplaceOption());
+		selection.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, yamlLoggerRule.getSystemErrReplaceOption());
+		selection.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY, yamlLoggerRule.getPrintStacktraceReplaceOption());
+		selection.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY,
+				yamlLoggerRule.getSystemOutPrintExceptionReplaceOption());
+		selection.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY,
+				yamlLoggerRule.getSystemErrPrintExceptionReplaceOption());
+		selection.put(StandardLoggerConstants.MISSING_LOG_KEY, yamlLoggerRule.getAddMissingLoggingStatement());
+
+		Map<String, String> selectionMap = selection.entrySet()
+			.stream()
+			.filter(map -> map.getValue() != null)
+			.collect(Collectors.toMap(Entry::getKey, map -> ((LogLevelEnum) map.getValue()).getLogLevel()));
+
 		if (null != yamlLoggerRule.getAttachExceptionObject()) {
 			selectionMap.put(StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT, yamlLoggerRule.getAttachExceptionObject()
 				.toString());

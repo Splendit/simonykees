@@ -101,20 +101,6 @@ public class YAMLConfigUtilTest {
 	}
 
 	@Test
-	public void loadConfiguration_ValidYAMLLoggerRuleConfig_ShouldReturnYAMLConfig() throws YAMLConfigException {
-		YAMLConfig config = YAMLConfigUtil.loadConfiguration(loadResource("validLogger.yaml"));
-		assertNotNull(config);
-	}
-
-	@Test
-	public void loadConfiguration_InvalidYAMLLoggerRuleConfig_ShouldThrowException() throws YAMLConfigException {
-		expectedException.expect(YAMLConfigException.class);
-
-		YAMLConfig config = YAMLConfigUtil.loadConfiguration(loadResource("invalidLogger.yaml"));
-		assertNotNull(config);
-	}
-
-	@Test
 	public void readConfig_NonExistentFile_ShouldThrowException() throws YAMLConfigException {
 		expectedException.expect(YAMLConfigException.class);
 		expectedException.expectMessage(
