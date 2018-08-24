@@ -406,7 +406,7 @@ public class StandaloneConfigTest {
 	class TestableStandaloneConfig extends StandaloneConfig {
 
 		public TestableStandaloneConfig(String id, String path, String compilerCompliance) throws Exception {
-			super("projectName", path, compilerCompliance, "", new String[] {}, config); //$NON-NLS-1$ //$NON-NLS-2$
+			super("projectName", path, compilerCompliance, "", new String[] {}, config, false); //$NON-NLS-1$ //$NON-NLS-2$
 			super.refactoringPipeline = pipeline;
 
 		}

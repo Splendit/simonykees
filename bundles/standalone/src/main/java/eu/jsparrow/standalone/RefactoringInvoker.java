@@ -47,6 +47,7 @@ public class RefactoringInvoker {
 	private static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
 	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
+	private static final String HAS_PARENT = "HAS.PARENT"; //$NON-NLS-1$
 
 	private boolean abort = false;
 	private YAMLConfigurationWrapper yamlConfigurationWrapper = new YAMLConfigurationWrapper();
@@ -240,6 +241,7 @@ public class RefactoringInvoker {
 			String path = entry.getValue();
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
 			String projectName = context.getProperty(PROJECT_NAME + DOT + id);
+			boolean hasParent = Boolean.valueOf(context.getProperty(HAS_PARENT + DOT + id));
 			if (excludedModules.contains(projectName)) {
 				/*
 				 * Skip adding StandaloneConfig for excluded module. Checks if
@@ -253,7 +255,7 @@ public class RefactoringInvoker {
 			try {
 				YAMLConfig config = getConfiguration(context, id);
 				StandaloneConfig standaloneConfig = new StandaloneConfig(projectName, path, compilerCompliance,
-						sourceFolder, natureIds, config);
+						sourceFolder, natureIds, config, hasParent);
 				standaloneConfigs.add(standaloneConfig);
 
 			} catch (CoreException | RuntimeException e) {

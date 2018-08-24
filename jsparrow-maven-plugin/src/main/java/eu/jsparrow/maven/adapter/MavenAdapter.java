@@ -1,5 +1,7 @@
 package eu.jsparrow.maven.adapter;
 
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.*;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -72,7 +74,7 @@ public class MavenAdapter {
 			log.error(NLS.bind(Messages.MavenAdapter_jSparrowAlreadyRunning, rootProject.getArtifactId()));
 			throw new MojoExecutionException(Messages.MavenAdapter_jSparrowIsAlreadyRunning);
 		}
-		configuration.put(ConfigurationKeys.ROOT_CONFIG_PATH, defaultYamlFile.getAbsolutePath());
+		configuration.put(ROOT_CONFIG_PATH, defaultYamlFile.getAbsolutePath());
 		workingDirectory.lockProjects();
 		for (MavenProject mavenProject : projects) {
 			if (!MavenProjectUtil.isAggregateProject(mavenProject)) {
@@ -123,18 +125,20 @@ public class MavenAdapter {
 		String projectIdentifier = MavenProjectUtil.findProjectIdentifier(project);
 		String artifactId = project.getArtifactId();
 		String sourcePath = MavenProjectUtil.findSourceDirectory(project);
+		Boolean hasParent = project.hasParent();
 
 		String allIdentifiers = getAllProjectIdentifiers();
-		configuration.put(ConfigurationKeys.ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
-		configuration.put(ConfigurationKeys.PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
-		configuration.put(ConfigurationKeys.PROJECT_NAME_CONSTANT + DOT + projectIdentifier, artifactId);
+		configuration.put(ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
+		configuration.put(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
+		configuration.put(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, artifactId);
 		String yamlFilePath = findYamlFilePath(project, defaultYamlFile);
 		log.info(Messages.MavenAdapter_jSparrowConfigurationFile + yamlFilePath);
-		configuration.put(ConfigurationKeys.CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
-		configuration.put(ConfigurationKeys.PROJECT_JAVA_VERSION + DOT + projectIdentifier,
+		configuration.put(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
+		configuration.put(PROJECT_JAVA_VERSION + DOT + projectIdentifier,
 				MavenProjectUtil.getCompilerCompliance(project));
-		configuration.put(ConfigurationKeys.NATURE_IDS + DOT + projectIdentifier, MavenProjectUtil.findNatureIds(project));
-		configuration.put(ConfigurationKeys.SOURCE_FOLDER + DOT + projectIdentifier, sourcePath);
+		configuration.put(NATURE_IDS + DOT + projectIdentifier, MavenProjectUtil.findNatureIds(project));
+		configuration.put(SOURCE_FOLDER + DOT + projectIdentifier, sourcePath);
+		configuration.put(HAS_PARENT + DOT + projectIdentifier, hasParent.toString());
 
 	}
 
@@ -187,15 +191,14 @@ public class MavenAdapter {
 	}
 
 	private String getAllProjectIdentifiers() {
-		return configuration.getOrDefault(ConfigurationKeys.ALL_PROJECT_IDENTIFIERS, ""); //$NON-NLS-1$
+		return configuration.getOrDefault(ALL_PROJECT_IDENTIFIERS, ""); //$NON-NLS-1$
 	}
 
 	void addInitialConfiguration(MavenParameters config) {
 		boolean useDefaultConfig = config.getUseDefaultConfig();
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
-		configuration.put(Constants.FRAMEWORK_STORAGE, ConfigurationKeys.FRAMEWORK_STORAGE_VALUE);
-		configuration.put(ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT,
-				System.getProperty(ConfigurationKeys.USER_DIR));
+		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
+		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
 
 		/*
 		 * This is solution B from this article:
@@ -203,14 +206,14 @@ public class MavenAdapter {
 		 * osgi/
 		 */
 		configuration.put(Constants.FRAMEWORK_BOOTDELEGATION, "javax.*,org.xml.*"); //$NON-NLS-1$
-		configuration.put(ConfigurationKeys.DEBUG_ENABLED, Boolean.toString(log.isDebugEnabled()));
-		configuration.put(ConfigurationKeys.STANDALONE_MODE_KEY, config.getMode());
-		configuration.put(ConfigurationKeys.SELECTED_PROFILE, config.getProfile());
-		configuration.put(ConfigurationKeys.USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
-		configuration.put(ConfigurationKeys.LICENSE_KEY, config.getLicense());
-		configuration.put(ConfigurationKeys.AGENT_URL, config.getUrl());
+		configuration.put(DEBUG_ENABLED, Boolean.toString(log.isDebugEnabled()));
+		configuration.put(STANDALONE_MODE_KEY, config.getMode());
+		configuration.put(SELECTED_PROFILE, config.getProfile());
+		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
+		configuration.put(LICENSE_KEY, config.getLicense());
+		configuration.put(AGENT_URL, config.getUrl());
 		config.getRuleId()
-			.ifPresent(ruleId -> configuration.put(ConfigurationKeys.LIST_RULES_SELECTED_ID, ruleId));
+			.ifPresent(ruleId -> configuration.put(LIST_RULES_SELECTED_ID, ruleId));
 	}
 
 	/**
@@ -227,8 +230,8 @@ public class MavenAdapter {
 
 		if (directory.exists() || directory.mkdirs()) {
 			String directoryAbsolutePath = directory.getAbsolutePath();
-			setSystemProperty(ConfigurationKeys.USER_DIR, directoryAbsolutePath);
-			configuration.put(ConfigurationKeys.OSGI_INSTANCE_AREA_CONSTANT, directoryAbsolutePath);
+			setSystemProperty(USER_DIR, directoryAbsolutePath);
+			configuration.put(OSGI_INSTANCE_AREA_CONSTANT, directoryAbsolutePath);
 
 			String loggerInfo = NLS.bind(Messages.MavenAdapter_setUserDir, directoryAbsolutePath);
 			log.debug(loggerInfo);

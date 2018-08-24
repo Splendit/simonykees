@@ -42,6 +42,7 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -89,6 +90,7 @@ public class StandaloneConfig {
 	protected RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private boolean abort = false;
 	private YAMLConfig yamlConfig;
+	private Boolean hasParent;
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
@@ -113,7 +115,7 @@ public class StandaloneConfig {
 	 *             if the project cannot be created
 	 */
 	public StandaloneConfig(String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds, YAMLConfig yamlConfig) throws CoreException, StandaloneException {
+			String[] natureIds, YAMLConfig yamlConfig, boolean hasParent) throws CoreException, StandaloneException {
 
 		this.projectName = projectName;
 		this.path = path;
@@ -121,6 +123,7 @@ public class StandaloneConfig {
 		this.sourceFolder = sourceFolder;
 		this.natureIds = natureIds;
 		this.yamlConfig = yamlConfig;
+		this.hasParent = hasParent;
 		setUp();
 	}
 
@@ -494,6 +497,11 @@ public class StandaloneConfig {
 	private PublicFieldsRenamingRule setUpRenamingRule() throws StandaloneException {
 		PublicFieldsRenamingWrapper factory = new PublicFieldsRenamingWrapper(javaProject);
 		Map<String, Boolean> options = yamlConfig.getFieldRenamingOptions();
+		if(hasParent) {
+			options.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);
+			options.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, false);
+			options.put(FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS, false);
+		}
 		List<ICompilationUnit> iCompilationUnits = refactoringPipeline.getRefactoringStates()
 			.stream()
 			.map(RefactoringState::getWorkingCopy)
