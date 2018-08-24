@@ -147,57 +147,35 @@ public class YAMLConfigUtil {
 		List<RefactoringRule> result;
 
 		String selectedProfile = config.getSelectedProfile();
+		YAMLLoggerRule yamlLoggerRule;
+		List<RefactoringRule> selectedRules;
 		if (selectedProfile != null && !selectedProfile.isEmpty()) {
-			Optional<YAMLProfile> configProfile = config.getProfiles()
+			String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
+					selectedProfile);
+			YAMLProfile configProfile = config.getProfiles()
 				.stream()
-				.filter(profile -> profile.getName()
-					.equals(selectedProfile))
-				.findFirst();
+				.filter(profile -> selectedProfile.equals(profile.getName()))
+				.findFirst()
+				.orElseThrow(() -> new YAMLConfigException(exceptionMessage));
+			selectedRules = getConfigRules(configProfile.getRules());
+			yamlLoggerRule = configProfile.getLoggerRule();
 
-			if (configProfile.isPresent()) {
-				List<RefactoringRule> profileRules = getConfigRules(configProfile.get()
-					.getRules());
-
-				result = projectRules.stream()
-					.filter(RefactoringRule::isEnabled)
-					.filter(profileRules::contains)
-					.collect(Collectors.toList());
-
-				Optional<RefactoringRule> loggerRule = result.stream()
-					.filter(rule -> rule.getId()
-						.equals(StandardLoggerRule.STANDARD_LOGGER_RULE_ID))
-					.findFirst();
-				if (loggerRule.isPresent()) {
-					YAMLLoggerRule yamlLoggerRule = configProfile.get()
-						.getLoggerRule();
-					configureLoggerRule(yamlLoggerRule, (StandardLoggerRule) loggerRule.get());
-				}
-
-				logSelectedRulesWithUnsatisfiedDeps(projectRules, profileRules);
-			} else {
-				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
-						selectedProfile);
-				throw new YAMLConfigException(exceptionMessage);
-			}
 		} else { // use all rules from config file
-			List<RefactoringRule> configSelectedRules = getConfigRules(config.getRules());
-
-			result = projectRules.stream()
-				.filter(RefactoringRule::isEnabled)
-				.filter(configSelectedRules::contains)
-				.collect(Collectors.toList());
-
-			Optional<RefactoringRule> loggerRule = result.stream()
-				.filter(rule -> rule.getId()
-					.equals(StandardLoggerRule.STANDARD_LOGGER_RULE_ID))
-				.findFirst();
-			if (loggerRule.isPresent()) {
-				YAMLLoggerRule yamlLoggerRule = config.getLoggerRule();
-				configureLoggerRule(yamlLoggerRule, (StandardLoggerRule) loggerRule.get());
-			}
-
-			logSelectedRulesWithUnsatisfiedDeps(projectRules, configSelectedRules);
+			selectedRules = getConfigRules(config.getRules());
+			yamlLoggerRule = config.getLoggerRule();
 		}
+
+		result = projectRules.stream()
+			.filter(RefactoringRule::isEnabled)
+			.filter(selectedRules::contains)
+			.collect(Collectors.toList());
+
+		result.stream()
+			.filter(rule -> StandardLoggerRule.STANDARD_LOGGER_RULE_ID.equals(rule.getId()))
+			.findFirst()
+			.ifPresent(loggerRule -> configureLoggerRule(yamlLoggerRule, (StandardLoggerRule) loggerRule));
+
+		logSelectedRulesWithUnsatisfiedDeps(projectRules, selectedRules);
 
 		return result;
 	}
@@ -348,16 +326,14 @@ public class YAMLConfigUtil {
 
 	}
 
-
 	/**
 	 * 
 	 * @param yamlConfig
 	 * @return
 	 */
-	 public static boolean isEnabledRenamingRule(YAMLConfig yamlConfig) {
-		 return null != yamlConfig.getRenamingRule();
-	 }
-
+	public static boolean isEnabledRenamingRule(YAMLConfig yamlConfig) {
+		return null != yamlConfig.getRenamingRule();
+	}
 
 	/**
 	 * 
