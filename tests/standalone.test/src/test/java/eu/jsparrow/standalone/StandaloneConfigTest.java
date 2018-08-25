@@ -161,7 +161,7 @@ public class StandaloneConfigTest {
 
 		verify(javaProject).open(any());
 	}
-	
+
 	@Test(expected = StandaloneException.class)
 	public void initJavaProject_iProjectNotOpen_shouldThrowException() throws StandaloneException {
 		String javaVersion = "1.8"; //$NON-NLS-1$
@@ -170,7 +170,7 @@ public class StandaloneConfigTest {
 		when(project.isOpen()).thenReturn(false);
 
 		standaloneConfig.initJavaProject(project);
-		
+
 		assertTrue(false);
 	}
 
@@ -272,6 +272,7 @@ public class StandaloneConfigTest {
 		when(project.getName()).thenReturn(PROJECT_NAME);
 		when(javaProject.getElementName()).thenReturn(PROJECT_NAME);
 		when(pipeline.getRulesWithChangesAsString()).thenReturn("changes-as-string"); //$NON-NLS-1$
+		when(config.getRules()).thenReturn(Collections.singletonList("CodeFormatter"));//$NON-NLS-1$
 
 		standaloneConfig.computeRefactoring();
 
@@ -296,6 +297,7 @@ public class StandaloneConfigTest {
 		when(project.getName()).thenReturn(PROJECT_NAME);
 		doThrow(RefactoringException.class).when(pipeline)
 			.doRefactoring(any(IProgressMonitor.class));
+		when(config.getRules()).thenReturn(Collections.singletonList("CodeFormatter"));//$NON-NLS-1$
 
 		standaloneConfig.computeRefactoring();
 
