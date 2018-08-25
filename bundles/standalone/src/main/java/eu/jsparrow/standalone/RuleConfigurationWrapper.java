@@ -1,5 +1,13 @@
 package eu.jsparrow.standalone;
 
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT;
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.MISSING_LOG_KEY;
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.PRINT_STACKTRACE_KEY;
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY;
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY;
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY;
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,8 +27,6 @@ import eu.jsparrow.core.config.YAMLProfile;
 import eu.jsparrow.core.config.YAMLRenamingRule;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.rule.impl.logger.LogLevelEnum;
-import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
-import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -78,19 +84,11 @@ public class RuleConfigurationWrapper {
 		return selectedAutomaticRules;
 	}
 
-	public Optional<YAMLProfile> findSelectedProfile(String profileName) {
+	private Optional<YAMLProfile> findSelectedProfile(String profileName) {
 		return yamlConfig.getProfiles()
 			.stream()
 			.filter(profile -> profileName.equals(profile.getName()))
 			.findFirst();
-	}
-
-	public YAMLLoggerRule getLoggerRuleConfiguration() {
-		return loggerRuleConfiguration;
-	}
-
-	public YAMLRenamingRule getRenamingRuleConfiguration() {
-		return renamingConfiguration;
 	}
 
 	public boolean isSelectedRule(String ruleId) {
@@ -137,42 +135,27 @@ public class RuleConfigurationWrapper {
 		return configSelectedRules;
 	}
 
-	/**
-	 * 
-	 * @param yamlConfig
-	 * @return
-	 */
-	public StandardLoggerRule configureLoggerRule(YAMLLoggerRule yamlLoggerRule) {
-		StandardLoggerRule loggerRule = new StandardLoggerRule();
-		if (null == yamlLoggerRule) {
-			loggerRule.activateDefaultOptions();
-			return loggerRule;
-		}
+	public Map<String, String> getLoggerConfigurationOptions() {
 		Map<String, LogLevelEnum> selection = new HashMap<>();
-		selection.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, yamlLoggerRule.getSystemOutReplaceOption());
-		selection.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, yamlLoggerRule.getSystemErrReplaceOption());
-		selection.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY, yamlLoggerRule.getPrintStacktraceReplaceOption());
-		selection.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY,
-				yamlLoggerRule.getSystemOutPrintExceptionReplaceOption());
-		selection.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY,
-				yamlLoggerRule.getSystemErrPrintExceptionReplaceOption());
-		selection.put(StandardLoggerConstants.MISSING_LOG_KEY, yamlLoggerRule.getAddMissingLoggingStatement());
+		selection.put(SYSTEM_OUT_PRINT_KEY, loggerRuleConfiguration.getSystemOutReplaceOption());
+		selection.put(SYSTEM_ERR_PRINT_KEY, loggerRuleConfiguration.getSystemErrReplaceOption());
+		selection.put(PRINT_STACKTRACE_KEY, loggerRuleConfiguration.getPrintStacktraceReplaceOption());
+		selection.put(SYSTEM_OUT_PRINT_EXCEPTION_KEY,
+				loggerRuleConfiguration.getSystemOutPrintExceptionReplaceOption());
+		selection.put(SYSTEM_ERR_PRINT_EXCEPTION_KEY,
+				loggerRuleConfiguration.getSystemErrPrintExceptionReplaceOption());
+		selection.put(MISSING_LOG_KEY, loggerRuleConfiguration.getAddMissingLoggingStatement());
 
 		Map<String, String> selectionMap = selection.entrySet()
 			.stream()
 			.filter(map -> map.getValue() != null)
 			.collect(Collectors.toMap(Entry::getKey, map -> ((LogLevelEnum) map.getValue()).getLogLevel()));
 
-		if (null != yamlLoggerRule.getAttachExceptionObject()) {
-			selectionMap.put(StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT, yamlLoggerRule.getAttachExceptionObject()
+		if (null != loggerRuleConfiguration.getAttachExceptionObject()) {
+			selectionMap.put(ATTACH_EXCEPTION_OBJECT, loggerRuleConfiguration.getAttachExceptionObject()
 				.toString());
 		}
-
-		if (!selectionMap.isEmpty()) {
-			loggerRule.activateOptions(selectionMap);
-		}
-
-		return loggerRule;
+		return selectionMap;
 	}
 
 	public Map<String, Boolean> getFieldRenamingOptions() {

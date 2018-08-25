@@ -498,8 +498,8 @@ public class StandaloneConfig {
 		}
 
 		if (ruleConfigurationWrapper.isSelectedRule(StandardLoggerRule.STANDARD_LOGGER_RULE_ID)) {
-			StandardLoggerRule loggerRule = ruleConfigurationWrapper
-				.configureLoggerRule(ruleConfigurationWrapper.getLoggerRuleConfiguration());
+			Map<String, String> options = ruleConfigurationWrapper.getLoggerConfigurationOptions();
+			StandardLoggerRule loggerRule = setUpLoggerRule(options); 
 			rules.add(loggerRule);
 		}
 
@@ -507,6 +507,12 @@ public class StandaloneConfig {
 		rules.addAll(selectedAutomaticRules);
 
 		applyRules(rules);
+	}
+
+	private StandardLoggerRule setUpLoggerRule(Map<String, String> options) {
+		StandardLoggerRule loggerRule = new StandardLoggerRule();
+		loggerRule.activateOptions(options);
+		return loggerRule;
 	}
 
 	private PublicFieldsRenamingRule setUpRenamingRule(Map<String, Boolean> options)
