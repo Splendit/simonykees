@@ -3,10 +3,10 @@ package eu.jsparrow.core.config;
 import java.util.Arrays;
 import java.util.List;
 
-import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 
 /**
- * Model class for {@link PublicFieldsRenamingRule} YAML data
+ * Model class for {@link FieldsRenamingRule} YAML data
  *
  */
 public class YAMLRenamingRule {

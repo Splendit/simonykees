@@ -26,7 +26,7 @@ import eu.jsparrow.core.config.YAMLLoggerRule;
 import eu.jsparrow.core.config.YAMLProfile;
 import eu.jsparrow.core.config.YAMLRenamingRule;
 import eu.jsparrow.core.rule.RulesContainer;
-import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.logger.LogLevelEnum;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
@@ -36,7 +36,7 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
  * Reads the selected profile and configurations for the
- * {@link StandardLoggerRule} and {@link PublicFieldsRenamingRule} from a
+ * {@link StandardLoggerRule} and {@link FieldsRenamingRule} from a
  * {@link YAMLConfig}. If no selected profile is defined in the
  * {@link YAMLConfig} then the list of the rules in the root yaml are considered
  * as the selected rule.
@@ -58,7 +58,7 @@ public class RuleConfigurationWrapper {
 	/**
 	 * Creates an instance of this wrapper and finds the list of the selected
 	 * rules, the configuration for the {@link StandardLoggerRule} and
-	 * {@link PublicFieldsRenamingRule}.
+	 * {@link FieldsRenamingRule}.
 	 * 
 	 * @param yamlConfig
 	 * @param refactoringRules
@@ -90,7 +90,7 @@ public class RuleConfigurationWrapper {
 	 * Finds the list of the selected rules either from the {@link YAMLProfile}
 	 * or from the root of {@link YAMLConfig}. Does NOT include the rules which
 	 * require configuration, i.e. {@link StandardLoggerRule} or
-	 * {@link PublicFieldsRenamingRule}.
+	 * {@link FieldsRenamingRule}.
 	 * 
 	 * @return the list of the automatic rules form the selected profile if
 	 *         there is one, or the list of the rules from the {@code rules}
@@ -210,7 +210,7 @@ public class RuleConfigurationWrapper {
 
 	/**
 	 * Unwraps the configuration options for the
-	 * {@link PublicFieldsRenamingRule} from the {@link YAMLRenamingRule}.
+	 * {@link FieldsRenamingRule} from the {@link YAMLRenamingRule}.
 	 * 
 	 * @return a map with the configuration options from
 	 *         {@link #renamingConfiguration}.

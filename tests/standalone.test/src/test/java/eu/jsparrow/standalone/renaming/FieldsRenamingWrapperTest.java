@@ -23,15 +23,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorWrapper;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.standalone.CompilationUnitProvider;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
-public class PublicFieldsRenamingWrapperTest {
+public class FieldsRenamingWrapperTest {
 
-	private PublicFieldsRenamingWrapper fieldsRenamingWrapper;
+	private FieldsRenamingWrapper fieldsRenamingWrapper;
 	private IJavaProject javaProject;
 	private FieldDeclarationVisitorWrapper fieldDeclarationVisitorWrapper;
 
@@ -63,7 +63,7 @@ public class PublicFieldsRenamingWrapperTest {
 		when(metadata.getReferences()).thenReturn(emptyList());
 		when(compilationUnitProvider.containsExcludedFiles(any())).thenReturn(true);
 
-		PublicFieldsRenamingRule rule = fieldsRenamingWrapper.createRule(singletonList(metadata),
+		FieldsRenamingRule rule = fieldsRenamingWrapper.createRule(singletonList(metadata),
 				compilationUnitProvider);
 		assertThat(rule.getMetaData(), equalTo(emptyList()));
 	}
@@ -75,7 +75,7 @@ public class PublicFieldsRenamingWrapperTest {
 		when(metadata.getReferences()).thenReturn(emptyList());
 		when(compilationUnitProvider.containsExcludedFiles(any())).thenReturn(false);
 
-		PublicFieldsRenamingRule rule = fieldsRenamingWrapper.createRule(singletonList(metadata),
+		FieldsRenamingRule rule = fieldsRenamingWrapper.createRule(singletonList(metadata),
 				compilationUnitProvider);
 		assertThat(rule.getMetaData(), hasSize(1));
 	}
@@ -102,7 +102,7 @@ public class PublicFieldsRenamingWrapperTest {
 		verify(fieldDeclarationVisitorWrapper, times(1)).getFieldsMetaData();
 	}
 
-	class TestablePublicFieldsRenamingWrapper extends PublicFieldsRenamingWrapper {
+	class TestablePublicFieldsRenamingWrapper extends FieldsRenamingWrapper {
 
 		public TestablePublicFieldsRenamingWrapper() {
 			super(javaProject, fieldDeclarationVisitorWrapper);

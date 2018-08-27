@@ -1,11 +1,11 @@
 package eu.jsparrow.core.exception.runtime;
 
-import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 
 /**
  * An exception for indicating that a file containing compilation
  * errors will be affected by the modifications of a rule. For example, 
- * a reference of a field which is being renamed by {@link PublicFieldsRenamingRule}
+ * a reference of a field which is being renamed by {@link FieldsRenamingRule}
  * is occurring in a file with compilation errors. 
  * 
  * @author Ardit Ymeri

@@ -20,7 +20,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
-import eu.jsparrow.core.visitor.renaming.PublicFieldsRenamingASTVisitor;
+import eu.jsparrow.core.visitor.renaming.FieldsRenamingASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
@@ -28,23 +28,23 @@ import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
 /**
- * @see PublicFieldsRenamingASTVisitor
+ * @see FieldsRenamingASTVisitor
  * 
  * @author Ardit Ymeri
  * @since 2.3.0
  *
  */
-public class PublicFieldsRenamingRule extends RefactoringRuleImpl<PublicFieldsRenamingASTVisitor> {
+public class FieldsRenamingRule extends RefactoringRuleImpl<FieldsRenamingASTVisitor> {
 
 	private List<FieldMetaData> metaData;
 	private List<FieldMetaData> todosMetaData;
-	public static final String PUBLIC_FIELDS_RENAMING_RULE_ID = "PublicFieldRenaming"; //$NON-NLS-1$
+	public static final String FIELDS_RENAMING_RULE_ID = "FieldRenaming"; //$NON-NLS-1$
 
-	public PublicFieldsRenamingRule(List<FieldMetaData> metaData, List<FieldMetaData> todosMetaData) {
-		this.visitorClass = PublicFieldsRenamingASTVisitor.class;
+	public FieldsRenamingRule(List<FieldMetaData> metaData, List<FieldMetaData> todosMetaData) {
+		this.visitorClass = FieldsRenamingASTVisitor.class;
 		this.metaData = metaData;
 		this.todosMetaData = todosMetaData;
-		this.id = PUBLIC_FIELDS_RENAMING_RULE_ID;
+		this.id = FIELDS_RENAMING_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.PublicFieldsRenamingRule_name,
 				Messages.PublicFieldsRenamingRule_description, Duration.ofMinutes(15),
 				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY));
@@ -56,8 +56,8 @@ public class PublicFieldsRenamingRule extends RefactoringRuleImpl<PublicFieldsRe
 	}
 
 	@Override
-	public PublicFieldsRenamingASTVisitor visitorFactory() {
-		PublicFieldsRenamingASTVisitor visitor = new PublicFieldsRenamingASTVisitor(metaData, todosMetaData);
+	public FieldsRenamingASTVisitor visitorFactory() {
+		FieldsRenamingASTVisitor visitor = new FieldsRenamingASTVisitor(metaData, todosMetaData);
 		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
 		return visitor;
 

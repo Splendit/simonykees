@@ -39,7 +39,7 @@ import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.RulesContainer;
-import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
@@ -47,7 +47,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
-import eu.jsparrow.standalone.renaming.PublicFieldsRenamingWrapper;
+import eu.jsparrow.standalone.renaming.FieldsRenamingWrapper;
 
 /**
  * Class that contains all configuration needed to run headless version of
@@ -495,9 +495,9 @@ public class StandaloneConfig {
 
 		List<RefactoringRule> rules = new ArrayList<>();
 
-		if (ruleConfigurationWrapper.isSelectedRule(PublicFieldsRenamingRule.PUBLIC_FIELDS_RENAMING_RULE_ID)) {
+		if (ruleConfigurationWrapper.isSelectedRule(FieldsRenamingRule.FIELDS_RENAMING_RULE_ID)) {
 			Map<String, Boolean> options = ruleConfigurationWrapper.getFieldRenamingRuleConfigurationOptions();
-			PublicFieldsRenamingRule renamingRule = setUpRenamingRule(options);
+			FieldsRenamingRule renamingRule = setUpRenamingRule(options);
 			rules.add(renamingRule);
 		}
 
@@ -519,8 +519,8 @@ public class StandaloneConfig {
 		return loggerRule;
 	}
 
-	private PublicFieldsRenamingRule setUpRenamingRule(Map<String, Boolean> options) throws StandaloneException {
-		PublicFieldsRenamingWrapper factory = new PublicFieldsRenamingWrapper(javaProject);
+	private FieldsRenamingRule setUpRenamingRule(Map<String, Boolean> options) throws StandaloneException {
+		FieldsRenamingWrapper factory = new FieldsRenamingWrapper(javaProject);
 
 		if (isChildModule) {
 			options.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);

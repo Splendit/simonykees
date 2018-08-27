@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorWrapper;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.ExceptionMessages;
@@ -44,7 +44,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
  * Wizard that holds {@link ConfigureRenameFieldsRuleWizardPage} with
- * configuration options for {@link PublicFieldsRenamingRule}. On Finish it sets
+ * configuration options for {@link FieldsRenamingRule}. On Finish it sets
  * chosen options on rule and start refactoring process.
  * 
  * @author Andreja Sambolec
@@ -65,7 +65,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
 	private RefactoringPipeline refactoringPipeline;
 	private List<FieldMetaData> metadata;
-	private PublicFieldsRenamingRule renameFieldsRule;
+	private FieldsRenamingRule renameFieldsRule;
 
 	private List<ICompilationUnit> targetCompilationUnits = new ArrayList<>();
 
@@ -242,7 +242,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 	 * @param subMonitor
 	 *            progress monitor
 	 * @param visitorWrapper
-	 *            {@link PublicFieldsRenamingRule} visitor
+	 *            {@link FieldsRenamingRule} visitor
 	 */
 	private void searchScopeAndPrepareRefactoringStates(SubMonitor subMonitor,
 			FieldDeclarationVisitorWrapper visitorWrapper) {
@@ -261,7 +261,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 			return;
 		}
 
-		renameFieldsRule = new PublicFieldsRenamingRule(metadata, todosMetadata);
+		renameFieldsRule = new FieldsRenamingRule(metadata, todosMetadata);
 		final List<RefactoringRule> rules = Arrays.asList(renameFieldsRule);
 
 		refactoringPipeline = new RefactoringPipeline();

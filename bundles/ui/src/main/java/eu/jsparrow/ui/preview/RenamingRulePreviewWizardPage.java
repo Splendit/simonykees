@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
@@ -64,7 +64,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	private Map<IPath, Document> originalDocuments;
 
 	public RenamingRulePreviewWizardPage(Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes,
-			Map<IPath, Document> originalDocuments, PublicFieldsRenamingRule rule1) {
+			Map<IPath, Document> originalDocuments, FieldsRenamingRule rule1) {
 		super(rule1.getRuleDescription()
 			.getName());
 		this.changes = changes;
