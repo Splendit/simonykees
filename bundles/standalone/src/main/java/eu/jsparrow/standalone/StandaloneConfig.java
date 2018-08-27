@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -497,14 +498,12 @@ public class StandaloneConfig {
 
 		if (ruleConfigurationWrapper.isSelectedRule(FieldsRenamingRule.FIELDS_RENAMING_RULE_ID)) {
 			Map<String, Boolean> options = ruleConfigurationWrapper.getFieldRenamingRuleConfigurationOptions();
-			FieldsRenamingRule renamingRule = setUpRenamingRule(options);
-			rules.add(renamingRule);
+			setUpRenamingRule(options).ifPresent(rules::add);
 		}
 
 		if (ruleConfigurationWrapper.isSelectedRule(StandardLoggerRule.STANDARD_LOGGER_RULE_ID)) {
 			Map<String, String> options = ruleConfigurationWrapper.getLoggerRuleConfigurationOptions();
-			StandardLoggerRule loggerRule = setUpLoggerRule(options);
-			rules.add(loggerRule);
+			setUpLoggerRule(options).ifPresent(rules::add);
 		}
 
 		List<RefactoringRule> selectedAutomaticRules = ruleConfigurationWrapper.getSelectedAutomaticRules();
@@ -513,13 +512,15 @@ public class StandaloneConfig {
 		applyRules(rules);
 	}
 
-	private StandardLoggerRule setUpLoggerRule(Map<String, String> options) {
+	private Optional<StandardLoggerRule> setUpLoggerRule(Map<String, String> options) {
 		StandardLoggerRule loggerRule = new StandardLoggerRule();
 		loggerRule.activateOptions(options);
-		return loggerRule;
+		loggerRule.calculateEnabledForProject(javaProject);
+		return Optional.ofNullable(loggerRule)
+			.filter(StandardLoggerRule::isEnabled);
 	}
 
-	private FieldsRenamingRule setUpRenamingRule(Map<String, Boolean> options) throws StandaloneException {
+	private Optional<FieldsRenamingRule> setUpRenamingRule(Map<String, Boolean> options) throws StandaloneException {
 		FieldsRenamingWrapper factory = new FieldsRenamingWrapper(javaProject);
 
 		if (isChildModule) {
@@ -533,7 +534,11 @@ public class StandaloneConfig {
 			.map(ICompilationUnit::getPrimary)
 			.collect(Collectors.toList());
 		List<FieldMetaData> metaData = factory.findFields(iCompilationUnits, options);
-		return factory.createRule(metaData, compilationUnitsProvider);
+		FieldsRenamingRule renamingRule = factory.createRule(metaData, compilationUnitsProvider);
+		renamingRule.calculateEnabledForProject(javaProject);
+		return Optional.of(renamingRule)
+			.filter(FieldsRenamingRule::isEnabled);
+
 	}
 
 	private void applyRules(List<RefactoringRule> rules) throws StandaloneException {

@@ -157,7 +157,12 @@ public class RuleConfigurationWrapper {
 		List<RefactoringRule> configSelectedRules = new LinkedList<>();
 		List<String> nonExistentRules = new LinkedList<>();
 
-		for (String configRule : configRules) {
+		List<String> automaticConfigRules = configRules.stream()
+			.filter(id -> !FieldsRenamingRule.FIELDS_RENAMING_RULE_ID.equals(id))
+			.filter(id -> !StandardLoggerRule.STANDARD_LOGGER_RULE_ID.equals(id))
+			.collect(Collectors.toList());
+
+		for (String configRule : automaticConfigRules) {
 			Optional<RefactoringRule> currentRule = rules.stream()
 				.filter(rule -> rule.getId()
 					.equals(configRule))
@@ -209,8 +214,8 @@ public class RuleConfigurationWrapper {
 	}
 
 	/**
-	 * Unwraps the configuration options for the
-	 * {@link FieldsRenamingRule} from the {@link YAMLRenamingRule}.
+	 * Unwraps the configuration options for the {@link FieldsRenamingRule} from
+	 * the {@link YAMLRenamingRule}.
 	 * 
 	 * @return a map with the configuration options from
 	 *         {@link #renamingConfiguration}.

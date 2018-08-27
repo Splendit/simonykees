@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,6 +42,8 @@ import org.junit.rules.TemporaryFolder;
 
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLExcludes;
+import eu.jsparrow.core.config.YAMLLoggerRule;
+import eu.jsparrow.core.config.YAMLRenamingRule;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -269,10 +272,14 @@ public class StandaloneConfigTest {
 	public void computeRefactoring_shouldCallDoRefactoring() throws Exception {
 		hasRefactoringStates = true;
 		standaloneConfig.setProject(project);
+		standaloneConfig.setJavaProject(javaProject);
 		when(project.getName()).thenReturn(PROJECT_NAME);
 		when(javaProject.getElementName()).thenReturn(PROJECT_NAME);
+		when(javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true)).thenReturn("1.1"); //$NON-NLS-1$
 		when(pipeline.getRulesWithChangesAsString()).thenReturn("changes-as-string"); //$NON-NLS-1$
-		when(config.getRules()).thenReturn(Collections.singletonList("CodeFormatter"));//$NON-NLS-1$
+		when(config.getRenamingRule()).thenReturn(new YAMLRenamingRule());
+		when(config.getLoggerRule()).thenReturn(new YAMLLoggerRule());
+		when(config.getRules()).thenReturn(Arrays.asList("CodeFormatter", "FieldRenaming", "StandardLogger"));//$NON-NLS-1$ , //$NON-NLS-2$ //$NON-NLS-3$
 
 		standaloneConfig.computeRefactoring();
 
@@ -408,7 +415,7 @@ public class StandaloneConfigTest {
 	class TestableStandaloneConfig extends StandaloneConfig {
 
 		public TestableStandaloneConfig(String id, String path, String compilerCompliance) throws Exception {
-			super("projectName", path, compilerCompliance, "", new String[] {}, config, false); //$NON-NLS-1$ //$NON-NLS-2$
+			super("projectName", path, compilerCompliance, "", new String[] {}, config, true); //$NON-NLS-1$ //$NON-NLS-2$
 			super.refactoringPipeline = pipeline;
 
 		}
