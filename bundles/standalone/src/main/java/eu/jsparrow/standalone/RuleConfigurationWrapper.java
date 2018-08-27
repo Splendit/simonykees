@@ -26,12 +26,25 @@ import eu.jsparrow.core.config.YAMLLoggerRule;
 import eu.jsparrow.core.config.YAMLProfile;
 import eu.jsparrow.core.config.YAMLRenamingRule;
 import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.logger.LogLevelEnum;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
+/**
+ * Reads the selected profile and configurations for the
+ * {@link StandardLoggerRule} and {@link PublicFieldsRenamingRule} from a
+ * {@link YAMLConfig}. If no selected profile is defined in the
+ * {@link YAMLConfig} then the list of the rules in the root yaml are considered
+ * as the selected rule.
+ * 
+ * 
+ * @since 2.6.0
+ *
+ */
 public class RuleConfigurationWrapper {
 
 	private static final Logger logger = LoggerFactory.getLogger(RuleConfigurationWrapper.class);
@@ -42,6 +55,15 @@ public class RuleConfigurationWrapper {
 	private YAMLLoggerRule loggerRuleConfiguration;
 	private YAMLRenamingRule renamingConfiguration;
 
+	/**
+	 * Creates an instance of this wrapper and finds the list of the selected
+	 * rules, the configuration for the {@link StandardLoggerRule} and
+	 * {@link PublicFieldsRenamingRule}.
+	 * 
+	 * @param yamlConfig
+	 * @param refactoringRules
+	 * @throws StandaloneException
+	 */
 	public RuleConfigurationWrapper(YAMLConfig yamlConfig, List<RefactoringRule> refactoringRules)
 			throws StandaloneException {
 		this.yamlConfig = yamlConfig;
@@ -64,6 +86,19 @@ public class RuleConfigurationWrapper {
 		}
 	}
 
+	/**
+	 * Finds the list of the selected rules either from the {@link YAMLProfile}
+	 * or from the root of {@link YAMLConfig}. Does NOT include the rules which
+	 * require configuration, i.e. {@link StandardLoggerRule} or
+	 * {@link PublicFieldsRenamingRule}.
+	 * 
+	 * @return the list of the automatic rules form the selected profile if
+	 *         there is one, or the list of the rules from the {@code rules}
+	 *         node of the {@link YAMLConfig}.
+	 * @throws StandaloneException
+	 *             if an invalid rule id is found in the list of the selected
+	 *             rules.
+	 */
 	public List<RefactoringRule> getSelectedAutomaticRules() throws StandaloneException {
 		List<RefactoringRule> configuredRules;
 		if (yamlProfile != null) {
@@ -91,6 +126,14 @@ public class RuleConfigurationWrapper {
 			.findFirst();
 	}
 
+	/**
+	 * Checks whether the given rule id matches any of the rule id-s in the
+	 * selected rules.
+	 * 
+	 * @param ruleId
+	 *            the id of the rule to be checked
+	 * @return {@code true} if a match is found, and {@code false} otherwise.
+	 */
 	public boolean isSelectedRule(String ruleId) {
 		if (yamlProfile != null) {
 			return yamlProfile.getRules()
@@ -135,7 +178,14 @@ public class RuleConfigurationWrapper {
 		return configSelectedRules;
 	}
 
-	public Map<String, String> getLoggerConfigurationOptions() {
+	/**
+	 * Unwraps the configuration options for the {@link StandardLoggerRule} from
+	 * the @l{@link #loggerRuleConfiguration}
+	 * 
+	 * @return a map with configuration options from
+	 *         {@link #loggerRuleConfiguration}
+	 */
+	public Map<String, String> getLoggerRuleConfigurationOptions() {
 		Map<String, LogLevelEnum> selection = new HashMap<>();
 		selection.put(SYSTEM_OUT_PRINT_KEY, loggerRuleConfiguration.getSystemOutReplaceOption());
 		selection.put(SYSTEM_ERR_PRINT_KEY, loggerRuleConfiguration.getSystemErrReplaceOption());
@@ -158,7 +208,14 @@ public class RuleConfigurationWrapper {
 		return selectionMap;
 	}
 
-	public Map<String, Boolean> getFieldRenamingOptions() {
+	/**
+	 * Unwraps the configuration options for the
+	 * {@link PublicFieldsRenamingRule} from the {@link YAMLRenamingRule}.
+	 * 
+	 * @return a map with the configuration options from
+	 *         {@link #renamingConfiguration}.
+	 */
+	public Map<String, Boolean> getFieldRenamingRuleConfigurationOptions() {
 		List<String> fieldTypes = renamingConfiguration.getFieldTypes();
 		String dollarReplacement = renamingConfiguration.getDollarReplacementOption();
 		String underscoreReplacement = renamingConfiguration.getUnderscoreReplacementOption();

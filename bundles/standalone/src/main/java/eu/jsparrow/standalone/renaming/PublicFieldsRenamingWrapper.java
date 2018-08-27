@@ -10,12 +10,21 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorWrapper;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.ReferenceSearchMatch;
 import eu.jsparrow.standalone.CompilationUnitProvider;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
+/**
+ * Contains functionality for creating an instance of
+ * {@link PublicFieldsRenamingRule} based on the search result from
+ * {@link FieldDeclarationVisitorWrapper}. Additionally, checks if any of the
+ * references of the fields to be renamed falls in the excluded files.
+ * 
+ * @since 2.6.0
+ */
 public class PublicFieldsRenamingWrapper {
 
 	private IJavaProject javaProject;
@@ -26,22 +35,26 @@ public class PublicFieldsRenamingWrapper {
 		this.javaProject = javaProject;
 		this.visitorWrapper = new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE);
 	}
-	
+
 	protected PublicFieldsRenamingWrapper(IJavaProject javaProject, FieldDeclarationVisitorWrapper visitorWrapper) {
 		this.javaProject = javaProject;
 		this.visitorWrapper = visitorWrapper;
 	}
 
 	/**
+	 * Creates an instance of the {@link PublicFieldsRenamingRule} with the
+	 * provided {@link FieldMetaData}. Skips the fields having references in the
+	 * excluded files.
 	 * 
-	 * @param javaProject
-	 *            the current IJavaProject
-	 * @param iCompilationUnits
-	 *            all compilation units of the project except for the excluded
-	 *            ones
-	 * @param options
-	 * @return
+	 * @param metadata
+	 *            the meta data of the fields to be renamed.
+	 * @param compilationUnitProvider
+	 *            used for verifying references in excluded files.
+	 * @return the created instance of {@link PublicFieldsRenamingRule}.
 	 * @throws StandaloneException
+	 *             if the {@link CompilationUnitProvider} cannot decide if any
+	 *             of the compilation units having at least one reference
+	 *             belongs to the list of excluded files.
 	 */
 	public PublicFieldsRenamingRule createRule(List<FieldMetaData> metadata,
 			CompilationUnitProvider compilationUnitProvider) throws StandaloneException {
@@ -56,6 +69,21 @@ public class PublicFieldsRenamingWrapper {
 
 	}
 
+	/**
+	 * Makes use of the {@link FieldDeclarationVisitorWrapper} for finding the
+	 * fields which need to be renamed and all their references.
+	 * 
+	 * @param selectedJavaElements
+	 *            list of the {@link ICompilationUnit}s to be check for fields
+	 *            that need to be renamed.
+	 * @param options
+	 *            the options for the {@link FieldDeclarationASTVisitor}
+	 * @return list of the {@link FieldMetaData} resulting from the search
+	 *         process.
+	 * @throws StandaloneException
+	 *             if the search did not succeed. See
+	 *             {@link FieldDeclarationVisitorWrapper#prepareRenaming(List, Map)}
+	 */
 	public List<FieldMetaData> findFields(List<ICompilationUnit> selectedJavaElements, Map<String, Boolean> options)
 			throws StandaloneException {
 		int status = visitorWrapper.prepareRenaming(selectedJavaElements, options);

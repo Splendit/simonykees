@@ -134,6 +134,18 @@ public class CompilationUnitProvider {
 			.collect(Collectors.toSet());
 	}
 
+	/**
+	 * Checks if any of the compilation units in the given list belongs to the
+	 * excluded packages or files.
+	 * 
+	 * @param compilationUnitsWithReferences
+	 *            list of compilation units to be checked.
+	 * @return {@code true} if the above condition is satisfied or {@code false}
+	 *         otherwise.
+	 * @throws StandaloneException
+	 *             if the name of a compilation unit or its package could not be
+	 *             found.
+	 */
 	public boolean containsExcludedFiles(List<ICompilationUnit> compilationUnitsWithReferences)
 			throws StandaloneException {
 		List<String> excludedClasses = excludes.getExcludeClasses();

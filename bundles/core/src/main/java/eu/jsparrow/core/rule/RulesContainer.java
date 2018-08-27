@@ -58,7 +58,6 @@ import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
-import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
 
@@ -107,7 +106,7 @@ public class RulesContainer {
 		List<RuleService> services = getExternalRuleServices();
 
 		List<RefactoringRule> rules = new LinkedList<>();
-		
+
 		rules.addAll(Arrays.asList(
 				/*
 				 * Coding conventions
@@ -115,9 +114,8 @@ public class RulesContainer {
 				new TryWithResourceRule(), new MultiCatchRule(), new FunctionalInterfaceRule(),
 				new CollectionRemoveAllRule(), new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
-				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(),
-				new EnumsWithoutEqualsRule(), new ReImplementingInterfaceRule(), new PutIfAbsentRule(),
-				new DateDeprecatedRule(),
+				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
+				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new DateDeprecatedRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

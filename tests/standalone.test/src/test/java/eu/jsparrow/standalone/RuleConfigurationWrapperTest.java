@@ -1,5 +1,18 @@
 package eu.jsparrow.standalone;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -10,26 +23,13 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import eu.jsparrow.core.config.YAMLConfig;
+import eu.jsparrow.core.config.YAMLLoggerRule;
 import eu.jsparrow.core.config.YAMLProfile;
 import eu.jsparrow.core.config.YAMLRenamingRule;
-import eu.jsparrow.core.config.YAMLLoggerRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.core.rule.impl.logger.LogLevelEnum;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SuppressWarnings("nls")
 public class RuleConfigurationWrapperTest {
@@ -157,7 +157,7 @@ public class RuleConfigurationWrapperTest {
 		when(config.getLoggerRule()).thenReturn(loggerRuleConfiguration);
 
 		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(config, refactoringRules);
-		Map<String, String> loggerConfigurationOptions = ruleConfigurationWrapper.getLoggerConfigurationOptions();
+		Map<String, String> loggerConfigurationOptions = ruleConfigurationWrapper.getLoggerRuleConfigurationOptions();
 
 		assertTrue(loggerConfigurationOptions.isEmpty());
 	}
@@ -170,7 +170,7 @@ public class RuleConfigurationWrapperTest {
 		when(config.getLoggerRule()).thenReturn(loggerRuleConfiguration);
 
 		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(config, refactoringRules);
-		Map<String, String> loggerConfigurationOptions = ruleConfigurationWrapper.getLoggerConfigurationOptions();
+		Map<String, String> loggerConfigurationOptions = ruleConfigurationWrapper.getLoggerRuleConfigurationOptions();
 
 		assertThat(loggerConfigurationOptions,
 				allOf(hasEntry("system-out-print", "info"), hasEntry("system-err-print", "error"),
@@ -186,7 +186,7 @@ public class RuleConfigurationWrapperTest {
 		when(config.getRenamingRule()).thenReturn(renamingConfiguration);
 
 		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(config, refactoringRules);
-		Map<String, Boolean> renamingConfigurationOptions = ruleConfigurationWrapper.getFieldRenamingOptions();
+		Map<String, Boolean> renamingConfigurationOptions = ruleConfigurationWrapper.getFieldRenamingRuleConfigurationOptions();
 
 		assertThat(renamingConfigurationOptions,
 				allOf(hasEntry("public", true), hasEntry("package-private", true), hasEntry("protected", true),

@@ -89,7 +89,7 @@ public class StandaloneConfig {
 	protected RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private boolean abort = false;
 	private YAMLConfig yamlConfig;
-	private Boolean hasParent;
+	private Boolean isChildModule;
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
@@ -107,6 +107,9 @@ public class StandaloneConfig {
 	 *            the nature id-s of the project
 	 * @param yamlConfig
 	 *            the default yaml configuration file of the project
+	 * @param isChildModule
+	 *            a flag indicating whether the project represents a module in a
+	 *            multi-module project or a simple project.
 	 * @throws CoreException
 	 *             if the classpath entries cannot be added or the source files
 	 *             cannot be parsed
@@ -114,7 +117,8 @@ public class StandaloneConfig {
 	 *             if the project cannot be created
 	 */
 	public StandaloneConfig(String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds, YAMLConfig yamlConfig, boolean hasParent) throws CoreException, StandaloneException {
+			String[] natureIds, YAMLConfig yamlConfig, boolean isChildModule)
+			throws CoreException, StandaloneException {
 
 		this.projectName = projectName;
 		this.path = path;
@@ -122,7 +126,7 @@ public class StandaloneConfig {
 		this.sourceFolder = sourceFolder;
 		this.natureIds = natureIds;
 		this.yamlConfig = yamlConfig;
-		this.hasParent = hasParent;
+		this.isChildModule = isChildModule;
 		setUp();
 	}
 
@@ -492,14 +496,14 @@ public class StandaloneConfig {
 		List<RefactoringRule> rules = new ArrayList<>();
 
 		if (ruleConfigurationWrapper.isSelectedRule(PublicFieldsRenamingRule.PUBLIC_FIELDS_RENAMING_RULE_ID)) {
-			Map<String, Boolean> options = ruleConfigurationWrapper.getFieldRenamingOptions();
+			Map<String, Boolean> options = ruleConfigurationWrapper.getFieldRenamingRuleConfigurationOptions();
 			PublicFieldsRenamingRule renamingRule = setUpRenamingRule(options);
 			rules.add(renamingRule);
 		}
 
 		if (ruleConfigurationWrapper.isSelectedRule(StandardLoggerRule.STANDARD_LOGGER_RULE_ID)) {
-			Map<String, String> options = ruleConfigurationWrapper.getLoggerConfigurationOptions();
-			StandardLoggerRule loggerRule = setUpLoggerRule(options); 
+			Map<String, String> options = ruleConfigurationWrapper.getLoggerRuleConfigurationOptions();
+			StandardLoggerRule loggerRule = setUpLoggerRule(options);
 			rules.add(loggerRule);
 		}
 
@@ -515,11 +519,10 @@ public class StandaloneConfig {
 		return loggerRule;
 	}
 
-	private PublicFieldsRenamingRule setUpRenamingRule(Map<String, Boolean> options)
-			throws StandaloneException {
+	private PublicFieldsRenamingRule setUpRenamingRule(Map<String, Boolean> options) throws StandaloneException {
 		PublicFieldsRenamingWrapper factory = new PublicFieldsRenamingWrapper(javaProject);
-		
-		if (hasParent) {
+
+		if (isChildModule) {
 			options.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);
 			options.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, false);
 			options.put(FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS, false);

@@ -35,10 +35,10 @@ public class FieldDeclarationVisitorWrapper {
 	private static final Logger logger = LoggerFactory.getLogger(FieldDeclarationVisitorWrapper.class);
 
 	public static final String SCOPE_PROJECT = Messages.RenameFieldsRuleWizardPageModel_scopeOption_project;
-	
+
 	private IJavaProject javaProject;
 	private FieldDeclarationASTVisitor visitor;
-	
+
 	public FieldDeclarationVisitorWrapper(IJavaProject iProject, String modelSearchScope) {
 		this.javaProject = iProject;
 		IJavaElement[] scope = createSearchScope(modelSearchScope);
@@ -48,9 +48,9 @@ public class FieldDeclarationVisitorWrapper {
 	private IJavaElement[] createSearchScope(String modelSearchScope) {
 
 		if (SCOPE_PROJECT.equals(modelSearchScope)) {
-			 return new IJavaElement[] { javaProject };
+			return new IJavaElement[] { javaProject };
 		}
-		
+
 		List<IJavaProject> projectList = new LinkedList<>();
 		try {
 			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace()
@@ -68,11 +68,31 @@ public class FieldDeclarationVisitorWrapper {
 		return projectList.toArray(new IJavaElement[0]);
 	}
 
-	public int prepareRenaming(List<ICompilationUnit> selectedJavaElements,
-			Map<String, Boolean> options, SubMonitor child) {
+	/**
+	 * Updates the options of the {@link FieldDeclarationASTVisitor} and uses it
+	 * to visit each of the provided {@link ICompilationUnit}s.
+	 * 
+	 * @param selectedJavaElements
+	 *            the {@link ICompilationUnit}s to be checked for fields that
+	 *            need to be renamed.
+	 * @param options
+	 *            the configuration options for the field search
+	 * @param child
+	 *            a {@link SubMonitor} for indicating the progress of the search
+	 *            process.
+	 * @return {@link Status#OK} if the search finished successfully, or
+	 *         {@link Status#CANCEL} if the {@link SubMonitor} is cancelled, or
+	 *         {@link Status#WARNING} if an {@link ICompilationUnit} does not
+	 *         belong to the current project.
+	 */
+	public int prepareRenaming(List<ICompilationUnit> selectedJavaElements, Map<String, Boolean> options,
+			SubMonitor child) {
 		visitor.updateOptions(options);
 		for (ICompilationUnit compilationUnit : selectedJavaElements) {
-			visit(visitor, compilationUnit);
+			int status = visit(visitor, compilationUnit);
+			if (status != Status.OK) {
+				return status;
+			}
 
 			if (child.isCanceled()) {
 				return Status.CANCEL;
@@ -82,13 +102,25 @@ public class FieldDeclarationVisitorWrapper {
 		}
 		return Status.OK;
 	}
-	
-	public int prepareRenaming(List<ICompilationUnit> selectedJavaElements,
-			Map<String, Boolean> options) {
+
+	/**
+	 * Updates the options of the {@link FieldDeclarationASTVisitor} and uses it
+	 * to visit each of the provided {@link ICompilationUnit}s.
+	 * 
+	 * @param selectedJavaElements
+	 *            the {@link ICompilationUnit}s to be checked for fields that
+	 *            need to be renamed.
+	 * @param options
+	 *            the configuration options for the field search
+	 * @return {@link Status#OK} if the search finished successfully, or
+	 *         {@link Status#WARNING} if an {@link ICompilationUnit} does not
+	 *         belong to the current project.
+	 */
+	public int prepareRenaming(List<ICompilationUnit> selectedJavaElements, Map<String, Boolean> options) {
 		visitor.updateOptions(options);
 		for (ICompilationUnit compilationUnit : selectedJavaElements) {
 			int status = visit(visitor, compilationUnit);
-			if(status == Status.WARNING) {
+			if (status == Status.WARNING) {
 				return status;
 			}
 		}
@@ -104,7 +136,7 @@ public class FieldDeclarationVisitorWrapper {
 		cu.accept(visitor);
 		return Status.OK;
 	}
-	
+
 	public List<FieldMetaData> getFieldsMetaData() {
 		return visitor.getFieldMetaData();
 	}
