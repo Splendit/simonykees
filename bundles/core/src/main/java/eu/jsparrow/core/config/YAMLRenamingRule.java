@@ -4,9 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 
 /**
  * Model class for {@link FieldsRenamingRule} YAML data
+ * 
+ * @since 2.6.0
  *
  */
 public class YAMLRenamingRule {
@@ -18,9 +21,12 @@ public class YAMLRenamingRule {
 
 	public YAMLRenamingRule() {
 		super();
-		this.fieldTypes = Arrays.asList("private", "protected", "package-private", "public");
-		this.underscoreReplacementOption = "Upper";
-		this.dollarReplacementOption = "Leave";
+		this.fieldTypes = Arrays.asList(FieldDeclarationOptionKeys.RENAME_PRIVATE_FIELDS,
+				FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS,
+				FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS,
+				FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS);
+		this.underscoreReplacementOption = "Upper"; //$NON-NLS-1$
+		this.dollarReplacementOption = "Leave"; //$NON-NLS-1$
 		this.addTodoComments = false;
 	}
 
@@ -66,6 +72,7 @@ public class YAMLRenamingRule {
 	}
 
 	@Override
+	@SuppressWarnings("nls")
 	public String toString() {
 		return "YAMLRenamingRule [fieldTypes=" + fieldTypes + ", underscoreReplacementOption="
 				+ underscoreReplacementOption + ", dollarReplacementOption=" + dollarReplacementOption

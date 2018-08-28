@@ -49,6 +49,9 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
 public class RuleConfigurationWrapper {
 
 	private static final Logger logger = LoggerFactory.getLogger(RuleConfigurationWrapper.class);
+	
+	public static final String UPPER = "Upper"; //$NON-NLS-1$
+	public static final String LEAVE = "Leave"; //$NON-NLS-1$
 
 	private YAMLConfig yamlConfig;
 	private List<RefactoringRule> refactoringRules;
@@ -233,20 +236,19 @@ public class RuleConfigurationWrapper {
 		for (String fieldType : fieldTypes) {
 			options.put(fieldType, true);
 		}
-		
-		options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_DOLLAR_SIGN, "Upper".equals(dollarReplacement)); //$NON-NLS-1$
-		options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_UNDERSCORE, "Upper".equals(underscoreReplacement)); //$NON-NLS-1$
+
+		options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_DOLLAR_SIGN, UPPER.equals(dollarReplacement));
+		options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_UNDERSCORE, UPPER.equals(underscoreReplacement));
 
 		return options;
 	}
 
-	@SuppressWarnings("nls")
 	private Map<String, Boolean> getFieldTypesMap() {
 		Map<String, Boolean> fieldTypesMap = new HashMap<>();
-		fieldTypesMap.put("private", false);
-		fieldTypesMap.put("protected", false);
-		fieldTypesMap.put("package-private", false);
-		fieldTypesMap.put("public", false);
+		fieldTypesMap.put(FieldDeclarationOptionKeys.RENAME_PRIVATE_FIELDS, false);
+		fieldTypesMap.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, false);
+		fieldTypesMap.put(FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS, false);
+		fieldTypesMap.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);
 		return Collections.unmodifiableMap(fieldTypesMap);
 	}
 

@@ -4,7 +4,9 @@ import eu.jsparrow.core.rule.impl.logger.LogLevelEnum;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 
 /**
- * Model class for {@link StandardLoggerRule} YAML data
+ * Model class for {@link StandardLoggerRule} YAML data.
+ * 
+ * @since 2.6.0
  *
  */
 public class YAMLLoggerRule {
@@ -98,6 +100,7 @@ public class YAMLLoggerRule {
 	}
 
 	@Override
+	@SuppressWarnings("nls")
 	public String toString() {
 		return "YAMLLoggerRule [systemOutReplaceOption=" + systemOutReplaceOption + ", systemErrReplaceOption="
 				+ systemErrReplaceOption + ", printStacktraceReplaceOption=" + printStacktraceReplaceOption
