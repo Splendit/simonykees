@@ -442,7 +442,7 @@ public class StandaloneConfig {
 		loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compilationUnits.size());
 		logger.debug(loggerInfo);
 
-		logUnusedexcludes();
+		logUnusedExcludes();
 
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		List<ICompilationUnit> containingErrors = new ArrayList<>();
@@ -465,7 +465,7 @@ public class StandaloneConfig {
 		logger.debug(loggerInfo);
 	}
 
-	private void logUnusedexcludes() {
+	private void logUnusedExcludes() {
 		String loggerInfo;
 		Collector<CharSequence, ?, String> collector = Collectors.joining(", "); //$NON-NLS-1$
 
@@ -524,6 +524,10 @@ public class StandaloneConfig {
 		FieldsRenamingWrapper factory = new FieldsRenamingWrapper(javaProject);
 
 		if (isChildModule) {
+			/*
+			 * see SIM-1250. If we are dealing with a multimodule project, we limit 
+			 * the renaming rule to run only for private fields. 
+			 */
 			options.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);
 			options.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, false);
 			options.put(FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS, false);

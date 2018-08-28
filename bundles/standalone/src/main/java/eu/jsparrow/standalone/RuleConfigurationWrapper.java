@@ -8,6 +8,7 @@ import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_E
 import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY;
 import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -224,23 +225,29 @@ public class RuleConfigurationWrapper {
 		List<String> fieldTypes = renamingConfiguration.getFieldTypes();
 		String dollarReplacement = renamingConfiguration.getDollarReplacementOption();
 		String underscoreReplacement = renamingConfiguration.getUnderscoreReplacementOption();
-		boolean addComments = renamingConfiguration.isAddTodoComments();
-
+		
+		Map<String, Boolean> fieldTypesMap = getFieldTypesMap();
+		
 		Map<String, Boolean> options = new HashMap<>();
+		options.putAll(fieldTypesMap);
 		for (String fieldType : fieldTypes) {
 			options.put(fieldType, true);
 		}
-
-		if ("Upper".equals(dollarReplacement)) { //$NON-NLS-1$
-			options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_DOLLAR_SIGN, true);
-		}
-
-		if ("Upper".equals(underscoreReplacement)) { //$NON-NLS-1$
-			options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_UNDERSCORE, true);
-		}
-		options.put(FieldDeclarationOptionKeys.ADD_COMMENT, addComments);
+		
+		options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_DOLLAR_SIGN, "Upper".equals(dollarReplacement)); //$NON-NLS-1$
+		options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_UNDERSCORE, "Upper".equals(underscoreReplacement)); //$NON-NLS-1$
 
 		return options;
+	}
+
+	@SuppressWarnings("nls")
+	private Map<String, Boolean> getFieldTypesMap() {
+		Map<String, Boolean> fieldTypesMap = new HashMap<>();
+		fieldTypesMap.put("private", false);
+		fieldTypesMap.put("protected", false);
+		fieldTypesMap.put("package-private", false);
+		fieldTypesMap.put("public", false);
+		return Collections.unmodifiableMap(fieldTypesMap);
 	}
 
 	private void logSelectedRulesWithUnsatisfiedDeps(List<RefactoringRule> selectedRules) {

@@ -1,11 +1,7 @@
 package eu.jsparrow.core.config;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
-import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 
 /**
  * Model class for configuration data.
