@@ -23,6 +23,13 @@ public class YAMLLoggerRule {
 	 * Default constructor
 	 */
 	public YAMLLoggerRule() {
+		this.systemOutReplaceOption = LogLevelEnum.INFO;
+		this.systemErrReplaceOption = LogLevelEnum.ERROR;
+		this.printStacktraceReplaceOption = LogLevelEnum.ERROR;
+		this.systemOutPrintExceptionReplaceOption = LogLevelEnum.INFO;
+		this.systemErrPrintExceptionReplaceOption = LogLevelEnum.ERROR;
+		this.addMissingLoggingStatement = LogLevelEnum.ERROR;
+		this.attachExceptionObject = true;
 	}
 
 	public YAMLLoggerRule(LogLevelEnum systemOutReplaceOption, LogLevelEnum systemErrReplaceOption,
@@ -36,11 +43,6 @@ public class YAMLLoggerRule {
 		this.systemErrPrintExceptionReplaceOption = systemErrPrintExceptionReplaceOption;
 		this.addMissingLoggingStatement = addMissingLoggingStatement;
 		this.attachExceptionObject = attachExceptionObject;
-	}
-
-	public YAMLLoggerRule getDefaultConfig() {
-		return new YAMLLoggerRule(LogLevelEnum.INFO, LogLevelEnum.ERROR, LogLevelEnum.ERROR, LogLevelEnum.INFO,
-				LogLevelEnum.ERROR, LogLevelEnum.ERROR, true);
 	}
 
 	public LogLevelEnum getSystemOutReplaceOption() {

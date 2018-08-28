@@ -195,6 +195,9 @@ public class RuleConfigurationWrapper {
 	 *         {@link #loggerRuleConfiguration}
 	 */
 	public Map<String, String> getLoggerRuleConfigurationOptions() {
+		if (null == loggerRuleConfiguration) {
+			loggerRuleConfiguration = new YAMLLoggerRule();
+		}
 		Map<String, LogLevelEnum> selection = new HashMap<>();
 		selection.put(SYSTEM_OUT_PRINT_KEY, loggerRuleConfiguration.getSystemOutReplaceOption());
 		selection.put(SYSTEM_ERR_PRINT_KEY, loggerRuleConfiguration.getSystemErrReplaceOption());
@@ -225,6 +228,9 @@ public class RuleConfigurationWrapper {
 	 *         {@link #renamingConfiguration}.
 	 */
 	public Map<String, Boolean> getFieldRenamingRuleConfigurationOptions() {
+		if (null == renamingConfiguration) {
+			renamingConfiguration = new YAMLRenamingRule();
+		}
 		List<String> fieldTypes = renamingConfiguration.getFieldTypes();
 		String dollarReplacement = renamingConfiguration.getDollarReplacementOption();
 		String underscoreReplacement = renamingConfiguration.getUnderscoreReplacementOption();
