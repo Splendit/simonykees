@@ -7,6 +7,7 @@ import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_E
 import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY;
 import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY;
 import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.*;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,7 +31,6 @@ import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.logger.LogLevelEnum;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
-import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
@@ -50,6 +50,9 @@ public class RuleConfigurationWrapper {
 
 	private static final Logger logger = LoggerFactory.getLogger(RuleConfigurationWrapper.class);
 	
+	public static final String UPPER = "Upper"; //$NON-NLS-1$
+	public static final String LEAVE = "Leave"; //$NON-NLS-1$
+
 	public static final String UPPER = "Upper"; //$NON-NLS-1$
 	public static final String LEAVE = "Leave"; //$NON-NLS-1$
 
@@ -234,9 +237,9 @@ public class RuleConfigurationWrapper {
 		List<String> fieldTypes = renamingConfiguration.getFieldTypes();
 		String dollarReplacement = renamingConfiguration.getDollarReplacementOption();
 		String underscoreReplacement = renamingConfiguration.getUnderscoreReplacementOption();
-		
+
 		Map<String, Boolean> fieldTypesMap = getFieldTypesMap();
-		
+
 		Map<String, Boolean> options = new HashMap<>();
 		options.putAll(fieldTypesMap);
 		for (String fieldType : fieldTypes) {

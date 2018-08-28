@@ -186,11 +186,10 @@ public class RuleConfigurationWrapperTest {
 		when(config.getRenamingRule()).thenReturn(renamingConfiguration);
 
 		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(config, refactoringRules);
-		Map<String, Boolean> renamingConfigurationOptions = ruleConfigurationWrapper.getFieldRenamingRuleConfigurationOptions();
+		Map<String, Boolean> renamingConfigurationOptions = ruleConfigurationWrapper
+			.getFieldRenamingRuleConfigurationOptions();
 
-		assertThat(renamingConfigurationOptions,
-				allOf(hasEntry("public", true), hasEntry("package-private", true), hasEntry("protected", true),
-						hasEntry("private", true), hasEntry("add-todo", false),
-						hasEntry("uppercase-after-underscore", true)));
+		assertThat(renamingConfigurationOptions, allOf(hasEntry("public", true), hasEntry("package-protected", true),
+				hasEntry("protected", true), hasEntry("private", true), hasEntry("uppercase-after-underscore", true)));
 	}
 }

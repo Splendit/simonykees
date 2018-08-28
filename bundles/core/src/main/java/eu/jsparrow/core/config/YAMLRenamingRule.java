@@ -21,10 +21,7 @@ public class YAMLRenamingRule {
 
 	public YAMLRenamingRule() {
 		super();
-		this.fieldTypes = Arrays.asList(FieldDeclarationOptionKeys.RENAME_PRIVATE_FIELDS,
-				FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS,
-				FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS,
-				FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS);
+		this.fieldTypes = Arrays.asList("private", "protected", "package-protected", "public"); //$NON-NLS-1$, //$NON-NLS-2$, //$NON-NLS-3$, //$NON-NLS-4$
 		this.underscoreReplacementOption = "Upper"; //$NON-NLS-1$
 		this.dollarReplacementOption = "Leave"; //$NON-NLS-1$
 		this.addTodoComments = false;
