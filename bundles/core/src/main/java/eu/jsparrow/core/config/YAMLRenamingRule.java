@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
-import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 
 /**
  * Model class for {@link FieldsRenamingRule} YAML data

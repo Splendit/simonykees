@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -58,19 +59,23 @@ public class RuleConfigurationWrapperTest {
 	public void computeConfiguration_selectedProfile_shouldComputeConfigFromSelectedProfile() throws Exception {
 		when(config.getSelectedProfile()).thenReturn(selectedProfileName);
 
-		new RuleConfigurationWrapper(config, refactoringRules);
+		RuleConfigurationWrapper configWrapper = new RuleConfigurationWrapper(config, refactoringRules);
 
 		verify(selectedProfile, times(1)).getLoggerRule();
 		verify(selectedProfile, times(1)).getRenamingRule();
+		assertNotNull(configWrapper.getLoggerRuleConfigurationOptions());
+		assertNotNull(configWrapper.getFieldRenamingRuleConfigurationOptions());
 	}
 
 	@Test
 	public void computeConfiguration_noSelectedProfile_shouldComputeConfigFromRoot() throws Exception {
 
-		new RuleConfigurationWrapper(config, refactoringRules);
+		RuleConfigurationWrapper configWrapper = new RuleConfigurationWrapper(config, refactoringRules);
 
 		verify(config, times(1)).getLoggerRule();
 		verify(config, times(1)).getRenamingRule();
+		assertNotNull(configWrapper.getLoggerRuleConfigurationOptions());
+		assertNotNull(configWrapper.getFieldRenamingRuleConfigurationOptions());
 	}
 
 	@Test
@@ -151,22 +156,10 @@ public class RuleConfigurationWrapperTest {
 		assertFalse(selectedRefactoring);
 	}
 
-	@Test
-	public void getLoggerConfiguration_emptyConfiguration_shouldReturnEmptyMap() throws Exception {
-		YAMLLoggerRule loggerRuleConfiguration = new YAMLLoggerRule();
-		when(config.getLoggerRule()).thenReturn(loggerRuleConfiguration);
-
-		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(config, refactoringRules);
-		Map<String, String> loggerConfigurationOptions = ruleConfigurationWrapper.getLoggerRuleConfigurationOptions();
-
-		assertTrue(loggerConfigurationOptions.isEmpty());
-	}
-
 	@SuppressWarnings("unchecked")
 	@Test
-	public void getLoggerConfiguration_defaultConfiguration_shouldDefaultOptions() throws Exception {
-		YAMLLoggerRule loggerRuleConfiguration = new YAMLLoggerRule(LogLevelEnum.INFO, LogLevelEnum.ERROR,
-				LogLevelEnum.ERROR, LogLevelEnum.INFO, LogLevelEnum.ERROR, LogLevelEnum.ERROR, true);
+	public void getLoggerConfiguration_defaultConfiguration_shouldReturnDefaultOptions() throws Exception {
+		YAMLLoggerRule loggerRuleConfiguration = new YAMLLoggerRule();
 		when(config.getLoggerRule()).thenReturn(loggerRuleConfiguration);
 
 		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(config, refactoringRules);
@@ -177,11 +170,28 @@ public class RuleConfigurationWrapperTest {
 						hasEntry("print-stacktrace", "error"), hasEntry("system-out-print-exception", "info"),
 						hasEntry("system-err-print-exception", "error"), hasEntry("new-logging-statement", "error"),
 						hasEntry("attach-exception-object", "true")));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void getLoggerConfiguration_customConfiguration_shouldReturnCustomOptions() throws Exception {
+		YAMLLoggerRule loggerRuleConfiguration = new YAMLLoggerRule(LogLevelEnum.ERROR, LogLevelEnum.ERROR,
+				LogLevelEnum.ERROR, LogLevelEnum.ERROR, LogLevelEnum.ERROR, LogLevelEnum.ERROR, false);
+		when(config.getLoggerRule()).thenReturn(loggerRuleConfiguration);
+
+		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(config, refactoringRules);
+		Map<String, String> loggerConfigurationOptions = ruleConfigurationWrapper.getLoggerRuleConfigurationOptions();
+
+		assertThat(loggerConfigurationOptions,
+				allOf(hasEntry("system-out-print", "error"), hasEntry("system-err-print", "error"),
+						hasEntry("print-stacktrace", "error"), hasEntry("system-out-print-exception", "error"),
+						hasEntry("system-err-print-exception", "error"), hasEntry("new-logging-statement", "error"),
+						hasEntry("attach-exception-object", "false")));
 
 	}
 
 	@Test
-	public void getFieldRenamingOptions_emptyConfiguration_shouldReturnEmptyMap() throws Exception {
+	public void getFieldRenamingOptions_emptyConfiguration_shouldReturnDefaultOptionsMap() throws Exception {
 		YAMLRenamingRule renamingConfiguration = new YAMLRenamingRule();
 		when(config.getRenamingRule()).thenReturn(renamingConfiguration);
 
