@@ -35,7 +35,7 @@ public class YAMLLoggerRule {
 	public YAMLLoggerRule(LogLevelEnum systemOutReplaceOption, LogLevelEnum systemErrReplaceOption,
 			LogLevelEnum printStacktraceReplaceOption, LogLevelEnum systemOutPrintExceptionReplaceOption,
 			LogLevelEnum systemErrPrintExceptionReplaceOption, LogLevelEnum addMissingLoggingStatement,
-			boolean attachExceptionObject) {
+			Boolean attachExceptionObject) {
 		this.systemOutReplaceOption = systemOutReplaceOption;
 		this.systemErrReplaceOption = systemErrReplaceOption;
 		this.printStacktraceReplaceOption = printStacktraceReplaceOption;
@@ -97,7 +97,7 @@ public class YAMLLoggerRule {
 		return attachExceptionObject;
 	}
 
-	public void setAttachExceptionObject(boolean attachExceptionObject) {
+	public void setAttachExceptionObject(Boolean attachExceptionObject) {
 		this.attachExceptionObject = attachExceptionObject;
 	}
 

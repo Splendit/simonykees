@@ -43,19 +43,7 @@ rules:
   - StringBuildingLoop
   - LambdaToMethodReference
 #  - CodeFormatter
-  - StandardLogger
 
-# configuration for LoggerRule and RenamingRule can be placed together with profile in which rules are included.
-# if there is no additional configuration for those rules when they are included in the list of rules for the profile, default values are used.
-# following is the configuration sample with default values set
-loggerRule
-  systemOutReplaceOption: INFO
-  systemErrReplaceOption: ERROR
-  printStacktraceReplaceOption: ERROR
-  systemOutPrintExceptionReplaceOption: INFO
-  systemErrPrintExceptionReplaceOption: ERROR
-  addMissingLoggingStatement: ERROR
-  attachExceptionObject: true
 
 # define modules, classes and packages that you don't want to apply refactoring to
 # excluded modules could only be defined on parent project and those modules are then entirely ignored
