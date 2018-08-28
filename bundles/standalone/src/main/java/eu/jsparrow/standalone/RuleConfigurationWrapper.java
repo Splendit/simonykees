@@ -7,7 +7,12 @@ import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_E
 import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY;
 import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY;
 import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY;
-import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.*;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.RENAME_PRIVATE_FIELDS;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_DOLLAR_SIGN;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_UNDERSCORE;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,9 +58,6 @@ public class RuleConfigurationWrapper {
 	public static final String UPPER = "Upper"; //$NON-NLS-1$
 	public static final String LEAVE = "Leave"; //$NON-NLS-1$
 
-	public static final String UPPER = "Upper"; //$NON-NLS-1$
-	public static final String LEAVE = "Leave"; //$NON-NLS-1$
-
 	private YAMLConfig yamlConfig;
 	private List<RefactoringRule> refactoringRules;
 	private YAMLProfile yamlProfile;
@@ -85,12 +87,20 @@ public class RuleConfigurationWrapper {
 					selectedProfile);
 			yamlProfile = findSelectedProfile(selectedProfile)
 				.orElseThrow(() -> new StandaloneException(exceptionMessage));
-			loggerRuleConfiguration = yamlProfile.getLoggerRule();
-			renamingConfiguration = yamlProfile.getRenamingRule();
+			loggerRuleConfiguration = getOrDefault(yamlProfile.getLoggerRule());
+			renamingConfiguration = getOrDefault(yamlProfile.getRenamingRule());
 		} else {
-			loggerRuleConfiguration = yamlConfig.getLoggerRule();
-			renamingConfiguration = yamlConfig.getRenamingRule();
+			loggerRuleConfiguration = getOrDefault(yamlConfig.getLoggerRule());
+			renamingConfiguration = getOrDefault(yamlConfig.getRenamingRule());
 		}
+	}
+
+	private YAMLRenamingRule getOrDefault(YAMLRenamingRule renamingRule) {
+		return renamingRule != null ? renamingRule : new YAMLRenamingRule();
+	}
+
+	private YAMLLoggerRule getOrDefault(YAMLLoggerRule loggerConfig) {
+		return loggerConfig != null ? loggerConfig : new YAMLLoggerRule();
 	}
 
 	/**
@@ -198,9 +208,6 @@ public class RuleConfigurationWrapper {
 	 *         {@link #loggerRuleConfiguration}
 	 */
 	public Map<String, String> getLoggerRuleConfigurationOptions() {
-		if (null == loggerRuleConfiguration) {
-			loggerRuleConfiguration = new YAMLLoggerRule();
-		}
 		Map<String, LogLevelEnum> selection = new HashMap<>();
 		selection.put(SYSTEM_OUT_PRINT_KEY, loggerRuleConfiguration.getSystemOutReplaceOption());
 		selection.put(SYSTEM_ERR_PRINT_KEY, loggerRuleConfiguration.getSystemErrReplaceOption());
@@ -231,9 +238,6 @@ public class RuleConfigurationWrapper {
 	 *         {@link #renamingConfiguration}.
 	 */
 	public Map<String, Boolean> getFieldRenamingRuleConfigurationOptions() {
-		if (null == renamingConfiguration) {
-			renamingConfiguration = new YAMLRenamingRule();
-		}
 		List<String> fieldTypes = renamingConfiguration.getFieldTypes();
 		String dollarReplacement = renamingConfiguration.getDollarReplacementOption();
 		String underscoreReplacement = renamingConfiguration.getUnderscoreReplacementOption();
@@ -246,18 +250,18 @@ public class RuleConfigurationWrapper {
 			options.put(fieldType, true);
 		}
 
-		options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_DOLLAR_SIGN, UPPER.equals(dollarReplacement));
-		options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_UNDERSCORE, UPPER.equals(underscoreReplacement));
+		options.put(UPPER_CASE_FOLLOWING_DOLLAR_SIGN, UPPER.equals(dollarReplacement));
+		options.put(UPPER_CASE_FOLLOWING_UNDERSCORE, UPPER.equals(underscoreReplacement));
 
 		return options;
 	}
 
 	private Map<String, Boolean> getFieldTypesMap() {
 		Map<String, Boolean> fieldTypesMap = new HashMap<>();
-		fieldTypesMap.put(FieldDeclarationOptionKeys.RENAME_PRIVATE_FIELDS, false);
-		fieldTypesMap.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, false);
-		fieldTypesMap.put(FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS, false);
-		fieldTypesMap.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);
+		fieldTypesMap.put(RENAME_PRIVATE_FIELDS, false);
+		fieldTypesMap.put(RENAME_PROTECTED_FIELDS, false);
+		fieldTypesMap.put(RENAME_PACKAGE_PROTECTED_FIELDS, false);
+		fieldTypesMap.put(RENAME_PUBLIC_FIELDS, false);
 		return Collections.unmodifiableMap(fieldTypesMap);
 	}
 
