@@ -43,6 +43,7 @@ import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorWrapper;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -73,6 +74,9 @@ public class StandaloneConfig {
 	private static final String TEMP_FILE_EXTENSION = ".tmp"; //$NON-NLS-1$
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
+	
+	private static final String SEARCH_SCOPE = "workspace"; //$NON-NLS-1$
+
 
 	private String path;
 	private String compilerCompliance;
@@ -521,7 +525,7 @@ public class StandaloneConfig {
 	}
 
 	private Optional<FieldsRenamingRule> setUpRenamingRule(Map<String, Boolean> options) throws StandaloneException {
-		FieldsRenamingWrapper factory = new FieldsRenamingWrapper(javaProject);
+		FieldsRenamingWrapper factory = new FieldsRenamingWrapper(javaProject, new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE));
 
 		if (isChildModule) {
 			/*

@@ -29,14 +29,8 @@ public class FieldsRenamingWrapper {
 
 	private IJavaProject javaProject;
 	private FieldDeclarationVisitorWrapper visitorWrapper;
-	private static final String SEARCH_SCOPE = "workspace"; //$NON-NLS-1$
 
-	public FieldsRenamingWrapper(IJavaProject javaProject) {
-		this.javaProject = javaProject;
-		this.visitorWrapper = new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE);
-	}
-
-	protected FieldsRenamingWrapper(IJavaProject javaProject, FieldDeclarationVisitorWrapper visitorWrapper) {
+	public FieldsRenamingWrapper(IJavaProject javaProject, FieldDeclarationVisitorWrapper visitorWrapper) {
 		this.javaProject = javaProject;
 		this.visitorWrapper = visitorWrapper;
 	}

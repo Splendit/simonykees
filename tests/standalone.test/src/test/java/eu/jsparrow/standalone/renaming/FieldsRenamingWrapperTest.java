@@ -42,7 +42,7 @@ public class FieldsRenamingWrapperTest {
 	public void setUp() {
 		javaProject = mock(IJavaProject.class);
 		fieldDeclarationVisitorWrapper = mock(FieldDeclarationVisitorWrapper.class);
-		fieldsRenamingWrapper = new TestablePublicFieldsRenamingWrapper();
+		fieldsRenamingWrapper = new FieldsRenamingWrapper(javaProject, fieldDeclarationVisitorWrapper);
 	}
 
 	@Test
@@ -100,12 +100,5 @@ public class FieldsRenamingWrapperTest {
 		fieldsRenamingWrapper.findFields(selectedElements, options);
 
 		verify(fieldDeclarationVisitorWrapper, times(1)).getFieldsMetaData();
-	}
-
-	class TestablePublicFieldsRenamingWrapper extends FieldsRenamingWrapper {
-
-		public TestablePublicFieldsRenamingWrapper() {
-			super(javaProject, fieldDeclarationVisitorWrapper);
-		}
 	}
 }
