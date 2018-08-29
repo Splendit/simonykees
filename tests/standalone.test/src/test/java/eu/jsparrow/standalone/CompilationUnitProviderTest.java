@@ -23,6 +23,9 @@ import eu.jsparrow.core.config.YAMLExcludes;
 @SuppressWarnings("nls")
 public class CompilationUnitProviderTest {
 
+	private static final String EU_JSPARROW_PACKAGE = "eu.jsparrow.package";
+	private static final String EU_JSPARROW = "eu.jsparrow";
+
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
@@ -34,7 +37,7 @@ public class CompilationUnitProviderTest {
 	@Before
 	public void setUp() {
 		YAMLExcludes excludes = new YAMLExcludes();
-		excludes.setExcludePackages(Arrays.asList("eu.jsparrow", "eu.jsparrow.package"));
+		excludes.setExcludePackages(Arrays.asList(EU_JSPARROW, EU_JSPARROW_PACKAGE));
 
 		excludes.setExcludeClasses(Collections.singletonList("eu.jsparrow.test.ExcludedClass.java"));
 
@@ -49,8 +52,8 @@ public class CompilationUnitProviderTest {
 	public void getFilteredCompilationUnits_excludesIsNull_shouldReturnAllCompilationUnits() {
 		YAMLExcludes excludes = null;
 
-		ICompilationUnit compUnitMock = mock(ICompilationUnit.class);
-		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
+		compUnitMock = mock(ICompilationUnit.class);
+		compilationUnitProvider = new CompilationUnitProvider(
 				Collections.singletonList(compUnitMock), excludes);
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
@@ -61,7 +64,7 @@ public class CompilationUnitProviderTest {
 	@Test
 	public void getFilteredCompilationUnits_classFromExcludedPackage_shouldBeIgnored() throws JavaModelException {
 		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
-		when(packageDeclarationMock.getElementName()).thenReturn("eu.jsparrow");
+		when(packageDeclarationMock.getElementName()).thenReturn(EU_JSPARROW);
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
@@ -124,7 +127,7 @@ public class CompilationUnitProviderTest {
 	@Test
 	public void containsExcludedClasses_classInExcludedPackages_shouldReturnTrue() throws Exception {
 		ICompilationUnit compilationUnitInExcludedPackage = mock(ICompilationUnit.class);
-		when(packageDeclarationMock.getElementName()).thenReturn("eu.jsparrow");
+		when(packageDeclarationMock.getElementName()).thenReturn(EU_JSPARROW);
 		when(compilationUnitInExcludedPackage.getPackageDeclarations())
 			.thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
 

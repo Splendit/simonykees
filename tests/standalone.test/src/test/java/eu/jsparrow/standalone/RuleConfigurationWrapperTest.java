@@ -35,6 +35,8 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
 @SuppressWarnings("nls")
 public class RuleConfigurationWrapperTest {
 
+	private static final String INFO = "info";
+	private static final String ERROR = "error";
 	private YAMLConfig config;
 	private List<RefactoringRule> refactoringRules;
 	private YAMLProfile selectedProfile;
@@ -46,7 +48,7 @@ public class RuleConfigurationWrapperTest {
 	public ExpectedException expectedException = ExpectedException.none();
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		config = mock(YAMLConfig.class);
 		selectedProfile = mock(YAMLProfile.class);
 		refactoringRules = Collections.singletonList(refactoringRule);
@@ -166,9 +168,9 @@ public class RuleConfigurationWrapperTest {
 		Map<String, String> loggerConfigurationOptions = ruleConfigurationWrapper.getLoggerRuleConfigurationOptions();
 
 		assertThat(loggerConfigurationOptions,
-				allOf(hasEntry("system-out-print", "info"), hasEntry("system-err-print", "error"),
-						hasEntry("print-stacktrace", "error"), hasEntry("system-out-print-exception", "info"),
-						hasEntry("system-err-print-exception", "error"), hasEntry("new-logging-statement", "error"),
+				allOf(hasEntry("system-out-print", INFO), hasEntry("system-err-print", ERROR),
+						hasEntry("print-stacktrace", ERROR), hasEntry("system-out-print-exception", INFO),
+						hasEntry("system-err-print-exception", ERROR), hasEntry("new-logging-statement", ERROR),
 						hasEntry("attach-exception-object", "true")));
 	}
 
@@ -183,9 +185,9 @@ public class RuleConfigurationWrapperTest {
 		Map<String, String> loggerConfigurationOptions = ruleConfigurationWrapper.getLoggerRuleConfigurationOptions();
 
 		assertThat(loggerConfigurationOptions,
-				allOf(hasEntry("system-out-print", "error"), hasEntry("system-err-print", "error"),
-						hasEntry("print-stacktrace", "error"), hasEntry("system-out-print-exception", "error"),
-						hasEntry("system-err-print-exception", "error"), hasEntry("new-logging-statement", "error"),
+				allOf(hasEntry("system-out-print", ERROR), hasEntry("system-err-print", ERROR),
+						hasEntry("print-stacktrace", ERROR), hasEntry("system-out-print-exception", ERROR),
+						hasEntry("system-err-print-exception", ERROR), hasEntry("new-logging-statement", ERROR),
 						hasEntry("attach-exception-object", "false")));
 
 	}
