@@ -14,12 +14,17 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaModelException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import eu.jsparrow.core.config.YAMLExcludes;
 
 @SuppressWarnings("nls")
 public class CompilationUnitProviderTest {
+
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
 
 	private CompilationUnitProvider compilationUnitProvider;
 
@@ -45,7 +50,8 @@ public class CompilationUnitProviderTest {
 		YAMLExcludes excludes = null;
 
 		ICompilationUnit compUnitMock = mock(ICompilationUnit.class);
-		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes);
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
+				Collections.singletonList(compUnitMock), excludes);
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
@@ -94,4 +100,52 @@ public class CompilationUnitProviderTest {
 		assertEquals(1, compilationUnits.size());
 		assertTrue(compilationUnits.contains(compUnitMock));
 	}
+
+	@Test
+	public void containsExcludedClasses_emptyList_shouldReturnFalse() throws Exception {
+		boolean expected = compilationUnitProvider.containsExcludedFiles(Collections.emptyList());
+		assertFalse(expected);
+	}
+
+	@Test
+	public void containsExcludedClasses_classInExcludedFiles_shouldReturnTrue() throws Exception {
+		ICompilationUnit compilationUnitInExcludedFiles = mock(ICompilationUnit.class);
+		when(compilationUnitInExcludedFiles.getElementName()).thenReturn("ExcludedClass.java");
+		when(packageDeclarationMock.getElementName()).thenReturn("eu.jsparrow.test");
+		when(compilationUnitInExcludedFiles.getPackageDeclarations())
+			.thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
+
+		boolean expected = compilationUnitProvider
+			.containsExcludedFiles(Collections.singletonList(compilationUnitInExcludedFiles));
+
+		assertTrue(expected);
+	}
+
+	@Test
+	public void containsExcludedClasses_classInExcludedPackages_shouldReturnTrue() throws Exception {
+		ICompilationUnit compilationUnitInExcludedPackage = mock(ICompilationUnit.class);
+		when(packageDeclarationMock.getElementName()).thenReturn("eu.jsparrow");
+		when(compilationUnitInExcludedPackage.getPackageDeclarations())
+			.thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
+
+		boolean expected = compilationUnitProvider
+			.containsExcludedFiles(Collections.singletonList(compilationUnitInExcludedPackage));
+
+		assertTrue(expected);
+	}
+	
+	@Test
+	public void containsExcludedClasses_notExcludedClass_shouldReturnFalse() throws Exception {
+		ICompilationUnit compilationUnitInExcludedFiles = mock(ICompilationUnit.class);
+		when(compilationUnitInExcludedFiles.getElementName()).thenReturn("NotExcludedClass.java");
+		when(packageDeclarationMock.getElementName()).thenReturn("not.excluded.package");
+		when(compilationUnitInExcludedFiles.getPackageDeclarations())
+			.thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
+
+		boolean expected = compilationUnitProvider
+			.containsExcludedFiles(Collections.singletonList(compilationUnitInExcludedFiles));
+
+		assertFalse(expected);
+	}
+
 }
