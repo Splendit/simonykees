@@ -63,6 +63,7 @@ public class RuleConfigurationWrapper {
 	private YAMLProfile yamlProfile;
 	private YAMLLoggerRule loggerRuleConfiguration;
 	private YAMLRenamingRule renamingConfiguration;
+	private List<RefactoringRule> configuredRules;
 
 	/**
 	 * Creates an instance of this wrapper and finds the list of the selected
@@ -83,16 +84,29 @@ public class RuleConfigurationWrapper {
 	private void computeConfiguration() throws StandaloneException {
 		String selectedProfile = yamlConfig.getSelectedProfile();
 		if (selectedProfile != null && !selectedProfile.isEmpty()) {
-			String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
-					selectedProfile);
-			yamlProfile = findSelectedProfile(selectedProfile)
-				.orElseThrow(() -> new StandaloneException(exceptionMessage));
-			loggerRuleConfiguration = getOrDefault(yamlProfile.getLoggerRule());
-			renamingConfiguration = getOrDefault(yamlProfile.getRenamingRule());
-		} else {
-			loggerRuleConfiguration = getOrDefault(yamlConfig.getLoggerRule());
-			renamingConfiguration = getOrDefault(yamlConfig.getRenamingRule());
+			useConfigurationFromProfile(selectedProfile);
+			return;
 		}
+		useRootConfiguration();
+	}
+
+	private void useRootConfiguration() throws StandaloneException {
+		loggerRuleConfiguration = getOrDefault(yamlConfig.getLoggerRule());
+		renamingConfiguration = getOrDefault(yamlConfig.getRenamingRule());
+		List<String> selectedIds = yamlConfig.getRules();
+		configuredRules = getConfigRules(selectedIds);
+	}
+
+	private void useConfigurationFromProfile(String selectedProfile) throws StandaloneException {
+		String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
+				selectedProfile);
+		yamlProfile = findSelectedProfile(selectedProfile)
+			.orElseThrow(() -> new StandaloneException(exceptionMessage));
+		loggerRuleConfiguration = getOrDefault(yamlProfile.getLoggerRule());
+		renamingConfiguration = getOrDefault(yamlProfile.getRenamingRule());
+		
+		List<String> selectedIds = yamlProfile.getRules();
+		configuredRules = getConfigRules(selectedIds);
 	}
 
 	private YAMLRenamingRule getOrDefault(YAMLRenamingRule renamingRule) {
@@ -117,15 +131,6 @@ public class RuleConfigurationWrapper {
 	 *             rules.
 	 */
 	public List<RefactoringRule> getSelectedAutomaticRules() throws StandaloneException {
-		List<RefactoringRule> configuredRules;
-		if (yamlProfile != null) {
-			List<String> selectedIds = yamlProfile.getRules();
-			configuredRules = getConfigRules(selectedIds);
-
-		} else {
-			List<String> selectedIds = yamlConfig.getRules();
-			configuredRules = getConfigRules(selectedIds);
-		}
 
 		List<RefactoringRule> selectedAutomaticRules = refactoringRules.stream()
 			.filter(RefactoringRule::isEnabled)
