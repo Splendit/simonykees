@@ -23,8 +23,9 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
- * A factory for creating instances of {@link FieldDeclarationASTVisitor} and
- * for visiting the list of compilation units with it.
+ * Provides functionality 
+ * for visiting compilation units {@link FieldDeclarationASTVisitor} and retrieving 
+ * the results. 
  * 
  * @author Ardit Ymeri
  * @since 2.3.1

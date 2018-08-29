@@ -29,9 +29,9 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.standalone.CompilationUnitProvider;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
-public class FieldsRenamingWrapperTest {
+public class FieldsRenamingInstantiatorTest {
 
-	private FieldsRenamingWrapper fieldsRenamingWrapper;
+	private FieldsRenamingInstantiator fieldsRenamingWrapper;
 	private IJavaProject javaProject;
 	private FieldDeclarationVisitorWrapper fieldDeclarationVisitorWrapper;
 
@@ -42,7 +42,7 @@ public class FieldsRenamingWrapperTest {
 	public void setUp() {
 		javaProject = mock(IJavaProject.class);
 		fieldDeclarationVisitorWrapper = mock(FieldDeclarationVisitorWrapper.class);
-		fieldsRenamingWrapper = new FieldsRenamingWrapper(javaProject, fieldDeclarationVisitorWrapper);
+		fieldsRenamingWrapper = new FieldsRenamingInstantiator(javaProject, fieldDeclarationVisitorWrapper);
 	}
 
 	@Test

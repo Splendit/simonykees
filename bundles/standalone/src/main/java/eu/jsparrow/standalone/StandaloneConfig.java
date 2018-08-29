@@ -49,7 +49,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
-import eu.jsparrow.standalone.renaming.FieldsRenamingWrapper;
+import eu.jsparrow.standalone.renaming.FieldsRenamingInstantiator;
 
 /**
  * Class that contains all configuration needed to run headless version of
@@ -525,7 +525,7 @@ public class StandaloneConfig {
 	}
 
 	private Optional<FieldsRenamingRule> setUpRenamingRule(Map<String, Boolean> options) throws StandaloneException {
-		FieldsRenamingWrapper factory = new FieldsRenamingWrapper(javaProject, new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE));
+		FieldsRenamingInstantiator factory = new FieldsRenamingInstantiator(javaProject, new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE));
 
 		if (isChildModule) {
 			/*

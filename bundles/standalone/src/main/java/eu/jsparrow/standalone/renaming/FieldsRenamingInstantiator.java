@@ -25,12 +25,12 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
  * 
  * @since 2.6.0
  */
-public class FieldsRenamingWrapper {
+public class FieldsRenamingInstantiator {
 
 	private IJavaProject javaProject;
 	private FieldDeclarationVisitorWrapper visitorWrapper;
 
-	public FieldsRenamingWrapper(IJavaProject javaProject, FieldDeclarationVisitorWrapper visitorWrapper) {
+	public FieldsRenamingInstantiator(IJavaProject javaProject, FieldDeclarationVisitorWrapper visitorWrapper) {
 		this.javaProject = javaProject;
 		this.visitorWrapper = visitorWrapper;
 	}
