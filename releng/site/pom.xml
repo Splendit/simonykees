@@ -20,7 +20,7 @@
 
 		<!-- Here we need the download url of the packagedrone channel -->
 		<!-- We override how the url is built in the root pom -->
-		<packagedrone.url.complete>${packagedrone.download.prefix}${packagedrone.channel.suffix}</packagedrone.url.complete>
+		<packagedrone.url.complete.m2>${packagedrone.download.prefix}${packagedrone.channel.suffix}</packagedrone.url.complete.m2>
 	</properties>
 
 	<build>
@@ -62,7 +62,7 @@
 						<configuration>
 							<associateSites>
 								<!-- Has been overridden -->
-								<associateSite>${packagedrone.url.complete}</associateSite>
+								<associateSite>${packagedrone.url.complete.m2}</associateSite>
 							</associateSites>
 						</configuration>
 					</execution>
