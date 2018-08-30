@@ -39,6 +39,7 @@ public class ConfigurationKeys {
 			ECLIPSE_PLUGIN_NATURE_ID, JAVA_NATURE_ID);
 	public static final String MAVEN_PROJECT_NATURE_IDS = MAVEN_NATURE_ID + "," + JAVA_NATURE_ID; //$NON-NLS-1$
 	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	public static final String HAS_PARENT = "HAS.PARENT"; //$NON-NLS-1$
 
 	private ConfigurationKeys() {
 		/*

@@ -39,7 +39,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 2.3.0
  *
  */
-public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor {
+public class FieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String DASH = "-"; //$NON-NLS-1$
 	private static final String COMMENT_TEMPLATE = "Rename %s to comply with naming conventions."; //$NON-NLS-1$
@@ -63,7 +63,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 * @param unmodifiableFields
 	 *            metadata for the fields to insert comments to
 	 */
-	public PublicFieldsRenamingASTVisitor(List<FieldMetaData> metaData, List<FieldMetaData> unmodifiableFields) {
+	public FieldsRenamingASTVisitor(List<FieldMetaData> metaData, List<FieldMetaData> unmodifiableFields) {
 		this.metaData = metaData;
 		this.unmodifiableFields = unmodifiableFields;
 		this.todosEditGroups = new HashMap<>();

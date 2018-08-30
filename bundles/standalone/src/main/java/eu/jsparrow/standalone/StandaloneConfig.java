@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -33,16 +35,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
-import eu.jsparrow.core.config.YAMLConfigException;
-import eu.jsparrow.core.config.YAMLConfigUtil;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorWrapper;
+import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
+import eu.jsparrow.standalone.renaming.FieldsRenamingInstantiator;
 
 /**
  * Class that contains all configuration needed to run headless version of
@@ -67,6 +74,9 @@ public class StandaloneConfig {
 	private static final String TEMP_FILE_EXTENSION = ".tmp"; //$NON-NLS-1$
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
+	
+	private static final String SEARCH_SCOPE = "workspace"; //$NON-NLS-1$
+
 
 	private String path;
 	private String compilerCompliance;
@@ -84,6 +94,7 @@ public class StandaloneConfig {
 	protected RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private boolean abort = false;
 	private YAMLConfig yamlConfig;
+	private Boolean isChildModule;
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
@@ -101,6 +112,9 @@ public class StandaloneConfig {
 	 *            the nature id-s of the project
 	 * @param yamlConfig
 	 *            the default yaml configuration file of the project
+	 * @param isChildModule
+	 *            a flag indicating whether the project represents a module in a
+	 *            multi-module project or a simple project.
 	 * @throws CoreException
 	 *             if the classpath entries cannot be added or the source files
 	 *             cannot be parsed
@@ -108,7 +122,8 @@ public class StandaloneConfig {
 	 *             if the project cannot be created
 	 */
 	public StandaloneConfig(String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds, YAMLConfig yamlConfig) throws CoreException, StandaloneException {
+			String[] natureIds, YAMLConfig yamlConfig, boolean isChildModule)
+			throws CoreException, StandaloneException {
 
 		this.projectName = projectName;
 		this.path = path;
@@ -116,6 +131,7 @@ public class StandaloneConfig {
 		this.sourceFolder = sourceFolder;
 		this.natureIds = natureIds;
 		this.yamlConfig = yamlConfig;
+		this.isChildModule = isChildModule;
 		setUp();
 	}
 
@@ -430,7 +446,7 @@ public class StandaloneConfig {
 		loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compilationUnits.size());
 		logger.debug(loggerInfo);
 
-		logUnusedexcludes();
+		logUnusedExcludes();
 
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		List<ICompilationUnit> containingErrors = new ArrayList<>();
@@ -453,7 +469,7 @@ public class StandaloneConfig {
 		logger.debug(loggerInfo);
 	}
 
-	private void logUnusedexcludes() {
+	private void logUnusedExcludes() {
 		String loggerInfo;
 		Collector<CharSequence, ?, String> collector = Collectors.joining(", "); //$NON-NLS-1$
 
@@ -479,9 +495,61 @@ public class StandaloneConfig {
 			return;
 		}
 
-		List<RefactoringRule> projectRules = getProjectRules();
-		List<RefactoringRule> rules = getSelectedRules(projectRules);
+		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
+		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(yamlConfig, getProjectRules());
 
+		List<RefactoringRule> rules = new ArrayList<>();
+
+		if (ruleConfigurationWrapper.isSelectedRule(FieldsRenamingRule.FIELDS_RENAMING_RULE_ID)) {
+			Map<String, Boolean> options = ruleConfigurationWrapper.getFieldRenamingRuleConfigurationOptions();
+			setUpRenamingRule(options).ifPresent(rules::add);
+		}
+
+		if (ruleConfigurationWrapper.isSelectedRule(StandardLoggerRule.STANDARD_LOGGER_RULE_ID)) {
+			Map<String, String> options = ruleConfigurationWrapper.getLoggerRuleConfigurationOptions();
+			setUpLoggerRule(options).ifPresent(rules::add);
+		}
+
+		List<RefactoringRule> selectedAutomaticRules = ruleConfigurationWrapper.getSelectedAutomaticRules();
+		rules.addAll(selectedAutomaticRules);
+
+		applyRules(rules);
+	}
+
+	private Optional<StandardLoggerRule> setUpLoggerRule(Map<String, String> options) {
+		StandardLoggerRule loggerRule = new StandardLoggerRule();
+		loggerRule.activateOptions(options);
+		loggerRule.calculateEnabledForProject(javaProject);
+		return Optional.ofNullable(loggerRule)
+			.filter(StandardLoggerRule::isEnabled);
+	}
+
+	private Optional<FieldsRenamingRule> setUpRenamingRule(Map<String, Boolean> options) throws StandaloneException {
+		FieldsRenamingInstantiator factory = new FieldsRenamingInstantiator(javaProject, new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE));
+
+		if (isChildModule) {
+			/*
+			 * see SIM-1250. If we are dealing with a multimodule project, we limit 
+			 * the renaming rule to run only for private fields. 
+			 */
+			options.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);
+			options.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, false);
+			options.put(FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS, false);
+		}
+		List<ICompilationUnit> iCompilationUnits = refactoringPipeline.getRefactoringStates()
+			.stream()
+			.map(RefactoringState::getWorkingCopy)
+			.map(ICompilationUnit::getPrimary)
+			.collect(Collectors.toList());
+		List<FieldMetaData> metaData = factory.findFields(iCompilationUnits, options);
+		FieldsRenamingRule renamingRule = factory.createRule(metaData, compilationUnitsProvider);
+		renamingRule.calculateEnabledForProject(javaProject);
+		return Optional.of(renamingRule)
+			.filter(FieldsRenamingRule::isEnabled);
+
+	}
+
+	private void applyRules(List<RefactoringRule> rules) throws StandaloneException {
 		refactoringPipeline.setRules(rules);
 
 		if (!rules.isEmpty()) {
@@ -505,15 +573,6 @@ public class StandaloneConfig {
 			}
 		} else {
 			logger.info(Messages.Activator_standalone_noRulesSelected);
-		}
-	}
-
-	protected List<RefactoringRule> getSelectedRules(List<RefactoringRule> projectRules) throws StandaloneException {
-		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
-		try {
-			return YAMLConfigUtil.getSelectedRulesFromConfig(yamlConfig, projectRules);
-		} catch (YAMLConfigException e) {
-			throw new StandaloneException(e.getMessage(), e);
 		}
 	}
 

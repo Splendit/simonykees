@@ -16,7 +16,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 
 @SuppressWarnings("nls")
-public class PublicFieldsRenamingRuleTest {
+public class FieldsRenamingRuleTest {
 
 	private static final String PRERULE_RENAMING_PACKAGE = "eu.jsparrow.sample.preRule.renaming";
 	private static final String PRERULE_DIRECTORY = RulesTestUtil.PRERULE_DIRECTORY + "/renaming";

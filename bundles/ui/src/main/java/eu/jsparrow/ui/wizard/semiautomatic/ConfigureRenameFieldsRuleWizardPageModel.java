@@ -20,7 +20,7 @@ import java.util.Set;
 
 import org.eclipse.jface.wizard.WizardPage;
 
-import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.wizard.IValueChangeListener;
@@ -195,7 +195,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 
 	// GETTERS used by rule
 	/**
-	 * Getter used by {@link PublicFieldsRenamingRule} to get selected field
+	 * Getter used by {@link FieldsRenamingRule} to get selected field
 	 * types chosen by user for renaming.
 	 * 
 	 * @return List with field types chosen to be renamed
@@ -205,7 +205,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	}
 
 	/**
-	 * Getter used by {@link PublicFieldsRenamingRule} to get selected search
+	 * Getter used by {@link FieldsRenamingRule} to get selected search
 	 * scope chosen by user.
 	 * 
 	 * @return selected search scope
@@ -215,7 +215,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	}
 
 	/**
-	 * Getter used by {@link PublicFieldsRenamingRule} to get selected
+	 * Getter used by {@link FieldsRenamingRule} to get selected
 	 * replacement option for underscore replacement chosen by user.
 	 * 
 	 * @return selected underscore replacement option
@@ -225,7 +225,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	}
 
 	/**
-	 * Getter used by {@link PublicFieldsRenamingRule} to get selected
+	 * Getter used by {@link FieldsRenamingRule} to get selected
 	 * replacement option for dollar sign replacement chosen by user.
 	 * 
 	 * @return selected dollar sign replacement option
@@ -235,7 +235,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	}
 
 	/**
-	 * Getter used by {@link PublicFieldsRenamingRule} to get if user wants to
+	 * Getter used by {@link FieldsRenamingRule} to get if user wants to
 	 * add to-do comments where renaming wasn't able.
 	 * 
 	 * @return true if to-do comments are wanted, false otherwise

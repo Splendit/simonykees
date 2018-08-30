@@ -83,24 +83,6 @@ public class YAMLConfigUtilTest {
 	}
 
 	@Test
-	public void getSelectedRulesFromConfig_InvalidSelectedProfile_ShouldThrowException() throws YAMLConfigException {
-		YAMLConfig config = new YAMLConfig();
-		config.setSelectedProfile("INVALID");
-		expectedException.expect(YAMLConfigException.class);
-		YAMLConfigUtil.getSelectedRulesFromConfig(config, new ArrayList<>());
-	}
-
-	@Test
-	public void getSelectedRulesFromConfig_WithoutProfileWithValidRules_ShouldReturnAllRules()
-			throws YAMLConfigException {
-		YAMLConfig config = new YAMLConfig();
-		config.getRules()
-			.add("TryWithResource");
-
-		YAMLConfigUtil.getSelectedRulesFromConfig(config, new ArrayList<>());
-	}
-
-	@Test
 	public void readConfig_NonExistentFile_ShouldThrowException() throws YAMLConfigException {
 		expectedException.expect(YAMLConfigException.class);
 		expectedException.expectMessage(
@@ -124,7 +106,8 @@ public class YAMLConfigUtilTest {
 		YAMLConfig yamlConfig = new YAMLConfig();
 		yamlConfig.setSelectedProfile(PROFILE_NAME);
 		yamlConfig.setProfiles(
-				Arrays.asList(new YAMLProfile(PROFILE_NAME, emptyList()), new YAMLProfile(profileName2, emptyList())));
+				Arrays.asList(new YAMLProfile(PROFILE_NAME, emptyList(), new YAMLRenamingRule(), new YAMLLoggerRule()),
+						new YAMLProfile(profileName2, emptyList(), new YAMLRenamingRule(), new YAMLLoggerRule())));
 
 		YAMLConfigUtil.updateSelectedProfile(yamlConfig, profileName2);
 
@@ -134,7 +117,8 @@ public class YAMLConfigUtilTest {
 	@Test
 	public void updateProfile_NonExistingProflie_shouldThrowException() throws YAMLConfigException {
 		YAMLConfig yamlConfig = new YAMLConfig();
-		yamlConfig.setProfiles(singletonList(new YAMLProfile(PROFILE_NAME, emptyList())));
+		yamlConfig.setProfiles(singletonList(
+				new YAMLProfile(PROFILE_NAME, emptyList(), new YAMLRenamingRule(), new YAMLLoggerRule())));
 
 		expectedException.expect(YAMLConfigException.class);
 		expectedException.expectMessage("Profile [INVALID] does not exist"); //$NON-NLS-1$
