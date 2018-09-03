@@ -28,6 +28,7 @@
 		<!-- modular rules -->
 		<module>rules.api</module>
 		<module>rules.imports</module>
+		<module>rules.imports.old</module>
 		<module>rules.java10</module>
 
 		<!-- licensing -->
