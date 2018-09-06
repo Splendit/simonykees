@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
    <feature url="features/eu.jsparrow.3rd.party.feature_0.0.0.jar" id="eu.jsparrow.3rd.party.feature" version="0.0.0"/>
-   <feature url="features/eu.jsparrow.rules.import.feature_0.0.0.jar" id="eu.jsparrow.rules.import.feature" version="0.0.0"/>
-   <feature url="features/eu.jsparrow.feature_0.0.0.jar" id="eu.jsparrow.feature" version="0.0.0">
-      <category name="oxygen_neon"/>
-   </feature>
    <feature url="features/eu.jsparrow.photon.feature_2.6.0.qualifier.jar" id="eu.jsparrow.photon.feature" version="2.6.0.qualifier">
       <category name="photon"/>
    </feature>
-   <category-def name="oxygen_neon" label="Oxygen and Neon">
-      <description>
-         Eclipse plugins by Splendit IT-Consulting GmbH
-      </description>
-   </category-def>
    <category-def name="photon" label="Photon"/>
 </site>

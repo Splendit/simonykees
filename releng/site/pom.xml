@@ -32,6 +32,30 @@
 					<includeAllDependencies>false</includeAllDependencies>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-p2-extras-plugin</artifactId>
+				<version>${tycho.extras.version}</version>
+				<executions>
+					<execution>
+						<id>copy-to-central-site</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>mirror</goal>
+						</goals>
+						<configuration>
+							<source>
+								<repository>
+									<url>${project.baseUri}/../eu.jsparrow.site.oxygen/target/repository</url>
+									<layout>p2</layout>
+								</repository>
+							</source>
+							<append>true</append>
+							<destination>${project.build.directory}/repository</destination>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
 			<!-- workaround https://bugs.eclipse.org/bugs/show_bug.cgi?id=453708 -->
 
