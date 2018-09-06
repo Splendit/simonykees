@@ -20,9 +20,9 @@ import org.osgi.framework.Version;
 public class JdtVersionBindingUtil {
 
 	private static final String ORG_ECLIPSE_JDT = "org.eclipse.jdt"; //$NON-NLS-1$
-	private static final String PHOTON_JDT_VERSION = "3.14.0"; //$NON-NLS-1$
-	private static final String OXYGEN_JDT_VERSION = "3.13.0"; //$NON-NLS-1$
-	private static final String NEON_JDT_VERSION = "3.12.0"; //$NON-NLS-1$
+	private static final String JDT_JAVA_10_SUPPORT = "3.14.0"; //$NON-NLS-1$
+	private static final String JDT_JAVA_9_SUPPORT = "3.13.2"; //$NON-NLS-1$
+	private static final String JDT_LEAST_SUPPORTED = "3.12.0"; //$NON-NLS-1$
 	private static Bundle jdtBundle;
 
 	private JdtVersionBindingUtil() {
@@ -36,7 +36,7 @@ public class JdtVersionBindingUtil {
 	 * {@link Platform}.
 	 * 
 	 * @return the {@link Version} of {@value #ORG_ECLIPSE_JDT} bundle on the
-	 *         current platform or {@value #NEON_JDT_VERSION} if none is found
+	 *         current platform or {@value #JDT_LEAST_SUPPORTED} if none is found
 	 *         since it corresponds to the least eclipse version that we
 	 *         support.
 	 */
@@ -44,7 +44,7 @@ public class JdtVersionBindingUtil {
 		if (jdtBundle == null) {
 			Bundle bundle = Platform.getBundle(ORG_ECLIPSE_JDT);
 			if (bundle == null) {
-				return Version.parseVersion(NEON_JDT_VERSION);
+				return Version.parseVersion(JDT_LEAST_SUPPORTED);
 			}
 			jdtBundle = bundle;
 		}
@@ -62,9 +62,9 @@ public class JdtVersionBindingUtil {
 	 */
 	@SuppressWarnings("deprecation")
 	public static int findJLSLevel(Version jdtVersion) {
-		if (isAtLeastPhoton(jdtVersion)) {
+		if (isJava10Supported(jdtVersion)) {
 			return AST.JLS10;
-		} else if (isAtLeastOxygen(jdtVersion)) {
+		} else if (isJava9Supported(jdtVersion)) {
 			return AST.JLS9;
 		}
 		return AST.JLS8;
@@ -84,9 +84,9 @@ public class JdtVersionBindingUtil {
 	 */
 	public static Map<String, String> findCompilerOptions(Version jdtVersion) {
 		String javaVersion = JavaCore.VERSION_1_8;
-		if (isAtLeastPhoton(jdtVersion)) {
+		if (isJava10Supported(jdtVersion)) {
 			javaVersion = JavaCore.VERSION_10;
-		} else if (isAtLeastOxygen(jdtVersion)) {
+		} else if (isJava9Supported(jdtVersion)) {
 			javaVersion = JavaCore.VERSION_9;
 		}
 		Map<String, String> options = JavaCore.getOptions();
@@ -108,18 +108,18 @@ public class JdtVersionBindingUtil {
 	 */
 	@SuppressWarnings("deprecation")
 	public static ChildListPropertyDescriptor findTryWithResourcesProperty(Version jdtVersion) {
-		if (isAtLeastOxygen(jdtVersion)) {
+		if (isJava9Supported(jdtVersion)) {
 			return TryStatement.RESOURCES2_PROPERTY;
 		}
 		return TryStatement.RESOURCES_PROPERTY;
 	}
 
-	private static boolean isAtLeastPhoton(Version jdtVersion) {
-		return jdtVersion.compareTo(Version.parseVersion(PHOTON_JDT_VERSION)) >= 0;
+	private static boolean isJava10Supported(Version jdtVersion) {
+		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_10_SUPPORT)) >= 0;
 	}
 
-	private static boolean isAtLeastOxygen(Version jdtVersion) {
-		return jdtVersion.compareTo(Version.parseVersion(OXYGEN_JDT_VERSION)) >= 0;
+	private static boolean isJava9Supported(Version jdtVersion) {
+		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_9_SUPPORT)) >= 0;
 	}
 
 }
