@@ -1,14 +1,9 @@
 package eu.jsparrow.rules.imports;
 
-import java.time.Duration;
-import java.util.Arrays;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
@@ -17,17 +12,11 @@ import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation.IChooseImportQ
 import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
-import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
-import eu.jsparrow.rules.common.RuleDescription;
-import eu.jsparrow.rules.common.Tag;
-import eu.jsparrow.rules.common.statistics.FileChangeCount;
-import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
+import eu.jsparrow.rules.common.OrganiseImportsRuleBase;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -43,37 +32,12 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  *
  */
 
-public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteASTVisitor> {
-
-	public OrganiseImportsRule() {
-		super();
-		this.visitorClass = AbstractASTRewriteASTVisitor.class;
-		this.id = "OrganiseImports"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.OrganiseImportsRule_name,
-				Messages.OrganiseImportsRule_description, Duration.ofMinutes(1),
-				Arrays.asList(Tag.JAVA_1_1, Tag.FORMATTING, Tag.READABILITY));
-	}
+public class OrganiseImportsRule extends OrganiseImportsRuleBase {
 
 	@Override
-	protected String provideRequiredJavaVersion() {
-		return JavaCore.VERSION_1_1;
-	}
-
-	@Override
-	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy, CompilationUnit astRoot)
-			throws ReflectiveOperationException, JavaModelException {
-
-		try {
-			return applyOrganising(workingCopy);
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
-		}
-	}
-
-	private DocumentChange applyOrganising(ICompilationUnit workingCopy) throws CoreException {
-
-		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
-		final boolean[] hasAmbiguity = new boolean[] { false };
+	protected TextEdit createTextEdits(ICompilationUnit workingCopy, CompilationUnit astRoot,
+			boolean[] hasAmbiguity) throws CoreException {
+		setUpOrganizeImportsConstants();
 		IChooseImportQuery query = (TypeNameMatch[][] openChoices, ISourceRange[] ranges) -> {
 			hasAmbiguity[0] = true;
 			return new TypeNameMatch[0];
@@ -81,29 +45,22 @@ public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteA
 
 		OrganizeImportsOperation importsOperation = new OrganizeImportsOperation(workingCopy, astRoot, false, true,
 				true, query);
-		setUpOrganizeImportsConstants();
 		TextEdit edit = importsOperation.createTextEdit(null);
-
-		DocumentChange documentChange = null;
-
-		if (!hasAmbiguity[0] && importsOperation.getParseError() == null && edit != null
-				&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
-			FileChangeCount count = RuleApplicationCount.getFor(this)
-				.getApplicationsForFile(workingCopy.getHandleIdentifier());
-			count.clear();
-			count.update();
-			Document document = new Document(workingCopy.getSource());
-			documentChange = RefactoringUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,
-					edit.copy());
-
-			workingCopy.applyTextEdit(edit, null);
-
+		if(hasAmbiguity[0] || importsOperation.getParseError() != null) {
+			return null;
 		}
-
-		return documentChange;
-
+		return edit;
 	}
 
+	@Override
+	protected DocumentChange createDocumentChange(TextEdit edit, Document document) {
+		DocumentChange documentChange;
+		documentChange = RefactoringUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,
+				edit.copy());
+		return documentChange;
+	}
+	
+	
 	/**
 	 * If the JavaManipulation.PreferenceNodeId if not set. In Photon the
 	 * previously internal Organize imports functionality was extracted, but not
@@ -114,7 +71,7 @@ public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteA
 	 * 
 	 * TODO: find a better solution when adding the rule to the JMP
 	 */
-	private void setUpOrganizeImportsConstants() {
+	protected void setUpOrganizeImportsConstants() {
 		if (JavaManipulation.getPreferenceNodeId() == null) {
 			Preferences preferences = InstanceScope.INSTANCE.getNode("eu.jsparrow.manipulation");
 			preferences.put(CodeStyleConfiguration.ORGIMPORTS_IMPORTORDER, "java;javax;org;com");

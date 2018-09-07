@@ -1,28 +1,17 @@
 package eu.jsparrow.rules.imports;
 
-import java.time.Duration;
-import java.util.Arrays;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRuleImpl;
-import eu.jsparrow.rules.common.RuleDescription;
-import eu.jsparrow.rules.common.Tag;
-import eu.jsparrow.rules.common.statistics.FileChangeCount;
-import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
+import eu.jsparrow.rules.common.OrganiseImportsRuleBase;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -39,37 +28,11 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 
 @SuppressWarnings("restriction")
-public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteASTVisitor> {
-
-	public OrganiseImportsRule() {
-		super();
-		this.visitorClass = AbstractASTRewriteASTVisitor.class;
-		this.id = "OrganiseImports"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.OrganiseImportsRule_name,
-				Messages.OrganiseImportsRule_description, Duration.ofMinutes(1),
-				Arrays.asList(Tag.JAVA_1_1, Tag.FORMATTING, Tag.READABILITY));
-	}
+public class OrganiseImportsRule extends OrganiseImportsRuleBase {
 
 	@Override
-	protected String provideRequiredJavaVersion() {
-		return JavaCore.VERSION_1_1;
-	}
-
-	@Override
-	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy, CompilationUnit astRoot)
-			throws ReflectiveOperationException, JavaModelException {
-
-		try {
-			return applyOrganising(workingCopy);
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
-		}
-	}
-
-	private DocumentChange applyOrganising(ICompilationUnit workingCopy) throws CoreException {
-
-		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
-		final boolean[] hasAmbiguity = new boolean[] { false };
+	protected TextEdit createTextEdits(ICompilationUnit workingCopy, CompilationUnit astRoot,
+			boolean[] hasAmbiguity) throws CoreException {
 		IChooseImportQuery query = (TypeNameMatch[][] openChoices, ISourceRange[] ranges) -> {
 			hasAmbiguity[0] = true;
 			return new TypeNameMatch[0];
@@ -78,25 +41,16 @@ public class OrganiseImportsRule extends RefactoringRuleImpl<AbstractASTRewriteA
 		OrganizeImportsOperation importsOperation = new OrganizeImportsOperation(workingCopy, astRoot, false, true,
 				true, query);
 		TextEdit edit = importsOperation.createTextEdit(null);
-
-		DocumentChange documentChange = null;
-
-		if (!hasAmbiguity[0] && importsOperation.getParseError() == null && edit != null
-				&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
-			FileChangeCount count = RuleApplicationCount.getFor(this)
-				.getApplicationsForFile(workingCopy.getHandleIdentifier());
-			count.clear();
-			count.update();
-			Document document = new Document(workingCopy.getSource());
-			documentChange = RefactoringUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,
-					edit.copy());
-
-			workingCopy.applyTextEdit(edit, null);
-
+		if(hasAmbiguity[0] || importsOperation.getParseError() != null) {
+			return null;
 		}
+		return edit;
+	}
 
-		return documentChange;
-
+	@Override
+	protected DocumentChange createDocumentChange(TextEdit edit, Document document) {
+		return RefactoringUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,
+				edit.copy());
 	}
 
 }
