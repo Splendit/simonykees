@@ -26,9 +26,6 @@
 
 		<!-- eclipse plugin at least Photon -->
 		<module>feature.photon</module>
-
-		<!-- eclipse plugin -->
-		<module>feature.rules.import</module>
 	</modules>
 
 </project>

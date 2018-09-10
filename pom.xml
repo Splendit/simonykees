@@ -70,12 +70,12 @@
 	</prerequisites>
 
 	<modules>
+		<module>bundles</module>
+		<module>tests</module>
+		<module>features</module>
+		
 		<!-- release engineering -->
 		<module>releng</module>
-
-		<module>bundles</module>
-		<module>features</module>
-		<module>tests</module>
 
 		<!-- The jsparrow-maven-plugin cannot be deployed alongside jSparrow. SIM-877 
 			will improve/fix this. -->

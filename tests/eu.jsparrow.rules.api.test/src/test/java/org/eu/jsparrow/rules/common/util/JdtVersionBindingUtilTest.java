@@ -19,7 +19,7 @@ import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
 public class JdtVersionBindingUtilTest {
 
 	private static final String JDT_VERSION_NEON = "3.12.0";
-	private static final String JDT_VERSION_OXYGEN = "3.13.0";
+	private static final String JDT_VERSION_OXYGEN = "3.13.2";
 	private static final String JDT_VERSION_PHOTON = "3.14.0";
 
 	@Test
