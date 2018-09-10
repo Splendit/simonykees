@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="eu.jsparrow.photon.feature"
-      label="jSparrow"
+      label="jsparrow"
       version="2.6.0.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 

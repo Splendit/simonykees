@@ -365,14 +365,14 @@ void mockStage(String stageName) {
 
 void uploadMappingFile(Profile profile) {
 
-    // TODO there has to be a nicer way to get the version (and then the directory), when we already have the qualifier
-    def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu.jsparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" releng/site/target/p2content.xml").trim()
-    def directory = "${buildNumber}${profile.qualifier}"
-
     def stageName = "Upload Mapping Files"
 
     if (isLiveEnvironment) {
         stage(stageName) {
+        	// TODO there has to be a nicer way to get the version (and then the directory), when we already have the qualifier
+          // tag-deployment.sh uses the same mechanism
+    		def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu.jsparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" releng/eu.jsparrow.site.oxygen/target/p2content.xml").trim()
+    		def directory = "${buildNumber}${profile.qualifier}"
             uploadMappingFiles(directory)
         }
     } else {
