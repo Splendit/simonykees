@@ -11,7 +11,7 @@
 
 	<artifactId>eu.jsparrow.site.oxygen</artifactId>
 	<packaging>eclipse-repository</packaging>
-	<name>jSparrow :: update site</name>
+	<name>jSparrow :: neon-oxygen update site</name>
 	<description>jSparrow Update Site</description>
 
 </project>

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>eu.jsparrow.rules.java10</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<name>jsparrow :: rules.java10</name>
+	<name>jsparrow :: rules java10</name>
 	<description>jSparrow java 10</description>
 	<parent>
 		<groupId>at.splendit</groupId>

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>eu.jsparrow.rules.imports.old</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<name>jsparrow :: rules.import.old</name>
+	<name>jSparrow :: rules import old</name>
 	<description>jSparrow Organize Imports Rule</description>
 	<parent>
 		<groupId>at.splendit</groupId>

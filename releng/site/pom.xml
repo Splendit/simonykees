@@ -11,7 +11,7 @@
 
 	<artifactId>eu.jsparrow.site</artifactId>
 	<packaging>eclipse-repository</packaging>
-	<name>jSparrow :: update site</name>
+	<name>jSparrow :: composite update site</name>
 	<description>jSparrow Update Site</description>
 
 	<properties>
