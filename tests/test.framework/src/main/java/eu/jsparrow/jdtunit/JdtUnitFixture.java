@@ -190,7 +190,7 @@ public class JdtUnitFixture {
 	}
 
 	/**
-	 * Returns the list of the definded imports
+	 * Returns the list of the defined imports
 	 */
 	public List<ImportDeclaration> getImports() {
 		return ASTNodeUtil.convertToTypedList(astRoot.imports(), ImportDeclaration.class);
