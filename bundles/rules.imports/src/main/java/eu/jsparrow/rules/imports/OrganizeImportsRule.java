@@ -32,7 +32,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  *
  */
 
-public class OrganiseImportsRule extends OrganiseImportsRuleBase {
+public class OrganizeImportsRule extends OrganiseImportsRuleBase {
 
 	@Override
 	protected TextEdit createTextEdits(ICompilationUnit workingCopy, CompilationUnit astRoot,
@@ -55,7 +55,7 @@ public class OrganiseImportsRule extends OrganiseImportsRuleBase {
 	@Override
 	protected DocumentChange createDocumentChange(TextEdit edit, Document document) {
 		DocumentChange documentChange;
-		documentChange = RefactoringUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,
+		documentChange = RefactoringUtil.generateDocumentChange(OrganizeImportsRule.class.getSimpleName(), document,
 				edit.copy());
 		return documentChange;
 	}
