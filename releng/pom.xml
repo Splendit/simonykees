@@ -14,10 +14,9 @@
 	<name>jSparrow :: releng</name>
 	<description>jSparrow Release Engineering Plugin</description>
 
-
 	<modules>
 		<module>eu.jsparrow.product</module>
-		<module>eu.jsparrow.site.oxygen</module>
-		<module>site</module>
+		<module>eu.jsparrow.site.neon</module>
+		<module>eu.jsparrow.site.photon</module>
 	</modules>
 </project>

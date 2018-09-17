@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jsparrow :: rules imports old
-Bundle-SymbolicName: eu.jsparrow.rules.imports.old
+Bundle-SymbolicName: eu.jsparrow.rules.imports.neon
 Bundle-Version: 2.6.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
@@ -18,6 +18,6 @@ Require-Bundle: eu.jsparrow.logging,
  org.eclipse.jdt.ui;bundle-version="[3.11.0,3.14.0)",
  org.eclipse.core.runtime;bundle-version="[3.11.0,4.0.0)",
  org.eclipse.core.resources;bundle-version="[3.11.0,4.0.0)"
-Service-Component: OSGI-INF/eu.jsparrow.rules.imports.OldImportsRuleServiceImpl.xml
+Service-Component: OSGI-INF/eu.jsparrow.rules.imports.OrganizeImportsRuleNeonServiceImpl.xml
 Bundle-ActivationPolicy: lazy
 Export-Package: eu.jsparrow.rules.imports
