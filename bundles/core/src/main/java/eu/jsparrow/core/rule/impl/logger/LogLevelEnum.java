@@ -4,6 +4,7 @@ package eu.jsparrow.core.rule.impl.logger;
  * Enum values used in {@link StandardLoggerRule} for log level. Used also for
  * YAML configuration of {@link StandardLoggerRule}
  *
+ * @since 2.6.0
  */
 public enum LogLevelEnum {
 
