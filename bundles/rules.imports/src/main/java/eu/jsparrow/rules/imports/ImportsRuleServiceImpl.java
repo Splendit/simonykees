@@ -9,7 +9,7 @@ import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
 
 /**
- * Implementor of {@link RuleService}. Currently provides only {@link OrganiseImportsRule}.  
+ * Implementor of {@link RuleService}. Currently provides only {@link OrganizeImportsRule}.  
  *
  * @author Hans-Jörg Schrödl
  *
@@ -19,7 +19,7 @@ public class ImportsRuleServiceImpl implements RuleService {
 
 	@Override
 	public List<RefactoringRule> loadRules() {
-		return Collections.singletonList(new OrganiseImportsRule());
+		return Collections.singletonList(new OrganizeImportsRule());
 	}
 
 }

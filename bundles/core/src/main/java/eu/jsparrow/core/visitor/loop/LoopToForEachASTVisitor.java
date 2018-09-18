@@ -140,7 +140,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			int outerTypeStartingIndex = fullyQualifiedName.lastIndexOf(outerType.getErasure()
 				.getName());
 			Name qualifiedName = astRewrite.getAST()
-				.newName(fullyQualifiedName.substring(outerTypeStartingIndex));
+				.newName(StringUtils.substring(fullyQualifiedName, outerTypeStartingIndex));
 			iteratorType = ASTNodeUtil.convertToQualifiedName(
 					importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST()), qualifiedName);
 		} else {
@@ -240,8 +240,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 		String identifier = simpleName.getIdentifier();
 		String defaultName;
-		if (identifier.length() > 1 && identifier.endsWith("s")) { //$NON-NLS-1$
-			defaultName = identifier.substring(0, identifier.length() - 1);
+		if (identifier.length() > 1 && StringUtils.endsWith(identifier, "s")) { //$NON-NLS-1$
+			defaultName = StringUtils.substring(identifier, 0, identifier.length() - 1);
 			if (JavaReservedKeyWords.isKeyWord(defaultName)) {
 				defaultName = addSingularPrefix(defaultName);
 			}

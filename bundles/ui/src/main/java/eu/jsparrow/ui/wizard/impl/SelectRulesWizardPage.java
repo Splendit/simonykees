@@ -45,9 +45,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizardPage.class);
 
-	private Composite filterComposite;
-
 	private static final String CUSTOM_PROFILE = Messages.SelectRulesWizardPage_CustomProfileLabel;
+
+	private Composite filterComposite;
 
 	private Combo selectProfileCombo;
 
@@ -102,8 +102,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		nameFilterText.setLayoutData(gridData);
 		nameFilterText.addModifyListener((ModifyEvent e) -> {
 			Text source = (Text) e.getSource();
-			((SelectRulesWizardPageControler) controler).nameFilterTextChanged(StringUtils.lowerCase(source.getText()
-				.trim()));
+			((SelectRulesWizardPageControler) controler).nameFilterTextChanged(StringUtils.lowerCase(StringUtils
+				.trim(source.getText())));
 		});
 		// following doesn't work under Windows7
 		nameFilterText.addSelectionListener(new SelectionAdapter() {
@@ -114,8 +114,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 					text.setText(Messages.SelectRulesWizardPage_emptyString);
 				} else if (e.detail == SWT.ICON_SEARCH) {
 					Text text = (Text) e.getSource();
-					String input = StringUtils.lowerCase(text.getText()
-						.trim());
+					String input = StringUtils.lowerCase(StringUtils
+						.trim(text.getText()));
 					if (!StringUtils.isEmpty(input) && !((SelectRulesWizardPageModel) model).getAppliedTags()
 						.contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
@@ -132,8 +132,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR) {
-					String input = StringUtils.lowerCase(((Text) e.getSource()).getText()
-						.trim());
+					String input = StringUtils.lowerCase(StringUtils
+						.trim(((Text) e.getSource()).getText()));
 					if (!StringUtils.isEmpty(input) && !((SelectRulesWizardPageModel) model).getAppliedTags()
 						.contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);

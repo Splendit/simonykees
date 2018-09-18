@@ -38,6 +38,7 @@ import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
+import eu.jsparrow.core.rule.impl.OptionalIfPresentRule;
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
@@ -105,6 +106,7 @@ public class RulesContainer {
 		List<RuleService> services = getExternalRuleServices();
 
 		List<RefactoringRule> rules = new LinkedList<>();
+
 		rules.addAll(Arrays.asList(
 				/*
 				 * Coding conventions
@@ -112,9 +114,8 @@ public class RulesContainer {
 				new TryWithResourceRule(), new MultiCatchRule(), new FunctionalInterfaceRule(),
 				new CollectionRemoveAllRule(), new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
-				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(),
-				new EnumsWithoutEqualsRule(), new ReImplementingInterfaceRule(), new PutIfAbsentRule(),
-				new DateDeprecatedRule(),
+				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
+				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new DateDeprecatedRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
@@ -124,6 +125,10 @@ public class RulesContainer {
 				new RemoveToStringOnStringRule(), new StringUtilsRule(), new StringLiteralEqualityCheckRule(),
 				new StringConcatToPlusRule(), new UseIsEmptyOnCollectionsRule(), new ArithmethicAssignmentRule(),
 				new StringBufferToBuilderRule(), new PrimitiveObjectUseEqualsRule(),
+				/*
+				 * Optionals
+				 */
+				new OptionalIfPresentRule(),
 				/*
 				 * Loops and streams
 				 */

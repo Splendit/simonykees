@@ -24,16 +24,29 @@ public class YAMLConfig {
 
 	private String selectedProfile;
 
+	private YAMLExcludes excludes;
+
+	private YAMLRenamingRule renamingRule;
+
+	private YAMLLoggerRule loggerRule;
+
 	public YAMLConfig() {
 		this.rules = new LinkedList<>();
 		this.profiles = new LinkedList<>();
 		this.selectedProfile = ""; //$NON-NLS-1$
+		this.excludes = new YAMLExcludes();
+		this.renamingRule = new YAMLRenamingRule();
+		this.loggerRule = new YAMLLoggerRule();
 	}
 
-	public YAMLConfig(List<String> rules, List<YAMLProfile> profiles, String defaultProfile) {
+	public YAMLConfig(List<String> rules, List<YAMLProfile> profiles, String defaultProfile, YAMLExcludes excludes,
+			YAMLRenamingRule renamingRule, YAMLLoggerRule loggerRule) {
 		this.rules = rules;
 		this.profiles = profiles;
 		this.selectedProfile = defaultProfile;
+		this.excludes = excludes;
+		this.renamingRule = renamingRule;
+		this.loggerRule = loggerRule;
 	}
 
 	/**
@@ -108,10 +121,34 @@ public class YAMLConfig {
 		this.selectedProfile = defaultProfile;
 	}
 
+	public YAMLExcludes getExcludes() {
+		return excludes;
+	}
+
+	public void setExcludes(YAMLExcludes excludes) {
+		this.excludes = excludes;
+	}
+
+	public YAMLRenamingRule getRenamingRule() {
+		return renamingRule;
+	}
+
+	public void setRenamingRule(YAMLRenamingRule renamingRule) {
+		this.renamingRule = renamingRule;
+	}
+
+	public YAMLLoggerRule getLoggerRule() {
+		return loggerRule;
+	}
+
+	public void setLoggerRule(YAMLLoggerRule loggerRule) {
+		this.loggerRule = loggerRule;
+	}
+
 	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
-		return "YAMLConfig [rules=" + rules + ", profiles=" + profiles + ", defaultProfile=" + selectedProfile + "]";
+		return "YAMLConfig [rules=" + rules + ", profiles=" + profiles + ", defaultProfile=" + selectedProfile + ", "
+				+ excludes.toString() + ", " + renamingRule.toString() + ", " + loggerRule.toString() + "]";
 	}
-
 }

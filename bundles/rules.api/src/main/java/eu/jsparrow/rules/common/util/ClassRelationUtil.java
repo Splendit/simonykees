@@ -23,9 +23,6 @@ import org.eclipse.jdt.core.dom.Modifier;
  */
 public class ClassRelationUtil {
 
-	private ClassRelationUtil() {
-	}
-
 	private static final String INT = "int"; //$NON-NLS-1$
 	private static final String DOUBLE = "double"; //$NON-NLS-1$
 	private static final String FLOAT = "float"; //$NON-NLS-1$
@@ -34,6 +31,9 @@ public class ClassRelationUtil {
 	private static final String BOOLEAN = "boolean"; //$NON-NLS-1$
 	private static final String BYTE = "byte"; //$NON-NLS-1$
 	private static final String CHAR = "char"; //$NON-NLS-1$
+
+	private ClassRelationUtil() {
+	}
 
 	/**
 	 * Checks whether the given type binding is a subtype of any of the types
@@ -60,7 +60,7 @@ public class ClassRelationUtil {
 			.anyMatch(fullyQuallifiedTargetnames::contains);
 
 	}
-	
+
 	/**
 	 * Checks whether the erasure of the given type binding coincides with any
 	 * of the given registered type.

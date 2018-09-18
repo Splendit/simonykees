@@ -21,10 +21,6 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 
 	private IObservableList<ChangedFilesModel> changedFiles = new WritableList<>();
 
-	public IObservableList<ChangedFilesModel> getChangedFiles() {
-		return changedFiles;
-	}
-
 	public RefactoringPreviewWizardPageModel(RefactoringRule rule, Map<ICompilationUnit, DocumentChange> changes) {
 		setIssuesFixed(RuleApplicationCount.getFor(rule)
 			.toInt());
@@ -34,6 +30,10 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 			.map(x -> new ChangedFilesModel(x.getKey(), x.getValue()))
 			.collect(Collectors.toList()));
 
+	}
+
+	public IObservableList<ChangedFilesModel> getChangedFiles() {
+		return changedFiles;
 	}
 
 	public int getIssuesFixed() {

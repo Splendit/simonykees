@@ -60,3 +60,10 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
+
+# ignore log files
+*.log
+
+# ignore idea files
+.idea
+*.iml

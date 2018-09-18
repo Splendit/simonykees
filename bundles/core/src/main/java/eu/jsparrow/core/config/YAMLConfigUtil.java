@@ -4,17 +4,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -70,7 +68,10 @@ public class YAMLConfigUtil {
 			Constructor constructor = new Constructor(YAMLConfig.class);
 			constructor.addTypeDescription(rootTypeDescription);
 
-			Yaml yaml = new Yaml(constructor);
+			LoaderOptions loaderOptions = new LoaderOptions();
+			loaderOptions.setAllowDuplicateKeys(false);
+
+			Yaml yaml = new Yaml(constructor, new Representer(), new DumperOptions(), loaderOptions);
 
 			config = yaml.loadAs(fis, YAMLConfig.class);
 		} catch (YAMLException | IOException e) {
@@ -111,105 +112,6 @@ public class YAMLConfigUtil {
 		}
 	}
 
-	/**
-	 * this method selects the rules to be applied. for all rules it will be
-	 * checked if they are available in general and for the current project. if
-	 * a rule does not meet the criteria, it will be filtered.
-	 * 
-	 * <ul>
-	 * <li>the defaultProfile is checked and if it exists its rules will be
-	 * used</li>
-	 * <li>if no defaultProfile is set the rules in the rules-section of the
-	 * configuration file will be used</li>
-	 * <li>if the given defaultProfile is not specified or a selected rule does
-	 * not exist a {@link YAMLConfigException} will be thrown</li>
-	 * </ul>
-	 * 
-	 * @param config
-	 *            configuration
-	 * @param javaProject
-	 *            the current {@link IJavaElement}
-	 * @return a list of rules to be applied on the project
-	 * @throws YAMLConfigException
-	 */
-	public static List<RefactoringRule> getSelectedRulesFromConfig(YAMLConfig config,
-			List<RefactoringRule> projectRules) throws YAMLConfigException {
-		List<RefactoringRule> result;
-
-		String selectedProfile = config.getSelectedProfile();
-		if (selectedProfile != null && !selectedProfile.isEmpty()) {
-			if (checkProfileExistence(config, selectedProfile)) {
-				Optional<YAMLProfile> configProfile = config.getProfiles()
-					.stream()
-					.filter(profile -> profile.getName()
-						.equals(selectedProfile))
-					.findFirst();
-
-				if (configProfile.isPresent()) {
-					List<RefactoringRule> profileRules = getConfigRules(configProfile.get()
-						.getRules());
-
-					result = projectRules.stream()
-						.filter(RefactoringRule::isEnabled)
-						.filter(profileRules::contains)
-						.collect(Collectors.toList());
-				} else {
-					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
-							selectedProfile);
-					throw new YAMLConfigException(exceptionMessage);
-				}
-			} else {
-				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
-						selectedProfile);
-				throw new YAMLConfigException(exceptionMessage);
-			}
-		} else { // use all rules from config file
-			List<RefactoringRule> configSelectedRules = getConfigRules(config.getRules());
-
-			result = projectRules.stream()
-				.filter(RefactoringRule::isEnabled)
-				.filter(configSelectedRules::contains)
-				.collect(Collectors.toList());
-		}
-
-		return result;
-	}
-
-	/**
-	 * this method takes a list of rule IDs and produces a list of rules
-	 * 
-	 * @param configRules
-	 *            rule IDs
-	 * @return list of rules ({@link RefactoringRule})
-	 * @throws YAMLConfigException
-	 *             is thrown if a given rule ID does not exist
-	 */
-	private static List<RefactoringRule> getConfigRules(List<String> configRules) throws YAMLConfigException {
-		List<RefactoringRule> rules = RulesContainer.getAllRules(true);
-		List<RefactoringRule> configSelectedRules = new LinkedList<>();
-		List<String> nonExistentRules = new LinkedList<>();
-
-		for (String configRule : configRules) {
-			Optional<RefactoringRule> currentRule = rules.stream()
-				.filter(rule -> rule.getId()
-					.equals(configRule))
-				.findFirst();
-			if (currentRule.isPresent()) {
-				configSelectedRules.add(currentRule.get());
-			} else {
-				nonExistentRules.add(configRule);
-			}
-		}
-
-		if (!nonExistentRules.isEmpty()) {
-			String exceptionMessage = NLS.bind(Messages.Activator_standalone_RulesDoNotExist,
-					nonExistentRules.toString());
-			throw new YAMLConfigException(exceptionMessage);
-		}
-
-		return configSelectedRules;
-	}
-
 	private static boolean isRuleExistent(String ruleId, boolean isStandalone) {
 		List<RefactoringRule> rules = RulesContainer.getAllRules(isStandalone);
 		for (RefactoringRule rule : rules) {
@@ -235,21 +137,16 @@ public class YAMLConfigUtil {
 	}
 
 	/**
-	 * reads the configuration file and modifies it according to maven flags. if
-	 * no configuration file is specified the default configuration will be
-	 * used. if a profile is chosen via maven flags there is a check if the
-	 * profile exists.
+	 * reads the configuration file with the provided path. if no configuration
+	 * file is specified the default configuration will be used.
 	 * 
 	 * @param configFilePath
 	 *            path to the configuration file
-	 * @param profile
-	 *            selected profile
-	 * @return jsparrow configuration
+	 * @return jSparrow configuration
 	 * @throws YAMLConfigException
-	 *             if an error occurs during loading of the file or if the
-	 *             profile does not exist
+	 *             if an error occurs while loading of the file
 	 */
-	public static YAMLConfig readConfig(String configFilePath, String profile) throws YAMLConfigException {
+	public static YAMLConfig readConfig(String configFilePath) throws YAMLConfigException {
 		YAMLConfig config = null;
 		if (configFilePath != null && !configFilePath.isEmpty()) {
 			File configFile = new File(configFilePath);
@@ -268,15 +165,6 @@ public class YAMLConfigUtil {
 			throw new YAMLConfigException(exceptionMessage);
 		}
 
-		if (profile != null && !profile.isEmpty()) {
-			if (checkProfileExistence(config, profile)) {
-				config.setSelectedProfile(profile);
-			} else {
-				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, profile);
-				throw new YAMLConfigException(exceptionMessage);
-			}
-		}
-
 		return config;
 	}
 
@@ -289,10 +177,34 @@ public class YAMLConfigUtil {
 	 *            selected profile
 	 * @return true, if the profile exists, false otherwise
 	 */
-	private static boolean checkProfileExistence(YAMLConfig config, String profile) {
+	public static boolean checkProfileExistence(YAMLConfig config, String profile) {
 		return config.getProfiles()
 			.stream()
 			.anyMatch(configProfile -> configProfile.getName()
 				.equals(profile));
+	}
+
+	/**
+	 * Updates the selected profile of the configuration.
+	 * 
+	 * @param config
+	 *            the {@link YAMLConfig} to be updated
+	 * @param profile
+	 *            the selected profile name
+	 * 
+	 * @throws YAMLConfigException
+	 *             if the provided profile does not exist.
+	 */
+	public static void updateSelectedProfile(YAMLConfig config, String profile) throws YAMLConfigException {
+		if (profile == null || profile.isEmpty()) {
+			return;
+		}
+
+		if (YAMLConfigUtil.checkProfileExistence(config, profile)) {
+			config.setSelectedProfile(profile);
+		} else {
+			String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, profile);
+			throw new YAMLConfigException(exceptionMessage);
+		}
 	}
 }

@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.OverrideAnnotationRuleASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -14,7 +14,7 @@ import eu.jsparrow.rules.common.Tag;
 /**
  * @see OverrideAnnotationRuleASTVisitor
  * 
- *      Required java version is {@value JavaVersion#JAVA_1_6} because with
+ *      Required java version is {@value JavaCore#VERSION_1_6} because with
  *      previous version it was not possible to annotate the methods inherited
  *      from the interfaces.
  * 
@@ -34,8 +34,8 @@ public class OverrideAnnotationRule extends RefactoringRuleImpl<OverrideAnnotati
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_1_6;
+	protected String provideRequiredJavaVersion() {
+		return JavaCore.VERSION_1_6;
 	}
 
 }

@@ -10,8 +10,8 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.JavaVersion;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -129,9 +129,9 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	 */
 	private List<String> generatedIdsPerMethod = new ArrayList<>();
 
-	private JavaVersion javaVersion;
+	private String javaVersion;
 
-	public StringBuildingLoopASTVisitor(JavaVersion javaVersion) {
+	public StringBuildingLoopASTVisitor(String javaVersion) {
 		this.javaVersion = javaVersion;
 	}
 
@@ -167,7 +167,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			return true;
 		}
 
-		if (this.javaVersion.atLeast(JavaVersion.JAVA_1_8)) {
+		if (JavaCore.compareJavaVersions(javaVersion, JavaCore.VERSION_1_8) >= 0) {
 			// create the collection statement
 
 			MethodInvocation streamExpression;
@@ -196,7 +196,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 				concatUsingStringBuilder(loopNode, loopParameter, singleBodyStatement, resultVariable);
 			}
 
-		} else if (this.javaVersion.atLeast(JavaVersion.JAVA_1_5)) {
+		} else if (JavaCore.compareJavaVersions(javaVersion, JavaCore.VERSION_1_5) >= 0) {
 			concatUsingStringBuilder(loopNode, loopParameter, singleBodyStatement, resultVariable);
 		}
 

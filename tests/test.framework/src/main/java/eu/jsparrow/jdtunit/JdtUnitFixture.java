@@ -99,8 +99,7 @@ public class JdtUnitFixture {
 
 		compilationUnit = addCompilationUnit(packageFragment, FILE_FIXTURE_NAME);
 
-		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		ASTParser parser = ASTParser.newParser(AST.JLS10);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(false);
 		astRoot = (CompilationUnit) parser.createAST(null);
@@ -191,7 +190,7 @@ public class JdtUnitFixture {
 	}
 
 	/**
-	 * Returns the list of the definded imports
+	 * Returns the list of the defined imports
 	 */
 	public List<ImportDeclaration> getImports() {
 		return ASTNodeUtil.convertToTypedList(astRoot.imports(), ImportDeclaration.class);
@@ -248,8 +247,7 @@ public class JdtUnitFixture {
 	}
 
 	private Block createBlockFromString(String string) throws JdtUnitException {
-		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
-		ASTParser astParser = ASTParser.newParser(AST.JLS8);
+		ASTParser astParser = ASTParser.newParser(AST.JLS10);
 		astParser.setSource(string.toCharArray());
 		astParser.setKind(ASTParser.K_STATEMENTS);
 		ASTNode result = astParser.createAST(null);
@@ -265,8 +263,7 @@ public class JdtUnitFixture {
 	}
 
 	private void refreshFixtures() {
-		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		ASTParser parser = ASTParser.newParser(AST.JLS10);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(true);
 

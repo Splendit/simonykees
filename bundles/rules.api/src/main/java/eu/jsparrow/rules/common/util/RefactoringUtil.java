@@ -14,9 +14,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.text.Document;
@@ -62,7 +60,7 @@ public final class RefactoringUtil {
 	private static List<IJavaElement> getSubPackages(IPackageFragment p) {
 		List<IJavaElement> result = new ArrayList<>();
 		List<IJavaElement> packages;
-		if (p.getParent() != null && p.getParent() instanceof IPackageFragmentRoot) {
+		if (p.getParent() instanceof IPackageFragmentRoot) {
 			IPackageFragmentRoot fragmentRoot = (IPackageFragmentRoot) p.getParent();
 			try {
 				packages = Arrays.asList(fragmentRoot.getChildren());
@@ -94,15 +92,12 @@ public final class RefactoringUtil {
 	 * @since 0.9
 	 */
 	public static CompilationUnit parse(ICompilationUnit compilationUnit) {
-		@SuppressWarnings("deprecation") // see ticket SIM-878
-		ASTParser astParser = ASTParser.newParser(AST.JLS8);
+		int astLevel = JdtVersionBindingUtil.findJLSLevel(JdtVersionBindingUtil.findCurrentJDTVersion());
+		ASTParser astParser = ASTParser.newParser(astLevel);
 		astParser.setKind(ASTParser.K_COMPILATION_UNIT);
 		astParser.setSource(compilationUnit);
 		astParser.setResolveBindings(true);
-		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		Map<String, String> options = JdtVersionBindingUtil.findCompilerOptions(JdtVersionBindingUtil.findCurrentJDTVersion());
 		astParser.setCompilerOptions(options);
 		return (CompilationUnit) astParser.createAST(null);
 	}

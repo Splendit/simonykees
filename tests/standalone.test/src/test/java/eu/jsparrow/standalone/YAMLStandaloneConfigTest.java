@@ -22,7 +22,7 @@ public class YAMLStandaloneConfigTest {
 
 	@Test
 	public void load_withValidConfigFile_shouldLoadConfig() throws Exception {
-		config = YAMLStandaloneConfig.load(new File("src/test/resources/standalone-config.yaml")); //$NON-NLS-1$
+		config = YAMLStandaloneConfig.load(new File("src/test/resources/standalone-config.yaml"));
 
 		assertEquals("Test123", config.getKey());
 		assertEquals("http://localhost:8080", config.getUrl());

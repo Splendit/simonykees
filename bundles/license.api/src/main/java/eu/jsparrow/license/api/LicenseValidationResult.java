@@ -2,7 +2,8 @@ package eu.jsparrow.license.api;
 
 import java.time.ZonedDateTime;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import eu.jsparrow.license.api.util.AnnotationToStringBuilder;
+import eu.jsparrow.license.api.util.Shorten;
 
 /**
  * This class represents a validation result produced by {@link LicenseService}.
@@ -12,7 +13,10 @@ public class LicenseValidationResult {
 	private boolean valid;
 	private String detail;
 	private LicenseType licenseType;
+	
+	@Shorten
 	private String key;
+	
 	private ZonedDateTime expirationDate;
 
 	public LicenseValidationResult(LicenseType licenseType, String key, boolean valid, String detail,
@@ -50,7 +54,7 @@ public class LicenseValidationResult {
 
 	@Override
 	public String toString() {
-		return ReflectionToStringBuilder.toString(this);
+		return new AnnotationToStringBuilder(this).toString();
 	}
 
 }

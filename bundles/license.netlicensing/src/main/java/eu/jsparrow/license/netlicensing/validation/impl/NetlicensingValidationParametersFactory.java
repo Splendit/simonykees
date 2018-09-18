@@ -48,7 +48,6 @@ public class NetlicensingValidationParametersFactory {
 		}
 		parameters.setProductNumber(model.getProductNr());
 		parameters.setLicenseeName(model.getName());
-		logger.debug("Returning parameters {}", parameters); //$NON-NLS-1$
 		return parameters;
 	}
 
@@ -90,7 +89,7 @@ public class NetlicensingValidationParametersFactory {
 	}
 
 	private ValidationParameters createFloatingParameters(NetlicensingLicenseModel model, String action) {
-		logger.debug("Creating floating parameters for sessionId {} and action {}", model.getSecret(), action); //$NON-NLS-1$
+		logger.debug("Creating floating parameters for session id and action {}", action); //$NON-NLS-1$
 		ValidationParameters parameters = new ValidationParameters();
 		HashMap<String, String> params = new HashMap<>();
 		params.put(SESSION_ID_KEY, model.getSecret());
@@ -101,7 +100,7 @@ public class NetlicensingValidationParametersFactory {
 	}
 
 	private ValidationParameters createNodeLockedParameters(String secretKey) {
-		logger.debug("Creating node locked for secret {}", secretKey); //$NON-NLS-1$
+		logger.debug("Creating node lock parameters"); //$NON-NLS-1$
 		ValidationParameters parameters = new ValidationParameters();
 		parameters.setLicenseeSecret(secretKey);
 		return parameters;

@@ -9,19 +9,15 @@ package eu.jsparrow.ui.preference;
 @SuppressWarnings("nls")
 public class SimonykeesPreferenceConstants {
 
+	public static final String PROFILE_PREFIX = "profile.";
+	public static final String PROFILE_USE_OPTION_PREFIX = "useProfileOption";
+	public static final String ENABLE_INTRO = "enableIntro";
+	public static final String RESOLVE_PACKAGES_RECURSIVELY = "resolvePackagesRecursively";
+	public static final String NAME_RULES_DELIMITER = "^";
+	public static final String RULE_RULE_DELIMITER = "~";
+	public static final String PROFILE_ID_CURRENT = PROFILE_PREFIX + "currentId";
+	public static final String PROFILE_LIST = PROFILE_PREFIX + "list";
 	private SimonykeesPreferenceConstants() {
 		// private constructor to hide the implicit default constructor (SonarLint)
 	}
-	
-	public static final String PROFILE_PREFIX = "profile.";
-	public static final String PROFILE_USE_OPTION_PREFIX = "useProfileOption";
-	
-	public static final String ENABLE_INTRO = "enableIntro";
-	public static final String RESOLVE_PACKAGES_RECURSIVELY = "resolvePackagesRecursively";
-
-	public static final String NAME_RULES_DELIMITER = "^";
-	public static final String RULE_RULE_DELIMITER = "~";
-	
-	public static final String PROFILE_ID_CURRENT = PROFILE_PREFIX + "currentId";
-	public static final String PROFILE_LIST = PROFILE_PREFIX + "list";
 }

@@ -2,7 +2,7 @@ package eu.jsparrow.core.visitor.impl;
 
 import java.util.List;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -21,10 +21,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -43,11 +40,9 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final Logger logger = LoggerFactory.getLogger(DiamondOperatorASTVisitor.class);
+	private String compilerCompliance;
 
-	private JavaVersion compilerCompliance;
-
-	public DiamondOperatorASTVisitor(JavaVersion compilerCompliance) {
+	public DiamondOperatorASTVisitor(String compilerCompliance) {
 		this.compilerCompliance = compilerCompliance;
 	}
 
@@ -268,7 +263,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private boolean isMethodArgumentsTypeInferable() {
 		if (compilerCompliance != null) {
-			return compilerCompliance.atLeast(JavaVersion.JAVA_1_8);
+			return JavaCore.compareJavaVersions(compilerCompliance, JavaCore.VERSION_1_8) >= 0;
 		}
 		return false;
 	}
@@ -307,7 +302,6 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private void replaceWithDiamond(ParameterizedType parameterizedType, List<Type> rhsTypeArguments) {
 		// removing type arguments in new class instance creation
-		logger.debug(Messages.DiamondOperatorASTVisitor_using_diamond_operator);
 		ListRewrite typeArgumentsListRewrite = astRewrite.getListRewrite(parameterizedType,
 				ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
 		Statement statement = ASTNodeUtil.getSpecificAncestor(parameterizedType, Statement.class);

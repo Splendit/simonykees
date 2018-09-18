@@ -74,13 +74,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	private boolean forcedSelectLeft = false;
 	private boolean forcedSelectRight = false;
-
-	private enum SelectionSide {
-		LEFT,
-		RIGHT,
-		NONE,
-	}
-
 	private SelectionSide latestSelectionSide = SelectionSide.NONE;
 
 	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
@@ -420,7 +413,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			.isEmpty()
 				&& selectionContainsEnabledEntry(((IStructuredSelection) leftTreeViewer.getSelection()).toList()));
 		addAllButton.setEnabled(!((Set<Object>) leftTreeViewer.getInput()).isEmpty()
-				&& selectionContainsEnabledEntry(new ArrayList<Object>((Set<Object>) leftTreeViewer.getInput())));
+				&& selectionContainsEnabledEntry(new ArrayList<>((Set<Object>) leftTreeViewer.getInput())));
 		removeButton.setEnabled(!rightTableViewer.getSelection()
 			.isEmpty());
 		removeAllButton.setEnabled(!((Set<Object>) rightTableViewer.getInput()).isEmpty());
@@ -650,5 +643,11 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	protected Button getRemoveAllButton() {
 		return removeAllButton;
+	}
+
+	private enum SelectionSide {
+		LEFT,
+		RIGHT,
+		NONE,
 	}
 }
