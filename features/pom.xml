@@ -22,7 +22,7 @@
 		<module>feature.standalone</module>
 
 		<!-- eclipse plugin prior to Photon -->
-		<module>feature</module>
+		<module>feature.neon</module>
 
 		<!-- eclipse plugin at least Photon -->
 		<module>feature.photon</module>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
    <feature url="features/eu.jsparrow.feature_0.0.0.jar" id="eu.jsparrow.feature" version="0.0.0">
-      <category name="oxygen_neon"/>
+      <category name="neon"/>
    </feature>
-   <category-def name="oxygen_neon" label="Oxygen and Neon">
+   <category-def name="neon" label="Neon and Oxygen">
       <description>
          Eclipse plugins by Splendit IT-Consulting GmbH
       </description>

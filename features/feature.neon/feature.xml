@@ -77,7 +77,7 @@
          unpack="false"/>
 
    <plugin
-         id="eu.jsparrow.rules.imports.old"
+         id="eu.jsparrow.rules.imports.neon"
          download-size="0"
          install-size="0"
          version="0.0.0"

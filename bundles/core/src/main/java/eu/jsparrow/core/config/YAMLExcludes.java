@@ -6,6 +6,7 @@ import java.util.List;
 /**
  * model class for excludes data
  * 
+ * @since 2.6.0
  */
 public class YAMLExcludes {
 

@@ -55,6 +55,35 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 		Block expectedBlock = createBlock(varDeclaration);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
+	
+	@Test
+	public void visit_forLoop_shouldReplace() throws Exception {
+		String original = "String[]values = Arrays.asList(\"1\", \"2\", \"3\"); int i =0; for(String value = values[i]; i < values.length; i++) {}";
+		String expected = "String[]values = Arrays.asList(\"1\", \"2\", \"3\"); int i =0; for(var value = values[i]; i < values.length; i++) {}";
+
+		fixture.addImport(JAVA_UTIL_ARRAYS);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expectedBlock = createBlock(expected);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_forLoopMultipleInitializations_shouldNotReplace() throws Exception {
+		String block = "String[]values = Arrays.asList(\"1\", \"2\", \"3\"); int i =0; for(String value = values[i], suffix = \"s\"; i < values.length; i++) {}";
+
+		fixture.addImport(JAVA_UTIL_ARRAYS);
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expectedBlock = createBlock(block);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
 
 	@Test
 	public void visit_varInEnhancedForLoop_shouldNotReplace() throws Exception {
@@ -188,7 +217,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	}
 
 	@Test
-	public void visit_nullTypeInitialization_shouldReplace() throws Exception {
+	public void visit_nullTypeInitialization_shouldNotReplace() throws Exception {
 		String block = "String nullValue = null;";
 		fixture.addMethodBlock(block);
 		visitor.setASTRewrite(fixture.getAstRewrite());

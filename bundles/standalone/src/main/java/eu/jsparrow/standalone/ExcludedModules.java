@@ -13,6 +13,13 @@ import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
 import eu.jsparrow.core.config.YAMLExcludes;
 
+/**
+ * Contains functionality for finding the excluded modules from the yaml
+ * configuration file in the project root.
+ * 
+ * @since 2.6.0
+ *
+ */
 public class ExcludedModules {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()

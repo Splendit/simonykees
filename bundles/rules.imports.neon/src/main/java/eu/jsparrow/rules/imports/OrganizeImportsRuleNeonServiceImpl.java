@@ -15,7 +15,7 @@ import eu.jsparrow.rules.common.RefactoringRule;
  *
  */
 @Component
-public class OldImportsRuleServiceImpl implements RuleService {
+public class OrganizeImportsRuleNeonServiceImpl implements RuleService {
 
 	@Override
 	public List<RefactoringRule> loadRules() {

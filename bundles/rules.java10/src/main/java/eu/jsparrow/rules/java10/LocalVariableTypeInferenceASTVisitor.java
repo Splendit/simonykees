@@ -90,17 +90,7 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		Expression initializer = node.getInitializer();
 		SimpleName name = node.getName();
 
-		Type type = null;
-		ASTNode parent = node.getParent();
-		if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
-			VariableDeclarationStatement statement = (VariableDeclarationStatement) parent;
-			if (hasMultipleFragments(statement)) {
-				return true;
-			}
-			type = statement.getType();
-		} else if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_EXPRESSION) {
-			type = ((VariableDeclarationExpression) parent).getType();
-		}
+		Type type = findType(node);
 
 		if (type == null || type.isVar()) {
 			return false;
@@ -116,6 +106,27 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		replaceWithVarType(type);
 		getCommentRewriter().saveCommentsInParentStatement(type);
 		return true;
+	}
+
+	private Type findType(VariableDeclarationFragment node) {
+		Type type = null;
+		ASTNode parent = node.getParent();
+		if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
+			VariableDeclarationStatement statement = (VariableDeclarationStatement) parent;
+			if (statement.fragments()
+				.size() == 1) {
+				type = statement.getType();
+			}
+		}
+
+		if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_EXPRESSION) {
+			VariableDeclarationExpression declarationExpression = ((VariableDeclarationExpression) parent);
+			if (declarationExpression.fragments()
+				.size() == 1) {
+				type = declarationExpression.getType();
+			}
+		}
+		return type;
 	}
 
 	private void checkSpaces(Type type, SimpleName name) {
@@ -376,12 +387,6 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 
 	private void removeArrayDimensions(List<Dimension> dimensions) {
 		dimensions.forEach(this::removeAndSaveComments);
-	}
-
-	private boolean hasMultipleFragments(VariableDeclarationStatement declarationStatement) {
-		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(declarationStatement.fragments(),
-				VariableDeclarationFragment.class);
-		return fragments.size() != 1;
 	}
 
 	private void replaceWithVarType(Type type) {

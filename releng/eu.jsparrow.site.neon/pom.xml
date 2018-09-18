@@ -9,7 +9,7 @@
 		<version>2.7.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>eu.jsparrow.site.oxygen</artifactId>
+	<artifactId>eu.jsparrow.site.neon</artifactId>
 	<packaging>eclipse-repository</packaging>
 	<name>jSparrow :: neon-oxygen update site</name>
 	<description>jSparrow Update Site</description>

@@ -27,4 +27,14 @@
 		<module>standalone.test</module>
 		<module>eu.jsparrow.rules.api.test</module>
 	</modules>
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.sample</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
