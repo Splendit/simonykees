@@ -15,7 +15,7 @@
 	<description>jSparrow Plugin for headless start</description>
 
 	<properties>
-		<snakeyaml.version>1.18</snakeyaml.version>
+		<snakeyaml.version>1.23</snakeyaml.version>
 		<standalone.properties.destinationFile>src/main/resources/standalone.properties</standalone.properties.destinationFile>
 		<standalone.properties.sourceFile></standalone.properties.sourceFile>
 		<proguard.extra.options>
