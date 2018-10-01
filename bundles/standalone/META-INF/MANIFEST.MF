@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: eu.jsparrow.standalone
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Standalone
 Bundle-SymbolicName: eu.jsparrow.standalone;singleton:=true
