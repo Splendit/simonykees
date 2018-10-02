@@ -65,15 +65,11 @@
 		</developer>
 	</developers>
 
-	<prerequisites>
-		<maven>3.0</maven>
-	</prerequisites>
-
 	<modules>
 		<module>bundles</module>
 		<module>tests</module>
 		<module>features</module>
-		
+
 		<!-- release engineering -->
 		<module>releng</module>
 
@@ -225,6 +221,27 @@
 
 	<build>
 		<plugins>
+		<!-- ensures that Maven 3.0 is the minimal required version -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.0.0-M2</version>
+				<executions>
+					<execution>
+						<id>enforce-maven</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>3.0</version>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>eu.jsparrow</groupId>
 				<artifactId>jsparrow-maven-plugin</artifactId>
