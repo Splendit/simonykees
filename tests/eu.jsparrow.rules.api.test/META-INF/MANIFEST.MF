@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: eu.jsparrow.rules.api.test
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow :: test rules api
 Bundle-SymbolicName: eu.jsparrow.rules.api.test

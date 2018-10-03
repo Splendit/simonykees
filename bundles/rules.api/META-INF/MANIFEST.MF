@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: eu.jsparrow.rules.api
 Bundle-ManifestVersion: 2
 Bundle-Name: jsparrow::rules.api
 Bundle-SymbolicName: eu.jsparrow.rules.api

@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: eu.jsparrow.logging
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Logging
 Bundle-SymbolicName: eu.jsparrow.logging

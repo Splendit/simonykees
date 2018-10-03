@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: eu.jsparrow.license.api
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Api
 Bundle-SymbolicName: eu.jsparrow.license.api

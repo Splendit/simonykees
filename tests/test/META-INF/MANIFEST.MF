@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: eu.jsparrow.test
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Test Fragment
 Bundle-SymbolicName: eu.jsparrow.test
