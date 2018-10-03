@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: eu.jsparrow.rules.imports.neon
 Bundle-ManifestVersion: 2
 Bundle-Name: jsparrow :: rules imports old
 Bundle-SymbolicName: eu.jsparrow.rules.imports.neon
@@ -21,3 +22,4 @@ Require-Bundle: eu.jsparrow.logging,
 Service-Component: OSGI-INF/eu.jsparrow.rules.imports.OrganizeImportsRuleNeonServiceImpl.xml
 Bundle-ActivationPolicy: lazy
 Export-Package: eu.jsparrow.rules.imports
+
