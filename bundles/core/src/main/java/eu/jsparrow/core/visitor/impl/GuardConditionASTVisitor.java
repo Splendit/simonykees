@@ -29,9 +29,15 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 	public boolean visit(MethodDeclaration methodDeclaration) {
 
 		Block methodBody = methodDeclaration.getBody();
+		if(methodBody == null) {
+			return true;
+		}
 		List<Statement> statements = ASTNodeUtil.convertToTypedList(methodBody.statements(), Statement.class);
 
 		Type returnType = methodDeclaration.getReturnType2();
+		if(returnType == null) {
+			return true;
+		}
 		if (returnType.isPrimitiveType()) {
 			PrimitiveType primitiveType = (PrimitiveType) returnType;
 			Code code = primitiveType.getPrimitiveTypeCode();
