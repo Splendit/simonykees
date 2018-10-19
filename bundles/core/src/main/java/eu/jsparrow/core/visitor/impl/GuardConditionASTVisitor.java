@@ -3,11 +3,14 @@ package eu.jsparrow.core.visitor.impl;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -24,9 +27,10 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
- *  
+ * 
  * @since 2.7.0
  */
 public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
@@ -220,16 +224,30 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private void insertGuardStatement(Block methodBody, IfStatement ifStatement, IfStatement guardStatement) {
-		getCommentRewriter().saveLeadingComment(ifStatement);
 		astRewrite.replace(ifStatement, guardStatement, null);
 		ListRewrite listRewrite = astRewrite.getListRewrite(methodBody, Block.STATEMENTS_PROPERTY);
 		Block thenStatement = (Block) ifStatement.getThenStatement();
 		List<Statement> ifBodyStatements = ASTNodeUtil.convertToTypedList(thenStatement.statements(), Statement.class);
+		saveComments(ifStatement, ifBodyStatements);
 		Collections.reverse(ifBodyStatements);
 		for (Statement statement : ifBodyStatements) {
 			listRewrite.insertAfter(astRewrite.createMoveTarget(statement), ifStatement, null);
 		}
 		onRewrite();
+	}
+
+	private List<Comment> saveComments(IfStatement ifStatement, List<Statement> ifBodyStatements) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> comments = commentRewriter.findRelatedComments(ifStatement);
+		List<Comment> expressionRelatedComments = commentRewriter.findRelatedComments(ifStatement.getExpression());
+		List<Comment> commentsRelatedWithBodyStatements = ifBodyStatements.stream()
+			.map(commentRewriter::findRelatedComments)
+			.flatMap(List::stream)
+			.collect(Collectors.toList());
+		comments.removeAll(expressionRelatedComments);
+		comments.removeAll(commentsRelatedWithBodyStatements);
+		commentRewriter.saveBeforeStatement(ifStatement, comments);
+		return comments;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -266,13 +284,14 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private Expression createGuardExpression(Expression expression) {
+		int expressionType = expression.getNodeType();
 		AST ast = expression.getAST();
-		if (ASTNode.INFIX_EXPRESSION == expression.getNodeType()) {
+		if (ASTNode.INFIX_EXPRESSION == expressionType) {
 			InfixExpression infixExpression = (InfixExpression) expression;
 			return negateInfixExpression(infixExpression, ast);
-		} 
+		}
 
-		if (ASTNode.PREFIX_EXPRESSION == expression.getNodeType()) {
+		if (ASTNode.PREFIX_EXPRESSION == expressionType) {
 			PrefixExpression prefixExpression = (PrefixExpression) expression;
 			PrefixExpression.Operator operator = prefixExpression.getOperator();
 
@@ -284,13 +303,21 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 				guardExpression = createNegatedParenthesized(ast, expression);
 			}
 			return guardExpression;
-		} 
-
-		if (ASTNode.METHOD_INVOCATION == expression.getNodeType()) {
-			return createNegated(ast, expression);
 		}
 
-		return createNegatedParenthesized(ast, expression);
+		if (ASTNode.METHOD_INVOCATION == expressionType || ASTNode.SIMPLE_NAME == expressionType) {
+			return createNegated(ast, expression);
+		}
+		
+		if(ASTNode.BOOLEAN_LITERAL != expressionType) {
+			return createNegatedParenthesized(ast, expression);
+		}
+		
+		BooleanLiteral booleanLiteral = (BooleanLiteral)expression;
+		if(booleanLiteral.booleanValue()) {
+			return ast.newBooleanLiteral(false);
+		}
+		return ast.newBooleanLiteral(true);
 	}
 
 	private Expression findPrefixExpressionBody(PrefixExpression prefixExpression) {

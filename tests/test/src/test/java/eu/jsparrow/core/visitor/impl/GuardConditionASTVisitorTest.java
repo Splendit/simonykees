@@ -20,7 +20,7 @@ public class GuardConditionASTVisitorTest extends UsesJDTUnitFixture {
 	public void visit_singleIfStatementBody_shouldReplace() throws Exception {
 		
 		String block = "if(true) { System.out.println(\"always true\"); if(false) { System.out.println(\"always false\");}}";
-		String varDeclaration = "if(!true) {return;} System.out.println(\"always true\"); if(false) { System.out.println(\"always false\"); }";
+		String varDeclaration = "if(false) {return;} System.out.println(\"always true\"); if(false) { System.out.println(\"always false\"); }";
 		fixture.addMethodBlock(block);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 

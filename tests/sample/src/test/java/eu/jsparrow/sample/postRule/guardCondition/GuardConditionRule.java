@@ -8,6 +8,30 @@ public class GuardConditionRule {
 	 * void methods
 	 */
 	
+	public void voidMethod_testComments_shouldTransform() {
+		//1
+		doSomething("Whatever"); //2 
+		
+		//3 
+		
+		//4
+		/* 5 */
+		/* 9 */
+		/* 10 */
+		/* 12 */
+		/* 15 */
+		if (!/* 6 */condition/* 7 */()/* 8 */) {
+			return;
+		}
+		/* 11 */
+		doSomething("Should create guard condition with negation");
+		/* 13 */
+		doSomething("Should transform");
+		/* 14 */
+		
+		/* 16 */
+	}
+	
 	public void voidMethod_methodInvocationCondition_shouldTransform() {
 		if (!condition()) {
 			return;
@@ -136,6 +160,33 @@ public class GuardConditionRule {
 		doSomething("Should be moved out of the if");
 		doSomething("should transform");
 		return 1;
+	}
+	
+	public int ifWithReturn_testComments_shouldTransform() {
+		/* 1 */
+		doSomething("what ever"); /* 2 */
+		/* 3 */
+		
+		/* 4 */
+		
+		/* 5 */
+		/* 6 */
+		/* 10 */
+		/* 11 */
+		/* 13 */
+		/* 16 */
+		if (!/* 7 */condition(/* 8 */)/* 9 */) {
+			/* 17 */
+			return 0;
+		}
+		/* 12 */
+		doSomething("Should be moved out of the if");
+		/* 14 */
+		doSomething("should transform");
+		/* 15 */
+		return 1;
+		
+		/* 18 */
 	}
 	
 	/*
