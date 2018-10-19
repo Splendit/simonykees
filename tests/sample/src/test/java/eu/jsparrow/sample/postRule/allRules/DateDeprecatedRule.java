@@ -104,15 +104,16 @@ public class DateDeprecatedRule {
 				= // leading init comment
 				calendar2.getTime(); // trailing statement comment
 
-		if (date != null) {
-			Calendar calendar3 = Calendar.getInstance();
-			calendar3.set(1990, 1, 31);
-			/* leading initializer comment */
-			/* inner initializer comment */
-			/* trailing initializer comment */
-			// leading comment
-			date /* name comment */ = calendar3.getTime(); // trailing comment
+		if (date == null) {
+			return;
 		}
+		Calendar calendar3 = Calendar.getInstance();
+		calendar3.set(1990, 1, 31);
+		/* leading initializer comment */
+		/* inner initializer comment */
+		/* trailing initializer comment */
+		// leading comment
+		date /* name comment */ = calendar3.getTime(); // trailing comment
 	}
 
 	class InnerClass {

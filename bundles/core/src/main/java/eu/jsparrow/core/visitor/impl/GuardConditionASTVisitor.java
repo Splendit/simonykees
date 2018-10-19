@@ -220,14 +220,16 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private void insertGuardStatement(Block methodBody, IfStatement ifStatement, IfStatement guardStatement) {
+		getCommentRewriter().saveLeadingComment(ifStatement);
 		astRewrite.replace(ifStatement, guardStatement, null);
 		ListRewrite listRewrite = astRewrite.getListRewrite(methodBody, Block.STATEMENTS_PROPERTY);
 		Block thenStatement = (Block) ifStatement.getThenStatement();
 		List<Statement> ifBodyStatements = ASTNodeUtil.convertToTypedList(thenStatement.statements(), Statement.class);
 		Collections.reverse(ifBodyStatements);
 		for (Statement statement : ifBodyStatements) {
-			listRewrite.insertAfter(statement, ifStatement, null);
+			listRewrite.insertAfter(astRewrite.createMoveTarget(statement), ifStatement, null);
 		}
+		onRewrite();
 	}
 
 	@SuppressWarnings("unchecked")

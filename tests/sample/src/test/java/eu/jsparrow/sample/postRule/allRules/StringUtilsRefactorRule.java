@@ -97,27 +97,25 @@ public class StringUtilsRefactorRule {
 	}
 
 	private String complexSplit(String input, String splitSign, int limit) {
-		if (StringUtils.contains(input, splitSign)) {
-			if ("?".equals(splitSign)) {
-				/*
-				 * We need to escape the "?" because otherwise there is the
-				 * following exception: java.util.regex.PatternSyntaxException:
-				 * Dangling meta character '?' near index 0
-				 */
-				splitSign = splitSign.replace("?", "\\?");
-			}
-			if ("|".equals(splitSign)) {
-				/*
-				 * We need to escape the "|" because otherwise an empty String
-				 * is taken as split sign.
-				 */
-				splitSign = splitSign.replace("|", "\\|");
-			}
-			return limit == 0 ? Arrays.toString(input.split(splitSign))
-					: Arrays.toString(input.split(splitSign, limit));
-		} else {
+		if (!StringUtils.contains(input, splitSign)) {
 			return input;
 		}
+		if ("?".equals(splitSign)) {
+			/*
+			 * We need to escape the "?" because otherwise there is the
+			 * following exception: java.util.regex.PatternSyntaxException:
+			 * Dangling meta character '?' near index 0
+			 */
+			splitSign = splitSign.replace("?", "\\?");
+		}
+		if ("|".equals(splitSign)) {
+			/*
+			 * We need to escape the "|" because otherwise an empty String is
+			 * taken as split sign.
+			 */
+			splitSign = splitSign.replace("|", "\\|");
+		}
+		return limit == 0 ? Arrays.toString(input.split(splitSign)) : Arrays.toString(input.split(splitSign, limit));
 	}
 
 	public String testReplaceCornerCaseCharSequence(String testString) {
