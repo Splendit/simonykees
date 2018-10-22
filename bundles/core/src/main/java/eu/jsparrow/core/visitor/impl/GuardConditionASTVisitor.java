@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.Comment;
@@ -16,7 +15,6 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
@@ -25,6 +23,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.sub.SimpleExpressionVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
@@ -34,6 +33,15 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @since 2.7.0
  */
 public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
+
+	private static final Code VOID = PrimitiveType.VOID;
+	private static final InfixExpression.Operator EQUALS_EQUALS = InfixExpression.Operator.EQUALS;
+	private static final InfixExpression.Operator NOT_EQUALS = InfixExpression.Operator.NOT_EQUALS;
+	private static final InfixExpression.Operator GREATER = InfixExpression.Operator.GREATER;
+	private static final InfixExpression.Operator LESS_EQUALS = InfixExpression.Operator.LESS_EQUALS;
+	private static final InfixExpression.Operator GREATER_EQUALS = InfixExpression.Operator.GREATER_EQUALS;
+	private static final InfixExpression.Operator LESS = InfixExpression.Operator.LESS;
+	private static final PrefixExpression.Operator NOT = PrefixExpression.Operator.NOT;
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
@@ -60,7 +68,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		Statement lastStatement = statements.get(numStatements - 1);
 
 		if (ASTNode.IF_STATEMENT == lastStatement.getNodeType()) {
-			analyzeIfReturnElseReturn(methodDeclaration, methodBody, lastStatement);
+			analyzeIfReturnElseReturn(methodDeclaration, lastStatement);
 			return true;
 		}
 
@@ -83,16 +91,120 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		Statement elseStatement = ifStatement.getElseStatement();
 		if (elseStatement != null) {
-			analyzeIfElseReturn(methodDeclaration, methodBody, ifStatement, elseStatement);
+			analyzeIfElseReturn(methodDeclaration, ifStatement, elseStatement);
 		} else {
-			analyzeIfReturn(methodDeclaration, methodBody, lastStatement, ifStatement);
+			analyzeIfReturn(methodDeclaration, (ReturnStatement)lastStatement, ifStatement);
 		}
 
 		return true;
 	}
 
-	private void analyzeIfReturnElseReturn(MethodDeclaration methodDeclaration, Block methodBody,
-			Statement lastStatement) {
+	/**
+	 * Analyzes the last statement of a void method. If possible, unwraps a
+	 * guard-if statement. For example, the following:
+	 * 
+	 * <pre>
+	 * <code>
+	 * public void method() {
+	 * 	...
+	 * 	if(condition()) {
+	 * 		doSomething();
+	 * 		doSomethingMore();
+	 * 	}
+	 * }
+	 * </code>
+	 * </pre>
+	 * 
+	 * is transformed to:
+	 * 
+	 * <pre>
+	 * <code>
+	 * public void method() {
+	 * 	...
+	 * 	if(!condition()) {
+	 * 		return;
+	 * 	}
+	 * 	doSomething();
+	 * 	doSomethingMore();
+	 * }
+	 * </code>
+	 * </pre>
+	 * 
+	 * @param methodBody
+	 *            the body of a method to be analyzed.
+	 * @param statements
+	 *            the list of statements in the method body.
+	 */
+	private void analyzeVoidMethod(Block methodBody, List<Statement> statements) {
+		IfStatement ifStatement = findLastIfStatement(statements).orElse(null);
+		if (ifStatement == null) {
+			return;
+		}
+
+		Statement elseStatement = ifStatement.getElseStatement();
+		if (elseStatement != null) {
+			return;
+		}
+
+		if (isTrivialIfStatementBody(ifStatement, 2)) {
+			return;
+		}
+
+		// generate the new method body
+		AST ast = methodBody.getAST();
+		IfStatement guardIf = createGuardIfStatement(ifStatement, ast.newReturnStatement(), ast);
+		insertGuardStatement(methodBody, ifStatement, guardIf);
+	}
+
+	/**
+	 * Checks whether the last statement of the method body is an
+	 * {@link IfStatement} having an else branch consisting of a single
+	 * {@link ReturnStatement}.
+	 * 
+	 * <pre>
+	 * <code>
+	 * public Object method() {
+	 * 	...
+	 * 	if(condition()) {
+	 * 		doSomething();
+	 * 		doSomethingMore();
+	 * 		return something;
+	 * 	} else {
+	 * 		return somethingElse;
+	 * 	}
+	 * }
+	 * </code>
+	 * </pre>
+	 * 
+	 * is transformed to:
+	 * 
+	 * <pre>
+	 * <code>
+	 * public void method() {
+	 * 	...
+	 * 	if(!condition()) {
+	 * 		return somethingElse;
+	 * 	}
+	 * 	doSomething();
+	 * 	doSomethingMore();
+	 *  return something;
+	 * }
+	 * </code>
+	 * </pre>
+	 * 
+	 * @param methodDeclaration
+	 *            the method declaration to be analyzed.
+	 * @param lastStatement
+	 *            the last statement of the method body.
+	 */
+	private void analyzeIfReturnElseReturn(MethodDeclaration methodDeclaration, Statement lastStatement) {
+		/*
+		 * last statement must be an if-else with the following condition: -
+		 * then statement must not be trivial - else statement must not contain
+		 * further else statements - both, else-then and if-then must end with
+		 * return statements - the body of the else-then must consist of a
+		 * single return statement
+		 */
 		IfStatement ifStatement = (IfStatement) lastStatement;
 		if (isTrivialIfStatementBody(ifStatement, 3)) {
 			return;
@@ -115,22 +227,14 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 			return;
 		}
 
-		/*
-		 * last statement must be an if-else with the following condition: -
-		 * then statement must not be trivial - else statement must not contain
-		 * further else statements - both, else-then and if-then must end with
-		 * return statements - the body of the else-then must consist of a
-		 * single return statement
-		 */
-
 		IfStatement guardIfStatement = createGuardIfStatement(ifStatement,
 				(ReturnStatement) astRewrite.createMoveTarget(elseReturnStatement), methodDeclaration.getAST());
-		insertGuardStatement(methodBody, ifStatement, guardIfStatement);
+		insertGuardStatement(methodDeclaration.getBody(), ifStatement, guardIfStatement);
 	}
 
-	private void analyzeIfReturn(MethodDeclaration methodDeclaration, Block methodBody, Statement lastStatement,
+	private void analyzeIfReturn(MethodDeclaration methodDeclaration, ReturnStatement returnStatement,
 			IfStatement ifStatement) {
-		// else if there is no else branch, the body of the if must
+		// if there is no else branch, the body of the if must
 		// end with a return statement
 		// the last return statement is the return on the guard
 
@@ -146,13 +250,13 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		/*
 		 * construct the guard statement and do the replacement
 		 */
-		ReturnStatement guardReturnStatement = (ReturnStatement) astRewrite.createMoveTarget(lastStatement);
+		ReturnStatement guardReturnStatement = (ReturnStatement) astRewrite.createMoveTarget(returnStatement);
 		IfStatement guardStatement = createGuardIfStatement(ifStatement, guardReturnStatement,
 				methodDeclaration.getAST());
-		insertGuardStatement(methodBody, ifStatement, guardStatement);
+		insertGuardStatement(methodDeclaration.getBody(), ifStatement, guardStatement);
 	}
 
-	private void analyzeIfElseReturn(MethodDeclaration methodDeclaration, Block methodBody, IfStatement ifStatement,
+	private void analyzeIfElseReturn(MethodDeclaration methodDeclaration, IfStatement ifStatement,
 			Statement elseStatement) {
 		ReturnStatement elseReturnStatement = isSingleReturnStatement(elseStatement);
 		if (elseReturnStatement == null) {
@@ -169,32 +273,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		AST ast = methodDeclaration.getAST();
 		ReturnStatement guardReturnStatement = (ReturnStatement) astRewrite.createCopyTarget(elseReturnStatement);
 		IfStatement guardStatement = createGuardIfStatement(ifStatement, guardReturnStatement, ast);
-		insertGuardStatement(methodBody, ifStatement, guardStatement);
-	}
-
-	private void analyzeVoidMethod(Block methodBody, List<Statement> statements) {
-		IfStatement ifStatement = findLastIfStatement(statements).orElse(null);
-		if (ifStatement == null) {
-			return;
-		}
-
-		Statement elseStatement = ifStatement.getElseStatement();
-		if (elseStatement != null) {
-			/*
-			 * Consider using the body of the else statement as body of the
-			 * guard
-			 */
-			return;
-		}
-
-		if (isTrivialIfStatementBody(ifStatement, 2)) {
-			return;
-		}
-
-		// generate the new method body
-		AST ast = methodBody.getAST();
-		IfStatement guardIf = createGuardIfStatement(ifStatement, ast.newReturnStatement(), ast);
-		insertGuardStatement(methodBody, ifStatement, guardIf);
+		insertGuardStatement(methodDeclaration.getBody(), ifStatement, guardStatement);
 	}
 
 	private ReturnStatement isSingleReturnStatement(Statement elseStatement) {
@@ -278,11 +357,17 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 			return false;
 		}
 		PrimitiveType primitiveType = (PrimitiveType) returnType;
-		Code code = primitiveType.getPrimitiveTypeCode();
-		return "void".equals(code.toString());
 
+		Code code = primitiveType.getPrimitiveTypeCode();
+		return VOID.equals(code);
 	}
 
+	/**
+	 * Creates a negated expression for the guard command. 
+	 * 
+	 * @param expression expression to be negated
+	 * @return the negated expression. 
+	 */
 	private Expression createGuardExpression(Expression expression) {
 		int expressionType = expression.getNodeType();
 		AST ast = expression.getAST();
@@ -296,7 +381,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 			PrefixExpression.Operator operator = prefixExpression.getOperator();
 
 			Expression guardExpression;
-			if ("!".equals(operator.toString())) {
+			if (NOT.equals(operator)) {
 				Expression body = findPrefixExpressionBody(prefixExpression);
 				guardExpression = (Expression) astRewrite.createCopyTarget(body);
 			} else {
@@ -308,13 +393,13 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (ASTNode.METHOD_INVOCATION == expressionType || ASTNode.SIMPLE_NAME == expressionType) {
 			return createNegated(ast, expression);
 		}
-		
-		if(ASTNode.BOOLEAN_LITERAL != expressionType) {
+
+		if (ASTNode.BOOLEAN_LITERAL != expressionType) {
 			return createNegatedParenthesized(ast, expression);
 		}
-		
-		BooleanLiteral booleanLiteral = (BooleanLiteral)expression;
-		if(booleanLiteral.booleanValue()) {
+
+		BooleanLiteral booleanLiteral = (BooleanLiteral) expression;
+		if (booleanLiteral.booleanValue()) {
 			return ast.newBooleanLiteral(false);
 		}
 		return ast.newBooleanLiteral(true);
@@ -338,18 +423,18 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 			return createNegatedParenthesized(ast, infixExpression);
 		}
 
-		if ("==".equals(operator.toString())) {
-			newOperator = InfixExpression.Operator.toOperator("!=");
-		} else if ("!=".equals(operator.toString())) {
-			newOperator = InfixExpression.Operator.toOperator("==");
-		} else if (">".equals(operator.toString())) {
-			newOperator = InfixExpression.Operator.toOperator("<=");
-		} else if (">=".equals(operator.toString())) {
-			newOperator = InfixExpression.Operator.toOperator("<");
-		} else if ("<".equals(operator.toString())) {
-			newOperator = InfixExpression.Operator.toOperator(">=");
-		} else if ("<=".equals(operator.toString())) {
-			newOperator = InfixExpression.Operator.toOperator(">");
+		if (EQUALS_EQUALS.equals(operator)) {
+			newOperator = NOT_EQUALS;
+		} else if (NOT_EQUALS.equals(operator)) {
+			newOperator = EQUALS_EQUALS;
+		} else if (GREATER.equals(operator)) {
+			newOperator = LESS_EQUALS;
+		} else if (GREATER_EQUALS.equals(operator)) {
+			newOperator = LESS;
+		} else if (LESS.equals(operator)) {
+			newOperator = GREATER_EQUALS;
+		} else if (LESS_EQUALS.equals(operator)) {
+			newOperator = GREATER;
 		}
 
 		if (newOperator == null) {
@@ -368,7 +453,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private Expression createNegatedParenthesized(AST ast, Expression expression) {
 		PrefixExpression guardPrefixExpression = ast.newPrefixExpression();
-		guardPrefixExpression.setOperator(PrefixExpression.Operator.toOperator("!"));
+		guardPrefixExpression.setOperator(NOT);
 		ParenthesizedExpression parenthesizedExpression = ast.newParenthesizedExpression();
 		parenthesizedExpression.setExpression((Expression) astRewrite.createCopyTarget(expression));
 		guardPrefixExpression.setOperand(parenthesizedExpression);
@@ -377,7 +462,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private Expression createNegated(AST ast, Expression expression) {
 		PrefixExpression guardPrefixExpression = ast.newPrefixExpression();
-		guardPrefixExpression.setOperator(PrefixExpression.Operator.toOperator("!"));
+		guardPrefixExpression.setOperator(NOT);
 		guardPrefixExpression.setOperand((Expression) astRewrite.createCopyTarget(expression));
 		return guardPrefixExpression;
 	}
@@ -407,38 +492,5 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return Optional.of((IfStatement) statement);
-	}
-
-	class SimpleExpressionVisitor extends ASTVisitor {
-
-		private boolean isSimple = true;
-
-		@Override
-		public boolean preVisit2(ASTNode node) {
-			return isSimple;
-		}
-
-		@Override
-		public boolean visit(InfixExpression expression) {
-			isSimple = false;
-			return true;
-		}
-
-		@Override
-		public boolean visit(PostfixExpression expression) {
-			isSimple = false;
-			return true;
-		}
-
-		@Override
-		public boolean visit(PrefixExpression expression) {
-			isSimple = false;
-			return true;
-		}
-
-		public boolean isSimple() {
-			return isSimple;
-		}
-
 	}
 }
