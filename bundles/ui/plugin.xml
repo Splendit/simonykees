@@ -105,4 +105,21 @@
 	<extension point="org.eclipse.ui.startup">
 		<startup class="eu.jsparrow.ui.startup.Startup" />
 	</extension>
+	
+	<extension point="org.eclipse.ui.editors">
+		<editor
+			class="eu.jsparrow.ui.startup.WelcomeEditor"
+			icon="$nl$/icons/jSparrow_active_icon_16.png"
+			id="ui.editors.jsparrow.WelcomeEditor"
+			name="Introduction jSparrow">
+		</editor>
+	</extension>
+	 
+ 	<extension point="org.eclipse.ui.elementFactories">
+    	<factory
+          class="eu.jsparrow.ui.startup.WelcomeEditorInputFactory"
+          id="eu.jsparrow.ui.startup.elementFactory">
+    	</factory>
+ 	</extension>
+ 	
 </plugin>
