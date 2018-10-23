@@ -75,5 +75,15 @@ public class RemoveDoubleNegationVisitorTest extends UsesJDTUnitFixture {
 		Block expected = createBlock("boolean a = !true;");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
+	
+	@Test
+	public void visit_numericExpressionPrefix() throws Exception {
+		fixture.addMethodBlock("int i = 0; boolean a = ++i == 0;");
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+
+		Block expected = createBlock("int i = 0; boolean a = ++i == 0;");
+		assertMatch(expected, fixture.getMethodBlock());
+	}
 
 }
