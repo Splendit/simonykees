@@ -12,8 +12,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
- * ASTVisitor that searches control statements for non-block bodies and wraps it
- * into a block.
+ * Removes pairs of negations from boolean expressions until only zero or one
+ * negation is left.
  * 
  * @since 2.7
  *
@@ -24,7 +24,7 @@ public class RemoveDoubleNegationASTVisitor extends AbstractASTRewriteASTVisitor
 	public boolean visit(PrefixExpression prefixExpression) {
 		ASTNode replaceNode = unwrapNegations(prefixExpression, true);
 
-		if (null != replaceNode && prefixExpression != replaceNode) {
+		if (prefixExpression != replaceNode) {
 			astRewrite.replace(prefixExpression, astRewrite.createCopyTarget(replaceNode), null);
 			saveComments(prefixExpression, replaceNode);
 			onRewrite();
