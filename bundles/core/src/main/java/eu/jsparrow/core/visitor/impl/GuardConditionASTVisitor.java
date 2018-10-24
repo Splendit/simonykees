@@ -218,7 +218,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 			return;
 		}
 
-		ReturnStatement elseReturnStatement = isSingleReturnStatement(elseStatement);
+		ReturnStatement elseReturnStatement = findSingleReturnStatement(elseStatement);
 		if (elseReturnStatement == null) {
 			return;
 		}
@@ -338,7 +338,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private void analyzeIfElseReturn(MethodDeclaration methodDeclaration, IfStatement ifStatement,
 			Statement elseStatement) {
-		ReturnStatement elseReturnStatement = isSingleReturnStatement(elseStatement);
+		ReturnStatement elseReturnStatement = findSingleReturnStatement(elseStatement);
 		if (elseReturnStatement == null) {
 			return;
 		}
@@ -352,7 +352,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		insertGuardStatement(methodDeclaration.getBody(), ifStatement, guardStatement);
 	}
 
-	private ReturnStatement isSingleReturnStatement(Statement elseStatement) {
+	private ReturnStatement findSingleReturnStatement(Statement elseStatement) {
 		if (ASTNode.IF_STATEMENT == elseStatement.getNodeType()) {
 			return null;
 		}
