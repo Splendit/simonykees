@@ -81,7 +81,7 @@ public class GuardConditionRule {
 	}
 
 	public void voidMethod_infixExpressionConditionBiggerThan_shouldTransform() {
-		if (numericCondition() <= 0) {
+		if (numericCondition() < 0) {
 			return;
 		}
 		doSomething("Should create guard condition with less equals");
@@ -140,6 +140,31 @@ public class GuardConditionRule {
 
 	public void voidMethod_instanceOfOperator_shouldTransform(Object object) {
 		if (!(object instanceof List)) {
+			return;
+		}
+		doSomething("Object is a list");
+		doSomething("Should transform");
+	}
+
+	public void voidMethod_booleanLiteralTrue_shouldTransform(Object object) {
+		if (false) {
+			return;
+		}
+		doSomething("Object is a list");
+		doSomething("Should transform");
+	}
+
+	public void voidMethod_booleanLiteralFalse_shouldTransform(Object object) {
+		if (true) {
+			return;
+		}
+		doSomething("Object is a list");
+		doSomething("Should transform");
+	}
+
+	public void voidMethod_infixBooleanExpression_shouldTransform(Object object) {
+		boolean a = false;
+		if (!(condition() && a)) {
 			return;
 		}
 		doSomething("Object is a list");
@@ -241,6 +266,152 @@ public class GuardConditionRule {
 		}
 	}
 
+	public int ifWithoutReturn_followedByElseReturn_shouldNotTransform() {
+		doSomething("what ever");
+
+		if (condition()) {
+			doSomething("Should be moved out of the if");
+			doSomething("should transform");
+		} else {
+			return 0;
+		}
+		{
+			return 1;
+		}
+	}
+
+	public void voidMethod_trivialBody_shouldNotTransform() {
+		doSomething("Whatever");
+		if (numericCondition() > 0) {
+			doSomething("Trivial, should not transform");
+		}
+	}
+
+	public void voidMethod_lastIsNotIf_shouldNotTransform() {
+		if (numericCondition() > 0) {
+			doSomething("Not trivial");
+			doSomething("There are statements following the if");
+		}
+		doSomething("Whatever");
+	}
+
+	public int ifReturnElseReturn_notExplicitIfReturn_shouldNotTransform() {
+		if (condition()) {
+			doSomething("Not trivial");
+			doSomething("else branch does not return explicitly");
+			{
+				return 0;
+			}
+		} else {
+			return 1;
+		}
+	}
+
+	public int ifReturnElseReturn_elseIsReturnStatement_shouldTransform() {
+		if (!condition()) {
+			return 1;
+		}
+		doSomething("Not trivial");
+		doSomething("else branch does not return explicitly");
+		return 0;
+	}
+
+	public int ifReturnElseReturn_elseWithMultipleStatements_shouldTransform() {
+		if (condition()) {
+			doSomething("Not trivial");
+			doSomething("else branch does not return explicitly");
+			return 0;
+		} else {
+			doSomething("Here as well");
+			return 1;
+		}
+	}
+
+	public int ifReturn_missingifReturnStatement_shouldNotTransform() {
+		if (condition()) {
+			doSomething("Not trivial");
+			doSomething("Next statement is not return");
+			doSomething("Should not transform");
+
+		}
+		return 1;
+	}
+
+	public int ifReturn_thenSingleReturnStatement_shouldNotTransform() {
+		doSomething("Whatever ");
+		if (condition()) {
+			return 0;
+		}
+		return 1;
+	}
+
+	public int ifReturnElseReturn_trivialBody_shouldNotTransform() {
+		if (condition()) {
+			return 0;
+		} else {
+			return 1;
+		}
+	}
+
+	public int ifWithoutReturn_followedElseWithoutReturn_shouldNotTransform() {
+		doSomething("what ever");
+
+		if (condition()) {
+			doSomething("Should be moved out of the if");
+			doSomething("should transform");
+		} else {
+			doSomething("what ever else");
+		}
+		return 1;
+	}
+
+	public int ifWithReturn_multipleElseWithReturn_shouldNotTransform() {
+		doSomething("what ever");
+
+		if (condition()) {
+			doSomething("Should be moved out of the if");
+			doSomething("should transform");
+			return 1;
+		} else if (numericCondition() == 1) {
+			doSomething("what ever else");
+			return 0;
+		} else {
+			return -1;
+		}
+	}
+
+	public int noIf_shouldNotTransform() {
+		doSomething("what ever");
+
+		if (condition()) {
+			doSomething("Should be moved out of the if");
+			doSomething("should transform");
+			return 1;
+		}
+		doSomething("Do something before returning");
+		return 0;
+	}
+
+	public int trivialIfStatement_shouldNotTransform() {
+		doSomething("what ever");
+
+		if (condition()) {
+			return 0;
+		}
+		return 1;
+	}
+
+	public void emptyMethod() {
+
+	}
+
+	public void emptyIfStatementMethod_shouldNotTransform() {
+		doSomething("what ever");
+		if (condition()) {
+
+		}
+	}
+
 	private boolean condition() {
 		return true;
 	}
@@ -251,6 +422,20 @@ public class GuardConditionRule {
 
 	private void doSomething(String value) {
 
+	}
+
+	abstract class AbstractClass {
+		public AbstractClass() {
+			/*
+			 * constructor
+			 */
+			if (numericCondition() == 0) {
+				doSomething("Should create guard condition with not equals operator");
+				doSomething("Should transform");
+			}
+		}
+
+		abstract void abstractMethod();
 	}
 
 }

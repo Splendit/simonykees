@@ -29,6 +29,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
+ * A visitor for converting the last if-statement in a method body, to a guard
+ * if.
  * 
  * @since 2.7.0
  */
@@ -93,7 +95,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (elseStatement != null) {
 			analyzeIfElseReturn(methodDeclaration, ifStatement, elseStatement);
 		} else {
-			analyzeIfReturn(methodDeclaration, (ReturnStatement)lastStatement, ifStatement);
+			analyzeIfReturn(methodDeclaration, (ReturnStatement) lastStatement, ifStatement);
 		}
 
 		return true;
@@ -187,7 +189,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 	 * 	}
 	 * 	doSomething();
 	 * 	doSomethingMore();
-	 *  return something;
+	 * 	return something;
 	 * }
 	 * </code>
 	 * </pre>
@@ -199,8 +201,8 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private void analyzeIfReturnElseReturn(MethodDeclaration methodDeclaration, Statement lastStatement) {
 		/*
-		 * last statement must be an if-else with the following condition: -
-		 * then statement must not be trivial - else statement must not contain
+		 * last statement must be an if-else with the following condition: then
+		 * statement must not be trivial - else statement must not contain
 		 * further else statements - both, else-then and if-then must end with
 		 * return statements - the body of the else-then must consist of a
 		 * single return statement
@@ -218,7 +220,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		Statement elseStatement = ifStatement.getElseStatement();
-		if (ASTNode.BLOCK != elseStatement.getNodeType()) {
+		if (ASTNode.BLOCK != elseStatement.getNodeType() && ASTNode.RETURN_STATEMENT != elseStatement.getNodeType()) {
 			return;
 		}
 
@@ -232,11 +234,50 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		insertGuardStatement(methodDeclaration.getBody(), ifStatement, guardIfStatement);
 	}
 
+	/**
+	 * Checks whether the second last statement of the method body is an
+	 * {@link IfStatement} ending with a return, and the last statement of the
+	 * method body ends with a {@link ReturnStatement}.
+	 * 
+	 * <pre>
+	 * <code>
+	 * public Object method() {
+	 * 	...
+	 * 	if(condition()) {
+	 * 		doSomething();
+	 * 		doSomethingMore();
+	 * 		return something;
+	 * 	}
+	 * 	return somethingElse;
+	 * }
+	 * </code>
+	 * </pre>
+	 * 
+	 * is transformed to:
+	 * 
+	 * <pre>
+	 * <code>
+	 * public void method() {
+	 * 	...
+	 * 	if(!condition()) {
+	 * 		return somethingElse;
+	 * 	}
+	 * 	doSomething();
+	 * 	doSomethingMore();
+	 * 	return something;
+	 * }
+	 * </code>
+	 * </pre>
+	 * 
+	 * @param methodDeclaration
+	 *            the method declaration to be analyzed.
+	 * @param returnStatement
+	 *            the last return statement of the method body.
+	 * @param ifStatement
+	 *            the last if statement of the method body.
+	 */
 	private void analyzeIfReturn(MethodDeclaration methodDeclaration, ReturnStatement returnStatement,
 			IfStatement ifStatement) {
-		// if there is no else branch, the body of the if must
-		// end with a return statement
-		// the last return statement is the return on the guard
 
 		// if it's not a block, it's trivial
 		Block thenStatement = (Block) ifStatement.getThenStatement();
@@ -256,16 +297,57 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		insertGuardStatement(methodDeclaration.getBody(), ifStatement, guardStatement);
 	}
 
+	/**
+	 * Checks whether the second last statement of the method body is an
+	 * {@link IfStatement} having an else branch consisting of a single
+	 * {@link ReturnStatement}, and the last statement of the method body is a
+	 * {@link ReturnStatement}
+	 * 
+	 * <pre>
+	 * <code>
+	 * public Object method() {
+	 * 	...
+	 * 	if(condition()) {
+	 * 		doSomething();
+	 * 		doSomethingMore();
+	 * 	} else {
+	 * 		return somethingElse;
+	 * 	}
+	 * 	return something;
+	 * }
+	 * </code>
+	 * </pre>
+	 * 
+	 * is transformed to:
+	 * 
+	 * <pre>
+	 * <code>
+	 * public void method() {
+	 * 	...
+	 * 	if(!condition()) {
+	 * 		return somethingElse;
+	 * 	}
+	 * 	doSomething();
+	 * 	doSomethingMore();
+	 * 	return something;
+	 * }
+	 * </code>
+	 * </pre>
+	 * 
+	 * @param methodDeclaration
+	 *            the method declaration to be analyzed.
+	 * @param ifStatement
+	 *            the last if statement of the method.
+	 * @param elseStatement
+	 *            the else branch of the if statement
+	 * 
+	 */
 	private void analyzeIfElseReturn(MethodDeclaration methodDeclaration, IfStatement ifStatement,
 			Statement elseStatement) {
 		ReturnStatement elseReturnStatement = isSingleReturnStatement(elseStatement);
 		if (elseReturnStatement == null) {
 			return;
 		}
-
-		// if there is an else branch, its body must consist of a
-		// single return statement
-		// the return on else branch is the return on the guard
 
 		/*
 		 * construct the guard and do the replacement
@@ -363,10 +445,11 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * Creates a negated expression for the guard command. 
+	 * Creates a negated expression for the guard command.
 	 * 
-	 * @param expression expression to be negated
-	 * @return the negated expression. 
+	 * @param expression
+	 *            expression to be negated
+	 * @return the negated expression.
 	 */
 	private Expression createGuardExpression(Expression expression) {
 		int expressionType = expression.getNodeType();
