@@ -7,7 +7,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ArithmeticUtil;
+import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -58,7 +58,7 @@ public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisito
 
 			if (arithExpASTVisitor.getNewOperator() != null) {
 				astRewrite.set(node, Assignment.OPERATOR_PROPERTY,
-						ArithmeticUtil.generateOperator(arithExpASTVisitor.getNewOperator()), null);
+						OperatorUtil.generateOperator(arithExpASTVisitor.getNewOperator()), null);
 				getCommentRewriter().saveRelatedComments(node.getRightHandSide(),
 						ASTNodeUtil.getSpecificAncestor(node, Statement.class));
 				onRewrite();

@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -17,8 +18,8 @@ import eu.jsparrow.rules.common.visitor.helper.SimpleExpressionVisitor;
  * @author Martin Huter
  * @since 0.9
  */
-public class ArithmeticUtil {
-	
+public class OperatorUtil {
+
 	public static final InfixExpression.Operator EQUALS_EQUALS = InfixExpression.Operator.EQUALS;
 	public static final InfixExpression.Operator NOT_EQUALS = InfixExpression.Operator.NOT_EQUALS;
 	public static final InfixExpression.Operator GREATER = InfixExpression.Operator.GREATER;
@@ -26,8 +27,9 @@ public class ArithmeticUtil {
 	public static final InfixExpression.Operator GREATER_EQUALS = InfixExpression.Operator.GREATER_EQUALS;
 	public static final InfixExpression.Operator LESS = InfixExpression.Operator.LESS;
 	private static final PrefixExpression.Operator NOT = PrefixExpression.Operator.NOT;
-	
-	private ArithmeticUtil() {}
+
+	private OperatorUtil() {
+	}
 
 	/**
 	 * Generates a corresponding arithmetic assignment operator to an arithmetic
@@ -54,14 +56,58 @@ public class ArithmeticUtil {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * Inverts if possible the operator of the given {@link InfixExpression}.
+	 * Otherwise, wraps it into a negated {@link ParenthesizedExpression}. E.g.
+	 * the following:
+	 * 
+	 * <pre>
+	 * <code>
+	 * a == b
+	 * a == b == c
+	 * </code>
+	 * }
+	 * </pre>
+	 * 
+	 * are transformed to
+	 * 
+	 * <pre>
+	 * <code>
+	 * a != b
+	 * !(a == b == c)
+	 * </code>
+	 * }
+	 * </pre>
+	 * 
+	 * Supports the invertion of the following operators:
+	 * <ul>
+	 * <li>{@link InfixExpression.Operator#EQUALS}</li>
+	 * <li>{@link InfixExpression.Operator#NOT_EQUALS}</li>
+	 * <li>{@link InfixExpression.Operator#GREATER}</li>
+	 * <li>{@link InfixExpression.Operator#GREATER_EQUALS}</li>
+	 * <li>{@link InfixExpression.Operator#LESS}</li>
+	 * <li>{@link InfixExpression.Operator#LESS_EQUALS}</li>
+	 * </ul>
+	 * 
+	 * <b>Note:</b>
+	 * 
+	 * @param infixExpression
+	 *            the expression to be inverted
+	 * @param ast
+	 *            the ast for creating the negated expression
+	 * @param astRewrite
+	 *            a rewriter for recording the changes
+	 * @return a new infix expression equivalent with the negated form of the
+	 *         provided expression.
+	 */
 	public static Expression negateInfixExpression(InfixExpression infixExpression, AST ast, ASTRewrite astRewrite) {
 		InfixExpression.Operator operator = infixExpression.getOperator();
 		InfixExpression.Operator newOperator = null;
-	
+
 		if (!isSimpleExpression(infixExpression)) {
 			return createNegatedParenthesized(ast, infixExpression, astRewrite);
 		}
-	
+
 		if (EQUALS_EQUALS.equals(operator)) {
 			newOperator = NOT_EQUALS;
 		} else if (NOT_EQUALS.equals(operator)) {
@@ -75,20 +121,29 @@ public class ArithmeticUtil {
 		} else if (LESS_EQUALS.equals(operator)) {
 			newOperator = GREATER;
 		}
-	
+
 		if (newOperator == null) {
 			return createNegatedParenthesized(ast, infixExpression, astRewrite);
 		}
-	
+
 		InfixExpression guardInfixExpression = ast.newInfixExpression();
 		guardInfixExpression.setOperator(newOperator);
 		guardInfixExpression.setLeftOperand((Expression) astRewrite.createCopyTarget(infixExpression.getLeftOperand()));
 		guardInfixExpression
 			.setRightOperand((Expression) astRewrite.createCopyTarget(infixExpression.getRightOperand()));
-	
+
 		return guardInfixExpression;
 	}
-	
+
+	/**
+	 * Checks whether the given {@link InfixExpression} contains further
+	 * {@link InfixExpression}, {@link PrefixExpression} or
+	 * {@link PostfixExpression} expression.
+	 * 
+	 * @param expression
+	 *            the expression to be checked
+	 * @return if the above condition is satisfied.
+	 */
 	public static boolean isSimpleExpression(InfixExpression expression) {
 		SimpleExpressionVisitor visitor = new SimpleExpressionVisitor();
 		Expression left = expression.getLeftOperand();
@@ -102,7 +157,19 @@ public class ArithmeticUtil {
 		right.accept(visitor);
 		return visitor.isSimple();
 	}
-	
+
+	/**
+	 * Wraps the given expression into a {@link ParenthesizedExpression} and
+	 * negates it with a {@link PrefixExpression.Operator#NOT}.
+	 * 
+	 * @param ast
+	 *            an ast to create the new expression
+	 * @param expression
+	 *            expression to be negated
+	 * @param astRewrite
+	 *            an {@link ASTRewrite} to register the changes
+	 * @return the negated expression of type {@link PrefixExpression}.
+	 */
 	public static Expression createNegatedParenthesized(AST ast, Expression expression, ASTRewrite astRewrite) {
 		PrefixExpression guardPrefixExpression = ast.newPrefixExpression();
 		guardPrefixExpression.setOperator(NOT);

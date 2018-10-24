@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ArithmeticUtil;
+import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -450,7 +450,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		AST ast = expression.getAST();
 		if (ASTNode.INFIX_EXPRESSION == expressionType) {
 			InfixExpression infixExpression = (InfixExpression) expression;
-			return ArithmeticUtil.negateInfixExpression(infixExpression, ast, astRewrite);
+			return OperatorUtil.negateInfixExpression(infixExpression, ast, astRewrite);
 		}
 
 		if (ASTNode.PREFIX_EXPRESSION == expressionType) {
@@ -462,7 +462,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 				Expression body = findPrefixExpressionBody(prefixExpression);
 				guardExpression = (Expression) astRewrite.createCopyTarget(body);
 			} else {
-				guardExpression = ArithmeticUtil.createNegatedParenthesized(ast, expression, astRewrite);
+				guardExpression = OperatorUtil.createNegatedParenthesized(ast, expression, astRewrite);
 			}
 			return guardExpression;
 		}
@@ -472,7 +472,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		if (ASTNode.BOOLEAN_LITERAL != expressionType) {
-			return ArithmeticUtil.createNegatedParenthesized(ast, expression, astRewrite);
+			return OperatorUtil.createNegatedParenthesized(ast, expression, astRewrite);
 		}
 
 		BooleanLiteral booleanLiteral = (BooleanLiteral) expression;
