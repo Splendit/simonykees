@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.sub;
+package eu.jsparrow.rules.common.visitor.helper;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
  * Checks whether an expression contains other {@link InfixExpression},
  * {@link PrefixExpression} or {@link PostfixExpression} expressions.
  * 
- * @since 2.7
+ * @since 2.7.0
  *
  */
 public class SimpleExpressionVisitor extends ASTVisitor {

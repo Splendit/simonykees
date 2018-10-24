@@ -23,8 +23,8 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.visitor.sub.SimpleExpressionVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ArithmeticUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -37,12 +37,6 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final Code VOID = PrimitiveType.VOID;
-	private static final InfixExpression.Operator EQUALS_EQUALS = InfixExpression.Operator.EQUALS;
-	private static final InfixExpression.Operator NOT_EQUALS = InfixExpression.Operator.NOT_EQUALS;
-	private static final InfixExpression.Operator GREATER = InfixExpression.Operator.GREATER;
-	private static final InfixExpression.Operator LESS_EQUALS = InfixExpression.Operator.LESS_EQUALS;
-	private static final InfixExpression.Operator GREATER_EQUALS = InfixExpression.Operator.GREATER_EQUALS;
-	private static final InfixExpression.Operator LESS = InfixExpression.Operator.LESS;
 	private static final PrefixExpression.Operator NOT = PrefixExpression.Operator.NOT;
 
 	@Override
@@ -456,7 +450,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		AST ast = expression.getAST();
 		if (ASTNode.INFIX_EXPRESSION == expressionType) {
 			InfixExpression infixExpression = (InfixExpression) expression;
-			return negateInfixExpression(infixExpression, ast);
+			return ArithmeticUtil.negateInfixExpression(infixExpression, ast, astRewrite);
 		}
 
 		if (ASTNode.PREFIX_EXPRESSION == expressionType) {
@@ -468,7 +462,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 				Expression body = findPrefixExpressionBody(prefixExpression);
 				guardExpression = (Expression) astRewrite.createCopyTarget(body);
 			} else {
-				guardExpression = createNegatedParenthesized(ast, expression);
+				guardExpression = ArithmeticUtil.createNegatedParenthesized(ast, expression, astRewrite);
 			}
 			return guardExpression;
 		}
@@ -478,7 +472,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		if (ASTNode.BOOLEAN_LITERAL != expressionType) {
-			return createNegatedParenthesized(ast, expression);
+			return ArithmeticUtil.createNegatedParenthesized(ast, expression, astRewrite);
 		}
 
 		BooleanLiteral booleanLiteral = (BooleanLiteral) expression;
@@ -498,51 +492,6 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		return parenthesizedExpression.getExpression();
 	}
 
-	private Expression negateInfixExpression(InfixExpression infixExpression, AST ast) {
-		InfixExpression.Operator operator = infixExpression.getOperator();
-		InfixExpression.Operator newOperator = null;
-
-		if (!isSimpleExpression(infixExpression)) {
-			return createNegatedParenthesized(ast, infixExpression);
-		}
-
-		if (EQUALS_EQUALS.equals(operator)) {
-			newOperator = NOT_EQUALS;
-		} else if (NOT_EQUALS.equals(operator)) {
-			newOperator = EQUALS_EQUALS;
-		} else if (GREATER.equals(operator)) {
-			newOperator = LESS_EQUALS;
-		} else if (GREATER_EQUALS.equals(operator)) {
-			newOperator = LESS;
-		} else if (LESS.equals(operator)) {
-			newOperator = GREATER_EQUALS;
-		} else if (LESS_EQUALS.equals(operator)) {
-			newOperator = GREATER;
-		}
-
-		if (newOperator == null) {
-			return createNegatedParenthesized(ast, infixExpression);
-		}
-
-		InfixExpression guardInfixExpression = ast.newInfixExpression();
-		guardInfixExpression.setOperator(newOperator);
-		guardInfixExpression.setLeftOperand((Expression) astRewrite.createCopyTarget(infixExpression.getLeftOperand()));
-		guardInfixExpression
-			.setRightOperand((Expression) astRewrite.createCopyTarget(infixExpression.getRightOperand()));
-
-		return guardInfixExpression;
-
-	}
-
-	private Expression createNegatedParenthesized(AST ast, Expression expression) {
-		PrefixExpression guardPrefixExpression = ast.newPrefixExpression();
-		guardPrefixExpression.setOperator(NOT);
-		ParenthesizedExpression parenthesizedExpression = ast.newParenthesizedExpression();
-		parenthesizedExpression.setExpression((Expression) astRewrite.createCopyTarget(expression));
-		guardPrefixExpression.setOperand(parenthesizedExpression);
-		return guardPrefixExpression;
-	}
-
 	private Expression createNegated(AST ast, Expression expression) {
 		PrefixExpression guardPrefixExpression = ast.newPrefixExpression();
 		guardPrefixExpression.setOperator(NOT);
@@ -550,19 +499,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		return guardPrefixExpression;
 	}
 
-	private boolean isSimpleExpression(InfixExpression expression) {
-		SimpleExpressionVisitor visitor = new SimpleExpressionVisitor();
-		Expression left = expression.getLeftOperand();
-		left.accept(visitor);
-		boolean isSimpleLeftOperand = visitor.isSimple();
-		if (!isSimpleLeftOperand) {
-			return false;
-		}
-		visitor = new SimpleExpressionVisitor();
-		Expression right = expression.getRightOperand();
-		right.accept(visitor);
-		return visitor.isSimple();
-	}
+
 
 	private Optional<IfStatement> findLastIfStatement(List<Statement> statements) {
 		if (statements.isEmpty()) {
