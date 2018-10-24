@@ -66,7 +66,6 @@ public class OperatorUtil {
 	 * a == b
 	 * a == b == c
 	 * </code>
-	 * }
 	 * </pre>
 	 * 
 	 * are transformed to
@@ -76,7 +75,6 @@ public class OperatorUtil {
 	 * a != b
 	 * !(a == b == c)
 	 * </code>
-	 * }
 	 * </pre>
 	 * 
 	 * Supports the invertion of the following operators:
@@ -89,7 +87,8 @@ public class OperatorUtil {
 	 * <li>{@link InfixExpression.Operator#LESS_EQUALS}</li>
 	 * </ul>
 	 * 
-	 * <b>Note:</b>
+	 * <p/>
+	 * <b>Note:</b> the returned expression must not be discarded!
 	 * 
 	 * @param infixExpression
 	 *            the expression to be inverted
@@ -140,6 +139,7 @@ public class OperatorUtil {
 	 * {@link InfixExpression}, {@link PrefixExpression} or
 	 * {@link PostfixExpression} expression.
 	 * 
+	 * 
 	 * @param expression
 	 *            the expression to be checked
 	 * @return if the above condition is satisfied.
@@ -161,6 +161,9 @@ public class OperatorUtil {
 	/**
 	 * Wraps the given expression into a {@link ParenthesizedExpression} and
 	 * negates it with a {@link PrefixExpression.Operator#NOT}.
+	 * <p/>
+	 * 
+	 * <b>Note:</b> the returned expression must not be discarded!
 	 * 
 	 * @param ast
 	 *            an ast to create the new expression
