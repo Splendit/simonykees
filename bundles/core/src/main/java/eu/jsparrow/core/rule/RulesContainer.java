@@ -29,6 +29,7 @@ import eu.jsparrow.core.rule.impl.EnumsWithoutEqualsRule;
 import eu.jsparrow.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import eu.jsparrow.core.rule.impl.ForToForEachRule;
 import eu.jsparrow.core.rule.impl.FunctionalInterfaceRule;
+import eu.jsparrow.core.rule.impl.GuardConditionRule;
 import eu.jsparrow.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import eu.jsparrow.core.rule.impl.IndexOfToContainsRule;
 import eu.jsparrow.core.rule.impl.InefficientConstructorRule;
@@ -109,6 +110,7 @@ public class RulesContainer {
 		List<RefactoringRule> rules = new LinkedList<>();
 
 		rules.addAll(Arrays.asList(
+
 				/*
 				 * Coding conventions
 				 */
@@ -117,7 +119,7 @@ public class RulesContainer {
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new DateDeprecatedRule(),
-				new RemoveDoubleNegationRule(),
+				new RemoveDoubleNegationRule(), new OptionalIfPresentRule(), new GuardConditionRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
@@ -127,10 +129,6 @@ public class RulesContainer {
 				new RemoveToStringOnStringRule(), new StringUtilsRule(), new StringLiteralEqualityCheckRule(),
 				new StringConcatToPlusRule(), new UseIsEmptyOnCollectionsRule(), new ArithmethicAssignmentRule(),
 				new StringBufferToBuilderRule(), new PrimitiveObjectUseEqualsRule(),
-				/*
-				 * Optionals
-				 */
-				new OptionalIfPresentRule(),
 				/*
 				 * Loops and streams
 				 */

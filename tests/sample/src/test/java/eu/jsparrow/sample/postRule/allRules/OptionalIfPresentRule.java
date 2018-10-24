@@ -158,35 +158,39 @@ public class OptionalIfPresentRule {
 	}
 
 	public void getExpressionNotPresent_shouldNotTransform(Optional<String> input) {
-		if (input.isPresent()) {
-			String value = "";
-			logger.info(value);
+		if (!input.isPresent()) {
+			return;
 		}
+		String value = "";
+		logger.info(value);
 	}
 
 	public void getWithArgument_shouldNotTransform(Optional<String> input, List<String> users) {
-		if (input.isPresent()) {
-			String value = users.get(0);
-			logger.info(value);
+		if (!input.isPresent()) {
+			return;
 		}
+		String value = users.get(0);
+		logger.info(value);
 	}
 
 	public void getWithNullExpression_shouldNotTransform(Optional<String> input) {
-		if (input.isPresent()) {
-			// comment under isPresent
-			String value = "";
-			get();
-			logger.info(value);
+		if (!input.isPresent()) {
+			return;
 		}
+		// comment under isPresent
+		String value = "";
+		get();
+		logger.info(value);
 	}
 
 	public void throwingCheckedException_shouldNotTransform(Optional<String> input) throws Exception {
 		// comment before isPresent
-		if (input.isPresent()) {
-			String value = input.get();
-			logger.info(value);
-			throwSomething();
+		if (!input.isPresent()) {
+			return;
 		}
+		String value = input.get();
+		logger.info(value);
+		throwSomething();
 	}
 
 	public void defaultUseCase_shouldTransform(Optional<String> input) {
@@ -272,27 +276,30 @@ public class OptionalIfPresentRule {
 	}
 
 	public void fakeOptional_shouldNotTransform(IoNonSonoOpzionale input) {
-		if (input.isPresent()) {
-			String value = input.get();
-			logger.info(value);
+		if (!input.isPresent()) {
+			return;
 		}
+		String value = input.get();
+		logger.info(value);
 	}
 
 	public void multipleConditions_shouldNotTransform(Optional<String> input) {
 		boolean beTrue = true;
-		if (input.isPresent() && beTrue) {
-			String value = input.get();
-			logger.info(value);
+		if (!(input.isPresent() && beTrue)) {
+			return;
 		}
+		String value = input.get();
+		logger.info(value);
 	}
 
 	public void nonEffectivelyFinalVariables_shouldNotTransform(Optional<String> input) {
 		int i = 0;
 		i++;
-		if (input.isPresent()) {
-			String value = input.get();
-			logger.info(value + i);
+		if (!input.isPresent()) {
+			return;
 		}
+		String value = input.get();
+		logger.info(value + i);
 	}
 
 	public void elseStatement_shouldNotTransform(Optional<String> input) {
@@ -363,10 +370,11 @@ public class OptionalIfPresentRule {
 
 	public void discardedSingleOptionalGet_shouldNotTransform() {
 		Optional<String> input = findUserName("");
-		if (input.isPresent()) {
-			input.get();
-			String myVar = "somewar";
+		if (!input.isPresent()) {
+			return;
 		}
+		input.get();
+		String myVar = "somewar";
 	}
 
 	public void discardedOptionalGet_shouldTransform() {

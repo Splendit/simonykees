@@ -125,6 +125,8 @@ public class Messages extends NLS {
 	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;
 	public static String FunctionalInterfaceRule_name;
+	public static String GuardConditionRule_description;
+	public static String GuardConditionRule_name;
 	public static String LambdaForEachCollectRule_description;
 	public static String LambdaForEachCollectRule_name;
 	public static String LambdaForEachIfWrapperToFilterRule_description;
