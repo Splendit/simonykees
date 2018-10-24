@@ -24,7 +24,7 @@ public class GuardConditionRule extends RefactoringRuleImpl<GuardConditionASTVis
 		this.visitorClass = GuardConditionASTVisitor.class;
 		this.id = "GuardCondition"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.GuardConditionRule_name,
-				Messages.GuardConditionRule_description, Duration.ofMinutes(2),
+				Messages.GuardConditionRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
 	}
 
