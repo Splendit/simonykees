@@ -26,6 +26,8 @@ public class SimonykeesPreferenceInitializer extends AbstractPreferenceInitializ
 
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.ENABLE_INTRO, true);
 
+		preferenceStore.setDefault(SimonykeesPreferenceConstants.ENABLE_DASHBOARD, true);
+
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, true);
 	}
 }
