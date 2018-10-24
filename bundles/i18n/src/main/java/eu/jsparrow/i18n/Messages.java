@@ -261,6 +261,10 @@ public class Messages extends NLS {
 	public static String RefactoringInvoker_GetEnabledRulesForProject;
 	public static String RefactoringInvoker_GetSelectedRules;
 	public static String RefactoringInvoker_OverridingConfigWithCommandLine;
+	public static String RemoveDoubleNegationRule_description;
+
+	public static String RemoveDoubleNegationRule_name;
+
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
