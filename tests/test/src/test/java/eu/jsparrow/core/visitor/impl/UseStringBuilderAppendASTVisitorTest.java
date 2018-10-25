@@ -221,4 +221,16 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		Block expectedBlock = createBlock(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
+	
+	@Test
+	public void visit_expressionWithNullLiteral_shouldNotTransform() throws Exception {
+		String block = "String value = \"\" + null;";
+		
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		
+		Block expectedBlock = createBlock(block);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
 }

@@ -3,25 +3,48 @@ package eu.jsparrow.core.visitor.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
+/**
+ * Replaces the {@link String} concatenation using the {@link InfixExpression.Operator#PLUS} 
+ * by {@link StringBuilder#append}. 
+ * 
+ * @since 2.7.0
+ *
+ */
 public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final InfixExpression.Operator PLUS = InfixExpression.Operator.PLUS;
 	private static final String TO_STRING = "toString"; //$NON-NLS-1$
 	private static final String APPEND = "append"; //$NON-NLS-1$
+
+	@Override
+	public boolean visit(NormalAnnotation annotation) {
+		return false;
+	}
+
+	@Override
+	public boolean visit(SingleMemberAnnotation annotation) {
+		return false;
+	}
 
 	@Override
 	public boolean visit(InfixExpression infixExpression) {
@@ -30,7 +53,7 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 		if (!PLUS.equals(operator)) {
 			return false;
 		}
-		
+
 		ITypeBinding typeBinding = infixExpression.resolveTypeBinding();
 		if (!ClassRelationUtil.isContentOfTypes(typeBinding,
 				Collections.singletonList(java.lang.String.class.getName()))) {
@@ -38,7 +61,7 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 		}
 
 		List<Expression> operands = findOperands(infixExpression);
-		if(operands.size() <= 1) {
+		if (operands.size() <= 1) {
 			return false;
 		}
 
@@ -57,8 +80,21 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 
 		toString.setExpression(expression);
 		astRewrite.replace(infixExpression, toString, null);
+		onRewrite();
+		saveComments(infixExpression, operands);
 
 		return false;
+	}
+
+	private void saveComments(InfixExpression infixExpression, List<Expression> operands) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> comments = commentRewriter.findRelatedComments(infixExpression);
+		List<Comment> allreadySaved = operands.stream()
+				.flatMap(expression -> commentRewriter.findRelatedComments(expression).stream())
+				.collect(Collectors.toList());
+		comments.removeAll(allreadySaved);
+		Statement parentStatement = ASTNodeUtil.getSpecificAncestor(infixExpression, Statement.class);
+		commentRewriter.saveBeforeStatement(parentStatement, comments);
 	}
 
 	private List<Expression> findOperands(InfixExpression infixExpression) {
@@ -86,7 +122,16 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 			operands.addAll(findIncludedOperands(extendedOperand));
 		}
 
+		if (containsNullLiteral(operands)) {
+			return Collections.singletonList(infixExpression);
+		}
+
 		return operands;
+	}
+
+	private boolean containsNullLiteral(List<Expression> operands) {
+		return operands.stream()
+			.anyMatch(expression -> ASTNode.NULL_LITERAL == expression.getNodeType());
 	}
 
 	private List<Expression> findIncludedOperands(Expression expression) {
@@ -110,7 +155,7 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 		boolean isRightExpressionString = isStringExpression(right);
 		return isLeftExpressionString || isRightExpressionString;
 	}
-	
+
 	private boolean isStringExpression(Expression expression) {
 		if (expression.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
 			return isStringExpression(((ParenthesizedExpression) expression).getExpression());
@@ -124,7 +169,7 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 		return ClassRelationUtil.isContentOfTypes(typeBinding,
 				Collections.singletonList(java.lang.String.class.getName()));
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private MethodInvocation createAppendInvocation(Expression operand, AST ast, Expression expression) {
 		MethodInvocation append = ast.newMethodInvocation();
