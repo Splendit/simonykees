@@ -69,7 +69,10 @@ public class TestForToForEachListIteratingIndexRule {
 		StringBuilder sb = new StringBuilder();
 		fooList.forEach(aFooList -> {
 			sb.append(aFooList);
-			fooList.forEach(aFooList1 -> sb.append(aFooList + input + aFooList1));
+			fooList.forEach(aFooList1 -> sb.append(new StringBuilder().append(aFooList)
+				.append(input)
+				.append(aFooList1)
+				.toString()));
 		});
 		return "";
 	}
@@ -160,7 +163,12 @@ public class TestForToForEachListIteratingIndexRule {
 			String s = foo.get(i % 2);
 			String firstString = foo.get(0);
 			String someConstant = "const";
-			sb.append(i + it + s + firstString + someConstant);
+			sb.append(new StringBuilder().append(i)
+				.append(it)
+				.append(s)
+				.append(firstString)
+				.append(someConstant)
+				.toString());
 		}
 
 		return sb.toString();
@@ -176,7 +184,11 @@ public class TestForToForEachListIteratingIndexRule {
 			String it = foo.get(i);
 			String it2 = foo.get(k);
 
-			sb.append(it + "," + it2 + ";");
+			sb.append(new StringBuilder().append(it)
+				.append(",")
+				.append(it2)
+				.append(";")
+				.toString());
 		});
 
 		return sb.toString();
@@ -192,7 +204,12 @@ public class TestForToForEachListIteratingIndexRule {
 			String s = foo.get(i % 2);
 			String firstString = foo.get(0);
 			String someConstant = "const";
-			sb.append(i + it + s + firstString + someConstant);
+			sb.append(new StringBuilder().append(i)
+				.append(it)
+				.append(s)
+				.append(firstString)
+				.append(someConstant)
+				.toString());
 		}
 
 		return sb.toString();
@@ -206,7 +223,10 @@ public class TestForToForEachListIteratingIndexRule {
 		for (int i = 1; i < foo.size(); i++) {
 			String it = foo.get(i);
 			String someConstant = "const";
-			sb.append(i + it + someConstant);
+			sb.append(new StringBuilder().append(i)
+				.append(it)
+				.append(someConstant)
+				.toString());
 		}
 
 		return sb.toString();
@@ -272,10 +292,14 @@ public class TestForToForEachListIteratingIndexRule {
 			s += ";";
 			sb.append(s);
 			for (String n : ndFoo) {
-				sb.append(n + ",");
+				sb.append(new StringBuilder().append(n)
+					.append(",")
+					.toString());
 				for (String r : rdFoo) {
 					String t = s;
-					sb.append(r + t);
+					sb.append(new StringBuilder().append(r)
+						.append(t)
+						.toString());
 				}
 			}
 		}
@@ -290,12 +314,16 @@ public class TestForToForEachListIteratingIndexRule {
 
 		foo.forEach(it -> {
 			String someConstant = "const";
-			sb.append(it + someConstant);
+			sb.append(new StringBuilder().append(it)
+				.append(someConstant)
+				.toString());
 		});
 
 		foo.forEach(it -> {
 			String someConstant = "const";
-			sb.append(it + someConstant);
+			sb.append(new StringBuilder().append(it)
+				.append(someConstant)
+				.toString());
 		});
 
 		return sb.toString();
@@ -308,7 +336,9 @@ public class TestForToForEachListIteratingIndexRule {
 		if (foo != null) {
 			foo.forEach(it -> {
 				String someConstant = "const";
-				sb.append(it + someConstant);
+				sb.append(new StringBuilder().append(it)
+					.append(someConstant)
+					.toString());
 			});
 		}
 
@@ -324,7 +354,9 @@ public class TestForToForEachListIteratingIndexRule {
 				foo.forEach(s -> {
 					String someConstant = "const";
 					try {
-						sb.append(s + someConstant);
+						sb.append(new StringBuilder().append(s)
+							.append(someConstant)
+							.toString());
 					} finally {
 						sb.append(",");
 					}

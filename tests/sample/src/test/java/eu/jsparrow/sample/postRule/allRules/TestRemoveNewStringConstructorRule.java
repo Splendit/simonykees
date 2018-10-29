@@ -15,7 +15,9 @@ public class TestRemoveNewStringConstructorRule {
 	}
 
 	private String sampleMethod(String input) {
-		return "sample-method-" + input;
+		return new StringBuilder().append("sample-method-")
+			.append(input)
+			.toString();
 	}
 
 	public String testNewEmptyStrig() {
@@ -67,7 +69,13 @@ public class TestRemoveNewStringConstructorRule {
 	}
 
 	public String testNestedNewStringsAndConcat(String input) {
-		return input + "-" + input + "-" + "val" + "val";
+		return new StringBuilder().append(input)
+			.append("-")
+			.append(input)
+			.append("-")
+			.append("val")
+			.append("val")
+			.toString();
 	}
 
 	public String testNestedNewStrings(String input) {
@@ -113,7 +121,9 @@ public class TestRemoveNewStringConstructorRule {
 	public String testConvertInputParameter(String input) {
 		BigDecimal number = new BigDecimal("10.05");
 		Integer.valueOf("123");
-		return input + number;
+		return new StringBuilder().append(input)
+			.append(number)
+			.toString();
 	}
 
 	public String testConvertInLambdaExpressionBody(String input) {

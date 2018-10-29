@@ -83,12 +83,18 @@ public class StringLiteralEqualityCheckRule {
 
 	public boolean compareStringExpression() {
 		String fooConcat = "fooconcatexpression";
-		return fooConcat.equals("foo" + "concat" + "expression");
+		return fooConcat.equals(new StringBuilder().append("foo")
+			.append("concat")
+			.append("expression")
+			.toString());
 	}
 
 	public boolean compareStringExpression2() {
 		String fooConcat = "fooconcatexpression";
-		return "fooconcatexpression".equals(("foo" + "concat" + "expression"));
+		return "fooconcatexpression".equals((new StringBuilder().append("foo")
+			.append("concat")
+			.append("expression")
+			.toString()));
 	}
 
 	public boolean checkingCustomComparable() {
@@ -147,7 +153,9 @@ public class StringLiteralEqualityCheckRule {
 
 		@Override
 		public int compareTo(String o) {
-			String result = "malicous-prefix" + foo;
+			String result = new StringBuilder().append("malicous-prefix")
+				.append(foo)
+				.toString();
 			return result.compareTo(o);
 		}
 

@@ -116,7 +116,9 @@ public class StringBuildingLoopRule {
 
 		collectionOfStrings.add(anotherDecl);
 
-		collectionOfStrings.forEach(val -> result = result + val);
+		collectionOfStrings.forEach(val -> result = new StringBuilder().append(result)
+			.append(val)
+			.toString());
 
 		return result;
 	}
@@ -209,7 +211,9 @@ public class StringBuildingLoopRule {
 		result += listOfStrings.stream()
 			.collect(Collectors.joining());
 
-		return result + anotherResult;
+		return new StringBuilder().append(result)
+			.append(anotherResult)
+			.toString();
 	}
 
 	public String clashWithParameterName(String resultSb) {
@@ -249,7 +253,9 @@ public class StringBuildingLoopRule {
 		List<String> collectionOfStrings = generateStringList(input);
 		String result = "";
 		for (String val : collectionOfStrings) {
-			result = result + val;
+			result = new StringBuilder().append(result)
+				.append(val)
+				.toString();
 			if (StringUtils.isEmpty(val)) {
 				result += "-";
 			}
@@ -262,7 +268,9 @@ public class StringBuildingLoopRule {
 		String result = "";
 		String anotherVal = "-";
 		for (String val : collectionOfStrings) {
-			result = result + anotherVal;
+			result = new StringBuilder().append(result)
+				.append(anotherVal)
+				.toString();
 		}
 		return result;
 	}
@@ -272,7 +280,9 @@ public class StringBuildingLoopRule {
 		String result = "";
 		String anotherVal = "-";
 		for (String val : collectionOfStrings) {
-			result = anotherVal + val;
+			result = new StringBuilder().append(anotherVal)
+				.append(val)
+				.toString();
 		}
 		return result;
 	}
@@ -282,7 +292,9 @@ public class StringBuildingLoopRule {
 		String result = "";
 		String anotherVal = "-";
 		for (String val : collectionOfStrings) {
-			anotherVal = result + val;
+			anotherVal = new StringBuilder().append(result)
+				.append(val)
+				.toString();
 		}
 		return result;
 	}
@@ -291,7 +303,10 @@ public class StringBuildingLoopRule {
 		List<String> collectionOfStrings = generateStringList(input);
 		String result = "";
 		for (String val : collectionOfStrings) {
-			result = result + "," + val;
+			result = new StringBuilder().append(result)
+				.append(",")
+				.append(val)
+				.toString();
 		}
 		return result;
 	}

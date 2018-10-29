@@ -68,14 +68,18 @@ public class TestFunctionalInterfaceRule {
 
 			@Override
 			public void method(int a) {
-				String sthToLog = a + FINAL_STRING_FIELD;
+				String sthToLog = new StringBuilder().append(a)
+					.append(FINAL_STRING_FIELD)
+					.toString();
 
 			}
 		};
 		FINAL_STRING_FIELD = "irritating";
 
 		AFunctionalInterface foo2 = (int a) -> {
-			String sthToLog = a + FINAL_STRING_FIELD;
+			String sthToLog = new StringBuilder().append(a)
+				.append(FINAL_STRING_FIELD)
+				.toString();
 
 		};
 
@@ -88,14 +92,18 @@ public class TestFunctionalInterfaceRule {
 			AFunctionalInterface foo4 = new AFunctionalInterface() {
 				@Override
 				public void method(int a) {
-					String sthToLog = a + NOT_INITIALIZED_FIELD;
+					String sthToLog = new StringBuilder().append(a)
+						.append(NOT_INITIALIZED_FIELD)
+						.toString();
 				}
 			};
 		} else {
 			AFunctionalInterface foo5 = new AFunctionalInterface() {
 				@Override
 				public void method(int a) {
-					String sthToLog = a + NOT_INITIALIZED_FIELD;
+					String sthToLog = new StringBuilder().append(a)
+						.append(NOT_INITIALIZED_FIELD)
+						.toString();
 				}
 			};
 		}
@@ -103,7 +111,9 @@ public class TestFunctionalInterfaceRule {
 		if (foo != null) {
 			NOT_INITIALIZED_FIELD = "";
 			AFunctionalInterface inNestedBlock = (int a) -> {
-				String sthToLog = a + NOT_INITIALIZED_FIELD;
+				String sthToLog = new StringBuilder().append(a)
+					.append(NOT_INITIALIZED_FIELD)
+					.toString();
 
 			};
 		} else {
@@ -114,7 +124,9 @@ public class TestFunctionalInterfaceRule {
 
 	public void usingUnassignedFieldInMethod() {
 		AFunctionalInterface foo2 = (int a) -> {
-			String sthToLog = a + FINAL_STRING_FIELD;
+			String sthToLog = new StringBuilder().append(a)
+				.append(FINAL_STRING_FIELD)
+				.toString();
 
 		};
 	}
@@ -336,7 +348,10 @@ public class TestFunctionalInterfaceRule {
 			try {
 
 			} catch (Exception e1) {
-				String sthToLog = e1.getMessage() + toString() + param;
+				String sthToLog = new StringBuilder().append(e1.getMessage())
+					.append(toString())
+					.append(param)
+					.toString();
 			}
 
 		};

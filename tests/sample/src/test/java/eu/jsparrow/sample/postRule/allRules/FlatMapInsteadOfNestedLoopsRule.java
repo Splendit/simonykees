@@ -116,7 +116,9 @@ public class FlatMapInsteadOfNestedLoopsRule {
 		matrix.stream()
 			.forEach(row -> row.stream()
 				.filter(element -> !StringUtils.isEmpty(element))
-				.forEach(element -> logger.info(row + element)));
+				.forEach(element -> logger.info(new StringBuilder().append(row)
+					.append(element)
+					.toString())));
 
 		class TestObject {
 			List<String> testList = Arrays.asList("asdf", "jkl");

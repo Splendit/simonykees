@@ -188,7 +188,9 @@ public class TestWhileToForEachRule {
 
 		while (iterator.hasNext()) {
 			while (innerIt.hasNext()) {
-				sb.append(innerIt.next() + iterator.next());
+				sb.append(new StringBuilder().append(innerIt.next())
+					.append(iterator.next())
+					.toString());
 			}
 		}
 
@@ -204,7 +206,9 @@ public class TestWhileToForEachRule {
 
 		l.forEach(outerKey -> {
 			while (innerIt.hasNext()) {
-				sb.append(innerIt.next() + outerKey);
+				sb.append(new StringBuilder().append(innerIt.next())
+					.append(outerKey)
+					.toString());
 			}
 		});
 
@@ -341,7 +345,10 @@ public class TestWhileToForEachRule {
 		while (iterator.hasNext() && !StringUtils.isEmpty(foo)) {
 			if (l.size() > 0) {
 				s = iterator.next();
-				sb.append(s + "|" + foo);
+				sb.append(new StringBuilder().append(s)
+					.append("|")
+					.append(foo)
+					.toString());
 			}
 		}
 
@@ -390,10 +397,14 @@ public class TestWhileToForEachRule {
 			} catch (Exception e) {
 				s = e.getLocalizedMessage();
 			} finally {
-				suffix = "|" + foo;
+				suffix = new StringBuilder().append("|")
+					.append(foo)
+					.toString();
 			}
 
-			sb.append(prefix + suffix);
+			sb.append(new StringBuilder().append(prefix)
+				.append(suffix)
+				.toString());
 		}
 
 		return sb.toString();
@@ -410,7 +421,11 @@ public class TestWhileToForEachRule {
 		String prefix = "";
 		for (String s : l) {
 			result = k.stream()
-				.map(key -> s + "|" + key + ";")
+				.map(key -> new StringBuilder().append(s)
+					.append("|")
+					.append(key)
+					.append(";")
+					.toString())
 				.collect(Collectors.toList());
 
 			result.forEach(sb::append);

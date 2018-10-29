@@ -43,7 +43,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		String key = values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
-			.map(value -> value + " sth to force a tailing map")
+			.map(value -> new StringBuilder().append(value)
+				.append(" sth to force a tailing map")
+				.toString())
 			.orElse("");
 		sb.append(key);
 
@@ -81,7 +83,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 			.filter(value -> value.length() > 4)
 			.findFirst()
 			.orElse("");
-		sb.append(key + anotherKey);
+		sb.append(new StringBuilder().append(key)
+			.append(anotherKey)
+			.toString());
 
 		return sb.toString();
 	}
@@ -345,7 +349,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		return values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
-			.map(value -> value + "sth to force a tailing map")
+			.map(value -> new StringBuilder().append(value)
+				.append("sth to force a tailing map")
+				.toString())
 			.orElse("nothing long was found");
 	}
 

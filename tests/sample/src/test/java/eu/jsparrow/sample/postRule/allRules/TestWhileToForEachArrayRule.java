@@ -92,7 +92,9 @@ public class TestWhileToForEachArrayRule {
 		while (i < array.length) {
 			String t = array[i];
 			logger.info(t);
-			sb.append(t + i);
+			sb.append(new StringBuilder().append(t)
+				.append(i)
+				.toString());
 			i++;
 		}
 		return sb.toString();

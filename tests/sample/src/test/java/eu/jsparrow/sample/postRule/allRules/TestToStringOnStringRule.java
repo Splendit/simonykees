@@ -18,7 +18,9 @@ public class TestToStringOnStringRule {
 	}
 
 	private String sampleMethod(String param) {
-		return param + "sample-method";
+		return new StringBuilder().append(param)
+			.append("sample-method")
+			.toString();
 	}
 
 	public String testToStringOnStringLiteral() {
@@ -50,13 +52,15 @@ public class TestToStringOnStringRule {
 			.toString();
 
 		String input = "noInput";
-		s = StringUtils.substring(s, 0) // save me
-			.toString() + input
-				+ ("some-other-nasty-string" // skip me
-					.toString())
-				+ "abc" // you dont want to break the code
-					.toString()
-				+ 'c';
+		s = new StringBuilder().append(StringUtils.substring(s, 0) // save me
+			.toString())
+			.append(input)
+			.append("some-other-nasty-string" // skip me
+				.toString())
+			.append("abc" // you dont want to break the code
+				.toString())
+			.append('c')
+			.toString();
 
 		/* leading comment */
 		/* invocation comment */
@@ -81,7 +85,9 @@ public class TestToStringOnStringRule {
 
 	public String testToStringOnParenthesizePlusString(String s) {
 
-		return s + "abc";
+		return new StringBuilder().append(s)
+			.append("abc")
+			.toString();
 
 	}
 
@@ -99,7 +105,9 @@ public class TestToStringOnStringRule {
 
 	public String testToStringOnOtherTypes(String input) {
 		String sampleString = numberSampleMethod().toString();
-		return sampleString + numberSampleMethod().toString();
+		return new StringBuilder().append(sampleString)
+			.append(numberSampleMethod().toString())
+			.toString();
 	}
 
 	public String testDiscardToStringOnString(String input) {
@@ -108,14 +116,20 @@ public class TestToStringOnStringRule {
 	}
 
 	public String testToStringInNestedConcatOperations(String input) {
-		String val = input + ("some-other-nasty-string") + "abc" + 'c';
+		String val = new StringBuilder().append(input)
+			.append("some-other-nasty-string")
+			.append("abc")
+			.append('c')
+			.toString();
 		return val;
 	}
 
 	public String testToStringInLambdaExpressionBody(String input) {
 		List<String> stringList = Arrays.asList(input, "foo");
 		String result = stringList.stream()
-			.map(s -> s + ";")
+			.map(s -> new StringBuilder().append(s)
+				.append(";")
+				.toString())
 			.collect(Collectors.joining(","));
 		return result;
 	}
@@ -129,9 +143,13 @@ public class TestToStringOnStringRule {
 		String result = "";
 		if (!StringUtils.isEmpty(input)) {
 			try {
-				result = input + "-";
+				result = new StringBuilder().append(input)
+					.append("-")
+					.toString();
 			} finally {
-				result = result + ";";
+				result = new StringBuilder().append(result)
+					.append(";")
+					.toString();
 			}
 		}
 		return result;
@@ -140,7 +158,9 @@ public class TestToStringOnStringRule {
 	public String testRemoveToStringOnIfCondition(String input) {
 		String result = "";
 		if (!StringUtils.isEmpty(input)) {
-			result = "nonEmpty:" + input;
+			result = new StringBuilder().append("nonEmpty:")
+				.append(input)
+				.toString();
 		}
 		return result;
 	}
@@ -148,9 +168,13 @@ public class TestToStringOnStringRule {
 	public String testRemoveToStringOnForCondition(String input) {
 		String result = "";
 		if (!StringUtils.isEmpty(input)) {
-			result = "nonEmpty:" + input;
+			result = new StringBuilder().append("nonEmpty:")
+				.append(input)
+				.toString();
 			for (int i = 0; sampleMethod(input).isEmpty() || i < sampleMethod(input).length(); i++) {
-				result = "empty:" + input;
+				result = new StringBuilder().append("empty:")
+					.append(input)
+					.toString();
 			}
 		}
 		return result;
@@ -159,9 +183,13 @@ public class TestToStringOnStringRule {
 	public String testRemoveToStringOnWhileCondition(String input) {
 		String result = "";
 		if (!StringUtils.isEmpty(input)) {
-			result = "nonEmpty:" + input;
+			result = new StringBuilder().append("nonEmpty:")
+				.append(input)
+				.toString();
 			while (input.isEmpty()) {
-				result = "empty:" + input;
+				result = new StringBuilder().append("empty:")
+					.append(input)
+					.toString();
 			}
 		}
 		return result;
@@ -170,6 +198,8 @@ public class TestToStringOnStringRule {
 	public String testChainMethodInvocatioonToString(String input) {
 		String className = this.getClass()
 			.getName();
-		return input + className;
+		return new StringBuilder().append(input)
+			.append(className)
+			.toString();
 	}
 }

@@ -102,7 +102,10 @@ public class TestForToForEachRule {
 		int i = 0;
 		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext(); i++) {
 			String s = iterator.next();
-			sb.append(s + "," + i);
+			sb.append(new StringBuilder().append(s)
+				.append(",")
+				.append(i)
+				.toString());
 		}
 		sb.append(i);
 
@@ -119,7 +122,9 @@ public class TestForToForEachRule {
 				String t = iterator.next();
 				sb.append(t);
 			}
-			sb.append(s + ",");
+			sb.append(new StringBuilder().append(s)
+				.append(",")
+				.toString());
 		}
 
 		return sb.toString();
@@ -130,8 +135,12 @@ public class TestForToForEachRule {
 		StringBuilder sb = new StringBuilder();
 
 		foo.forEach(s -> {
-			foo.forEach(t -> sb.append(t + ","));
-			sb.append(s + ";");
+			foo.forEach(t -> sb.append(new StringBuilder().append(t)
+				.append(",")
+				.toString()));
+			sb.append(new StringBuilder().append(s)
+				.append(";")
+				.toString());
 		});
 
 		return sb.toString();
@@ -145,7 +154,9 @@ public class TestForToForEachRule {
 			String anotherString = "foo";
 			String s = iterator.next();
 			String t = it2.next();
-			sb.append(s + t);
+			sb.append(new StringBuilder().append(s)
+				.append(t)
+				.toString());
 		}
 		return sb.toString();
 	}

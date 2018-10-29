@@ -129,7 +129,7 @@ public class RulesContainer {
 				new PrimitiveBoxedForStringRule(), new StringFormatLineSeparatorRule(), new IndexOfToContainsRule(),
 				new RemoveToStringOnStringRule(), new StringUtilsRule(), new StringLiteralEqualityCheckRule(),
 				new StringConcatToPlusRule(), new UseIsEmptyOnCollectionsRule(), new ArithmethicAssignmentRule(),
-				new StringBufferToBuilderRule(), new PrimitiveObjectUseEqualsRule(), new UseStringBuilderAppendRule(),
+				new StringBufferToBuilderRule(), new PrimitiveObjectUseEqualsRule(),
 				/*
 				 * Loops and streams
 				 */
@@ -138,6 +138,8 @@ public class RulesContainer {
 				new LambdaForEachCollectRule(), new LambdaForEachMapRule(), new FlatMapInsteadOfNestedLoopsRule(),
 				new EnhancedForLoopToStreamAnyMatchRule(), new EnhancedForLoopToStreamFindFirstRule(),
 				new EnhancedForLoopToStreamSumRule(), new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
+				
+				 new UseStringBuilderAppendRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen
