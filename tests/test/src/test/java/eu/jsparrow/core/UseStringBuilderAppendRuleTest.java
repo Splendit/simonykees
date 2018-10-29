@@ -1,6 +1,7 @@
 package eu.jsparrow.core;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
@@ -14,19 +15,19 @@ import org.junit.Test;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
+@SuppressWarnings("nls")
 public class UseStringBuilderAppendRuleTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "UseStringBuilderAppendRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "useStringBuilderAppend";
-	
+
 	private UseStringBuilderAppendRule rule;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		rule = new UseStringBuilderAppendRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
-	
 
 	@Test
 	public void testTransformationWithDefaultFile() throws Exception {
@@ -46,6 +47,15 @@ public class UseStringBuilderAppendRuleTest extends SingleRuleTest {
 		rule.calculateEnabledForProject(testProject);
 
 		assertTrue(rule.isEnabled());
+	}
+
+	@Test
+	public void calculateEnabledForProjectShouldBeDisabled() {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertFalse(rule.isEnabled());
 	}
 
 }

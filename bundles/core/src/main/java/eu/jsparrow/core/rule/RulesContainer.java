@@ -138,8 +138,12 @@ public class RulesContainer {
 				new LambdaForEachCollectRule(), new LambdaForEachMapRule(), new FlatMapInsteadOfNestedLoopsRule(),
 				new EnhancedForLoopToStreamAnyMatchRule(), new EnhancedForLoopToStreamFindFirstRule(),
 				new EnhancedForLoopToStreamSumRule(), new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
-				
-				 new UseStringBuilderAppendRule(),
+
+				/*
+				 * String manipulations. This rule must be applied after
+				 * StringBuildingLoopRule.
+				 */
+				new UseStringBuilderAppendRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen
