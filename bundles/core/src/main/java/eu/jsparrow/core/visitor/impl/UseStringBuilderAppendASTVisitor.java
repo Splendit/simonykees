@@ -25,7 +25,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * Replaces the {@link String} concatenation using the {@link InfixExpression.Operator#PLUS} 
- * by {@link StringBuilder#append}. 
+ * by {@link StringBuilder#append}. When possible, unwraps the parenthesized expressions.
  * 
  * @since 2.7.0
  *
