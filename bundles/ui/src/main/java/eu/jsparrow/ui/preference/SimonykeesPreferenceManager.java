@@ -113,6 +113,23 @@ public class SimonykeesPreferenceManager {
 		store.setValue(SimonykeesPreferenceConstants.ENABLE_INTRO, enabled);
 	}
 
+
+	/**
+	 * Returns the current selection for enabling dashboard on startup.
+	 * 
+	 * @return the boolean value if dashboard should be enabled
+	 */
+	public static boolean getEnableDashboard() {
+		return store.getBoolean(SimonykeesPreferenceConstants.ENABLE_DASHBOARD);
+	}
+
+	/**
+	 * Sets the current selection for enabling dashboard on startup.
+	 */
+	public static void setEnableDashboard(boolean enabled) {
+		store.setValue(SimonykeesPreferenceConstants.ENABLE_DASHBOARD, enabled);
+	}
+
 	/**
 	 * Returns the current selection for enabling recursive package resolving
 	 * 
