@@ -12,6 +12,12 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.ui.startup.WelcomeEditor;
 import eu.jsparrow.ui.startup.WelcomeEditorInput;
 
+/**
+ * Handler for toolbar button to open jSparrow introduction page in Editor.
+ * 
+ * @since 2.7.0
+ *
+ */
 public class WelcomeHandler extends AbstractHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(WelcomeHandler.class);

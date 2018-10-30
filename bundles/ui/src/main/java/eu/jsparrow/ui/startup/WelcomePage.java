@@ -22,6 +22,12 @@ import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
+/**
+ * Content displayed in Eclipse editor when the jSparrow plugin is installed.
+ * 
+ * @since 2.7.0
+ *
+ */
 public class WelcomePage extends FormPage {
 
 	public static final String PAGE_ID = "eu.jsparrow.ui.startup.page.overview";
@@ -87,7 +93,7 @@ public class WelcomePage extends FormPage {
 		browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		browser.setUrl("https://jsparrow.github.io/dashboard/");
 	}
-	
+
 	private void createButtonsSide(Composite rightComposite) {
 		Group gettingStartedGroup = new Group(rightComposite, SWT.NONE);
 		gettingStartedGroup.setText("Getting started");
