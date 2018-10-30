@@ -5,9 +5,15 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
 
+/**
+ * 
+ * 
+ * @since 2.7.0
+ *
+ */
 public class WelcomeEditorInput implements IEditorInput, IPersistableElement {
 
-	public final static WelcomeEditorInput INSTANCE = new WelcomeEditorInput();
+	public static final WelcomeEditorInput INSTANCE = new WelcomeEditorInput();
 
 	private WelcomeEditorInput() {
 	}
@@ -17,9 +23,8 @@ public class WelcomeEditorInput implements IEditorInput, IPersistableElement {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		return null;
 	}
 
@@ -35,7 +40,7 @@ public class WelcomeEditorInput implements IEditorInput, IPersistableElement {
 
 	@Override
 	public String getName() {
-		return "Welcome";
+		return "Welcome"; //$NON-NLS-1$
 	}
 
 	@Override
@@ -45,7 +50,7 @@ public class WelcomeEditorInput implements IEditorInput, IPersistableElement {
 
 	@Override
 	public String getToolTipText() {
-		return "Welcome";
+		return "Welcome"; //$NON-NLS-1$
 	}
 
 	@Override

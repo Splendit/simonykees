@@ -22,6 +22,8 @@ import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
+import eu.jsparrow.i18n.Messages;
+
 /**
  * Content displayed in Eclipse editor when the jSparrow plugin is installed.
  * 
@@ -30,7 +32,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
  */
 public class WelcomePage extends FormPage {
 
-	public static final String PAGE_ID = "eu.jsparrow.ui.startup.page.overview";
+	public static final String PAGE_ID = "eu.jsparrow.ui.startup.page.overview"; //$NON-NLS-1$
 
 	public WelcomePage(FormEditor editor, String id, String title) {
 		super(editor, id, title);
@@ -85,18 +87,18 @@ public class WelcomePage extends FormPage {
 		Font titleFont = titleFontDescription.createFont(title.getDisplay());
 
 		titleLabel.setFont(titleFont);
-		titleLabel.setText("jSparrow - Automatic Code Improvement Tool");
+		titleLabel.setText(Messages.WelcomePage_title);
 	}
 
 	protected void createScrolledFormContent(Composite parent) {
 		Browser browser = new Browser(parent, SWT.SIMPLE);
 		browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		browser.setUrl("https://jsparrow.github.io/dashboard/");
+		browser.setUrl("https://jsparrow.github.io/dashboard/"); //$NON-NLS-1$
 	}
 
 	private void createButtonsSide(Composite rightComposite) {
 		Group gettingStartedGroup = new Group(rightComposite, SWT.NONE);
-		gettingStartedGroup.setText("Getting started");
+		gettingStartedGroup.setText(Messages.WelcomePage_getting_started_group);
 		GridData groupGridData = new GridData(GridData.FILL_HORIZONTAL);
 		groupGridData.heightHint = 132;
 		groupGridData.horizontalIndent = 5;
@@ -110,23 +112,23 @@ public class WelcomePage extends FormPage {
 
 		Button guidelinesButton = new Button(gettingStartedGroup, SWT.PUSH);
 		guidelinesButton.setLayoutData(buttonGridData);
-		guidelinesButton.setText("Guidelines");
-		createButtonListenerToOpenWebpage(guidelinesButton, "https://jsparrow.github.io/eclipse/getting-started.html");
+		guidelinesButton.setText(Messages.WelcomePage_guidelines_button);
+		createButtonListenerToOpenWebpage(guidelinesButton, "https://jsparrow.github.io/eclipse/getting-started.html"); //$NON-NLS-1$
 
 		Button licenseButton = new Button(gettingStartedGroup, SWT.PUSH);
 		licenseButton.setLayoutData(buttonGridData);
-		licenseButton.setText("Buy a license");
+		licenseButton.setText(Messages.WelcomePage_buy_license_button);
 		createButtonListenerToOpenWebpage(licenseButton,
-				"https://order.shareit.com/cart/new?vendorid=200267175&PRODUCT%5B300770603%5D=1");
+				"https://order.shareit.com/cart/new?vendorid=200267175&PRODUCT%5B300770603%5D=1"); //$NON-NLS-1$
 
 		Button marketplaceButton = new Button(gettingStartedGroup, SWT.PUSH);
 		marketplaceButton.setLayoutData(buttonGridData);
-		marketplaceButton.setText("Eclipse Marketplace");
+		marketplaceButton.setText(Messages.WelcomePage_market_place_button);
 		createButtonListenerToOpenWebpage(marketplaceButton,
-				"https://marketplace.eclipse.org/content/jsparrow-automatical-java-code-improvement");
+				"https://marketplace.eclipse.org/content/jsparrow-automatical-java-code-improvement"); //$NON-NLS-1$
 
 		Group customizationGroup = new Group(rightComposite, SWT.NONE);
-		customizationGroup.setText("Customization");
+		customizationGroup.setText(Messages.WelcomePage_customization_group);
 		groupGridData = new GridData(GridData.FILL_HORIZONTAL);
 		groupGridData.heightHint = 92;
 		groupGridData.horizontalIndent = 5;
@@ -136,15 +138,15 @@ public class WelcomePage extends FormPage {
 
 		Button generalPreferencesButton = new Button(customizationGroup, SWT.PUSH);
 		generalPreferencesButton.setLayoutData(buttonGridData);
-		generalPreferencesButton.setText("Open preferences");
+		generalPreferencesButton.setText(Messages.WelcomePage_preferences_button);
 		createButtonListenerToOpenPreferences(generalPreferencesButton,
-				"eu.jsparrow.ui.preference.ProfilePreferencePage");
+				"eu.jsparrow.ui.preference.ProfilePreferencePage"); //$NON-NLS-1$
 
 		Button licensePreferencesButton = new Button(customizationGroup, SWT.PUSH);
 		licensePreferencesButton.setLayoutData(buttonGridData);
-		licensePreferencesButton.setText("Open license preferences");
+		licensePreferencesButton.setText(Messages.WelcomePage_license_preferences_button);
 		createButtonListenerToOpenPreferences(licensePreferencesButton,
-				"eu.jsparrow.ui.preference.ProfilePreferencePageLicense");
+				"eu.jsparrow.ui.preference.ProfilePreferencePageLicense"); //$NON-NLS-1$
 	}
 
 	private void createButtonListenerToOpenPreferences(Button openPreferencesButton, String activePreferencePageId) {

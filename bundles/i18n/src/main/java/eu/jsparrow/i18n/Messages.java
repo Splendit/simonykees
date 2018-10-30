@@ -424,6 +424,24 @@ public class Messages extends NLS {
 	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
 	public static String ValidateExecutor_validation_scheduler_started;
+	public static String WelcomeEditor_title;
+
+	public static String WelcomePage_buy_license_button;
+
+	public static String WelcomePage_customization_group;
+
+	public static String WelcomePage_getting_started_group;
+
+	public static String WelcomePage_guidelines_button;
+
+	public static String WelcomePage_license_preferences_button;
+
+	public static String WelcomePage_market_place_button;
+
+	public static String WelcomePage_preferences_button;
+
+	public static String WelcomePage_title;
+
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
 	public static String PutIfAbsentRule_description;
