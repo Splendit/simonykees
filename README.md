@@ -12,7 +12,7 @@ Execute
 	
 ## missing dependencies in eclipse ##
 
-Read instructions at: [Eclipse](https://confluence.splendit.loc/display/Tutorials/Eclipse)
+Read instructions at: [Eclipse](https://confluence.splendit.loc/display/Tutorials/Setup+Eclipse+for+jSparrow)
 
 ## build ##
 
