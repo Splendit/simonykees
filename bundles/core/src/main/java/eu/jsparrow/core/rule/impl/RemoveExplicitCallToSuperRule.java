@@ -15,9 +15,9 @@ import eu.jsparrow.rules.common.Tag;
  * @since 2.7.0
  *
  */
-public class RemoveExplicitCallToSuper extends RefactoringRuleImpl<RemoveExplicitCallToSuperASTVisitor> {
+public class RemoveExplicitCallToSuperRule extends RefactoringRuleImpl<RemoveExplicitCallToSuperASTVisitor> {
 
-	public RemoveExplicitCallToSuper() {
+	public RemoveExplicitCallToSuperRule() {
 		super();
 		this.visitorClass = RemoveExplicitCallToSuperASTVisitor.class;
 		this.id = "RemoveExplicitCallToSuper";

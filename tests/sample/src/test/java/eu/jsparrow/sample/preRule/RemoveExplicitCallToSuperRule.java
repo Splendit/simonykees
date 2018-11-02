@@ -25,6 +25,13 @@ public class RemoveExplicitCallToSuperRule extends RemoveExplicitCallToSuperRule
 		int i = 0;
 		i++;
 	}
+	
+	@Override
+	public void regularMethod () {
+		super.regularMethod();
+		
+	}
+	
 }
 
 class RemoveExplicitCallToSuperRuleParent {
@@ -34,5 +41,8 @@ class RemoveExplicitCallToSuperRuleParent {
 	
 	RemoveExplicitCallToSuperRuleParent(String stringArgument) {
 		// nothing to do
+	}
+	
+	public void regularMethod () {
 	}
 }

@@ -1,9 +1,9 @@
 package eu.jsparrow.core.visitor.impl;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -18,16 +18,11 @@ public class RemoveExplicitCallToSuperASTVisitor extends AbstractASTRewriteASTVi
 
 	@Override
 	public boolean visit(SuperConstructorInvocation node) {
-		// if parent is not method declaration, return
-		if (!(ASTNode.METHOD_DECLARATION == node.getParent()
-			.getParent()
-			.getNodeType())) {
-			return false;
-		}
-		MethodDeclaration parent = (MethodDeclaration) node.getParent()
-			.getParent();
-		// if parent node is not a constructor, return
-		if (!parent.isConstructor()) {
+
+		MethodDeclaration parent = ASTNodeUtil.getSpecificAncestor(node, MethodDeclaration.class);
+		// if parent is not method declaration or the parent node is not a
+		// constructor, return
+		if (null == parent || !parent.isConstructor()) {
 			return false;
 		}
 
