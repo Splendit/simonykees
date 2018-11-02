@@ -20,7 +20,6 @@ import eu.jsparrow.rules.common.Tag;
 public class RemoveExplicitCallToSuperRule extends RefactoringRuleImpl<RemoveExplicitCallToSuperASTVisitor> {
 
 	public RemoveExplicitCallToSuperRule() {
-		super();
 		this.visitorClass = RemoveExplicitCallToSuperASTVisitor.class;
 		this.id = "RemoveExplicitCallToSuper"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.RemoveExplicitCallToSuperRule_name,

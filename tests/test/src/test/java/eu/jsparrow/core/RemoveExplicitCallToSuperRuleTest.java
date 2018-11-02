@@ -14,7 +14,7 @@ import org.junit.Test;
 import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-public class RemoveExplicitCallToSuperTest extends SingleRuleTest {
+public class RemoveExplicitCallToSuperRuleTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE = "RemoveExplicitCallToSuperRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "removeExplicitCallToSuper";
