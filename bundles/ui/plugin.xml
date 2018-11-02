@@ -25,8 +25,6 @@
 		</definition>
 	</extension>
 
-
-
 	<extension point="org.eclipse.ui.menus">
 		<menuContribution
 			locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=org.eclipse.jdt.ui.refactoring.menu">
@@ -79,6 +77,8 @@
 			id="eu.jsparrow.ui.LoggerRuleWizardHandler" name="%command.name.logger_rule_wizard_handler" />
 		<command defaultHandler="eu.jsparrow.ui.handler.RenameFieldsRuleWizardHandler"
 			id="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" name="%command.name.rename_fields_wizard_handler" />
+		<command defaultHandler="eu.jsparrow.ui.handler.WelcomeHandler"
+           id="eu.jsparrow.ui.handler.WelcomeHandler" name="Introduction jSparrow" />
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page class="eu.jsparrow.ui.preference.SimonykeesPreferencePage"
@@ -105,4 +105,39 @@
 	<extension point="org.eclipse.ui.startup">
 		<startup class="eu.jsparrow.ui.startup.Startup" />
 	</extension>
+	
+	<extension point="org.eclipse.ui.editors">
+		<editor
+			class="eu.jsparrow.ui.startup.WelcomeEditor"
+			icon="$nl$/icons/jSparrow_active_icon_16.png"
+			id="ui.editors.jsparrow.WelcomeEditor"
+			name="Introduction jSparrow">
+		</editor>
+	</extension>
+	 
+ 	<extension point="org.eclipse.ui.elementFactories">
+    	<factory
+          class="eu.jsparrow.ui.startup.WelcomeEditorInputFactory"
+          id="eu.jsparrow.ui.startup.elementFactory">
+    	</factory>
+ 	</extension>
+ 	
+ 	  <extension
+        point="org.eclipse.ui.menus">
+     <menuContribution
+           allPopups="false"
+           locationURI="toolbar:org.eclipse.ui.main.toolbar">
+        <toolbar
+              id="eu.jsparrow.ui.startup.toolbar"
+              label="Introduction jSparrow">
+           <command
+                 commandId="eu.jsparrow.ui.handler.WelcomeHandler"
+                 icon="$nl$/icons/jSparrow_active_icon_16.png"
+                 label="Introduction jSparrow"
+                 style="push">
+           </command>
+        </toolbar>
+     </menuContribution>
+  </extension>
+  
 </plugin>
