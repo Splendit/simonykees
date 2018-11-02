@@ -15,9 +15,7 @@ public class TestRemoveNewStringConstructorRule {
 	}
 
 	private String sampleMethod(String input) {
-		return new StringBuilder().append("sample-method-")
-			.append(input)
-			.toString();
+		return "sample-method-" + input;
 	}
 
 	public String testNewEmptyStrig() {
@@ -121,9 +119,7 @@ public class TestRemoveNewStringConstructorRule {
 	public String testConvertInputParameter(String input) {
 		BigDecimal number = new BigDecimal("10.05");
 		Integer.valueOf("123");
-		return new StringBuilder().append(input)
-			.append(number)
-			.toString();
+		return input + number;
 	}
 
 	public String testConvertInLambdaExpressionBody(String input) {

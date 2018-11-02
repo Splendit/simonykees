@@ -115,9 +115,7 @@ public class IndexOfToContainsRule {
 		}
 
 		int index = l.indexOf(s);
-		logger.info(new StringBuilder().append("object found at index: ")
-			.append(index)
-			.toString());
+		logger.info("object found at index: " + index);
 
 		/*
 		 * Some cases with comments
@@ -251,8 +249,6 @@ public class IndexOfToContainsRule {
 		}
 
 		int index = StringUtils.indexOf(s, "ello");
-		logger.info(new StringBuilder().append("substring found at index: ")
-			.append(index)
-			.toString());
+		logger.info("substring found at index: " + index);
 	}
 }

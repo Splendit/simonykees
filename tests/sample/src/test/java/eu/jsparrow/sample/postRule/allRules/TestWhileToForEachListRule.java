@@ -97,9 +97,7 @@ public class TestWhileToForEachListRule {
 		while (i < list.size()) {
 			String t = list.get(i);
 			logger.info(t);
-			sb.append(new StringBuilder().append(t)
-				.append(i)
-				.toString());
+			sb.append(t + i);
 			i++;
 		}
 		return sb.toString();

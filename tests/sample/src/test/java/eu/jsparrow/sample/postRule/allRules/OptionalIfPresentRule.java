@@ -219,9 +219,7 @@ public class OptionalIfPresentRule {
 			logger.info(value);
 			logger.info(value2);
 			if (!StringUtils.isEmpty(value) && !StringUtils.isEmpty(value2)) {
-				logger.info(new StringBuilder().append(value)
-					.append(value2)
-					.toString());
+				logger.info(value + value2);
 			}
 		});
 	}
@@ -233,9 +231,7 @@ public class OptionalIfPresentRule {
 				logger.info(value);
 			} else {
 				String value = value1;
-				logger.info(new StringBuilder().append(value)
-					.append(i)
-					.toString());
+				logger.info(value + i);
 			}
 		});
 	}
@@ -313,9 +309,7 @@ public class OptionalIfPresentRule {
 			return;
 		}
 		String value = input.get();
-		logger.info(new StringBuilder().append(value)
-			.append(i)
-			.toString());
+		logger.info(value + i);
 	}
 
 	public void elseStatement_shouldNotTransform(Optional<String> input) {

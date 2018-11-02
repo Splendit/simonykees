@@ -153,9 +153,7 @@ public class StringLiteralEqualityCheckRule {
 
 		@Override
 		public int compareTo(String o) {
-			String result = new StringBuilder().append("malicous-prefix")
-				.append(foo)
-				.toString();
+			String result = "malicous-prefix" + foo;
 			return result.compareTo(o);
 		}
 

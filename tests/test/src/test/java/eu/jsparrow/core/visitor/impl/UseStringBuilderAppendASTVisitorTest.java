@@ -24,14 +24,26 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 
 	@Test
 	public void visit_simpleConcatenation_shouldReplace() throws Exception {
-		String block = "String value = \"first\" + \"second\";";
-		String expected = "String value = new StringBuilder().append(\"first\").append(\"second\").toString();";
+		String block = "String value = \"first\" + \"second\" + \"third\";";
+		String expected = "String value = new StringBuilder().append(\"first\").append(\"second\").append(\"third\").toString();";
 
 		fixture.addMethodBlock(block);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
 		Block expectedBlock = createBlock(expected);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
+
+	@Test
+	public void visit_veryFewOperands_shouldNotReplace() throws Exception {
+		String block = "String value = \"first\" + \"second\";";
+
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+
+		Block expectedBlock = createBlock(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -66,10 +78,10 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_mixedExpression_shouldTransform() throws Exception {
-		String block = "String value = \"left\" +  2 * 3;";
-		String expected = "String value = new StringBuilder()" + ".append(\"left\")" + ".append( 2 * 3 )"
-				+ ".toString();";
+	public void visit_mixedExpressionTypes_shouldTransform() throws Exception {
+		String block = "String value = \"left\" +  2 * 3 + \"right\";";
+		String expected = "String value = new StringBuilder()" + ".append(\"left\")"
+				+ ".append( 2 * 3 ).append(\"right\").toString();";
 
 		fixture.addMethodBlock(block);
 		visitor.setASTRewrite(fixture.getAstRewrite());

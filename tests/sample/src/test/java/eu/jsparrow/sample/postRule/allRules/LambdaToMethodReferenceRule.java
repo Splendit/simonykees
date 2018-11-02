@@ -383,9 +383,7 @@ public class LambdaToMethodReferenceRule {
 
 		@Override
 		public String getName() {
-			return new StringBuilder().append("e:")
-				.append(super.getName())
-				.toString();
+			return "e:" + super.getName();
 		}
 
 	}

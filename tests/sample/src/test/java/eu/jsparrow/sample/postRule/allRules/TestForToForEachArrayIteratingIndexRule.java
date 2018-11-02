@@ -176,9 +176,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 		StringBuilder sb = new StringBuilder();
 		for (String m : ms) {
 			for (String m1 : ms) {
-				sb.append(new StringBuilder().append(m1)
-					.append(m)
-					.toString());
+				sb.append(m1 + m);
 			}
 		}
 
@@ -193,9 +191,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 		for (String iterator : ms) {
 			for (String m : ms) {
-				sb.append(new StringBuilder().append(m)
-					.append(iterator)
-					.toString());
+				sb.append(m + iterator);
 			}
 		}
 

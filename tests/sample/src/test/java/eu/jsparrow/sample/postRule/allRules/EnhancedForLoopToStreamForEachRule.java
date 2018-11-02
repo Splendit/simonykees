@@ -30,9 +30,7 @@ public class EnhancedForLoopToStreamForEachRule {
 	public static List<String> stringList3;
 	static {
 		stringList3 = new LinkedList<>();
-		stringList1.forEach(s -> stringList2.forEach(t -> stringList3.add(new StringBuilder().append(s)
-			.append(t)
-			.toString())));
+		stringList1.forEach(s -> stringList2.forEach(t -> stringList3.add(s + t)));
 	}
 
 	public List<List<String>> stringListList = Arrays.asList(stringList1, stringList2);
@@ -81,9 +79,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			logger.info(s);
 		}
 
-		stringList1.forEach(s -> stringList2.forEach(t -> logger.info(new StringBuilder().append(s)
-			.append(t)
-			.toString())));
+		stringList1.forEach(s -> stringList2.forEach(t -> logger.info(s + t)));
 
 		for (List<String> list : stringListList) {
 			for (String s : list) {
@@ -105,9 +101,7 @@ public class EnhancedForLoopToStreamForEachRule {
 					logger.info(t);
 				}
 				if (t.length() > s.length()) {
-					logger.info(new StringBuilder().append(s)
-						.append(t)
-						.toString());
+					logger.info(s + t);
 				}
 			}));
 		});
@@ -212,14 +206,10 @@ public class EnhancedForLoopToStreamForEachRule {
 		stringList1.forEach(s -> {
 			sb.append(s);
 			stringList2.forEach(n -> {
-				sb.append(new StringBuilder().append(n)
-					.append(",")
-					.toString());
+				sb.append(n + ",");
 				stringList3.forEach(r -> {
 					String t = s;
-					sb.append(new StringBuilder().append(r)
-						.append(t)
-						.toString());
+					sb.append(r + t);
 				});
 			});
 		});
@@ -228,14 +218,10 @@ public class EnhancedForLoopToStreamForEachRule {
 			s += ";";
 			sb.append(s);
 			for (String n : stringList2) {
-				sb.append(new StringBuilder().append(n)
-					.append(",")
-					.toString());
+				sb.append(n + ",");
 				for (String r : stringList3) {
 					String t = s;
-					sb.append(new StringBuilder().append(r)
-						.append(t)
-						.toString());
+					sb.append(r + t);
 				}
 			}
 		}

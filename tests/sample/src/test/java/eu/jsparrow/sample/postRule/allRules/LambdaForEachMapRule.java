@@ -17,9 +17,7 @@ public class LambdaForEachMapRule {
 	}
 
 	public String unwrapFromCollection(String input) {
-		List<String> list = Arrays.asList(new StringBuilder().append(input)
-			.append("non")
-			.toString(), "non-empty");
+		List<String> list = Arrays.asList(input + "non", "non-empty");
 		StringBuilder sb = new StringBuilder();
 
 		// save me 1
@@ -116,9 +114,7 @@ public class LambdaForEachMapRule {
 			.map(s -> {
 				// save me 1
 				int i = 10;
-				return new StringBuilder().append(StringUtils.substring(s, 1))
-					.append(i)
-					.toString();
+				return StringUtils.substring(s, 1) + i;
 			})
 			.forEach(subString -> {
 				// save me 3
@@ -138,13 +134,9 @@ public class LambdaForEachMapRule {
 			.filter(s -> !StringUtils.isEmpty(s))
 			.forEach(s -> {
 				int i = 10;
-				String subString = new StringBuilder().append(StringUtils.substring(s, 1))
-					.append(i)
-					.toString();
+				String subString = StringUtils.substring(s, 1) + i;
 				String lower = StringUtils.lowerCase(subString);
-				sb.append(new StringBuilder().append(lower)
-					.append(i)
-					.toString());
+				sb.append(lower + i);
 			});
 		return sb.toString();
 	}
@@ -163,9 +155,7 @@ public class LambdaForEachMapRule {
 					.append(c)
 					.toString();
 				String lower = StringUtils.lowerCase(subString);
-				sb.append(new StringBuilder().append(lower)
-					.append(c)
-					.toString());
+				sb.append(lower + c);
 			});
 		return sb.toString();
 	}
@@ -253,9 +243,7 @@ public class LambdaForEachMapRule {
 			})
 			.forEach(pos -> {
 				sb.append("c");
-				sb.append(new StringBuilder().append(pos)
-					.append("d")
-					.toString());
+				sb.append(pos + "d");
 			});
 		return sb.toString();
 	}
@@ -277,9 +265,7 @@ public class LambdaForEachMapRule {
 			.forEach(pos -> {
 				// and here...
 				sb.append("c");
-				sb.append(new StringBuilder().append(pos)
-					.append("d")
-					.toString());
+				sb.append(pos + "d");
 			});
 		return sb.toString();
 	}
@@ -299,9 +285,7 @@ public class LambdaForEachMapRule {
 			})
 			.forEach(pos -> {
 				sb.append("c");
-				sb.append(new StringBuilder().append(pos)
-					.append("d")
-					.toString());
+				sb.append(pos + "d");
 			});
 		return sb.toString();
 	}
@@ -319,9 +303,7 @@ public class LambdaForEachMapRule {
 			.forEach(pos -> {
 				int c = 0;
 				sb.append("c");
-				sb.append(new StringBuilder().append(pos)
-					.append("d")
-					.toString());
+				sb.append(pos + "d");
 			});
 		return sb.toString();
 	}
@@ -494,9 +476,7 @@ public class LambdaForEachMapRule {
 			// Wrapper::getInnerClass is a generic method
 			InnerClass innerClass = wrapp.getInnerClass();
 			String toString = wrapp.toString();
-			sb.append(new StringBuilder().append(innerClass.getName())
-				.append(toString)
-				.toString());
+			sb.append(innerClass.getName() + toString);
 		});
 	}
 
@@ -511,9 +491,7 @@ public class LambdaForEachMapRule {
 				 */
 				InnerClass innerClass = wrapp.getInnerClass();
 				String strInnerClass = innerClass.toString();
-				return new StringBuilder().append(wrapp.toString())
-					.append(strInnerClass)
-					.toString();
+				return wrapp.toString() + strInnerClass;
 			})
 			.forEach(sb::append);
 	}

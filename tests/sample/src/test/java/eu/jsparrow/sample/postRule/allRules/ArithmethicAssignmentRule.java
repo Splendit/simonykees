@@ -13,9 +13,7 @@ public class ArithmethicAssignmentRule {
 	private int int_q = 3;
 
 	public String a(String i) {
-		i = new StringBuilder().append(i)
-			.append("aaa")
-			.toString();
+		i = i + "aaa";
 		return i;
 	}
 

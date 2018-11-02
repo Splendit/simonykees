@@ -116,9 +116,7 @@ public class StringBuildingLoopRule {
 
 		collectionOfStrings.add(anotherDecl);
 
-		collectionOfStrings.forEach(val -> result = new StringBuilder().append(result)
-			.append(val)
-			.toString());
+		collectionOfStrings.forEach(val -> result = result + val);
 
 		return result;
 	}
@@ -211,9 +209,7 @@ public class StringBuildingLoopRule {
 		result += listOfStrings.stream()
 			.collect(Collectors.joining());
 
-		return new StringBuilder().append(result)
-			.append(anotherResult)
-			.toString();
+		return result + anotherResult;
 	}
 
 	public String clashWithParameterName(String resultSb) {
@@ -253,9 +249,7 @@ public class StringBuildingLoopRule {
 		List<String> collectionOfStrings = generateStringList(input);
 		String result = "";
 		for (String val : collectionOfStrings) {
-			result = new StringBuilder().append(result)
-				.append(val)
-				.toString();
+			result = result + val;
 			if (StringUtils.isEmpty(val)) {
 				result += "-";
 			}
@@ -268,9 +262,7 @@ public class StringBuildingLoopRule {
 		String result = "";
 		String anotherVal = "-";
 		for (String val : collectionOfStrings) {
-			result = new StringBuilder().append(result)
-				.append(anotherVal)
-				.toString();
+			result = result + anotherVal;
 		}
 		return result;
 	}
@@ -280,9 +272,7 @@ public class StringBuildingLoopRule {
 		String result = "";
 		String anotherVal = "-";
 		for (String val : collectionOfStrings) {
-			result = new StringBuilder().append(anotherVal)
-				.append(val)
-				.toString();
+			result = anotherVal + val;
 		}
 		return result;
 	}
@@ -292,9 +282,7 @@ public class StringBuildingLoopRule {
 		String result = "";
 		String anotherVal = "-";
 		for (String val : collectionOfStrings) {
-			anotherVal = new StringBuilder().append(result)
-				.append(val)
-				.toString();
+			anotherVal = result + val;
 		}
 		return result;
 	}

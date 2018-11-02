@@ -35,9 +35,7 @@ public class TestPrimitiveBoxedForStringWithExpressionsRule {
 	}
 
 	public String testIntegerValueOfCascadeExpressions(int input) {
-		return new StringBuilder().append(Integer.toString(input + intSampleMethod()))
-			.append(Integer.toString(input + "abc".length()))
-			.toString();
+		return Integer.toString(input + intSampleMethod()) + Integer.toString(input + "abc".length());
 	}
 
 	public String testIntegerValueOfInIfCondition(int input) {
@@ -57,9 +55,8 @@ public class TestPrimitiveBoxedForStringWithExpressionsRule {
 			.toString(/* ctor arg comment */ 5 + input
 					+ intSampleMethod("2")) /* trailing comment */ ;
 
-		String result = new StringBuilder().append(Integer.toString(5 + input + intSampleMethod("2")))
-			.append(Integer.toString(input + intSampleMethod()))
-			.toString();
+		String result = Integer.toString(5 + input + intSampleMethod("2"))
+				+ Integer.toString(input + intSampleMethod());
 		return result;
 	}
 

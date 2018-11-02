@@ -15,9 +15,7 @@ public class TestStringConcatToPlusRule {
 	}
 
 	private String sampleMethod(String param) {
-		return new StringBuilder().append("method-invocation-result")
-			.append(param)
-			.toString();
+		return "method-invocation-result" + param;
 	}
 
 	public String testConcatWithLiteral(String input) {
@@ -31,22 +29,16 @@ public class TestStringConcatToPlusRule {
 
 		// 2. --------------- --------------- --------------- ---------------
 
-		string = new StringBuilder().append(input)
-			.append(string // don't break the semicolon
-			/* */)
-			.toString();
+		string = input + string // don't break the semicolon
+		/* */;
 
 		// 3. --------------- --------------- --------------- ---------------
 
 		int b = "".compareTo(input.concat("abc" // don't break the semicolon
 		));
 
-		String c = new StringBuilder().append(input.concat("abc" // don't break
-																	// the
-																	// semicolon
-		))
-			.append("")
-			.toString();
+		String c = input.concat("abc" // don't break the semicolon
+		) + "";
 
 		// 4. --------------- --------------- --------------- ---------------
 
@@ -57,15 +49,11 @@ public class TestStringConcatToPlusRule {
 	}
 
 	public String testConcatWithVariable(String input, String param) {
-		return new StringBuilder().append(input)
-			.append(param)
-			.toString();
+		return input + param;
 	}
 
 	public String testConcatOnlyLiterals() {
-		return new StringBuilder().append("abc")
-			.append("def")
-			.toString();
+		return "abc" + "def";
 	}
 
 	public String testConcatRecursionWithLiteral(String input) {
@@ -101,9 +89,7 @@ public class TestStringConcatToPlusRule {
 	}
 
 	public String testConcatWithToString(String input, String param) {
-		return new StringBuilder().append(input)
-			.append(param)
-			.toString();
+		return input + param;
 	}
 
 	public String testConcatChain(String input) {
@@ -116,9 +102,7 @@ public class TestStringConcatToPlusRule {
 	}
 
 	public String testConcatWithResultOfMethodCall(String input) {
-		return new StringBuilder().append(input)
-			.append(sampleMethod())
-			.toString();
+		return input + sampleMethod();
 	}
 
 	public String testConcatWithResultOfMethodCallWithParams(String input, String param) {
@@ -130,9 +114,7 @@ public class TestStringConcatToPlusRule {
 
 	public String testConcatWithNumber(String input) {
 		Number number = new BigDecimal("10.00");
-		return new StringBuilder().append(input)
-			.append(number.toString())
-			.toString();
+		return input + number.toString();
 	}
 
 	public String testConcatWithStreamResult(String input) {
@@ -147,9 +129,7 @@ public class TestStringConcatToPlusRule {
 	}
 
 	public String testConcatEmptyString(String input) {
-		return new StringBuilder().append(input)
-			.append("")
-			.toString();
+		return input + "";
 	}
 
 	public String testConcatEmptyCharacter(String input) {
@@ -180,25 +160,17 @@ public class TestStringConcatToPlusRule {
 		List<String> values = Arrays.asList("val1", "val2", input);
 
 		if ("".equals(result)) {
-			result = new StringBuilder().append(result)
-				.append(input)
-				.toString();
+			result = result + input;
 		}
 
 		switch (result) {
 		case "some-val":
-			result = new StringBuilder().append(result)
-				.append(parameter)
-				.toString();
+			result = result + parameter;
 			break;
 		default:
-			result = new StringBuilder().append(result)
-				.append(parameter)
-				.toString();
+			result = result + parameter;
 		}
-		result = new StringBuilder().append(result)
-			.append(";")
-			.toString();
+		result = result + ";";
 
 		for (String key : values) {
 			result = new StringBuilder().append(result)
@@ -207,33 +179,23 @@ public class TestStringConcatToPlusRule {
 				.toString();
 		}
 
-		result = new StringBuilder().append(result)
-			.append(";")
-			.toString();
+		result = result + ";";
 
 		return result;
 	}
 
 	public String testConcatWithStaticField(String input) {
-		return new StringBuilder().append(input)
-			.append(STATIC_VALUE)
-			.toString();
+		return input + STATIC_VALUE;
 	}
 
 	public String testDiscardConcatResult(String input, String parameter) {
 		input.concat(parameter);
-		return new StringBuilder().append(input)
-			.append(parameter)
-			.toString();
+		return input + parameter;
 	}
 
 	public String testConcatInMethodInvocationParam(String input, String param) {
-		boolean startsWitParam = input.startsWith((new StringBuilder().append(param)
-			.append("a")
-			.toString()), 0);
-		return new StringBuilder().append(input)
-			.append(Boolean.toString(startsWitParam))
-			.toString();
+		boolean startsWitParam = input.startsWith((param + "a"), 0);
+		return input + Boolean.toString(startsWitParam);
 	}
 
 	public String testConcatRecursionWithLiteral_saveComments(String input) {

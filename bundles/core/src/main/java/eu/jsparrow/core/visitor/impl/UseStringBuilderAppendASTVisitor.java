@@ -24,8 +24,9 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
- * Replaces the {@link String} concatenation using the {@link InfixExpression.Operator#PLUS} 
- * by {@link StringBuilder#append}. When possible, unwraps the parenthesized expressions.
+ * Replaces the {@link String} concatenation using the
+ * {@link InfixExpression.Operator#PLUS} by {@link StringBuilder#append}. When
+ * possible, unwraps the parenthesized expressions.
  * 
  * @since 2.7.0
  *
@@ -35,6 +36,8 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 	private static final InfixExpression.Operator PLUS = InfixExpression.Operator.PLUS;
 	private static final String TO_STRING = "toString"; //$NON-NLS-1$
 	private static final String APPEND = "append"; //$NON-NLS-1$
+
+	private static final int MIN_OPERANDS = 3;
 
 	@Override
 	public boolean visit(NormalAnnotation annotation) {
@@ -61,7 +64,11 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 		}
 
 		List<Expression> operands = findOperands(infixExpression);
-		if (operands.size() <= 1) {
+		if (operands.size() < MIN_OPERANDS) {
+			/*
+			 * If there are less than three operands, it does not make much
+			 * sense to introduce an instance of a StringBuilder.
+			 */
 			return false;
 		}
 
@@ -90,8 +97,9 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 		CommentRewriter commentRewriter = getCommentRewriter();
 		List<Comment> comments = commentRewriter.findRelatedComments(infixExpression);
 		List<Comment> allreadySaved = operands.stream()
-				.flatMap(expression -> commentRewriter.findRelatedComments(expression).stream())
-				.collect(Collectors.toList());
+			.flatMap(expression -> commentRewriter.findRelatedComments(expression)
+				.stream())
+			.collect(Collectors.toList());
 		comments.removeAll(allreadySaved);
 		Statement parentStatement = ASTNodeUtil.getSpecificAncestor(infixExpression, Statement.class);
 		commentRewriter.saveBeforeStatement(parentStatement, comments);

@@ -52,9 +52,7 @@ public class TestStandardLoggerRule {
 		try {
 			StringUtils.substring(input, 5);
 		} catch (Exception e) {
-			logger1.error(String.format(new StringBuilder().append("%d : ")
-				.append(e.getMessage())
-				.toString(), 1), e);
+			logger1.error(String.format("%d : " + e.getMessage(), 1), e);
 			logger1.info("%d : val %d : ", 1, 2);
 			logger1.info(String.format(Locale.FRANCE, "%d : val %d : ", 1, 2));
 		}
@@ -117,12 +115,8 @@ public class TestStandardLoggerRule {
 	}
 
 	public void replaceSystemOutPrintf(String input) {
-		logger1.info(new StringBuilder().append("%d : ")
-			.append(input)
-			.toString(), 1);
-		logger1.info(String.format(Locale.GERMANY, new StringBuilder().append("%d : ")
-			.append(input)
-			.toString(), 1));
+		logger1.info("%d : " + input, 1);
+		logger1.info(String.format(Locale.GERMANY, "%d : " + input, 1));
 	}
 
 	public void replaceSystemErrPrint(String input) {
@@ -134,12 +128,8 @@ public class TestStandardLoggerRule {
 	}
 
 	public void replaceSystemErrPrintf(String input) {
-		logger1.error(new StringBuilder().append("%d : ")
-			.append(input)
-			.toString(), 1);
-		logger1.error(String.format(Locale.GERMANY, new StringBuilder().append("%d : ")
-			.append(input)
-			.toString(), 1));
+		logger1.error("%d : " + input, 1);
+		logger1.error(String.format(Locale.GERMANY, "%d : " + input, 1));
 	}
 
 	public void replacePrintStackTrace(String input) {

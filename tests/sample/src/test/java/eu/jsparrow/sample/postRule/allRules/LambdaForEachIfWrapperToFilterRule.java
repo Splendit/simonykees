@@ -33,9 +33,7 @@ public class LambdaForEachIfWrapperToFilterRule {
 				// save me 2
 				logger.info(s);
 				// save me 3
-				logger.info(new StringBuilder().append(s)
-					.append(s)
-					.toString());
+				logger.info(s + s);
 			});
 
 		// i'm last but not least
@@ -122,9 +120,7 @@ public class LambdaForEachIfWrapperToFilterRule {
 			.filter(s -> s.length() > 3)
 			.forEach(s -> {
 				logger.info(s);
-				logger.info(new StringBuilder().append(s)
-					.append(s)
-					.toString());
+				logger.info(s + s);
 			});
 	}
 

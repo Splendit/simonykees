@@ -188,9 +188,7 @@ public class TestWhileToForEachRule {
 
 		while (iterator.hasNext()) {
 			while (innerIt.hasNext()) {
-				sb.append(new StringBuilder().append(innerIt.next())
-					.append(iterator.next())
-					.toString());
+				sb.append(innerIt.next() + iterator.next());
 			}
 		}
 
@@ -206,9 +204,7 @@ public class TestWhileToForEachRule {
 
 		l.forEach(outerKey -> {
 			while (innerIt.hasNext()) {
-				sb.append(new StringBuilder().append(innerIt.next())
-					.append(outerKey)
-					.toString());
+				sb.append(innerIt.next() + outerKey);
 			}
 		});
 
@@ -397,14 +393,10 @@ public class TestWhileToForEachRule {
 			} catch (Exception e) {
 				s = e.getLocalizedMessage();
 			} finally {
-				suffix = new StringBuilder().append("|")
-					.append(foo)
-					.toString();
+				suffix = "|" + foo;
 			}
 
-			sb.append(new StringBuilder().append(prefix)
-				.append(suffix)
-				.toString());
+			sb.append(prefix + suffix);
 		}
 
 		return sb.toString();

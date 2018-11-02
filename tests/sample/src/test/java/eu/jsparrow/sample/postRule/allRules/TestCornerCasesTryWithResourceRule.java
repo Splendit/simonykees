@@ -184,9 +184,7 @@ public class TestCornerCasesTryWithResourceRule {
 		String path = "some/Funny/Path";
 		try {
 
-			path = new StringBuilder().append(path)
-				.append("getting/sad")
-				.toString();
+			path = path + "getting/sad";
 			OutputStream uniqueName001 = new FileOutputStream(path);
 			// Flush and close the stream.
 			uniqueName001.flush();

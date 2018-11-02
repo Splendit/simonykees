@@ -68,18 +68,14 @@ public class TestFunctionalInterfaceRule {
 
 			@Override
 			public void method(int a) {
-				String sthToLog = new StringBuilder().append(a)
-					.append(FINAL_STRING_FIELD)
-					.toString();
+				String sthToLog = a + FINAL_STRING_FIELD;
 
 			}
 		};
 		FINAL_STRING_FIELD = "irritating";
 
 		AFunctionalInterface foo2 = (int a) -> {
-			String sthToLog = new StringBuilder().append(a)
-				.append(FINAL_STRING_FIELD)
-				.toString();
+			String sthToLog = a + FINAL_STRING_FIELD;
 
 		};
 
@@ -92,18 +88,14 @@ public class TestFunctionalInterfaceRule {
 			AFunctionalInterface foo4 = new AFunctionalInterface() {
 				@Override
 				public void method(int a) {
-					String sthToLog = new StringBuilder().append(a)
-						.append(NOT_INITIALIZED_FIELD)
-						.toString();
+					String sthToLog = a + NOT_INITIALIZED_FIELD;
 				}
 			};
 		} else {
 			AFunctionalInterface foo5 = new AFunctionalInterface() {
 				@Override
 				public void method(int a) {
-					String sthToLog = new StringBuilder().append(a)
-						.append(NOT_INITIALIZED_FIELD)
-						.toString();
+					String sthToLog = a + NOT_INITIALIZED_FIELD;
 				}
 			};
 		}
@@ -111,9 +103,7 @@ public class TestFunctionalInterfaceRule {
 		if (foo != null) {
 			NOT_INITIALIZED_FIELD = "";
 			AFunctionalInterface inNestedBlock = (int a) -> {
-				String sthToLog = new StringBuilder().append(a)
-					.append(NOT_INITIALIZED_FIELD)
-					.toString();
+				String sthToLog = a + NOT_INITIALIZED_FIELD;
 
 			};
 		} else {
@@ -124,9 +114,7 @@ public class TestFunctionalInterfaceRule {
 
 	public void usingUnassignedFieldInMethod() {
 		AFunctionalInterface foo2 = (int a) -> {
-			String sthToLog = new StringBuilder().append(a)
-				.append(FINAL_STRING_FIELD)
-				.toString();
+			String sthToLog = a + FINAL_STRING_FIELD;
 
 		};
 	}
