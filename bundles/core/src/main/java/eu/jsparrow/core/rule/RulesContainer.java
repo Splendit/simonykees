@@ -47,6 +47,7 @@ import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
 import eu.jsparrow.core.rule.impl.RemoveDoubleNegationRule;
+import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
@@ -121,6 +122,7 @@ public class RulesContainer {
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new DateDeprecatedRule(),
 				new RemoveDoubleNegationRule(), new OptionalIfPresentRule(), new GuardConditionRule(),
+				new RemoveExplicitCallToSuperRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

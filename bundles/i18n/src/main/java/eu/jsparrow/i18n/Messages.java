@@ -267,6 +267,10 @@ public class Messages extends NLS {
 
 	public static String RemoveDoubleNegationRule_name;
 
+	public static String RemoveExplicitCallToSuperRule_description;
+
+	public static String RemoveExplicitCallToSuperRule_name;
+
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
