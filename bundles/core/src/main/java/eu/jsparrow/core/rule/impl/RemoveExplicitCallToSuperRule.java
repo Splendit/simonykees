@@ -5,6 +5,7 @@ import java.time.Duration;
 import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.RemoveExplicitCallToSuperASTVisitor;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
@@ -20,9 +21,9 @@ public class RemoveExplicitCallToSuperRule extends RefactoringRuleImpl<RemoveExp
 	public RemoveExplicitCallToSuperRule() {
 		super();
 		this.visitorClass = RemoveExplicitCallToSuperASTVisitor.class;
-		this.id = "RemoveExplicitCallToSuper";
-		this.ruleDescription = new RuleDescription("Remove Explicit Call To super()",
-				"Removes unnecessary explicit call to the default constructor of the super class.",
+		this.id = "RemoveExplicitCallToSuper"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.RemoveExplicitCallToSuperRule_name,
+				Messages.RemoveExplicitCallToSuperRule_description,
 				Duration.ofMinutes(1), Tag.READABILITY);
 	}
 

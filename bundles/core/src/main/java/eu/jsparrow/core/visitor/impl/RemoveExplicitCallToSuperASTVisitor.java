@@ -20,8 +20,7 @@ public class RemoveExplicitCallToSuperASTVisitor extends AbstractASTRewriteASTVi
 	public boolean visit(SuperConstructorInvocation node) {
 
 		MethodDeclaration parent = ASTNodeUtil.getSpecificAncestor(node, MethodDeclaration.class);
-		// if parent is not method declaration or the parent node is not a
-		// constructor, return
+		// if the parent is not a method declaration or a constructor, return
 		if (null == parent || !parent.isConstructor()) {
 			return false;
 		}
