@@ -336,7 +336,10 @@ public class TestFunctionalInterfaceRule {
 			try {
 
 			} catch (Exception e1) {
-				String sthToLog = e1.getMessage() + toString() + param;
+				String sthToLog = new StringBuilder().append(e1.getMessage())
+					.append(toString())
+					.append(param)
+					.toString();
 			}
 
 		};

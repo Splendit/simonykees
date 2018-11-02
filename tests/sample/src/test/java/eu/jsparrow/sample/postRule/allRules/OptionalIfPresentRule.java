@@ -247,7 +247,11 @@ public class OptionalIfPresentRule {
 			logger.info(value);
 			logger.info(value2);
 			if (!StringUtils.isEmpty(value) && !StringUtils.isEmpty(value2)) {
-				logger.info(value + value2 + ":" + value3);
+				logger.info(new StringBuilder().append(value)
+					.append(value2)
+					.append(":")
+					.append(value3)
+					.toString());
 			}
 		});
 	}
@@ -262,14 +266,20 @@ public class OptionalIfPresentRule {
 		Optional<String> user = Optional.ofNullable("John Snow");
 		user.ifPresent(value1 -> {
 			String value = "I could crash with the lambda parameter";
-			logger.info(value + ":" + value1);
+			logger.info(new StringBuilder().append(value)
+				.append(":")
+				.append(value1)
+				.toString());
 		});
 	}
 
 	public void avoidShadowingFields_shouldTransform() {
 		Optional<String> user = Optional.ofNullable("John Snow");
 		user.ifPresent(value -> {
-			logger.info(value2 + ":" + value);
+			logger.info(new StringBuilder().append(value2)
+				.append(":")
+				.append(value)
+				.toString());
 			String value2 = value;
 			logger.info(value2);
 		});
