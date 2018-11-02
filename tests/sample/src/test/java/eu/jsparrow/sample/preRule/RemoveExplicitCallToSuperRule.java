@@ -1,13 +1,38 @@
 package eu.jsparrow.sample.preRule;
 
-public class RemoveExplicitCallToSuperRule {
+@SuppressWarnings("unused")
+public class RemoveExplicitCallToSuperRule extends RemoveExplicitCallToSuperRuleParent {
 
-	@SuppressWarnings("unused")
 	public RemoveExplicitCallToSuperRule() {
 		// comment above super()
-		super(); // comment in-line with super()
+		super(/* nothing to put in */) /* another comment to save */; // comment in-line with super()
 		// comment under super()
 		int i = 0;
 		i++;
+	}
+	
+	public RemoveExplicitCallToSuperRule(String argumentFirst) {
+		super(argumentFirst/* nothing to put in */) /* another comment to save */; // comment in-line with super()
+		// comment under super()
+		int i = 0;
+		i++;
+	}
+	
+	public RemoveExplicitCallToSuperRule(String argumentFirst, String argumentSecond) {
+		// comment above super()
+		super(/* nothing to put in */) /* another comment to save */; // comment in-line with super()
+		// comment under super()
+		int i = 0;
+		i++;
+	}
+}
+
+class RemoveExplicitCallToSuperRuleParent {
+	public RemoveExplicitCallToSuperRuleParent() {
+		// nothing to do
+	}
+	
+	RemoveExplicitCallToSuperRuleParent(String stringArgument) {
+		// nothing to do
 	}
 }

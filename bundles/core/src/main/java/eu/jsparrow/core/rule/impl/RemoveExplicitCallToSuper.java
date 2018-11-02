@@ -9,6 +9,12 @@ import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
+/**
+ * @see RemoveExplicitCallToSuperASTVisitor
+ * 
+ * @since 2.7.0
+ *
+ */
 public class RemoveExplicitCallToSuper extends RefactoringRuleImpl<RemoveExplicitCallToSuperASTVisitor> {
 
 	public RemoveExplicitCallToSuper() {
