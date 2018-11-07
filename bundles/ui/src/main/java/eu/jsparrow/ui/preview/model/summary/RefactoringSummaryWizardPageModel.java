@@ -12,13 +12,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
+import eu.jsparrow.core.statistic.StopWatchUtil;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.preview.model.BaseModel;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
-import eu.jsparrow.ui.util.StopWatchUtil;
 
 public class RefactoringSummaryWizardPageModel extends BaseModel {
 
