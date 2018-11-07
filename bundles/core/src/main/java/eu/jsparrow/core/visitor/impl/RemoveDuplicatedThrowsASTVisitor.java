@@ -19,6 +19,13 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
+ * Removes the following thrown exceptions from the method signature:
+ * 
+ * <ul>
+ * <li>Exceptions that are subtypes of already thrown exceptions</li>
+ * <li>Exceptions that are thrown more than once</li>
+ * <li>Exceptions that are inheriting from {@link RuntimeException}</li>
+ * </ul>
  * 
  * @since 2.7.0
  *
