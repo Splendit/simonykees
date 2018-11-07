@@ -11,20 +11,20 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.core.rule.impl.RemoveDuplicatedThrowsRule;
+import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
-public class RemoveDuplicatedThrowsRuleTest extends SingleRuleTest {
+public class RemoveUnnecessaryThrownExceptionsRuleTest extends SingleRuleTest {
 	
-	private static final String SAMPLE_FILE = "RemoveDuplicatedThrowsRule.java";
+	private static final String SAMPLE_FILE = "RemoveUnnecessaryThrownExceptionsRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "duplicatedThrows";
 
-	private RemoveDuplicatedThrowsRule rule;
+	private RemoveUnnecessaryThrownExceptionsRule rule;
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new RemoveDuplicatedThrowsRule();
+		rule = new RemoveUnnecessaryThrownExceptionsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 	

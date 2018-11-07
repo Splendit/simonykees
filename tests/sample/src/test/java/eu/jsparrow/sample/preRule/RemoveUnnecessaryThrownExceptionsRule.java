@@ -1,6 +1,6 @@
 package eu.jsparrow.sample.preRule;
 
-public class RemoveDuplicatedThrowsRule {
+public class RemoveUnnecessaryThrownExceptionsRule {
 
 	public void throwingTheSameExceptionTwice_shouldTransform() throws ParentException, ParentException {
 		/*

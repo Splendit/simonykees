@@ -1,6 +1,6 @@
 package eu.jsparrow.sample.postRule.duplicatedThrows;
 
-public class RemoveDuplicatedThrowsRule {
+public class RemoveUnnecessaryThrownExceptionsRule {
 
 	public void throwingTheSameExceptionTwice_shouldTransform() throws ParentException {
 		/*
@@ -21,12 +21,6 @@ public class RemoveDuplicatedThrowsRule {
 	}
 
 	public void throwingExceptionAndGrandChildException_shouldTransform() throws ParentException {
-		/*
-		 * Should keep: ParentException
-		 */
-	}
-	
-	public void throwingRuntimeException_shouldTransform() {
 		/*
 		 * Should keep: ParentException
 		 */

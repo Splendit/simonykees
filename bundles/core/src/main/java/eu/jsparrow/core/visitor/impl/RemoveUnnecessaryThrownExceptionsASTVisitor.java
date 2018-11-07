@@ -30,7 +30,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 2.7.0
  *
  */
-public class RemoveDuplicatedThrowsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveUnnecessaryThrownExceptionsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {

@@ -5,23 +5,23 @@ import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import eu.jsparrow.core.visitor.impl.RemoveDuplicatedThrowsASTVisitor;
+import eu.jsparrow.core.visitor.impl.RemoveUnnecessaryThrownExceptionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
- * @see RemoveDuplicatedThrowsASTVisitor
+ * @see RemoveUnnecessaryThrownExceptionsASTVisitor
  * 
  * @since 2.7.0
  *
  */
-public class RemoveDuplicatedThrowsRule extends RefactoringRuleImpl<RemoveDuplicatedThrowsASTVisitor> {
+public class RemoveUnnecessaryThrownExceptionsRule extends RefactoringRuleImpl<RemoveUnnecessaryThrownExceptionsASTVisitor> {
 
-	public RemoveDuplicatedThrowsRule() {
-		this.visitorClass = RemoveDuplicatedThrowsASTVisitor.class;
-		this.id = "RemoveDuplicatedThrows"; //$NON-NLS-1$
+	public RemoveUnnecessaryThrownExceptionsRule() {
+		this.visitorClass = RemoveUnnecessaryThrownExceptionsASTVisitor.class;
+		this.id = "RemoveUnnecessaryThrows"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.RemoveDuplicatedThrowsRule_name, Messages.RemoveDuplicatedThrowsRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY));
 	}
