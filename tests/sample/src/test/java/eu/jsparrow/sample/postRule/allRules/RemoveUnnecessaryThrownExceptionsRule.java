@@ -26,12 +26,6 @@ public class RemoveUnnecessaryThrownExceptionsRule {
 		 */
 	}
 
-	public void throwingRuntimeException_shouldTransform() {
-		/*
-		 * Should keep: ParentException
-		 */
-	}
-
 	public void throwingExceptionSiblingAndChild_shouldTransform() throws ChildException, SiblingException {
 		/*
 		 * Should keep: ChildException, SiblingException
@@ -41,6 +35,18 @@ public class RemoveUnnecessaryThrownExceptionsRule {
 	public void throwingOneExceptionMultipleTimes_shouldTransform() throws ChildException, SiblingException {
 		/*
 		 * Should keep: ChildException, SiblingException
+		 */
+	}
+
+	public void throwingRuntimeException_shouldTransform() {
+		/*
+		 * Should keep: nothing
+		 */
+	}
+
+	public void throwingCheckedAndUncheckedExceptions_shouldTransform() throws ParentException {
+		/*
+		 * Should keep ParentException
 		 */
 	}
 
