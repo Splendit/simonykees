@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -546,8 +547,8 @@ public class RefactoringPipeline {
 
 	public JsparrowMetric getMetricData() {
 		JsparrowMetric metricData = new JsparrowMetric();
-		metricData.setuUID(""); // TODO get data
-		metricData.setTimestamp(Instant.now());
+		metricData.setuUID(UUID.randomUUID().toString());
+		metricData.setTimestamp(Instant.now().getEpochSecond());
 		metricData.setProjectName(""); // TODO
 
 		JsparrowData projectData = new JsparrowData();
@@ -574,7 +575,7 @@ public class RefactoringPipeline {
 			int numberOfFilesChanged = getChangesForRule(rule).size();
 			numberOfTotalFilesChanged += numberOfFilesChanged;
 
-			JsparrowRuleData ruleData = new JsparrowRuleData(rule.getId(), numberOfIssuesFixedForRule, remediationCost,
+			JsparrowRuleData ruleData = new JsparrowRuleData(rule.getId(), numberOfIssuesFixedForRule, remediationCost.toMinutes(),
 					numberOfFilesChanged);
 
 			rulesDataList.add(ruleData);
@@ -582,7 +583,7 @@ public class RefactoringPipeline {
 		projectData.setRulesData(rulesDataList);
 		projectData.setTotalIssuesFixed(numberOfTotalIssuesFixed);
 		projectData.setFilesChanged(numberOfTotalFilesChanged);
-		projectData.setTotalTimeSaved(amountOfTotalTimeSaved);
+		projectData.setTotalTimeSaved(amountOfTotalTimeSaved.toMinutes());
 		
 		projectData.setDurationOfCalculation(StopWatchUtil.getTime());
 		projectData.setFileCount(initialSource.size());

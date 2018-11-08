@@ -1,12 +1,11 @@
 package eu.jsparrow.core.statistic.entity;
 
-import java.time.Duration;
 import java.util.List;
 
 public class JsparrowData {
 
 	private long durationOfCalculation;
-	private Duration totalTimeSaved;
+	private long totalTimeSaved;
 	private int totalIssuesFixed;
 	private int filesChanged;
 	private int fileCount;
@@ -20,11 +19,11 @@ public class JsparrowData {
 		this.durationOfCalculation = durationOfCalculation;
 	}
 
-	public Duration getTotalTimeSaved() {
+	public long getTotalTimeSaved() {
 		return totalTimeSaved;
 	}
 
-	public void setTotalTimeSaved(Duration totalTimeSaved) {
+	public void setTotalTimeSaved(long totalTimeSaved) {
 		this.totalTimeSaved = totalTimeSaved;
 	}
 

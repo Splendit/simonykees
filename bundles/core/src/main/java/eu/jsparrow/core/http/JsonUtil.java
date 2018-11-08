@@ -7,11 +7,17 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonUtil {
+
+	private static final Logger logger = LoggerFactory.getLogger(JsonUtil.class);
 
 	private JsonUtil() {
 
@@ -63,31 +69,29 @@ public class JsonUtil {
 			os = con.getOutputStream();
 
 			os.write(json.toString()
-				.getBytes("UTF-8"));
+				.getBytes(StandardCharsets.UTF_8.name()));
 			os.close();
 
 			StringBuilder sb = new StringBuilder();
 			int HttpResult = con.getResponseCode();
 			if (HttpResult == HttpURLConnection.HTTP_OK) {
-				BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
-
+				BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8.name()));
+				
 				String line = null;
 				while ((line = br.readLine()) != null) {
-					sb.append(line + "\n");
+					sb.append(line + System.lineSeparator());
 				}
 				br.close();
-				System.out.println("" + sb.toString());
+				logger.debug(sb.toString());
 
 			} else {
-				System.out.println(con.getResponseCode());
-				System.out.println(con.getResponseMessage());
+				logger.debug("Response code: " + con.getResponseCode()); //$NON-NLS-1$
+				logger.debug("Response message: " + con.getResponseMessage()); //$NON-NLS-1$
 			}
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.error("MalformedURLException",e); //$NON-NLS-1$
+		} catch (IOException e) {
+			logger.error("IOException",e); //$NON-NLS-1$
 		}
 	}
 }

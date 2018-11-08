@@ -1,11 +1,10 @@
 package eu.jsparrow.core.statistic.entity;
 
-import java.time.Instant;
 
 public class JsparrowMetric {
 	
 	private String uUID;
-	private Instant timestamp;
+	private long metricTimestamp;
 	private String projectName;
 	private JsparrowData data;
 	public String getuUID() {
@@ -14,11 +13,11 @@ public class JsparrowMetric {
 	public void setuUID(String uUID) {
 		this.uUID = uUID;
 	}
-	public Instant getTimestamp() {
-		return timestamp;
+	public long getTimestamp() {
+		return metricTimestamp;
 	}
-	public void setTimestamp(Instant timestamp) {
-		this.timestamp = timestamp;
+	public void setTimestamp(long metricTimestamp) {
+		this.metricTimestamp = metricTimestamp;
 	}
 	public String getProjectName() {
 		return projectName;

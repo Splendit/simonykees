@@ -1,15 +1,13 @@
 package eu.jsparrow.core.statistic.entity;
 
-import java.time.Duration;
-
 public class JsparrowRuleData {
 
 	private String ruleId;
 	private int issuesFixed;
-	private Duration remediationCost;
+	private long remediationCost;
 	private int filesChanged;
 
-	public JsparrowRuleData(String ruleId, int issuesFixed, Duration remediationCost, int filesChanged) {
+	public JsparrowRuleData(String ruleId, int issuesFixed, long remediationCost, int filesChanged) {
 		super();
 		this.ruleId = ruleId;
 		this.issuesFixed = issuesFixed;
@@ -33,11 +31,11 @@ public class JsparrowRuleData {
 		this.issuesFixed = issuesFixed;
 	}
 
-	public Duration getRemediationCost() {
+	public long getRemediationCost() {
 		return remediationCost;
 	}
 
-	public void setRemediationCost(Duration remediationCost) {
+	public void setRemediationCost(long remediationCost) {
 		this.remediationCost = remediationCost;
 	}
 
