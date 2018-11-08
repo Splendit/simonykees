@@ -190,8 +190,7 @@ public class TestMultiCatchRule {
 		}
 	}
 
-	private void throwSomethingWithInheritance(int i) throws FirstException, SecondChildChildException,
-			SecondChildException, SecondChildSecondException, SecondException {
+	private void throwSomethingWithInheritance(int i) throws FirstException, SecondException {
 		switch (i) {
 		case 1:
 			throw new FirstException();
@@ -209,8 +208,7 @@ public class TestMultiCatchRule {
 		}
 	}
 
-	private void throwSomethingMixedCheckedAndUnchecked(int i) throws FirstException, FirstUncheckedException,
-			SecondException, SecondtUncheckedException, ThirdException, ThirdUncheckedException {
+	private void throwSomethingMixedCheckedAndUnchecked(int i) throws FirstException, SecondException, ThirdException {
 		switch (i) {
 		case 1:
 			throw new FirstException();
