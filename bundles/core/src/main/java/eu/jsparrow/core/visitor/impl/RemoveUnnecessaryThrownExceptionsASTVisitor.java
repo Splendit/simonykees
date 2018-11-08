@@ -99,20 +99,20 @@ public class RemoveUnnecessaryThrownExceptionsASTVisitor extends AbstractASTRewr
 		return toBeRemoved;
 	}
 
-	private List<Type> findDuplications(Map<Type, ITypeBinding> keySet) {
+	private List<Type> findDuplications(Map<Type, ITypeBinding> typeBindingsMap) {
 		List<Type> duplications = new ArrayList<>();
-		for (Map.Entry<Type, ITypeBinding> type : keySet.entrySet()) {
+		for (Map.Entry<Type, ITypeBinding> type : typeBindingsMap.entrySet()) {
 			if (!duplications.contains(type.getKey())) {
-				List<Type> equivalentOccurrences = findEquivalentOccurrences(type.getKey(), type.getValue(), keySet);
+				List<Type> equivalentOccurrences = findEquivalentOccurrences(type.getKey(), type.getValue(), typeBindingsMap);
 				duplications.addAll(equivalentOccurrences);
 			}
 		}
 		return duplications;
 	}
 
-	private List<Type> findEquivalentOccurrences(Type type, ITypeBinding typeBinding, Map<Type, ITypeBinding> keySet) {
+	private List<Type> findEquivalentOccurrences(Type type, ITypeBinding typeBinding, Map<Type, ITypeBinding> typeBindingsMap) {
 		List<Type> equivalentTypes = new ArrayList<>();
-		for (Map.Entry<Type, ITypeBinding> entry : keySet.entrySet()) {
+		for (Map.Entry<Type, ITypeBinding> entry : typeBindingsMap.entrySet()) {
 			Type key = entry.getKey();
 			if (key != type) {
 				ITypeBinding keyBinding = entry.getValue();
