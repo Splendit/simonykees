@@ -38,12 +38,14 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
+import eu.jsparrow.core.http.JsonUtil;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
+import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorWrapper;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
@@ -607,6 +609,9 @@ public class StandaloneConfig {
 			statisticsData.setEndTime(Instant.now()
 				.getEpochSecond());
 			statisticsData.logMetricData();
+			JsparrowMetric metric = statisticsData.getMetricData();
+			String json = JsonUtil.generateJSON(metric);
+			JsonUtil.sendJson(json);
 		} catch (RefactoringException | ReconcileException e) {
 			throw new StandaloneException(String.format("Cannot commit refactoring on %s", project.getName()), e); //$NON-NLS-1$
 		}
