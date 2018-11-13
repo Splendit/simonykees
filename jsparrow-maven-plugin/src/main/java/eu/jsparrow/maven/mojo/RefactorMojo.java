@@ -14,6 +14,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.eclipse.sisu.Parameters;
 import org.osgi.framework.BundleException;
 
 import eu.jsparrow.maven.adapter.BundleStarter;
@@ -51,7 +52,7 @@ public class RefactorMojo extends AbstractMojo {
 	private String mavenHome;
 
 	/**
-	 * Path to the configuration file. 
+	 * Path to the configuration file.
 	 */
 	@Parameter(defaultValue = "jsparrow.yml", property = "configFile")
 	private File configFile;
@@ -63,22 +64,31 @@ public class RefactorMojo extends AbstractMojo {
 	private String profile;
 
 	/**
-	 * Use this parameter to use the default configuration. 
+	 * Use this parameter to use the default configuration.
 	 */
 	@Parameter(property = "defaultConfiguration")
 	protected boolean defaultConfiguration;
 
 	/**
-	 * Specify the license key to use. 
+	 * Specify the license key to use.
 	 */
 	@Parameter(property = "license")
 	private String license;
 
 	/**
-	 * Specify the license server to use. 
+	 * Specify the license server to use.
 	 */
 	@Parameter(property = "url")
 	private String url;
+
+	@Parameter(property = "startTime")
+	private String startTime;
+
+	@Parameter(property = "repoOwner", defaultValue = "")
+	private String repoOwner;
+
+	@Parameter(property = "repoName", defaultValue = "")
+	private String repoName;
 
 	public void execute() throws MojoExecutionException {
 		Log log = getLog();
@@ -91,7 +101,8 @@ public class RefactorMojo extends AbstractMojo {
 		}
 
 		String mode = StandaloneMode.REFACTOR.name();
-		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration);
+		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration, startTime,
+				repoOwner, repoName);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		DependencyManager dependencyManager = new DependencyManager(log, mavenHome);
 		List<MavenProject> projects = mavenSession.getAllProjects();
