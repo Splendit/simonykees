@@ -1,5 +1,7 @@
 package eu.jsparrow.maven.adapter;
 
+import java.util.Map;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
@@ -59,6 +61,7 @@ public class StandaloneLoader {
 	 */
 	public void loadStandalone(MavenAdapter mavenAdapter)
 			throws InterruptedException, MojoExecutionException, BundleException {
-		bundleStarter.runStandalone(mavenAdapter.getConfiguration());
+		Map<String, String> configuration = mavenAdapter.getConfiguration();
+		bundleStarter.runStandalone(configuration);
 	}
 }

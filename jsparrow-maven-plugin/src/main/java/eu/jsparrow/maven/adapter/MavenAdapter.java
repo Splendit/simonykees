@@ -212,6 +212,9 @@ public class MavenAdapter {
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 		configuration.put(LICENSE_KEY, config.getLicense());
 		configuration.put(AGENT_URL, config.getUrl());
+		configuration.put(STATISTICS_START_TIME, config.getStartTime().toString());
+		configuration.put(STATISTICS_REPO_OWNER, config.getRepoOwner());
+		configuration.put(STATISTICS_REPO_NAME, config.getRepoName());
 		config.getRuleId()
 			.ifPresent(ruleId -> configuration.put(LIST_RULES_SELECTED_ID, ruleId));
 	}

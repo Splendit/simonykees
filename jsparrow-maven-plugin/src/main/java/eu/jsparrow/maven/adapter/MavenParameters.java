@@ -1,5 +1,6 @@
 package eu.jsparrow.maven.adapter;
 
+import java.time.Instant;
 import java.util.Optional;
 
 /**
@@ -17,11 +18,24 @@ public class MavenParameters {
 	private String ruleId;
 	private String license = ""; //$NON-NLS-1$
 	private String url = ""; //$NON-NLS-1$
+	private Instant startTime;
+	private String repoOwner;
+	private String repoName;
 
-	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault) {
+	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault,
+			String startTime, String repoOwner, String repoName) {
 		this(mode, license, url);
 		this.profile = profile;
 		this.useDefaultConfig = useDefault;
+		
+		if(startTime != null && !startTime.isEmpty()) {
+			this.startTime = Instant.parse(startTime);
+		} else {
+			this.startTime = Instant.now();
+		}
+		
+		this.repoOwner = repoOwner;
+		this.repoName = repoName;
 	}
 
 	public MavenParameters(String mode, String license, String url) {
@@ -61,6 +75,30 @@ public class MavenParameters {
 
 	public String getUrl() {
 		return url;
+	}
+
+	public Instant getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Instant startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getRepoOwner() {
+		return repoOwner;
+	}
+
+	public void setRepoOwner(String repoOwner) {
+		this.repoOwner = repoOwner;
+	}
+
+	public String getRepoName() {
+		return repoName;
+	}
+
+	public void setRepoName(String repoName) {
+		this.repoName = repoName;
 	}
 
 }
