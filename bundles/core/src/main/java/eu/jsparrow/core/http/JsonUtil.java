@@ -53,7 +53,9 @@ public class JsonUtil {
 	}
 
 	public static void sendJson(String json) {
-		String targeturl = "https://nxiikrr4xl.execute-api.eu-central-1.amazonaws.com/testing/upload-data";
+		// String targeturl =
+		// "https://nxiikrr4xl.execute-api.eu-central-1.amazonaws.com/testing/upload-data";
+		String targeturl = "https://nxiikrr4xl.execute-api.eu-central-1.amazonaws.com/testing/post-new-data"; //$NON-NLS-1$
 
 		URL myurl;
 		try {
@@ -75,8 +77,9 @@ public class JsonUtil {
 			StringBuilder sb = new StringBuilder();
 			int HttpResult = con.getResponseCode();
 			if (HttpResult == HttpURLConnection.HTTP_OK) {
-				BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8.name()));
-				
+				BufferedReader br = new BufferedReader(
+						new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8.name()));
+
 				String line = null;
 				while ((line = br.readLine()) != null) {
 					sb.append(line + System.lineSeparator());
@@ -89,9 +92,9 @@ public class JsonUtil {
 				logger.debug("Response message: " + con.getResponseMessage()); //$NON-NLS-1$
 			}
 		} catch (MalformedURLException e) {
-			logger.error("MalformedURLException",e); //$NON-NLS-1$
+			logger.error("MalformedURLException", e); //$NON-NLS-1$
 		} catch (IOException e) {
-			logger.error("IOException",e); //$NON-NLS-1$
+			logger.error("IOException", e); //$NON-NLS-1$
 		}
 	}
 }
