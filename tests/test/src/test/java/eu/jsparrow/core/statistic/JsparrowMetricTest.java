@@ -25,11 +25,13 @@ public class JsparrowMetricTest {
 		Instant currentTime = Instant.ofEpochSecond(0);
 
 		JsparrowMetric jm = new JsparrowMetric();
-		jm.setProjectName("jSparrow");
+		jm.setRepoName("jSparrow");
+		jm.setRepoOwner("Splendit");
 		jm.setTimestamp(currentTime.getEpochSecond());
 		jm.setuUID("1337");
 		JsparrowData data = new JsparrowData();
-		data.setDurationOfCalculation(100L);
+		data.setTimestampGitHubStart(100L);
+		data.setTimestampGitHubStart(200L);
 		data.setTotalIssuesFixed(5);
 		data.setTotalTimeSaved(1000L);
 		data.setFilesChanged(2);

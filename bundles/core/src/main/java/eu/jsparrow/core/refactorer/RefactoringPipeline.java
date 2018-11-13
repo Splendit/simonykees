@@ -1,7 +1,5 @@
 package eu.jsparrow.core.refactorer;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,7 +7,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,15 +27,10 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.exception.model.NotWorkingRuleModel;
-import eu.jsparrow.core.statistic.StopWatchUtil;
-import eu.jsparrow.core.statistic.entity.JsparrowData;
-import eu.jsparrow.core.statistic.entity.JsparrowMetric;
-import eu.jsparrow.core.statistic.entity.JsparrowRuleData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
-import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
@@ -543,53 +535,6 @@ public class RefactoringPipeline {
 					NLS.bind(ExceptionMessages.RefactoringPipeline_reconcile_failed, notWorkingRulesCollected),
 					NLS.bind(ExceptionMessages.RefactoringPipeline_user_reconcile_failed, notWorkingRulesCollected));
 		}
-	}
-
-	public JsparrowMetric getMetricData() {
-		JsparrowMetric metricData = new JsparrowMetric();
-		metricData.setuUID(UUID.randomUUID().toString());
-		metricData.setTimestamp(Instant.now().getEpochSecond());
-		metricData.setProjectName(""); // TODO
-
-		JsparrowData projectData = new JsparrowData();
-		List<JsparrowRuleData> rulesDataList = new ArrayList<>();
-		List<RefactoringRule> rulesWithChanges = new ArrayList<>();
-		rulesWithChanges = this.getRules()
-			.stream()
-			.filter(rule -> null != this.getChangesForRule(rule) && !this.getChangesForRule(rule)
-				.isEmpty())
-			.collect(Collectors.toList());
-		int numberOfTotalIssuesFixed = 0;
-		int numberOfTotalFilesChanged = 0;
-		Duration amountOfTotalTimeSaved = Duration.ZERO;
-		for (RefactoringRule rule : rulesWithChanges) {
-			// number of issues fixed
-			int numberOfIssuesFixedForRule = RuleApplicationCount.getFor(rule)
-				.toInt();
-			numberOfTotalIssuesFixed += numberOfIssuesFixedForRule;
-			// amount of time saved
-			Duration amountOfTimeSavedForRule = EliminatedTechnicalDebt.get(rule);
-			amountOfTotalTimeSaved = amountOfTotalTimeSaved.plus(amountOfTimeSavedForRule);
-			Duration remediationCost = rule.getRuleDescription()
-				.getRemediationCost();
-			int numberOfFilesChanged = getChangesForRule(rule).size();
-			numberOfTotalFilesChanged += numberOfFilesChanged;
-
-			JsparrowRuleData ruleData = new JsparrowRuleData(rule.getId(), numberOfIssuesFixedForRule, remediationCost.toMinutes(),
-					numberOfFilesChanged);
-
-			rulesDataList.add(ruleData);
-		}
-		projectData.setRulesData(rulesDataList);
-		projectData.setTotalIssuesFixed(numberOfTotalIssuesFixed);
-		projectData.setFilesChanged(numberOfTotalFilesChanged);
-		projectData.setTotalTimeSaved(amountOfTotalTimeSaved.toMinutes());
-		
-		projectData.setDurationOfCalculation(StopWatchUtil.getTime());
-		projectData.setFileCount(initialSource.size());
-
-		metricData.setData(projectData);
-		return metricData;
 	}
 
 	/**

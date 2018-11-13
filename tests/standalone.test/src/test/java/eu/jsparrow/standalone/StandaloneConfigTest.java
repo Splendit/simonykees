@@ -125,7 +125,8 @@ public class StandaloneConfigTest {
 
 		config = mock(YAMLConfig.class);
 
-		standaloneConfig = new TestableStandaloneConfig(path.toString(), "1.8"); //$NON-NLS-1$ , //$NON-NLS-2$
+		standaloneConfig = new TestableStandaloneConfig(path.toString(), "1.8"); //$NON-NLS-1$ ,
+																					// //$NON-NLS-2$
 		hasRefactoringStates = true;
 	}
 
@@ -415,7 +416,7 @@ public class StandaloneConfigTest {
 	class TestableStandaloneConfig extends StandaloneConfig {
 
 		public TestableStandaloneConfig(String path, String compilerCompliance) throws Exception {
-			super("projectName", path, compilerCompliance, "", new String[] {}, config, true); //$NON-NLS-1$ //$NON-NLS-2$
+			super("projectName", path, compilerCompliance, "", new String[] {}, config, true, "", "", 0L); //$NON-NLS-1$ //$NON-NLS-2$
 			super.refactoringPipeline = pipeline;
 
 		}

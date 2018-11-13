@@ -4,19 +4,37 @@ import java.util.List;
 
 public class JsparrowData {
 
-	private long durationOfCalculation;
+	private String projectName;
+	private long timestampGitHubStart;
+	private long timestampJSparrowEnd;
 	private long totalTimeSaved;
 	private int totalIssuesFixed;
 	private int filesChanged;
 	private int fileCount;
 	private List<JsparrowRuleData> rulesData;
 
-	public long getDurationOfCalculation() {
-		return durationOfCalculation;
+	public String getProjectName() {
+		return projectName;
+	}
+	
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
+	
+	public long getTimestampGitHubStart() {
+		return timestampGitHubStart;
 	}
 
-	public void setDurationOfCalculation(long durationOfCalculation) {
-		this.durationOfCalculation = durationOfCalculation;
+	public void setTimestampGitHubStart(long timestampGitHubStart) {
+		this.timestampGitHubStart = timestampGitHubStart;
+	}
+
+	public long getTimestampJSparrowEnd() {
+		return timestampJSparrowEnd;
+	}
+
+	public void setTimestampJSparrowEnd(long timestampJSparrowEnd) {
+		this.timestampJSparrowEnd = timestampJSparrowEnd;
 	}
 
 	public long getTotalTimeSaved() {

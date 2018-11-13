@@ -48,6 +48,9 @@ public class RefactoringInvoker {
 	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
 	private static final String HAS_PARENT = "HAS.PARENT"; //$NON-NLS-1$
+	private static final String REPO_OWNER = "REPO.OWNER";
+	private static final String REPO_NAME = "REPO.NAME";
+	private static final String TIMESTAMP_GITHUB_START = "TIMESTAMP.GITHUB.START";
 
 	private boolean abort = false;
 	private YAMLConfigurationWrapper yamlConfigurationWrapper = new YAMLConfigurationWrapper();
@@ -233,6 +236,10 @@ public class RefactoringInvoker {
 
 		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
 				context.getProperty(ROOT_CONFIG_PATH)).get();
+		
+		String repoOwner = context.getProperty(REPO_OWNER);
+		String repoName = context.getProperty(REPO_NAME);
+		long timestampGitHubStart = Long.parseLong(context.getProperty(TIMESTAMP_GITHUB_START));
 
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
@@ -261,7 +268,7 @@ public class RefactoringInvoker {
 			try {
 				YAMLConfig config = getConfiguration(context, id);
 				StandaloneConfig standaloneConfig = new StandaloneConfig(projectName, path, compilerCompliance,
-						sourceFolder, natureIds, config, isChildModule);
+						sourceFolder, natureIds, config, isChildModule, repoOwner, repoName, timestampGitHubStart);
 				standaloneConfigs.add(standaloneConfig);
 
 			} catch (CoreException | RuntimeException e) {

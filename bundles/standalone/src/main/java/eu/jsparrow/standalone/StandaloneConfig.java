@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +40,7 @@ import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
@@ -74,9 +76,8 @@ public class StandaloneConfig {
 	private static final String TEMP_FILE_EXTENSION = ".tmp"; //$NON-NLS-1$
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
-	
-	private static final String SEARCH_SCOPE = "workspace"; //$NON-NLS-1$
 
+	private static final String SEARCH_SCOPE = "workspace"; //$NON-NLS-1$
 
 	private String path;
 	private String compilerCompliance;
@@ -95,6 +96,12 @@ public class StandaloneConfig {
 	private boolean abort = false;
 	private YAMLConfig yamlConfig;
 	private Boolean isChildModule;
+	private String repoOwner;
+	private String repoName;
+	private long timestampGitHubStart;
+
+	// standalone statistics data
+	private StandaloneStatisticsData statisticsData;
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
@@ -122,8 +129,8 @@ public class StandaloneConfig {
 	 *             if the project cannot be created
 	 */
 	public StandaloneConfig(String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds, YAMLConfig yamlConfig, boolean isChildModule)
-			throws CoreException, StandaloneException {
+			String[] natureIds, YAMLConfig yamlConfig, boolean isChildModule, String repoOwner, String repoName,
+			long timestampGitHubStart) throws CoreException, StandaloneException {
 
 		this.projectName = projectName;
 		this.path = path;
@@ -132,6 +139,9 @@ public class StandaloneConfig {
 		this.natureIds = natureIds;
 		this.yamlConfig = yamlConfig;
 		this.isChildModule = isChildModule;
+		this.repoOwner = repoOwner;
+		this.repoName = repoName;
+		this.timestampGitHubStart = timestampGitHubStart;
 		setUp();
 	}
 
@@ -155,6 +165,9 @@ public class StandaloneConfig {
 		addToClasspath(mavenClasspathEntries);
 		List<ICompilationUnit> compilationUnits = findProjectCompilationUnits();
 		compilationUnitsProvider = new CompilationUnitProvider(compilationUnits, yamlConfig.getExcludes());
+
+		statisticsData = new StandaloneStatisticsData(compilationUnits.size(), project.getName(), repoOwner, repoName,
+				timestampGitHubStart, refactoringPipeline);
 	}
 
 	/**
@@ -525,12 +538,13 @@ public class StandaloneConfig {
 	}
 
 	private Optional<FieldsRenamingRule> setUpRenamingRule(Map<String, Boolean> options) throws StandaloneException {
-		FieldsRenamingInstantiator factory = new FieldsRenamingInstantiator(javaProject, new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE));
+		FieldsRenamingInstantiator factory = new FieldsRenamingInstantiator(javaProject,
+				new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE));
 
 		if (isChildModule) {
 			/*
-			 * see SIM-1250. If we are dealing with a multimodule project, we limit 
-			 * the renaming rule to run only for private fields. 
+			 * see SIM-1250. If we are dealing with a multimodule project, we
+			 * limit the renaming rule to run only for private fields.
 			 */
 			options.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);
 			options.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, false);
@@ -588,7 +602,11 @@ public class StandaloneConfig {
 		String logInfo = NLS.bind(Messages.Activator_debug_commitRefactoring, project.getName());
 		logger.info(logInfo);
 		try {
+			statisticsData.setMetricData();
 			refactoringPipeline.commitRefactoring();
+			statisticsData.setEndTime(Instant.now()
+				.getEpochSecond());
+			statisticsData.logMetricData();
 		} catch (RefactoringException | ReconcileException e) {
 			throw new StandaloneException(String.format("Cannot commit refactoring on %s", project.getName()), e); //$NON-NLS-1$
 		}
