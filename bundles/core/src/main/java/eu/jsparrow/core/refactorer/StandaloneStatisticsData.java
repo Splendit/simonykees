@@ -166,4 +166,8 @@ public class StandaloneStatisticsData {
 					.size());
 	}
 
+	
+	public JsparrowMetric getMetricData() {
+		return metricData;
+	}
 }
