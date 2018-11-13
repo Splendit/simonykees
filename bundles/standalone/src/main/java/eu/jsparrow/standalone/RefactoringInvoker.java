@@ -2,6 +2,7 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -48,9 +49,9 @@ public class RefactoringInvoker {
 	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
 	private static final String HAS_PARENT = "HAS.PARENT"; //$NON-NLS-1$
-	private static final String REPO_OWNER = "REPO.OWNER";
-	private static final String REPO_NAME = "REPO.NAME";
-	private static final String TIMESTAMP_GITHUB_START = "TIMESTAMP.GITHUB.START";
+	public static final String STATISTICS_START_TIME = "STATISTICS_START_TIME"; //$NON-NLS-1$
+	public static final String STATISTICS_REPO_OWNER = "STATISTICS_REPO_OWNER"; //$NON-NLS-1$
+	public static final String STATISTICS_REPO_NAME = "STATISTICS_REPO_NAME"; //$NON-NLS-1$
 
 	private boolean abort = false;
 	private YAMLConfigurationWrapper yamlConfigurationWrapper = new YAMLConfigurationWrapper();
@@ -237,9 +238,10 @@ public class RefactoringInvoker {
 		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
 				context.getProperty(ROOT_CONFIG_PATH)).get();
 		
-		String repoOwner = context.getProperty(REPO_OWNER);
-		String repoName = context.getProperty(REPO_NAME);
-		long timestampGitHubStart = Long.parseLong(context.getProperty(TIMESTAMP_GITHUB_START));
+		String repoOwner = context.getProperty(STATISTICS_REPO_OWNER);
+		String repoName = context.getProperty(STATISTICS_REPO_NAME);
+		Instant gitHubStartTime = Instant.parse(context.getProperty(STATISTICS_START_TIME));
+		long timestampGitHubStart = gitHubStartTime.getEpochSecond();
 
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
