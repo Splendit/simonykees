@@ -5,12 +5,9 @@ import static org.junit.Assert.assertTrue;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -20,16 +17,11 @@ import eu.jsparrow.core.statistic.entity.JsparrowData;
 import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.core.statistic.entity.JsparrowRuleData;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
-import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
 public class StandaloneStatisticsDataTest {
 
 	private int filesCount;
 	private String projectName;
-	private String repoOwner;
-	private String repoName;
-	private long timestampGitHubStart;
 
 	private JsparrowMetric metricData;
 	private JsparrowData jsparrowData;
@@ -42,22 +34,12 @@ public class StandaloneStatisticsDataTest {
 	@Mock
 	private ICompilationUnit compilationUnit;
 
-	@Mock
-	private DocumentChange documentChange;
-
-	@Mock
-	private RuleApplicationCount ruleApplicationCount;
-
 	private RefactoringRule rule = new ArithmethicAssignmentRule();
 
 	@Before
 	public void setUp() throws Exception {
 		filesCount = 5;
 		projectName = "testProject";
-		repoOwner = "owner";
-		repoName = "repoName";
-		timestampGitHubStart = Instant.now()
-			.toEpochMilli();
 
 		StandaloneStatisticsMetadata statisticsMetadata = new StandaloneStatisticsMetadata(100, "owner", "repoName");
 
@@ -88,6 +70,7 @@ public class StandaloneStatisticsDataTest {
 
 	@Test
 	public void setJsparrowDataTest() {
+		jsparrowData = metricData.getData();
 		List<JsparrowRuleData> rules = jsparrowData.getRules();
 		JsparrowRuleData ruleData = rules.get(0);
 
@@ -111,11 +94,6 @@ public class StandaloneStatisticsDataTest {
 
 	class TestableStandaloneStatisticsData extends StandaloneStatisticsData {
 
-		@SuppressWarnings("unused")
-		private int numberOfTotalIssuesFixed = 0;
-		private Set<ICompilationUnit> changedFiles = new HashSet<>();
-		private Duration amountOfTotalTimeSaved = Duration.ZERO;
-
 		public TestableStandaloneStatisticsData(int filesCount, String projectName,
 				StandaloneStatisticsMetadata statisticsMetadata, RefactoringPipeline refactoringPipeline) {
 			super(filesCount, projectName, statisticsMetadata, refactoringPipeline);
@@ -135,10 +113,9 @@ public class StandaloneStatisticsDataTest {
 
 		@Override
 		protected void updateTotalCounter(JsparrowRuleData ruleData, RefactoringRule rule) {
-			numberOfTotalIssuesFixed += ruleData.getIssuesFixed();
-			Duration amountOfTimeSavedForRule = EliminatedTechnicalDebt.get(rule);
-			amountOfTotalTimeSaved = amountOfTotalTimeSaved.plus(amountOfTimeSavedForRule);
-			changedFiles.addAll(Collections.singletonList(compilationUnit));
+			updateNumberOfTotalIssuesFixed(ruleData.getIssuesFixed());
+			updateAmountOfTimeSavedForRule(Duration.ofMinutes(4));
+			addFilesChangedByRule(Collections.singleton(compilationUnit));
 		}
 	}
 }

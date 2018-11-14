@@ -2,6 +2,12 @@ package eu.jsparrow.core.statistic.entity;
 
 import java.util.List;
 
+/**
+ * Entity class for jSparrow statistics project data
+ * 
+ * @since 2.7.0
+ *
+ */
 public class JsparrowData {
 
 	private String projectName;
