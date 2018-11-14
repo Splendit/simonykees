@@ -26,7 +26,11 @@ public class StatisticsMetadata {
 
 	public StatisticsMetadata(String startTime, String repoOwner, String repoName) {
 		try {
-			this.startTime = Instant.parse(startTime);
+			if (startTime != null) {
+				this.startTime = Instant.parse(startTime);
+			} else {
+				this.startTime = null;
+			}
 		} catch (DateTimeParseException e) {
 			this.startTime = null;
 			logger.debug(e.getMessage(), e);
