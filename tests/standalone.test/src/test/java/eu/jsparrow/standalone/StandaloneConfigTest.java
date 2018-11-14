@@ -45,6 +45,7 @@ import eu.jsparrow.core.config.YAMLExcludes;
 import eu.jsparrow.core.config.YAMLLoggerRule;
 import eu.jsparrow.core.config.YAMLRenamingRule;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -417,7 +418,8 @@ public class StandaloneConfigTest {
 	class TestableStandaloneConfig extends StandaloneConfig {
 
 		public TestableStandaloneConfig(String path, String compilerCompliance) throws Exception {
-			super("projectName", path, compilerCompliance, "", new String[] {}, config, true, new StandaloneStatisticsMetadata()); //$NON-NLS-1$ //$NON-NLS-2$
+			super("projectName", path, compilerCompliance, "", new String[] {}, config, true, //$NON-NLS-1$ //$NON-NLS-2$
+					new StandaloneStatisticsMetadata());
 			super.refactoringPipeline = pipeline;
 
 		}
@@ -429,6 +431,9 @@ public class StandaloneConfigTest {
 			when(iCompilationUnitsProvider.getFilteredCompilationUnits())
 				.thenReturn(Collections.singletonList(iCompilationUnit));
 			super.compilationUnitsProvider = iCompilationUnitsProvider;
+
+			super.statisticsData = new StandaloneStatisticsData(1, "TestProject", super.statisticsMetadata, //$NON-NLS-1$
+					refactoringPipeline);
 		}
 
 		@Override

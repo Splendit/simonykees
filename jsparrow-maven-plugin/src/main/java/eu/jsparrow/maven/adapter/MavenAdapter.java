@@ -214,7 +214,7 @@ public class MavenAdapter {
 		configuration.put(AGENT_URL, config.getUrl());
 
 		StatisticsMetadata statisticsMetadata = config.getStatisticsMetadata();
-		if (statisticsMetadata.isValid()) {
+		if (statisticsMetadata != null && statisticsMetadata.isValid()) {
 			configuration.put(STATISTICS_START_TIME, statisticsMetadata.getStartTime().toString());
 			configuration.put(STATISTICS_REPO_OWNER, statisticsMetadata.getRepoOwner());
 			configuration.put(STATISTICS_REPO_NAME, statisticsMetadata.getRepoName());

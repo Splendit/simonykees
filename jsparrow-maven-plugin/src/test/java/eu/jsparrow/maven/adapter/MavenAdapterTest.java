@@ -37,6 +37,7 @@ public class MavenAdapterTest {
 	private File jsparrowTemDirectory;
 	private File jsparrowYml;
 	private File projectBaseDir;
+	private StatisticsMetadata statisticsMetadata;
 
 	@Rule
 	public TemporaryFolder directory = new TemporaryFolder();
@@ -53,6 +54,8 @@ public class MavenAdapterTest {
 		projectBaseDir = directory.newFolder("project_base_dir");
 		jsparrowYml = new File(projectBaseDir.getPath() + File.separator + "jsparrow.yml");
 		jsparrowYml.createNewFile();
+		
+		statisticsMetadata = mock(StatisticsMetadata.class);
 
 		when(project.getGroupId()).thenReturn(groupId);
 		when(project.getArtifactId()).thenReturn(artifactId);
@@ -71,6 +74,7 @@ public class MavenAdapterTest {
 		when(config.getUrl()).thenReturn(""); //$NON-NLS-1$
 		when(config.getProfile()).thenReturn(""); //$NON-NLS-1$
 		when(config.getRuleId()).thenReturn(Optional.empty());
+		when(config.getStatisticsMetadata()).thenReturn(statisticsMetadata);
 
 		mavenAdapter.addInitialConfiguration(config); // $NON-NLS-1$
 

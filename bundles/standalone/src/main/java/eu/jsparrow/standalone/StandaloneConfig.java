@@ -98,10 +98,10 @@ public class StandaloneConfig {
 	private boolean abort = false;
 	private YAMLConfig yamlConfig;
 	private Boolean isChildModule;
-	private StandaloneStatisticsMetadata statisticsMetadata;
+	protected StandaloneStatisticsMetadata statisticsMetadata;
 
 	// standalone statistics data
-	private StandaloneStatisticsData statisticsData;
+	protected StandaloneStatisticsData statisticsData;
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
