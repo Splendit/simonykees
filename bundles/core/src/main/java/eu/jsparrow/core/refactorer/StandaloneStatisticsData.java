@@ -65,18 +65,20 @@ public class StandaloneStatisticsData {
 		metricData.setRepoName(statisticsMetadata.getRepoName());
 
 		JsparrowData projectData = new JsparrowData();
+		setProjectData(projectData);
+
+		metricData.setData(projectData);
+	}
+
+	private void setProjectData(JsparrowData projectData) {
 		projectData.setProjectName(projectName);
 		projectData.setTimestampGitHubStart(statisticsMetadata.getStartTime());
 		List<JsparrowRuleData> rulesDataList = new ArrayList<>();
-		List<RefactoringRule> rulesWithChanges = new ArrayList<>();
-		rulesWithChanges = refactoringPipeline.getRules()
-			.stream()
-			.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
-					&& !refactoringPipeline.getChangesForRule(rule)
-						.isEmpty())
-			.collect(Collectors.toList());
+		List<RefactoringRule> rulesWithChanges = getRulesWithChanges();
 		for (RefactoringRule rule : rulesWithChanges) {
-			rulesDataList.add(getRuleData(rule));
+			JsparrowRuleData ruleData = getRuleData(rule);
+			rulesDataList.add(ruleData);
+			updateTotalCounter(ruleData, rule);
 		}
 		projectData.setRules(rulesDataList);
 		projectData.setTotalIssuesFixed(numberOfTotalIssuesFixed);
@@ -84,8 +86,15 @@ public class StandaloneStatisticsData {
 		projectData.setTotalTimeSaved(amountOfTotalTimeSaved.toMinutes());
 
 		projectData.setTotalFilesCount(filesCount);
+	}
 
-		metricData.setData(projectData);
+	protected List<RefactoringRule> getRulesWithChanges() {
+		return refactoringPipeline.getRules()
+			.stream()
+			.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
+					&& !refactoringPipeline.getChangesForRule(rule)
+						.isEmpty())
+			.collect(Collectors.toList());
 	}
 
 	public void setEndTime(long timestampJSparrowEnd) {
@@ -161,24 +170,26 @@ public class StandaloneStatisticsData {
 	}
 
 	public JsparrowRuleData getRuleData(RefactoringRule rule) {
-		// number of issues fixed
-		int numberOfIssuesFixedForRule = RuleApplicationCount.getFor(rule)
+		int issuesFixedForRule = RuleApplicationCount.getFor(rule)
 			.toInt();
-		numberOfTotalIssuesFixed += numberOfIssuesFixedForRule;
-		// amount of time saved
-		Duration amountOfTimeSavedForRule = EliminatedTechnicalDebt.get(rule);
-		amountOfTotalTimeSaved = amountOfTotalTimeSaved.plus(amountOfTimeSavedForRule);
 		Duration remediationCost = rule.getRuleDescription()
 			.getRemediationCost();
-		changedFiles.addAll(refactoringPipeline.getChangesForRule(rule)
-			.keySet());
 
-		return new JsparrowRuleData(rule.getId(), numberOfIssuesFixedForRule, remediationCost.toMinutes(),
+		return new JsparrowRuleData(rule.getId(), issuesFixedForRule, remediationCost.toMinutes(),
 				refactoringPipeline.getChangesForRule(rule)
 					.size());
 	}
 
 	public Optional<JsparrowMetric> getMetricData() {
 		return Optional.ofNullable(metricData);
+	}
+	
+	protected void updateTotalCounter(JsparrowRuleData ruleData, RefactoringRule rule) {
+		numberOfTotalIssuesFixed += ruleData.getIssuesFixed();
+		Duration amountOfTimeSavedForRule = EliminatedTechnicalDebt.get(rule);
+		amountOfTotalTimeSaved = amountOfTotalTimeSaved.plus(amountOfTimeSavedForRule);
+
+		changedFiles.addAll(refactoringPipeline.getChangesForRule(rule)
+			.keySet());
 	}
 }

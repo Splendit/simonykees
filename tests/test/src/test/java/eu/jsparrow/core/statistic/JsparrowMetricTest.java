@@ -1,9 +1,5 @@
 package eu.jsparrow.core.statistic;
 
-import static org.junit.Assert.assertEquals;
-
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,11 +15,8 @@ import eu.jsparrow.core.statistic.entity.JsparrowRuleData;
 public class JsparrowMetricTest {
 
 	@Test
-//	@Ignore
+	@Ignore
 	public void jsonMetricTest() {
-		String expected = "{\"uUID\":\"1337\",\"timestamp\":{\"nano\":0,\"epochSecond\":0},\"projectName\":\"jSparrow\",\"data\":{\"durationOfCalculation\":100,\"totalTimeSaved\":null,\"totalIssuesFixed\":5,\"filesChanged\":2,\"fileCount\":5,\"rulesData\":[{\"ruleId\":\"RuleID1\",\"issuesFixed\":2,\"remediationCost\":{\"seconds\":2,\"negative\":false,\"nano\":0,\"units\":[\"SECONDS\",\"NANOS\"],\"zero\":false},\"filesChanged\":2}]}}";
-		long currentTime = Instant.now().getEpochSecond();
-
 		JsparrowMetric jm = new JsparrowMetric();
 		jm.setRepoName("jSparrow");
 		jm.setRepoOwner("Splendit");
@@ -47,7 +40,7 @@ public class JsparrowMetricTest {
 		jm.setData(data);
 
 		String result = JsonUtil.generateJSON(jm);
-		//assertEquals(expected, result);
+		// assertEquals(expected, result);
 
 		JsonUtil.sendJson(result);
 	}
