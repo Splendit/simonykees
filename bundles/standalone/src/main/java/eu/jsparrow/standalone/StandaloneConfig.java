@@ -42,6 +42,7 @@ import eu.jsparrow.core.http.JsonUtil;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
@@ -98,9 +99,7 @@ public class StandaloneConfig {
 	private boolean abort = false;
 	private YAMLConfig yamlConfig;
 	private Boolean isChildModule;
-	private String repoOwner;
-	private String repoName;
-	private long timestampGitHubStart;
+	private StandaloneStatisticsMetadata statisticsMetadata;
 
 	// standalone statistics data
 	private StandaloneStatisticsData statisticsData;
@@ -131,8 +130,8 @@ public class StandaloneConfig {
 	 *             if the project cannot be created
 	 */
 	public StandaloneConfig(String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds, YAMLConfig yamlConfig, boolean isChildModule, String repoOwner, String repoName,
-			long timestampGitHubStart) throws CoreException, StandaloneException {
+			String[] natureIds, YAMLConfig yamlConfig, boolean isChildModule,
+			StandaloneStatisticsMetadata statisticsMetadata) throws CoreException, StandaloneException {
 
 		this.projectName = projectName;
 		this.path = path;
@@ -141,9 +140,7 @@ public class StandaloneConfig {
 		this.natureIds = natureIds;
 		this.yamlConfig = yamlConfig;
 		this.isChildModule = isChildModule;
-		this.repoOwner = repoOwner;
-		this.repoName = repoName;
-		this.timestampGitHubStart = timestampGitHubStart;
+		this.statisticsMetadata = statisticsMetadata;
 		setUp();
 	}
 
@@ -168,8 +165,8 @@ public class StandaloneConfig {
 		List<ICompilationUnit> compilationUnits = findProjectCompilationUnits();
 		compilationUnitsProvider = new CompilationUnitProvider(compilationUnits, yamlConfig.getExcludes());
 
-		statisticsData = new StandaloneStatisticsData(compilationUnits.size(), project.getName(), repoOwner, repoName,
-				timestampGitHubStart, refactoringPipeline);
+		statisticsData = new StandaloneStatisticsData(compilationUnits.size(), project.getName(), statisticsMetadata,
+				refactoringPipeline);
 	}
 
 	/**
@@ -609,14 +606,14 @@ public class StandaloneConfig {
 			statisticsData.setEndTime(Instant.now()
 				.getEpochSecond());
 			statisticsData.logMetricData();
-			JsparrowMetric metric = statisticsData.getMetricData();
-			String json = JsonUtil.generateJSON(metric);
-			JsonUtil.sendJson(json);
+			statisticsData.getMetricData()
+				.map(JsonUtil::generateJSON)
+				.ifPresent(JsonUtil::sendJson);
 		} catch (RefactoringException | ReconcileException e) {
 			throw new StandaloneException(String.format("Cannot commit refactoring on %s", project.getName()), e); //$NON-NLS-1$
 		}
 	}
-
+	
 	protected boolean hasRefactoringStates() {
 		if (refactoringPipeline.getRefactoringStates()
 			.isEmpty()) {

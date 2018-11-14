@@ -18,24 +18,14 @@ public class MavenParameters {
 	private String ruleId;
 	private String license = ""; //$NON-NLS-1$
 	private String url = ""; //$NON-NLS-1$
-	private Instant startTime;
-	private String repoOwner;
-	private String repoName;
+	private StatisticsMetadata statisticsMetadata;
 
 	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault,
-			String startTime, String repoOwner, String repoName) {
+			StatisticsMetadata statisticsMetadata) {
 		this(mode, license, url);
 		this.profile = profile;
 		this.useDefaultConfig = useDefault;
-		
-		if(startTime != null && !startTime.isEmpty()) {
-			this.startTime = Instant.parse(startTime);
-		} else {
-			this.startTime = Instant.now();
-		}
-		
-		this.repoOwner = repoOwner;
-		this.repoName = repoName;
+		this.statisticsMetadata = statisticsMetadata;
 	}
 
 	public MavenParameters(String mode, String license, String url) {
@@ -77,28 +67,12 @@ public class MavenParameters {
 		return url;
 	}
 
-	public Instant getStartTime() {
-		return startTime;
+	public StatisticsMetadata getStatisticsMetadata() {
+		return statisticsMetadata;
 	}
 
-	public void setStartTime(Instant startTime) {
-		this.startTime = startTime;
-	}
-
-	public String getRepoOwner() {
-		return repoOwner;
-	}
-
-	public void setRepoOwner(String repoOwner) {
-		this.repoOwner = repoOwner;
-	}
-
-	public String getRepoName() {
-		return repoName;
-	}
-
-	public void setRepoName(String repoName) {
-		this.repoName = repoName;
+	public void setStatisticsMetadata(StatisticsMetadata statisticsMetadata) {
+		this.statisticsMetadata = statisticsMetadata;
 	}
 
 }
