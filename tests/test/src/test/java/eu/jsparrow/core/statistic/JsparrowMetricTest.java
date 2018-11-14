@@ -19,29 +19,30 @@ import eu.jsparrow.core.statistic.entity.JsparrowRuleData;
 public class JsparrowMetricTest {
 
 	@Test
-	@Ignore
+//	@Ignore
 	public void jsonMetricTest() {
 		String expected = "{\"uUID\":\"1337\",\"timestamp\":{\"nano\":0,\"epochSecond\":0},\"projectName\":\"jSparrow\",\"data\":{\"durationOfCalculation\":100,\"totalTimeSaved\":null,\"totalIssuesFixed\":5,\"filesChanged\":2,\"fileCount\":5,\"rulesData\":[{\"ruleId\":\"RuleID1\",\"issuesFixed\":2,\"remediationCost\":{\"seconds\":2,\"negative\":false,\"nano\":0,\"units\":[\"SECONDS\",\"NANOS\"],\"zero\":false},\"filesChanged\":2}]}}";
-		Instant currentTime = Instant.ofEpochSecond(0);
+		long currentTime = Instant.now().getEpochSecond();
 
 		JsparrowMetric jm = new JsparrowMetric();
 		jm.setRepoName("jSparrow");
 		jm.setRepoOwner("Splendit");
-		jm.setTimestamp(currentTime.getEpochSecond());
-		jm.setuUID("1337");
+		jm.setTimestamp(50);
+		jm.setuuid("1337");
 		JsparrowData data = new JsparrowData();
-		data.setTimestampGitHubStart(100L);
-		data.setTimestampGitHubStart(200L);
+		data.setProjectName("Name");
+		data.setTimestampGitHubStart(100);
+		data.setTimestampJSparrowFinish(200);
 		data.setTotalIssuesFixed(5);
-		data.setTotalTimeSaved(1000L);
-		data.setFilesChanged(2);
-		data.setFileCount(5);
+		data.setTotalTimeSaved(1000);
+		data.setTotalFilesChanged(2);
+		data.setTotalFilesCount(5);
 
-		JsparrowRuleData ruleData = new JsparrowRuleData("RuleID1", 2, 2L, 2);
+		JsparrowRuleData ruleData = new JsparrowRuleData("RuleID1", 2, 2, 2);
 
 		List<JsparrowRuleData> ruleList = new ArrayList<>();
 		ruleList.add(ruleData);
-		data.setRulesData(ruleList);
+		data.setRules(ruleList);
 
 		jm.setData(data);
 

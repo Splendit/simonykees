@@ -6,12 +6,12 @@ public class JsparrowData {
 
 	private String projectName;
 	private long timestampGitHubStart;
-	private long timestampJSparrowEnd;
+	private long timestampJSparrowFinish;
 	private long totalTimeSaved;
 	private int totalIssuesFixed;
-	private int filesChanged;
-	private int fileCount;
-	private List<JsparrowRuleData> rulesData;
+	private int totalFilesChanged;
+	private int totalFilesCount;
+	private List<JsparrowRuleData> rules;
 
 	public String getProjectName() {
 		return projectName;
@@ -29,12 +29,12 @@ public class JsparrowData {
 		this.timestampGitHubStart = timestampGitHubStart;
 	}
 
-	public long getTimestampJSparrowEnd() {
-		return timestampJSparrowEnd;
+	public long getTimestampJSparrowFinish() {
+		return timestampJSparrowFinish;
 	}
 
-	public void setTimestampJSparrowEnd(long timestampJSparrowEnd) {
-		this.timestampJSparrowEnd = timestampJSparrowEnd;
+	public void setTimestampJSparrowFinish(long timestampJSparrowFinish) {
+		this.timestampJSparrowFinish = timestampJSparrowFinish;
 	}
 
 	public long getTotalTimeSaved() {
@@ -53,28 +53,28 @@ public class JsparrowData {
 		this.totalIssuesFixed = totalIssuesFixed;
 	}
 
-	public int getFilesChanged() {
-		return filesChanged;
+	public int getTotalFilesChanged() {
+		return totalFilesChanged;
 	}
 
-	public void setFilesChanged(int filesChanged) {
-		this.filesChanged = filesChanged;
+	public void setTotalFilesChanged(int totalFilesChanged) {
+		this.totalFilesChanged = totalFilesChanged;
 	}
 
-	public int getFileCount() {
-		return fileCount;
+	public int getTotalFilesCount() {
+		return totalFilesCount;
 	}
 
-	public void setFileCount(int fileCount) {
-		this.fileCount = fileCount;
+	public void setTotalFilesCount(int totalFilesCount) {
+		this.totalFilesCount = totalFilesCount;
 	}
 
-	public List<JsparrowRuleData> getRulesData() {
-		return rulesData;
+	public List<JsparrowRuleData> getRules() {
+		return rules;
 	}
 
-	public void setRulesData(List<JsparrowRuleData> rulesData) {
-		this.rulesData = rulesData;
+	public void setRules(List<JsparrowRuleData> rules) {
+		this.rules = rules;
 	}
 
 }

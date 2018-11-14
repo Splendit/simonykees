@@ -2,18 +2,18 @@ package eu.jsparrow.core.statistic.entity;
 
 public class JsparrowMetric {
 
-	private String uUID;
+	private String uuid;
 	private long timestamp;
 	private String repoOwner;
 	private String repoName;
 	private JsparrowData data;
 
-	public String getuUID() {
-		return uUID;
+	public String getuuid() {
+		return uuid;
 	}
 
-	public void setuUID(String uUID) {
-		this.uUID = uUID;
+	public void setuuid(String uuid) {
+		this.uuid = uuid;
 	}
 
 	public long getTimestamp() {

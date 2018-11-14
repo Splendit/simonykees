@@ -51,7 +51,7 @@ public class StandaloneStatisticsData {
 	}
 
 	public void setMetricData() {
-		metricData.setuUID(UUID.randomUUID()
+		metricData.setuuid(UUID.randomUUID()
 			.toString());
 		metricData.setTimestamp(Instant.now()
 			.getEpochSecond());
@@ -72,19 +72,19 @@ public class StandaloneStatisticsData {
 		for (RefactoringRule rule : rulesWithChanges) {
 			rulesDataList.add(getRuleData(rule));
 		}
-		projectData.setRulesData(rulesDataList);
+		projectData.setRules(rulesDataList);
 		projectData.setTotalIssuesFixed(numberOfTotalIssuesFixed);
-		projectData.setFilesChanged(changedFiles.size());
+		projectData.setTotalFilesChanged(changedFiles.size());
 		projectData.setTotalTimeSaved(amountOfTotalTimeSaved.toMinutes());
 
-		projectData.setFileCount(filesCount);
+		projectData.setTotalFilesCount(filesCount);
 
 		metricData.setData(projectData);
 	}
 
 	public void setEndTime(long timestampJSparrowEnd) {
 		metricData.getData()
-			.setTimestampJSparrowEnd(timestampJSparrowEnd);
+			.setTimestampJSparrowFinish(timestampJSparrowEnd);
 	}
 
 	public void logMetricData() {
@@ -100,7 +100,7 @@ public class StandaloneStatisticsData {
 			.append(System.lineSeparator());
 		logString.append("Number of total files changed: ")
 			.append(metricData.getData()
-				.getFilesChanged())
+				.getTotalFilesChanged())
 			.append(System.lineSeparator());
 		logString.append("Total amount of time saved: ")
 			.append(metricData.getData()
@@ -116,16 +116,16 @@ public class StandaloneStatisticsData {
 			.append(System.lineSeparator());
 		logString.append("End of the jSparrow refactoring: ")
 			.append(metricData.getData()
-				.getTimestampJSparrowEnd())
+				.getTimestampJSparrowFinish())
 			.append(System.lineSeparator());
 		logString.append("Total number of files in the project: ")
 			.append(metricData.getData()
-				.getFileCount())
+				.getTotalFilesCount())
 			.append(System.lineSeparator());
 		logString.append(System.lineSeparator());
 
 		for (JsparrowRuleData ruleData : metricData.getData()
-			.getRulesData()) {
+			.getRules()) {
 			appendLogForRule(ruleData, logString);
 		}
 		logger.info(logString.toString());
