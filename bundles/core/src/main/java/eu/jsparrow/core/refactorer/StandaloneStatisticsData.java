@@ -146,7 +146,7 @@ public class StandaloneStatisticsData {
 
 	public void logMetricData() {
 		StringBuilder logString = new StringBuilder();
-		if (metricData != null) {
+		if (null != metricData) {
 			logString.append("Metrics for the project ")
 				.append(metricData.getRepoName())
 				.append(", with owner ")
@@ -182,14 +182,14 @@ public class StandaloneStatisticsData {
 					.getTotalFilesCount())
 				.append(System.lineSeparator());
 			logString.append(System.lineSeparator());
-		}
 
-		for (JsparrowRuleData ruleData : metricData.getData()
-			.getRules()) {
-			appendLogForRule(ruleData, logString);
-		}
+			for (JsparrowRuleData ruleData : metricData.getData()
+				.getRules()) {
+				appendLogForRule(ruleData, logString);
+			}
 
-		logger.info(logString.toString());
+			logger.info(logString.toString());
+		}
 	}
 
 	private void appendLogForRule(JsparrowRuleData ruleData, StringBuilder logString) {
