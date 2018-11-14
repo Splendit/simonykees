@@ -21,6 +21,12 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
+/**
+ * Used for collecting statistics data to be stored in database or logged out.
+ * 
+ * @since 2.7.0
+ *
+ */
 public class StandaloneStatisticsData {
 
 	private static final Logger logger = LoggerFactory.getLogger(StandaloneStatisticsData.class);
@@ -104,6 +110,40 @@ public class StandaloneStatisticsData {
 		}
 	}
 
+	public JsparrowRuleData getRuleData(RefactoringRule rule) {
+		int issuesFixedForRule = RuleApplicationCount.getFor(rule)
+			.toInt();
+		Duration remediationCost = rule.getRuleDescription()
+			.getRemediationCost();
+
+		return new JsparrowRuleData(rule.getId(), issuesFixedForRule, remediationCost.toMinutes(),
+				refactoringPipeline.getChangesForRule(rule)
+					.size());
+	}
+
+	public Optional<JsparrowMetric> getMetricData() {
+		return Optional.ofNullable(metricData);
+	}
+
+	protected void updateTotalCounter(JsparrowRuleData ruleData, RefactoringRule rule) {
+		updateNumberOfTotalIssuesFixed(ruleData.getIssuesFixed());
+		updateAmountOfTimeSavedForRule(EliminatedTechnicalDebt.get(rule));
+		addFilesChangedByRule(refactoringPipeline.getChangesForRule(rule)
+			.keySet());
+	}
+
+	protected void addFilesChangedByRule(Set<ICompilationUnit> files) {
+		changedFiles.addAll(files);
+	}
+
+	protected void updateAmountOfTimeSavedForRule(Duration amountOfTimeSavedForRule) {
+		amountOfTotalTimeSaved = amountOfTotalTimeSaved.plus(amountOfTimeSavedForRule);
+	}
+
+	protected void updateNumberOfTotalIssuesFixed(int issuesFixed) {
+		numberOfTotalIssuesFixed += issuesFixed;
+	}
+
 	public void logMetricData() {
 		StringBuilder logString = new StringBuilder();
 		if (metricData != null) {
@@ -169,27 +209,4 @@ public class StandaloneStatisticsData {
 		logString.append(System.lineSeparator());
 	}
 
-	public JsparrowRuleData getRuleData(RefactoringRule rule) {
-		int issuesFixedForRule = RuleApplicationCount.getFor(rule)
-			.toInt();
-		Duration remediationCost = rule.getRuleDescription()
-			.getRemediationCost();
-
-		return new JsparrowRuleData(rule.getId(), issuesFixedForRule, remediationCost.toMinutes(),
-				refactoringPipeline.getChangesForRule(rule)
-					.size());
-	}
-
-	public Optional<JsparrowMetric> getMetricData() {
-		return Optional.ofNullable(metricData);
-	}
-	
-	protected void updateTotalCounter(JsparrowRuleData ruleData, RefactoringRule rule) {
-		numberOfTotalIssuesFixed += ruleData.getIssuesFixed();
-		Duration amountOfTimeSavedForRule = EliminatedTechnicalDebt.get(rule);
-		amountOfTotalTimeSaved = amountOfTotalTimeSaved.plus(amountOfTimeSavedForRule);
-
-		changedFiles.addAll(refactoringPipeline.getChangesForRule(rule)
-			.keySet());
-	}
 }

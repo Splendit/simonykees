@@ -1,5 +1,11 @@
 package eu.jsparrow.core.statistic.entity;
 
+/**
+ * Entity class for jSparrow statistics rule data
+ * 
+ * @since 2.7.0
+ *
+ */
 public class JsparrowRuleData {
 
 	private String ruleId;

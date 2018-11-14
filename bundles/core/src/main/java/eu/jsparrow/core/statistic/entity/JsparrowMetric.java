@@ -1,5 +1,11 @@
 package eu.jsparrow.core.statistic.entity;
 
+/**
+ * Entity class for jSparrow statistics data
+ * 
+ * @since 2.7.0
+ *
+ */
 public class JsparrowMetric {
 
 	private String uuid;
