@@ -28,7 +28,7 @@ public class JsparrowMetricTest {
 		jm.setRepoName("jSparrow");
 		jm.setRepoOwner("Splendit");
 		jm.setTimestamp(50);
-		jm.setuuid("1337");
+		jm.setuuid("1338");
 		JsparrowData data = new JsparrowData();
 		data.setProjectName("Name");
 		data.setTimestampGitHubStart(100);

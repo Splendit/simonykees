@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -32,35 +33,40 @@ public class StandaloneStatisticsData {
 	private Duration amountOfTotalTimeSaved = Duration.ZERO;
 	private int filesCount;
 	private String projectName;
-	private String repoOwner;
-	private String repoName;
-	private long timestampGitHubStart;
+	private StandaloneStatisticsMetadata statisticsMetadata;
 
 	private RefactoringPipeline refactoringPipeline;
 	private JsparrowMetric metricData;
 
-	public StandaloneStatisticsData(int filesCount, String projectName, String repoOwner, String repoName,
-			long timestampGitHubStart, RefactoringPipeline refactoringPipeline) {
+	public StandaloneStatisticsData(int filesCount, String projectName, StandaloneStatisticsMetadata statisticsMetadata,
+			RefactoringPipeline refactoringPipeline) {
 		this.filesCount = filesCount;
 		this.projectName = projectName;
 		this.refactoringPipeline = refactoringPipeline;
-		this.repoOwner = repoOwner;
-		this.repoName = repoName;
-		this.timestampGitHubStart = timestampGitHubStart;
-		metricData = new JsparrowMetric();
+		this.statisticsMetadata = statisticsMetadata;
 	}
 
 	public void setMetricData() {
+		if (statisticsMetadata.isValid()) {
+			populateData();
+		} else {
+			metricData = null;
+		}
+	}
+
+	private void populateData() {
+		metricData = new JsparrowMetric();
+
 		metricData.setuuid(UUID.randomUUID()
 			.toString());
 		metricData.setTimestamp(Instant.now()
 			.getEpochSecond());
-		metricData.setRepoOwner(repoOwner);
-		metricData.setRepoName(repoName);
+		metricData.setRepoOwner(statisticsMetadata.getRepoOwner());
+		metricData.setRepoName(statisticsMetadata.getRepoName());
 
 		JsparrowData projectData = new JsparrowData();
 		projectData.setProjectName(projectName);
-		projectData.setTimestampGitHubStart(timestampGitHubStart);
+		projectData.setTimestampGitHubStart(statisticsMetadata.getStartTime());
 		List<JsparrowRuleData> rulesDataList = new ArrayList<>();
 		List<RefactoringRule> rulesWithChanges = new ArrayList<>();
 		rulesWithChanges = refactoringPipeline.getRules()
@@ -83,51 +89,57 @@ public class StandaloneStatisticsData {
 	}
 
 	public void setEndTime(long timestampJSparrowEnd) {
-		metricData.getData()
-			.setTimestampJSparrowFinish(timestampJSparrowEnd);
+		if (metricData != null) {
+			metricData.getData()
+				.setTimestampJSparrowFinish(timestampJSparrowEnd);
+		}
 	}
 
 	public void logMetricData() {
-		StringBuilder logString = new StringBuilder().append("Metrics for the project ")
-			.append(metricData.getRepoName())
-			.append(", with owner ")
-			.append(metricData.getRepoOwner())
-			.append(":")
-			.append(System.lineSeparator());
-		logString.append("Number of total issues fixed: ")
-			.append(metricData.getData()
-				.getTotalIssuesFixed())
-			.append(System.lineSeparator());
-		logString.append("Number of total files changed: ")
-			.append(metricData.getData()
-				.getTotalFilesChanged())
-			.append(System.lineSeparator());
-		logString.append("Total amount of time saved: ")
-			.append(metricData.getData()
-				.getTotalTimeSaved())
-			.append(System.lineSeparator());
-		logString.append("Project name: ")
-			.append(metricData.getData()
-				.getProjectName())
-			.append(System.lineSeparator());
-		logString.append("Start of the GitHub App: ")
-			.append(metricData.getData()
-				.getTimestampGitHubStart())
-			.append(System.lineSeparator());
-		logString.append("End of the jSparrow refactoring: ")
-			.append(metricData.getData()
-				.getTimestampJSparrowFinish())
-			.append(System.lineSeparator());
-		logString.append("Total number of files in the project: ")
-			.append(metricData.getData()
-				.getTotalFilesCount())
-			.append(System.lineSeparator());
-		logString.append(System.lineSeparator());
+		StringBuilder logString = new StringBuilder();
+		if (metricData != null) {
+			logString.append("Metrics for the project ")
+				.append(metricData.getRepoName())
+				.append(", with owner ")
+				.append(metricData.getRepoOwner())
+				.append(":")
+				.append(System.lineSeparator());
+			logString.append("Number of total issues fixed: ")
+				.append(metricData.getData()
+					.getTotalIssuesFixed())
+				.append(System.lineSeparator());
+			logString.append("Number of total files changed: ")
+				.append(metricData.getData()
+					.getTotalFilesChanged())
+				.append(System.lineSeparator());
+			logString.append("Total amount of time saved: ")
+				.append(metricData.getData()
+					.getTotalTimeSaved())
+				.append(System.lineSeparator());
+			logString.append("Project name: ")
+				.append(metricData.getData()
+					.getProjectName())
+				.append(System.lineSeparator());
+			logString.append("Start of the GitHub App: ")
+				.append(metricData.getData()
+					.getTimestampGitHubStart())
+				.append(System.lineSeparator());
+			logString.append("End of the jSparrow refactoring: ")
+				.append(metricData.getData()
+					.getTimestampJSparrowFinish())
+				.append(System.lineSeparator());
+			logString.append("Total number of files in the project: ")
+				.append(metricData.getData()
+					.getTotalFilesCount())
+				.append(System.lineSeparator());
+			logString.append(System.lineSeparator());
+		}
 
 		for (JsparrowRuleData ruleData : metricData.getData()
 			.getRules()) {
 			appendLogForRule(ruleData, logString);
 		}
+
 		logger.info(logString.toString());
 	}
 
@@ -166,8 +178,7 @@ public class StandaloneStatisticsData {
 					.size());
 	}
 
-	
-	public JsparrowMetric getMetricData() {
-		return metricData;
+	public Optional<JsparrowMetric> getMetricData() {
+		return Optional.ofNullable(metricData);
 	}
 }

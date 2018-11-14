@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
@@ -237,11 +238,8 @@ public class RefactoringInvoker {
 
 		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
 				context.getProperty(ROOT_CONFIG_PATH)).get();
-		
-		String repoOwner = context.getProperty(STATISTICS_REPO_OWNER);
-		String repoName = context.getProperty(STATISTICS_REPO_NAME);
-		Instant gitHubStartTime = Instant.parse(context.getProperty(STATISTICS_START_TIME));
-		long timestampGitHubStart = gitHubStartTime.getEpochSecond();
+
+		StandaloneStatisticsMetadata metadata = extractStatisticsMetadata(context);
 
 		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
@@ -270,7 +268,7 @@ public class RefactoringInvoker {
 			try {
 				YAMLConfig config = getConfiguration(context, id);
 				StandaloneConfig standaloneConfig = new StandaloneConfig(projectName, path, compilerCompliance,
-						sourceFolder, natureIds, config, isChildModule, repoOwner, repoName, timestampGitHubStart);
+						sourceFolder, natureIds, config, isChildModule, metadata);
 				standaloneConfigs.add(standaloneConfig);
 
 			} catch (CoreException | RuntimeException e) {
@@ -282,6 +280,21 @@ public class RefactoringInvoker {
 		if (standaloneConfigs.isEmpty()) {
 			throw new StandaloneException(Messages.RefactoringInvoker_error_allModulesExcluded);
 		}
+	}
+
+	private StandaloneStatisticsMetadata extractStatisticsMetadata(BundleContext context) {
+		String repoOwner = context.getProperty(STATISTICS_REPO_OWNER);
+		String repoName = context.getProperty(STATISTICS_REPO_NAME);
+
+		String gitHubStartTimeString = context.getProperty(STATISTICS_START_TIME);
+
+		long timestampGitHubStart = -1;
+		if (gitHubStartTimeString != null && !gitHubStartTimeString.isEmpty()) {
+			Instant gitHubStartTime = Instant.parse(context.getProperty(STATISTICS_START_TIME));
+			timestampGitHubStart = gitHubStartTime.getEpochSecond();
+		}
+
+		return new StandaloneStatisticsMetadata(timestampGitHubStart, repoOwner, repoName);
 	}
 
 	protected String[] findNatureIds(BundleContext context, String id) {

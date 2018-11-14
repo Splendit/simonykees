@@ -22,6 +22,7 @@ import eu.jsparrow.maven.adapter.DependencyManager;
 import eu.jsparrow.maven.adapter.MavenAdapter;
 import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.StandaloneLoader;
+import eu.jsparrow.maven.adapter.StatisticsMetadata;
 import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.i18n.Messages;
@@ -84,10 +85,10 @@ public class RefactorMojo extends AbstractMojo {
 	@Parameter(property = "startTime")
 	private String startTime;
 
-	@Parameter(property = "repoOwner", defaultValue = "")
+	@Parameter(property = "repoOwner")
 	private String repoOwner;
 
-	@Parameter(property = "repoName", defaultValue = "")
+	@Parameter(property = "repoName")
 	private String repoName;
 
 	public void execute() throws MojoExecutionException {
@@ -101,8 +102,8 @@ public class RefactorMojo extends AbstractMojo {
 		}
 
 		String mode = StandaloneMode.REFACTOR.name();
-		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration, startTime,
-				repoOwner, repoName);
+		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
+		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration, statisticsMetadata);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		DependencyManager dependencyManager = new DependencyManager(log, mavenHome);
 		List<MavenProject> projects = mavenSession.getAllProjects();
