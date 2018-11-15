@@ -21,7 +21,6 @@ public class TestBracketsToControlRule {
 
 	public static void testforLoop() {
 		for (int i = 1; i < 2; i++) {
-			;
 		}
 		Arrays.asList(1, 2, 3)
 			.forEach(i -> logger.info(String.valueOf(i)));
@@ -30,10 +29,8 @@ public class TestBracketsToControlRule {
 	public static void thestWhileLoop() {
 		String st = null;
 		while (st != null) {
-			;
 		}
 		do {
-			;
 		} while (st != null);
 	}
 
@@ -43,7 +40,6 @@ public class TestBracketsToControlRule {
 		if (s.equals("a")) {
 			if (t.equals("b")) {
 				do {
-					;
 				} while (t != null);
 			} else if (s.equals("aaa")) {
 				logger.info("aa");
@@ -51,7 +47,6 @@ public class TestBracketsToControlRule {
 				logger.info("bbb");
 			}
 		} else {
-			;
 		}
 	}
 

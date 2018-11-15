@@ -267,6 +267,18 @@ public class Messages extends NLS {
 
 	public static String RemoveDoubleNegationRule_name;
 
+	public static String RemoveDuplicatedThrowsRule_description;
+
+	public static String RemoveDuplicatedThrowsRule_name;
+
+	public static String RemoveEmptyStatementRule_description;
+
+	public static String RemoveEmptyStatementRule_name;
+
+	public static String RemoveExplicitCallToSuperRule_description;
+
+	public static String RemoveExplicitCallToSuperRule_name;
+
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
@@ -428,6 +440,10 @@ public class Messages extends NLS {
 	public static String UpdateLicenseDialog_error_licenseInvalid;
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
+	public static String UseStringBuilderAppendRule_description;
+
+	public static String UseStringBuilderAppendRule_name;
+
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
 	public static String ValidateExecutor_validation_scheduler_started;
 	public static String WelcomeEditor_title;

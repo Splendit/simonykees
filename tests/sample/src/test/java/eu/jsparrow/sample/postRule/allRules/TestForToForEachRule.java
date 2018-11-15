@@ -102,7 +102,10 @@ public class TestForToForEachRule {
 		int i = 0;
 		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext(); i++) {
 			String s = iterator.next();
-			sb.append(s + "," + i);
+			sb.append(new StringBuilder().append(s)
+				.append(",")
+				.append(i)
+				.toString());
 		}
 		sb.append(i);
 

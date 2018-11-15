@@ -67,7 +67,13 @@ public class TestRemoveNewStringConstructorRule {
 	}
 
 	public String testNestedNewStringsAndConcat(String input) {
-		return input + "-" + input + "-" + "val" + "val";
+		return new StringBuilder().append(input)
+			.append("-")
+			.append(input)
+			.append("-")
+			.append("val")
+			.append("val")
+			.toString();
 	}
 
 	public String testNestedNewStrings(String input) {

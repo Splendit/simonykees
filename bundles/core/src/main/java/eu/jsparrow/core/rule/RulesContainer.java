@@ -47,6 +47,9 @@ import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
 import eu.jsparrow.core.rule.impl.RemoveDoubleNegationRule;
+import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
+import eu.jsparrow.core.rule.impl.RemoveEmptyStatementRule;
+import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
@@ -59,6 +62,7 @@ import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
+import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -120,6 +124,7 @@ public class RulesContainer {
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new DateDeprecatedRule(),
 				new RemoveDoubleNegationRule(), new OptionalIfPresentRule(), new GuardConditionRule(),
+				new RemoveExplicitCallToSuperRule(), new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
@@ -137,6 +142,12 @@ public class RulesContainer {
 				new LambdaForEachCollectRule(), new LambdaForEachMapRule(), new FlatMapInsteadOfNestedLoopsRule(),
 				new EnhancedForLoopToStreamAnyMatchRule(), new EnhancedForLoopToStreamFindFirstRule(),
 				new EnhancedForLoopToStreamSumRule(), new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
+
+				/*
+				 * String manipulations. This rule must be applied after
+				 * StringBuildingLoopRule.
+				 */
+				new UseStringBuilderAppendRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen

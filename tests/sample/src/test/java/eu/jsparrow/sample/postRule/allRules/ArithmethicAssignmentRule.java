@@ -332,7 +332,10 @@ public class ArithmethicAssignmentRule {
 
 	// SIM-94
 	public CharSequence cornerCaseByte(CharSequence cs) {
-		cs = cs + "a" + 'b';
+		cs = new StringBuilder().append(cs)
+			.append("a")
+			.append('b')
+			.toString();
 		return cs;
 	}
 
