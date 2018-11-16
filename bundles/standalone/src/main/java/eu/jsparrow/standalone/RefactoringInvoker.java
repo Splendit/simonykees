@@ -8,6 +8,7 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.core.resources.IProject;
@@ -160,6 +161,7 @@ public class RefactoringInvoker {
 	private void collectAndSendStatisticData() {
 		boolean computedStatistics = standaloneConfigs.stream()
 			.map(config -> config.getStatisticsData())
+			.filter(Objects::nonNull)
 			.map(statistics -> statistics.getMetricData())
 			.anyMatch(Optional::isPresent); 
 
