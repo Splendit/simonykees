@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
-import eu.jsparrow.core.http.JsonUtil;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
@@ -525,6 +524,7 @@ public class StandaloneConfig {
 		rules.addAll(selectedAutomaticRules);
 
 		applyRules(rules);
+		statisticsData.setMetricData();
 	}
 
 	private Optional<StandardLoggerRule> setUpLoggerRule(Map<String, String> options) {
@@ -600,19 +600,14 @@ public class StandaloneConfig {
 		String logInfo = NLS.bind(Messages.Activator_debug_commitRefactoring, project.getName());
 		logger.info(logInfo);
 		try {
-			statisticsData.setMetricData();
 			refactoringPipeline.commitRefactoring();
 			statisticsData.setEndTime(Instant.now()
 				.getEpochSecond());
-			statisticsData.logMetricData();
-			statisticsData.getMetricData()
-				.map(JsonUtil::generateJSON)
-				.ifPresent(JsonUtil::sendJson);
 		} catch (RefactoringException | ReconcileException e) {
 			throw new StandaloneException(String.format("Cannot commit refactoring on %s", project.getName()), e); //$NON-NLS-1$
 		}
 	}
-	
+
 	protected boolean hasRefactoringStates() {
 		if (refactoringPipeline.getRefactoringStates()
 			.isEmpty()) {
@@ -679,6 +674,10 @@ public class StandaloneConfig {
 	protected IProject getProject(IWorkspace workspace, String name) {
 		return workspace.getRoot()
 			.getProject(name);
+	}
+
+	public StandaloneStatisticsData getStatisticsData() {
+		return statisticsData;
 	}
 
 	protected IJavaProject createJavaProject(IProject project) {
