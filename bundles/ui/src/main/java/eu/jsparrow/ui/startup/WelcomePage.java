@@ -104,6 +104,8 @@ public class WelcomePage extends FormPage {
 
 	protected void createScrolledFormContent(Composite parent) {
 		Group browserGroup = new Group(parent, SWT.NONE);
+		browserGroup.setBackground(Display.getDefault()
+			.getSystemColor(SWT.COLOR_WHITE));
 		GridData groupGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		browserGroup.setLayoutData(groupGridData);
 		browserGroup.setLayout(new GridLayout(1, false));
