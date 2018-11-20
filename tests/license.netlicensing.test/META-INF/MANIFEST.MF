@@ -1,8 +1,9 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: eu.jsparrow.license.netlicensing.test
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow License Test Fragment
 Bundle-SymbolicName: eu.jsparrow.license.netlicensing.test
-Bundle-Version: 2.6.0.qualifier
+Bundle-Version: 2.7.0.qualifier
 Fragment-Host: eu.jsparrow.license.netlicensing
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.jdt.junit4.runtime;bundle-version="1.1.0",

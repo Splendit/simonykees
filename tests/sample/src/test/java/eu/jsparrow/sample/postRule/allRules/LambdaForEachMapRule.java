@@ -150,7 +150,10 @@ public class LambdaForEachMapRule {
 			.forEach(s -> {
 				int i = 10;
 				int c = 0;
-				String subString = StringUtils.substring(s, 1) + i + c;
+				String subString = new StringBuilder().append(StringUtils.substring(s, 1))
+					.append(i)
+					.append(c)
+					.toString();
 				String lower = StringUtils.lowerCase(subString);
 				sb.append(lower + c);
 			});
@@ -166,7 +169,10 @@ public class LambdaForEachMapRule {
 			.forEach(s -> {
 				int i = 10;
 				int c = 0;
-				String subString = StringUtils.substring(s, 1) + i + c;
+				String subString = new StringBuilder().append(StringUtils.substring(s, 1))
+					.append(i)
+					.append(c)
+					.toString();
 				String lower = StringUtils.lowerCase(subString);
 				sb.append(lower);
 				if (StringUtils.isEmpty(lower)) {

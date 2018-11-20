@@ -125,6 +125,8 @@ public class Messages extends NLS {
 	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;
 	public static String FunctionalInterfaceRule_name;
+	public static String GuardConditionRule_description;
+	public static String GuardConditionRule_name;
 	public static String LambdaForEachCollectRule_description;
 	public static String LambdaForEachCollectRule_name;
 	public static String LambdaForEachIfWrapperToFilterRule_description;
@@ -261,6 +263,22 @@ public class Messages extends NLS {
 	public static String RefactoringInvoker_GetEnabledRulesForProject;
 	public static String RefactoringInvoker_GetSelectedRules;
 	public static String RefactoringInvoker_OverridingConfigWithCommandLine;
+	public static String RemoveDoubleNegationRule_description;
+
+	public static String RemoveDoubleNegationRule_name;
+
+	public static String RemoveDuplicatedThrowsRule_description;
+
+	public static String RemoveDuplicatedThrowsRule_name;
+
+	public static String RemoveEmptyStatementRule_description;
+
+	public static String RemoveEmptyStatementRule_name;
+
+	public static String RemoveExplicitCallToSuperRule_description;
+
+	public static String RemoveExplicitCallToSuperRule_name;
+
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
@@ -422,8 +440,30 @@ public class Messages extends NLS {
 	public static String UpdateLicenseDialog_error_licenseInvalid;
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
+	public static String UseStringBuilderAppendRule_description;
+
+	public static String UseStringBuilderAppendRule_name;
+
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
 	public static String ValidateExecutor_validation_scheduler_started;
+	public static String WelcomeEditor_title;
+
+	public static String WelcomePage_buy_license_button;
+
+	public static String WelcomePage_customization_group;
+
+	public static String WelcomePage_getting_started_group;
+
+	public static String WelcomePage_guidelines_button;
+
+	public static String WelcomePage_license_preferences_button;
+
+	public static String WelcomePage_market_place_button;
+
+	public static String WelcomePage_preferences_button;
+
+	public static String WelcomePage_title;
+
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
 	public static String PutIfAbsentRule_description;

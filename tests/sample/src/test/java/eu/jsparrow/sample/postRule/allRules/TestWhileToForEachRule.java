@@ -341,7 +341,10 @@ public class TestWhileToForEachRule {
 		while (iterator.hasNext() && !StringUtils.isEmpty(foo)) {
 			if (l.size() > 0) {
 				s = iterator.next();
-				sb.append(s + "|" + foo);
+				sb.append(new StringBuilder().append(s)
+					.append("|")
+					.append(foo)
+					.toString());
 			}
 		}
 
@@ -410,7 +413,11 @@ public class TestWhileToForEachRule {
 		String prefix = "";
 		for (String s : l) {
 			result = k.stream()
-				.map(key -> s + "|" + key + ";")
+				.map(key -> new StringBuilder().append(s)
+					.append("|")
+					.append(key)
+					.append(";")
+					.toString())
 				.collect(Collectors.toList());
 
 			result.forEach(sb::append);

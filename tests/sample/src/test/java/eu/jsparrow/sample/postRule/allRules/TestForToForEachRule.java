@@ -102,7 +102,10 @@ public class TestForToForEachRule {
 		int i = 0;
 		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext(); i++) {
 			String s = iterator.next();
-			sb.append(s + "," + i);
+			sb.append(new StringBuilder().append(s)
+				.append(",")
+				.append(i)
+				.toString());
 		}
 		sb.append(i);
 
@@ -196,16 +199,15 @@ public class TestForToForEachRule {
 	}
 
 	public Object encode(final Object value) {
-		if (value != null) {
-			Map<String, Object> map = new LinkedHashMap<>();
-			List<Object> list = (List<Object>) value;
-			for (int i = 0; i < list.size(); i++) {
-				map.put(Integer.toString(i), list.get(i));
-			}
-			return map;
+		if (value == null) {
+			return null;
 		}
-
-		return null;
+		Map<String, Object> map = new LinkedHashMap<>();
+		List<Object> list = (List<Object>) value;
+		for (int i = 0; i < list.size(); i++) {
+			map.put(Integer.toString(i), list.get(i));
+		}
+		return map;
 	}
 
 	public boolean testDoubleLoop() {
