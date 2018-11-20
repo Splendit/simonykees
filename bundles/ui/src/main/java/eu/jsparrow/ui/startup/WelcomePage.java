@@ -43,11 +43,15 @@ public class WelcomePage extends FormPage {
 		FormToolkit toolkit = managedForm.getToolkit();
 		Composite content = managedForm.getForm()
 			.getBody();
+		content.setBackground(Display.getDefault()
+			.getSystemColor(SWT.COLOR_WHITE));
 		content.setLayout(new GridLayout(1, true));
 		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Composite title = toolkit.createComposite(content);
 		title.setLayout(new GridLayout(1, false));
+		title.setBackground(Display.getDefault()
+			.getSystemColor(SWT.COLOR_WHITE));
 		GridData gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		gridData.horizontalIndent = 6;
 		title.setLayoutData(gridData);
@@ -55,16 +59,22 @@ public class WelcomePage extends FormPage {
 		createTitleBar(title);
 
 		Composite body = toolkit.createComposite(content);
+		body.setBackground(Display.getDefault()
+			.getSystemColor(SWT.COLOR_WHITE));
 		body.setLayout(new GridLayout(5, true));
 		body.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// create left side
 		Composite leftComposite = toolkit.createComposite(body);
+		leftComposite.setBackground(Display.getDefault()
+			.getSystemColor(SWT.COLOR_WHITE));
 		leftComposite.setLayout(new GridLayout(1, false));
 		leftComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
 
 		// create right side
 		Composite rightComposite = toolkit.createComposite(body);
+		rightComposite.setBackground(Display.getDefault()
+			.getSystemColor(SWT.COLOR_WHITE));
 		rightComposite.setLayout(new GridLayout(1, false));
 		rightComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
@@ -88,10 +98,19 @@ public class WelcomePage extends FormPage {
 
 		titleLabel.setFont(titleFont);
 		titleLabel.setText(Messages.WelcomePage_title);
+		titleLabel.setBackground(Display.getDefault()
+			.getSystemColor(SWT.COLOR_WHITE));
 	}
 
 	protected void createScrolledFormContent(Composite parent) {
-		Browser browser = new Browser(parent, SWT.SIMPLE);
+		Group browserGroup = new Group(parent, SWT.NONE);
+		browserGroup.setBackground(Display.getDefault()
+			.getSystemColor(SWT.COLOR_WHITE));
+		GridData groupGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		browserGroup.setLayoutData(groupGridData);
+		browserGroup.setLayout(new GridLayout(1, false));
+
+		Browser browser = new Browser(browserGroup, SWT.SIMPLE);
 		browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		browser.setUrl("https://jsparrow.github.io/dashboard/"); //$NON-NLS-1$
 	}
