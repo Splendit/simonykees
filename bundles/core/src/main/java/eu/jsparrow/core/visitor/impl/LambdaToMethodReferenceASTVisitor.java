@@ -397,7 +397,9 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	}
 
 	private boolean qualifiedNameNeeded(ITypeBinding binding) {
-		String bindingName = binding.getName();
+		ITypeBinding typeBidning = binding.getErasure() != null ? binding.getErasure() : binding;
+		String bindingName = typeBidning.getName();
+		String bindingQualifiedName = typeBidning.getQualifiedName();
 		return ASTNodeUtil.returnTypedList(compilationUnit.imports(), ImportDeclaration.class)
 			.stream()
 			.map(ImportDeclaration::getName)
@@ -406,9 +408,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 				QualifiedName qualifiedImportName = (QualifiedName) name;
 				return qualifiedImportName.getName()
 					.getIdentifier()
-					.equals(bindingName)
-						&& !binding.getQualifiedName()
-							.equals(qualifiedImportName.toString());
+					.equals(bindingName) && !bindingQualifiedName.equals(qualifiedImportName.toString());
 			});
 	}
 
