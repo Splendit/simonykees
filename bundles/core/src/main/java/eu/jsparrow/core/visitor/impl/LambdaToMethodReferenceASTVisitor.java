@@ -89,19 +89,19 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 				 * 
 				 * case 2: reference to instance method i.e.
 				 * 
-				 * personList.forEach(element -> System.out.println(element));
+				 * personList.forEach(element -> System.out.println(element))
 				 * 
 				 * becomes
 				 * 
-				 * personList.forEach(System.out::println);
+				 * personList.forEach(System.out::println)
 				 * 
 				 * case 3: reference to 'this' i.e.
 				 * 
-				 * personList.forEach(person -> doSomething(person));
+				 * personList.forEach(person -> doSomething(person))
 				 * 
 				 * becomes
 				 * 
-				 * personList.forEach(this::doSomething);
+				 * personList.forEach(this::doSomething)
 				 */
 				if (methodArguments.size() == lambdaParams.size()
 						&& checkMethodParameters(lambdaParams, methodArguments)) {
@@ -187,11 +187,11 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 				/*
 				 * case 4: reference to instance method of arbitrary type i.e.
 				 * 
-				 * Arrays.sort(stringArray, (a, b) -> a.compareToIgnoreCase(b));
+				 * Arrays.sort(stringArray, (a, b) -> a.compareToIgnoreCase(b))
 				 * 
 				 * becomes
 				 * 
-				 * Arrays.sort(stringArray, String::compareToIgnoreCase);
+				 * Arrays.sort(stringArray, String::compareToIgnoreCase)
 				 */
 				else if ((lambdaParams.size() - 1) == methodArguments.size() && methodInvocationExpression != null) {
 
@@ -238,12 +238,12 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			 * case 5: reference to class instance creation (new) i.e.
 			 * 
 			 * Set<Person> persSet2 = transferElements(personList, () -> new
-			 * HashSet<>());
+			 * HashSet<>())
 			 * 
 			 * becomes
 			 * 
 			 * Set<Person> persSet3 = transferElements(personList,
-			 * HashSet<Person>::new);
+			 * HashSet<Person>::new)
 			 */
 			else if (ASTNode.CLASS_INSTANCE_CREATION == body.getNodeType()) {
 				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) body;
@@ -259,7 +259,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						.newCreationReference();
 					if (ASTNode.PARAMETERIZED_TYPE == classInstanceCreationType.getNodeType()
 							&& ((ParameterizedType) classInstanceCreationType).typeArguments()
-								.size() == 0) {
+								.isEmpty()) {
 						ref.setType((Type) astRewrite
 							.createMoveTarget(((ParameterizedType) classInstanceCreationType).getType()));
 					} else {
