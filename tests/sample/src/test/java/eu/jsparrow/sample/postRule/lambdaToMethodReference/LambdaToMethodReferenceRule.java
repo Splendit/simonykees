@@ -320,6 +320,22 @@ public class LambdaToMethodReferenceRule {
 		 */
 		numberUtils.stream().map(UsingApacheNumberUtils::getNumber).map(org.apache.commons.lang3.math.NumberUtils::toString);
 	}
+	
+	public void usingOverloadedMethods(Other other) {
+		/*
+		 * SIM-1351 The wrap and the other.read methods are both overloaded.
+		 * Converting to method reference causes ambiguity.
+		 */
+		ClassWithStaticOverloadedMethods.wrap(() -> other.read());
+
+		/*
+		 * SIM-1351 The other.overloadedWihtPrivateMethod should not cause
+		 * ambiguity because the overloaded method is private. It should be
+		 * possible to convert to method reference.
+		 */
+		ClassWithStaticOverloadedMethods.wrap(other::overloadedWihtPrivateMethod);
+
+	}
 
 	class ComparisonProvider {
 		public int compareByName(Person a, Person b) {
@@ -406,3 +422,47 @@ class AmbiguousMethods {
 		return  String.valueOf(i);
 	}
 }
+
+/**
+ * SIM-1351
+ */
+class Other {
+	
+	public byte [] read () {
+		return new byte[] {};
+	}
+	
+	public String read(boolean bytes) {
+		return null;
+	}
+	
+	public byte[] overloadedWihtPrivateMethod() {
+		return overloadedWihtPrivateMethod(false);
+	}
+	
+	private byte[] overloadedWihtPrivateMethod(boolean bytes) {
+		return new byte[] {};
+	}
+}
+
+class ClassWithStaticOverloadedMethods {
+
+	public static void wrap(CheckedRunnable runable) {
+
+	}
+
+	public static <T> T wrap(CheckedSupplier<T> block) {
+		return block.get();
+	}
+
+}
+
+interface CheckedRunnable {
+	void run();
+}
+
+interface CheckedSupplier<R> {
+
+	R get();
+}
+
