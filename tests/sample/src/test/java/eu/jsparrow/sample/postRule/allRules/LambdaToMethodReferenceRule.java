@@ -321,6 +321,14 @@ public class LambdaToMethodReferenceRule {
 		numberUtils.stream()
 			.map(UsingApacheNumberUtils::getNumber)
 			.map(org.apache.commons.lang3.math.NumberUtils::toString);
+
+		List<List<String>> javaLists = new ArrayList<>();
+		javaLists.stream()
+			.map(eu.jsparrow.sample.utilities.List::new);
+
+		List<eu.jsparrow.sample.utilities.List<String>> customLists = new ArrayList<>();
+		customLists.stream()
+			.map(eu.jsparrow.sample.utilities.List::size);
 	}
 
 	public void usingOverloadedMethods(Other other) {

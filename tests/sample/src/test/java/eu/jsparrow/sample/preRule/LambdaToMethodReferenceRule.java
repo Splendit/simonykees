@@ -327,6 +327,12 @@ public class LambdaToMethodReferenceRule {
 		 * Expecting the transformation to use a fully qualified name. 
 		 */
 		numberUtils.stream().map(v -> v.getNumber()).map(num -> num.toString());
+		
+		List<List<String>> javaLists = new ArrayList<>();
+		javaLists.stream().map(javaList -> new eu.jsparrow.sample.utilities.List(javaList));
+		
+		List<eu.jsparrow.sample.utilities.List<String>> customLists = new ArrayList<>();
+		customLists.stream().map(element -> element.size());
 	}
 	
 	public void usingOverloadedMethods(Other other) {
