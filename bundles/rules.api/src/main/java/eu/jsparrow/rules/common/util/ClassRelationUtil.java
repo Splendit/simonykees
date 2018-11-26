@@ -393,4 +393,23 @@ public class ClassRelationUtil {
 		return allButParamMatching;
 	}
 
+	public static ITypeBinding findFirstTypeBound(ITypeBinding streamType) {
+		if (streamType.isTypeVariable() || streamType.isCapture() || streamType.isWildcardType()
+				|| streamType.isIntersectionType()) {
+			ITypeBinding[] typeBounds = streamType.getTypeBounds();
+			if (typeBounds.length > 0) {
+				return typeBounds[0];
+			}
+		}
+		return streamType;
+	}
+
+	public static boolean isBoxedType(ITypeBinding streamType) {
+		return isContentOfTypes(streamType,
+				Arrays.asList(java.lang.Integer.class.getName(), java.lang.Double.class.getName(),
+						java.lang.Float.class.getName(), java.lang.Long.class.getName(),
+						java.lang.Short.class.getName(), java.lang.Boolean.class.getName(),
+						java.lang.Byte.class.getName(), java.lang.Character.class.getName()));
+	}
+
 }
