@@ -166,10 +166,10 @@ public class MavenAdapter {
 
 		MavenProject parent = project;
 		while ((parent = parent.getParent()) != null) {
-			if (parent == rootProject) {
+			File parentBaseDir = parent.getBasedir();
+			if (parent == rootProject || parentBaseDir == null) {
 				break;
 			}
-			File parentBaseDir = parent.getBasedir();
 			Path parentYamlPath = joinPaths(yamlFileName, parentBaseDir);
 			if (parentYamlPath.toFile()
 				.exists()) {

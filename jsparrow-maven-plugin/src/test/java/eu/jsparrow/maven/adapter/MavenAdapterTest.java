@@ -151,6 +151,23 @@ public class MavenAdapterTest {
 
 		assertTrue(actualPath.equals(expectedPath));
 	}
+	
+	@Test
+	public void findYamlFilePath_parentBaseDirIsNull_shouldReturnDefaultYamlFilePath() throws IOException {
+		MavenProject childProject = mock(MavenProject.class);
+		MavenProject parentProject = mock(MavenProject.class);
+		String expectedPath = jsparrowYml.getAbsolutePath();
+		File childBaseDir = directory.newFolder("project_base_dir" + File.separator + "child_Base_Dir");
+		when(childProject.getBasedir()).thenReturn(childBaseDir);
+//		when(parentProject.getParent()).thenReturn(project);
+		when(childProject.getParent()).thenReturn(parentProject);
+		when(path.toFile()).thenReturn(jsparrowYml);
+		when(parentProject.getBasedir()).thenReturn(null);
+
+		String actualPath = mavenAdapter.findYamlFilePath(childProject, jsparrowYml);
+
+		assertTrue(actualPath.equals(expectedPath));
+	}
 
 	@Test
 	public void joinWithComma_emptyLeftSide() {
