@@ -528,7 +528,10 @@ public class ClassRelationUtil {
 	public static boolean belongToSamePackage(ITypeBinding originTypeBinding, ITypeBinding typeBinding) {
 		IPackageBinding typePackage = typeBinding.getPackage();
 		IPackageBinding originPackage = originTypeBinding.getPackage();
-		if (typeBinding == originPackage) {
+		
+		
+		if (typePackage == originPackage) {
+			// either both are null, or typePackage and originPackage are references to the same object
 			return true;
 		}
 		return typePackage != null && originPackage != null && typePackage.getName()
