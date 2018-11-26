@@ -205,4 +205,16 @@ public class TestStringConcatToPlusRule {
 			.append("def")
 			.toString();
 	}
+
+	public void test_missingExpression_shouldNotTransform() {
+		/*
+		 * SIM-1350
+		 */
+
+		concat("fake", "news");
+	}
+
+	private void concat(String fake, String concat) {
+		fake.concat(concat);
+	}
 }
