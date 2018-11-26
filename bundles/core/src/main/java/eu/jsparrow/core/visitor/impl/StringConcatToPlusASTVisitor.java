@@ -39,11 +39,11 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation node) {
 		List<String> fullyQualifiedStringName = generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME);
+
 		if (StringUtils.equals("concat", node.getName() //$NON-NLS-1$
-			.getFullyQualifiedName()) && ClassRelationUtil.isContentOfTypes(
-					node.getExpression()
-						.resolveTypeBinding(),
-					fullyQualifiedStringName)
+			.getFullyQualifiedName()) && node.getExpression() != null
+				&& ClassRelationUtil.isContentOfTypes(node.getExpression()
+					.resolveTypeBinding(), fullyQualifiedStringName)
 				&& ASTNode.EXPRESSION_STATEMENT != node.getParent()
 					.getNodeType()
 				&& node.arguments()
