@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Type;
 
 /**
  * A utility class for computing information related with the ancestors of a
@@ -528,10 +527,10 @@ public class ClassRelationUtil {
 	public static boolean belongToSamePackage(ITypeBinding originTypeBinding, ITypeBinding typeBinding) {
 		IPackageBinding typePackage = typeBinding.getPackage();
 		IPackageBinding originPackage = originTypeBinding.getPackage();
-		
-		
+
 		if (typePackage == originPackage) {
-			// either both are null, or typePackage and originPackage are references to the same object
+			// either both are null, or typePackage and originPackage are
+			// references to the same object
 			return true;
 		}
 		return typePackage != null && originPackage != null && typePackage.getName()
