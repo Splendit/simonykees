@@ -11,7 +11,7 @@ import eu.jsparrow.sample.postRule.standardLoggerSlf4j.TestStandardLoggerExistin
  */
 public class TestStandardLoggerExistingNonStaticSlf4jLogger {
 
-	private final Logger logger = LoggerFactory.getLogger(TestStandardLoggerExistingNonStaticSlf4jLogger.class);
+	Logger logger = LoggerFactory.getLogger(TestStandardLoggerExistingNonStaticSlf4jLogger.class);
 
 	public void testingLogger() {
 		logger.info("");
