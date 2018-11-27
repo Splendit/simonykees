@@ -306,6 +306,9 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			streamType = tailingMap.get(tailingMap.size() - 1)
 				.resolveTypeBinding();
 		}
+
+		streamType = ClassRelationUtil.findFirstTypeBound(streamType);
+
 		streamTypeBoxed = ClassRelationUtil.findBoxedTypeOfPrimitive(streamType);
 
 		if (!streamTypeBoxed.equals(orElseTypeBoxed)) {
@@ -314,7 +317,8 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 				orElseCandidate = boxIfPrimitive(orElseCandidate, expectedOrElseType);
 			}
 
-			if (!expectedReturnTypeBoxed.equals(streamTypeBoxed)) {
+			if (!expectedReturnTypeBoxed.equals(streamTypeBoxed)
+					&& (ClassRelationUtil.isBoxedType(streamType) || streamType.isPrimitive())) {
 				if (tailingMap.isEmpty()) {
 					AST ast = orElseCandidate.getAST();
 					ExpressionMethodReference castingMethod = ast.newExpressionMethodReference();
