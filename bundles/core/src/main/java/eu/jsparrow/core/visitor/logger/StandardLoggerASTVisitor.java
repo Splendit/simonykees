@@ -109,12 +109,12 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private AbstractTypeDeclaration rootType;
 	private int nestedTypeDeclarationLevel = 0;
 	Map<String, List<String>> newImports;
-	private Map<String, VariableDeclarationFragment> loggerNames;
+	private Map<String, VariableDeclarationFragment> declaredLoggers;
 
 	public StandardLoggerASTVisitor(String loggerQualifiedName, Map<String, String> replacingOptions) {
 		this.replacingOptions = replacingOptions;
 		this.loggerQualifiedName = loggerQualifiedName;
-		this.loggerNames = new HashMap<>();
+		this.declaredLoggers = new HashMap<>();
 		this.newImports = new HashMap<>();
 
 		List<String> slf4jImports = new ArrayList<>();
@@ -398,7 +398,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		this.typeDeclaration = abstractType;
 		this.nestedTypeDeclarationLevel++;
 		findDeclaredLogger(abstractType)
-			.ifPresent(identifier -> loggerNames.put(generateUniqueTypeId(abstractType), identifier));
+			.ifPresent(identifier -> declaredLoggers.put(generateUniqueTypeId(abstractType), identifier));
 	}
 
 	/**
@@ -435,9 +435,9 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		nestedTypeDeclarationLevel--;
 		this.typeDeclaration = ASTNodeUtil.getSpecificAncestor(typeDeclaration2, AbstractTypeDeclaration.class);
 		if (nestedTypeDeclarationLevel == 0) {
-			loggerNames.clear();
+			declaredLoggers.clear();
 		} else {
-			loggerNames.remove(generateUniqueTypeId(typeDeclaration2));
+			declaredLoggers.remove(generateUniqueTypeId(typeDeclaration2));
 		}
 	}
 
@@ -627,7 +627,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		fragment.setName(ast.newSimpleName(loggerName));
 		Expression loggerInitializer = generateLoggerInitializer(loggerDeclaration);
 		fragment.setInitializer(loggerInitializer);
-		setCurrentLoggerName(fragment);
+		setCurrentLogger(fragment);
 		Type loggerType = ast.newSimpleType(ast.newName(LOGGER_CLASS_NAME));
 		loggerDeclaration.setType(loggerType);
 		ListRewrite loggerListRewirte = astRewrite.getListRewrite(loggerDeclaration,
@@ -671,8 +671,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 * @param loggerName
 	 *            name to be stored.
 	 */
-	private void setCurrentLoggerName(VariableDeclarationFragment fragment) {
-		loggerNames.put(generateUniqueTypeId(this.typeDeclaration), fragment);
+	private void setCurrentLogger(VariableDeclarationFragment fragment) {
+		declaredLoggers.put(generateUniqueTypeId(this.typeDeclaration), fragment);
 	}
 
 	/**
@@ -749,7 +749,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	private String getLoggerName() {
-		VariableDeclarationFragment fragment = loggerNames.get(generateUniqueTypeId(this.typeDeclaration));
+		VariableDeclarationFragment fragment = declaredLoggers.get(generateUniqueTypeId(this.typeDeclaration));
 
 		if (fragment == null) {
 			return null;
@@ -774,10 +774,10 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	private boolean loggerNamesContainsName(String name) {
-		return loggerNames.values()
+		return declaredLoggers.values()
 			.stream()
 			.map(dec -> dec.getName()
 				.getIdentifier())
-			.anyMatch(id -> id.equals(name));
+			.anyMatch(name::equals);
 	}
 }
