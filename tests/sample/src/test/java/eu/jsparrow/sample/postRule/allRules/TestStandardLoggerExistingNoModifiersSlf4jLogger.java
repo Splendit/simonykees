@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
  * SIM-1337
  *
  */
-public class TestStandardLoggerExistingNonStaticSlf4jLogger {
+public class TestStandardLoggerExistingNoModifiersSlf4jLogger {
 
-	private final Logger logger = LoggerFactory.getLogger(TestStandardLoggerExistingNonStaticSlf4jLogger.class);
+	Logger logger = LoggerFactory.getLogger(TestStandardLoggerExistingNoModifiersSlf4jLogger.class);
 
 	public void testingLogger() {
 		logger.info("");

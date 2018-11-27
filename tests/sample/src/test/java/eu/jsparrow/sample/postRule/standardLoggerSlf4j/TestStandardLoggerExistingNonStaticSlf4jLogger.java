@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TestStandardLoggerExistingNonStaticSlf4jLogger {
 
-	Logger logger = LoggerFactory.getLogger(TestStandardLoggerExistingNonStaticSlf4jLogger.class);
+	private final Logger logger = LoggerFactory.getLogger(TestStandardLoggerExistingNonStaticSlf4jLogger.class);
 
 	public void testingLogger() {
 		logger.info("");
