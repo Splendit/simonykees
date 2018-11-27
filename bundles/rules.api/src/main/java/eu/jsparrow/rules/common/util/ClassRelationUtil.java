@@ -2,11 +2,14 @@ package eu.jsparrow.rules.common.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -391,6 +394,185 @@ public class ClassRelationUtil {
 			}
 		}
 		return allButParamMatching;
+	}
+
+	/**
+	 * Finds the {@link IMethodBinding}s of all methods overloading the given
+	 * one, i.e. having the same method name, having different parameters and
+	 * declared on the same or on a parent type.
+	 * 
+	 * @param methodInvocation
+	 *            the method to find the overloads for.
+	 * @return {@link List} of overloaded methods, or an empty list if the type
+	 *         bindings cannot be resolved.
+	 */
+	public static List<IMethodBinding> findOverloadedMethods(MethodInvocation methodInvocation) {
+
+		Expression expression = methodInvocation.getExpression();
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		ITypeBinding type;
+		List<IMethodBinding> methods = new ArrayList<>();
+		if (expression != null) {
+			type = expression.resolveTypeBinding();
+		} else {
+			type = methodBinding.getDeclaringClass();
+		}
+
+		if (type == null) {
+			return Collections.emptyList();
+		}
+
+		methods.addAll(Arrays.asList(type.getDeclaredMethods()));
+		methods.addAll(findInheretedMethods(type));
+		String methodIdentifier = methodInvocation.getName()
+			.getIdentifier();
+
+		return methods.stream()
+			// exclude overridden methods
+			.filter(method -> !methodBinding.overrides(method))
+			// exclude the binding of the method itself
+			.filter(method -> !method.getMethodDeclaration()
+				.isEqualTo(methodBinding.getMethodDeclaration()))
+			.filter(method -> methodIdentifier.equals(method.getName()))
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Verifies if the given {@link IMethodBinding}s have the same signature
+	 * except for the parameter on the given position.
+	 * 
+	 * @param methodBinding
+	 *            the type binding of the original method
+	 * @param overloadedMethod
+	 *            the type binding of a method overloading the original method
+	 * @param paramterIndex
+	 *            the position of the parameter expected to have a different
+	 *            type on each of the given methods.
+	 * @return {@code true} the condition is satisfied and {@code false}
+	 *         otherwise.
+	 */
+	public static boolean isOverloadedOnParamter(IMethodBinding methodBinding, IMethodBinding overloadedMethod,
+			int paramterIndex) {
+		ITypeBinding[] methodParameterTypes = methodBinding.getParameterTypes();
+		ITypeBinding[] overloadedMethodParameterTypes = overloadedMethod.getParameterTypes();
+
+		if (methodParameterTypes.length != overloadedMethodParameterTypes.length) {
+			return false;
+		}
+
+		for (int i = 0; i < methodParameterTypes.length; i++) {
+			ITypeBinding methodParamter = methodParameterTypes[i];
+			ITypeBinding overloadedParameter = overloadedMethodParameterTypes[i];
+
+			if (i != paramterIndex
+					&& !isContentOfType(methodParamter.getErasure(), overloadedParameter.getQualifiedName())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Checks if the modifiers of the given {@link IMethodBinding} allow for
+	 * accessing it in the arguments section of the given method invocation.
+	 * 
+	 * @param method
+	 *            the type binding of the method to be checked
+	 * @param wrapperMethod
+	 *            normal method invocation
+	 * @return {@code true} if the method can be invoked in the arguments of the
+	 *         given wrapper method, or {@code false} otherwise.
+	 */
+	public static boolean isVisibleIn(IMethodBinding method, MethodInvocation wrapperMethod) {
+		if (Modifier.isPublic(method.getModifiers())) {
+			return true;
+		}
+
+		ITypeBinding methodDeclaringClass = method.getDeclaringClass();
+		ITypeBinding erasure = methodDeclaringClass.getErasure();
+		String qualifiedName = erasure == null ? methodDeclaringClass.getQualifiedName() : erasure.getQualifiedName();
+		AbstractTypeDeclaration type = ASTNodeUtil.getSpecificAncestor(wrapperMethod, AbstractTypeDeclaration.class);
+
+		ITypeBinding typeBinding = type.resolveBinding();
+		if (typeBinding == null) {
+			return false;
+		}
+
+		if (Modifier.isPrivate(method.getModifiers())) {
+			return ClassRelationUtil.isContentOfType(typeBinding, qualifiedName);
+		}
+
+		if (!Modifier.isProtected(method.getModifiers())) {
+			return belongToSamePackage(methodDeclaringClass, typeBinding);
+		}
+
+		if (!Modifier.isProtected(method.getModifiers())) {
+			return belongToSamePackage(methodDeclaringClass, typeBinding) || ClassRelationUtil
+				.isInheritingContentOfTypes(typeBinding, Collections.singletonList(qualifiedName));
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if the given type bindings belong to the same package.
+	 * 
+	 * @param originTypeBinding
+	 *            origin type
+	 * @param typeBinding
+	 *            target type
+	 * @return {@code true} if both types belong to the same package or
+	 *         {@code false} otherwise.
+	 */
+	public static boolean belongToSamePackage(ITypeBinding originTypeBinding, ITypeBinding typeBinding) {
+		IPackageBinding typePackage = typeBinding.getPackage();
+		IPackageBinding originPackage = originTypeBinding.getPackage();
+
+		if (typePackage == originPackage) {
+			// either both are null, or typePackage and originPackage are
+			// references to the same object
+			return true;
+		}
+		return typePackage != null && originPackage != null && typePackage.getName()
+			.equals(originPackage.getName());
+	}
+
+	/**
+	 * Returns the first upper type bound of this type variable, wildcard,
+	 * capture, or intersectionType.
+	 * 
+	 * @param typeBinding
+	 *            the type to be checked
+	 * @return the first upper type bound or the unchanged type if no upper
+	 *         bound is found or if the given type does not represent any of the
+	 *         aforementioned types.
+	 */
+	public static ITypeBinding findFirstTypeBound(ITypeBinding typeBinding) {
+		if (typeBinding.isTypeVariable() || typeBinding.isCapture() || typeBinding.isWildcardType()
+				|| typeBinding.isIntersectionType()) {
+			ITypeBinding[] typeBounds = typeBinding.getTypeBounds();
+			if (typeBounds.length > 0) {
+				return typeBounds[0];
+			}
+		}
+		return typeBinding;
+	}
+
+	/**
+	 * Checks if the given {@link ITypeBinding} represents the boxing of a
+	 * primitive type.
+	 * 
+	 * @param typeBinding
+	 *            the {@link ITypeBinding} to be checked.
+	 * @return {@code true} if the binding represents a boxing or {@code false}
+	 *         otherwise.
+	 */
+	public static boolean isBoxedType(ITypeBinding typeBinding) {
+		return isContentOfTypes(typeBinding,
+				Arrays.asList(java.lang.Integer.class.getName(), java.lang.Double.class.getName(),
+						java.lang.Float.class.getName(), java.lang.Long.class.getName(),
+						java.lang.Short.class.getName(), java.lang.Boolean.class.getName(),
+						java.lang.Byte.class.getName(), java.lang.Character.class.getName()));
 	}
 
 }
