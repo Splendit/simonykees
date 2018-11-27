@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A utility class for computing information related with the ancestors of a
@@ -33,7 +34,7 @@ import org.slf4j.Logger;
  */
 public class ClassRelationUtil {
 
-	private static final Logger logger = org.slf4j.LoggerFactory.getLogger(MethodHandles.lookup()
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
 	private static final String INT = "int"; //$NON-NLS-1$
@@ -594,7 +595,7 @@ public class ClassRelationUtil {
 	 *            import declaration to be checked.
 	 * @param typeName
 	 *            type to be checked
-	 * @return {@code true} if a type with the given name exist in the package
+	 * @return {@code true} if a type with the given name exists in the package
 	 *         imported with the on-demand {@link ImportDeclaration} or
 	 *         {@code false} otherwise.
 	 */
