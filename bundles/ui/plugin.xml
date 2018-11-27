@@ -78,7 +78,7 @@
 		<command defaultHandler="eu.jsparrow.ui.handler.RenameFieldsRuleWizardHandler"
 			id="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" name="%command.name.rename_fields_wizard_handler" />
 		<command defaultHandler="eu.jsparrow.ui.handler.WelcomeHandler"
-           id="eu.jsparrow.ui.handler.WelcomeHandler" name="Introduction jSparrow" />
+           id="eu.jsparrow.ui.handler.WelcomeHandler" name="jSparrow Dashboard" />
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page class="eu.jsparrow.ui.preference.SimonykeesPreferencePage"
@@ -111,7 +111,7 @@
 			class="eu.jsparrow.ui.startup.WelcomeEditor"
 			icon="$nl$/icons/jSparrow_active_icon_16.png"
 			id="ui.editors.jsparrow.WelcomeEditor"
-			name="Introduction jSparrow">
+			name="jSparrow Dashboard">
 		</editor>
 	</extension>
 	 
@@ -129,11 +129,11 @@
            locationURI="toolbar:org.eclipse.ui.main.toolbar">
         <toolbar
               id="eu.jsparrow.ui.startup.toolbar"
-              label="Introduction jSparrow">
+              label="jSparrow Dashboard">
            <command
                  commandId="eu.jsparrow.ui.handler.WelcomeHandler"
                  icon="$nl$/icons/jSparrow_active_icon_16.png"
-                 label="Introduction jSparrow"
+                 label="jSparrow Dashboard"
                  style="push">
            </command>
         </toolbar>

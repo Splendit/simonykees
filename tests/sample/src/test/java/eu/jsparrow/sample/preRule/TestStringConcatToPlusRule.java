@@ -159,4 +159,16 @@ public class TestStringConcatToPlusRule {
 				"abc".concat( // save comment 2
 						"def"));
 	}
+	
+	public void test_missingExpression_shouldNotTransform() {
+		/*
+		 * SIM-1350
+		 */
+		
+		concat("fake", "news");
+	}
+	
+	private void concat(String fake, String concat) {
+		fake.concat(concat);
+	}
 }
