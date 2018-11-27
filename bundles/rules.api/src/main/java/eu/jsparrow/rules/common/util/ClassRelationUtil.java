@@ -548,6 +548,44 @@ public class ClassRelationUtil {
 	}
 
 	/**
+	 * Returns the first upper type bound of this type variable, wildcard,
+	 * capture, or intersectionType.
+	 * 
+	 * @param typeBinding
+	 *            the type to be checked
+	 * @return the first upper type bound or the unchanged type if no upper
+	 *         bound is found or if the given type does not represent any of the
+	 *         aforementioned types.
+	 */
+	public static ITypeBinding findFirstTypeBound(ITypeBinding typeBinding) {
+		if (typeBinding.isTypeVariable() || typeBinding.isCapture() || typeBinding.isWildcardType()
+				|| typeBinding.isIntersectionType()) {
+			ITypeBinding[] typeBounds = typeBinding.getTypeBounds();
+			if (typeBounds.length > 0) {
+				return typeBounds[0];
+			}
+		}
+		return typeBinding;
+	}
+
+	/**
+	 * Checks if the given {@link ITypeBinding} represents the boxing of a
+	 * primitive type.
+	 * 
+	 * @param typeBinding
+	 *            the {@link ITypeBinding} to be checked.
+	 * @return {@code true} if the binding represents a boxing or {@code false}
+	 *         otherwise.
+	 */
+	public static boolean isBoxedType(ITypeBinding typeBinding) {
+		return isContentOfTypes(typeBinding,
+				Arrays.asList(java.lang.Integer.class.getName(), java.lang.Double.class.getName(),
+						java.lang.Float.class.getName(), java.lang.Long.class.getName(),
+						java.lang.Short.class.getName(), java.lang.Boolean.class.getName(),
+						java.lang.Byte.class.getName(), java.lang.Character.class.getName()));
+	}
+
+	/**
 	 * Checks if the given {@link ImportDeclaration} is
 	 * {@link ImportDeclaration#isOnDemand} and implicitly imports the given
 	 * type.

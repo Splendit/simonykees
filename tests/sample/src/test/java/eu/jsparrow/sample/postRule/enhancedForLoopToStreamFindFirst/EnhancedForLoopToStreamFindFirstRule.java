@@ -506,6 +506,24 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		}
 	}
 	
+	class ParameterizedSampleType<T extends ReturnTypeSample> {
+		
+		public ReturnTypeSample streamOfTypeVariable_shouldNotAddCasting() {
+			/*
+			 * SIM-1336 
+			 */
+			ReturnTypeSample typeSample = new ReturnTypeSample("");
+			return getAllTypeSamples().stream()
+				.filter(value -> value.equals(typeSample))
+				.findFirst()
+				.orElse(null);
+		}
+		
+		private List<T> getAllTypeSamples() {
+			return new ArrayList<>();
+		}
+	}
+	
 	class ReturnTypeSampleChild extends ReturnTypeSample {
 
 		ReturnTypeSampleChild(String value) {
