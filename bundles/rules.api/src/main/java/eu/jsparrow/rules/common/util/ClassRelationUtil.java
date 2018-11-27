@@ -543,9 +543,9 @@ public class ClassRelationUtil {
 	 * 
 	 * @param typeBinding
 	 *            the type to be checked
-	 * @return the first upper type bound or the type the unchanged type if no
-	 *         upper bound is found or if the given type does not represent any
-	 *         of the aforementioned types.
+	 * @return the first upper type bound or the unchanged type if no upper
+	 *         bound is found or if the given type does not represent any of the
+	 *         aforementioned types.
 	 */
 	public static ITypeBinding findFirstTypeBound(ITypeBinding typeBinding) {
 		if (typeBinding.isTypeVariable() || typeBinding.isCapture() || typeBinding.isWildcardType()
