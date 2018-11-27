@@ -220,31 +220,29 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	private boolean checkLoggerValidityForMethod(MethodDeclaration methodDeclaration) {
-
-		// if logger is not static and method is static, return false
-		VariableDeclarationFragment fragment = loggerNames.get(generateUniqueTypeId(this.typeDeclaration));
-
-		if (fragment == null) {
-			return true;
-		}
-
-		FieldDeclaration field = (FieldDeclaration) fragment.getParent();
-
 		/*
+		 * if logger is not static and method is static, return false
+		 * 
 		 * if the logger has been introduced by us, it doesn't have any
 		 * modifiers yet. but we can be sure, that our logger is static. so this
 		 * check can be skipped
 		 * 
 		 * SIM-1337
 		 */
-		if (field.modifiers() == null || field.modifiers()
-			.isEmpty()) {
+
+		AbstractTypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(methodDeclaration,
+				AbstractTypeDeclaration.class);
+		Optional<VariableDeclarationFragment> fragment = findDeclaredLogger(typeDeclaration);
+		if (!fragment.isPresent()) {
 			return true;
 		}
 
-		boolean isLoggerStatic = ASTNodeUtil.hasModifier(field.modifiers(), Modifier::isStatic);
-		boolean isMethodStatic = ASTNodeUtil.hasModifier(methodDeclaration.modifiers(), Modifier::isStatic);
+		boolean isLoggerStatic = fragment.map(declarationFragment -> (FieldDeclaration) declarationFragment.getParent())
+			.filter(field -> ASTNodeUtil.hasModifier(field.modifiers(), Modifier::isStatic))
+			.map(field -> true)
+			.orElse(false);
 
+		boolean isMethodStatic = ASTNodeUtil.hasModifier(methodDeclaration.modifiers(), Modifier::isStatic);
 		return (!isMethodStatic || isLoggerStatic);
 	}
 

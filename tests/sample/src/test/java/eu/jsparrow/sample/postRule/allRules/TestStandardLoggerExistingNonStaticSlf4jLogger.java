@@ -3,8 +3,6 @@ package eu.jsparrow.sample.postRule.allRules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.sample.postRule.standardLoggerSlf4j.TestStandardLoggerExistingSlf4jLogger;
-
 /**
  * SIM-1337
  *
