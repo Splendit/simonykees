@@ -109,7 +109,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private AbstractTypeDeclaration rootType;
 	private int nestedTypeDeclarationLevel = 0;
 	Map<String, List<String>> newImports;
-	private Map<String, String> loggerNames;
+	private Map<String, VariableDeclarationFragment> loggerNames;
 
 	public StandardLoggerASTVisitor(String loggerQualifiedName, Map<String, String> replacingOptions) {
 		this.replacingOptions = replacingOptions;
@@ -205,6 +205,11 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
+
+		if (!checkLoggerValidityForMethod(methodDeclaration)) {
+			return false;
+		}
+
 		/*
 		 * Since it is not possible to have a static field in a nested class,
 		 * the introduced logger has to be an instance field too. Therefore, it
@@ -212,6 +217,35 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		 */
 		return !(nestedTypeDeclarationLevel > 1
 				&& ASTNodeUtil.hasModifier(methodDeclaration.modifiers(), Modifier::isStatic));
+	}
+
+	private boolean checkLoggerValidityForMethod(MethodDeclaration methodDeclaration) {
+
+		// if logger is not static and method is static, return false
+		VariableDeclarationFragment fragment = loggerNames.get(generateUniqueTypeId(this.typeDeclaration));
+
+		if (fragment == null) {
+			return true;
+		}
+
+		FieldDeclaration field = (FieldDeclaration) fragment.getParent();
+
+		/*
+		 * if the logger has been introduced by us, it doesn't have any
+		 * modifiers yet. but we can be sure, that our logger is static. so this
+		 * check can be skipped
+		 * 
+		 * SIM-1337
+		 */
+		if (field.modifiers() == null || field.modifiers()
+			.isEmpty()) {
+			return true;
+		}
+
+		boolean isLoggerStatic = ASTNodeUtil.hasModifier(field.modifiers(), Modifier::isStatic);
+		boolean isMethodStatic = ASTNodeUtil.hasModifier(methodDeclaration.modifiers(), Modifier::isStatic);
+
+		return (!isMethodStatic || isLoggerStatic);
 	}
 
 	@Override
@@ -268,7 +302,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 					Collections.singletonList(JAVA_LANG_SYSTEM))) {
 				return false;
 			}
-			
+
 			ExceptionsASTVisitor visitor = new ExceptionsASTVisitor();
 			arguments.forEach(argument -> argument.accept(visitor));
 			List<Expression> exceptions = visitor.getExceptions();
@@ -276,13 +310,11 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 			List<Expression> tobeLoggedExceptions = findExceptionsToBeLogged(exceptions);
 
-			
 			SimpleName qualifierName = expressionQualifier.getName();
-			calcReplacingOption(qualifierName, logsException)
-				.ifPresent(replacingOption -> {
-					List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier, tobeLoggedExceptions);
-					replaceMethod(methodInvocation, replacingOption, logArguments);
-				});
+			calcReplacingOption(qualifierName, logsException).ifPresent(replacingOption -> {
+				List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier, tobeLoggedExceptions);
+				replaceMethod(methodInvocation, replacingOption, logArguments);
+			});
 
 		} else if (PRINT_STACK_TRACE.equals(methodIdentifier)
 				&& !StringUtils.isEmpty(replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY))) {
@@ -380,7 +412,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 * @return the identifier of the declared logger or an empty optional if no
 	 *         logger declaration was found;
 	 */
-	private Optional<String> findDeclaredLogger(AbstractTypeDeclaration typeDeclaration) {
+	private Optional<VariableDeclarationFragment> findDeclaredLogger(AbstractTypeDeclaration typeDeclaration) {
 		return ASTNodeUtil.convertToTypedList(typeDeclaration.bodyDeclarations(), FieldDeclaration.class)
 			.stream()
 			.filter(field -> {
@@ -391,8 +423,6 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			})
 			.flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
 				.stream())
-			.map(VariableDeclarationFragment::getName)
-			.map(SimpleName::getIdentifier)
 			.findAny();
 	}
 
@@ -429,7 +459,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 * @return the list of the arguments adapted for the
 	 *         {@value #loggerQualifiedName}
 	 */
-	private List<Expression> calcLogArgument(List<Expression> arguments, String methodIdentifier, List<Expression>exceptions) {
+	private List<Expression> calcLogArgument(List<Expression> arguments, String methodIdentifier,
+			List<Expression> exceptions) {
 		List<Expression> logArguments = new ArrayList<>();
 		List<String> stringQualifiedName = Collections.singletonList(java.lang.String.class.getName());
 		Expression firstArgument = arguments.get(0);
@@ -477,7 +508,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				argRewrite.insertFirst((Expression) astRewrite.createCopyTarget(firstArgument), null);
 				logArguments.add(stringValueOf);
 			}
-			
+
 			logArguments.addAll(exceptions);
 		}
 
@@ -489,6 +520,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 * {@link #replacingOptions}, the method used for printing to standard
 	 * output and whether an exception occurs in the parameters used in the
 	 * print method.
+	 * 
 	 * @param qualiferName
 	 *            the qualifier of the print method
 	 * 
@@ -591,13 +623,13 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private void addLogger() {
 		importsNeeded = true;
 		String loggerName = generateLoggerName();
-		setCurrentLoggerName(loggerName);
 		AST ast = compilationUnit.getAST();
 		VariableDeclarationFragment fragment = ast.newVariableDeclarationFragment();
 		FieldDeclaration loggerDeclaration = ast.newFieldDeclaration(fragment);
 		fragment.setName(ast.newSimpleName(loggerName));
 		Expression loggerInitializer = generateLoggerInitializer(loggerDeclaration);
 		fragment.setInitializer(loggerInitializer);
+		setCurrentLoggerName(fragment);
 		Type loggerType = ast.newSimpleType(ast.newName(LOGGER_CLASS_NAME));
 		loggerDeclaration.setType(loggerType);
 		ListRewrite loggerListRewirte = astRewrite.getListRewrite(loggerDeclaration,
@@ -641,8 +673,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 * @param loggerName
 	 *            name to be stored.
 	 */
-	private void setCurrentLoggerName(String loggerName) {
-		loggerNames.put(generateUniqueTypeId(this.typeDeclaration), loggerName);
+	private void setCurrentLoggerName(VariableDeclarationFragment fragment) {
+		loggerNames.put(generateUniqueTypeId(this.typeDeclaration), fragment);
 	}
 
 	/**
@@ -710,7 +742,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		String suffix = ""; //$NON-NLS-1$
 		int count = 0;
 		while (declaredNames.contains(DEFAULT_LOGGER_NAME + suffix)
-				|| loggerNames.containsValue(DEFAULT_LOGGER_NAME + suffix)) {
+				|| loggerNamesContainsName(DEFAULT_LOGGER_NAME + suffix)) {
 			count++;
 			suffix = Integer.toString(count);
 		}
@@ -719,7 +751,14 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	private String getLoggerName() {
-		return loggerNames.get(generateUniqueTypeId(this.typeDeclaration));
+		VariableDeclarationFragment fragment = loggerNames.get(generateUniqueTypeId(this.typeDeclaration));
+
+		if (fragment == null) {
+			return null;
+		}
+
+		return fragment.getName()
+			.getIdentifier();
 	}
 
 	/**
@@ -734,5 +773,13 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private String generateUniqueTypeId(AbstractTypeDeclaration typeDeclaration) {
 		return typeDeclaration.getName()
 			.getIdentifier() + SEPARATOR + typeDeclaration.getStartPosition() + SEPARATOR + typeDeclaration.getLength();
+	}
+
+	private boolean loggerNamesContainsName(String name) {
+		return loggerNames.values()
+			.stream()
+			.map(dec -> dec.getName()
+				.getIdentifier())
+			.anyMatch(id -> id.equals(name));
 	}
 }
