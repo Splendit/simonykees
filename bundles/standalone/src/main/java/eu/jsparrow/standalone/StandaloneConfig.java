@@ -521,18 +521,6 @@ public class StandaloneConfig {
 		FieldsRenamingInstantiator factory = new FieldsRenamingInstantiator(javaProject,
 				new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE));
 
-		/*
-		 * see SIM-1250. If we are dealing with a multimodule project, we limit
-		 * the renaming rule to run only for private fields.
-		 * 
-		 * SIM-1340. Since a Field can be referenced in test sources and we are
-		 * not processing test sources with the JMP, then limitation must apply
-		 * also for the single-module projects.
-		 */
-		options.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);
-		options.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, false);
-		options.put(FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS, false);
-
 		List<ICompilationUnit> iCompilationUnits = refactoringPipeline.getRefactoringStates()
 			.stream()
 			.map(RefactoringState::getWorkingCopy)

@@ -36,6 +36,7 @@ import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.logger.LogLevelEnum;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
@@ -207,7 +208,7 @@ public class RuleConfigurationWrapper {
 
 	/**
 	 * Unwraps the configuration options for the {@link StandardLoggerRule} from
-	 * the @l{@link #loggerRuleConfiguration}
+	 * the {@link #loggerRuleConfiguration}
 	 * 
 	 * @return a map with configuration options from
 	 *         {@link #loggerRuleConfiguration}
@@ -257,6 +258,18 @@ public class RuleConfigurationWrapper {
 
 		options.put(UPPER_CASE_FOLLOWING_DOLLAR_SIGN, UPPER.equals(dollarReplacement));
 		options.put(UPPER_CASE_FOLLOWING_UNDERSCORE, UPPER.equals(underscoreReplacement));
+		
+		/*
+		 * see SIM-1250. If we are dealing with a multimodule project, we limit
+		 * the renaming rule to run only for private fields.
+		 * 
+		 * SIM-1340. Since a Field can be referenced in test sources and we are
+		 * not processing test sources with the JMP, then limitation must apply
+		 * also for the single-module projects.
+		 */
+		options.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);
+		options.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, false);
+		options.put(FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS, false);
 
 		return options;
 	}

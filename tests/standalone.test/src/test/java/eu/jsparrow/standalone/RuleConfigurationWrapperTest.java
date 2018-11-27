@@ -193,7 +193,10 @@ public class RuleConfigurationWrapperTest {
 	}
 
 	@Test
-	public void getFieldRenamingOptions_emptyConfiguration_shouldReturnDefaultOptionsMap() throws Exception {
+	public void getFieldRenamingOptions_emptyConfiguration_shouldReturnDefaultOptionsMapWithJMPlimitations() throws Exception {
+		/*
+		 * For limitations see SIM-1250 and SIM-1340
+		 */
 		YAMLRenamingRule renamingConfiguration = new YAMLRenamingRule();
 		when(config.getRenamingRule()).thenReturn(renamingConfiguration);
 
@@ -201,7 +204,7 @@ public class RuleConfigurationWrapperTest {
 		Map<String, Boolean> renamingConfigurationOptions = ruleConfigurationWrapper
 			.getFieldRenamingRuleConfigurationOptions();
 
-		assertThat(renamingConfigurationOptions, allOf(hasEntry("public", true), hasEntry("package-protected", true),
-				hasEntry("protected", true), hasEntry("private", true), hasEntry("uppercase-after-underscore", true)));
+		assertThat(renamingConfigurationOptions, allOf(hasEntry("public", false), hasEntry("package-protected", false),
+				hasEntry("protected", false), hasEntry("private", true), hasEntry("uppercase-after-underscore", true)));
 	}
 }
