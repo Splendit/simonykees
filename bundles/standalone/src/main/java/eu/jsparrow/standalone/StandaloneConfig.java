@@ -74,9 +74,8 @@ public class StandaloneConfig {
 	private static final String TEMP_FILE_EXTENSION = ".tmp"; //$NON-NLS-1$
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
-	
-	private static final String SEARCH_SCOPE = "workspace"; //$NON-NLS-1$
 
+	private static final String SEARCH_SCOPE = "workspace"; //$NON-NLS-1$
 
 	private String path;
 	private String compilerCompliance;
@@ -94,7 +93,6 @@ public class StandaloneConfig {
 	protected RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private boolean abort = false;
 	private YAMLConfig yamlConfig;
-	private Boolean isChildModule;
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
@@ -112,9 +110,6 @@ public class StandaloneConfig {
 	 *            the nature id-s of the project
 	 * @param yamlConfig
 	 *            the default yaml configuration file of the project
-	 * @param isChildModule
-	 *            a flag indicating whether the project represents a module in a
-	 *            multi-module project or a simple project.
 	 * @throws CoreException
 	 *             if the classpath entries cannot be added or the source files
 	 *             cannot be parsed
@@ -122,8 +117,7 @@ public class StandaloneConfig {
 	 *             if the project cannot be created
 	 */
 	public StandaloneConfig(String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds, YAMLConfig yamlConfig, boolean isChildModule)
-			throws CoreException, StandaloneException {
+			String[] natureIds, YAMLConfig yamlConfig) throws CoreException, StandaloneException {
 
 		this.projectName = projectName;
 		this.path = path;
@@ -131,7 +125,6 @@ public class StandaloneConfig {
 		this.sourceFolder = sourceFolder;
 		this.natureIds = natureIds;
 		this.yamlConfig = yamlConfig;
-		this.isChildModule = isChildModule;
 		setUp();
 	}
 
@@ -525,17 +518,21 @@ public class StandaloneConfig {
 	}
 
 	private Optional<FieldsRenamingRule> setUpRenamingRule(Map<String, Boolean> options) throws StandaloneException {
-		FieldsRenamingInstantiator factory = new FieldsRenamingInstantiator(javaProject, new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE));
+		FieldsRenamingInstantiator factory = new FieldsRenamingInstantiator(javaProject,
+				new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE));
 
-		if (isChildModule) {
-			/*
-			 * see SIM-1250. If we are dealing with a multimodule project, we limit 
-			 * the renaming rule to run only for private fields. 
-			 */
-			options.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);
-			options.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, false);
-			options.put(FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS, false);
-		}
+		/*
+		 * see SIM-1250. If we are dealing with a multimodule project, we limit
+		 * the renaming rule to run only for private fields.
+		 * 
+		 * SIM-1340. Since a Field can be referenced in test sources and we are
+		 * not processing test sources with the JMP, then limitation must apply
+		 * also for the single-module projects.
+		 */
+		options.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, false);
+		options.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, false);
+		options.put(FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS, false);
+
 		List<ICompilationUnit> iCompilationUnits = refactoringPipeline.getRefactoringStates()
 			.stream()
 			.map(RefactoringState::getWorkingCopy)
