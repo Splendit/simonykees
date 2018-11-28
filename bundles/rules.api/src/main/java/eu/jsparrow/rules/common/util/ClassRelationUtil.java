@@ -1,19 +1,27 @@
 package eu.jsparrow.rules.common.util;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A utility class for computing information related with the ancestors of a
@@ -25,6 +33,9 @@ import org.eclipse.jdt.core.dom.Modifier;
  * @since 0.9.2
  */
 public class ClassRelationUtil {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
+		.lookupClass());
 
 	private static final String INT = "int"; //$NON-NLS-1$
 	private static final String DOUBLE = "double"; //$NON-NLS-1$
@@ -573,6 +584,51 @@ public class ClassRelationUtil {
 						java.lang.Float.class.getName(), java.lang.Long.class.getName(),
 						java.lang.Short.class.getName(), java.lang.Boolean.class.getName(),
 						java.lang.Byte.class.getName(), java.lang.Character.class.getName()));
+	}
+
+	/**
+	 * Checks if the given {@link ImportDeclaration} is
+	 * {@link ImportDeclaration#isOnDemand} and implicitly imports the given
+	 * type.
+	 * 
+	 * @param importDeclaration
+	 *            import declaration to be checked.
+	 * @param typeName
+	 *            type to be checked
+	 * @return {@code true} if a type with the given name exists in the package
+	 *         imported with the on-demand {@link ImportDeclaration} or
+	 *         {@code false} otherwise.
+	 */
+	public static boolean importsTypeOnDemand(ImportDeclaration importDeclaration, String typeName) {
+		if (!importDeclaration.isOnDemand()) {
+			return false;
+		}
+
+		IBinding iBinding = importDeclaration.resolveBinding();
+		if (iBinding.getKind() != IBinding.PACKAGE) {
+			return false;
+		}
+
+		IPackageBinding iPackageBinding = (IPackageBinding) iBinding;
+		IJavaElement packageJavaElement = iPackageBinding.getJavaElement();
+		if (packageJavaElement.getElementType() != IJavaElement.PACKAGE_FRAGMENT) {
+			return false;
+		}
+
+		IPackageFragment iPackageFragment = (IPackageFragment) packageJavaElement;
+		try {
+			IJavaElement[] children = iPackageFragment.getChildren();
+			for (IJavaElement child : children) {
+				if (typeName.equals(child.getElementName())) {
+					return true;
+				}
+			}
+
+		} catch (JavaModelException e) {
+			logger.debug(e.getMessage(), e);
+		}
+
+		return false;
 	}
 
 }
