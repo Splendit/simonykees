@@ -241,9 +241,9 @@ public class RefactoringInvoker {
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
 			String projectName = context.getProperty(PROJECT_NAME + DOT + id);
 			/*
-			 * Since the aggregate projects do not contain java sources and we do
-			 * not refactor them, given that the provided project has a parent
-			 * is enough to derive that we re dealing with a multimodule
+			 * Since the aggregate projects do not contain java sources and we
+			 * do not refactor them, given that the provided project has a
+			 * parent is enough to derive that we re dealing with a multimodule
 			 * project.
 			 */
 			if (excludedModules.contains(projectName)) {
