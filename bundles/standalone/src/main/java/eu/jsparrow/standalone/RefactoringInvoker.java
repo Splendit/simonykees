@@ -47,7 +47,6 @@ public class RefactoringInvoker {
 	private static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
 	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
-	private static final String HAS_PARENT = "HAS.PARENT"; //$NON-NLS-1$
 
 	private boolean abort = false;
 	private YAMLConfigurationWrapper yamlConfigurationWrapper = new YAMLConfigurationWrapper();
@@ -242,12 +241,11 @@ public class RefactoringInvoker {
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
 			String projectName = context.getProperty(PROJECT_NAME + DOT + id);
 			/*
-			 * Since the agregate projects do not contain java sources and we do
-			 * not refactor them, given that the provided project has a parent
-			 * is enaugh to derive that we re dealing with a multimodule
+			 * Since the aggregate projects do not contain java sources and we
+			 * do not refactor them, given that the provided project has a
+			 * parent is enough to derive that we re dealing with a multimodule
 			 * project.
 			 */
-			boolean isChildModule = Boolean.parseBoolean(context.getProperty(HAS_PARENT + DOT + id));
 			if (excludedModules.contains(projectName)) {
 				/*
 				 * Skip adding StandaloneConfig for excluded module. Checks if
@@ -261,7 +259,7 @@ public class RefactoringInvoker {
 			try {
 				YAMLConfig config = getConfiguration(context, id);
 				StandaloneConfig standaloneConfig = new StandaloneConfig(projectName, path, compilerCompliance,
-						sourceFolder, natureIds, config, isChildModule);
+						sourceFolder, natureIds, config);
 				standaloneConfigs.add(standaloneConfig);
 
 			} catch (CoreException | RuntimeException e) {
