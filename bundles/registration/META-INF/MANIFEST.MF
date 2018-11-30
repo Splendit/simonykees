@@ -22,4 +22,5 @@ Export-Package:
  eu.jsparrow.registration.model,
  eu.jsparrow.registration.validation
 Service-Component: OSGI-INF/eu.jsparrow.registration.CustomerRegistrationService.xml,
- OSGI-INF/eu.jsparrow.registration.CustomerRegistrationPersistenceService.xml
+ OSGI-INF/eu.jsparrow.registration.CustomerRegistrationPersistenceService.xml,
+ OSGI-INF/eu.jsparrow.registration.CustomerRegistrationModelFactoryService.xml

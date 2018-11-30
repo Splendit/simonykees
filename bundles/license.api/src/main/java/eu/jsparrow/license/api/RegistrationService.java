@@ -1,9 +1,11 @@
 package eu.jsparrow.license.api;
 
+import eu.jsparrow.license.api.exception.ValidationException;
+
 public interface RegistrationService {
 	
-	void register(RegistrationModel registrationModel);
+	boolean register(RegistrationModel registrationModel) throws ValidationException;
 	
-	boolean validate(RegistrationModel registrationModel);
+	boolean validate(RegistrationModel registrationModel) throws ValidationException;
 
 }

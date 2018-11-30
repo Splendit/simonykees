@@ -12,6 +12,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,9 @@ import eu.jsparrow.license.api.LicensePersistenceService;
 import eu.jsparrow.license.api.LicenseService;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
+import eu.jsparrow.license.api.RegistrationModel;
+import eu.jsparrow.license.api.RegistrationModelFactoryService;
+import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
@@ -38,7 +42,7 @@ import oshi.hardware.HardwareAbstractionLayer;
  * 
  * It uses various services from the License API package.
  */
-public class LicenseUtil implements LicenseUtilService {
+public class LicenseUtil implements LicenseUtilService, RegistrationUtilService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
@@ -46,10 +50,13 @@ public class LicenseUtil implements LicenseUtilService {
 	private static LicenseUtil instance;
 
 	private LicenseService licenseService;
+	private RegistrationService registrationService;
 
 	private LicensePersistenceService<LicenseModel> persistenceService;
+	private LicensePersistenceService<RegistrationModel> registrationPersistenceSerice;
 
 	private LicenseModelFactoryService factoryService;
+	private RegistrationModelFactoryService registrationModelFactoryService;
 
 	private LicenseValidationResult result = null;
 
@@ -64,14 +71,40 @@ public class LicenseUtil implements LicenseUtilService {
 
 		ServiceReference<LicenseService> licenseReference = bundleContext.getServiceReference(LicenseService.class);
 		licenseService = bundleContext.getService(licenseReference);
+		
+		ServiceReference<RegistrationService> registrationReference = bundleContext.getServiceReference(RegistrationService.class);
+		registrationService = bundleContext.getService(registrationReference);
 
 		ServiceReference<LicensePersistenceService> persistenceReference = bundleContext
 			.getServiceReference(LicensePersistenceService.class);
 		persistenceService = bundleContext.getService(persistenceReference);
+		
+		initPersistenceServices();
 
 		ServiceReference<LicenseModelFactoryService> factoryReference = bundleContext
 			.getServiceReference(LicenseModelFactoryService.class);
 		factoryService = bundleContext.getService(factoryReference);
+		
+		ServiceReference<RegistrationModelFactoryService> registrationFactoryReference = bundleContext.getServiceReference(RegistrationModelFactoryService.class);
+		registrationModelFactoryService = bundleContext.getService(registrationFactoryReference);
+	}
+	
+	private void initPersistenceServices() {
+		BundleContext bundleContext = FrameworkUtil.getBundle(LicenseUtil.class).getBundleContext();
+		try {
+			ServiceReference<?>[] serviceReferences = bundleContext.getServiceReferences(LicensePersistenceService.class.getName(), null);
+			for(ServiceReference<?> service : serviceReferences) {
+				LicensePersistenceService<?> persistenceService = (LicensePersistenceService) bundleContext.getService(service);
+				if(persistenceService.getClass().getName().contains("NetlicensingLicense")) {
+					this.persistenceService = (LicensePersistenceService<LicenseModel>) persistenceService;
+				} else if(persistenceService.getClass().getName().contains("CustomerRegistrationPersistence")) {
+					this.registrationPersistenceSerice =  (LicensePersistenceService<RegistrationModel>) persistenceService;
+				}
+				
+			}
+		} catch (InvalidSyntaxException e) {
+			logger.error("Failed to load license persistence service", e); //$NON-NLS-1$
+		}
 	}
 
 	public static LicenseUtil get() {
@@ -83,19 +116,36 @@ public class LicenseUtil implements LicenseUtilService {
 
 	@Override
 	public boolean checkAtStartUp(Shell shell) {
-		LicenseModel model = null;
+		LicenseModel licenseModel = null;
+		RegistrationModel registrationModel = null;
 		try {
-			model = persistenceService.loadFromPersistence();
+			licenseModel = persistenceService.loadFromPersistence();
 		} catch (PersistenceException e) {
 			handleStartUpPersistenceFailure(shell, e);
-			model = factoryService.createDemoLicenseModel();
+			licenseModel = factoryService.createDemoLicenseModel();
 		}
+		
 		try {
-			result = licenseService.validate(model);
+			registrationModel = registrationPersistenceSerice.loadFromPersistence();
+		} catch (PersistenceException e) {
+			handleStartUpPersistenceFailure(shell, e);
+			registrationModel = registrationModelFactoryService.createRegistrationMode();
+		}
+		
+		try {
+			result = licenseService.validate(licenseModel);
 		} catch (ValidationException e) {
 			handleStartUpValidationFailure(shell, e);
 			return true;
 		}
+		
+		try {
+			boolean isValidRegistration = registrationService.validate(registrationModel);
+		} catch (ValidationException e) {
+			handleStartUpValidationFailure(shell, e);
+			return true;
+		}
+		
 		// When starting with an expired demo license we show the wizard dialog
 		if (result.getLicenseType() == LicenseType.DEMO && !result.isValid()) {
 			BuyLicenseDialog dialog = new BuyLicenseDialog(shell);
@@ -153,6 +203,57 @@ public class LicenseUtil implements LicenseUtilService {
 	public LicenseValidationResult getValidationResult() {
 		updateValidationResult();
 		return result;
+	}
+	
+	
+	@Override
+	public void activateRegistration(String key, String email) {
+		try {
+			RegistrationModel registrationModel = registrationPersistenceSerice.loadFromPersistence();
+			
+			RegistrationModel model = registrationModelFactoryService.createRegistrationModel(key, email, 
+					registrationModel.getFirstName(), registrationModel.getLastName(), registrationModel.getCompany(), registrationModel.hasSubscribed());
+			boolean successful = registrationService.register(model);
+			if(successful) {
+				registrationPersistenceSerice.saveToPersistence(model);
+			} else {
+				registrationPersistenceSerice.saveToPersistence(registrationModelFactoryService.createRegistrationMode());
+			}
+			
+		} catch (PersistenceException e) {
+			// TODO Auto-generated catch block
+		} catch (ValidationException e) {
+			// TODO Auto-generated catch block
+		}
+	}
+	
+	@Override
+	public void register(String email, String firstName, String lastName, String company, boolean subscribe) {
+		RegistrationModel model = registrationModelFactoryService.createRegistrationModel("", email, firstName, lastName, company, subscribe);
+		try {
+			boolean successful = registrationService.register(model);
+			if(successful) {
+				registrationPersistenceSerice.saveToPersistence(model);
+			} else {
+				registrationPersistenceSerice.saveToPersistence(registrationModelFactoryService.createRegistrationMode());
+			}
+		} catch (ValidationException e) {
+			// TODO Auto-generated catch block
+			
+		} catch (PersistenceException e) {
+			// TODO Auto-generated catch block
+		}
+	}
+	
+	@Override
+	public boolean isActiveRegistration() {
+		try {
+			RegistrationModel model = registrationPersistenceSerice.loadFromPersistence();
+			return !model.getKey().isEmpty();
+		} catch (PersistenceException e) {
+			// TODO Auto-generated catch block
+		}
+		return false;
 	}
 
 	public void updateValidationResult() {

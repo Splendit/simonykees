@@ -16,6 +16,7 @@ public class CustomerRegistrationModel implements RegistrationModel {
 	private String firstName = ""; //$NON-NLS-1$
 	private String lastName = ""; //$NON-NLS-1$
 	private String company = ""; //$NON-NLS-1$
+	private boolean subscribe = false;
 
 	public CustomerRegistrationModel() {
 
@@ -26,11 +27,12 @@ public class CustomerRegistrationModel implements RegistrationModel {
 		this.key = key;
 	}
 
-	public CustomerRegistrationModel(String key, String email, String firstName, String lastName, String company) {
+	public CustomerRegistrationModel(String key, String email, String firstName, String lastName, String company, boolean subscribe) {
 		this(key, email);
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.company = company;
+		this.subscribe = subscribe;
 	}
 
 	@Override
@@ -59,8 +61,12 @@ public class CustomerRegistrationModel implements RegistrationModel {
 	}
 
 	@Override
+	public boolean hasSubscribed() {
+		return subscribe;
+	}
+	
+	@Override
 	public String toString() {
 		return ReflectionToStringBuilder.toString(this);
 	}
-
 }

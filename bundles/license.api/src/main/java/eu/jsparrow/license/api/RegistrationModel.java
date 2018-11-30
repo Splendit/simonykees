@@ -9,5 +9,5 @@ public interface RegistrationModel extends Serializable {
 	String getLastName();
 	String getCompany();
 	String getKey();
-
+	boolean hasSubscribed();
 }
