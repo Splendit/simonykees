@@ -6,21 +6,21 @@ import eu.jsparrow.license.api.exception.PersistenceException;
  * Implementors provide methods to save or load a {@link LicenseModel} from some
  * persistent storage.
  */
-public interface LicensePersistenceService {
+public interface LicensePersistenceService<T> {
 
 	/**
-	 * Load a license model from the persistent storage.
+	 * Load a model from the persistent storage.
 	 * 
-	 * @return a license model loaded from the persistent storage
+	 * @return a model loaded from the persistent storage
 	 * @throws PersistenceException if loading the model failed
 	 */
-	public LicenseModel loadFromPersistence() throws PersistenceException;
+	public T loadFromPersistence() throws PersistenceException;
 
 	/**
-	 * Save a license model to the persistent storage. 
+	 * Save a model to the persistent storage. 
 	 * 
 	 * @param model the model to save to the persistent storage
 	 * @throws PersistenceException if saving the model failed
 	 */
-	public void saveToPersistence(LicenseModel model) throws PersistenceException;
+	public void saveToPersistence(T model) throws PersistenceException;
 }

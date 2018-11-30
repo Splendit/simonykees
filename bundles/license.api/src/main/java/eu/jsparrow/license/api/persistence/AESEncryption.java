@@ -1,4 +1,4 @@
-package eu.jsparrow.license.netlicensing.persistence;
+package eu.jsparrow.license.api.persistence;
 
 import java.lang.invoke.MethodHandles;
 import java.security.GeneralSecurityException;
@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.license.api.exception.PersistenceException;
+
+
 
 /**
  * Implementor of {@link IEncryption} using AES.
@@ -50,6 +52,7 @@ public class AESEncryption implements IEncryption {
 			cipher.init(Cipher.DECRYPT_MODE, secretKey);
 			return cipher.doFinal(encryptedData);
 		} catch (GeneralSecurityException e) {
+			//FIXME
 			throw new PersistenceException(ExceptionMessages.Netlicensing_persistenceException_failedToDecrypt, e);
 		}
 	}

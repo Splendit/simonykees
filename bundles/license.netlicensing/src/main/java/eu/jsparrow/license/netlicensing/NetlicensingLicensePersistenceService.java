@@ -7,24 +7,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicensePersistence;
 import eu.jsparrow.license.api.LicensePersistenceService;
 import eu.jsparrow.license.api.exception.PersistenceException;
-import eu.jsparrow.license.netlicensing.persistence.AESEncryption;
-import eu.jsparrow.license.netlicensing.persistence.SecureStoragePersistence;
+import eu.jsparrow.license.api.persistence.AESEncryption;
+import eu.jsparrow.license.netlicensing.persistence.LicenseSecureStoragePersistence;
 
 /**
  * Implementor of {@link LicensePersistenceService} using {@link ISecurePreferences}.
  *
  */
 @Component
-public class NetlicensingLicensePersistenceService implements LicensePersistenceService {
+public class NetlicensingLicensePersistenceService implements LicensePersistenceService<LicenseModel> {
 
 	private static final Logger logger = LoggerFactory.getLogger(NetlicensingLicensePersistenceService.class);
 
-	private LicensePersistence persistence;
+	private LicensePersistence<LicenseModel> persistence;
 	
 	public NetlicensingLicensePersistenceService() {
-		this.persistence = new SecureStoragePersistence(SecurePreferencesFactory.getDefault(), new AESEncryption());
+		this.persistence = new LicenseSecureStoragePersistence(SecurePreferencesFactory.getDefault(), new AESEncryption());
 	}
 	
 	@Override
@@ -35,7 +36,7 @@ public class NetlicensingLicensePersistenceService implements LicensePersistence
 
 	@Override
 	public void saveToPersistence(LicenseModel model) throws PersistenceException {
-		logger.debug("Saving {}", model); //$NON-NLS-1$
+		logger.debug("Saving '{}'", model); //$NON-NLS-1$
 		persistence.save(model);
 	}
 

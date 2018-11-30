@@ -47,7 +47,7 @@ public class LicenseUtil implements LicenseUtilService {
 
 	private LicenseService licenseService;
 
-	private LicensePersistenceService persistenceService;
+	private LicensePersistenceService<LicenseModel> persistenceService;
 
 	private LicenseModelFactoryService factoryService;
 

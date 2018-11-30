@@ -1,4 +1,4 @@
-package eu.jsparrow.license.netlicensing.persistence;
+package eu.jsparrow.license.api.persistence;
 
 import eu.jsparrow.license.api.exception.PersistenceException;
 
