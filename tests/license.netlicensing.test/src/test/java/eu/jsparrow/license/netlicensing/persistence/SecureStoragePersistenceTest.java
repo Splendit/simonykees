@@ -22,6 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.exception.PersistenceException;
+import eu.jsparrow.license.api.persistence.IEncryption;
 import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
 import eu.jsparrow.license.netlicensing.testhelper.DummyLicenseModel;
 
@@ -41,14 +42,14 @@ public class SecureStoragePersistenceTest {
 	@Mock
 	private IEncryption encryption;
 
-	private SecureStoragePersistence secureStoragePersistence;
+	private LicenseSecureStoragePersistence secureStoragePersistence;
 
 	@Before
 	public void setUp() {
 		ISecurePreferences securePreferences = mock(ISecurePreferences.class);
 		when(securePreferences.node(anyString())).thenReturn(simonykeesNode);
 
-		this.secureStoragePersistence = new SecureStoragePersistence(securePreferences, encryption);
+		this.secureStoragePersistence = new LicenseSecureStoragePersistence(securePreferences, encryption);
 	}
 
 	@Test
