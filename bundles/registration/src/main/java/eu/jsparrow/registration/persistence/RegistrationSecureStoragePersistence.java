@@ -32,12 +32,12 @@ public class RegistrationSecureStoragePersistence extends SecureStoragePersisten
 			save(defaultRegistration);
 			return defaultRegistration;
 		}
-		return ModelSerializer.deserialize(encryptedModel);
+		return ModelSerializer.deserialize(encryption.decrypt(encryptedModel));
 	}
 
 	@Override
 	public void save(RegistrationModel model) throws PersistenceException {
 		byte[] modelAsBytes = ModelSerializer.serialize(model);
-		saveToSecureStorage(modelAsBytes, NODE_KEY);
+		saveToSecureStorage(encryption.encrypt(modelAsBytes), NODE_KEY);
 	}
 }

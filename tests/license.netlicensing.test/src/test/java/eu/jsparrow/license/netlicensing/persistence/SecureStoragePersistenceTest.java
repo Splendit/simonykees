@@ -37,7 +37,7 @@ public class SecureStoragePersistenceTest {
 	 */
 
 	@Mock
-	private ISecurePreferences simonykeesNode;
+	private ISecurePreferences simonykeesLicenseNode;
 
 	@Mock
 	private IEncryption encryption;
@@ -47,7 +47,7 @@ public class SecureStoragePersistenceTest {
 	@Before
 	public void setUp() {
 		ISecurePreferences securePreferences = mock(ISecurePreferences.class);
-		when(securePreferences.node(anyString())).thenReturn(simonykeesNode);
+		when(securePreferences.node(anyString())).thenReturn(simonykeesLicenseNode);
 
 		this.secureStoragePersistence = new LicenseSecureStoragePersistence(securePreferences, encryption);
 	}
@@ -61,7 +61,7 @@ public class SecureStoragePersistenceTest {
 
 		secureStoragePersistence.save(new DummyLicenseModel());
 
-		verify(simonykeesNode).putByteArray(eq("license-model"), eq(encryptedModelBytes), eq(false));
+		verify(simonykeesLicenseNode).putByteArray(eq("license-model"), eq(encryptedModelBytes), eq(false));
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class SecureStoragePersistenceTest {
 		LicenseModel model = new DummyLicenseModel();
 		byte[] encryptedModelBytes = "encryptedModel".getBytes();
 		byte[] decryptedModel = ModelSerializer.serialize(model);
-		when(simonykeesNode.getByteArray(any(), any())).thenReturn(encryptedModelBytes);
+		when(simonykeesLicenseNode.getByteArray(any(), any())).thenReturn(encryptedModelBytes);
 		when(encryption.decrypt(encryptedModelBytes)).thenReturn(decryptedModel);
 
 		LicenseModel result = secureStoragePersistence.load();
@@ -81,7 +81,7 @@ public class SecureStoragePersistenceTest {
 
 	@Test
 	public void load_withNothingInStorage_returnsDemoLicenseModel() throws Exception {
-		when(simonykeesNode.getByteArray(any(), any())).thenReturn(null);
+		when(simonykeesLicenseNode.getByteArray(any(), any())).thenReturn(null);
 
 		LicenseModel result = secureStoragePersistence.load();
 
@@ -94,7 +94,7 @@ public class SecureStoragePersistenceTest {
 		byte[] encryptedModelBytes = "encryptedModel".getBytes();
 		when(encryption.encrypt(eq(modelBytes))).thenReturn(encryptedModelBytes);
 
-		doThrow(StorageException.class).when(simonykeesNode)
+		doThrow(StorageException.class).when(simonykeesLicenseNode)
 			.putByteArray(anyString(), any(), anyBoolean());
 
 		secureStoragePersistence.save(new DummyLicenseModel());
