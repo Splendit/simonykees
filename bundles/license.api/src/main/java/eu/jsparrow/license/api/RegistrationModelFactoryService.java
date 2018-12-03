@@ -2,7 +2,7 @@ package eu.jsparrow.license.api;
 
 public interface RegistrationModelFactoryService {
 	
-	RegistrationModel createRegistrationMode();
+	RegistrationModel createRegistrationModel();
 	
 	RegistrationModel createRegistrationModel(String key, String email);
 	

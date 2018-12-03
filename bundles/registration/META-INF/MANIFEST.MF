@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Automatic-Module-Name: eu.jsparrow.license.freemium
+Automatic-Module-Name: eu.jsparrow.registration
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Freemium Licensing
 Bundle-SymbolicName: eu.jsparrow.registration

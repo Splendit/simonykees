@@ -94,11 +94,11 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		try {
 			ServiceReference<?>[] serviceReferences = bundleContext.getServiceReferences(LicensePersistenceService.class.getName(), null);
 			for(ServiceReference<?> service : serviceReferences) {
-				LicensePersistenceService<?> persistenceService = (LicensePersistenceService) bundleContext.getService(service);
-				if(persistenceService.getClass().getName().contains("NetlicensingLicense")) {
-					this.persistenceService = (LicensePersistenceService<LicenseModel>) persistenceService;
-				} else if(persistenceService.getClass().getName().contains("CustomerRegistrationPersistence")) {
-					this.registrationPersistenceSerice =  (LicensePersistenceService<RegistrationModel>) persistenceService;
+				LicensePersistenceService<?> licensePersistenceService = (LicensePersistenceService) bundleContext.getService(service);
+				if(licensePersistenceService.getClass().getName().contains("NetlicensingLicense")) {
+					this.persistenceService = (LicensePersistenceService<LicenseModel>) licensePersistenceService;
+				} else if(licensePersistenceService.getClass().getName().contains("CustomerRegistrationPersistence")) {
+					this.registrationPersistenceSerice =  (LicensePersistenceService<RegistrationModel>) licensePersistenceService;
 				}
 				
 			}
@@ -128,8 +128,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		try {
 			registrationModel = registrationPersistenceSerice.loadFromPersistence();
 		} catch (PersistenceException e) {
-			handleStartUpPersistenceFailure(shell, e);
-			registrationModel = registrationModelFactoryService.createRegistrationMode();
+			registrationModel = registrationModelFactoryService.createRegistrationModel();
 		}
 		
 		try {
@@ -212,37 +211,42 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			RegistrationModel registrationModel = registrationPersistenceSerice.loadFromPersistence();
 			
 			RegistrationModel model = registrationModelFactoryService.createRegistrationModel(key, email, 
-					registrationModel.getFirstName(), registrationModel.getLastName(), registrationModel.getCompany(), registrationModel.hasSubscribed());
+					registrationModel.getFirstName(), registrationModel.getLastName(), registrationModel.getCompany(), 
+					registrationModel.hasSubscribed());
 			boolean successful = registrationService.register(model);
 			if(successful) {
 				registrationPersistenceSerice.saveToPersistence(model);
 			} else {
-				registrationPersistenceSerice.saveToPersistence(registrationModelFactoryService.createRegistrationMode());
+				registrationPersistenceSerice.saveToPersistence(registrationModelFactoryService.createRegistrationModel());
 			}
 			
 		} catch (PersistenceException e) {
-			// TODO Auto-generated catch block
+			logger.warn("Failed to persist registration", e); //$NON-NLS-1$
 		} catch (ValidationException e) {
-			// TODO Auto-generated catch block
+			logger.warn("Cannot validate registration - email: '{}', key: '{}'", email, key, e); //$NON-NLS-1$
 		}
 	}
 	
 	@Override
 	public void register(String email, String firstName, String lastName, String company, boolean subscribe) {
-		RegistrationModel model = registrationModelFactoryService.createRegistrationModel("", email, firstName, lastName, company, subscribe);
+		RegistrationModel model = registrationModelFactoryService.createRegistrationModel("", email, firstName, lastName, company, subscribe); //$NON-NLS-1$
+		boolean successful = false;
 		try {
-			boolean successful = registrationService.register(model);
+			successful = registrationService.register(model);
+		} catch (ValidationException e) {
+			logger.warn("Failed to register", e); //$NON-NLS-1$
+		}
+		
+		try {			
 			if(successful) {
 				registrationPersistenceSerice.saveToPersistence(model);
 			} else {
-				registrationPersistenceSerice.saveToPersistence(registrationModelFactoryService.createRegistrationMode());
+				RegistrationModel empty = registrationModelFactoryService.createRegistrationModel();
+				registrationPersistenceSerice.saveToPersistence(empty);
 			}
-		} catch (ValidationException e) {
-			// TODO Auto-generated catch block
-			
 		} catch (PersistenceException e) {
-			// TODO Auto-generated catch block
-		}
+			logger.warn("Failed to persist registration", e); //$NON-NLS-1$
+		} 
 	}
 	
 	@Override
@@ -251,7 +255,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			RegistrationModel model = registrationPersistenceSerice.loadFromPersistence();
 			return !model.getKey().isEmpty();
 		} catch (PersistenceException e) {
-			// TODO Auto-generated catch block
+			logger.warn("Failed to load registration model", e); //$NON-NLS-1$
 		}
 		return false;
 	}

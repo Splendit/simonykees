@@ -10,7 +10,7 @@ import eu.jsparrow.registration.model.CustomerRegistrationModel;
 public class CustomerRegistrationModelFactoryService implements RegistrationModelFactoryService {
 
 	@Override
-	public RegistrationModel createRegistrationMode() {
+	public RegistrationModel createRegistrationModel() {
 		return new CustomerRegistrationModel();
 	}
 
