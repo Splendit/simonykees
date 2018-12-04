@@ -16,7 +16,6 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import eu.jsparrow.license.api.RegistrationModel;
@@ -25,19 +24,23 @@ import eu.jsparrow.license.api.persistence.IEncryption;
 import eu.jsparrow.registration.helper.DummyRegistrationModel;
 
 @SuppressWarnings("nls")
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class RegistrationSecureStoragePersistenceTest {
 
-	@Mock
+	/*
+	 * TODO change to @RunWith(MockitoJUnitRunner.class) later on. the Silent
+	 * class is for preventing compatibility issues, after upgrading to mockito
+	 * 2
+	 */
+
 	private ISecurePreferences simonykeesRegistrationNode;
-
-	@Mock
 	private IEncryption encryption;
-
 	private RegistrationSecureStoragePersistence persistence;
 
 	@Before
 	public void setUp() {
+		simonykeesRegistrationNode = mock(ISecurePreferences.class);
+		encryption = mock(IEncryption.class);
 		ISecurePreferences securePreferences = mock(ISecurePreferences.class);
 		when(securePreferences.node(anyString())).thenReturn(simonykeesRegistrationNode);
 
@@ -48,36 +51,37 @@ public class RegistrationSecureStoragePersistenceTest {
 	public void save_validModle_encryptsAndSavesData() throws Exception {
 		byte[] modelBytes = ModelSerializer.serialize(new DummyRegistrationModel());
 		byte[] encryptedModelBytes = "encryptedModel".getBytes();
-		
+
 		when(encryption.encrypt(modelBytes)).thenReturn(encryptedModelBytes);
-		
+
 		persistence.save(new DummyRegistrationModel());
-		
+
 		verify(simonykeesRegistrationNode).putByteArray(eq("registration-model"), eq(encryptedModelBytes), eq(false));
 	}
-	
+
 	@Test
 	public void load_validModle_decryptsAndLoadsModel() throws Exception {
 		RegistrationModel model = new DummyRegistrationModel();
 		byte[] encryptedModelBytes = "encryptedModel".getBytes();
 		byte[] decryptedModel = ModelSerializer.serialize(model);
-		
+
 		when(simonykeesRegistrationNode.getByteArray(any(), any())).thenReturn(encryptedModelBytes);
 		when(encryption.decrypt(encryptedModelBytes)).thenReturn(decryptedModel);
-		
+
 		RegistrationModel result = persistence.load();
 		assertNotNull(result);
 	}
-	
+
 	@Test
 	public void load_withNothingInStorage_returnsEmptyRegistrationModel() throws Exception {
 		when(simonykeesRegistrationNode.getByteArray(any(), any())).thenReturn(null);
 
 		RegistrationModel result = persistence.load();
 
-		assertTrue(result.getKey().isEmpty());
+		assertTrue(result.getKey()
+			.isEmpty());
 	}
-	
+
 	@Test(expected = PersistenceException.class)
 	public void save_withCorruptedSecureStorage_throwsPersistenceException() throws Exception {
 		byte[] modelBytes = "model".getBytes();

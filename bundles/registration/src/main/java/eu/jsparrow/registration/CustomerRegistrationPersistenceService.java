@@ -14,6 +14,14 @@ import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.persistence.AESEncryption;
 import eu.jsparrow.registration.persistence.RegistrationSecureStoragePersistence;
 
+/**
+ * Service for persisting customer registration. Provides functionality for
+ * persisting a customer registration and loading it from the persistence
+ * storage.
+ * 
+ * @since 3.0.0
+ *
+ */
 @Component
 public class CustomerRegistrationPersistenceService implements LicensePersistenceService<RegistrationModel> {
 

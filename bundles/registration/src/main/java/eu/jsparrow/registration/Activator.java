@@ -48,9 +48,8 @@ public class Activator extends Plugin {
 
 		// load pseudo-activator from test fragment and execute its start method
 		try {
-			//FIXME: create a fragment for the registration tests
 			Class<? extends BundleActivator> frgActClass = Class
-				.forName("eu.jsparrow.license.netlicensing.TestFragmentActivator") //$NON-NLS-1$
+				.forName("eu.jsparrow.registration.TestFragmentActivator") //$NON-NLS-1$
 				.asSubclass(BundleActivator.class);
 			testFragmentActivator = frgActClass.newInstance();
 			testFragmentActivator.start(context);

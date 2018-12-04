@@ -12,6 +12,13 @@ import eu.jsparrow.license.api.persistence.IEncryption;
 import eu.jsparrow.license.api.persistence.SecureStoragePersistence;
 import eu.jsparrow.registration.model.CustomerRegistrationModel;
 
+/**
+ * Contains functionality for encrypting, storing and retrieving a
+ * {@link RegistrationModel} into {@link ISecurePreferences}.
+ * 
+ * @since 3.0.0
+ *
+ */
 public class RegistrationSecureStoragePersistence extends SecureStoragePersistence<RegistrationModel> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
