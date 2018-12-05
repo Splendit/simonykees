@@ -16,6 +16,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormEditor;
@@ -23,6 +25,7 @@ import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 
 /**
  * Content displayed in Eclipse editor when the jSparrow plugin is installed.
@@ -166,6 +169,25 @@ public class WelcomePage extends FormPage {
 		licensePreferencesButton.setText(Messages.WelcomePage_license_preferences_button);
 		createButtonListenerToOpenPreferences(licensePreferencesButton,
 				"eu.jsparrow.ui.preference.ProfilePreferencePageLicense"); //$NON-NLS-1$
+
+		Button freemiumRegistrationButton = new Button(rightComposite, SWT.PUSH);
+		freemiumRegistrationButton.setLayoutData(buttonGridData);
+		freemiumRegistrationButton.setText("Freemium Registration");
+		freemiumRegistrationButton.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				PlatformUI.getWorkbench()
+					.getDisplay()
+					.asyncExec(() -> {
+						Shell activeShell = PlatformUI.getWorkbench()
+							.getActiveWorkbenchWindow()
+							.getShell();
+						new RegistrationDialog(activeShell).open();
+					});
+			}
+		});
+
 	}
 
 	private void createButtonListenerToOpenPreferences(Button openPreferencesButton, String activePreferencePageId) {

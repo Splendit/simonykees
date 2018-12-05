@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
+import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 
 /**
  * Startup class starts immediately on Eclipse startup with welcome screen if it
@@ -29,11 +30,11 @@ public class Startup implements IStartup {
 		PlatformUI.getWorkbench()
 			.getDisplay()
 			.asyncExec(() -> {
-				if (SimonykeesPreferenceManager.getEnableIntro()) {
+				if (true) {
 					Shell activeShell = PlatformUI.getWorkbench()
 						.getActiveWorkbenchWindow()
 						.getShell();
-					new StartDialog(activeShell).open();
+					new RegistrationDialog(activeShell).open();
 				}
 				if (SimonykeesPreferenceManager.getEnableDashboard()) {
 					IWorkbenchPage page = PlatformUI.getWorkbench()
