@@ -114,16 +114,35 @@ public class RegistrationControl {
 	}
 
 	private void createRegisterButton(Composite parentComposite) {
-		GridData buttonGridData = new GridData(SWT.RIGHT, SWT.BOTTOM, false, true);
+		GridData statusLabelGridData = new GridData(SWT.RIGHT, SWT.BOTTOM, false, true);
+		Composite statusLabelComposite = new Composite(parentComposite, SWT.NONE);
+		GridLayout statusLabelRowLayout = new GridLayout(1, false);
+		statusLabelComposite.setLayout(statusLabelRowLayout);
+		statusLabelComposite.setLayoutData(statusLabelGridData);
+
+		Label statusLabel = new Label(statusLabelComposite, SWT.NONE);
+		statusLabel.setText(Messages.RegistrationControl_statusText);
+		statusLabel.setVisible(false);
+		
+		GridData buttonGridData = new GridData(SWT.RIGHT, SWT.BOTTOM, false, false);
 		Composite buttonRowComposite = new Composite(parentComposite, SWT.NONE);
 		GridLayout buttonRowLayout = new GridLayout(2, false);
 		buttonRowComposite.setLayout(buttonRowLayout);
 		buttonRowComposite.setLayoutData(buttonGridData);
 
-		Label statusLabel = new Label(buttonRowComposite, SWT.NONE);
-		statusLabel.setText(Messages.RegistrationControl_statusText);
-		statusLabel.setVisible(false);
-
+		GridData buttonData = new GridData(SWT.FILL, SWT.CENTER, false, false);
+		buttonData.widthHint = 90;
+		
+		Button cancelButton = new Button(buttonRowComposite, SWT.PUSH);
+		cancelButton.setText(Messages.RegistrationControl_cancelButton);
+		cancelButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				((Button)event.getSource()).getShell().close();
+			}
+		});
+		cancelButton.setLayoutData(buttonData);
+	
 		Button registerButton = new Button(buttonRowComposite, SWT.PUSH);
 		registerButton.setText(Messages.RegistrationControl_registerButton);
 		registerButton.addSelectionListener(new SelectionAdapter() {
@@ -153,6 +172,7 @@ public class RegistrationControl {
 				statusLabel.setVisible(false);
 			}
 		});
+		registerButton.setLayoutData(buttonData);
 	}
 
 	private void checkMandatoryFieldsAndUpdateDecorations() {

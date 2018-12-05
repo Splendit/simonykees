@@ -24,6 +24,8 @@ public class Messages extends NLS {
 
 	public static String ActivationControl_activationFailedText;
 
+	public static String ActivationControl_cancelButton;
+
 	public static String ActivationControl_enterLicenseLabel;
 
 	public static String ActivationControl_invalidLicenseLabel;
@@ -277,6 +279,8 @@ public class Messages extends NLS {
 	public static String RefactoringInvoker_GetEnabledRulesForProject;
 	public static String RefactoringInvoker_GetSelectedRules;
 	public static String RefactoringInvoker_OverridingConfigWithCommandLine;
+	public static String RegistrationControl_cancelButton;
+
 	public static String RegistrationControl_checkEmailForLicenseText;
 
 	public static String RegistrationControl_checkInternetText;

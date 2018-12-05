@@ -75,17 +75,36 @@ public class ActivationControl {
 	}
 
 	private void createActivateButton(Composite composite) {
-		GridData buttonGridData = new GridData(SWT.RIGHT, SWT.BOTTOM, false, true);
-		Composite buttonRowComposite = new Composite(composite, SWT.NONE);
-		GridLayout buttonRowLayout = new GridLayout(2, false);
-		buttonRowComposite.setLayout(buttonRowLayout);
-		buttonRowComposite.setLayoutData(buttonGridData);
+		GridData statusLabelGridData = new GridData(SWT.RIGHT, SWT.BOTTOM, false, true);
+		Composite statusLabelComposite = new Composite(composite, SWT.NONE);
+		GridLayout statusLabelRowLayout = new GridLayout(1, false);
+		statusLabelComposite.setLayout(statusLabelRowLayout);
+		statusLabelComposite.setLayoutData(statusLabelGridData);
 
-		statusLabel = new Label(buttonRowComposite, SWT.NONE);
+		statusLabel = new Label(statusLabelComposite, SWT.NONE);
 		statusLabel.setText(Messages.ActivationControl_statusLabel);
 		statusLabel.setVisible(false);
 
-		activateButton = new Button(buttonRowComposite, SWT.PUSH);
+		GridData buttonGridData = new GridData(SWT.RIGHT, SWT.BOTTOM, false, false);
+		Composite buttonComposite = new Composite(composite, SWT.NONE);
+		GridLayout buttonRowLayout = new GridLayout(2, false);
+		buttonComposite.setLayout(buttonRowLayout);
+		buttonComposite.setLayoutData(buttonGridData);
+
+		GridData buttonData = new GridData(SWT.FILL, SWT.CENTER, false, false);
+		buttonData.widthHint = 90;
+		
+		Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+		cancelButton.setText(Messages.ActivationControl_cancelButton);
+		cancelButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				((Button)event.getSource()).getShell().close();
+			}
+		});
+		cancelButton.setLayoutData(buttonData);
+		
+		activateButton = new Button(buttonComposite, SWT.PUSH);
 		activateButton.setText(Messages.ActivationControl_activateButton);
 		activateButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -108,6 +127,8 @@ public class ActivationControl {
 				}
 			}
 		});
+		activateButton.setLayoutData(buttonData);
+		
 	}
 
 	public boolean validateLicenseKey() {
