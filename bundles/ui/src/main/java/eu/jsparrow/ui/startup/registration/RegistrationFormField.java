@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.osgi.framework.Bundle;
 
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 
 public class RegistrationFormField {
@@ -72,27 +73,25 @@ public class RegistrationFormField {
 		scaledCloseRedIconImage = new Image(parent.getDisplay(), imageDataCloseRed);
 
 		// set description and image
-		decoValid.setDescriptionText("Valid name");
+		decoValid.setDescriptionText(Messages.RegistrationFormField_validDataText);
 		decoValid.setImage(scaledTickmarkGreenIconImage);
 		decoValid.hide();
 
 		// set description and image
-		decoInvalid.setDescriptionText("Please enter valid name");
+		decoInvalid.setDescriptionText(Messages.RegistrationFormField_invalidDataText);
 		decoInvalid.setImage(scaledCloseRedIconImage);
 		decoInvalid.hide();
 
 		text.addModifyListener((ModifyEvent event) -> {
 			isValid((Text) event.getSource());
 			updateDecoVisibility();
-//			decoInvalid.hide();
-//			decoValid.hide();
 		});
 
 		text.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent event) {
-				 isValid((Text) event.getSource());
-				 updateDecoVisibility();
+				isValid((Text) event.getSource());
+				updateDecoVisibility();
 			}
 		});
 	}

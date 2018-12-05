@@ -20,6 +20,20 @@ public class Messages extends NLS {
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
+	public static String ActivationControl_activateButton;
+
+	public static String ActivationControl_activationFailedText;
+
+	public static String ActivationControl_enterLicenseLabel;
+
+	public static String ActivationControl_invalidLicenseLabel;
+
+	public static String ActivationControl_licenseValidityExplanationText;
+
+	public static String ActivationControl_statusLabel;
+
+	public static String ActivationControl_successfulActivationText;
+
 	public static String Activator_couldNotDeleteFileWithPath;
 	public static String Activator_debug_collectCompilationUnits;
 	public static String Activator_debug_commitRefactoring;
@@ -263,6 +277,54 @@ public class Messages extends NLS {
 	public static String RefactoringInvoker_GetEnabledRulesForProject;
 	public static String RefactoringInvoker_GetSelectedRules;
 	public static String RefactoringInvoker_OverridingConfigWithCommandLine;
+	public static String RegistrationControl_checkEmailForLicenseText;
+
+	public static String RegistrationControl_checkInternetText;
+
+	public static String RegistrationControl_companyLabel;
+
+	public static String RegistrationControl_emailAgreeText;
+
+	public static String RegistrationControl_emailLabel;
+
+	public static String RegistrationControl_firstNameLabel;
+
+	public static String RegistrationControl_gpdrAgreeText;
+
+	public static String RegistrationControl_introText;
+
+	public static String RegistrationControl_lastNameLabel;
+
+	public static String RegistrationControl_licenseAgreeText;
+
+	public static String RegistrationControl_newsletterAgreeText;
+
+	public static String RegistrationControl_registerButton;
+
+	public static String RegistrationControl_registrationSuccessfulText;
+
+	public static String RegistrationControl_serverUnreachableText;
+
+	public static String RegistrationControl_statusText;
+
+	public static String RegistrationControl_termsGroupTitle;
+
+	public static String RegistrationDialog_activateTabTitle;
+
+	public static String RegistrationDialog_activateTabTooltip;
+
+	public static String RegistrationDialog_registerTabTitle;
+
+	public static String RegistrationDialog_registerTabTooltip;
+
+	public static String RegistrationDialog_registrationTitle;
+
+	public static String RegistrationFormCheckBox_invalidDataText;
+
+	public static String RegistrationFormField_invalidDataText;
+
+	public static String RegistrationFormField_validDataText;
+
 	public static String RemoveDoubleNegationRule_description;
 
 	public static String RemoveDoubleNegationRule_name;

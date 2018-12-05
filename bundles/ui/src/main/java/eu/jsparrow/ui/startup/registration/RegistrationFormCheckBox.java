@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Group;
 import org.osgi.framework.Bundle;
 
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 
 public class RegistrationFormCheckBox {
@@ -52,7 +53,7 @@ public class RegistrationFormCheckBox {
 		ImageData imageDataCloseRed = closeRedIconImage.getImageData();
 		scaledCloseRedIconImage = new Image(parent.getDisplay(), imageDataCloseRed);
 
-		decoInvalid.setDescriptionText("Please enter valid name");
+		decoInvalid.setDescriptionText(Messages.RegistrationFormCheckBox_invalidDataText);
 		decoInvalid.setImage(scaledCloseRedIconImage);
 		decoInvalid.hide();
 	}

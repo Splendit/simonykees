@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
 
@@ -25,7 +26,7 @@ public class ActivationControl {
 	private Composite parentComposite;
 
 	private Text licenseText;
-	private String licenseKeyString = "";
+	private String licenseKeyString = ""; //$NON-NLS-1$
 
 	private Label invalidLicenseLabel;
 	private Label statusLabel;
@@ -40,9 +41,9 @@ public class ActivationControl {
 
 		GridData labelGridData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
 		labelGridData.verticalIndent = 5;
-		Label introLabel = new Label(parentComposite, SWT.NONE);
-		introLabel.setLayoutData(labelGridData);
-		introLabel.setText("Enter the license key received by email:");
+		Label enterLicenseLabel = new Label(parentComposite, SWT.NONE);
+		enterLicenseLabel.setLayoutData(labelGridData);
+		enterLicenseLabel.setText(Messages.ActivationControl_enterLicenseLabel);
 
 		createLicenseInputArea(parentComposite);
 	}
@@ -65,7 +66,7 @@ public class ActivationControl {
 		licenseLabelGridData.horizontalIndent = 5;
 		licenseLabelGridData.verticalIndent = 5;
 		invalidLicenseLabel.setLayoutData(licenseLabelGridData);
-		invalidLicenseLabel.setText("Please provide a valid license key");
+		invalidLicenseLabel.setText(Messages.ActivationControl_invalidLicenseLabel);
 		invalidLicenseLabel.setVisible(false);
 
 		createActivateButton(composite);
@@ -81,11 +82,11 @@ public class ActivationControl {
 		buttonRowComposite.setLayoutData(buttonGridData);
 
 		statusLabel = new Label(buttonRowComposite, SWT.NONE);
-		statusLabel.setText("Contacting Server . . . ");
+		statusLabel.setText(Messages.ActivationControl_statusLabel);
 		statusLabel.setVisible(false);
 
 		activateButton = new Button(buttonRowComposite, SWT.PUSH);
-		activateButton.setText("Activate");
+		activateButton.setText(Messages.ActivationControl_activateButton);
 		activateButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
@@ -110,7 +111,7 @@ public class ActivationControl {
 	}
 
 	public boolean validateLicenseKey() {
-			String regex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+			String regex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"; //$NON-NLS-1$
 			Pattern pattern = Pattern.compile(regex);
 			Matcher matcher = pattern.matcher(licenseText.getText());
 
@@ -124,7 +125,7 @@ public class ActivationControl {
 
 	private void showLicenseValidDialog() {
 		if (SimonykeesMessageDialog.openMessageDialog(Display.getCurrent()
-			.getActiveShell(), "Your activation was successful! Enjoy using free rules and improving your code base.",
+			.getActiveShell(), Messages.ActivationControl_successfulActivationText,
 				MessageDialog.INFORMATION)) {
 			getControl().getShell()
 				.close();
@@ -134,10 +135,10 @@ public class ActivationControl {
 	private void showInvalidLicenseDialog() {
 		if (SimonykeesMessageDialog.openMessageDialog(Display.getCurrent()
 			.getActiveShell(),
-				"Activation failed. Please verify you entered a valid license key." + System.lineSeparator()
-						+ "The license key is valid for only one activation. If you have already used the license key, please register again to get a new license key.",
+				Messages.ActivationControl_activationFailedText + System.lineSeparator()
+						+ Messages.ActivationControl_licenseValidityExplanationText,
 				MessageDialog.ERROR)) {
-			licenseText.setText("");
+			licenseText.setText(""); //$NON-NLS-1$
 			resetToDefaultSelection();
 		}
 	}

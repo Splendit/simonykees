@@ -13,6 +13,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
+import eu.jsparrow.i18n.Messages;
+
 public class RegistrationDialog extends Dialog {
 
 	RegistrationControl registrationTabControl;
@@ -40,13 +42,13 @@ public class RegistrationDialog extends Dialog {
 		// Create each tab and set its text, tool tip text,
 		// image, and control
 		TabItem registerTab = new TabItem(tabFolder, SWT.FILL);
-		registerTab.setText("Register");
-		registerTab.setToolTipText("Register email");
+		registerTab.setText(Messages.RegistrationDialog_registerTabTitle);
+		registerTab.setToolTipText(Messages.RegistrationDialog_registerTabTooltip);
 		registerTab.setControl(getRegistrationControl(tabFolder));
 
 		TabItem activateTab = new TabItem(tabFolder, SWT.FILL);
-		activateTab.setText("Activate");
-		activateTab.setToolTipText("Activate license");
+		activateTab.setText(Messages.RegistrationDialog_activateTabTitle);
+		activateTab.setToolTipText(Messages.RegistrationDialog_activateTabTooltip);
 		activateTab.setControl(getActivationControl(tabFolder));
 
 		// Select the third tab (index is zero-based)
@@ -104,7 +106,7 @@ public class RegistrationDialog extends Dialog {
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText("jSparrow Freemium Registration");
+		newShell.setText(Messages.RegistrationDialog_registrationTitle);
 	}
 
 	@Override

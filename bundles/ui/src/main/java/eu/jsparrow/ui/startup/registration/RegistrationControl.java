@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.Text;
 
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
 
@@ -46,7 +47,7 @@ public class RegistrationControl {
 		gridData.verticalIndent = 5;
 		Label introLabel = new Label(parentComposite, SWT.NONE);
 		introLabel.setLayoutData(gridData);
-		introLabel.setText("Register and get FREE rules.");
+		introLabel.setText(Messages.RegistrationControl_introText);
 
 		createUserDataForm(parentComposite);
 
@@ -61,15 +62,15 @@ public class RegistrationControl {
 		GridLayout formGroupLayout = new GridLayout(2, false);
 		formGroup.setLayout(formGroupLayout);
 
-		firstName = new RegistrationFormField(formGroup, "First name");
-		lastName = new RegistrationFormField(formGroup, "Last name");
-		email = new RegistrationFormField(formGroup, "Email") {
+		firstName = new RegistrationFormField(formGroup, Messages.RegistrationControl_firstNameLabel);
+		lastName = new RegistrationFormField(formGroup, Messages.RegistrationControl_lastNameLabel);
+		email = new RegistrationFormField(formGroup, Messages.RegistrationControl_emailLabel) {
 			@Override
 			protected void isValid(Text text) {
 				setValid(validateEmail(text.getText()));
 			}
 		};
-		company = new RegistrationFormField(formGroup, "Company") {
+		company = new RegistrationFormField(formGroup, Messages.RegistrationControl_companyLabel) {
 			@Override
 			protected void isValid(Text text) {
 				setValid(true);
@@ -84,20 +85,19 @@ public class RegistrationControl {
 
 	private void createConditionsAgreementsForm(Composite composite) {
 		Group conditionsGroup = new Group(composite, SWT.BORDER_DASH);
-		conditionsGroup.setText("Terms and conditions");
+		conditionsGroup.setText(Messages.RegistrationControl_termsGroupTitle);
 		GridData groupGridData = new GridData(GridData.FILL_BOTH);
 		groupGridData.verticalIndent = 10;
 		conditionsGroup.setLayoutData(groupGridData);
 		conditionsGroup.setLayout(new GridLayout(1, false));
 
 		emailAgreeCheckBox = new RegistrationFormCheckBox(conditionsGroup,
-				"I agree to being contacted via email with license key for free rule activation.");
-		dsgvoAgreeCheckBox = new RegistrationFormCheckBox(conditionsGroup, "I agree to DSGVO text.");
+				Messages.RegistrationControl_emailAgreeText);
+		dsgvoAgreeCheckBox = new RegistrationFormCheckBox(conditionsGroup, Messages.RegistrationControl_gpdrAgreeText);
 		licenseAgreeLCheckBox = new RegistrationFormCheckBox(conditionsGroup,
-				"I agree with terms and conditions of the License Agreement");
+				Messages.RegistrationControl_licenseAgreeText);
 		newsletterAgreeCheckBox = new RegistrationFormCheckBox(conditionsGroup,
-				"I agree to receive the jSparrow newsletter about new product features, "
-						+ "special offers and interesting information about Java refactoring and improving code quality") {
+				Messages.RegistrationControl_newsletterAgreeText) { 
 			@Override
 			protected void addCheckBoxChangeListener() {
 				// do nothing, this is not mandatory field
@@ -121,11 +121,11 @@ public class RegistrationControl {
 		buttonRowComposite.setLayoutData(buttonGridData);
 
 		Label statusLabel = new Label(buttonRowComposite, SWT.NONE);
-		statusLabel.setText("Contacting Server . . . ");
+		statusLabel.setText(Messages.RegistrationControl_statusText);
 		statusLabel.setVisible(false);
 
 		Button registerButton = new Button(buttonRowComposite, SWT.PUSH);
-		registerButton.setText("Register");
+		registerButton.setText(Messages.RegistrationControl_registerButton);
 		registerButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -174,7 +174,7 @@ public class RegistrationControl {
 	}
 
 	private boolean validateEmail(String email) {
-		String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
+		String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$"; //$NON-NLS-1$
 		Pattern pattern = Pattern.compile(regex);
 		Matcher matcher = pattern.matcher(email);
 
@@ -189,8 +189,8 @@ public class RegistrationControl {
 	private void showLicenseGenerationSucceededDialog() {
 		if (SimonykeesMessageDialog.openMessageDialog(Display.getCurrent()
 			.getActiveShell(),
-				"Registration has completed!" + System.lineSeparator()
-						+ "Please check your email to activate jSparrow Freemium.",
+				Messages.RegistrationControl_registrationSuccessfulText + System.lineSeparator()
+						+ Messages.RegistrationControl_checkEmailForLicenseText,
 				MessageDialog.INFORMATION)) {
 			TabFolder tabParent = (TabFolder) getControl().getParent();
 			tabParent.setSelection(1);
@@ -201,8 +201,8 @@ public class RegistrationControl {
 	private void showLicenseGenerationFailedDialog() {
 		if (SimonykeesMessageDialog.openMessageDialog(Display.getCurrent()
 			.getActiveShell(),
-				"Server cannot be reached." + System.lineSeparator()
-						+ "Please check your internet connection and try again later.",
+				Messages.RegistrationControl_serverUnreachableText + System.lineSeparator()
+						+ Messages.RegistrationControl_checkInternetText,
 				MessageDialog.ERROR)) {
 
 			resetToDefaultSelection();
