@@ -91,13 +91,12 @@ public class RegistrationControl {
 		conditionsGroup.setLayoutData(groupGridData);
 		conditionsGroup.setLayout(new GridLayout(1, false));
 
-		emailAgreeCheckBox = new RegistrationFormCheckBox(conditionsGroup,
-				Messages.RegistrationControl_emailAgreeText);
+		emailAgreeCheckBox = new RegistrationFormCheckBox(conditionsGroup, Messages.RegistrationControl_emailAgreeText);
 		dsgvoAgreeCheckBox = new RegistrationFormCheckBox(conditionsGroup, Messages.RegistrationControl_gpdrAgreeText);
 		licenseAgreeLCheckBox = new RegistrationFormCheckBox(conditionsGroup,
 				Messages.RegistrationControl_licenseAgreeText);
 		newsletterAgreeCheckBox = new RegistrationFormCheckBox(conditionsGroup,
-				Messages.RegistrationControl_newsletterAgreeText) { 
+				Messages.RegistrationControl_newsletterAgreeText) {
 			@Override
 			protected void addCheckBoxChangeListener() {
 				// do nothing, this is not mandatory field
@@ -110,10 +109,10 @@ public class RegistrationControl {
 		newsletterAgreeCheckBox.setLayoutData(newsletterCheckBoxTextGridData);
 		newsletterAgreeCheckBox.setSelection(true);
 
-		createRegisterButton(composite);
+		createButtonsBar(composite);
 	}
 
-	private void createRegisterButton(Composite parentComposite) {
+	private void createButtonsBar(Composite parentComposite) {
 		GridData statusLabelGridData = new GridData(SWT.RIGHT, SWT.BOTTOM, false, true);
 		Composite statusLabelComposite = new Composite(parentComposite, SWT.NONE);
 		GridLayout statusLabelRowLayout = new GridLayout(1, false);
@@ -123,7 +122,7 @@ public class RegistrationControl {
 		Label statusLabel = new Label(statusLabelComposite, SWT.NONE);
 		statusLabel.setText(Messages.RegistrationControl_statusText);
 		statusLabel.setVisible(false);
-		
+
 		GridData buttonGridData = new GridData(SWT.RIGHT, SWT.BOTTOM, false, false);
 		Composite buttonRowComposite = new Composite(parentComposite, SWT.NONE);
 		GridLayout buttonRowLayout = new GridLayout(2, false);
@@ -132,17 +131,18 @@ public class RegistrationControl {
 
 		GridData buttonData = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		buttonData.widthHint = 90;
-		
+
 		Button cancelButton = new Button(buttonRowComposite, SWT.PUSH);
 		cancelButton.setText(Messages.RegistrationControl_cancelButton);
 		cancelButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				((Button)event.getSource()).getShell().close();
+				((Button) event.getSource()).getShell()
+					.close();
 			}
 		});
 		cancelButton.setLayoutData(buttonData);
-	
+
 		Button registerButton = new Button(buttonRowComposite, SWT.PUSH);
 		registerButton.setText(Messages.RegistrationControl_registerButton);
 		registerButton.addSelectionListener(new SelectionAdapter() {

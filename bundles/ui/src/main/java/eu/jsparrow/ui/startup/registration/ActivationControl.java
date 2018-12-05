@@ -69,12 +69,12 @@ public class ActivationControl {
 		invalidLicenseLabel.setText(Messages.ActivationControl_invalidLicenseLabel);
 		invalidLicenseLabel.setVisible(false);
 
-		createActivateButton(composite);
+		createButtonsBar(composite);
 
 		updateEnabledActivateButton();
 	}
 
-	private void createActivateButton(Composite composite) {
+	private void createButtonsBar(Composite composite) {
 		GridData statusLabelGridData = new GridData(SWT.RIGHT, SWT.BOTTOM, false, true);
 		Composite statusLabelComposite = new Composite(composite, SWT.NONE);
 		GridLayout statusLabelRowLayout = new GridLayout(1, false);
@@ -93,17 +93,18 @@ public class ActivationControl {
 
 		GridData buttonData = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		buttonData.widthHint = 90;
-		
+
 		Button cancelButton = new Button(buttonComposite, SWT.PUSH);
 		cancelButton.setText(Messages.ActivationControl_cancelButton);
 		cancelButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				((Button)event.getSource()).getShell().close();
+				((Button) event.getSource()).getShell()
+					.close();
 			}
 		});
 		cancelButton.setLayoutData(buttonData);
-		
+
 		activateButton = new Button(buttonComposite, SWT.PUSH);
 		activateButton.setText(Messages.ActivationControl_activateButton);
 		activateButton.addSelectionListener(new SelectionAdapter() {
@@ -128,15 +129,15 @@ public class ActivationControl {
 			}
 		});
 		activateButton.setLayoutData(buttonData);
-		
+
 	}
 
 	public boolean validateLicenseKey() {
-			String regex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"; //$NON-NLS-1$
-			Pattern pattern = Pattern.compile(regex);
-			Matcher matcher = pattern.matcher(licenseText.getText());
+		String regex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"; //$NON-NLS-1$
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(licenseText.getText());
 
-			return matcher.matches();
+		return matcher.matches();
 
 	}
 
@@ -146,8 +147,7 @@ public class ActivationControl {
 
 	private void showLicenseValidDialog() {
 		if (SimonykeesMessageDialog.openMessageDialog(Display.getCurrent()
-			.getActiveShell(), Messages.ActivationControl_successfulActivationText,
-				MessageDialog.INFORMATION)) {
+			.getActiveShell(), Messages.ActivationControl_successfulActivationText, MessageDialog.INFORMATION)) {
 			getControl().getShell()
 				.close();
 		}
