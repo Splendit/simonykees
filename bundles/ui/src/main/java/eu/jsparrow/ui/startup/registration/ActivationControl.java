@@ -1,5 +1,8 @@
 package eu.jsparrow.ui.startup.registration;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -52,7 +55,7 @@ public class ActivationControl {
 		licenseText.setLayoutData(licenseTextGridData);
 		licenseText.addModifyListener((ModifyEvent e) -> {
 			licenseKeyString = ((Text) e.getSource()).getText();
-			invalidLicenseLabel.setVisible(!validateLicenseKey());
+			invalidLicenseLabel.setVisible(false);
 			updateEnabledActivateButton();
 		});
 
@@ -86,11 +89,16 @@ public class ActivationControl {
 		activateButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
+				if (!validateLicenseKey()) {
+					invalidLicenseLabel.setVisible(true);
+					return;
+				}
 				statusLabel.setVisible(true);
 				ActivationEntity activationData = new ActivationEntity(licenseKeyString);
 				// TODO send license key and wait for response
 				statusLabel.setVisible(false);
 
+				// TODO check if response is valid
 				// if license is valid
 				if (validateLicenseKey()) {
 					showLicenseValidDialog();
@@ -102,13 +110,16 @@ public class ActivationControl {
 	}
 
 	public boolean validateLicenseKey() {
-		// TODO validate key, general validation (length/form)
+			String regex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+			Pattern pattern = Pattern.compile(regex);
+			Matcher matcher = pattern.matcher(licenseText.getText());
 
-		return (null != licenseKeyString && licenseKeyString.length() >= 1);
+			return matcher.matches();
+
 	}
 
 	private void updateEnabledActivateButton() {
-		activateButton.setEnabled(validateLicenseKey());
+		activateButton.setEnabled(null != licenseKeyString && licenseKeyString.length() >= 1);
 	}
 
 	private void showLicenseValidDialog() {
