@@ -1,7 +1,7 @@
 package eu.jsparrow.registration.validation;
 
-import eu.jsparrow.license.api.RegistrationModel;
 import eu.jsparrow.license.api.exception.ValidationException;
+import eu.jsparrow.registration.model.CustomerRegistrationModel;
 
 /**
  * Handles creating validation requests and response parsing for customer registrations. 
@@ -17,24 +17,18 @@ public class RegisterValidation {
 		this.registerRequest = new RegisterRequest();
 	}
 
-	public boolean register(RegistrationModel model) throws ValidationException {
+	public boolean register(CustomerRegistrationModel model) throws ValidationException {
 		String response = registerRequest.sendRegisterRequest(model);
 		return evaluateRegisterResponse(response);
 	}
 
-	public boolean activate(RegistrationModel model) throws ValidationException {
-		String response = registerRequest.sendActivateRequest(model);
+	public boolean activate(String activationKey) throws ValidationException {
+		String response = registerRequest.sendActivateRequest(activationKey);
 		return evaluateActivateResponse(response);
 	}
 	
-	public boolean validate(RegistrationModel model, String secret) {
-		String key = model.getKey();
-		if (key.isEmpty()) {
-			return false;
-		}
-		
-		String modelSecret = model.getSecret();
-		return secret.equals(modelSecret);
+	public boolean validate(String hardwareId, String secret) {
+		return secret.equals(hardwareId);
 	}
 
 

@@ -6,8 +6,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.registration.helper.DummyRegistrationModel;
-
 public class RegisterValidationTest {
 	
 	private RegisterValidation registerValidation;
@@ -19,33 +17,30 @@ public class RegisterValidationTest {
 	
 	@Test
 	public void validate_validRegistration_shouldReturnTrue() {
-		String expectedKey = "expected-key";
-		String expectedSecret = "expected-secret";
-		DummyRegistrationModel model = new DummyRegistrationModel(expectedKey, expectedSecret);
+		String hardwareId = "secret";
+		String expectedSecret = "secret";
 		
-		boolean valid = registerValidation.validate(model, expectedSecret);
+		boolean valid = registerValidation.validate(hardwareId, expectedSecret);
 		
 		assertTrue(valid);
 	}
 	
 	@Test
 	public void validate_emptyKey_shouldReturnFalse() {
-		String expectedKey = "";
-		String expectedSecret = "expected-secret";
-		DummyRegistrationModel model = new DummyRegistrationModel(expectedKey, expectedSecret);
+		String hardwareId = "";
+		String expectedSecret = "secret";
 		
-		boolean valid = registerValidation.validate(model, expectedSecret);
+		boolean valid = registerValidation.validate(hardwareId, expectedSecret);
 		
 		assertFalse(valid);
 	}
 	
 	@Test
 	public void validate_secretMisMatch_shouldReturnFalse() {
-		String expectedKey = "expected-key";
-		String expectedSecret = "expected-secret";
-		DummyRegistrationModel model = new DummyRegistrationModel(expectedKey, expectedSecret);
+		String hardwareId = "secret";
+		String expectedSecret = "";
 		
-		boolean valid = registerValidation.validate(model, "mismatching-secret");
+		boolean valid = registerValidation.validate(hardwareId, expectedSecret);
 		
 		assertFalse(valid);
 	}

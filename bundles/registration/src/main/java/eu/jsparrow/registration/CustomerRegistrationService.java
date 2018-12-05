@@ -6,9 +6,9 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.license.api.RegistrationModel;
 import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.ValidationException;
+import eu.jsparrow.registration.model.CustomerRegistrationModel;
 import eu.jsparrow.registration.validation.RegisterValidation;
 
 /**
@@ -26,21 +26,23 @@ public class CustomerRegistrationService implements RegistrationService {
 	private RegisterValidation registrationValidation = new RegisterValidation();
 
 	@Override
-	public boolean validate(RegistrationModel model, String secret) {
-		logger.debug("Validating registration {}", model); //$NON-NLS-1$
-		return registrationValidation.validate(model, secret);
+	public boolean validate(String hardwareId, String secret) {
+		logger.debug("Validating registration"); //$NON-NLS-1$
+		return registrationValidation.validate(hardwareId, secret);
 	}
 
 	@Override
-	public boolean register(RegistrationModel model) throws ValidationException {
+	public boolean register(String email, String firstName, String lastName, String company, boolean subscribe)
+			throws ValidationException {
+		CustomerRegistrationModel model = new CustomerRegistrationModel(email, firstName, lastName, company, subscribe);
 		logger.debug("Registering {}", model); //$NON-NLS-1$
 		return registrationValidation.register(model);
 	}
 
 	@Override
-	public boolean activate(RegistrationModel model) throws ValidationException {
-		logger.debug("Activating registration {}", model); //$NON-NLS-1$
-		return registrationValidation.activate(model);
+	public boolean activate(String activationKey) throws ValidationException {
+		logger.debug("Activating registration with key {}", activationKey); //$NON-NLS-1$
+		return registrationValidation.activate(activationKey);
 	}
 
 }

@@ -29,8 +29,8 @@ public class RegisterRequestTest {
 	
 	@Test
 	public void sendActivateRequest_dummyRegistrationModel_shouldInvokePost() throws Exception {
-		DummyRegistrationModel model = new DummyRegistrationModel();
-		registerRequest.sendActivateRequest(model);
+		String activationKey = "activationKey"; //$NON-NLS-1$
+		registerRequest.sendActivateRequest(activationKey);
 		verify(httpClientWrapper).post(anyString(), anyString());
 	}
 

@@ -24,8 +24,6 @@ import eu.jsparrow.license.api.LicensePersistenceService;
 import eu.jsparrow.license.api.LicenseService;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
-import eu.jsparrow.license.api.RegistrationModel;
-import eu.jsparrow.license.api.RegistrationModelFactoryService;
 import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
@@ -53,10 +51,9 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	private RegistrationService registrationService;
 
 	private LicensePersistenceService<LicenseModel> persistenceService;
-	private LicensePersistenceService<RegistrationModel> registrationPersistenceSerice;
+	private LicensePersistenceService<String> registrationPersistenceSerice;
 
 	private LicenseModelFactoryService factoryService;
-	private RegistrationModelFactoryService registrationModelFactoryService;
 
 	private LicenseValidationResult result = null;
 
@@ -85,10 +82,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		ServiceReference<LicenseModelFactoryService> factoryReference = bundleContext
 			.getServiceReference(LicenseModelFactoryService.class);
 		factoryService = bundleContext.getService(factoryReference);
-
-		ServiceReference<RegistrationModelFactoryService> registrationFactoryReference = bundleContext
-			.getServiceReference(RegistrationModelFactoryService.class);
-		registrationModelFactoryService = bundleContext.getService(registrationFactoryReference);
 	}
 
 	private void initPersistenceServices() {
@@ -107,7 +100,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 				} else if (licensePersistenceService.getClass()
 					.getName()
 					.contains("CustomerRegistrationPersistence")) {
-					this.registrationPersistenceSerice = (LicensePersistenceService<RegistrationModel>) licensePersistenceService;
+					this.registrationPersistenceSerice = (LicensePersistenceService<String>) licensePersistenceService;
 				}
 
 			}
@@ -126,7 +119,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	@Override
 	public boolean checkAtStartUp(Shell shell) {
 		LicenseModel licenseModel = null;
-		RegistrationModel registrationModel = null;
 		try {
 			licenseModel = persistenceService.loadFromPersistence();
 		} catch (PersistenceException e) {
@@ -135,19 +127,11 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 
 		try {
-			registrationModel = registrationPersistenceSerice.loadFromPersistence();
-		} catch (PersistenceException e) {
-			registrationModel = registrationModelFactoryService.createRegistrationModel();
-		}
-
-		try {
 			result = licenseService.validate(licenseModel);
 		} catch (ValidationException e) {
 			handleStartUpValidationFailure(shell, e);
 			return true;
 		}
-
-		boolean isValidRegistration = registrationService.validate(registrationModel, createNameFromHardware());
 
 		// When starting with an expired demo license we show the wizard dialog
 		if (result.getLicenseType() == LicenseType.DEMO && !result.isValid()) {
@@ -209,60 +193,35 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	}
 
 	@Override
-	public void activateRegistration(String key, String email) {
+	public void activateRegistration(String activationKey) {
 		String secret = createSecretFromHardware();
 		try {
-			RegistrationModel registrationModel = registrationPersistenceSerice.loadFromPersistence();
-
-			RegistrationModel model = registrationModelFactoryService.createRegistrationModel(key, email,
-					registrationModel.getFirstName(), registrationModel.getLastName(), registrationModel.getCompany(),
-					registrationModel.hasSubscribed(), secret);
-			boolean successful = registrationService.activate(model);
+			boolean successful = registrationService.activate(activationKey);
 			if (successful) {
-				registrationPersistenceSerice.saveToPersistence(model);
-			} else {
-				registrationPersistenceSerice
-					.saveToPersistence(registrationModelFactoryService.createRegistrationModel());
+				registrationPersistenceSerice.saveToPersistence(secret);
 			}
-
 		} catch (PersistenceException e) {
 			logger.warn("Failed to persist registration", e); //$NON-NLS-1$
 		} catch (ValidationException e) {
-			logger.warn("Cannot validate registration - email: '{}', key: '{}'", email, key, e); //$NON-NLS-1$
+			logger.warn("Cannot activate registration key: '{}'", activationKey, e); //$NON-NLS-1$
 		}
 	}
 
 	@Override
 	public void register(String email, String firstName, String lastName, String company, boolean subscribe) {
-		String key = ""; //$NON-NLS-1$
-		String secret = ""; //$NON-NLS-1$
-		RegistrationModel model = registrationModelFactoryService.createRegistrationModel(key, email, firstName,
-				lastName, company, subscribe, secret);
-		boolean successful = false;
 		try {
-			successful = registrationService.register(model);
+			registrationService.register(email, firstName, lastName, company, subscribe);
 		} catch (ValidationException e) {
 			logger.warn("Failed to register", e); //$NON-NLS-1$
-		}
-
-		try {
-			if (successful) {
-				registrationPersistenceSerice.saveToPersistence(model);
-			} else {
-				RegistrationModel empty = registrationModelFactoryService.createRegistrationModel();
-				registrationPersistenceSerice.saveToPersistence(empty);
-			}
-		} catch (PersistenceException e) {
-			logger.warn("Failed to persist registration", e); //$NON-NLS-1$
 		}
 	}
 
 	@Override
 	public boolean isActiveRegistration() {
-		String secret = createSecretFromHardware();
+		String hardwareId = createSecretFromHardware();
 		try {
-			RegistrationModel model = registrationPersistenceSerice.loadFromPersistence();
-			return registrationService.validate(model, secret);
+			String secret = registrationPersistenceSerice.loadFromPersistence();
+			return registrationService.validate(hardwareId, secret);
 		} catch (PersistenceException e) {
 			logger.warn("Failed to load registration model", e); //$NON-NLS-1$
 		}

@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.license.api.LicensePersistence;
 import eu.jsparrow.license.api.LicensePersistenceService;
-import eu.jsparrow.license.api.RegistrationModel;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.persistence.AESEncryption;
 import eu.jsparrow.registration.persistence.RegistrationSecureStoragePersistence;
@@ -23,12 +22,12 @@ import eu.jsparrow.registration.persistence.RegistrationSecureStoragePersistence
  *
  */
 @Component
-public class CustomerRegistrationPersistenceService implements LicensePersistenceService<RegistrationModel> {
+public class CustomerRegistrationPersistenceService implements LicensePersistenceService<String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private LicensePersistence<RegistrationModel> persistence;
+	private LicensePersistence<String> persistence;
 
 	public CustomerRegistrationPersistenceService() {
 		persistence = new RegistrationSecureStoragePersistence(SecurePreferencesFactory.getDefault(),
@@ -36,13 +35,13 @@ public class CustomerRegistrationPersistenceService implements LicensePersistenc
 	}
 
 	@Override
-	public RegistrationModel loadFromPersistence() throws PersistenceException {
+	public String loadFromPersistence() throws PersistenceException {
 		logger.debug("Loading registration model from persistence"); //$NON-NLS-1$
 		return persistence.load();
 	}
 
 	@Override
-	public void saveToPersistence(RegistrationModel model) throws PersistenceException {
+	public void saveToPersistence(String model) throws PersistenceException {
 		logger.debug("Saving registration model '{}' ", model); //$NON-NLS-1$
 		persistence.save(model);
 	}
