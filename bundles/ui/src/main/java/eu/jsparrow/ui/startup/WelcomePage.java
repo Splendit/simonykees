@@ -170,7 +170,16 @@ public class WelcomePage extends FormPage {
 		createButtonListenerToOpenPreferences(licensePreferencesButton,
 				"eu.jsparrow.ui.preference.ProfilePreferencePageLicense"); //$NON-NLS-1$
 
-		Button freemiumRegistrationButton = new Button(rightComposite, SWT.PUSH);
+		// TODO check for license and show only if none present
+		Group freemiumGroup = new Group(rightComposite, SWT.NONE);
+		freemiumGroup.setText("Get FREE rules now");
+		groupGridData = new GridData(GridData.FILL_HORIZONTAL);
+		groupGridData.heightHint = 52;
+		groupGridData.horizontalIndent = 5;
+		groupGridData.verticalIndent = 65;
+		freemiumGroup.setLayoutData(groupGridData);
+		freemiumGroup.setLayout(new GridLayout(1, false));
+		Button freemiumRegistrationButton = new Button(freemiumGroup, SWT.PUSH);
 		freemiumRegistrationButton.setLayoutData(buttonGridData);
 		freemiumRegistrationButton.setText("Freemium Registration");
 		freemiumRegistrationButton.addSelectionListener(new SelectionAdapter() {

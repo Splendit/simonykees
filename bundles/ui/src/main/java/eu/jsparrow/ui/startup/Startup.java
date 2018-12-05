@@ -23,7 +23,7 @@ import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 public class Startup implements IStartup {
 
 	private static final Logger logger = LoggerFactory.getLogger(Startup.class);
-	
+
 	@Override
 	public void earlyStartup() {
 
@@ -31,10 +31,17 @@ public class Startup implements IStartup {
 			.getDisplay()
 			.asyncExec(() -> {
 				if (true) {
+					// TODO update condition
 					Shell activeShell = PlatformUI.getWorkbench()
 						.getActiveWorkbenchWindow()
 						.getShell();
 					new RegistrationDialog(activeShell).open();
+				}
+				if (SimonykeesPreferenceManager.getEnableIntro()) {
+					Shell activeShell = PlatformUI.getWorkbench()
+						.getActiveWorkbenchWindow()
+						.getShell();
+					new StartDialog(activeShell).open();
 				}
 				if (SimonykeesPreferenceManager.getEnableDashboard()) {
 					IWorkbenchPage page = PlatformUI.getWorkbench()
