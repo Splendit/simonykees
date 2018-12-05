@@ -27,17 +27,18 @@ public class RegisterValidation {
 		return evaluateActivateResponse(response);
 	}
 	
-	public boolean validate(RegistrationModel model) throws ValidationException {
-		String response = registerRequest.sendValidateRequest(model);
-		return evaluateValidateResponse(response);
+	public boolean validate(RegistrationModel model, String secret) {
+		String key = model.getKey();
+		if (key.isEmpty()) {
+			return false;
+		}
+		
+		String modelSecret = model.getSecret();
+		return secret.equals(modelSecret);
 	}
 
 
 	private boolean evaluateActivateResponse(String response) {
-		return false;
-	}
-
-	private boolean evaluateValidateResponse(String response) {
 		return false;
 	}
 	

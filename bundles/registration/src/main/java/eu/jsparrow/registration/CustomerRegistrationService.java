@@ -26,9 +26,9 @@ public class CustomerRegistrationService implements RegistrationService {
 	private RegisterValidation registrationValidation = new RegisterValidation();
 
 	@Override
-	public boolean validate(RegistrationModel model) throws ValidationException {
+	public boolean validate(RegistrationModel model, String secret) {
 		logger.debug("Validating registration {}", model); //$NON-NLS-1$
-		return registrationValidation.validate(model);
+		return registrationValidation.validate(model, secret);
 	}
 
 	@Override

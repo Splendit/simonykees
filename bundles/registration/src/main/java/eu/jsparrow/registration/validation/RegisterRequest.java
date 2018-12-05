@@ -16,7 +16,6 @@ public class RegisterRequest {
 
 	private static final String REGISTER_API_ENDPOINT = "";
 	private static final String ACTIVATE_API_ENDPOINT = "";
-	private static final String VALIDATE_API_ENDPOINT = "";
 
 	private HttpClientWrapper httpClientWrapper;
 
@@ -36,11 +35,6 @@ public class RegisterRequest {
 	public String sendActivateRequest(RegistrationModel model) throws ValidationException {
 		String json = toJson(model);
 		return httpClientWrapper.post(json, ACTIVATE_API_ENDPOINT);
-	}
-
-	public String sendValidateRequest(RegistrationModel model) throws ValidationException {
-		String json = toJson(model);
-		return httpClientWrapper.post(json, VALIDATE_API_ENDPOINT);
 	}
 
 	private String toJson(RegistrationModel model) throws ValidationException {

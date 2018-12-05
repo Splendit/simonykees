@@ -27,9 +27,9 @@ public class CustomerRegistrationModelFactoryService implements RegistrationMode
 
 	@Override
 	public RegistrationModel createRegistrationModel(String key, String email, String firstName, String lastName,
-			String company, boolean subscribe) {
-		
-		return new CustomerRegistrationModel(key, email, firstName, lastName, company, subscribe);
+			String company, boolean subscribe, String secret) {
+
+		return new CustomerRegistrationModel(key, email, firstName, lastName, company, subscribe, secret);
 	}
 
 }
