@@ -25,15 +25,12 @@ public class RegistrationFormCheckBox {
 
 	private Button checkBox;
 
-//	private ControlDecoration decoValid;
 	private ControlDecoration decoInvalid;
 
 	private boolean selected = false;
 
-//	private static final String TICKMARK_GREEN_ICON_PATH = "icons/if_Tick_Mark_12px.png"; //$NON-NLS-1$
 	private static final String CLOSE_RED_ICON_PATH = "icons/if_Close_Icon_12px.png"; //$NON-NLS-1$
 
-//	private Image scaledTickmarkGreenIconImage;
 	private Image scaledCloseRedIconImage;
 
 	public RegistrationFormCheckBox(Group parent, String text) {
@@ -44,17 +41,9 @@ public class RegistrationFormCheckBox {
 		checkBox.setLayoutData(checkBoxTextGridData);
 		addCheckBoxChangeListener();
 
-//		decoValid = new ControlDecoration(checkBox, SWT.TOP | SWT.RIGHT);
 		decoInvalid = new ControlDecoration(checkBox, SWT.TOP | SWT.RIGHT);
 
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
-
-//		IPath iPathTickMarkGreen = new Path(TICKMARK_GREEN_ICON_PATH);
-//		URL urlTickMarkGreen = FileLocator.find(bundle, iPathTickMarkGreen, new HashMap<>());
-//		ImageDescriptor imageDescTickMarkGreen = ImageDescriptor.createFromURL(urlTickMarkGreen);
-//		Image tickmarkGreenIconImage = imageDescTickMarkGreen.createImage();
-//		ImageData imageDataTickmarkGreen = tickmarkGreenIconImage.getImageData();
-//		scaledTickmarkGreenIconImage = new Image(parent.getDisplay(), imageDataTickmarkGreen);
 
 		IPath iPathCloseRed = new Path(CLOSE_RED_ICON_PATH);
 		URL urlCloseRed = FileLocator.find(bundle, iPathCloseRed, new HashMap<>());
@@ -62,10 +51,6 @@ public class RegistrationFormCheckBox {
 		Image closeRedIconImage = imageDescCloseRed.createImage();
 		ImageData imageDataCloseRed = closeRedIconImage.getImageData();
 		scaledCloseRedIconImage = new Image(parent.getDisplay(), imageDataCloseRed);
-
-//		decoValid.setDescriptionText("Valid name");
-//		decoValid.setImage(scaledTickmarkGreenIconImage);
-//		decoValid.hide();
 
 		decoInvalid.setDescriptionText("Please enter valid name");
 		decoInvalid.setImage(scaledCloseRedIconImage);
@@ -102,10 +87,12 @@ public class RegistrationFormCheckBox {
 	public void updateDecoVisibility(boolean showDecoInvalid) {
 		if (selected) {
 			decoInvalid.hide();
-//			decoValid.show();
-		} else if(showDecoInvalid) {
-//			decoValid.hide();
+		} else if (showDecoInvalid) {
 			decoInvalid.show();
 		}
+	}
+
+	public void resetDecoVisibility() {
+		decoInvalid.hide();
 	}
 }

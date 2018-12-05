@@ -12,6 +12,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.layout.GridData;
@@ -38,19 +39,21 @@ public class RegistrationFormField {
 	private Image scaledCloseRedIconImage;
 
 	public RegistrationFormField(Group parent, String labelText) {
-		GridData labelGridData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
+		GridData labelGridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
 		labelGridData.verticalIndent = 5;
 		Label firstNameLabel = new Label(parent, SWT.NONE);
 		firstNameLabel.setLayoutData(labelGridData);
 		firstNameLabel.setText(labelText);
 
-		GridData dataTextField = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		GridData dataTextField = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		dataTextField.verticalIndent = 5;
+		dataTextField.horizontalIndent = 20;
+		dataTextField.widthHint = 180;
 		text = new Text(parent, SWT.BORDER);
 		text.setLayoutData(dataTextField);
 
-		decoValid = new ControlDecoration(text, SWT.TOP | SWT.LEFT);
-		decoInvalid = new ControlDecoration(text, SWT.TOP | SWT.LEFT);
+		decoValid = new ControlDecoration(text, SWT.CENTER | SWT.RIGHT);
+		decoInvalid = new ControlDecoration(text, SWT.CENTER | SWT.RIGHT);
 
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
 
@@ -78,16 +81,18 @@ public class RegistrationFormField {
 		decoInvalid.setImage(scaledCloseRedIconImage);
 		decoInvalid.hide();
 
-		// text.addModifyListener((ModifyEvent event) -> {
-		// isValid((Text) event.getSource());
-		// updateDecoVisibility();
-		// });
+		text.addModifyListener((ModifyEvent event) -> {
+			isValid((Text) event.getSource());
+			updateDecoVisibility();
+//			decoInvalid.hide();
+//			decoValid.hide();
+		});
 
 		text.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent event) {
-				isValid((Text) event.getSource());
-				updateDecoVisibility();
+				 isValid((Text) event.getSource());
+				 updateDecoVisibility();
 			}
 		});
 	}

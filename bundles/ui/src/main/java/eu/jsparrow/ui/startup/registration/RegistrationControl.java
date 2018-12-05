@@ -58,7 +58,7 @@ public class RegistrationControl {
 		GridData groupGridData = new GridData(GridData.FILL_BOTH);
 		groupGridData.verticalIndent = 15;
 		formGroup.setLayoutData(groupGridData);
-		GridLayout formGroupLayout = new GridLayout(2, true);
+		GridLayout formGroupLayout = new GridLayout(2, false);
 		formGroup.setLayout(formGroupLayout);
 
 		firstName = new RegistrationFormField(formGroup, "First name");
@@ -143,16 +143,14 @@ public class RegistrationControl {
 						company.getText()
 							.getText(),
 						newsletterAgreeCheckBox.getSelection());
-				// TODO send license key and wait for response
-				statusLabel.setVisible(false);
-				// TODO show appropriate dialog regarding received response
-
-				// if license generation succeeded
+				// TODO send data and wait for response
+				// TODO check the response and update condition
 				if (true) {
 					showLicenseGenerationSucceededDialog();
 				} else {
 					showLicenseGenerationFailedDialog();
 				}
+				statusLabel.setVisible(false);
 			}
 		});
 	}
@@ -206,9 +204,8 @@ public class RegistrationControl {
 				"Server cannot be reached." + System.lineSeparator()
 						+ "Please check your internet connection and try again later.",
 				MessageDialog.ERROR)) {
-			emailAgreeCheckBox.setSelection(false);
-			dsgvoAgreeCheckBox.setSelection(false);
-			licenseAgreeLCheckBox.setSelection(false);
+
+			resetToDefaultSelection();
 		}
 
 	}
@@ -220,5 +217,16 @@ public class RegistrationControl {
 	 */
 	public Control getControl() {
 		return parentComposite;
+	}
+
+	public void resetToDefaultSelection() {
+		emailAgreeCheckBox.setSelection(false);
+		dsgvoAgreeCheckBox.setSelection(false);
+		licenseAgreeLCheckBox.setSelection(false);
+		newsletterAgreeCheckBox.setSelection(true);
+
+		emailAgreeCheckBox.resetDecoVisibility();
+		dsgvoAgreeCheckBox.resetDecoVisibility();
+		licenseAgreeLCheckBox.resetDecoVisibility();
 	}
 }

@@ -3,6 +3,7 @@ package eu.jsparrow.ui.startup.registration;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -13,6 +14,9 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
 public class RegistrationDialog extends Dialog {
+
+	RegistrationControl registrationTabControl;
+	ActivationControl activationTabControl;
 
 	public RegistrationDialog(Shell parent) {
 		super(parent);
@@ -35,15 +39,15 @@ public class RegistrationDialog extends Dialog {
 
 		// Create each tab and set its text, tool tip text,
 		// image, and control
-		TabItem one = new TabItem(tabFolder, SWT.FILL);
-		one.setText("Register");
-		one.setToolTipText("Register email");
-		one.setControl(getRegistrationControl(tabFolder));
+		TabItem registerTab = new TabItem(tabFolder, SWT.FILL);
+		registerTab.setText("Register");
+		registerTab.setToolTipText("Register email");
+		registerTab.setControl(getRegistrationControl(tabFolder));
 
-		TabItem two = new TabItem(tabFolder, SWT.FILL);
-		two.setText("Activate");
-		two.setToolTipText("Activate license");
-		two.setControl(getActivationControl(tabFolder));
+		TabItem activateTab = new TabItem(tabFolder, SWT.FILL);
+		activateTab.setText("Activate");
+		activateTab.setToolTipText("Activate license");
+		activateTab.setControl(getActivationControl(tabFolder));
 
 		// Select the third tab (index is zero-based)
 		tabFolder.setSelection(0);
@@ -52,9 +56,13 @@ public class RegistrationDialog extends Dialog {
 		tabFolder.addSelectionListener(new SelectionAdapter() {
 
 			@Override
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent event) {
-				// TODO decide what has to be cleared
-				System.out.println(tabFolder.getSelection()[0].getText() + " selected");
+			public void widgetSelected(SelectionEvent event) {
+				if (tabFolder.getSelection()[0].equals(registerTab)) {
+					registrationTabControl.resetToDefaultSelection();
+				}
+				if (tabFolder.getSelection()[0].equals(activateTab)) {
+					activationTabControl.resetToDefaultSelection();
+				}
 			}
 		});
 
@@ -69,8 +77,8 @@ public class RegistrationDialog extends Dialog {
 	 * @return Control
 	 */
 	private Control getRegistrationControl(TabFolder tabFolder) {
-		RegistrationControl registrationTab = new RegistrationControl(tabFolder, SWT.NONE);
-		return registrationTab.getControl();
+		registrationTabControl = new RegistrationControl(tabFolder, SWT.NONE);
+		return registrationTabControl.getControl();
 	}
 
 	/**
@@ -81,8 +89,8 @@ public class RegistrationDialog extends Dialog {
 	 * @return Control
 	 */
 	private Control getActivationControl(TabFolder tabFolder) {
-		ActivationControl activationTab = new ActivationControl(tabFolder, SWT.NONE);
-		return activationTab.getControl();
+		activationTabControl = new ActivationControl(tabFolder, SWT.NONE);
+		return activationTabControl.getControl();
 	}
 
 	@Override
