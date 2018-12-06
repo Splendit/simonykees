@@ -188,27 +188,30 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	}
 
 	@Override
-	public void activateRegistration(String activationKey) {
+	public boolean activateRegistration(String activationKey) {
 		String secret = createSecretFromHardware();
 		try {
 			boolean successful = registrationService.activate(activationKey);
 			if (successful) {
 				registrationPersistenceSerice.saveToPersistence(secret);
+				return true;
 			}
 		} catch (PersistenceException e) {
 			logger.warn("Failed to persist registration", e); //$NON-NLS-1$
 		} catch (ValidationException e) {
 			logger.warn("Cannot activate registration key: '{}'", activationKey, e); //$NON-NLS-1$
 		}
+		return false;
 	}
 
 	@Override
-	public void register(String email, String firstName, String lastName, String company, boolean subscribe) {
+	public boolean register(String email, String firstName, String lastName, String company, boolean subscribe) {
 		try {
-			registrationService.register(email, firstName, lastName, company, subscribe);
+			return registrationService.register(email, firstName, lastName, company, subscribe);
 		} catch (ValidationException e) {
 			logger.warn("Failed to register", e); //$NON-NLS-1$
 		}
+		return false;
 	}
 
 	@Override
