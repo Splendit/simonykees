@@ -162,9 +162,7 @@ public class RegistrationControl {
 						company.getText()
 							.getText(),
 						newsletterAgreeCheckBox.getSelection());
-				// TODO send data and wait for response
-				// TODO check the response and update condition
-				if (true) {
+				if (sendData()) {
 					showLicenseGenerationSucceededDialog();
 				} else {
 					showLicenseGenerationFailedDialog();
@@ -173,6 +171,11 @@ public class RegistrationControl {
 			}
 		});
 		registerButton.setLayoutData(buttonData);
+	}
+
+	private boolean sendData() {
+		// TODO send data and wait for response, return whether it was successful
+		return true;
 	}
 
 	private void checkMandatoryFieldsAndUpdateDecorations() {

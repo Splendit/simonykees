@@ -110,29 +110,33 @@ public class ActivationControl {
 		activateButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				if (!validateLicenseKey()) {
+				if (!validateLicenseKeyForm()) {
 					invalidLicenseLabel.setVisible(true);
 					return;
 				}
 				statusLabel.setVisible(true);
 				ActivationEntity activationData = new ActivationEntity(licenseKeyString);
-				// TODO send license key and wait for response
-				statusLabel.setVisible(false);
 
-				// TODO check if response is valid
 				// if license is valid
 				if (validateLicenseKey()) {
 					showLicenseValidDialog();
 				} else {
 					showInvalidLicenseDialog();
 				}
+				statusLabel.setVisible(false);
 			}
 		});
 		activateButton.setLayoutData(buttonData);
 
 	}
 
-	public boolean validateLicenseKey() {
+	private boolean validateLicenseKey() {
+		// TODO send license key and wait for response
+		// TODO check if response is valid and return
+		return false;
+	}
+
+	public boolean validateLicenseKeyForm() {
 		String regex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"; //$NON-NLS-1$
 		Pattern pattern = Pattern.compile(regex);
 		Matcher matcher = pattern.matcher(licenseText.getText());
