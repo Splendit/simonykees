@@ -40,7 +40,7 @@ public class RegisterValidation {
 	private boolean evaluateActivateResponse(String activateResponseBody) throws ValidationException {
 		try {
 			RegisterResponse activateResponse = response.parseRegisterResponse(activateResponseBody);
-			// TODO: check the values in the parsed body
+			// TODO: check the values in the parsed body SIM-1360
 		} catch (IOException e) {
 			throw new ValidationException("Cannot parse registration response body", e);
 
@@ -51,7 +51,7 @@ public class RegisterValidation {
 	private boolean evaluateRegisterResponse(String registerResponseBody) throws ValidationException {
 		try {
 			RegisterResponse registerResponse = response.parseRegisterResponse(registerResponseBody);
-			// TODO: check the values in the parsed body
+			// TODO: check the values in the parsed body SIM-1360
 		} catch (IOException e) {
 			throw new ValidationException("Cannot parse registration response body", e);
 

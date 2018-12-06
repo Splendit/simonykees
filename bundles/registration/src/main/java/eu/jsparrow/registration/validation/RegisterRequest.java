@@ -14,8 +14,8 @@ import eu.jsparrow.registration.model.CustomerRegistrationModel;
  */
 public class RegisterRequest {
 
-	private static final String REGISTER_API_ENDPOINT = "";
-	private static final String ACTIVATE_API_ENDPOINT = "";
+	private static final String REGISTER_API_ENDPOINT = ""; //TODO: to be implemented in SIM-1360
+	private static final String ACTIVATE_API_ENDPOINT = ""; //TODO: to be implemented in SIM-1360
 	
 	
 	private static final String ACTIVATION_KEY = "activation-key"; //$NON-NLS-1$
@@ -53,7 +53,8 @@ public class RegisterRequest {
 	}
 
 	private String toJson(String key, String value) {
-		//TODO: create a JSON with the given key/value
+		
+		//TODO: create a JSON with the given key/value. The exact format to be implemented in SIM-1360
 		return "";
 	}
 }

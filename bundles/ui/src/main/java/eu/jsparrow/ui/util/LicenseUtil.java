@@ -45,6 +45,9 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
+	private static final String NETLICENSING_PERSISTENCE_SERVICE_CLASS = "eu.jsparrow.license.netlicensing.NetlicensingLicensePersistenceService"; //$NON-NLS-1$
+	private static final String REGISTRATION_PERSISTENCE_SERCICE_CLASS = "eu.jsparrow.registration.CustomerRegistrationPersistenceService"; //$NON-NLS-1$
+
 	private static LicenseUtil instance;
 
 	private LicenseService licenseService;
@@ -73,36 +76,28 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			.getServiceReference(RegistrationService.class);
 		registrationService = bundleContext.getService(registrationReference);
 
-		ServiceReference<LicensePersistenceService> persistenceReference = bundleContext
-			.getServiceReference(LicensePersistenceService.class);
-		persistenceService = bundleContext.getService(persistenceReference);
-
-		initPersistenceServices();
+		initPersistenceServices(bundleContext);
 
 		ServiceReference<LicenseModelFactoryService> factoryReference = bundleContext
 			.getServiceReference(LicenseModelFactoryService.class);
 		factoryService = bundleContext.getService(factoryReference);
 	}
 
-	private void initPersistenceServices() {
-		BundleContext bundleContext = FrameworkUtil.getBundle(LicenseUtil.class)
-			.getBundleContext();
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void initPersistenceServices(BundleContext bundleContext) {
 		try {
 			ServiceReference<?>[] serviceReferences = bundleContext
 				.getServiceReferences(LicensePersistenceService.class.getName(), null);
 			for (ServiceReference<?> service : serviceReferences) {
 				LicensePersistenceService<?> licensePersistenceService = (LicensePersistenceService) bundleContext
 					.getService(service);
-				if (licensePersistenceService.getClass()
-					.getName()
-					.contains("NetlicensingLicense")) {
+				String className = licensePersistenceService.getClass()
+					.getName();
+				if (NETLICENSING_PERSISTENCE_SERVICE_CLASS.equals(className)) {
 					this.persistenceService = (LicensePersistenceService<LicenseModel>) licensePersistenceService;
-				} else if (licensePersistenceService.getClass()
-					.getName()
-					.contains("CustomerRegistrationPersistence")) {
+				} else if (REGISTRATION_PERSISTENCE_SERCICE_CLASS.equals(className)) {
 					this.registrationPersistenceSerice = (LicensePersistenceService<String>) licensePersistenceService;
 				}
-
 			}
 		} catch (InvalidSyntaxException e) {
 			logger.error("Failed to load license persistence service", e); //$NON-NLS-1$
