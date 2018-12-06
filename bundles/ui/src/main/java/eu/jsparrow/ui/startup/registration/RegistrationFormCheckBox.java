@@ -36,7 +36,7 @@ public class RegistrationFormCheckBox {
 
 	public RegistrationFormCheckBox(Group parent, String text) {
 		GridData checkBoxTextGridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
-		checkBoxTextGridData.widthHint = 405;
+		checkBoxTextGridData.widthHint = 402;
 		checkBox = new Button(parent, SWT.CHECK | SWT.WRAP);
 		checkBox.setText(text);
 		checkBox.setLayoutData(checkBoxTextGridData);
