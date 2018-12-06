@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.jsparrow.license.api.exception.ValidationException;
-import eu.jsparrow.registration.model.CustomerRegistrationModel;
+import eu.jsparrow.registration.model.RegistrationModel;
 
 /**
  * Provides functionality for sending HTTP requests to the validation endpoint.
@@ -31,7 +31,7 @@ public class RegisterRequest {
 		this.httpClientWrapper = httpClientWrapper;
 	}
 
-	public String sendRegisterRequest(CustomerRegistrationModel model) throws ValidationException {
+	public String sendRegisterRequest(RegistrationModel model) throws ValidationException {
 		String json = toJson(model);
 		return httpClientWrapper.post(json, REGISTER_API_ENDPOINT);
 	}
@@ -41,7 +41,7 @@ public class RegisterRequest {
 		return httpClientWrapper.post(json, ACTIVATE_API_ENDPOINT);
 	}
 
-	private String toJson(CustomerRegistrationModel model) throws ValidationException {
+	private String toJson(RegistrationModel model) throws ValidationException {
 		String json;
 		try {
 			json = objectMapper.writeValueAsString(model);

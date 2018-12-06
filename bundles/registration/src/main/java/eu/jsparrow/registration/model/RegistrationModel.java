@@ -4,7 +4,12 @@ import java.io.Serializable;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
-public class CustomerRegistrationModel implements Serializable {
+/**
+ * Represents the information for a customer registration.
+ * 
+ * @since 3.0.0
+ */
+public class RegistrationModel implements Serializable {
 
 	private static final long serialVersionUID = -7570445276249127853L;
 
@@ -14,12 +19,7 @@ public class CustomerRegistrationModel implements Serializable {
 	private String company = ""; //$NON-NLS-1$
 	private boolean subscribe = false;
 
-	public CustomerRegistrationModel() {
-
-	}
-
-	public CustomerRegistrationModel(String email, String firstName, String lastName, String company,
-			boolean subscribe) {
+	public RegistrationModel(String email, String firstName, String lastName, String company, boolean subscribe) {
 		this.email = email;
 		this.firstName = firstName;
 		this.lastName = lastName;

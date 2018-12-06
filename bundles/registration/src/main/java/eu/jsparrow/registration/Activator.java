@@ -7,6 +7,13 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The entry point of the customer registration plugin. Provides functionality
+ * for creating a registration, activating it and the logic for registration
+ * validation.
+ * 
+ * @since 3.0.0
+ */
 public class Activator extends Plugin {
 
 	public static final Logger logger = LoggerFactory.getLogger(Activator.class);

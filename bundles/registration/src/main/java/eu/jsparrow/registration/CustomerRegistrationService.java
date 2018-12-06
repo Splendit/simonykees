@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.ValidationException;
-import eu.jsparrow.registration.model.CustomerRegistrationModel;
+import eu.jsparrow.registration.model.RegistrationModel;
 import eu.jsparrow.registration.validation.RegisterValidation;
 
 /**
- * Service for customer registrations. Provides functionality for registering,
- * activating and validating customer registrations.
+ * An implementation of {@link RegistrationService} for handling customer
+ * registrations on AWS services.
  * 
  * @since 3.0.0
  */
@@ -34,7 +34,7 @@ public class CustomerRegistrationService implements RegistrationService {
 	@Override
 	public boolean register(String email, String firstName, String lastName, String company, boolean subscribe)
 			throws ValidationException {
-		CustomerRegistrationModel model = new CustomerRegistrationModel(email, firstName, lastName, company, subscribe);
+		RegistrationModel model = new RegistrationModel(email, firstName, lastName, company, subscribe);
 		logger.debug("Registering {}", model); //$NON-NLS-1$
 		return registrationValidation.register(model);
 	}

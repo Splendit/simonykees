@@ -3,7 +3,7 @@ package eu.jsparrow.registration.validation;
 import java.io.IOException;
 
 import eu.jsparrow.license.api.exception.ValidationException;
-import eu.jsparrow.registration.model.CustomerRegistrationModel;
+import eu.jsparrow.registration.model.RegistrationModel;
 import eu.jsparrow.registration.validation.response.RegisterResponse;
 
 /**
@@ -23,7 +23,7 @@ public class RegisterValidation {
 		this.response = new ResponseParser();
 	}
 
-	public boolean register(CustomerRegistrationModel model) throws ValidationException {
+	public boolean register(RegistrationModel model) throws ValidationException {
 		String responseBody = registerRequest.sendRegisterRequest(model);
 		return evaluateRegisterResponse(responseBody);
 	}
