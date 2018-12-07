@@ -23,7 +23,7 @@ public class CustomerRegistrationPersistenceServiceTest {
 	
 	@Test
 	public void loadFromPersistence_validKey_shouldReturnStoredValue() throws Exception {
-		String expectedStoredValue = "expected-value";
+		String expectedStoredValue = "expected-value"; //$NON-NLS-1$
 		when(registrationPersistence.load()).thenReturn(expectedStoredValue);
 		
 		String value = persistenceService.loadFromPersistence();
@@ -34,7 +34,7 @@ public class CustomerRegistrationPersistenceServiceTest {
 
 	@Test
 	public void save_validKey_shouldInvokeSave() throws Exception {
-		String expectedStoredValue = "expected-value";
+		String expectedStoredValue = "expected-value"; //$NON-NLS-1$
 		when(registrationPersistence.load()).thenReturn(expectedStoredValue);
 		
 		persistenceService.saveToPersistence(expectedStoredValue);

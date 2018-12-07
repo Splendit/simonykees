@@ -1,17 +1,15 @@
 package eu.jsparrow.registration.validation;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.registration.helper.DummyRegistrationModel;
 import eu.jsparrow.registration.helper.JsonHelper;
 

@@ -1,6 +1,10 @@
 package eu.jsparrow.registration.validation;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.registration.model.RegistrationModel;
@@ -15,6 +19,8 @@ import eu.jsparrow.registration.validation.response.RegisterResponse;
  *
  */
 public class RegisterValidation {
+	
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private RegisterRequest registerRequest;
 	private ResponseParser response;
@@ -31,11 +37,13 @@ public class RegisterValidation {
 
 	public boolean register(RegistrationModel model) throws ValidationException {
 		String responseBody = registerRequest.sendRegisterRequest(model);
+		logger.debug("Register response body '{}'", responseBody); //$NON-NLS-1$
 		return evaluateRegisterResponse(responseBody);
 	}
 
 	public boolean activate(String activationKey) throws ValidationException {
 		String responseBody = registerRequest.sendActivateRequest(activationKey);
+		logger.debug("Activate response body '{}'", responseBody); //$NON-NLS-1$
 		return evaluateActivateResponse(responseBody);
 	}
 

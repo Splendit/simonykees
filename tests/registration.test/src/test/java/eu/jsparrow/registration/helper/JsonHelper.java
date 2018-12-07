@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.jsparrow.registration.validation.response.ActivateResponse;
 import eu.jsparrow.registration.validation.response.RegisterResponse;
 
+@SuppressWarnings("nls")
 public class JsonHelper {
 	private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().getClass());
 	
