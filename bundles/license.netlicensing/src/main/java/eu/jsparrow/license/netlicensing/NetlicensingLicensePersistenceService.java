@@ -14,20 +14,22 @@ import eu.jsparrow.license.api.persistence.AESEncryption;
 import eu.jsparrow.license.netlicensing.persistence.LicenseSecureStoragePersistence;
 
 /**
- * Implementor of {@link LicensePersistenceService} using {@link ISecurePreferences}.
+ * Implementor of {@link LicensePersistenceService} using
+ * {@link ISecurePreferences}.
  *
  */
-@Component
+@Component(property = "licenseType=default")
 public class NetlicensingLicensePersistenceService implements LicensePersistenceService<LicenseModel> {
 
 	private static final Logger logger = LoggerFactory.getLogger(NetlicensingLicensePersistenceService.class);
 
 	private LicensePersistence<LicenseModel> persistence;
-	
+
 	public NetlicensingLicensePersistenceService() {
-		this.persistence = new LicenseSecureStoragePersistence(SecurePreferencesFactory.getDefault(), new AESEncryption());
+		this.persistence = new LicenseSecureStoragePersistence(SecurePreferencesFactory.getDefault(),
+				new AESEncryption());
 	}
-	
+
 	@Override
 	public LicenseModel loadFromPersistence() throws PersistenceException {
 		logger.debug("Loading model from persistence"); //$NON-NLS-1$

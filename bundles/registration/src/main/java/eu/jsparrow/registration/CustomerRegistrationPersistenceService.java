@@ -21,7 +21,7 @@ import eu.jsparrow.registration.persistence.RegistrationSecureStoragePersistence
  * @since 3.0.0
  *
  */
-@Component
+@Component(property = "licenseType=registration")
 public class CustomerRegistrationPersistenceService implements LicensePersistenceService<String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()

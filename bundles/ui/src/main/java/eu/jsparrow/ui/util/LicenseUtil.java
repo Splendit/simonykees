@@ -45,9 +45,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private static final String NETLICENSING_PERSISTENCE_SERVICE_CLASS = "eu.jsparrow.license.netlicensing.NetlicensingLicensePersistenceService"; //$NON-NLS-1$
-	private static final String REGISTRATION_PERSISTENCE_SERCICE_CLASS = "eu.jsparrow.registration.CustomerRegistrationPersistenceService"; //$NON-NLS-1$
-
 	private static LicenseUtil instance;
 
 	private LicenseService licenseService;
@@ -86,21 +83,21 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initPersistenceServices(BundleContext bundleContext) {
 		try {
-			ServiceReference<?>[] serviceReferences = bundleContext
-				.getServiceReferences(LicensePersistenceService.class.getName(), null);
-			for (ServiceReference<?> service : serviceReferences) {
-				LicensePersistenceService<?> licensePersistenceService = (LicensePersistenceService) bundleContext
-					.getService(service);
-				String className = licensePersistenceService.getClass()
-					.getName();
-				if (NETLICENSING_PERSISTENCE_SERVICE_CLASS.equals(className)) {
-					this.persistenceService = (LicensePersistenceService<LicenseModel>) licensePersistenceService;
-				} else if (REGISTRATION_PERSISTENCE_SERCICE_CLASS.equals(className)) {
-					this.registrationPersistenceSerice = (LicensePersistenceService<String>) licensePersistenceService;
-				}
+			ServiceReference registrationReferences[] = bundleContext
+				.getServiceReferences(LicensePersistenceService.class.getName(), "(licenseType=registration)"); //$NON-NLS-1$
+			ServiceReference netlicensingReferences[] = bundleContext
+				.getServiceReferences(LicensePersistenceService.class.getName(), "(licenseType=default)"); //$NON-NLS-1$
+
+			if (registrationReferences.length != 0 && netlicensingReferences.length != 0) {
+
+				this.registrationPersistenceSerice = (LicensePersistenceService<String>) bundleContext
+					.getService(registrationReferences[0]);
+				this.persistenceService = (LicensePersistenceService<LicenseModel>) bundleContext
+					.getService(netlicensingReferences[0]);
 			}
-		} catch (InvalidSyntaxException e) {
-			logger.error("Failed to load license persistence service", e); //$NON-NLS-1$
+		} catch (InvalidSyntaxException ise) {
+			logger.debug(ise.getMessage(), ise);
+			logger.error(ise.getMessage());
 		}
 	}
 
