@@ -8,17 +8,20 @@ import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.registration.model.RegistrationModel;
 
 /**
- * Provides functionality for sending HTTP requests to the validation endpoint.
+ * Provides functionality for sending HTTP requests to the validation end-point.
  * 
  * @since 3.0.0
  *
  */
 public class RegisterRequest {
 
-	private static final String REGISTER_API_ENDPOINT = ""; // TODO: to be implemented in SIM-1360
-	private static final String ACTIVATE_API_ENDPOINT = ""; // TODO: to be implemented in SIM-1360
-	
-	
+	/*
+	 * Should the api end-point change the location/name, the following fields
+	 * need to be changed too.
+	 */
+	private static final String REGISTER_API_ENDPOINT = "https://04la6bsajj.execute-api.eu-central-1.amazonaws.com/develop/freemium/create"; //$NON-NLS-1$
+	private static final String ACTIVATE_API_ENDPOINT = "https://04la6bsajj.execute-api.eu-central-1.amazonaws.com/develop/freemium/activate"; //$NON-NLS-1$
+
 	private static final String ACTIVATION_KEY = "activationKey"; //$NON-NLS-1$
 	private ObjectMapper objectMapper = new ObjectMapper();
 

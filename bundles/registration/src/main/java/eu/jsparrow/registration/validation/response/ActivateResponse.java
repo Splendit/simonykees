@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class ActivateResponse {
 
 	private boolean active;
-	private Instant activatonTimestamp;
+	private Instant activationTimestamp;
 	private String message;
 
 	public ActivateResponse() {
@@ -23,7 +23,7 @@ public class ActivateResponse {
 
 	public ActivateResponse(boolean active, String activationTimestamp, String message) {
 		this.active = active;
-		this.activatonTimestamp = Instant.parse(activationTimestamp);
+		this.activationTimestamp = Instant.parse(activationTimestamp);
 		this.message = message;
 	}
 
@@ -32,7 +32,7 @@ public class ActivateResponse {
 	}
 
 	public String getActivationTimestamp() {
-		return activatonTimestamp.toString();
+		return activationTimestamp.toString();
 	}
 
 	public String getMessage() {
@@ -40,7 +40,7 @@ public class ActivateResponse {
 	}
 	
 	public void setActivationTimestamp(String activationTimestamp) {
-		this.activatonTimestamp = Instant.parse(activationTimestamp);
+		this.activationTimestamp = Instant.parse(activationTimestamp);
 	}
 
 	@Override
