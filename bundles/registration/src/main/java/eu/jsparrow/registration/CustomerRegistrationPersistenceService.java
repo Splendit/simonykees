@@ -29,6 +29,10 @@ public class CustomerRegistrationPersistenceService implements LicensePersistenc
 
 	private LicensePersistence<String> persistence;
 
+	CustomerRegistrationPersistenceService(RegistrationSecureStoragePersistence persistence) {
+		this.persistence = persistence;
+	}
+	
 	public CustomerRegistrationPersistenceService() {
 		persistence = new RegistrationSecureStoragePersistence(SecurePreferencesFactory.getDefault(),
 				new AESEncryption());

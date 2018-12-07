@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.registration.model.RegistrationModel;
+import eu.jsparrow.registration.validation.response.ActivateResponse;
 import eu.jsparrow.registration.validation.response.RegisterResponse;
 
 /**
@@ -22,6 +23,11 @@ public class RegisterValidation {
 		this.registerRequest = new RegisterRequest();
 		this.response = new ResponseParser();
 	}
+	
+	RegisterValidation(RegisterRequest registerRequest, ResponseParser responseParser) {
+		this.registerRequest = registerRequest;
+		this.response = responseParser;
+	}
 
 	public boolean register(RegistrationModel model) throws ValidationException {
 		String responseBody = registerRequest.sendRegisterRequest(model);
@@ -39,24 +45,21 @@ public class RegisterValidation {
 
 	private boolean evaluateActivateResponse(String activateResponseBody) throws ValidationException {
 		try {
-			RegisterResponse activateResponse = response.parseRegisterResponse(activateResponseBody);
-			// TODO: check the values in the parsed body SIM-1360
+			ActivateResponse activateResponse = response.parseActivateResponse(activateResponseBody);
+			return activateResponse.isActive();
 		} catch (IOException e) {
-			throw new ValidationException("Cannot parse registration response body", e);
-
+			throw new ValidationException("Cannot parse registration response body", e); //$NON-NLS-1$
 		}
-		return true;
 	}
 
 	private boolean evaluateRegisterResponse(String registerResponseBody) throws ValidationException {
 		try {
 			RegisterResponse registerResponse = response.parseRegisterResponse(registerResponseBody);
-			// TODO: check the values in the parsed body SIM-1360
+			return registerResponse.isCreated();
 		} catch (IOException e) {
-			throw new ValidationException("Cannot parse registration response body", e);
+			throw new ValidationException("Cannot parse registration response body", e); //$NON-NLS-1$
 
 		}
-		return true;
 	}
 
 }

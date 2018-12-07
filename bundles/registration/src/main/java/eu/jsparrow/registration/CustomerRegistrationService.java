@@ -23,7 +23,15 @@ public class CustomerRegistrationService implements RegistrationService {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private RegisterValidation registrationValidation = new RegisterValidation();
+	private RegisterValidation registrationValidation;
+	
+	public CustomerRegistrationService() {
+		registrationValidation = new RegisterValidation();
+	}
+	
+	CustomerRegistrationService(RegisterValidation registerValidation) {
+		this.registrationValidation = registerValidation;
+	}
 
 	@Override
 	public boolean validate(String hardwareId, String secret) {

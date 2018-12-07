@@ -2,6 +2,7 @@ package eu.jsparrow.registration.validation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.registration.model.RegistrationModel;
@@ -14,11 +15,11 @@ import eu.jsparrow.registration.model.RegistrationModel;
  */
 public class RegisterRequest {
 
-	private static final String REGISTER_API_ENDPOINT = ""; //TODO: to be implemented in SIM-1360
-	private static final String ACTIVATE_API_ENDPOINT = ""; //TODO: to be implemented in SIM-1360
+	private static final String REGISTER_API_ENDPOINT = ""; // TODO: to be implemented in SIM-1360
+	private static final String ACTIVATE_API_ENDPOINT = ""; // TODO: to be implemented in SIM-1360
 	
 	
-	private static final String ACTIVATION_KEY = "activation-key"; //$NON-NLS-1$
+	private static final String ACTIVATION_KEY = "activationKey"; //$NON-NLS-1$
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	private HttpClientWrapper httpClientWrapper;
@@ -53,8 +54,8 @@ public class RegisterRequest {
 	}
 
 	private String toJson(String key, String value) {
-		
-		//TODO: create a JSON with the given key/value. The exact format to be implemented in SIM-1360
-		return "";
+		ObjectNode node = objectMapper.createObjectNode();
+		node.put(key, value);
+		return node.toString();
 	}
 }

@@ -17,14 +17,14 @@ public class RegistrationModel implements Serializable {
 	private String firstName = ""; //$NON-NLS-1$
 	private String lastName = ""; //$NON-NLS-1$
 	private String company = ""; //$NON-NLS-1$
-	private boolean subscribe = false;
+	private boolean newsLetterAccepted = false;
 
-	public RegistrationModel(String email, String firstName, String lastName, String company, boolean subscribe) {
+	public RegistrationModel(String email, String firstName, String lastName, String company, boolean newsLetterAccepted) {
 		this.email = email;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.company = company;
-		this.subscribe = subscribe;
+		this.newsLetterAccepted = newsLetterAccepted;
 	}
 
 	public String getEmail() {
@@ -43,8 +43,8 @@ public class RegistrationModel implements Serializable {
 		return company;
 	}
 
-	public boolean hasSubscribed() {
-		return subscribe;
+	public boolean isNewsLetterAccepted() {
+		return newsLetterAccepted;
 	}
 
 	public String toString() {
