@@ -5,7 +5,6 @@ public class ActivationEntity {
 	private String license;
 
 	public ActivationEntity(String license) {
-		super();
 		this.license = license;
 	}
 
@@ -16,5 +15,5 @@ public class ActivationEntity {
 	public void setLicense(String license) {
 		this.license = license;
 	}
-	
+
 }

@@ -31,7 +31,7 @@ public class RegistrationFormField {
 	private ControlDecoration decoValid;
 	private ControlDecoration decoInvalid;
 
-	private boolean isValid;
+	private boolean valid;
 
 	private static final String TICKMARK_GREEN_ICON_PATH = "icons/if_Tick_Mark_12px.png"; //$NON-NLS-1$
 	private static final String CLOSE_RED_ICON_PATH = "icons/if_Close_Icon_12px.png"; //$NON-NLS-1$
@@ -83,21 +83,21 @@ public class RegistrationFormField {
 		decoInvalid.hide();
 
 		text.addModifyListener((ModifyEvent event) -> {
-			isValid((Text) event.getSource());
+			validate((Text) event.getSource());
 			updateDecoVisibility();
 		});
 
 		text.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent event) {
-				isValid((Text) event.getSource());
+				validate((Text) event.getSource());
 				updateDecoVisibility();
 			}
 		});
 	}
 
 	protected void updateDecoVisibility() {
-		if (isValid) {
+		if (valid) {
 			decoInvalid.hide();
 			decoValid.show();
 		} else {
@@ -106,17 +106,17 @@ public class RegistrationFormField {
 		}
 	}
 
-	protected void isValid(Text text) {
+	protected void validate(Text text) {
 		setValid(text.getText()
 			.length() >= 1);
 	}
 
 	public boolean isValid() {
-		return isValid;
+		return valid;
 	}
 
 	public void setValid(boolean isValid) {
-		this.isValid = isValid;
+		this.valid = isValid;
 	}
 
 	public Text getText() {

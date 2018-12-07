@@ -10,7 +10,6 @@ public class RegistrationEntity {
 
 	public RegistrationEntity(String firstName, String lastName, String email, String company,
 			boolean agreeToNewsletter) {
-		super();
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;

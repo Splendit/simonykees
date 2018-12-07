@@ -51,7 +51,7 @@ public class RegistrationDialog extends Dialog {
 		activateTab.setToolTipText(Messages.RegistrationDialog_activateTabTooltip);
 		activateTab.setControl(getActivationControl(tabFolder));
 
-		// Select the third tab (index is zero-based)
+		// Select the first tab (index is zero-based)
 		tabFolder.setSelection(0);
 
 		// Add an event listener to write the selected tab to stdout

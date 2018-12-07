@@ -66,13 +66,13 @@ public class RegistrationControl {
 		lastName = new RegistrationFormField(formGroup, Messages.RegistrationControl_lastNameLabel);
 		email = new RegistrationFormField(formGroup, Messages.RegistrationControl_emailLabel) {
 			@Override
-			protected void isValid(Text text) {
+			protected void validate(Text text) {
 				setValid(validateEmail(text.getText()));
 			}
 		};
 		company = new RegistrationFormField(formGroup, Messages.RegistrationControl_companyLabel) {
 			@Override
-			protected void isValid(Text text) {
+			protected void validate(Text text) {
 				setValid(true);
 			}
 
@@ -174,7 +174,8 @@ public class RegistrationControl {
 	}
 
 	private boolean sendData() {
-		// TODO send data and wait for response, return whether it was successful
+		// TODO send data and wait for response, return whether it was
+		// successful
 		return true;
 	}
 
