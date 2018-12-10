@@ -1,5 +1,11 @@
 package eu.jsparrow.ui.startup.registration.entity;
 
+/**
+ * An entity containing information for customer registration. 
+ * 
+ * @since 3.0.0
+ *
+ */
 public class RegistrationEntity {
 
 	private String firstName;

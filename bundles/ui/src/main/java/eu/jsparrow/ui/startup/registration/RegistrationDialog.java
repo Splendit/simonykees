@@ -15,6 +15,13 @@ import org.eclipse.swt.widgets.TabItem;
 
 import eu.jsparrow.i18n.Messages;
 
+/**
+ * A dialog containing a {@link TabFolder} with {@link TabItem}s for customer
+ * registration and activation.
+ * 
+ * @since 3.0.0
+ *
+ */
 public class RegistrationDialog extends Dialog {
 
 	RegistrationControl registrationTabControl;

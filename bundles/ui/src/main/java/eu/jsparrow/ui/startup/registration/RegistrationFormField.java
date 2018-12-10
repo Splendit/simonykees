@@ -24,6 +24,13 @@ import org.osgi.framework.Bundle;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 
+/**
+ * A wrapper for a text field in the registration form. Provides
+ * {@link ControlDecoration}s for the validity of the entered value.
+ * 
+ * @since 3.0.0
+ *
+ */
 public class RegistrationFormField {
 
 	private Text text;

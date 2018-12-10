@@ -22,6 +22,13 @@ import org.osgi.framework.Bundle;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 
+/**
+ * A wrapper for a check box in the registration form. Provides
+ * {@link ControlDecoration} for cases where the check is required.
+ * 
+ * @since 3.0.0
+ *
+ */
 public class RegistrationFormCheckBox {
 
 	private Button checkBox;

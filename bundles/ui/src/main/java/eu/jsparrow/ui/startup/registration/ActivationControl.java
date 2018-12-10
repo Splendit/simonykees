@@ -21,6 +21,12 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
 
+/**
+ * Controller for activating the customer registration.
+ * 
+ * @since 3.0.0
+ *
+ */
 public class ActivationControl {
 
 	private Composite parentComposite;
