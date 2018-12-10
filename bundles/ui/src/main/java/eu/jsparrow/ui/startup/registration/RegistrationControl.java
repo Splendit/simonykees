@@ -198,7 +198,7 @@ public class RegistrationControl {
 	}
 
 	private boolean validateEmail(String email) {
-		String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$"; //$NON-NLS-1$
+		String regex = "^\\S*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$"; //$NON-NLS-1$
 		Pattern pattern = Pattern.compile(regex);
 		Matcher matcher = pattern.matcher(email);
 
