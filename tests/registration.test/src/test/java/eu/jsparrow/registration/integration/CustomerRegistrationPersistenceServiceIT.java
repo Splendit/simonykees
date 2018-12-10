@@ -1,4 +1,4 @@
-package eu.jsparrow.registration;
+package eu.jsparrow.registration.integration;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,15 +7,16 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import eu.jsparrow.license.api.exception.PersistenceException;
+import eu.jsparrow.registration.RegistrationPersistenceService;
 
 @Ignore
-public class IntegrationSampleTest {
+public class CustomerRegistrationPersistenceServiceIT {
 	
-	private CustomerRegistrationPersistenceService persistenceService;
+	private RegistrationPersistenceService persistenceService;
 	
 	@Before
 	public void setUp() {
-		persistenceService = new CustomerRegistrationPersistenceService();
+		persistenceService = new RegistrationPersistenceService();
 	}
 	
 	@Test
