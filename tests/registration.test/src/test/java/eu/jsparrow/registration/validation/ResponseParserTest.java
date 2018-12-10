@@ -14,6 +14,7 @@ import org.junit.rules.ExpectedException;
 
 import eu.jsparrow.registration.validation.response.ActivateResponse;
 import eu.jsparrow.registration.validation.response.RegisterResponse;
+import eu.jsparrow.registration.validation.response.ResponseParser;
 
 @SuppressWarnings("nls")
 public class ResponseParserTest {

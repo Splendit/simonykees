@@ -12,20 +12,20 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import eu.jsparrow.license.api.exception.ValidationException;
-import eu.jsparrow.registration.validation.RegisterValidation;
+import eu.jsparrow.registration.validation.RegisterValidator;
 
 @SuppressWarnings("nls")
 public class CustomerRegistrationServiceTest {
 	
 	private CustomerRegistrationService service;
-	private RegisterValidation registrationValidation;
+	private RegisterValidator registrationValidation;
 	
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 	
 	@Before
 	public void setUp() {
-		this.registrationValidation = Mockito.mock(RegisterValidation.class);
+		this.registrationValidation = Mockito.mock(RegisterValidator.class);
 		this.service = new CustomerRegistrationService(registrationValidation);
 	}
 	

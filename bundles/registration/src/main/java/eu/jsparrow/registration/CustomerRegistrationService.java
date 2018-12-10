@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.registration.model.RegistrationModel;
-import eu.jsparrow.registration.validation.RegisterValidation;
+import eu.jsparrow.registration.validation.RegisterValidator;
 
 /**
  * An implementation of {@link RegistrationService} for handling customer
@@ -23,13 +23,13 @@ public class CustomerRegistrationService implements RegistrationService {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private RegisterValidation registrationValidation;
+	private RegisterValidator registrationValidation;
 	
 	public CustomerRegistrationService() {
-		registrationValidation = new RegisterValidation();
+		registrationValidation = new RegisterValidator();
 	}
 	
-	CustomerRegistrationService(RegisterValidation registerValidation) {
+	CustomerRegistrationService(RegisterValidator registerValidation) {
 		this.registrationValidation = registerValidation;
 	}
 

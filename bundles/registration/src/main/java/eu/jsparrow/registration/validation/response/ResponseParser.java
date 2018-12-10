@@ -1,4 +1,4 @@
-package eu.jsparrow.registration.validation;
+package eu.jsparrow.registration.validation.response;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -7,9 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import eu.jsparrow.registration.validation.response.ActivateResponse;
-import eu.jsparrow.registration.validation.response.RegisterResponse;
 
 /**
  * Parses the response body of activate and register request.

@@ -10,15 +10,15 @@ import org.junit.Test;
 
 import eu.jsparrow.registration.persistence.RegistrationSecureStoragePersistence;
 
-public class CustomerRegistrationPersistenceServiceTest {
+public class RegistrationPersistenceServiceTest {
 	
-	private CustomerRegistrationPersistenceService persistenceService;
+	private RegistrationPersistenceService persistenceService;
 	private RegistrationSecureStoragePersistence registrationPersistence;
 	
 	@Before
 	public void setUp() {
 		registrationPersistence = mock(RegistrationSecureStoragePersistence.class);
-		persistenceService = new CustomerRegistrationPersistenceService(registrationPersistence);
+		persistenceService = new RegistrationPersistenceService(registrationPersistence);
 	}
 	
 	@Test

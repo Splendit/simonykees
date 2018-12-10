@@ -22,18 +22,18 @@ import eu.jsparrow.registration.persistence.RegistrationSecureStoragePersistence
  *
  */
 @Component(property = "licenseType=registration")
-public class CustomerRegistrationPersistenceService implements LicensePersistenceService<String> {
+public class RegistrationPersistenceService implements LicensePersistenceService<String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
 	private LicensePersistence<String> persistence;
 
-	CustomerRegistrationPersistenceService(RegistrationSecureStoragePersistence persistence) {
+	RegistrationPersistenceService(RegistrationSecureStoragePersistence persistence) {
 		this.persistence = persistence;
 	}
 	
-	public CustomerRegistrationPersistenceService() {
+	public RegistrationPersistenceService() {
 		persistence = new RegistrationSecureStoragePersistence(SecurePreferencesFactory.getDefault(),
 				new AESEncryption());
 	}

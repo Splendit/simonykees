@@ -10,6 +10,7 @@ import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.registration.model.RegistrationModel;
 import eu.jsparrow.registration.validation.response.ActivateResponse;
 import eu.jsparrow.registration.validation.response.RegisterResponse;
+import eu.jsparrow.registration.validation.response.ResponseParser;
 
 /**
  * Handles creating validation requests and response parsing for customer
@@ -18,19 +19,19 @@ import eu.jsparrow.registration.validation.response.RegisterResponse;
  * @since 3.0.0
  *
  */
-public class RegisterValidation {
+public class RegisterValidator {
 	
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private RegisterRequest registerRequest;
 	private ResponseParser response;
 
-	public RegisterValidation() {
+	public RegisterValidator() {
 		this.registerRequest = new RegisterRequest();
 		this.response = new ResponseParser();
 	}
 	
-	RegisterValidation(RegisterRequest registerRequest, ResponseParser responseParser) {
+	RegisterValidator(RegisterRequest registerRequest, ResponseParser responseParser) {
 		this.registerRequest = registerRequest;
 		this.response = responseParser;
 	}

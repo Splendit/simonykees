@@ -16,11 +16,12 @@ import org.junit.rules.ExpectedException;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.registration.helper.DummyRegistrationModel;
 import eu.jsparrow.registration.helper.JsonHelper;
+import eu.jsparrow.registration.validation.response.ResponseParser;
 
 @SuppressWarnings("nls")
-public class RegisterValidationTest {
+public class RegisterValidatorTest {
 	
-	private RegisterValidation registerValidation;
+	private RegisterValidator registerValidation;
 	private RegisterRequest registerRequest;
 	private ResponseParser response;
 	
@@ -32,7 +33,7 @@ public class RegisterValidationTest {
 	public void setUp() {
 		registerRequest = mock(RegisterRequest.class);
 		response = new ResponseParser();
-		registerValidation = new RegisterValidation(registerRequest, response);
+		registerValidation = new RegisterValidator(registerRequest, response);
 	}
 	
 	/*
