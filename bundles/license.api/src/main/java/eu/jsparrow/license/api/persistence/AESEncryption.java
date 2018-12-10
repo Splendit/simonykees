@@ -1,4 +1,4 @@
-package eu.jsparrow.license.netlicensing.persistence;
+package eu.jsparrow.license.api.persistence;
 
 import java.lang.invoke.MethodHandles;
 import java.security.GeneralSecurityException;
