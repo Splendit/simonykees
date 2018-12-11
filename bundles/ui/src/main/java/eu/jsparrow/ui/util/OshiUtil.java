@@ -23,6 +23,9 @@ import oshi.hardware.UsbDevice;
  *
  */
 public class OshiUtil {
+	
+	private static SystemInfo systemInfo = new SystemInfo();
+	private static HardwareAbstractionLayer hardwareAbstractionLayer = systemInfo.getHardware();
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
@@ -34,21 +37,6 @@ public class OshiUtil {
 	}
 
 	private static final String MISSING = "missing-hardware-id"; //$NON-NLS-1$
-
-	public static String createSecretFromHardware() {
-
-		String diskSerial = ""; //$NON-NLS-1$
-		SystemInfo systemInfo = new SystemInfo();
-
-		HardwareAbstractionLayer hal = systemInfo.getHardware();
-		HWDiskStore[] diskStores = hal.getDiskStores();
-
-		if (diskStores.length > 0) {
-			diskSerial = diskStores[0].getSerial();
-		}
-
-		return diskSerial;
-	}
 
 	/**
 	 * 
@@ -72,8 +60,7 @@ public class OshiUtil {
 	 * @return list of nonempty USB serial numbers connected in the system.
 	 */
 	private static List<String> findAllUsbSerialNumbers() {
-		SystemInfo systemInfo = new SystemInfo();
-		HardwareAbstractionLayer hardwareAbstractionLayer = systemInfo.getHardware();
+
 		UsbDevice[] usbDevices = hardwareAbstractionLayer.getUsbDevices(false);
 		List<String> usbSerialNumbers = new ArrayList<>();
 		for (UsbDevice usbDevice : usbDevices) {
@@ -91,10 +78,8 @@ public class OshiUtil {
 	 * 
 	 * @return List of nonempty disk serial numbers.
 	 */
-	public static List<String> findAllDiskSerialNumbers() {
+	private static List<String> findAllDiskSerialNumbers() {
 
-		SystemInfo systemInfo = new SystemInfo();
-		HardwareAbstractionLayer hardwareAbstractionLayer = systemInfo.getHardware();
 		HWDiskStore[] diskStores = hardwareAbstractionLayer.getDiskStores();
 
 		List<String> diskSerialNumbers = new ArrayList<>();
@@ -115,9 +100,7 @@ public class OshiUtil {
 	 * 
 	 * @return the CPU identifier.
 	 */
-	public static String findProcessorId() {
-		SystemInfo systemInfo = new SystemInfo();
-		HardwareAbstractionLayer hardwareAbstractionLayer = systemInfo.getHardware();
+	private static String findProcessorId() {
 		CentralProcessor processor = hardwareAbstractionLayer.getProcessor();
 		return processor.getProcessorID();
 	}
@@ -132,7 +115,7 @@ public class OshiUtil {
 	 * 
 	 * @return the first nonempty disk number which is not a USB device.
 	 */
-	public static String findFirstDiskNumber() {
+	private static String findFirstDiskNumber() {
 		List<String> usbDevices = findAllUsbSerialNumbers();
 		List<String> diskSerialNumbers = findAllDiskSerialNumbers();
 
@@ -158,7 +141,7 @@ public class OshiUtil {
 	 * 
 	 * @return a unique identifier for the machine.
 	 */
-	public static String createHardwareUniqueId() {
+	public static String createUniqueHardwareId() {
 		String diskSerialNumber = findFirstDiskNumber();
 		if (!diskSerialNumber.isEmpty()) {
 			return diskSerialNumber;

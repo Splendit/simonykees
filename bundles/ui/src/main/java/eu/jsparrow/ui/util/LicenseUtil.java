@@ -138,7 +138,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	@Override
 	public LicenseUpdateResult update(String key) {
-		String secret = OshiUtil.createSecretFromHardware();
+		String secret = OshiUtil.createUniqueHardwareId();
 		LicenseValidationResult validationResult;
 		LicenseModel model;
 		try {
@@ -181,7 +181,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	@Override
 	public boolean activateRegistration(String activationKey) {
-		String secret = OshiUtil.createSecretFromHardware();
+		String secret = OshiUtil.createUniqueHardwareId();
 		try {
 			boolean successful = registrationService.activate(activationKey);
 			if (successful) {
@@ -208,7 +208,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	@Override
 	public boolean isActiveRegistration() {
-		String hardwareId = OshiUtil.createSecretFromHardware();
+		String hardwareId = OshiUtil.createUniqueHardwareId();
 		try {
 			String secret = registrationPersistenceSerice.loadFromPersistence();
 			return registrationService.validate(hardwareId, secret);
