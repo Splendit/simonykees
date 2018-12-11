@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import oshi.SystemInfo;
+import oshi.hardware.CentralProcessor;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.UsbDevice;
@@ -49,6 +50,10 @@ public class OshiUtil {
 		return diskSerial;
 	}
 
+	/**
+	 * 
+	 * @return the host name of the machine
+	 */
 	public static String createNameFromHardware() {
 		InetAddress addr;
 		try {
@@ -105,6 +110,19 @@ public class OshiUtil {
 	}
 
 	/**
+	 * Makes use of {@link CentralProcessor#getProcessorID()} to find an
+	 * identifier for the CPU.
+	 * 
+	 * @return the CPU identifier.
+	 */
+	public static String findProcessorId() {
+		SystemInfo systemInfo = new SystemInfo();
+		HardwareAbstractionLayer hardwareAbstractionLayer = systemInfo.getHardware();
+		CentralProcessor processor = hardwareAbstractionLayer.getProcessor();
+		return processor.getProcessorID();
+	}
+
+	/**
 	 * Finds the first serial number of the disk which is not a USB device. Uses
 	 * {@link #findAllDiskSerialNumbers()} to retrieve the serial numbers of all
 	 * disks. Uses {@link #findAllUsbSerialNumbers()}. Drops all USB serial
@@ -114,7 +132,7 @@ public class OshiUtil {
 	 * 
 	 * @return the first nonempty disk number which is not a USB device.
 	 */
-	public String findFirstDiskNumber() {
+	public static String findFirstDiskNumber() {
 		List<String> usbDevices = findAllUsbSerialNumbers();
 		List<String> diskSerialNumbers = findAllDiskSerialNumbers();
 
@@ -130,10 +148,27 @@ public class OshiUtil {
 			return diskSerialNumbers.stream()
 				.filter(s -> !s.isEmpty())
 				.findFirst()
-				.orElse(MISSING);
+				.orElse(""); //$NON-NLS-1$
 		}
 
 		return nonUsbDiskSerials.get(0);
 	}
 
+	/**
+	 * 
+	 * @return a unique identifier for the machine.
+	 */
+	public static String createHardwareUniqueId() {
+		String diskSerialNumber = findFirstDiskNumber();
+		if (!diskSerialNumber.isEmpty()) {
+			return diskSerialNumber;
+		}
+
+		String processorId = findProcessorId();
+		if (!processorId.isEmpty()) {
+			return processorId;
+		}
+
+		return MISSING;
+	}
 }
