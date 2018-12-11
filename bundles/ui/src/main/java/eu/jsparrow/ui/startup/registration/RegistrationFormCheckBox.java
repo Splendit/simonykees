@@ -35,8 +35,6 @@ public class RegistrationFormCheckBox {
 
 	private ControlDecoration decoInvalid;
 
-	private boolean selected = false;
-
 	private static final String CLOSE_RED_ICON_PATH = "icons/if_Close_Icon_12px.png"; //$NON-NLS-1$
 
 	private Image scaledCloseRedIconImage;
@@ -86,14 +84,13 @@ public class RegistrationFormCheckBox {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				selected = ((Button) e.getSource()).getSelection();
 				updateDecoVisibility(false);
 			}
 		});
 	}
 
 	public void updateDecoVisibility(boolean showDecoInvalid) {
-		if (selected) {
+		if (getSelection()) {
 			decoInvalid.hide();
 		} else if (showDecoInvalid) {
 			decoInvalid.show();

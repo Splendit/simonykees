@@ -126,6 +126,9 @@ public class ActivationControl {
 				// if license is valid
 				if (validateLicenseKey()) {
 					showLicenseValidDialog();
+					getControl().getShell()
+						.close();
+					return;
 				} else {
 					showInvalidLicenseDialog();
 				}
@@ -156,11 +159,8 @@ public class ActivationControl {
 	}
 
 	private void showLicenseValidDialog() {
-		if (SimonykeesMessageDialog.openMessageDialog(Display.getCurrent()
-			.getActiveShell(), Messages.ActivationControl_successfulActivationText, MessageDialog.INFORMATION)) {
-			getControl().getShell()
-				.close();
-		}
+		SimonykeesMessageDialog.openMessageDialog(Display.getCurrent()
+			.getActiveShell(), Messages.ActivationControl_successfulActivationText, MessageDialog.INFORMATION);
 	}
 
 	private void showInvalidLicenseDialog() {
