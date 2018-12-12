@@ -18,9 +18,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class RemoveDoubleNegationRule extends RefactoringRuleImpl<RemoveDoubleNegationASTVisitor> {
 
+	public static final String REMOVE_DOUBLE_NEGATION_RULE_ID = "RemoveDoubleNegationRule"; //$NON-NLS-1$
+
 	public RemoveDoubleNegationRule() {
 		this.visitorClass = RemoveDoubleNegationASTVisitor.class;
-		this.id = "RemoveDoubleNegationRule"; //$NON-NLS-1$
+		this.id = REMOVE_DOUBLE_NEGATION_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.RemoveDoubleNegationRule_name,
 				Messages.RemoveDoubleNegationRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS));

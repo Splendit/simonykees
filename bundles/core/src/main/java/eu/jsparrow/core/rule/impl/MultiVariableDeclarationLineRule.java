@@ -20,10 +20,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class MultiVariableDeclarationLineRule extends RefactoringRuleImpl<MultiVariableDeclarationLineASTVisitor> {
 
+	public static final String MULTI_VARIABLE_DECLARATION_LINE_RULE_ID = "MultiVariableDeclarationLine"; //$NON-NLS-1$
+
 	public MultiVariableDeclarationLineRule() {
 		super();
 		this.visitorClass = MultiVariableDeclarationLineASTVisitor.class;
-		this.id = "MultiVariableDeclarationLine"; //$NON-NLS-1$
+		this.id = MULTI_VARIABLE_DECLARATION_LINE_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.MultiVariableDeclarationLineRule_name,
 				Messages.MultiVariableDeclarationLineRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));

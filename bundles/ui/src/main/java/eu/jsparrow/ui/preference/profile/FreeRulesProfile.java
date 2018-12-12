@@ -18,6 +18,7 @@ import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.OrganiseImportsRuleBase;
 
 /**
  * Profile containing free rules.
@@ -32,15 +33,21 @@ public class FreeRulesProfile implements SimonykeesProfile {
 	boolean isBuiltInProfile = true;
 
 	public FreeRulesProfile() {
-		enabledRulesIds = Arrays.asList(new OverrideAnnotationRule().getId(), new TryWithResourceRule().getId(),
-				new LambdaToMethodReferenceRule().getId(), new RemoveUnnecessaryThrownExceptionsRule().getId(),
-				new MultiVariableDeclarationLineRule().getId(), new InefficientConstructorRule().getId(),
-				new RemoveEmptyStatementRule().getId(), new RemoveDoubleNegationRule().getId(),
+		enabledRulesIds = Arrays.asList(OverrideAnnotationRule.OVERRIDE_ANNOTATION_RULE_ID,
+				TryWithResourceRule.TRY_WITH_RESOURCE_RULE_ID,
+				LambdaToMethodReferenceRule.LAMBDA_TO_METHOD_REFERENCE_RULE_ID,
+				RemoveUnnecessaryThrownExceptionsRule.REMOVE_UNNECESSARY_THROWN_EXCEPTIONS_RULE_ID,
+				MultiVariableDeclarationLineRule.MULTI_VARIABLE_DECLARATION_LINE_RULE_ID,
+				InefficientConstructorRule.INEFFICIENT_CONSTRUCTOR_RULE_ID,
+				RemoveEmptyStatementRule.REMOVE_EMPTY_STATEMENT_RULE_ID,
+				RemoveDoubleNegationRule.REMOVE_DOUBLE_NEGATION_RULE_ID,
 
-				new ForToForEachRule().getId(), new RemoveToStringOnStringRule().getId(),
-				new StringLiteralEqualityCheckRule().getId(), new EnumsWithoutEqualsRule().getId(),
-				new UseIsEmptyOnCollectionsRule().getId(), new PrimitiveBoxedForStringRule().getId());
-		// TODO OrganizeImports Rule
+				ForToForEachRule.FOR_TO_FOR_EACH_RULE_ID, RemoveToStringOnStringRule.REMOVE_TO_STRING_ON_STRING_RULE_ID,
+				StringLiteralEqualityCheckRule.STRING_LITERAL_EQUALITY_CHECK_RULE_ID,
+				EnumsWithoutEqualsRule.ENUMS_WITHOUT_EQUALS_RULE_ID,
+				UseIsEmptyOnCollectionsRule.USE_IS_EMPTY_ON_COLLECTIONS_RULE_ID,
+				PrimitiveBoxedForStringRule.PRIMITIVE_BOXED_FOR_STRING_RULE_ID,
+				OrganiseImportsRuleBase.ORGANISE_IMPORTS_RULE_ID);
 	}
 
 	@Override
