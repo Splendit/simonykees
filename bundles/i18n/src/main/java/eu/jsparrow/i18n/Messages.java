@@ -452,6 +452,13 @@ public class Messages extends NLS {
 	public static String StringUtilsRule_classNotInClassPath;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
+	public static String SuggestRegistrationDialog_descriptionOfFreemiumLicense;
+	public static String SuggestRegistrationDialog_dontShowAgainCheckbox;
+	public static String SuggestRegistrationDialog_getFreeRulesTitle;
+	public static String SuggestRegistrationDialog_noFreemiumLiceseWarning;
+	public static String SuggestRegistrationDialog_registerButtonText;
+	public static String SuggestRegistrationDialog_skipButtonText;
+	public static String SuggestRegistrationDialog_suggestToRegister;
 	public static String SummaryWizardPage_Files;
 	public static String SummaryWizardPage_Rule;
 	public static String SummaryWizardPage_Rules;

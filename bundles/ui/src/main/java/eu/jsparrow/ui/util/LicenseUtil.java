@@ -28,6 +28,7 @@ import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
+import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
 import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
@@ -130,6 +131,12 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		// When starting with an expired demo license we show the wizard dialog
 		if (result.getLicenseType() == LicenseType.DEMO && !result.isValid()) {
 			BuyLicenseDialog dialog = new BuyLicenseDialog(shell);
+			return dialog.open() == 0;
+		}
+		// When starting with an demo license we offer to register for free
+		// rules if not registered yet
+		if (result.getLicenseType() == LicenseType.DEMO || !isActiveRegistration()) {
+			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(shell);
 			return dialog.open() == 0;
 		}
 		return true;
