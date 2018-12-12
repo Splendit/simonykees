@@ -29,9 +29,6 @@ import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
 import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
-import oshi.SystemInfo;
-import oshi.hardware.HWDiskStore;
-import oshi.hardware.HardwareAbstractionLayer;
 
 /**
  * Implements {@link LicenseUtilService}. The purpose of this class is to wrap
