@@ -8,18 +8,18 @@ package eu.jsparrow.ui.startup.registration.entity;
  */
 public class ActivationEntity {
 
-	private String license;
+	private String activationKey;
 
 	public ActivationEntity(String license) {
-		this.license = license;
+		this.activationKey = license;
 	}
 
-	public String getLicense() {
-		return license;
+	public String getActivationKey() {
+		return activationKey;
 	}
 
 	public void setLicense(String license) {
-		this.license = license;
+		this.activationKey = license;
 	}
 
 }

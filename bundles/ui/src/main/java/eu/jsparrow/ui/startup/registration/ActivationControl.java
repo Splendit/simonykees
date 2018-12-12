@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Text;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Controller for activating the customer registration.
@@ -124,7 +125,7 @@ public class ActivationControl {
 				ActivationEntity activationData = new ActivationEntity(licenseKeyString);
 
 				// if license is valid
-				if (validateLicenseKey()) {
+				if (validateActivationKey(activationData)) {
 					showLicenseValidDialog();
 					getControl().getShell()
 						.close();
@@ -139,10 +140,9 @@ public class ActivationControl {
 
 	}
 
-	private boolean validateLicenseKey() {
-		// TODO send license key and wait for response
-		// TODO check if response is valid and return
-		return false;
+	private boolean validateActivationKey(ActivationEntity activationEntity) {
+		LicenseUtil licenseUtil = LicenseUtil.get();
+		return licenseUtil.activateRegistration(activationEntity);
 	}
 
 	public boolean validateLicenseKeyForm() {

@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Text;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Controller for customer registration.
@@ -159,16 +160,10 @@ public class RegistrationControl {
 					return;
 				}
 				statusLabel.setVisible(true);
-				RegistrationEntity registrationData = new RegistrationEntity(firstName.getText()
-					.getText(),
-						lastName.getText()
-							.getText(),
-						email.getText()
-							.getText(),
-						company.getText()
-							.getText(),
-						newsletterAgreeCheckBox.getSelection());
-				if (sendData()) {
+				
+				RegistrationEntity registrationData = new RegistrationEntity(firstName.getValue(), lastName.getValue(),
+						email.getValue(), company.getValue(), newsletterAgreeCheckBox.getSelection());
+				if (sendData(registrationData)) {
 					showLicenseGenerationSucceededDialog();
 				} else {
 					showLicenseGenerationFailedDialog();
@@ -179,10 +174,9 @@ public class RegistrationControl {
 		registerButton.setLayoutData(buttonData);
 	}
 
-	private boolean sendData() {
-		// TODO send data and wait for response, return whether it was
-		// successful
-		return true;
+	private boolean sendData(RegistrationEntity registerData) {
+		LicenseUtil licenseUtil = LicenseUtil.get();
+		return licenseUtil.register(registerData);
 	}
 
 	private void checkMandatoryFieldsAndUpdateDecorations() {
