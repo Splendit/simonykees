@@ -1,6 +1,8 @@
 package eu.jsparrow.ui.util;
 
 import eu.jsparrow.license.api.RegistrationService;
+import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
+import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
 
 /**
  * Implementors of this class provide functions for customer registrations. This
@@ -14,30 +16,22 @@ public interface RegistrationUtilService {
 	/**
 	 * Uses the {@link RegistrationService} for registering a customer.
 	 * 
-	 * @param email
-	 *            customers email address
-	 * @param firstName
-	 *            customer's first name
-	 * @param lastName
-	 *            customer's last name
-	 * @param company
-	 *            customer's company
-	 * @param subscribe
-	 *            customer's subscription
+	 * @param registrationEntity
+	 *            entity containing information for customer registration.
 	 * @return {@code true} if the registration was successful and {@code false}
 	 *         otherwise.
 	 */
-	boolean register(String email, String firstName, String lastName, String company, boolean subscribe);
+	boolean register(RegistrationEntity registrationEntity);
 
 	/**
 	 * Activates a customer registration.
 	 * 
-	 * @param key
-	 *            activation key which customer delivers via email
+	 * @param activationEntity
+	 *             entity containing information for activating customer registration.
 	 * @return {@code true} if the activation is successful and {@code false}
 	 *         otherwise
 	 */
-	boolean activateRegistration(String key);
+	boolean activateRegistration(ActivationEntity activationEntity);
 
 	/**
 	 * Checks if customers has an active registration.

@@ -27,6 +27,11 @@ import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
+import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
+import oshi.SystemInfo;
+import oshi.hardware.HWDiskStore;
+import oshi.hardware.HardwareAbstractionLayer;
 
 /**
  * Implements {@link LicenseUtilService}. The purpose of this class is to wrap
@@ -182,8 +187,9 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	}
 
 	@Override
-	public boolean activateRegistration(String activationKey) {
+	public boolean activateRegistration(ActivationEntity activationEntity) {
 		String secret = systemInfoWrapper.createUniqueHardwareId();
+		String activationKey = activationEntity.getActivationKey();
 		try {
 			boolean successful = registrationService.activate(activationKey);
 			if (successful) {
@@ -199,7 +205,12 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	}
 
 	@Override
-	public boolean register(String email, String firstName, String lastName, String company, boolean subscribe) {
+	public boolean register(RegistrationEntity registerEntity) {
+		String email = registerEntity.getEmail();
+		String firstName = registerEntity.getFirstName();
+		String lastName = registerEntity.getLastName();
+		String company = registerEntity.getCompany();
+		boolean subscribe = registerEntity.isAgreeToNewsletter();
 		try {
 			return registrationService.register(email, firstName, lastName, company, subscribe);
 		} catch (ValidationException e) {
