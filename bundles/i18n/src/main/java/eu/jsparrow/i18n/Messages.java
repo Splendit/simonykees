@@ -238,6 +238,7 @@ public class Messages extends NLS {
 	public static String PrimitiveObjectUseEqualsRule_description;
 	public static String PrimitiveObjectUseEqualsRule_name;
 	public static String Profile_DefaultProfile_profileName;
+	public static String Profile_FreeRulesProfile_profileName;
 	public static String Profile_Java8Profile_profileName;
 	public static String ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName;
 	public static String ProgressMonitor_AbstractRefactorer_doRefactoring_taskName;

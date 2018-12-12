@@ -13,6 +13,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preference.profile.DefaultProfile;
 import eu.jsparrow.ui.preference.profile.EmptyProfile;
+import eu.jsparrow.ui.preference.profile.FreeRulesProfile;
 import eu.jsparrow.ui.preference.profile.Profile;
 import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 
@@ -30,6 +31,7 @@ public class SimonykeesPreferenceManager {
 	private static List<SimonykeesProfile> profiles = new ArrayList<>();
 
 	private static SimonykeesProfile defaultProfile = new DefaultProfile();
+	private static SimonykeesProfile freeRulesProfile = new FreeRulesProfile();
 	private static SimonykeesProfile emptyProfile = new EmptyProfile();
 
 	private SimonykeesPreferenceManager() {
@@ -45,12 +47,20 @@ public class SimonykeesPreferenceManager {
 		sb.append(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER);
 		sb.append(StringUtils.join(defaultProfile.getEnabledRuleIds(),
 				SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
-
+		sb.append("|"); //$NON-NLS-1$
+		sb.append(freeRulesProfile.getProfileName());
+		sb.append(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER);
+		sb.append(StringUtils.join(freeRulesProfile.getEnabledRuleIds(),
+				SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
 		return sb.toString();
 	}
 
 	public static String getDefaultProfileName() {
 		return defaultProfile.getProfileName();
+	}
+
+	public static String getFreeRulesProfileName() {
+		return freeRulesProfile.getProfileName();
 	}
 
 	public static String getEmptyProfileName() {
@@ -177,6 +187,8 @@ public class SimonykeesPreferenceManager {
 				.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
 			if (name.equals(Messages.Profile_DefaultProfile_profileName)) {
 				profiles.add(defaultProfile);
+			} else if (name.equals(Messages.Profile_FreeRulesProfile_profileName)) {
+				profiles.add(freeRulesProfile);
 			} else if (name.equals(Messages.EmptyProfile_profileName)) {
 				profiles.add(emptyProfile);
 			} else {
@@ -251,6 +263,7 @@ public class SimonykeesPreferenceManager {
 
 		profiles.clear();
 		defaultProfile = new DefaultProfile();
+		freeRulesProfile = new FreeRulesProfile();
 		emptyProfile = new EmptyProfile();
 		loadProfilesFromStore();
 	}
