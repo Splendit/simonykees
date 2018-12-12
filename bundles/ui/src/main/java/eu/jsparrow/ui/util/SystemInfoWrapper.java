@@ -27,9 +27,9 @@ public class SystemInfoWrapper {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private HardwareAbstractionLayer hardwareAbstractionLayer;
-
 	private static final String MISSING = "missing-hardware-id"; //$NON-NLS-1$
+
+	private HardwareAbstractionLayer hardwareAbstractionLayer;
 
 	public SystemInfoWrapper() {
 		SystemInfo systemInfo = new SystemInfo();
@@ -38,6 +38,24 @@ public class SystemInfoWrapper {
 
 	SystemInfoWrapper(HardwareAbstractionLayer hardwareAbstractionLayer) {
 		this.hardwareAbstractionLayer = hardwareAbstractionLayer;
+	}
+
+	/**
+	 * 
+	 * @return a unique identifier for the machine.
+	 */
+	public String createUniqueHardwareId() {
+		String diskSerialNumber = findFirstDiskNumber();
+		if (!diskSerialNumber.isEmpty()) {
+			return diskSerialNumber;
+		}
+
+		String processorId = findProcessorId();
+		if (!processorId.isEmpty()) {
+			return processorId;
+		}
+
+		return MISSING;
 	}
 
 	/**
@@ -134,23 +152,5 @@ public class SystemInfoWrapper {
 		}
 
 		return nonUsbDiskSerials.get(0);
-	}
-
-	/**
-	 * 
-	 * @return a unique identifier for the machine.
-	 */
-	public String createUniqueHardwareId() {
-		String diskSerialNumber = findFirstDiskNumber();
-		if (!diskSerialNumber.isEmpty()) {
-			return diskSerialNumber;
-		}
-
-		String processorId = findProcessorId();
-		if (!processorId.isEmpty()) {
-			return processorId;
-		}
-
-		return MISSING;
 	}
 }
