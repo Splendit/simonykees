@@ -53,9 +53,11 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	private LicenseValidationResult result = null;
 
 	private Scheduler scheduler;
+	private SystemInfoWrapper systemInfoWrapper;
 
 	private LicenseUtil() {
 		scheduler = new Scheduler(this);
+		systemInfoWrapper = new SystemInfoWrapper();
 		scheduler.start();
 
 		BundleContext bundleContext = FrameworkUtil.getBundle(getClass())
@@ -138,11 +140,11 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	@Override
 	public LicenseUpdateResult update(String key) {
-		String secret = OshiUtil.createUniqueHardwareId();
+		String secret = systemInfoWrapper.createUniqueHardwareId();
 		LicenseValidationResult validationResult;
 		LicenseModel model;
 		try {
-			String name = OshiUtil.createNameFromHardware();
+			String name = systemInfoWrapper.createNameFromHardware();
 			Properties properties = loadProperties();
 			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
 			String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
@@ -181,7 +183,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	@Override
 	public boolean activateRegistration(String activationKey) {
-		String secret = OshiUtil.createUniqueHardwareId();
+		String secret = systemInfoWrapper.createUniqueHardwareId();
 		try {
 			boolean successful = registrationService.activate(activationKey);
 			if (successful) {
@@ -208,7 +210,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	@Override
 	public boolean isActiveRegistration() {
-		String hardwareId = OshiUtil.createUniqueHardwareId();
+		String hardwareId = systemInfoWrapper.createUniqueHardwareId();
 		try {
 			String secret = registrationPersistenceSerice.loadFromPersistence();
 			return registrationService.validate(hardwareId, secret);
