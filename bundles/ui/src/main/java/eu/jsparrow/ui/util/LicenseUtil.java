@@ -61,6 +61,8 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	private LicenseValidationResult result = null;
 
 	private Scheduler scheduler;
+	
+	private boolean openSuggestRegistrationDialog = true;
 
 	private LicenseUtil() {
 		scheduler = new Scheduler(this);
@@ -135,7 +137,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 		// When starting with an demo license we offer to register for free
 		// rules if not registered yet
-		if (result.getLicenseType() == LicenseType.DEMO || !isActiveRegistration()) {
+		if (result.getLicenseType() == LicenseType.DEMO && !isActiveRegistration() && openSuggestRegistrationDialog) {
 			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(shell);
 			return dialog.open() == 0;
 		}
@@ -343,5 +345,9 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			return wasSuccessful;
 		}
 
+	}
+
+	public void openSuggestRegistrationDialogAgain(boolean openAgain) {
+		openSuggestRegistrationDialog = openAgain;
 	}
 }

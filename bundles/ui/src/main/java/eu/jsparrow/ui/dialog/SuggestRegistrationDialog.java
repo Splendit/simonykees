@@ -3,6 +3,8 @@ package eu.jsparrow.ui.dialog;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -14,6 +16,7 @@ import org.eclipse.ui.PlatformUI;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Dialog that shows when user has free license and is not registered for free
@@ -48,9 +51,17 @@ public class SuggestRegistrationDialog extends Dialog {
 
 		GridData checkBoxTextGridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
 		checkBoxTextGridData.widthHint = 300;
-		Button checkBox = new Button(area, SWT.CHECK | SWT.WRAP);
-		checkBox.setText(Messages.SuggestRegistrationDialog_dontShowAgainCheckbox);
-		checkBox.setLayoutData(checkBoxTextGridData);
+		Button dontShowAgainCheckBox = new Button(area, SWT.CHECK | SWT.WRAP);
+		dontShowAgainCheckBox.setText(Messages.SuggestRegistrationDialog_dontShowAgainCheckbox);
+		dontShowAgainCheckBox.setLayoutData(checkBoxTextGridData);
+		dontShowAgainCheckBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Button source = (Button) e.getSource();
+				LicenseUtil.get()
+					.openSuggestRegistrationDialogAgain(!source.getSelection());
+			}
+		});
 
 		return composite;
 	}
