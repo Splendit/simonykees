@@ -335,6 +335,7 @@ public class Messages extends NLS {
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase;
 	public static String RenamingRulePreviewWizardPage_RenameFields;
 	public static String SelectRulesWizardHandler_allready_running;
+	public static String SelectRulesWizardHandler_finishButtonText;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
 	public static String SelectRulesWizardHandler_noFileWithoutError;
 	public static String SelectRulesWizardHandler_selectionNotPossible_ubuntuBug;
