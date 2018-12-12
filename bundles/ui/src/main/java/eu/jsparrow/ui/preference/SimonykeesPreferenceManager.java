@@ -16,6 +16,7 @@ import eu.jsparrow.ui.preference.profile.EmptyProfile;
 import eu.jsparrow.ui.preference.profile.FreeRulesProfile;
 import eu.jsparrow.ui.preference.profile.Profile;
 import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Central point to access property values.
@@ -47,11 +48,14 @@ public class SimonykeesPreferenceManager {
 		sb.append(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER);
 		sb.append(StringUtils.join(defaultProfile.getEnabledRuleIds(),
 				SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
-		sb.append("|"); //$NON-NLS-1$
-		sb.append(freeRulesProfile.getProfileName());
-		sb.append(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER);
-		sb.append(StringUtils.join(freeRulesProfile.getEnabledRuleIds(),
-				SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
+		if (LicenseUtil.get()
+			.isFreeLicense()) {
+			sb.append("|"); //$NON-NLS-1$
+			sb.append(freeRulesProfile.getProfileName());
+			sb.append(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER);
+			sb.append(StringUtils.join(freeRulesProfile.getEnabledRuleIds(),
+					SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
+		}
 		return sb.toString();
 	}
 
@@ -123,7 +127,6 @@ public class SimonykeesPreferenceManager {
 		store.setValue(SimonykeesPreferenceConstants.ENABLE_INTRO, enabled);
 	}
 
-
 	/**
 	 * Returns the current selection for enabling dashboard on startup.
 	 * 
@@ -182,9 +185,12 @@ public class SimonykeesPreferenceManager {
 		for (String profileInfo : profilesArray) {
 			String name = StringUtils.substring(profileInfo, 0,
 					StringUtils.indexOf(profileInfo, SimonykeesPreferenceConstants.NAME_RULES_DELIMITER));
-			List<String> rules = Arrays.asList(StringUtils
-				.substring(profileInfo, StringUtils.indexOf(profileInfo, SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
-				.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
+			List<String> rules = Arrays.asList(
+					StringUtils
+						.substring(profileInfo,
+								StringUtils.indexOf(profileInfo, SimonykeesPreferenceConstants.NAME_RULES_DELIMITER)
+										+ 1)
+						.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
 			if (name.equals(Messages.Profile_DefaultProfile_profileName)) {
 				profiles.add(defaultProfile);
 			} else if (name.equals(Messages.Profile_FreeRulesProfile_profileName)) {
@@ -263,7 +269,10 @@ public class SimonykeesPreferenceManager {
 
 		profiles.clear();
 		defaultProfile = new DefaultProfile();
-		freeRulesProfile = new FreeRulesProfile();
+		if (LicenseUtil.get()
+			.isFreeLicense()) {
+			freeRulesProfile = new FreeRulesProfile();
+		}
 		emptyProfile = new EmptyProfile();
 		loadProfilesFromStore();
 	}
