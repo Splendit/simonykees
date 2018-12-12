@@ -27,6 +27,8 @@ import eu.jsparrow.ui.util.LicenseUtil;
  */
 public class SuggestRegistrationDialog extends Dialog {
 
+	private LicenseUtil licenseUtil = LicenseUtil.get();
+
 	public SuggestRegistrationDialog(Shell parentShell) {
 		super(parentShell);
 	}
@@ -58,8 +60,7 @@ public class SuggestRegistrationDialog extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Button source = (Button) e.getSource();
-				LicenseUtil.get()
-					.openSuggestRegistrationDialogAgain(!source.getSelection());
+				licenseUtil.openSuggestRegistrationDialogAgain(!source.getSelection());
 			}
 		});
 
@@ -88,6 +89,7 @@ public class SuggestRegistrationDialog extends Dialog {
 	}
 
 	private void registerButtonPressed() {
+		licenseUtil.setShouldContinueWithSelectRules(false);
 		PlatformUI.getWorkbench()
 			.getDisplay()
 			.asyncExec(() -> {
@@ -96,5 +98,6 @@ public class SuggestRegistrationDialog extends Dialog {
 					.getShell();
 				new RegistrationDialog(activeShell).open();
 			});
+		this.close();
 	}
 }
