@@ -129,4 +129,8 @@ public class RegistrationFormField {
 	public Text getText() {
 		return text;
 	}
+	
+	public String getValue() {
+		return text.getText();
+	}
 }
