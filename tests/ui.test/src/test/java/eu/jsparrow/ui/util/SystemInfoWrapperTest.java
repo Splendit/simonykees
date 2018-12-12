@@ -37,7 +37,7 @@ public class SystemInfoWrapperTest {
 	}
 	
 	@Test
-	public void createUniqueHardwareId_missingDiskSerial_shuldReturnProcessorId() {
+	public void createUniqueHardwareId_missingDiskSerial_shouldReturnProcessorId() {
 		String expectedHardwareId = "processor-id";
 		when(diskStore.getSerial()).thenReturn("");
 		when(centralProcessor.getProcessorID()).thenReturn(expectedHardwareId);
@@ -48,7 +48,7 @@ public class SystemInfoWrapperTest {
 	}
 	
 	@Test
-	public void createUniqueHardwareId_validDiskSerialNumber_shuldReturnDiskSerialNumber() {
+	public void createUniqueHardwareId_validDiskSerialNumber_shouldReturnDiskSerialNumber() {
 		String expectedHardwareId = "disk-serial-number";
 		when(diskStore.getSerial()).thenReturn(expectedHardwareId);
 		
@@ -58,7 +58,7 @@ public class SystemInfoWrapperTest {
 	}
 	
 	@Test
-	public void createUniqueHardwareId_skipUsbSerialNumber_shouldreturnProcessorId() {
+	public void createUniqueHardwareId_skipUsbSerialNumber_shouldReturnProcessorId() {
 		String expectedHardwareId = "processor-id";
 		String usbId = "usb-id";
 		when(diskStore.getSerial()).thenReturn(usbId);
