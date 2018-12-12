@@ -31,4 +31,8 @@ public class RemoveUnnecessaryThrownExceptionsRule extends RefactoringRuleImpl<R
 		return JavaCore.VERSION_1_1;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

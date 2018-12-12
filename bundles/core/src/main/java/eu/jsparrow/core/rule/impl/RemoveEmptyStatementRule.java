@@ -31,4 +31,8 @@ public class RemoveEmptyStatementRule extends RefactoringRuleImpl<RemoveEmptySta
 		return JavaCore.VERSION_1_1;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

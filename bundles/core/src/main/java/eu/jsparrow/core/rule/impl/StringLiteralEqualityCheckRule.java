@@ -34,4 +34,8 @@ public class StringLiteralEqualityCheckRule extends RefactoringRuleImpl<StringLi
 		return JavaCore.VERSION_1_1;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

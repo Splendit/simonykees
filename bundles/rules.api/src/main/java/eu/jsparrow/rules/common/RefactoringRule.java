@@ -15,6 +15,8 @@ public interface RefactoringRule {
 
 	public boolean isEnabled();
 
+	public boolean isFree();
+
 	public String getId();
 
 	public void calculateEnabledForProject(IJavaProject project);

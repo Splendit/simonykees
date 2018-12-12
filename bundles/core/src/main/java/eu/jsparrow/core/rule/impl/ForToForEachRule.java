@@ -33,4 +33,8 @@ public class ForToForEachRule extends RefactoringRuleImpl<ForToForEachASTVisitor
 		return JavaCore.VERSION_1_5;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

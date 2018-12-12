@@ -34,4 +34,8 @@ public class MultiVariableDeclarationLineRule extends RefactoringRuleImpl<MultiV
 		return JavaCore.VERSION_1_1;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

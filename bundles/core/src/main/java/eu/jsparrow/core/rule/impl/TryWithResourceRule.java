@@ -34,4 +34,8 @@ public class TryWithResourceRule extends RefactoringRuleImpl<TryWithResourceASTV
 		return JavaCore.VERSION_1_7;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

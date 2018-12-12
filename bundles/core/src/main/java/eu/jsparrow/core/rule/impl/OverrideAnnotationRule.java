@@ -38,4 +38,8 @@ public class OverrideAnnotationRule extends RefactoringRuleImpl<OverrideAnnotati
 		return JavaCore.VERSION_1_6;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }
