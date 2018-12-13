@@ -589,10 +589,18 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		} else if (model.getSelectionAsList()
 			.isEmpty()) {
 			((StatusInfo) fSelectionStatus).setError(Messages.AbstractSelectRulesWizardPage_error_NoRulesSelected);
-		} else if (licenseUtil.isFreeLicense() && licenseUtil.isActiveRegistration()
-				&& model.selectionContainsNonFreemiumRules()) {
-			((StatusInfo) fSelectionStatus)
-				.setWarning(Messages.AbstractSelectRulesWizardPage_notOnlyFreemiumSelected_statusInfoMessage);
+		} else if (licenseUtil.isFreeLicense()) {
+			if (licenseUtil.isActiveRegistration()) {
+				if (model.selectionContainsNonFreemiumRules()) {
+					((StatusInfo) fSelectionStatus)
+						.setWarning(Messages.AbstractSelectRulesWizardPage_notOnlyFreemiumSelected_statusInfoMessage);
+				} else {
+					fSelectionStatus = new StatusInfo();
+				}
+			} else {
+				((StatusInfo) fSelectionStatus)
+					.setWarning(Messages.AbstractSelectRulesWizardPage_neitherRegisteredNorLicensed_statusInfoMessage);
+			}
 		} else {
 			fSelectionStatus = new StatusInfo();
 		}
