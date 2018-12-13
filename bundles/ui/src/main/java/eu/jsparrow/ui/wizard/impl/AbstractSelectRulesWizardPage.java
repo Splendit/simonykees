@@ -525,7 +525,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				+ lineDelimiter.length() + requiredLibrariesLabel.length() + requiredLibrariesValue.length()
 				+ lineDelimiter.length() + freemiumValue.length() + lineDelimiter.length();
 		tagsLabelStyleRange.length = tagsLabel.length();
-		tagsLabelStyleRange.font = normalTitle;
+		tagsLabelStyleRange.font = paragraphTitle;
 
 		StyleRange style0 = new StyleRange();
 		style0.metrics = new GlyphMetrics(0, 0, 40);
