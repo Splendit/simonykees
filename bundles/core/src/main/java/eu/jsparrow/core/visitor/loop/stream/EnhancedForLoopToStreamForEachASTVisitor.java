@@ -59,8 +59,10 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 
 		// expression must be of type java.util.Collection
 		ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
-		if (expressionTypeBinding != null
-				&& (ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST)
+		if(expressionTypeBinding == null || expressionTypeBinding.isRawType()) {
+			return;
+		}
+		if ((ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST)
 						|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST))
 				&& isTypeSafe(parameterTypeBinding)) {
 
