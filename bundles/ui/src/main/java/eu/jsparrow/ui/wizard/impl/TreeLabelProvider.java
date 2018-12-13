@@ -69,7 +69,8 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 				// info icon that rule is disabled, explanation appears in
 				// description text when rule is clicked
 				return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_INFO);
-			} else if (rule.isFree() && LicenseUtil.get().isFreeLicense()) {
+			} else if (rule.isFree() && LicenseUtil.get()
+				.isFreeLicense()) {
 				return greenFreeRuleImage;
 			} else {
 				// without icon

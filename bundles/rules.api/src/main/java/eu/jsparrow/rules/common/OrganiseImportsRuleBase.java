@@ -32,7 +32,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 
 public abstract class OrganiseImportsRuleBase extends RefactoringRuleImpl<AbstractASTRewriteASTVisitor> {
-	
+
 	public static final String ORGANISE_IMPORTS_RULE_ID = "OrganiseImports"; //$NON-NLS-1$
 
 	public OrganiseImportsRuleBase() {
@@ -43,7 +43,7 @@ public abstract class OrganiseImportsRuleBase extends RefactoringRuleImpl<Abstra
 				Messages.OrganiseImportsRule_description, Duration.ofMinutes(1),
 				Arrays.asList(Tag.JAVA_1_1, Tag.FORMATTING, Tag.READABILITY));
 	}
-	
+
 	@Override
 	public boolean isFree() {
 		return true;
@@ -69,11 +69,11 @@ public abstract class OrganiseImportsRuleBase extends RefactoringRuleImpl<Abstra
 
 		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
 		final boolean[] hasAmbiguity = new boolean[] { false };
-		
+
 		TextEdit edit = createTextEdits(workingCopy, astRoot, hasAmbiguity);
-		
+
 		DocumentChange documentChange = null;
-		
+
 		if (edit != null && !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
 			FileChangeCount count = RuleApplicationCount.getFor(this)
 				.getApplicationsForFile(workingCopy.getHandleIdentifier());
@@ -85,7 +85,7 @@ public abstract class OrganiseImportsRuleBase extends RefactoringRuleImpl<Abstra
 			workingCopy.applyTextEdit(edit, null);
 
 		}
-		
+
 		return documentChange;
 	}
 
@@ -94,4 +94,3 @@ public abstract class OrganiseImportsRuleBase extends RefactoringRuleImpl<Abstra
 	protected abstract TextEdit createTextEdits(ICompilationUnit workingCopy, final CompilationUnit astRoot,
 			final boolean[] hasAmbiguity) throws CoreException;
 }
-

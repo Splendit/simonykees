@@ -41,8 +41,8 @@ public class FreeRulesProfile implements SimonykeesProfile {
 				InefficientConstructorRule.INEFFICIENT_CONSTRUCTOR_RULE_ID,
 				RemoveEmptyStatementRule.REMOVE_EMPTY_STATEMENT_RULE_ID,
 				RemoveDoubleNegationRule.REMOVE_DOUBLE_NEGATION_RULE_ID,
-
-				ForToForEachRule.FOR_TO_FOR_EACH_RULE_ID, RemoveToStringOnStringRule.REMOVE_TO_STRING_ON_STRING_RULE_ID,
+				ForToForEachRule.FOR_TO_FOR_EACH_RULE_ID,
+				RemoveToStringOnStringRule.REMOVE_TO_STRING_ON_STRING_RULE_ID,
 				StringLiteralEqualityCheckRule.STRING_LITERAL_EQUALITY_CHECK_RULE_ID,
 				EnumsWithoutEqualsRule.ENUMS_WITHOUT_EQUALS_RULE_ID,
 				UseIsEmptyOnCollectionsRule.USE_IS_EMPTY_ON_COLLECTIONS_RULE_ID,
