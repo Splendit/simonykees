@@ -3,8 +3,6 @@ package eu.jsparrow.ui.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -31,9 +29,6 @@ import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
 import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
-import oshi.SystemInfo;
-import oshi.hardware.HWDiskStore;
-import oshi.hardware.HardwareAbstractionLayer;
 
 /**
  * Implements {@link LicenseUtilService}. The purpose of this class is to wrap
@@ -60,9 +55,11 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	private LicenseValidationResult result = null;
 
 	private Scheduler scheduler;
+	private SystemInfoWrapper systemInfoWrapper;
 
 	private LicenseUtil() {
 		scheduler = new Scheduler(this);
+		systemInfoWrapper = new SystemInfoWrapper();
 		scheduler.start();
 
 		BundleContext bundleContext = FrameworkUtil.getBundle(getClass())
@@ -145,11 +142,11 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	@Override
 	public LicenseUpdateResult update(String key) {
-		String secret = createSecretFromHardware();
+		String secret = systemInfoWrapper.createUniqueHardwareId();
 		LicenseValidationResult validationResult;
 		LicenseModel model;
 		try {
-			String name = createNameFromHardware();
+			String name = systemInfoWrapper.createNameFromHardware();
 			Properties properties = loadProperties();
 			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
 			String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
@@ -188,7 +185,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	@Override
 	public boolean activateRegistration(ActivationEntity activationEntity) {
-		String secret = createSecretFromHardware();
+		String secret = systemInfoWrapper.createUniqueHardwareId();
 		String activationKey = activationEntity.getActivationKey();
 		try {
 			boolean successful = registrationService.activate(activationKey);
@@ -221,7 +218,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	@Override
 	public boolean isActiveRegistration() {
-		String hardwareId = createSecretFromHardware();
+		String hardwareId = systemInfoWrapper.createUniqueHardwareId();
 		try {
 			String secret = registrationPersistenceSerice.loadFromPersistence();
 			return registrationService.validate(hardwareId, secret);
@@ -275,32 +272,6 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 
 		return new LicenseUpdateResult(true, Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
-	}
-
-	private String createSecretFromHardware() {
-
-		String diskSerial = ""; //$NON-NLS-1$
-		SystemInfo systemInfo = new SystemInfo();
-
-		HardwareAbstractionLayer hal = systemInfo.getHardware();
-		HWDiskStore[] diskStores = hal.getDiskStores();
-
-		if (diskStores.length > 0) {
-			diskSerial = diskStores[0].getSerial();
-		}
-
-		return diskSerial;
-	}
-
-	private String createNameFromHardware() {
-		InetAddress addr;
-		try {
-			addr = InetAddress.getLocalHost();
-			return addr.getHostName();
-		} catch (UnknownHostException e) {
-			logger.warn("Error while reading the host name", e); //$NON-NLS-1$
-			return ""; //$NON-NLS-1$
-		}
 	}
 
 	private Properties loadProperties() throws IOException {
