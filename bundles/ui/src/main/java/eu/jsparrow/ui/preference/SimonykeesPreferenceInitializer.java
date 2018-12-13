@@ -35,6 +35,8 @@ public class SimonykeesPreferenceInitializer extends AbstractPreferenceInitializ
 
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.ENABLE_DASHBOARD, true);
 
+		preferenceStore.setDefault(SimonykeesPreferenceConstants.DISABLE_REGISTER_SUGGESTION, false);
+
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, true);
 	}
 }

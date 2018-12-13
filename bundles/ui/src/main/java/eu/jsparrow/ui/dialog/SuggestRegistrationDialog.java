@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
@@ -60,7 +61,7 @@ public class SuggestRegistrationDialog extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Button source = (Button) e.getSource();
-				licenseUtil.openSuggestRegistrationDialogAgain(!source.getSelection());
+				SimonykeesPreferenceManager.setDisableRegisterSuggestion(source.getSelection());
 			}
 		});
 
