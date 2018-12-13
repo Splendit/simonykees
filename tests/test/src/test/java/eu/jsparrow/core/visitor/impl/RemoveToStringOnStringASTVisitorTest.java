@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings("nls")
-public class RemoveToTest extends UsesJDTUnitFixture {
+public class RemoveToStringOnStringASTVisitorTest extends UsesJDTUnitFixture {
 
 	private RemoveToStringOnStringASTVisitor visitor;
 
