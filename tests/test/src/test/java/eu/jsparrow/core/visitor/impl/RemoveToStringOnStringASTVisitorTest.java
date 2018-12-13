@@ -17,7 +17,7 @@ public class RemoveToStringOnStringASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
-	public void visit_zeroNegation() throws Exception {
+	public void visit_parenthesisedMethodExpression_shouldTransformButNotUnwrap() throws Exception {
 		fixture.addMethodBlock("System.out.println((\"abc\".toString() + System.getProperty(\"line.separator\", \"\\n\")).toString().hashCode());");
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
