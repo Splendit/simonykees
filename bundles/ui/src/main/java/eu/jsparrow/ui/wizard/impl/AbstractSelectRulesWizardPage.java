@@ -457,9 +457,9 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		String requiredLibrariesLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
 		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
 				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
-		String freemiumValue = (rule.isFree() && licenseUtil.isFreeLicense())
+		String jSparrowStarterValue = (rule.isFree() && licenseUtil.isFreeLicense())
 				? Messages.AbstractSelectRulesWizardPage_freemiumRegirementsMessage + lineDelimiter
-				: ""; // $NON-NLS-2$
+				: ""; //$NON-NLS-1$
 		String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 		String tagsValue = StringUtils.join(rule.getRuleDescription()
 			.getTags()
@@ -469,7 +469,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		String descriptionText = name + lineDelimiter + lineDelimiter + description + lineDelimiter + lineDelimiter
 				+ requirementsLabel + lineDelimiter + minJavaVersionLabel + minJavaVersionValue + lineDelimiter
-				+ requiredLibrariesLabel + requiredLibrariesValue + lineDelimiter + freemiumValue + lineDelimiter
+				+ requiredLibrariesLabel + requiredLibrariesValue + lineDelimiter + jSparrowStarterValue + lineDelimiter
 				+ tagsLabel + lineDelimiter + tagsValue;
 
 		FontData data = descriptionStyledText.getFont()
@@ -479,7 +479,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		Font normalTitle = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), data.getStyle());
 		Color unsetisfiedRequirementsColor = getShell().getDisplay()
 			.getSystemColor(SWT.COLOR_RED);
-		Color freemiumColor = getShell().getDisplay()
+		Color jSparrowStarterColor = getShell().getDisplay()
 			.getSystemColor(SWT.COLOR_GREEN);
 
 		StyleRange ruleNameStyleRange = new StyleRange();
@@ -508,22 +508,22 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		requiredLibrariesLabelStyleRange.length = requiredLibrariesLabel.length();
 		requiredLibrariesLabelStyleRange.font = normalTitle;
 
-		StyleRange freemiumValueStyleRange = new StyleRange();
+		StyleRange jSparrowStarterValueStyleRange = new StyleRange();
 		requiredLibrariesLabelStyleRange.start = name.length() + lineDelimiter.length() + lineDelimiter.length()
 				+ description.length() + lineDelimiter.length() + lineDelimiter.length() + requirementsLabel.length()
 				+ lineDelimiter.length() + minJavaVersionLabel.length() + minJavaVersionValue.length()
 				+ lineDelimiter.length() + requiredLibrariesLabel.length() + requiredLibrariesValue.length()
 				+ lineDelimiter.length();
-		requiredLibrariesLabelStyleRange.length = freemiumValue.length();
+		requiredLibrariesLabelStyleRange.length = jSparrowStarterValue.length();
 		requiredLibrariesLabelStyleRange.font = paragraphTitle;
-		requiredLibrariesLabelStyleRange.foreground = freemiumColor;
+		requiredLibrariesLabelStyleRange.foreground = jSparrowStarterColor;
 
 		StyleRange tagsLabelStyleRange = new StyleRange();
 		tagsLabelStyleRange.start = name.length() + lineDelimiter.length() + lineDelimiter.length()
 				+ description.length() + lineDelimiter.length() + lineDelimiter.length() + requirementsLabel.length()
 				+ lineDelimiter.length() + minJavaVersionLabel.length() + minJavaVersionValue.length()
 				+ lineDelimiter.length() + requiredLibrariesLabel.length() + requiredLibrariesValue.length()
-				+ lineDelimiter.length() + freemiumValue.length() + lineDelimiter.length();
+				+ lineDelimiter.length() + jSparrowStarterValue.length() + lineDelimiter.length();
 		tagsLabelStyleRange.length = tagsLabel.length();
 		tagsLabelStyleRange.font = paragraphTitle;
 
@@ -538,7 +538,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		descriptionStyledText.setStyleRange(requirementsLabelStyleRange);
 		descriptionStyledText.setStyleRange(minJavaVersionLabelStyleRange);
 		descriptionStyledText.setStyleRange(requiredLibrariesLabelStyleRange);
-		descriptionStyledText.setStyleRange(freemiumValueStyleRange);
+		descriptionStyledText.setStyleRange(jSparrowStarterValueStyleRange);
 		descriptionStyledText.setStyleRange(tagsLabelStyleRange);
 
 		if (!rule.isSatisfiedJavaVersion()) {
@@ -567,7 +567,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				+ lineDelimiter.length() + lineDelimiter.length() + description.length() + lineDelimiter.length()
 				+ lineDelimiter.length() + requirementsLabel.length() + lineDelimiter.length());
 
-		descriptionStyledText.setLineBullet(requirementsBulletingStartLine, freemiumValue.isEmpty() ? 2 : 3, bullet0);
+		descriptionStyledText.setLineBullet(requirementsBulletingStartLine, jSparrowStarterValue.isEmpty() ? 2 : 3,
+				bullet0);
 	}
 
 	private boolean selectionContainsEnabledEntry(List<Object> selection) {
