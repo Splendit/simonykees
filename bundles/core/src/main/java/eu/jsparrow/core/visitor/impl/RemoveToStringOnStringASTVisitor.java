@@ -49,11 +49,6 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 		Expression variableExpression = node.getExpression();
 		List<String> stringFullyQualifiedNameList = generateFullyQualifiedNameList(stringFullyQualifiedName);
 
-		/*
-		 * Checks if method invocation is toString. The invocation needs to have
-		 * zero arguments. The expressions type where the toString is used on
-		 * needs to be a String or a StringLiteral
-		 */
 		if (!checkSemanticPrecondition(node, variableExpression, stringFullyQualifiedNameList)) {
 			return true;
 		}
@@ -71,7 +66,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 		boolean unwrapped = false;
 		do {
 			unwrapped = false;
-			if (variableExpression instanceof ParenthesizedExpression) {
+			if (variableExpression instanceof ParenthesizedExpression && ASTNode.METHOD_INVOCATION != node.getParent().getNodeType()) {
 				variableExpression = ASTNodeUtil.unwrapParenthesizedExpression(variableExpression);
 				unwrapped = true;
 			}
@@ -96,7 +91,12 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 
 		return true;
 	}
-
+	
+	/**
+	 * Checks if method invocation is toString. The invocation needs to have
+	 * zero arguments. The expressions type where the toString is used on
+	 * needs to be a String or a StringLiteral
+	 */
 	protected boolean checkSemanticPrecondition(MethodInvocation node, Expression methodInvocationexpression,
 			List<String> stringFullyQualifiedNameList) {
 		ASTNode parent = node.getParent();
