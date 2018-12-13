@@ -4,7 +4,6 @@ import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -144,8 +143,6 @@ public class SystemInfoWrapper {
 		nonUsbDiskSerials.addAll(diskSerialNumbers);
 
 		nonUsbDiskSerials.removeAll(usbDevices);
-
-		Collections.sort(nonUsbDiskSerials);
 
 		if (nonUsbDiskSerials.isEmpty()) {
 			return ""; //$NON-NLS-1$
