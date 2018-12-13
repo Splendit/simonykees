@@ -109,11 +109,6 @@ public class RegistrationControl {
 				// do nothing, this is not mandatory field
 			}
 		};
-
-		GridData newsletterCheckBoxTextGridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
-		newsletterCheckBoxTextGridData.widthHint = 415;
-		newsletterCheckBoxTextGridData.heightHint = 70;
-		newsletterAgreeCheckBox.setLayoutData(newsletterCheckBoxTextGridData);
 		newsletterAgreeCheckBox.setSelection(true);
 
 		createButtonsBar(composite);
