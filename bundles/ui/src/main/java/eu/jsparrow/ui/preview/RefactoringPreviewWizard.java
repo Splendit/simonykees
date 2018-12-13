@@ -27,6 +27,7 @@ import eu.jsparrow.rules.common.exception.SimonykeesException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
+import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 /**
@@ -48,6 +49,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	private RefactoringPreviewWizardModel model;
 	protected RefactoringSummaryWizardPage summaryPage;
+	
+	private LicenseUtil licenseUtil = LicenseUtil.get();
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
@@ -171,6 +174,22 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 					.update(refactoringPipeline.getChangesForRule(((RefactoringPreviewWizardPage) page).getRule()));
 			}
 		}
+	}
+
+	@Override
+	public boolean canFinish() {
+		if (licenseUtil.isFreeLicense()) {
+			if (licenseUtil.isActiveRegistration()  && containsOnlyFreeRules()) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return super.canFinish();
+	}
+
+	private boolean containsOnlyFreeRules() {
+		return !refactoringPipeline.getRules().stream().anyMatch(rule -> !rule.isFree());
 	}
 
 	/*
