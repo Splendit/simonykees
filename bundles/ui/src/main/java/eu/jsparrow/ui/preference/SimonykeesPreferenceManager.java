@@ -211,7 +211,8 @@ public class SimonykeesPreferenceManager {
 						.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
 			if (name.equals(Messages.Profile_DefaultProfile_profileName)) {
 				profiles.add(defaultProfile);
-			} else if (name.equals(Messages.Profile_FreeRulesProfile_profileName)) {
+			} else if (name.equals(Messages.Profile_FreeRulesProfile_profileName) && LicenseUtil.get()
+				.isFreeLicense()) {
 				profiles.add(freeRulesProfile);
 			} else if (name.equals(Messages.EmptyProfile_profileName)) {
 				profiles.add(emptyProfile);
