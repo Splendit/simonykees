@@ -179,17 +179,13 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public boolean canFinish() {
 		if (licenseUtil.isFreeLicense()) {
-			if (licenseUtil.isActiveRegistration()  && containsOnlyFreeRules()) {
-				return true;
-			} else {
-				return false;
-			}
+			return licenseUtil.isActiveRegistration()  && containsOnlyFreeRules();
 		}
 		return super.canFinish();
 	}
 
 	private boolean containsOnlyFreeRules() {
-		return !refactoringPipeline.getRules().stream().anyMatch(rule -> !rule.isFree());
+		return refactoringPipeline.getRules().stream().allMatch(RefactoringRule::isFree);
 	}
 
 	/*
