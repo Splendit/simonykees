@@ -27,11 +27,11 @@ public class Startup implements IStartup {
 
 	@Override
 	public void earlyStartup() {
-
+		LicenseUtil licenseUtil = LicenseUtil.get();
 		PlatformUI.getWorkbench()
 			.getDisplay()
 			.asyncExec(() -> {
-				if (LicenseUtil.get().isFreeLicense() && !LicenseUtil.get().isActiveRegistration()) {
+				if (!licenseUtil.isFullLicensePresentInSecureStore() && !licenseUtil.isActiveRegistration()) {
 					Shell activeShell = PlatformUI.getWorkbench()
 						.getActiveWorkbenchWindow()
 						.getShell();
