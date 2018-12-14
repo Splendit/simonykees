@@ -91,7 +91,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.size() == 1
 				&& refactoringPipeline.getRules()
 					.get(0) instanceof StandardLoggerRule)) {
-			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model);
+			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish());
 			addPage(summaryPage);
 		}
 	}

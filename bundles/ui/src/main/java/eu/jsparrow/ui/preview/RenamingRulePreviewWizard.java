@@ -121,7 +121,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		if (!privateChanges.isEmpty()) {
 			addPage(new RenamingRulePreviewWizardPage(privateChanges, originalDocuments, rule));
 		}
-		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model);
+		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model, canFinish());
 		addPage(summaryPage);
 	}
 
