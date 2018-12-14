@@ -239,6 +239,12 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 	}
 
+	public boolean isFullLicensePresentInSecureStore() {
+		LicenseModel model = tryLoadModelFromPersistence();
+		LicenseType type = model.getType();
+		return type != LicenseType.DEMO;
+	}
+
 	private LicenseModel tryLoadModelFromPersistence() {
 		LicenseModel model = null;
 		try {
