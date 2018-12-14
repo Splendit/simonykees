@@ -275,7 +275,6 @@ public class Messages extends NLS {
 	public static String RegistrationControl_checkEmailForLicenseText;
 	public static String RegistrationControl_checkInternetText;
 	public static String RegistrationControl_companyLabel;
-	public static String RegistrationControl_emailAgreeText;
 	public static String RegistrationControl_emailLabel;
 	public static String RegistrationControl_firstNameLabel;
 	public static String RegistrationControl_gpdrAgreeText;
