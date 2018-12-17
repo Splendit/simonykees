@@ -23,8 +23,10 @@ public class Messages extends NLS {
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
+	public static String ActivationControl_acitvationSuccessfulTitle;
 	public static String ActivationControl_activateButton;
 	public static String ActivationControl_activationFailedText;
+	public static String ActivationControl_activationFailedTitle;
 	public static String ActivationControl_cancelButton;
 	public static String ActivationControl_enterLicenseLabel;
 	public static String ActivationControl_invalidLicenseLabel;
@@ -287,7 +289,9 @@ public class Messages extends NLS {
 	public static String RegistrationControl_licenseAgreeText;
 	public static String RegistrationControl_newsletterAgreeText;
 	public static String RegistrationControl_registerButton;
+	public static String RegistrationControl_registrationFailedTitle;
 	public static String RegistrationControl_registrationSuccessfulText;
+	public static String RegistrationControl_registrationSuccessfulTitle;
 	public static String RegistrationControl_serverUnreachableText;
 	public static String RegistrationControl_statusText;
 	public static String RegistrationControl_termsGroupTitle;

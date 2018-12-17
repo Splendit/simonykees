@@ -206,7 +206,7 @@ public class RegistrationControl {
 			.getActiveShell(),
 				Messages.RegistrationControl_registrationSuccessfulText + System.lineSeparator()
 						+ Messages.RegistrationControl_checkEmailForLicenseText,
-				MessageDialog.INFORMATION)) {
+				MessageDialog.INFORMATION, Messages.RegistrationControl_registrationSuccessfulTitle)) {
 			TabFolder tabParent = (TabFolder) getControl().getParent();
 			tabParent.setSelection(1);
 		}
@@ -218,7 +218,7 @@ public class RegistrationControl {
 			.getActiveShell(),
 				Messages.RegistrationControl_serverUnreachableText + System.lineSeparator()
 						+ Messages.RegistrationControl_checkInternetText,
-				MessageDialog.ERROR)) {
+				MessageDialog.ERROR, Messages.RegistrationControl_registrationFailedTitle)) {
 
 			resetToDefaultSelection();
 		}
