@@ -16,6 +16,9 @@ public class Messages extends NLS {
 	public static String AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
 	public static String AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 	public static String AbstractSelectRulesWizardPage_error_NoRulesSelected;
+	public static String AbstractSelectRulesWizardPage_freemiumRegirementsMessage;
+	public static String AbstractSelectRulesWizardPage_neitherRegisteredNorLicensed_statusInfoMessage;
+	public static String AbstractSelectRulesWizardPage_notOnlyFreemiumSelected_statusInfoMessage;
 	public static String AbstractSelectRulesWizardPage_warning_RulesInProfileNotApplicable;
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
@@ -238,6 +241,7 @@ public class Messages extends NLS {
 	public static String PrimitiveObjectUseEqualsRule_description;
 	public static String PrimitiveObjectUseEqualsRule_name;
 	public static String Profile_DefaultProfile_profileName;
+	public static String Profile_FreeRulesProfile_profileName;
 	public static String Profile_Java8Profile_profileName;
 	public static String ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName;
 	public static String ProgressMonitor_AbstractRefactorer_doRefactoring_taskName;
@@ -332,6 +336,7 @@ public class Messages extends NLS {
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase;
 	public static String RenamingRulePreviewWizardPage_RenameFields;
 	public static String SelectRulesWizardHandler_allready_running;
+	public static String SelectRulesWizardHandler_finishButtonText;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
 	public static String SelectRulesWizardHandler_noFileWithoutError;
 	public static String SelectRulesWizardHandler_selectionNotPossible_ubuntuBug;
@@ -451,6 +456,13 @@ public class Messages extends NLS {
 	public static String StringUtilsRule_classNotInClassPath;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
+	public static String SuggestRegistrationDialog_descriptionOfFreemiumLicense;
+	public static String SuggestRegistrationDialog_dontShowAgainCheckbox;
+	public static String SuggestRegistrationDialog_getFreeRulesTitle;
+	public static String SuggestRegistrationDialog_noFreemiumLiceseWarning;
+	public static String SuggestRegistrationDialog_registerButtonText;
+	public static String SuggestRegistrationDialog_skipButtonText;
+	public static String SuggestRegistrationDialog_suggestToRegister;
 	public static String SummaryWizardPage_Files;
 	public static String SummaryWizardPage_Rule;
 	public static String SummaryWizardPage_Rules;

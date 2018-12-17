@@ -19,10 +19,12 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class ForToForEachRule extends RefactoringRuleImpl<ForToForEachASTVisitor> {
 
+	public static final String FOR_TO_FOR_EACH_RULE_ID = "ForToForEach"; //$NON-NLS-1$
+
 	public ForToForEachRule() {
 		super();
 		this.visitorClass = ForToForEachASTVisitor.class;
-		this.id = "ForToForEach"; //$NON-NLS-1$
+		this.id = FOR_TO_FOR_EACH_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.ForToForEachRule_name,
 				Messages.ForToForEachRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_5, Tag.LOOP, Tag.OLD_LANGUAGE_CONSTRUCTS));
@@ -33,4 +35,8 @@ public class ForToForEachRule extends RefactoringRuleImpl<ForToForEachASTVisitor
 		return JavaCore.VERSION_1_5;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

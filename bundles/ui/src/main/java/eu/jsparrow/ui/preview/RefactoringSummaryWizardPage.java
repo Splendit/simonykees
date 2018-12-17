@@ -8,8 +8,8 @@ import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 public class RefactoringSummaryWizardPage extends AbstractSummaryWizardPage {
 
 	protected RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline,
-			RefactoringPreviewWizardModel wizardModel) {
-		super(refactoringPipeline, wizardModel);
+			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton) {
+		super(refactoringPipeline, wizardModel, enabledFinishButton);
 	}
 
 	/**

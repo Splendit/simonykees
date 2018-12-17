@@ -19,9 +19,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class RemoveUnnecessaryThrownExceptionsRule extends RefactoringRuleImpl<RemoveUnnecessaryThrownExceptionsASTVisitor> {
 
+	public static final String REMOVE_UNNECESSARY_THROWN_EXCEPTIONS_RULE_ID = "RemoveUnnecessaryThrows"; //$NON-NLS-1$
+
 	public RemoveUnnecessaryThrownExceptionsRule() {
 		this.visitorClass = RemoveUnnecessaryThrownExceptionsASTVisitor.class;
-		this.id = "RemoveUnnecessaryThrows"; //$NON-NLS-1$
+		this.id = REMOVE_UNNECESSARY_THROWN_EXCEPTIONS_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.RemoveDuplicatedThrowsRule_name, Messages.RemoveDuplicatedThrowsRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY));
 	}
@@ -31,4 +33,8 @@ public class RemoveUnnecessaryThrownExceptionsRule extends RefactoringRuleImpl<R
 		return JavaCore.VERSION_1_1;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }
