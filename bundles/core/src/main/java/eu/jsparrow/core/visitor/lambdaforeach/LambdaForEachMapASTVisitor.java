@@ -1,8 +1,6 @@
 package eu.jsparrow.core.visitor.lambdaforeach;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -32,7 +30,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
@@ -72,9 +69,9 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  *
  */
 public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor {
-	
+
 	private List<Statement> replacedStatements = new ArrayList<>();
-	
+
 	@Override
 	public void endVisit(CompilationUnit cu) {
 		replacedStatements.clear();
@@ -84,9 +81,14 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		boolean toStreamNeeded = false;
+
 		if (isCollectionForEachInvocation(methodInvocation)) {
 			toStreamNeeded = true;
-		} else if (!isStreamForEachInvocation(methodInvocation) || isStreamOfRawList(methodInvocation)) {
+		} else if (!isStreamForEachInvocation(methodInvocation)) {
+			return true;
+		}
+
+		if (hasRawExpression(methodInvocation)) {
 			return true;
 		}
 
@@ -117,7 +119,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		ASTNode extractableBlock = analyzer.getExtractableBlock();
 		ASTNode remainingBlock = analyzer.getRemainingBlock();
 		SimpleName newForEachParamName = analyzer.getNewForEachParameterName();
-		
+
 		this.replacedStatements.add(analyzer.getReplacedRemainingStatement());
 
 		// introduce a Stream::map
@@ -177,12 +179,23 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		return true;
 	}
 
+	private boolean hasRawExpression(MethodInvocation methodInvocation) {
+		Expression expression = methodInvocation.getExpression();
+		if (expression == null) {
+			return false;
+		}
+		ITypeBinding expressionType = expression.resolveTypeBinding();
+
+		return expressionType != null && expressionType.isRawType();
+	}
+
 	private void saveComments(MethodInvocation methodInvocation, ForEachBodyAnalyzer analyzer) {
-		Statement parentStatement = findParentStatement(methodInvocation); 
+		Statement parentStatement = findParentStatement(methodInvocation);
 		CommentRewriter helper = getCommentRewriter();
 		helper.saveRelatedComments(analyzer.getMapVariableDeclaration(), parentStatement);
 		List<Statement> remainingStatements = analyzer.getRemainingStatements();
-		if (remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0).getNodeType()) {
+		if (remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0)
+			.getNodeType()) {
 			Statement rs = remainingStatements.get(0);
 			List<Comment> rsComments = new ArrayList<>();
 			rsComments.addAll(helper.findLeadingComments(rs));
@@ -193,7 +206,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 	private Statement findParentStatement(MethodInvocation methodInvocation) {
 		ExpressionStatement parent = ASTNodeUtil.getSpecificAncestor(methodInvocation, ExpressionStatement.class);
-		while(parent != null && this.replacedStatements.contains(parent)) {
+		while (parent != null && this.replacedStatements.contains(parent)) {
 			parent = ASTNodeUtil.getSpecificAncestor(parent, ExpressionStatement.class);
 		}
 		return parent;
@@ -219,34 +232,6 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 				paramRewriter.insertFirst(astRewrite.createCopyTarget(modifier), null);
 			}
 		}
-	}
-
-	/**
-	 * Checks whether the expression of the method invocation is a stream
-	 * generated from a raw collection.
-	 * 
-	 * @param methodInvocation
-	 *            to be checked
-	 * 
-	 * @return {@code true} the expression of the method invocation is a stream
-	 *         generated from a raw collection, or {@code false} otherwise.
-	 */
-	private boolean isStreamOfRawList(MethodInvocation methodInvocation) {
-		Expression expression = methodInvocation.getExpression();
-		StreamInvocationVisitor visitor = new StreamInvocationVisitor();
-		expression.accept(visitor);
-		MethodInvocation streamInvocation = visitor.getStreamInvocation();
-		if (streamInvocation != null) {
-			Expression iterableExpression = streamInvocation.getExpression();
-			if (iterableExpression != null) {
-				ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
-				if (iterableTypeBinding.isRawType()) {
-					return true;
-				}
-
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -599,7 +584,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			ASTNode block;
 			if (this.remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0)
 				.getNodeType()) {
-				ExpressionStatement remainingStm = (ExpressionStatement)remainingStatements.get(0);
+				ExpressionStatement remainingStm = (ExpressionStatement) remainingStatements.get(0);
 				Expression expression = remainingStm.getExpression();
 				block = astRewrite.createCopyTarget(expression);
 				replacedRemainingStatement = remainingStm;
@@ -617,11 +602,11 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		public Expression getMapExpression() {
 			return this.mapExpression;
 		}
-		
+
 		public VariableDeclarationStatement getMapVariableDeclaration() {
 			return this.mapVariableDeclaration;
 		}
-		
+
 		public List<Statement> getRemainingStatements() {
 			return this.remainingStatements;
 		}
@@ -633,7 +618,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		public ASTNode getRemainingBlock() {
 			return this.remainingBlock;
 		}
-		
+
 		public ExpressionStatement getReplacedRemainingStatement() {
 			return this.replacedRemainingStatement;
 		}
@@ -692,44 +677,6 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 		public boolean hasReturnStatement() {
 			return this.returnStatement != null;
-		}
-	}
-
-	/**
-	 * 
-	 * A visitor for finding the first invocation of {@link Collection#stream()}
-	 * or {@link Collection#parallelStream()} method.
-	 *
-	 */
-	class StreamInvocationVisitor extends ASTVisitor {
-
-		private MethodInvocation streamInvocation = null;
-
-		@Override
-		public boolean preVisit2(ASTNode node) {
-			return streamInvocation == null;
-		}
-
-		@Override
-		public boolean visit(MethodInvocation methodInvocation) {
-			if (methodInvocation.getName()
-				.getIdentifier()
-				.equals(STREAM)
-					|| methodInvocation.getName()
-						.getIdentifier()
-						.equals(PARALLEL_STREAM)) {
-				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-				if (ClassRelationUtil.isContentOfTypes(methodBinding.getDeclaringClass(),
-						Collections.singletonList(JAVA_UTIL_COLLECTION))) {
-					streamInvocation = methodInvocation;
-				}
-			}
-
-			return true;
-		}
-
-		public MethodInvocation getStreamInvocation() {
-			return streamInvocation;
 		}
 	}
 }
