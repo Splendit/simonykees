@@ -62,7 +62,7 @@ public class ActivationControl {
 		licenseTextGridData.verticalIndent = 5;
 		licenseText.setLayoutData(licenseTextGridData);
 		licenseText.addModifyListener((ModifyEvent e) -> {
-			licenseKeyString = ((Text) e.getSource()).getText();
+			licenseKeyString = ((Text) e.getSource()).getText().trim();
 			invalidLicenseLabel.setVisible(false);
 			updateEnabledActivateButton();
 		});
@@ -148,7 +148,7 @@ public class ActivationControl {
 	public boolean validateLicenseKeyForm() {
 		String regex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"; //$NON-NLS-1$
 		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(licenseText.getText());
+		Matcher matcher = pattern.matcher(licenseKeyString);
 
 		return matcher.matches();
 
