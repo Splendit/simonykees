@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Default values for the plug-in preference page.
@@ -21,12 +22,20 @@ public class SimonykeesPreferenceInitializer extends AbstractPreferenceInitializ
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.PROFILE_LIST,
 				SimonykeesPreferenceManager.getDefaultProfileList());
 
-		preferenceStore.setDefault(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
-				SimonykeesPreferenceManager.getDefaultProfileName());
+		if (LicenseUtil.get()
+			.isFreeLicense()) {
+			preferenceStore.setDefault(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
+					SimonykeesPreferenceManager.getFreeRulesProfileName());
+		} else {
+			preferenceStore.setDefault(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
+					SimonykeesPreferenceManager.getDefaultProfileName());
+		}
 
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.ENABLE_INTRO, true);
 
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.ENABLE_DASHBOARD, true);
+
+		preferenceStore.setDefault(SimonykeesPreferenceConstants.DISABLE_REGISTER_SUGGESTION, false);
 
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, true);
 	}

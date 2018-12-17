@@ -248,7 +248,9 @@ public class EnhancedForLoopToStreamForEachRule {
 			TestClass tc = new TestClass(1);
 		}
 
-		((List) stringList1).forEach(o -> logger.info(String.valueOf(o)));
+		for (Object o : (List) stringList1) {
+			logger.info(String.valueOf(o));
+		}
 
 		return "";
 	}

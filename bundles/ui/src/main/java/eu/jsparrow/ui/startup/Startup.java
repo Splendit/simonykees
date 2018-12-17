@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Startup class starts immediately on Eclipse startup with welcome screen if it
@@ -26,12 +27,11 @@ public class Startup implements IStartup {
 
 	@Override
 	public void earlyStartup() {
-
+		LicenseUtil licenseUtil = LicenseUtil.get();
 		PlatformUI.getWorkbench()
 			.getDisplay()
 			.asyncExec(() -> {
-				if (true) {
-					// TODO update condition
+				if (!licenseUtil.isFullLicensePresentInSecureStore() && !licenseUtil.isActiveRegistration()) {
 					Shell activeShell = PlatformUI.getWorkbench()
 						.getActiveWorkbenchWindow()
 						.getShell();

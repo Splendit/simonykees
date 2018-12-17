@@ -27,6 +27,8 @@ import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
+import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
 import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
 
@@ -56,6 +58,8 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	private Scheduler scheduler;
 	private SystemInfoWrapper systemInfoWrapper;
+
+	private boolean shouldContinueWithSelectRules = true;
 
 	private LicenseUtil() {
 		scheduler = new Scheduler(this);
@@ -128,6 +132,13 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		if (result.getLicenseType() == LicenseType.DEMO && !result.isValid()) {
 			BuyLicenseDialog dialog = new BuyLicenseDialog(shell);
 			return dialog.open() == 0;
+		}
+		// When starting with an demo license we offer to register for free
+		// rules if not registered yet
+		if (isFreeLicense() && !isActiveRegistration() && !SimonykeesPreferenceManager.getDisableRegisterSuggestion()) {
+			setShouldContinueWithSelectRules(true);
+			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(shell);
+			return (dialog.open() == 0) && shouldContinueWithSelectRules;
 		}
 		return true;
 	}
@@ -244,7 +255,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		LicenseType type = model.getType();
 		return type != LicenseType.DEMO;
 	}
-
+	
 	private LicenseModel tryLoadModelFromPersistence() {
 		LicenseModel model = null;
 		try {
@@ -313,5 +324,9 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			return wasSuccessful;
 		}
 
+	}
+
+	public void setShouldContinueWithSelectRules(boolean shouldContinue) {
+		shouldContinueWithSelectRules = shouldContinue;
 	}
 }

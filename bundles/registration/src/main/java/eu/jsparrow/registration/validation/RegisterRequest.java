@@ -19,8 +19,8 @@ public class RegisterRequest {
 	 * Should the api end-point change the location/name, the following fields
 	 * need to be changed too.
 	 */
-	private static final String REGISTER_API_ENDPOINT = "https://04la6bsajj.execute-api.eu-central-1.amazonaws.com/develop/freemium/create"; //$NON-NLS-1$
-	private static final String ACTIVATE_API_ENDPOINT = "https://04la6bsajj.execute-api.eu-central-1.amazonaws.com/develop/freemium/activate"; //$NON-NLS-1$
+	private static final String REGISTER_API_ENDPOINT = "https://1k4wn56lwd.execute-api.eu-central-1.amazonaws.com/Prod/starter/create"; //$NON-NLS-1$
+	private static final String ACTIVATE_API_ENDPOINT = "https://1k4wn56lwd.execute-api.eu-central-1.amazonaws.com/Prod/starter/activate"; //$NON-NLS-1$
 
 	private static final String ACTIVATION_KEY = "activationKey"; //$NON-NLS-1$
 	private ObjectMapper objectMapper = new ObjectMapper();

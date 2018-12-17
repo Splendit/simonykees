@@ -70,6 +70,11 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 		return enabled;
 	}
 
+	@Override
+	public boolean isFree() {
+		return false;
+	}
+
 	public Class<T> getVisitor() {
 		return visitorClass;
 	}
