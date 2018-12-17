@@ -26,6 +26,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Content displayed in Eclipse editor when the jSparrow plugin is installed.
@@ -170,33 +171,36 @@ public class WelcomePage extends FormPage {
 		createButtonListenerToOpenPreferences(licensePreferencesButton,
 				"eu.jsparrow.ui.preference.ProfilePreferencePageLicense"); //$NON-NLS-1$
 
-		// TODO check for license and show only if none present
-		Group freemiumGroup = new Group(rightComposite, SWT.NONE);
-		freemiumGroup.setText("Get FREE rules now");
-		groupGridData = new GridData(GridData.FILL_HORIZONTAL);
-		groupGridData.heightHint = 52;
-		groupGridData.horizontalIndent = 5;
-		groupGridData.verticalIndent = 65;
-		freemiumGroup.setLayoutData(groupGridData);
-		freemiumGroup.setLayout(new GridLayout(1, false));
-		Button freemiumRegistrationButton = new Button(freemiumGroup, SWT.PUSH);
-		freemiumRegistrationButton.setLayoutData(buttonGridData);
-		freemiumRegistrationButton.setText("Freemium Registration");
-		freemiumRegistrationButton.addSelectionListener(new SelectionAdapter() {
+		if (!LicenseUtil.get()
+			.isFullLicensePresentInSecureStore()
+				&& !LicenseUtil.get()
+					.isActiveRegistration()) {
+			Group freemiumGroup = new Group(rightComposite, SWT.NONE);
+			freemiumGroup.setText("jSparrow Starter Registration");
+			groupGridData = new GridData(GridData.FILL_HORIZONTAL);
+			groupGridData.heightHint = 52;
+			groupGridData.horizontalIndent = 5;
+			groupGridData.verticalIndent = 65;
+			freemiumGroup.setLayoutData(groupGridData);
+			freemiumGroup.setLayout(new GridLayout(1, false));
+			Button freemiumRegistrationButton = new Button(freemiumGroup, SWT.PUSH);
+			freemiumRegistrationButton.setLayoutData(buttonGridData);
+			freemiumRegistrationButton.setText("Get FREE Rules Now");
+			freemiumRegistrationButton.addSelectionListener(new SelectionAdapter() {
 
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				PlatformUI.getWorkbench()
-					.getDisplay()
-					.asyncExec(() -> {
-						Shell activeShell = PlatformUI.getWorkbench()
-							.getActiveWorkbenchWindow()
-							.getShell();
-						new RegistrationDialog(activeShell).open();
-					});
-			}
-		});
-
+				@Override
+				public void widgetSelected(SelectionEvent event) {
+					PlatformUI.getWorkbench()
+						.getDisplay()
+						.asyncExec(() -> {
+							Shell activeShell = PlatformUI.getWorkbench()
+								.getActiveWorkbenchWindow()
+								.getShell();
+							new RegistrationDialog(activeShell).open();
+						});
+				}
+			});
+		}
 	}
 
 	private void createButtonListenerToOpenPreferences(Button openPreferencesButton, String activePreferencePageId) {

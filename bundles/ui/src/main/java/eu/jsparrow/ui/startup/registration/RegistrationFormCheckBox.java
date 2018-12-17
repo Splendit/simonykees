@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.startup.registration;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
@@ -15,9 +16,16 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
@@ -31,7 +39,10 @@ import eu.jsparrow.ui.Activator;
  */
 public class RegistrationFormCheckBox {
 
+	private static final Logger logger = LoggerFactory.getLogger(RegistrationFormCheckBox.class);
+
 	private Button checkBox;
+	private Link checkBoxText;
 
 	private ControlDecoration decoInvalid;
 
@@ -40,14 +51,24 @@ public class RegistrationFormCheckBox {
 	private Image scaledCloseRedIconImage;
 
 	public RegistrationFormCheckBox(Group parent, String text) {
-		GridData checkBoxTextGridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
-		checkBoxTextGridData.widthHint = 402;
-		checkBox = new Button(parent, SWT.CHECK | SWT.WRAP);
-		checkBox.setText(text);
-		checkBox.setLayoutData(checkBoxTextGridData);
+		Composite checkBoxContainer = new Composite(parent, SWT.NONE);
+		GridLayout checkBoxLayout = new GridLayout(2, false);
+		checkBoxContainer.setLayout(checkBoxLayout);
+		GridData checkBoxGridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
+		checkBoxGridData.widthHint = 402;
+		checkBoxContainer.setLayoutData(checkBoxGridData);
+
+		checkBox = new Button(checkBoxContainer, SWT.CHECK | SWT.WRAP);
 		addCheckBoxChangeListener();
 
-		decoInvalid = new ControlDecoration(checkBox, SWT.TOP | SWT.RIGHT);
+		checkBoxText = new Link(checkBoxContainer, SWT.WRAP);
+		checkBoxText.setText(text);
+		GridData checkBoxTextGridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
+		checkBoxTextGridData.widthHint = 372;
+		checkBoxText.setLayoutData(checkBoxTextGridData);
+		addLinkSelectionListener(checkBoxText);
+
+		decoInvalid = new ControlDecoration(checkBoxText, SWT.TOP | SWT.RIGHT);
 
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
 
@@ -99,5 +120,30 @@ public class RegistrationFormCheckBox {
 
 	public void resetDecoVisibility() {
 		decoInvalid.hide();
+	}
+
+	/**
+	 * Helper method to add selection listener on links to open link in external
+	 * browser.
+	 * 
+	 * @param link
+	 *            that should be opened
+	 */
+	private void addLinkSelectionListener(Link link) {
+		link.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				try {
+					PlatformUI.getWorkbench()
+						.getBrowserSupport()
+						.getExternalBrowser()
+						.openURL(new URL(arg0.text));
+				} catch (PartInitException | MalformedURLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+		});
+
 	}
 }

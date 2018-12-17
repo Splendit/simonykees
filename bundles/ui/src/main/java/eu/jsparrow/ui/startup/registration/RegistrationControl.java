@@ -38,7 +38,6 @@ public class RegistrationControl {
 	private RegistrationFormField email;
 	private RegistrationFormField company;
 
-	private RegistrationFormCheckBox emailAgreeCheckBox;
 	private RegistrationFormCheckBox dsgvoAgreeCheckBox;
 	private RegistrationFormCheckBox licenseAgreeLCheckBox;
 	private RegistrationFormCheckBox newsletterAgreeCheckBox;
@@ -98,7 +97,6 @@ public class RegistrationControl {
 		conditionsGroup.setLayoutData(groupGridData);
 		conditionsGroup.setLayout(new GridLayout(1, false));
 
-		emailAgreeCheckBox = new RegistrationFormCheckBox(conditionsGroup, Messages.RegistrationControl_emailAgreeText);
 		dsgvoAgreeCheckBox = new RegistrationFormCheckBox(conditionsGroup, Messages.RegistrationControl_gpdrAgreeText);
 		licenseAgreeLCheckBox = new RegistrationFormCheckBox(conditionsGroup,
 				Messages.RegistrationControl_licenseAgreeText);
@@ -109,11 +107,6 @@ public class RegistrationControl {
 				// do nothing, this is not mandatory field
 			}
 		};
-
-		GridData newsletterCheckBoxTextGridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
-		newsletterCheckBoxTextGridData.widthHint = 415;
-		newsletterCheckBoxTextGridData.heightHint = 70;
-		newsletterAgreeCheckBox.setLayoutData(newsletterCheckBoxTextGridData);
 		newsletterAgreeCheckBox.setSelection(true);
 
 		createButtonsBar(composite);
@@ -160,7 +153,7 @@ public class RegistrationControl {
 					return;
 				}
 				statusLabel.setVisible(true);
-				
+
 				RegistrationEntity registrationData = new RegistrationEntity(firstName.getValue(), lastName.getValue(),
 						email.getValue(), company.getValue(), newsletterAgreeCheckBox.getSelection());
 				if (sendData(registrationData)) {
@@ -184,7 +177,6 @@ public class RegistrationControl {
 		lastName.updateDecoVisibility();
 		email.updateDecoVisibility();
 
-		emailAgreeCheckBox.updateDecoVisibility(true);
 		dsgvoAgreeCheckBox.updateDecoVisibility(true);
 		licenseAgreeLCheckBox.updateDecoVisibility(true);
 	}
@@ -206,8 +198,7 @@ public class RegistrationControl {
 	}
 
 	private boolean validateCheckboxes() {
-		return emailAgreeCheckBox.getSelection() && dsgvoAgreeCheckBox.getSelection()
-				&& licenseAgreeLCheckBox.getSelection();
+		return dsgvoAgreeCheckBox.getSelection() && licenseAgreeLCheckBox.getSelection();
 	}
 
 	private void showLicenseGenerationSucceededDialog() {
@@ -215,7 +206,7 @@ public class RegistrationControl {
 			.getActiveShell(),
 				Messages.RegistrationControl_registrationSuccessfulText + System.lineSeparator()
 						+ Messages.RegistrationControl_checkEmailForLicenseText,
-				MessageDialog.INFORMATION)) {
+				MessageDialog.INFORMATION, Messages.RegistrationControl_registrationSuccessfulTitle)) {
 			TabFolder tabParent = (TabFolder) getControl().getParent();
 			tabParent.setSelection(1);
 		}
@@ -227,7 +218,7 @@ public class RegistrationControl {
 			.getActiveShell(),
 				Messages.RegistrationControl_serverUnreachableText + System.lineSeparator()
 						+ Messages.RegistrationControl_checkInternetText,
-				MessageDialog.ERROR)) {
+				MessageDialog.ERROR, Messages.RegistrationControl_registrationFailedTitle)) {
 
 			resetToDefaultSelection();
 		}
@@ -244,12 +235,10 @@ public class RegistrationControl {
 	}
 
 	public void resetToDefaultSelection() {
-		emailAgreeCheckBox.setSelection(false);
 		dsgvoAgreeCheckBox.setSelection(false);
 		licenseAgreeLCheckBox.setSelection(false);
 		newsletterAgreeCheckBox.setSelection(true);
 
-		emailAgreeCheckBox.resetDecoVisibility();
 		dsgvoAgreeCheckBox.resetDecoVisibility();
 		licenseAgreeLCheckBox.resetDecoVisibility();
 	}

@@ -62,7 +62,8 @@ public class ActivationControl {
 		licenseTextGridData.verticalIndent = 5;
 		licenseText.setLayoutData(licenseTextGridData);
 		licenseText.addModifyListener((ModifyEvent e) -> {
-			licenseKeyString = ((Text) e.getSource()).getText();
+			licenseKeyString = ((Text) e.getSource()).getText()
+				.trim();
 			invalidLicenseLabel.setVisible(false);
 			updateEnabledActivateButton();
 		});
@@ -148,7 +149,7 @@ public class ActivationControl {
 	public boolean validateLicenseKeyForm() {
 		String regex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"; //$NON-NLS-1$
 		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(licenseText.getText());
+		Matcher matcher = pattern.matcher(licenseKeyString);
 
 		return matcher.matches();
 
@@ -160,7 +161,8 @@ public class ActivationControl {
 
 	private void showLicenseValidDialog() {
 		SimonykeesMessageDialog.openMessageDialog(Display.getCurrent()
-			.getActiveShell(), Messages.ActivationControl_successfulActivationText, MessageDialog.INFORMATION);
+			.getActiveShell(), Messages.ActivationControl_successfulActivationText, MessageDialog.INFORMATION,
+				Messages.ActivationControl_acitvationSuccessfulTitle);
 	}
 
 	private void showInvalidLicenseDialog() {
@@ -168,7 +170,7 @@ public class ActivationControl {
 			.getActiveShell(),
 				Messages.ActivationControl_activationFailedText + System.lineSeparator()
 						+ Messages.ActivationControl_licenseValidityExplanationText,
-				MessageDialog.ERROR)) {
+				MessageDialog.ERROR, Messages.ActivationControl_activationFailedTitle)) {
 			licenseText.setText(""); //$NON-NLS-1$
 			resetToDefaultSelection();
 		}
