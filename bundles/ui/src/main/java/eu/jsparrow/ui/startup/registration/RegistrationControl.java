@@ -49,7 +49,7 @@ public class RegistrationControl {
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		parentComposite.setLayoutData(gridData);
 
-		gridData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
+		gridData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
 		gridData.verticalIndent = 5;
 		Label introLabel = new Label(parentComposite, SWT.NONE);
 		introLabel.setLayoutData(gridData);
@@ -62,7 +62,7 @@ public class RegistrationControl {
 
 	private void createUserDataForm(Composite composite) {
 		Group formGroup = new Group(composite, SWT.NONE);
-		GridData groupGridData = new GridData(GridData.FILL_BOTH);
+		GridData groupGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		groupGridData.verticalIndent = 15;
 		formGroup.setLayoutData(groupGridData);
 		GridLayout formGroupLayout = new GridLayout(2, false);
@@ -92,7 +92,7 @@ public class RegistrationControl {
 	private void createConditionsAgreementsForm(Composite composite) {
 		Group conditionsGroup = new Group(composite, SWT.BORDER_DASH);
 		conditionsGroup.setText(Messages.RegistrationControl_termsGroupTitle);
-		GridData groupGridData = new GridData(GridData.FILL_BOTH);
+		GridData groupGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		groupGridData.verticalIndent = 10;
 		conditionsGroup.setLayoutData(groupGridData);
 		conditionsGroup.setLayout(new GridLayout(1, false));
