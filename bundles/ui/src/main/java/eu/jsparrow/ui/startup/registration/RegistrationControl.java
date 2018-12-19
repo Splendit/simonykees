@@ -58,6 +58,9 @@ public class RegistrationControl {
 		createUserDataForm(parentComposite);
 
 		createConditionsAgreementsForm(parentComposite);
+		
+		parent.layout();
+		parent.getShell().layout();
 	}
 
 	private void createUserDataForm(Composite composite) {

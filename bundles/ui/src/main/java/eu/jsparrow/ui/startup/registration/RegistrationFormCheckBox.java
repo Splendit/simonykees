@@ -54,16 +54,19 @@ public class RegistrationFormCheckBox {
 		Composite checkBoxContainer = new Composite(parent, SWT.NONE);
 		GridLayout checkBoxLayout = new GridLayout(2, false);
 		checkBoxContainer.setLayout(checkBoxLayout);
-		GridData checkBoxGridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
+		GridData checkBoxGridData = new GridData(SWT.LEFT, SWT.TOP, false, false);
 		checkBoxGridData.widthHint = 402;
 		checkBoxContainer.setLayoutData(checkBoxGridData);
 
 		checkBox = new Button(checkBoxContainer, SWT.CHECK | SWT.WRAP);
+		GridData checkBoxButtonGridData = new GridData(SWT.LEFT, SWT.TOP, false, false);
+		checkBoxButtonGridData.verticalIndent = 2;
+		checkBox.setLayoutData(checkBoxButtonGridData);
 		addCheckBoxChangeListener();
 
 		checkBoxText = new Link(checkBoxContainer, SWT.WRAP);
 		checkBoxText.setText(text);
-		GridData checkBoxTextGridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
+		GridData checkBoxTextGridData = new GridData(SWT.LEFT, SWT.TOP, false, false);
 		checkBoxTextGridData.widthHint = 372;
 		checkBoxText.setLayoutData(checkBoxTextGridData);
 		addLinkSelectionListener(checkBoxText);
@@ -86,10 +89,6 @@ public class RegistrationFormCheckBox {
 
 	public Button getCheckBox() {
 		return checkBox;
-	}
-
-	public void setLayoutData(GridData data) {
-		checkBox.setLayoutData(data);
 	}
 
 	public void setSelection(boolean isSelected) {
