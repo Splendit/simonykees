@@ -1,6 +1,5 @@
 package eu.jsparrow.ui.startup.registration;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
@@ -17,15 +16,12 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
@@ -38,8 +34,6 @@ import eu.jsparrow.ui.Activator;
  *
  */
 public class RegistrationFormCheckBox {
-
-	private static final Logger logger = LoggerFactory.getLogger(RegistrationFormCheckBox.class);
 
 	private Button checkBox;
 	private Link checkBoxText;
@@ -133,14 +127,7 @@ public class RegistrationFormCheckBox {
 
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				try {
-					PlatformUI.getWorkbench()
-						.getBrowserSupport()
-						.getExternalBrowser()
-						.openURL(new URL(arg0.text));
-				} catch (PartInitException | MalformedURLException e) {
-					logger.error(e.getMessage(), e);
-				}
+				Program.launch(arg0.text);
 			}
 		});
 
