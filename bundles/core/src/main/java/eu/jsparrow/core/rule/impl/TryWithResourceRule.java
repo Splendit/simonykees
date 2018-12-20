@@ -28,7 +28,7 @@ public class TryWithResourceRule extends RefactoringRuleImpl<TryWithResourceASTV
 		this.id = TRY_WITH_RESOURCE_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.TryWithResourceRule_name,
 				Messages.TryWithResourceRule_description, Duration.ofMinutes(15),
-				Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS));
+				Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.FREE));
 	}
 
 	@Override

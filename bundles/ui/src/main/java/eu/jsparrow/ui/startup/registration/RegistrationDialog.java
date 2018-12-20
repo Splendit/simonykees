@@ -118,6 +118,6 @@ public class RegistrationDialog extends Dialog {
 
 	@Override
 	protected Point getInitialSize() {
-		return new Point(450, 600);
+		return new Point(450, 630);
 	}
 }

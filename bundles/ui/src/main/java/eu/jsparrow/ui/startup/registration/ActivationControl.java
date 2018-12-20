@@ -122,19 +122,36 @@ public class ActivationControl {
 					invalidLicenseLabel.setVisible(true);
 					return;
 				}
+
+				Display display = (Display.getCurrent() != null) ? Display.getCurrent() : Display.getDefault();
+
+				activateButton.setEnabled(false);
 				statusLabel.setVisible(true);
+
 				ActivationEntity activationData = new ActivationEntity(licenseKeyString);
 
-				// if license is valid
-				if (validateActivationKey(activationData)) {
-					showLicenseValidDialog();
-					getControl().getShell()
-						.close();
-					return;
-				} else {
-					showInvalidLicenseDialog();
-				}
-				statusLabel.setVisible(false);
+				new Thread(() -> {
+
+					boolean valid = validateActivationKey(activationData);
+
+					display.asyncExec(() -> {
+						statusLabel.setVisible(false);
+
+						// if license is valid
+						if (valid) {
+							showLicenseValidDialog(display);
+							getControl().getShell()
+								.close();
+							return;
+						} else {
+							showInvalidLicenseDialog(display);
+						}
+
+						activateButton.setEnabled(true);
+					});
+
+				}).start();
+
 			}
 		});
 		activateButton.setLayoutData(buttonData);
@@ -159,15 +176,14 @@ public class ActivationControl {
 		activateButton.setEnabled(null != licenseKeyString && licenseKeyString.length() >= 1);
 	}
 
-	private void showLicenseValidDialog() {
-		SimonykeesMessageDialog.openMessageDialog(Display.getCurrent()
-			.getActiveShell(), Messages.ActivationControl_successfulActivationText, MessageDialog.INFORMATION,
+	private void showLicenseValidDialog(Display display) {
+		SimonykeesMessageDialog.openMessageDialog(display.getActiveShell(),
+				Messages.ActivationControl_successfulActivationText, MessageDialog.INFORMATION,
 				Messages.ActivationControl_acitvationSuccessfulTitle);
 	}
 
-	private void showInvalidLicenseDialog() {
-		if (SimonykeesMessageDialog.openMessageDialog(Display.getCurrent()
-			.getActiveShell(),
+	private void showInvalidLicenseDialog(Display display) {
+		if (SimonykeesMessageDialog.openMessageDialog(display.getActiveShell(),
 				Messages.ActivationControl_activationFailedText + System.lineSeparator()
 						+ Messages.ActivationControl_licenseValidityExplanationText,
 				MessageDialog.ERROR, Messages.ActivationControl_activationFailedTitle)) {

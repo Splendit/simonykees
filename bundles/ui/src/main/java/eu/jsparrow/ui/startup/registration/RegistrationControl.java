@@ -49,7 +49,7 @@ public class RegistrationControl {
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		parentComposite.setLayoutData(gridData);
 
-		gridData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
+		gridData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
 		gridData.verticalIndent = 5;
 		Label introLabel = new Label(parentComposite, SWT.NONE);
 		introLabel.setLayoutData(gridData);
@@ -58,11 +58,14 @@ public class RegistrationControl {
 		createUserDataForm(parentComposite);
 
 		createConditionsAgreementsForm(parentComposite);
+		
+		parent.layout();
+		parent.getShell().layout();
 	}
 
 	private void createUserDataForm(Composite composite) {
 		Group formGroup = new Group(composite, SWT.NONE);
-		GridData groupGridData = new GridData(GridData.FILL_BOTH);
+		GridData groupGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		groupGridData.verticalIndent = 15;
 		formGroup.setLayoutData(groupGridData);
 		GridLayout formGroupLayout = new GridLayout(2, false);
@@ -92,7 +95,7 @@ public class RegistrationControl {
 	private void createConditionsAgreementsForm(Composite composite) {
 		Group conditionsGroup = new Group(composite, SWT.BORDER_DASH);
 		conditionsGroup.setText(Messages.RegistrationControl_termsGroupTitle);
-		GridData groupGridData = new GridData(GridData.FILL_BOTH);
+		GridData groupGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		groupGridData.verticalIndent = 10;
 		conditionsGroup.setLayoutData(groupGridData);
 		conditionsGroup.setLayout(new GridLayout(1, false));
@@ -152,16 +155,33 @@ public class RegistrationControl {
 				if (!areMandatorySatisfied()) {
 					return;
 				}
+
+				Display display = (Display.getCurrent() != null) ? Display.getCurrent() : Display.getDefault();
+
+				registerButton.setEnabled(false);
 				statusLabel.setVisible(true);
 
 				RegistrationEntity registrationData = new RegistrationEntity(firstName.getValue(), lastName.getValue(),
 						email.getValue(), company.getValue(), newsletterAgreeCheckBox.getSelection());
-				if (sendData(registrationData)) {
-					showLicenseGenerationSucceededDialog();
-				} else {
-					showLicenseGenerationFailedDialog();
-				}
-				statusLabel.setVisible(false);
+
+				new Thread(() -> {
+
+					boolean result = sendData(registrationData);
+
+					display.asyncExec(() -> {
+						statusLabel.setVisible(false);
+
+						if (result) {
+							showLicenseGenerationSucceededDialog(display);
+						} else {
+							showLicenseGenerationFailedDialog(display);
+						}
+
+						registerButton.setEnabled(true);
+					});
+
+				}).start();
+
 			}
 		});
 		registerButton.setLayoutData(buttonData);
@@ -201,9 +221,8 @@ public class RegistrationControl {
 		return dsgvoAgreeCheckBox.getSelection() && licenseAgreeLCheckBox.getSelection();
 	}
 
-	private void showLicenseGenerationSucceededDialog() {
-		if (SimonykeesMessageDialog.openMessageDialog(Display.getCurrent()
-			.getActiveShell(),
+	private void showLicenseGenerationSucceededDialog(Display display) {
+		if (SimonykeesMessageDialog.openMessageDialog(display.getActiveShell(),
 				Messages.RegistrationControl_registrationSuccessfulText + System.lineSeparator()
 						+ Messages.RegistrationControl_checkEmailForLicenseText,
 				MessageDialog.INFORMATION, Messages.RegistrationControl_registrationSuccessfulTitle)) {
@@ -213,9 +232,8 @@ public class RegistrationControl {
 
 	}
 
-	private void showLicenseGenerationFailedDialog() {
-		if (SimonykeesMessageDialog.openMessageDialog(Display.getCurrent()
-			.getActiveShell(),
+	private void showLicenseGenerationFailedDialog(Display display) {
+		if (SimonykeesMessageDialog.openMessageDialog(display.getActiveShell(),
 				Messages.RegistrationControl_serverUnreachableText + System.lineSeparator()
 						+ Messages.RegistrationControl_checkInternetText,
 				MessageDialog.ERROR, Messages.RegistrationControl_registrationFailedTitle)) {

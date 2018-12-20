@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
@@ -31,6 +30,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -40,8 +40,6 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -529,14 +527,7 @@ public class StartDialog extends Dialog {
 
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				try {
-					PlatformUI.getWorkbench()
-						.getBrowserSupport()
-						.getExternalBrowser()
-						.openURL(new URL(arg0.text));
-				} catch (PartInitException | MalformedURLException e) {
-					logger.error(e.getMessage(), e);
-				}
+				Program.launch(arg0.text);
 			}
 		});
 

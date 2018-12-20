@@ -25,7 +25,7 @@ public class RemoveDoubleNegationRule extends RefactoringRuleImpl<RemoveDoubleNe
 		this.id = REMOVE_DOUBLE_NEGATION_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.RemoveDoubleNegationRule_name,
 				Messages.RemoveDoubleNegationRule_description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS));
+				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.FREE));
 	}
 
 	@Override

@@ -32,7 +32,7 @@ public class OverrideAnnotationRule extends RefactoringRuleImpl<OverrideAnnotati
 		this.id = OVERRIDE_ANNOTATION_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.OverrideAnnotationRule_name,
 				Messages.OverrideAnnotationRule_description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_6, Tag.READABILITY, Tag.CODING_CONVENTIONS));
+				Arrays.asList(Tag.JAVA_1_6, Tag.READABILITY, Tag.CODING_CONVENTIONS, Tag.FREE));
 	}
 
 	@Override
