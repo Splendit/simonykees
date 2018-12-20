@@ -24,13 +24,15 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class OverrideAnnotationRule extends RefactoringRuleImpl<OverrideAnnotationRuleASTVisitor> {
 
+	public static final String OVERRIDE_ANNOTATION_RULE_ID = "OverrideAnnotation"; //$NON-NLS-1$
+
 	public OverrideAnnotationRule() {
 		super();
 		this.visitorClass = OverrideAnnotationRuleASTVisitor.class;
-		this.id = "OverrideAnnotation"; //$NON-NLS-1$
+		this.id = OVERRIDE_ANNOTATION_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.OverrideAnnotationRule_name,
 				Messages.OverrideAnnotationRule_description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_6, Tag.READABILITY, Tag.CODING_CONVENTIONS));
+				Arrays.asList(Tag.JAVA_1_6, Tag.READABILITY, Tag.CODING_CONVENTIONS, Tag.FREE));
 	}
 
 	@Override
@@ -38,4 +40,8 @@ public class OverrideAnnotationRule extends RefactoringRuleImpl<OverrideAnnotati
 		return JavaCore.VERSION_1_6;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

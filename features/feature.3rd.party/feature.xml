@@ -2,7 +2,7 @@
 <feature
       id="eu.jsparrow.3rd.party.feature"
       label="jSparrow Third-party Dependencies"
-      version="2.7.0.qualifier"
+      version="3.0.0.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
    <description url="https://jsparrow.eu/knowledge-base/">
@@ -37,4 +37,26 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="com.fasterxml.jackson.core.jackson-databind"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.fasterxml.jackson.core.jackson-core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.fasterxml.jackson.core.jackson-annotations"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

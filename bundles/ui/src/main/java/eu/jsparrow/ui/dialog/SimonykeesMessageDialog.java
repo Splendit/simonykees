@@ -58,21 +58,34 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	}
 
 	public static boolean openMessageDialog(Shell parentShell, String message, int dialogImage) {
+		return openMessageDialog(parentShell, message, dialogImage, dialogTitle);
+	}
+
+	public static boolean openMessageDialog(Shell parentShell, String message, int dialogImage, String title) {
 		String messageText = message;
-		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, dialogImage,
-				defaultIndex, dialogButtonLabels).open() == 0;
+		return new SimonykeesMessageDialog(parentShell, title, dialogTitleImage, messageText, dialogImage, defaultIndex,
+				dialogButtonLabels).open() == 0;
 	}
 
 	public static boolean openConfirmDialog(Shell parentShell, String message) {
+		return openConfirmDialog(parentShell, message, dialogTitle);
+	}
+
+	public static boolean openConfirmDialog(Shell parentShell, String message, String title) {
 		String messageText = message;
-		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText,
-				MessageDialog.CONFIRM, defaultIndex, new String[] { Messages.ui_cancel, Messages.ui_ok }).open() == 1;
+		return new SimonykeesMessageDialog(parentShell, title, dialogTitleImage, messageText, MessageDialog.CONFIRM,
+				defaultIndex, new String[] { Messages.ui_cancel, Messages.ui_ok }).open() == 1;
 	}
 
 	public static boolean openErrorMessageDialog(Shell parentShell, SimonykeesException simonykeesException) {
+		return openErrorMessageDialog(parentShell, simonykeesException, dialogTitle);
+	}
+
+	public static boolean openErrorMessageDialog(Shell parentShell, SimonykeesException simonykeesException,
+			String title) {
 		String messageText = ((simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage)
 				+ System.lineSeparator() + MAIL_BUGREPORT;
-		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, MessageDialog.ERROR,
+		return new SimonykeesMessageDialog(parentShell, title, dialogTitleImage, messageText, MessageDialog.ERROR,
 				defaultIndex, dialogButtonLabels).open() == 0;
 	}
 
@@ -90,7 +103,12 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	 *         parameter
 	 */
 	public static int openQuestionWithCancelDialog(Shell parentShell, String question, String[] dialogButtons) {
-		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, question,
+		return openQuestionWithCancelDialog(parentShell, question, dialogButtons, dialogTitle);
+	}
+
+	public static int openQuestionWithCancelDialog(Shell parentShell, String question, String[] dialogButtons,
+			String title) {
+		return new SimonykeesMessageDialog(parentShell, title, dialogTitleImage, question,
 				MessageDialog.QUESTION_WITH_CANCEL, dialogButtons.length, dialogButtons).open();
 	}
 

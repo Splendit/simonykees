@@ -43,7 +43,7 @@ enum Profile {
     MASTER_TEST_noPROGUARD("-Pmaster-test-noProguard", "_noProguard_test"),
     DEVELOP_TEST_PROGUARD("-Dproguard -Pdevelop-test-proguard", "_test"),
     DEVELOP_TEST_noPROGUARD("-Pdevelop-test-noProguard", "_noProguard_test"),
-    RELEASE_TEST_PROGUARD("-Dproguard -PreleaseCandidate", "_test");
+    RELEASE_TEST_PROGUARD("-Dproguard -PreleaseCandidate", "_test_rc");
 
     Profile(String options, String qualifier) {
         this.options = options
@@ -140,6 +140,7 @@ timestamps {
                     // deploy test proguard
                     Profile profile = Profile.RELEASE_TEST_PROGUARD
                     deployEclipsePlugin(profile, timestamp)
+                    uploadMappingFile(profile)
                     deployMavenPlugin(profile, timestamp)
 
                     break

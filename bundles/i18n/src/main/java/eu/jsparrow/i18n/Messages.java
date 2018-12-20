@@ -16,10 +16,23 @@ public class Messages extends NLS {
 	public static String AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
 	public static String AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 	public static String AbstractSelectRulesWizardPage_error_NoRulesSelected;
+	public static String AbstractSelectRulesWizardPage_freemiumRegirementsMessage;
+	public static String AbstractSelectRulesWizardPage_neitherRegisteredNorLicensed_statusInfoMessage;
+	public static String AbstractSelectRulesWizardPage_notOnlyFreemiumSelected_statusInfoMessage;
 	public static String AbstractSelectRulesWizardPage_warning_RulesInProfileNotApplicable;
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
+	public static String ActivationControl_acitvationSuccessfulTitle;
+	public static String ActivationControl_activateButton;
+	public static String ActivationControl_activationFailedText;
+	public static String ActivationControl_activationFailedTitle;
+	public static String ActivationControl_cancelButton;
+	public static String ActivationControl_enterLicenseLabel;
+	public static String ActivationControl_invalidLicenseLabel;
+	public static String ActivationControl_licenseValidityExplanationText;
+	public static String ActivationControl_statusLabel;
+	public static String ActivationControl_successfulActivationText;
 	public static String Activator_couldNotDeleteFileWithPath;
 	public static String Activator_debug_collectCompilationUnits;
 	public static String Activator_debug_commitRefactoring;
@@ -230,6 +243,7 @@ public class Messages extends NLS {
 	public static String PrimitiveObjectUseEqualsRule_description;
 	public static String PrimitiveObjectUseEqualsRule_name;
 	public static String Profile_DefaultProfile_profileName;
+	public static String Profile_FreeRulesProfile_profileName;
 	public static String Profile_Java8Profile_profileName;
 	public static String ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName;
 	public static String ProgressMonitor_AbstractRefactorer_doRefactoring_taskName;
@@ -263,22 +277,40 @@ public class Messages extends NLS {
 	public static String RefactoringInvoker_GetEnabledRulesForProject;
 	public static String RefactoringInvoker_GetSelectedRules;
 	public static String RefactoringInvoker_OverridingConfigWithCommandLine;
+	public static String RegistrationControl_cancelButton;
+	public static String RegistrationControl_checkEmailForLicenseText;
+	public static String RegistrationControl_checkInternetText;
+	public static String RegistrationControl_companyLabel;
+	public static String RegistrationControl_emailLabel;
+	public static String RegistrationControl_firstNameLabel;
+	public static String RegistrationControl_gpdrAgreeText;
+	public static String RegistrationControl_introText;
+	public static String RegistrationControl_lastNameLabel;
+	public static String RegistrationControl_licenseAgreeText;
+	public static String RegistrationControl_newsletterAgreeText;
+	public static String RegistrationControl_registerButton;
+	public static String RegistrationControl_registrationFailedTitle;
+	public static String RegistrationControl_registrationSuccessfulText;
+	public static String RegistrationControl_registrationSuccessfulTitle;
+	public static String RegistrationControl_serverUnreachableText;
+	public static String RegistrationControl_statusText;
+	public static String RegistrationControl_termsGroupTitle;
+	public static String RegistrationDialog_activateTabTitle;
+	public static String RegistrationDialog_activateTabTooltip;
+	public static String RegistrationDialog_registerTabTitle;
+	public static String RegistrationDialog_registerTabTooltip;
+	public static String RegistrationDialog_registrationTitle;
+	public static String RegistrationFormCheckBox_invalidDataText;
+	public static String RegistrationFormField_invalidDataText;
+	public static String RegistrationFormField_validDataText;
 	public static String RemoveDoubleNegationRule_description;
-
 	public static String RemoveDoubleNegationRule_name;
-
 	public static String RemoveDuplicatedThrowsRule_description;
-
 	public static String RemoveDuplicatedThrowsRule_name;
-
 	public static String RemoveEmptyStatementRule_description;
-
 	public static String RemoveEmptyStatementRule_name;
-
 	public static String RemoveExplicitCallToSuperRule_description;
-
 	public static String RemoveExplicitCallToSuperRule_name;
-
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
@@ -307,6 +339,7 @@ public class Messages extends NLS {
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase;
 	public static String RenamingRulePreviewWizardPage_RenameFields;
 	public static String SelectRulesWizardHandler_allready_running;
+	public static String SelectRulesWizardHandler_finishButtonText;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
 	public static String SelectRulesWizardHandler_noFileWithoutError;
 	public static String SelectRulesWizardHandler_selectionNotPossible_ubuntuBug;
@@ -426,6 +459,13 @@ public class Messages extends NLS {
 	public static String StringUtilsRule_classNotInClassPath;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
+	public static String SuggestRegistrationDialog_descriptionOfFreemiumLicense;
+	public static String SuggestRegistrationDialog_dontShowAgainCheckbox;
+	public static String SuggestRegistrationDialog_getFreeRulesTitle;
+	public static String SuggestRegistrationDialog_noFreemiumLiceseWarning;
+	public static String SuggestRegistrationDialog_registerButtonText;
+	public static String SuggestRegistrationDialog_skipButtonText;
+	public static String SuggestRegistrationDialog_suggestToRegister;
 	public static String SummaryWizardPage_Files;
 	public static String SummaryWizardPage_Rule;
 	public static String SummaryWizardPage_Rules;

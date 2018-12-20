@@ -3,8 +3,6 @@ package eu.jsparrow.ui.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -12,6 +10,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +22,15 @@ import eu.jsparrow.license.api.LicensePersistenceService;
 import eu.jsparrow.license.api.LicenseService;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
+import eu.jsparrow.license.api.RegistrationService;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import oshi.SystemInfo;
-import oshi.hardware.HWDiskStore;
-import oshi.hardware.HardwareAbstractionLayer;
+import eu.jsparrow.ui.dialog.SuggestRegistrationDialog;
+import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
+import eu.jsparrow.ui.startup.registration.entity.ActivationEntity;
+import eu.jsparrow.ui.startup.registration.entity.RegistrationEntity;
 
 /**
  * Implements {@link LicenseUtilService}. The purpose of this class is to wrap
@@ -38,7 +39,7 @@ import oshi.hardware.HardwareAbstractionLayer;
  * 
  * It uses various services from the License API package.
  */
-public class LicenseUtil implements LicenseUtilService {
+public class LicenseUtil implements LicenseUtilService, RegistrationUtilService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
@@ -46,17 +47,23 @@ public class LicenseUtil implements LicenseUtilService {
 	private static LicenseUtil instance;
 
 	private LicenseService licenseService;
+	private RegistrationService registrationService;
 
-	private LicensePersistenceService persistenceService;
+	private LicensePersistenceService<LicenseModel> persistenceService;
+	private LicensePersistenceService<String> registrationPersistenceSerice;
 
 	private LicenseModelFactoryService factoryService;
 
 	private LicenseValidationResult result = null;
 
 	private Scheduler scheduler;
+	private SystemInfoWrapper systemInfoWrapper;
+
+	private boolean shouldContinueWithSelectRules = true;
 
 	private LicenseUtil() {
 		scheduler = new Scheduler(this);
+		systemInfoWrapper = new SystemInfoWrapper();
 		scheduler.start();
 
 		BundleContext bundleContext = FrameworkUtil.getBundle(getClass())
@@ -65,13 +72,36 @@ public class LicenseUtil implements LicenseUtilService {
 		ServiceReference<LicenseService> licenseReference = bundleContext.getServiceReference(LicenseService.class);
 		licenseService = bundleContext.getService(licenseReference);
 
-		ServiceReference<LicensePersistenceService> persistenceReference = bundleContext
-			.getServiceReference(LicensePersistenceService.class);
-		persistenceService = bundleContext.getService(persistenceReference);
+		ServiceReference<RegistrationService> registrationReference = bundleContext
+			.getServiceReference(RegistrationService.class);
+		registrationService = bundleContext.getService(registrationReference);
+
+		initPersistenceServices(bundleContext);
 
 		ServiceReference<LicenseModelFactoryService> factoryReference = bundleContext
 			.getServiceReference(LicenseModelFactoryService.class);
 		factoryService = bundleContext.getService(factoryReference);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void initPersistenceServices(BundleContext bundleContext) {
+		try {
+			ServiceReference registrationReferences[] = bundleContext
+				.getServiceReferences(LicensePersistenceService.class.getName(), "(licenseType=registration)"); //$NON-NLS-1$
+			ServiceReference netlicensingReferences[] = bundleContext
+				.getServiceReferences(LicensePersistenceService.class.getName(), "(licenseType=default)"); //$NON-NLS-1$
+
+			if (registrationReferences.length != 0 && netlicensingReferences.length != 0) {
+
+				this.registrationPersistenceSerice = (LicensePersistenceService<String>) bundleContext
+					.getService(registrationReferences[0]);
+				this.persistenceService = (LicensePersistenceService<LicenseModel>) bundleContext
+					.getService(netlicensingReferences[0]);
+			}
+		} catch (InvalidSyntaxException ise) {
+			logger.debug(ise.getMessage(), ise);
+			logger.error(ise.getMessage());
+		}
 	}
 
 	public static LicenseUtil get() {
@@ -83,23 +113,32 @@ public class LicenseUtil implements LicenseUtilService {
 
 	@Override
 	public boolean checkAtStartUp(Shell shell) {
-		LicenseModel model = null;
+		LicenseModel licenseModel = null;
 		try {
-			model = persistenceService.loadFromPersistence();
+			licenseModel = persistenceService.loadFromPersistence();
 		} catch (PersistenceException e) {
 			handleStartUpPersistenceFailure(shell, e);
-			model = factoryService.createDemoLicenseModel();
+			licenseModel = factoryService.createDemoLicenseModel();
 		}
+
 		try {
-			result = licenseService.validate(model);
+			result = licenseService.validate(licenseModel);
 		} catch (ValidationException e) {
 			handleStartUpValidationFailure(shell, e);
 			return true;
 		}
+
 		// When starting with an expired demo license we show the wizard dialog
 		if (result.getLicenseType() == LicenseType.DEMO && !result.isValid()) {
 			BuyLicenseDialog dialog = new BuyLicenseDialog(shell);
 			return dialog.open() == 0;
+		}
+		// When starting with an demo license we offer to register for free
+		// rules if not registered yet
+		if (isFreeLicense() && !isActiveRegistration() && !SimonykeesPreferenceManager.getDisableRegisterSuggestion()) {
+			setShouldContinueWithSelectRules(true);
+			SuggestRegistrationDialog dialog = new SuggestRegistrationDialog(shell);
+			return (dialog.open() == 0) && shouldContinueWithSelectRules;
 		}
 		return true;
 	}
@@ -114,11 +153,11 @@ public class LicenseUtil implements LicenseUtilService {
 
 	@Override
 	public LicenseUpdateResult update(String key) {
-		String secret = createSecretFromHardware();
+		String secret = systemInfoWrapper.createUniqueHardwareId();
 		LicenseValidationResult validationResult;
 		LicenseModel model;
 		try {
-			String name = createNameFromHardware();
+			String name = systemInfoWrapper.createNameFromHardware();
 			Properties properties = loadProperties();
 			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
 			String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
@@ -155,6 +194,51 @@ public class LicenseUtil implements LicenseUtilService {
 		return result;
 	}
 
+	@Override
+	public boolean activateRegistration(ActivationEntity activationEntity) {
+		String secret = systemInfoWrapper.createUniqueHardwareId();
+		String activationKey = activationEntity.getActivationKey();
+		try {
+			boolean successful = registrationService.activate(activationKey);
+			if (successful) {
+				registrationPersistenceSerice.saveToPersistence(secret);
+				return true;
+			}
+		} catch (PersistenceException e) {
+			logger.warn("Failed to persist registration", e); //$NON-NLS-1$
+		} catch (ValidationException e) {
+			logger.warn("Cannot activate registration key: '{}'", activationKey, e); //$NON-NLS-1$
+		}
+		return false;
+	}
+
+	@Override
+	public boolean register(RegistrationEntity registerEntity) {
+		String email = registerEntity.getEmail();
+		String firstName = registerEntity.getFirstName();
+		String lastName = registerEntity.getLastName();
+		String company = registerEntity.getCompany();
+		boolean subscribe = registerEntity.isAgreeToNewsletter();
+		try {
+			return registrationService.register(email, firstName, lastName, company, subscribe);
+		} catch (ValidationException e) {
+			logger.warn("Failed to register", e); //$NON-NLS-1$
+		}
+		return false;
+	}
+
+	@Override
+	public boolean isActiveRegistration() {
+		String hardwareId = systemInfoWrapper.createUniqueHardwareId();
+		try {
+			String secret = registrationPersistenceSerice.loadFromPersistence();
+			return registrationService.validate(hardwareId, secret);
+		} catch (PersistenceException e) {
+			logger.warn("Failed to load registration model", e); //$NON-NLS-1$
+		}
+		return false;
+	}
+
 	public void updateValidationResult() {
 		LicenseModel model = tryLoadModelFromPersistence();
 		try {
@@ -166,6 +250,12 @@ public class LicenseUtil implements LicenseUtilService {
 		}
 	}
 
+	public boolean isFullLicensePresentInSecureStore() {
+		LicenseModel model = tryLoadModelFromPersistence();
+		LicenseType type = model.getType();
+		return type != LicenseType.DEMO;
+	}
+	
 	private LicenseModel tryLoadModelFromPersistence() {
 		LicenseModel model = null;
 		try {
@@ -201,32 +291,6 @@ public class LicenseUtil implements LicenseUtilService {
 		return new LicenseUpdateResult(true, Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
 	}
 
-	private String createSecretFromHardware() {
-
-		String diskSerial = ""; //$NON-NLS-1$
-		SystemInfo systemInfo = new SystemInfo();
-
-		HardwareAbstractionLayer hal = systemInfo.getHardware();
-		HWDiskStore[] diskStores = hal.getDiskStores();
-
-		if (diskStores.length > 0) {
-			diskSerial = diskStores[0].getSerial();
-		}
-
-		return diskSerial;
-	}
-
-	private String createNameFromHardware() {
-		InetAddress addr;
-		try {
-			addr = InetAddress.getLocalHost();
-			return addr.getHostName();
-		} catch (UnknownHostException e) {
-			logger.warn("Error while reading the host name", e); //$NON-NLS-1$
-			return ""; //$NON-NLS-1$
-		}
-	}
-
 	private Properties loadProperties() throws IOException {
 		Properties properties = new Properties();
 		try (InputStream input = getClass().getClassLoader()
@@ -260,5 +324,9 @@ public class LicenseUtil implements LicenseUtilService {
 			return wasSuccessful;
 		}
 
+	}
+
+	public void setShouldContinueWithSelectRules(boolean shouldContinue) {
+		shouldContinueWithSelectRules = shouldContinue;
 	}
 }

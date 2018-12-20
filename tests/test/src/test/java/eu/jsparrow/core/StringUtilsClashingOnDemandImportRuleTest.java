@@ -1,0 +1,45 @@
+package eu.jsparrow.core;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.eclipse.jdt.core.JavaCore;
+import org.junit.Before;
+import org.junit.Test;
+
+import eu.jsparrow.core.rule.impl.StringUtilsRule;
+import eu.jsparrow.core.util.RulesTestUtil;
+
+@SuppressWarnings("nls")
+public class StringUtilsClashingOnDemandImportRuleTest extends SingleRuleTest {
+
+	private static final String SAMPLE_FILE_ON_DEMAND_IMPORT = "StringUtilsOnDemandClashingImportCornerCaseRule.java";
+	private static final String POSTRULE_SUBDIRECTORY = "stringUtilsOnDemandClashinImport";
+
+	private StringUtilsRule rule;
+
+	@Before
+	public void setUp() throws Exception {
+		rule = new StringUtilsRule();
+		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
+
+	}
+
+	@Test
+	public void testTransformationWithDefaultFile() throws Exception {
+		Path preRule = getPreRuleFile(SAMPLE_FILE_ON_DEMAND_IMPORT);
+		Path postRule = getPostRuleFile(SAMPLE_FILE_ON_DEMAND_IMPORT, POSTRULE_SUBDIRECTORY);
+
+		// A utility class is imported in
+		// StringUtilsClashingImportCornerCaseRule.java
+		loadUtilities();
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+}

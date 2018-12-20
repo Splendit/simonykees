@@ -33,7 +33,8 @@ public enum Tag {
 	PERFORMANCE("performance"),
 	READABILITY("readability"),
 	OLD_LANGUAGE_CONSTRUCTS("outdated constructs"),
-	LAMBDA("lambda");
+	LAMBDA("lambda"),
+	FREE("free");
 
 	private List<String> tagName;
 

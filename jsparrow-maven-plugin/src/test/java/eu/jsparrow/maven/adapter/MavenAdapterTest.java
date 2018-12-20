@@ -2,7 +2,7 @@ package eu.jsparrow.maven.adapter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -148,6 +148,23 @@ public class MavenAdapterTest {
 		when(child.getBasedir()).thenReturn(childBaseDir);
 
 		String actualPath = mavenAdapter.findYamlFilePath(child, parentYamlFile);
+
+		assertTrue(actualPath.equals(expectedPath));
+	}
+	
+	@Test
+	public void findYamlFilePath_parentBaseDirIsNull_shouldReturnDefaultYamlFilePath() throws IOException {
+		MavenProject childProject = mock(MavenProject.class);
+		MavenProject parentProject = mock(MavenProject.class);
+		String expectedPath = jsparrowYml.getAbsolutePath();
+		File childBaseDir = directory.newFolder("project_base_dir" + File.separator + "child_Base_Dir");
+		when(childProject.getBasedir()).thenReturn(childBaseDir);
+//		when(parentProject.getParent()).thenReturn(project);
+		when(childProject.getParent()).thenReturn(parentProject);
+		when(path.toFile()).thenReturn(jsparrowYml);
+		when(parentProject.getBasedir()).thenReturn(null);
+
+		String actualPath = mavenAdapter.findYamlFilePath(childProject, jsparrowYml);
 
 		assertTrue(actualPath.equals(expectedPath));
 	}

@@ -20,13 +20,15 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class TryWithResourceRule extends RefactoringRuleImpl<TryWithResourceASTVisitor> {
 
+	public static final String TRY_WITH_RESOURCE_RULE_ID = "TryWithResource"; //$NON-NLS-1$
+
 	public TryWithResourceRule() {
 		super();
 		this.visitorClass = TryWithResourceASTVisitor.class;
-		this.id = "TryWithResource"; //$NON-NLS-1$
+		this.id = TRY_WITH_RESOURCE_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.TryWithResourceRule_name,
 				Messages.TryWithResourceRule_description, Duration.ofMinutes(15),
-				Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS));
+				Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.FREE));
 	}
 
 	@Override
@@ -34,4 +36,8 @@ public class TryWithResourceRule extends RefactoringRuleImpl<TryWithResourceASTV
 		return JavaCore.VERSION_1_7;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

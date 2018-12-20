@@ -19,13 +19,15 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class PrimitiveBoxedForStringRule extends RefactoringRuleImpl<PrimitiveBoxedForStringASTVisitor> {
 
+	public static final String PRIMITIVE_BOXED_FOR_STRING_RULE_ID = "PrimitiveBoxedForString"; //$NON-NLS-1$
+
 	public PrimitiveBoxedForStringRule() {
 		super();
 		this.visitorClass = PrimitiveBoxedForStringASTVisitor.class;
-		this.id = "PrimitiveBoxedForString"; //$NON-NLS-1$
+		this.id = PRIMITIVE_BOXED_FOR_STRING_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.PrimitiveBoxedForStringRule_name,
 				Messages.PrimitiveBoxedForStringRule_description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE));
+				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE, Tag.FREE));
 	}
 
 	@Override
@@ -33,4 +35,8 @@ public class PrimitiveBoxedForStringRule extends RefactoringRuleImpl<PrimitiveBo
 		return JavaCore.VERSION_1_1;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }
