@@ -28,7 +28,7 @@ public class MultiVariableDeclarationLineRule extends RefactoringRuleImpl<MultiV
 		this.id = MULTI_VARIABLE_DECLARATION_LINE_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.MultiVariableDeclarationLineRule_name,
 				Messages.MultiVariableDeclarationLineRule_description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
+				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS, Tag.FREE));
 	}
 
 	@Override

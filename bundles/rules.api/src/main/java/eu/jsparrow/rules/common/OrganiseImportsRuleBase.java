@@ -41,7 +41,7 @@ public abstract class OrganiseImportsRuleBase extends RefactoringRuleImpl<Abstra
 		this.id = ORGANISE_IMPORTS_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.OrganiseImportsRule_name,
 				Messages.OrganiseImportsRule_description, Duration.ofMinutes(1),
-				Arrays.asList(Tag.JAVA_1_1, Tag.FORMATTING, Tag.READABILITY));
+				Arrays.asList(Tag.JAVA_1_1, Tag.FORMATTING, Tag.READABILITY, Tag.FREE));
 	}
 
 	@Override

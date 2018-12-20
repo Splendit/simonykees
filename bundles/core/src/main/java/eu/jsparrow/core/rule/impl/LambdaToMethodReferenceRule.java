@@ -28,7 +28,7 @@ public class LambdaToMethodReferenceRule extends RefactoringRuleImpl<LambdaToMet
 		this.id = LAMBDA_TO_METHOD_REFERENCE_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.LambdaToMethodReferenceRule_name,
 				Messages.LambdaToMethodReferenceRule_description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA));
+				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.FREE));
 	}
 
 	@Override

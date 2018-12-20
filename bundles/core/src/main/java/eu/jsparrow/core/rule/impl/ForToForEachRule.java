@@ -27,7 +27,7 @@ public class ForToForEachRule extends RefactoringRuleImpl<ForToForEachASTVisitor
 		this.id = FOR_TO_FOR_EACH_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.ForToForEachRule_name,
 				Messages.ForToForEachRule_description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_5, Tag.LOOP, Tag.OLD_LANGUAGE_CONSTRUCTS));
+				Arrays.asList(Tag.JAVA_1_5, Tag.LOOP, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.FREE));
 	}
 
 	@Override

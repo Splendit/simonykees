@@ -27,7 +27,7 @@ public class InefficientConstructorRule extends RefactoringRuleImpl<InefficientC
 		this.id = INEFFICIENT_CONSTRUCTOR_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.InefficientConstructorRule_name,
 				Messages.InefficientConstructorRule_description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS));
+				Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS, Tag.FREE ));
 	}
 
 	@Override
