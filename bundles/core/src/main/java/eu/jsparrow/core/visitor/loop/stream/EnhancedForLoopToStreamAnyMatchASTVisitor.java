@@ -90,6 +90,10 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 
 		SingleVariableDeclaration enhancedForParameter = enhancedForStatement.getParameter();
 		Expression enhancedForExp = enhancedForStatement.getExpression();
+		
+		if(isConditionalExpression(enhancedForExp)) {
+			return true;
+		}
 
 		IfStatement ifStatement = isConvertableInterruptedLoop(enhancedForStatement);
 		if (ifStatement == null) {

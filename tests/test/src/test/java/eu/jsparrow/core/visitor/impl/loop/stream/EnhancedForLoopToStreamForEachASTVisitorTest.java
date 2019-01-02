@@ -39,6 +39,26 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesJDTUnitFix
 	}
 	
 	@Test
+	public void visit_conditionalLoopExpression_shouldNotTranform() throws Exception {
+		String block = "" +
+				"		List<String> strings = new ArrayList<String>();\n" + 
+				"		List<String> strings2 = new ArrayList<>();\n" + 
+				"		Object object = new Object();\n" + 
+				"		for(Object string : object == null ? strings : strings2) {\n" + 
+				"			int hashCode = string.hashCode(); \n" + 
+				"			}";
+		fixture.addImport("java.util.List");
+		fixture.addImport("java.util.ArrayList");
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expected = createBlock(block);
+		assertMatch(expected, fixture.getMethodBlock());
+	}
+	
+	@Test
 	public void visit_typedCollection_shouldTranform() throws Exception {
 		
 		String block = "" +

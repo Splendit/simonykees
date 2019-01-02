@@ -151,6 +151,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		Expression loopExpression = loopNode.getExpression();
 		SingleVariableDeclaration loopParameter = loopNode.getParameter();
 
+		if(isConditionalExpression(loopExpression)) {
+			return true;
+		}
+		
 		ExpressionStatement singleBodyStatement = getSingleBodyStatement(loopNode).orElse(null);
 		if (singleBodyStatement == null) {
 			return true;
