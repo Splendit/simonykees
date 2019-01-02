@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.sample.utilities.NumberUtils;
 import eu.jsparrow.sample.utilities.Person;
+import eu.jsparrow.sample.utilities.StringUtils;
 import eu.jsparrow.sample.utilities.TestModifier;
 
 /**
@@ -357,6 +358,12 @@ public class LambdaToMethodReferenceRule {
 			.minusYears(123));
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
 		executorService.submit(() -> employee.getName());
+	}
+
+	public void addMissingImports() {
+
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(StringUtils::doesntDoAnything);
 	}
 
 	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(

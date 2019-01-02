@@ -1,5 +1,7 @@
 package eu.jsparrow.sample.preRule;
 
+import static eu.jsparrow.sample.utilities.StringUtils.doesntDoAnything;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -360,6 +362,12 @@ public class LambdaToMethodReferenceRule {
 		Employee employee = new Employee("John", LocalDate.now().minusYears(123));
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
 		executorService.submit(() -> employee.getName());
+	}
+	
+	public void addMissingImports() {
+		
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(() -> doesntDoAnything());
 	}
 
 	class ComparisonProvider {

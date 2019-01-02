@@ -149,9 +149,10 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						ITypeBinding lambdaEnclosingType = lambdaEnclosing.resolveBinding();
 
 						if (Modifier.isStatic(methodBinding.getModifiers())) {
+							ITypeBinding declaringClassErasure = methodsDeclaringClass.getErasure();
+							newImports.add(declaringClassErasure.getQualifiedName());
 							SimpleName staticClassName = astRewrite.getAST()
-								.newSimpleName(methodsDeclaringClass.getErasure()
-									.getName());
+								.newSimpleName(declaringClassErasure.getName());
 							ref.setExpression(staticClassName);
 							isReferenceExpressionSet = true;
 						} else if (compareITypeBinding(methodsDeclaringClass, lambdaEnclosingType)) {
