@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.sample.utilities.NumberUtils;
 import eu.jsparrow.sample.utilities.Person;
+import eu.jsparrow.sample.utilities.StringUtils;
 import eu.jsparrow.sample.utilities.TestModifier;
 
 /**
@@ -345,6 +348,22 @@ public class LambdaToMethodReferenceRule {
 		 */
 		ClassWithStaticOverloadedMethods.wrap(other::overloadedWihtPrivateMethod);
 
+	}
+
+	public void referringToMethodsInRawObjects() {
+		/*
+		 * SIM-1400
+		 */
+		Employee employee = new Employee("John", LocalDate.now()
+			.minusYears(123));
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(() -> employee.getName());
+	}
+
+	public void addMissingImports() {
+
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(StringUtils::doesntDoAnything);
 	}
 
 	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(

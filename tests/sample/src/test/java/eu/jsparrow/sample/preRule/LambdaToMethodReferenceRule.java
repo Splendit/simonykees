@@ -1,5 +1,7 @@
 package eu.jsparrow.sample.preRule;
 
+import static eu.jsparrow.sample.utilities.StringUtils.doesntDoAnything;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -349,6 +353,21 @@ public class LambdaToMethodReferenceRule {
 		 */
 		ClassWithStaticOverloadedMethods.wrap(() -> other.overloadedWihtPrivateMethod());
 
+	}
+	
+	public void referringToMethodsInRawObjects() {
+		/*
+		 * SIM-1400
+		 */
+		Employee employee = new Employee("John", LocalDate.now().minusYears(123));
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(() -> employee.getName());
+	}
+	
+	public void addMissingImports() {
+		
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(() -> doesntDoAnything());
 	}
 
 	class ComparisonProvider {
