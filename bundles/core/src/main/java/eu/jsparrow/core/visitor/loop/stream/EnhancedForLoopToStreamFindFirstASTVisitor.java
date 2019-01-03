@@ -360,8 +360,8 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			Expression lastMap = tailingMap.get(tailingMap.size() - 1);
 			streamType = lastMap.resolveTypeBinding();
 		}
-		
-		if(streamType == null) {
+
+		if (streamType == null) {
 			return false;
 		}
 		return ClassRelationUtil.compareITypeBinding(orElseType, streamType) || ClassRelationUtil

@@ -10,6 +10,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.JavaVersion;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
@@ -151,10 +152,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		Expression loopExpression = loopNode.getExpression();
 		SingleVariableDeclaration loopParameter = loopNode.getParameter();
 
-		if(isConditionalExpression(loopExpression)) {
+		if (isConditionalExpression(loopExpression)) {
 			return true;
 		}
-		
+
 		ExpressionStatement singleBodyStatement = getSingleBodyStatement(loopNode).orElse(null);
 		if (singleBodyStatement == null) {
 			return true;

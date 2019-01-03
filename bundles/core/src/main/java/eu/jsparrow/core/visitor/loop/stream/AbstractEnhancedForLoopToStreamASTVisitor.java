@@ -65,7 +65,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 
 		if (typeBinding.isParameterizedType()) {
 			for (ITypeBinding argument : typeBinding.getTypeArguments()) {
-				if(!isTypeSafe(argument)) {
+				if (!isTypeSafe(argument)) {
 					return false;
 				}
 			}
@@ -73,7 +73,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 
 		return true;
 	}
-	
+
 	protected boolean isConditionalExpression(Expression expression) {
 		return expression.getNodeType() == ASTNode.CONDITIONAL_EXPRESSION;
 	}

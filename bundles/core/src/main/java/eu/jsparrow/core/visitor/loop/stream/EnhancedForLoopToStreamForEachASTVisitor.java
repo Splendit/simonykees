@@ -56,18 +56,18 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 		Statement statement = enhancedForStatementNode.getBody();
 		SimpleName parameterName = parameter.getName();
 		ITypeBinding parameterTypeBinding = parameterName.resolveTypeBinding();
-		
-		if(isConditionalExpression(expression)) {
+
+		if (isConditionalExpression(expression)) {
 			return;
 		}
 
 		// expression must be of type java.util.Collection
 		ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
-		if(expressionTypeBinding == null || expressionTypeBinding.isRawType()) {
+		if (expressionTypeBinding == null || expressionTypeBinding.isRawType()) {
 			return;
 		}
 		if ((ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST)
-						|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST))
+				|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST))
 				&& isTypeSafe(parameterTypeBinding)) {
 
 			ASTNode approvedStatement = getApprovedStatement(statement, parameterName);
