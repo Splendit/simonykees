@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import eu.jsparrow.sample.utilities.NumberUtils;
 import eu.jsparrow.sample.utilities.Person;
+import eu.jsparrow.sample.utilities.Queue;
 
 /**
  * 
@@ -440,7 +441,7 @@ public class LambdaToMethodReferenceRule {
 		 */
 		Queue queue = new Queue();
 		queue.withLock(() -> {
-			generateNumber();
+			getRandomPerson();
 		});
 	}
 	
@@ -449,29 +450,6 @@ public class LambdaToMethodReferenceRule {
 		queue.withLock(() -> {
 			doSomething(2);
 		});
-	}
-
-	private void doSomething(int element) {
-		System.out.println(element);
-	}
-	
-	private int generateNumber() {
-		return 1;
-	}
-	
-}
-/**
- * 
- * Named after hudson.model.Queue in jenkins-core
- *
- */
-class Queue {
-	public void withLock(Runnable runnable) {
-		
-	}
-	
-	public <V> V withLock(Callable<V> callable) throws Exception {
-		return null;
 	}
 }
 

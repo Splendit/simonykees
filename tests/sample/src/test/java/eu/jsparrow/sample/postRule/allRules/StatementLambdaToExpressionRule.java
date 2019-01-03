@@ -1,11 +1,12 @@
 package eu.jsparrow.sample.postRule.allRules;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.jsparrow.sample.utilities.Queue;
 
 /**
  * 
@@ -85,20 +86,5 @@ public class StatementLambdaToExpressionRule {
 
 	private int generateNumber() {
 		return 1;
-	}
-
-	/**
-	 * 
-	 * Named after hudson.model.Queue in jenkins-core
-	 *
-	 */
-	class Queue {
-		public void withLock(Runnable runnable) {
-
-		}
-
-		public <V> V withLock(Callable<V> callable) throws Exception {
-			return null;
-		}
 	}
 }

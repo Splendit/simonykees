@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -24,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.sample.utilities.NumberUtils;
 import eu.jsparrow.sample.utilities.Person;
+import eu.jsparrow.sample.utilities.Queue;
 import eu.jsparrow.sample.utilities.StringUtils;
 import eu.jsparrow.sample.utilities.TestModifier;
 
@@ -397,21 +397,13 @@ public class LambdaToMethodReferenceRule {
 		 */
 		Queue queue = new Queue();
 		queue.withLock(() -> {
-			generateNumber();
+			getRandomPerson();
 		});
 	}
 
 	public void noDiscardedReturnType_shouldTransform() {
 		Queue queue = new Queue();
 		queue.withLock(() -> doSomething(2));
-	}
-
-	private void doSomething(int element) {
-		logger.info(String.valueOf(element));
-	}
-
-	private int generateNumber() {
-		return 1;
 	}
 
 	class NestedClass {
@@ -465,22 +457,6 @@ public class LambdaToMethodReferenceRule {
 		public org.apache.commons.lang3.math.NumberUtils getNumber() {
 			return null;
 		}
-	}
-
-}
-
-/**
- * 
- * Named after hudson.model.Queue in jenkins-core
- *
- */
-class Queue {
-	public void withLock(Runnable runnable) {
-
-	}
-
-	public <V> V withLock(Callable<V> callable) throws Exception {
-		return null;
 	}
 }
 
