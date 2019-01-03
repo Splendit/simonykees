@@ -488,6 +488,30 @@ public class EnhancedForLoopToStreamFindFirstRule {
 			.map(value -> new ReturnTypeSampleChild(value))
 			.orElse(null);
 	}
+	
+	public ReturnTypeSample returnSubtypeOrSibling_shouldNotTransform(String input) {
+		List<String> values = generateList(input);
+		for(String value : values) {
+			if(value.equals(input)) {
+				return new ReturnTypeSampleChild(value);
+			}
+		}
+		return new ReturnTypeSampleChildSibling("");
+	}
+	
+	public Object mapToParameterizedType_shouldNotTransform(String input) {
+		List<String> values = generateList(input);
+		for(String value : values) {
+			if(value.equals(input)) {
+				return createParaeterizedInstance(value);
+			}
+		}
+		return new Object();
+	}
+	
+	private ParameterizedSampleType<?> createParaeterizedInstance(String value) {
+		return new ParameterizedSampleType<ReturnTypeSampleChild>();
+	}
 
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(","));
@@ -527,6 +551,14 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	class ReturnTypeSampleChild extends ReturnTypeSample {
 
 		ReturnTypeSampleChild(String value) {
+			super(value);
+		}
+		
+	}
+	
+	class ReturnTypeSampleChildSibling extends ReturnTypeSample {
+
+		ReturnTypeSampleChildSibling(String value) {
 			super(value);
 		}
 		
