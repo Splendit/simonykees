@@ -1,6 +1,7 @@
 package eu.jsparrow.sample.postRule.allRules;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -63,7 +64,41 @@ public class StatementLambdaToExpressionRule {
 		);
 	}
 
+	public void discardedReturnType_shouldNotTranform() {
+		/*
+		 * SIM-1401
+		 */
+		Queue queue = new Queue();
+		queue.withLock(() -> {
+			generateNumber();
+		});
+	}
+
+	public void noDiscardedReturnType_shouldTransform() {
+		Queue queue = new Queue();
+		queue.withLock(() -> doSomething(2));
+	}
+
 	private void doSomething(int element) {
 		logger.info(String.valueOf(element));
+	}
+
+	private int generateNumber() {
+		return 1;
+	}
+
+	/**
+	 * 
+	 * Named after hudson.model.Queue in jenkins-core
+	 *
+	 */
+	class Queue {
+		public void withLock(Runnable runnable) {
+
+		}
+
+		public <V> V withLock(Callable<V> callable) throws Exception {
+			return null;
+		}
 	}
 }

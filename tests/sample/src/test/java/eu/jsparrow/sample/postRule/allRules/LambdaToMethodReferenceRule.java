@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -390,6 +391,29 @@ public class LambdaToMethodReferenceRule {
 
 	}
 
+	public void discardedReturnType_shouldNotTranform() {
+		/*
+		 * SIM-1401
+		 */
+		Queue queue = new Queue();
+		queue.withLock(() -> {
+			generateNumber();
+		});
+	}
+
+	public void noDiscardedReturnType_shouldTransform() {
+		Queue queue = new Queue();
+		queue.withLock(() -> doSomething(2));
+	}
+
+	private void doSomething(int element) {
+		logger.info(String.valueOf(element));
+	}
+
+	private int generateNumber() {
+		return 1;
+	}
+
 	class NestedClass {
 		public void referencingMethodInNestedClass() {
 			List<Person> persons = new ArrayList<>();
@@ -441,6 +465,22 @@ public class LambdaToMethodReferenceRule {
 		public org.apache.commons.lang3.math.NumberUtils getNumber() {
 			return null;
 		}
+	}
+
+}
+
+/**
+ * 
+ * Named after hudson.model.Queue in jenkins-core
+ *
+ */
+class Queue {
+	public void withLock(Runnable runnable) {
+
+	}
+
+	public <V> V withLock(Callable<V> callable) throws Exception {
+		return null;
 	}
 }
 

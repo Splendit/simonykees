@@ -1,13 +1,23 @@
 package eu.jsparrow.core.visitor.impl;
 
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.findOverloadedMethods;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isOverloadedOnParamter;
+
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -43,14 +53,54 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 				expressionToUse = returnStatement.getExpression();
 			}
 			if (statement instanceof ExpressionStatement) {
-				ExpressionStatement expressionStatemnet = (ExpressionStatement) statement;
-				expressionToUse = expressionStatemnet.getExpression();
+				ExpressionStatement expressionStatement = (ExpressionStatement) statement;
+				Expression expression = expressionStatement.getExpression();
+				boolean returnedValueDiscarded = returnsValue(expression);
+
+				if (returnedValueDiscarded && isWrappedInOverloadedMethod(lambdaExpression)) {
+						return true;
+				}
+
+				expressionToUse = expression;
 			}
 			astRewrite.replace(block, expressionToUse, null);
 			getCommentRewriter().saveCommentsInParentStatement(block);
 			onRewrite();
 		}
 		return true;
+	}
+
+	private boolean isWrappedInOverloadedMethod(LambdaExpression lambdaExpression) {
+		if (lambdaExpression.getLocationInParent() != MethodInvocation.ARGUMENTS_PROPERTY) {
+			return false;
+		}
+		MethodInvocation methodInvocation = (MethodInvocation) lambdaExpression.getParent();
+		int index = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
+			.indexOf(lambdaExpression);
+		if (index < 0) {
+			return false;
+		}
+		List<IMethodBinding> overloads = findOverloadedMethods(methodInvocation);
+		if (overloads.isEmpty()) {
+			return false;
+		}
+
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		return overloads.stream()
+			.anyMatch(overloadingMethod -> isOverloadedOnParamter(methodBinding, overloadingMethod, index));
+	}
+
+	private boolean returnsValue(Expression expression) {
+
+		ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
+
+		if (!expressionTypeBinding.isPrimitive()) {
+			return true;
+		}
+
+		String name = expressionTypeBinding.getName();
+		String voidTypeName = PrimitiveType.VOID.toString();
+		return !voidTypeName.equals(name);
 	}
 
 	private boolean isApplicableTo(Block block) {
