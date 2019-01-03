@@ -30,7 +30,7 @@ public class CatchExceptionUsagesASTVisitor extends ASTVisitor {
 	public CatchExceptionUsagesASTVisitor(SimpleName exceptionName) {
 		this.exceptionIdentifer = exceptionName.getIdentifier();
 	}
-	
+
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		return !exceptionUsedInTypeInference;
@@ -90,8 +90,7 @@ public class CatchExceptionUsagesASTVisitor extends ASTVisitor {
 		}
 		String typeVariableName = declaredArgumentType.getName();
 		ITypeBinding[] thrownTypes = methodDeclaration.getExceptionTypes();
-		return Arrays.asList(thrownTypes)
-			.stream()
+		return Arrays.stream(thrownTypes)
 			.map(ITypeBinding::getName)
 			.anyMatch(typeVariableName::equals);
 	}
