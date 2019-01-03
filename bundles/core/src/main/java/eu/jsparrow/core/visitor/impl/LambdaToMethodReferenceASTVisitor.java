@@ -298,7 +298,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		List<Expression> wrapperMethodParameters = ASTNodeUtil.convertToTypedList(wrapperMethod.arguments(),
 				Expression.class);
 		int index = wrapperMethodParameters.indexOf(lambdaExpressionNode);
-		
+
 		List<IMethodBinding> overloadedWrapperMethods = findOverloadedMethods(wrapperMethod).stream()
 			.filter(method -> Modifier.isPublic(method.getModifiers()))
 			.collect(Collectors.toList());
@@ -306,14 +306,14 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		if (wrapperMethodBinding == null) {
 			return false;
 		}
-		
+
 		boolean isOverloadedWrapperMethod = overloadedWrapperMethods.stream()
-				.anyMatch(method -> isOverloadedOnParamter(wrapperMethodBinding, method, index));
-		
+			.anyMatch(method -> isOverloadedOnParamter(wrapperMethodBinding, method, index));
+
 		Expression expression = methodInvocation.getExpression();
-		if(expression != null) {
+		if (expression != null) {
 			ITypeBinding expressionBinidng = expression.resolveTypeBinding();
-			if(expressionBinidng != null && expressionBinidng.isRawType() && isOverloadedWrapperMethod) {
+			if (expressionBinidng != null && expressionBinidng.isRawType() && isOverloadedWrapperMethod) {
 				return true;
 			}
 		}
@@ -325,7 +325,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		if (publicOverloadedMethods.isEmpty()) {
 			return false;
 		}
-		
+
 		return isOverloadedWrapperMethod;
 	}
 
@@ -357,7 +357,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		if (type == null) {
 			return true;
 		}
-		
+
 		methods.addAll(Arrays.asList(type.getDeclaredMethods()));
 		methods.addAll(findInheretedMethods(type));
 		String methodIdentifier = methodInvocation.getName()
