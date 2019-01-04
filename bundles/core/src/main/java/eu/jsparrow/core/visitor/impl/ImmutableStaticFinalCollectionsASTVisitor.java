@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -17,10 +18,13 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -132,6 +136,7 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	public boolean visit(VariableDeclarationFragment fragmentNode) {
 
 		if (fragmentNode.getLocationInParent() != FieldDeclaration.FRAGMENTS_PROPERTY) {
+			excludeInitializer(fragmentNode.getInitializer());
 			return false;
 		}
 		FieldDeclaration parent = (FieldDeclaration) fragmentNode.getParent();
@@ -247,6 +252,38 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 		}
 
 		return true;
+	}
+	
+	@Override
+	public boolean visit(ReturnStatement returnStatement) {
+		Expression expression = returnStatement.getExpression();
+		if(expression != null) {
+			excludeFields(expression);
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean visit(Assignment assignment) {
+		Expression rightHandSide = assignment.getRightHandSide();
+		excludeFields(rightHandSide);
+		return true;
+	}
+
+	private void excludeFields(Expression expression) {
+		if(expression.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return;
+		}
+		
+		SimpleName simpleName = (SimpleName) expression;
+		IBinding typeBinding = simpleName.resolveBinding();
+		if(IBinding.VARIABLE != typeBinding.getKind()) {
+			return;
+		}
+		IVariableBinding variableBinding = (IVariableBinding)typeBinding;
+		if(variableBinding.isField()) {
+			this.excludedNames.add(variableBinding.getName());
+		}
 	}
 
 	@Override
