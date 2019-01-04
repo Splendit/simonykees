@@ -131,39 +131,45 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	@Override
 	public boolean visit(VariableDeclarationFragment fragmentNode) {
 
-		if (fragmentNode.getParent() != null && ASTNode.FIELD_DECLARATION == fragmentNode.getParent()
-			.getNodeType()) {
-			FieldDeclaration parent = (FieldDeclaration) fragmentNode.getParent();
-			ITypeBinding parentTypeBinding = parent.getType()
-				.resolveBinding();
+		if (fragmentNode.getLocationInParent() != FieldDeclaration.FRAGMENTS_PROPERTY) {
+			return false;
+		}
+		FieldDeclaration parent = (FieldDeclaration) fragmentNode.getParent();
+		ITypeBinding parentTypeBinding = parent.getType()
+			.resolveBinding();
 
-			if (parentTypeBinding != null && ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isStatic)
-					&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isFinal)
-					&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isPrivate)) {
+		Expression initializer = fragmentNode.getInitializer();
+		if (parentTypeBinding != null && ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isStatic)
+				&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isFinal)
+				&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isPrivate)
+				&& verifyInitializerPrecondition(initializer)) {
 
-				Expression initializer = fragmentNode.getInitializer();
-				if (verifyInitializerPrecondition(initializer)) {
+			ITypeBinding initializerTypeBinding = initializer.resolveTypeBinding();
+			List<String> parentTypeList = Collections.singletonList(parentTypeBinding.getErasure()
+				.getQualifiedName());
 
-					ITypeBinding initializerTypeBinding = initializer.resolveTypeBinding();
-					List<String> parentTypeList = Collections.singletonList(parentTypeBinding.getErasure()
-						.getQualifiedName());
+			if (ClassRelationUtil.isContentOfTypes(initializerTypeBinding, parentTypeList)
+					|| ClassRelationUtil.isInheritingContentOfTypes(initializerTypeBinding, parentTypeList)) {
+				String methodNameString = getSuitableMethodNameForType(parentTypeBinding);
 
-					if (ClassRelationUtil.isContentOfTypes(initializerTypeBinding, parentTypeList)
-							|| ClassRelationUtil.isInheritingContentOfTypes(initializerTypeBinding, parentTypeList)) {
-						String methodNameString = getSuitableMethodNameForType(parentTypeBinding);
-
-						if (methodNameString != null) {
-							String fieldName = fragmentNode.getName()
-								.getIdentifier();
-							initializersToReplace.put(fieldName, initializer);
-							methodNames.put(fieldName, methodNameString);
-						}
-					}
+				if (methodNameString != null) {
+					String fieldName = fragmentNode.getName()
+						.getIdentifier();
+					initializersToReplace.put(fieldName, initializer);
+					methodNames.put(fieldName, methodNameString);
+					return false;
 				}
 			}
 		}
-
+		excludeInitializer(initializer);
 		return false;
+	}
+
+	private void excludeInitializer(Expression initializer) {
+		if (initializer != null && initializer.getNodeType() == ASTNode.SIMPLE_NAME) {
+			String initializerName = ((SimpleName) initializer).getIdentifier();
+			excludedNames.add(initializerName);
+		}
 	}
 
 	private boolean verifyInitializerPrecondition(Expression initializer) {

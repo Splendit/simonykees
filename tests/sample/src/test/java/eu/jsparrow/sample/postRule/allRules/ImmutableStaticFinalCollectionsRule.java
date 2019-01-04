@@ -101,7 +101,14 @@ public class ImmutableStaticFinalCollectionsRule {
 
 	private static final List<String> CONSTANT_LIST_3 = new LinkedList<>();
 
+	/*
+	 * Should not change. Field is used as an initializer of non-final field
+	 */
+	private static final Map<String, Integer> EMPTY_INITIALIZER = new TreeMap<>();
+
 	private final List<String> CONSTANT_LIST_6 = new LinkedList<>();
+
+	private Map<String, Integer> idToNumber = EMPTY_INITIALIZER;
 
 	public void test() {
 		CONSTANT_LIST_3.add("foo");
