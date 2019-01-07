@@ -9,18 +9,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -131,39 +135,46 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	@Override
 	public boolean visit(VariableDeclarationFragment fragmentNode) {
 
-		if (fragmentNode.getParent() != null && ASTNode.FIELD_DECLARATION == fragmentNode.getParent()
-			.getNodeType()) {
-			FieldDeclaration parent = (FieldDeclaration) fragmentNode.getParent();
-			ITypeBinding parentTypeBinding = parent.getType()
-				.resolveBinding();
+		if (fragmentNode.getLocationInParent() != FieldDeclaration.FRAGMENTS_PROPERTY) {
+			excludeInitializer(fragmentNode.getInitializer());
+			return false;
+		}
+		FieldDeclaration parent = (FieldDeclaration) fragmentNode.getParent();
+		ITypeBinding parentTypeBinding = parent.getType()
+			.resolveBinding();
 
-			if (parentTypeBinding != null && ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isStatic)
-					&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isFinal)
-					&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isPrivate)) {
+		Expression initializer = fragmentNode.getInitializer();
+		if (parentTypeBinding != null && ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isStatic)
+				&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isFinal)
+				&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isPrivate)
+				&& verifyInitializerPrecondition(initializer)) {
 
-				Expression initializer = fragmentNode.getInitializer();
-				if (verifyInitializerPrecondition(initializer)) {
+			ITypeBinding initializerTypeBinding = initializer.resolveTypeBinding();
+			List<String> parentTypeList = Collections.singletonList(parentTypeBinding.getErasure()
+				.getQualifiedName());
 
-					ITypeBinding initializerTypeBinding = initializer.resolveTypeBinding();
-					List<String> parentTypeList = Collections.singletonList(parentTypeBinding.getErasure()
-						.getQualifiedName());
+			if (ClassRelationUtil.isContentOfTypes(initializerTypeBinding, parentTypeList)
+					|| ClassRelationUtil.isInheritingContentOfTypes(initializerTypeBinding, parentTypeList)) {
+				String methodNameString = getSuitableMethodNameForType(parentTypeBinding);
 
-					if (ClassRelationUtil.isContentOfTypes(initializerTypeBinding, parentTypeList)
-							|| ClassRelationUtil.isInheritingContentOfTypes(initializerTypeBinding, parentTypeList)) {
-						String methodNameString = getSuitableMethodNameForType(parentTypeBinding);
-
-						if (methodNameString != null) {
-							String fieldName = fragmentNode.getName()
-								.getIdentifier();
-							initializersToReplace.put(fieldName, initializer);
-							methodNames.put(fieldName, methodNameString);
-						}
-					}
+				if (methodNameString != null) {
+					String fieldName = fragmentNode.getName()
+						.getIdentifier();
+					initializersToReplace.put(fieldName, initializer);
+					methodNames.put(fieldName, methodNameString);
+					return false;
 				}
 			}
 		}
-
+		excludeInitializer(initializer);
 		return false;
+	}
+
+	private void excludeInitializer(Expression initializer) {
+		if (initializer != null && initializer.getNodeType() == ASTNode.SIMPLE_NAME) {
+			String initializerName = ((SimpleName) initializer).getIdentifier();
+			excludedNames.add(initializerName);
+		}
 	}
 
 	private boolean verifyInitializerPrecondition(Expression initializer) {
@@ -241,6 +252,38 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 		}
 
 		return true;
+	}
+
+	@Override
+	public boolean visit(ReturnStatement returnStatement) {
+		Expression expression = returnStatement.getExpression();
+		if (expression != null) {
+			excludeFields(expression);
+		}
+		return true;
+	}
+
+	@Override
+	public boolean visit(Assignment assignment) {
+		Expression rightHandSide = assignment.getRightHandSide();
+		excludeFields(rightHandSide);
+		return true;
+	}
+
+	private void excludeFields(Expression expression) {
+		if (expression.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return;
+		}
+
+		SimpleName simpleName = (SimpleName) expression;
+		IBinding typeBinding = simpleName.resolveBinding();
+		if (IBinding.VARIABLE != typeBinding.getKind()) {
+			return;
+		}
+		IVariableBinding variableBinding = (IVariableBinding) typeBinding;
+		if (variableBinding.isField()) {
+			this.excludedNames.add(variableBinding.getName());
+		}
 	}
 
 	@Override
