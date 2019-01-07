@@ -3,6 +3,8 @@ package eu.jsparrow.sample.preRule;
 import java.util.List;
 import java.util.function.Function;
 
+import eu.jsparrow.sample.utilities.Queue;
+
 /**
  * 
  * @author Matthias Webhofer
@@ -80,8 +82,29 @@ public class StatementLambdaToExpressionRule {
 		// i'm here
 		);
 	}
+	
+	public void discardedReturnType_shouldNotTranform() {
+		/*
+		 * SIM-1401
+		 */
+		Queue queue = new Queue();
+		queue.withLock(() -> {
+			generateNumber();
+		});
+	}
+	
+	public void noDiscardedReturnType_shouldTransform() {
+		Queue queue = new Queue();
+		queue.withLock(() -> {
+			doSomething(2);
+		});
+	}
 
 	private void doSomething(int element) {
 		System.out.println(element);
+	}
+	
+	private int generateNumber() {
+		return 1;
 	}
 }

@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -310,6 +311,10 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		boolean isOverloadedWrapperMethod = overloadedWrapperMethods.stream()
 			.anyMatch(method -> isOverloadedOnParamter(wrapperMethodBinding, method, index));
 
+		if (isOverloadedWrapperMethod && discardsReturnedType(methodInvocation)) {
+			return true;
+		}
+
 		Expression expression = methodInvocation.getExpression();
 		if (expression != null) {
 			ITypeBinding expressionBinidng = expression.resolveTypeBinding();
@@ -327,6 +332,21 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		}
 
 		return isOverloadedWrapperMethod;
+	}
+
+	private boolean discardsReturnedType(MethodInvocation methodInvocation) {
+		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return false;
+		}
+
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		ITypeBinding returnType = methodBinding.getReturnType();
+		if (returnType == null) {
+			return false;
+		}
+
+		String typeName = returnType.getName();
+		return !typeName.equals(PrimitiveType.VOID.toString());
 	}
 
 	/**
