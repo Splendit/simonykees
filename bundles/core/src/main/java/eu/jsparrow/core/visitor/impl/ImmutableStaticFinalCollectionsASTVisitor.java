@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -253,16 +253,16 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(ReturnStatement returnStatement) {
 		Expression expression = returnStatement.getExpression();
-		if(expression != null) {
+		if (expression != null) {
 			excludeFields(expression);
 		}
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(Assignment assignment) {
 		Expression rightHandSide = assignment.getRightHandSide();
@@ -271,17 +271,17 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	}
 
 	private void excludeFields(Expression expression) {
-		if(expression.getNodeType() != ASTNode.SIMPLE_NAME) {
+		if (expression.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return;
 		}
-		
+
 		SimpleName simpleName = (SimpleName) expression;
 		IBinding typeBinding = simpleName.resolveBinding();
-		if(IBinding.VARIABLE != typeBinding.getKind()) {
+		if (IBinding.VARIABLE != typeBinding.getKind()) {
 			return;
 		}
-		IVariableBinding variableBinding = (IVariableBinding)typeBinding;
-		if(variableBinding.isField()) {
+		IVariableBinding variableBinding = (IVariableBinding) typeBinding;
+		if (variableBinding.isField()) {
 			this.excludedNames.add(variableBinding.getName());
 		}
 	}
