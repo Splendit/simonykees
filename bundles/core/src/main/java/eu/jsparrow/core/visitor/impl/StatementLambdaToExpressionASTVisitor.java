@@ -58,7 +58,7 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 				boolean returnedValueDiscarded = returnsValue(expression);
 
 				if (returnedValueDiscarded && isWrappedInOverloadedMethod(lambdaExpression)) {
-						return true;
+					return true;
 				}
 
 				expressionToUse = expression;

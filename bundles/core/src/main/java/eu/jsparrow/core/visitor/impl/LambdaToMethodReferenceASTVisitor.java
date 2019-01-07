@@ -309,12 +309,12 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		}
 
 		boolean isOverloadedWrapperMethod = overloadedWrapperMethods.stream()
-				.anyMatch(method -> isOverloadedOnParamter(wrapperMethodBinding, method, index));
-		
-		if(isOverloadedWrapperMethod && discardsReturnedType(methodInvocation)) {
+			.anyMatch(method -> isOverloadedOnParamter(wrapperMethodBinding, method, index));
+
+		if (isOverloadedWrapperMethod && discardsReturnedType(methodInvocation)) {
 			return true;
 		}
-		
+
 		Expression expression = methodInvocation.getExpression();
 		if (expression != null) {
 			ITypeBinding expressionBinidng = expression.resolveTypeBinding();
@@ -335,16 +335,16 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	}
 
 	private boolean discardsReturnedType(MethodInvocation methodInvocation) {
-		if(methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return false;
 		}
-		
+
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		ITypeBinding returnType = methodBinding.getReturnType();
-		if(returnType == null) {
+		if (returnType == null) {
 			return false;
 		}
-		
+
 		String typeName = returnType.getName();
 		return !typeName.equals(PrimitiveType.VOID.toString());
 	}
