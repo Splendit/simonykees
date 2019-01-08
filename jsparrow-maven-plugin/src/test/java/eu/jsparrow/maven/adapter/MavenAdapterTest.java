@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -151,7 +152,7 @@ public class MavenAdapterTest {
 
 		assertTrue(actualPath.equals(expectedPath));
 	}
-	
+
 	@Test
 	public void findYamlFilePath_parentBaseDirIsNull_shouldReturnDefaultYamlFilePath() throws IOException {
 		MavenProject childProject = mock(MavenProject.class);
@@ -159,7 +160,7 @@ public class MavenAdapterTest {
 		String expectedPath = jsparrowYml.getAbsolutePath();
 		File childBaseDir = directory.newFolder("project_base_dir" + File.separator + "child_Base_Dir");
 		when(childProject.getBasedir()).thenReturn(childBaseDir);
-//		when(parentProject.getParent()).thenReturn(project);
+		// when(parentProject.getParent()).thenReturn(project);
 		when(childProject.getParent()).thenReturn(parentProject);
 		when(path.toFile()).thenReturn(jsparrowYml);
 		when(parentProject.getBasedir()).thenReturn(null);
@@ -224,6 +225,18 @@ public class MavenAdapterTest {
 		assertEquals(expectedUrl, configuration.getOrDefault("URL", ""));
 		assertEquals(expectedLicenseKey, configuration.getOrDefault("LICENSE", ""));
 		assertEquals(expectedMode, configuration.getOrDefault("STANDALONE.MODE", expectedMode));
+	}
+
+	@Test
+	public void setUp_multiModuleProjectWithNoModules_flagShouldBeFalse() throws Exception {
+		MavenParameters mavenParameters = new MavenParameters("list-rules");
+
+		when(project.getModules()).thenReturn(new LinkedList<>());
+		when(project.getPackaging()).thenReturn("jar");
+
+		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml);
+
+		assertTrue(mavenAdapter.isProjectConfigurationAdded());
 	}
 
 	class TestableMavenAdapter extends MavenAdapter {
