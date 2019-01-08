@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaModelException;
@@ -88,13 +89,20 @@ public class CompilationUnitProvider {
 
 			boolean isExcludedPackage = exludedPackages.contains(packageName);
 			boolean isExcludedClass = exludedClasses.contains(className);
-			boolean isIncluded = !isExcludedPackage && !isExcludedClass;
+
+			/*
+			 * Bugfix SIM-1338
+			 */
+			boolean isInfoFile = StringUtils.endsWithIgnoreCase(compUnit.getElementName(), "module-info.java") //$NON-NLS-1$
+					|| StringUtils.endsWithIgnoreCase(compUnit.getElementName(), "package-info.java"); //$NON-NLS-1$
+
+			boolean isIncluded = !isExcludedPackage && !isExcludedClass && !isInfoFile;
 			if (!isIncluded) {
 				logger.debug("Excluding compilation unit {}", className); //$NON-NLS-1$
 				if (isExcludedPackage) {
 					usedExcludedPackages.add(packageName);
 				}
-				if (isExcludedClass) {
+				if (isExcludedClass || isInfoFile) {
 					usedExcludedClasses.add(className);
 				}
 			}
