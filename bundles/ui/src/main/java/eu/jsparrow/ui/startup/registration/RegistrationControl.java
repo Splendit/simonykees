@@ -45,7 +45,7 @@ public class RegistrationControl extends Composite {
 	public RegistrationControl(Composite parent, int style) {
 		super(parent, style);
 		tabFolderParent = (TabFolder) parent;
-		
+
 		GridLayout overallLayout = new GridLayout();
 		overallLayout.marginHeight = 0;
 		overallLayout.marginWidth = 0;
