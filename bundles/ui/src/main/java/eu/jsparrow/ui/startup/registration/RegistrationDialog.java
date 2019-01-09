@@ -4,9 +4,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -33,30 +30,23 @@ public class RegistrationDialog extends Dialog {
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		Composite container = new Composite(parent, SWT.NONE);
-		GridLayout titleLayout = new GridLayout(1, false);
-		container.setLayout(titleLayout);
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		container.setLayoutData(gridData);
 
 		// Create the containing tab folder
-		final TabFolder tabFolder = new TabFolder(container, SWT.FILL);
-		GridLayout tabFolderLayout = new GridLayout(1, false);
-		tabFolder.setLayout(tabFolderLayout);
-		GridData tabFolderData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		tabFolder.setLayoutData(tabFolderData);
+		final TabFolder tabFolder = new TabFolder(parent, SWT.NONE);
 
 		// Create each tab and set its text, tool tip text,
 		// image, and control
-		TabItem registerTab = new TabItem(tabFolder, SWT.FILL);
+		TabItem registerTab = new TabItem(tabFolder, SWT.NONE);
 		registerTab.setText(Messages.RegistrationDialog_registerTabTitle);
 		registerTab.setToolTipText(Messages.RegistrationDialog_registerTabTooltip);
-		registerTab.setControl(getRegistrationControl(tabFolder));
+		registrationTabControl = new RegistrationControl(tabFolder, SWT.NONE);
+		registerTab.setControl(registrationTabControl);
 
-		TabItem activateTab = new TabItem(tabFolder, SWT.FILL);
+		TabItem activateTab = new TabItem(tabFolder, SWT.NONE);
 		activateTab.setText(Messages.RegistrationDialog_activateTabTitle);
 		activateTab.setToolTipText(Messages.RegistrationDialog_activateTabTooltip);
-		activateTab.setControl(getActivationControl(tabFolder));
+		activationTabControl = new ActivationControl(tabFolder, SWT.NONE);
+		activateTab.setControl(activationTabControl);
 
 		// Select the first tab (index is zero-based)
 		tabFolder.setSelection(0);
@@ -75,31 +65,7 @@ public class RegistrationDialog extends Dialog {
 			}
 		});
 
-		return container;
-	}
-
-	/**
-	 * Gets the control for tab one
-	 * 
-	 * @param tabFolder
-	 *            the parent tab folder
-	 * @return Control
-	 */
-	private Control getRegistrationControl(TabFolder tabFolder) {
-		registrationTabControl = new RegistrationControl(tabFolder, SWT.NONE);
-		return registrationTabControl.getControl();
-	}
-
-	/**
-	 * Gets the control for tab two
-	 * 
-	 * @param tabFolder
-	 *            the parent tab folder
-	 * @return Control
-	 */
-	private Control getActivationControl(TabFolder tabFolder) {
-		activationTabControl = new ActivationControl(tabFolder, SWT.NONE);
-		return activationTabControl.getControl();
+		return tabFolder;
 	}
 
 	@Override
@@ -116,8 +82,4 @@ public class RegistrationDialog extends Dialog {
 		newShell.setText(Messages.RegistrationDialog_registrationTitle);
 	}
 
-	@Override
-	protected Point getInitialSize() {
-		return new Point(450, 630);
-	}
 }

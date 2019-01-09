@@ -49,7 +49,7 @@ public class RegistrationFormCheckBox {
 		GridLayout checkBoxLayout = new GridLayout(2, false);
 		checkBoxContainer.setLayout(checkBoxLayout);
 		GridData checkBoxGridData = new GridData(SWT.LEFT, SWT.TOP, false, false);
-		checkBoxGridData.widthHint = 402;
+		checkBoxGridData.widthHint = 408;
 		checkBoxContainer.setLayoutData(checkBoxGridData);
 
 		checkBox = new Button(checkBoxContainer, SWT.CHECK | SWT.WRAP);
