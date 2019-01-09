@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaModelException;
@@ -93,8 +92,8 @@ public class CompilationUnitProvider {
 			/*
 			 * Bugfix SIM-1338
 			 */
-			boolean isInfoFile = StringUtils.endsWithIgnoreCase(compUnit.getElementName(), "module-info.java") //$NON-NLS-1$
-					|| StringUtils.endsWithIgnoreCase(compUnit.getElementName(), "package-info.java"); //$NON-NLS-1$
+			boolean isInfoFile = "module-info.java".equalsIgnoreCase(compUnit.getElementName()) //$NON-NLS-1$
+					|| "package-info.java".equalsIgnoreCase(compUnit.getElementName()); //$NON-NLS-1$
 
 			boolean isIncluded = !isExcludedPackage && !isExcludedClass && !isInfoFile;
 			if (!isIncluded) {
