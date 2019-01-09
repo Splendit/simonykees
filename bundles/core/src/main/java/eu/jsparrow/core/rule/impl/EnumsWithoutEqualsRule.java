@@ -27,7 +27,7 @@ public class EnumsWithoutEqualsRule extends RefactoringRuleImpl<EnumsWithoutEqua
 		this.id = ENUMS_WITHOUT_EQUALS_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.EnumsWithoutEqualsRule_name,
 				Messages.EnumsWithoutEqualsRule_description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS));
+				Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS, Tag.FREE));
 	}
 
 	@Override

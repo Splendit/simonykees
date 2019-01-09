@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.loop.stream;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -100,6 +101,9 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 	public boolean visit(EnhancedForStatement forLoop) {
 
 		Expression loopExpression = forLoop.getExpression();
+		if (isConditionalExpression(loopExpression)) {
+			return true;
+		}
 		SingleVariableDeclaration loopParameter = forLoop.getParameter();
 
 		IfStatement ifStatement = isConvertableInterruptedLoop(forLoop);
@@ -148,6 +152,9 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 		} else if ((returnStatement = isConvertableWithReturn(thenStatement, forLoop, loopParameter.getName(),
 				tailingMap)) != null) {
 			if (containsNonEffectiveVariable(tailingMap)) {
+				return true;
+			}
+			if (!isNonPrimitiveTypeCompatible(returnStatement.getExpression(), loopExpression, tailingMap)) {
 				return true;
 			}
 			List<Expression> boxingExpresions = new ArrayList<>();
@@ -301,7 +308,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 		ITypeBinding streamType;
 		String streamTypeBoxed;
 		if (tailingMap.isEmpty()) {
-			streamType = (loopExpression.resolveTypeBinding()).getTypeArguments()[0];
+			streamType = findCollectionType(loopExpression.resolveTypeBinding());
 		} else {
 			streamType = tailingMap.get(tailingMap.size() - 1)
 				.resolveTypeBinding();
@@ -332,6 +339,48 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			}
 		}
 		return orElseCandidate;
+	}
+
+	private boolean isNonPrimitiveTypeCompatible(Expression orElseExpression, Expression loopExpression,
+			List<Expression> tailingMap) {
+		ITypeBinding orElseType = orElseExpression.resolveTypeBinding();
+		ITypeBinding streamType;
+
+		if (orElseExpression.getNodeType() == ASTNode.NULL_LITERAL) {
+			return true;
+		}
+
+		if (ClassRelationUtil.isBoxedType(orElseType) || orElseType.isPrimitive()) {
+			return true;
+		}
+
+		if (tailingMap.isEmpty()) {
+			streamType = findCollectionType(loopExpression.resolveTypeBinding());
+		} else {
+			Expression lastMap = tailingMap.get(tailingMap.size() - 1);
+			streamType = lastMap.resolveTypeBinding();
+		}
+
+		if (streamType == null) {
+			return false;
+		}
+		return ClassRelationUtil.compareITypeBinding(orElseType, streamType) || ClassRelationUtil
+			.isInheritingContentOfTypes(orElseType, Collections.singletonList(streamType.getQualifiedName()));
+	}
+
+	private ITypeBinding findCollectionType(ITypeBinding expressionTypeBinding) {
+		ITypeBinding streamType;
+		if (expressionTypeBinding.isParameterizedType()) {
+			ITypeBinding[] typeArguments = expressionTypeBinding.getTypeArguments();
+			streamType = typeArguments[0];
+			return streamType;
+		}
+
+		ITypeBinding superType = expressionTypeBinding.getSuperclass();
+		if (superType != null) {
+			return findCollectionType(expressionTypeBinding.getSuperclass());
+		}
+		return null;
 	}
 
 	/**
@@ -454,7 +503,9 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 		ReturnStatement returnStatement = isReturnBlock(statement);
 		if (returnStatement != null) {
 			Expression returnedExpression = returnStatement.getExpression();
-			if (returnedExpression != null && ASTNode.NULL_LITERAL != returnedExpression.getNodeType()) {
+
+			if (returnedExpression != null && ASTNode.NULL_LITERAL != returnedExpression.getNodeType()
+					&& !containsUndefinedTypes(returnedExpression)) {
 				tailingMap.addAll(wrapNonIdentical(returnedExpression, parameter));
 				ReturnStatement followingReturnStatement = isFollowedByReturnStatement(forLoop);
 				if (followingReturnStatement != null && followingReturnStatement.getExpression() != null) {
@@ -463,6 +514,11 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			}
 		}
 		return null;
+	}
+
+	private boolean containsUndefinedTypes(Expression returnedExpression) {
+		ITypeBinding returnTypeBinding = returnedExpression.resolveTypeBinding();
+		return !isTypeSafe(returnTypeBinding);
 	}
 
 	/**

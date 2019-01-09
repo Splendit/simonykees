@@ -103,6 +103,34 @@ public class CompilationUnitProviderTest {
 		assertEquals(1, compilationUnits.size());
 		assertTrue(compilationUnits.contains(compUnitMock));
 	}
+	
+	/*
+	 * Bugfix SIM-1338
+	 */
+	@Test
+	public void getFilteredCompilationUnits_packageInfoFilesExcluded_shouldBeIgnored() throws Exception {
+		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
+		when(packageDeclarationMock.getElementName()).thenReturn("test.infofiles");
+		when(compUnitMock.getElementName()).thenReturn("package-info.java");
+		
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+		
+		assertTrue(compilationUnits.isEmpty());
+	}
+	
+	/*
+	 * Bugfix SIM-1338
+	 */
+	@Test
+	public void getFilteredCompilationUnits_moduleInfoFilesExcluded_shouldBeIgnored() throws Exception {
+		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
+		when(packageDeclarationMock.getElementName()).thenReturn("test.infofiles");
+		when(compUnitMock.getElementName()).thenReturn("module-info.java");
+		
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+		
+		assertTrue(compilationUnits.isEmpty());
+	}
 
 	@Test
 	public void containsExcludedClasses_emptyList_shouldReturnFalse() throws Exception {

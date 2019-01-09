@@ -27,7 +27,7 @@ public class PrimitiveBoxedForStringRule extends RefactoringRuleImpl<PrimitiveBo
 		this.id = PRIMITIVE_BOXED_FOR_STRING_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.PrimitiveBoxedForStringRule_name,
 				Messages.PrimitiveBoxedForStringRule_description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE));
+				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE, Tag.FREE));
 	}
 
 	@Override

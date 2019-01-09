@@ -24,8 +24,9 @@ public class RemoveEmptyStatementRule extends RefactoringRuleImpl<RemoveEmptySta
 	public RemoveEmptyStatementRule() {
 		this.visitorClass = RemoveEmptyStatementASTVisitor.class;
 		this.id = REMOVE_EMPTY_STATEMENT_RULE_ID;
-		this.ruleDescription = new RuleDescription(Messages.RemoveEmptyStatementRule_name, Messages.RemoveEmptyStatementRule_description,
-				Duration.ofMinutes(1), Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY));
+		this.ruleDescription = new RuleDescription(Messages.RemoveEmptyStatementRule_name,
+				Messages.RemoveEmptyStatementRule_description, Duration.ofMinutes(1),
+				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.FREE));
 	}
 
 	@Override
