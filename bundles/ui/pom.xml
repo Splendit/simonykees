@@ -26,6 +26,7 @@
 			${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
 			-libraryjars
 			${project.basedir}/../core/target/eu.jsparrow.core-${project.version}_proguard_base.jar
+			-ignorewarnings
 		</proguard.extra.options>
 	</properties>
 
