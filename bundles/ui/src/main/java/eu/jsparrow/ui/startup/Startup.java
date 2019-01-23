@@ -37,12 +37,6 @@ public class Startup implements IStartup {
 						.getShell();
 					new RegistrationDialog(activeShell).open();
 				}
-				if (SimonykeesPreferenceManager.getEnableIntro()) {
-					Shell activeShell = PlatformUI.getWorkbench()
-						.getActiveWorkbenchWindow()
-						.getShell();
-					new StartDialog(activeShell).open();
-				}
 				if (SimonykeesPreferenceManager.getEnableDashboard()) {
 					IWorkbenchPage page = PlatformUI.getWorkbench()
 						.getActiveWorkbenchWindow()
