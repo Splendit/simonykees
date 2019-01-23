@@ -67,3 +67,6 @@ buildNumber.properties
 # ignore idea files
 .idea
 *.iml
+
+# jenv
+.java-version
