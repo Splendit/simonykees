@@ -51,7 +51,7 @@ public class DependencyManager {
 	 * default Maven configuration should be the only time where this gets
 	 * relevant.
 	 */
-	private static final String MAVEN_ZIP_FILE = "apache-maven-3.5.2-bin.zip"; //$NON-NLS-1$
+	private static final String MAVEN_ZIP_FILE = "apache-maven-bin.zip"; //$NON-NLS-1$
 	private static final int BUFFER_SIZE = 4096;
 
 	/**

@@ -14,7 +14,7 @@ EOF
 
 TEST=false
 OBFUSCATION=false
-PRODUCTION=false 
+PRODUCTION=false
 
 # parse arguments
 while getopts ":top" option
@@ -30,6 +30,8 @@ done
 JSPARROW_TARGET_PATH="releng/eu.jsparrow.product/target/repository/plugins"
 PLUGIN_RESOURCES_PATH="jsparrow-maven-plugin/src/main/resources"
 MANIFEST_FILE_NAME="manifest.standalone"
+MAVEN_BIN_DOWNLOAD_URL="http://mirror.klaus-uwe.me/apache/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.zip"
+MAVEN_BIN_LOCAL_NAME="apache-maven-bin.zip"
 
 echo "Building jSparrow"
 
@@ -86,6 +88,14 @@ echo "Creating $MANIFEST_FILE_NAME"
 # list the contents of the build jsparrow plugins and redirect it to the necessary manifest.standalone in the maven plugins
 ls $JSPARROW_TARGET_PATH > $PLUGIN_RESOURCES_PATH/$MANIFEST_FILE_NAME
 
+# download maven binaries
+wget -O $PLUGIN_RESOURCES_PATH/$MAVEN_BIN_LOCAL_NAME $MAVEN_BIN_DOWNLOAD_URL
+
+if [ $? -ne 0 ]; then
+  echo "downloading maven binaries from $MAVEN_BIN_DOWNLOAD_URL failed!"
+  exit 4
+fi
+
 # build and install the jsparrow-maven-plugin
 cd jsparrow-maven-plugin
 
@@ -95,7 +105,7 @@ mvn clean install $PARAMETERS
 
 if [ $? -ne 0 ]; then
   echo "maven on jSparrow maven plugin failed!"
-  exit 4
+  exit 5
 fi
 
 echo
