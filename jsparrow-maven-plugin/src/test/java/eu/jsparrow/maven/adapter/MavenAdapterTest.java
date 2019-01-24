@@ -124,7 +124,7 @@ public class MavenAdapterTest {
 	public void findYamlFilePath_parentIsRootProject_shouldReturnRootYamlFilePath() throws IOException {
 		MavenProject childProject = mock(MavenProject.class);
 		String expectedPath = jsparrowYml.getAbsolutePath();
-		File childBaseDir = directory.newFolder("project_base_dir" + File.separator + "child_Base_Dir");
+		File childBaseDir = directory.newFolder("project_base_dir", "child_Base_Dir");
 		when(childProject.getBasedir()).thenReturn(childBaseDir);
 		when(childProject.getParent()).thenReturn(project);
 		when(path.toFile()).thenReturn(jsparrowYml);
@@ -141,7 +141,7 @@ public class MavenAdapterTest {
 		File parentBaseDir = directory.newFolder("parent-folder");
 		File parentYamlFile = new File(parentBaseDir.getAbsolutePath() + File.separator + "file.yaml");
 		parentYamlFile.createNewFile();
-		File childBaseDir = directory.newFolder("parent-folder" + File.separator + "child-folder");
+		File childBaseDir = directory.newFolder("parent-folder", "child-folder");
 		String expectedPath = parentYamlFile.getAbsolutePath();
 		when(path.toFile()).thenReturn(jsparrowYml);
 		when(parent.getBasedir()).thenReturn(parentBaseDir);
@@ -158,7 +158,7 @@ public class MavenAdapterTest {
 		MavenProject childProject = mock(MavenProject.class);
 		MavenProject parentProject = mock(MavenProject.class);
 		String expectedPath = jsparrowYml.getAbsolutePath();
-		File childBaseDir = directory.newFolder("project_base_dir" + File.separator + "child_Base_Dir");
+		File childBaseDir = directory.newFolder("project_base_dir", "child_Base_Dir");
 		when(childProject.getBasedir()).thenReturn(childBaseDir);
 		// when(parentProject.getParent()).thenReturn(project);
 		when(childProject.getParent()).thenReturn(parentProject);
