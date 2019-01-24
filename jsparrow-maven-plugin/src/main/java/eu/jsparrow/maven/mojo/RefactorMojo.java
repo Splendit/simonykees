@@ -37,6 +37,7 @@ public class RefactorMojo extends AbstractMojo {
 
 	private static final String JAVA_VERSION_PROPERTY_CONSTANT = "java.version"; //$NON-NLS-1$
 	private static final String JAVA_VERSION_1_8 = "1.8"; //$NON-NLS-1$
+	private static final String JAVA_VERSION_11 = "11"; //$NON-NLS-1$
 
 	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession mavenSession;
@@ -51,7 +52,7 @@ public class RefactorMojo extends AbstractMojo {
 	private String mavenHome;
 
 	/**
-	 * Path to the configuration file. 
+	 * Path to the configuration file.
 	 */
 	@Parameter(defaultValue = "jsparrow.yml", property = "configFile")
 	private File configFile;
@@ -63,19 +64,19 @@ public class RefactorMojo extends AbstractMojo {
 	private String profile;
 
 	/**
-	 * Use this parameter to use the default configuration. 
+	 * Use this parameter to use the default configuration.
 	 */
 	@Parameter(property = "defaultConfiguration")
 	protected boolean defaultConfiguration;
 
 	/**
-	 * Specify the license key to use. 
+	 * Specify the license key to use.
 	 */
 	@Parameter(property = "license")
 	private String license;
 
 	/**
-	 * Specify the license server to use. 
+	 * Specify the license server to use.
 	 */
 	@Parameter(property = "url")
 	private String url;
@@ -85,9 +86,9 @@ public class RefactorMojo extends AbstractMojo {
 
 		// With version 1.0.0 of jSparrow Maven Plugin, only JDK 8 is supported.
 		String javaVersion = System.getProperty(JAVA_VERSION_PROPERTY_CONSTANT);
-		if (!javaVersion.startsWith(JAVA_VERSION_1_8)) {
-			log.warn(Messages.RefactorMojo_supportJDK8);
-			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8);
+		if (!javaVersion.startsWith(JAVA_VERSION_1_8) && !javaVersion.startsWith(JAVA_VERSION_11)) {
+			log.warn(Messages.RefactorMojo_supportJDK8andJDK11);
+			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8andJDK11);
 		}
 
 		String mode = StandaloneMode.REFACTOR.name();

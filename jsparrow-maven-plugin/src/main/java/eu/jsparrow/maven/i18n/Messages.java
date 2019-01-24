@@ -42,7 +42,7 @@ public class Messages extends NLS {
 
 	public static String MavenAdapter_jSparrowAlreadyRunning;
 	
-	public static String RefactorMojo_supportJDK8;
+	public static String RefactorMojo_supportJDK8andJDK11;
 
 	static {
 		// initialize resource bundle
