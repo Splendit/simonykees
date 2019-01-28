@@ -31,8 +31,6 @@ public class SimonykeesPreferenceInitializer extends AbstractPreferenceInitializ
 					SimonykeesPreferenceManager.getDefaultProfileName());
 		}
 
-		preferenceStore.setDefault(SimonykeesPreferenceConstants.ENABLE_INTRO, true);
-
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.ENABLE_DASHBOARD, true);
 
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.DISABLE_REGISTER_SUGGESTION, false);
