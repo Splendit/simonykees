@@ -86,7 +86,7 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 		 * The loop expression bust be a collection
 		 */
 		Expression expression = loopNode.getExpression();
-		if (!isCollection(expression)) {
+		if (!isCollection(expression) || isConditionalExpression(expression)) {
 			return true;
 		}
 

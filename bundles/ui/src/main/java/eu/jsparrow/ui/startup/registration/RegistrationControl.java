@@ -11,7 +11,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -29,9 +28,10 @@ import eu.jsparrow.ui.util.LicenseUtil;
  * @since 3.0.0
  *
  */
-public class RegistrationControl {
+public class RegistrationControl extends Composite {
 
 	private Composite parentComposite;
+	private TabFolder tabFolderParent;
 
 	private RegistrationFormField firstName;
 	private RegistrationFormField lastName;
@@ -43,14 +43,20 @@ public class RegistrationControl {
 	private RegistrationFormCheckBox newsletterAgreeCheckBox;
 
 	public RegistrationControl(Composite parent, int style) {
-		parentComposite = new Composite(parent, style);
-		GridLayout titleLayout = new GridLayout(1, false);
-		parentComposite.setLayout(titleLayout);
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		parentComposite.setLayoutData(gridData);
+		super(parent, style);
+		tabFolderParent = (TabFolder) parent;
 
-		gridData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
-		gridData.verticalIndent = 5;
+		GridLayout overallLayout = new GridLayout();
+		overallLayout.marginHeight = 0;
+		overallLayout.marginWidth = 0;
+		this.setLayout(overallLayout);
+		this.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		parentComposite = new Composite(this, style);
+		parentComposite.setLayout(new GridLayout());
+		parentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		GridData gridData = new GridData(SWT.LEFT, SWT.TOP, true, false);
 		Label introLabel = new Label(parentComposite, SWT.NONE);
 		introLabel.setLayoutData(gridData);
 		introLabel.setText(Messages.RegistrationControl_introText);
@@ -58,9 +64,6 @@ public class RegistrationControl {
 		createUserDataForm(parentComposite);
 
 		createConditionsAgreementsForm(parentComposite);
-		
-		parent.layout();
-		parent.getShell().layout();
 	}
 
 	private void createUserDataForm(Composite composite) {
@@ -226,8 +229,7 @@ public class RegistrationControl {
 				Messages.RegistrationControl_registrationSuccessfulText + System.lineSeparator()
 						+ Messages.RegistrationControl_checkEmailForLicenseText,
 				MessageDialog.INFORMATION, Messages.RegistrationControl_registrationSuccessfulTitle)) {
-			TabFolder tabParent = (TabFolder) getControl().getParent();
-			tabParent.setSelection(1);
+			tabFolderParent.setSelection(1);
 		}
 
 	}
@@ -241,15 +243,6 @@ public class RegistrationControl {
 			resetToDefaultSelection();
 		}
 
-	}
-
-	/**
-	 * Get parent composite as control for the registration tab
-	 * 
-	 * @return parent composite as control
-	 */
-	public Control getControl() {
-		return parentComposite;
 	}
 
 	public void resetToDefaultSelection() {

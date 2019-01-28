@@ -278,6 +278,25 @@ public class TestMultiCatchRule {
 			break;
 		}
 	}
+	
+	public void reporingWithGenericMethods_shouldNotTransform(int i) throws FirstException, SecondException {
+		try {
+			if(i == 0) {
+				throw new FirstException();
+			} else {
+				throw new SecondException();
+			}
+			
+		} catch (FirstException e) {
+			report(e);
+		} catch (SecondException e) {
+			report(e);
+		}
+	}
+	
+	private <T extends Throwable> void report(T e) throws T {
+		
+	}
 
 	@SuppressWarnings("serial")
 	class FirstException extends Exception {

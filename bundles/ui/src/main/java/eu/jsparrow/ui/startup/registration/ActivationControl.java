@@ -12,7 +12,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -28,7 +27,7 @@ import eu.jsparrow.ui.util.LicenseUtil;
  * @since 3.0.0
  *
  */
-public class ActivationControl {
+public class ActivationControl extends Composite {
 
 	private Composite parentComposite;
 
@@ -40,11 +39,17 @@ public class ActivationControl {
 	private Button activateButton;
 
 	public ActivationControl(Composite parent, int style) {
-		parentComposite = new Composite(parent, style);
-		GridLayout titleLayout = new GridLayout(1, false);
-		parentComposite.setLayout(titleLayout);
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		parentComposite.setLayoutData(gridData);
+		super(parent, style);
+
+		GridLayout overallLayout = new GridLayout();
+		overallLayout.marginHeight = 0;
+		overallLayout.marginWidth = 0;
+		this.setLayout(overallLayout);
+		this.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		parentComposite = new Composite(this, style);
+		parentComposite.setLayout(new GridLayout());
+		parentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		GridData labelGridData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
 		labelGridData.verticalIndent = 5;
@@ -140,7 +145,7 @@ public class ActivationControl {
 						// if license is valid
 						if (valid) {
 							showLicenseValidDialog(display);
-							getControl().getShell()
+							parentComposite.getShell()
 								.close();
 							return;
 						} else {
@@ -190,15 +195,6 @@ public class ActivationControl {
 			licenseText.setText(""); //$NON-NLS-1$
 			resetToDefaultSelection();
 		}
-	}
-
-	/**
-	 * Get parent composite as control for the activation tab
-	 * 
-	 * @return parent composite as control
-	 */
-	public Control getControl() {
-		return parentComposite;
 	}
 
 	public void resetToDefaultSelection() {
