@@ -112,22 +112,6 @@ public class SimonykeesPreferenceManager {
 	}
 
 	/**
-	 * Returns the current selection for enabling intro on startup.
-	 * 
-	 * @return the boolean value if intro should be enabled
-	 */
-	public static boolean getEnableIntro() {
-		return store.getBoolean(SimonykeesPreferenceConstants.ENABLE_INTRO);
-	}
-
-	/**
-	 * Sets the current selection for enabling intro on startup.
-	 */
-	public static void setEnableIntro(boolean enabled) {
-		store.setValue(SimonykeesPreferenceConstants.ENABLE_INTRO, enabled);
-	}
-
-	/**
 	 * Returns the current selection for enabling dashboard on startup.
 	 * 
 	 * @return the boolean value if dashboard should be enabled
@@ -283,7 +267,6 @@ public class SimonykeesPreferenceManager {
 		store.setValue(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
 				store.getDefaultString(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT));
 
-		store.setValue(SimonykeesPreferenceConstants.ENABLE_INTRO, true);
 		store.setValue(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, true);
 
 		profiles.clear();

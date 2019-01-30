@@ -11,7 +11,6 @@ public class SimonykeesPreferenceConstants {
 
 	public static final String PROFILE_PREFIX = "profile.";
 	public static final String PROFILE_USE_OPTION_PREFIX = "useProfileOption";
-	public static final String ENABLE_INTRO = "enableIntro";
 	public static final String ENABLE_DASHBOARD = "enableDashboard";
 	public static final String DISABLE_REGISTER_SUGGESTION = "disableRegisterSuggestion";
 	public static final String RESOLVE_PACKAGES_RECURSIVELY = "resolvePackagesRecursively";
