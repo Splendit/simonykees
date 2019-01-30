@@ -43,7 +43,8 @@ public class Activator implements BundleActivator {
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
-	// SIM-1406 org.eclipse.equinox.ds has been replaced with org.apache.felix.scr
+	// SIM-1406 org.eclipse.equinox.ds has been replaced with
+	// org.apache.felix.scr
 	private static final String EQUINOX_DS_BUNDLE_NAME = "org.apache.felix.scr"; //$NON-NLS-1$
 
 	private RefactoringInvoker refactoringInvoker;
@@ -139,16 +140,29 @@ public class Activator implements BundleActivator {
 
 	private void refactor(BundleContext context) {
 		try {
-			String key = getLicenseKey(context);
-			String agentUrl = getAgentUrl(context);
-			licenseService = getStandaloneLicenseUtilService();
-			if (licenseService.validate(key, agentUrl)) {
-				refactoringInvoker.startRefactoring(context);
-			} else {
-				String message = Messages.StandaloneActivator_noValidLicenseFound;
-				logger.error(message);
-				setExitErrorMessage(context, message);
-			}
+
+			logger.warn("TODO: REACTIVATE LICENSE CHECK!!!!!!!!!");
+			refactoringInvoker.startRefactoring(context);
+
+			/*
+			 * TODO: reactivate the license check
+			 * 
+			 * license check has been deactivated because the NetLicensing
+			 * client doesn't work at all with java 11. see SIM-1430
+			 */
+
+			// String key = getLicenseKey(context);
+			// String agentUrl = getAgentUrl(context);
+			//
+			// licenseService = getStandaloneLicenseUtilService();
+			// if (licenseService.validate(key, agentUrl)) {
+			// refactoringInvoker.startRefactoring(context);
+			// } else {
+			// String message =
+			// Messages.StandaloneActivator_noValidLicenseFound;
+			// logger.error(message);
+			// setExitErrorMessage(context, message);
+			// }
 		} catch (StandaloneException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
