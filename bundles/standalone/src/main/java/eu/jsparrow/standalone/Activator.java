@@ -141,28 +141,17 @@ public class Activator implements BundleActivator {
 	private void refactor(BundleContext context) {
 		try {
 
-			logger.warn("TODO: REACTIVATE LICENSE CHECK!!!!!!!!!");
-			refactoringInvoker.startRefactoring(context);
+			String key = getLicenseKey(context);
+			String agentUrl = getAgentUrl(context);
 
-			/*
-			 * TODO: reactivate the license check
-			 * 
-			 * license check has been deactivated because the NetLicensing
-			 * client doesn't work at all with java 11. see SIM-1430
-			 */
-
-			// String key = getLicenseKey(context);
-			// String agentUrl = getAgentUrl(context);
-			//
-			// licenseService = getStandaloneLicenseUtilService();
-			// if (licenseService.validate(key, agentUrl)) {
-			// refactoringInvoker.startRefactoring(context);
-			// } else {
-			// String message =
-			// Messages.StandaloneActivator_noValidLicenseFound;
-			// logger.error(message);
-			// setExitErrorMessage(context, message);
-			// }
+			licenseService = getStandaloneLicenseUtilService();
+			if (licenseService.validate(key, agentUrl)) {
+				refactoringInvoker.startRefactoring(context);
+			} else {
+				String message = Messages.StandaloneActivator_noValidLicenseFound;
+				logger.error(message);
+				setExitErrorMessage(context, message);
+			}
 		} catch (StandaloneException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
