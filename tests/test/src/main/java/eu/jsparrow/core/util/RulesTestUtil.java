@@ -1,6 +1,8 @@
 package eu.jsparrow.core.util;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -52,6 +54,8 @@ public class RulesTestUtil {
 	public static final String BASE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/eu/jsparrow/sample";
 	public static final String PRERULE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/eu/jsparrow/sample/preRule";
 
+	private static final String JSPARROW_RT_JAR_PATH_KEY = "JSPARROW_RT_JAR_PATH";
+
 	private RulesTestUtil() {
 		// hiding
 	}
@@ -74,10 +78,27 @@ public class RulesTestUtil {
 
 	public static List<IClasspathEntry> getClassPathEntries(IPackageFragmentRoot root) throws Exception {
 		final List<IClasspathEntry> entries = new ArrayList<>();
+
+		IPath path = getPathToRtJar();
+		if (path != null) {
+			final IClasspathEntry rtJarEntry = JavaCore.newLibraryEntry(path, null, null);
+			entries.add(rtJarEntry);
+		} else {
+			String rtJarPathString = System.getenv(JSPARROW_RT_JAR_PATH_KEY);
+			if (rtJarPathString == null || !Files.exists(Paths.get(rtJarPathString))) {
+				throw new RuntimeException(
+						"Could not find java runtime library rt.jar. Is the JSPARROW_RT_JAR_PATH environment variable set?");
+			}
+
+			IPath rtJarPath = new Path(rtJarPathString);
+
+			final IClasspathEntry rtJarEntry = JavaCore.newLibraryEntry(rtJarPath, null, null);
+			entries.add(rtJarEntry);
+		}
+
 		final IClasspathEntry srcEntry = JavaCore.newSourceEntry(root.getPath(), EMPTY_PATHS, EMPTY_PATHS, null);
-		final IClasspathEntry rtJarEntry = JavaCore.newLibraryEntry(getPathToRtJar(), null, null);
+
 		entries.add(srcEntry);
-		entries.add(rtJarEntry);
 
 		return entries;
 	}
@@ -191,7 +212,7 @@ public class RulesTestUtil {
 		final String classPath = System.getProperty("sun.boot.class.path");
 		final int idx = StringUtils.indexOf(classPath, "rt.jar");
 		if (idx == -1) {
-			throw new RuntimeException("Could not find Java runtime library rt.jar");
+			return null;
 		}
 		final int end = idx + "rt.jar".length();
 		final int lastIdx = classPath.lastIndexOf(":", idx);
