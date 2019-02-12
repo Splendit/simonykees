@@ -2,7 +2,7 @@
 bin/
 tmp/
 lib/
-!lib/netlicensing-client-*.jar
+!bundles/license.netlicensing/lib/netlicensing-client-*.jar
 *.tmp
 *.bak
 *.swp
