@@ -1,6 +1,25 @@
 package eu.jsparrow.maven.adapter;
 
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.*;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.AGENT_URL;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.ALL_PROJECT_IDENTIFIERS;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.CONFIG_FILE_PATH;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.DEBUG_ENABLED;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.FRAMEWORK_STORAGE_VALUE;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.HAS_PARENT;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.LICENSE_KEY;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.LIST_RULES_SELECTED_ID;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.NATURE_IDS;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.OSGI_INSTANCE_AREA_CONSTANT;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.PROJECT_JAVA_VERSION;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.PROJECT_NAME_CONSTANT;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.PROJECT_PATH_CONSTANT;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.ROOT_CONFIG_PATH;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.SELECTED_PROFILE;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.SOURCE_FOLDER;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.STANDALONE_MODE_KEY;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.USER_DIR;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.USE_DEFAULT_CONFIGURATION;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -37,6 +56,7 @@ public class MavenAdapter {
 	private MavenProject rootProject;
 	private Set<String> sessionProjects;
 	private boolean jsparrowAlreadyRunningError = false;
+	private boolean projectConfigurationAdded = false;
 
 	public MavenAdapter(MavenProject rootProject, Log log) {
 		this.rootProject = rootProject;
@@ -79,6 +99,7 @@ public class MavenAdapter {
 		for (MavenProject mavenProject : projects) {
 			if (!MavenProjectUtil.isAggregateProject(mavenProject)) {
 				addProjectConfiguration(mavenProject, defaultYamlFile);
+				projectConfigurationAdded = true;
 			}
 		}
 		log.info(Messages.MavenAdapter_allProjectsLoaded);
@@ -273,4 +294,9 @@ public class MavenAdapter {
 	public Map<String, String> getConfiguration() {
 		return configuration;
 	}
+
+	public boolean isProjectConfigurationAdded() {
+		return projectConfigurationAdded;
+	}
+
 }

@@ -6,6 +6,8 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.sample.utilities.Queue;
+
 /**
  * 
  * @author Matthias Webhofer
@@ -63,7 +65,26 @@ public class StatementLambdaToExpressionRule {
 		);
 	}
 
+	public void discardedReturnType_shouldNotTranform() {
+		/*
+		 * SIM-1401
+		 */
+		Queue queue = new Queue();
+		queue.withLock(() -> {
+			generateNumber();
+		});
+	}
+
+	public void noDiscardedReturnType_shouldTransform() {
+		Queue queue = new Queue();
+		queue.withLock(() -> doSomething(2));
+	}
+
 	private void doSomething(int element) {
 		logger.info(String.valueOf(element));
+	}
+
+	private int generateNumber() {
+		return 1;
 	}
 }

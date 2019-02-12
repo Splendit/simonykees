@@ -19,11 +19,14 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class RemoveEmptyStatementRule extends RefactoringRuleImpl<RemoveEmptyStatementASTVisitor> {
 
+	public static final String REMOVE_EMPTY_STATEMENT_RULE_ID = "RemoveEmptyStatement"; //$NON-NLS-1$
+
 	public RemoveEmptyStatementRule() {
 		this.visitorClass = RemoveEmptyStatementASTVisitor.class;
-		this.id = "RemoveEmptyStatement"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.RemoveEmptyStatementRule_name, Messages.RemoveEmptyStatementRule_description,
-				Duration.ofMinutes(1), Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY));
+		this.id = REMOVE_EMPTY_STATEMENT_RULE_ID;
+		this.ruleDescription = new RuleDescription(Messages.RemoveEmptyStatementRule_name,
+				Messages.RemoveEmptyStatementRule_description, Duration.ofMinutes(1),
+				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.FREE));
 	}
 
 	@Override
@@ -31,4 +34,8 @@ public class RemoveEmptyStatementRule extends RefactoringRuleImpl<RemoveEmptySta
 		return JavaCore.VERSION_1_1;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

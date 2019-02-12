@@ -19,13 +19,15 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class RemoveToStringOnStringRule extends RefactoringRuleImpl<RemoveToStringOnStringASTVisitor> {
 
+	public static final String REMOVE_TO_STRING_ON_STRING_RULE_ID = "RemoveToStringOnString"; //$NON-NLS-1$
+
 	public RemoveToStringOnStringRule() {
 		super();
 		this.visitorClass = RemoveToStringOnStringASTVisitor.class;
-		this.id = "RemoveToStringOnString"; //$NON-NLS-1$
+		this.id = REMOVE_TO_STRING_ON_STRING_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.RemoveToStringOnStringRule_name,
 				Messages.RemoveToStringOnStringRule_description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE));
+				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE, Tag.FREE));
 	}
 
 	@Override
@@ -33,4 +35,8 @@ public class RemoveToStringOnStringRule extends RefactoringRuleImpl<RemoveToStri
 		return JavaCore.VERSION_1_1;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

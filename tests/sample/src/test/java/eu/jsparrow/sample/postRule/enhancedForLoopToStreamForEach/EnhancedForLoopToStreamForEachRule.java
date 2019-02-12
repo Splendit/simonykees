@@ -269,9 +269,9 @@ public class EnhancedForLoopToStreamForEachRule {
 			TestClass tc = new TestClass(1);
 		}
 
-		((List) stringList1).forEach(o -> {
+		for (Object o : (List) stringList1) {
 			System.out.println(o);
-		});
+		}
 
 		return "";
 	}

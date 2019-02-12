@@ -40,7 +40,8 @@ public class StandaloneLoader {
 	 */
 	public void loadStandalone(MavenAdapter mavenAdapter, DependencyManager dependencyManager)
 			throws InterruptedException, MojoExecutionException, BundleException {
-		
+
+		checkMavenModules(mavenAdapter);
 		dependencyManager.copyDependencies(rootProject);
 		loadStandalone(mavenAdapter);
 	}
@@ -61,7 +62,15 @@ public class StandaloneLoader {
 	 */
 	public void loadStandalone(MavenAdapter mavenAdapter)
 			throws InterruptedException, MojoExecutionException, BundleException {
+		checkMavenModules(mavenAdapter);
 		Map<String, String> configuration = mavenAdapter.getConfiguration();
 		bundleStarter.runStandalone(configuration);
+	}
+
+	private void checkMavenModules(MavenAdapter mavenAdapter) throws MojoExecutionException {
+		if (!mavenAdapter.isProjectConfigurationAdded()) {
+			throw new MojoExecutionException(
+					"There aren't any modules definded in the parent POM for this multi-module maven project."); //$NON-NLS-1$
+		}
 	}
 }

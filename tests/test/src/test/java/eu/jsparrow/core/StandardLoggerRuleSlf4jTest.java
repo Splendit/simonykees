@@ -23,6 +23,8 @@ public class StandardLoggerRuleSlf4jTest extends SingleRuleTest {
 	private static final String STANDARD_FILE = "TestStandardLoggerRule.java";
 	private static final String CONFLICT_FILE = "TestStandardLoggerConflictRule.java";
 	private static final String EXISTING_LOGGER_FILE = "TestStandardLoggerExistingSlf4jLogger.java";
+	private static final String EXISTING_NONSTATIC_LOGGER_FILE = "TestStandardLoggerExistingNonStaticSlf4jLogger.java";
+	private static final String EXISTING_NOMODIFIERS_LOGGER_FILE = "TestStandardLoggerExistingNoModifiersSlf4jLogger.java";
 	private static final String POSTRULE_SUBDIRECTORY = "standardLoggerSlf4j";
 
 	private StandardLoggerRule rule;
@@ -41,45 +43,27 @@ public class StandardLoggerRuleSlf4jTest extends SingleRuleTest {
 
 	@Test
 	public void testTransformationWithDefaultFile() throws Exception {
-		Path preRule = getPreRuleFile(STANDARD_FILE);
-		Path postRule = getPostRuleFile(STANDARD_FILE, POSTRULE_SUBDIRECTORY);
-
-		RulesTestUtil.addToClasspath(testProject,
-				Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25")));
-		RulesTestUtil.addToClasspath(testProject, RulesTestUtil.getClassPathEntries(root));
-		rule.calculateEnabledForProject(testProject);
-
-		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
-
-		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
-		assertEquals(expected, actual);
+		testTransformationWithFile(STANDARD_FILE);
 	}
 
 	@Test
 	public void testTransformationWithConflictFile() throws Exception {
-		Path preRule = getPreRuleFile(CONFLICT_FILE);
-		Path postRule = getPostRuleFile(CONFLICT_FILE, POSTRULE_SUBDIRECTORY);
-
-		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
-
-		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
-		assertEquals(expected, actual);
+		testTransformationWithFile(CONFLICT_FILE);
 	}
 
 	@Test
 	public void testTransformationWithExistingLoggerFile() throws Exception {
-		Path preRule = getPreRuleFile(EXISTING_LOGGER_FILE);
-		Path postRule = getPostRuleFile(EXISTING_LOGGER_FILE, POSTRULE_SUBDIRECTORY);
+		testTransformationWithFile(EXISTING_LOGGER_FILE);
+	}
 
-		RulesTestUtil.addToClasspath(testProject,
-				Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25")));
-		RulesTestUtil.addToClasspath(testProject, RulesTestUtil.getClassPathEntries(root));
-		rule.calculateEnabledForProject(testProject);
+	@Test
+	public void testTransformationWithExistingNonStaticLoggerFile() throws Exception {
+		testTransformationWithFile(EXISTING_NONSTATIC_LOGGER_FILE);
+	}
 
-		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
-
-		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
-		assertEquals(expected, actual);
+	@Test
+	public void testTransformationWithExistingNoModifiersLoggerFile() throws Exception {
+		testTransformationWithFile(EXISTING_NOMODIFIERS_LOGGER_FILE);
 	}
 
 	@Test
@@ -101,4 +85,18 @@ public class StandardLoggerRuleSlf4jTest extends SingleRuleTest {
 		assertTrue(rule.isEnabled());
 	}
 
+	private void testTransformationWithFile(String file) throws Exception {
+		Path preRule = getPreRuleFile(file);
+		Path postRule = getPostRuleFile(file, POSTRULE_SUBDIRECTORY);
+
+		RulesTestUtil.addToClasspath(testProject,
+				Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25")));
+		RulesTestUtil.addToClasspath(testProject, RulesTestUtil.getClassPathEntries(root));
+		rule.calculateEnabledForProject(testProject);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
 }

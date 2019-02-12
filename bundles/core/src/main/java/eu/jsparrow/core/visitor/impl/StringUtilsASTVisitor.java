@@ -63,10 +63,6 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String TO_LOWER_CASE = "toLowerCase"; //$NON-NLS-1$
 	private static final String LOWER_CASE = "lowerCase"; //$NON-NLS-1$
 
-	public StringUtilsASTVisitor() {
-		super();
-	}
-
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		boolean clashingImports = false;
@@ -86,10 +82,18 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 		 * Check if there is another import declaration conflicting with
 		 * org.apache.commons.lang3.StringUtils
 		 */
-		if (!clashingImports) {
-			List<ImportDeclaration> imports = ASTNodeUtil.returnTypedList(compilationUnit.imports(),
-					ImportDeclaration.class);
 
+		List<ImportDeclaration> imports = ASTNodeUtil.returnTypedList(compilationUnit.imports(),
+				ImportDeclaration.class);
+
+		if (!clashingImports) {
+			String stringUtilsTypeName = STRING_UTILS + ".java"; //$NON-NLS-1$
+			clashingImports = imports.stream()
+				.anyMatch(importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration,
+						stringUtilsTypeName));
+		}
+
+		if (!clashingImports) {
 			for (ImportDeclaration importDeclaration : imports) {
 				Name qualifiedName = importDeclaration.getName();
 				String fullyQualifiedName = qualifiedName.getFullyQualifiedName();

@@ -2,8 +2,8 @@ package eu.jsparrow.standalone;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -127,8 +127,7 @@ public class StandaloneConfigTest {
 
 		config = mock(YAMLConfig.class);
 
-		standaloneConfig = new TestableStandaloneConfig(path.toString(), "1.8"); //$NON-NLS-1$ ,
-																					// //$NON-NLS-2$
+		standaloneConfig = new TestableStandaloneConfig(path.toString(), "1.8"); //$NON-NLS-1$
 		hasRefactoringStates = true;
 	}
 

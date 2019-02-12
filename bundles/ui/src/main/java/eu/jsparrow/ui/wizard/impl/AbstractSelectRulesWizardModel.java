@@ -234,6 +234,12 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 	}
 
+	public boolean selectionContainsNonFreemiumRules() {
+		return selection.stream()
+			.map(object -> (RefactoringRule) object)
+			.anyMatch(rule -> !rule.isFree());
+	}
+
 	private int indexOfRuleInSortedList(RefactoringRule searchedRule) {
 		final List<RefactoringRule> sortedRules = RulesContainer.getAllRules(false);
 		for (int i = 0; i < sortedRules.size(); i++) {

@@ -42,6 +42,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Lists all rules as checkboxes and a description for the currently selected
@@ -75,6 +76,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	private boolean forcedSelectLeft = false;
 	private boolean forcedSelectRight = false;
 	private SelectionSide latestSelectionSide = SelectionSide.NONE;
+
+	private LicenseUtil licenseUtil = LicenseUtil.get();
 
 	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
@@ -450,11 +453,13 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			.getDescription();
 		String requirementsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
 		String minJavaVersionLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
-		String minJavaVersionValue = rule.getRequiredJavaVersion()
-			.toString();
+		String minJavaVersionValue = rule.getRequiredJavaVersion();
 		String requiredLibrariesLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
 		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
 				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
+		String jSparrowStarterValue = (rule.isFree() && licenseUtil.isFreeLicense())
+				? Messages.AbstractSelectRulesWizardPage_freemiumRegirementsMessage + lineDelimiter
+				: ""; //$NON-NLS-1$
 		String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 		String tagsValue = StringUtils.join(rule.getRuleDescription()
 			.getTags()
@@ -464,8 +469,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		String descriptionText = name + lineDelimiter + lineDelimiter + description + lineDelimiter + lineDelimiter
 				+ requirementsLabel + lineDelimiter + minJavaVersionLabel + minJavaVersionValue + lineDelimiter
-				+ requiredLibrariesLabel + requiredLibrariesValue + lineDelimiter + lineDelimiter + tagsLabel
-				+ lineDelimiter + tagsValue;
+				+ requiredLibrariesLabel + requiredLibrariesValue + lineDelimiter + jSparrowStarterValue + lineDelimiter
+				+ tagsLabel + lineDelimiter + tagsValue;
 
 		FontData data = descriptionStyledText.getFont()
 			.getFontData()[0];
@@ -474,6 +479,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		Font normalTitle = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), data.getStyle());
 		Color unsetisfiedRequirementsColor = getShell().getDisplay()
 			.getSystemColor(SWT.COLOR_RED);
+		Color jSparrowStarterColor = getShell().getDisplay()
+			.getSystemColor(SWT.COLOR_GREEN);
 
 		StyleRange ruleNameStyleRange = new StyleRange();
 		ruleNameStyleRange.start = 0;
@@ -501,12 +508,22 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		requiredLibrariesLabelStyleRange.length = requiredLibrariesLabel.length();
 		requiredLibrariesLabelStyleRange.font = normalTitle;
 
+		StyleRange jSparrowStarterValueStyleRange = new StyleRange();
+		requiredLibrariesLabelStyleRange.start = name.length() + lineDelimiter.length() + lineDelimiter.length()
+				+ description.length() + lineDelimiter.length() + lineDelimiter.length() + requirementsLabel.length()
+				+ lineDelimiter.length() + minJavaVersionLabel.length() + minJavaVersionValue.length()
+				+ lineDelimiter.length() + requiredLibrariesLabel.length() + requiredLibrariesValue.length()
+				+ lineDelimiter.length();
+		requiredLibrariesLabelStyleRange.length = jSparrowStarterValue.length();
+		requiredLibrariesLabelStyleRange.font = paragraphTitle;
+		requiredLibrariesLabelStyleRange.foreground = jSparrowStarterColor;
+
 		StyleRange tagsLabelStyleRange = new StyleRange();
 		tagsLabelStyleRange.start = name.length() + lineDelimiter.length() + lineDelimiter.length()
 				+ description.length() + lineDelimiter.length() + lineDelimiter.length() + requirementsLabel.length()
 				+ lineDelimiter.length() + minJavaVersionLabel.length() + minJavaVersionValue.length()
 				+ lineDelimiter.length() + requiredLibrariesLabel.length() + requiredLibrariesValue.length()
-				+ lineDelimiter.length() + lineDelimiter.length();
+				+ lineDelimiter.length() + jSparrowStarterValue.length() + lineDelimiter.length();
 		tagsLabelStyleRange.length = tagsLabel.length();
 		tagsLabelStyleRange.font = paragraphTitle;
 
@@ -521,6 +538,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		descriptionStyledText.setStyleRange(requirementsLabelStyleRange);
 		descriptionStyledText.setStyleRange(minJavaVersionLabelStyleRange);
 		descriptionStyledText.setStyleRange(requiredLibrariesLabelStyleRange);
+		descriptionStyledText.setStyleRange(jSparrowStarterValueStyleRange);
 		descriptionStyledText.setStyleRange(tagsLabelStyleRange);
 
 		if (!rule.isSatisfiedJavaVersion()) {
@@ -549,7 +567,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				+ lineDelimiter.length() + lineDelimiter.length() + description.length() + lineDelimiter.length()
 				+ lineDelimiter.length() + requirementsLabel.length() + lineDelimiter.length());
 
-		descriptionStyledText.setLineBullet(requirementsBulletingStartLine, 2, bullet0);
+		descriptionStyledText.setLineBullet(requirementsBulletingStartLine, jSparrowStarterValue.isEmpty() ? 2 : 3,
+				bullet0);
 	}
 
 	private boolean selectionContainsEnabledEntry(List<Object> selection) {
@@ -571,6 +590,18 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		} else if (model.getSelectionAsList()
 			.isEmpty()) {
 			((StatusInfo) fSelectionStatus).setError(Messages.AbstractSelectRulesWizardPage_error_NoRulesSelected);
+		} else if (licenseUtil.isFreeLicense()) {
+			if (licenseUtil.isActiveRegistration()) {
+				if (model.selectionContainsNonFreemiumRules()) {
+					((StatusInfo) fSelectionStatus)
+						.setWarning(Messages.AbstractSelectRulesWizardPage_notOnlyFreemiumSelected_statusInfoMessage);
+				} else {
+					fSelectionStatus = new StatusInfo();
+				}
+			} else {
+				((StatusInfo) fSelectionStatus)
+					.setWarning(Messages.AbstractSelectRulesWizardPage_neitherRegisteredNorLicensed_statusInfoMessage);
+			}
 		} else {
 			fSelectionStatus = new StatusInfo();
 		}

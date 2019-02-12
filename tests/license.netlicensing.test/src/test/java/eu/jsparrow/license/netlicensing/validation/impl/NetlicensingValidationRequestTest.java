@@ -1,19 +1,21 @@
 package eu.jsparrow.license.netlicensing.validation.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 import com.labs64.netlicensing.exception.RestException;
-
-import static org.mockito.Matchers.*;
 
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
@@ -48,10 +50,9 @@ public class NetlicensingValidationRequestTest {
 		assertEquals(expected, result);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test(expected = ValidationException.class)
 	public void validate_withNetlicensingException_returnsInvalidValidationResult() throws Exception {
-		when(licenseeService.validate(any(), anyString(), any(ValidationParameters.class)))
+		when(licenseeService.validate(any(), anyString(), nullable(ValidationParameters.class)))
 			.thenThrow(RestException.class);
 
 		validationRequest.send("key", null);

@@ -88,13 +88,20 @@ public class CompilationUnitProvider {
 
 			boolean isExcludedPackage = exludedPackages.contains(packageName);
 			boolean isExcludedClass = exludedClasses.contains(className);
-			boolean isIncluded = !isExcludedPackage && !isExcludedClass;
+
+			/*
+			 * Bugfix SIM-1338
+			 */
+			boolean isInfoFile = "module-info.java".equalsIgnoreCase(compUnit.getElementName()) //$NON-NLS-1$
+					|| "package-info.java".equalsIgnoreCase(compUnit.getElementName()); //$NON-NLS-1$
+
+			boolean isIncluded = !isExcludedPackage && !isExcludedClass && !isInfoFile;
 			if (!isIncluded) {
 				logger.debug("Excluding compilation unit {}", className); //$NON-NLS-1$
 				if (isExcludedPackage) {
 					usedExcludedPackages.add(packageName);
 				}
-				if (isExcludedClass) {
+				if (isExcludedClass || isInfoFile) {
 					usedExcludedClasses.add(className);
 				}
 			}
