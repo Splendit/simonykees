@@ -51,6 +51,10 @@ public class MavenAdapter {
 
 	public static final String DOT = "."; //$NON-NLS-1$
 
+	public static final String STATISTICS_START_TIME = "STATISTICS_START_TIME"; //$NON-NLS-1$
+	public static final String STATISTICS_REPO_OWNER = "STATISTICS_REPO_OWNER"; //$NON-NLS-1$
+	public static final String STATISTICS_REPO_NAME = "STATISTICS_REPO_NAME"; //$NON-NLS-1$
+	
 	private Log log;
 	private Map<String, String> configuration = new HashMap<>();
 	private MavenProject rootProject;

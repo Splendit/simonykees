@@ -328,6 +328,7 @@ public class RefactoringInvoker {
 			 * parent is enough to derive that we re dealing with a multimodule
 			 * project.
 			 */
+			boolean isChildModule = Boolean.parseBoolean(context.getProperty(HAS_PARENT + DOT + id));
 			if (excludedModules.contains(projectName)) {
 				/*
 				 * Skip adding StandaloneConfig for excluded module. Checks if
