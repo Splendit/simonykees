@@ -32,8 +32,10 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GlyphMetrics;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -55,6 +57,12 @@ import eu.jsparrow.ui.util.LicenseUtil;
  */
 @SuppressWarnings("restriction") // StatusInfo is internal
 public abstract class AbstractSelectRulesWizardPage extends WizardPage {
+	
+	private static class SelectedRule {
+		public static int start=0;
+		public static int end=0;
+		public static String link="http://www.google.com/";	
+	}
 
 	protected AbstractSelectRulesWizardModel model;
 	protected AbstractSelectRulesWizardControler controler;
@@ -359,6 +367,12 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		gridData.minimumHeight = 110;
 		descriptionStyledText.setLayoutData(gridData);
 		descriptionStyledText.setMargins(2, 2, 2, 2);
+		descriptionStyledText.addListener(SWT.MouseDown, event -> {
+			int offset = descriptionStyledText.getOffsetAtPoint(new Point(event.x, event.y));
+			if (offset != -1 && SelectedRule.start < offset && offset < SelectedRule.end) {
+				Program.launch(SelectedRule.link);
+			}
+		});
 	}
 
 	/**
@@ -446,6 +460,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	 * @param rule
 	 */
 	private void createTextForDescription(RefactoringRule rule) {
+		
 		String lineDelimiter = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
 		String name = rule.getRuleDescription()
 			.getName();
@@ -466,11 +481,12 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			.stream()
 			.map(Tag::getTagNames)
 			.collect(Collectors.toList()), "  "); //$NON-NLS-1$
+		
 
 		String descriptionText = name + lineDelimiter + lineDelimiter + description + lineDelimiter + lineDelimiter
 				+ requirementsLabel + lineDelimiter + minJavaVersionLabel + minJavaVersionValue + lineDelimiter
 				+ requiredLibrariesLabel + requiredLibrariesValue + lineDelimiter + jSparrowStarterValue + lineDelimiter
-				+ tagsLabel + lineDelimiter + tagsValue;
+				+ tagsLabel + lineDelimiter + tagsValue + lineDelimiter + lineDelimiter + SelectedRule.link;
 
 		FontData data = descriptionStyledText.getFont()
 			.getFontData()[0];
@@ -486,6 +502,10 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		ruleNameStyleRange.start = 0;
 		ruleNameStyleRange.length = name.length();
 		ruleNameStyleRange.font = ruleName;
+		
+				
+			descriptionStyledText.setText(descriptionText);
+			descriptionStyledText.setStyleRange(ruleNameStyleRange);
 
 		StyleRange requirementsLabelStyleRange = new StyleRange();
 		requirementsLabelStyleRange.start = name.length() + lineDelimiter.length() + lineDelimiter.length()
@@ -526,6 +546,18 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				+ lineDelimiter.length() + jSparrowStarterValue.length() + lineDelimiter.length();
 		tagsLabelStyleRange.length = tagsLabel.length();
 		tagsLabelStyleRange.font = paragraphTitle;
+		
+		StyleRange htmlDocumentationLink = new StyleRange();
+		SelectedRule.start = name.length() + lineDelimiter.length() + lineDelimiter.length()
+		+ description.length() + lineDelimiter.length() + lineDelimiter.length() + requirementsLabel.length()
+		+ lineDelimiter.length() + minJavaVersionLabel.length() + minJavaVersionValue.length()
+		+ lineDelimiter.length() + requiredLibrariesLabel.length() + requiredLibrariesValue.length()
+		+ lineDelimiter.length() + jSparrowStarterValue.length() + lineDelimiter.length() + tagsLabel.length() + lineDelimiter.length() + tagsValue.length() + lineDelimiter.length()+ lineDelimiter.length();
+		htmlDocumentationLink.start = SelectedRule.start;
+		htmlDocumentationLink.length = SelectedRule.link.length();
+		SelectedRule.end = SelectedRule.start + SelectedRule.link.length();
+		htmlDocumentationLink.font = paragraphTitle;
+		
 
 		StyleRange style0 = new StyleRange();
 		style0.metrics = new GlyphMetrics(0, 0, 40);
@@ -540,6 +572,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		descriptionStyledText.setStyleRange(requiredLibrariesLabelStyleRange);
 		descriptionStyledText.setStyleRange(jSparrowStarterValueStyleRange);
 		descriptionStyledText.setStyleRange(tagsLabelStyleRange);
+		descriptionStyledText.setStyleRange(htmlDocumentationLink);
+		
 
 		if (!rule.isSatisfiedJavaVersion()) {
 			StyleRange minJavaVersionUnsatisfiedValueStyleRange = new StyleRange();
@@ -568,7 +602,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				+ lineDelimiter.length() + requirementsLabel.length() + lineDelimiter.length());
 
 		descriptionStyledText.setLineBullet(requirementsBulletingStartLine, jSparrowStarterValue.isEmpty() ? 2 : 3,
-				bullet0);
+				bullet0);		
 	}
 
 	private boolean selectionContainsEnabledEntry(List<Object> selection) {
