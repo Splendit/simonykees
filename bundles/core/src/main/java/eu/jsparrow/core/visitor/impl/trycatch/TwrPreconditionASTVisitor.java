@@ -112,7 +112,7 @@ class TwrPreconditionASTVisitor extends ASTVisitor {
 			.getIdentifier()) && invocation.arguments()
 				.isEmpty()) {
 			Expression expression = invocation.getExpression();
-			if (ASTNode.SIMPLE_NAME == expression.getNodeType()) {
+			if (expression != null && ASTNode.SIMPLE_NAME == expression.getNodeType()) {
 				SimpleName simpleName = (SimpleName) expression;
 				if (targetName.getIdentifier()
 					.equals(simpleName.getIdentifier())) {
