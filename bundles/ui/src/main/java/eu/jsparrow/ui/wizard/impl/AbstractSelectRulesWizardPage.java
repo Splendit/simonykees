@@ -499,6 +499,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		Color red = getShell().getDisplay()
 			.getSystemColor(SWT.COLOR_RED);
+		Color blue = getShell().getDisplay()
+				.getSystemColor(SWT.COLOR_BLUE);
 		Color green = getShell().getDisplay()
 			.getSystemColor(SWT.COLOR_GREEN);
 
@@ -524,8 +526,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		descriptionList.add(new StyleContainer(tagsValue));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(lineDelimiter));
-		// Find a better name
-		descriptionList.add(new StyleContainer(documentationLabel, bold));
+		descriptionList.add(new StyleContainer(documentationLabel, bold, blue));
 		
 		String descriptionText = descriptionList.stream()
 				.map(container -> container.getValue())

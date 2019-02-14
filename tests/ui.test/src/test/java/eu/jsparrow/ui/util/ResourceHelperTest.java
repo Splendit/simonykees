@@ -2,7 +2,6 @@ package eu.jsparrow.ui.util;
 
 import java.util.Arrays;
 
-import org.eclipse.swt.program.Program;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -84,7 +83,6 @@ public class ResourceHelperTest {
 	public void testTransformation() {
 		String result = ResourceHelper.generateLinkToDocumentation("https://jsparrow.github.io/rules/", ruleId);
 		Assert.assertEquals(expected, result);
-		Program.launch(result);
 	}
 
 }
