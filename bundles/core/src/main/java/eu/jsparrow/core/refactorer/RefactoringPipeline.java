@@ -1,5 +1,6 @@
 package eu.jsparrow.core.refactorer;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,6 +67,11 @@ public class RefactoringPipeline {
 	private boolean multipleProjects = false;
 
 	private WorkingCopyOwnerDecorator workingCopyOwner;
+	
+	private StandaloneStatisticsMetadata statisticsMetadata;
+	private int fileCount;
+	private String projectName;
+	private Instant finishTime;
 
 	/**
 	 * Constructor without parameters, used to create RefactoringPipeline before
@@ -648,6 +654,38 @@ public class RefactoringPipeline {
 	 */
 	public List<RefactoringState> getRefactoringStates() {
 		return refactoringStates;
+	}
+
+	public StandaloneStatisticsMetadata getStatisticsMetadata() {
+		return statisticsMetadata;
+	}
+
+	public void setStatisticsMetadata(StandaloneStatisticsMetadata statisticsMetadata) {
+		this.statisticsMetadata = statisticsMetadata;
+	}
+
+	public int getFileCount() {
+		return fileCount;
+	}
+
+	public void setFileCount(int fileCount) {
+		this.fileCount = fileCount;
+	}
+
+	public String getProjectName() {
+		return projectName;
+	}
+
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
+
+	public Instant getFinishTime() {
+		return finishTime;
+	}
+
+	public void setFinishTime(Instant finishTime) {
+		this.finishTime = finishTime;
 	}
 
 }

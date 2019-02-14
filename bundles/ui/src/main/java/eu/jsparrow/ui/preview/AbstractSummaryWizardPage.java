@@ -1,7 +1,13 @@
 package eu.jsparrow.ui.preview;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
 
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
@@ -39,8 +45,12 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
+import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
@@ -119,12 +129,39 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		if (visible) {
 			setStatusInfo();
 			summaryWizardPageModel.updateData();
+
+			saveStatisticsData();
+
 			createCompareInputControl();
 			// We must wait to set selection until control is visible
 			setInitialFileSelection();
 
 		}
 		super.setVisible(visible);
+	}
+
+	private void saveStatisticsData() {
+		RefactoringPipeline refactoringPipeline = summaryWizardPageModel.getRefactoringPipeline();
+		
+		ObjectMapper om = new ObjectMapper();
+		final Path filePath = Paths.get(System.getProperty("user.home"), "Desktop", "statistics", refactoringPipeline.getProjectName(), Instant.now().getEpochSecond() + ".json");
+		
+		StandaloneStatisticsData statisticsData = new StandaloneStatisticsData(refactoringPipeline.getFileCount(),
+				refactoringPipeline.getProjectName(), refactoringPipeline.getStatisticsMetadata(), refactoringPipeline);
+		
+		statisticsData.setMetricData();
+		statisticsData.setEndTime(refactoringPipeline.getFinishTime().getEpochSecond());
+		Optional<JsparrowMetric> metric = statisticsData.getMetricData();
+		metric.ifPresent(m -> {
+			try {
+				File file = filePath.toFile();
+				file.getParentFile().mkdirs();
+				om.writeValue(filePath.toFile(), m);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
 	}
 
 	protected void addHeader() {

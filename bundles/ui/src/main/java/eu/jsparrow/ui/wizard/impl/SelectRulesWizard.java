@@ -1,10 +1,15 @@
 package eu.jsparrow.ui.wizard.impl;
 
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -15,6 +20,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -28,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -37,7 +44,6 @@ import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which
@@ -122,9 +128,42 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				
+				IJavaElement javaElement = javaElements.get(0);
+				String repoName = "";
+				
+				
+				IJavaElement parent;
+				while(javaElement != null && !(javaElement instanceof IJavaProject)) {
+					parent = javaElement.getParent();
+					javaElement = parent;
+				}
+				
+				if (javaElement != null) {
+					repoName = ((IJavaProject) javaElement).getProject().getName();
+				}
+				
+				StandaloneStatisticsMetadata metadata = new StandaloneStatisticsMetadata();
+				metadata.setRepoOwner("Splendit");
+				metadata.setStartTime(Instant.now().getEpochSecond());
+				metadata.setRepoName(repoName);
+				refactoringPipeline.setStatisticsMetadata(metadata);
+				refactoringPipeline.setProjectName(repoName);
+				
+				try {
+					List<ICompilationUnit> compilationUnits = new LinkedList<>();
+					collectICompilationUnits(compilationUnits, javaElements, new NullProgressMonitor());
+					refactoringPipeline.setFileCount(compilationUnits.size());
+				} catch (JavaModelException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				preRefactoring();
 				IStatus refactoringStatus = doRefactoring(monitor, refactoringPipeline);
 				postRefactoring();
+				
+				refactoringPipeline.setFinishTime(Instant.now());
 
 				return refactoringStatus;
 			}

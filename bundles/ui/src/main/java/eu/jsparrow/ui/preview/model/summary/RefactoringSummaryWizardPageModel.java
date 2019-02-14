@@ -195,4 +195,7 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		addModifiedFiles();
 	}
 
+	public RefactoringPipeline getRefactoringPipeline() {
+		return refactoringPipeline;
+	}
 }
