@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.wizard.impl;
 
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 
@@ -14,19 +15,19 @@ public class StyleContainer {
 		this.font=font;
 	}
 	
-	public StyleContainer(String value, Font font, Color color) {
+	public StyleContainer(String value, Font font, Color foreground) {
 		this(value, font);
-		this.color=color;
+		this.foreground=foreground;
 	}
 	
-	public StyleContainer(String value, Font font, Color color, boolean enabled) {
-		this(value, font, color);
+	public StyleContainer(String value, Font font, Color foreground, boolean enabled) {
+		this(value, font, foreground);
 		this.enabled=enabled;
 	}
 	
 	private String value;
 	private Font font;
-	private Color color;
+	private Color foreground;
 	private boolean enabled = true;
 	
 	public String getValue() {
@@ -41,16 +42,26 @@ public class StyleContainer {
 	public void setFont(Font font) {
 		this.font = font;
 	}
-	public Color getColor() {
-		return color;
+	public Color getForeground() {
+		return foreground;
 	}
-	public void setColor(Color color) {
-		this.color = color;
+	public void setForeground(Color foreground) {
+		this.foreground = foreground;
 	}
 	public boolean isEnabled() {
 		return enabled;
 	}
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+	
+	public StyleRange generateStyle(int offset) {
+		StyleRange result = new StyleRange();
+		result.start = offset;
+		result.length = value
+			.length();
+		result.font = font;
+		result.foreground = foreground;
+		return result;
 	}
 }

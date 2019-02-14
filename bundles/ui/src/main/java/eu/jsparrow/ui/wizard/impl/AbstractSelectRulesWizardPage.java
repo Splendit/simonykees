@@ -45,6 +45,7 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.ResourceHelper;
 
 /**
  * Lists all rules as checkboxes and a description for the currently selected
@@ -59,10 +60,16 @@ import eu.jsparrow.ui.util.LicenseUtil;
 public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	private static class SelectedRule {
+		private SelectedRule() {
+			
+		}
+		
 		public static int start = 0;
 		public static int end = 0;
-		public static String link = "http://www.google.com/";
+		public static String link = "";
 	}
+	
+	private static final String documentationSpace = "https://jsparrow.github.io/rules/";
 
 	protected AbstractSelectRulesWizardModel model;
 	protected AbstractSelectRulesWizardControler controler;
@@ -464,20 +471,20 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		final String lineDelimiter = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
 		final String requirementsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
 		final String minJavaVersionLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
-
+		final String requiredLibrariesLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
+		final String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
+		final String documentationLabel = "Documentation";
+		
 		String name = rule.getRuleDescription()
 			.getName();
 		String description = rule.getRuleDescription()
 			.getDescription();
-
 		String minJavaVersionValue = rule.getRequiredJavaVersion();
-		String requiredLibrariesLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
 		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
 				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
 		String jSparrowStarterValue = (rule.isFree() && licenseUtil.isFreeLicense())
 				? Messages.AbstractSelectRulesWizardPage_freemiumRegirementsMessage + lineDelimiter
 				: ""; //$NON-NLS-1$
-		String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 		String tagsValue = StringUtils.join(rule.getRuleDescription()
 			.getTags()
 			.stream()
@@ -485,74 +492,60 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			.collect(Collectors.toList()), "  "); //$NON-NLS-1$
 
 		FontData data = descriptionStyledText.getFont()
-				.getFontData()[0];
-		List<Font> fontList = new ArrayList<>();
-		// rulename Font [0]
-		fontList.add(new Font(getShell().getDisplay(), data.getName(), data.getHeight() * 3 / 2, data.getStyle()));
-		// paragraphTitle Font [1]
-		fontList.add(new Font(getShell().getDisplay(), data.getName(), data.getHeight(), SWT.BOLD));
-		// normalTitle [2]
-		fontList.add(new Font(getShell().getDisplay(), data.getName(), data.getHeight(), data.getStyle()));
-		// font selection 0,1,2,2,1,1,1
-		
+			.getFontData()[0];
+		Font h1 = new Font(getShell().getDisplay(), data.getName(), data.getHeight() * 3 / 2, data.getStyle());
+		Font bold = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), SWT.BOLD);
+		Font h2 = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), data.getStyle());
+
 		Color red = getShell().getDisplay()
-				.getSystemColor(SWT.COLOR_RED);
+			.getSystemColor(SWT.COLOR_RED);
 		Color green = getShell().getDisplay()
-				.getSystemColor(SWT.COLOR_GREEN);
-		
+			.getSystemColor(SWT.COLOR_GREEN);
+
 		List<StyleContainer> descriptionList = new ArrayList<>();
-		descriptionList.add(new StyleContainer(name, fontList.get(0)));
+		descriptionList.add(new StyleContainer(name, h1));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(description));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(requirementsLabel, fontList.get(1)));
+		descriptionList.add(new StyleContainer(requirementsLabel, bold));
 		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(minJavaVersionLabel, fontList.get(2)));
-		descriptionList.add(new StyleContainer(minJavaVersionValue, fontList.get(1), red,!rule.isSatisfiedJavaVersion()));
+		descriptionList.add(new StyleContainer(minJavaVersionLabel, h2));
+		descriptionList.add(new StyleContainer(minJavaVersionValue, bold, red, !rule.isSatisfiedJavaVersion()));
 		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(requiredLibrariesLabel, fontList.get(2)));
-		descriptionList.add(new StyleContainer(requiredLibrariesValue, fontList.get(1), red,!rule.isSatisfiedLibraries()));
+		descriptionList.add(new StyleContainer(requiredLibrariesLabel, h2));
+		descriptionList.add(new StyleContainer(requiredLibrariesValue, bold, red, !rule.isSatisfiedLibraries()));
 		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(jSparrowStarterValue, fontList.get(1), green));
+		descriptionList.add(new StyleContainer(jSparrowStarterValue, bold, green));
 		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(tagsLabel, fontList.get(1)));
+		descriptionList.add(new StyleContainer(tagsLabel, bold));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(tagsValue));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(SelectedRule.link, fontList.get(1)));
+		// Find a better name
+		descriptionList.add(new StyleContainer(documentationLabel, bold));
 		
-		List<StyleRange> styleList = new ArrayList<>();
+		String descriptionText = descriptionList.stream()
+				.map(container -> container.getValue())
+				.collect(Collectors.joining());
+
+		descriptionStyledText.setText(descriptionText);
+
 		int offset = 0;
 		for (StyleContainer iterator : descriptionList) {
-			if (!lineDelimiter.equals(iterator.getValue())
-					&& iterator.isEnabled()
-					) {
-				StyleRange newStyle = new StyleRange();
-				newStyle.start = offset;
-				newStyle.length = iterator.getValue()
-					.length();
-				newStyle.font = iterator.getFont();
-				newStyle.foreground = iterator.getColor();
-				styleList.add(newStyle);
-				if(SelectedRule.link.equals(iterator.getValue())) {
+			if (!lineDelimiter.equals(iterator.getValue()) && iterator.isEnabled()) {
+				descriptionStyledText.setStyleRange(iterator.generateStyle(offset));
+				if (documentationLabel.equals(iterator.getValue())) {
 					SelectedRule.start = offset;
-					SelectedRule.end = offset + iterator.getValue().length();
+					SelectedRule.end = offset + iterator.getValue()
+						.length();
+					SelectedRule.link = ResourceHelper.generateLinkToDocumentation(documentationSpace,rule.getId());
 				}
 			}
 			offset += iterator.getValue()
 				.length();
-		}
-
-		String descriptionText = descriptionList.stream()
-			.map(container -> container.getValue())
-			.collect(Collectors.joining());
-
-		descriptionStyledText.setText(descriptionText);
-		for(StyleRange styledText : styleList) {
-			descriptionStyledText.setStyleRange(styledText);
 		}
 
 		int requirementsBulletingStartLine = descriptionStyledText.getLineAtOffset(name.length()
@@ -564,7 +557,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		style0.foreground = getShell().getDisplay()
 			.getSystemColor(SWT.COLOR_BLACK);
 		Bullet bullet0 = new Bullet(style0);
-		
+
 		descriptionStyledText.setLineBullet(requirementsBulletingStartLine, jSparrowStarterValue.isEmpty() ? 2 : 3,
 				bullet0);
 	}
