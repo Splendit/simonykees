@@ -12,6 +12,6 @@ Require-Bundle: eu.jsparrow.logging,
  org.junit;bundle-version="4.12.0",
  org.mockito;bundle-version="[2.13.0,3.0.0)",
  org.hamcrest;bundle-version="[1.1.0,2.0.0)",
- javax.annotation;bundle-version="1.2.0"
+ javax.annotation;bundle-version="[1.2.0,2.0.0)"
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Import-Package: org.eclipse.jdt.core
