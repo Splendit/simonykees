@@ -2,6 +2,7 @@ package eu.jsparrow.sample.postRule.lambdaToMethodReference;
 
 import static eu.jsparrow.sample.utilities.StringUtils.doesntDoAnything;
 
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -263,6 +264,14 @@ public class LambdaToMethodReferenceRule {
 	 */
 	public <T> void consumeString(T s) {
 		
+	}
+	
+	/*
+	 * SIM-1450
+	 */
+	private static Object createDeepCopy(byte[][] value, Class<?> valueClass) {
+		// see org.eclipse.mdm.api.base.model.Value
+		return Arrays.stream(value).map(v -> v.clone()).toArray(byte[][]::new);
 	}
 	
 	class NestedClass {
