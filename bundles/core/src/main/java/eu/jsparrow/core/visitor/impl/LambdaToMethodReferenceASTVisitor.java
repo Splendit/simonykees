@@ -439,6 +439,11 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		if (binding == null) {
 			return ""; //$NON-NLS-1$
 		}
+		
+		if(binding.isArray()) {
+			// see SIM-1453
+			return ""; //$NON-NLS-1$
+		}
 
 		if (binding.isCapture()) {
 			Optional<ITypeBinding> optBinding = Arrays.asList(binding.getTypeBounds())

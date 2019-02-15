@@ -274,6 +274,16 @@ public class LambdaToMethodReferenceRule {
 
 	}
 
+	/*
+	 * SIM-1450
+	 */
+	private static Object createDeepCopy(byte[][] value, Class<?> valueClass) {
+		// see org.eclipse.mdm.api.base.model.Value
+		return Arrays.stream(value)
+			.map(v -> v.clone())
+			.toArray(byte[][]::new);
+	}
+
 	public void saveTypeArguments(String input) {
 		List<Person> persons = new ArrayList<>();
 		persons.stream()
