@@ -3,6 +3,7 @@ package eu.jsparrow.ui.wizard.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +30,6 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GlyphMetrics;
@@ -62,14 +62,14 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	private static class SelectedRule {
 		private SelectedRule() {
-			
+
 		}
-		
+
 		public static int start = 0;
 		public static int end = 0;
 		public static String link = "";
 	}
-	
+
 	private static final String documentationSpace = "https://jsparrow.github.io/rules/";
 
 	protected AbstractSelectRulesWizardModel model;
@@ -379,7 +379,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			int offset;
 			try {
 				offset = descriptionStyledText.getOffsetAtLocation(new Point(event.x, event.y));
-			}catch (SWTException | IllegalArgumentException e) {
+			} catch (SWTException | IllegalArgumentException e) {
 				offset = -1;
 			}
 			if (offset != -1 && SelectedRule.start < offset && offset < SelectedRule.end) {
@@ -480,7 +480,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		final String requiredLibrariesLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
 		final String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 		final String documentationLabel = "Documentation";
-		
+
 		String name = rule.getRuleDescription()
 			.getName();
 		String description = rule.getRuleDescription()
@@ -499,19 +499,27 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		FontData data = descriptionStyledText.getFont()
 			.getFontData()[0];
-		Font h1 = new Font(getShell().getDisplay(), data.getName(), data.getHeight() * 3 / 2, data.getStyle());
-		Font bold = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), SWT.BOLD);
-		Font h2 = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), data.getStyle());
-
-		Color red = getShell().getDisplay()
-			.getSystemColor(SWT.COLOR_RED);
-		Color blue = getShell().getDisplay()
+		Consumer<StyleRange> h1 = style -> style.font = new Font(getShell().getDisplay(), data.getName(), data.getHeight() * 3 / 2, data.getStyle());
+		Consumer<StyleRange> h2 = style -> style.font = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), data.getStyle());
+		Consumer<StyleRange> bold = style -> style.font = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), SWT.BOLD);
+		
+		Consumer<StyleRange> blueForeground = style -> style.foreground = getShell().getDisplay()
 				.getSystemColor(SWT.COLOR_BLUE);
-		Color green = getShell().getDisplay()
-			.getSystemColor(SWT.COLOR_GREEN);
+		Consumer<StyleRange> red = style -> style.foreground = getShell().getDisplay()
+				.getSystemColor(SWT.COLOR_RED);
+		Consumer<StyleRange> green = style -> style.foreground = getShell().getDisplay()
+				.getSystemColor(SWT.COLOR_GREEN);
+		
+		Consumer<StyleRange> documentationConfig = style -> {
+			style.underline = true;
+			style.underlineStyle = SWT.UNDERLINE_LINK;
+			style.data = SelectedRule.link;
+		};
 
 		List<StyleContainer> descriptionList = new ArrayList<>();
 		descriptionList.add(new StyleContainer(name, h1));
+		descriptionList.add(new StyleContainer(lineDelimiter));
+		descriptionList.add(new StyleContainer(documentationLabel, documentationConfig.andThen(bold).andThen(blueForeground)));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(description));
@@ -520,23 +528,20 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		descriptionList.add(new StyleContainer(requirementsLabel, bold));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(minJavaVersionLabel, h2));
-		descriptionList.add(new StyleContainer(minJavaVersionValue, bold, red, !rule.isSatisfiedJavaVersion()));
+		descriptionList.add(new StyleContainer(minJavaVersionValue, bold.andThen(red), !rule.isSatisfiedJavaVersion()));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(requiredLibrariesLabel, h2));
-		descriptionList.add(new StyleContainer(requiredLibrariesValue, bold, red, !rule.isSatisfiedLibraries()));
+		descriptionList.add(new StyleContainer(requiredLibrariesValue, bold.andThen(red), !rule.isSatisfiedLibraries()));
 		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(jSparrowStarterValue, bold, green));
+		descriptionList.add(new StyleContainer(jSparrowStarterValue, bold.andThen(green)));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(tagsLabel, bold));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(tagsValue));
-		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(documentationLabel, bold, blue));
-		
+
 		String descriptionText = descriptionList.stream()
-				.map(container -> container.getValue())
-				.collect(Collectors.joining());
+			.map(container -> container.getValue())
+			.collect(Collectors.joining());
 
 		descriptionStyledText.setText(descriptionText);
 
@@ -548,13 +553,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 					SelectedRule.start = offset;
 					SelectedRule.end = offset + iterator.getValue()
 						.length();
-					SelectedRule.link = ResourceHelper.generateLinkToDocumentation(documentationSpace,rule.getId());
-					
-					StyleRange linkStyleRange = new StyleRange(offset, iterator.getValue().length(), blue, null);
-					linkStyleRange.underline = true;
-					linkStyleRange.underlineStyle = SWT.UNDERLINE_LINK;
-					linkStyleRange.data = SelectedRule.link;
-					descriptionStyledText.setStyleRange(linkStyleRange);
+					SelectedRule.link = ResourceHelper.generateLinkToDocumentation(documentationSpace, rule.getId());
 				}
 			}
 			offset += iterator.getValue()

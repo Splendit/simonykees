@@ -1,8 +1,8 @@
 package eu.jsparrow.ui.wizard.impl;
 
+import java.util.function.Consumer;
+
 import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
 
 /**
  * Simple Pojo that holds the properties for a SWT {@link StyleRange} and is
@@ -14,52 +14,30 @@ import org.eclipse.swt.graphics.Font;
  */
 public class StyleContainer {
 
+	Consumer<StyleRange> additionalStyles = style -> {};
+	private String value;
+	private boolean enabled = true;
+
 	public StyleContainer(String value) {
 		this.value = value;
 	}
-
-	public StyleContainer(String value, Font font) {
+	
+	public StyleContainer(String value, Consumer<StyleRange> additionalStyles) {
 		this(value);
-		this.font = font;
+		this.additionalStyles = additionalStyles;
 	}
-
-	public StyleContainer(String value, Font font, Color foreground) {
-		this(value, font);
-		this.foreground = foreground;
-	}
-
-	public StyleContainer(String value, Font font, Color foreground, boolean enabled) {
-		this(value, font, foreground);
+	
+	public StyleContainer(String value, Consumer<StyleRange> additionalStyles, boolean enabled) {
+		this(value, additionalStyles);
 		this.enabled = enabled;
 	}
-
-	private String value;
-	private Font font;
-	private Color foreground;
-	private boolean enabled = true;
-
+	
 	public String getValue() {
 		return value;
 	}
 
 	public void setValue(String value) {
 		this.value = value;
-	}
-
-	public Font getFont() {
-		return font;
-	}
-
-	public void setFont(Font font) {
-		this.font = font;
-	}
-
-	public Color getForeground() {
-		return foreground;
-	}
-
-	public void setForeground(Color foreground) {
-		this.foreground = foreground;
 	}
 
 	public boolean isEnabled() {
@@ -74,8 +52,7 @@ public class StyleContainer {
 		StyleRange result = new StyleRange();
 		result.start = offset;
 		result.length = value.length();
-		result.font = font;
-		result.foreground = foreground;
+		additionalStyles.accept(result);
 		return result;
 	}
 }
