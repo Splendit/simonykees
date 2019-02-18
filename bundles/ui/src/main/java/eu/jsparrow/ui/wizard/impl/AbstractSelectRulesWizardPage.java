@@ -549,6 +549,12 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 					SelectedRule.end = offset + iterator.getValue()
 						.length();
 					SelectedRule.link = ResourceHelper.generateLinkToDocumentation(documentationSpace,rule.getId());
+					
+					StyleRange linkStyleRange = new StyleRange(offset, iterator.getValue().length(), blue, null);
+					linkStyleRange.underline = true;
+					linkStyleRange.underlineStyle = SWT.UNDERLINE_LINK;
+					linkStyleRange.data = SelectedRule.link;
+					descriptionStyledText.setStyleRange(linkStyleRange);
 				}
 			}
 			offset += iterator.getValue()
