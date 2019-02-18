@@ -43,7 +43,8 @@ public class Activator implements BundleActivator {
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
-	// SIM-1406 org.eclipse.equinox.ds has been replaced with org.apache.felix.scr
+	// SIM-1406 org.eclipse.equinox.ds has been replaced with
+	// org.apache.felix.scr
 	private static final String EQUINOX_DS_BUNDLE_NAME = "org.apache.felix.scr"; //$NON-NLS-1$
 
 	private RefactoringInvoker refactoringInvoker;
@@ -139,8 +140,10 @@ public class Activator implements BundleActivator {
 
 	private void refactor(BundleContext context) {
 		try {
+
 			String key = getLicenseKey(context);
 			String agentUrl = getAgentUrl(context);
+
 			licenseService = getStandaloneLicenseUtilService();
 			if (licenseService.validate(key, agentUrl)) {
 				refactoringInvoker.startRefactoring(context);

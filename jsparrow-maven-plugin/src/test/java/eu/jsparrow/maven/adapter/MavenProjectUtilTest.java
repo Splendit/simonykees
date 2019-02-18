@@ -33,7 +33,7 @@ public class MavenProjectUtilTest {
 	public void setUp() throws Exception {
 		project = mock(MavenProject.class);
 		projectHomeFolder = directory.newFolder("project-home");
-		projectSourceFolder = directory.newFolder("project-home/source-folder");
+		projectSourceFolder = directory.newFolder("project-home", "source-folder");
 	}
 	
 	@Test

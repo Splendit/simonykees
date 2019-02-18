@@ -18,7 +18,7 @@ import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.i18n.Messages;
 
 /**
- * Check validity of the given license.  
+ * Check validity of the given license.
  * 
  * @author Matthias Webhofer
  * @since 2.3.0
@@ -28,6 +28,7 @@ public class LicenseInfoMojo extends AbstractMojo {
 
 	private static final String JAVA_VERSION_PROPERTY_CONSTANT = "java.version"; //$NON-NLS-1$
 	private static final String JAVA_VERSION_1_8 = "1.8"; //$NON-NLS-1$
+	private static final String JAVA_VERSION_11 = "11"; //$NON-NLS-1$
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
@@ -39,14 +40,14 @@ public class LicenseInfoMojo extends AbstractMojo {
 	private String license;
 
 	/**
-	 * The URL to the license server to use. 
+	 * The URL to the license server to use.
 	 */
 	@Parameter(property = "url")
 	private String url;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		Log log = getLog();		
+		Log log = getLog();
 
 		// With version 1.0.0 of jSparrow Maven Plugin, only JDK 8 is supported.
 		String javaVersion = System.getProperty(JAVA_VERSION_PROPERTY_CONSTANT);
@@ -69,11 +70,12 @@ public class LicenseInfoMojo extends AbstractMojo {
 			log.error(e1.getMessage());
 		}
 	}
-	
+
 	private void addShutdownHook(BundleStarter starter, WorkingDirectory workingDirectory) {
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			starter.shutdownFramework();
-			workingDirectory.cleanUp();
-		}));
+		Runtime.getRuntime()
+			.addShutdownHook(new Thread(() -> {
+				starter.shutdownFramework();
+				workingDirectory.cleanUp();
+			}));
 	}
 }
