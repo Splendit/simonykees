@@ -47,7 +47,7 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 		Expression conditionConjunction = createConditionConjunction(ifStatement, innerifStatementStatements);
 
 		astRewrite.replace(ifStatement.getExpression(), conditionConjunction, null);
-		astRewrite.replace(ifStatement.getThenStatement(), newBodyStatement, null);
+		astRewrite.replace(ifStatement.getThenStatement(), (Block) astRewrite.createMoveTarget(newBodyStatement), null);
 		onRewrite();
 
 		return true;
@@ -70,7 +70,7 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 	@SuppressWarnings("unchecked")
 	private Expression createInfixExpressionConjunction(AST ast, List<Expression> conjuncts) {
 		Expression left = conjuncts.remove(0);
-		if(conjuncts.isEmpty()) {
+		if (conjuncts.isEmpty()) {
 			return left;
 		}
 		InfixExpression infixExpression = ast.newInfixExpression();
@@ -78,47 +78,53 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 		infixExpression.setLeftOperand(left);
 		Expression rightOperand = conjuncts.remove(0);
 		infixExpression.setRightOperand(rightOperand);
-		infixExpression.extendedOperands().addAll(conjuncts);
+		infixExpression.extendedOperands()
+			.addAll(conjuncts);
 		return infixExpression;
 	}
 
 	private Expression parenthesizeInfixExpression(Expression expression) {
 		Expression copy = (Expression) astRewrite.createCopyTarget(expression);
-		if (expression.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-			AST ast = expression.getAST();
-			ParenthesizedExpression parenthesizedExpression = ast.newParenthesizedExpression();
-			parenthesizedExpression.setExpression(copy);
-			return parenthesizedExpression;
+		if (expression.getNodeType() != ASTNode.INFIX_EXPRESSION) {
+			return copy;
 		}
-		return copy;
+		InfixExpression infixExpression = (InfixExpression) expression;
+		if(InfixExpression.Operator.CONDITIONAL_OR != infixExpression.getOperator()) {
+			return copy;
+		}
+		AST ast = expression.getAST();
+		ParenthesizedExpression parenthesizedExpression = ast.newParenthesizedExpression();
+		parenthesizedExpression.setExpression(copy);
+		return parenthesizedExpression;
+
 	}
 
 	private List<IfStatement> findInnerIfStatements(Statement thenStatement) {
 
 		IfStatement innerIfStatement = null;
-		if(thenStatement.getNodeType() == ASTNode.IF_STATEMENT) {
+		if (thenStatement.getNodeType() == ASTNode.IF_STATEMENT) {
 			innerIfStatement = (IfStatement) thenStatement;
-		} else if(thenStatement.getNodeType() == ASTNode.BLOCK) {
-			Block block = (Block)thenStatement;
+		} else if (thenStatement.getNodeType() == ASTNode.BLOCK) {
+			Block block = (Block) thenStatement;
 			List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
-			if(statements.size() != 1) {
+			if (statements.size() != 1) {
 				return Collections.emptyList();
 			}
 			Statement singleBodyStatement = statements.get(0);
-			if(singleBodyStatement.getNodeType() != ASTNode.IF_STATEMENT) {
+			if (singleBodyStatement.getNodeType() != ASTNode.IF_STATEMENT) {
 				return Collections.emptyList();
 			}
 			innerIfStatement = (IfStatement) singleBodyStatement;
 		}
-		if(innerIfStatement == null) {
+		if (innerIfStatement == null) {
 			return Collections.emptyList();
 		}
-		
+
 		Statement elseStatement = innerIfStatement.getElseStatement();
-		if(elseStatement != null) {
+		if (elseStatement != null) {
 			return Collections.emptyList();
 		}
-		
+
 		Statement innerThenStatement = innerIfStatement.getThenStatement();
 		List<IfStatement> innerIfStatements = new ArrayList<>();
 		innerIfStatements.add(innerIfStatement);
