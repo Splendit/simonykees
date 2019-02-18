@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.custom.Bullet;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -375,7 +376,12 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		descriptionStyledText.setLayoutData(gridData);
 		descriptionStyledText.setMargins(2, 2, 2, 2);
 		descriptionStyledText.addListener(SWT.MouseDown, event -> {
-			int offset = descriptionStyledText.getOffsetAtPoint(new Point(event.x, event.y));
+			int offset;
+			try {
+				offset = descriptionStyledText.getOffsetAtLocation(new Point(event.x, event.y));
+			}catch (SWTException | IllegalArgumentException e) {
+				offset = -1;
+			}
 			if (offset != -1 && SelectedRule.start < offset && offset < SelectedRule.end) {
 				Program.launch(SelectedRule.link);
 			}
