@@ -4,62 +4,76 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 
+/**
+ * Simple Pojo that holds the properties for a SWT {@link StyleRange} and is
+ * possible to create a {@link StyleRange} from it for the defined test at an
+ * offset.
+ * 
+ * @author Martin Huter
+ *
+ */
 public class StyleContainer {
-	
+
 	public StyleContainer(String value) {
-		this.value=value;
+		this.value = value;
 	}
-	
+
 	public StyleContainer(String value, Font font) {
 		this(value);
-		this.font=font;
+		this.font = font;
 	}
-	
+
 	public StyleContainer(String value, Font font, Color foreground) {
 		this(value, font);
-		this.foreground=foreground;
+		this.foreground = foreground;
 	}
-	
+
 	public StyleContainer(String value, Font font, Color foreground, boolean enabled) {
 		this(value, font, foreground);
-		this.enabled=enabled;
+		this.enabled = enabled;
 	}
-	
+
 	private String value;
 	private Font font;
 	private Color foreground;
 	private boolean enabled = true;
-	
+
 	public String getValue() {
 		return value;
 	}
+
 	public void setValue(String value) {
 		this.value = value;
 	}
+
 	public Font getFont() {
 		return font;
 	}
+
 	public void setFont(Font font) {
 		this.font = font;
 	}
+
 	public Color getForeground() {
 		return foreground;
 	}
+
 	public void setForeground(Color foreground) {
 		this.foreground = foreground;
 	}
+
 	public boolean isEnabled() {
 		return enabled;
 	}
+
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
-	
+
 	public StyleRange generateStyle(int offset) {
 		StyleRange result = new StyleRange();
 		result.start = offset;
-		result.length = value
-			.length();
+		result.length = value.length();
 		result.font = font;
 		result.foreground = foreground;
 		return result;

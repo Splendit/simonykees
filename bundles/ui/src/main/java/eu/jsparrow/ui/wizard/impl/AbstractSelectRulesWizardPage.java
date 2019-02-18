@@ -559,14 +559,14 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				+ lineDelimiter.length() + lineDelimiter.length() + description.length() + lineDelimiter.length()
 				+ lineDelimiter.length() + requirementsLabel.length() + lineDelimiter.length());
 
-		StyleRange style0 = new StyleRange();
-		style0.metrics = new GlyphMetrics(0, 0, 40);
-		style0.foreground = getShell().getDisplay()
+		StyleRange bulletPointStyle = new StyleRange();
+		bulletPointStyle.metrics = new GlyphMetrics(0, 0, 40);
+		bulletPointStyle.foreground = getShell().getDisplay()
 			.getSystemColor(SWT.COLOR_BLACK);
-		Bullet bullet0 = new Bullet(style0);
+		Bullet bulletPoint = new Bullet(bulletPointStyle);
 
 		descriptionStyledText.setLineBullet(requirementsBulletingStartLine, jSparrowStarterValue.isEmpty() ? 2 : 3,
-				bullet0);
+				bulletPoint);
 	}
 
 	private boolean selectionContainsEnabledEntry(List<Object> selection) {
