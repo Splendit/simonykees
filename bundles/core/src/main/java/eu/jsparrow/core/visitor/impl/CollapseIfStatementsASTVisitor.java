@@ -9,12 +9,23 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -23,6 +34,10 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  *
  */
 public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor {
+
+	private static final String CONDITION_NAME = "condition"; //$NON-NLS-1$
+
+	private LiveVariableScope aliveVariableScope = new LiveVariableScope();
 
 	@Override
 	public boolean visit(IfStatement ifStatement) {
@@ -40,17 +55,90 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 
 		IfStatement innestIf = innerifStatementStatements.get(innerifStatementStatements.size() - 1);
 		Statement newBodyStatement = innestIf.getThenStatement();
-		/*
-		 * TODO: create a local variable to store the condition if it is too
-		 * long (? decide what too long means)
-		 */
 		Expression conditionConjunction = createConditionConjunction(ifStatement, innerifStatementStatements);
 
-		astRewrite.replace(ifStatement.getExpression(), conditionConjunction, null);
-		astRewrite.replace(ifStatement.getThenStatement(), (Block) astRewrite.createMoveTarget(newBodyStatement), null);
+		if (doCreateLocalVariable(ifStatement, innerifStatementStatements)) {
+			ASTNode enclosingScope = this.aliveVariableScope.findEnclosingScope(ifStatement)
+				.orElse(null);
+			aliveVariableScope.lazyLoadScopeNames(enclosingScope);
+			String conditionName = createConditionName();
+			AST ast = ifStatement.getAST();
+			VariableDeclarationFragment fragment = ast.newVariableDeclarationFragment();
+			fragment.setName(ast.newSimpleName(conditionName));
+			fragment.setInitializer(conditionConjunction);
+			VariableDeclarationStatement conditionDeclaration = ast.newVariableDeclarationStatement(fragment);
+			conditionDeclaration.setType(ast.newPrimitiveType(PrimitiveType.BOOLEAN));
+
+			Block block = ASTNodeUtil.getSpecificAncestor(ifStatement, Block.class);
+			ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+			int positionInBlock = findPositionInBlock(block, ifStatement);
+			positionInBlock = positionInBlock >= 0 ? positionInBlock : 0;
+			listRewrite.insertAt(conditionDeclaration, positionInBlock, null);
+			SimpleName newIfExpression = ast.newSimpleName(conditionName);
+			astRewrite.replace(ifStatement.getExpression(), newIfExpression, null);
+			aliveVariableScope.addName(enclosingScope, conditionName);
+
+		} else {
+			astRewrite.replace(ifStatement.getExpression(), conditionConjunction, null);
+		}
+
+		astRewrite.replace(ifStatement.getThenStatement(), (Block) astRewrite.createCopyTarget(newBodyStatement), null);
 		onRewrite();
 
 		return true;
+	}
+
+	private boolean doCreateLocalVariable(IfStatement ifStatement, List<IfStatement> innerifStatementStatements) {
+		if (innerifStatementStatements.size() > 1) {
+			return true;
+		}
+		if (!OperatorUtil.isSimpleExpression(ifStatement.getExpression())) {
+			return true;
+		}
+		return !innerifStatementStatements.stream()
+			.map(IfStatement::getExpression)
+			.allMatch(OperatorUtil::isSimpleExpression);
+	}
+
+	private int findPositionInBlock(Block block, IfStatement ifStatement) {
+		List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
+		Statement statement = ifStatement;
+		int index = -1;
+		while (statement != null && (index = statements.indexOf(statement)) < 0) {
+			statement = ASTNodeUtil.getSpecificAncestor(statement, Statement.class);
+		}
+		return index;
+	}
+
+	@Override
+	public void endVisit(TypeDeclaration typeDeclaration) {
+		aliveVariableScope.clearLocalVariablesScope(typeDeclaration);
+		aliveVariableScope.clearFieldScope(typeDeclaration);
+	}
+
+	@Override
+	public void endVisit(MethodDeclaration methodDeclaration) {
+		aliveVariableScope.clearLocalVariablesScope(methodDeclaration);
+	}
+
+	@Override
+	public void endVisit(FieldDeclaration fieldDeclaration) {
+		aliveVariableScope.clearLocalVariablesScope(fieldDeclaration);
+	}
+
+	@Override
+	public void endVisit(Initializer initializer) {
+		aliveVariableScope.clearLocalVariablesScope(initializer);
+	}
+
+	private String createConditionName() {
+		String name = CONDITION_NAME;
+		int suffix = 1;
+		while (aliveVariableScope.isInScope(name)) {
+			name = CONDITION_NAME + suffix;
+			suffix++;
+		}
+		return name;
 	}
 
 	private Expression createConditionConjunction(IfStatement ifStatement,
@@ -89,7 +177,7 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 			return copy;
 		}
 		InfixExpression infixExpression = (InfixExpression) expression;
-		if(InfixExpression.Operator.CONDITIONAL_OR != infixExpression.getOperator()) {
+		if (InfixExpression.Operator.CONDITIONAL_OR != infixExpression.getOperator()) {
 			return copy;
 		}
 		AST ast = expression.getAST();
