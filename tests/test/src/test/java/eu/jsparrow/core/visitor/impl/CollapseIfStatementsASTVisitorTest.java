@@ -63,7 +63,8 @@ public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
 		String expectedBlock = ""
 				+ "		boolean condition = true;\n" + 
 				"		boolean innerCondition = true;\n" + 
-				"		if(condition && innerCondition && true) {\n" + 
+				"		boolean condition1=condition && innerCondition && true;\n" + 
+				"		if (condition1) {\n" + 
 				"			condition = false;\n" + 
 				"			innerCondition = false;\n" + 
 				"		}";
@@ -92,7 +93,8 @@ public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
 		String expectedBlock = ""
 				+ "		boolean condition = true;\n" + 
 				"		boolean innerCondition = true;\n" + 
-				"		if(condition && (innerCondition || true)) {\n" + 
+				"		boolean condition1=condition && (innerCondition || true);\n" + 
+				"		if (condition1) {\n" + 
 				"			condition = false;\n" + 
 				"			innerCondition = false;\n" + 
 				"		}";
