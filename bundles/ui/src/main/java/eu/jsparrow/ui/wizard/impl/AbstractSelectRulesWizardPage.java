@@ -479,7 +479,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		final String minJavaVersionLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
 		final String requiredLibrariesLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
 		final String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
-		final String documentationLabel = "Documentation";
+		final String documentationLabel = "See Documentation";
 
 		String name = rule.getRuleDescription()
 			.getName();
@@ -499,17 +499,21 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		FontData data = descriptionStyledText.getFont()
 			.getFontData()[0];
-		Consumer<StyleRange> h1 = style -> style.font = new Font(getShell().getDisplay(), data.getName(), data.getHeight() * 3 / 2, data.getStyle());
-		Consumer<StyleRange> h2 = style -> style.font = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), data.getStyle());
-		Consumer<StyleRange> bold = style -> style.font = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), SWT.BOLD);
-		
-		Consumer<StyleRange> blueForeground = style -> style.foreground = getShell().getDisplay()
-				.getSystemColor(SWT.COLOR_BLUE);
+		Consumer<StyleRange> h1 = style -> style.font = new Font(getShell().getDisplay(), data.getName(),
+				data.getHeight() * 3 / 2, data.getStyle());
+		Consumer<StyleRange> h2 = style -> style.font = new Font(getShell().getDisplay(), data.getName(),
+				data.getHeight(), data.getStyle());
+		Consumer<StyleRange> bold = style -> style.font = new Font(getShell().getDisplay(), data.getName(),
+				data.getHeight(), SWT.BOLD);
+
+		Consumer<StyleRange> blue = style -> style.foreground = getShell().getDisplay()
+			.getSystemColor(SWT.COLOR_BLUE);
 		Consumer<StyleRange> red = style -> style.foreground = getShell().getDisplay()
-				.getSystemColor(SWT.COLOR_RED);
+			.getSystemColor(SWT.COLOR_RED);
 		Consumer<StyleRange> green = style -> style.foreground = getShell().getDisplay()
-				.getSystemColor(SWT.COLOR_GREEN);
-		
+			.getSystemColor(SWT.COLOR_GREEN);
+
+		SelectedRule.link = ResourceHelper.generateLinkToDocumentation(documentationSpace, rule.getId());
 		Consumer<StyleRange> documentationConfig = style -> {
 			style.underline = true;
 			style.underlineStyle = SWT.UNDERLINE_LINK;
@@ -519,7 +523,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		List<StyleContainer> descriptionList = new ArrayList<>();
 		descriptionList.add(new StyleContainer(name, h1));
 		descriptionList.add(new StyleContainer(lineDelimiter));
-		descriptionList.add(new StyleContainer(documentationLabel, documentationConfig.andThen(bold).andThen(blueForeground)));
+		descriptionList.add(new StyleContainer(documentationLabel, blue.andThen(documentationConfig)));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(description));
@@ -531,7 +535,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		descriptionList.add(new StyleContainer(minJavaVersionValue, bold.andThen(red), !rule.isSatisfiedJavaVersion()));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(requiredLibrariesLabel, h2));
-		descriptionList.add(new StyleContainer(requiredLibrariesValue, bold.andThen(red), !rule.isSatisfiedLibraries()));
+		descriptionList
+			.add(new StyleContainer(requiredLibrariesValue, bold.andThen(red), !rule.isSatisfiedLibraries()));
 		descriptionList.add(new StyleContainer(lineDelimiter));
 		descriptionList.add(new StyleContainer(jSparrowStarterValue, bold.andThen(green)));
 		descriptionList.add(new StyleContainer(lineDelimiter));
@@ -553,16 +558,16 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 					SelectedRule.start = offset;
 					SelectedRule.end = offset + iterator.getValue()
 						.length();
-					SelectedRule.link = ResourceHelper.generateLinkToDocumentation(documentationSpace, rule.getId());
 				}
 			}
 			offset += iterator.getValue()
 				.length();
 		}
 
-		int requirementsBulletingStartLine = descriptionStyledText.getLineAtOffset(name.length()
-				+ lineDelimiter.length() + lineDelimiter.length() + description.length() + lineDelimiter.length()
-				+ lineDelimiter.length() + requirementsLabel.length() + lineDelimiter.length());
+		int requirementsBulletingStartLine = descriptionStyledText
+			.getLineAtOffset(name.length() + lineDelimiter.length() + documentationLabel.length()
+					+ 2 * lineDelimiter.length() + description.length() + 2 * lineDelimiter.length()
+					+ requirementsLabel.length() + lineDelimiter.length());
 
 		StyleRange bulletPointStyle = new StyleRange();
 		bulletPointStyle.metrics = new GlyphMetrics(0, 0, 40);
