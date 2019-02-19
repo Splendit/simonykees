@@ -12,17 +12,19 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
+ * @see CollapseIfStatementsASTVisitor
  * 
  * @since 3.2.0
  *
  */
-public class CollapseIfStatementsRule extends RefactoringRuleImpl<CollapseIfStatementsASTVisitor>{
-	
+public class CollapseIfStatementsRule extends RefactoringRuleImpl<CollapseIfStatementsASTVisitor> {
+
 	public CollapseIfStatementsRule() {
 		this.visitorClass = CollapseIfStatementsASTVisitor.class;
 		this.id = "CollapseIfStatements"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription("Collapse If Statements",
-				"Merges the collapsible if - statements", Duration.ofMinutes(5),
+		String name = Messages.CollapseIfStatementsRule_name;
+		String description = Messages.CollapseIfStatementsRule_description;
+		this.ruleDescription = new RuleDescription(name, description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 	}
 

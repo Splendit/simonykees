@@ -153,7 +153,17 @@ public class OperatorUtil {
 		Expression right = expression.getRightOperand();
 		return isSimpleExpression(right);
 	}
-	
+
+	/**
+	 * Checks whether an expression contains other {@link InfixExpression}s,
+	 * {@link PrefixExpression}s or {@link PostfixExpression}s.
+	 * 
+	 * @see SimpleExpressionVisitor
+	 * 
+	 * @param expression
+	 *            the expression to be checked
+	 * @return if the above condition is met.
+	 */
 	public static boolean isSimpleExpression(Expression expression) {
 		SimpleExpressionVisitor visitor = new SimpleExpressionVisitor();
 		expression.accept(visitor);

@@ -36,6 +36,9 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
+ * A visitor that searches for nested {@link IfStatement} and collapses them to
+ * a single one if possible. Introduces a boolean variable to store the
+ * condition if it contains more than 2 components.
  * 
  * @since 3.2.0
  *
