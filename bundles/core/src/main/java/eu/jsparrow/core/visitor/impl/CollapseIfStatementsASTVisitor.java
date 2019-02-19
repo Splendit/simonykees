@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -29,6 +28,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.OperatorUtil;
@@ -170,30 +170,17 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 			List<IfStatement> innerifStatementStatements) {
 		Expression expression = ifStatement.getExpression();
 		List<Expression> conjuncts = new ArrayList<>();
-
-		conjuncts.add(parenthesizeInfixExpression(expression));
 		conjuncts.addAll(innerifStatementStatements.stream()
 			.map(IfStatement::getExpression)
-			.map(this::parenthesizeInfixExpression)
+			.map(this::parenthesize)
 			.collect(Collectors.toList()));
 		AST ast = ifStatement.getAST();
-		return createInfixExpressionConjunction(ast, conjuncts);
+		Expression left = parenthesize(expression);
+		Expression right = conjuncts.remove(0);
+		return NodeBuilder.newInfixExpression(ast, CONDITIONAL_AND, left, right, conjuncts);
 	}
 
-	@SuppressWarnings("unchecked")
-	private Expression createInfixExpressionConjunction(AST ast, List<Expression> conjuncts) {
-		Expression left = conjuncts.remove(0);
-		InfixExpression infixExpression = ast.newInfixExpression();
-		infixExpression.setOperator(CONDITIONAL_AND);
-		infixExpression.setLeftOperand(left);
-		Expression rightOperand = conjuncts.remove(0);
-		infixExpression.setRightOperand(rightOperand);
-		infixExpression.extendedOperands()
-			.addAll(conjuncts);
-		return infixExpression;
-	}
-
-	private Expression parenthesizeInfixExpression(Expression expression) {
+	private Expression parenthesize(Expression expression) {
 		Expression copy = (Expression) astRewrite.createCopyTarget(expression);
 		if (expression.getNodeType() != ASTNode.INFIX_EXPRESSION) {
 			return copy;
@@ -204,10 +191,7 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 		if (!requiresParenthesis) {
 			return copy;
 		}
-		AST ast = expression.getAST();
-		ParenthesizedExpression parenthesizedExpression = ast.newParenthesizedExpression();
-		parenthesizedExpression.setExpression(copy);
-		return parenthesizedExpression;
+		return NodeBuilder.newParenthesizedExpression(expression.getAST(), copy);
 	}
 
 	private List<IfStatement> findInnerIfStatements(Statement thenStatement) {
