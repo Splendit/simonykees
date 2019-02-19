@@ -110,6 +110,119 @@ public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
+	public void visit_statementParentedIf_shouldTransform() throws Exception {
+		String block = ""
+				+ "		boolean condition = true;\n" + 
+				"		boolean innerCondition = true;" +
+				"		while (condition)\n" + 
+				"			if (condition) {\n" + 
+				"				if (innerCondition) {\n" + 
+				"					condition = false;\n" + 
+				"				}\n" + 
+				"			}";
+		String expectedBlock = ""
+				+ "		boolean condition=true;\n" + 
+				"		boolean innerCondition=true;\n" + 
+				"		while (condition)" +
+				"			if (condition && innerCondition) {\n" + 
+				"				condition=false;\n" + 
+				"			}";
+		
+		
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expected = createBlock(expectedBlock);
+		assertMatch(expected, fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_missingBraces_shouldTransform() throws Exception {
+		String block = ""
+				+ "		boolean condition = true;\n" + 
+				"		boolean innerCondition = true;" +
+				"		if (condition)\n" + 
+				"			if (innerCondition || true) \n" + 
+				"				condition = false;\n" + 
+				"			";
+		String expectedBlock = ""
+				+ "		boolean condition=true;\n" + 
+				"		boolean innerCondition=true;\n" + 
+				"		boolean condition1=condition && (innerCondition || true);\n" + 
+				"		if (condition1) \n" + 
+				"			condition=false;\n" + 
+				"		";
+		
+		
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expected = createBlock(expectedBlock);
+		assertMatch(expected, fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_noAdditionalParenthesisRequired_shouldTransform() throws Exception {
+		String block = ""
+				+ "		boolean condition = true;\n" + 
+				"		boolean innerCondition = true;" +
+				"		if (condition) {\n" + 
+				"			if (innerCondition && true) {\n" + 
+				"				condition = false;\n" + 
+				"			}\n" + 
+				"		}";
+		String expectedBlock = ""
+				+ "		boolean condition=true;\n" + 
+				"		boolean innerCondition=true;\n" + 
+				"		boolean condition1=condition && innerCondition && true;\n" + 
+				"		if (condition1) {\n" + 
+				"			condition=false;\n" + 
+				"		}";
+		
+		
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expected = createBlock(expectedBlock);
+		assertMatch(expected, fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_noAdditionalParenthesisRequired2_shouldTransform() throws Exception {
+		String block = ""
+				+ "		boolean condition = true;\n" + 
+				"		boolean innerCondition = true;" +
+				"		if (condition && true) {\n" + 
+				"			if (innerCondition) {\n" + 
+				"				condition = false;\n" + 
+				"			}\n" + 
+				"		}";
+		String expectedBlock = ""
+				+ "		boolean condition=true;\n" + 
+				"		boolean innerCondition=true;\n" + 
+				"		boolean condition1=condition && true && innerCondition;\n" + 
+				"		if (condition1) {\n" + 
+				"			condition=false;\n" + 
+				"		}";
+		
+		
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expected = createBlock(expectedBlock);
+		assertMatch(expected, fixture.getMethodBlock());
+	}
+	
+	
+	@Test
 	public void visit_nestedIfThenElse_shouldNotTransform() throws Exception {
 		String block = ""
 				+ "		boolean condition = true;\n" + 
@@ -199,23 +312,24 @@ public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
 		assertFalse(fixture.hasChanged());
 	}
 	
-	public void samples() {
-
-		boolean condition = true;
-		boolean innerCondition = true;
-		// before
-		if(condition) {
-			if(innerCondition || true) {					
-					condition = false;
-					innerCondition = false;
-			}
-		}
+	@Test
+	public void visit_statementParentedIf_shouldNotTransform() throws Exception {
+		String block = ""
+				+ "		boolean condition = true;\n" + 
+				"		boolean innerCondition = true;" +
+				"		while (condition)\n" + 
+				"			if (condition) {\n" + 
+				"				if (innerCondition || true) {\n" + 
+				"					condition = false;\n" + 
+				"				}\n" + 
+				"			}";
 		
-		// before
-		if(condition && (innerCondition || true)) {
-			condition = false;
-			innerCondition = false;
-		}
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+		
+		assertFalse(fixture.hasChanged());
+
 	}
-	
 }
