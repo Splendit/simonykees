@@ -1,5 +1,10 @@
 package eu.jsparrow.core.visitor.impl;
 
+import static org.eclipse.jdt.core.dom.InfixExpression.Operator.AND;
+import static org.eclipse.jdt.core.dom.InfixExpression.Operator.CONDITIONAL_AND;
+import static org.eclipse.jdt.core.dom.InfixExpression.Operator.CONDITIONAL_OR;
+import static org.eclipse.jdt.core.dom.InfixExpression.Operator.OR;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +13,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -27,6 +33,7 @@ import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * 
@@ -55,37 +62,62 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 
 		IfStatement innestIf = innerifStatementStatements.get(innerifStatementStatements.size() - 1);
 		Statement newBodyStatement = innestIf.getThenStatement();
-		Expression conditionConjunction = createConditionConjunction(ifStatement, innerifStatementStatements);
 
 		if (doCreateLocalVariable(ifStatement, innerifStatementStatements)) {
+			Block block = ASTNodeUtil.getSpecificAncestor(ifStatement, Block.class);
+			if (block != ifStatement.getParent()) {
+				/*
+				 * We should only insert a statement immediately before the
+				 * current if
+				 */
+				return true;
+			}
 			ASTNode enclosingScope = this.aliveVariableScope.findEnclosingScope(ifStatement)
 				.orElse(null);
 			aliveVariableScope.lazyLoadScopeNames(enclosingScope);
 			String conditionName = createConditionName();
 			AST ast = ifStatement.getAST();
+			Expression conditionConjunction = createConditionConjunction(ifStatement, innerifStatementStatements);
 			VariableDeclarationFragment fragment = ast.newVariableDeclarationFragment();
 			fragment.setName(ast.newSimpleName(conditionName));
 			fragment.setInitializer(conditionConjunction);
 			VariableDeclarationStatement conditionDeclaration = ast.newVariableDeclarationStatement(fragment);
 			conditionDeclaration.setType(ast.newPrimitiveType(PrimitiveType.BOOLEAN));
 
-			Block block = ASTNodeUtil.getSpecificAncestor(ifStatement, Block.class);
 			ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-			int positionInBlock = findPositionInBlock(block, ifStatement);
-			positionInBlock = positionInBlock >= 0 ? positionInBlock : 0;
-			listRewrite.insertAt(conditionDeclaration, positionInBlock, null);
+			listRewrite.insertBefore(conditionDeclaration, ifStatement, null);
 			SimpleName newIfExpression = ast.newSimpleName(conditionName);
 			astRewrite.replace(ifStatement.getExpression(), newIfExpression, null);
 			aliveVariableScope.addName(enclosingScope, conditionName);
 
 		} else {
+			Expression conditionConjunction = createConditionConjunction(ifStatement, innerifStatementStatements);
 			astRewrite.replace(ifStatement.getExpression(), conditionConjunction, null);
 		}
 
-		astRewrite.replace(ifStatement.getThenStatement(), (Block) astRewrite.createCopyTarget(newBodyStatement), null);
+		astRewrite.replace(ifStatement.getThenStatement(), (Statement) astRewrite.createCopyTarget(newBodyStatement),
+				null);
+		saveComments(ifStatement, innerifStatementStatements, newBodyStatement);
 		onRewrite();
 
 		return true;
+	}
+
+	private void saveComments(IfStatement ifStatement, List<IfStatement> innerifStatementStatements,
+			Statement newBodyStatement) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> internalComments = new ArrayList<>(
+				commentRewriter.findRelatedComments(ifStatement.getThenStatement()));
+		List<Comment> savedComments = new ArrayList<>();
+		savedComments.addAll(commentRewriter.findRelatedComments(newBodyStatement));
+		savedComments.addAll(commentRewriter.findRelatedComments(ifStatement.getExpression()));
+		savedComments.addAll(innerifStatementStatements.stream()
+			.map(IfStatement::getExpression)
+			.map(commentRewriter::findRelatedComments)
+			.flatMap(List::stream)
+			.collect(Collectors.toList()));
+		internalComments.removeAll(savedComments);
+		commentRewriter.saveBeforeStatement(ifStatement, internalComments);
 	}
 
 	private boolean doCreateLocalVariable(IfStatement ifStatement, List<IfStatement> innerifStatementStatements) {
@@ -98,16 +130,6 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 		return !innerifStatementStatements.stream()
 			.map(IfStatement::getExpression)
 			.allMatch(OperatorUtil::isSimpleExpression);
-	}
-
-	private int findPositionInBlock(Block block, IfStatement ifStatement) {
-		List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
-		Statement statement = ifStatement;
-		int index = -1;
-		while (statement != null && (index = statements.indexOf(statement)) < 0) {
-			statement = ASTNodeUtil.getSpecificAncestor(statement, Statement.class);
-		}
-		return index;
 	}
 
 	@Override
@@ -158,11 +180,8 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 	@SuppressWarnings("unchecked")
 	private Expression createInfixExpressionConjunction(AST ast, List<Expression> conjuncts) {
 		Expression left = conjuncts.remove(0);
-		if (conjuncts.isEmpty()) {
-			return left;
-		}
 		InfixExpression infixExpression = ast.newInfixExpression();
-		infixExpression.setOperator(InfixExpression.Operator.CONDITIONAL_AND);
+		infixExpression.setOperator(CONDITIONAL_AND);
 		infixExpression.setLeftOperand(left);
 		Expression rightOperand = conjuncts.remove(0);
 		infixExpression.setRightOperand(rightOperand);
@@ -177,18 +196,18 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 			return copy;
 		}
 		InfixExpression infixExpression = (InfixExpression) expression;
-		if (InfixExpression.Operator.CONDITIONAL_OR != infixExpression.getOperator()) {
+		InfixExpression.Operator infixOperator = infixExpression.getOperator();
+		boolean requiresParenthesis = CONDITIONAL_OR == infixOperator || OR == infixOperator || AND == infixOperator;
+		if (!requiresParenthesis) {
 			return copy;
 		}
 		AST ast = expression.getAST();
 		ParenthesizedExpression parenthesizedExpression = ast.newParenthesizedExpression();
 		parenthesizedExpression.setExpression(copy);
 		return parenthesizedExpression;
-
 	}
 
 	private List<IfStatement> findInnerIfStatements(Statement thenStatement) {
-
 		IfStatement innerIfStatement = null;
 		if (thenStatement.getNodeType() == ASTNode.IF_STATEMENT) {
 			innerIfStatement = (IfStatement) thenStatement;
