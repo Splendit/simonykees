@@ -20,6 +20,7 @@ import org.osgi.framework.Version;
 public class JdtVersionBindingUtil {
 
 	private static final String ORG_ECLIPSE_JDT = "org.eclipse.jdt"; //$NON-NLS-1$
+	private static final String JDT_JAVA_11_SUPPORT = "3.16.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_10_SUPPORT = "3.14.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_9_SUPPORT = "3.13.2"; //$NON-NLS-1$
 	private static final String JDT_LEAST_SUPPORTED = "3.12.0"; //$NON-NLS-1$
@@ -62,7 +63,10 @@ public class JdtVersionBindingUtil {
 	 */
 	@SuppressWarnings("deprecation")
 	public static int findJLSLevel(Version jdtVersion) {
-		if (isJava10Supported(jdtVersion)) {
+		
+		if (isJava11Supported(jdtVersion)) {
+			return AST.JLS11;
+		} else if (isJava10Supported(jdtVersion)) {
 			return AST.JLS10;
 		} else if (isJava9Supported(jdtVersion)) {
 			return AST.JLS9;
@@ -84,7 +88,9 @@ public class JdtVersionBindingUtil {
 	 */
 	public static Map<String, String> findCompilerOptions(Version jdtVersion) {
 		String javaVersion = JavaCore.VERSION_1_8;
-		if (isJava10Supported(jdtVersion)) {
+		if (isJava11Supported(jdtVersion)) {
+			javaVersion = JavaCore.VERSION_11;
+		} else 	if (isJava10Supported(jdtVersion)) {
 			javaVersion = JavaCore.VERSION_10;
 		} else if (isJava9Supported(jdtVersion)) {
 			javaVersion = JavaCore.VERSION_9;
@@ -114,6 +120,10 @@ public class JdtVersionBindingUtil {
 		return TryStatement.RESOURCES_PROPERTY;
 	}
 
+	private static boolean isJava11Supported(Version jdtVersion) {
+		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_11_SUPPORT)) >= 0;
+	}
+	
 	private static boolean isJava10Supported(Version jdtVersion) {
 		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_10_SUPPORT)) >= 0;
 	}
@@ -121,5 +131,4 @@ public class JdtVersionBindingUtil {
 	private static boolean isJava9Supported(Version jdtVersion) {
 		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_9_SUPPORT)) >= 0;
 	}
-
 }
