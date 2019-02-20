@@ -283,6 +283,30 @@ public class NodeBuilder {
 	 * 
 	 * @param ast
 	 *            the AbstractSyntaxTree thats the target of the node
+	 * @param operator
+	 *            {@link InfixExpression.Operator} of the
+	 *            {@link InfixExpression}
+	 * @param left
+	 *            {@link Expression} for the left-operand
+	 * @param right
+	 *            {@link Expression} for the right-operand
+	 * @param extendedOperands
+	 *            list of {@link Expressions} for the extended operands
+	 * @return {@link InfixExpression} with the given operator and operands
+	 */
+	@SuppressWarnings("unchecked")
+	public static InfixExpression newInfixExpression(AST ast, InfixExpression.Operator operator, Expression left,
+			Expression right, List<Expression> extendedOperands) {
+		InfixExpression result = newInfixExpression(ast, operator, left, right);
+		result.extendedOperands()
+			.addAll(extendedOperands);
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param ast
+	 *            the AbstractSyntaxTree thats the target of the node
 	 * @param expression
 	 *            {@link Expression} that is wrapped by the new
 	 *            {@link ParenthesizedExpression}

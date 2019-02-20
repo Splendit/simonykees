@@ -90,6 +90,10 @@ public class Messages extends NLS {
 	public static String BrowserDialog_introTitle;
 	public static String CodeFormatterRule_description;
 	public static String CodeFormatterRule_name;
+	public static String CollapseIfStatementsRule_description;
+
+	public static String CollapseIfStatementsRule_name;
+
 	public static String CollectionRemoveAllRule_description;
 	public static String CollectionRemoveAllRule_name;
 	public static String CompareInput_ancestorName;

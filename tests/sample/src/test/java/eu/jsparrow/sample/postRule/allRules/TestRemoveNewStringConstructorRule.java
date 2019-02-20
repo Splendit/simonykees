@@ -108,10 +108,9 @@ public class TestRemoveNewStringConstructorRule {
 
 	public String testConvertInsideBlock(String input) {
 		String result = "";
-		if (!StringUtils.isEmpty(input)) {
-			if (StringUtils.isEmpty(result)) {
-				result = input;
-			}
+		boolean condition = !StringUtils.isEmpty(input) && StringUtils.isEmpty(result);
+		if (condition) {
+			result = input;
 		}
 		return result;
 	}
