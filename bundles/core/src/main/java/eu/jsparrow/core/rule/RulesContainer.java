@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
+import eu.jsparrow.core.rule.impl.CollapseIfStatementsRule;
 import eu.jsparrow.core.rule.impl.CollectionRemoveAllRule;
 import eu.jsparrow.core.rule.impl.DateDeprecatedRule;
 import eu.jsparrow.core.rule.impl.DiamondOperatorRule;
@@ -123,7 +124,7 @@ public class RulesContainer {
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new DateDeprecatedRule(),
-				new RemoveDoubleNegationRule(), new OptionalIfPresentRule(), new GuardConditionRule(),
+				new RemoveDoubleNegationRule(), new OptionalIfPresentRule(), new GuardConditionRule(), new CollapseIfStatementsRule(),
 				new RemoveExplicitCallToSuperRule(), new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
 
 				/*

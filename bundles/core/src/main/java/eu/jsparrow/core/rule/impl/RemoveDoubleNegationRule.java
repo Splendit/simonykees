@@ -18,7 +18,7 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class RemoveDoubleNegationRule extends RefactoringRuleImpl<RemoveDoubleNegationASTVisitor> {
 
-	public static final String REMOVE_DOUBLE_NEGATION_RULE_ID = "RemoveDoubleNegationRule"; //$NON-NLS-1$
+	public static final String REMOVE_DOUBLE_NEGATION_RULE_ID = "RemoveDoubleNegation"; //$NON-NLS-1$
 
 	public RemoveDoubleNegationRule() {
 		this.visitorClass = RemoveDoubleNegationASTVisitor.class;

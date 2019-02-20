@@ -51,7 +51,7 @@ public class RefactorMojo extends AbstractMojo {
 	private String mavenHome;
 
 	/**
-	 * Path to the configuration file. 
+	 * Path to the configuration file.
 	 */
 	@Parameter(defaultValue = "jsparrow.yml", property = "configFile")
 	private File configFile;
@@ -63,19 +63,19 @@ public class RefactorMojo extends AbstractMojo {
 	private String profile;
 
 	/**
-	 * Use this parameter to use the default configuration. 
+	 * Use this parameter to use the default configuration.
 	 */
 	@Parameter(property = "defaultConfiguration")
 	protected boolean defaultConfiguration;
 
 	/**
-	 * Specify the license key to use. 
+	 * Specify the license key to use.
 	 */
 	@Parameter(property = "license")
 	private String license;
 
 	/**
-	 * Specify the license server to use. 
+	 * Specify the license server to use.
 	 */
 	@Parameter(property = "url")
 	private String url;

@@ -33,7 +33,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public abstract class OrganiseImportsRuleBase extends RefactoringRuleImpl<AbstractASTRewriteASTVisitor> {
 
-	public static final String ORGANISE_IMPORTS_RULE_ID = "OrganiseImports"; //$NON-NLS-1$
+	public static final String ORGANISE_IMPORTS_RULE_ID = "OrganizeImports"; //$NON-NLS-1$
 
 	public OrganiseImportsRuleBase() {
 		super();

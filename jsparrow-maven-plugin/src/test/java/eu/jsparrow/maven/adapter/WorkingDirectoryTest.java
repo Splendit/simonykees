@@ -65,7 +65,7 @@ public class WorkingDirectoryTest {
 	public void cleanUp_multipleProjectsInLock_shouldDeleteProjectRelatedFiles() throws IOException {
 		writeToLockFile(rootProjectId + "\n" + "another-project-id");
 
-		File deps = temporaryDirectory.newFolder("temp_jsparrow" + File.separator + "deps");
+		File deps = temporaryDirectory.newFolder("temp_jsparrow", "deps");
 		File projectRelated = new File(deps.getPath() + File.separator + artifactId);
 		projectRelated.createNewFile();
 

@@ -233,10 +233,9 @@ public class TestWhileToForEachArrayRule {
 			while (j < i) {
 				Object o1 = array[i];
 				Object o2 = array[j];
-				if (o1 != null && o2 != null) {
-					if (o1.equals(o2)) {
-						return true;
-					}
+				boolean condition = o1 != null && o2 != null && o1.equals(o2);
+				if (condition) {
+					return true;
 				}
 				j++;
 			}

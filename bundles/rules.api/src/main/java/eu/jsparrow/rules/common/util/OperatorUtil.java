@@ -145,16 +145,28 @@ public class OperatorUtil {
 	 * @return if the above condition is satisfied.
 	 */
 	public static boolean isSimpleExpression(InfixExpression expression) {
-		SimpleExpressionVisitor visitor = new SimpleExpressionVisitor();
 		Expression left = expression.getLeftOperand();
-		left.accept(visitor);
-		boolean isSimpleLeftOperand = visitor.isSimple();
+		boolean isSimpleLeftOperand = isSimpleExpression(left);
 		if (!isSimpleLeftOperand) {
 			return false;
 		}
-		visitor = new SimpleExpressionVisitor();
 		Expression right = expression.getRightOperand();
-		right.accept(visitor);
+		return isSimpleExpression(right);
+	}
+
+	/**
+	 * Checks whether an expression contains other {@link InfixExpression}s,
+	 * {@link PrefixExpression}s or {@link PostfixExpression}s.
+	 * 
+	 * @see SimpleExpressionVisitor
+	 * 
+	 * @param expression
+	 *            the expression to be checked
+	 * @return if the above condition is met.
+	 */
+	public static boolean isSimpleExpression(Expression expression) {
+		SimpleExpressionVisitor visitor = new SimpleExpressionVisitor();
+		expression.accept(visitor);
 		return visitor.isSimple();
 	}
 
