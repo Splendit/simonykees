@@ -4,46 +4,40 @@ package eu.jsparrow.core.visitor.impl;
 import static org.junit.Assert.assertTrue;
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @SuppressWarnings({ "nls" })
-@RunWith(Parameterized.class)
 public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 
-	@Parameters
-	public static Collection<Object[]> data() {
-		return Arrays.asList(new Object[][] { { "99, 1, 1", "1999, 1, 1" }, { "99.00, 1, 1", "1900 + 99.00, 1, 1" }, { "100, 1, 1", "2000, 1, 1" },
-				{ "99, 1, 1, 1, 1", "1999, 1, 1, 1, 1" }, { "99, 1, 1, 1, 1, 1", "1999, 1, 1, 1, 1, 1" } });
-	}
-
-	private String dateConfigPre;
-	private String dateConfigPost;
-
-	public DateDeprecatedASTVisitorTest(String dateConfigPre, String dateConfigPost) {
-		this.dateConfigPre = dateConfigPre;
-		this.dateConfigPost = dateConfigPost;
+	public static Stream<Arguments> createDates() {
+		return Stream.of(Arguments.of("99, 1, 1", "1999, 1, 1" ),
+				Arguments.of("99.00, 1, 1", "1900 + 99.00, 1, 1" ),
+				Arguments.of("100, 1, 1", "2000, 1, 1"),
+				Arguments.of("99, 1, 1, 1, 1", "1999, 1, 1, 1, 1" ),
+				Arguments.of("99, 1, 1, 1, 1, 1", "1999, 1, 1, 1, 1, 1" ),
+				Arguments.of("99, 1, 1", "1999, 1, 1" )
+				);
 	}
 
 	private DateDeprecatedASTVisitor visitor;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		visitor = new DateDeprecatedASTVisitor();
 		fixture.addImport("java.util.Date");
 	}
 
-	@Test
-	public void visit_newDate_YMD() throws Exception {
+	@ParameterizedTest
+	@MethodSource("createDates")
+	public void visit_newDate_YMD(String dateConfigPre, String dateConfigPost) throws Exception {
 		fixture.addMethodBlock("Date d = new Date(" + dateConfigPre + ");");
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
@@ -63,8 +57,9 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 			.anyMatch(i -> astMatcher.match(i, expectedAddedImport)));
 	}
 
-	@Test
-	public void visit_newDateExp_YMD() throws Exception {
+	@ParameterizedTest
+	@MethodSource("createDates")
+	public void visit_newDateExp_YMD(String dateConfigPre, String dateConfigPost) throws Exception {
 		fixture.addMethodBlock("new Date(" + dateConfigPre + ");");
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
@@ -84,8 +79,9 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 			.anyMatch(i -> astMatcher.match(i, expectedAddedImport)));
 	}
 
-	@Test
-	public void visit_newDate_YMD_extra_statement() throws Exception {
+	@ParameterizedTest
+	@MethodSource("createDates")
+	public void visit_newDate_YMD_extra_statement(String dateConfigPre, String dateConfigPost) throws Exception {
 		fixture.addMethodBlock("new String(\"Hellow\"); Date d = new Date(" + dateConfigPre + ");");
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
@@ -105,8 +101,9 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 			.anyMatch(i -> astMatcher.match(i, expectedAddedImport)));
 	}
 
-	@Test
-	public void visit_newDate_YMD_single_statement() throws Exception {
+	@ParameterizedTest
+	@MethodSource("createDates")
+	public void visit_newDate_YMD_single_statement(String dateConfigPre, String dateConfigPost) throws Exception {
 		fixture.addMethodBlock("if(true) new Date(" + dateConfigPre + ");");
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
@@ -125,8 +122,9 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 			.anyMatch(i -> astMatcher.match(i, expectedAddedImport)));
 	}
 	
-	@Test
-	public void visit_newDate_YMD_avoidNameConflict() throws Exception {
+	@ParameterizedTest
+	@MethodSource("createDates")
+	public void visit_newDate_YMD_avoidNameConflict(String dateConfigPre, String dateConfigPost) throws Exception {
 		fixture.addMethodBlock("int calendar; double calendar2; Date calendar1 = new Date(" + dateConfigPre + ");");
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
@@ -136,8 +134,9 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
-	@Test
-	public void visit_newDate_YMD_multiIntroducedNames() throws Exception {
+	@ParameterizedTest
+	@MethodSource("createDates")
+	public void visit_newDate_YMD_multiIntroducedNames(String dateConfigPre, String dateConfigPost) throws Exception {
 		fixture.addMethodBlock("Date d = new Date(" + dateConfigPre + "); int calendar1; Date d2 = new Date(" + dateConfigPre + ");");
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
@@ -153,7 +152,8 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
-	@Test
+	@ParameterizedTest
+	@MethodSource("createDates")
 	public void visit_newDate_noParameters() throws Exception {
 		fixture.addMethodBlock("Date date = new Date();");
 		visitor.setASTRewrite(fixture.getAstRewrite());
