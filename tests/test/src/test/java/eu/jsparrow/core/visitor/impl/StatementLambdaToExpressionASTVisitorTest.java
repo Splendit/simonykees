@@ -1,11 +1,11 @@
 package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.jdt.core.dom.Block;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
@@ -16,7 +16,7 @@ public class StatementLambdaToExpressionASTVisitorTest extends UsesJDTUnitFixtur
 
 	private String blockTemplate = "new ArrayList<>().forEach(element -> %s);";
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		visitor = new StatementLambdaToExpressionASTVisitor();
 		fixture.addImport("java.util.ArrayList");

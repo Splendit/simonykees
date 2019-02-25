@@ -3,15 +3,15 @@ package eu.jsparrow.core.visitor.impl;
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
 import org.eclipse.jdt.core.dom.Block;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("nls")
 public class RemoveDoubleNegationVisitorTest extends UsesJDTUnitFixture {
 
 	private RemoveDoubleNegationASTVisitor visitor;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		visitor = new RemoveDoubleNegationASTVisitor();
 	}

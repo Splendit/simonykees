@@ -4,10 +4,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
@@ -25,7 +25,7 @@ public class SyntaxErrorCheckTest {
 	IJavaProject testproject = null;
 	IPackageFragment packageFragment = null;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		testproject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 		IPackageFragmentRoot root = RulesTestUtil.addSourceContainer(testproject, "/allRulesTestRoot");
@@ -35,7 +35,7 @@ public class SyntaxErrorCheckTest {
 		packageFragment = root.createPackageFragment("eu.jsparrow", true, null);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		testproject = null;
 		packageFragment = null;
@@ -49,7 +49,7 @@ public class SyntaxErrorCheckTest {
 				+ System.lineSeparator() + "}" + System.lineSeparator();
 		ICompilationUnit testfile = packageFragment.createCompilationUnit("SyntaxErrorCheckTest2.java", source, true,
 				null);
-		Assert.assertFalse(RefactoringUtil.checkForSyntaxErrors(testfile));
+		Assertions.assertFalse(RefactoringUtil.checkForSyntaxErrors(testfile));
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class SyntaxErrorCheckTest {
 				+ System.lineSeparator() + "}" + System.lineSeparator();
 		ICompilationUnit testfile = packageFragment.createCompilationUnit("SyntaxErrorCheckTest2.java", source, true,
 				null);
-		Assert.assertFalse(RefactoringUtil.checkForSyntaxErrors(testfile));
+		Assertions.assertFalse(RefactoringUtil.checkForSyntaxErrors(testfile));
 	}
 
 }

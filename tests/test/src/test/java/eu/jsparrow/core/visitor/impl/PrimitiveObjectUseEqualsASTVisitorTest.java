@@ -1,12 +1,12 @@
 package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.jdt.core.dom.Block;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
@@ -17,7 +17,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesJDTUnitFixture {
 	
 	private String template = "Integer a = new Integer(1);Integer b = new Integer(2);if (%s) {}";
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		visitor = new PrimitiveObjectUseEqualsASTVisitor();
 	}

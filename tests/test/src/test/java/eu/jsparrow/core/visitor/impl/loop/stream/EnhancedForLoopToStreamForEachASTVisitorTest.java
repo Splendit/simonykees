@@ -3,8 +3,8 @@ package eu.jsparrow.core.visitor.impl.loop.stream;
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
 import org.eclipse.jdt.core.dom.Block;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamForEachASTVisitor;
@@ -14,7 +14,7 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesJDTUnitFix
 	
 	private EnhancedForLoopToStreamForEachASTVisitor visitor;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		visitor = new EnhancedForLoopToStreamForEachASTVisitor();
 	}

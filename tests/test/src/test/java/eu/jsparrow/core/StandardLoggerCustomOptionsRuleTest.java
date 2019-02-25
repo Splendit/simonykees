@@ -1,7 +1,7 @@
 package eu.jsparrow.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.core.JavaCore;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
@@ -26,7 +26,7 @@ public class StandardLoggerCustomOptionsRuleTest extends SingleRuleTest {
 
 	private StandardLoggerRule rule;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		rule = new StandardLoggerRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");

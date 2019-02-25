@@ -1,7 +1,8 @@
 package eu.jsparrow.core.visitor.impl;
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
+
 import static org.junit.Assert.assertTrue;
+import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
 import java.util.Arrays;
 import java.util.Collection;
