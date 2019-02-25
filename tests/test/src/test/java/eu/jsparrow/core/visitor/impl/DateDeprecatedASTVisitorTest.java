@@ -18,8 +18,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 
 	public static Stream<Arguments> createDates() {
-		return Stream.of(Arguments.of("99, 1, 1", "1999, 1, 1" ),
-				Arguments.of("99.00, 1, 1", "1900 + 99.00, 1, 1" ),
+		return Stream.of(Arguments.of("99.00, 1, 1", "1900 + 99.00, 1, 1" ),
 				Arguments.of("100, 1, 1", "2000, 1, 1"),
 				Arguments.of("99, 1, 1, 1, 1", "1999, 1, 1, 1, 1" ),
 				Arguments.of("99, 1, 1, 1, 1, 1", "1999, 1, 1, 1, 1, 1" ),

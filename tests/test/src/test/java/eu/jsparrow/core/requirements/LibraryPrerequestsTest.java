@@ -43,8 +43,6 @@ public class LibraryPrerequestsTest {
 	public static Stream<Arguments> data() throws Exception {
 		return Stream.of(
 					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
-						"commons-lang3", "3.0"),true),
-					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
 							"commons-lang3", "3.0"), true ),
 					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
 							"commons-lang3", "3.0.1"), true ),
@@ -71,7 +69,7 @@ public class LibraryPrerequestsTest {
 				);
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "{index}: test with pom:[{0}]")
 	@MethodSource("data")
 	public void filterWithStringUtilsIsPresent(IClasspathEntry entry, boolean enabled) throws Exception {
 		RulesTestUtil.addToClasspath(testproject, Arrays.asList(entry));
