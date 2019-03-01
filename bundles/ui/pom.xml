@@ -42,6 +42,32 @@
 		</resources>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-libraries</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<item>
+									<groupId>com.github.oshi</groupId>
+									<artifactId>oshi-core</artifactId>
+									<version>3.13.0</version>
+								</item>
+							</artifactItems>
+							<outputDirectory>lib</outputDirectory>
+							<stripVersion>true</stripVersion>
+							<overWriteReleases>true</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>com.coderplus.maven.plugins</groupId>
 				<artifactId>copy-rename-maven-plugin</artifactId>
 				<version>1.0.1</version>
