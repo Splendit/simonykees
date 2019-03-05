@@ -20,6 +20,10 @@ Require-Bundle: eu.jsparrow.logging,
  org.opentest4j
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Import-Package: org.junit.jupiter.api,
+ org.junit.jupiter.api.function,
  org.junit.jupiter.engine.execution,
  org.junit.jupiter.params,
  org.junit.jupiter.params.provider
+ 
+  
+ 

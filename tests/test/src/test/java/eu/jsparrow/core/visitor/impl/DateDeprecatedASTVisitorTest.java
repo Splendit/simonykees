@@ -1,8 +1,8 @@
 package eu.jsparrow.core.visitor.impl;
 
 
-import static org.junit.Assert.assertTrue;
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.stream.Stream;
 

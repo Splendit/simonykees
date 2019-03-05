@@ -2,10 +2,11 @@ package eu.jsparrow.core.config;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,11 +15,9 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 import org.eclipse.osgi.util.NLS;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,15 +34,12 @@ public class YAMLConfigUtilTest {
 
 	File exportFile;
 
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
-
-	@Before
+	@BeforeEach
 	public void setUp() throws IOException {
 		exportFile = File.createTempFile("export", "yaml");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws IOException {
 		if (!Files.deleteIfExists(exportFile.toPath())) {
 			String loggerError = NLS.bind(Messages.Activator_couldNotDeleteFileWithPath, exportFile.getAbsolutePath());
@@ -59,10 +55,7 @@ public class YAMLConfigUtilTest {
 
 	@Test
 	public void loadConfiguration_LoadInvalidYAML_ShouldThrowException() throws YAMLConfigException {
-		expectedException.expect(YAMLConfigException.class);
-
-		YAMLConfig config = YAMLConfigUtil.loadConfiguration(loadResource("invalid.yaml"));
-		assertNotNull(config);
+		assertThrows(YAMLConfigException.class, () -> YAMLConfigUtil.loadConfiguration(loadResource("invalid.yaml")));
 	}
 
 	@Test
@@ -77,26 +70,23 @@ public class YAMLConfigUtilTest {
 	public void exportConfig_ToNonWritableFile_ShouldThrowException() throws YAMLConfigException {
 		YAMLConfig config = new YAMLConfig();
 		assertTrue(exportFile.setWritable(false));
-		expectedException.expect(YAMLConfigException.class);
-		YAMLConfigUtil.exportConfig(config, exportFile);
+		assertThrows(YAMLConfigException.class, () -> YAMLConfigUtil.exportConfig(config, exportFile));
 	}
 
 	@Test
 	public void readConfig_NonExistentFile_ShouldThrowException() throws YAMLConfigException {
-		expectedException.expect(YAMLConfigException.class);
-		expectedException.expectMessage(
-				"The provided path (file) does not lead to a YAML configuration file! (File extension must be *.yml or *.yaml)");
-		YAMLConfig config = YAMLConfigUtil.readConfig("file");
-		assertEquals("default", config.getSelectedProfile());
+		YAMLConfigException expectedException = assertThrows(YAMLConfigException.class,
+				() -> YAMLConfigUtil.readConfig("file"));
+		assertEquals(
+				"The provided path (file) does not lead to a YAML configuration file! (File extension must be *.yml or *.yaml)",
+				expectedException.getMessage());
 	}
 
 	@Test
 	public void readConfig_ExistingFile_ShouldUseDefaultProfile() throws YAMLConfigException {
 		YAMLConfig config = YAMLConfigUtil.readConfig(String.join("/", RESOURCE_DIRECTORY, "valid.yaml"));
 
-		assertEquals("aaa", config.getProfiles()
-			.get(0)
-			.getName());
+		assertEquals("aaa", config.getProfiles().get(0).getName());
 	}
 
 	@Test
@@ -119,10 +109,9 @@ public class YAMLConfigUtilTest {
 		yamlConfig.setProfiles(singletonList(
 				new YAMLProfile(PROFILE_NAME, emptyList(), new YAMLRenamingRule(), new YAMLLoggerRule())));
 
-		expectedException.expect(YAMLConfigException.class);
-		expectedException.expectMessage("Profile [INVALID] does not exist"); //$NON-NLS-1$
-
-		YAMLConfigUtil.updateSelectedProfile(yamlConfig, "INVALID"); //$NON-NLS-1$
+		YAMLConfigException exception = assertThrows(YAMLConfigException.class,
+				() -> YAMLConfigUtil.updateSelectedProfile(yamlConfig, "INVALID"));
+		assertEquals("Profile [INVALID] does not exist", exception.getMessage());
 	}
 
 	@Test
@@ -146,8 +135,7 @@ public class YAMLConfigUtilTest {
 	}
 
 	private File loadResource(String resource) {
-		return Paths.get(String.join("/", RESOURCE_DIRECTORY, resource))
-			.toFile();
+		return Paths.get(String.join("/", RESOURCE_DIRECTORY, resource)).toFile();
 	}
 
 }
