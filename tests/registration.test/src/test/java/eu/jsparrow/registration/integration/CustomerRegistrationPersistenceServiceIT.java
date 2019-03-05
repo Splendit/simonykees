@@ -1,20 +1,21 @@
 package eu.jsparrow.registration.integration;
 
-import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.registration.RegistrationPersistenceService;
 
-@Ignore
+@Disabled
 public class CustomerRegistrationPersistenceServiceIT {
 	
 	private RegistrationPersistenceService persistenceService;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		persistenceService = new RegistrationPersistenceService();
 	}
