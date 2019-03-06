@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -23,6 +24,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -94,9 +97,24 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				 * parts of the lambda expression.
 				 */
 				SimpleName parameterNameCopy = (SimpleName) astRewrite.createCopyTarget(parameterName);
-				VariableDeclarationFragment lambdaParameter = astRewrite.getAST()
-					.newVariableDeclarationFragment();
-				lambdaParameter.setName(parameterNameCopy);
+				Type parameterTypeCopy = (Type) astRewrite.createCopyTarget(parameterType);
+				
+				ASTNode lambdaParameter;
+				List<IExtendedModifier> modifiers = ASTNodeUtil.returnTypedList(parameter.modifiers(), IExtendedModifier.class);
+				if (modifiers.isEmpty()) {
+					VariableDeclarationFragment temp = astRewrite.getAST().newVariableDeclarationFragment();
+					temp.setName(parameterNameCopy);
+					lambdaParameter = temp;
+				} else {
+					SingleVariableDeclaration temp = NodeBuilder.newSingleVariableDeclaration(astRewrite.getAST(), parameterNameCopy, parameterTypeCopy);
+					ListRewrite lambdaExpressionParameterListRewrite = astRewrite.getListRewrite(temp,
+							SingleVariableDeclaration.MODIFIERS2_PROPERTY);
+					for( IExtendedModifier mod : modifiers) {
+						lambdaExpressionParameterListRewrite.insertLast(astRewrite.createCopyTarget((ASTNode)mod), null);
+					}
+					lambdaParameter = temp;
+				}
+				
 
 				ASTNode statementCopy = astRewrite.createCopyTarget(approvedStatement);
 
