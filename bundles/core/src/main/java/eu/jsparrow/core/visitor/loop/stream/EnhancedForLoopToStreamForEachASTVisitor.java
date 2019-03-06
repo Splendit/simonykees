@@ -97,24 +97,27 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				 * parts of the lambda expression.
 				 */
 				SimpleName parameterNameCopy = (SimpleName) astRewrite.createCopyTarget(parameterName);
-				Type parameterTypeCopy = (Type) astRewrite.createCopyTarget(parameterType);
-				
+
 				ASTNode lambdaParameter;
-				List<IExtendedModifier> modifiers = ASTNodeUtil.returnTypedList(parameter.modifiers(), IExtendedModifier.class);
+				List<IExtendedModifier> modifiers = ASTNodeUtil.returnTypedList(parameter.modifiers(),
+						IExtendedModifier.class);
 				if (modifiers.isEmpty()) {
-					VariableDeclarationFragment temp = astRewrite.getAST().newVariableDeclarationFragment();
+					VariableDeclarationFragment temp = astRewrite.getAST()
+						.newVariableDeclarationFragment();
 					temp.setName(parameterNameCopy);
 					lambdaParameter = temp;
 				} else {
-					SingleVariableDeclaration temp = NodeBuilder.newSingleVariableDeclaration(astRewrite.getAST(), parameterNameCopy, parameterTypeCopy);
+					Type parameterTypeCopy = (Type) astRewrite.createCopyTarget(parameterType);
+					SingleVariableDeclaration temp = NodeBuilder.newSingleVariableDeclaration(astRewrite.getAST(),
+							parameterNameCopy, parameterTypeCopy);
 					ListRewrite lambdaExpressionParameterListRewrite = astRewrite.getListRewrite(temp,
 							SingleVariableDeclaration.MODIFIERS2_PROPERTY);
-					for( IExtendedModifier mod : modifiers) {
-						lambdaExpressionParameterListRewrite.insertLast(astRewrite.createCopyTarget((ASTNode)mod), null);
+					for (IExtendedModifier mod : modifiers) {
+						lambdaExpressionParameterListRewrite.insertLast(astRewrite.createCopyTarget((ASTNode) mod),
+								null);
 					}
 					lambdaParameter = temp;
 				}
-				
 
 				ASTNode statementCopy = astRewrite.createCopyTarget(approvedStatement);
 
