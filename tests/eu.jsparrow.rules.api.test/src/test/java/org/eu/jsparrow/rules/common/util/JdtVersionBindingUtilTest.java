@@ -1,13 +1,7 @@
 package org.eu.jsparrow.rules.common.util;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertEquals;
 
-import java.util.Map;
-
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.junit.Test;
@@ -41,30 +35,6 @@ public class JdtVersionBindingUtilTest {
 		Version jdtVersion = createJDTVersion(JDT_VERSION_NEON);
 		int jlsLevel = JdtVersionBindingUtil.findJLSLevel(jdtVersion);
 		assertEquals(8, jlsLevel);
-	}
-
-	@Test
-	public void test_findCompilerOptions_shouldReturnJava10() {
-		Version jdtVersion = createJDTVersion(JDT_VERSION_PHOTON);
-		Map<String, String> options = JdtVersionBindingUtil.findCompilerOptions(jdtVersion);
-		assertThat(options, allOf(hasEntry(JavaCore.COMPILER_COMPLIANCE, "10"),
-				hasEntry(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, "10"), hasEntry(JavaCore.COMPILER_SOURCE, "10")));
-	}
-
-	@Test
-	public void test_findCompilerOptions_shouldReturnJava9() {
-		Version jdtVersion = createJDTVersion(JDT_VERSION_OXYGEN);
-		Map<String, String> options = JdtVersionBindingUtil.findCompilerOptions(jdtVersion);
-		assertThat(options, allOf(hasEntry(JavaCore.COMPILER_COMPLIANCE, "9"),
-				hasEntry(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, "9"), hasEntry(JavaCore.COMPILER_SOURCE, "9")));
-	}
-
-	@Test
-	public void test_findCompilerOptions_shouldReturnJava8() {
-		Version jdtVersion = createJDTVersion(JDT_VERSION_NEON);
-		Map<String, String> options = JdtVersionBindingUtil.findCompilerOptions(jdtVersion);
-		assertThat(options, allOf(hasEntry(JavaCore.COMPILER_COMPLIANCE, "1.8"),
-				hasEntry(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, "1.8"), hasEntry(JavaCore.COMPILER_SOURCE, "1.8")));
 	}
 
 	@SuppressWarnings("deprecation")
