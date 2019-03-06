@@ -1,7 +1,7 @@
 package eu.jsparrow.core.precondition;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -9,8 +9,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
@@ -26,7 +26,7 @@ public class CompilationUnitParserTest {
 	IJavaProject testproject = null;
 	IPackageFragment packageFragment = null;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		testproject = RulesTestUtil.createJavaProject("compilationUnitParserProject", "bin");
 		IPackageFragmentRoot root = RulesTestUtil.addSourceContainer(testproject, "/allRulesTestRoot");
