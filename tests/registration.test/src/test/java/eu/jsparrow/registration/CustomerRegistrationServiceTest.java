@@ -1,14 +1,13 @@
 package eu.jsparrow.registration;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import eu.jsparrow.license.api.exception.ValidationException;
@@ -19,11 +18,8 @@ public class CustomerRegistrationServiceTest {
 	
 	private CustomerRegistrationService service;
 	private RegisterValidator registrationValidation;
-	
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-	
-	@Before
+
+	@BeforeEach
 	public void setUp() {
 		this.registrationValidation = Mockito.mock(RegisterValidator.class);
 		this.service = new CustomerRegistrationService(registrationValidation);
@@ -44,9 +40,7 @@ public class CustomerRegistrationServiceTest {
 		String activationKey = "sample-activation-key";
 		when(registrationValidation.activate(activationKey)).thenThrow(ValidationException.class);
 		
-		thrown.expect(ValidationException.class);
-		
-		service.activate(activationKey);
+		assertThrows(ValidationException.class, () -> service.activate(activationKey));
 	}
 	
 	@Test
@@ -62,8 +56,7 @@ public class CustomerRegistrationServiceTest {
 	public void register_unavailableService_shouldThrowException() throws Exception {
 		when(registrationValidation.register(any())).thenThrow(ValidationException.class);
 		
-		thrown.expect(ValidationException.class);
-		service.register("mail", "first-name", "last-name", "company", true);
+		assertThrows(ValidationException.class, () -> service.register("mail", "first-name", "last-name", "company", true));
 	}
 	
 	@Test

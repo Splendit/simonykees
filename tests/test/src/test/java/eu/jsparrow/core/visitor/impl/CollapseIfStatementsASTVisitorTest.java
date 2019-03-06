@@ -1,11 +1,11 @@
 package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.eclipse.jdt.core.dom.Block;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "nls" })
 public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
@@ -13,7 +13,7 @@ public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
 	private CollapseIfStatementsASTVisitor visitor;
 	
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.visitor = new CollapseIfStatementsASTVisitor();
 	}

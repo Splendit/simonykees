@@ -1,11 +1,13 @@
 package eu.jsparrow.license.netlicensing.validation.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.ZonedDateTime;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
@@ -16,7 +18,7 @@ public class DemoLicenseValidationTest {
 
 	private DemoLicenseValidation validation;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		model = new DemoLicenseModel(null);
 		validation = new DemoLicenseValidation(model);

@@ -1,10 +1,11 @@
 package eu.jsparrow.jdtunit;
 
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
-
-import junit.framework.ComparisonFailure;
 
 public final class Matchers {
 
@@ -24,7 +25,7 @@ public final class Matchers {
 	public static void assertMatch(Block expected, ASTNode actual) {
 		ASTMatcher astMatcher = new ASTMatcher();
 		if (!astMatcher.match(expected, actual)) {
-			throw new ComparisonFailure("ASTNodes do not match.", expected.toString(), actual.toString()); //$NON-NLS-1$
+			fail("ASTNodes do not match. expected:" + expected.toString() +", actual:"+ actual.toString()); //$NON-NLS-1$
 		}
 	}
 }

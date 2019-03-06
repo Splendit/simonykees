@@ -1,10 +1,10 @@
 package org.eu.jsparrow.rules.common.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.Version;
 
 import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;

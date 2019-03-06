@@ -1,15 +1,15 @@
 package eu.jsparrow.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.eclipse.jdt.core.JavaCore;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
@@ -22,7 +22,7 @@ public class PrimitiveObjectUseEqualsRuleTest extends SingleRuleTest {
 
 	private PrimitiveObjectUseEqualsRule rule;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		rule = new PrimitiveObjectUseEqualsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");

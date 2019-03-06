@@ -1,8 +1,9 @@
 package eu.jsparrow.core.renaming;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,8 +16,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.AbstractRulesTest;
 import eu.jsparrow.core.visitor.renaming.FieldReferencesSearch;
@@ -94,7 +95,7 @@ public class FieldReferencesSearchTest extends AbstractRulesTest  {
 	
 	private IPackageFragment packageFragment;
 	
-	@Before
+	@BeforeEach
 	public void setUpCompilationUnits() throws Exception {
 		IPackageFragmentRoot root = AbstractRulesTest.createRootPackageFragment();
 		packageFragment = root.createPackageFragment(ROOT_PACKAGE_NAME, true, null);
@@ -158,7 +159,7 @@ public class FieldReferencesSearchTest extends AbstractRulesTest  {
 		 * If the bug will eventually be fixed, this test case will fail. 
 		 */
 		List<ReferenceSearchMatch> references = optReferences.get();
-		assertTrue("No references can be found if the type of the field has a $", references.isEmpty());
+		assertTrue(references.isEmpty(), "No references can be found if the type of the field has a $");
 	}
 	
 	@Test

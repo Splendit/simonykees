@@ -1,9 +1,9 @@
 package eu.jsparrow.core.precondition;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.renaming.NamingConventionUtil;
 
@@ -22,8 +22,8 @@ public class NamingConventionsUtilTest {
 	public void cammelCaseAfterDollar() {
 		String identifierWithDollarSign = "has$dollar_sign";
 		String newId = NamingConventionUtil.generateNewIdentifier(identifierWithDollarSign, true, false).orElse("");
-		assertFalse("Expecting an identifier to be generated", newId.isEmpty());
-		assertEquals("Expecting the generated id to have upper cases after dollar sign", "hasDollarsign", newId);
+		assertFalse(newId.isEmpty(), "Expecting an identifier to be generated");
+		assertEquals("hasDollarsign", newId, "Expecting the generated id to have upper cases after dollar sign");
 		
 	}
 	
@@ -31,8 +31,8 @@ public class NamingConventionsUtilTest {
 	public void cammelCaseAfterUnderscore() {
 		String identifierWithDollarSign = "has_under$score";
 		String newId = NamingConventionUtil.generateNewIdentifier(identifierWithDollarSign, false, true).orElse("");
-		assertFalse("Expecting an identifier to be generated", newId.isEmpty());
-		assertEquals("Expecting the generated id to have upper cases after '_'", "hasUnderscore", newId);
+		assertFalse(newId.isEmpty(), "Expecting an identifier to be generated");
+		assertEquals("hasUnderscore", newId, "Expecting the generated id to have upper cases after '_'");
 		
 	}
 	
@@ -40,8 +40,8 @@ public class NamingConventionsUtilTest {
 	public void cammelCaseAllways() {
 		String identifierWithDollarSign = "has_under$score_and$dollar_sign";
 		String newId = NamingConventionUtil.generateNewIdentifier(identifierWithDollarSign, true, true).orElse("");
-		assertFalse("Expecting an identifier to be generated", newId.isEmpty());
-		assertEquals("Expecting the generated id to have upper cases after '$' and '_'", "hasUnderScoreAndDollarSign", newId);
+		assertFalse(newId.isEmpty(), "Expecting an identifier to be generated");
+		assertEquals("hasUnderScoreAndDollarSign", newId,"Expecting the generated id to have upper cases after '$' and '_'");
 		
 	}
 	

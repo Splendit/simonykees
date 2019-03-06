@@ -1,16 +1,19 @@
 package eu.jsparrow.registration.validation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.registration.validation.response.ActivateResponse;
 import eu.jsparrow.registration.validation.response.RegisterResponse;
@@ -20,11 +23,8 @@ import eu.jsparrow.registration.validation.response.ResponseParser;
 public class ResponseParserTest {
 	
 	private ResponseParser responseParser;
-	
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-	
-	@Before
+
+	@BeforeEach
 	public void setUp() {
 		responseParser = new ResponseParser();
 	}
@@ -40,16 +40,6 @@ public class ResponseParserTest {
 	}
 	
 	@Test
-	public void parseRegisterResponse_emptyValue_shouldThrowException() throws IOException {
-		String validResponseBody = "";
-		
-		thrown.expect(IOException.class);
-		responseParser.parseRegisterResponse(validResponseBody);
-		
-		fail();
-	}
-	
-	@Test
 	public void parseActivateResponse_validResponseBody_shouldParseActivateResponse() throws IOException {
 		String now = Instant.now().toString();
 		String validResponseBody = "{ \"active\": true, \"message\": \"success\", \"activationTimestamp\": \""+ now + "\" }";
@@ -62,22 +52,27 @@ public class ResponseParserTest {
 	}
 	
 	@Test
-	public void parseActivateResponse_emptyResponseBody_shouldThrowException() throws IOException {
+	public void parseRegisterResponse_emptyValue_shouldThrowException() throws IOException {
 		String validResponseBody = "";
 		
-		thrown.expect(IOException.class);
-		responseParser.parseActivateResponse(validResponseBody);
-		
-		fail();
+		assertThrows(IOException.class, () -> responseParser.parseRegisterResponse(validResponseBody));
 	}
 	
-	@Test
-	public void parseActivateResponse_invalidResponseBody_shouldThrowException() throws IOException {
-		String validResponseBody = "invlid-json-value";
-		
-		thrown.expect(IOException.class);
-		responseParser.parseActivateResponse(validResponseBody);
-		
-		fail();
+	/**
+	 * Parameters for following Test
+	 * @return
+	 * @throws Exception
+	 */
+	public static Stream<Arguments> response() throws Exception {
+		return Stream.of(
+					Arguments.of(""),
+					Arguments.of("invlid-json-value")
+				);
+	}
+
+	@ParameterizedTest(name = "{index}: test with responseBody:[{0}]")
+	@MethodSource("response")
+	public void parseActivateResponse_emptyResponseBody_shouldThrowException(String validResponseBody) throws IOException {
+		assertThrows(IOException.class, () -> responseParser.parseActivateResponse(validResponseBody));
 	}
 }

@@ -1,21 +1,21 @@
 package eu.jsparrow.registration.integration;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.registration.CustomerRegistrationService;
 
 @SuppressWarnings("nls")
-@Ignore
+@Disabled
 public class CustomerRegistrationServiceIT {
 
 	private CustomerRegistrationService customerRegistrationService;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		customerRegistrationService = new CustomerRegistrationService();
 	}

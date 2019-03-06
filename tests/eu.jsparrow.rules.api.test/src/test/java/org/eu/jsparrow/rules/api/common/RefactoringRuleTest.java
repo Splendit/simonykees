@@ -1,17 +1,18 @@
 package org.eu.jsparrow.rules.api.common;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.jdtunit.util.CompilationUnitBuilder;
 import eu.jsparrow.jdtunit.util.JavaProjectBuilder;
@@ -34,14 +35,14 @@ public class RefactoringRuleTest {
 
 	private IPackageFragment fragment;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		rule = new DummyRefactoringRule();
 		project = new JavaProjectBuilder().build();
 		fragment = new PackageFragmentBuilder(project).build();
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		project.getProject()
 			.delete(true, null);
