@@ -1,11 +1,7 @@
 package eu.jsparrow.rules.common.util;
 
-import java.util.Map;
-
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.osgi.framework.Bundle;
@@ -72,34 +68,6 @@ public class JdtVersionBindingUtil {
 			return AST.JLS9;
 		}
 		return AST.JLS8;
-	}
-
-	/**
-	 * Finds the compiler options for the {@link ASTParser} based on the given
-	 * JDT version.
-	 * 
-	 * @param jdtVersion
-	 *            the JDT version of the current {@link Platform}.
-	 * @return options corresponding to {@link JavaCore#VERSION_10} if the JDT
-	 *         version corresponds to Photon; options corresponding to
-	 *         {@link JavaCore#VERSION_9} if the JDT version corresponds to
-	 *         Oxygen; or options corresponding to {@link JavaCore#VERSION_8} if
-	 *         the JDT version corresponds to Neon.
-	 */
-	public static Map<String, String> findCompilerOptions(Version jdtVersion) {
-		String javaVersion = JavaCore.VERSION_1_8;
-		if (isJava11Supported(jdtVersion)) {
-			javaVersion = JavaCore.VERSION_11;
-		} else 	if (isJava10Supported(jdtVersion)) {
-			javaVersion = JavaCore.VERSION_10;
-		} else if (isJava9Supported(jdtVersion)) {
-			javaVersion = JavaCore.VERSION_9;
-		}
-		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, javaVersion);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, javaVersion);
-		options.put(JavaCore.COMPILER_SOURCE, javaVersion);
-		return options;
 	}
 
 	/**

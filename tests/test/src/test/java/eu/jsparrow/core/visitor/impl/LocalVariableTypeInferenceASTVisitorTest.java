@@ -361,6 +361,19 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 
 	}
+	
+	@Test
+	public void visit_methodReferenceInitializer_shouldNotTransform() throws Exception {
+		String block = "Runnable r = this::hashCode;";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expectedBlock = createBlock(block);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+
+	}
 
 	@Test
 	public void visit_2dArray_shouldTransform() throws Exception {
