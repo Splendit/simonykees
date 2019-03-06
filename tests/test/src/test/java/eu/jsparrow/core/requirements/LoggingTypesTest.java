@@ -1,12 +1,13 @@
 package eu.jsparrow.core.requirements;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +56,7 @@ public class LoggingTypesTest {
 		StandardLoggerRule slr = new StandardLoggerRule();
 		slr.calculateEnabledForProject(testproject);
 
-		Assertions.assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
+		assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
 	}
 
 	@Test
@@ -69,7 +70,7 @@ public class LoggingTypesTest {
 		StandardLoggerRule slr = new StandardLoggerRule();
 		slr.calculateEnabledForProject(testproject);
 
-		Assertions.assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
+		assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
 	}
 
 	@Test
@@ -82,7 +83,7 @@ public class LoggingTypesTest {
 		StandardLoggerRule slr = new StandardLoggerRule();
 		slr.calculateEnabledForProject(testproject);
 
-		Assertions.assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
+		assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
 	}
 
 	@Test
@@ -94,7 +95,7 @@ public class LoggingTypesTest {
 		StandardLoggerRule slr = new StandardLoggerRule();
 		slr.calculateEnabledForProject(testproject);
 
-		Assertions.assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
+		assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
 	}
 
 	@Test
@@ -106,7 +107,7 @@ public class LoggingTypesTest {
 		StandardLoggerRule slr = new StandardLoggerRule();
 		slr.calculateEnabledForProject(testproject);
 
-		Assertions.assertEquals(SupportedLogger.LOG4J, slr.getAvailableLoggerType());
+		assertEquals(SupportedLogger.LOG4J, slr.getAvailableLoggerType());
 	}
 
 	@Test
@@ -116,7 +117,7 @@ public class LoggingTypesTest {
 		StandardLoggerRule slr = new StandardLoggerRule();
 		slr.calculateEnabledForProject(testproject);
 
-		Assertions.assertEquals(null, slr.getAvailableLoggerType());
+		assertEquals(null, slr.getAvailableLoggerType());
 	}
 
 }

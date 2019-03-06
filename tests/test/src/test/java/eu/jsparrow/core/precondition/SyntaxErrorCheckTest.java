@@ -1,11 +1,12 @@
 package eu.jsparrow.core.precondition;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -49,7 +50,7 @@ public class SyntaxErrorCheckTest {
 				+ System.lineSeparator() + "}" + System.lineSeparator();
 		ICompilationUnit testfile = packageFragment.createCompilationUnit("SyntaxErrorCheckTest2.java", source, true,
 				null);
-		Assertions.assertFalse(RefactoringUtil.checkForSyntaxErrors(testfile));
+		assertFalse(RefactoringUtil.checkForSyntaxErrors(testfile));
 	}
 
 	@Test
@@ -60,7 +61,7 @@ public class SyntaxErrorCheckTest {
 				+ System.lineSeparator() + "}" + System.lineSeparator();
 		ICompilationUnit testfile = packageFragment.createCompilationUnit("SyntaxErrorCheckTest2.java", source, true,
 				null);
-		Assertions.assertFalse(RefactoringUtil.checkForSyntaxErrors(testfile));
+		assertFalse(RefactoringUtil.checkForSyntaxErrors(testfile));
 	}
 
 }
