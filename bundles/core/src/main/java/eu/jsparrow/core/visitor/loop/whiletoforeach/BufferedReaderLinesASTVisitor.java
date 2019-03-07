@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -25,8 +24,8 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
-import eu.jsparrow.core.visitor.optional.ExternalNonEffectivelyFinalReferencesVisitor;
-import eu.jsparrow.core.visitor.optional.FlowBreakersVisitor;
+import eu.jsparrow.core.visitor.sub.ExternalNonEffectivelyFinalReferencesVisitor;
+import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class BufferedReaderLinesASTVisitor extends LoopToForEachASTVisitor<WhileStatement> {

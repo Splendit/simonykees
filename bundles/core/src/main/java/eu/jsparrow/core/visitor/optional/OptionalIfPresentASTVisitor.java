@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.core.visitor.sub.ExternalNonEffectivelyFinalReferencesVisitor;
+import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
 import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.core.visitor.sub.ReferencedFieldsVisitor;
 import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
