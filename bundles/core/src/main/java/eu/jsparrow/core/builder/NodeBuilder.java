@@ -102,6 +102,23 @@ public class NodeBuilder {
 	}
 
 	/**
+	 * Creates an method invocation on an expression with
+	 * 
+	 * @param ast
+	 *            the AbstractSyntaxTree thats the target of the node
+	 * @param optionalExpression
+	 *            target of the invocation
+	 * @param name
+	 *            is the name of the invoked method
+	 * @return returns a new method with fills with the parameters
+	 */
+	public static MethodInvocation newMethodInvocation(AST ast, Expression optionalExpression, String name) {
+		SimpleName methodName = ast.newSimpleName(name);
+		return newMethodInvocation(ast, optionalExpression, methodName);
+	}
+
+
+	/**
 	 * 
 	 * @param ast
 	 *            the AbstractSyntaxTree thats the target of the node

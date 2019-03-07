@@ -1,5 +1,10 @@
 package eu.jsparrow.core.visitor.loop.whiletoforeach;
 
+import static eu.jsparrow.core.builder.NodeBuilder.newMethodInvocation;
+import static eu.jsparrow.core.builder.NodeBuilder.newSimpleName;
+import static eu.jsparrow.core.builder.NodeBuilder.newLambdaExpression;
+import static eu.jsparrow.core.builder.NodeBuilder.newExpressionStatement;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -7,6 +12,7 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -22,10 +28,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
 import eu.jsparrow.core.visitor.sub.ExternalNonEffectivelyFinalReferencesVisitor;
 import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class BufferedReaderLinesASTVisitor extends LoopToForEachASTVisitor<WhileStatement> {
@@ -47,13 +53,15 @@ public class BufferedReaderLinesASTVisitor extends LoopToForEachASTVisitor<While
 
 		BufferedReaderLinesPreconditionVisitor preconditionVisitor = new BufferedReaderLinesPreconditionVisitor(loop,
 				lineName, bufferName);
-		ASTNode parent = loop.getParent();
-		if (parent.getLocationInParent() == TryStatement.BODY_PROPERTY) {
-			parent = parent.getParent();
-		}
-		parent.accept(preconditionVisitor);
 
+		ASTNode ancestor = findLoopAncestor(loop);
+		ancestor.accept(preconditionVisitor);
 		if (!preconditionVisitor.isSatisfied()) {
+			return true;
+		}
+
+		VariableDeclarationFragment lineDeclaration = preconditionVisitor.getLineDeclaration();
+		if (lineDeclaration.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
 			return true;
 		}
 
@@ -61,7 +69,6 @@ public class BufferedReaderLinesASTVisitor extends LoopToForEachASTVisitor<While
 		ExternalNonEffectivelyFinalReferencesVisitor visitor = new ExternalNonEffectivelyFinalReferencesVisitor(
 				Collections.singletonList(lineName.getIdentifier()));
 		body.accept(visitor);
-
 		if (visitor.containsReferencesToExternalNonFinalVariables()) {
 			return true;
 		}
@@ -72,27 +79,34 @@ public class BufferedReaderLinesASTVisitor extends LoopToForEachASTVisitor<While
 			return true;
 		}
 
-		VariableDeclarationFragment lineDeclaration = preconditionVisitor.getLineDeclaration();
-		AST ast = loop.getAST();
-		MethodInvocation linesInvocation = ast.newMethodInvocation();
-		linesInvocation.setName(ast.newSimpleName("lines"));
-		linesInvocation.setExpression(ast.newSimpleName(bufferName.getIdentifier()));
-
-		MethodInvocation forEach = ast.newMethodInvocation();
-		forEach.setName(ast.newSimpleName("forEach"));
-		forEach.setExpression(linesInvocation);
-
-		LambdaExpression lambda = NodeBuilder.newLambdaExpression(ast, astRewrite.createCopyTarget(body),
-				lineName.getIdentifier());
-		forEach.arguments()
-			.add(lambda);
-		ExpressionStatement expressionStatement = NodeBuilder.newExpressionStatement(ast, forEach);
+		ExpressionStatement expressionStatement = createForEachStatement(loop.getAST(), lineName, bufferName, body);
 		astRewrite.replace(loop, expressionStatement, null);
 		removeFragment(lineDeclaration);
 
 		onRewrite();
 
 		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	private ExpressionStatement createForEachStatement(AST ast, SimpleName lineName, SimpleName bufferName,
+			Statement body) {
+		SimpleName linesExpression = newSimpleName(ast, bufferName.getIdentifier());
+		MethodInvocation linesInvocation = newMethodInvocation(ast, linesExpression, "lines"); //$NON-NLS-1$
+		MethodInvocation forEach = newMethodInvocation(ast, linesInvocation, "forEach"); //$NON-NLS-1$
+		LambdaExpression lambda = newLambdaExpression(ast, astRewrite.createCopyTarget(body),
+				lineName.getIdentifier());
+		forEach.arguments()
+			.add(lambda);
+		return newExpressionStatement(ast, forEach);
+	}
+
+	private ASTNode findLoopAncestor(WhileStatement loop) {
+		ASTNode ancestor = ASTNodeUtil.getSpecificAncestor(loop, Block.class);
+		if (ancestor.getLocationInParent() == TryStatement.BODY_PROPERTY) {
+			ancestor = ancestor.getParent();
+		}
+		return ancestor;
 	}
 
 	private void removeFragment(VariableDeclarationFragment lineDeclaration) {
