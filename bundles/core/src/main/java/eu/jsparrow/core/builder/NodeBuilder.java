@@ -4,12 +4,14 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -344,5 +346,37 @@ public class NodeBuilder {
 	 */
 	public static ExpressionStatement newExpressionStatement(AST ast, Expression expression) {
 		return ast.newExpressionStatement(expression);
+	}
+
+	/**
+	 * Creates a {@link LambdaExpression} node. 
+	 * 
+	 * @param ast an AST instance for creating the new node
+	 * @param lambdaBody a new node to be plugged in the lambda body
+	 * @param identifier the name of the lambda parameter
+	 * @return a new {@link LambdaExpression} node. 
+	 */
+	@SuppressWarnings("unchecked")
+	public static LambdaExpression newLambdaExpression(AST ast, ASTNode lambdaBody, String identifier) {
+	
+		LambdaExpression lambdaExpression = ast.newLambdaExpression();
+		SimpleName parameter = ast.newSimpleName(identifier);
+		VariableDeclarationFragment parameterDeclaration = ast.newVariableDeclarationFragment();
+		parameterDeclaration.setName(parameter);
+	
+		lambdaExpression.setParentheses(false);
+		lambdaExpression.parameters()
+			.add(parameterDeclaration);
+		int bodyNodeType = lambdaBody.getNodeType();
+		if (ASTNode.BLOCK == bodyNodeType || lambdaBody instanceof Expression) {
+			lambdaExpression.setBody(lambdaBody);
+		} else {
+			Block newBlock = ast.newBlock();
+			newBlock.statements()
+				.add(lambdaBody);
+			lambdaExpression.setBody(newBlock);
+		}
+	
+		return lambdaExpression;
 	}
 }

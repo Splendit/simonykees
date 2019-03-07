@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.core.visitor.sub.ReferencedFieldsVisitor;
 import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
@@ -132,7 +133,8 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 				astRewrite);
 		thenStatement.accept(visitor);
 		ASTNode lambdaBody = unwrapBody(thenStatement);
-		LambdaExpression lambda = createLambdaExpression(lambdaBody, identifier);
+		LambdaExpression lambda = NodeBuilder.newLambdaExpression(methodInvocation.getAST(),
+				astRewrite.createCopyTarget(lambdaBody), identifier);
 
 		/*
 		 * Create a lambda expression with parameter and body optional and
@@ -189,31 +191,6 @@ public class OptionalIfPresentASTVisitor extends AbstractASTRewriteASTVisitor {
 			.add(lambda);
 
 		return ast.newExpressionStatement(ifPresent);
-	}
-
-	@SuppressWarnings("unchecked")
-	private LambdaExpression createLambdaExpression(ASTNode lambdaBody, String identifier) {
-
-		AST ast = astRewrite.getAST();
-		LambdaExpression lambdaExpression = ast.newLambdaExpression();
-		SimpleName parameter = ast.newSimpleName(identifier);
-		VariableDeclarationFragment parameterDeclaration = ast.newVariableDeclarationFragment();
-		parameterDeclaration.setName(parameter);
-
-		lambdaExpression.setParentheses(false);
-		lambdaExpression.parameters()
-			.add(parameterDeclaration);
-		int bodyNodeType = lambdaBody.getNodeType();
-		if (ASTNode.BLOCK == bodyNodeType || lambdaBody instanceof Expression) {
-			lambdaExpression.setBody(astRewrite.createCopyTarget(lambdaBody));
-		} else {
-			Block newBlock = ast.newBlock();
-			newBlock.statements()
-				.add(astRewrite.createCopyTarget(lambdaBody));
-			lambdaExpression.setBody(newBlock);
-		}
-
-		return lambdaExpression;
 	}
 
 	/**

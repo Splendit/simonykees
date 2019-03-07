@@ -49,7 +49,7 @@ public class BufferedReaderLinesASTVisitor extends LoopToForEachASTVisitor<While
 		BufferedReaderLinesPreconditionVisitor preconditionVisitor = new BufferedReaderLinesPreconditionVisitor(loop,
 				lineName, bufferName);
 		ASTNode parent = loop.getParent();
-		if(parent.getLocationInParent() == TryStatement.BODY_PROPERTY) {
+		if (parent.getLocationInParent() == TryStatement.BODY_PROPERTY) {
 			parent = parent.getParent();
 		}
 		parent.accept(preconditionVisitor);
@@ -62,72 +62,51 @@ public class BufferedReaderLinesASTVisitor extends LoopToForEachASTVisitor<While
 		ExternalNonEffectivelyFinalReferencesVisitor visitor = new ExternalNonEffectivelyFinalReferencesVisitor(
 				Collections.singletonList(lineName.getIdentifier()));
 		body.accept(visitor);
-		
-		if(visitor.containsReferencesToExternalNonFinalVariables()) {
+
+		if (visitor.containsReferencesToExternalNonFinalVariables()) {
 			return true;
 		}
-		
+
 		FlowBreakersVisitor flowBreakersVisitor = new FlowBreakersVisitor();
 		body.accept(flowBreakersVisitor);
-		if(flowBreakersVisitor.hasFlowBreakerStatement()) {
+		if (flowBreakersVisitor.hasFlowBreakerStatement()) {
 			return true;
 		}
-		
+
 		VariableDeclarationFragment lineDeclaration = preconditionVisitor.getLineDeclaration();
 		AST ast = loop.getAST();
 		MethodInvocation linesInvocation = ast.newMethodInvocation();
 		linesInvocation.setName(ast.newSimpleName("lines"));
 		linesInvocation.setExpression(ast.newSimpleName(bufferName.getIdentifier()));
-		
+
 		MethodInvocation forEach = ast.newMethodInvocation();
 		forEach.setName(ast.newSimpleName("forEach"));
 		forEach.setExpression(linesInvocation);
-		
-		LambdaExpression lambda = createLambdaExpression(body, lineName.getIdentifier());
-		forEach.arguments().add(lambda);
+
+		LambdaExpression lambda = NodeBuilder.newLambdaExpression(ast, astRewrite.createCopyTarget(body),
+				lineName.getIdentifier());
+		forEach.arguments()
+			.add(lambda);
 		ExpressionStatement expressionStatement = NodeBuilder.newExpressionStatement(ast, forEach);
 		astRewrite.replace(loop, expressionStatement, null);
 		removeFragment(lineDeclaration);
-		
+
 		onRewrite();
 
 		return true;
 	}
-	
+
 	private void removeFragment(VariableDeclarationFragment lineDeclaration) {
 		ASTNode parent = lineDeclaration.getParent();
-		if(parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
+		if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
 			VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) parent;
-			if(declarationStatement.fragments().size() == 1) {
+			if (declarationStatement.fragments()
+				.size() == 1) {
 				astRewrite.remove(declarationStatement, null);
 				return;
 			}
-		}		
-		astRewrite.remove(lineDeclaration, null);
-	}
-
-	private LambdaExpression createLambdaExpression(ASTNode lambdaBody, String identifier) {
-
-		AST ast = astRewrite.getAST();
-		LambdaExpression lambdaExpression = ast.newLambdaExpression();
-		SimpleName parameter = ast.newSimpleName(identifier);
-		VariableDeclarationFragment parameterDeclaration = ast.newVariableDeclarationFragment();
-		parameterDeclaration.setName(parameter);
-
-		lambdaExpression.setParentheses(false);
-		lambdaExpression.parameters()
-			.add(parameterDeclaration);
-		int bodyNodeType = lambdaBody.getNodeType();
-		if (ASTNode.BLOCK == bodyNodeType || lambdaBody instanceof Expression) {
-			lambdaExpression.setBody(astRewrite.createCopyTarget(lambdaBody));
-		} else {
-			Block newBlock = ast.newBlock();
-			newBlock.statements()
-				.add(astRewrite.createCopyTarget(lambdaBody));
-			lambdaExpression.setBody(newBlock);
 		}
-
-		return lambdaExpression;
+		astRewrite.remove(lineDeclaration, null);
 	}
 
 	private Optional<Assignment> verifyExpressionPrecondition(WhileStatement loop) {
@@ -146,13 +125,13 @@ public class BufferedReaderLinesASTVisitor extends LoopToForEachASTVisitor<While
 		}
 
 		Expression leftOperand = infixExpression.getLeftOperand();
-		if(leftOperand.getNodeType() != ASTNode.PARENTHESIZED_EXPRESSION) {
+		if (leftOperand.getNodeType() != ASTNode.PARENTHESIZED_EXPRESSION) {
 			return Optional.empty();
 		}
-		
-		ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression)leftOperand;
+
+		ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression) leftOperand;
 		Expression inParenthesis = parenthesizedExpression.getExpression();
-		
+
 		if (inParenthesis.getNodeType() != ASTNode.ASSIGNMENT) {
 			return Optional.empty();
 		}
