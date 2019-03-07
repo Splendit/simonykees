@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import eu.jsparrow.core.visitor.loop.whiletoforeach.BufferedReaderLinesASTVisitor;
+import eu.jsparrow.core.visitor.loop.bufferedreader.BufferedReaderLinesASTVisitor;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;

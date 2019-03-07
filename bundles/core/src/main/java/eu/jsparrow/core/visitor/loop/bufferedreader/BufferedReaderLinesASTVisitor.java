@@ -1,19 +1,17 @@
-package eu.jsparrow.core.visitor.loop.whiletoforeach;
+package eu.jsparrow.core.visitor.loop.bufferedreader;
 
+import static eu.jsparrow.core.builder.NodeBuilder.newExpressionStatement;
+import static eu.jsparrow.core.builder.NodeBuilder.newLambdaExpression;
 import static eu.jsparrow.core.builder.NodeBuilder.newMethodInvocation;
 import static eu.jsparrow.core.builder.NodeBuilder.newSimpleName;
-import static eu.jsparrow.core.builder.NodeBuilder.newLambdaExpression;
-import static eu.jsparrow.core.builder.NodeBuilder.newExpressionStatement;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -28,18 +26,18 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
 import eu.jsparrow.core.visitor.sub.ExternalNonEffectivelyFinalReferencesVisitor;
 import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
-public class BufferedReaderLinesASTVisitor extends LoopToForEachASTVisitor<WhileStatement> {
-
-	@Override
-	protected List<Comment> getHeaderComments(WhileStatement loop) {
-		return Collections.emptyList();
-	}
+/**
+ * 
+ * @since 3.3.0
+ *
+ */
+public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(WhileStatement loop) {

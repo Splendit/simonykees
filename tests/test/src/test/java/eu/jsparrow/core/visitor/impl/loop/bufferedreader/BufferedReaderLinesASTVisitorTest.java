@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl.loop;
+package eu.jsparrow.core.visitor.impl.loop.bufferedreader;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
-import eu.jsparrow.core.visitor.loop.whiletoforeach.BufferedReaderLinesASTVisitor;
+import eu.jsparrow.core.visitor.loop.bufferedreader.BufferedReaderLinesASTVisitor;
 
 /**
  * 

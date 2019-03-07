@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.loop.whiletoforeach;
+package eu.jsparrow.core.visitor.loop.bufferedreader;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -9,6 +9,11 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+/**
+ * 
+ * @since 3.3.0
+ *
+ */
 public class BufferedReaderLinesPreconditionVisitor extends ASTVisitor {
 
 	private WhileStatement whileStatement;
@@ -17,7 +22,6 @@ public class BufferedReaderLinesPreconditionVisitor extends ASTVisitor {
 
 	private boolean beforeLoop = true;
 	private boolean inLoop = false;
-	private boolean afterLoop = false;
 
 	private boolean lineReferencesOutsideLoop;
 	private boolean bufferReferencesBeforeLoop;
@@ -45,7 +49,6 @@ public class BufferedReaderLinesPreconditionVisitor extends ASTVisitor {
 	public void endVisit(WhileStatement statement) {
 		if (statement == whileStatement) {
 			inLoop = false;
-			afterLoop = true;
 		}
 	}
 
