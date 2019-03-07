@@ -153,13 +153,14 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	@Override
 	public LicenseUpdateResult update(String key) {
+		if(key == null || key.isEmpty()) {
+			return new LicenseUpdateResult(false,
+					Messages.LicenseUtil_EmptyLicense);
+		}
 		String secret = systemInfoWrapper.createUniqueHardwareId();
 		LicenseValidationResult validationResult;
 		LicenseModel model;
 		try {
-			if(key == null || key.isEmpty()) {
-				throw new ValidationException("No License was entered.");
-			}
 			String name = systemInfoWrapper.createNameFromHardware();
 			Properties properties = loadProperties();
 			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$

@@ -38,7 +38,6 @@ import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * Preference page for displaying license information and updating license key.
@@ -67,7 +66,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private Label logoLabel;
 
-	private LicenseUtilService licenseUtil = LicenseUtil.get();
+	private LicenseUtil licenseUtil = LicenseUtil.get();
 
 	public SimonykeesPreferencePageLicense() {
 		super();
@@ -169,11 +168,24 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private void updateDisplayedInformation() {
 		LicenseValidationResult result = licenseUtil.getValidationResult();
-
-		String licenseModelInfo = getLicenseModelString(result);
+		
+		String licenseModelInfo = getLicenseLabel(result);
+		
+		boolean isFullLicense = result.getLicenseType() == LicenseType.NODE_LOCKED || result.getLicenseType() == LicenseType.FLOATING;
+		if(licenseUtil.isActiveRegistration() && (!isFullLicense || isFullLicense && !result.isValid())){
+			licenseModelInfo = "jSparrow is licensed as starter license."; //$NON-NLS-1$
+		}
 		licenseLabel.setText(licenseModelInfo);
-
-		setLicenseStatusMessage(result);
+		
+		
+		if(!result.isValid() && (isFullLicense ||licenseUtil.isFreeLicense() && !licenseUtil.isActiveRegistration())) {
+			licenseStatusLabel.setText(result.getDetail());
+			logoLabel.setImage(jSparrowImageInactive);
+		}
+		else {
+			licenseStatusLabel.setText(""); //$NON-NLS-1$
+			logoLabel.setImage(jSparrowImageActive);
+		} 
 
 		licenseLabel.getParent()
 			.pack();
@@ -181,18 +193,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			.layout(true);
 	}
 
-	private void setLicenseStatusMessage(LicenseValidationResult result) {
-		if (result.isValid()) {
-			licenseStatusLabel.setText(""); //$NON-NLS-1$
-			logoLabel.setImage(jSparrowImageActive);
-		} else {
-			String invalidReason = result.getDetail();
-			licenseStatusLabel.setText(invalidReason);
-			logoLabel.setImage(jSparrowImageInactive);
-		}
-	}
-
-	private String getLicenseModelString(LicenseValidationResult result) {
+	private static String getLicenseLabel(LicenseValidationResult result) {
 		if (result.getLicenseType() != LicenseType.DEMO && !result.isValid()) {
 			return ""; //$NON-NLS-1$
 		}
