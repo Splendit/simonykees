@@ -157,6 +157,10 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			return new LicenseUpdateResult(false,
 					Messages.LicenseUtil_EmptyLicense);
 		}
+		else if(key.matches(".*[\\/].*")) { //$NON-NLS-1$
+			return new LicenseUpdateResult(false,
+					"License contains illegal characters");
+		}
 		String secret = systemInfoWrapper.createUniqueHardwareId();
 		LicenseValidationResult validationResult;
 		LicenseModel model;
