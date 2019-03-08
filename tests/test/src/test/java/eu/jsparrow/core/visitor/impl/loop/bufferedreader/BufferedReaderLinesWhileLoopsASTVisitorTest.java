@@ -16,7 +16,7 @@ import eu.jsparrow.core.visitor.loop.bufferedreader.BufferedReaderLinesASTVisito
  *
  */
 @SuppressWarnings("nls")
-public class BufferedReaderLinesASTVisitorTest  extends UsesJDTUnitFixture {
+public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesJDTUnitFixture {
 	
 	private BufferedReaderLinesASTVisitor visitor;
 
