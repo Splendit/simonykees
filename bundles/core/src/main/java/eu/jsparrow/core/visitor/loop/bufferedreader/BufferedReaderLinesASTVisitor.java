@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import eu.jsparrow.core.visitor.sub.ExternalNonEffectivelyFinalReferencesVisitor;
 import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
+import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -105,6 +106,12 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 			return true;
 		}
 
+		UnhandledExceptionVisitor unhnadledExceptionsVisitor = new UnhandledExceptionVisitor();
+		body.accept(unhnadledExceptionsVisitor);
+		if(unhnadledExceptionsVisitor.throwsException()) {
+			return true;
+		}
+
 		ExpressionStatement expressionStatement = createForEachStatement(loop.getAST(), lineName, bufferName, body);
 		astRewrite.replace(loop, expressionStatement, null);
 		removeFragment(lineDeclaration);
@@ -120,8 +127,6 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 		List<Comment> bodyComments = new ArrayList<>(commentRewriter.findRelatedComments(loop.getBody()));
 		loopComments.removeAll(bodyComments);
 		commentRewriter.saveBeforeStatement(loop, loopComments);
-		
-		
 	}
 
 	@SuppressWarnings("unchecked")
