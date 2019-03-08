@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -69,10 +71,29 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
-	public boolean visit(WhileStatement loop) {
-		Assignment readLineAssignment = verifyExpressionPrecondition(loop).orElse(null);
-		if (readLineAssignment == null) {
+	public boolean visit(WhileStatement whileLoop) {
+		Statement body = whileLoop.getBody();
+		Expression expression = whileLoop.getExpression();
+		analyseLoop(whileLoop, expression, body);
+
+		return true;
+	}
+	
+	@Override
+	public boolean visit(ForStatement forLoop) {
+		Statement body = forLoop.getBody();
+		Expression expression = forLoop.getExpression();
+		if(!forLoop.updaters().isEmpty()) {
 			return true;
+		}
+		analyseLoop(forLoop, expression, body);
+		return true;
+	}
+
+	private void analyseLoop(Statement loop, Expression loopExpression, Statement body) {
+		Assignment readLineAssignment = verifyExpressionPrecondition(loopExpression).orElse(null);
+		if (readLineAssignment == null) {
+			return;
 		}
 		SimpleName lineName = (SimpleName) readLineAssignment.getLeftHandSide();
 		MethodInvocation readLine = (MethodInvocation) readLineAssignment.getRightHandSide();
@@ -84,47 +105,45 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 		ASTNode ancestor = findLoopAncestor(loop);
 		ancestor.accept(preconditionVisitor);
 		if (!preconditionVisitor.isSatisfied()) {
-			return true;
+			return;
 		}
 
 		VariableDeclarationFragment lineDeclaration = preconditionVisitor.getLineDeclaration();
-		if (lineDeclaration.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-			return true;
+		if (lineDeclaration.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY && 
+				lineDeclaration.getLocationInParent() != VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
+			return;
 		}
-
-		Statement body = loop.getBody();
+		
 		ExternalNonEffectivelyFinalReferencesVisitor visitor = new ExternalNonEffectivelyFinalReferencesVisitor(
 				Collections.singletonList(lineName.getIdentifier()));
 		body.accept(visitor);
 		if (visitor.containsReferencesToExternalNonFinalVariables()) {
-			return true;
+			return;
 		}
 
 		FlowBreakersVisitor flowBreakersVisitor = new FlowBreakersVisitor();
 		body.accept(flowBreakersVisitor);
 		if (flowBreakersVisitor.hasFlowBreakerStatement()) {
-			return true;
+			return;
 		}
 
 		UnhandledExceptionVisitor unhnadledExceptionsVisitor = new UnhandledExceptionVisitor();
 		body.accept(unhnadledExceptionsVisitor);
 		if(unhnadledExceptionsVisitor.throwsException()) {
-			return true;
+			return;
 		}
 
 		ExpressionStatement expressionStatement = createForEachStatement(loop.getAST(), lineName, bufferName, body);
 		astRewrite.replace(loop, expressionStatement, null);
 		removeFragment(lineDeclaration);
-		saveComments(loop, lineDeclaration);
+		saveComments(loop, body);
 		onRewrite();
-
-		return true;
 	}
 
-	private void saveComments(WhileStatement loop, VariableDeclarationFragment lineDeclaration) {
+	private void saveComments(Statement loop, Statement body) {
 		CommentRewriter commentRewriter = getCommentRewriter();
 		List<Comment> loopComments = new ArrayList<>(commentRewriter.findRelatedComments(loop));
-		List<Comment> bodyComments = new ArrayList<>(commentRewriter.findRelatedComments(loop.getBody()));
+		List<Comment> bodyComments = new ArrayList<>(commentRewriter.findRelatedComments(body));
 		loopComments.removeAll(bodyComments);
 		commentRewriter.saveBeforeStatement(loop, loopComments);
 	}
@@ -141,7 +160,7 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 		return newExpressionStatement(ast, forEach);
 	}
 
-	private ASTNode findLoopAncestor(WhileStatement loop) {
+	private ASTNode findLoopAncestor(Statement loop) {
 		ASTNode ancestor = ASTNodeUtil.getSpecificAncestor(loop, Block.class);
 		if (ancestor.getLocationInParent() == TryStatement.BODY_PROPERTY) {
 			ancestor = ancestor.getParent();
@@ -150,22 +169,23 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	private void removeFragment(VariableDeclarationFragment lineDeclaration) {
-		CommentRewriter commentRewriter = getCommentRewriter();
-		ASTNode parent = lineDeclaration.getParent();
-		VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) parent;
-		if (declarationStatement.fragments()
-			.size() == 1) {
-			List<Comment> comments = commentRewriter.findRelatedComments(declarationStatement);
-			commentRewriter.saveBeforeStatement(declarationStatement, comments);
-			astRewrite.remove(declarationStatement, null);
-			return;
+		if(lineDeclaration.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {			
+			CommentRewriter commentRewriter = getCommentRewriter();
+			ASTNode parent = lineDeclaration.getParent();
+			VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) parent;
+			if (declarationStatement.fragments()
+					.size() == 1) {
+				List<Comment> comments = commentRewriter.findRelatedComments(declarationStatement);
+				commentRewriter.saveBeforeStatement(declarationStatement, comments);
+				astRewrite.remove(declarationStatement, null);
+				return;
+			}
+			astRewrite.remove(lineDeclaration, null);
+			commentRewriter.saveCommentsInParentStatement(lineDeclaration);			
 		}
-		astRewrite.remove(lineDeclaration, null);
-		commentRewriter.saveCommentsInParentStatement(lineDeclaration);
 	}
 
-	private Optional<Assignment> verifyExpressionPrecondition(WhileStatement loop) {
-		Expression loopExpression = loop.getExpression();
+	private Optional<Assignment> verifyExpressionPrecondition(Expression loopExpression) {
 		if (loopExpression.getNodeType() != ASTNode.INFIX_EXPRESSION) {
 			return Optional.empty();
 		}
