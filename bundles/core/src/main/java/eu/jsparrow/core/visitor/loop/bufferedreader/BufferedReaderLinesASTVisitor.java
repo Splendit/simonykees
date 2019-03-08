@@ -34,6 +34,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * 
+ * 
  * @since 3.3.0
  *
  */
@@ -109,13 +110,11 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	private void removeFragment(VariableDeclarationFragment lineDeclaration) {
 		ASTNode parent = lineDeclaration.getParent();
-		if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
-			VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) parent;
-			if (declarationStatement.fragments()
-				.size() == 1) {
-				astRewrite.remove(declarationStatement, null);
-				return;
-			}
+		VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) parent;
+		if (declarationStatement.fragments()
+			.size() == 1) {
+			astRewrite.remove(declarationStatement, null);
+			return;
 		}
 		astRewrite.remove(lineDeclaration, null);
 	}
