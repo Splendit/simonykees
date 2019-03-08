@@ -5,13 +5,16 @@ import static eu.jsparrow.core.builder.NodeBuilder.newLambdaExpression;
 import static eu.jsparrow.core.builder.NodeBuilder.newMethodInvocation;
 import static eu.jsparrow.core.builder.NodeBuilder.newSimpleName;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -31,6 +34,7 @@ import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * An {@link AbstractASTRewriteASTVisitor} for replacing loops iterating over
@@ -104,10 +108,20 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 		ExpressionStatement expressionStatement = createForEachStatement(loop.getAST(), lineName, bufferName, body);
 		astRewrite.replace(loop, expressionStatement, null);
 		removeFragment(lineDeclaration);
-
+		saveComments(loop, lineDeclaration);
 		onRewrite();
 
 		return true;
+	}
+
+	private void saveComments(WhileStatement loop, VariableDeclarationFragment lineDeclaration) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> loopComments = new ArrayList<>(commentRewriter.findRelatedComments(loop));
+		List<Comment> bodyComments = new ArrayList<>(commentRewriter.findRelatedComments(loop.getBody()));
+		loopComments.removeAll(bodyComments);
+		commentRewriter.saveBeforeStatement(loop, loopComments);
+		
+		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -131,14 +145,18 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	private void removeFragment(VariableDeclarationFragment lineDeclaration) {
+		CommentRewriter commentRewriter = getCommentRewriter();
 		ASTNode parent = lineDeclaration.getParent();
 		VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) parent;
 		if (declarationStatement.fragments()
 			.size() == 1) {
+			List<Comment> comments = commentRewriter.findRelatedComments(declarationStatement);
+			commentRewriter.saveBeforeStatement(declarationStatement, comments);
 			astRewrite.remove(declarationStatement, null);
 			return;
 		}
 		astRewrite.remove(lineDeclaration, null);
+		commentRewriter.saveCommentsInParentStatement(lineDeclaration);
 	}
 
 	private Optional<Assignment> verifyExpressionPrecondition(WhileStatement loop) {
