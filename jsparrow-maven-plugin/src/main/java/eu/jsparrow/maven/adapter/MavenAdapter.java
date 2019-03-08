@@ -20,6 +20,9 @@ import static eu.jsparrow.maven.adapter.ConfigurationKeys.SOURCE_FOLDER;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.STANDALONE_MODE_KEY;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.USER_DIR;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.USE_DEFAULT_CONFIGURATION;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.PARENT_PROJECT_PATH;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.ROOT_PROJECT_BASE_PATH;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.DEFAULT_GROUP_ID;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -96,11 +99,14 @@ public class MavenAdapter {
 		}
 		configuration.put(ROOT_CONFIG_PATH, defaultYamlFile.getAbsolutePath());
 		workingDirectory.lockProjects();
+		
+		
+		
 		for (MavenProject mavenProject : projects) {
-			if (!MavenProjectUtil.isAggregateProject(mavenProject)) {
-				addProjectConfiguration(mavenProject, defaultYamlFile);
-				projectConfigurationAdded = true;
-			}
+			// if (!MavenProjectUtil.isAggregateProject(mavenProject)) {
+			addProjectConfiguration(mavenProject, defaultYamlFile);
+			projectConfigurationAdded = true;
+			// }
 		}
 		log.info(Messages.MavenAdapter_allProjectsLoaded);
 		return workingDirectory;
@@ -160,6 +166,22 @@ public class MavenAdapter {
 		configuration.put(NATURE_IDS + DOT + projectIdentifier, MavenProjectUtil.findNatureIds(project));
 		configuration.put(SOURCE_FOLDER + DOT + projectIdentifier, sourcePath);
 		configuration.put(HAS_PARENT + DOT + projectIdentifier, hasParent.toString());
+		configuration.put(ROOT_PROJECT_BASE_PATH, rootProject.getBasedir().getAbsolutePath());
+		configuration.put(DEFAULT_GROUP_ID, rootProject.getGroupId());
+		
+		if (hasParent) {
+			// configuration.put(PARENT + DOT + projectIdentifier,
+			// project.getParentFile())
+			MavenProject parent = project.getParent();
+			File parentBaseDir = parent.getBasedir();
+			if (parentBaseDir != null) {
+				String parentPath = parent.getBasedir()
+					.getAbsolutePath();
+				configuration.put(PARENT_PROJECT_PATH + DOT + projectIdentifier, parentPath);
+				System.out.println("PARENT ARTIFACT: " + parent.getArtifactId()); //$NON-NLS-1$
+			}
+
+		}
 
 	}
 

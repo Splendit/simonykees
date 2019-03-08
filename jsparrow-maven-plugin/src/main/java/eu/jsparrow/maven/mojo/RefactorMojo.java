@@ -94,7 +94,7 @@ public class RefactorMojo extends AbstractMojo {
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		DependencyManager dependencyManager = new DependencyManager(log, mavenHome);
-		List<MavenProject> projects = mavenSession.getAllProjects();
+		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);
 		StandaloneLoader loader = new StandaloneLoader(project, bundleStarter);
 

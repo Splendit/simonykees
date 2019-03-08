@@ -40,7 +40,7 @@ public class StandaloneLoader {
 			throws InterruptedException, MojoExecutionException, BundleException {
 
 		checkMavenModules(mavenAdapter);
-		dependencyManager.copyDependencies(rootProject);
+		//dependencyManager.copyDependencies(rootProject);
 		loadStandalone(mavenAdapter);
 	}
 

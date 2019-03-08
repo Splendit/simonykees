@@ -40,6 +40,9 @@ public class ConfigurationKeys {
 	public static final String MAVEN_PROJECT_NATURE_IDS = MAVEN_NATURE_ID + "," + JAVA_NATURE_ID; //$NON-NLS-1$
 	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	public static final String HAS_PARENT = "HAS.PARENT"; //$NON-NLS-1$
+	public static final String PARENT_PROJECT_PATH = "PARENT.PROJECT.PATH"; //$NON-NLS-1$
+	public static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$
+	public static final String DEFAULT_GROUP_ID = "DEFAULT.GROUP.ID"; //$NON-NLS-1$
 
 	private ConfigurationKeys() {
 		/*

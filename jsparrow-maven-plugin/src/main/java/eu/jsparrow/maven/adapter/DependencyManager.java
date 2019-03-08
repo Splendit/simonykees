@@ -117,8 +117,9 @@ public class DependencyManager {
 		File projectBaseDir = project.getBasedir();
 		String projectPath = projectBaseDir.getAbsolutePath();
 		request.setPomFile(new File(projectPath + File.separator + POM_FILE_NAME));
-		String cleanPackageCopyDependencies = String.format("clean package %s:%s ", DEPENDENCY_PLUGIN_ID, //$NON-NLS-1$
-				COPY_DEPENDENCIES_GOAL);
+//		String cleanPackageCopyDependencies = String.format("clean package %s:%s ", DEPENDENCY_PLUGIN_ID, //$NON-NLS-1$
+//				COPY_DEPENDENCIES_GOAL);
+		String cleanPackageCopyDependencies = String.format("clean package");
 		List<String> goals = Collections.singletonList(cleanPackageCopyDependencies);
 		request.setGoals(goals);
 		String outputDirectoryPath = System.getProperty(ConfigurationKeys.USER_DIR) + File.separator
