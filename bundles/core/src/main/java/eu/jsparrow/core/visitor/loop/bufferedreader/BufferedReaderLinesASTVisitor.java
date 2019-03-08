@@ -83,6 +83,9 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 	public boolean visit(ForStatement forLoop) {
 		Statement body = forLoop.getBody();
 		Expression expression = forLoop.getExpression();
+		if(expression == null) {
+			return true;
+		}
 		if(!forLoop.updaters().isEmpty()) {
 			return true;
 		}

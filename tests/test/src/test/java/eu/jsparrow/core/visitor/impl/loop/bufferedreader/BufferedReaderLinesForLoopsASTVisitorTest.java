@@ -139,4 +139,25 @@ public class BufferedReaderLinesForLoopsASTVisitorTest extends UsesJDTUnitFixtur
 		Block expectedBlock = createBlock(original);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
+	
+	@Test
+	public void visit_noExpression_shouldNotTransform() throws Exception {
+		String original = "" + 
+				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {		\n" + 
+				"			String line;\n" + 
+				"			for(; ;) {\n" + 
+				"				System.out.println(line);\n" + 
+				"			}\n" + 
+				"		} catch (Exception e) {\n" + 
+				"			e.printStackTrace();\n" + 
+				"		}";
+		
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expectedBlock = createBlock(original);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+	}
 }
