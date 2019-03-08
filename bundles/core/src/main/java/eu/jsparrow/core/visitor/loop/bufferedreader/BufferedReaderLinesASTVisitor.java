@@ -33,7 +33,30 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
+ * An {@link AbstractASTRewriteASTVisitor} for replacing loops iterating over
+ * the lines of a file through a {@link java.io.BufferedReader} by a stream generated 
+ * from {@link java.io.BufferedReader#lines}
+ * <p/>
+ * For example, the following:
  * 
+ * <pre>
+ * <code>
+ * String line;
+ * while((line = bufferedReader.readLine()) != null) {
+ * 	print(line);
+ * }
+ * </code>
+ * </pre>
+ * 
+ * becomes:
+ * 
+ * <pre>
+ * <code>
+ * bufferedReader.lines().forEach(line -> {
+ * 	print(line);
+ * });
+ * </code>
+ * </pre>
  * 
  * @since 3.3.0
  *
@@ -93,8 +116,7 @@ public class BufferedReaderLinesASTVisitor extends AbstractASTRewriteASTVisitor 
 		SimpleName linesExpression = newSimpleName(ast, bufferName.getIdentifier());
 		MethodInvocation linesInvocation = newMethodInvocation(ast, linesExpression, "lines"); //$NON-NLS-1$
 		MethodInvocation forEach = newMethodInvocation(ast, linesInvocation, "forEach"); //$NON-NLS-1$
-		LambdaExpression lambda = newLambdaExpression(ast, astRewrite.createCopyTarget(body),
-				lineName.getIdentifier());
+		LambdaExpression lambda = newLambdaExpression(ast, astRewrite.createCopyTarget(body), lineName.getIdentifier());
 		forEach.arguments()
 			.add(lambda);
 		return newExpressionStatement(ast, forEach);

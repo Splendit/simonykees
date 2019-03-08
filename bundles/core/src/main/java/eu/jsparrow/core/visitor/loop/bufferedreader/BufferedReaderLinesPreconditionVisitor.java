@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.loop.bufferedreader;
 
+import java.io.BufferedReader;
+
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -10,6 +12,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 /**
+ * A helper visitor for finding and checking whether the  {@link BufferedReader}
+ * and the line variable are used for any purpose other than iterating
+ * through the lines of a file with a while loop.   
  * 
  * @since 3.3.0
  *
@@ -74,11 +79,10 @@ public class BufferedReaderLinesPreconditionVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName simpleName) {
-
 		if (inLoop) {
 			return true;
 		}
-		
+
 		String identifier = simpleName.getIdentifier();
 		if (!identifier.equals(line.getIdentifier()) && !identifier.equals(bufferedReader.getIdentifier())) {
 			return false;
@@ -94,8 +98,6 @@ public class BufferedReaderLinesPreconditionVisitor extends ASTVisitor {
 		if (binding == null || IBinding.VARIABLE != binding.getKind()) {
 			return false;
 		}
-		
-
 
 		if (beforeLoop && bufferDeclaration != null && identifier.equals(bufferedReader.getIdentifier())) {
 			bufferReferencesBeforeLoop = true;
@@ -112,7 +114,7 @@ public class BufferedReaderLinesPreconditionVisitor extends ASTVisitor {
 		return lineDeclaration != null && bufferDeclaration != null && !lineReferencesOutsideLoop
 				&& !bufferReferencesBeforeLoop;
 	}
-	
+
 	public VariableDeclarationFragment getLineDeclaration() {
 		return this.lineDeclaration;
 	}

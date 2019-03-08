@@ -55,6 +55,10 @@ public class Messages extends NLS {
 	public static String ArithmethicAssignmentRule_name;
 	public static String BracketsToControlRule_description;
 	public static String BracketsToControlRule_name;
+	public static String BufferedReaderLinesRule_description;
+
+	public static String BufferedReaderLinesRule_name;
+
 	public static String BuyLicenseDialog_feedbackLabel;
 	public static String BuyLicenseDialog_opinionLabel;
 	public static String BuyLicenseDialog_purchaseLinkLabel;

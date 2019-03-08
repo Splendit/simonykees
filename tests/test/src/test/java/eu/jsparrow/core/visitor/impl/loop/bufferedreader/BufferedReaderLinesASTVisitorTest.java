@@ -2,9 +2,6 @@ package eu.jsparrow.core.visitor.impl.loop.bufferedreader;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-
 import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +10,8 @@ import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.bufferedreader.BufferedReaderLinesASTVisitor;
 
 /**
- * 
+ * Visitor tests for {@link BufferedReaderLinesASTVisitor}.
+ *  
  * @since 3.3.0
  *
  */
@@ -21,7 +19,6 @@ import eu.jsparrow.core.visitor.loop.bufferedreader.BufferedReaderLinesASTVisito
 public class BufferedReaderLinesASTVisitorTest  extends UsesJDTUnitFixture {
 	
 	private BufferedReaderLinesASTVisitor visitor;
-	
 
 	@BeforeEach
 	public void setUp() throws Exception {
@@ -44,6 +41,43 @@ public class BufferedReaderLinesASTVisitorTest  extends UsesJDTUnitFixture {
 				"		}";
 		String expected = ""
 				+ "		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {	\n" + 
+				"			bufferedReader.lines().forEach(line -> {\n" + 
+				"				System.out.println(line);\n" + 
+				"			});\n" + 
+				"		} catch (Exception e) {\n" + 
+				"			e.printStackTrace();\n" + 
+				"		}";
+		
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expectedBlock = createBlock(expected);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+		
+	}
+	
+	@Test
+	public void visit_identifyingLineDeclaration_shouldTransform() throws Exception {
+		
+		String original = "" + 
+				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n" + 
+				"			if(true) {\n" + 
+				"				String line = \"\";\n" + 
+				"			}\n" + 
+				"			String line;\n" + 
+				"			while((line = bufferedReader.readLine()) != null) {\n" + 
+				"				System.out.println(line);\n" + 
+				"			}\n" + 
+				"		} catch (Exception e) {\n" + 
+				"			e.printStackTrace();\n" + 
+				"		}";
+		String expected = "" + 
+				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {	\n" + 
+				"			if(true) {\n" + 
+				"				String line = \"\";\n" + 
+				"			}\n" + 
 				"			bufferedReader.lines().forEach(line -> {\n" + 
 				"				System.out.println(line);\n" + 
 				"			});\n" + 
@@ -138,10 +172,10 @@ public class BufferedReaderLinesASTVisitorTest  extends UsesJDTUnitFixture {
 		String block = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n" + 
 				"			String line;\n" + 
-				"			line = \"\";\n" + 
 				"			while((line = bufferedReader.readLine()) != null) {\n" + 
 				"				System.out.println(line);\n" + 
 				"			}\n" + 
+				"			line = \"\";\n" + 
 				"		} catch (Exception e) {\n" + 
 				"			e.printStackTrace();\n" + 
 				"		}";
@@ -369,27 +403,4 @@ public class BufferedReaderLinesASTVisitorTest  extends UsesJDTUnitFixture {
 
 		assertMatch(createBlock(block), fixture.getMethodBlock());
 	}
-	
-	public void presample() {
-		try (BufferedReader bufferedReader = new BufferedReader(new FileReader("file.name.txt"))) {
-			String line;
-			while((line = bufferedReader.readLine().toString()) != null) {
-				System.out.println(line);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void postsample() throws Exception {
-		try (BufferedReader bufferedReader = new BufferedReader(new FileReader("file.name.txt"))) {	
-			bufferedReader.lines().forEach(line -> {
-				System.out.println(line);
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-
 }
