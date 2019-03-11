@@ -403,4 +403,28 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesJDTUnitFix
 
 		assertMatch(createBlock(block), fixture.getMethodBlock());
 	}
+	
+	
+	@Test
+	public void visit_usingBufferedReaderInLoopBody_shouldNotransform() throws Exception {
+		
+		String original = ""
+				+ "		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {			\n" + 
+				"			String line;\n" + 
+				"			while((line = bufferedReader.readLine()) != null) {\n" + 
+				"				System.out.println(line);\n" + 
+				"				System.out.println(bufferedReader.readLine());\n" + 
+				"			}\n" + 
+				"		} catch (Exception e) {\n" + 
+				"			e.printStackTrace();\n" + 
+				"		}";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expectedBlock = createBlock(original);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+		
+	}
 }

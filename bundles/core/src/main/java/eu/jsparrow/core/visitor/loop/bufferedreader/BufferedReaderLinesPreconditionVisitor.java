@@ -89,9 +89,6 @@ public class BufferedReaderLinesPreconditionVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName simpleName) {
-		if (inLoop) {
-			return true;
-		}
 
 		String identifier = simpleName.getIdentifier();
 		if (!identifier.equals(line.getIdentifier()) && !identifier.equals(bufferedReader.getIdentifier())) {
@@ -113,7 +110,7 @@ public class BufferedReaderLinesPreconditionVisitor extends ASTVisitor {
 			bufferReferencesBeforeLoop = true;
 		}
 
-		if (lineDeclaration != null && identifier.equals(line.getIdentifier())) {
+		if (!inLoop && lineDeclaration != null && identifier.equals(line.getIdentifier())) {
 			lineReferencesOutsideLoop = true;
 		}
 
