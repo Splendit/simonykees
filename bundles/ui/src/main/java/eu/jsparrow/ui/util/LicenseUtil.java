@@ -151,15 +151,26 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		return result.getLicenseType() == LicenseType.DEMO;
 	}
 
+	/**
+	 * Does NOT check license validity.
+	 * 
+	 * @return whether the type of the validation result is either
+	 *         {@link LicenseType#FLOATING} or {@link LicenseType#NODE_LOCKED}.
+	 */
+	public boolean isProLicense() {
+		if (result == null) {
+			return false;
+		}
+		LicenseType type = result.getLicenseType();
+		return type == LicenseType.FLOATING || type == LicenseType.NODE_LOCKED;
+	}
+
 	@Override
 	public LicenseUpdateResult update(String key) {
-		if(key == null || key.isEmpty()) {
-			return new LicenseUpdateResult(false,
-					Messages.LicenseUtil_EmptyLicense);
-		}
-		else if(key.matches(".*[\\/].*")) { //$NON-NLS-1$
-			return new LicenseUpdateResult(false,
-					"License contains illegal characters");
+		if (key == null || key.isEmpty()) {
+			return new LicenseUpdateResult(false, Messages.LicenseUtil_EmptyLicense);
+		} else if (key.matches(".*[\\/].*")) { //$NON-NLS-1$
+			return new LicenseUpdateResult(false, "License contains illegal characters");
 		}
 		String secret = systemInfoWrapper.createUniqueHardwareId();
 		LicenseValidationResult validationResult;
@@ -263,7 +274,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		LicenseType type = model.getType();
 		return type != LicenseType.DEMO;
 	}
-	
+
 	private LicenseModel tryLoadModelFromPersistence() {
 		LicenseModel model = null;
 		try {

@@ -58,7 +58,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private Label licenseLabel;
 
-	private Label licenseStatusLabel;
+	private Label expirationLabel;
 
 	private Image jSparrowImageActive;
 
@@ -114,31 +114,27 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		jSparrowLink.setFont(parent.getFont());
 		jSparrowLink.setText(Messages.SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow);
 
-		licenseStatusLabel = new Label(composite, SWT.NONE);
+		expirationLabel = new Label(composite, SWT.NONE);
 		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont())
 			.setStyle(SWT.BOLD);
-		licenseStatusLabel.setFont(boldDescriptor.createFont(composite.getDisplay()));
-		licenseStatusLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
-		licenseStatusLabel.setVisible(true);
+		expirationLabel.setFont(boldDescriptor.createFont(composite.getDisplay()));
+		expirationLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
+		expirationLabel.setVisible(true);
 
 		Button updateButton = new Button(composite, SWT.PUSH);
 		updateButton.setText(Messages.SimonykeesPreferencePageLicense_update_license_key_button);
 		updateButton.setFont(parent.getFont());
 		updateButton.addSelectionListener(new SelectionAdapter() {
-
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-
 				SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell());
 				dialog.create();
 				dialog.open();
 				updateDisplayedInformation();
 			}
-
 		});
 
 		jSparrowLink.addSelectionListener(new SelectionAdapter() {
-
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				try {
@@ -150,13 +146,10 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 					// nothing...
 				}
 			}
-
 		});
 
 		updateDisplayedInformation();
-
 		updateButton.setVisible(true);
-
 		composite.addDisposeListener((DisposeEvent e) -> {
 			jSparrowImageActive.dispose();
 			jSparrowImageInactive.dispose();
@@ -168,22 +161,16 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private void updateDisplayedInformation() {
 		LicenseValidationResult result = licenseUtil.getValidationResult();
+		result.isValid();
+		String licenseModelInfo = computeLicenseLabel(result);
 		
-		String licenseModelInfo = getLicenseLabel(result);
-		
-		boolean isFullLicense = result.getLicenseType() == LicenseType.NODE_LOCKED || result.getLicenseType() == LicenseType.FLOATING;
-		if(licenseUtil.isActiveRegistration() && (!isFullLicense || isFullLicense && !result.isValid())){
-			licenseModelInfo = "jSparrow is licensed as starter license."; //$NON-NLS-1$
-		}
 		licenseLabel.setText(licenseModelInfo);
-		
-		
-		if(!result.isValid() && (isFullLicense ||licenseUtil.isFreeLicense() && !licenseUtil.isActiveRegistration())) {
-			licenseStatusLabel.setText(result.getDetail());
+		boolean freeWithStarter = !licenseUtil.isProLicense() && licenseUtil.isActiveRegistration();
+		if(!result.isValid() && !freeWithStarter) {
+			expirationLabel.setText(result.getDetail());
 			logoLabel.setImage(jSparrowImageInactive);
-		}
-		else {
-			licenseStatusLabel.setText(""); //$NON-NLS-1$
+		} else {
+			expirationLabel.setText(""); //$NON-NLS-1$
 			logoLabel.setImage(jSparrowImageActive);
 		} 
 
@@ -193,7 +180,13 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			.layout(true);
 	}
 
-	private static String getLicenseLabel(LicenseValidationResult result) {
+	private String computeLicenseLabel(LicenseValidationResult result) {
+		
+		boolean isFullLicense = licenseUtil.isProLicense();
+		if(licenseUtil.isActiveRegistration() && (!isFullLicense || !result.isValid())){
+			return Messages.SimonykeesPreferencePageLicense_jSparrow_starter_license;
+		}
+		
 		if (result.getLicenseType() != LicenseType.DEMO && !result.isValid()) {
 			return ""; //$NON-NLS-1$
 		}
@@ -233,7 +226,5 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 	@Override
 	public void init(IWorkbench workbench) {
 		// Required by super class
-
 	}
-
 }
