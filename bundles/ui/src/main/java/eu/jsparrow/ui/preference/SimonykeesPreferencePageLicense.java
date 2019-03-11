@@ -2,6 +2,7 @@ package eu.jsparrow.ui.preference;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
@@ -34,7 +35,6 @@ import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -163,16 +163,16 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		LicenseValidationResult result = licenseUtil.getValidationResult();
 		result.isValid();
 		String licenseModelInfo = computeLicenseLabel(result);
-		
+
 		licenseLabel.setText(licenseModelInfo);
 		boolean freeWithStarter = !licenseUtil.isProLicense() && licenseUtil.isActiveRegistration();
-		if(!result.isValid() && !freeWithStarter) {
+		if (!result.isValid() && !freeWithStarter) {
 			expirationLabel.setText(result.getDetail());
 			logoLabel.setImage(jSparrowImageInactive);
 		} else {
 			expirationLabel.setText(""); //$NON-NLS-1$
 			logoLabel.setImage(jSparrowImageActive);
-		} 
+		}
 
 		licenseLabel.getParent()
 			.pack();
@@ -181,34 +181,20 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 	}
 
 	private String computeLicenseLabel(LicenseValidationResult result) {
-		
 		boolean isFullLicense = licenseUtil.isProLicense();
-		if(licenseUtil.isActiveRegistration() && (!isFullLicense || !result.isValid())){
-			return Messages.SimonykeesPreferencePageLicense_jSparrow_starter_license;
-		}
-		
-		if (result.getLicenseType() != LicenseType.DEMO && !result.isValid()) {
-			return ""; //$NON-NLS-1$
+		boolean activeRegistration = licenseUtil.isActiveRegistration();
+		boolean isValid = result.isValid();
+		boolean fullValid = isFullLicense && isValid;
+
+		if (!fullValid) {
+			return activeRegistration ? Messages.SimonykeesPreferencePageLicense_jsparrow_starter
+					: Messages.SimonykeesPreferencePageLicense_jsparrow_free;
 		}
 
-		StringBuilder licenseModelString = new StringBuilder();
-		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as);
-		if (result.getLicenseType() == LicenseType.DEMO) {
-			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_freeLicense);
-		} else {
-			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_fulLicense);
-			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_under_key_label);
-			licenseModelString.append(result.getKey());
-			licenseModelString.append(". "); //$NON-NLS-1$
-		}
-
-		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-		licenseModelString.append(result.getExpirationDate()
-			.format(formatter));
-		licenseModelString.append("."); //$NON-NLS-1$
-
-		return licenseModelString.toString();
+		ZonedDateTime expireDate = result.getExpirationDate();
+		String formattedExpireDate = expireDate.format(formatter);
+		return String.format(Messages.SimonykeesPreferencePageLicense_jsparrow_pro_valid_until, formattedExpireDate);
 	}
 
 	@Override
