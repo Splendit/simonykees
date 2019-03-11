@@ -130,31 +130,54 @@ public class BufferedReaderLinesPreconditionVisitor extends ASTVisitor {
 		}
 	}
 
+	/**
+	 * Checks if the declaration of both {@link BufferedReader} and loop
+	 * variable were found. Additionally, checks the following:
+	 * 
+	 * <ul>
+	 * <li>the loop variable is not referenced outside the loop body.</li>
+	 * <li>the buffered reader is not referenced neither inside, nor outside the
+	 * loop body</li>
+	 * <li>in case the loop is a {@link ForStatement} then the line declaration
+	 * should either be a {@link VariableDeclarationExpression} with at most one
+	 * fragment or a {@link VariableDeclarationStatement}. In the latter case,
+	 * the loop must have empty initializers.</li>
+	 * </ul>
+	 * 
+	 * @return if all the aforementioned conditions are met.
+	 */
 	public boolean isSatisfied() {
-		
-		if(lineDeclaration == null) {
+
+		if (lineDeclaration == null) {
 			return false;
 		}
-		
-		if(lineDeclaration.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
-			VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) lineDeclaration.getParent();
-			if(declarationExpression.fragments().size() > 1) {
+
+		if (lineDeclaration.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
+			VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) lineDeclaration
+				.getParent();
+			if (declarationExpression.fragments()
+				.size() > 1) {
 				return false;
 			}
 		}
-		
-		if(loop.getNodeType() == ASTNode.FOR_STATEMENT) {
-			ForStatement forLoop = (ForStatement)loop;
-			if(lineDeclaration.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY 
-					&& !forLoop.initializers().isEmpty()) {
+
+		if (loop.getNodeType() == ASTNode.FOR_STATEMENT) {
+			ForStatement forLoop = (ForStatement) loop;
+			if (lineDeclaration.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY
+					&& !forLoop.initializers()
+						.isEmpty()) {
 				return false;
 			}
 		}
-		
-		return bufferDeclaration != null && !lineReferencesOutsideLoop
-				&& !bufferReferencesBeforeLoop;
+
+		return bufferDeclaration != null && !lineReferencesOutsideLoop && !bufferReferencesBeforeLoop;
 	}
 
+	/**
+	 * 
+	 * @return the {@link VariableDeclarationFragment} of the loop variable
+	 *         which is used to hold the line value for each loop cycle.
+	 */
 	public VariableDeclarationFragment getLineDeclaration() {
 		return this.lineDeclaration;
 	}
