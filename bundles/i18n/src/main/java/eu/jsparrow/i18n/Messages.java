@@ -55,6 +55,8 @@ public class Messages extends NLS {
 	public static String ArithmethicAssignmentRule_name;
 	public static String BracketsToControlRule_description;
 	public static String BracketsToControlRule_name;
+	public static String BufferedReaderLinesRule_description;
+	public static String BufferedReaderLinesRule_name;
 	public static String BuyLicenseDialog_feedbackLabel;
 	public static String BuyLicenseDialog_opinionLabel;
 	public static String BuyLicenseDialog_purchaseLinkLabel;
@@ -91,9 +93,7 @@ public class Messages extends NLS {
 	public static String CodeFormatterRule_description;
 	public static String CodeFormatterRule_name;
 	public static String CollapseIfStatementsRule_description;
-
 	public static String CollapseIfStatementsRule_name;
-
 	public static String CollectionRemoveAllRule_description;
 	public static String CollectionRemoveAllRule_name;
 	public static String CompareInput_ancestorName;
@@ -184,9 +184,7 @@ public class Messages extends NLS {
 	public static String ListRulesUtil_Name;
 	public static String ListRulesUtil_NoRulesAvailable;
 	public static String LocalVariableTypeInferenceRule_description;
-
 	public static String LocalVariableTypeInferenceRule_name;
-
 	public static String LoggerRuleWizard_title;
 	public static String LoggerRuleWizardHandler_info_supportedFrameworkFound;
 	public static String LoggerRuleWizardHandler_noLogger;
@@ -235,9 +233,7 @@ public class Messages extends NLS {
 	public static String Netlicensing_persistenceError_failedToSave;
 	public static String Netlicensing_validationResult_freeLicenseExpired0;
 	public static String OptionalIfPresentRule_description;
-
 	public static String OptionalIfPresentRule_name;
-
 	public static String OrganiseImportsRule_description;
 	public static String OrganiseImportsRule_name;
 	public static String OverrideAnnotationRule_description;
@@ -485,9 +481,7 @@ public class Messages extends NLS {
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String UseStringBuilderAppendRule_description;
-
 	public static String UseStringBuilderAppendRule_name;
-
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
 	public static String ValidateExecutor_validation_scheduler_started;
 	public static String WelcomeEditor_title;
