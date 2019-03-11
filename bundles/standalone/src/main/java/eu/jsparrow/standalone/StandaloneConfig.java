@@ -46,7 +46,6 @@ import eu.jsparrow.standalone.renaming.FieldsRenamingInstantiator;
  * @author Andreja Sambolec, Matthias Webhofer
  * @since 2.1.1
  */
-@SuppressWarnings("restriction")
 public class StandaloneConfig {
 
 	private static final Logger logger = LoggerFactory.getLogger(StandaloneConfig.class);
@@ -109,24 +108,9 @@ public class StandaloneConfig {
 	 *             if the project cannot be created
 	 */
 	protected void setUp() throws CoreException, StandaloneException {
-//		eclipseProjectFileManager = new EclipseProjectFileManager(path);
-//
-//		javaProject = importMavenProject();
-//		project = javaProject.getProject();
-
 		List<ICompilationUnit> compilationUnits = findProjectCompilationUnits();
 		compilationUnitsProvider = new CompilationUnitProvider(compilationUnits, yamlConfig.getExcludes());
 	}
-
-//	private IJavaProject importMavenProject() throws StandaloneException {
-//		MavenProjectImporter importer = new MavenProjectImporter(path, projectName, compilerCompliance,
-//				eclipseProjectFileManager, parentPath);
-//		try {
-//			return importer.importMavenProject();
-//		} catch (MavenImportException e) {
-//			throw new StandaloneException(e.getMessage(), e);
-//		}
-//	}
 
 	/**
 	 * this method gets all {@link ICompilationUnit}s from the project and

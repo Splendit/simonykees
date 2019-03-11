@@ -14,6 +14,11 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
+/**
+ * Manages the backup and restore of existing eclipse project files.
+ * 
+ * @since 3.3.0
+ */
 public class EclipseProjectFileManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(EclipseProjectFileManager.class);
@@ -23,14 +28,32 @@ public class EclipseProjectFileManager {
 	private static final String SETTINGS_DIRECTORY_NAME = ".settings"; //$NON-NLS-1$
 	private static final String TEMP_FILE_EXTENSION = ".tmp"; //$NON-NLS-1$
 
-	private List<EclipseProjectFileManagerStatus> projects = new LinkedList<>();
+	private List<EclipseProjectFileManagerStatus> projects;
 
 	public EclipseProjectFileManager() {
+		this.projects = new LinkedList<>();
 	}
 
+	/**
+	 * Add a project to be tracked by this {@link EclipseProjectFileManager}.
+	 * 
+	 * @param projectRootPath
+	 *            root path of the project to be tracked
+	 */
 	public void addProject(String projectRootPath) {
-		EclipseProjectFileManagerStatus project = new EclipseProjectFileManagerStatus(projectRootPath);
-		projects.add(project);
+		EclipseProjectFileManagerStatus projectStatus = new EclipseProjectFileManagerStatus(projectRootPath);
+		projects.add(projectStatus);
+	}
+
+	/**
+	 * Add projects to be tracked by this {@link EclipseProjectFileManager}.
+	 * 
+	 * @param projectRootPaths
+	 *            list of root paths of projects to be tracked
+	 */
+	public void addProjects(List<String> projectRootPaths) {
+		projectRootPaths.stream()
+			.forEach(this::addProject);
 	}
 
 	/**
@@ -109,8 +132,6 @@ public class EclipseProjectFileManager {
 			loggerInfo = NLS.bind(Messages.StandaloneConfig_directoryRestoreDone, SETTINGS_DIRECTORY_NAME);
 			logger.debug(loggerInfo);
 		}
-
-		project.setCleanUpAlreadyDone(true);
 	}
 
 	private void deleteCreatedEclipseProjectFiles(EclipseProjectFileManagerStatus project)
@@ -132,9 +153,10 @@ public class EclipseProjectFileManager {
 
 	private void doRevertEclipseProjectFiles(EclipseProjectFileManagerStatus project)
 			throws IOException, CoreException {
-		if (!project.cleanUpAlreadyDone) {
+		if (!project.isCleanUpAlreadyDone()) {
 			deleteCreatedEclipseProjectFiles(project);
 			restoreExistingEclipseFiles(project);
+			project.setCleanUpAlreadyDone(true);
 		}
 	}
 
@@ -186,6 +208,11 @@ public class EclipseProjectFileManager {
 		Files.delete(directory.toPath());
 	}
 
+	/**
+	 * Holds each project's status for managing eclipse project files
+	 * 
+	 * @since 3.3.0
+	 */
 	class EclipseProjectFileManagerStatus {
 		private String path;
 
