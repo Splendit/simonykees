@@ -22,7 +22,6 @@ public class ConfigurationKeys {
 	public static final String AGENT_URL = "URL"; //$NON-NLS-1$
 	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	public static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$
-	public static final String DEFAULT_GROUP_ID = "DEFAULT.GROUP.ID"; //$NON-NLS-1$
 
 	private ConfigurationKeys() {
 		/*

@@ -2,7 +2,6 @@ package eu.jsparrow.maven.adapter;
 
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.AGENT_URL;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.DEBUG_ENABLED;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.DEFAULT_GROUP_ID;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.FRAMEWORK_STORAGE_VALUE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.LICENSE_KEY;
@@ -78,7 +77,7 @@ public class MavenAdapter {
 			File defaultYamlFile) throws InterruptedException, MojoExecutionException {
 
 		log.info(Messages.MavenAdapter_setUpConfiguration);
-		
+
 		setProjectIds(projects);
 		WorkingDirectory workingDirectory = setUpConfiguration(parameters);
 		String rootProjectIdentifier = MavenProjectUtil.findProjectIdentifier(rootProject);
@@ -92,7 +91,6 @@ public class MavenAdapter {
 		configuration.put(ROOT_CONFIG_PATH, defaultYamlFile.getAbsolutePath());
 		configuration.put(ROOT_PROJECT_BASE_PATH, rootProject.getBasedir()
 			.getAbsolutePath());
-		configuration.put(DEFAULT_GROUP_ID, rootProject.getGroupId());
 
 		workingDirectory.lockProjects();
 
@@ -161,7 +159,7 @@ public class MavenAdapter {
 		} else {
 			throw new InterruptedException(Messages.MavenAdapter_couldnotCreateTempFolder);
 		}
-		
+
 		log.debug(Messages.MavenAdapter_workingDirectoryPrepared);
 		return createWorkingDirectory(directory);
 	}
