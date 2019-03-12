@@ -73,7 +73,9 @@ public class EclipseProjectFileManager {
 
 	private void doBackupExistingEclipseFiles(EclipseProjectFileManagerStatus project) throws StandaloneException {
 		String path = project.getPath();
-		String name = Paths.get(path).getFileName().toString();
+		String name = Paths.get(path)
+			.getFileName()
+			.toString();
 
 		File projectDescription = getProjectDescriptionFile(path);
 		File classpathFile = getClasspathFileFile(path);
@@ -85,7 +87,7 @@ public class EclipseProjectFileManager {
 			moveFile(projectDescription, getProjectDescriptionRenameFile(path));
 			project.setExistingProjectFileMoved(true);
 
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileBackupDone, PROJECT_FILE_NAME, name);
+			loggerInfo = NLS.bind(Messages.EclipseProjectFileManager_fileBackupDone, PROJECT_FILE_NAME, name);
 			logger.debug(loggerInfo);
 		}
 
@@ -93,7 +95,7 @@ public class EclipseProjectFileManager {
 			moveFile(classpathFile, getClasspathFileRenameFile(path));
 			project.setExistingClasspathFileMoved(true);
 
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileBackupDone, CLASSPATH_FILE_NAME, name);
+			loggerInfo = NLS.bind(Messages.EclipseProjectFileManager_fileBackupDone, CLASSPATH_FILE_NAME, name);
 			logger.debug(loggerInfo);
 		}
 
@@ -101,7 +103,8 @@ public class EclipseProjectFileManager {
 			moveFile(settingsDirectory, getSettingsDirectoryRenameFile(path));
 			project.setExistingSettingsDirectoryMoved(true);
 
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_directoryBackupDone, SETTINGS_DIRECTORY_NAME, name);
+			loggerInfo = NLS.bind(Messages.EclipseProjectFileManager_directoryBackupDone, SETTINGS_DIRECTORY_NAME,
+					name);
 			logger.debug(loggerInfo);
 		}
 	}
@@ -115,24 +118,27 @@ public class EclipseProjectFileManager {
 	private void restoreExistingEclipseFiles(EclipseProjectFileManagerStatus project) throws IOException {
 
 		String path = project.getPath();
-		String name = Paths.get(path).getFileName().toString();
+		String name = Paths.get(path)
+			.getFileName()
+			.toString();
 
 		String loggerInfo;
 		if (project.isExistingProjectFileMoved()) {
 			Files.move(getProjectDescriptionRenameFile(path).toPath(), getProjectDescriptionFile(path).toPath());
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileRestoreDone, PROJECT_FILE_NAME, name);
+			loggerInfo = NLS.bind(Messages.EclipseProjectFileManager_fileRestoreDone, PROJECT_FILE_NAME, name);
 			logger.debug(loggerInfo);
 		}
 
 		if (project.isExistingClasspathFileMoved()) {
 			Files.move(getClasspathFileRenameFile(path).toPath(), getClasspathFileFile(path).toPath());
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileRestoreDone, CLASSPATH_FILE_NAME, name);
+			loggerInfo = NLS.bind(Messages.EclipseProjectFileManager_fileRestoreDone, CLASSPATH_FILE_NAME, name);
 			logger.debug(loggerInfo);
 		}
 
 		if (project.isExistingSettingsDirectoryMoved()) {
 			Files.move(getSettingsDirectoryRenameFile(path).toPath(), getSettingsDirectoryFile(path).toPath());
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_directoryRestoreDone, SETTINGS_DIRECTORY_NAME, name);
+			loggerInfo = NLS.bind(Messages.EclipseProjectFileManager_directoryRestoreDone, SETTINGS_DIRECTORY_NAME,
+					name);
 			logger.debug(loggerInfo);
 		}
 	}
