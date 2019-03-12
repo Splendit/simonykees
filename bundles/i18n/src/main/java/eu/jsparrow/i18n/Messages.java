@@ -176,6 +176,8 @@ public class Messages extends NLS {
 	public static String LicenseType_node_locked;
 	public static String LicenseType_subscription;
 	public static String LicenseType_try_and_buy;
+
+	public static String LicenseUtil_EmptyLicense;
 	public static String LicenseValidator_cannot_reach_license_provider_on_validation_call;
 	public static String LicenseValidator_invalid_licensee_number;
 	public static String LicenseValidator_received_validation_response;
@@ -403,12 +405,10 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_useProfileOptionNoProfile;
 	public static String SimonykeesPreferencePage_useProfileOptionRadioGroupTitle;
 	public static String SimonykeesPreferencePage_useProfileOptionSelectedProfile;
-	public static String SimonykeesPreferencePageLicense_freeLicense;
-	public static String SimonykeesPreferencePageLicense_fulLicense;
-	public static String SimonykeesPreferencePageLicense_jsparrow_licensed_as;
-	public static String SimonykeesPreferencePageLicense_jsparrow_valid_until;
+	public static String SimonykeesPreferencePageLicense_jsparrow_free;
+	public static String SimonykeesPreferencePageLicense_jsparrow_pro_valid_until;
+	public static String SimonykeesPreferencePageLicense_jsparrow_starter;
 	public static String SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow;
-	public static String SimonykeesPreferencePageLicense_under_key_label;
 	public static String SimonykeesPreferencePageLicense_update_license_key_button;
 	public static String SimonykeesUpdateLicenseDialog_invalid_license_key;
 	public static String SimonykeesUpdateLicenseDialog_license_updated_successfully;
