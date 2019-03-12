@@ -172,16 +172,16 @@ public class StandaloneConfig {
 
 		Set<String> unusedExcludedPackages = compilationUnitsProvider.getUnusedExcludedPackages();
 		if (!unusedExcludedPackages.isEmpty()) {
-			loggerInfo = unusedExcludedPackages.stream()
-				.collect(collector);
-			logger.warn(Messages.StandaloneConfig_unusedPackageExcludesWarning, loggerInfo);
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_unusedPackageExcludesWarning, unusedExcludedPackages.stream()
+				.collect(collector));
+			logger.warn(loggerInfo);
 		}
 
 		Set<String> unusedExcludedClasses = compilationUnitsProvider.getUnusedExcludedClasses();
 		if (!unusedExcludedClasses.isEmpty()) {
-			loggerInfo = unusedExcludedClasses.stream()
-				.collect(collector);
-			logger.warn(Messages.StandaloneConfig_unusedClassExcludesWarning, loggerInfo);
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_unusedClassExcludesWarning,  unusedExcludedClasses.stream()
+				.collect(collector));
+			logger.warn(loggerInfo);
 		}
 	}
 
