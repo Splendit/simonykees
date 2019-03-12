@@ -8,14 +8,10 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -37,7 +33,6 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final Code VOID = PrimitiveType.VOID;
-	private static final PrefixExpression.Operator NOT = PrefixExpression.Operator.NOT;
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
@@ -411,7 +406,7 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		Block guardBody = ast.newBlock();
 		guardBody.statements()
 			.add(returnStatement);
-		Expression guardExpression = createGuardExpression(ifStatement.getExpression());
+		Expression guardExpression = OperatorUtil.createNegatedExpression(ifStatement.getExpression(), astRewrite);
 		guardStatement.setExpression(guardExpression);
 		guardStatement.setThenStatement(guardBody);
 		return guardStatement;
@@ -437,69 +432,6 @@ public class GuardConditionASTVisitor extends AbstractASTRewriteASTVisitor {
 		Code code = primitiveType.getPrimitiveTypeCode();
 		return VOID.equals(code);
 	}
-
-	/**
-	 * Creates a negated expression for the guard command.
-	 * 
-	 * @param expression
-	 *            expression to be negated
-	 * @return the negated expression.
-	 */
-	private Expression createGuardExpression(Expression expression) {
-		int expressionType = expression.getNodeType();
-		AST ast = expression.getAST();
-		if (ASTNode.INFIX_EXPRESSION == expressionType) {
-			InfixExpression infixExpression = (InfixExpression) expression;
-			return OperatorUtil.negateInfixExpression(infixExpression, ast, astRewrite);
-		}
-
-		if (ASTNode.PREFIX_EXPRESSION == expressionType) {
-			PrefixExpression prefixExpression = (PrefixExpression) expression;
-			PrefixExpression.Operator operator = prefixExpression.getOperator();
-
-			Expression guardExpression;
-			if (NOT.equals(operator)) {
-				Expression body = findPrefixExpressionBody(prefixExpression);
-				guardExpression = (Expression) astRewrite.createCopyTarget(body);
-			} else {
-				guardExpression = OperatorUtil.createNegatedParenthesized(ast, expression, astRewrite);
-			}
-			return guardExpression;
-		}
-
-		if (ASTNode.METHOD_INVOCATION == expressionType || ASTNode.SIMPLE_NAME == expressionType) {
-			return createNegated(ast, expression);
-		}
-
-		if (ASTNode.BOOLEAN_LITERAL != expressionType) {
-			return OperatorUtil.createNegatedParenthesized(ast, expression, astRewrite);
-		}
-
-		BooleanLiteral booleanLiteral = (BooleanLiteral) expression;
-		if (booleanLiteral.booleanValue()) {
-			return ast.newBooleanLiteral(false);
-		}
-		return ast.newBooleanLiteral(true);
-	}
-
-	private Expression findPrefixExpressionBody(PrefixExpression prefixExpression) {
-		Expression body = prefixExpression.getOperand();
-		if (ASTNode.PARENTHESIZED_EXPRESSION != body.getNodeType()) {
-			return body;
-		}
-
-		ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression) body;
-		return parenthesizedExpression.getExpression();
-	}
-
-	private Expression createNegated(AST ast, Expression expression) {
-		PrefixExpression guardPrefixExpression = ast.newPrefixExpression();
-		guardPrefixExpression.setOperator(NOT);
-		guardPrefixExpression.setOperand((Expression) astRewrite.createCopyTarget(expression));
-		return guardPrefixExpression;
-	}
-
-
 
 	private Optional<IfStatement> findLastIfStatement(List<Statement> statements) {
 		if (statements.isEmpty()) {
