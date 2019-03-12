@@ -115,11 +115,12 @@ public class MavenProjectImporter {
 		lps.run(new NullProgressMonitor());
 
 		List<MavenProjectInfo> projects = lps.getProjects();
+		
+		logger.debug(Messages.MavenProjectImporter_collectingProjectInfo);
 		return collectMavenProjectInfo(projects);
 	}
 
 	private List<MavenProjectInfo> collectMavenProjectInfo(Collection<MavenProjectInfo> input) {
-		logger.debug(Messages.MavenProjectImporter_collectingProjectInfo);
 
 		List<MavenProjectInfo> toRet = new ArrayList<MavenProjectInfo>();
 		for (MavenProjectInfo info : input) {
