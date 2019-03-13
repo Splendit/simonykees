@@ -8,6 +8,7 @@ Bundle-Activator: eu.jsparrow.ui.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/oshi-core.jar,
+ lib/jna.jar,
  .
 Require-Bundle: eu.jsparrow.i18n,
  eu.jsparrow.logging,
