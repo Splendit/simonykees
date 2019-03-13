@@ -216,6 +216,10 @@ public class EclipseProjectFileManager {
 		}
 		Files.delete(directory.toPath());
 	}
+	
+	protected List<EclipseProjectFileManagerStatus> getProjects() {
+		return this.projects;
+	}
 
 	/**
 	 * Holds each project's status for managing eclipse project files
