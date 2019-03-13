@@ -265,8 +265,7 @@ public class RefactoringInvoker {
 
 		logger.info(Messages.RefactoringInvoker_loadingConfiguration);
 
-		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
-				context.getProperty(ROOT_CONFIG_PATH)).get();
+		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context), context.getProperty(ROOT_CONFIG_PATH)).get();
 
 		for (IJavaProject javaProject : importedProjects) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
@@ -317,5 +316,13 @@ public class RefactoringInvoker {
 		}
 
 		logger.info(Messages.RefactoringInvoker_configurationLoaded);
+	}
+
+	public MavenProjectImporter getImporter() {
+		return importer;
+	}
+
+	public void setImporter(MavenProjectImporter importer) {
+		this.importer = importer;
 	}
 }

@@ -17,7 +17,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
+import org.eclipse.m2e.core.internal.project.ProjectConfigurationManager;
 import org.eclipse.m2e.core.project.IMavenProjectImportResult;
+import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.LocalProjectScanner;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
@@ -42,6 +44,10 @@ public class MavenProjectImporter {
 
 	public MavenProjectImporter() {
 		this.eclipseProjectFileManager = new EclipseProjectFileManager();
+	}
+
+	public MavenProjectImporter(EclipseProjectFileManager eclipseProjectFileManager) {
+		this.eclipseProjectFileManager = eclipseProjectFileManager;
 	}
 
 	/**
@@ -111,11 +117,11 @@ public class MavenProjectImporter {
 
 		MavenModelManager modelManager = MavenPlugin.getMavenModelManager();
 
-		LocalProjectScanner lps = new LocalProjectScanner(workspaceRoot, folders, false, modelManager);
+		LocalProjectScanner lps = getLocalProjectScanner(workspaceRoot, folders, false, modelManager);
 		lps.run(new NullProgressMonitor());
 
 		List<MavenProjectInfo> projects = lps.getProjects();
-		
+
 		logger.debug(Messages.MavenProjectImporter_collectingProjectInfo);
 		return collectMavenProjectInfo(projects);
 	}
@@ -136,8 +142,8 @@ public class MavenProjectImporter {
 
 		ProjectImportConfiguration pic = new ProjectImportConfiguration();
 
-		List<IMavenProjectImportResult> results = MavenPlugin.getProjectConfigurationManager()
-			.importProjects(projectInfos, pic, new NullProgressMonitor());
+		List<IMavenProjectImportResult> results = getProjectConfigurationManager().importProjects(projectInfos, pic,
+				new NullProgressMonitor());
 
 		List<IProject> projects = results.stream()
 			.map(r -> r.getProject())
@@ -174,7 +180,7 @@ public class MavenProjectImporter {
 			logMsg = NLS.bind(Messages.MavenProjectImporter_creatingSingleJavaProject, project.getName());
 			logger.debug(logMsg);
 
-			IJavaProject javaProject = JavaCore.create(project);
+			IJavaProject javaProject = createJavaProject(project);
 
 			if (!javaProject.isOpen()) {
 				javaProject.open(new NullProgressMonitor());
@@ -191,5 +197,18 @@ public class MavenProjectImporter {
 
 	public void cleanUp() throws IOException, CoreException {
 		eclipseProjectFileManager.revertEclipseProjectFiles();
+	}
+
+	protected LocalProjectScanner getLocalProjectScanner(File workspaceRoot, List<String> folders,
+			boolean basedirRenameRequired, MavenModelManager modelManager) {
+		return new LocalProjectScanner(workspaceRoot, folders, basedirRenameRequired, modelManager);
+	}
+
+	protected IProjectConfigurationManager getProjectConfigurationManager() {
+		return MavenPlugin.getProjectConfigurationManager();
+	}
+	
+	protected IJavaProject createJavaProject(IProject project) {
+		return JavaCore.create(project);
 	}
 }
