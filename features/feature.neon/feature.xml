@@ -22,8 +22,6 @@
    </url>
 
    <requires>
-      <import plugin="com.labs64.netlicensing.client" version="2.3.4" match="compatible"/>
-      <import plugin="com.github.oshi.core" version="3.4.2" match="compatible"/>
       <import plugin="org.apache.commons.lang3" version="3.0.0" match="compatible"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.equinox.ds"/>
