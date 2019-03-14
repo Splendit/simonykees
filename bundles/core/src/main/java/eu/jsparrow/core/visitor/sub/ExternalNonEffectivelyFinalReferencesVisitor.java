@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.optional;
+package eu.jsparrow.core.visitor.sub;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,14 @@ public class ExternalNonEffectivelyFinalReferencesVisitor extends ASTVisitor {
 	private List<String> declarations = new ArrayList<>();
 
 	private boolean containsExternalNonFinalVariable = false;
+	
+	public ExternalNonEffectivelyFinalReferencesVisitor() {
+
+	}
+	
+	public ExternalNonEffectivelyFinalReferencesVisitor(List<String> excludes) {
+		declarations.addAll(excludes);
+	}
 
 	@Override
 	public boolean preVisit2(ASTNode node) {

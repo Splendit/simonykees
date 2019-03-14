@@ -1,11 +1,11 @@
 package eu.jsparrow.ui.util;
 
-import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HWDiskStore;
@@ -22,7 +22,7 @@ public class SystemInfoWrapperTest {
 	private UsbDevice usbDevice;
 	
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		hardwareAbstractionLayer = mock(HardwareAbstractionLayer.class);
 		diskStore = mock(HWDiskStore.class);

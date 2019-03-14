@@ -160,10 +160,7 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 		try {
 			astRoot.accept(rule);
 		} catch (RuntimeException e) {
-			//How to get all the runtime exceptions
-			//throw new RefactoringException(e);
-			logger.debug(e.getMessage(),new RefactoringException(e));
-			return null;
+			throw new RefactoringException(e);
 		}
 
 		Document document = new Document(workingCopy.getSource());

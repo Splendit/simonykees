@@ -1,10 +1,10 @@
 package eu.jsparrow.core.visitor.impl.trycatch;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
@@ -12,7 +12,7 @@ public class TwrReferencedVariablesASTVisitorTest extends UsesJDTUnitFixture {
 	
 	private TwrReferencedVariablesASTVisitor visitor;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		visitor = new TwrReferencedVariablesASTVisitor();
 	}

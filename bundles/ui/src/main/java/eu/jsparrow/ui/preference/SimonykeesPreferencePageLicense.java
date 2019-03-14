@@ -2,6 +2,7 @@ package eu.jsparrow.ui.preference;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
@@ -34,11 +35,9 @@ import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * Preference page for displaying license information and updating license key.
@@ -59,7 +58,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private Label licenseLabel;
 
-	private Label licenseStatusLabel;
+	private Label expirationLabel;
 
 	private Image jSparrowImageActive;
 
@@ -67,7 +66,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private Label logoLabel;
 
-	private LicenseUtilService licenseUtil = LicenseUtil.get();
+	private LicenseUtil licenseUtil = LicenseUtil.get();
 
 	public SimonykeesPreferencePageLicense() {
 		super();
@@ -115,31 +114,27 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		jSparrowLink.setFont(parent.getFont());
 		jSparrowLink.setText(Messages.SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow);
 
-		licenseStatusLabel = new Label(composite, SWT.NONE);
+		expirationLabel = new Label(composite, SWT.NONE);
 		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont())
 			.setStyle(SWT.BOLD);
-		licenseStatusLabel.setFont(boldDescriptor.createFont(composite.getDisplay()));
-		licenseStatusLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
-		licenseStatusLabel.setVisible(true);
+		expirationLabel.setFont(boldDescriptor.createFont(composite.getDisplay()));
+		expirationLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
+		expirationLabel.setVisible(true);
 
 		Button updateButton = new Button(composite, SWT.PUSH);
 		updateButton.setText(Messages.SimonykeesPreferencePageLicense_update_license_key_button);
 		updateButton.setFont(parent.getFont());
 		updateButton.addSelectionListener(new SelectionAdapter() {
-
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-
 				SimonykeesUpdateLicenseDialog dialog = new SimonykeesUpdateLicenseDialog(getShell());
 				dialog.create();
 				dialog.open();
 				updateDisplayedInformation();
 			}
-
 		});
 
 		jSparrowLink.addSelectionListener(new SelectionAdapter() {
-
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				try {
@@ -151,13 +146,10 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 					// nothing...
 				}
 			}
-
 		});
 
 		updateDisplayedInformation();
-
 		updateButton.setVisible(true);
-
 		composite.addDisposeListener((DisposeEvent e) -> {
 			jSparrowImageActive.dispose();
 			jSparrowImageInactive.dispose();
@@ -169,11 +161,18 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private void updateDisplayedInformation() {
 		LicenseValidationResult result = licenseUtil.getValidationResult();
+		result.isValid();
+		String licenseModelInfo = computeLicenseLabel(result);
 
-		String licenseModelInfo = getLicenseModelString(result);
 		licenseLabel.setText(licenseModelInfo);
-
-		setLicenseStatusMessage(result);
+		boolean freeWithStarter = !licenseUtil.isProLicense() && licenseUtil.isActiveRegistration();
+		if (!result.isValid() && !freeWithStarter) {
+			expirationLabel.setText(result.getDetail());
+			logoLabel.setImage(jSparrowImageInactive);
+		} else {
+			expirationLabel.setText(""); //$NON-NLS-1$
+			logoLabel.setImage(jSparrowImageActive);
+		}
 
 		licenseLabel.getParent()
 			.pack();
@@ -181,40 +180,21 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			.layout(true);
 	}
 
-	private void setLicenseStatusMessage(LicenseValidationResult result) {
-		if (result.isValid()) {
-			licenseStatusLabel.setText(""); //$NON-NLS-1$
-			logoLabel.setImage(jSparrowImageActive);
-		} else {
-			String invalidReason = result.getDetail();
-			licenseStatusLabel.setText(invalidReason);
-			logoLabel.setImage(jSparrowImageInactive);
-		}
-	}
+	private String computeLicenseLabel(LicenseValidationResult result) {
+		boolean isFullLicense = licenseUtil.isProLicense();
+		boolean activeRegistration = licenseUtil.isActiveRegistration();
+		boolean isValid = result.isValid();
+		boolean fullValid = isFullLicense && isValid;
 
-	private String getLicenseModelString(LicenseValidationResult result) {
-		if (result.getLicenseType() != LicenseType.DEMO && !result.isValid()) {
-			return ""; //$NON-NLS-1$
+		if (!fullValid) {
+			return activeRegistration ? Messages.SimonykeesPreferencePageLicense_jsparrow_starter
+					: Messages.SimonykeesPreferencePageLicense_jsparrow_free;
 		}
 
-		StringBuilder licenseModelString = new StringBuilder();
-		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as);
-		if (result.getLicenseType() == LicenseType.DEMO) {
-			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_freeLicense);
-		} else {
-			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_fulLicense);
-			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_under_key_label);
-			licenseModelString.append(result.getKey());
-			licenseModelString.append(". "); //$NON-NLS-1$
-		}
-
-		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-		licenseModelString.append(result.getExpirationDate()
-			.format(formatter));
-		licenseModelString.append("."); //$NON-NLS-1$
-
-		return licenseModelString.toString();
+		ZonedDateTime expireDate = result.getExpirationDate();
+		String formattedExpireDate = expireDate.format(formatter);
+		return String.format(Messages.SimonykeesPreferencePageLicense_jsparrow_pro_valid_until, formattedExpireDate);
 	}
 
 	@Override
@@ -232,7 +212,5 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 	@Override
 	public void init(IWorkbench workbench) {
 		// Required by super class
-
 	}
-
 }

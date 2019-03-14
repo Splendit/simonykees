@@ -1,12 +1,12 @@
 package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.jdt.core.dom.Block;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
@@ -16,7 +16,7 @@ public class ArithmeticAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 	private ArithmethicAssignmentASTVisitor visitor;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		visitor = new ArithmethicAssignmentASTVisitor();
 	}

@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.optional;
+package eu.jsparrow.core.visitor.sub;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;

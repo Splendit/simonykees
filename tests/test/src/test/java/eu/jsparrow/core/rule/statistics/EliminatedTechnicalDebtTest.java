@@ -1,12 +1,13 @@
 package eu.jsparrow.core.rule.statistics;
 
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.dummies.DummyRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
@@ -18,7 +19,7 @@ public class EliminatedTechnicalDebtTest {
 
 	private DummyRule dummyRule;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		dummyRule = new DummyRule();
 	}

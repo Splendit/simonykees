@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
+import eu.jsparrow.core.rule.impl.BufferedReaderLinesRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.core.rule.impl.CollapseIfStatementsRule;
 import eu.jsparrow.core.rule.impl.CollectionRemoveAllRule;
@@ -124,8 +125,9 @@ public class RulesContainer {
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new DateDeprecatedRule(),
-				new RemoveDoubleNegationRule(), new OptionalIfPresentRule(), new GuardConditionRule(), new CollapseIfStatementsRule(),
-				new RemoveExplicitCallToSuperRule(), new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
+				new RemoveDoubleNegationRule(), new OptionalIfPresentRule(), new GuardConditionRule(),
+				new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(), new RemoveEmptyStatementRule(),
+				new RemoveUnnecessaryThrownExceptionsRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
@@ -139,10 +141,11 @@ public class RulesContainer {
 				 * Loops and streams
 				 */
 				new WhileToForEachRule(), new ForToForEachRule(), new EnhancedForLoopToStreamForEachRule(),
-				new LambdaForEachIfWrapperToFilterRule(), new StatementLambdaToExpressionRule(),
-				new LambdaForEachCollectRule(), new LambdaForEachMapRule(), new FlatMapInsteadOfNestedLoopsRule(),
-				new EnhancedForLoopToStreamAnyMatchRule(), new EnhancedForLoopToStreamFindFirstRule(),
-				new EnhancedForLoopToStreamSumRule(), new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
+				new BufferedReaderLinesRule(), new LambdaForEachIfWrapperToFilterRule(),
+				new StatementLambdaToExpressionRule(), new LambdaForEachCollectRule(), new LambdaForEachMapRule(),
+				new FlatMapInsteadOfNestedLoopsRule(), new EnhancedForLoopToStreamAnyMatchRule(),
+				new EnhancedForLoopToStreamFindFirstRule(), new EnhancedForLoopToStreamSumRule(),
+				new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
 
 				/*
 				 * String manipulations. This rule must be applied after

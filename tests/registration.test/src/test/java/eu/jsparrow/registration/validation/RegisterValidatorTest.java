@@ -1,17 +1,15 @@
 package eu.jsparrow.registration.validation;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.registration.helper.DummyRegistrationModel;
@@ -25,11 +23,8 @@ public class RegisterValidatorTest {
 	private RegisterRequest registerRequest;
 	private ResponseParser response;
 	
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none(); 
 	
-	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		registerRequest = mock(RegisterRequest.class);
 		response = new ResponseParser();
@@ -65,10 +60,7 @@ public class RegisterValidatorTest {
 		DummyRegistrationModel model = new DummyRegistrationModel();
 		when(registerRequest.sendRegisterRequest(model)).thenReturn("invlaid-response-body");
 		
-		expectedException.expect(ValidationException.class);
-		registerValidation.register(model);
-		
-		fail();
+		assertThrows(ValidationException.class, () -> registerValidation.register(model));
 	}
 	
 	/*
@@ -103,10 +95,7 @@ public class RegisterValidatorTest {
 		String responseBody = "invalid-response-body";
 		when(registerRequest.sendActivateRequest(activationKey)).thenReturn(responseBody);
 		
-		expectedException.expect(ValidationException.class);
-		registerValidation.activate(activationKey);
-		
-		fail();
+		assertThrows(ValidationException.class, () -> registerValidation.activate(activationKey));
 	}
 	
 	/*

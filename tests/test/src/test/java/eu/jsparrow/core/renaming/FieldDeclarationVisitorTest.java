@@ -1,8 +1,9 @@
 package eu.jsparrow.core.renaming;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -15,8 +16,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.AbstractRulesTest;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
@@ -64,7 +65,7 @@ public class FieldDeclarationVisitorTest {
 	private IPackageFragment packageFragment;
 	private List<CompilationUnit> compilationUnits;
 	
-	@Before
+	@BeforeEach
 	public void setUpCompilationUnits() throws Exception {
 		IPackageFragmentRoot root = AbstractRulesTest.createRootPackageFragment();
 		packageFragment = root.createPackageFragment(ROOT_PACKAGE_NAME, true, null);

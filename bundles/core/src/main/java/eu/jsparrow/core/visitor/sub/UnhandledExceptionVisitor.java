@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.sub;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -39,7 +40,10 @@ public class UnhandledExceptionVisitor extends AbstractASTRewriteASTVisitor {
 		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class)
 			.stream()
 			.map(catchClause -> catchClause.getException()
-				.resolveBinding()).filter(exceptionVariableBinding -> exceptionVariableBinding != null).forEach(exceptionVariableBinding -> currentHandledExceptionsTypes.add(exceptionVariableBinding.getType().getQualifiedName()));
+				.resolveBinding())
+			.filter(Objects::nonNull)
+			.forEach(exceptionVariableBinding -> currentHandledExceptionsTypes.add(exceptionVariableBinding.getType()
+				.getQualifiedName()));
 		return true;
 	}
 
@@ -48,7 +52,10 @@ public class UnhandledExceptionVisitor extends AbstractASTRewriteASTVisitor {
 		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class)
 			.stream()
 			.map(catchClause -> catchClause.getException()
-				.resolveBinding()).filter(exceptionVariableBinding -> exceptionVariableBinding != null).forEach(exceptionVariableBinding -> currentHandledExceptionsTypes.remove(exceptionVariableBinding.getType().getQualifiedName()));
+				.resolveBinding())
+			.filter(Objects::nonNull)
+			.forEach(exceptionVariableBinding -> currentHandledExceptionsTypes.remove(exceptionVariableBinding.getType()
+				.getQualifiedName()));
 	}
 
 	@Override

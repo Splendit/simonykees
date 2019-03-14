@@ -134,10 +134,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 
 	public void swappedBooleanValues(List<String> strings) {
 		boolean containsNonEmpty = strings.stream()
-			.filter(StringUtils::isEmpty)
-			.findFirst()
-			.map(value -> false)
-			.orElse(true);
+			.noneMatch(StringUtils::isEmpty);
 	}
 
 	public void sameBooleanValues1(List<String> strings) {
@@ -235,10 +232,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	public boolean mixedReturnValues3(List<String> strings) {
 		String emptyString = "";
 		return strings.stream()
-			.filter(emptyString::equals)
-			.findFirst()
-			.map(value -> false)
-			.orElse(true);
+			.noneMatch(emptyString::equals);
 	}
 
 	public boolean irrelevantStatementsBeforeLoop(List<String> strings) {
