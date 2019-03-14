@@ -111,18 +111,21 @@ public class MavenAdapterTest {
 
 	@Test
 	public void setUp_listOfProjects() throws Exception {
-		String expectedCompilerSource = "expectedCompilerSource";
 		MavenParameters mavenParameters = new MavenParameters("list-rules");
 
 		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(false);
 		when(project.getPackaging()).thenReturn("jar");
 		when(path.toFile()).thenReturn(jsparrowYml);
-		when(properties.getProperty("maven.compiler.source")).thenReturn(expectedCompilerSource);
 
 		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml);
 
 		Map<String, String> configurations = mavenAdapter.getConfiguration();
-		assertTrue(configurations.containsKey("NATURE.IDS." + groupId + "." + artifactId));
+		assertTrue(configurations.containsKey(ConfigurationKeys.ROOT_CONFIG_PATH));
+		assertTrue(configurations.get(ConfigurationKeys.ROOT_CONFIG_PATH)
+			.equals(jsparrowYml.getAbsolutePath()));
+		assertTrue(configurations.containsKey(ConfigurationKeys.ROOT_PROJECT_BASE_PATH));
+		assertTrue(configurations.get(ConfigurationKeys.ROOT_PROJECT_BASE_PATH)
+			.equals(projectBaseDir.getAbsolutePath()));
 	}
 
 	@Test(expected = MojoExecutionException.class)
