@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,7 +143,7 @@ public class EclipseProjectFileManager {
 	}
 
 	private void deleteCreatedEclipseProjectFiles(EclipseProjectFileManagerStatus project)
-			throws IOException, CoreException {
+			throws IOException {
 		String path = project.getPath();
 
 		File settings = getSettingsDirectoryFile(path);
@@ -154,14 +153,14 @@ public class EclipseProjectFileManager {
 
 	}
 
-	public void revertEclipseProjectFiles() throws IOException, CoreException {
+	public void revertEclipseProjectFiles() throws IOException {
 		for (EclipseProjectFileManagerStatus p : projects) {
 			doRevertEclipseProjectFiles(p);
 		}
 	}
 
 	private void doRevertEclipseProjectFiles(EclipseProjectFileManagerStatus project)
-			throws IOException, CoreException {
+			throws IOException {
 		if (!project.isCleanUpAlreadyDone()) {
 			deleteCreatedEclipseProjectFiles(project);
 			restoreExistingEclipseFiles(project);

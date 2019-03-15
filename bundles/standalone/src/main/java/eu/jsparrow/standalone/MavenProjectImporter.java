@@ -17,7 +17,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
-import org.eclipse.m2e.core.internal.project.ProjectConfigurationManager;
 import org.eclipse.m2e.core.project.IMavenProjectImportResult;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.LocalProjectScanner;
@@ -128,7 +127,7 @@ public class MavenProjectImporter {
 
 	private List<MavenProjectInfo> collectMavenProjectInfo(Collection<MavenProjectInfo> input) {
 
-		List<MavenProjectInfo> toRet = new ArrayList<MavenProjectInfo>();
+		List<MavenProjectInfo> toRet = new ArrayList<>();
 		for (MavenProjectInfo info : input) {
 			toRet.add(info);
 			toRet.addAll(collectMavenProjectInfo(info.getProjects()));
@@ -145,11 +144,9 @@ public class MavenProjectImporter {
 		List<IMavenProjectImportResult> results = getProjectConfigurationManager().importProjects(projectInfos, pic,
 				new NullProgressMonitor());
 
-		List<IProject> projects = results.stream()
-			.map(r -> r.getProject())
+		return results.stream()
+			.map(IMavenProjectImportResult::getProject)
 			.collect(Collectors.toList());
-
-		return projects;
 	}
 
 	private List<IJavaProject> createJavaProjects(List<IProject> projects) throws MavenImportException {
