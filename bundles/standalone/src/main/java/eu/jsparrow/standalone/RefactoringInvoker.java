@@ -197,11 +197,11 @@ public class RefactoringInvoker {
 			return yamlConfigurationWrapper.getDefaultYamlConfig();
 		}
 
-		Optional<String> configFilePath = findConfigFilePath(projectRootDir);
 		String profile = context.getProperty(SELECTED_PROFILE);
 		String rootConfigFilePath = context.getProperty(ROOT_CONFIG_PATH);
+		String configFilePath = findConfigFilePath(projectRootDir).orElse(rootConfigFilePath);
 
-		return yamlConfigurationWrapper.readConfiguration(configFilePath.orElse(rootConfigFilePath), profile);
+		return yamlConfigurationWrapper.readConfiguration(configFilePath, profile);
 	}
 
 	private Optional<String> findConfigFilePath(File projectRootDir) {
@@ -265,7 +265,8 @@ public class RefactoringInvoker {
 
 		logger.info(Messages.RefactoringInvoker_loadingConfiguration);
 
-		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context), context.getProperty(ROOT_CONFIG_PATH)).get();
+		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
+				context.getProperty(ROOT_CONFIG_PATH)).get();
 
 		for (IJavaProject javaProject : importedProjects) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
