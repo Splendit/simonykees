@@ -15,7 +15,7 @@ public class RemoveModifiersInInterfacePropertiesRule extends RefactoringRuleImp
 
 	public RemoveModifiersInInterfacePropertiesRule() {
 		this.visitorClass = RemoveModifiersInInterfacePropertiesASTVisitor.class;
-		this.id = "RemoveExplicitCallToSuper"; //$NON-NLS-1$
+		this.id = "RemoveModifiersFromInterfaceProperties"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription("Remove Modifiers from Interface Properties",
 				"", Duration.ofMinutes(1),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY));
