@@ -323,6 +323,8 @@ public class Messages extends NLS {
 	public static String RemoveEmptyStatementRule_name;
 	public static String RemoveExplicitCallToSuperRule_description;
 	public static String RemoveExplicitCallToSuperRule_name;
+	public static String RemoveModifiersInInterfacePropertiesRule_description;
+	public static String RemoveModifiersInInterfacePropertiesRule_name;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;

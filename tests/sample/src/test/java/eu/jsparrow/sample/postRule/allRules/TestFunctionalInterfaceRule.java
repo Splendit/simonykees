@@ -350,13 +350,13 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	private interface AFunctionalInterface {
-		public void method(int a);
+		void method(int a);
 	}
 
 	private interface NonFunctionalInterface {
-		public void method();
+		void method();
 
-		public void method(int a);
+		void method(int a);
 	}
 
 	private class MyClass {
