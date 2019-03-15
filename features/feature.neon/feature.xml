@@ -24,6 +24,7 @@
    <requires>
       <import plugin="org.apache.commons.lang3" version="3.0.0" match="compatible"/>
       <import plugin="org.eclipse.osgi"/>
+      <import plugin="org.eclipse.equinox.ds"/>
       <import plugin="org.eclipse.equinox.util"/>
    </requires>
 
