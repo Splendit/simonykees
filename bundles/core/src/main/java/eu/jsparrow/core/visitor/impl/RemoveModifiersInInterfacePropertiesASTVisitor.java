@@ -1,50 +1,46 @@
 package eu.jsparrow.core.visitor.impl;
 
-import java.util.List;
+import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
 
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
+import java.util.Arrays;
+
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Removes the {@code public} modifier from the methods and
+ * {@code public static final} modifiers from fields declared in interfaces.
+ * 
+ * @since 3.3.0
+ *
+ */
 public class RemoveModifiersInInterfacePropertiesASTVisitor extends AbstractASTRewriteASTVisitor {
-	
+
 	@Override
-	public boolean visit(TypeDeclaration type) {
-		
-		if(!type.isInterface()) {
+	public boolean visit(TypeDeclaration interfaceDeclaration) {
+
+		if (!interfaceDeclaration.isInterface()) {
 			return true;
 		}
-		
-		FieldDeclaration[] fields = type.getFields();
-		
-		for(FieldDeclaration field : fields) {
-			List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(field.modifiers(), Modifier.class);
-			for(Modifier modifier : modifiers) {
-				if(modifier.isPublic() || modifier.isStatic() || modifier.isFinal()) {
-					astRewrite.remove(modifier, null);
-					onRewrite();
-				}
-			}
-		}
-		
-		
-		MethodDeclaration[] methods = type.getMethods();
-		for(MethodDeclaration method : methods) {
-			List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(method.modifiers(), Modifier.class);
-			for(Modifier modifier : modifiers) {
-				if(modifier.isPublic()) {
-					astRewrite.remove(modifier, null);
-					onRewrite();
-				}
-			}
-		}
-		
-		
+
+		Arrays.stream(interfaceDeclaration.getFields())
+			.flatMap(field -> convertToTypedList(field.modifiers(), Modifier.class).stream())
+			.filter(modifier -> modifier.isPublic() || modifier.isStatic() || modifier.isFinal())
+			.forEach(this::removeModifier);
+
+		Arrays.stream(interfaceDeclaration.getMethods())
+			.flatMap(method -> convertToTypedList(method.modifiers(), Modifier.class).stream())
+			.filter(Modifier::isPublic)
+			.forEach(this::removeModifier);
+
 		return true;
+	}
+
+	private void removeModifier(Modifier modifier) {
+		astRewrite.remove(modifier, null);
+		onRewrite();
 	}
 
 }
