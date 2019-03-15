@@ -16,17 +16,17 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 public class RemoveModifiersInInterfacePropertiesRuleTest extends SingleRuleTest {
 
-	private static final String SAMPLE_FILE = "RemoveModifiersInInterfacePropertiesRule.java";
-	private static final String POSTRULE_SUBDIRECTORY = "removeModifiersInInterfaceProperties";
-	
+	private static final String SAMPLE_FILE = "RemoveModifiersInInterfacePropertiesRule.java"; //$NON-NLS-1$
+	private static final String POSTRULE_SUBDIRECTORY = "removeModifiersInInterfaceProperties"; //$NON-NLS-1$
+
 	private RemoveModifiersInInterfacePropertiesRule rule;
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		rule = new RemoveModifiersInInterfacePropertiesRule();
-		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
+		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	@Test
 	public void testTransformationWithDefaultFile() throws Exception {
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
