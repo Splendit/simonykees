@@ -218,7 +218,7 @@ enum Days {
 
 interface OneHavingAnImplementedMethod {
 
-	static final Logger logger = LoggerFactory.getLogger(OneHavingAnImplementedMethod.class);
+	Logger logger = LoggerFactory.getLogger(OneHavingAnImplementedMethod.class);
 
 	default void makeUseOfSystemOut(String input) {
 		logger.info(input);
