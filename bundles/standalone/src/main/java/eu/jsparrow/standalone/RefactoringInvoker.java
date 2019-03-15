@@ -62,8 +62,6 @@ public class RefactoringInvoker {
 	 * 
 	 * @param context
 	 *            the bundle context configuration
-	 * @param refactoringPipeline
-	 *            an instance of the {@link RefactoringPipeline}
 	 * @throws StandaloneException
 	 *             if an exception occurs during refactoring. Reasons include:
 	 *             <ul>
@@ -302,7 +300,7 @@ public class RefactoringInvoker {
 				YAMLConfig config = getConfiguration(context, javaProject.getProject()
 					.getLocation()
 					.toFile());
-				StandaloneConfig standaloneConfig = new StandaloneConfig(javaProject, projectName, path, config);
+				StandaloneConfig standaloneConfig = new StandaloneConfig(javaProject, path, config);
 
 				standaloneConfigs.add(standaloneConfig);
 

@@ -28,9 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLExcludes;
@@ -55,16 +53,12 @@ public class StandaloneConfigTest {
 	private static Path path;
 
 	private IWorkspace workspace;
-	private IProject project;
 	private IJavaProject javaProject;
 	private StandaloneConfig standaloneConfig;
 	private RefactoringPipeline pipeline;
 	private boolean hasRefactoringStates;
 	private CompilationUnitProvider iCompilationUnitsProvider;
 	private YAMLConfig config;
-
-	@Rule
-	public TemporaryFolder directory = new TemporaryFolder();
 
 	@BeforeClass
 	public static void setUpClass() throws IOException {
@@ -81,8 +75,10 @@ public class StandaloneConfigTest {
 	public void setUp() throws Exception {
 
 		workspace = mock(IWorkspace.class);
-		project = mock(IProject.class);
+		IProject project = mock(IProject.class);
+		when(project.getName()).thenReturn(PROJECT_NAME);
 		javaProject = mock(IJavaProject.class);
+		when(javaProject.getProject()).thenReturn(project);
 		pipeline = mock(RefactoringPipeline.class);
 
 		config = mock(YAMLConfig.class);
@@ -93,7 +89,6 @@ public class StandaloneConfigTest {
 
 	@Test
 	public void getCompilationUnits_noCompilationUnitsExist_returnsEmptyList() throws Exception {
-		standaloneConfig.setJavaProject(javaProject);
 		when(javaProject.getPackageFragments()).thenReturn(new IPackageFragment[] {});
 
 		List<ICompilationUnit> units = standaloneConfig.findProjectCompilationUnits();
@@ -106,7 +101,6 @@ public class StandaloneConfigTest {
 		IPackageFragment packageFragment = mock(IPackageFragment.class);
 		ICompilationUnit compilationUnit = mock(ICompilationUnit.class);
 
-		standaloneConfig.setJavaProject(javaProject);
 		when(javaProject.getPackageFragments()).thenReturn(new IPackageFragment[] { packageFragment });
 		when(packageFragment.containsJavaResources()).thenReturn(true);
 		when(packageFragment.getCompilationUnits()).thenReturn(new ICompilationUnit[] { compilationUnit });
@@ -120,8 +114,6 @@ public class StandaloneConfigTest {
 	@SuppressWarnings("unchecked")
 	@Test(expected = StandaloneException.class)
 	public void createRefactoringStates_shouldThrowStandaloneException() throws Exception {
-		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn(PROJECT_NAME);
 		doThrow(JavaModelException.class).when(pipeline)
 			.createRefactoringState(any(ICompilationUnit.class), any(List.class));
 
@@ -132,8 +124,6 @@ public class StandaloneConfigTest {
 
 	@Test(expected = StandaloneException.class)
 	public void createRefactoringStates_abortFlag_shouldThrowStandaloneException() throws Exception {
-		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn(PROJECT_NAME);
 		standaloneConfig.setAbortFlag();
 		YAMLExcludes excludes = mock(YAMLExcludes.class);
 		when(excludes.getExcludeClasses()).thenReturn(Collections.emptyList());
@@ -148,9 +138,6 @@ public class StandaloneConfigTest {
 	@Test
 	public void computeRefactoring_shouldCallDoRefactoring() throws Exception {
 		hasRefactoringStates = true;
-		standaloneConfig.setProject(project);
-		standaloneConfig.setJavaProject(javaProject);
-		when(project.getName()).thenReturn(PROJECT_NAME);
 		when(javaProject.getElementName()).thenReturn(PROJECT_NAME);
 		when(javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true)).thenReturn("1.1"); //$NON-NLS-1$
 		when(pipeline.getRulesWithChangesAsString()).thenReturn("changes-as-string"); //$NON-NLS-1$
@@ -166,8 +153,6 @@ public class StandaloneConfigTest {
 	@Test
 	public void computeRefactoring_emptyRefactoringStates() throws Exception {
 		hasRefactoringStates = false;
-		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn(PROJECT_NAME);
 
 		standaloneConfig.computeRefactoring();
 
@@ -177,8 +162,6 @@ public class StandaloneConfigTest {
 	@Test(expected = StandaloneException.class)
 	public void computeRefactoring_shouldThrowStandaloneException() throws Exception {
 		hasRefactoringStates = true;
-		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn(PROJECT_NAME);
 		doThrow(RefactoringException.class).when(pipeline)
 			.doRefactoring(any(IProgressMonitor.class));
 		when(config.getRules()).thenReturn(Collections.singletonList("CodeFormatter"));//$NON-NLS-1$
@@ -191,8 +174,6 @@ public class StandaloneConfigTest {
 	@Test
 	public void commitrefactoring_emptyRefactoringStates() throws Exception {
 		hasRefactoringStates = false;
-		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn(PROJECT_NAME);
 
 		standaloneConfig.commitRefactoring();
 
@@ -202,8 +183,6 @@ public class StandaloneConfigTest {
 	@Test(expected = StandaloneException.class)
 	public void commitChanges_shouldThrowStandaloneException() throws Exception {
 		hasRefactoringStates = true;
-		standaloneConfig.setProject(project);
-		when(project.getName()).thenReturn(PROJECT_NAME);
 		doThrow(RefactoringException.class).when(pipeline)
 			.commitRefactoring();
 
@@ -215,7 +194,7 @@ public class StandaloneConfigTest {
 	class TestableStandaloneConfig extends StandaloneConfig {
 
 		public TestableStandaloneConfig(String path, String compilerCompliance) throws Exception {
-			super(javaProject, "projectName", path, config); //$NON-NLS-1$
+			super(javaProject, path, config);
 			super.refactoringPipeline = pipeline;
 
 		}
@@ -232,11 +211,6 @@ public class StandaloneConfigTest {
 		@Override
 		protected IWorkspace getWorkspace() {
 			return workspace;
-		}
-
-		@Override
-		protected IProject getProject(IWorkspace workspace, String name) {
-			return project;
 		}
 
 		@Override
