@@ -29,6 +29,7 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Constants;
 
 import eu.jsparrow.maven.i18n.Messages;
+import eu.jsparrow.maven.util.MavenProjectUtil;
 
 /**
  * Sets up the configuration used for starting the equinox framework.

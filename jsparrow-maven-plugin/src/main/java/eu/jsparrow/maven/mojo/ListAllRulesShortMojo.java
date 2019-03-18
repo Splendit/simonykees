@@ -15,6 +15,7 @@ import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.i18n.Messages;
+import eu.jsparrow.maven.util.JavaVersion;
 
 /**
  * Prints all rules with their name and ID in a table.
@@ -28,17 +29,12 @@ public class ListAllRulesShortMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
 	
-	private static final String JAVA_VERSION_PROPERTY_CONSTANT = "java.version"; //$NON-NLS-1$
-	private static final String JAVA_VERSION_1_8 = "1.8"; //$NON-NLS-1$
-	private static final String JAVA_VERSION_11 = "11"; //$NON-NLS-1$
-
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		Log log = getLog();
 
-		String javaVersion = System.getProperty(JAVA_VERSION_PROPERTY_CONSTANT);
-		if (!javaVersion.startsWith(JAVA_VERSION_1_8) && !javaVersion.startsWith(JAVA_VERSION_11)) {
+		if (!JavaVersion.isJava8or11()) {
 			log.warn(Messages.RefactorMojo_supportJDK8and11);
 			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8and11);
 		}

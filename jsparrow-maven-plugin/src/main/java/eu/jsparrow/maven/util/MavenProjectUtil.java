@@ -1,6 +1,8 @@
-package eu.jsparrow.maven.adapter;
+package eu.jsparrow.maven.util;
 
 import org.apache.maven.project.MavenProject;
+
+import eu.jsparrow.maven.adapter.MavenAdapter;
 
 /**
  * A utility class for extracting information from a {@link MavenProject}.

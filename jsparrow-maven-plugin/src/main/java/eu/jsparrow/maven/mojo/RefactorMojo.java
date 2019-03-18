@@ -22,6 +22,7 @@ import eu.jsparrow.maven.adapter.MavenParameters;
 import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.i18n.Messages;
+import eu.jsparrow.maven.util.JavaVersion;
 
 /**
  * Runs jSparrow on the Maven project.
@@ -32,10 +33,6 @@ import eu.jsparrow.maven.i18n.Messages;
  */
 @Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
 public class RefactorMojo extends AbstractMojo {
-
-	private static final String JAVA_VERSION_PROPERTY_CONSTANT = "java.version"; //$NON-NLS-1$
-	private static final String JAVA_VERSION_1_8 = "1.8"; //$NON-NLS-1$
-	private static final String JAVA_VERSION_11 = "11"; //$NON-NLS-1$
 
 	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession mavenSession;
@@ -82,8 +79,7 @@ public class RefactorMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 		Log log = getLog();
 
-		String javaVersion = System.getProperty(JAVA_VERSION_PROPERTY_CONSTANT);
-		if (!javaVersion.startsWith(JAVA_VERSION_1_8) && !javaVersion.startsWith(JAVA_VERSION_11)) {
+		if (!JavaVersion.isJava8or11()) {
 			log.warn(Messages.RefactorMojo_supportJDK8and11);
 			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8and11);
 		}
