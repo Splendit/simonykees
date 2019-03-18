@@ -2,15 +2,20 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +24,7 @@ import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.standalone.exceptions.MavenImportException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
@@ -34,22 +40,16 @@ public class RefactoringInvoker {
 	 * must match with the ones in {@link eu.jsparrow.adapter.ConfigurationKeys}
 	 */
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
-	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
-	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
-	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
-	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
-	private static final String SOURCE_FOLDER = "SOURCE.FOLDER"; //$NON-NLS-1$
-	private static final String NATURE_IDS = "NATURE.IDS"; //$NON-NLS-1$
-	private static final String PROJECT_NAME = "PROJECT.NAME"; //$NON-NLS-1$
-	private static final String DOT = "."; //$NON-NLS-1$
+	private static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$
 
 	private boolean abort = false;
 	private YAMLConfigurationWrapper yamlConfigurationWrapper = new YAMLConfigurationWrapper();
+	private MavenProjectImporter importer = new MavenProjectImporter();
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
@@ -62,8 +62,6 @@ public class RefactoringInvoker {
 	 * 
 	 * @param context
 	 *            the bundle context configuration
-	 * @param refactoringPipeline
-	 *            an instance of the {@link RefactoringPipeline}
 	 * @throws StandaloneException
 	 *             if an exception occurs during refactoring. Reasons include:
 	 *             <ul>
@@ -79,7 +77,8 @@ public class RefactoringInvoker {
 	 *             <ul>
 	 */
 	public void startRefactoring(BundleContext context) throws StandaloneException {
-		loadStandaloneConfig(context);
+		List<IJavaProject> importedProjects = importAllProjects(context);
+		loadStandaloneConfig(importedProjects, context);
 		prepareRefactoring();
 		computeRefactoring();
 		commitRefactoring();
@@ -168,7 +167,7 @@ public class RefactoringInvoker {
 				logger.debug("Cannot clear refactoring states on {} ", standaloneConfig.getProjectName(), e); //$NON-NLS-1$
 				throw e;
 			} finally {
-				standaloneConfig.revertEclipseProjectFiles();
+				importer.cleanUp();
 			}
 		}
 	}
@@ -188,7 +187,7 @@ public class RefactoringInvoker {
 	 * 
 	 * @see YAMLConfigurationWrapper#readConfiguration(String, String)
 	 */
-	private YAMLConfig getConfiguration(BundleContext context, String projectId) throws StandaloneException {
+	private YAMLConfig getConfiguration(BundleContext context, File projectRootDir) throws StandaloneException {
 
 		boolean useDefaultConfig = parseUseDefaultConfiguration(context);
 
@@ -196,10 +195,21 @@ public class RefactoringInvoker {
 			return yamlConfigurationWrapper.getDefaultYamlConfig();
 		}
 
-		String configFilePath = context.getProperty(CONFIG_FILE_PATH + DOT + projectId);
 		String profile = context.getProperty(SELECTED_PROFILE);
+		String rootConfigFilePath = context.getProperty(ROOT_CONFIG_PATH);
+		String configFilePath = findConfigFilePath(projectRootDir).orElse(rootConfigFilePath);
 
 		return yamlConfigurationWrapper.readConfiguration(configFilePath, profile);
+	}
+
+	private Optional<String> findConfigFilePath(File projectRootDir) {
+		Path configFilePath = Paths.get(projectRootDir.getAbsolutePath(), "jsparrow.yml"); //$NON-NLS-1$
+
+		if (Files.exists(configFilePath)) {
+			return Optional.ofNullable(configFilePath.toString());
+		}
+
+		return Optional.empty();
 	}
 
 	private boolean parseUseDefaultConfiguration(BundleContext context) {
@@ -216,6 +226,28 @@ public class RefactoringInvoker {
 		}
 	}
 
+	protected List<IJavaProject> importAllProjects(BundleContext context) throws StandaloneException {
+		logger.info(Messages.RefactoringInvoker_importingMavenProjects);
+
+		File workspaceRoot = ResourcesPlugin.getWorkspace()
+			.getRoot()
+			.getLocation()
+			.toFile();
+		String folder = context.getProperty(ROOT_PROJECT_BASE_PATH);
+
+		List<IJavaProject> imported;
+
+		try {
+			imported = importer.importProjects(workspaceRoot, folder);
+		} catch (MavenImportException e) {
+			throw new StandaloneException(e.getMessage(), e);
+		}
+
+		logger.info(Messages.RefactoringInvoker_mavenProjectsImported);
+
+		return imported;
+	}
+
 	/**
 	 * Loads a new {@link StandaloneConfig} with the properties found in
 	 * {@link BundleContext}
@@ -226,20 +258,25 @@ public class RefactoringInvoker {
 	 *             if an instance of the {@link StandaloneConfig} cannot be
 	 *             created.
 	 */
-	protected void loadStandaloneConfig(BundleContext context) throws StandaloneException {
+	protected void loadStandaloneConfig(List<IJavaProject> importedProjects, BundleContext context)
+			throws StandaloneException {
 
-		Map<String, String> projectPaths = findAllProjectPaths(context);
+		logger.info(Messages.RefactoringInvoker_loadingConfiguration);
 
 		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
 				context.getProperty(ROOT_CONFIG_PATH)).get();
 
-		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
+		for (IJavaProject javaProject : importedProjects) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
 			verifyAbortFlag(abortMessage);
-			String id = entry.getKey();
-			String path = entry.getValue();
-			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
-			String projectName = context.getProperty(PROJECT_NAME + DOT + id);
+
+			String path = javaProject.getProject()
+				.getLocation()
+				.toFile()
+				.getAbsolutePath();
+			String projectName = javaProject.getProject()
+				.getName();
+
 			/*
 			 * Since the aggregate projects do not contain java sources and we
 			 * do not refactor them, given that the provided project has a
@@ -252,14 +289,19 @@ public class RefactoringInvoker {
 				 * name matches and excludes only that package, but not possible
 				 * sub-packages / packages that start with the same string.
 				 */
+				String skippedLog = NLS.bind(Messages.RefactoringInvoker_projectExcludedFromRefactoring, projectName);
+				logger.debug(skippedLog);
 				continue;
 			}
-			String sourceFolder = context.getProperty(SOURCE_FOLDER + DOT + id);
-			String[] natureIds = findNatureIds(context, id);
+
+			String logMsg = NLS.bind(Messages.RefactoringInvoker_loadingConfigurationForProject, projectName);
+			logger.debug(logMsg);
 			try {
-				YAMLConfig config = getConfiguration(context, id);
-				StandaloneConfig standaloneConfig = new StandaloneConfig(projectName, path, compilerCompliance,
-						sourceFolder, natureIds, config);
+				YAMLConfig config = getConfiguration(context, javaProject.getProject()
+					.getLocation()
+					.toFile());
+				StandaloneConfig standaloneConfig = new StandaloneConfig(javaProject, path, config);
+
 				standaloneConfigs.add(standaloneConfig);
 
 			} catch (CoreException | RuntimeException e) {
@@ -271,22 +313,15 @@ public class RefactoringInvoker {
 		if (standaloneConfigs.isEmpty()) {
 			throw new StandaloneException(Messages.RefactoringInvoker_error_allModulesExcluded);
 		}
+
+		logger.info(Messages.RefactoringInvoker_configurationLoaded);
 	}
 
-	protected String[] findNatureIds(BundleContext context, String id) {
-		return context.getProperty(NATURE_IDS + DOT + id)
-			.split(","); //$NON-NLS-1$
+	public MavenProjectImporter getImporter() {
+		return importer;
 	}
 
-	private Map<String, String> findAllProjectPaths(BundleContext context) {
-		String concatenatedIds = context.getProperty(ALL_PROJECT_IDENTIFIERS);
-		Map<String, String> paths = new HashMap<>();
-		String[] allIds = concatenatedIds.split(","); //$NON-NLS-1$
-		for (String id : allIds) {
-			String propertyKey = PROJECT_PATH_CONSTANT + "." + id; //$NON-NLS-1$
-			String path = context.getProperty(propertyKey);
-			paths.put(id, path);
-		}
-		return paths;
+	public void setImporter(MavenProjectImporter importer) {
+		this.importer = importer;
 	}
 }
