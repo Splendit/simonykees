@@ -242,6 +242,10 @@
 						<manifestEntries>
 							<Built-By>Splendit IT-Consulting GmbH</Built-By>
 						</manifestEntries>
+						<manifest>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+						</manifest>
 					</archive>
 				</configuration>
 			</plugin>
