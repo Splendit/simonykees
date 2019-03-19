@@ -286,7 +286,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		LicenseType type = model.getType();
 
 		ZonedDateTime expireDate = model.getExpirationDate();
-		boolean isValid = false;
+		boolean isValid = true;
 		if (expireDate != null) {
 			isValid = ZonedDateTime.now()
 				.isBefore(model.getExpirationDate());
