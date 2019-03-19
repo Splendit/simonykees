@@ -69,7 +69,7 @@ public class Activator implements BundleActivator {
 
 		startDeclarativeServices(context);
 		// Put both together because it looks nicer
-		String startMessage = String.format("%s %n %s", Messages.Activator_start, loadBanner()); //$NON-NLS-1$
+		String startMessage = String.format("%s", Messages.Activator_start); //$NON-NLS-1$
 		logger.info(startMessage);
 		registerShutdownHook(context);
 		StandaloneMode mode = parseMode(context);
@@ -114,13 +114,6 @@ public class Activator implements BundleActivator {
 		}
 
 		logger.info(Messages.Activator_stop);
-	}
-
-	private String loadBanner() {
-		InputStream in = getClass().getResourceAsStream("/banner.txt"); //$NON-NLS-1$
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		return reader.lines()
-			.collect(Collectors.joining("\n")); //$NON-NLS-1$
 	}
 
 	private void printLicenseInfo(BundleContext context) {
