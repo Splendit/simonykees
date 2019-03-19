@@ -1,6 +1,7 @@
 package eu.jsparrow.maven.mojo;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.maven.execution.MavenSession;
@@ -49,8 +50,8 @@ public class RefactorMojo extends AbstractMojo {
 	/**
 	 * Path to the configuration file.
 	 */
-	@Parameter(defaultValue = "jsparrow.yml", property = "configFile")
-	private File configFile;
+	@Parameter(property = "configFile")
+	private File configFileOverride;
 
 	/**
 	 * Selected profile. Overrides the settings in the configuration file.
@@ -89,9 +90,13 @@ public class RefactorMojo extends AbstractMojo {
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);
+		File rootConfig = Paths.get(project.getBasedir()
+			.getAbsolutePath(), "jsparrow.yml") //$NON-NLS-1$
+			.toFile();
 
 		try {
-			WorkingDirectory workingDirectory = mavenAdapter.setUpConfiguration(parameters, projects, configFile);
+			WorkingDirectory workingDirectory = mavenAdapter.setUpConfiguration(parameters, projects,
+					configFileOverride, rootConfig);
 			addShutdownHook(bundleStarter, workingDirectory, mavenAdapter.isJsparrowRunningFlag());
 			bundleStarter.runStandalone(mavenAdapter.getConfiguration());
 		} catch (BundleException | InterruptedException e1) {
