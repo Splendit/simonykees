@@ -192,14 +192,19 @@ public class RefactoringInvoker {
 		String configFileOverride = context.getProperty(CONFIG_FILE_OVERRIDE);
 
 		if (useDefaultConfig) {
+			logger.debug(Messages.RefactoringInvoker_usingDefaultConfiguration);
 			return yamlConfigurationWrapper.getDefaultYamlConfig();
 		}
 
 		if (configFileOverride != null && !configFileOverride.isEmpty()) {
+			String logMsg = NLS.bind(Messages.RefactoringInvoker_usingOverriddenConfiguration, configFileOverride);
+			logger.debug(logMsg);
 			return yamlConfigurationWrapper.readConfiguration(configFileOverride, profile);
 		}
 
 		String configFilePath = findConfigFilePath(context, projectRootDir);
+		String logMsg = NLS.bind(Messages.RefactoringInvoker_usingConfiguration, configFilePath);
+		logger.debug(logMsg);
 
 		return yamlConfigurationWrapper.readConfiguration(configFilePath, profile);
 	}

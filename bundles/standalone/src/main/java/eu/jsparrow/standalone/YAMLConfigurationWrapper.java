@@ -53,8 +53,9 @@ public class YAMLConfigurationWrapper {
 				throw new StandaloneException(e.getMessage(), e);
 			}
 		} else {
-			throw new StandaloneException(
-					String.format("A configuration file has not been found at the given path [{0}]", configFilePath)); //$NON-NLS-1$
+			String exceptionMessage = NLS.bind(Messages.YAMLConfigurationWrapper_configurationFileNotFoundAtPath,
+					configFilePath);
+			throw new StandaloneException(exceptionMessage);
 		}
 
 		updateSelectedProfile(config, profile);
