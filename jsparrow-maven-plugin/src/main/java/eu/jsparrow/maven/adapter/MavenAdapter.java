@@ -91,7 +91,8 @@ public class MavenAdapter {
 		}
 
 		configuration.put(ROOT_CONFIG_PATH, rootConfigFile.getAbsolutePath());
-		configuration.put(CONFIG_FILE_OVERRIDE, configFileOverride.getAbsolutePath());
+		configuration.put(CONFIG_FILE_OVERRIDE,
+				(configFileOverride == null) ? null : configFileOverride.getAbsolutePath());
 		configuration.put(ROOT_PROJECT_BASE_PATH, rootProject.getBasedir()
 			.getAbsolutePath());
 
