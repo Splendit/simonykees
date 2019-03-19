@@ -1,14 +1,10 @@
 package eu.jsparrow.standalone;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -120,7 +116,13 @@ public class Activator implements BundleActivator {
 		licenseService = getStandaloneLicenseUtilService();
 		String key = getLicenseKey(context);
 		String agentUrl = getAgentUrl(context);
-		licenseService.licenseInfo(key, agentUrl);
+		try {
+			licenseService.licenseInfo(key, agentUrl);
+		} catch (StandaloneException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+			setExitErrorMessage(context, e.getMessage());
+		}
 	}
 
 	private void listRules(String listRulesId) {

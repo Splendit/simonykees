@@ -224,7 +224,7 @@
 		<pluginRepository>
 			<id>jsparrow-maven-plugin</id>
 			<name>jsparrow maven plugin</name>
-			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-maven-plugin-develop-test-noProguard/</url>
+			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jSparrow-maven-plugin-release-candidate/</url>
 			<layout>default</layout>
 		</pluginRepository>
 	</pluginRepositories>
