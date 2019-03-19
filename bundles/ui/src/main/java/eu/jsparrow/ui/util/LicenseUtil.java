@@ -202,7 +202,10 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 		}
 
-		return trySaveToPersistence(secret, productNr, moduleNr, name, validationResult);
+		LicenseModel persitModel = factoryService.createNewModel(validationResult.getKey(), secret, productNr, moduleNr,
+				validationResult.getLicenseType(), name, validationResult.getExpirationDate());
+
+		return persistLicense(persitModel);
 	}
 
 	@Override
@@ -315,11 +318,8 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
 	}
 
-	private LicenseUpdateResult trySaveToPersistence(String secret, String productNr, String moduleNr, String name,
-			LicenseValidationResult validationResult) {
+	private LicenseUpdateResult persistLicense(LicenseModel persitModel) {
 
-		LicenseModel persitModel = factoryService.createNewModel(validationResult.getKey(), secret, productNr, moduleNr,
-				validationResult.getLicenseType(), name, validationResult.getExpirationDate());
 		try {
 			persistenceService.saveToPersistence(persitModel);
 		} catch (PersistenceException e) {
