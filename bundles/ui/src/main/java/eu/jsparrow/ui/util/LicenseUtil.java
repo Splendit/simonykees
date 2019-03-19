@@ -3,6 +3,7 @@ package eu.jsparrow.ui.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
+import java.time.ZonedDateTime;
 import java.util.Properties;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -170,30 +171,41 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		if (key == null || key.isEmpty()) {
 			return new LicenseUpdateResult(false, Messages.LicenseUtil_EmptyLicense);
 		} else if (key.matches(".*[\\/].*")) { //$NON-NLS-1$
-			return new LicenseUpdateResult(false, "License contains illegal characters");
+			return new LicenseUpdateResult(false, "License contains illegal characters"); //$NON-NLS-1$
 		}
 		String secret = systemInfoWrapper.createUniqueHardwareId();
 		LicenseValidationResult validationResult;
 		LicenseModel model;
+		String name = systemInfoWrapper.createNameFromHardware();
+		Properties properties;
 		try {
-			String name = systemInfoWrapper.createNameFromHardware();
-			Properties properties = loadProperties();
-			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
-			String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
-			model = factoryService.createNewModel(key, secret, productNr, moduleNr, LicenseType.NONE, name, null);
-			validationResult = licenseService.validate(model);
-		} catch (ValidationException | IOException e) {
+			properties = loadProperties();
+		} catch (IOException e) {
 			logger.error("Could not validate license", e); //$NON-NLS-1$
 			return new LicenseUpdateResult(false,
 					NLS.bind(Messages.UpdateLicenseDialog_error_couldNotValidate, e.getMessage()));
 		}
+		String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
+		String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
+		model = factoryService.createNewModel(key, secret, productNr, moduleNr, LicenseType.NONE, name, null);
+		try {
+			validationResult = licenseService.validate(model);
+		} catch (ValidationException e) {
+			logger.error("Could not validate license", e); //$NON-NLS-1$
+			return new LicenseUpdateResult(false,
+					NLS.bind(Messages.UpdateLicenseDialog_error_couldNotValidate, e.getMessage()));
+		}
+
 		if (!validationResult.isValid()) {
 			logger.warn("License with key '{}' is not valid. License not saved.", key); //$NON-NLS-1$
 			return new LicenseUpdateResult(false, NLS.bind(Messages.UpdateLicenseDialog_error_licenseInvalid, key));
 
 		}
 
-		return trySaveToPersistence(model);
+		LicenseModel persitModel = factoryService.createNewModel(validationResult.getKey(), secret, productNr, moduleNr,
+				validationResult.getLicenseType(), name, validationResult.getExpirationDate());
+
+		return persistLicense(persitModel);
 	}
 
 	@Override
@@ -269,10 +281,18 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 	}
 
-	public boolean isFullLicensePresentInSecureStore() {
+	public boolean isValidProLicensePresentInSecureStore() {
 		LicenseModel model = tryLoadModelFromPersistence();
 		LicenseType type = model.getType();
-		return type != LicenseType.DEMO;
+
+		ZonedDateTime expireDate = model.getExpirationDate();
+		boolean isValid = false;
+		if (expireDate != null) {
+			isValid = ZonedDateTime.now()
+				.isBefore(model.getExpirationDate());
+		}
+
+		return isValid && type != LicenseType.DEMO;
 	}
 
 	private LicenseModel tryLoadModelFromPersistence() {
@@ -298,9 +318,10 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
 	}
 
-	private LicenseUpdateResult trySaveToPersistence(LicenseModel model) {
+	private LicenseUpdateResult persistLicense(LicenseModel persitModel) {
+
 		try {
-			persistenceService.saveToPersistence(model);
+			persistenceService.saveToPersistence(persitModel);
 		} catch (PersistenceException e) {
 			logger.error("License is valid but could not be persisted", e); //$NON-NLS-1$
 			return new LicenseUpdateResult(false,
