@@ -28,6 +28,8 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 
+import eu.jsparrow.standalone.ConfigFinder.ConfigType;
+
 /**
  * The {@link ConfigFinderTest} uses mocking, as well as parameterized and
  * non-parameterized tests to test the {@link ConfigFinder} class.
@@ -79,7 +81,7 @@ public class ConfigFinderTest {
 			Path path = Paths.get(folder.getRoot()
 				.getAbsolutePath());
 
-			Optional<String> configFile = configFinder.getYAMLFilePath(path);
+			Optional<String> configFile = configFinder.getYAMLFilePath(path, ConfigType.CONFIG_FILE);
 
 			assertTrue(String.format("Valid config file '%s' should be found", configFileName), configFile.isPresent());
 		}
@@ -107,7 +109,7 @@ public class ConfigFinderTest {
 			Path path = Paths.get(folder.getRoot()
 				.getAbsolutePath());
 
-			Optional<String> configFile = configFinder.getYAMLFilePath(path);
+			Optional<String> configFile = configFinder.getYAMLFilePath(path, ConfigType.CONFIG_FILE);
 
 			assertFalse(String.format("Invalid config file '%s' should not be found", configFileName),
 					configFile.isPresent());
@@ -124,7 +126,7 @@ public class ConfigFinderTest {
 			Path path = Paths.get(folder.getRoot()
 				.getAbsolutePath());
 
-			Optional<String> configFile = configFinder.getYAMLFilePath(path);
+			Optional<String> configFile = configFinder.getYAMLFilePath(path, ConfigType.CONFIG_FILE);
 
 			assertFalse("Config file does not exist and should not be present", configFile.isPresent());
 		}
@@ -134,7 +136,7 @@ public class ConfigFinderTest {
 			String invalidFolderPath = "/thatdoesnotexist/forreal";
 			Path path = Paths.get(invalidFolderPath);
 
-			Optional<String> configFile = configFinder.getYAMLFilePath(path);
+			Optional<String> configFile = configFinder.getYAMLFilePath(path, ConfigType.CONFIG_FILE);
 
 			assertFalse(String.format("Invalid path '%s' should not return a config file", invalidFolderPath),
 					configFile.isPresent());
@@ -145,7 +147,7 @@ public class ConfigFinderTest {
 			String invalidFolderPath = "/thatdoesnotexist/forreal";
 			Path path = Paths.get(invalidFolderPath);
 
-			configFinder.getYAMLFilePath(path);
+			configFinder.getYAMLFilePath(path, ConfigType.CONFIG_FILE);
 
 			verify(mockLogger, times(1)).debug(anyString(), eq(invalidFolderPath));
 		}
@@ -164,7 +166,7 @@ public class ConfigFinderTest {
 			Path path = Paths.get(folder.getRoot()
 				.getAbsolutePath());
 
-			Optional<String> configFile = configFinder.getYAMLFilePath(path);
+			Optional<String> configFile = configFinder.getYAMLFilePath(path, ConfigType.CONFIG_FILE);
 
 			// configFileName is used for a nicer assert message exclusively
 			String configFileName = "<empty>";
