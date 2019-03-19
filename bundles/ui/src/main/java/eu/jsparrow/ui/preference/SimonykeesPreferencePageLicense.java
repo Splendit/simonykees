@@ -161,7 +161,6 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private void updateDisplayedInformation() {
 		LicenseValidationResult result = licenseUtil.getValidationResult();
-		result.isValid();
 		String licenseModelInfo = computeLicenseLabel(result);
 
 		licenseLabel.setText(licenseModelInfo);

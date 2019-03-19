@@ -3,6 +3,7 @@ package eu.jsparrow.ui.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
+import java.time.ZonedDateTime;
 import java.util.Properties;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -269,10 +270,12 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 	}
 
-	public boolean isFullLicensePresentInSecureStore() {
+	public boolean isValidProLicensePresentInSecureStore() {
 		LicenseModel model = tryLoadModelFromPersistence();
 		LicenseType type = model.getType();
-		return type != LicenseType.DEMO;
+		boolean isValid = ZonedDateTime.now().isBefore(model.getExpirationDate());
+		
+		return isValid && type != LicenseType.DEMO;
 	}
 
 	private LicenseModel tryLoadModelFromPersistence() {
