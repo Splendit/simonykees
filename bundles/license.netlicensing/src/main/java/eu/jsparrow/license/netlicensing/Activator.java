@@ -24,19 +24,6 @@ public class Activator extends Plugin {
 	public void start(BundleContext context) throws Exception {
 		plugin = this;
 
-		/*
-		 * JNA first tries to read from jna.boot.library.path. If system
-		 * property jna.boot.library.path is set to wrong version from another
-		 * project in Eclipse where jSparrow is installed, jSparrow throws
-		 * exception. If property is reset it will try to read from
-		 * jna.library.path. To avoid that jna.nosys is set to true. This should
-		 * force libraries to be unpacked from the jar.
-		 * 
-		 * See SIM-323 and the explanatory comment.
-		 */
-		System.setProperty("jna.boot.library.path", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		System.setProperty("jna.nosys", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
 			if ("eu.jsparrow.logging".equals(bundle.getSymbolicName()) //$NON-NLS-1$
