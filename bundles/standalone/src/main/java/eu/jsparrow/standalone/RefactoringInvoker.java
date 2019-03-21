@@ -267,8 +267,12 @@ public class RefactoringInvoker {
 
 		logger.info(Messages.RefactoringInvoker_loadingConfiguration);
 
+		String configFileOverride = context.getProperty(CONFIG_FILE_OVERRIDE);
+		boolean useDefaultFallBack = configFileOverride == null || configFileOverride.isEmpty();
+		String excludedModulesFilePath = useDefaultFallBack ? context.getProperty(ROOT_CONFIG_PATH)
+				: configFileOverride;
 		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
-				context.getProperty(ROOT_CONFIG_PATH)).get();
+				excludedModulesFilePath).get();
 
 		for (IJavaProject javaProject : importedProjects) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$

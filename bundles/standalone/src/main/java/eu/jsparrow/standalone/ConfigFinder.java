@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -70,7 +69,7 @@ public class ConfigFinder {
 				if (match.isPresent()) {
 					match = match.map(fileName -> filePath.resolve(fileName).toString());
 				} else {
-					logger.debug("No matching config file found in directory: '{}'", filePath.toString()); //$NON-NLS-1$
+					logger.debug("No matching config file found in directory: '{}'", filePath); //$NON-NLS-1$
 				}
 
 			} catch (IOException e) {
@@ -79,10 +78,10 @@ public class ConfigFinder {
 				 * is not an error case for us. This branch should never be
 				 * reached.
 				 */
-				logger.debug("Unable to list files in directory: '{}'", filePath.toString()); //$NON-NLS-1$
+				logger.debug("Unable to list files in directory: '{}'", filePath); //$NON-NLS-1$
 			}
 		} else {
-			logger.debug("Directory does not exist: '{}'", filePath.toString()); //$NON-NLS-1$
+			logger.debug("Directory does not exist: '{}'", filePath); //$NON-NLS-1$
 		}
 
 		return match;
