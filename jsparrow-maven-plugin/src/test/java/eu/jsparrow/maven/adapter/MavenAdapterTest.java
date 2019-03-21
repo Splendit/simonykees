@@ -117,7 +117,7 @@ public class MavenAdapterTest {
 		when(project.getPackaging()).thenReturn("jar");
 		when(path.toFile()).thenReturn(jsparrowYml);
 
-		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml);
+		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml);
 
 		Map<String, String> configurations = mavenAdapter.getConfiguration();
 		assertTrue(configurations.containsKey(ConfigurationKeys.ROOT_CONFIG_PATH));
@@ -134,7 +134,7 @@ public class MavenAdapterTest {
 
 		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(true);
 
-		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml);
+		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml);
 
 		assertTrue(false);
 	}

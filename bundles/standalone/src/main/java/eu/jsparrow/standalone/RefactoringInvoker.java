@@ -2,13 +2,9 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -24,6 +20,7 @@ import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.MavenImportException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
@@ -46,6 +43,7 @@ public class RefactoringInvoker {
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
 	private static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$
+	private static final String CONFIG_FILE_OVERRIDE = "CONFIG.FILE.OVERRIDE"; //$NON-NLS-1$
 
 	private boolean abort = false;
 	private YAMLConfigurationWrapper yamlConfigurationWrapper = new YAMLConfigurationWrapper();
@@ -190,26 +188,32 @@ public class RefactoringInvoker {
 	private YAMLConfig getConfiguration(BundleContext context, File projectRootDir) throws StandaloneException {
 
 		boolean useDefaultConfig = parseUseDefaultConfiguration(context);
+		String profile = context.getProperty(SELECTED_PROFILE);
+		String configFileOverride = context.getProperty(CONFIG_FILE_OVERRIDE);
 
 		if (useDefaultConfig) {
+			logger.debug(Messages.RefactoringInvoker_usingDefaultConfiguration);
 			return yamlConfigurationWrapper.getDefaultYamlConfig();
 		}
 
-		String profile = context.getProperty(SELECTED_PROFILE);
-		String rootConfigFilePath = context.getProperty(ROOT_CONFIG_PATH);
-		String configFilePath = findConfigFilePath(projectRootDir).orElse(rootConfigFilePath);
+		if (configFileOverride != null && !configFileOverride.isEmpty()) {
+			String logMsg = NLS.bind(Messages.RefactoringInvoker_usingOverriddenConfiguration, configFileOverride);
+			logger.debug(logMsg);
+			return yamlConfigurationWrapper.readConfiguration(configFileOverride, profile);
+		}
+
+		String configFilePath = findConfigFilePath(context, projectRootDir);
+		String logMsg = NLS.bind(Messages.RefactoringInvoker_usingConfiguration, configFilePath);
+		logger.debug(logMsg);
 
 		return yamlConfigurationWrapper.readConfiguration(configFilePath, profile);
 	}
 
-	private Optional<String> findConfigFilePath(File projectRootDir) {
-		Path configFilePath = Paths.get(projectRootDir.getAbsolutePath(), "jsparrow.yml"); //$NON-NLS-1$
+	private String findConfigFilePath(BundleContext context, File projectRootDir) {
+		ConfigFinder configFinder = new ConfigFinder();
 
-		if (Files.exists(configFilePath)) {
-			return Optional.ofNullable(configFilePath.toString());
-		}
-
-		return Optional.empty();
+		return configFinder.getYAMLFilePath(projectRootDir.toPath(), ConfigType.JSPARROW_FILE)
+			.orElse(context.getProperty(ROOT_CONFIG_PATH));
 	}
 
 	private boolean parseUseDefaultConfiguration(BundleContext context) {
@@ -263,8 +267,12 @@ public class RefactoringInvoker {
 
 		logger.info(Messages.RefactoringInvoker_loadingConfiguration);
 
+		String configFileOverride = context.getProperty(CONFIG_FILE_OVERRIDE);
+		boolean useDefaultFallBack = configFileOverride == null || configFileOverride.isEmpty();
+		String excludedModulesFilePath = useDefaultFallBack ? context.getProperty(ROOT_CONFIG_PATH)
+				: configFileOverride;
 		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
-				context.getProperty(ROOT_CONFIG_PATH)).get();
+				excludedModulesFilePath).get();
 
 		for (IJavaProject javaProject : importedProjects) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
