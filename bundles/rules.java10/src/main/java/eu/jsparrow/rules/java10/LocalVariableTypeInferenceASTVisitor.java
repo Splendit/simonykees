@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -163,7 +164,8 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		}
 
 		int initializerNodeType = initializer.getNodeType();
-		if (ASTNode.LAMBDA_EXPRESSION == initializerNodeType || ASTNode.ARRAY_INITIALIZER == initializerNodeType) {
+		if (ASTNode.LAMBDA_EXPRESSION == initializerNodeType || ASTNode.ARRAY_INITIALIZER == initializerNodeType 
+				|| initializer instanceof MethodReference) {
 			return false;
 		}
 

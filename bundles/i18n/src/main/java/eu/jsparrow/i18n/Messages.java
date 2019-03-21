@@ -42,19 +42,18 @@ public class Messages extends NLS {
 	public static String Activator_debug_startRefactoring;
 	public static String Activator_start;
 	public static String Activator_stop;
-	public static String Activator_standalone_LoadingConfiguration;
 	public static String Activator_standalone_SelectedProfile;
 	public static String Activator_standalone_SelectedRules;
 	public static String Activator_standalone_DefaultProfileDoesNotExist;
 	public static String Activator_standalone_RulesDoNotExist;
-	public static String Activator_standalone_ConfigFileReadSuccessfully;
 	public static String Activator_standalone_None;
 	public static String Activator_standalone_noRulesSelected;
-	public static String Activator_standalone_UsingDefaultConfiguration;
 	public static String ArithmethicAssignmentRule_description;
 	public static String ArithmethicAssignmentRule_name;
 	public static String BracketsToControlRule_description;
 	public static String BracketsToControlRule_name;
+	public static String BufferedReaderLinesRule_description;
+	public static String BufferedReaderLinesRule_name;
 	public static String BuyLicenseDialog_feedbackLabel;
 	public static String BuyLicenseDialog_opinionLabel;
 	public static String BuyLicenseDialog_purchaseLinkLabel;
@@ -91,9 +90,7 @@ public class Messages extends NLS {
 	public static String CodeFormatterRule_description;
 	public static String CodeFormatterRule_name;
 	public static String CollapseIfStatementsRule_description;
-
 	public static String CollapseIfStatementsRule_name;
-
 	public static String CollectionRemoveAllRule_description;
 	public static String CollectionRemoveAllRule_name;
 	public static String CompareInput_ancestorName;
@@ -130,6 +127,13 @@ public class Messages extends NLS {
 	public static String EnhancedForLoopToStreamSumRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
+	public static String MavenProjectImporter_collectingProjectInfo;
+	public static String MavenProjectImporter_createingJavaProjects;
+	public static String MavenProjectImporter_creatingSingleJavaProject;
+	public static String MavenProjectImporter_importingMavenProject;
+	public static String MavenProjectImporter_searchingMavenProjects;
+	public static String MavenProjectImporter_skippingJavaProjectCreation;
+	public static String MavenProjectImporter_startImport;
 	public static String MessageDialog_licensingError_failedToLoad;
 	public static String MessageDialog_licensingError_failedToValidate;
 	public static String MultiCatchRule_description;
@@ -176,6 +180,8 @@ public class Messages extends NLS {
 	public static String LicenseType_node_locked;
 	public static String LicenseType_subscription;
 	public static String LicenseType_try_and_buy;
+
+	public static String LicenseUtil_EmptyLicense;
 	public static String LicenseValidator_cannot_reach_license_provider_on_validation_call;
 	public static String LicenseValidator_invalid_licensee_number;
 	public static String LicenseValidator_received_validation_response;
@@ -184,9 +190,7 @@ public class Messages extends NLS {
 	public static String ListRulesUtil_Name;
 	public static String ListRulesUtil_NoRulesAvailable;
 	public static String LocalVariableTypeInferenceRule_description;
-
 	public static String LocalVariableTypeInferenceRule_name;
-
 	public static String LoggerRuleWizard_title;
 	public static String LoggerRuleWizardHandler_info_supportedFrameworkFound;
 	public static String LoggerRuleWizardHandler_noLogger;
@@ -235,9 +239,7 @@ public class Messages extends NLS {
 	public static String Netlicensing_persistenceError_failedToSave;
 	public static String Netlicensing_validationResult_freeLicenseExpired0;
 	public static String OptionalIfPresentRule_description;
-
 	public static String OptionalIfPresentRule_name;
-
 	public static String OrganiseImportsRule_description;
 	public static String OrganiseImportsRule_name;
 	public static String OverrideAnnotationRule_description;
@@ -277,10 +279,16 @@ public class Messages extends NLS {
 	public static String RefactoringSummaryWizardPage_title;
 	public static String RefactoringSummaryWizardPage_warn_disableFinishWhenFree;
 	public static String RefactoringInvoker_ConfigContainsInvalidSyntax;
+	public static String RefactoringInvoker_configurationLoaded;
 	public static String RefactoringInvoker_error_allModulesExcluded;
 	public static String RefactoringInvoker_GetEnabledRulesForProject;
 	public static String RefactoringInvoker_GetSelectedRules;
+	public static String RefactoringInvoker_importingMavenProjects;
+	public static String RefactoringInvoker_loadingConfiguration;
+	public static String RefactoringInvoker_loadingConfigurationForProject;
+	public static String RefactoringInvoker_mavenProjectsImported;
 	public static String RefactoringInvoker_OverridingConfigWithCommandLine;
+	public static String RefactoringInvoker_projectExcludedFromRefactoring;
 	public static String RegistrationControl_cancelButton;
 	public static String RegistrationControl_checkEmailForLicenseText;
 	public static String RegistrationControl_checkInternetText;
@@ -315,6 +323,8 @@ public class Messages extends NLS {
 	public static String RemoveEmptyStatementRule_name;
 	public static String RemoveExplicitCallToSuperRule_description;
 	public static String RemoveExplicitCallToSuperRule_name;
+	public static String RemoveModifiersInInterfacePropertiesRule_description;
+	public static String RemoveModifiersInInterfacePropertiesRule_name;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
@@ -407,12 +417,10 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_useProfileOptionNoProfile;
 	public static String SimonykeesPreferencePage_useProfileOptionRadioGroupTitle;
 	public static String SimonykeesPreferencePage_useProfileOptionSelectedProfile;
-	public static String SimonykeesPreferencePageLicense_freeLicense;
-	public static String SimonykeesPreferencePageLicense_fulLicense;
-	public static String SimonykeesPreferencePageLicense_jsparrow_licensed_as;
-	public static String SimonykeesPreferencePageLicense_jsparrow_valid_until;
+	public static String SimonykeesPreferencePageLicense_jsparrow_free;
+	public static String SimonykeesPreferencePageLicense_jsparrow_pro_valid_until;
+	public static String SimonykeesPreferencePageLicense_jsparrow_starter;
 	public static String SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow;
-	public static String SimonykeesPreferencePageLicense_under_key_label;
 	public static String SimonykeesPreferencePageLicense_update_license_key_button;
 	public static String SimonykeesUpdateLicenseDialog_invalid_license_key;
 	public static String SimonykeesUpdateLicenseDialog_license_updated_successfully;
@@ -422,25 +430,12 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
 	public static String StandaloneActivator_noValidLicenseFound;
-	public static String StandaloneConfig_AddProjectNaturesToProjectDescription;
 	public static String StandaloneConfig_collectCompilationUnits;
-	public static String StandaloneConfig_CompilerComplianceSetTo;
-	public static String StandaloneConfig_ConfigureClasspath;
-	public static String StandaloneConfig_CreateClasspathEntriesForDependencies;
-	public static String StandaloneConfig_CreateNewProjectDescription;
-	public static String StandaloneConfig_debug_cleanUp;
-	public static String StandaloneConfig_debug_collectDependencies;
-	public static String StandaloneConfig_debug_createJavaProject;
-	public static String StandaloneConfig_debug_createProject;
-	public static String StandaloneConfig_directoryBackupDone;
-	public static String StandaloneConfig_directoryRestoreDone;
-	public static String StandaloneConfig_fileBackupDone;
-	public static String StandaloneConfig_fileRestoreDone;
+	public static String EclipseProjectFileManager_directoryBackupDone;
+	public static String EclipseProjectFileManager_directoryRestoreDone;
+	public static String EclipseProjectFileManager_fileBackupDone;
+	public static String EclipseProjectFileManager_fileRestoreDone;
 	public static String StandaloneConfig_noRefactoringStates;
-	public static String StandaloneConfig_projectDescriptionDoesNotExist;
-	public static String StandaloneConfig_projectIsNotAnEclipseProjectAndCouldNotConvert;
-	public static String StandaloneConfig_RevertClasspath;
-	public static String StandaloneConfig_SetProjectLocation;
 	public static String StandaloneConfig_unusedClassExcludesWarning;
 	public static String StandaloneConfig_unusedPackageExcludesWarning;
 	public static String StandaloneLicenseUtil_expirationDate;
@@ -485,29 +480,18 @@ public class Messages extends NLS {
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String UseStringBuilderAppendRule_description;
-
 	public static String UseStringBuilderAppendRule_name;
-
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
 	public static String ValidateExecutor_validation_scheduler_started;
 	public static String WelcomeEditor_title;
-
 	public static String WelcomePage_buy_license_button;
-
 	public static String WelcomePage_customization_group;
-
 	public static String WelcomePage_getting_started_group;
-
 	public static String WelcomePage_guidelines_button;
-
 	public static String WelcomePage_license_preferences_button;
-
 	public static String WelcomePage_market_place_button;
-
 	public static String WelcomePage_preferences_button;
-
 	public static String WelcomePage_title;
-
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
 	public static String PutIfAbsentRule_description;

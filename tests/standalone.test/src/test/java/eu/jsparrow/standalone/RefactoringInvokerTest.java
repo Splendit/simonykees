@@ -1,12 +1,16 @@
 package eu.jsparrow.standalone;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.junit.Before;
@@ -29,18 +33,25 @@ public class RefactoringInvokerTest {
 	private RefactoringInvoker refactoringInvoker;
 	private StandaloneConfig standaloneConfig;
 
+	private MavenProjectImporter mavenImporter;
+
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 		refactoringInvoker = new TestableRefactoringInvoker();
+		mavenImporter = mock(MavenProjectImporter.class);
 
 		IJavaProject javaProject = mock(IJavaProject.class);
 		when(javaProject.getElementName()).thenReturn("projectName"); //$NON-NLS-1$
 
 		standaloneConfig = mock(StandaloneConfig.class);
 		when(standaloneConfig.getJavaProject()).thenReturn(javaProject);
+
+		when(mavenImporter.importProjects(any(File.class), any(String.class)))
+			.thenReturn(Collections.singletonList(javaProject));
+		refactoringInvoker.setImporter(mavenImporter);
 	}
 
 	@Test
@@ -88,8 +99,9 @@ public class RefactoringInvokerTest {
 	class TestableRefactoringInvoker extends RefactoringInvoker {
 
 		@Override
-		protected void loadStandaloneConfig(BundleContext context) {
+		protected void loadStandaloneConfig(List<IJavaProject> importedProjects, BundleContext context) {
 			super.standaloneConfigs = Arrays.asList(standaloneConfig);
 		}
+		
 	}
 }

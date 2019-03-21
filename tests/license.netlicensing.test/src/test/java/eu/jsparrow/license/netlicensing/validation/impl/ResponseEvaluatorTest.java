@@ -1,17 +1,21 @@
 package eu.jsparrow.license.netlicensing.validation.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.ZonedDateTime;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
-import eu.jsparrow.license.netlicensing.model.*;
+import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
+import eu.jsparrow.license.netlicensing.model.StatusDetail;
 import eu.jsparrow.license.netlicensing.testhelper.DummyResponseGenerator;
 import eu.jsparrow.license.netlicensing.testhelper.NetlicensingLicenseModelFactory;
 
@@ -21,7 +25,7 @@ public class ResponseEvaluatorTest {
 	private ResponseEvaluator responseEvaluator;
 	private DummyResponseGenerator responseGenerator;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		responseGenerator = new DummyResponseGenerator();
 		NetlicensingLicenseModel model = NetlicensingLicenseModelFactory.create();
@@ -111,22 +115,21 @@ public class ResponseEvaluatorTest {
 		assertEquals(StatusDetail.NODE_LOCKED_HARDWARE_MISMATCH.getUserMessage(), result.getDetail());
 	}
 
-	@Test(expected = ValidationException.class)
-	public void evaluateResult_undefined() throws ValidationException {
+	@Test
+	public void evaluateResult_undefined() {
 		ZonedDateTime now = ZonedDateTime.now();
 		ZonedDateTime expireDate = ZonedDateTime.now()
 			.minusDays(1);
 		ValidationResult response = responseGenerator.createNodeLockedResponse("false", now.toString(), "false",
 				expireDate.toString());
 
-		responseEvaluator.evaluateResult(response);
+		assertThrows(ValidationException.class, () -> responseEvaluator.evaluateResult(response));
 	}
 
-	@Test(expected = ValidationException.class)
+	@Test
 	public void evaluateResult_undefined_incompleteResponse() throws ValidationException {
 		ValidationResult response = new ValidationResult();
 
-		responseEvaluator.evaluateResult(response);
-
+		assertThrows(ValidationException.class, () -> responseEvaluator.evaluateResult(response));
 	}
 }

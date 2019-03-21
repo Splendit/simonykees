@@ -1,13 +1,16 @@
 package eu.jsparrow.core.rule.statistics;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 import eu.jsparrow.dummies.DummyRule;
 import eu.jsparrow.rules.common.statistics.FileChangeCount;
@@ -15,11 +18,12 @@ import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.visitor.ASTRewriteEvent;
 
 @SuppressWarnings("nls")
+@TestInstance(Lifecycle.PER_CLASS)
 public class RuleApplicationCountTest {
 
 	private RuleApplicationCount applicationCounter;
 
-	@Before
+	@BeforeAll
 	public void setUp() {
 		applicationCounter = new RuleApplicationCount();
 	}

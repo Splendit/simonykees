@@ -1,12 +1,12 @@
 package eu.jsparrow.registration;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.registration.persistence.RegistrationSecureStoragePersistence;
 
@@ -15,7 +15,7 @@ public class RegistrationPersistenceServiceTest {
 	private RegistrationPersistenceService persistenceService;
 	private RegistrationSecureStoragePersistence registrationPersistence;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		registrationPersistence = mock(RegistrationSecureStoragePersistence.class);
 		persistenceService = new RegistrationPersistenceService(registrationPersistence);

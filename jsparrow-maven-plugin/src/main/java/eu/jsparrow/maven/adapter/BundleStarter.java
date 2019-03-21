@@ -20,6 +20,7 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
 import eu.jsparrow.maven.i18n.Messages;
+import eu.jsparrow.maven.util.BannerUtil;
 
 /**
  * A class containing functionalities for starting/stopping the equinox
@@ -45,6 +46,8 @@ public class BundleStarter {
 	public BundleStarter(Log log) {
 		this.log = log;
 		standaloneBundleID = 0;
+		
+		log.info(BannerUtil.getBanner());
 	}
 
 	/**

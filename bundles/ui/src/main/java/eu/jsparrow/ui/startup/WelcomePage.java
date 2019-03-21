@@ -172,7 +172,7 @@ public class WelcomePage extends FormPage {
 				"eu.jsparrow.ui.preference.ProfilePreferencePageLicense"); //$NON-NLS-1$
 
 		if (!LicenseUtil.get()
-			.isFullLicensePresentInSecureStore()
+			.isValidProLicensePresentInSecureStore()
 				&& !LicenseUtil.get()
 					.isActiveRegistration()) {
 			Group freemiumGroup = new Group(rightComposite, SWT.NONE);

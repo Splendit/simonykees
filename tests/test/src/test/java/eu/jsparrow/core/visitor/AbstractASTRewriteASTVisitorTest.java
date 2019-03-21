@@ -1,9 +1,9 @@
 package eu.jsparrow.core.visitor;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -12,7 +12,7 @@ public class AbstractASTRewriteASTVisitorTest {
 
 	private AbstractASTRewriteASTVisitor visitor;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		visitor = new DummyASTRewriteASTVisitorImpl();
 	}

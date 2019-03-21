@@ -2,19 +2,19 @@ package eu.jsparrow.license.netlicensing;
 
 import java.time.ZonedDateTime;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.exception.PersistenceException;
 
-@Ignore
+@Disabled
 public class IntegrationSampleTest {
 
 	private NetlicensingLicensePersistenceService persistenceService;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		persistenceService = new NetlicensingLicensePersistenceService();
 	}
