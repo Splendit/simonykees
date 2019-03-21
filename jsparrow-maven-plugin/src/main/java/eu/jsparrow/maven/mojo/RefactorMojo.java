@@ -90,13 +90,13 @@ public class RefactorMojo extends AbstractMojo {
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);
-		File rootConfig = Paths.get(project.getBasedir()
+		File fallbackConfigFile = Paths.get(project.getBasedir()
 			.getAbsolutePath(), "jsparrow.yml") //$NON-NLS-1$
 			.toFile();
 
 		try {
 			WorkingDirectory workingDirectory = mavenAdapter.setUpConfiguration(parameters, projects,
-					configFileOverride, rootConfig);
+					configFileOverride, fallbackConfigFile);
 			addShutdownHook(bundleStarter, workingDirectory, mavenAdapter.isJsparrowRunningFlag());
 			bundleStarter.runStandalone(mavenAdapter.getConfiguration());
 		} catch (BundleException | InterruptedException e1) {
