@@ -166,10 +166,10 @@ public class RefactoringInvoker {
 				 */
 				logger.debug("Cannot clear refactoring states on {} ", standaloneConfig.getProjectName(), e); //$NON-NLS-1$
 				throw e;
-			} finally {
-				importer.cleanUp();
 			}
 		}
+
+		importer.cleanUp();
 	}
 
 	/**

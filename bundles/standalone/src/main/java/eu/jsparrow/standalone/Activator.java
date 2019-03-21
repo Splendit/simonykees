@@ -1,14 +1,10 @@
 package eu.jsparrow.standalone;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -92,7 +88,7 @@ public class Activator implements BundleActivator {
 		default:
 			String errorMsg = "No mode has been selected!"; //$NON-NLS-1$
 			logger.error(errorMsg);
-			setExitErrorMessage(context, errorMsg);
+			setExitErrorMessageAndCleanUp(context, errorMsg);
 		}
 	}
 
@@ -143,12 +139,12 @@ public class Activator implements BundleActivator {
 			} else {
 				String message = Messages.StandaloneActivator_noValidLicenseFound;
 				logger.error(message);
-				setExitErrorMessage(context, message);
+				setExitErrorMessageAndCleanUp(context, message);
 			}
 		} catch (StandaloneException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
-			setExitErrorMessage(context, e.getMessage());
+			setExitErrorMessageAndCleanUp(context, e.getMessage());
 		}
 	}
 
@@ -202,6 +198,12 @@ public class Activator implements BundleActivator {
 		ctx.ungetService(infoRev);
 
 		return envInfo;
+	}
+
+	public void setExitErrorMessageAndCleanUp(BundleContext ctx, String exitMessage) {
+		cleanUp(ctx);
+
+		setExitErrorMessage(ctx, exitMessage);
 	}
 
 	public void setExitErrorMessage(BundleContext ctx, String exitMessage) {
