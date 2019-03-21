@@ -144,12 +144,11 @@ public class ConfigFinderTest {
 
 		@Test
 		public void getYAMLFilePath_invalidPath_logDebug() {
-			String invalidFolderPath = "/thatdoesnotexist/forreal";
-			Path path = Paths.get(invalidFolderPath);
+			Path path = Paths.get("/thatdoesnotexist/forreal");
 
 			configFinder.getYAMLFilePath(path, ConfigType.CONFIG_FILE);
 
-			verify(mockLogger, times(1)).debug(anyString(), eq(invalidFolderPath));
+			verify(mockLogger, times(1)).debug(anyString(), eq(path));
 		}
 
 		@Test
