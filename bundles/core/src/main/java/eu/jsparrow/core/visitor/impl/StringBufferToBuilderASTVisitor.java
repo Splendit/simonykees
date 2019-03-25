@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -16,7 +17,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -196,11 +196,11 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 			declarationParent.accept(visitor);
 			List<SimpleName> references = visitor.getUsages();
 			for (SimpleName reference : references) {
-				if (isInAssignmentExpressionRightHandSide(reference)) {
+				if (isExpressionOf(reference,java.lang.StringBuffer.class.getName(), Assignment.RIGHT_HAND_SIDE_PROPERTY)) {
 					return true;
 				}
 
-				if (isInInitializationExpression(reference)) {
+				if (isExpressionOf(reference,java.lang.StringBuffer.class.getName(), VariableDeclarationFragment.INITIALIZER_PROPERTY)) {
 					return true;
 				}
 			}
@@ -209,41 +209,19 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 		return false;
 	}
 
-	private boolean isInInitializationExpression(ASTNode astNode) {
-		if (astNode.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+	private static boolean isExpressionOf(Expression astNode , String assignedType, ChildPropertyDescriptor locationInAncestor) {
+		if (astNode.getLocationInParent() == locationInAncestor) {
 			Expression expression = (Expression) astNode;
 			ITypeBinding typeBinding = expression.resolveTypeBinding();
 			return typeBinding == null
-					|| ClassRelationUtil.isContentOfType(typeBinding, java.lang.StringBuffer.class.getName());
+					|| ClassRelationUtil.isContentOfType(typeBinding, assignedType);
 		}
 
 		ASTNode parent = astNode.getParent();
-		if (parent == null) {
-			return false;
+		if (parent instanceof Expression) {
+			return isExpressionOf((Expression) parent, assignedType, locationInAncestor);
 		}
-
-		if (parent instanceof Statement || parent.getNodeType() == ASTNode.FIELD_DECLARATION) {
-			return false;
-		}
-
-		return isInInitializationExpression(parent);
-	}
-
-	private boolean isInAssignmentExpressionRightHandSide(ASTNode node) {
-		if (node.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) node.getParent();
-			Expression rhs = assignment.getRightHandSide();
-			ITypeBinding typeBinding = rhs.resolveTypeBinding();
-			return typeBinding == null
-					|| ClassRelationUtil.isContentOfType(typeBinding, java.lang.StringBuffer.class.getName());
-		}
-
-		ASTNode parent = node.getParent();
-		if (parent == null || parent instanceof Statement) {
-			return false;
-		}
-
-		return isInAssignmentExpressionRightHandSide(parent);
+		return false;
 	}
 
 	/**
