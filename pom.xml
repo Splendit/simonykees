@@ -218,6 +218,14 @@
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/mylyn/releases/latest/</url>
 		</repository>
+		<repository>
+			<id>bintray</id>
+			<name>bintray</name>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<url>http://jcenter.bintray.com</url>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
@@ -231,7 +239,7 @@
 
 	<build>
 		<plugins>
-		<!-- ensures that Maven 3.0 is the minimal required version -->
+			<!-- ensures that Maven 3.0 is the minimal required version -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>

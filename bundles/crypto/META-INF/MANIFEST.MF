@@ -11,4 +11,5 @@ Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Bundle-Classpath: lib/bcprov-jdk15on.jar,
  lib/bcpg-jdk15on.jar,
+ lib/bouncy-gpg.jar,
  .
