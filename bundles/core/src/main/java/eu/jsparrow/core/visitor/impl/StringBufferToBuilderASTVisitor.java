@@ -196,11 +196,13 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 			declarationParent.accept(visitor);
 			List<SimpleName> references = visitor.getUsages();
 			for (SimpleName reference : references) {
-				if (isExpressionOf(reference,java.lang.StringBuffer.class.getName(), Assignment.RIGHT_HAND_SIDE_PROPERTY)) {
+				if (isExpressionOf(reference, java.lang.StringBuffer.class.getName(),
+						Assignment.RIGHT_HAND_SIDE_PROPERTY)) {
 					return true;
 				}
 
-				if (isExpressionOf(reference,java.lang.StringBuffer.class.getName(), VariableDeclarationFragment.INITIALIZER_PROPERTY)) {
+				if (isExpressionOf(reference, java.lang.StringBuffer.class.getName(),
+						VariableDeclarationFragment.INITIALIZER_PROPERTY)) {
 					return true;
 				}
 			}
@@ -209,12 +211,12 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 		return false;
 	}
 
-	private static boolean isExpressionOf(Expression astNode , String assignedType, ChildPropertyDescriptor locationInAncestor) {
+	private static boolean isExpressionOf(Expression astNode, String assignedType,
+			ChildPropertyDescriptor locationInAncestor) {
 		if (astNode.getLocationInParent() == locationInAncestor) {
 			Expression expression = (Expression) astNode;
 			ITypeBinding typeBinding = expression.resolveTypeBinding();
-			return typeBinding == null
-					|| ClassRelationUtil.isContentOfType(typeBinding, assignedType);
+			return typeBinding == null || ClassRelationUtil.isContentOfType(typeBinding, assignedType);
 		}
 
 		ASTNode parent = astNode.getParent();
