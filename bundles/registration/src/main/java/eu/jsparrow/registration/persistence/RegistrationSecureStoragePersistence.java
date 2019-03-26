@@ -24,9 +24,11 @@ public class RegistrationSecureStoragePersistence extends SecureStoragePersisten
 
 	private static final String NODE_KEY = "registration-model"; //$NON-NLS-1$
 	private static final String DEFAULT = ""; //$NON-NLS-1$
+	private IEncryption encryption;
 
 	public RegistrationSecureStoragePersistence(ISecurePreferences securePreferences, IEncryption encryption) {
-		super(securePreferences, encryption);
+		super(securePreferences);
+		this.encryption = encryption;
 	}
 
 	@Override

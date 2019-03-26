@@ -23,9 +23,13 @@ public class LicenseSecureStoragePersistence extends SecureStoragePersistence<Li
 		.lookupClass());
 
 	private static final String NODE_KEY = "license-model"; //$NON-NLS-1$
+	
+	private IEncryption encryption;
+	
 
 	public LicenseSecureStoragePersistence(ISecurePreferences securePreferences, IEncryption encryption) {
-		super(securePreferences, encryption);
+		super(securePreferences);
+		this.encryption = encryption;
 	}
 
 	@Override

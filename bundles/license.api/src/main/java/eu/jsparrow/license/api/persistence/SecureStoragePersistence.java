@@ -24,12 +24,10 @@ public abstract class SecureStoragePersistence<T> implements LicensePersistence<
 	private static final String SECURE_PREFERENCES_KEY = "simonykees"; //$NON-NLS-1$
 
 	private ISecurePreferences securePreferences;
-	
-	protected IEncryption encryption;
 
-	public SecureStoragePersistence(ISecurePreferences securePreferences, IEncryption encryption) {
+	public SecureStoragePersistence(ISecurePreferences securePreferences) {
 		this.securePreferences = securePreferences;
-		this.encryption = encryption;
+		
 	}
 
 	protected void saveToSecureStorage(byte[] data, String nodeKey) throws PersistenceException {

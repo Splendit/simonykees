@@ -32,21 +32,31 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 	private NetlicensingValidationRequest validationRequest;
 
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model) {
+		initState(model);
+		this.validationRequest = createValidationRequest(model);
+	}
+	
+	public NetlicensingLicenseValidation(NetlicensingLicenseModel model, String endpoint) {
+		initState(model);
+		this.validationRequest = createValidationRequest(model, endpoint);
+	}
+
+	private void initState(NetlicensingLicenseModel model) {
 		this.model = model;
 		this.licenseCache = new NetlicensingLicenseCache();
 		this.parametersFactory = new NetlicensingValidationParametersFactory();
-		this.validationRequest = createValidationRequest(model);
 	}
-
+	
 	private NetlicensingValidationRequest createValidationRequest(NetlicensingLicenseModel model) {
-		String validationBaseUrl = model.getValidationBaseUrl();
 		String licenseeNr = model.getKey();
 		ResponseEvaluator responseEvaluator = new ResponseEvaluator(licenseeNr);
-		if(validationBaseUrl != null && !validationBaseUrl.isEmpty()) {		
-			return new NetlicensingValidationRequest(responseEvaluator, validationBaseUrl);
-		} else {
-			return new NetlicensingValidationRequest(responseEvaluator);
-		}
+		return new NetlicensingValidationRequest(responseEvaluator);
+	}
+
+	private NetlicensingValidationRequest createValidationRequest(NetlicensingLicenseModel model, String endpoint) {
+		String licenseeNr = model.getKey();
+		ResponseEvaluator responseEvaluator = new ResponseEvaluator(licenseeNr);
+		return new NetlicensingValidationRequest(responseEvaluator, endpoint);
 	}
 
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model, NetlicensingLicenseCache cache,

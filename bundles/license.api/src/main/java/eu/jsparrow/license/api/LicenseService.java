@@ -17,6 +17,8 @@ public interface LicenseService {
 	 *             if the validation could not be performed
 	 */
 	public LicenseValidationResult validate(LicenseModel model) throws ValidationException;
+	
+	public LicenseValidationResult validate(LicenseModel model, String endpoint) throws ValidationException;
 
 	/**
 	 * Check in the given {@link LicenseModel}
@@ -26,6 +28,6 @@ public interface LicenseService {
 	 * @throws ValidationException
 	 *             if the checkIn could not be performed
 	 */
-	public void checkIn(LicenseModel model) throws ValidationException;
+	public void checkIn(LicenseModel model, String endpoint) throws ValidationException;
 
 }
