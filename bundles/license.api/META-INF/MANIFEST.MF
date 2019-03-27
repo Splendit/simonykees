@@ -9,7 +9,7 @@ Require-Bundle: org.apache.commons.lang3;bundle-version="[3.1.0,4.0.0)",
  eu.jsparrow.logging,
  org.eclipse.equinox.security;bundle-version="[1.2.0,2.0.0)",
  org.eclipse.equinox.util;bundle-version="[1.0.500,2.0.0)",
- eu.jsparrow.i18n;bundle-version="3.0.0"
+ eu.jsparrow.i18n
 Export-Package: eu.jsparrow.license.api,
  eu.jsparrow.license.api.exception,
  eu.jsparrow.license.api.persistence,

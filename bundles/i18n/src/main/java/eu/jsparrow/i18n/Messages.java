@@ -289,6 +289,9 @@ public class Messages extends NLS {
 	public static String RefactoringInvoker_mavenProjectsImported;
 	public static String RefactoringInvoker_OverridingConfigWithCommandLine;
 	public static String RefactoringInvoker_projectExcludedFromRefactoring;
+	public static String RefactoringInvoker_usingConfiguration;
+	public static String RefactoringInvoker_usingDefaultConfiguration;
+	public static String RefactoringInvoker_usingOverriddenConfiguration;
 	public static String RegistrationControl_cancelButton;
 	public static String RegistrationControl_checkEmailForLicenseText;
 	public static String RegistrationControl_checkInternetText;
@@ -496,6 +499,7 @@ public class Messages extends NLS {
 	public static String WhileToForEachRule_name;
 	public static String PutIfAbsentRule_description;
 	public static String PutIfAbsentRule_name;
+	public static String YAMLConfigurationWrapper_configurationFileNotFoundAtPath;
 	public static String YAMLConfigUtil_providedPathNotLeadingToYAMLConfig;
 	public static String YAMLConfigUtil_rulesWithUnsatisfiedRequirements;
 

@@ -37,10 +37,11 @@ public class YAMLConfigurationWrapperTest {
 	}
 
 	@Test
-	public void readConfiguration_invalidPath_shouldReturnDefaultConfiguration() throws StandaloneException {
-		YAMLConfig ymlConfig = yamlConfigurationWrapper.readConfiguration("i/dont/exist", "profile");
-
-		assertThat(ymlConfig, hasProperty("selectedProfile", equalTo("default")));
+	public void readConfiguration_invalidPath_shouldThrowException() throws StandaloneException {
+		expectedException.expect(StandaloneException.class);
+		expectedException.expectMessage("configuration file has not been found");
+		
+		yamlConfigurationWrapper.readConfiguration("i/dont/exist", "profile");
 	}
 
 	@Test

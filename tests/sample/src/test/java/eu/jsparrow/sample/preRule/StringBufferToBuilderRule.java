@@ -142,4 +142,93 @@ public class StringBufferToBuilderRule {
 		localStringBuffer4.append("asdf").append("jkl");
 		return localStringBuffer4;
 	}
+	
+	/*
+	 * Return StringBuffer tests
+	 */
+	
+	private String returnMethodInvocation_shouldTransform() {
+		StringBuffer localStringBuffer4 = new StringBuffer();
+		localStringBuffer4.append("asdf").append("jkl");
+		return localStringBuffer4.append("zxc").toString();
+	}
+	
+	private StringBuffer returnSimpleName_shouldNotTransform() {
+		StringBuffer localStringBuffer4 = new StringBuffer();
+		localStringBuffer4.append("asdf").append("jkl");
+		return localStringBuffer4;
+	}
+	
+	private StringBuffer returnMethodInvocation_shouldNotTransform() {
+		StringBuffer localStringBuffer4 = new StringBuffer();
+		localStringBuffer4.append("asdf").append("jkl");
+		return localStringBuffer4.append("zxc");
+	}
+	
+	private StringBuffer returnMethodInvocationChain_shouldNotTransform() {
+		StringBuffer localStringBuffer4 = new StringBuffer();
+		localStringBuffer4.append("asdf").append("jkl");
+		return localStringBuffer4.append("zxc").append("").insert(0, true);
+	}
+	
+	/*
+	 * StringBuffer assignment tests
+	 */
+	
+	private void assignSimpleName_shouldTransform() {
+		StringBuffer localStringBuffer1 = new StringBuffer();
+		localStringBuffer1.append("asdf").append("jkl");
+		String localStringBuffer2; 
+		localStringBuffer2 = localStringBuffer1.toString();
+	}
+	
+	private void assignSimpleName_shouldNotTransform() {
+		StringBuffer localStringBuffer1 = new StringBuffer();
+		localStringBuffer1.append("asdf").append("jkl");
+		StringBuffer localStringBuffer2; 
+		localStringBuffer2 = localStringBuffer1;
+	}
+	
+	private void assignMethodInvocation_shouldNotTransform() {
+		StringBuffer localStringBuffer1 = new StringBuffer();
+		localStringBuffer1.append("asdf").append("jkl");
+		StringBuffer localStringBuffer2; 
+		localStringBuffer2 = localStringBuffer1.append("zxc");
+	}
+	
+	private void assignMethodInvocationChain_shouldNotTransform() {
+		StringBuffer localStringBuffer1 = new StringBuffer();
+		localStringBuffer1.append("asdf").append("jkl");
+		StringBuffer localStringBuffer2;  
+		localStringBuffer2 = localStringBuffer1.append("zxc").append("").insert(0, true);
+	}
+	
+	/*
+	 * StringBuffer initialization tests
+	 */
+	
+	private void initializerSimpleName_shouldTransform() {
+		StringBuffer localStringBuffer1 = new StringBuffer();
+		localStringBuffer1.append("asdf").append("jkl");
+		String result = localStringBuffer1.toString();
+	}
+	
+	private void initializerSimpleName_shouldNotTransform() {
+		StringBuffer localStringBuffer1 = new StringBuffer();
+		localStringBuffer1.append("asdf").append("jkl");
+		StringBuffer localStringBuffer2 = localStringBuffer1;
+	}
+	
+	private void initializerMethodInvocation_shouldNotTransform() {
+		StringBuffer localStringBuffer1 = new StringBuffer();
+		localStringBuffer1.append("asdf").append("jkl");
+		StringBuffer localStringBuffer2 = localStringBuffer1.append("zxc");
+	}
+	
+	private void initializerMethodInvocationChain_shouldNotTransform() {
+		StringBuffer localStringBuffer1 = new StringBuffer();
+		localStringBuffer1.append("asdf").append("jkl");
+		StringBuffer localStringBuffer2 = localStringBuffer1.append("zxc").append("").insert(0, true);
+	}
+
 }

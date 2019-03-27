@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.logging.LoggingUtil;
+import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
@@ -114,7 +115,13 @@ public class Activator implements BundleActivator {
 		licenseService = getStandaloneLicenseUtilService();
 		String key = getLicenseKey(context);
 		String agentUrl = getAgentUrl(context);
-		licenseService.licenseInfo(key, agentUrl);
+		try {
+			licenseService.licenseInfo(key, agentUrl);
+		} catch (StandaloneException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+			setExitErrorMessage(context, e.getMessage());
+		}
 	}
 
 	private void listRules(String listRulesId) {
@@ -243,7 +250,7 @@ public class Activator implements BundleActivator {
 
 		YAMLStandaloneConfig yamlStandaloneConfig = null;
 
-		Optional<String> configFile = new ConfigFinder().getYAMLFilePath(filePath);
+		Optional<String> configFile = new ConfigFinder().getYAMLFilePath(filePath, ConfigType.CONFIG_FILE);
 		if (configFile.isPresent()) {
 			try {
 				yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(configFile.get()));
