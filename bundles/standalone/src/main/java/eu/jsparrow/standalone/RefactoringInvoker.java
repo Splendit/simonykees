@@ -1,12 +1,10 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
@@ -144,13 +142,8 @@ public class RefactoringInvoker {
 
 	/**
 	 * Reverts eclipse files for all projects if they were previously existing
-	 * 
-	 * @throws IOException
-	 *             if reverting eclipse project files fails for some reason
-	 * @throws CoreException
-	 *             if closing {@link IProject} fails
 	 */
-	public void cleanUp() throws IOException, CoreException {
+	public void cleanUp() {
 		abort = true;
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
 			standaloneConfig.setAbortFlag();
@@ -163,7 +156,6 @@ public class RefactoringInvoker {
 				 * 
 				 */
 				logger.debug("Cannot clear refactoring states on {} ", standaloneConfig.getProjectName(), e); //$NON-NLS-1$
-				throw e;
 			}
 		}
 

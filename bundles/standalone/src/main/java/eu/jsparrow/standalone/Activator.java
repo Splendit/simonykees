@@ -1,13 +1,11 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -165,13 +163,8 @@ public class Activator implements BundleActivator {
 		if (licenseService != null && (mode == StandaloneMode.REFACTOR || mode == StandaloneMode.LICENSE_INFO)) {
 			licenseService.stop();
 		}
-		try {
-			refactoringInvoker.cleanUp();
-		} catch (IOException | CoreException e) {
-			logger.debug(e.getMessage(), e);
-			logger.error(e.getMessage());
-			setExitErrorMessage(context, e.getMessage());
-		}
+
+		refactoringInvoker.cleanUp();
 	}
 
 	private StandaloneMode parseMode(BundleContext context) {

@@ -64,13 +64,13 @@ public class EclipseProjectFileManager {
 	 * @throws StandaloneException
 	 *             if the existing project files cannot be renamed
 	 */
-	public void backupExistingEclipseFiles() throws StandaloneException {
+	public void backupExistingEclipseFiles() throws IOException {
 		for (EclipseProjectFileManagerStatus p : projects) {
 			doBackupExistingEclipseFiles(p);
 		}
 	}
 
-	private void doBackupExistingEclipseFiles(EclipseProjectFileManagerStatus project) throws StandaloneException {
+	private void doBackupExistingEclipseFiles(EclipseProjectFileManagerStatus project) throws IOException {
 		String path = project.getPath();
 		String name = Paths.get(path)
 			.getFileName()
@@ -142,8 +142,7 @@ public class EclipseProjectFileManager {
 		}
 	}
 
-	private void deleteCreatedEclipseProjectFiles(EclipseProjectFileManagerStatus project)
-			throws IOException {
+	private void deleteCreatedEclipseProjectFiles(EclipseProjectFileManagerStatus project) throws IOException {
 		String path = project.getPath();
 
 		File settings = getSettingsDirectoryFile(path);
@@ -153,14 +152,17 @@ public class EclipseProjectFileManager {
 
 	}
 
-	public void revertEclipseProjectFiles() throws IOException {
+	public void revertEclipseProjectFiles() {
 		for (EclipseProjectFileManagerStatus p : projects) {
-			doRevertEclipseProjectFiles(p);
+			try {
+				doRevertEclipseProjectFiles(p);
+			} catch (IOException e) {
+				logger.debug(e.getMessage(), e);
+			}
 		}
 	}
 
-	private void doRevertEclipseProjectFiles(EclipseProjectFileManagerStatus project)
-			throws IOException {
+	private void doRevertEclipseProjectFiles(EclipseProjectFileManagerStatus project) throws IOException {
 		if (!project.isCleanUpAlreadyDone()) {
 			deleteCreatedEclipseProjectFiles(project);
 			restoreExistingEclipseFiles(project);
@@ -192,13 +194,8 @@ public class EclipseProjectFileManager {
 		return new File(path + File.separator + SETTINGS_DIRECTORY_NAME);
 	}
 
-	protected void moveFile(File src, File dest) throws StandaloneException {
-		try {
-			Files.move(src.toPath(), dest.toPath());
-		} catch (IOException e) {
-			String message = String.format("Cannot move file %s to %s ", src.getName(), dest.getName()); //$NON-NLS-1$
-			throw new StandaloneException(message, e);
-		}
+	protected void moveFile(File src, File dest) throws IOException {
+		Files.move(src.toPath(), dest.toPath());
 	}
 
 	protected void removeDirectory(File directory) throws IOException {
@@ -215,7 +212,7 @@ public class EclipseProjectFileManager {
 		}
 		Files.delete(directory.toPath());
 	}
-	
+
 	protected List<EclipseProjectFileManagerStatus> getProjects() {
 		return this.projects;
 	}

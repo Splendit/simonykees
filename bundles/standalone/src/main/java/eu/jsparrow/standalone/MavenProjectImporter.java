@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.standalone.exceptions.MavenImportException;
-import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 /**
  * Helper for importing maven projects into the eclipse workspace.
@@ -105,7 +104,7 @@ public class MavenProjectImporter {
 			List<IJavaProject> importedJavaProjects = createJavaProjects(importedProjects);
 
 			return importedJavaProjects;
-		} catch (InterruptedException | CoreException | StandaloneException e) {
+		} catch (InterruptedException | CoreException | IOException e) {
 			throw new MavenImportException(e.getMessage(), e);
 		}
 	}
@@ -192,7 +191,7 @@ public class MavenProjectImporter {
 		return Optional.empty();
 	}
 
-	public void cleanUp() throws IOException, CoreException {
+	public void cleanUp() {
 		eclipseProjectFileManager.revertEclipseProjectFiles();
 	}
 
@@ -204,7 +203,7 @@ public class MavenProjectImporter {
 	protected IProjectConfigurationManager getProjectConfigurationManager() {
 		return MavenPlugin.getProjectConfigurationManager();
 	}
-	
+
 	protected IJavaProject createJavaProject(IProject project) {
 		return JavaCore.create(project);
 	}
