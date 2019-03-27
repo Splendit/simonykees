@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -23,6 +24,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
 /**
  * This rule replaces {@link StringBuffer} with {@link StringBuilder}. This is
@@ -143,6 +145,10 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 				.filter(stringBufferMethodInvocationArgs::contains)
 				.collect(Collectors.toList());
 
+			if (isUsedAsBufferedReaderAssignment(declaration)) {
+				return;
+			}
+
 			if (occuringFragmentNames != null && occuringFragmentNames.isEmpty()) {
 				String returnStatementName = getReturnStatementExpressionSimpleName(stringBufferReturnStatement);
 				if (!declarationFragmentNames.contains(returnStatementName)) {
@@ -178,6 +184,48 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 
 	/*** VALIDATORS ***/
 
+	private boolean isUsedAsBufferedReaderAssignment(VariableDeclarationStatement declaration) {
+		List<SimpleName> fragmentNames = ASTNodeUtil
+			.convertToTypedList(declaration.fragments(), VariableDeclarationFragment.class)
+			.stream()
+			.map(VariableDeclarationFragment::getName)
+			.collect(Collectors.toList());
+		ASTNode declarationParent = declaration.getParent();
+		for (SimpleName stringBuffername : fragmentNames) {
+			LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(stringBuffername);
+			declarationParent.accept(visitor);
+			List<SimpleName> references = visitor.getUsages();
+			for (SimpleName reference : references) {
+				if (isExpressionOf(reference, java.lang.StringBuffer.class.getName(),
+						Assignment.RIGHT_HAND_SIDE_PROPERTY)) {
+					return true;
+				}
+
+				if (isExpressionOf(reference, java.lang.StringBuffer.class.getName(),
+						VariableDeclarationFragment.INITIALIZER_PROPERTY)) {
+					return true;
+				}
+			}
+
+		}
+		return false;
+	}
+
+	private static boolean isExpressionOf(Expression astNode, String assignedType,
+			ChildPropertyDescriptor locationInAncestor) {
+		if (astNode.getLocationInParent() == locationInAncestor) {
+			Expression expression = (Expression) astNode;
+			ITypeBinding typeBinding = expression.resolveTypeBinding();
+			return typeBinding == null || ClassRelationUtil.isContentOfType(typeBinding, assignedType);
+		}
+
+		ASTNode parent = astNode.getParent();
+		if (parent instanceof Expression) {
+			return isExpressionOf((Expression) parent, assignedType, locationInAncestor);
+		}
+		return false;
+	}
+
 	/**
 	 * gets the {@link SimpleName} of the given {@link ReturnStatement}
 	 * 
@@ -190,12 +238,38 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 		if (returnStatement != null) {
 			Expression expression = returnStatement.getExpression();
 
-			if (expression != null && ASTNode.SIMPLE_NAME == expression.getNodeType()) {
+			if (expression == null) {
+				return null;
+			}
+			if (ASTNode.SIMPLE_NAME == expression.getNodeType()) {
 				SimpleName simpleName = (SimpleName) expression;
 				return simpleName.getIdentifier();
 			}
+
+			if (ASTNode.METHOD_INVOCATION == expression.getNodeType()) {
+				SimpleName methodInvocationExpression = findMethodChainExpression((MethodInvocation) expression);
+				if (methodInvocationExpression != null) {
+					return methodInvocationExpression.getIdentifier();
+				}
+			}
 		}
 
+		return null;
+	}
+
+	private SimpleName findMethodChainExpression(MethodInvocation methodInvocation) {
+		Expression expression = methodInvocation.getExpression();
+		if (expression == null) {
+			return null;
+		}
+
+		if (expression.getNodeType() == ASTNode.SIMPLE_NAME) {
+			return (SimpleName) expression;
+		}
+
+		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			return findMethodChainExpression((MethodInvocation) expression);
+		}
 		return null;
 	}
 

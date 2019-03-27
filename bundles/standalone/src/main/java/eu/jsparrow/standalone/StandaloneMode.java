@@ -1,5 +1,7 @@
 package eu.jsparrow.standalone;
 
+import org.apache.commons.lang3.StringUtils;
+
 public enum StandaloneMode {
 	TEST,
 	REFACTOR,
@@ -13,7 +15,7 @@ public enum StandaloneMode {
 		if (value == null) {
 			return NONE;
 		}
-		String upperCaseValue = value.toUpperCase();
+		String upperCaseValue = StringUtils.upperCase(value);
 
 		switch (upperCaseValue) {
 		case "TEST":

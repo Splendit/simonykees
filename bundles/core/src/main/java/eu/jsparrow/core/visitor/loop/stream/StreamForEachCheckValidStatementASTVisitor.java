@@ -15,6 +15,8 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
+
 /**
  * visits blocks and checks their validity
  * 

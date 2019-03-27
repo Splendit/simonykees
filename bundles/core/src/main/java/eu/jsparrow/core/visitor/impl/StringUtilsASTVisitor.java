@@ -32,8 +32,8 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  */
 public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 
-	private static final String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
-	private static final String STRING_UTILS_FULLY_QUALLIFIED_NAME = org.apache.commons.lang3.StringUtils.class
+	private static final String STRING_FULLY_QUALIFIED_NAME = java.lang.String.class.getName();
+	private static final String STRING_UTILS_FULLY_QUALIFIED_NAME = org.apache.commons.lang3.StringUtils.class
 		.getName();
 
 	private static final String STRING_UTILS = "StringUtils"; //$NON-NLS-1$
@@ -63,10 +63,6 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String TO_LOWER_CASE = "toLowerCase"; //$NON-NLS-1$
 	private static final String LOWER_CASE = "lowerCase"; //$NON-NLS-1$
 
-	public StringUtilsASTVisitor() {
-		super();
-	}
-
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		boolean clashingImports = false;
@@ -86,17 +82,25 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 		 * Check if there is another import declaration conflicting with
 		 * org.apache.commons.lang3.StringUtils
 		 */
-		if (!clashingImports) {
-			List<ImportDeclaration> imports = ASTNodeUtil.returnTypedList(compilationUnit.imports(),
-					ImportDeclaration.class);
 
+		List<ImportDeclaration> imports = ASTNodeUtil.returnTypedList(compilationUnit.imports(),
+				ImportDeclaration.class);
+
+		if (!clashingImports) {
+			String stringUtilsTypeName = STRING_UTILS + ".java"; //$NON-NLS-1$
+			clashingImports = imports.stream()
+				.anyMatch(importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration,
+						stringUtilsTypeName));
+		}
+
+		if (!clashingImports) {
 			for (ImportDeclaration importDeclaration : imports) {
 				Name qualifiedName = importDeclaration.getName();
 				String fullyQualifiedName = qualifiedName.getFullyQualifiedName();
 				if (ASTNode.QUALIFIED_NAME == qualifiedName.getNodeType()) {
 					SimpleName name = ((QualifiedName) qualifiedName).getName();
 					if (StringUtils.equals(name.getIdentifier(), STRING_UTILS)
-							&& !StringUtils.equals(fullyQualifiedName, STRING_UTILS_FULLY_QUALLIFIED_NAME)) {
+							&& !StringUtils.equals(fullyQualifiedName, STRING_UTILS_FULLY_QUALIFIED_NAME)) {
 						clashingImports = true;
 						break;
 					}
@@ -121,7 +125,7 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 		}
 
 		if (ClassRelationUtil.isContentOfTypes(optionalExpression.resolveTypeBinding(),
-				generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
+				generateFullyQualifiedNameList(STRING_FULLY_QUALIFIED_NAME))) {
 			AST currentAST = node.getAST();
 			String replacementOperation = null;
 			String stringOperation = node.getName()
@@ -155,7 +159,7 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 				break;
 			}
 			if (replacementOperation != null) {
-				addImports.add(STRING_UTILS_FULLY_QUALLIFIED_NAME);
+				addImports.add(STRING_UTILS_FULLY_QUALIFIED_NAME);
 				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, currentAST.newSimpleName(STRING_UTILS),
 						null);
 				astRewrite.set(node, MethodInvocation.NAME_PROPERTY, node.getAST()
@@ -168,7 +172,7 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		return true;
 	}
-	
+
 	private void saveComments(MethodInvocation node) {
 		CommentRewriter commRewrite = getCommentRewriter();
 		Statement parent = ASTNodeUtil.getSpecificAncestor(node, Statement.class);

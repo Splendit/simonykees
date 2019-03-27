@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.visitor.lambdaforeach.AbstractLambdaForEachASTVisitor;
+import eu.jsparrow.core.visitor.sub.EffectivelyFinalVisitor;
+import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -63,11 +65,17 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 
 		if (typeBinding.isParameterizedType()) {
 			for (ITypeBinding argument : typeBinding.getTypeArguments()) {
-				return isTypeSafe(argument);
+				if (!isTypeSafe(argument)) {
+					return false;
+				}
 			}
 		}
 
 		return true;
+	}
+
+	protected boolean isConditionalExpression(Expression expression) {
+		return expression.getNodeType() == ASTNode.CONDITIONAL_EXPRESSION;
 	}
 
 	/**

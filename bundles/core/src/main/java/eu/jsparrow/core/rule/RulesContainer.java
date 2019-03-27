@@ -17,7 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
+import eu.jsparrow.core.rule.impl.BufferedReaderLinesRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
+import eu.jsparrow.core.rule.impl.CollapseIfStatementsRule;
 import eu.jsparrow.core.rule.impl.CollectionRemoveAllRule;
 import eu.jsparrow.core.rule.impl.DateDeprecatedRule;
 import eu.jsparrow.core.rule.impl.DiamondOperatorRule;
@@ -29,6 +31,7 @@ import eu.jsparrow.core.rule.impl.EnumsWithoutEqualsRule;
 import eu.jsparrow.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import eu.jsparrow.core.rule.impl.ForToForEachRule;
 import eu.jsparrow.core.rule.impl.FunctionalInterfaceRule;
+import eu.jsparrow.core.rule.impl.GuardConditionRule;
 import eu.jsparrow.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import eu.jsparrow.core.rule.impl.IndexOfToContainsRule;
 import eu.jsparrow.core.rule.impl.InefficientConstructorRule;
@@ -38,12 +41,18 @@ import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
+import eu.jsparrow.core.rule.impl.OptionalIfPresentRule;
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
+import eu.jsparrow.core.rule.impl.RemoveDoubleNegationRule;
+import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
+import eu.jsparrow.core.rule.impl.RemoveEmptyStatementRule;
+import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
+import eu.jsparrow.core.rule.impl.RemoveModifiersInInterfacePropertiesRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
@@ -56,6 +65,7 @@ import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
+import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -105,16 +115,20 @@ public class RulesContainer {
 		List<RuleService> services = getExternalRuleServices();
 
 		List<RefactoringRule> rules = new LinkedList<>();
+
 		rules.addAll(Arrays.asList(
+
 				/*
 				 * Coding conventions
 				 */
 				new TryWithResourceRule(), new MultiCatchRule(), new FunctionalInterfaceRule(),
 				new CollectionRemoveAllRule(), new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
-				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(),
-				new EnumsWithoutEqualsRule(), new ReImplementingInterfaceRule(), new PutIfAbsentRule(),
-				new DateDeprecatedRule(),
+				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
+				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new DateDeprecatedRule(),
+				new RemoveDoubleNegationRule(), new OptionalIfPresentRule(), new GuardConditionRule(),
+				new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(), new RemoveEmptyStatementRule(),
+				new RemoveUnnecessaryThrownExceptionsRule(), new RemoveModifiersInInterfacePropertiesRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
@@ -128,10 +142,17 @@ public class RulesContainer {
 				 * Loops and streams
 				 */
 				new WhileToForEachRule(), new ForToForEachRule(), new EnhancedForLoopToStreamForEachRule(),
-				new LambdaForEachIfWrapperToFilterRule(), new StatementLambdaToExpressionRule(),
-				new LambdaForEachCollectRule(), new LambdaForEachMapRule(), new FlatMapInsteadOfNestedLoopsRule(),
-				new EnhancedForLoopToStreamAnyMatchRule(), new EnhancedForLoopToStreamFindFirstRule(),
-				new EnhancedForLoopToStreamSumRule(), new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
+				new BufferedReaderLinesRule(), new LambdaForEachIfWrapperToFilterRule(),
+				new StatementLambdaToExpressionRule(), new LambdaForEachCollectRule(), new LambdaForEachMapRule(),
+				new FlatMapInsteadOfNestedLoopsRule(), new EnhancedForLoopToStreamAnyMatchRule(),
+				new EnhancedForLoopToStreamFindFirstRule(), new EnhancedForLoopToStreamSumRule(),
+				new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
+
+				/*
+				 * String manipulations. This rule must be applied after
+				 * StringBuildingLoopRule.
+				 */
+				new UseStringBuilderAppendRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen

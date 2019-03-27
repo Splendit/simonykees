@@ -12,12 +12,6 @@ import java.util.Arrays;
  */
 public class JavaReservedKeyWords {
 
-	private JavaReservedKeyWords() {
-		/*
-		 * Hiding the default public constructor
-		 */
-	}
-
 	@SuppressWarnings("nls")
 	static final String[] javaKeyWords = { "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char",
 			"class", "const", "continue", "default", "do", "double", "else", "enum", "extends", "false", "final",
@@ -25,6 +19,12 @@ public class JavaReservedKeyWords {
 			"native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
 			"strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true", "try",
 			"void", "volatile", "while" };
+
+	private JavaReservedKeyWords() {
+		/*
+		 * Hiding the default public constructor
+		 */
+	}
 
 	public static boolean isKeyWord(String keyword) {
 		return (Arrays.binarySearch(javaKeyWords, keyword) >= 0);

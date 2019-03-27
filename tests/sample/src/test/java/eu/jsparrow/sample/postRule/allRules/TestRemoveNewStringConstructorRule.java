@@ -67,7 +67,13 @@ public class TestRemoveNewStringConstructorRule {
 	}
 
 	public String testNestedNewStringsAndConcat(String input) {
-		return input + "-" + input + "-" + "val" + "val";
+		return new StringBuilder().append(input)
+			.append("-")
+			.append(input)
+			.append("-")
+			.append("val")
+			.append("val")
+			.toString();
 	}
 
 	public String testNestedNewStrings(String input) {
@@ -102,10 +108,9 @@ public class TestRemoveNewStringConstructorRule {
 
 	public String testConvertInsideBlock(String input) {
 		String result = "";
-		if (!StringUtils.isEmpty(input)) {
-			if (StringUtils.isEmpty(result)) {
-				result = input;
-			}
+		boolean condition = !StringUtils.isEmpty(input) && StringUtils.isEmpty(result);
+		if (condition) {
+			result = input;
 		}
 		return result;
 	}

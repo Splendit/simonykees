@@ -24,15 +24,17 @@ public enum Tag {
 	JAVA_1_6("1.6", "6"),
 	JAVA_1_7("1.7", "7"),
 	JAVA_1_8("1.8", "8"),
-	// not yet arrived! JAVA_1_9("1.9","9"),
+	JAVA_1_9("1.9","9"),
+	JAVA_1_10("1.10", "10"),
 	EMPTY(),
-	STRING_MANIPULATION("string-manipulation"),
-	FORMATTING("format", "organize"),
-	CODING_CONVENTIONS("conventions"),
+	STRING_MANIPULATION("string manipulation"),
+	FORMATTING("formatting", "organize"),
+	CODING_CONVENTIONS("coding conventions"),
 	PERFORMANCE("performance"),
 	READABILITY("readability"),
-	OLD_LANGUAGE_CONSTRUCTS("outdated constructs"),
-	LAMBDA("lambda");
+	OLD_LANGUAGE_CONSTRUCTS("old language constructs"),
+	LAMBDA("lambda"),
+	FREE("free");
 
 	private List<String> tagName;
 

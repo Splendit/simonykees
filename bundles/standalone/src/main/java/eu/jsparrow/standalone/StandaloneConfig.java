@@ -1,46 +1,43 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.internal.events.BuildCommand;
-import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
-import eu.jsparrow.core.config.YAMLConfigException;
-import eu.jsparrow.core.config.YAMLConfigUtil;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorWrapper;
+import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
+import eu.jsparrow.standalone.renaming.FieldsRenamingInstantiator;
 
 /**
  * Class that contains all configuration needed to run headless version of
@@ -49,235 +46,59 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
  * @author Andreja Sambolec, Matthias Webhofer
  * @since 2.1.1
  */
-@SuppressWarnings("restriction")
 public class StandaloneConfig {
 
 	private static final Logger logger = LoggerFactory.getLogger(StandaloneConfig.class);
 
-	/**
-	 * The dependencies folder name must match with the one declared in
-	 * {@link eu.jsparrow.adapter.DependencyManger#OUTPUT_DIRECTORY_PREFIX}.
-	 */
-	private static final String DEPENDENCIES_FOLDER = "deps"; //$NON-NLS-1$
-	private static final String PROJECT_FILE_NAME = ".project"; //$NON-NLS-1$
-	private static final String CLASSPATH_FILE_NAME = ".classpath"; //$NON-NLS-1$
-	private static final String SETTINGS_DIRECTORY_NAME = ".settings"; //$NON-NLS-1$
-	private static final String TEMP_FILE_EXTENSION = ".tmp"; //$NON-NLS-1$
-	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
+	private static final String SEARCH_SCOPE = "workspace"; //$NON-NLS-1$
 
 	private String path;
-	private String compilerCompliance;
-	private boolean descriptionGenerated = false;
-	private boolean cleanUpAlreadyDone = false;
-	private boolean existingProjectFileMoved = false;
-	private boolean existingClasspathFileMoved = false;
-	private boolean existingSettingsDirectoryMoved = false;
-	private IProject project = null;
+
 	private IJavaProject javaProject = null;
 	protected CompilationUnitProvider compilationUnitsProvider;
 	private String projectName;
-	private String sourceFolder;
-	private String[] natureIds;
 	protected RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private boolean abort = false;
 	private YAMLConfig yamlConfig;
 
 	/**
-	 * Constructor that calls setting up of the project and collecting the
-	 * compilation units.
+	 * Constructor that calls collecting the compilation units.
 	 * 
-	 * @param projectName
-	 *            name of the eclipse project to be created
+	 * @param javaProject
+	 *            imported project with java sources
 	 * @param path
 	 *            path to the base directory of the project
-	 * @param compilerCompliance
-	 *            java version of the project (i.e. "1.8" or "9")
-	 * @param sourceFolder
-	 *            the relative path to the source folder of the project
-	 * @param natureIds
-	 *            the nature id-s of the project
 	 * @param yamlConfig
 	 *            the default yaml configuration file of the project
+	 * @param projectName
+	 *            name of the eclipse project to be created
 	 * @throws CoreException
 	 *             if the classpath entries cannot be added or the source files
 	 *             cannot be parsed
 	 * @throws StandaloneException
 	 *             if the project cannot be created
 	 */
-	public StandaloneConfig(String projectName, String path, String compilerCompliance, String sourceFolder,
-			String[] natureIds, YAMLConfig yamlConfig) throws CoreException, StandaloneException {
+	public StandaloneConfig(IJavaProject javaProject, String path, YAMLConfig yamlConfig)
+			throws CoreException, StandaloneException {
 
-		this.projectName = projectName;
+		this.javaProject = javaProject;
+		this.projectName = javaProject.getProject()
+			.getName();
 		this.path = path;
-		this.compilerCompliance = compilerCompliance;
-		this.sourceFolder = sourceFolder;
-		this.natureIds = natureIds;
 		this.yamlConfig = yamlConfig;
 		setUp();
 	}
 
 	/**
-	 * Create workspace and load project into it. If a .project file does not
-	 * exist, one is generated by using the eclipse maven plugin.
+	 * Finds project's {@link ICompilationUnit}s.
 	 * 
 	 * @throws CoreException
-	 *             if the classpath entries cannot be added or the source files
-	 *             cannot be parsed
-	 * @throws StandaloneException
-	 *             if the project cannot be created
+	 *             the source files cannot be parsed
 	 */
-	protected void setUp() throws CoreException, StandaloneException {
-		IProjectDescription projectDescription = getProjectDescription();
-		project = initProject(projectDescription);
-
-		javaProject = initJavaProject(project);
-		List<IClasspathEntry> mavenClasspathEntries = collectMavenDependenciesAsClasspathEntries();
-		mavenClasspathEntries = addProjectSourceConfigurations(mavenClasspathEntries);
-		addToClasspath(mavenClasspathEntries);
+	protected void setUp() throws CoreException {
 		List<ICompilationUnit> compilationUnits = findProjectCompilationUnits();
 		compilationUnitsProvider = new CompilationUnitProvider(compilationUnits, yamlConfig.getExcludes());
-	}
-
-	/**
-	 * Creates a project description on the workspace using the
-	 * {@link #getProjectName()} as a project name
-	 * 
-	 * @return a project description for an eclipse project
-	 */
-	IProjectDescription getProjectDescription() throws StandaloneException {
-		IWorkspace workspace = getWorkspace();
-
-		backupExistingEclipseFiles();
-
-		logger.debug("Creating project description for {} ", path); //$NON-NLS-1$
-		IProjectDescription description = workspace.newProjectDescription(getProjectName());
-		description.setLocation(new Path(path));
-		description.setNatureIds(natureIds);
-
-		ICommand[] commands = description.getBuildSpec();
-		List<ICommand> commandList = Arrays.asList(commands);
-		ICommand build = new BuildCommand();
-		build.setBuilderName("org.eclipse.m2e.core.maven2Builder"); //$NON-NLS-1$
-		List<ICommand> modList = new ArrayList<>(commandList);
-		modList.add(build);
-		description.setBuildSpec(modList.toArray(new ICommand[] {}));
-
-		return description;
-	}
-
-	/**
-	 * this method prepares projects for creating an eclipse project accordingly
-	 * by renaming any existing .project and .classpath files and the .settings
-	 * directory temporarily.
-	 * 
-	 * @throws StandaloneException
-	 *             if the existing project files cannot be renamed
-	 */
-	protected void backupExistingEclipseFiles() throws StandaloneException {
-		File projectDescription = getProjectDescriptionFile();
-		File classpathFile = getClasspathFileFile();
-		File settingsDirectory = getSettingsDirectoryFile();
-
-		String loggerInfo;
-
-		if (projectDescription.exists()) {
-			moveFile(projectDescription, getProjectDescriptionRenameFile());
-			existingProjectFileMoved = true;
-
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileBackupDone, PROJECT_FILE_NAME);
-			logger.debug(loggerInfo);
-		}
-
-		if (classpathFile.exists()) {
-			moveFile(classpathFile, getClasspathFileRenameFile());
-			existingClasspathFileMoved = true;
-
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileBackupDone, CLASSPATH_FILE_NAME);
-			logger.debug(loggerInfo);
-		}
-
-		if (settingsDirectory.exists()) {
-			moveFile(settingsDirectory, getSettingsDirectoryRenameFile());
-			existingSettingsDirectoryMoved = true;
-
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_directoryBackupDone, SETTINGS_DIRECTORY_NAME);
-			logger.debug(loggerInfo);
-		}
-	}
-
-	/**
-	 * this method creates and opens a new {@link IProject}
-	 * 
-	 * @param description
-	 *            project description of the new project
-	 * @return a newly created and opened project
-	 * @throws StandaloneException
-	 *             if the project cannot be created or opened
-	 */
-	IProject initProject(IProjectDescription description) throws StandaloneException {
-		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createProject, description.getName());
-		logger.debug(loggerInfo);
-
-		IWorkspace workspace = getWorkspace();
-
-		IProject iproject = getProject(workspace, description.getName());
-
-		try {
-			iproject.create(description, new NullProgressMonitor());
-		} catch (CoreException e) {
-			throw new StandaloneException("Project cannot be created", e); //$NON-NLS-1$
-		}
-
-		try {
-			iproject.open(new NullProgressMonitor());
-			/*
-			 * This here is very important. Related to SIM-1155. If you remove
-			 * this line, the jSparrow maven plugin will no longer be able to
-			 * handle umlauts.
-			 */
-			iproject.setDefaultCharset(StandardCharsets.UTF_8.name(), new NullProgressMonitor());
-		} catch (CoreException e) {
-			throw new StandaloneException("Project cannot be opened", e); //$NON-NLS-1$
-		}
-
-		return iproject;
-	}
-
-	/**
-	 * takes an {@link IProject} and converts it in a java project of type
-	 * {@link IJavaProject}. The java version is set here.
-	 * 
-	 * @param project
-	 *            project to convert in a java project
-	 * @return a java project
-	 * @throws StandaloneException
-	 *             if the provided {@link IProject} is not open or the newly
-	 *             created {@link IJavaProject} cannot be opened
-	 */
-	IJavaProject initJavaProject(IProject project) throws StandaloneException {
-		logger.debug(Messages.StandaloneConfig_debug_createJavaProject);
-
-		if (!project.isOpen()) {
-			throw new StandaloneException("Cannot create java project. Project is not open"); //$NON-NLS-1$
-		}
-
-		IJavaProject iJavaProject = createJavaProject(project);
-		// set compiler compliance level from the project
-		iJavaProject.setOption(JavaCore.COMPILER_COMPLIANCE, compilerCompliance);
-		iJavaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, compilerCompliance);
-		iJavaProject.setOption(JavaCore.COMPILER_SOURCE, compilerCompliance);
-
-		String loggerInfo = NLS.bind(Messages.StandaloneConfig_CompilerComplianceSetTo, compilerCompliance);
-		logger.debug(loggerInfo);
-
-		try {
-			iJavaProject.open(new NullProgressMonitor());
-		} catch (JavaModelException e) {
-			throw new StandaloneException("The newly created IJavaProject cannot be opened"); //$NON-NLS-1$
-		}
-
-		return iJavaProject;
 	}
 
 	/**
@@ -302,131 +123,16 @@ public class StandaloneConfig {
 		return units;
 	}
 
-	/**
-	 * Collects all jars from tmp folder in which maven plugin copied
-	 * dependencies. Creates {@link IClasspathEntry} for each jar and returns
-	 * them.
-	 */
-	List<IClasspathEntry> collectMavenDependenciesAsClasspathEntries() {
-		logger.debug(Messages.StandaloneConfig_debug_collectDependencies);
-
-		List<IClasspathEntry> collectedEntries = new ArrayList<>();
-
-		File depsFolder = getMavenDependencyFolder();
-		File[] listOfFiles = depsFolder.listFiles();
-
-		if (null != listOfFiles) {
-			logger.debug(Messages.StandaloneConfig_CreateClasspathEntriesForDependencies);
-			collectedEntries = createClasspathEntries(listOfFiles);
-		}
-
-		return collectedEntries;
-	}
-
-	private List<IClasspathEntry> addProjectSourceConfigurations(List<IClasspathEntry> classpathEntries) {
-		IPath sourcePath = javaProject.getPath()
-			.append(sourceFolder);
-		classpathEntries.add(JavaCore.newSourceEntry(sourcePath));
-		classpathEntries.add(JavaCore.newContainerEntry(new Path(JavaRuntime.JRE_CONTAINER)));
-
-		// remove duplicated source entries and return
-		return classpathEntries.stream()
-			.filter(entry -> entry.getEntryKind() != IClasspathEntry.CPE_SOURCE || !entry.getPath()
-				.toString()
-				.isEmpty())
-			.collect(Collectors.toList());
-	}
-
-	protected List<IClasspathEntry> createClasspathEntries(File[] listOfFiles) {
-		List<IClasspathEntry> collectedEntries = new ArrayList<>();
-		for (File file : listOfFiles) {
-			if (file.isDirectory()) {
-				List<IClasspathEntry> entries = createClasspathEntries(file.listFiles());
-				collectedEntries.addAll(entries);
-			} else {
-				String jarPath = file.toString();
-				IClasspathEntry jarEntry = createLibraryClasspathEntry(jarPath);
-				collectedEntries.add(jarEntry);
-			}
-		}
-		return collectedEntries;
-	}
-
-	/**
-	 * Adds all classpath entries on classpath of received java project
-	 * 
-	 * @param javaProject
-	 *            project to which classpath entries should be added
-	 * @param classpathEntries
-	 *            new entries to be added to classpath
-	 * @throws JavaModelException
-	 */
-	void addToClasspath(List<IClasspathEntry> classpathEntries) throws JavaModelException {
-		logger.debug(Messages.StandaloneConfig_ConfigureClasspath);
-
-		if (!classpathEntries.isEmpty()) {
-			IClasspathEntry[] newEntries = classpathEntries.toArray(new IClasspathEntry[classpathEntries.size()]);
-			javaProject.setRawClasspath(newEntries, null);
-		}
-	}
-
-	/**
-	 * On stop, checks if eclipse project files were existing and backed up
-	 * before refactoring and reverts them.
-	 * 
-	 * @throws IOException
-	 */
-	private void restoreExistingEclipseFiles() throws IOException {
-
-		String loggerInfo;
-		if (isExistingProjectFileMoved()) {
-			Files.move(getProjectDescriptionRenameFile().toPath(), getProjectDescriptionFile().toPath());
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileRestoreDone, PROJECT_FILE_NAME);
-			logger.debug(loggerInfo);
-		}
-
-		if (isExistingClasspathFileMoved()) {
-			Files.move(getClasspathFileRenameFile().toPath(), getClasspathFileFile().toPath());
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_fileRestoreDone, CLASSPATH_FILE_NAME);
-			logger.debug(loggerInfo);
-		}
-
-		if (isExistingSettingsDirectoryMoved()) {
-			Files.move(getSettingsDirectoryRenameFile().toPath(), getSettingsDirectoryFile().toPath());
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_directoryRestoreDone, SETTINGS_DIRECTORY_NAME);
-			logger.debug(loggerInfo);
-		}
-		cleanUpAlreadyDone = true;
-	}
-
-	private void deleteCreatedEclipseProjectFiles() throws IOException, CoreException {
-		String debugInfo = NLS.bind(Messages.StandaloneConfig_debug_cleanUp, project.getName());
-		logger.debug(debugInfo);
-
-		project.close(new NullProgressMonitor());
-
-		File settings = getSettingsDirectoryFile();
-		removeDirectory(settings);
-		Files.deleteIfExists(getClasspathFileFile().toPath());
-		Files.deleteIfExists(getProjectDescriptionFile().toPath());
-
-	}
-
-	public void revertEclipseProjectFiles() throws IOException, CoreException {
-		if (!cleanUpAlreadyDone) {
-			deleteCreatedEclipseProjectFiles();
-			restoreExistingEclipseFiles();
-		}
-	}
-
 	public void createRefactoringStates() throws StandaloneException {
 
-		String loggerInfo = NLS.bind(Messages.Activator_debug_collectCompilationUnits, project.getName());
+		String loggerInfo = NLS.bind(Messages.Activator_debug_collectCompilationUnits, projectName);
 		logger.info(loggerInfo);
 
 		List<ICompilationUnit> compilationUnits = compilationUnitsProvider.getFilteredCompilationUnits();
 		loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compilationUnits.size());
 		logger.debug(loggerInfo);
+
+		logUnusedExcludes();
 
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		List<ICompilationUnit> containingErrors = new ArrayList<>();
@@ -438,7 +144,7 @@ public class StandaloneConfig {
 			try {
 				refactoringPipeline.createRefactoringState(icu, containingErrors);
 			} catch (JavaModelException e) {
-				String message = String.format("Cannot create refactoring states on %s ", project.getName()); //$NON-NLS-1$
+				String message = String.format("Cannot create refactoring states on %s ", projectName); //$NON-NLS-1$
 				throw new StandaloneException(message, e);
 			}
 		}
@@ -449,16 +155,80 @@ public class StandaloneConfig {
 		logger.debug(loggerInfo);
 	}
 
+	private void logUnusedExcludes() {
+		String loggerInfo;
+		Collector<CharSequence, ?, String> collector = Collectors.joining(", "); //$NON-NLS-1$
+
+		Set<String> unusedExcludedPackages = compilationUnitsProvider.getUnusedExcludedPackages();
+		if (!unusedExcludedPackages.isEmpty()) {
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_unusedPackageExcludesWarning,
+					unusedExcludedPackages.stream()
+						.collect(collector));
+			logger.warn(loggerInfo);
+		}
+
+		Set<String> unusedExcludedClasses = compilationUnitsProvider.getUnusedExcludedClasses();
+		if (!unusedExcludedClasses.isEmpty()) {
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_unusedClassExcludesWarning, unusedExcludedClasses.stream()
+				.collect(collector));
+			logger.warn(loggerInfo);
+		}
+	}
+
 	public void computeRefactoring() throws StandaloneException {
 		if (!hasRefactoringStates()) {
-			String loggerInfo = NLS.bind(Messages.StandaloneConfig_noRefactoringStates, project.getName());
+			String loggerInfo = NLS.bind(Messages.StandaloneConfig_noRefactoringStates, projectName);
 			logger.info(loggerInfo);
 			return;
 		}
 
-		List<RefactoringRule> projectRules = getProjectRules();
-		List<RefactoringRule> rules = getSelectedRules(projectRules);
+		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
+		RuleConfigurationWrapper ruleConfigurationWrapper = new RuleConfigurationWrapper(yamlConfig, getProjectRules());
 
+		List<RefactoringRule> rules = new ArrayList<>();
+
+		if (ruleConfigurationWrapper.isSelectedRule(FieldsRenamingRule.FIELDS_RENAMING_RULE_ID)) {
+			Map<String, Boolean> options = ruleConfigurationWrapper.getFieldRenamingRuleConfigurationOptions();
+			setUpRenamingRule(options).ifPresent(rules::add);
+		}
+
+		if (ruleConfigurationWrapper.isSelectedRule(StandardLoggerRule.STANDARD_LOGGER_RULE_ID)) {
+			Map<String, String> options = ruleConfigurationWrapper.getLoggerRuleConfigurationOptions();
+			setUpLoggerRule(options).ifPresent(rules::add);
+		}
+
+		List<RefactoringRule> selectedAutomaticRules = ruleConfigurationWrapper.getSelectedAutomaticRules();
+		rules.addAll(selectedAutomaticRules);
+
+		applyRules(rules);
+	}
+
+	private Optional<StandardLoggerRule> setUpLoggerRule(Map<String, String> options) {
+		StandardLoggerRule loggerRule = new StandardLoggerRule();
+		loggerRule.activateOptions(options);
+		loggerRule.calculateEnabledForProject(javaProject);
+		return Optional.ofNullable(loggerRule)
+			.filter(StandardLoggerRule::isEnabled);
+	}
+
+	private Optional<FieldsRenamingRule> setUpRenamingRule(Map<String, Boolean> options) throws StandaloneException {
+		FieldsRenamingInstantiator factory = new FieldsRenamingInstantiator(javaProject,
+				new FieldDeclarationVisitorWrapper(javaProject, SEARCH_SCOPE));
+
+		List<ICompilationUnit> iCompilationUnits = refactoringPipeline.getRefactoringStates()
+			.stream()
+			.map(RefactoringState::getWorkingCopy)
+			.map(ICompilationUnit::getPrimary)
+			.collect(Collectors.toList());
+		List<FieldMetaData> metaData = factory.findFields(iCompilationUnits, options);
+		FieldsRenamingRule renamingRule = factory.createRule(metaData, compilationUnitsProvider);
+		renamingRule.calculateEnabledForProject(javaProject);
+		return Optional.of(renamingRule)
+			.filter(FieldsRenamingRule::isEnabled);
+
+	}
+
+	private void applyRules(List<RefactoringRule> rules) throws StandaloneException {
 		refactoringPipeline.setRules(rules);
 
 		if (!rules.isEmpty()) {
@@ -466,31 +236,22 @@ public class StandaloneConfig {
 			String loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, rules.size(), rules.toString());
 			logger.info(loggerInfo);
 
-			loggerInfo = NLS.bind(Messages.Activator_debug_startRefactoring, project.getName());
+			loggerInfo = NLS.bind(Messages.Activator_debug_startRefactoring, projectName);
 			logger.info(loggerInfo);
 			try {
 				refactoringPipeline.doRefactoring(new NullProgressMonitor());
-				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, project.getName(),
+				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, projectName,
 						refactoringPipeline.getRulesWithChangesAsString());
 				logger.info(loggerInfo);
 			} catch (RuleException e) {
 				logger.debug(e.getMessage(), e);
 				logger.error(e.getMessage());
 			} catch (RefactoringException e) {
-				String message = String.format("Cannot compute refactoring on %s.", project.getName()); //$NON-NLS-1$
+				String message = String.format("Cannot compute refactoring on %s.", projectName); //$NON-NLS-1$
 				throw new StandaloneException(message, e);
 			}
 		} else {
 			logger.info(Messages.Activator_standalone_noRulesSelected);
-		}
-	}
-
-	protected List<RefactoringRule> getSelectedRules(List<RefactoringRule> projectRules) throws StandaloneException {
-		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
-		try {
-			return YAMLConfigUtil.getSelectedRulesFromConfig(yamlConfig, projectRules);
-		} catch (YAMLConfigException e) {
-			throw new StandaloneException(e.getMessage(), e);
 		}
 	}
 
@@ -503,19 +264,19 @@ public class StandaloneConfig {
 		if (!hasRefactoringStates()) {
 			return;
 		}
-		String logInfo = NLS.bind(Messages.Activator_debug_commitRefactoring, project.getName());
+		String logInfo = NLS.bind(Messages.Activator_debug_commitRefactoring, projectName);
 		logger.info(logInfo);
 		try {
 			refactoringPipeline.commitRefactoring();
 		} catch (RefactoringException | ReconcileException e) {
-			throw new StandaloneException(String.format("Cannot commit refactoring on %s", project.getName()), e); //$NON-NLS-1$
+			throw new StandaloneException(String.format("Cannot commit refactoring on %s", projectName), e); //$NON-NLS-1$
 		}
 	}
 
 	protected boolean hasRefactoringStates() {
 		if (refactoringPipeline.getRefactoringStates()
 			.isEmpty()) {
-			logger.debug("No refactoring states on {} ", project.getName()); //$NON-NLS-1$
+			logger.debug("No refactoring states on {} ", projectName); //$NON-NLS-1$
 			return false;
 		}
 		return true;
@@ -528,47 +289,8 @@ public class StandaloneConfig {
 
 	/*** HELPER METHODS ***/
 
-	public void removeDirectory(File directory) throws IOException {
-		if (!directory.isDirectory()) {
-			Files.delete(directory.toPath());
-			return;
-		}
-		for (File file : directory.listFiles()) {
-			if (file.isDirectory()) {
-				removeDirectory(file);
-			} else {
-				Files.deleteIfExists(file.toPath());
-			}
-		}
-		Files.delete(directory.toPath());
-	}
-
 	protected IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
-	}
-
-	protected File getProjectDescriptionFile() {
-		return new File(path + File.separator + PROJECT_FILE_NAME);
-	}
-
-	protected File getProjectDescriptionRenameFile() {
-		return new File(path + File.separator + PROJECT_FILE_NAME + TEMP_FILE_EXTENSION);
-	}
-
-	protected File getClasspathFileRenameFile() {
-		return new File(path + File.separator + CLASSPATH_FILE_NAME + TEMP_FILE_EXTENSION);
-	}
-
-	protected File getClasspathFileFile() {
-		return new File(path + File.separator + CLASSPATH_FILE_NAME);
-	}
-
-	protected File getSettingsDirectoryRenameFile() {
-		return new File(path + File.separator + SETTINGS_DIRECTORY_NAME + TEMP_FILE_EXTENSION);
-	}
-
-	protected File getSettingsDirectoryFile() {
-		return new File(path + File.separator + SETTINGS_DIRECTORY_NAME);
 	}
 
 	protected String getPomFilePath() {
@@ -580,26 +302,6 @@ public class StandaloneConfig {
 			.getProject(name);
 	}
 
-	protected IJavaProject createJavaProject(IProject project) {
-		return JavaCore.create(project);
-	}
-
-	/**
-	 * The full path of the dependencies folder must match with the one used in
-	 * {@link eu.jsparrow.adapter.DependencyManager#prepareDefaultRequest}.
-	 * 
-	 * @return the directory with the dependencies.
-	 */
-	protected File getMavenDependencyFolder() {
-		String dependenciesPath = System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER + File.separator
-				+ getProjectName();
-		return new File(dependenciesPath);
-	}
-
-	protected IClasspathEntry createLibraryClasspathEntry(String jarPath) {
-		return JavaCore.newLibraryEntry(new Path(jarPath), null, null);
-	}
-
 	/**
 	 * Getter for IJavaProject
 	 * 
@@ -607,39 +309,6 @@ public class StandaloneConfig {
 	 */
 	public IJavaProject getJavaProject() {
 		return javaProject;
-	}
-
-	protected void setJavaProject(IJavaProject javaProject) {
-		this.javaProject = javaProject;
-	}
-
-	protected void setProject(IProject project) {
-		this.project = project;
-	}
-
-	protected boolean isDescriptionGenerated() {
-		return descriptionGenerated;
-	}
-
-	protected void moveFile(File src, File dest) throws StandaloneException {
-		try {
-			Files.move(src.toPath(), dest.toPath());
-		} catch (IOException e) {
-			String message = String.format("Cannot move file %s to %s ", src.getName(), dest.getName()); //$NON-NLS-1$
-			throw new StandaloneException(message, e);
-		}
-	}
-
-	protected boolean isExistingProjectFileMoved() {
-		return existingProjectFileMoved;
-	}
-
-	protected boolean isExistingClasspathFileMoved() {
-		return existingClasspathFileMoved;
-	}
-
-	protected boolean isExistingSettingsDirectoryMoved() {
-		return existingSettingsDirectoryMoved;
 	}
 
 	public String getProjectName() {

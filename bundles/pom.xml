@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>eu.jsparrow</artifactId>
-		<version>2.6.0-SNAPSHOT</version>
+		<version>3.3.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>bundles</artifactId>
@@ -28,10 +28,13 @@
 		<!-- modular rules -->
 		<module>rules.api</module>
 		<module>rules.imports</module>
+		<module>rules.imports.neon</module>
+		<module>rules.java10</module>
 
 		<!-- licensing -->
 		<module>license.api</module>
 		<module>license.netlicensing</module>
+		<module>registration</module>
 
 		<!-- plug-in functionality -->
 		<module>core</module>
@@ -61,7 +64,7 @@
 						<dependency>
 							<groupId>net.sf.proguard</groupId>
 							<artifactId>proguard-base</artifactId>
-							<version>6.0.1</version>
+							<version>6.0.3</version>
 							<scope>runtime</scope>
 						</dependency>
 					</dependencies>
@@ -73,6 +76,7 @@
 						<libs>
 							<lib>${java.home}/lib/rt.jar</lib>
 							<lib>${java.home}/lib/jsse.jar</lib>
+							<lib>${java.home}/lib/jce.jar</lib>
 						</libs>
 						<options>
 							<!-- Default parameters -->

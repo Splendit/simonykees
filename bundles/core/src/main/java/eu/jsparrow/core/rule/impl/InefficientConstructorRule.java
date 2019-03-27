@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.InefficientConstructorASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -19,18 +19,24 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class InefficientConstructorRule extends RefactoringRuleImpl<InefficientConstructorASTVisitor> {
 
+	public static final String INEFFICIENT_CONSTRUCTOR_RULE_ID = "InefficientConstructor"; //$NON-NLS-1$
+
 	public InefficientConstructorRule() {
 		super();
 		this.visitorClass = InefficientConstructorASTVisitor.class;
-		this.id = "InefficientConstructor"; //$NON-NLS-1$
+		this.id = INEFFICIENT_CONSTRUCTOR_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.InefficientConstructorRule_name,
 				Messages.InefficientConstructorRule_description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS));
+				Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS, Tag.FREE ));
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_1_5;
+	protected String provideRequiredJavaVersion() {
+		return JavaCore.VERSION_1_5;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

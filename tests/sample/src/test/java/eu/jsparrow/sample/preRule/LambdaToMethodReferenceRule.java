@@ -1,5 +1,8 @@
 package eu.jsparrow.sample.preRule;
 
+import static eu.jsparrow.sample.utilities.StringUtils.doesntDoAnything;
+
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,12 +15,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import eu.jsparrow.sample.utilities.NumberUtils;
 import eu.jsparrow.sample.utilities.Person;
+import eu.jsparrow.sample.utilities.Queue;
 
 /**
  * 
@@ -266,6 +273,14 @@ public class LambdaToMethodReferenceRule {
 		
 	}
 	
+	/*
+	 * SIM-1450
+	 */
+	private static Object createDeepCopy(byte[][] value, Class<?> valueClass) {
+		// see org.eclipse.mdm.api.base.model.Value
+		return Arrays.stream(value).map(v -> v.clone()).toArray(byte[][]::new);
+	}
+	
 	class NestedClass {
 		public void referencingMethodInNestedClass() {
 			List<Person> persons = new ArrayList<>();
@@ -327,6 +342,43 @@ public class LambdaToMethodReferenceRule {
 		 * Expecting the transformation to use a fully qualified name. 
 		 */
 		numberUtils.stream().map(v -> v.getNumber()).map(num -> num.toString());
+		
+		List<List<String>> javaLists = new ArrayList<>();
+		javaLists.stream().map(javaList -> new eu.jsparrow.sample.utilities.List(javaList));
+		
+		List<eu.jsparrow.sample.utilities.List<String>> customLists = new ArrayList<>();
+		customLists.stream().map(element -> element.size());
+	}
+	
+	public void usingOverloadedMethods(Other other) {
+		/*
+		 * SIM-1351 The wrap and the other.read methods are both overloaded.
+		 * Converting to method reference causes ambiguity.
+		 */
+		ClassWithStaticOverloadedMethods.wrap(() -> other.read());
+
+		/*
+		 * SIM-1351 The other.overloadedWihtPrivateMethod should not cause
+		 * ambiguity because the overloaded method is private. It should be
+		 * possible to convert to method reference.
+		 */
+		ClassWithStaticOverloadedMethods.wrap(() -> other.overloadedWihtPrivateMethod());
+
+	}
+	
+	public void referringToMethodsInRawObjects() {
+		/*
+		 * SIM-1400
+		 */
+		Employee employee = new Employee("John", LocalDate.now().minusYears(123));
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(() -> employee.getName());
+	}
+	
+	public void addMissingImports() {
+		
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(() -> doesntDoAnything());
 	}
 
 	class ComparisonProvider {
@@ -391,6 +443,23 @@ public class LambdaToMethodReferenceRule {
 			return null;
 		}
 	}
+	
+	public void discardedReturnType_shouldNotTranform() {
+		/*
+		 * SIM-1401
+		 */
+		Queue queue = new Queue();
+		queue.withLock(() -> {
+			getRandomPerson();
+		});
+	}
+	
+	public void noDiscardedReturnType_shouldTransform() {
+		Queue queue = new Queue();
+		queue.withLock(() -> {
+			doSomething(2);
+		});
+	}
 }
 
 /**
@@ -414,3 +483,47 @@ class AmbiguousMethods {
 		return  String.valueOf(i);
 	}
 }
+
+/**
+ * SIM-1351
+ */
+class Other {
+	
+	public byte [] read () {
+		return new byte[] {};
+	}
+	
+	public String read(boolean bytes) {
+		return null;
+	}
+	
+	public byte[] overloadedWihtPrivateMethod() {
+		return overloadedWihtPrivateMethod(false);
+	}
+	
+	private byte[] overloadedWihtPrivateMethod(boolean bytes) {
+		return new byte[] {};
+	}
+}
+
+class ClassWithStaticOverloadedMethods {
+
+	public static void wrap(CheckedRunnable runable) {
+
+	}
+
+	public static <T> T wrap(CheckedSupplier<T> block) {
+		return block.get();
+	}
+
+}
+
+interface CheckedRunnable {
+	void run();
+}
+
+interface CheckedSupplier<R> {
+
+	R get();
+}
+

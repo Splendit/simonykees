@@ -49,8 +49,6 @@ import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
-import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 @SuppressWarnings({ "restriction" })
@@ -78,16 +76,16 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 	private int displayHeight;
 
-	private LicenseUtilService licenseUtil = LicenseUtil.get();
+	private boolean enabledFinishButton;
 
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
-			RefactoringPreviewWizardModel wizardModel) {
+			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton) {
 		super("wizardPage"); //$NON-NLS-1$
-
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 
 		setTitle(Messages.SummaryWizardPage_RunSummary);
 		this.summaryWizardPageModel = new RefactoringSummaryWizardPageModel(refactoringPipeline, wizardModel);
+		this.enabledFinishButton = enabledFinishButton;
 		displayHeight = Display.getCurrent()
 			.getPrimaryMonitor()
 			.getBounds().height;
@@ -254,7 +252,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 	private void setStatusInfo() {
 		StatusInfo statusInfo = new StatusInfo();
-		if (licenseUtil.isFreeLicense()) {
+		if (!enabledFinishButton) {
 			statusInfo.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
 		}
 		StatusUtil.applyToStatusLine(this, statusInfo);

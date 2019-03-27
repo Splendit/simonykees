@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.trycatch.TryWithResourceASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -20,18 +20,24 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class TryWithResourceRule extends RefactoringRuleImpl<TryWithResourceASTVisitor> {
 
+	public static final String TRY_WITH_RESOURCE_RULE_ID = "TryWithResource"; //$NON-NLS-1$
+
 	public TryWithResourceRule() {
 		super();
 		this.visitorClass = TryWithResourceASTVisitor.class;
-		this.id = "TryWithResource"; //$NON-NLS-1$
+		this.id = TRY_WITH_RESOURCE_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.TryWithResourceRule_name,
 				Messages.TryWithResourceRule_description, Duration.ofMinutes(15),
-				Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS));
+				Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.FREE));
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_1_7;
+	protected String provideRequiredJavaVersion() {
+		return JavaCore.VERSION_1_7;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

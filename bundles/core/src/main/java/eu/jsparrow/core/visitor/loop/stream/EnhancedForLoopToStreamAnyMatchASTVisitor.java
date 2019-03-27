@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -20,10 +21,13 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.rules.common.util.OperatorUtil;
+
 /**
  * Analyzes the occurrences of {@link EnhancedForStatement}s and checks whether
- * a transformation to {@link Stream#anyMatch(java.util.function.Predicate)} is
- * possible. Considers two cases:
+ * a transformation to {@link Stream#anyMatch}, {@link Stream#allMatch} or
+ * {@link Stream#noneMatch} is possible. Considers loops interrupted with a
+ * {@link BreakStatement} and loops interrupted with a {@link ReturnStatement}.
  * 
  * <ul>
  * <li>The for loop is only used to for instantiating a {@code boolean}
@@ -77,19 +81,21 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
  * </li>
  * </ul>
  * 
- * @author Ardit Ymeri
  * @since 2.1.1
  *
  */
 public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedForLoopToStreamASTVisitor {
 
 	private static final String ANY_MATCH = "anyMatch"; //$NON-NLS-1$
+	private static final String ALL_MATCH = "allMatch"; //$NON-NLS-1$
+	private static final String NONE_MATCH = "noneMatch"; //$NON-NLS-1$
 
 	@Override
 	public boolean visit(EnhancedForStatement enhancedForStatement) {
 
-		SingleVariableDeclaration enhancedForParameter = enhancedForStatement.getParameter();
-		Expression enhancedForExp = enhancedForStatement.getExpression();
+		if (isConditionalExpression(enhancedForStatement.getExpression())) {
+			return true;
+		}
 
 		IfStatement ifStatement = isConvertableInterruptedLoop(enhancedForStatement);
 		if (ifStatement == null) {
@@ -98,31 +104,154 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 
 		Expression ifCondition = ifStatement.getExpression();
 		Statement thenStatement = ifStatement.getThenStatement();
-		VariableDeclarationFragment booleanDeclFragment;
-		ReturnStatement returnStatement;
 
-		if ((booleanDeclFragment = isAssignmentAndBreakBlock(thenStatement, enhancedForStatement)) != null) {
+		Assignment assignment = isAssignmentAndBreak(thenStatement);
+		if (assignment != null) {
+			analyzeLoopWithBreakStatement(enhancedForStatement, ifCondition, assignment);
+			return true;
+		}
+
+		ReturnStatement returnStatement = isReturnBlock(thenStatement);
+		if (returnStatement != null) {
+			analyzeLoopWithReturnStatement(enhancedForStatement, ifCondition, returnStatement);
+		}
+
+		return true;
+	}
+
+	private void analyzeLoopWithReturnStatement(EnhancedForStatement enhancedForStatement, Expression ifCondition,
+			ReturnStatement returnStatement) {
+		Expression returnedExpression = returnStatement.getExpression();
+
+		if (returnedExpression == null || ASTNode.BOOLEAN_LITERAL != returnedExpression.getNodeType()) {
+			return;
+		}
+
+		BooleanLiteral booleanLiteral = (BooleanLiteral) returnedExpression;
+		boolean booleanLiteralValue = booleanLiteral.booleanValue();
+		ReturnStatement followingReturnStatement = isFollowedByReturnStatement(enhancedForStatement);
+
+		if (followingReturnStatement == null) {
+			return;
+		}
+		Expression followingReturnedExpression = followingReturnStatement.getExpression();
+		if (followingReturnedExpression == null
+				|| ASTNode.BOOLEAN_LITERAL != followingReturnedExpression.getNodeType()) {
+			return;
+		}
+
+		boolean followingBooleanLiteralValue = ((BooleanLiteral) followingReturnedExpression).booleanValue();
+
+		Expression matchExpression;
+		if (booleanLiteralValue && !followingBooleanLiteralValue) {
+			/*
+			 * use anyMatch replace the return statement with a Stream::AnyMatch
+			 */
+
+			matchExpression = (Expression) astRewrite.createCopyTarget(ifCondition);
+			replaceLoopWithReturnStatement(enhancedForStatement, followingReturnStatement, ANY_MATCH, matchExpression);
+
+		} else if (!booleanLiteralValue && followingBooleanLiteralValue) {
+			if (useNoneMatch(ifCondition)) {
+				/*
+				 * replace return expression by Stream::noneMatch
+				 */
+				matchExpression = (Expression) astRewrite.createCopyTarget(ifCondition);
+				replaceLoopWithReturnStatement(enhancedForStatement, followingReturnStatement, NONE_MATCH,
+						matchExpression);
+			} else {
+				/*
+				 * replace return expression by Stream::allMatch
+				 */
+				matchExpression = OperatorUtil.createNegatedExpression(ifCondition, astRewrite);
+				replaceLoopWithReturnStatement(enhancedForStatement, followingReturnStatement, ALL_MATCH,
+						matchExpression);
+			}
+
+		}
+	}
+
+	private void analyzeLoopWithBreakStatement(EnhancedForStatement enhancedForStatement, Expression ifCondition,
+			Assignment assignment) {
+		Expression lhs = assignment.getLeftHandSide();
+		Expression rhs = assignment.getRightHandSide();
+		if (ASTNode.BOOLEAN_LITERAL != rhs.getNodeType() || ASTNode.SIMPLE_NAME != lhs.getNodeType()) {
+			return;
+		}
+		boolean loopAssignmentValue = ((BooleanLiteral) rhs).booleanValue();
+		SimpleName boolVarName = (SimpleName) lhs;
+		VariableDeclarationFragment declarationFragment = findBoolDeclFragment(boolVarName, enhancedForStatement);
+
+		if (declarationFragment == null) {
+			return;
+		}
+
+		Expression initializer = declarationFragment.getInitializer();
+		if (initializer.getNodeType() != ASTNode.BOOLEAN_LITERAL) {
+			return;
+		}
+
+		BooleanLiteral booleanInitializer = (BooleanLiteral) initializer;
+		boolean initializerValue = booleanInitializer.booleanValue();
+
+		Expression matchExpression;
+		if (!initializerValue && loopAssignmentValue) {
 			/*
 			 * replace initialization of the boolean variable with
 			 * Stream::anyMatch
 			 */
-			MethodInvocation methodInvocation = createStreamAnymatchInitalizer(enhancedForExp, ifCondition,
-					enhancedForParameter);
-			astRewrite.replace(booleanDeclFragment.getInitializer(), methodInvocation, null);
-			replaceLoopWithFragment(enhancedForStatement, booleanDeclFragment);
-			getCommentRewriter().saveRelatedComments(enhancedForStatement);
-			onRewrite();
-
-		} else if ((returnStatement = isReturnBlock(thenStatement, enhancedForStatement)) != null) {
-			// replace the return statement with a Stream::AnyMatch
-			MethodInvocation methodInvocation = createStreamAnymatchInitalizer(enhancedForExp, ifCondition,
-					enhancedForParameter);
-			astRewrite.replace(returnStatement.getExpression(), methodInvocation, null);
-			astRewrite.remove(enhancedForStatement, null);
-			getCommentRewriter().saveRelatedComments(enhancedForStatement);
-			onRewrite();
+			matchExpression = (Expression) astRewrite.createCopyTarget(ifCondition);
+			replaceLoopWithBreakStatement(enhancedForStatement, declarationFragment, matchExpression, ANY_MATCH);
+		} else if (initializerValue && !loopAssignmentValue) {
+			if (useNoneMatch(ifCondition)) {
+				/*
+				 * replace initialization of the boolean variable with
+				 * Stream::allMatch
+				 */
+				matchExpression = (Expression) astRewrite.createCopyTarget(ifCondition);
+				replaceLoopWithBreakStatement(enhancedForStatement, declarationFragment, matchExpression, NONE_MATCH);
+			} else {
+				/*
+				 * replace initialization of the boolean variable with
+				 * Stream::allMatch
+				 */
+				matchExpression = OperatorUtil.createNegatedExpression(ifCondition, astRewrite);
+				replaceLoopWithBreakStatement(enhancedForStatement, declarationFragment, matchExpression, ALL_MATCH);
+			}
 		}
+	}
 
+	private void replaceLoopWithReturnStatement(EnhancedForStatement enhancedForStatement,
+			ReturnStatement followingReturnStatement, String methodName, Expression matchExpression) {
+		SingleVariableDeclaration enhancedForParameter = enhancedForStatement.getParameter();
+		Expression enhancedForExp = enhancedForStatement.getExpression();
+		MethodInvocation methodInvocation = createStreamAnymatchInitalizer(enhancedForExp, matchExpression,
+				enhancedForParameter, methodName);
+		astRewrite.replace(followingReturnStatement.getExpression(), methodInvocation, null);
+		astRewrite.remove(enhancedForStatement, null);
+		getCommentRewriter().saveRelatedComments(enhancedForStatement);
+		onRewrite();
+	}
+
+	private void replaceLoopWithBreakStatement(EnhancedForStatement enhancedForStatement,
+			VariableDeclarationFragment declarationFragment, Expression matchExpression, String methodName) {
+		Expression enhancedForExpression = enhancedForStatement.getExpression();
+		SingleVariableDeclaration enhancedForParameter = enhancedForStatement.getParameter();
+		Expression initializer = declarationFragment.getInitializer();
+
+		MethodInvocation methodInvocation = createStreamAnymatchInitalizer(enhancedForExpression, matchExpression,
+				enhancedForParameter, methodName);
+		astRewrite.replace(initializer, methodInvocation, null);
+		replaceLoopWithFragment(enhancedForStatement, declarationFragment);
+		getCommentRewriter().saveRelatedComments(enhancedForStatement);
+		onRewrite();
+	}
+
+	private boolean useNoneMatch(Expression ifCondition) {
+		if (ifCondition.getNodeType() == ASTNode.PREFIX_EXPRESSION) {
+			PrefixExpression infixExpression = (PrefixExpression) ifCondition;
+			return infixExpression.getOperator() != PrefixExpression.Operator.NOT;
+		}
 		return true;
 	}
 
@@ -144,18 +273,18 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 	 *         enhancedForExp.stream().anyMatch(param -> ifCondition) <code>
 	 */
 	private MethodInvocation createStreamAnymatchInitalizer(Expression enhancedForExp, Expression ifCondition,
-			SingleVariableDeclaration param) {
+			SingleVariableDeclaration param, String methodName) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation stream = ast.newMethodInvocation();
 		stream.setName(ast.newSimpleName(STREAM));
 		stream.setExpression(createExpressionForStreamMethodInvocation(enhancedForExp));
 
 		MethodInvocation anyMatch = ast.newMethodInvocation();
-		anyMatch.setName(ast.newSimpleName(ANY_MATCH));
+		anyMatch.setName(ast.newSimpleName(methodName));
 		anyMatch.setExpression(stream);
 
 		LambdaExpression anyMatchCondition = ast.newLambdaExpression();
-		anyMatchCondition.setBody(astRewrite.createMoveTarget(ifCondition));
+		anyMatchCondition.setBody(ifCondition);
 		ListRewrite lambdaRewrite = astRewrite.getListRewrite(anyMatchCondition, LambdaExpression.PARAMETERS_PROPERTY);
 		anyMatchCondition.setParentheses(false);
 		VariableDeclarationFragment newDeclFragment = ast.newVariableDeclarationFragment();
@@ -166,40 +295,6 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 		anyMatchParamRewrite.insertFirst(anyMatchCondition, null);
 
 		return anyMatch;
-	}
-
-	/**
-	 * Checks whether the body of a <em>then statement</em> consists of a block
-	 * of exactly two statements where the first one is an assignment to
-	 * {@code true} of a boolean variable and the second one is a
-	 * {@link BreakStatement}.
-	 * 
-	 * @param thenStatement
-	 *            a node representing the 'then statement' of an
-	 *            {@link IfStatement}.
-	 * @param forNode
-	 *            the enhanced for-loop containing the {@link IfStatement}.
-	 * 
-	 * @return the declaration fragment of the boolean variable which is
-	 *         assigned in the given thenStatement or {@code null} if it is not
-	 *         possible to transform the loop into an invocation of
-	 *         {@link Stream#anyMatch(java.util.function.Predicate)}.
-	 */
-	private VariableDeclarationFragment isAssignmentAndBreakBlock(Statement thenStatement,
-			EnhancedForStatement forNode) {
-
-		Assignment assignment = super.isAssignmentAndBreak(thenStatement);
-		if (assignment != null) {
-			Expression lhs = assignment.getLeftHandSide();
-			Expression rhs = assignment.getRightHandSide();
-			if (ASTNode.BOOLEAN_LITERAL == rhs.getNodeType() && ASTNode.SIMPLE_NAME == lhs.getNodeType()
-					&& ((BooleanLiteral) rhs).booleanValue()) {
-				SimpleName boolVarName = (SimpleName) lhs;
-				return findBoolDeclFragment(boolVarName, forNode);
-			}
-		}
-
-		return null;
 	}
 
 	/**
@@ -226,74 +321,9 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 			if (declFragment != null && declFragment.getInitializer() != null) {
 				Expression initializer = declFragment.getInitializer();
 				if (ASTNode.BOOLEAN_LITERAL == initializer.getNodeType()) {
-					BooleanLiteral fragmentInit = (BooleanLiteral) initializer;
-					if (!fragmentInit.booleanValue()) {
-						return declFragment;
-					}
+					return declFragment;
 				}
 			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Checks whether the given thenStatement consists of a single
-	 * {@link ReturnStatement} which returns a boolean {@code true} value and
-	 * whether the given enhanced for-loop is followed by a
-	 * {@link ReturnStatement} which returns a boolean {@code false} value.
-	 * 
-	 * @param thenStatement
-	 *            a node representing the 'then statement' of a
-	 *            {@link IfStatement}.
-	 * @param forNode
-	 *            a loop having the aforementioned if statement as the only
-	 *            statement in the body.
-	 * @return the {@link ReturnStatement} following the the given loop, or
-	 *         {@code null} if the loop is not followed by a return statement or
-	 *         if the transformation is not possible.
-	 */
-	private ReturnStatement isReturnBlock(Statement thenStatement, EnhancedForStatement forNode) {
-		ReturnStatement returnStatement = super.isReturnBlock(thenStatement);
-		if (returnStatement != null) {
-			Expression returnedExpression = returnStatement.getExpression();
-			if (returnedExpression != null && ASTNode.BOOLEAN_LITERAL == returnedExpression.getNodeType()) {
-				BooleanLiteral booleanLiteral = (BooleanLiteral) returnedExpression;
-				if (booleanLiteral.booleanValue()) {
-					return isFollowedByReturnStatement(forNode);
-
-				}
-			}
-
-		}
-
-		return null;
-	}
-
-	/**
-	 * Finds the {@link ReturnStatement} which is placed immediately after the
-	 * given {@link EnhancedForStatement} and which returns a {@code false}
-	 * value.
-	 * 
-	 * @param forNode
-	 *            represents an enhanced for loop which is expected to be
-	 *            followed by a {@code return false;} statement.
-	 * 
-	 * @return the return statement following the given
-	 *         {@link EnhancedForStatement} or {@code null} if the loop is not
-	 *         followed by a return statement or the returned value is not
-	 *         {@code false}
-	 */
-	@Override
-	protected ReturnStatement isFollowedByReturnStatement(EnhancedForStatement forNode) {
-		ReturnStatement followingReturnSt = super.isFollowedByReturnStatement(forNode);
-		if (followingReturnSt != null) {
-			Expression returnedExpression = followingReturnSt.getExpression();
-			if (returnedExpression != null && ASTNode.BOOLEAN_LITERAL == returnedExpression.getNodeType()
-					&& !((BooleanLiteral) returnedExpression).booleanValue()) {
-				return followingReturnSt;
-			}
-
 		}
 
 		return null;

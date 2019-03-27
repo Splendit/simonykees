@@ -1,18 +1,16 @@
 package eu.jsparrow.core.requirements;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
@@ -28,44 +26,57 @@ import eu.jsparrow.core.util.RulesTestUtil;
  *
  */
 @SuppressWarnings("nls")
-@RunWith(Parameterized.class)
 public class LibraryPrerequestsTest {
 
 	IJavaProject testproject = null;
-	private List<IClasspathEntry> entries;
-	private boolean enabled;
 
-	public LibraryPrerequestsTest(List<IClasspathEntry> entries, boolean enabled) {
-		this.entries = entries;
-		this.enabled = enabled;
-	}
-
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		testproject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		testproject = null;
 	}
 
-	@Parameters(name = "{index}: test with pom:[{0}]")
-	public static Collection<Object[]> data() throws Exception {
-		return Arrays.asList(new Object[][] {
-				{ Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
-						"commons-lang3", "3.1")), true },
-				{ Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
-						"commons-lang3", "3.2.1")), false } });
+	public static Stream<Arguments> data() throws Exception {
+		return Stream.of(
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.0"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.0.1"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.1"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.2"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.2.1"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.3"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.3.1"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.3.2"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.4"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.5"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.6"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.7"), true )
+				);
 	}
 
-	@Test
-	public void filterWithStringUtilsIsPresent() throws Exception {
-		RulesTestUtil.addToClasspath(testproject, entries);
+	@ParameterizedTest(name = "{index}: test with pom:[{0}]")
+	@MethodSource("data")
+	public void filterWithStringUtilsIsPresent(IClasspathEntry entry, boolean enabled) throws Exception {
+		RulesTestUtil.addToClasspath(testproject, Arrays.asList(entry));
 
 		StringUtilsRule sur = new StringUtilsRule();
 		sur.calculateEnabledForProject(testproject);
 
-		Assert.assertEquals(enabled, sur.isEnabled());
+		Assertions.assertEquals(enabled, sur.isEnabled());
 	}
 }

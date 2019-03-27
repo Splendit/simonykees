@@ -1,6 +1,5 @@
 package eu.jsparrow.rules.common;
 
-import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
-import eu.jsparrow.rules.common.util.PropertyUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -42,7 +40,7 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 
 	protected RuleDescription ruleDescription;
 
-	protected final JavaVersion requiredJavaVersion;
+	protected final String requiredJavaVersion;
 
 	// default is true because of preferences page
 	protected boolean enabled = true;
@@ -60,20 +58,28 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 	 * 
 	 * @return
 	 */
-	protected abstract JavaVersion provideRequiredJavaVersion();
+	protected abstract String provideRequiredJavaVersion();
 
-	public JavaVersion getRequiredJavaVersion() {
+	@Override
+	public String getRequiredJavaVersion() {
 		return requiredJavaVersion;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return enabled;
+	}
+
+	@Override
+	public boolean isFree() {
+		return false;
 	}
 
 	public Class<T> getVisitor() {
 		return visitorClass;
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -84,6 +90,7 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 	 * 
 	 * @param project
 	 */
+	@Override
 	public void calculateEnabledForProject(IJavaProject project) {
 		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		if (null == compilerCompliance) {
@@ -93,9 +100,7 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 			 */
 			satisfiedJavaVersion = false;
 		} else {
-			// SIM-844 HOTFIX to accept java 9
-			JavaVersion usedJavaVersion = PropertyUtil.stringToJavaVersion(compilerCompliance);
-			satisfiedJavaVersion = usedJavaVersion.atLeast(requiredJavaVersion);
+			satisfiedJavaVersion = JavaCore.compareJavaVersions(compilerCompliance, requiredJavaVersion) >= 0;
 		}
 		satisfiedLibraries = ruleSpecificImplementation(project);
 		enabled = satisfiedJavaVersion && satisfiedLibraries;
@@ -108,6 +113,7 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 	 * @param project
 	 * @return
 	 */
+	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 		return true;
 	}
@@ -186,6 +192,7 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 	 * 
 	 * @return String value of required library fully qualified class name
 	 */
+	@Override
 	public String requiredLibraries() {
 		return null;
 	}
@@ -197,6 +204,7 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 	 * @return true if rule can be applied according to java version, false
 	 *         otherwise
 	 */
+	@Override
 	public boolean isSatisfiedJavaVersion() {
 		return satisfiedJavaVersion;
 	}
@@ -208,6 +216,7 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 	 * @return true if rule can be applied according to required libraries,
 	 *         false otherwise
 	 */
+	@Override
 	public boolean isSatisfiedLibraries() {
 		return satisfiedLibraries;
 	}

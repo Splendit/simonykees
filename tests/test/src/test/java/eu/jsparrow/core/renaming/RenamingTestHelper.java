@@ -1,7 +1,7 @@
 package eu.jsparrow.core.renaming;
 
 import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +32,7 @@ import eu.jsparrow.core.AbstractRulesTest;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
@@ -106,7 +106,7 @@ public class RenamingTestHelper {
 	}
 
 	/**
-	 * Applies the {@link PublicFieldsRenamingRule} to the target compilation
+	 * Applies the {@link FieldsRenamingRule} to the target compilation
 	 * units of the given {@link FieldDeclarationASTVisitor}.
 	 * 
 	 * 
@@ -123,7 +123,7 @@ public class RenamingTestHelper {
 	public static List<ICompilationUnit> applyRenamingRule(FieldDeclarationASTVisitor referencesVisitor)
 			throws RefactoringException, RuleException, ReconcileException {
 		List<RefactoringRule> rules = new ArrayList<>();
-		PublicFieldsRenamingRule rule = new PublicFieldsRenamingRule(referencesVisitor.getFieldMetaData(),
+		FieldsRenamingRule rule = new FieldsRenamingRule(referencesVisitor.getFieldMetaData(),
 				referencesVisitor.getUnmodifiableFieldMetaData());
 		rules.add(rule);
 

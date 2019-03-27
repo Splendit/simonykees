@@ -14,7 +14,7 @@ EOF
 
 TEST=false
 OBFUSCATION=false
-PRODUCTION=false 
+PRODUCTION=false
 
 # parse arguments
 while getopts ":top" option
@@ -95,7 +95,7 @@ mvn clean install $PARAMETERS
 
 if [ $? -ne 0 ]; then
   echo "maven on jSparrow maven plugin failed!"
-  exit 4
+  exit 5
 fi
 
 echo

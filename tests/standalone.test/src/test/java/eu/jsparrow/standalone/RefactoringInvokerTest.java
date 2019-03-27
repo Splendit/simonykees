@@ -1,19 +1,24 @@
 package eu.jsparrow.standalone;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.osgi.framework.BundleContext;
 
-import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
@@ -28,15 +33,25 @@ public class RefactoringInvokerTest {
 	private RefactoringInvoker refactoringInvoker;
 	private StandaloneConfig standaloneConfig;
 
+	private MavenProjectImporter mavenImporter;
+
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
+
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 		refactoringInvoker = new TestableRefactoringInvoker();
+		mavenImporter = mock(MavenProjectImporter.class);
 
 		IJavaProject javaProject = mock(IJavaProject.class);
 		when(javaProject.getElementName()).thenReturn("projectName"); //$NON-NLS-1$
 
 		standaloneConfig = mock(StandaloneConfig.class);
 		when(standaloneConfig.getJavaProject()).thenReturn(javaProject);
+
+		when(mavenImporter.importProjects(any(File.class), any(String.class)))
+			.thenReturn(Collections.singletonList(javaProject));
+		refactoringInvoker.setImporter(mavenImporter);
 	}
 
 	@Test
@@ -55,25 +70,27 @@ public class RefactoringInvokerTest {
 		verify(standaloneConfig).commitRefactoring();
 	}
 
-	@Test(expected = StandaloneException.class)
-	public void startRefactoring_exceptinsInCreateRefactoringState_shouldNotCommit() throws Exception {
+	@Test
+	public void startRefactoring_exceptionsInCreateRefactoringState_shouldNotCommit() throws Exception {
 		BundleContext context = mock(BundleContext.class);
 
 		doThrow(StandaloneException.class).when(standaloneConfig)
 			.createRefactoringStates();
 
+		expectedException.expect(StandaloneException.class);
 		refactoringInvoker.startRefactoring(context);
 
 		verify(standaloneConfig, never()).computeRefactoring();
 		verify(standaloneConfig, never()).commitRefactoring();
 	}
 
-	@Test(expected = StandaloneException.class)
-	public void startRefactoring_exceptinsInDoRefactoring_shouldNotCommit() throws Exception {
+	@Test
+	public void startRefactoring_exceptionsInDoRefactoring_shouldNotCommit() throws Exception {
 		BundleContext context = mock(BundleContext.class);
 		doThrow(StandaloneException.class).when(standaloneConfig)
 			.computeRefactoring();
 
+		expectedException.expect(StandaloneException.class);
 		refactoringInvoker.startRefactoring(context);
 
 		verify(standaloneConfig, never()).commitRefactoring();
@@ -82,13 +99,9 @@ public class RefactoringInvokerTest {
 	class TestableRefactoringInvoker extends RefactoringInvoker {
 
 		@Override
-		protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws StandaloneException {
-			return new YAMLConfig();
-		}
-
-		@Override
-		protected void loadStandaloneConfig(BundleContext context) {
+		protected void loadStandaloneConfig(List<IJavaProject> importedProjects, BundleContext context) {
 			super.standaloneConfigs = Arrays.asList(standaloneConfig);
 		}
+		
 	}
 }

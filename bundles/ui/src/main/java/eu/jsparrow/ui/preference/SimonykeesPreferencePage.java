@@ -59,13 +59,6 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	private Font font;
 
-	private enum ProfileImportMode {
-		SKIP,
-		RENAME,
-		REPLACE,
-		IMPORT,
-	}
-
 	public SimonykeesPreferencePage() {
 		super(GRID);
 		setPreferenceStore(Activator.getDefault()
@@ -88,8 +81,6 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		generalGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		generalGroup.setLayout(new GridLayout(1, false));
 
-		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO,
-				Messages.SimonykeesPreferencePage_enableIntroText, generalGroup));
 		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY,
 				Messages.SimonykeesPreferencePage_resolvePackagesRecursivelyLabel, generalGroup));
 
@@ -657,5 +648,12 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		}
 
 		return newProfileName;
+	}
+
+	private enum ProfileImportMode {
+		SKIP,
+		RENAME,
+		REPLACE,
+		IMPORT,
 	}
 }

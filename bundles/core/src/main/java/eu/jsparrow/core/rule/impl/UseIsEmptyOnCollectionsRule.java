@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -19,19 +19,25 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class UseIsEmptyOnCollectionsRule extends RefactoringRuleImpl<UseIsEmptyOnCollectionsASTVisitor> {
 
+	public static final String USE_IS_EMPTY_ON_COLLECTIONS_RULE_ID = "UseIsEmptyOnCollections"; //$NON-NLS-1$
+
 	public UseIsEmptyOnCollectionsRule() {
 		super();
 		this.visitorClass = UseIsEmptyOnCollectionsASTVisitor.class;
-		this.id = "UseIsEmptyOnCollections"; //$NON-NLS-1$
+		this.id = USE_IS_EMPTY_ON_COLLECTIONS_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.UseIsEmptyOnCollectionsRule_name,
-				Messages.UseIsEmptyOnCollectionsRule_description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_6, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				Messages.UseIsEmptyOnCollectionsRule_description, Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_6,
+						Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS, Tag.READABILITY, Tag.FREE));
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
+	protected String provideRequiredJavaVersion() {
 		// string 1.6, collection 1.2, map 1.2
-		return JavaVersion.JAVA_1_6;
+		return JavaCore.VERSION_1_6;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

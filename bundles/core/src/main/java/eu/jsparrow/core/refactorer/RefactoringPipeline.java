@@ -17,10 +17,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +32,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
+import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
@@ -64,12 +65,15 @@ public class RefactoringPipeline {
 
 	private boolean multipleProjects = false;
 
+	private WorkingCopyOwnerDecorator workingCopyOwner;
+
 	/**
 	 * Constructor without parameters, used to create RefactoringPipeline before
 	 * SelectRulesWizard is opened
 	 */
 	public RefactoringPipeline() {
 		this.refactoringStates = new ArrayList<>();
+		this.workingCopyOwner = new WorkingCopyOwnerDecorator();
 	}
 
 	/**
@@ -90,9 +94,8 @@ public class RefactoringPipeline {
 		 * outside of the Job. Plus we only know the list of rules when
 		 * finishing.
 		 */
-
+		this();
 		this.rules = rules;
-		this.refactoringStates = new ArrayList<>();
 	}
 
 	public List<RefactoringRule> getRules() {
@@ -308,11 +311,11 @@ public class RefactoringPipeline {
 	 */
 	public void createRefactoringState(ICompilationUnit compilationUnit, List<ICompilationUnit> containingErrorList)
 			throws JavaModelException {
-		ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(WorkingCopyOwnerDecorator.OWNER, null);
-		IProblemRequestor problemRequestor = WorkingCopyOwnerDecorator.OWNER.getProblemRequestor(workingCopy);
+		ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(workingCopyOwner, null);
+		IProblemRequestor problemRequestor = workingCopyOwner.getProblemRequestor(workingCopy);
 		List<IProblem> problems = ((ProblemRequestor) problemRequestor).getProblems();
 		if (problems.isEmpty()) {
-			refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, WorkingCopyOwnerDecorator.OWNER));
+			refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, workingCopyOwner));
 		} else {
 			String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors,
 					compilationUnit.getElementName(), problems.get(0));
@@ -585,7 +588,6 @@ public class RefactoringPipeline {
 		}
 	}
 
-	@SuppressWarnings("deprecation") // see SIM-878
 	private CompilationUnit applyToRefactoringState(RefactoringState refactoringState,
 			List<NotWorkingRuleModel> returnListNotWorkingRules, CompilationUnit astRoot, RefactoringRule rule,
 			boolean initialApply) {
@@ -594,8 +596,9 @@ public class RefactoringPipeline {
 		try {
 			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, newAstRoot, initialApply);
 			if (hasChanges) {
+				Version jdtVersion = JdtVersionBindingUtil.findCurrentJDTVersion();
 				ICompilationUnit workingCopy = refactoringState.getWorkingCopy();
-				newAstRoot = workingCopy.reconcile(AST.JLS8, true, null, null);
+				newAstRoot = workingCopy.reconcile(JdtVersionBindingUtil.findJLSLevel(jdtVersion), true, null, null);
 			}
 		} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 			logger.error(e.getMessage(), e);

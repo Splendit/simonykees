@@ -16,7 +16,7 @@ public class StringLiteralEqualityCheckRule {
 
 		boolean swap = input // don't break the semicolon
 			.equals("input" // don't break the line
-		);
+			);
 		return swap;
 	}
 
@@ -66,7 +66,7 @@ public class StringLiteralEqualityCheckRule {
 				// please dont loose me
 				foo // comparing equality with a copy of init value
 					.equals("cornerCaseWithCommentsInBetween" // I may be useful
-				);
+					);
 
 		return swap;
 	}
@@ -83,12 +83,18 @@ public class StringLiteralEqualityCheckRule {
 
 	public boolean compareStringExpression() {
 		String fooConcat = "fooconcatexpression";
-		return fooConcat.equals("foo" + "concat" + "expression");
+		return fooConcat.equals(new StringBuilder().append("foo")
+			.append("concat")
+			.append("expression")
+			.toString());
 	}
 
 	public boolean compareStringExpression2() {
 		String fooConcat = "fooconcatexpression";
-		return "fooconcatexpression".equals(("foo" + "concat" + "expression"));
+		return "fooconcatexpression".equals((new StringBuilder().append("foo")
+			.append("concat")
+			.append("expression")
+			.toString()));
 	}
 
 	public boolean checkingCustomComparable() {

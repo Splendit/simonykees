@@ -2,7 +2,6 @@ package eu.jsparrow.dummies;
 
 import java.time.Duration;
 
-import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -23,12 +22,17 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 public class DummyRule implements RefactoringRule {
 
 	@Override
-	public JavaVersion getRequiredJavaVersion() {
+	public String getRequiredJavaVersion() {
 		return null;
 	}
 
 	@Override
 	public boolean isEnabled() {
+		return false;
+	}
+	
+	@Override
+	public boolean isFree() {
 		return false;
 	}
 

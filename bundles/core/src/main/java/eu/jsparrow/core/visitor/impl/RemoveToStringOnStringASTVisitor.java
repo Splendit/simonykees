@@ -8,7 +8,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
@@ -49,11 +48,6 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 		Expression variableExpression = node.getExpression();
 		List<String> stringFullyQualifiedNameList = generateFullyQualifiedNameList(stringFullyQualifiedName);
 
-		/*
-		 * Checks if method invocation is toString. The invocation needs to have
-		 * zero arguments. The expressions type where the toString is used on
-		 * needs to be a String or a StringLiteral
-		 */
 		if (!checkSemanticPrecondition(node, variableExpression, stringFullyQualifiedNameList)) {
 			return true;
 		}
@@ -71,7 +65,9 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 		boolean unwrapped = false;
 		do {
 			unwrapped = false;
-			if (variableExpression instanceof ParenthesizedExpression) {
+
+			if (variableExpression.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION
+					&& node.getLocationInParent() != MethodInvocation.EXPRESSION_PROPERTY) {
 				variableExpression = ASTNodeUtil.unwrapParenthesizedExpression(variableExpression);
 				unwrapped = true;
 			}
@@ -97,6 +93,11 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 		return true;
 	}
 
+	/**
+	 * Checks if method invocation is toString. The invocation needs to have
+	 * zero arguments. The expressions type where the toString is used on needs
+	 * to be a String or a StringLiteral
+	 */
 	protected boolean checkSemanticPrecondition(MethodInvocation node, Expression methodInvocationexpression,
 			List<String> stringFullyQualifiedNameList) {
 		ASTNode parent = node.getParent();

@@ -3,7 +3,6 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -13,7 +12,6 @@ import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
-import eu.jsparrow.rules.common.util.PropertyUtil;
 
 /**
  * @see DiamondOperatorASTVisitor
@@ -27,7 +25,7 @@ import eu.jsparrow.rules.common.util.PropertyUtil;
  */
 public class DiamondOperatorRule extends RefactoringRuleImpl<DiamondOperatorASTVisitor> {
 
-	private JavaVersion javaVersion;
+	private String javaVersion;
 
 	public DiamondOperatorRule() {
 		super();
@@ -39,8 +37,8 @@ public class DiamondOperatorRule extends RefactoringRuleImpl<DiamondOperatorASTV
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_1_7;
+	protected String provideRequiredJavaVersion() {
+		return JavaCore.VERSION_1_7;
 	}
 
 	/**
@@ -48,8 +46,7 @@ public class DiamondOperatorRule extends RefactoringRuleImpl<DiamondOperatorASTV
 	 */
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
-		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		javaVersion = PropertyUtil.stringToJavaVersion(compilerCompliance);
+		javaVersion = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		return true;
 	}
 

@@ -19,6 +19,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -43,7 +44,8 @@ import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
- * TODO SIM-103 add class description
+ * Wizard handler called when Select rules is selected from context menu under
+ * jSparrow
  * 
  * @author Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec, Matthias
  *         Webhofer
@@ -192,6 +194,15 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 						super.configureShell(newShell);
 						newShell.setSize(1000, 1000);
 						newShell.setMinimumSize(680, 600);
+					}
+
+					@Override
+					protected void createButtonsForButtonBar(Composite parent) {
+						super.createButtonsForButtonBar(parent);
+
+						Button finish = getButton(IDialogConstants.FINISH_ID);
+						finish.setText(Messages.SelectRulesWizardHandler_finishButtonText);
+						setButtonLayoutData(finish);
 					}
 				};
 				/*

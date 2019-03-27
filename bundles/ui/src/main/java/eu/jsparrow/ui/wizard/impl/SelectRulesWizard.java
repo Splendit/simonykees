@@ -37,6 +37,7 @@ import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which
@@ -300,14 +301,14 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 			throws JavaModelException {
 		String packageName = packageFragment.getElementName();
 		IJavaElement parent = packageFragment.getParent();
-		if (parent != null && parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && !packageName.isEmpty()) {
+		if (parent != null && parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && !StringUtils.isEmpty(packageName)) {
 			IPackageFragmentRoot root = (IPackageFragmentRoot) parent;
 			for (IJavaElement packageElement : root.getChildren()) {
 				if (packageElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 					IPackageFragment pkg = (IPackageFragment) packageElement;
 					if (!pkg.getElementName()
-						.equals(packageName) && pkg.getElementName()
-							.startsWith(packageName)) {
+						.equals(packageName) && StringUtils
+							.startsWith(pkg.getElementName(), packageName)) {
 						addCompilationUnit(result, pkg.getCompilationUnits());
 					}
 				}

@@ -490,6 +490,30 @@ public class EnhancedForLoopToStreamFindFirstRule {
 			.orElse(null);
 	}
 
+	public ReturnTypeSample returnSubtypeOrSibling_shouldNotTransform(String input) {
+		List<String> values = generateList(input);
+		for (String value : values) {
+			if (value.equals(input)) {
+				return new ReturnTypeSampleChild(value);
+			}
+		}
+		return new ReturnTypeSampleChildSibling("");
+	}
+
+	public Object mapToParameterizedType_shouldNotTransform(String input) {
+		List<String> values = generateList(input);
+		for (String value : values) {
+			if (value.equals(input)) {
+				return createParaeterizedInstance(value);
+			}
+		}
+		return new Object();
+	}
+
+	private ParameterizedSampleType<?> createParaeterizedInstance(String value) {
+		return new ParameterizedSampleType<ReturnTypeSampleChild>();
+	}
+
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(","));
 	}
@@ -507,9 +531,35 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		}
 	}
 
+	class ParameterizedSampleType<T extends ReturnTypeSample> {
+
+		public ReturnTypeSample streamOfTypeVariable_shouldNotAddCasting() {
+			/*
+			 * SIM-1336
+			 */
+			ReturnTypeSample typeSample = new ReturnTypeSample("");
+			return getAllTypeSamples().stream()
+				.filter(value -> value.equals(typeSample))
+				.findFirst()
+				.orElse(null);
+		}
+
+		private List<T> getAllTypeSamples() {
+			return new ArrayList<>();
+		}
+	}
+
 	class ReturnTypeSampleChild extends ReturnTypeSample {
 
 		ReturnTypeSampleChild(String value) {
+			super(value);
+		}
+
+	}
+
+	class ReturnTypeSampleChildSibling extends ReturnTypeSample {
+
+		ReturnTypeSampleChildSibling(String value) {
 			super(value);
 		}
 

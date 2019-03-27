@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.i18n.ExceptionMessages;
@@ -35,7 +35,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
  * Wizard that holds {@link RenamingRulePreviewWizardPage} for
- * {@link PublicFieldsRenamingRule}. On Finish it commits all wanted renaming
+ * {@link FieldsRenamingRule}. On Finish it commits all wanted renaming
  * changes to {@link CompilationUnit}s.
  * 
  * @author Andreja Sambolec, Matthias Webhofer
@@ -49,7 +49,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	private List<FieldMetaData> metaData;
 
 	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges;
-	private PublicFieldsRenamingRule rule;
+	private FieldsRenamingRule rule;
 
 	private List<ICompilationUnit> targetCompilationUnits;
 	private Map<IPath, Document> originalDocuments;
@@ -57,7 +57,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
-			List<ICompilationUnit> targetCompilationUnits, PublicFieldsRenamingRule rule) {
+			List<ICompilationUnit> targetCompilationUnits, FieldsRenamingRule rule) {
 		super();
 		this.refactoringPipeline = refactoringPipeline;
 		this.metaData = metadata;
@@ -121,7 +121,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		if (!privateChanges.isEmpty()) {
 			addPage(new RenamingRulePreviewWizardPage(privateChanges, originalDocuments, rule));
 		}
-		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model);
+		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model, canFinish());
 		addPage(summaryPage);
 	}
 

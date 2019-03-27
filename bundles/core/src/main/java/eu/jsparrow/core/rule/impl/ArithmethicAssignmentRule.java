@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -30,8 +30,8 @@ public class ArithmethicAssignmentRule extends RefactoringRuleImpl<ArithmethicAs
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_1_4;
+	protected String provideRequiredJavaVersion() {
+		return JavaCore.VERSION_1_4;
 	}
 
 }

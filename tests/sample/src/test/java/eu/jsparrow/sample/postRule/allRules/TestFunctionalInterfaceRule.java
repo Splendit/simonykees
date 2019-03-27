@@ -336,7 +336,10 @@ public class TestFunctionalInterfaceRule {
 			try {
 
 			} catch (Exception e1) {
-				String sthToLog = e1.getMessage() + toString() + param;
+				String sthToLog = new StringBuilder().append(e1.getMessage())
+					.append(toString())
+					.append(param)
+					.toString();
 			}
 
 		};
@@ -347,13 +350,13 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	private interface AFunctionalInterface {
-		public void method(int a);
+		void method(int a);
 	}
 
 	private interface NonFunctionalInterface {
-		public void method();
+		void method();
 
-		public void method(int a);
+		void method(int a);
 	}
 
 	private class MyClass {

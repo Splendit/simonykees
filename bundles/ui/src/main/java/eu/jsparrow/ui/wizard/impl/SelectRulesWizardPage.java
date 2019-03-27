@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Wizard page for selecting rules when applying rules to selected resources
@@ -45,9 +46,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizardPage.class);
 
-	private Composite filterComposite;
-
 	private static final String CUSTOM_PROFILE = Messages.SelectRulesWizardPage_CustomProfileLabel;
+
+	private Composite filterComposite;
 
 	private Combo selectProfileCombo;
 
@@ -102,8 +103,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		nameFilterText.setLayoutData(gridData);
 		nameFilterText.addModifyListener((ModifyEvent e) -> {
 			Text source = (Text) e.getSource();
-			((SelectRulesWizardPageControler) controler).nameFilterTextChanged(StringUtils.lowerCase(source.getText()
-				.trim()));
+			((SelectRulesWizardPageControler) controler)
+				.nameFilterTextChanged(StringUtils.lowerCase(StringUtils.trim(source.getText())));
 		});
 		// following doesn't work under Windows7
 		nameFilterText.addSelectionListener(new SelectionAdapter() {
@@ -114,8 +115,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 					text.setText(Messages.SelectRulesWizardPage_emptyString);
 				} else if (e.detail == SWT.ICON_SEARCH) {
 					Text text = (Text) e.getSource();
-					String input = StringUtils.lowerCase(text.getText()
-						.trim());
+					String input = StringUtils.lowerCase(StringUtils.trim(text.getText()));
 					if (!StringUtils.isEmpty(input) && !((SelectRulesWizardPageModel) model).getAppliedTags()
 						.contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
@@ -132,8 +132,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR) {
-					String input = StringUtils.lowerCase(((Text) e.getSource()).getText()
-						.trim());
+					String input = StringUtils.lowerCase(StringUtils.trim(((Text) e.getSource()).getText()));
 					if (!StringUtils.isEmpty(input) && !((SelectRulesWizardPageModel) model).getAppliedTags()
 						.contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
@@ -186,6 +185,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	private void populateGroupFilterCombo() {
 		SimonykeesPreferenceManager.getAllProfileIds()
 			.stream()
+			.filter(profileName -> LicenseUtil.get()
+				.isFreeLicense() || (!Messages.Profile_FreeRulesProfile_profileName.equals(profileName)))
 			.map(SimonykeesPreferenceManager::getProfileFromName)
 			.filter(Optional<SimonykeesProfile>::isPresent)
 			.map(Optional<SimonykeesProfile>::get)
@@ -200,6 +201,19 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 */
 	private void initializeGroupFilterCombo() {
 		String currentProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
+
+		/*
+		 * only show the Free Rules Profile, if jSparrow free or starter is
+		 * activated. remove it from the profiles and default to the Defalut
+		 * profile, if the Free Rules Profile is selected.
+		 */
+		if (!LicenseUtil.get()
+			.isFreeLicense()) {
+			SimonykeesPreferenceManager.removeProfile(Messages.Profile_FreeRulesProfile_profileName);
+			if (Messages.Profile_FreeRulesProfile_profileName.equals(currentProfileId)) {
+				currentProfileId = Messages.Profile_DefaultProfile_profileName;
+			}
+		}
 
 		if (!SimonykeesPreferenceManager.getProfileFromName(currentProfileId)
 			.isPresent()) {

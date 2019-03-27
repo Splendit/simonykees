@@ -28,8 +28,9 @@ public class MapContentProvider implements IStructuredContentProvider {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (inputElement == null)
+		if (inputElement == null) {
 			return new Object[0];
+		}
 
 		if (inputElement instanceof Map) {
 			return ((Map) inputElement).entrySet()

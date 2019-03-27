@@ -13,8 +13,10 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preference.profile.DefaultProfile;
 import eu.jsparrow.ui.preference.profile.EmptyProfile;
+import eu.jsparrow.ui.preference.profile.FreeRulesProfile;
 import eu.jsparrow.ui.preference.profile.Profile;
 import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Central point to access property values.
@@ -30,6 +32,7 @@ public class SimonykeesPreferenceManager {
 	private static List<SimonykeesProfile> profiles = new ArrayList<>();
 
 	private static SimonykeesProfile defaultProfile = new DefaultProfile();
+	private static SimonykeesProfile freeRulesProfile = new FreeRulesProfile();
 	private static SimonykeesProfile emptyProfile = new EmptyProfile();
 
 	private SimonykeesPreferenceManager() {
@@ -45,12 +48,23 @@ public class SimonykeesPreferenceManager {
 		sb.append(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER);
 		sb.append(StringUtils.join(defaultProfile.getEnabledRuleIds(),
 				SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
-
+		if (LicenseUtil.get()
+			.isFreeLicense()) {
+			sb.append("|"); //$NON-NLS-1$
+			sb.append(freeRulesProfile.getProfileName());
+			sb.append(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER);
+			sb.append(StringUtils.join(freeRulesProfile.getEnabledRuleIds(),
+					SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
+		}
 		return sb.toString();
 	}
 
 	public static String getDefaultProfileName() {
 		return defaultProfile.getProfileName();
+	}
+
+	public static String getFreeRulesProfileName() {
+		return freeRulesProfile.getProfileName();
 	}
 
 	public static String getEmptyProfileName() {
@@ -66,7 +80,7 @@ public class SimonykeesPreferenceManager {
 	}
 
 	public static void removeProfile(String name) {
-		getProfileFromName(name).ifPresent(profile -> profiles.remove(profile));
+		getProfileFromName(name).ifPresent(profiles::remove);
 	}
 
 	public static void updateProfile(int index, String name, List<String> ruleIds, boolean isSetAsDefault) {
@@ -98,19 +112,37 @@ public class SimonykeesPreferenceManager {
 	}
 
 	/**
-	 * Returns the current selection for enabling intro on startup.
+	 * Returns the current selection for enabling dashboard on startup.
 	 * 
-	 * @return the boolean value if intro should be enabled
+	 * @return the boolean value if dashboard should be enabled
 	 */
-	public static boolean getEnableIntro() {
-		return store.getBoolean(SimonykeesPreferenceConstants.ENABLE_INTRO);
+	public static boolean getEnableDashboard() {
+		return store.getBoolean(SimonykeesPreferenceConstants.ENABLE_DASHBOARD);
 	}
 
 	/**
-	 * Sets the current selection for enabling intro on startup.
+	 * Sets the current selection for enabling dashboard on startup.
 	 */
-	public static void setEnableIntro(boolean enabled) {
-		store.setValue(SimonykeesPreferenceConstants.ENABLE_INTRO, enabled);
+	public static void setEnableDashboard(boolean enabled) {
+		store.setValue(SimonykeesPreferenceConstants.ENABLE_DASHBOARD, enabled);
+	}
+
+	/**
+	 * Returns the current selection for disabling register suggestion when
+	 * starting select rules wizard.
+	 * 
+	 * @return the boolean value if register suggestion should be disabled
+	 */
+	public static boolean getDisableRegisterSuggestion() {
+		return store.getBoolean(SimonykeesPreferenceConstants.DISABLE_REGISTER_SUGGESTION);
+	}
+
+	/**
+	 * Sets the current selection for disabling register suggestion when
+	 * starting select rules wizard.
+	 */
+	public static void setDisableRegisterSuggestion(boolean disabled) {
+		store.setValue(SimonykeesPreferenceConstants.DISABLE_REGISTER_SUGGESTION, disabled);
 	}
 
 	/**
@@ -154,12 +186,18 @@ public class SimonykeesPreferenceManager {
 		String[] profilesArray = parseString(getAllProfiles());
 		for (String profileInfo : profilesArray) {
 			String name = StringUtils.substring(profileInfo, 0,
-					profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER));
-			List<String> rules = Arrays.asList(StringUtils
-				.substring(profileInfo, profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
-				.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
+					StringUtils.indexOf(profileInfo, SimonykeesPreferenceConstants.NAME_RULES_DELIMITER));
+			List<String> rules = Arrays.asList(
+					StringUtils
+						.substring(profileInfo,
+								StringUtils.indexOf(profileInfo, SimonykeesPreferenceConstants.NAME_RULES_DELIMITER)
+										+ 1)
+						.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
 			if (name.equals(Messages.Profile_DefaultProfile_profileName)) {
 				profiles.add(defaultProfile);
+			} else if (name.equals(Messages.Profile_FreeRulesProfile_profileName) && LicenseUtil.get()
+				.isFreeLicense()) {
+				profiles.add(freeRulesProfile);
 			} else if (name.equals(Messages.EmptyProfile_profileName)) {
 				profiles.add(emptyProfile);
 			} else {
@@ -229,11 +267,14 @@ public class SimonykeesPreferenceManager {
 		store.setValue(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
 				store.getDefaultString(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT));
 
-		store.setValue(SimonykeesPreferenceConstants.ENABLE_INTRO, true);
 		store.setValue(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, true);
 
 		profiles.clear();
 		defaultProfile = new DefaultProfile();
+		if (LicenseUtil.get()
+			.isFreeLicense()) {
+			freeRulesProfile = new FreeRulesProfile();
+		}
 		emptyProfile = new EmptyProfile();
 		loadProfilesFromStore();
 	}

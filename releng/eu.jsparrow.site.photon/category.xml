@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/eu.jsparrow.3rd.party.feature_0.0.0.jar" id="eu.jsparrow.3rd.party.feature" version="0.0.0"/>
+   <feature url="features/eu.jsparrow.photon.feature_0.0.0.jar" id="eu.jsparrow.photon.feature" version="0.0.0">
+      <category name="photon"/>
+   </feature>
+   <category-def name="photon" label="Photon">
+      <description>
+         Eclipse plugins by Splendit IT-Consulting GmbH
+      </description>
+   </category-def>
+</site>

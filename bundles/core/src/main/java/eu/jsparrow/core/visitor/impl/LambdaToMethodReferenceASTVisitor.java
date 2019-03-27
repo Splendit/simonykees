@@ -1,5 +1,12 @@
 package eu.jsparrow.core.visitor.impl;
 
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.compareBoxedITypeBinding;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.compareITypeBinding;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.findInheretedMethods;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.findOverloadedMethods;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isOverloadedOnParamter;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isVisibleIn;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -8,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -26,6 +34,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -35,7 +44,6 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
@@ -83,24 +91,28 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						Expression.class);
 				Expression methodInvocationExpression = methodInvocation.getExpression();
 
+				if (isWrappedInOverloadedMethod(lambdaExpressionNode, methodInvocation)) {
+					return true;
+				}
+
 				/*
 				 * case 1: reference to static method
 				 * 
 				 * case 2: reference to instance method i.e.
 				 * 
-				 * personList.forEach(element -> System.out.println(element));
+				 * personList.forEach(element -> System.out.println(element))
 				 * 
 				 * becomes
 				 * 
-				 * personList.forEach(System.out::println);
+				 * personList.forEach(System.out::println)
 				 * 
 				 * case 3: reference to 'this' i.e.
 				 * 
-				 * personList.forEach(person -> doSomething(person));
+				 * personList.forEach(person -> doSomething(person))
 				 * 
 				 * becomes
 				 * 
-				 * personList.forEach(this::doSomething);
+				 * personList.forEach(this::doSomething)
 				 */
 				if (methodArguments.size() == lambdaParams.size()
 						&& checkMethodParameters(lambdaParams, methodArguments)) {
@@ -138,12 +150,13 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						ITypeBinding lambdaEnclosingType = lambdaEnclosing.resolveBinding();
 
 						if (Modifier.isStatic(methodBinding.getModifiers())) {
+							ITypeBinding declaringClassErasure = methodsDeclaringClass.getErasure();
+							newImports.add(declaringClassErasure.getQualifiedName());
 							SimpleName staticClassName = astRewrite.getAST()
-								.newSimpleName(methodsDeclaringClass.getErasure()
-									.getName());
+								.newSimpleName(declaringClassErasure.getName());
 							ref.setExpression(staticClassName);
 							isReferenceExpressionSet = true;
-						} else if (ClassRelationUtil.compareITypeBinding(methodsDeclaringClass, lambdaEnclosingType)) {
+						} else if (compareITypeBinding(methodsDeclaringClass, lambdaEnclosingType)) {
 							ClassInstanceCreation enclosingAnonymousInnerClass = ASTNodeUtil
 								.getSpecificAncestor(lambdaExpressionNode, ClassInstanceCreation.class);
 							if (enclosingAnonymousInnerClass == null) {
@@ -186,11 +199,11 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 				/*
 				 * case 4: reference to instance method of arbitrary type i.e.
 				 * 
-				 * Arrays.sort(stringArray, (a, b) -> a.compareToIgnoreCase(b));
+				 * Arrays.sort(stringArray, (a, b) -> a.compareToIgnoreCase(b))
 				 * 
 				 * becomes
 				 * 
-				 * Arrays.sort(stringArray, String::compareToIgnoreCase);
+				 * Arrays.sort(stringArray, String::compareToIgnoreCase)
 				 */
 				else if ((lambdaParams.size() - 1) == methodArguments.size() && methodInvocationExpression != null) {
 
@@ -209,7 +222,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 								.map(var -> var.resolveBinding()
 									.getType())
 								.collect(Collectors.toList());
-							if (typeNameStr != null && !typeNameStr.isEmpty()
+							if (typeNameStr != null && !StringUtils.isEmpty(typeNameStr)
 									&& !isAmbiguousMethodReference(methodInvocation, ambTypes)) {
 
 								Name typeName = astRewrite.getAST()
@@ -237,12 +250,12 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			 * case 5: reference to class instance creation (new) i.e.
 			 * 
 			 * Set<Person> persSet2 = transferElements(personList, () -> new
-			 * HashSet<>());
+			 * HashSet<>())
 			 * 
 			 * becomes
 			 * 
 			 * Set<Person> persSet3 = transferElements(personList,
-			 * HashSet<Person>::new);
+			 * HashSet<Person>::new)
 			 */
 			else if (ASTNode.CLASS_INSTANCE_CREATION == body.getNodeType()) {
 				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) body;
@@ -258,7 +271,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						.newCreationReference();
 					if (ASTNode.PARAMETERIZED_TYPE == classInstanceCreationType.getNodeType()
 							&& ((ParameterizedType) classInstanceCreationType).typeArguments()
-								.size() == 0) {
+								.isEmpty()) {
 						ref.setType((Type) astRewrite
 							.createMoveTarget(((ParameterizedType) classInstanceCreationType).getType()));
 					} else {
@@ -275,6 +288,67 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		return true;
 	}
 
+	private boolean isWrappedInOverloadedMethod(LambdaExpression lambdaExpressionNode,
+			MethodInvocation methodInvocation) {
+		ASTNode parent = lambdaExpressionNode.getParent();
+		if (parent.getNodeType() != ASTNode.METHOD_INVOCATION) {
+			return false;
+		}
+
+		MethodInvocation wrapperMethod = (MethodInvocation) parent;
+		List<Expression> wrapperMethodParameters = ASTNodeUtil.convertToTypedList(wrapperMethod.arguments(),
+				Expression.class);
+		int index = wrapperMethodParameters.indexOf(lambdaExpressionNode);
+
+		List<IMethodBinding> overloadedWrapperMethods = findOverloadedMethods(wrapperMethod).stream()
+			.filter(method -> Modifier.isPublic(method.getModifiers()))
+			.collect(Collectors.toList());
+		IMethodBinding wrapperMethodBinding = wrapperMethod.resolveMethodBinding();
+		if (wrapperMethodBinding == null) {
+			return false;
+		}
+
+		boolean isOverloadedWrapperMethod = overloadedWrapperMethods.stream()
+			.anyMatch(method -> isOverloadedOnParamter(wrapperMethodBinding, method, index));
+
+		if (isOverloadedWrapperMethod && discardsReturnedType(methodInvocation)) {
+			return true;
+		}
+
+		Expression expression = methodInvocation.getExpression();
+		if (expression != null) {
+			ITypeBinding expressionBinidng = expression.resolveTypeBinding();
+			if (expressionBinidng != null && expressionBinidng.isRawType() && isOverloadedWrapperMethod) {
+				return true;
+			}
+		}
+
+		List<IMethodBinding> publicOverloadedMethods = findOverloadedMethods(methodInvocation).stream()
+			.filter(method -> isVisibleIn(method, wrapperMethod))
+			.collect(Collectors.toList());
+
+		if (publicOverloadedMethods.isEmpty()) {
+			return false;
+		}
+
+		return isOverloadedWrapperMethod;
+	}
+
+	private boolean discardsReturnedType(MethodInvocation methodInvocation) {
+		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return false;
+		}
+
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		ITypeBinding returnType = methodBinding.getReturnType();
+		if (returnType == null) {
+			return false;
+		}
+
+		String typeName = returnType.getName();
+		return !typeName.equals(PrimitiveType.VOID.toString());
+	}
+
 	/**
 	 * Checks if the transformation of a lambda expression to a method reference
 	 * will cause an ambiguity for the java compiler. For example
@@ -286,8 +360,9 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	 *            a node representing a method invocation
 	 * @param params
 	 *            the type of the parameters that can cause ambiguity
-	 * @return {@code true} if an ambiguity is detected, and {@code false}
-	 *         otherwise.
+	 * @return {@code true} if an ambiguity is detected of if the binding of the
+	 *         type where the method is declared cannot be resolved, and
+	 *         {@code false} otherwise.
 	 */
 	private boolean isAmbiguousMethodReference(MethodInvocation methodInvocation, List<ITypeBinding> params) {
 		Expression expression = methodInvocation.getExpression();
@@ -299,8 +374,12 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		} else {
 			type = methodBinding.getDeclaringClass();
 		}
+		if (type == null) {
+			return true;
+		}
+
 		methods.addAll(Arrays.asList(type.getDeclaredMethods()));
-		methods.addAll(ClassRelationUtil.findInheretedMethods(type));
+		methods.addAll(findInheretedMethods(type));
 		String methodIdentifier = methodInvocation.getName()
 			.getIdentifier();
 
@@ -313,7 +392,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			return methods.stream()
 				.anyMatch(
 						method -> methodIdentifier.equals(method.getName()) && !Modifier.isStatic(method.getModifiers())
-								&& ClassRelationUtil.compareBoxedITypeBinding(method.getParameterTypes(), paramsArray));
+								&& compareBoxedITypeBinding(method.getParameterTypes(), paramsArray));
 		} else {
 			/*
 			 * non-static methods can cause ambiguity with static methods
@@ -321,7 +400,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			return methods.stream()
 				.anyMatch(
 						method -> methodIdentifier.equals(method.getName()) && Modifier.isStatic(method.getModifiers())
-								&& ClassRelationUtil.compareBoxedITypeBinding(method.getParameterTypes(), paramsArray));
+								&& compareBoxedITypeBinding(method.getParameterTypes(), paramsArray));
 		}
 
 	}
@@ -360,6 +439,11 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		if (binding == null) {
 			return ""; //$NON-NLS-1$
 		}
+		
+		if(binding.isArray()) {
+			// see SIM-1453
+			return ""; //$NON-NLS-1$
+		}
 
 		if (binding.isCapture()) {
 			Optional<ITypeBinding> optBinding = Arrays.asList(binding.getTypeBounds())
@@ -380,7 +464,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			String qualifiedName = binding.getErasure()
 				.getQualifiedName();
 			int outerTypeStartingIndex = qualifiedName.lastIndexOf(outerTypeName);
-			typeNameStr = qualifiedName.substring(outerTypeStartingIndex);
+			typeNameStr = StringUtils.substring(qualifiedName, outerTypeStartingIndex);
 			newImports.add(declaringClassErasure.getQualifiedName());
 		} else if (qualifiedNameNeeded(binding)) {
 			typeNameStr = binding.getErasure()
@@ -396,7 +480,9 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	}
 
 	private boolean qualifiedNameNeeded(ITypeBinding binding) {
-		String bindingName = binding.getName();
+		ITypeBinding typeBidning = binding.getErasure() != null ? binding.getErasure() : binding;
+		String bindingName = typeBidning.getName();
+		String bindingQualifiedName = typeBidning.getQualifiedName();
 		return ASTNodeUtil.returnTypedList(compilationUnit.imports(), ImportDeclaration.class)
 			.stream()
 			.map(ImportDeclaration::getName)
@@ -405,9 +491,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 				QualifiedName qualifiedImportName = (QualifiedName) name;
 				return qualifiedImportName.getName()
 					.getIdentifier()
-					.equals(bindingName)
-						&& !binding.getQualifiedName()
-							.equals(qualifiedImportName.toString());
+					.equals(bindingName) && !bindingQualifiedName.equals(qualifiedImportName.toString());
 			});
 	}
 

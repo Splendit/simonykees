@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.LambdaToMethodReferenceASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -19,18 +19,25 @@ import eu.jsparrow.rules.common.Tag;
  *
  */
 public class LambdaToMethodReferenceRule extends RefactoringRuleImpl<LambdaToMethodReferenceASTVisitor> {
+
+	public static final String LAMBDA_TO_METHOD_REFERENCE_RULE_ID = "LambdaToMethodReference"; //$NON-NLS-1$
+
 	public LambdaToMethodReferenceRule() {
 		super();
 		this.visitorClass = LambdaToMethodReferenceASTVisitor.class;
-		this.id = "LambdaToMethodReference"; //$NON-NLS-1$
+		this.id = LAMBDA_TO_METHOD_REFERENCE_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.LambdaToMethodReferenceRule_name,
 				Messages.LambdaToMethodReferenceRule_description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA));
+				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.FREE));
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_1_8;
+	protected String provideRequiredJavaVersion() {
+		return JavaCore.VERSION_1_8;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

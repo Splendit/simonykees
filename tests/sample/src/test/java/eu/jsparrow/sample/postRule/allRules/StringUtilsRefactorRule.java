@@ -43,11 +43,14 @@ public class StringUtilsRefactorRule {
 
 	public boolean testStartWith(String testString) {
 		String sometimesExpectedString = "start";
-
+		testString.startsWith(sometimesExpectedString, 1);
 		return StringUtils.startsWith(testString, sometimesExpectedString);
 	}
 
 	public int testIndexOf(String testString) {
+		StringUtils.indexOf(testString, 0);
+		StringUtils.indexOf(testString, 4, 0);
+		StringUtils.indexOf(testString, "e", 1);
 		return StringUtils.indexOf(testString, "e");
 	}
 
@@ -94,27 +97,25 @@ public class StringUtilsRefactorRule {
 	}
 
 	private String complexSplit(String input, String splitSign, int limit) {
-		if (StringUtils.contains(input, splitSign)) {
-			if ("?".equals(splitSign)) {
-				/*
-				 * We need to escape the "?" because otherwise there is the
-				 * following exception: java.util.regex.PatternSyntaxException:
-				 * Dangling meta character '?' near index 0
-				 */
-				splitSign = splitSign.replace("?", "\\?");
-			}
-			if ("|".equals(splitSign)) {
-				/*
-				 * We need to escape the "|" because otherwise an empty String
-				 * is taken as split sign.
-				 */
-				splitSign = splitSign.replace("|", "\\|");
-			}
-			return limit == 0 ? Arrays.toString(input.split(splitSign))
-					: Arrays.toString(input.split(splitSign, limit));
-		} else {
+		if (!StringUtils.contains(input, splitSign)) {
 			return input;
 		}
+		if ("?".equals(splitSign)) {
+			/*
+			 * We need to escape the "?" because otherwise there is the
+			 * following exception: java.util.regex.PatternSyntaxException:
+			 * Dangling meta character '?' near index 0
+			 */
+			splitSign = splitSign.replace("?", "\\?");
+		}
+		if ("|".equals(splitSign)) {
+			/*
+			 * We need to escape the "|" because otherwise an empty String is
+			 * taken as split sign.
+			 */
+			splitSign = splitSign.replace("|", "\\|");
+		}
+		return limit == 0 ? Arrays.toString(input.split(splitSign)) : Arrays.toString(input.split(splitSign, limit));
 	}
 
 	public String testReplaceCornerCaseCharSequence(String testString) {
@@ -148,14 +149,19 @@ public class StringUtilsRefactorRule {
 
 	public String testUpperCaseCornerCase(String testString) {
 		Locale l = Locale.GERMAN;
-
+		StringUtils.upperCase(testString);
 		return StringUtils.upperCase(testString, l);
 	}
 
 	public String testLowerCaseCornerCase(String testString) {
 		Locale l = Locale.GERMAN;
-
+		StringUtils.lowerCase(testString);
 		return StringUtils.lowerCase(testString, l);
+	}
+
+	public String testSubstring(String testString) {
+		StringUtils.substring(testString, 0);
+		return StringUtils.substring(testString, 0, 0);
 	}
 
 	// Reproduces SIM-319

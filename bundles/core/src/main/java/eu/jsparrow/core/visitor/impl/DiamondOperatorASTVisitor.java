@@ -2,7 +2,7 @@ package eu.jsparrow.core.visitor.impl;
 
 import java.util.List;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -40,9 +40,9 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private JavaVersion compilerCompliance;
+	private String compilerCompliance;
 
-	public DiamondOperatorASTVisitor(JavaVersion compilerCompliance) {
+	public DiamondOperatorASTVisitor(String compilerCompliance) {
 		this.compilerCompliance = compilerCompliance;
 	}
 
@@ -263,7 +263,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private boolean isMethodArgumentsTypeInferable() {
 		if (compilerCompliance != null) {
-			return compilerCompliance.atLeast(JavaVersion.JAVA_1_8);
+			return JavaCore.compareJavaVersions(compilerCompliance, JavaCore.VERSION_1_8) >= 0;
 		}
 		return false;
 	}

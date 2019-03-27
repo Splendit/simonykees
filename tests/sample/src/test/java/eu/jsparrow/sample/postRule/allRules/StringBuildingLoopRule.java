@@ -291,7 +291,10 @@ public class StringBuildingLoopRule {
 		List<String> collectionOfStrings = generateStringList(input);
 		String result = "";
 		for (String val : collectionOfStrings) {
-			result = result + "," + val;
+			result = new StringBuilder().append(result)
+				.append(",")
+				.append(val)
+				.toString();
 		}
 		return result;
 	}

@@ -1,19 +1,19 @@
 package eu.jsparrow.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.eclipse.jdt.core.JavaCore;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.rules.imports.OrganiseImportsRule;
+import eu.jsparrow.rules.imports.OrganizeImportsRule;
 
 @SuppressWarnings("nls")
 public class OrganizeImportsRulesTest extends SingleRuleTest {
@@ -22,11 +22,11 @@ public class OrganizeImportsRulesTest extends SingleRuleTest {
 	private static final String CONFLICTING_IMPORTS_FILE = "OrganiseConflictingImportsRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "organiseImports";
 
-	private OrganiseImportsRule rule;
+	private OrganizeImportsRule rule;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
-		rule = new OrganiseImportsRule();
+		rule = new OrganizeImportsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
@@ -43,7 +43,7 @@ public class OrganizeImportsRulesTest extends SingleRuleTest {
 
 	@Test
 	// This test fails, and I don't know why. Need to ask
-	@Ignore
+	@Disabled
 	public void testTransformationWithConflictingImportsFile() throws Exception {
 		Path preRule = getPreRuleFile(CONFLICTING_IMPORTS_FILE);
 		Path postRule = getPostRuleFile(CONFLICTING_IMPORTS_FILE, POSTRULE_SUBDIRECTORY);

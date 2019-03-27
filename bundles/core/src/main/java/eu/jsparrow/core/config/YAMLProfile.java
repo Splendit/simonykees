@@ -20,14 +20,22 @@ public class YAMLProfile {
 	 */
 	private List<String> rules;
 
+	private YAMLRenamingRule renamingRule;
+
+	private YAMLLoggerRule loggerRule;
+
 	public YAMLProfile() {
 		this.name = ""; //$NON-NLS-1$
 		this.rules = new LinkedList<>();
+		this.renamingRule = new YAMLRenamingRule();
+		this.loggerRule = new YAMLLoggerRule();
 	}
 
-	public YAMLProfile(String name, List<String> rules) {
+	public YAMLProfile(String name, List<String> rules, YAMLRenamingRule renamingRule, YAMLLoggerRule loggerRule) {
 		this.name = name;
 		this.rules = rules;
+		this.renamingRule = renamingRule;
+		this.loggerRule = loggerRule;
 	}
 
 	public String getName() {
@@ -46,10 +54,26 @@ public class YAMLProfile {
 		this.rules = rules;
 	}
 
+	public YAMLRenamingRule getRenamingRule() {
+		return renamingRule;
+	}
+
+	public void setRenamingRule(YAMLRenamingRule renamingRule) {
+		this.renamingRule = renamingRule;
+	}
+
+	public YAMLLoggerRule getLoggerRule() {
+		return loggerRule;
+	}
+
+	public void setLoggerRule(YAMLLoggerRule loggerRule) {
+		this.loggerRule = loggerRule;
+	}
+
 	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
-		return "YAMLProfile [name=" + name + ", rules=" + rules + "]";
+		return "YAMLProfile [name=" + name + ", rules=" + rules + ", " + renamingRule.toString() + ", " + loggerRule.toString() + "]";
 	}
 
 }

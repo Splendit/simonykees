@@ -50,13 +50,15 @@ public class TestToStringOnStringRule {
 			.toString();
 
 		String input = "noInput";
-		s = StringUtils.substring(s, 0) // save me
-			.toString() + input
-				+ ("some-other-nasty-string" // skip me
-					.toString())
-				+ "abc" // you dont want to break the code
-					.toString()
-				+ 'c';
+		s = new StringBuilder().append(StringUtils.substring(s, 0) // save me
+			.toString())
+			.append(input)
+			.append("some-other-nasty-string" // skip me
+				.toString())
+			.append("abc" // you dont want to break the code
+				.toString())
+			.append('c')
+			.toString();
 
 		/* leading comment */
 		/* invocation comment */
@@ -108,7 +110,11 @@ public class TestToStringOnStringRule {
 	}
 
 	public String testToStringInNestedConcatOperations(String input) {
-		String val = input + ("some-other-nasty-string") + "abc" + 'c';
+		String val = new StringBuilder().append(input)
+			.append("some-other-nasty-string")
+			.append("abc")
+			.append('c')
+			.toString();
 		return val;
 	}
 

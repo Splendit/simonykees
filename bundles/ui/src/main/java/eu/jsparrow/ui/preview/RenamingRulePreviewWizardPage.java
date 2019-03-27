@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
@@ -64,7 +64,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	private Map<IPath, Document> originalDocuments;
 
 	public RenamingRulePreviewWizardPage(Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes,
-			Map<IPath, Document> originalDocuments, PublicFieldsRenamingRule rule1) {
+			Map<IPath, Document> originalDocuments, FieldsRenamingRule rule1) {
 		super(rule1.getRuleDescription()
 			.getName());
 		this.changes = changes;
@@ -86,8 +86,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	 */
 	private void convertChangesToDocumentChangeWrappers() {
 		changesWrapperList = new ArrayList<>();
-		for (Map.Entry<FieldMetaData, Map<ICompilationUnit, DocumentChange>> entry : changes.entrySet()) {
-			FieldMetaData fieldData = entry.getKey();
+		changes.entrySet().stream().map(Map.Entry::getKey).forEach(fieldData -> {
 			Map<ICompilationUnit, DocumentChange> changesForField = changes.get(fieldData);
 			if (!changesForField.isEmpty()) {
 				DocumentChange parent = null;
@@ -104,7 +103,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 							changesForField, parent);
 				}
 			}
-		}
+		});
 		if (!changesWrapperList.isEmpty()) {
 			this.selectedDocWrapper = changesWrapperList.get(0);
 		}
@@ -120,14 +119,13 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	private void createDocumentChangeWrapperChildren(FieldMetaData fieldData, Document originalDocument,
 			Map<ICompilationUnit, DocumentChange> changesForField, DocumentChange parent) {
 		DocumentChangeWrapper dcw = new DocumentChangeWrapper(parent, null, originalDocument, fieldData);
-		for (Map.Entry<ICompilationUnit, DocumentChange> entry : changesForField.entrySet()) {
-			ICompilationUnit iCompilationUnit = entry.getKey();
+		changesForField.entrySet().stream().map(Map.Entry::getKey).forEach(iCompilationUnit -> {
 			if (!(fieldData.getDeclarationPath()).equals(iCompilationUnit.getPath())) {
 				DocumentChange document = changesForField.get(iCompilationUnit);
 				dcw.addChild(document, iCompilationUnit.getElementName(),
 						this.originalDocuments.get(iCompilationUnit.getPath()));
 			}
-		}
+		});
 
 		changesWrapperList.add(dcw);
 	}

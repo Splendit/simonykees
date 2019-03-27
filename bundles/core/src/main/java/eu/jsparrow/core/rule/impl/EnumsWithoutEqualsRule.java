@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.EnumsWithoutEqualsASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -19,19 +19,25 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class EnumsWithoutEqualsRule extends RefactoringRuleImpl<EnumsWithoutEqualsASTVisitor> {
 
+	public static final String ENUMS_WITHOUT_EQUALS_RULE_ID = "EnumsWithoutEquals"; //$NON-NLS-1$
+
 	public EnumsWithoutEqualsRule() {
 		super();
 		this.visitorClass = EnumsWithoutEqualsASTVisitor.class;
-		this.id = "EnumsWithoutEquals"; //$NON-NLS-1$
+		this.id = ENUMS_WITHOUT_EQUALS_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.EnumsWithoutEqualsRule_name,
 				Messages.EnumsWithoutEqualsRule_description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS));
+				Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS, Tag.FREE));
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
+	protected String provideRequiredJavaVersion() {
 		// Enums exist since 1.5
-		return JavaVersion.JAVA_1_5;
+		return JavaCore.VERSION_1_5;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

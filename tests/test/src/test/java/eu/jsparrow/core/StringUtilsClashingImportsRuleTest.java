@@ -1,18 +1,18 @@
 package eu.jsparrow.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.eclipse.jdt.core.JavaCore;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.rules.imports.OrganiseImportsRule;
+import eu.jsparrow.rules.imports.OrganizeImportsRule;
 
 @SuppressWarnings("nls")
 public class StringUtilsClashingImportsRuleTest extends SingleRuleTest {
@@ -20,11 +20,11 @@ public class StringUtilsClashingImportsRuleTest extends SingleRuleTest {
 	private static final String SAMPLE_FILE = "StringUtilsClashingImportCornerCaseRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "stringUtilsClashinImport";
 
-	private OrganiseImportsRule rule;
+	private OrganizeImportsRule rule;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
-		rule = new OrganiseImportsRule();
+		rule = new OrganizeImportsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 
 	}

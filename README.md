@@ -16,11 +16,13 @@ Read instructions at: [Eclipse](https://confluence.splendit.loc/display/Tutorial
 
 ## build ##
 
+JDK 9 and above: set the Environment Variable ``JSPARROW_RT_JAR_PATH`` to a path to a JDK 8 rt.jar in your ``~/.profile`` (see SIM-1415)
+
     mvn clean verify -fae
 
 ## version update ##
 
-    mvn org.eclipse.tycho:tycho-versions-plugin:0.26.0:set-version -DnewVersion=<newVersion>
+    mvn org.eclipse.tycho:tycho-versions-plugin:1.0.0:set-version -DnewVersion=<newVersion>
     
 Since not everything can be done by tycho yet (i.e., releng and the maven-plugin) search for any occurrences of the old version like that:
 

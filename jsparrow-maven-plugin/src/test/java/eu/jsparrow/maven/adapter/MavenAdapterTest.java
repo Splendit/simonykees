@@ -1,9 +1,8 @@
 package eu.jsparrow.maven.adapter;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -111,112 +110,22 @@ public class MavenAdapterTest {
 	}
 
 	@Test
-	public void findProjectIdentifier_groupAndArtifactId() {
-		String expectedProjectId = "group.id.artifact.id";
-		MavenProject mavenProject = mock(MavenProject.class);
-
-		when(mavenProject.getGroupId()).thenReturn("group.id");
-		when(mavenProject.getArtifactId()).thenReturn("artifact.id");
-
-		String actualValue = mavenAdapter.findProjectIdentifier(mavenProject);
-		assertTrue(expectedProjectId.equals(actualValue));
-
-	}
-
-	@Test
-	public void findYamlFilePath_yamlFileExists_shouldReturnFilePath() throws IOException {
-
-		String expectedPath = jsparrowYml.getAbsolutePath();
-		when(path.toFile()).thenReturn(jsparrowYml);
-		String actualPath = mavenAdapter.findYamlFilePath(project, jsparrowYml);
-
-		assertTrue(actualPath.equals(expectedPath));
-	}
-
-	@Test
-	public void findYamlFilePath_parentIsRootProject_shouldReturnRootYamlFilePath() throws IOException {
-		MavenProject childProject = mock(MavenProject.class);
-		String expectedPath = jsparrowYml.getAbsolutePath();
-		File childBaseDir = directory.newFolder("project_base_dir" + File.separator + "child_Base_Dir");
-		when(childProject.getBasedir()).thenReturn(childBaseDir);
-		when(childProject.getParent()).thenReturn(project);
-		when(path.toFile()).thenReturn(jsparrowYml);
-
-		String actualPath = mavenAdapter.findYamlFilePath(childProject, jsparrowYml);
-
-		assertTrue(actualPath.equals(expectedPath));
-	}
-
-	@Test
-	public void findYamlFilePath_parentIsNotRoot_shouldReturnParentFilePath() throws IOException {
-		MavenProject child = mock(MavenProject.class);
-		MavenProject parent = mock(MavenProject.class);
-		File parentBaseDir = directory.newFolder("parent-folder");
-		File parentYamlFile = new File(parentBaseDir.getAbsolutePath() + File.separator + "file.yaml");
-		parentYamlFile.createNewFile();
-		File childBaseDir = directory.newFolder("parent-folder" + File.separator + "child-folder");
-		String expectedPath = parentYamlFile.getAbsolutePath();
-		when(path.toFile()).thenReturn(jsparrowYml);
-		when(parent.getBasedir()).thenReturn(parentBaseDir);
-		when(child.getParent()).thenReturn(parent);
-		when(child.getBasedir()).thenReturn(childBaseDir);
-
-		String actualPath = mavenAdapter.findYamlFilePath(child, parentYamlFile);
-
-		assertTrue(actualPath.equals(expectedPath));
-	}
-
-	@Test
-	public void isAggregateProject_hasPomPckage() {
-		MavenProject project = mock(MavenProject.class);
-		when(project.getPackaging()).thenReturn("pom");
-		assertTrue(mavenAdapter.isAggregateProject(project));
-	}
-
-	@Test
-	public void isAggregateProject_hasListOfModules() {
-		MavenProject project = mock(MavenProject.class);
-		when(project.getPackaging()).thenReturn("");
-		when(project.getModules()).thenReturn(Collections.singletonList("module"));
-		assertTrue(mavenAdapter.isAggregateProject(project));
-	}
-
-	@Test
-	public void isAggregateProject_shouldReturnFalse_jarPackagingNoModules() {
-		MavenProject project = mock(MavenProject.class);
-		when(project.getPackaging()).thenReturn("jar");
-		when(project.getModules()).thenReturn(Collections.emptyList());
-		assertFalse(mavenAdapter.isAggregateProject(project));
-	}
-
-	@Test
-	public void joinWithComma_emptyLeftSide() {
-		String expected = "right";
-		String actual = mavenAdapter.joinWithComma("", expected);
-		assertTrue(expected.equals(actual));
-	}
-
-	@Test
-	public void joinWithComma_shouldReturnCommaConcatenated() {
-		String expected = "project.one.id,project.two.id";
-		String actual = mavenAdapter.joinWithComma("project.one.id", "project.two.id");
-		assertTrue(expected.equals(actual));
-	}
-
-	@Test
 	public void setUp_listOfProjects() throws Exception {
-		String expectedCompilerSource = "expectedCompilerSource";
 		MavenParameters mavenParameters = new MavenParameters("list-rules");
 
 		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(false);
 		when(project.getPackaging()).thenReturn("jar");
 		when(path.toFile()).thenReturn(jsparrowYml);
-		when(properties.getProperty("maven.compiler.source")).thenReturn(expectedCompilerSource);
 
-		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml);
+		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml);
 
 		Map<String, String> configurations = mavenAdapter.getConfiguration();
-		assertTrue(configurations.containsKey("NATURE.IDS." + groupId + "." + artifactId));
+		assertTrue(configurations.containsKey(ConfigurationKeys.ROOT_CONFIG_PATH));
+		assertTrue(configurations.get(ConfigurationKeys.ROOT_CONFIG_PATH)
+			.equals(jsparrowYml.getAbsolutePath()));
+		assertTrue(configurations.containsKey(ConfigurationKeys.ROOT_PROJECT_BASE_PATH));
+		assertTrue(configurations.get(ConfigurationKeys.ROOT_PROJECT_BASE_PATH)
+			.equals(projectBaseDir.getAbsolutePath()));
 	}
 
 	@Test(expected = MojoExecutionException.class)
@@ -225,7 +134,7 @@ public class MavenAdapterTest {
 
 		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(true);
 
-		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml);
+		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml);
 
 		assertTrue(false);
 	}

@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,12 +45,9 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 
 	private static final Logger logger = LoggerFactory.getLogger(StandardLoggerRule.class);
 
-	private static final String TRACE = "trace"; //$NON-NLS-1$
-	private static final String DEBUG = "debug"; //$NON-NLS-1$
-	private static final String INFO = "info"; //$NON-NLS-1$
-	private static final String WARN = "warn"; //$NON-NLS-1$
-	private static final String ERROR = "error"; //$NON-NLS-1$
 	private static final String TRUE = Boolean.TRUE.toString();
+	
+	public static final String STANDARD_LOGGER_RULE_ID = "StandardLogger"; //$NON-NLS-1$
 
 	private Map<String, Integer> systemOutReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> systemErrReplaceOptions = new LinkedHashMap<>();
@@ -67,25 +64,25 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 
 	static {
 		Map<String, Integer> options = new LinkedHashMap<>();
-		options.put(TRACE, 1);
-		options.put(DEBUG, 2);
-		options.put(INFO, 3);
-		options.put(WARN, 4);
-		options.put(ERROR, 5);
+		options.put(LogLevelEnum.TRACE.getLogLevel(), 1);
+		options.put(LogLevelEnum.DEBUG.getLogLevel(), 2);
+		options.put(LogLevelEnum.INFO.getLogLevel(), 3);
+		options.put(LogLevelEnum.WARN.getLogLevel(), 4);
+		options.put(LogLevelEnum.ERROR.getLogLevel(), 5);
 		replaceOptions = Collections.unmodifiableMap(options);
 	}
 
 	public StandardLoggerRule() {
 		this.visitorClass = StandardLoggerASTVisitor.class;
-		this.id = "StandardLogger"; //$NON-NLS-1$
+		this.id = STANDARD_LOGGER_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.StandardLoggerRule_name,
 				Messages.StandardLoggerRule_description, Duration.ofMinutes(10),
 				Arrays.asList(Tag.JAVA_1_1, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS));
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_1_1;
+	protected String provideRequiredJavaVersion() {
+		return JavaCore.VERSION_1_1;
 	}
 
 	@Override
@@ -160,12 +157,12 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	@Override
 	public Map<String, String> getDefaultOptions() {
 		Map<String, String> defaultOptions = new HashMap<>();
-		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, INFO);
-		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, ERROR);
-		defaultOptions.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY, ERROR);
-		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY, INFO);
-		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY, ERROR);
-		defaultOptions.put(StandardLoggerConstants.MISSING_LOG_KEY, ERROR);
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, LogLevelEnum.INFO.getLogLevel());
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, LogLevelEnum.ERROR.getLogLevel());
+		defaultOptions.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY, LogLevelEnum.ERROR.getLogLevel());
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY, LogLevelEnum.INFO.getLogLevel());
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY, LogLevelEnum.ERROR.getLogLevel());
+		defaultOptions.put(StandardLoggerConstants.MISSING_LOG_KEY, LogLevelEnum.ERROR.getLogLevel());
 		defaultOptions.put(StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT, TRUE);
 
 		return defaultOptions;

@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -23,6 +24,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -57,11 +60,17 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 		SimpleName parameterName = parameter.getName();
 		ITypeBinding parameterTypeBinding = parameterName.resolveTypeBinding();
 
+		if (isConditionalExpression(expression)) {
+			return;
+		}
+
 		// expression must be of type java.util.Collection
 		ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
-		if (expressionTypeBinding != null
-				&& (ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST)
-						|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST))
+		if (expressionTypeBinding == null || expressionTypeBinding.isRawType()) {
+			return;
+		}
+		if ((ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST)
+				|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST))
 				&& isTypeSafe(parameterTypeBinding)) {
 
 			ASTNode approvedStatement = getApprovedStatement(statement, parameterName);
@@ -88,9 +97,27 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				 * parts of the lambda expression.
 				 */
 				SimpleName parameterNameCopy = (SimpleName) astRewrite.createCopyTarget(parameterName);
-				VariableDeclarationFragment lambdaParameter = astRewrite.getAST()
-					.newVariableDeclarationFragment();
-				lambdaParameter.setName(parameterNameCopy);
+
+				ASTNode lambdaParameter;
+				List<IExtendedModifier> modifiers = ASTNodeUtil.returnTypedList(parameter.modifiers(),
+						IExtendedModifier.class);
+				if (modifiers.isEmpty()) {
+					VariableDeclarationFragment temp = astRewrite.getAST()
+						.newVariableDeclarationFragment();
+					temp.setName(parameterNameCopy);
+					lambdaParameter = temp;
+				} else {
+					Type parameterTypeCopy = (Type) astRewrite.createCopyTarget(parameterType);
+					SingleVariableDeclaration temp = NodeBuilder.newSingleVariableDeclaration(astRewrite.getAST(),
+							parameterNameCopy, parameterTypeCopy);
+					ListRewrite lambdaExpressionParameterListRewrite = astRewrite.getListRewrite(temp,
+							SingleVariableDeclaration.MODIFIERS2_PROPERTY);
+					for (IExtendedModifier mod : modifiers) {
+						lambdaExpressionParameterListRewrite.insertLast(astRewrite.createCopyTarget((ASTNode) mod),
+								null);
+					}
+					lambdaParameter = temp;
+				}
 
 				ASTNode statementCopy = astRewrite.createCopyTarget(approvedStatement);
 

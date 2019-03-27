@@ -4,12 +4,14 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -98,6 +100,23 @@ public class NodeBuilder {
 		resultMI.setName(name);
 		return resultMI;
 	}
+
+	/**
+	 * Creates an method invocation on an expression with
+	 * 
+	 * @param ast
+	 *            the AbstractSyntaxTree thats the target of the node
+	 * @param optionalExpression
+	 *            target of the invocation
+	 * @param name
+	 *            is the name of the invoked method
+	 * @return returns a new method with fills with the parameters
+	 */
+	public static MethodInvocation newMethodInvocation(AST ast, Expression optionalExpression, String name) {
+		SimpleName methodName = ast.newSimpleName(name);
+		return newMethodInvocation(ast, optionalExpression, methodName);
+	}
+
 
 	/**
 	 * 
@@ -283,6 +302,30 @@ public class NodeBuilder {
 	 * 
 	 * @param ast
 	 *            the AbstractSyntaxTree thats the target of the node
+	 * @param operator
+	 *            {@link InfixExpression.Operator} of the
+	 *            {@link InfixExpression}
+	 * @param left
+	 *            {@link Expression} for the left-operand
+	 * @param right
+	 *            {@link Expression} for the right-operand
+	 * @param extendedOperands
+	 *            list of {@link Expressions} for the extended operands
+	 * @return {@link InfixExpression} with the given operator and operands
+	 */
+	@SuppressWarnings("unchecked")
+	public static InfixExpression newInfixExpression(AST ast, InfixExpression.Operator operator, Expression left,
+			Expression right, List<Expression> extendedOperands) {
+		InfixExpression result = newInfixExpression(ast, operator, left, right);
+		result.extendedOperands()
+			.addAll(extendedOperands);
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param ast
+	 *            the AbstractSyntaxTree thats the target of the node
 	 * @param expression
 	 *            {@link Expression} that is wrapped by the new
 	 *            {@link ParenthesizedExpression}
@@ -320,5 +363,37 @@ public class NodeBuilder {
 	 */
 	public static ExpressionStatement newExpressionStatement(AST ast, Expression expression) {
 		return ast.newExpressionStatement(expression);
+	}
+
+	/**
+	 * Creates a {@link LambdaExpression} node. 
+	 * 
+	 * @param ast an AST instance for creating the new node
+	 * @param lambdaBody a new node to be plugged in the lambda body
+	 * @param identifier the name of the lambda parameter
+	 * @return a new {@link LambdaExpression} node. 
+	 */
+	@SuppressWarnings("unchecked")
+	public static LambdaExpression newLambdaExpression(AST ast, ASTNode lambdaBody, String identifier) {
+	
+		LambdaExpression lambdaExpression = ast.newLambdaExpression();
+		SimpleName parameter = ast.newSimpleName(identifier);
+		VariableDeclarationFragment parameterDeclaration = ast.newVariableDeclarationFragment();
+		parameterDeclaration.setName(parameter);
+	
+		lambdaExpression.setParentheses(false);
+		lambdaExpression.parameters()
+			.add(parameterDeclaration);
+		int bodyNodeType = lambdaBody.getNodeType();
+		if (ASTNode.BLOCK == bodyNodeType || lambdaBody instanceof Expression) {
+			lambdaExpression.setBody(lambdaBody);
+		} else {
+			Block newBlock = ast.newBlock();
+			newBlock.statements()
+				.add(lambdaBody);
+			lambdaExpression.setBody(newBlock);
+		}
+	
+		return lambdaExpression;
 	}
 }

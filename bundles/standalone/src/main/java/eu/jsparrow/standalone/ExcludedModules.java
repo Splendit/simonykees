@@ -12,26 +12,28 @@ import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
 import eu.jsparrow.core.config.YAMLExcludes;
-import eu.jsparrow.standalone.exceptions.StandaloneException;
 
+/**
+ * Contains functionality for finding the excluded modules from the yaml
+ * configuration file in the project root.
+ * 
+ * @since 2.6.0
+ *
+ */
 public class ExcludedModules {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
 	private boolean useDefaultConfig;
-
 	private String rootProjectConfig;
 
-	private String selectedProfile;
-
-	public ExcludedModules(Boolean useDefaultConfig, String rootProjectConfig, String selectedProfile) {
+	public ExcludedModules(Boolean useDefaultConfig, String rootProjectConfig) {
 		this.useDefaultConfig = useDefaultConfig;
 		this.rootProjectConfig = rootProjectConfig;
-		this.selectedProfile = selectedProfile;
 	}
 
-	public List<String> get() throws StandaloneException {
+	public List<String> get() {
 
 		String logInfo;
 		if (useDefaultConfig) {
@@ -49,8 +51,18 @@ public class ExcludedModules {
 			return Collections.emptyList();
 		}
 
-		YAMLConfig rootYamlConfig = getRootYamlConfig(rootProjectConfig, selectedProfile);
+		YAMLConfig rootYamlConfig;
+		try {
+			rootYamlConfig = getRootYamlConfig(rootProjectConfig);
+		} catch (YAMLConfigException e) {
+			logger.warn("Cannot find excluded modules. The provided file {} cannot be read", rootProjectConfig); //$NON-NLS-1$
+			return Collections.emptyList();
+		}
+
 		YAMLExcludes excludes = rootYamlConfig.getExcludes();
+		if (null == excludes) {
+			return Collections.emptyList();
+		}
 		List<String> excludedModules = excludes.getExcludeModules();
 		if (!excludedModules.isEmpty()) {
 			logInfo = String.format("Excluded modules: %s ", excludedModules.stream() //$NON-NLS-1$
@@ -63,15 +75,8 @@ public class ExcludedModules {
 
 	}
 
-	protected YAMLConfig getRootYamlConfig(String rootProjectConfig, String selectedProfile)
-			throws StandaloneException {
-		YAMLConfig rootYamlConfig;
-		try {
-			rootYamlConfig = YAMLConfigUtil.readConfig(rootProjectConfig, selectedProfile);
-		} catch (YAMLConfigException e) {
-			throw new StandaloneException("Error occured while reading the root yaml configuration file", e); //$NON-NLS-1$
-		}
-		return rootYamlConfig;
+	protected YAMLConfig getRootYamlConfig(String rootProjectConfig) throws YAMLConfigException {
+		return YAMLConfigUtil.readConfig(rootProjectConfig);
 	}
 
 }

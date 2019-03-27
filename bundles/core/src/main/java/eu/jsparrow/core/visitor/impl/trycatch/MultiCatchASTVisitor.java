@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -46,7 +47,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 			 */
 			Block reference = blockList.remove(blockList.size() - 1);
 			CommentRewriter helper = getCommentRewriter();
-			List<Comment>relatedComments = helper.findRelatedComments(reference);
+			List<Comment> relatedComments = helper.findRelatedComments(reference);
 			SingleVariableDeclaration referenceException = ((CatchClause) reference.getParent()).getException();
 			Type referenceExceptionType = referenceException.getType();
 
@@ -66,7 +67,8 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 
 				if (reference.subtreeMatch(
 						new BijectiveSimpleNameASTMatcher(referenceException.getName(), compareException.getName()),
-						compareBlock) && !jumpsSuperType(compareExceptionType, jumpedTypes)) {
+						compareBlock) && !jumpsSuperType(compareExceptionType, jumpedTypes)
+						&& !usesExceptionForTypeInferene(compareCatch)) {
 					combined = true;
 					addTypesFromBlock(allNewTypes, compareExceptionType);
 					astRewrite.remove(compareCatch, null);
@@ -95,6 +97,15 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return true;
+	}
+
+	private boolean usesExceptionForTypeInferene(CatchClause catchClause) {
+		SingleVariableDeclaration exceptionDeclaration = catchClause.getException();
+		SimpleName exceptionName = exceptionDeclaration.getName();
+		Block body = catchClause.getBody();
+		CatchExceptionUsagesASTVisitor visitor = new CatchExceptionUsagesASTVisitor(exceptionName);
+		body.accept(visitor);
+		return visitor.isExceptionUsedInTypeInference();
 	}
 
 	private boolean jumpsSuperType(Type compareExceptionType, List<Type> jumpedTypes) {

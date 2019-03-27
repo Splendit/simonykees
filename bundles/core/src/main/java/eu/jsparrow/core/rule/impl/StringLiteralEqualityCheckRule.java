@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.StringLiteralEqualityCheckASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -20,18 +20,24 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class StringLiteralEqualityCheckRule extends RefactoringRuleImpl<StringLiteralEqualityCheckASTVisitor> {
 
+	public static final String STRING_LITERAL_EQUALITY_CHECK_RULE_ID = "StringLiteralEqualityCheck"; //$NON-NLS-1$
+
 	public StringLiteralEqualityCheckRule() {
 		super();
 		this.visitorClass = StringLiteralEqualityCheckASTVisitor.class;
-		this.id = "StringLiteralEqualityCheck"; //$NON-NLS-1$
+		this.id = STRING_LITERAL_EQUALITY_CHECK_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.StringLiteralEqualityCheckRule_name,
 				Messages.StringLiteralEqualityCheckRule_description, Duration.ofMinutes(10),
-				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION));
+				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.FREE));
 	}
 
 	@Override
-	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_1_1;
+	protected String provideRequiredJavaVersion() {
+		return JavaCore.VERSION_1_1;
 	}
 
+	@Override
+	public boolean isFree() {
+		return true;
+	}
 }

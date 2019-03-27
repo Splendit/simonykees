@@ -66,12 +66,13 @@ public class DiamondOperatorRule {
 		List<String> list;
 		Map<String, GenericSample<String>> map;
 		Integer ten = Integer.valueOf(10);
-		if (ten > 0) {
-			list = new ArrayList<>();
-			map = new HashMap<>();
-			list.add(ten.toString());
-			map.put(input, new GenericSample<>(ten.toString()));
+		if (ten <= 0) {
+			return;
 		}
+		list = new ArrayList<>();
+		map = new HashMap<>();
+		list.add(ten.toString());
+		map.put(input, new GenericSample<>(ten.toString()));
 	}
 
 	public void multipleMapDeclarationStatement(String input) {
@@ -88,14 +89,15 @@ public class DiamondOperatorRule {
 		List<Integer> numList = new ArrayList<>();
 		Map<String, Integer> map = new HashMap<>();
 		Set<String> set = new HashSet<>();
-		if (list.isEmpty()) {
-			Set<Integer> numSet = new HashSet<>();
-			list.add(input);
-			numSet.add(input.hashCode());
-			numList.add(input.length());
-			map.put(input, input.hashCode());
-			set.add(input);
+		if (!list.isEmpty()) {
+			return;
 		}
+		Set<Integer> numSet = new HashSet<>();
+		list.add(input);
+		numSet.add(input.hashCode());
+		numList.add(input.length());
+		map.put(input, input.hashCode());
+		set.add(input);
 	}
 
 	public String userDefinedGeneric(String input) {
