@@ -31,7 +31,7 @@ public class Startup implements IStartup {
 		PlatformUI.getWorkbench()
 			.getDisplay()
 			.asyncExec(() -> {
-				if (!licenseUtil.isFullLicensePresentInSecureStore() && !licenseUtil.isActiveRegistration()) {
+				if (!licenseUtil.isValidProLicensePresentInSecureStore() && !licenseUtil.isActiveRegistration()) {
 					Shell activeShell = PlatformUI.getWorkbench()
 						.getActiveWorkbenchWindow()
 						.getShell();
