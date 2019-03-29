@@ -8,6 +8,7 @@ import static eu.jsparrow.maven.adapter.ConfigurationKeys.INSTANCE_DATA_LOCATION
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.LICENSE_KEY;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.LIST_RULES_SELECTED_ID;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.OSGI_INSTANCE_AREA_CONSTANT;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.PROXY_SETTINGS;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.ROOT_CONFIG_PATH;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.ROOT_PROJECT_BASE_PATH;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.SELECTED_PROFILE;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Proxy;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Constants;
 
@@ -76,13 +78,16 @@ public class MavenAdapter {
 	 * @throws MojoExecutionException
 	 *             if jSparrow is already started in the root project of the
 	 *             current session.
+	 * @throws JsonProcessingException
 	 */
 	public WorkingDirectory setUpConfiguration(MavenParameters parameters, List<MavenProject> projects,
-			File configFileOverride, File fallbackConfigFile) throws InterruptedException, MojoExecutionException {
+			File configFileOverride, File fallbackConfigFile, List<Proxy> proxies)
+			throws InterruptedException, MojoExecutionException {
 
 		log.info(Messages.MavenAdapter_setUpConfiguration);
 
 		setProjectIds(projects);
+		setProxySettings(proxies);
 		WorkingDirectory workingDirectory = setUpConfiguration(parameters);
 		String rootProjectIdentifier = MavenProjectUtil.findProjectIdentifier(rootProject);
 
@@ -102,6 +107,50 @@ public class MavenAdapter {
 
 		log.info(Messages.MavenAdapter_configurationSetUp);
 		return workingDirectory;
+	}
+
+	private void setProxySettings(List<Proxy> proxies) {
+		String settingsDelimiter = "^"; //$NON-NLS-1$
+		String proxyDelimiter = "§"; //$NON-NLS-1$
+		StringBuilder proxySettingsString = new StringBuilder();
+
+		proxies.stream()
+			.forEach(proxy -> {
+				String type = proxy.getProtocol();
+				String host = proxy.getHost();
+				int port = proxy.getPort();
+				String username = proxy.getUsername();
+				String password = proxy.getPassword();
+				String nonProxyHosts = proxy.getNonProxyHosts();
+
+				proxySettingsString.append("type=") //$NON-NLS-1$
+					.append(type)
+					.append(settingsDelimiter);
+
+				proxySettingsString.append("host=") //$NON-NLS-1$
+					.append(host)
+					.append(settingsDelimiter);
+
+				proxySettingsString.append("port=") //$NON-NLS-1$
+					.append(port)
+					.append(settingsDelimiter);
+
+				proxySettingsString.append("username=") //$NON-NLS-1$
+					.append(username)
+					.append(settingsDelimiter);
+
+				proxySettingsString.append("password=") //$NON-NLS-1$
+					.append(password)
+					.append(settingsDelimiter);
+
+				proxySettingsString.append("nonProxyHosts=") //$NON-NLS-1$
+					.append(nonProxyHosts)
+					.append(settingsDelimiter);
+
+				proxySettingsString.append(proxyDelimiter);
+			});
+
+		configuration.put(PROXY_SETTINGS, proxySettingsString.toString());
 	}
 
 	/**
