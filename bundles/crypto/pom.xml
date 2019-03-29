@@ -14,49 +14,7 @@
 	<name>jSparrow :: crypto</name>
 
 	<properties>
-		<bouncycastle.version>1.61</bouncycastle.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-libraries</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
-								<item>
-									<groupId>org.bouncycastle</groupId>
-									<artifactId>bcprov-jdk15on</artifactId>
-									<version>${bouncycastle.version}</version>
-								</item>
-								<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcpg-jdk15on -->
-								<item>
-									<groupId>org.bouncycastle</groupId>
-									<artifactId>bcpg-jdk15on</artifactId>
-									<version>${bouncycastle.version}</version>
-								</item>
-								<item>
-									<groupId>name.neuhalfen.projects.crypto.bouncycastle.openpgp</groupId>
-									<artifactId>bouncy-gpg</artifactId>
-									<version>2.1.2</version>
-								</item>
-							</artifactItems>
-							<outputDirectory>lib</outputDirectory>
-							<stripVersion>true</stripVersion>
-							<overWriteReleases>true</overWriteReleases>
-							<overWriteSnapshots>true</overWriteSnapshots>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 </project>
