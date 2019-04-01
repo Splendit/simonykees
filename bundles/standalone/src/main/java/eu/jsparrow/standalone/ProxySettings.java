@@ -24,11 +24,7 @@ public class ProxySettings {
 	}
 
 	public void setHost(String host) throws StandaloneException {
-		try {
-			new URL(host);
-		} catch (MalformedURLException e) {
-			throw new StandaloneException(e.getMessage(), e);
-		}
+		this.host = host;
 	}
 
 	public int getPort() {
@@ -73,7 +69,7 @@ public class ProxySettings {
 	}
 
 	public void setType(String type) throws StandaloneException {
-		if("http".equalsIgnoreCase(type)) { //$NON-NLS-1$
+		if ("http".equalsIgnoreCase(type)) { //$NON-NLS-1$
 			this.type = IProxyData.HTTP_PROXY_TYPE;
 		} else if ("https".equalsIgnoreCase(type)) { //$NON-NLS-1$
 			this.type = IProxyData.HTTPS_PROXY_TYPE;

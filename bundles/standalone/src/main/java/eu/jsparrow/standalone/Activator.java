@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
-import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.Bundle;
@@ -118,7 +117,7 @@ public class Activator implements BundleActivator {
 			return new LinkedList<>();
 		}
 
-		String[] splitSettingsString = settingsString.split("\\$"); //$NON-NLS-1$
+		String[] splitSettingsString = settingsString.split("§"); //$NON-NLS-1$
 		List<ProxySettings> proxySettingsList = new LinkedList<>();
 
 		for (String proxySettingsString : splitSettingsString) {

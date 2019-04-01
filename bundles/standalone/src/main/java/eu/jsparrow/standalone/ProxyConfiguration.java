@@ -42,10 +42,13 @@ public class ProxyConfiguration {
 		try {
 			proxyService.setNonProxiedHosts(settings.getNonProxyHosts()
 				.toArray(new String[0]));
+			proxyService.setProxyData(proxyData);
 		} catch (CoreException e) {
 			throw new StandaloneException(e.getMessage(), e);
 		}
 
+		
+		
 		proxyService.setSystemProxiesEnabled(false);
 		proxyService.setProxiesEnabled(true);
 
