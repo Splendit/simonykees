@@ -1,13 +1,20 @@
 package eu.jsparrow.ui.util;
 
+/**
+ * Provides implementation for encrypting and decrypting of the endpoint URL and
+ * the license key.
+ * 
+ * @since 3.4.0
+ *
+ */
 public class EndpointEncryption {
-	
+
 	public String decryptEndpoint(String encrypted) {
 		/*
 		 * TODO: implement decryption algorithm
 		 */
 		String[] parts = encrypted.split("-");
-		if(parts.length < 2) {
+		if (parts.length < 2) {
 			return "";
 		}
 		return parts[1];
@@ -18,7 +25,7 @@ public class EndpointEncryption {
 		 * TODO: implement the decryption algorithm
 		 */
 		String[] parts = key.split("-");
-		if(parts.length < 2) {
+		if (parts.length < 2) {
 			return "";
 		}
 		return parts[0];
