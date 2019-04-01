@@ -31,11 +31,7 @@ public class ProxySettings {
 	}
 
 	public void setHost(String host) throws StandaloneException {
-		try {
-			new URL(host);
-		} catch (MalformedURLException e) {
-			throw new StandaloneException(e.getMessage(), e);
-		}
+		this.host = host;
 	}
 
 	public int getPort() {
