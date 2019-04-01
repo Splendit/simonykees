@@ -28,7 +28,7 @@ public class EndpointSecureStorePersistence extends SecureStoragePersistence<Str
 			logger.debug("No endpoint url was found in storage"); //$NON-NLS-1$
 			return ""; //$NON-NLS-1$
 		}
-		return Arrays.toString(bytes);
+		return new String(bytes);
 	}
 
 	@Override

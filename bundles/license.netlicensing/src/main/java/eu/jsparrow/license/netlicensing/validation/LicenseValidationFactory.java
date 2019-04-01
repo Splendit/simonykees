@@ -26,7 +26,6 @@ public class LicenseValidationFactory {
 	 *            the model to get a validation for
 	 * @return the validation for the given model
 	 */
-
 	public LicenseValidation create(LicenseModel model) {
 		return create(model, ""); //$NON-NLS-1$
 	}
@@ -36,6 +35,9 @@ public class LicenseValidationFactory {
 		logger.debug("Create new validation for model {}", model);
 		if (model instanceof NetlicensingLicenseModel) {
 			logger.debug("Creating new validation {}", NetlicensingLicenseValidation.class);
+			if(endpoint.isEmpty()) {
+				return new NetlicensingLicenseValidation((NetlicensingLicenseModel) model);
+			}
 			return new NetlicensingLicenseValidation((NetlicensingLicenseModel) model, endpoint);
 		} else if (model instanceof DemoLicenseModel) {
 			logger.debug("Creating new validation {}", NetlicensingLicenseValidation.class);

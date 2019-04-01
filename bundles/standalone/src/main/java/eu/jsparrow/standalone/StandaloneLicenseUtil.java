@@ -126,8 +126,8 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
 			String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
 
-			model = factoryService.createNewFloatingModel(key, sessionId, productNr, moduleNr, validationBaseUrl);
-			result = licenseService.validate(model);
+			model = factoryService.createNewFloatingModel(key, sessionId, productNr, moduleNr);
+			result = licenseService.validate(model, validationBaseUrl);
 		} catch (ValidationException | IOException e) {
 			throw new StandaloneException(e.getMessage(), e);
 		}
@@ -145,10 +145,10 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 	}
 
 	@Override
-	public void stop() {
+	public void stop(String validationBaseUrl) {
 		try {
 			if (model != null) {
-				licenseService.checkIn(model);
+				licenseService.checkIn(model, validationBaseUrl);
 			}
 		} catch (ValidationException e) {
 			logger.debug("Failed to check in License: ", e); //$NON-NLS-1$

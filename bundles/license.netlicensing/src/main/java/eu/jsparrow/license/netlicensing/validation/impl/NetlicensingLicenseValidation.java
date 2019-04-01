@@ -32,31 +32,21 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 	private NetlicensingValidationRequest validationRequest;
 
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model) {
-		initState(model);
-		this.validationRequest = createValidationRequest(model);
+		ResponseEvaluator responseEvaluator = initState(model);
+		this.validationRequest = new NetlicensingValidationRequest(responseEvaluator);
 	}
 	
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model, String endpoint) {
-		initState(model);
-		this.validationRequest = createValidationRequest(model, endpoint);
+		ResponseEvaluator responseEvaluator = initState(model);
+		this.validationRequest = new NetlicensingValidationRequest(responseEvaluator, endpoint);
 	}
 
-	private void initState(NetlicensingLicenseModel model) {
+	private ResponseEvaluator initState(NetlicensingLicenseModel model) {
 		this.model = model;
 		this.licenseCache = new NetlicensingLicenseCache();
 		this.parametersFactory = new NetlicensingValidationParametersFactory();
-	}
-	
-	private NetlicensingValidationRequest createValidationRequest(NetlicensingLicenseModel model) {
 		String licenseeNr = model.getKey();
-		ResponseEvaluator responseEvaluator = new ResponseEvaluator(licenseeNr);
-		return new NetlicensingValidationRequest(responseEvaluator);
-	}
-
-	private NetlicensingValidationRequest createValidationRequest(NetlicensingLicenseModel model, String endpoint) {
-		String licenseeNr = model.getKey();
-		ResponseEvaluator responseEvaluator = new ResponseEvaluator(licenseeNr);
-		return new NetlicensingValidationRequest(responseEvaluator, endpoint);
+		return new ResponseEvaluator(licenseeNr);
 	}
 
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model, NetlicensingLicenseCache cache,
@@ -106,7 +96,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		 * return a validation result specific to this license type.
 		 */
 		model = new NetlicensingLicenseModel(model.getKey(), model.getSecret(), model.getProductNr(),
-				model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate(), model.getValidationBaseUrl());
+				model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate());
 
 	}
 

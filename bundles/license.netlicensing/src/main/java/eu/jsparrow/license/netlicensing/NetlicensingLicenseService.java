@@ -30,13 +30,6 @@ public class NetlicensingLicenseService implements LicenseService {
 	}
 
 	@Override
-	public LicenseValidationResult validate(LicenseModel model) throws ValidationException {
-		logger.debug("Validating {}", model);
-		LicenseValidation validation = validationFactory.create(model);
-		return validation.validate();
-	}
-	
-	@Override
 	public LicenseValidationResult validate(LicenseModel model, String endpoint) throws ValidationException {
 		logger.debug("Validating {}", model);
 		LicenseValidation validation = validationFactory.create(model, endpoint);

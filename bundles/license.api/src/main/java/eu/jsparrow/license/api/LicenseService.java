@@ -16,8 +16,6 @@ public interface LicenseService {
 	 * @throws ValidationException
 	 *             if the validation could not be performed
 	 */
-	public LicenseValidationResult validate(LicenseModel model) throws ValidationException;
-	
 	public LicenseValidationResult validate(LicenseModel model, String endpoint) throws ValidationException;
 
 	/**
