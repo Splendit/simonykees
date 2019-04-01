@@ -71,6 +71,8 @@ public class MavenAdapter {
 	 *            path to the provided yml configuration file.
 	 * @param fallbackConfigFile
 	 *            the default {@code jsparrow.yml} file.
+	 * @param proxies
+	 *            list of proxy configurations for equinox
 	 * @return an instance of {@link WorkingDirectory} for managing the working
 	 *         directory of the equinox framework.
 	 * @throws InterruptedException
@@ -78,7 +80,6 @@ public class MavenAdapter {
 	 * @throws MojoExecutionException
 	 *             if jSparrow is already started in the root project of the
 	 *             current session.
-	 * @throws JsonProcessingException
 	 */
 	public WorkingDirectory setUpConfiguration(MavenParameters parameters, List<MavenProject> projects,
 			File configFileOverride, File fallbackConfigFile, List<Proxy> proxies)

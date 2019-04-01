@@ -7,8 +7,15 @@ import java.util.List;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.osgi.util.NLS;
 
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
+/**
+ * Contains the settings to configure the equinox proxy
+ * 
+ * @since JMP 2.0.1
+ *
+ */
 public class ProxySettings {
 
 	private String type;
@@ -37,7 +44,7 @@ public class ProxySettings {
 
 	public void setPort(int port) throws StandaloneException {
 		if (port < 0 || port > 65535) {
-			String msg = NLS.bind("Port must have a value between 0 and 65535. {0} is invalid!", port);
+			String msg = NLS.bind(Messages.ProxySettings_portMustBeBetween0And65535, port);
 			throw new StandaloneException(msg);
 		}
 
@@ -73,12 +80,12 @@ public class ProxySettings {
 	}
 
 	public void setType(String type) throws StandaloneException {
-		if("http".equalsIgnoreCase(type)) { //$NON-NLS-1$
+		if ("http".equalsIgnoreCase(type)) { //$NON-NLS-1$
 			this.type = IProxyData.HTTP_PROXY_TYPE;
 		} else if ("https".equalsIgnoreCase(type)) { //$NON-NLS-1$
 			this.type = IProxyData.HTTPS_PROXY_TYPE;
 		} else {
-			throw new StandaloneException("The proxy only supports HTTPS or HTTP");
+			throw new StandaloneException(Messages.ProxySettings_poxyOnlySupportsHTTPorHTTPS);
 		}
 	}
 

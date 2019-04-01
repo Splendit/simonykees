@@ -6,8 +6,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
+/**
+ * Configure equinox proxy settings
+ * 
+ * @since JMP 2.0.1
+ *
+ */
 public class ProxyConfiguration {
 
 	private BundleContext bundleContext;
@@ -19,11 +26,19 @@ public class ProxyConfiguration {
 		this.bundleContext = bundleContext;
 	}
 
+	/**
+	 * Use the given {@link ProxySettings} to configure the equinox proxy
+	 * 
+	 * @param settings
+	 *            object containing the proxy settings
+	 * @throws StandaloneException
+	 *             when the proxy couldn't be set
+	 */
 	public void setProxy(ProxySettings settings) throws StandaloneException {
 		initProxyService();
 
 		if (proxyService == null) {
-			throw new StandaloneException("Could not retrieve a proxy service instance");
+			throw new StandaloneException(Messages.ProxyConfiguration_CouldNotGetProxyServiceInstance);
 		}
 
 		IProxyData[] proxyData = proxyService.getProxyData();
