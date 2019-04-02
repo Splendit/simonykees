@@ -31,7 +31,8 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
 /**
- * Replaces {@code Map.get([key])} by {@code Map.getOrDefault([key], [defaultValue])}.
+ * Replaces {@code Map.get([key])} by
+ * {@code Map.getOrDefault([key], [defaultValue])}.
  * 
  * @since 3.4.0
  *
@@ -84,8 +85,29 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 			return true;
 		}
 
+		if (!isTypeCompatible(defaultValue, expression)) {
+			return true;
+		}
+
 		replace(methodInvocation, arguments.get(0), defaultValue, followingStatement);
 		return true;
+	}
+
+	private boolean isTypeCompatible(Expression defaultValue, Expression map) {
+		ITypeBinding mapTypeBinding = map.resolveTypeBinding();
+		if (!mapTypeBinding.isParameterizedType()) {
+			return false;
+		}
+
+		ITypeBinding[] typeArguments = mapTypeBinding.getTypeArguments();
+		if (typeArguments.length != 2) {
+			return false;
+		}
+
+		ITypeBinding mapValueType = typeArguments[1];
+		ITypeBinding defaultValueType = defaultValue.resolveTypeBinding();
+
+		return defaultValueType.isAssignmentCompatible(mapValueType);
 	}
 
 	private void replace(MethodInvocation methodInvocation, Expression key, Expression defaultValue,
@@ -104,7 +126,7 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(methodInvocation, getOrDefault, null);
 		astRewrite.remove(followingStatement, null);
 		onRewrite();
-		
+
 		/*
 		 * Handle comments
 		 */
@@ -119,7 +141,7 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 		comments.removeAll(commentRewriter.findRelatedComments(methodInvocation.getExpression()));
 		Statement parentStatement = ASTNodeUtil.getSpecificAncestor(methodInvocation, Statement.class);
 		commentRewriter.saveBeforeStatement(parentStatement, comments);
-		
+
 	}
 
 	private boolean isJavaUtilMethod(MethodInvocation methodInvocation) {
@@ -254,10 +276,10 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 			LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fragmentName);
 			parent.accept(visitor);
 			/*
-			 * The variable should not be used in other fragments. 
+			 * The variable should not be used in other fragments.
 			 */
 			List<SimpleName> references = visitor.getUsages();
-			if(references.size() == 1) {
+			if (references.size() == 1) {
 				return fragmentName;
 			}
 		}

@@ -284,4 +284,26 @@ public class MapGetOrDefaultASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertMatch(createBlock(original), fixture.getMethodBlock());
 	}
+	
+	@Test
+	public void visit_incompatibleDefaultValueType_shouldNotTransform() throws Exception {		
+		String original = ""
+				+ "		Map<String, List<String>> map = new HashMap<>();\n" + 
+				"		Collection<String> defaultValue = Collections.emptyList();\n" + 
+				"		Collection<String> result = map.get(\"key\");\n" + 
+				"		if(result == null) {\n" + 
+				"			result = defaultValue;\n" + 
+				"		}";
+		fixture.addImport("java.util.Collection");
+		fixture.addImport("java.util.Collections");
+		fixture.addImport("java.util.List");
+		
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+		
+	}
 }
