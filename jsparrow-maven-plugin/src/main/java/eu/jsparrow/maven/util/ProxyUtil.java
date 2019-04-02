@@ -7,20 +7,20 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.settings.Proxy;
 
 public class ProxyUtil {
-	
+
 	private ProxyUtil() {
-		
+
 	}
-	
+
 	public static List<Proxy> getHttpProxies(MavenSession mavenSession) {
 		return mavenSession.getSettings()
-		.getProxies()
-		.stream()
-		.filter(Proxy::isActive)
-		.filter(p -> "https".equalsIgnoreCase(p.getProtocol()) || "http".equalsIgnoreCase(p.getProtocol())) //$NON-NLS-1$ //$NON-NLS-2$
-		.collect(Collectors.toList());
+			.getProxies()
+			.stream()
+			.filter(Proxy::isActive)
+			.filter(p -> "https".equalsIgnoreCase(p.getProtocol()) || "http".equalsIgnoreCase(p.getProtocol())) //$NON-NLS-1$ //$NON-NLS-2$
+			.collect(Collectors.toList());
 	}
-	
+
 	public static String getSettingsStringFrom(List<Proxy> proxies) {
 		String settingsDelimiter = "^"; //$NON-NLS-1$
 		String proxyDelimiter = "§"; //$NON-NLS-1$
@@ -55,16 +55,16 @@ public class ProxyUtil {
 					.append(password)
 					.append(settingsDelimiter);
 
-				proxySettingsString.append("nonProxyHosts=") //$NON-NLS-1$
-					.append(nonProxyHosts)
-					.append(settingsDelimiter);
+				if (nonProxyHosts != null && !nonProxyHosts.isEmpty()) {
+					proxySettingsString.append("nonProxyHosts=") //$NON-NLS-1$
+						.append(nonProxyHosts)
+						.append(settingsDelimiter);
+				}
 
 				proxySettingsString.append(proxyDelimiter);
 			});
 
 		return proxySettingsString.toString();
 	}
-	
-	
 
 }

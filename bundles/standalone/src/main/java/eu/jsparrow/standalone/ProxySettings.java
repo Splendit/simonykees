@@ -1,5 +1,6 @@
 package eu.jsparrow.standalone;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.net.proxy.IProxyData;
@@ -22,7 +23,7 @@ public class ProxySettings {
 	private String userId;
 	private String password;
 	private boolean requiresAuthentication;
-	private List<String> nonProxyHosts;
+	private List<String> nonProxyHosts = new LinkedList<>();
 
 	public String getHost() {
 		return host;

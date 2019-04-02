@@ -61,9 +61,11 @@ public class ProxyUtils {
 			proxySettings.setPassword(prop.getProperty("password", null)); //$NON-NLS-1$
 
 			String nonProxyHosts = prop.getProperty("nonProxyHosts"); //$NON-NLS-1$
-			String[] nonProxyHostsArray = nonProxyHosts.split("|"); //$NON-NLS-1$
-			List<String> nonProxyHostsList = Arrays.asList(nonProxyHostsArray);
-			proxySettings.setNonProxyHosts(nonProxyHostsList);
+			if (nonProxyHosts != null && !nonProxyHosts.isEmpty()) {
+				String[] nonProxyHostsArray = nonProxyHosts.split("|"); //$NON-NLS-1$
+				List<String> nonProxyHostsList = Arrays.asList(nonProxyHostsArray);
+				proxySettings.setNonProxyHosts(nonProxyHostsList);
+			}
 
 			proxySettingsList.add(proxySettings);
 		}
@@ -74,8 +76,10 @@ public class ProxyUtils {
 	/**
 	 * Use the given {@link ProxySettings} to configure the equinox proxy
 	 * 
-	 * @param settings object containing the proxy settings
-	 * @throws StandaloneException when the proxy couldn't be set
+	 * @param settings
+	 *            object containing the proxy settings
+	 * @throws StandaloneException
+	 *             when the proxy couldn't be set
 	 */
 	private static void setProxy(BundleContext bundleContext, Queue<ProxySettings> settings)
 			throws StandaloneException {
@@ -94,7 +98,8 @@ public class ProxyUtils {
 		for (IProxyData proxy : proxyData) {
 			for (ProxySettings setting : settings) {
 				boolean httpOrHttps = !IProxyData.SOCKS_PROXY_TYPE.equals(proxy.getType());
-				if (httpOrHttps && proxy.getType().equals(setting.getType())) {
+				if (httpOrHttps && proxy.getType()
+					.equals(setting.getType())) {
 					proxy.setHost(setting.getHost());
 					proxy.setPort(setting.getPort());
 					proxy.setUserid(setting.getUserId());
@@ -105,7 +110,9 @@ public class ProxyUtils {
 		}
 
 		try {
-			proxyService.setNonProxiedHosts(nonProxyHosts.toArray(new String[0]));
+			if (!nonProxyHosts.isEmpty()) {
+				proxyService.setNonProxiedHosts(nonProxyHosts.toArray(new String[0]));
+			}
 			proxyService.setProxyData(proxyData);
 		} catch (CoreException e) {
 			throw new StandaloneException(e.getMessage(), e);
