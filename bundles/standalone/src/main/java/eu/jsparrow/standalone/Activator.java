@@ -1,15 +1,9 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
@@ -25,6 +19,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.logging.LoggingUtil;
 import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
+import eu.jsparrow.standalone.util.ProxyUtils;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -43,7 +38,6 @@ public class Activator implements BundleActivator {
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
-	private static final String PROXY_SETTINGS = "PROXY.SETTINGS"; //$NON-NLS-1$
 
 	// SIM-1406 org.eclipse.equinox.ds has been replaced with
 	// org.apache.felix.scr
@@ -74,7 +68,7 @@ public class Activator implements BundleActivator {
 		String startMessage = String.format("%s", Messages.Activator_start); //$NON-NLS-1$
 		logger.info(startMessage);
 		registerShutdownHook(context);
-		configureProxy(context);
+		ProxyUtils.configureProxy(context);
 		StandaloneMode mode = parseMode(context);
 		String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID_KEY);
 		switch (mode) {
@@ -99,49 +93,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	private void configureProxy(BundleContext context) throws IOException, StandaloneException {
-
-		List<ProxySettings> proxySettingsList = parseProxySettingsFromBundleContext(
-				context.getProperty(PROXY_SETTINGS));
-
-		ProxyConfiguration proxyConfiguration = new ProxyConfiguration(context);
-		for (ProxySettings settings : proxySettingsList) {
-			proxyConfiguration.setProxy(settings);
-		}
-	}
-
-	private List<ProxySettings> parseProxySettingsFromBundleContext(String settingsString)
-			throws IOException, StandaloneException {
-
-		if (settingsString == null || settingsString.isEmpty()) {
-			return new LinkedList<>();
-		}
-
-		String[] splitSettingsString = settingsString.split("§"); //$NON-NLS-1$
-		List<ProxySettings> proxySettingsList = new LinkedList<>();
-
-		for (String proxySettingsString : splitSettingsString) {
-			String proxySettingsPropertyString = proxySettingsString.replace("^", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			Properties prop = new Properties();
-			prop.load(new StringReader(proxySettingsPropertyString));
-
-			ProxySettings proxySettings = new ProxySettings();
-			proxySettings.setType(prop.getProperty("type")); //$NON-NLS-1$
-			proxySettings.setHost(prop.getProperty("host")); //$NON-NLS-1$
-			proxySettings.setPort(Integer.parseInt(prop.getProperty("port"))); //$NON-NLS-1$
-			proxySettings.setUserId(prop.getProperty("username", null)); //$NON-NLS-1$
-			proxySettings.setPassword(prop.getProperty("password", null)); //$NON-NLS-1$
-
-			String nonProxyHosts = prop.getProperty("nonProxyHosts"); //$NON-NLS-1$
-			String[] nonProxyHostsArray = nonProxyHosts.split("|"); //$NON-NLS-1$
-			List<String> nonProxyHostsList = Arrays.asList(nonProxyHostsArray);
-			proxySettings.setNonProxyHosts(nonProxyHostsList);
-
-			proxySettingsList.add(proxySettings);
-		}
-
-		return proxySettingsList;
-	}
+	
 
 	@Override
 	public void stop(BundleContext context) {

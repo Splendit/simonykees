@@ -1,7 +1,5 @@
 package eu.jsparrow.standalone;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
 import org.eclipse.core.net.proxy.IProxyData;
