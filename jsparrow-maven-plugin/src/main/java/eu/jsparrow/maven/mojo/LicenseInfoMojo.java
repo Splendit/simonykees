@@ -1,5 +1,8 @@
 package eu.jsparrow.maven.mojo;
 
+import java.util.List;
+
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -7,6 +10,7 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Proxy;
 import org.osgi.framework.BundleException;
 
 import eu.jsparrow.maven.adapter.BundleStarter;
@@ -16,6 +20,7 @@ import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.i18n.Messages;
 import eu.jsparrow.maven.util.JavaVersion;
+import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
  * Check validity of the given license.
@@ -26,7 +31,8 @@ import eu.jsparrow.maven.util.JavaVersion;
 @Mojo(name = "license-info", aggregator = true)
 public class LicenseInfoMojo extends AbstractMojo {
 
-	
+	@Parameter(defaultValue = "${session}", readonly = true)
+	private MavenSession mavenSession;	
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
@@ -57,8 +63,9 @@ public class LicenseInfoMojo extends AbstractMojo {
 		MavenParameters parameters = new MavenParameters(mode, license, url);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		BundleStarter starter = new BundleStarter(log);
+		List<Proxy> proxies = ProxyUtil.getHttpProxies(mavenSession);
 		try {
-			WorkingDirectory workingDir = mavenAdapter.setUpConfiguration(parameters);
+			WorkingDirectory workingDir = mavenAdapter.setUpConfiguration(parameters, proxies);
 			addShutdownHook(starter, workingDir);
 			starter.runStandalone(mavenAdapter.getConfiguration());
 		} catch (BundleException | InterruptedException e1) {

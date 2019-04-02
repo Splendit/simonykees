@@ -18,6 +18,7 @@ import java.util.Properties;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Proxy;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,6 +38,7 @@ public class MavenAdapterTest {
 	private File jsparrowTemDirectory;
 	private File jsparrowYml;
 	private File projectBaseDir;
+	private Proxy proxy;
 
 	@Rule
 	public TemporaryFolder directory = new TemporaryFolder();
@@ -53,6 +55,8 @@ public class MavenAdapterTest {
 		projectBaseDir = directory.newFolder("project_base_dir");
 		jsparrowYml = new File(projectBaseDir.getPath() + File.separator + "jsparrow.yml");
 		jsparrowYml.createNewFile();
+
+		proxy = mock(Proxy.class);
 
 		when(project.getGroupId()).thenReturn(groupId);
 		when(project.getArtifactId()).thenReturn(artifactId);
@@ -117,7 +121,8 @@ public class MavenAdapterTest {
 		when(project.getPackaging()).thenReturn("jar");
 		when(path.toFile()).thenReturn(jsparrowYml);
 
-		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml);
+		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml,
+				Collections.singletonList(proxy));
 
 		Map<String, String> configurations = mavenAdapter.getConfiguration();
 		assertTrue(configurations.containsKey(ConfigurationKeys.ROOT_CONFIG_PATH));
@@ -134,7 +139,8 @@ public class MavenAdapterTest {
 
 		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(true);
 
-		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml);
+		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml,
+				Collections.singletonList(proxy));
 
 		assertTrue(false);
 	}
