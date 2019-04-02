@@ -31,6 +31,10 @@ public class ProxyUtils {
 		Queue<ProxySettings> proxySettingsList = parseProxySettingsFromBundleContext(
 				context.getProperty(PROXY_SETTINGS));
 
+		if (proxySettingsList.isEmpty()) {
+			return;
+		}
+
 		setProxy(context, proxySettingsList);
 	}
 
