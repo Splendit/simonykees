@@ -127,6 +127,10 @@ public class Messages extends NLS {
 	public static String EnhancedForLoopToStreamSumRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
+	public static String MapGetOrDefaultRule_description;
+
+	public static String MapGetOrDefaultRule_name;
+
 	public static String MavenProjectImporter_collectingProjectInfo;
 	public static String MavenProjectImporter_createingJavaProjects;
 	public static String MavenProjectImporter_creatingSingleJavaProject;

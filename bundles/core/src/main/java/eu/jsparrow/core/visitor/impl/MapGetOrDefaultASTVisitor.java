@@ -1,0 +1,274 @@
+package eu.jsparrow.core.visitor.impl;
+
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+
+/**
+ * Replaces {@code Map.get([key])} by {@code Map.getOrDefault([key], [defaultValue])}.
+ * 
+ * @since 3.4.0
+ *
+ */
+public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
+
+	private static final String JAVA_UTIL_MAP = java.util.Map.class.getName();
+
+	@Override
+	public boolean visit(MethodInvocation methodInvocation) {
+		SimpleName name = methodInvocation.getName();
+		if (!"get".equals(name.getIdentifier())) { //$NON-NLS-1$
+			return true;
+		}
+		Expression expression = methodInvocation.getExpression();
+		if (expression == null) {
+			return true;
+		}
+
+		ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
+		if (!(isContentOfType(expressionTypeBinding, JAVA_UTIL_MAP)
+				|| isInheritingContentOfTypes(expressionTypeBinding, Collections.singletonList(JAVA_UTIL_MAP)))) {
+			return true;
+		}
+
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+		if (arguments.size() != 1) {
+			return true;
+		}
+
+		if (!isJavaUtilMethod(methodInvocation)) {
+			/*
+			 * We do not want to support user defined maps.
+			 */
+			return false;
+		}
+
+		SimpleName assignedVariable = findAssignedVariable(methodInvocation);
+		if (assignedVariable == null) {
+			return true;
+		}
+
+		Statement followingStatement = findFollowingStatement(methodInvocation);
+		if (followingStatement == null || followingStatement.getNodeType() != ASTNode.IF_STATEMENT) {
+			return true;
+		}
+
+		Expression defaultValue = findDefaultValueAssignment((IfStatement) followingStatement, assignedVariable);
+		if (defaultValue == null) {
+			return true;
+		}
+
+		replace(methodInvocation, arguments.get(0), defaultValue, followingStatement);
+		return true;
+	}
+
+	private void replace(MethodInvocation methodInvocation, Expression key, Expression defaultValue,
+			Statement followingStatement) {
+		AST ast = methodInvocation.getAST();
+		MethodInvocation getOrDefault = ast.newMethodInvocation();
+		getOrDefault.setExpression((Expression) astRewrite.createCopyTarget(methodInvocation.getExpression()));
+		getOrDefault.setName(ast.newSimpleName("getOrDefault")); //$NON-NLS-1$
+
+		Expression keyCopy = (Expression) astRewrite.createCopyTarget(key);
+		Expression defaultCopy = (Expression) astRewrite.createCopyTarget(defaultValue);
+		@SuppressWarnings("unchecked")
+		List<Expression> getOrDefaultArgumetns = getOrDefault.arguments();
+		getOrDefaultArgumetns.add(keyCopy);
+		getOrDefaultArgumetns.add(defaultCopy);
+		astRewrite.replace(methodInvocation, getOrDefault, null);
+		astRewrite.remove(followingStatement, null);
+		onRewrite();
+		
+		/*
+		 * Handle comments
+		 */
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> comments = new ArrayList<>();
+		comments.addAll(commentRewriter.findRelatedComments(followingStatement));
+		comments.removeAll(commentRewriter.findRelatedComments(defaultValue));
+		commentRewriter.saveBeforeStatement(followingStatement, comments);
+		comments.clear();
+		comments.addAll(commentRewriter.findRelatedComments(methodInvocation));
+		comments.removeAll(commentRewriter.findRelatedComments(key));
+		comments.removeAll(commentRewriter.findRelatedComments(methodInvocation.getExpression()));
+		Statement parentStatement = ASTNodeUtil.getSpecificAncestor(methodInvocation, Statement.class);
+		commentRewriter.saveBeforeStatement(parentStatement, comments);
+		
+	}
+
+	private boolean isJavaUtilMethod(MethodInvocation methodInvocation) {
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		IPackageBinding declaringClassPackage = declaringClass.getPackage();
+		if (declaringClassPackage == null) {
+			return false;
+		}
+		String packageName = declaringClassPackage.getName();
+		return packageName.startsWith("java.util"); //$NON-NLS-1$
+	}
+
+	private Expression findDefaultValueAssignment(IfStatement ifStatement, SimpleName assignedVariableName) {
+
+		if (ifStatement.getElseStatement() != null) {
+			return null;
+		}
+
+		Expression condition = ifStatement.getExpression();
+		if (!isNullCheck(assignedVariableName, condition)) {
+			return null;
+		}
+
+		ExpressionStatement singleBodyStatement = null;
+		Statement thenStatement = ifStatement.getThenStatement();
+		if (thenStatement.getNodeType() == ASTNode.BLOCK) {
+			Block block = (Block) thenStatement;
+			List<ExpressionStatement> bodyStatements = ASTNodeUtil.returnTypedList(block.statements(),
+					ExpressionStatement.class);
+			if (bodyStatements.size() == 1) {
+				singleBodyStatement = bodyStatements.get(0);
+			}
+		} else if (thenStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+			singleBodyStatement = (ExpressionStatement) thenStatement;
+		}
+
+		if (singleBodyStatement == null) {
+			return null;
+		}
+
+		Expression bodyExpression = singleBodyStatement.getExpression();
+		if (bodyExpression.getNodeType() != ASTNode.ASSIGNMENT) {
+			return null;
+		}
+
+		Assignment bodyAssignment = (Assignment) bodyExpression;
+		Expression assignmentLhs = bodyAssignment.getLeftHandSide();
+		if (assignmentLhs.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return null;
+		}
+		SimpleName assignmentLhsName = (SimpleName) assignmentLhs;
+		if (!assignmentLhsName.getIdentifier()
+			.equals(assignedVariableName.getIdentifier())) {
+			return null;
+		}
+		return bodyAssignment.getRightHandSide();
+	}
+
+	private boolean isNullCheck(SimpleName assignedVariableName, Expression condition) {
+		if (condition.getNodeType() != ASTNode.INFIX_EXPRESSION) {
+			return false;
+		}
+		InfixExpression infixExpression = (InfixExpression) condition;
+
+		if (infixExpression.hasExtendedOperands()) {
+			return false;
+		}
+
+		InfixExpression.Operator operator = infixExpression.getOperator();
+		if (operator != InfixExpression.Operator.EQUALS) {
+			return false;
+		}
+		Expression right = infixExpression.getRightOperand();
+		Expression left = infixExpression.getLeftOperand();
+
+		return isSecondOperandMatchingNull(left, right, assignedVariableName)
+				|| isSecondOperandMatchingNull(right, left, assignedVariableName);
+	}
+
+	private boolean isSecondOperandMatchingNull(Expression first, Expression second, SimpleName assignedVariableName) {
+		if (second.getNodeType() != ASTNode.NULL_LITERAL) {
+			return false;
+		}
+		if (first.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return false;
+		}
+		SimpleName leftName = (SimpleName) first;
+		return leftName.getIdentifier()
+			.equals(assignedVariableName.getIdentifier());
+	}
+
+	private Statement findFollowingStatement(MethodInvocation mapGetInvocation) {
+
+		Statement parentStatement = ASTNodeUtil.getSpecificAncestor(mapGetInvocation, Statement.class);
+		ASTNode parent = parentStatement.getParent();
+		if (parent.getNodeType() != ASTNode.BLOCK) {
+			return null;
+		}
+		Block enclosingBlock = (Block) parent;
+		List<Statement> enclosingBlockStatements = ASTNodeUtil.convertToTypedList(enclosingBlock.statements(),
+				Statement.class);
+		int index = enclosingBlockStatements.indexOf(parentStatement);
+		if (index < 0 || index >= enclosingBlockStatements.size() - 1) {
+			return null;
+		}
+
+		return enclosingBlockStatements.get(index + 1);
+	}
+
+	private boolean isExpressionStatementAssignmentRHS(MethodInvocation methodInvocation) {
+		if (methodInvocation.getLocationInParent() != Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			return false;
+		}
+		Assignment assignment = (Assignment) methodInvocation.getParent();
+		return assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY;
+	}
+
+	private boolean isInitializerInDeclarationFragment(MethodInvocation methodInvocation) {
+		if (methodInvocation.getLocationInParent() != VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			return false;
+		}
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment) methodInvocation.getParent();
+		return fragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY;
+	}
+
+	private SimpleName findAssignedVariable(MethodInvocation mapGetInvocation) {
+		if (isInitializerInDeclarationFragment(mapGetInvocation)) {
+			VariableDeclarationFragment fragment = (VariableDeclarationFragment) mapGetInvocation.getParent();
+			SimpleName fragmentName = fragment.getName();
+			ASTNode parent = fragment.getParent();
+			LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fragmentName);
+			parent.accept(visitor);
+			/*
+			 * The variable should not be used in other fragments. 
+			 */
+			List<SimpleName> references = visitor.getUsages();
+			if(references.size() == 1) {
+				return fragmentName;
+			}
+		}
+
+		if (isExpressionStatementAssignmentRHS(mapGetInvocation)) {
+			Assignment assignment = (Assignment) mapGetInvocation.getParent();
+			Expression lhs = assignment.getLeftHandSide();
+			if (lhs.getNodeType() == ASTNode.SIMPLE_NAME) {
+				return (SimpleName) lhs;
+			}
+		}
+		return null;
+	}
+}
