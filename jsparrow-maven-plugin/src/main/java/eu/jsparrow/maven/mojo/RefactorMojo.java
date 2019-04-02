@@ -3,7 +3,6 @@ package eu.jsparrow.maven.mojo;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -26,6 +25,7 @@ import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.i18n.Messages;
 import eu.jsparrow.maven.util.JavaVersion;
+import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
  * Runs jSparrow on the Maven project.
@@ -95,12 +95,7 @@ public class RefactorMojo extends AbstractMojo {
 		File fallbackConfigFile = Paths.get(project.getBasedir()
 			.getAbsolutePath(), "jsparrow.yml") //$NON-NLS-1$
 			.toFile();
-		List<Proxy> proxies = mavenSession.getSettings()
-			.getProxies()
-			.stream()
-			.filter(Proxy::isActive)
-			.filter(p -> "https".equalsIgnoreCase(p.getProtocol()) || "http".equalsIgnoreCase(p.getProtocol())) //$NON-NLS-1$ //$NON-NLS-2$
-			.collect(Collectors.toList());
+		List<Proxy> proxies = ProxyUtil.getHttpProxies(mavenSession);
 
 		try {
 			WorkingDirectory workingDirectory = mavenAdapter.setUpConfiguration(parameters, projects,

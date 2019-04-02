@@ -33,6 +33,7 @@ import org.osgi.framework.Constants;
 
 import eu.jsparrow.maven.i18n.Messages;
 import eu.jsparrow.maven.util.MavenProjectUtil;
+import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
  * Sets up the configuration used for starting the equinox framework.
@@ -88,7 +89,8 @@ public class MavenAdapter {
 		log.info(Messages.MavenAdapter_setUpConfiguration);
 
 		setProjectIds(projects);
-		setProxySettings(proxies);
+		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
+		
 		WorkingDirectory workingDirectory = setUpConfiguration(parameters);
 		String rootProjectIdentifier = MavenProjectUtil.findProjectIdentifier(rootProject);
 
@@ -110,50 +112,6 @@ public class MavenAdapter {
 		return workingDirectory;
 	}
 
-	private void setProxySettings(List<Proxy> proxies) {
-		String settingsDelimiter = "^"; //$NON-NLS-1$
-		String proxyDelimiter = "§"; //$NON-NLS-1$
-		StringBuilder proxySettingsString = new StringBuilder();
-
-		proxies.stream()
-			.forEach(proxy -> {
-				String type = proxy.getProtocol();
-				String host = proxy.getHost();
-				int port = proxy.getPort();
-				String username = proxy.getUsername();
-				String password = proxy.getPassword();
-				String nonProxyHosts = proxy.getNonProxyHosts();
-
-				proxySettingsString.append("type=") //$NON-NLS-1$
-					.append(type)
-					.append(settingsDelimiter);
-
-				proxySettingsString.append("host=") //$NON-NLS-1$
-					.append(host)
-					.append(settingsDelimiter);
-
-				proxySettingsString.append("port=") //$NON-NLS-1$
-					.append(port)
-					.append(settingsDelimiter);
-
-				proxySettingsString.append("username=") //$NON-NLS-1$
-					.append(username)
-					.append(settingsDelimiter);
-
-				proxySettingsString.append("password=") //$NON-NLS-1$
-					.append(password)
-					.append(settingsDelimiter);
-
-				proxySettingsString.append("nonProxyHosts=") //$NON-NLS-1$
-					.append(nonProxyHosts)
-					.append(settingsDelimiter);
-
-				proxySettingsString.append(proxyDelimiter);
-			});
-
-		configuration.put(PROXY_SETTINGS, proxySettingsString.toString());
-	}
-
 	/**
 	 * Creates a map with the required configurations for starting the equinox
 	 * framework based on the provided {@link MavenParameter}.
@@ -169,6 +127,13 @@ public class MavenAdapter {
 		addInitialConfiguration(parameters);
 		return prepareWorkingDirectory();
 	}
+	
+	
+	public WorkingDirectory setUpConfiguration(MavenParameters parameters, List<Proxy> proxies) throws InterruptedException {
+		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
+		return setUpConfiguration(parameters);
+	}
+	
 
 	void addInitialConfiguration(MavenParameters config) {
 		boolean useDefaultConfig = config.getUseDefaultConfig();
