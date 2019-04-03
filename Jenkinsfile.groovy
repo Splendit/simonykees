@@ -131,7 +131,14 @@ timestamps {
                     uploadMappingFile(profile)
                     deployMavenPlugin(profile, timestamp)
 
+                    // deploy test noProguard
+                    profile = Profile.MASTER_TEST_noPROGUARD
+                    buildEclipsePlugin(profile, timestamp) // only build, no deploy
+                    uploadMappingFile(profile)
+                    deployMavenPlugin(profile, timestamp)
+
                     tagCommit("master", "jmp")
+
                     break
                 case "release":
 
