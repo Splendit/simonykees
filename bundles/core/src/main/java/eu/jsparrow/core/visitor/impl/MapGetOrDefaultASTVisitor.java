@@ -14,11 +14,8 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -26,6 +23,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
@@ -63,7 +62,7 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 			return true;
 		}
 
-		if (!isJavaUtilMethod(methodInvocation)) {
+		if (!ClassRelationUtil.isJavaUtilMethod(methodInvocation)) {
 			/*
 			 * We do not want to support user defined maps.
 			 */
@@ -141,18 +140,6 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 		comments.removeAll(commentRewriter.findRelatedComments(methodInvocation.getExpression()));
 		Statement parentStatement = ASTNodeUtil.getSpecificAncestor(methodInvocation, Statement.class);
 		commentRewriter.saveBeforeStatement(parentStatement, comments);
-
-	}
-
-	private boolean isJavaUtilMethod(MethodInvocation methodInvocation) {
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-		IPackageBinding declaringClassPackage = declaringClass.getPackage();
-		if (declaringClassPackage == null) {
-			return false;
-		}
-		String packageName = declaringClassPackage.getName();
-		return packageName.startsWith("java.util"); //$NON-NLS-1$
 	}
 
 	private Expression findDefaultValueAssignment(IfStatement ifStatement, SimpleName assignedVariableName) {
@@ -162,7 +149,7 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		Expression condition = ifStatement.getExpression();
-		if (!isNullCheck(assignedVariableName, condition)) {
+		if (!OperatorUtil.isNullCheck(assignedVariableName, condition)) {
 			return null;
 		}
 
@@ -200,40 +187,6 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 		return bodyAssignment.getRightHandSide();
 	}
-
-	private boolean isNullCheck(SimpleName assignedVariableName, Expression condition) {
-		if (condition.getNodeType() != ASTNode.INFIX_EXPRESSION) {
-			return false;
-		}
-		InfixExpression infixExpression = (InfixExpression) condition;
-
-		if (infixExpression.hasExtendedOperands()) {
-			return false;
-		}
-
-		InfixExpression.Operator operator = infixExpression.getOperator();
-		if (operator != InfixExpression.Operator.EQUALS) {
-			return false;
-		}
-		Expression right = infixExpression.getRightOperand();
-		Expression left = infixExpression.getLeftOperand();
-
-		return isSecondOperandMatchingNull(left, right, assignedVariableName)
-				|| isSecondOperandMatchingNull(right, left, assignedVariableName);
-	}
-
-	private boolean isSecondOperandMatchingNull(Expression first, Expression second, SimpleName assignedVariableName) {
-		if (second.getNodeType() != ASTNode.NULL_LITERAL) {
-			return false;
-		}
-		if (first.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return false;
-		}
-		SimpleName leftName = (SimpleName) first;
-		return leftName.getIdentifier()
-			.equals(assignedVariableName.getIdentifier());
-	}
-
 	private Statement findFollowingStatement(MethodInvocation mapGetInvocation) {
 
 		Statement parentStatement = ASTNodeUtil.getSpecificAncestor(mapGetInvocation, Statement.class);
