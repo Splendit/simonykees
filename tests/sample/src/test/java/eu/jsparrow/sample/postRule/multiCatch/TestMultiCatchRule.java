@@ -224,7 +224,7 @@ public class TestMultiCatchRule {
 	}
 	
 	private <T extends Throwable> void report(T e) throws T {
-		
+		e.getCause();
 	}
 
 	@SuppressWarnings("serial")

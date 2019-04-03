@@ -277,7 +277,7 @@ public class LambdaToMethodReferenceRule {
 	/*
 	 * SIM-1450
 	 */
-	private static Object createDeepCopy(byte[][] value, Class<?> valueClass) {
+	private static Object createDeepCopy(byte[][] value) {
 		// see org.eclipse.mdm.api.base.model.Value
 		return Arrays.stream(value)
 			.map(v -> v.clone())
@@ -390,7 +390,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	private void doSomething(Object o) {
-
+		o.getClass();
 	}
 
 	private Person getRandomPerson() {
@@ -398,7 +398,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	private void setIterator(Iterator iterator) {
-
+		iterator.next();
 	}
 
 	public void discardedReturnType_shouldNotTranform() {
