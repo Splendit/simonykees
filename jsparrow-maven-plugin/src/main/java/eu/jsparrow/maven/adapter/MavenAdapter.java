@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -83,7 +84,7 @@ public class MavenAdapter {
 	 *             current session.
 	 */
 	public WorkingDirectory setUpConfiguration(MavenParameters parameters, List<MavenProject> projects,
-			File configFileOverride, File fallbackConfigFile, List<Proxy> proxies)
+			File configFileOverride, File fallbackConfigFile, Stream<Proxy> proxies)
 			throws InterruptedException, MojoExecutionException {
 
 		log.info(Messages.MavenAdapter_setUpConfiguration);
@@ -129,7 +130,7 @@ public class MavenAdapter {
 	}
 	
 	
-	public WorkingDirectory setUpConfiguration(MavenParameters parameters, List<Proxy> proxies) throws InterruptedException {
+	public WorkingDirectory setUpConfiguration(MavenParameters parameters, Stream<Proxy> proxies) throws InterruptedException {
 		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
 		return setUpConfiguration(parameters);
 	}

@@ -1,70 +1,61 @@
 package eu.jsparrow.maven.util;
 
-import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.settings.Proxy;
 
 public class ProxyUtil {
 
+	private static final String PROXY_DELIMITER = "§"; //$NON-NLS-1$
+	private static final String SETTINGS_DELIMITER = "^"; //$NON-NLS-1$
+
 	private ProxyUtil() {
 
 	}
 
-	public static List<Proxy> getHttpProxies(MavenSession mavenSession) {
+	public static Stream<Proxy> getHttpProxies(MavenSession mavenSession) {
 		return mavenSession.getSettings()
 			.getProxies()
 			.stream()
 			.filter(Proxy::isActive)
 			.filter(p -> "https".equalsIgnoreCase(p.getProtocol()) || "http".equalsIgnoreCase(p.getProtocol())) //$NON-NLS-1$ //$NON-NLS-2$
-			.collect(Collectors.toList());
+			.filter(p -> p.getHost() != null && !p.getHost()
+				.isEmpty())
+			.filter(p -> p.getPort() > 0 && p.getPort() < 65535);
 	}
 
-	public static String getSettingsStringFrom(List<Proxy> proxies) {
-		String settingsDelimiter = "^"; //$NON-NLS-1$
-		String proxyDelimiter = "§"; //$NON-NLS-1$
-		StringBuilder proxySettingsString = new StringBuilder();
+	public static String getSettingsStringFrom(Stream<Proxy> proxies) {
+		return proxies.map(p -> {
+			StringBuilder proxySB = new StringBuilder();
+			appendParameter(proxySB, "type=", p.getProtocol()); //$NON-NLS-1$
+			appendParameter(proxySB, "host=", p.getHost()); //$NON-NLS-1$
+			appendParameter(proxySB, "port=", String.valueOf(p.getPort())); //$NON-NLS-1$
 
-		proxies.stream()
-			.forEach(proxy -> {
-				String type = proxy.getProtocol();
-				String host = proxy.getHost();
-				int port = proxy.getPort();
-				String username = proxy.getUsername();
-				String password = proxy.getPassword();
-				String nonProxyHosts = proxy.getNonProxyHosts();
+			String username = p.getUsername();
+			if (username != null && !username.isEmpty()) {
+				appendParameter(proxySB, "username=", username); //$NON-NLS-1$
+			}
 
-				proxySettingsString.append("type=") //$NON-NLS-1$
-					.append(type)
-					.append(settingsDelimiter);
+			String password = p.getPassword();
+			if (password != null && !password.isEmpty()) {
+				appendParameter(proxySB, "password=", password); //$NON-NLS-1$
+			}
 
-				proxySettingsString.append("host=") //$NON-NLS-1$
-					.append(host)
-					.append(settingsDelimiter);
+			String nonProxyHosts = p.getNonProxyHosts();
+			if (nonProxyHosts != null && !nonProxyHosts.isEmpty()) {
+				appendParameter(proxySB, "nonProxyHosts=", nonProxyHosts); //$NON-NLS-1$
+			}
+			return proxySB.toString();
+		})
+			.collect(Collectors.joining(PROXY_DELIMITER));
+	}
 
-				proxySettingsString.append("port=") //$NON-NLS-1$
-					.append(port)
-					.append(settingsDelimiter);
-
-				proxySettingsString.append("username=") //$NON-NLS-1$
-					.append(username)
-					.append(settingsDelimiter);
-
-				proxySettingsString.append("password=") //$NON-NLS-1$
-					.append(password)
-					.append(settingsDelimiter);
-
-				if (nonProxyHosts != null && !nonProxyHosts.isEmpty()) {
-					proxySettingsString.append("nonProxyHosts=") //$NON-NLS-1$
-						.append(nonProxyHosts)
-						.append(settingsDelimiter);
-				}
-
-				proxySettingsString.append(proxyDelimiter);
-			});
-
-		return proxySettingsString.toString();
+	private static void appendParameter(StringBuilder sb, String key, String value) {
+		sb.append(key)
+			.append(value)
+			.append(SETTINGS_DELIMITER);
 	}
 
 }

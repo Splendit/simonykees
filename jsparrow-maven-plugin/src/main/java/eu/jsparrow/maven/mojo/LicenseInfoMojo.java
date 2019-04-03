@@ -1,6 +1,6 @@
 package eu.jsparrow.maven.mojo;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -63,7 +63,7 @@ public class LicenseInfoMojo extends AbstractMojo {
 		MavenParameters parameters = new MavenParameters(mode, license, url);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		BundleStarter starter = new BundleStarter(log);
-		List<Proxy> proxies = ProxyUtil.getHttpProxies(mavenSession);
+		Stream<Proxy> proxies = ProxyUtil.getHttpProxies(mavenSession);
 		try {
 			WorkingDirectory workingDir = mavenAdapter.setUpConfiguration(parameters, proxies);
 			addShutdownHook(starter, workingDir);
