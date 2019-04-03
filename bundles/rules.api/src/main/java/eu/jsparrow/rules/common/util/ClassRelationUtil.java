@@ -422,7 +422,6 @@ public class ClassRelationUtil {
 		Expression expression = methodInvocation.getExpression();
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		ITypeBinding type;
-		List<IMethodBinding> methods = new ArrayList<>();
 		if (expression != null) {
 			type = expression.resolveTypeBinding();
 		} else {
@@ -433,10 +432,14 @@ public class ClassRelationUtil {
 			return Collections.emptyList();
 		}
 
+		return findOverloadedMethods(methodBinding, type);
+	}
+
+	public static List<IMethodBinding> findOverloadedMethods(IMethodBinding methodBinding, ITypeBinding type) {
+		List<IMethodBinding> methods = new ArrayList<>();
 		methods.addAll(Arrays.asList(type.getDeclaredMethods()));
 		methods.addAll(findInheretedMethods(type));
-		String methodIdentifier = methodInvocation.getName()
-			.getIdentifier();
+		String methodIdentifier = methodBinding.getName();
 
 		return methods.stream()
 			// exclude overridden methods
