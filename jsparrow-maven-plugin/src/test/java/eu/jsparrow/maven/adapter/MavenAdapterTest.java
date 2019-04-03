@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -122,7 +123,7 @@ public class MavenAdapterTest {
 		when(path.toFile()).thenReturn(jsparrowYml);
 
 		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml,
-				Collections.singletonList(proxy));
+				Stream.of(proxy));
 
 		Map<String, String> configurations = mavenAdapter.getConfiguration();
 		assertTrue(configurations.containsKey(ConfigurationKeys.ROOT_CONFIG_PATH));
@@ -140,7 +141,7 @@ public class MavenAdapterTest {
 		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(true);
 
 		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml,
-				Collections.singletonList(proxy));
+				Stream.of(proxy));
 
 		assertTrue(false);
 	}
