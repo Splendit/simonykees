@@ -23,6 +23,7 @@ public class ConfigurationKeys {
 	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	public static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$
 	public static final String CONFIG_FILE_OVERRIDE = "CONFIG.FILE.OVERRIDE"; //$NON-NLS-1$
+	public static final String PROXY_SETTINGS = "PROXY.SETTINGS"; //$NON-NLS-1$
 
 	private ConfigurationKeys() {
 		/*
