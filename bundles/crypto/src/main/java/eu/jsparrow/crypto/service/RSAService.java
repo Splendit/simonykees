@@ -5,6 +5,11 @@ import java.security.PublicKey;
 
 import eu.jsparrow.crypto.exception.RSAServiceException;
 
+/**
+ * Service for encryption, decryption, signature and verification using RSA
+ * 
+ * @since 3.4.0
+ */
 public interface RSAService {
 
 	/**

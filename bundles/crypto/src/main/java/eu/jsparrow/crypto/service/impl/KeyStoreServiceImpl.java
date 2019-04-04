@@ -18,6 +18,11 @@ import eu.jsparrow.crypto.exception.KeyStoreServiceException;
 import eu.jsparrow.crypto.service.KeyStoreService;
 import eu.jsparrow.crypto.service.KeyStoreType;
 
+/**
+ * implementation for {@link KeyStoreService}
+ * 
+ * @since 3.4.0
+ */
 public class KeyStoreServiceImpl implements KeyStoreService {
 
 	private KeyStore keyStore;

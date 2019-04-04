@@ -16,6 +16,11 @@ import javax.crypto.NoSuchPaddingException;
 import eu.jsparrow.crypto.exception.RSAServiceException;
 import eu.jsparrow.crypto.service.RSAService;
 
+/**
+ * Implementation for {@link RSAService}
+ * 
+ * @since 3.4.0
+ */
 public class RSAServiceImpl implements RSAService {
 
 	private static final String ENCRYPTION_ALGORITHM = "RSA/ECB/PKCS1Padding"; //$NON-NLS-1$
