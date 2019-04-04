@@ -6,6 +6,7 @@ import java.util.Arrays;
 import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.RemoveUnusedParameterASTVisitor;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
@@ -19,10 +20,9 @@ import eu.jsparrow.rules.common.Tag;
 public class RemoveUnusedParameterRule extends RefactoringRuleImpl<RemoveUnusedParameterASTVisitor> {
 
 	public RemoveUnusedParameterRule() {
-
 		this.visitorClass = RemoveUnusedParameterASTVisitor.class;
 		this.id = "RemoveUnusedParameter"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription("Remove Unused Parameters in Private Methods", "",
+		this.ruleDescription = new RuleDescription(Messages.RemoveUnusedParameterRule_name, Messages.RemoveUnusedParameterRule_description,
 				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
 	}
 

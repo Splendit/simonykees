@@ -332,6 +332,10 @@ public class Messages extends NLS {
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
 	public static String RemoveNewStringConstructorRule_name;
+	public static String RemoveUnusedParameterRule_description;
+
+	public static String RemoveUnusedParameterRule_name;
+
 	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
 	public static String RenameFieldsRuleWizardHandler_performFinish_jobName;
 	public static String RenameFieldsRuleWizardPage_description;

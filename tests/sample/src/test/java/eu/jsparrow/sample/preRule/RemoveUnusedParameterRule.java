@@ -3,6 +3,10 @@ package eu.jsparrow.sample.preRule;
 @SuppressWarnings("nls")
 public class RemoveUnusedParameterRule {
 	
+	private RemoveUnusedParameterRule(String unusedParameter) {
+		
+	}
+	
 	public void visit_publicMethod_shouldNotTransform(String unusedParameter) {
 		
 	}
@@ -15,6 +19,11 @@ public class RemoveUnusedParameterRule {
 		
 	}
 	
+	/**
+	 * Main text 
+	 * 
+	 * @param unusedParameter to be removed
+	 */
 	private void visit_privateMethod_shouldTransform(String unusedParameter) {
 		
 	}
@@ -33,11 +42,24 @@ public class RemoveUnusedParameterRule {
 		
 	}
 	
-	private void visit_multipleUnusedParameters_shouldTranform(String first, String second, String third) {
+	/**
+	 * Main content
+	 * 
+	 * @param first
+	 *            should be removed
+	 * @param second
+	 *            should remain
+	 * @param third
+	 *            should be removed
+	 * 
+	 * @return empty string
+	 */
+	private String visit_multipleUnusedParameters_shouldTranform(String first, String second, String third) {
 		/*
 		 * Should remove first and second
 		 */
 		consume(second);
+		return "";
 	}
 	
 	
@@ -54,6 +76,11 @@ public class RemoveUnusedParameterRule {
 		visit_multipleUnusedParameters_shouldTranform(first, "second", "third");
 		visit_privateMethod_shouldTransform(first);
 		visit_sameSignatureWithInnerclassMethod_shouldTransformInInnerClass(first);
+		
+		/*
+		 * Save comments
+		 */
+		visit_multipleUnusedParameters_shouldTranform(/*1*/first/*2*/, /*3*/"second"/*4*/, /*5*/"third"/*6*/);
 	}
 	
 	private void secondaryInvocations() {
