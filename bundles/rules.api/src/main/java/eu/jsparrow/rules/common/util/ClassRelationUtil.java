@@ -631,4 +631,22 @@ public class ClassRelationUtil {
 		return false;
 	}
 
+	/**
+	 * 
+	 * @param methodInvocation
+	 *            method to be checked.
+	 * @return if the class where the given method invocation is declared
+	 *         belongs to {@code java.util} package.
+	 */
+	public static boolean isJavaUtilMethod(MethodInvocation methodInvocation) {
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		IPackageBinding declaringClassPackage = declaringClass.getPackage();
+		if (declaringClassPackage == null) {
+			return false;
+		}
+		String packageName = declaringClassPackage.getName();
+		return packageName.startsWith("java.util"); //$NON-NLS-1$
+	}
+
 }
