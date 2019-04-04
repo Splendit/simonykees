@@ -1,10 +1,10 @@
 package eu.jsparrow.core.visitor.impl;
 
-import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
-import static eu.jsparrow.rules.common.util.ClassRelationUtil.*;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfTypes;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isInheritingContentOfTypes;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -38,7 +38,10 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  */
 public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final String JAVA_UTIL_MAP = java.util.Map.class.getName();
+	private static final List<String> MAPS_FORBIDING_NULL_VALUES = Arrays.asList(
+			java.util.jar.Attributes.class.getName(), java.util.concurrent.ConcurrentHashMap.class.getName(),
+			java.util.concurrent.ConcurrentSkipListMap.class.getName(), java.util.Hashtable.class.getName(),
+			java.util.Properties.class.getName());
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
@@ -52,8 +55,8 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
-		if (!(isContentOfType(expressionTypeBinding, JAVA_UTIL_MAP)
-				|| isInheritingContentOfTypes(expressionTypeBinding, Collections.singletonList(JAVA_UTIL_MAP)))) {
+		if (!(isContentOfTypes(expressionTypeBinding, MAPS_FORBIDING_NULL_VALUES)
+				|| isInheritingContentOfTypes(expressionTypeBinding, MAPS_FORBIDING_NULL_VALUES))) {
 			return true;
 		}
 
@@ -187,6 +190,7 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 		return bodyAssignment.getRightHandSide();
 	}
+
 	private Statement findFollowingStatement(MethodInvocation mapGetInvocation) {
 
 		Statement parentStatement = ASTNodeUtil.getSpecificAncestor(mapGetInvocation, Statement.class);
