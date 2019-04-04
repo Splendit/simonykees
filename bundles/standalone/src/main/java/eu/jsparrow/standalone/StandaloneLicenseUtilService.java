@@ -25,5 +25,5 @@ public interface StandaloneLicenseUtilService {
 	 */
 	void licenseInfo(String key, String validationBaseUrl) throws StandaloneException;
 
-	void stop();
+	void stop(String validationBaseUrl);
 }

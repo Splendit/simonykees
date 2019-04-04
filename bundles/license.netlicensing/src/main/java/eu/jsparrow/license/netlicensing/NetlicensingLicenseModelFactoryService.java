@@ -23,13 +23,13 @@ public class NetlicensingLicenseModelFactoryService implements LicenseModelFacto
 	}
 
 	@Override
-	public LicenseModel createNewNodeLockedModel(String key, String secret, String productNr, String moduleNr, String validationBaseUrl) {
-		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.NODE_LOCKED, validationBaseUrl);
+	public LicenseModel createNewNodeLockedModel(String key, String secret, String productNr, String moduleNr) {
+		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.NODE_LOCKED);
 	}
 
 	@Override
-	public LicenseModel createNewFloatingModel(String key, String secret, String productNr, String moduleNr, String validationBaseUrl) {
-		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.FLOATING, validationBaseUrl);
+	public LicenseModel createNewFloatingModel(String key, String secret, String productNr, String moduleNr) {
+		return new NetlicensingLicenseModel(key, secret, productNr, moduleNr, LicenseType.FLOATING);
 	}
 
 	@Override

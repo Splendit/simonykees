@@ -32,21 +32,21 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 	private NetlicensingValidationRequest validationRequest;
 
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model) {
+		ResponseEvaluator responseEvaluator = initState(model);
+		this.validationRequest = new NetlicensingValidationRequest(responseEvaluator);
+	}
+	
+	public NetlicensingLicenseValidation(NetlicensingLicenseModel model, String endpoint) {
+		ResponseEvaluator responseEvaluator = initState(model);
+		this.validationRequest = new NetlicensingValidationRequest(responseEvaluator, endpoint);
+	}
+
+	private ResponseEvaluator initState(NetlicensingLicenseModel model) {
 		this.model = model;
 		this.licenseCache = new NetlicensingLicenseCache();
 		this.parametersFactory = new NetlicensingValidationParametersFactory();
-		this.validationRequest = createValidationRequest(model);
-	}
-
-	private NetlicensingValidationRequest createValidationRequest(NetlicensingLicenseModel model) {
-		String validationBaseUrl = model.getValidationBaseUrl();
 		String licenseeNr = model.getKey();
-		ResponseEvaluator responseEvaluator = new ResponseEvaluator(licenseeNr);
-		if(validationBaseUrl != null && !validationBaseUrl.isEmpty()) {		
-			return new NetlicensingValidationRequest(responseEvaluator, validationBaseUrl);
-		} else {
-			return new NetlicensingValidationRequest(responseEvaluator);
-		}
+		return new ResponseEvaluator(licenseeNr);
 	}
 
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model, NetlicensingLicenseCache cache,
@@ -96,7 +96,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		 * return a validation result specific to this license type.
 		 */
 		model = new NetlicensingLicenseModel(model.getKey(), model.getSecret(), model.getProductNr(),
-				model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate(), model.getValidationBaseUrl());
+				model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate());
 
 	}
 

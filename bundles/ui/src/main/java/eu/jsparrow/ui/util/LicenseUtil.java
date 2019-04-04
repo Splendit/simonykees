@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.Properties;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -51,6 +52,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	private RegistrationService registrationService;
 
 	private LicensePersistenceService<LicenseModel> persistenceService;
+	private LicensePersistenceService<String> endpointPersistenceService;
 	private LicensePersistenceService<String> registrationPersistenceSerice;
 
 	private LicenseModelFactoryService factoryService;
@@ -61,11 +63,15 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	private SystemInfoWrapper systemInfoWrapper;
 
 	private boolean shouldContinueWithSelectRules = true;
+	private EndpointEncryption endpointEncryption;
 
 	private LicenseUtil() {
+
 		scheduler = new Scheduler(this);
 		systemInfoWrapper = new SystemInfoWrapper();
 		scheduler.start();
+
+		endpointEncryption = new EndpointEncryption();
 
 		BundleContext bundleContext = FrameworkUtil.getBundle(getClass())
 			.getBundleContext();
@@ -87,18 +93,27 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initPersistenceServices(BundleContext bundleContext) {
 		try {
-			ServiceReference registrationReferences[] = bundleContext
+			ServiceReference[] registrationReferences = bundleContext
 				.getServiceReferences(LicensePersistenceService.class.getName(), "(licenseType=registration)"); //$NON-NLS-1$
-			ServiceReference netlicensingReferences[] = bundleContext
+			ServiceReference[] netlicensingReferences = bundleContext
 				.getServiceReferences(LicensePersistenceService.class.getName(), "(licenseType=default)"); //$NON-NLS-1$
+			ServiceReference[] endpointReferences = bundleContext
+				.getServiceReferences(LicensePersistenceService.class.getName(), "(licenseType=endpoint)"); //$NON-NLS-1$
 
-			if (registrationReferences.length != 0 && netlicensingReferences.length != 0) {
-
+			if (registrationReferences.length != 0) {
 				this.registrationPersistenceSerice = (LicensePersistenceService<String>) bundleContext
 					.getService(registrationReferences[0]);
+			}
+			if (netlicensingReferences.length != 0) {
 				this.persistenceService = (LicensePersistenceService<LicenseModel>) bundleContext
 					.getService(netlicensingReferences[0]);
 			}
+
+			if (endpointReferences.length != 0) {
+				this.endpointPersistenceService = (LicensePersistenceService<String>) bundleContext
+					.getService(endpointReferences[0]);
+			}
+
 		} catch (InvalidSyntaxException ise) {
 			logger.debug(ise.getMessage(), ise);
 			logger.error(ise.getMessage());
@@ -114,6 +129,8 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	@Override
 	public boolean checkAtStartUp(Shell shell) {
+		String endpoint = loadEncryptedEndpointFromPersistence().map(endpointEncryption::decryptEndpoint)
+			.orElse(""); //$NON-NLS-1$
 		LicenseModel licenseModel = null;
 		try {
 			licenseModel = persistenceService.loadFromPersistence();
@@ -123,7 +140,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 
 		try {
-			result = licenseService.validate(licenseModel);
+			result = licenseService.validate(licenseModel, endpoint);
 		} catch (ValidationException e) {
 			handleStartUpValidationFailure(shell, e);
 			return true;
@@ -168,6 +185,14 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	@Override
 	public LicenseUpdateResult update(String key) {
+		/*
+		 * TODO temporary commented out to for testing - should be updated depending on the pattern of the encryption
+		 * if (key == null || key.isEmpty()) {
+		 *		return new LicenseUpdateResult(false, Messages.LicenseUtil_EmptyLicense);
+		 * } else if (key.matches(".*[\\/].*")) { //$NON-NLS-1$
+		 *		return new LicenseUpdateResult(false, "License contains illegal characters"); //$NON-NLS-1$
+		 * }
+		 */
 		if (key == null || key.isEmpty()) {
 			return new LicenseUpdateResult(false, Messages.LicenseUtil_EmptyLicense);
 		} else if (key.matches(".*[\\/].*")) { //$NON-NLS-1$
@@ -187,9 +212,17 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 		String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
 		String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
-		model = factoryService.createNewModel(key, secret, productNr, moduleNr, LicenseType.NONE, name, null);
+
+		String licenseKey = key;
+		String endpoint = ""; //$NON-NLS-1$
+		if (endpointEncryption.isEncryptedKey(key)) {
+			licenseKey = endpointEncryption.decryptKey(key);
+			endpoint = endpointEncryption.decryptEndpoint(key);
+		}
+
+		model = factoryService.createNewModel(licenseKey, secret, productNr, moduleNr, LicenseType.NONE, name, null);
 		try {
-			validationResult = licenseService.validate(model);
+			validationResult = licenseService.validate(model, endpoint);
 		} catch (ValidationException e) {
 			logger.error("Could not validate license", e); //$NON-NLS-1$
 			return new LicenseUpdateResult(false,
@@ -204,6 +237,9 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 		LicenseModel persitModel = factoryService.createNewModel(validationResult.getKey(), secret, productNr, moduleNr,
 				validationResult.getLicenseType(), name, validationResult.getExpirationDate());
+		if (endpointEncryption.isEncryptedKey(key)) {
+			persistEndpoint(key);
+		}
 
 		return persistLicense(persitModel);
 	}
@@ -211,8 +247,10 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	@Override
 	public void stop() {
 		LicenseModel model = tryLoadModelFromPersistence();
+		String endpoint = loadEncryptedEndpointFromPersistence().map(endpointEncryption::decryptEndpoint)
+			.orElse(""); //$NON-NLS-1$
 		try {
-			licenseService.checkIn(model);
+			licenseService.checkIn(model, endpoint);
 		} catch (ValidationException e) {
 			logger.error("Failed to check in license.", e); //$NON-NLS-1$
 		}
@@ -272,8 +310,10 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	public void updateValidationResult() {
 		LicenseModel model = tryLoadModelFromPersistence();
+		String endpoint = loadEncryptedEndpointFromPersistence().map(endpointEncryption::decryptEndpoint)
+			.orElse(""); //$NON-NLS-1$
 		try {
-			result = licenseService.validate(model);
+			result = licenseService.validate(model, endpoint);
 		} catch (ValidationException e) {
 			logger.error("Failed to validate license", e); //$NON-NLS-1$
 			result = new LicenseValidationResult(model.getType(), "", false, //$NON-NLS-1$
@@ -306,6 +346,16 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		return model;
 	}
 
+	private Optional<String> loadEncryptedEndpointFromPersistence() {
+		String encrypted = ""; //$NON-NLS-1$
+		try {
+			encrypted = endpointPersistenceService.loadFromPersistence();
+		} catch (PersistenceException e) {
+			logger.warn("Error while loading stored endpoint", e); //$NON-NLS-1$
+		}
+		return Optional.ofNullable(encrypted);
+	}
+
 	private void handleStartUpPersistenceFailure(Shell shell, PersistenceException e) {
 		logger.error("Failed to load stored license. Falling back to free license.", e); //$NON-NLS-1$
 		String message = Messages.MessageDialog_licensingError_failedToLoad;
@@ -329,6 +379,15 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 
 		return new LicenseUpdateResult(true, Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
+	}
+
+	private void persistEndpoint(String encryptedKey) {
+		try {
+			endpointPersistenceService.saveToPersistence(encryptedKey);
+		} catch (PersistenceException e) {
+			logger.error("License is valid but endpoint could not be persisted", e); //$NON-NLS-1$
+		}
+
 	}
 
 	private Properties loadProperties() throws IOException {

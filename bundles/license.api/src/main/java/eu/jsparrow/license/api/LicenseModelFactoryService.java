@@ -31,8 +31,7 @@ public interface LicenseModelFactoryService {
 	 *            the secret to be used for the model
 	 * @return a license model with type NODE_LOCKED
 	 */
-	public LicenseModel createNewNodeLockedModel(String key, String secret, String productNr, String moduleNr,
-			String validationBaseUrl);
+	public LicenseModel createNewNodeLockedModel(String key, String secret, String productNr, String moduleNr);
 
 	/**
 	 * Create a new floating license model.
@@ -43,8 +42,7 @@ public interface LicenseModelFactoryService {
 	 *            the secret to be used for the model
 	 * @return a license model with type FLOATING
 	 */
-	public LicenseModel createNewFloatingModel(String key, String secret, String productNr, String moduleNr,
-			String validationBaseUrl);
+	public LicenseModel createNewFloatingModel(String key, String secret, String productNr, String moduleNr);
 
 	/**
 	 * Create a new license model with the given type.
