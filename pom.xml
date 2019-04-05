@@ -218,14 +218,6 @@
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/mylyn/releases/latest/</url>
 		</repository>
-		<repository>
-			<id>bintray</id>
-			<name>bintray</name>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<url>http://jcenter.bintray.com</url>
-		</repository>
 	</repositories>
 
 	<pluginRepositories>
