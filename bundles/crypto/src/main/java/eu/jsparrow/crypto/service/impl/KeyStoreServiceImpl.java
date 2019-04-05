@@ -17,6 +17,7 @@ import java.util.Optional;
 import eu.jsparrow.crypto.exception.KeyStoreServiceException;
 import eu.jsparrow.crypto.service.KeyStoreService;
 import eu.jsparrow.crypto.service.KeyStoreType;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * implementation for {@link KeyStoreService}
@@ -25,7 +26,7 @@ import eu.jsparrow.crypto.service.KeyStoreType;
  */
 public class KeyStoreServiceImpl implements KeyStoreService {
 
-	private KeyStore keyStore;
+	KeyStore keyStore;
 
 	@Override
 	public void loadKeyStore(InputStream inputStream, KeyStoreType keyStoreType, String password)
@@ -66,7 +67,7 @@ public class KeyStoreServiceImpl implements KeyStoreService {
 	@Override
 	public Optional<PrivateKey> getPrivateKey(String alias, String password) throws KeyStoreServiceException {
 		if (!isKeyStoreLoaded()) {
-			return Optional.empty();
+			throw new KeyStoreServiceException(Messages.KeyStoreServiceImpl_keyStoreNotLoadedException);
 		}
 
 		try {
@@ -86,7 +87,7 @@ public class KeyStoreServiceImpl implements KeyStoreService {
 	@Override
 	public Optional<Certificate> getCertificate(String alias) throws KeyStoreServiceException {
 		if (!isKeyStoreLoaded()) {
-			return Optional.empty();
+			throw new KeyStoreServiceException(Messages.KeyStoreServiceImpl_keyStoreNotLoadedException);
 		}
 
 		try {

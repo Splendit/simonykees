@@ -34,10 +34,8 @@ public class RSAServiceImpl implements RSAService {
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
 			byte[] binaryCipherText = cipher.doFinal(plainText.getBytes());
-			String cipherText = Base64.getEncoder()
+			return Base64.getEncoder()
 				.encodeToString(binaryCipherText);
-
-			return cipherText;
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException
 				| BadPaddingException e) {
 			throw new RSAServiceException(e.getMessage(), e);
@@ -55,9 +53,7 @@ public class RSAServiceImpl implements RSAService {
 			cipher.init(Cipher.DECRYPT_MODE, privateKey);
 
 			byte[] decryptedBinaryCipherText = cipher.doFinal(binaryCipherText);
-			String decryptedCipherText = new String(decryptedBinaryCipherText);
-
-			return decryptedCipherText;
+			return new String(decryptedBinaryCipherText);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException
 				| BadPaddingException e) {
 			throw new RSAServiceException(e.getMessage(), e);
@@ -74,10 +70,8 @@ public class RSAServiceImpl implements RSAService {
 			privateSignature.update(binaryPlainText);
 
 			byte[] binarySignature = privateSignature.sign();
-			String signature = Base64.getEncoder()
+			return Base64.getEncoder()
 				.encodeToString(binarySignature);
-
-			return signature;
 		} catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
 			throw new RSAServiceException(e.getMessage(), e);
 		}
@@ -94,9 +88,7 @@ public class RSAServiceImpl implements RSAService {
 			publicSignature.initVerify(publicKey);
 			publicSignature.update(binaryPlainText);
 
-			boolean valid = publicSignature.verify(binarySignature);
-
-			return valid;
+			return publicSignature.verify(binarySignature);
 		} catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
 			throw new RSAServiceException(e.getMessage(), e);
 		}
