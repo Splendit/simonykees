@@ -438,6 +438,7 @@ public class Messages extends NLS {
 	public static String EclipseProjectFileManager_directoryRestoreDone;
 	public static String EclipseProjectFileManager_fileBackupDone;
 	public static String EclipseProjectFileManager_fileRestoreDone;
+	public static String KeyStoreServiceImpl_keyStoreNotLoadedException;
 	public static String StandaloneConfig_noRefactoringStates;
 	public static String StandaloneConfig_unusedClassExcludesWarning;
 	public static String StandaloneConfig_unusedPackageExcludesWarning;
