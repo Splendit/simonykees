@@ -406,7 +406,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	private void doSomething(Object o) {
-
+		o.getClass();
 	}
 
 	private Person getRandomPerson() {
@@ -414,7 +414,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	private void setIterator(Iterator iterator) {
-
+		iterator.next();
 	}
 
 	class Employee<T> extends Person {

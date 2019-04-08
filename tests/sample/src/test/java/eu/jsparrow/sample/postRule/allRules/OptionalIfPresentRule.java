@@ -415,6 +415,7 @@ public class OptionalIfPresentRule {
 	}
 
 	private Optional<String> findUserName(String user) {
+		Optional.of(user);
 		return Optional.empty();
 	}
 
