@@ -35,7 +35,7 @@ public interface KeyStoreService {
 	/**
 	 * Checks, whether the key store has been loaded or not
 	 * 
-	 * @return true, if the key store is available, false otherwise
+	 * @return {@code true}, if the key store is available, {@code false} otherwise
 	 */
 	boolean isKeyStoreLoaded();
 
