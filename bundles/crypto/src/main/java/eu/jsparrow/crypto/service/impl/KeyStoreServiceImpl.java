@@ -14,16 +14,19 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Optional;
 
+import org.osgi.service.component.annotations.Component;
+
 import eu.jsparrow.crypto.exception.KeyStoreServiceException;
 import eu.jsparrow.crypto.service.KeyStoreService;
 import eu.jsparrow.crypto.service.KeyStoreType;
 import eu.jsparrow.i18n.Messages;
 
 /**
- * implementation for {@link KeyStoreService}
+ * Implementation for {@link KeyStoreService}
  * 
  * @since 3.4.0
  */
+@Component
 public class KeyStoreServiceImpl implements KeyStoreService {
 
 	KeyStore keyStore;
@@ -78,10 +81,10 @@ public class KeyStoreServiceImpl implements KeyStoreService {
 				return Optional.ofNullable((PrivateKey) key);
 			}
 
-			return Optional.empty();
 		} catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException e) {
 			throw new KeyStoreServiceException(e.getMessage(), e);
 		}
+		return Optional.empty();
 	}
 
 	@Override

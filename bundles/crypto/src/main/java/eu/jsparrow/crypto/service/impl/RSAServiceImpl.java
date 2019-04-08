@@ -13,6 +13,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.osgi.service.component.annotations.Component;
+
 import eu.jsparrow.crypto.exception.RSAServiceException;
 import eu.jsparrow.crypto.service.RSAService;
 
@@ -21,6 +23,7 @@ import eu.jsparrow.crypto.service.RSAService;
  * 
  * @since 3.4.0
  */
+@Component
 public class RSAServiceImpl implements RSAService {
 
 	private static final String ENCRYPTION_ALGORITHM = "RSA/ECB/PKCS1Padding"; //$NON-NLS-1$
