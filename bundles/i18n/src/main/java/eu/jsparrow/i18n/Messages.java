@@ -261,6 +261,9 @@ public class Messages extends NLS {
 	public static String ProgressMonitor_searching_for_references;
 	public static String ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName;
 	public static String ProgressMonitor_verifying_project_information;
+	public static String ProxyConfiguration_CouldNotGetProxyServiceInstance;
+	public static String ProxySettings_portMustBeBetween0And65535;
+	public static String ProxySettings_poxyOnlySupportsHTTPorHTTPS;
 	public static String PublicFieldsRenamingRule_description;
 	public static String PublicFieldsRenamingRule_name;
 	public static String RearrangeClassMembersRule_description;
