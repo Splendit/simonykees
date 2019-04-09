@@ -39,7 +39,6 @@ import eu.jsparrow.core.rule.impl.LambdaForEachCollectRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
-import eu.jsparrow.core.rule.impl.MapGetOrDefaultRule;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
 import eu.jsparrow.core.rule.impl.OptionalIfPresentRule;
@@ -50,13 +49,13 @@ import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
 import eu.jsparrow.core.rule.impl.RemoveDoubleNegationRule;
-import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
-import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.RemoveEmptyStatementRule;
 import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
 import eu.jsparrow.core.rule.impl.RemoveModifiersInInterfacePropertiesRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
+import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
+import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
@@ -127,7 +126,9 @@ public class RulesContainer {
 				new CollectionRemoveAllRule(), new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
-				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new MapGetOrDefaultRule(), new DateDeprecatedRule(),
+				new ReImplementingInterfaceRule(), new PutIfAbsentRule(),
+				//TODO release with 3.5.0 new MapGetOrDefaultRule(),
+				new DateDeprecatedRule(),
 				new RemoveDoubleNegationRule(), new OptionalIfPresentRule(), new GuardConditionRule(),
 				new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(), new RemoveEmptyStatementRule(),
 				new RemoveUnnecessaryThrownExceptionsRule(), new RemoveModifiersInInterfacePropertiesRule(),
