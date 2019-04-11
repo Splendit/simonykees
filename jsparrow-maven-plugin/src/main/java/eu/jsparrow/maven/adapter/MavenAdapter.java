@@ -1,12 +1,14 @@
 package eu.jsparrow.maven.adapter;
 
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.AGENT_URL;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.CONFIG_FILE_OVERRIDE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.DEBUG_ENABLED;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.FRAMEWORK_STORAGE_VALUE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.LICENSE_KEY;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.LIST_RULES_SELECTED_ID;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.OSGI_INSTANCE_AREA_CONSTANT;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.PROXY_SETTINGS;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.ROOT_CONFIG_PATH;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.ROOT_PROJECT_BASE_PATH;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.SELECTED_PROFILE;
@@ -21,15 +23,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Proxy;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Constants;
 
 import eu.jsparrow.maven.i18n.Messages;
 import eu.jsparrow.maven.util.MavenProjectUtil;
+import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
  * Sets up the configuration used for starting the equinox framework.
@@ -64,8 +69,12 @@ public class MavenAdapter {
 	 *            a set of parameters provided from the mojo.
 	 * @param projects
 	 *            the list of all projects in the current session
-	 * @param defaultYamlFile
+	 * @param configFileOverride
+	 *            path to the provided yml configuration file.
+	 * @param fallbackConfigFile
 	 *            the default {@code jsparrow.yml} file.
+	 * @param proxies
+	 *            list of proxy configurations for equinox
 	 * @return an instance of {@link WorkingDirectory} for managing the working
 	 *         directory of the equinox framework.
 	 * @throws InterruptedException
@@ -75,11 +84,14 @@ public class MavenAdapter {
 	 *             current session.
 	 */
 	public WorkingDirectory setUpConfiguration(MavenParameters parameters, List<MavenProject> projects,
-			File defaultYamlFile) throws InterruptedException, MojoExecutionException {
+			File configFileOverride, File fallbackConfigFile, Stream<Proxy> proxies)
+			throws InterruptedException, MojoExecutionException {
 
 		log.info(Messages.MavenAdapter_setUpConfiguration);
 
 		setProjectIds(projects);
+		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
+		
 		WorkingDirectory workingDirectory = setUpConfiguration(parameters);
 		String rootProjectIdentifier = MavenProjectUtil.findProjectIdentifier(rootProject);
 
@@ -89,7 +101,9 @@ public class MavenAdapter {
 			throw new MojoExecutionException(Messages.MavenAdapter_jSparrowIsAlreadyRunning);
 		}
 
-		configuration.put(ROOT_CONFIG_PATH, defaultYamlFile.getAbsolutePath());
+		configuration.put(ROOT_CONFIG_PATH, fallbackConfigFile.getAbsolutePath());
+		configuration.put(CONFIG_FILE_OVERRIDE,
+				(configFileOverride == null) ? null : configFileOverride.getAbsolutePath());
 		configuration.put(ROOT_PROJECT_BASE_PATH, rootProject.getBasedir()
 			.getAbsolutePath());
 
@@ -114,6 +128,13 @@ public class MavenAdapter {
 		addInitialConfiguration(parameters);
 		return prepareWorkingDirectory();
 	}
+	
+	
+	public WorkingDirectory setUpConfiguration(MavenParameters parameters, Stream<Proxy> proxies) throws InterruptedException {
+		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
+		return setUpConfiguration(parameters);
+	}
+	
 
 	void addInitialConfiguration(MavenParameters config) {
 		boolean useDefaultConfig = config.getUseDefaultConfig();

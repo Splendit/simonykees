@@ -5,7 +5,7 @@
 
 	<groupId>at.splendit</groupId>
 	<artifactId>eu.jsparrow</artifactId>
-	<version>3.3.0-SNAPSHOT</version>
+	<version>3.4.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
 	<description>jSparrow Parent</description>
@@ -229,7 +229,7 @@
 		<pluginRepository>
 			<id>jsparrow-maven-plugin</id>
 			<name>jsparrow maven plugin</name>
-			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jenkins-jSparrow-maven-plugin-develop-test-noProguard/</url>
+			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/jSparrow-maven-plugin-release-candidate/</url>
 			<layout>default</layout>
 		</pluginRepository>
 	</pluginRepositories>

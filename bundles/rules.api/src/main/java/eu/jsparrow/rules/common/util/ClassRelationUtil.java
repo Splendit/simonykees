@@ -422,7 +422,6 @@ public class ClassRelationUtil {
 		Expression expression = methodInvocation.getExpression();
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		ITypeBinding type;
-		List<IMethodBinding> methods = new ArrayList<>();
 		if (expression != null) {
 			type = expression.resolveTypeBinding();
 		} else {
@@ -433,10 +432,28 @@ public class ClassRelationUtil {
 			return Collections.emptyList();
 		}
 
+		return findOverloadedMethods(methodBinding, type);
+	}
+
+	/**
+	 * Finds the {@link IMethodBinding}s of all methods overloading the given
+	 * one, i.e. having the same method name, having different parameters and
+	 * declared on the same or on a parent type.
+	 * 
+	 * @param methodBinding
+	 *            the {@link IMethodBinding} of the method to find the overloads
+	 *            for.
+	 * @param type
+	 *            the type where the search for overloaded methods will start
+	 *            from.
+	 * @return {@link List} of overloaded methods, or an empty list if the type
+	 *         bindings cannot be resolved.
+	 */
+	public static List<IMethodBinding> findOverloadedMethods(IMethodBinding methodBinding, ITypeBinding type) {
+		List<IMethodBinding> methods = new ArrayList<>();
 		methods.addAll(Arrays.asList(type.getDeclaredMethods()));
 		methods.addAll(findInheretedMethods(type));
-		String methodIdentifier = methodInvocation.getName()
-			.getIdentifier();
+		String methodIdentifier = methodBinding.getName();
 
 		return methods.stream()
 			// exclude overridden methods
@@ -629,6 +646,24 @@ public class ClassRelationUtil {
 		}
 
 		return false;
+	}
+
+	/**
+	 * 
+	 * @param methodInvocation
+	 *            method to be checked.
+	 * @return if the class where the given method invocation is declared
+	 *         belongs to {@code java.util} package.
+	 */
+	public static boolean isJavaUtilMethod(MethodInvocation methodInvocation) {
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		IPackageBinding declaringClassPackage = declaringClass.getPackage();
+		if (declaringClassPackage == null) {
+			return false;
+		}
+		String packageName = declaringClassPackage.getName();
+		return packageName.startsWith("java.util"); //$NON-NLS-1$
 	}
 
 }

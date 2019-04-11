@@ -414,7 +414,7 @@ public class GuardConditionRule {
 	}
 	
 	private void doSomething(String value) {
-		
+		value.chars();
 	}
 
 }

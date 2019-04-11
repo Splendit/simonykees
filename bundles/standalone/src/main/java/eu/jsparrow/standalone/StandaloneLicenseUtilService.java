@@ -1,5 +1,7 @@
 package eu.jsparrow.standalone;
 
+import eu.jsparrow.standalone.exceptions.StandaloneException;
+
 public interface StandaloneLicenseUtilService {
 
 	/**
@@ -11,7 +13,7 @@ public interface StandaloneLicenseUtilService {
 	 *            the base url of the license server.
 	 * @return if the license is valid.
 	 */
-	boolean validate(String key, String validationBaseUrl);
+	boolean validate(String key, String validationBaseUrl) throws StandaloneException;
 
 	/**
 	 * Prints information (type, validity and expiration date) about license
@@ -21,7 +23,7 @@ public interface StandaloneLicenseUtilService {
 	 *            license key for which information is asked
 	 * @param validationBaseUrl
 	 */
-	void licenseInfo(String key, String validationBaseUrl);
+	void licenseInfo(String key, String validationBaseUrl) throws StandaloneException;
 
 	void stop();
 }
