@@ -173,13 +173,20 @@ public class RulesContainer {
 		return rules;
 	}
 
+	/**
+	 * 
+	 * @return the list of all rules that require user configuration, e.g.
+	 *         {@link FieldsRenamingRule}, {@link StandardLoggerRule}.
+	 *         <em>NOTE:</em> No initialization data is provided in the
+	 *         instances of this list.
+	 */
 	public static List<RefactoringRule> getAllSemiAutomaticRules() {
 		List<RefactoringRule> semiautomaticRules = new LinkedList<>();
 
 		semiautomaticRules.addAll(Arrays.asList(new StandardLoggerRule(),
-				new FieldsRenamingRule(new LinkedList<>(), new LinkedList<>())));
+				new FieldsRenamingRule(Collections.emptyList(), Collections.emptyList())));
 
-		return semiautomaticRules;
+		return Collections.unmodifiableList(semiautomaticRules);
 	}
 
 	public static List<RefactoringRule> getRulesForProject(IJavaProject selectedJavaProjekt, boolean isStandalone) {
