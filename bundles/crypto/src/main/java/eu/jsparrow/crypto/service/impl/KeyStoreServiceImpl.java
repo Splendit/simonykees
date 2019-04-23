@@ -24,7 +24,7 @@ import eu.jsparrow.i18n.Messages;
 /**
  * Implementation for {@link KeyStoreService}
  * 
- * @since 3.4.0
+ * @since 3.5.0
  */
 @Component
 public class KeyStoreServiceImpl implements KeyStoreService {

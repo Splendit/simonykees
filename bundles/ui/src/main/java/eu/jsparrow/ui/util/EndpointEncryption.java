@@ -19,7 +19,7 @@ import eu.jsparrow.crypto.service.RSAService;
  * Provides implementation for encrypting and decrypting of the endpoint URL and
  * the license key.
  * 
- * @since 3.4.0
+ * @since 3.5.0
  *
  */
 public class EndpointEncryption {

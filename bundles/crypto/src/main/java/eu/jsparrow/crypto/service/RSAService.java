@@ -8,7 +8,7 @@ import eu.jsparrow.crypto.exception.RSAServiceException;
 /**
  * Service for encryption, decryption, signature and verification using RSA
  * 
- * @since 3.4.0
+ * @since 3.5.0
  */
 public interface RSAService {
 

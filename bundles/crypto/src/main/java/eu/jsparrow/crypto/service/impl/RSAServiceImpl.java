@@ -21,7 +21,7 @@ import eu.jsparrow.crypto.service.RSAService;
 /**
  * Implementation for {@link RSAService}
  * 
- * @since 3.4.0
+ * @since 3.5.0
  */
 @Component
 public class RSAServiceImpl implements RSAService {

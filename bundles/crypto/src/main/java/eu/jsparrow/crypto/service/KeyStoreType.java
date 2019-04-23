@@ -3,7 +3,7 @@ package eu.jsparrow.crypto.service;
 /**
  * enum representing diferent types for the java key store
  * 
- * @since 3.4.0
+ * @since 3.5.0
  */
 @SuppressWarnings("nls")
 public enum KeyStoreType {

@@ -14,7 +14,7 @@ import eu.jsparrow.license.api.persistence.SecureStoragePersistence;
  * Implementor of {@link SecureStoragePersistence} for persisting and loading
  * license server URL.
  * 
- * @since 3.4.0
+ * @since 3.5.0
  *
  */
 public class EndpointSecureStorePersistence extends SecureStoragePersistence<String> {

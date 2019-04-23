@@ -13,7 +13,7 @@ import eu.jsparrow.crypto.exception.KeyStoreServiceException;
 /**
  * Interface for describing a service to access java key stores
  * 
- * @since 3.4.0
+ * @since 3.5.0
  */
 public interface KeyStoreService {
 
