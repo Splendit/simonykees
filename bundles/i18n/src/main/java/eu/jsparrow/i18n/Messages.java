@@ -127,6 +127,10 @@ public class Messages extends NLS {
 	public static String EnhancedForLoopToStreamSumRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
+	public static String MapGetOrDefaultRule_description;
+
+	public static String MapGetOrDefaultRule_name;
+
 	public static String MavenProjectImporter_collectingProjectInfo;
 	public static String MavenProjectImporter_createingJavaProjects;
 	public static String MavenProjectImporter_creatingSingleJavaProject;
@@ -258,6 +262,9 @@ public class Messages extends NLS {
 	public static String ProgressMonitor_searching_for_references;
 	public static String ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName;
 	public static String ProgressMonitor_verifying_project_information;
+	public static String ProxyConfiguration_CouldNotGetProxyServiceInstance;
+	public static String ProxySettings_portMustBeBetween0And65535;
+	public static String ProxySettings_poxyOnlySupportsHTTPorHTTPS;
 	public static String PublicFieldsRenamingRule_description;
 	public static String PublicFieldsRenamingRule_name;
 	public static String RearrangeClassMembersRule_description;
@@ -333,6 +340,10 @@ public class Messages extends NLS {
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
 	public static String RemoveNewStringConstructorRule_name;
+	public static String RemoveUnusedParameterRule_description;
+
+	public static String RemoveUnusedParameterRule_name;
+
 	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
 	public static String RenameFieldsRuleWizardHandler_performFinish_jobName;
 	public static String RenameFieldsRuleWizardPage_description;

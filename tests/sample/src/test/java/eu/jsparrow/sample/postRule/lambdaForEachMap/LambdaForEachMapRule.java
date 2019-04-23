@@ -448,6 +448,7 @@ public class LambdaForEachMapRule {
 	}
 	
 	private <T> List<T> refToKey(Person ref) {
+		ref.getBirthday();
 		return new ArrayList<>();
 	}
 

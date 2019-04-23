@@ -369,6 +369,7 @@ public class TestFunctionalInterfaceRule {
 	}
 	
 	private void sampleMethodAcceptingFunction(GenericFoo foo) {
+		foo.hashCode();
 		// do nothing
 	}
 }

@@ -3,6 +3,7 @@ package eu.jsparrow.maven.mojo;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -15,6 +16,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Proxy;
 import org.osgi.framework.BundleException;
 
 import eu.jsparrow.maven.adapter.BundleStarter;
@@ -24,6 +26,7 @@ import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.i18n.Messages;
 import eu.jsparrow.maven.util.JavaVersion;
+import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
  * Runs jSparrow on the Maven project.
@@ -93,10 +96,11 @@ public class RefactorMojo extends AbstractMojo {
 		File fallbackConfigFile = Paths.get(project.getBasedir()
 			.getAbsolutePath(), "jsparrow.yml") //$NON-NLS-1$
 			.toFile();
+		Stream<Proxy> proxies = ProxyUtil.getHttpProxies(mavenSession);
 
 		try {
 			WorkingDirectory workingDirectory = mavenAdapter.setUpConfiguration(parameters, projects,
-					configFileOverride, fallbackConfigFile);
+					configFileOverride, fallbackConfigFile, proxies);
 			addShutdownHook(bundleStarter, workingDirectory, mavenAdapter.isJsparrowRunningFlag());
 			bundleStarter.runStandalone(mavenAdapter.getConfiguration());
 		} catch (BundleException | InterruptedException e1) {

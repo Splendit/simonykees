@@ -302,7 +302,7 @@ public class EnhancedForLoopToStreamForEachRule {
 	}
 	
 	private void useClass(Class<Object> c) {
-		
+		c.getAnnotations();
 	}
 	
 	private void collectionOfDoubles() {

@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import eu.jsparrow.rules.common.visitor.helper.SimpleExpressionVisitor;
@@ -179,6 +180,7 @@ public class OperatorUtil {
 	 * <p/>
 	 * 
 	 * <b>Note:</b> the returned expression must not be discarded!
+	 * 
 	 * @param expression
 	 *            expression to be negated
 	 * @param astRewrite
@@ -270,6 +272,52 @@ public class OperatorUtil {
 		prefixExpression.setOperator(NOT);
 		prefixExpression.setOperand((Expression) astRewrite.createCopyTarget(expression));
 		return prefixExpression;
+	}
+
+	/**
+	 * Checks if the given expression is a null-check of the given variable,
+	 * i.e. any of the forms {@code variableName==null} or
+	 * {@code null==variableName}.
+	 * 
+	 * @param variableName
+	 *            name of the variable being null-checked
+	 * @param expression
+	 *            expression comparing the a variable to {@code null}
+	 * @return {@code true} if the expression has any of the forms mentioned
+	 *         above or {@code false} otherwise.
+	 */
+	public static boolean isNullCheck(SimpleName variableName, Expression expression) {
+		if (expression.getNodeType() != ASTNode.INFIX_EXPRESSION) {
+			return false;
+		}
+		InfixExpression infixExpression = (InfixExpression) expression;
+
+		if (infixExpression.hasExtendedOperands()) {
+			return false;
+		}
+
+		InfixExpression.Operator operator = infixExpression.getOperator();
+		if (operator != InfixExpression.Operator.EQUALS) {
+			return false;
+		}
+		Expression right = infixExpression.getRightOperand();
+		Expression left = infixExpression.getLeftOperand();
+
+		return isSecondOperandMatchingNull(left, right, variableName)
+				|| isSecondOperandMatchingNull(right, left, variableName);
+	}
+
+	private static boolean isSecondOperandMatchingNull(Expression first, Expression second,
+			SimpleName assignedVariableName) {
+		if (second.getNodeType() != ASTNode.NULL_LITERAL) {
+			return false;
+		}
+		if (first.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return false;
+		}
+		SimpleName leftName = (SimpleName) first;
+		return leftName.getIdentifier()
+			.equals(assignedVariableName.getIdentifier());
 	}
 
 }

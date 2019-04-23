@@ -19,6 +19,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.logging.LoggingUtil;
 import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
+import eu.jsparrow.standalone.util.ProxyUtils;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -67,6 +68,7 @@ public class Activator implements BundleActivator {
 		String startMessage = String.format("%s", Messages.Activator_start); //$NON-NLS-1$
 		logger.info(startMessage);
 		registerShutdownHook(context);
+		ProxyUtils.configureProxy(context);
 		StandaloneMode mode = parseMode(context);
 		String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID_KEY);
 		switch (mode) {
@@ -90,6 +92,8 @@ public class Activator implements BundleActivator {
 			setExitErrorMessageAndCleanUp(context, errorMsg);
 		}
 	}
+
+	
 
 	@Override
 	public void stop(BundleContext context) {
