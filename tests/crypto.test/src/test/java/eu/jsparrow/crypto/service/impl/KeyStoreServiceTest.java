@@ -28,6 +28,8 @@ public class KeyStoreServiceTest {
 
 	private static final String KEYSTORE_RESOURCE_NAME = "/jep-keystore.jks"; //$NON-NLS-1$
 
+	private static final String EMPTY = "empty"; //$NON-NLS-1$
+
 	private KeyStoreServiceImpl keyStoreService;
 
 	@Rule
@@ -52,7 +54,7 @@ public class KeyStoreServiceTest {
 
 	@Test
 	public void getCertificate_nonExistingAlias_shouldReturnEmptyOptional() throws Exception {
-		Optional<Certificate> cert = keyStoreService.getCertificate("empty"); //$NON-NLS-1$
+		Optional<Certificate> cert = keyStoreService.getCertificate(EMPTY); // $NON-NLS-1$
 
 		assertFalse(cert.isPresent());
 	}
@@ -84,7 +86,7 @@ public class KeyStoreServiceTest {
 
 	@Test
 	public void getPrivateKey_nonExistingAlias_shouldReturnEmptyOptional() throws Exception {
-		Optional<PrivateKey> privateKey = keyStoreService.getPrivateKey("empty", null); //$NON-NLS-1$
+		Optional<PrivateKey> privateKey = keyStoreService.getPrivateKey(EMPTY, null); // $NON-NLS-1$
 
 		assertFalse(privateKey.isPresent());
 	}
@@ -124,7 +126,7 @@ public class KeyStoreServiceTest {
 
 	@Test
 	public void getKeyPair_nonExistingAlias_shouldReturnEmptyOptional() throws Exception {
-		Optional<KeyPair> keyPair = keyStoreService.getKeyPair("empty", JEP_KEY_PASSWORD); //$NON-NLS-1$
+		Optional<KeyPair> keyPair = keyStoreService.getKeyPair(EMPTY, JEP_KEY_PASSWORD); // $NON-NLS-1$
 
 		assertFalse(keyPair.isPresent());
 	}

@@ -24,11 +24,11 @@ public class RegistrationSecureStoragePersistence extends SecureStoragePersisten
 
 	private static final String NODE_KEY = "registration-model"; //$NON-NLS-1$
 	private static final String DEFAULT = ""; //$NON-NLS-1$
-	private IEncryption encryption;
+	private IEncryption registrationEncryption;
 
 	public RegistrationSecureStoragePersistence(ISecurePreferences securePreferences, IEncryption encryption) {
 		super(securePreferences);
-		this.encryption = encryption;
+		this.registrationEncryption = encryption;
 	}
 
 	@Override
@@ -39,12 +39,12 @@ public class RegistrationSecureStoragePersistence extends SecureStoragePersisten
 			save(DEFAULT);
 			return DEFAULT;
 		}
-		return new String(encryption.decrypt(encryptedModel));
+		return new String(registrationEncryption.decrypt(encryptedModel));
 	}
 
 	@Override
 	public void save(String model) throws PersistenceException {
 		byte[] modelAsBytes = model.getBytes();
-		saveToSecureStorage(encryption.encrypt(modelAsBytes), NODE_KEY);
+		saveToSecureStorage(registrationEncryption.encrypt(modelAsBytes), NODE_KEY);
 	}
 }

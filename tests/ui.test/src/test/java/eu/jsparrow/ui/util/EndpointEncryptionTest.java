@@ -15,8 +15,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import eu.jsparrow.crypto.service.RSAService;
-
 @SuppressWarnings("nls")
 public class EndpointEncryptionTest {
 

@@ -27,12 +27,14 @@ public class RSAServiceImplTest {
 
 	private static final String KEYSTORE_RESOURCE_NAME = "/jep-keystore.jks"; //$NON-NLS-1$
 
+	private static final String PLAIN_TEXT = "Hello"; //$NON-NLS-1$
+
 	private PublicKey jepPublic;
 	private PrivateKey jepPrivate;
 	private PublicKey licensePublic;
 
 	private RSAService rsaService;
-	
+
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
@@ -56,40 +58,33 @@ public class RSAServiceImplTest {
 
 	@Test
 	public void encryptDecrypt_shouldReturnOriginalString() throws Exception {
-		String plain = "Hello"; //$NON-NLS-1$
-
-		String encrypted = rsaService.encrypt(plain, jepPublic);
+		String encrypted = rsaService.encrypt(PLAIN_TEXT, jepPublic);
 		String decrypted = rsaService.decrypt(encrypted, jepPrivate);
 
-		assertEquals(plain, decrypted);
+		assertEquals(PLAIN_TEXT, decrypted);
 	}
 
 	@Test
 	public void encryptDecrypt_wrongPrivateKeyForDecryption_shouldThrowException() throws Exception {
-		String plain = "hello"; //$NON-NLS-1$
 		expectedException.expect(RSAServiceException.class);
-		
-		String encrypted = rsaService.encrypt(plain, licensePublic);
+
+		String encrypted = rsaService.encrypt(PLAIN_TEXT, licensePublic);
 		rsaService.decrypt(encrypted, jepPrivate);
 	}
-	
+
 	@Test
 	public void signVerify_shouldVerify() throws Exception {
-		String plain = "Hello"; //$NON-NLS-1$
-
-		String signature = rsaService.sign(plain, jepPrivate);
-		boolean verified = rsaService.verify(plain, signature, jepPublic);
+		String signature = rsaService.sign(PLAIN_TEXT, jepPrivate);
+		boolean verified = rsaService.verify(PLAIN_TEXT, signature, jepPublic);
 
 		assertTrue(verified);
 	}
 
 	@Test
 	public void signVerify_wrongPublicKeyForVerification_shouldThrowException() throws Exception {
-		String plain = "Hello"; //$NON-NLS-1$
+		String signature = rsaService.sign(PLAIN_TEXT, jepPrivate);
+		boolean verified = rsaService.verify(PLAIN_TEXT, signature, licensePublic);
 
-		String signature = rsaService.sign(plain, jepPrivate);
-		boolean verified = rsaService.verify(plain, signature, licensePublic);
-		
 		assertFalse(verified);
 	}
 }

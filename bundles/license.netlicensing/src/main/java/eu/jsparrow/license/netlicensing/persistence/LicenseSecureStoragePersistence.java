@@ -24,12 +24,12 @@ public class LicenseSecureStoragePersistence extends SecureStoragePersistence<Li
 
 	private static final String NODE_KEY = "license-model"; //$NON-NLS-1$
 	
-	private IEncryption encryption;
+	private IEncryption licenseEncryption;
 	
 
 	public LicenseSecureStoragePersistence(ISecurePreferences securePreferences, IEncryption encryption) {
 		super(securePreferences);
-		this.encryption = encryption;
+		this.licenseEncryption = encryption;
 	}
 
 	@Override
@@ -41,13 +41,13 @@ public class LicenseSecureStoragePersistence extends SecureStoragePersistence<Li
 			save(defaultModel);
 			return defaultModel;
 		}
-		return ModelSerializer.deserialize(encryption.decrypt(encryptedModel));
+		return ModelSerializer.deserialize(licenseEncryption.decrypt(encryptedModel));
 	}
 
 	@Override
 	public void save(LicenseModel model) throws PersistenceException {
 		byte[] modelAsBytes = ModelSerializer.serialize(model);
-		saveToSecureStorage(encryption.encrypt(modelAsBytes), NODE_KEY);
+		saveToSecureStorage(licenseEncryption.encrypt(modelAsBytes), NODE_KEY);
 	}
 
 }

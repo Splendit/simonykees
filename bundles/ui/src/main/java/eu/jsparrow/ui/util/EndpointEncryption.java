@@ -103,7 +103,7 @@ public class EndpointEncryption {
 	public boolean isEncryptedKey(String key) {
 
 		// regex for checking base64 matches
-		final String base64Regex = "^(?:[A-Za-z0-9+/]{4})+(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"; //$NON-NLS-1$
+		final String BASE_64_REGEX = "^(?:[A-Za-z0-9+/]{4})+(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"; //$NON-NLS-1$
 
 		String[] licenseSignature = key.split(ENCRYPTED_SIGNATURE_SEPARATOR);
 		if (licenseSignature.length != 2) {
@@ -113,8 +113,8 @@ public class EndpointEncryption {
 		String license = licenseSignature[0];
 		String signature = licenseSignature[1];
 
-		boolean isSignatureB64 = signature.matches(base64Regex);
-		boolean isLicenseB64 = license.matches(base64Regex);
+		boolean isSignatureB64 = signature.matches(BASE_64_REGEX);
+		boolean isLicenseB64 = license.matches(BASE_64_REGEX);
 
 		return isSignatureB64 && isLicenseB64;
 	}
