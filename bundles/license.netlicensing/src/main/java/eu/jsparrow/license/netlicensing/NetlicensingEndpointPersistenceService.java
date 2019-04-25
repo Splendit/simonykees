@@ -10,13 +10,20 @@ import eu.jsparrow.license.api.LicensePersistenceService;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.netlicensing.persistence.EndpointSecureStorePersistence;
 
+/**
+ * Implementation of {@link LicensePersistenceService} for saving and loading
+ * encrypted license keys and local agent endpoints to/from the Eclipse Secure
+ * Storage.
+ * 
+ * @since 3.5.0
+ */
 @Component(property = "licenseType=endpoint")
 public class NetlicensingEndpointPersistenceService implements LicensePersistenceService<String> {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(NetlicensingEndpointPersistenceService.class);
-	
+
 	private LicensePersistence<String> persistence;
-	
+
 	public NetlicensingEndpointPersistenceService() {
 		persistence = new EndpointSecureStorePersistence(SecurePreferencesFactory.getDefault());
 	}
@@ -31,7 +38,7 @@ public class NetlicensingEndpointPersistenceService implements LicensePersistenc
 	public void saveToPersistence(String endpoint) throws PersistenceException {
 		logger.debug("Saving endpoint to persistence"); //$NON-NLS-1$
 		persistence.save(endpoint);
-		
+
 	}
 
 }
