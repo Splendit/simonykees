@@ -12,20 +12,24 @@ public interface LicenseService {
 	 * 
 	 * @param model
 	 *            the license model to validate.
+	 * @param endpoint
+	 *            the license server url. Use empty for default.
 	 * @return a {@link LicenseValidationResult}
 	 * @throws ValidationException
 	 *             if the validation could not be performed
 	 */
-	public LicenseValidationResult validate(LicenseModel model) throws ValidationException;
+	public LicenseValidationResult validate(LicenseModel model, String endpoint) throws ValidationException;
 
 	/**
 	 * Check in the given {@link LicenseModel}
 	 * 
 	 * @param model
 	 *            the license model to check in
+	 * @param endpoint
+	 *            the license server url. Use empty for default.
 	 * @throws ValidationException
 	 *             if the checkIn could not be performed
 	 */
-	public void checkIn(LicenseModel model) throws ValidationException;
+	public void checkIn(LicenseModel model, String endpoint) throws ValidationException;
 
 }

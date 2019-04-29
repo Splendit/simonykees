@@ -27,6 +27,7 @@
 		<!-- standalone -->
 		<module>standalone.test</module>
 		<module>eu.jsparrow.rules.api.test</module>
+		<module>crypto.test</module>
 	</modules>
 	
 	<dependencyManagement>

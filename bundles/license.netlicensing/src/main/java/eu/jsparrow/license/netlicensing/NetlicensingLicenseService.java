@@ -30,16 +30,16 @@ public class NetlicensingLicenseService implements LicenseService {
 	}
 
 	@Override
-	public LicenseValidationResult validate(LicenseModel model) throws ValidationException {
+	public LicenseValidationResult validate(LicenseModel model, String endpoint) throws ValidationException {
 		logger.debug("Validating {}", model);
-		LicenseValidation validation = validationFactory.create(model);
+		LicenseValidation validation = validationFactory.create(model, endpoint);
 		return validation.validate();
 	}
 
 	@Override
-	public void checkIn(LicenseModel licenseModel) throws ValidationException {
+	public void checkIn(LicenseModel licenseModel, String endpoint) throws ValidationException {
 		logger.debug("Checkin {}", licenseModel);
-		LicenseValidation validation = validationFactory.create(licenseModel);
+		LicenseValidation validation = validationFactory.create(licenseModel, endpoint);
 
 		validation.checkIn();
 	}
