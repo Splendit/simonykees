@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -32,11 +33,15 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 			return true;
 		}
 		Expression argument = arguments.get(0);
-		
+
 		UnmodifiableArgumentAnalyser analyzer = new UnmodifiableArgumentAnalyser(argument);
 
 		List<Expression> elements = analyzer.getElements();
-		if(elements == null) {
+		if (elements == null) {
+			return true;
+		}
+
+		if (!isNullSafe(elements)) {
 			return true;
 		}
 
@@ -51,10 +56,14 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 
 		Expression factoryMethod = createCollectionFactoryMethod(expressionTypeName, newArguments);
 		astRewrite.replace(methodInvocation, factoryMethod, null);
-
-
+		onRewrite();
 
 		return true;
+	}
+
+	private boolean isNullSafe(List<Expression> elements) {
+		return elements.stream()
+			.allMatch(element -> ASTNode.NULL_LITERAL != element.getNodeType());
 	}
 
 	private String findExpressionTypeName(MethodInvocation methodInvocation) {
@@ -66,7 +75,7 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 		case UNMODIFIABLE_SET:
 			return java.util.Set.class.getSimpleName();
 		case UNMODIFIABLE_MAP:
-			return java.util.Map.class.getName();
+			return java.util.Map.class.getSimpleName();
 		default:
 			return ""; //$NON-NLS-1$
 		}

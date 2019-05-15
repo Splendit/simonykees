@@ -55,12 +55,14 @@ public class UnmodifiableArgumentAnalyser {
 	private void analyzeAnonymousClassArgument(ClassInstanceCreation classInstanceCreation) {
 		Type type = classInstanceCreation.getType();
 		ITypeBinding typeBinding = type.resolveBinding();
-		List<String> setsAndLists = Arrays.asList(java.util.List.class.getName(), java.util.Set.class.getName());
+		List<String> setsAndLists = Arrays.asList(java.util.List.class.getName(), java.util.Set.class.getName(),
+				java.util.Map.class.getName());
 		if (!ClassRelationUtil.isInheritingContentOfTypes(typeBinding, setsAndLists)) {
 			return;
 		}
 		AnonymousClassDeclaration anonymousClassDeclaration = classInstanceCreation.getAnonymousClassDeclaration();
-		List<BodyDeclaration> bodyDeclarations = convertToTypedList(anonymousClassDeclaration.bodyDeclarations(), BodyDeclaration.class);
+		List<BodyDeclaration> bodyDeclarations = convertToTypedList(anonymousClassDeclaration.bodyDeclarations(),
+				BodyDeclaration.class);
 		if (bodyDeclarations.size() != 1) {
 			return;
 		}

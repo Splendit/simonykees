@@ -5,7 +5,9 @@ import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,11 +71,36 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		assertMatch(createBlock(expected), fixture.getMethodBlock());
 	}
 	
+	@Test
+	public void visit_immutableMapOfAnonymousArrayList_shouldTransform() throws Exception {
+		
+		String original = "Map<String, String> map = Collections.unmodifiableMap(new HashMap<String, String>() {{\n" + 
+				"			put(\"1\", \"one\");\n" + 
+				"			put(\"2\", \"two\");\n" + 
+				"		}});";
+		String expected = "Map<String, String> map = Map.of(\"1\", \"one\", \"2\", \"two\");";
+		fixture.addImport(JAVA_UTIL_MAP);
+		fixture.addImport(JAVA_UTIL_COLLECTIONS);
+		fixture.addImport(JAVA_UTIL_HASH_MAP);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
+	
 	private void sampleCode() {
 		List<String> list = Collections.unmodifiableList(Arrays.asList("1", "2"));
 		list = Collections.unmodifiableList(new ArrayList<String>() {{
 			add("1");
 			add("2");
+		}});
+		
+		Map<String, String> map = Collections.unmodifiableMap(new HashMap<String, String>() {{
+			put("1", "one");
+			put("2", "two");
 		}});
 	}
 
