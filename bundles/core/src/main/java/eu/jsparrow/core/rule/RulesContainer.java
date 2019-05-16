@@ -28,6 +28,7 @@ import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamFindFirstRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamForEachRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamSumRule;
 import eu.jsparrow.core.rule.impl.EnumsWithoutEqualsRule;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import eu.jsparrow.core.rule.impl.ForToForEachRule;
 import eu.jsparrow.core.rule.impl.FunctionalInterfaceRule;
@@ -39,6 +40,7 @@ import eu.jsparrow.core.rule.impl.LambdaForEachCollectRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
+import eu.jsparrow.core.rule.impl.MapGetOrDefaultRule;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
 import eu.jsparrow.core.rule.impl.OptionalIfPresentRule;
@@ -68,6 +70,7 @@ import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
 
@@ -126,13 +129,11 @@ public class RulesContainer {
 				new CollectionRemoveAllRule(), new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
-				new ReImplementingInterfaceRule(), new PutIfAbsentRule(),
-				//TODO release with 3.5.0 new MapGetOrDefaultRule(),
-				new DateDeprecatedRule(),
-				new RemoveDoubleNegationRule(), new OptionalIfPresentRule(), new GuardConditionRule(),
-				new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(), new RemoveEmptyStatementRule(),
-				new RemoveUnnecessaryThrownExceptionsRule(), new RemoveModifiersInInterfacePropertiesRule(),
-				new RemoveUnusedParameterRule(),
+				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new MapGetOrDefaultRule(),
+				new DateDeprecatedRule(), new RemoveDoubleNegationRule(), new OptionalIfPresentRule(),
+				new GuardConditionRule(), new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(),
+				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
+				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
@@ -170,6 +171,22 @@ public class RulesContainer {
 		}
 
 		return rules;
+	}
+
+	/**
+	 * 
+	 * @return the list of all rules that require user configuration, e.g.
+	 *         {@link FieldsRenamingRule}, {@link StandardLoggerRule}.
+	 *         <em>NOTE:</em> No initialization data is provided in the
+	 *         instances of this list.
+	 */
+	public static List<RefactoringRule> getAllSemiAutomaticRules() {
+		List<RefactoringRule> semiautomaticRules = new LinkedList<>();
+
+		semiautomaticRules.addAll(Arrays.asList(new StandardLoggerRule(),
+				new FieldsRenamingRule(Collections.emptyList(), Collections.emptyList())));
+
+		return Collections.unmodifiableList(semiautomaticRules);
 	}
 
 	public static List<RefactoringRule> getRulesForProject(IJavaProject selectedJavaProjekt, boolean isStandalone) {

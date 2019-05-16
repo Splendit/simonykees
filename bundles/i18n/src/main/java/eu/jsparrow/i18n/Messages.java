@@ -186,6 +186,7 @@ public class Messages extends NLS {
 	public static String LicenseType_try_and_buy;
 
 	public static String LicenseUtil_EmptyLicense;
+	public static String LicenseUtil_invalidLicenseFormat;
 	public static String LicenseValidator_cannot_reach_license_provider_on_validation_call;
 	public static String LicenseValidator_invalid_licensee_number;
 	public static String LicenseValidator_received_validation_response;
@@ -449,6 +450,7 @@ public class Messages extends NLS {
 	public static String EclipseProjectFileManager_directoryRestoreDone;
 	public static String EclipseProjectFileManager_fileBackupDone;
 	public static String EclipseProjectFileManager_fileRestoreDone;
+	public static String KeyStoreServiceImpl_keyStoreNotLoadedException;
 	public static String StandaloneConfig_noRefactoringStates;
 	public static String StandaloneConfig_unusedClassExcludesWarning;
 	public static String StandaloneConfig_unusedPackageExcludesWarning;

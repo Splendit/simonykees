@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>bundles</artifactId>
-		<version>3.4.0-SNAPSHOT</version>
+		<version>3.5.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>eu.jsparrow.ui</artifactId>
@@ -26,13 +26,14 @@
 			${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
 			-libraryjars
 			${project.basedir}/../core/target/eu.jsparrow.core-${project.version}_proguard_base.jar
+			-libraryjars
+			${project.basedir}/../crypto/target/eu.jsparrow.crypto-${project.version}_proguard_base.jar
 			-ignorewarnings
 		</proguard.extra.options>
 		<oshi.version>3.13.0</oshi.version>
 		<jna.version>4.4.0</jna.version>
 		<threetenbp.version>1.3.4</threetenbp.version>
 	</properties>
-
 
 	<build>
 		<resources>

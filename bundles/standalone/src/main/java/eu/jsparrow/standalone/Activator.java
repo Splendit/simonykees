@@ -165,7 +165,7 @@ public class Activator implements BundleActivator {
 	private void cleanUp(BundleContext context) {
 		StandaloneMode mode = parseMode(context);
 		if (licenseService != null && (mode == StandaloneMode.REFACTOR || mode == StandaloneMode.LICENSE_INFO)) {
-			licenseService.stop();
+			licenseService.stop(getAgentUrl(context));
 		}
 
 		refactoringInvoker.cleanUp();

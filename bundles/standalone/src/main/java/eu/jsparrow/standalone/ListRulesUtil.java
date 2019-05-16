@@ -1,5 +1,6 @@
 package eu.jsparrow.standalone;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -173,6 +174,14 @@ public class ListRulesUtil {
 	}
 
 	protected List<RefactoringRule> getAllRulesFromContainer() {
-		return RulesContainer.getAllRules(true);
+		List<RefactoringRule> allRules = new LinkedList<>();
+
+		// all regular rules
+		allRules.addAll(RulesContainer.getAllRules(true));
+
+		// all semiautomatic rules (i.e. filed renaming rule, logger rule, ...)
+		allRules.addAll(RulesContainer.getAllSemiAutomaticRules());
+
+		return allRules;
 	}
 }
