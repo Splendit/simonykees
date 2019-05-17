@@ -10,6 +10,8 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -56,9 +58,28 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 
 		Expression factoryMethod = createCollectionFactoryMethod(expressionTypeName, newArguments);
 		astRewrite.replace(methodInvocation, factoryMethod, null);
+		analyzer.getReplacedStatements().forEach(stm -> astRewrite.remove(stm, null));
+		VariableDeclarationFragment declarationFragment = analyzer.getNameDeclaration();
+		if(declarationFragment != null) {			
+			removeFragment(declarationFragment);
+		}
+		
 		onRewrite();
 
 		return true;
+	}
+
+	private void removeFragment(VariableDeclarationFragment nameDeclaration) {
+		VariableDeclarationStatement statement = (VariableDeclarationStatement) nameDeclaration.getParent();
+		int fragmentsSize = statement.fragments().size();
+		if(fragmentsSize > 1) {
+			astRewrite.remove(nameDeclaration, null);
+			
+		} else {
+			astRewrite.remove(statement, null);
+		}
+		
+		
 	}
 
 	private boolean isNullSafe(List<Expression> elements) {

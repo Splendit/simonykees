@@ -123,6 +123,75 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		assertMatch(createBlock(original), fixture.getMethodBlock());
 	}
 	
+	@Test
+	public void visit_convertingToImmutableMap_shouldTransform() throws Exception {
+		
+		String original = "" +
+				"		Map<String, String> map = new HashMap<>();\n" + 
+				"		map.put(\"1\", \"one\");\n" + 
+				"		map.put(\"2\", \"two\");\n" + 
+				"		Map<String, String> m = Collections.unmodifiableMap(map);";
+		String expected = "Map<String, String> m = Map.of(\"1\", \"one\", \"2\", \"two\");";
+		fixture.addImport(JAVA_UTIL_MAP);
+		fixture.addImport(JAVA_UTIL_COLLECTIONS);
+		fixture.addImport(JAVA_UTIL_HASH_MAP);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_skipUnrelatedStatements_shouldTransform() throws Exception {
+		
+		String original = "" +
+				"		Map<String, String> map3 = new HashMap<>();\n" + 
+				"		Map<String, String> map = new HashMap<>();\n" + 
+				"		map.put(\"1\", \"one\");\n" + 
+				"		map.put(\"2\", \"two\");\n" + 
+				"		map3.put(\"3\", \"three\");\n" + 
+				"		Map<String, String> m = Collections.unmodifiableMap(map);";
+		String expected = "" +
+				"		Map<String, String> map3 = new HashMap<>();\n" +
+				"		map3.put(\"3\", \"three\");\n" +
+				"		Map<String, String> m = Map.of(\"1\", \"one\", \"2\", \"two\");";
+		fixture.addImport(JAVA_UTIL_MAP);
+		fixture.addImport(JAVA_UTIL_COLLECTIONS);
+		fixture.addImport(JAVA_UTIL_HASH_MAP);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_reuseAfterUnmodifiableInvocation_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"		Map<String, String> map = new HashMap<>();\n" + 
+				"		map.put(\"1\", \"one\");\n" + 
+				"		map.put(\"2\", \"two\");\n" + 
+				"		Map<String, String> m = Collections.unmodifiableMap(map);\n" + 
+				"		map.put(\"4\", \"5\");";
+
+		fixture.addImport(JAVA_UTIL_MAP);
+		fixture.addImport(JAVA_UTIL_COLLECTIONS);
+		fixture.addImport(JAVA_UTIL_HASH_MAP);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
 	private void sampleCode() {
 		List<String> list = Collections.unmodifiableList(Arrays.asList("1", "2"));
 		list = Collections.unmodifiableList(new ArrayList<String>() {{
@@ -132,10 +201,17 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		
 		Collections.emptyList();
 		
-		Map<String, String> map = Collections.unmodifiableMap(new HashMap<String, String>() {{
+		Map<String, String> map2 = Collections.unmodifiableMap(new HashMap<String, String>() {{
 			put("1", "one");
 			put("2", "two");
 		}});
+		
+		Map<String, String> map = new HashMap<>();
+		map.put("1", "one");
+		map.put("2", "two");
+		Map<String, String> m = Collections.unmodifiableMap(map);
+		map.put("4", "5");
+		
 	}
 
 }
