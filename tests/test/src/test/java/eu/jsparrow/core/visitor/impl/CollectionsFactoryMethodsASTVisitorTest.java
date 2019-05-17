@@ -91,12 +91,46 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		assertMatch(createBlock(expected), fixture.getMethodBlock());
 	}
 	
+	@Test
+	public void visit_nullElement_shouldNotTransform() throws Exception {
+		
+		String original = "List<String> list = Collections.unmodifiableList(Arrays.asList(\"1\", \"2\", null));";
+		fixture.addImport(JAVA_UTIL_ARRAYS);
+		fixture.addImport(JAVA_UTIL_LIST);
+		fixture.addImport(JAVA_UTIL_COLLECTIONS);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_emptyList_shouldNotTransform() throws Exception {
+		
+		String original = "List<String> list = Collections.emptyList();";
+		fixture.addImport(JAVA_UTIL_ARRAYS);
+		fixture.addImport(JAVA_UTIL_LIST);
+		fixture.addImport(JAVA_UTIL_COLLECTIONS);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
 	private void sampleCode() {
 		List<String> list = Collections.unmodifiableList(Arrays.asList("1", "2"));
 		list = Collections.unmodifiableList(new ArrayList<String>() {{
 			add("1");
 			add("2");
 		}});
+		
+		Collections.emptyList();
 		
 		Map<String, String> map = Collections.unmodifiableMap(new HashMap<String, String>() {{
 			put("1", "one");

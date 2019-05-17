@@ -1,8 +1,10 @@
 package eu.jsparrow.rules.java10.factorymethods;
 
+import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -19,7 +21,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 
-import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class UnmodifiableArgumentAnalyser {
@@ -74,18 +75,14 @@ public class UnmodifiableArgumentAnalyser {
 		Initializer initializer = (Initializer) declaration;
 		Block body = initializer.getBody();
 		List<Statement> bodyStatements = convertToTypedList(body.statements(), Statement.class);
-		if (consistsOfInsertStatements("add", 1, bodyStatements) //$NON-NLS-1$
-				|| consistsOfInsertStatements("put", 2, bodyStatements)) { //$NON-NLS-1$
-			elements = bodyStatements.stream()
-				.map(statement -> ((ExpressionStatement) statement).getExpression())
-				.flatMap(expression -> convertToTypedList(((MethodInvocation) expression).arguments(), Expression.class)
-					.stream())
-				.collect(Collectors.toList());
-		}
 
+		if (!collectInsertedElements("add", 1, bodyStatements)) { //$NON-NLS-1$
+			collectInsertedElements("put", 2, bodyStatements); //$NON-NLS-1$
+		}
 	}
 
-	private boolean consistsOfInsertStatements(String name, int arity, List<Statement> bodyStatements) {
+	private boolean collectInsertedElements(String name, int arity, List<Statement> bodyStatements) {
+		List<Expression> collectedElements = new ArrayList<>();
 		for (Statement statement : bodyStatements) {
 			if (statement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
 				return false;
@@ -98,13 +95,15 @@ public class UnmodifiableArgumentAnalyser {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
 			SimpleName methodName = methodInvocation.getName();
 			Expression methodExpression = methodInvocation.getExpression();
-			int methodArity = methodInvocation.arguments()
-				.size();
+			List<Expression> methodArgments = convertToTypedList(methodInvocation.arguments(), Expression.class);
+			int methodArity = methodArgments.size();
 			if (methodExpression != null || !name.equals(methodName.getIdentifier()) || arity != methodArity) {
 				return false;
 			}
+			collectedElements.addAll(methodArgments);
 
 		}
+		this.elements = collectedElements;
 		return true;
 	}
 
@@ -119,7 +118,6 @@ public class UnmodifiableArgumentAnalyser {
 		if ("asList".equals(methodBinding.getName()) && ClassRelationUtil //$NON-NLS-1$
 			.isContentOfType(methodBinding.getDeclaringClass(), java.util.Arrays.class.getName())) {
 			elements = convertToTypedList(argumentMethod.arguments(), Expression.class);
-
 		}
 	}
 

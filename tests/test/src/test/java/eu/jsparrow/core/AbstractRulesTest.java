@@ -72,7 +72,8 @@ public abstract class AbstractRulesTest {
 				 * we cannot apply Local Variable Type Inference rule until we upgrade to java
 				 * 10.
 				 */
-				.filter(r -> !r.getId().equals("LocalVariableTypeInference")).collect(Collectors.toList());
+				.filter(r -> JavaCore.compareJavaVersions(JavaCore.VERSION_1_8, r.getRequiredJavaVersion()) >= 0)
+				.collect(Collectors.toList());
 
 		StandardLoggerRule standardLoggerRule = new StandardLoggerRule();
 		Map<String, String> options = standardLoggerRule.getDefaultOptions();

@@ -12,6 +12,7 @@ import eu.jsparrow.rules.common.Tag;
 public class CollectionsFactoryMethodsRule extends RefactoringRuleImpl<CollectionsFactoryMethodsASTVisitor> {
 	
 	public CollectionsFactoryMethodsRule() {
+		this.visitorClass = CollectionsFactoryMethodsASTVisitor.class;
 		this.id = "CollectionsFactoryMethods"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
 				"Use Factory Methods for Collections",  //$NON-NLS-1$
