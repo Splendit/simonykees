@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class MethodInvocationArgumentAnalyser extends ArgumentAnalyser<MethodInvocation> {
-	
+
 	@Override
 	public void analyzeArgument(MethodInvocation argumentMethod) {
 		/*

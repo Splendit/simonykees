@@ -37,7 +37,7 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 		}
 		Expression argument = arguments.get(0);
 
-		ArgumentAnalyser<?> analyser = null; 
+		ArgumentAnalyser<?> analyser = null;
 		if (argument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
 			ClassInstanceCreation anonymousClass = (ClassInstanceCreation) argument;
 			AnonymousClassArgumentAnalyser anonymousClassAnalyser = new AnonymousClassArgumentAnalyser();
@@ -57,7 +57,7 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 			analyser = simpleNameAnalyser;
 		}
 
-		if(analyser == null) {
+		if (analyser == null) {
 			return true;
 		}
 
@@ -83,7 +83,8 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 		astRewrite.replace(methodInvocation, factoryMethod, null);
 		analyser.getReplacedStatements()
 			.forEach(statement -> astRewrite.remove(statement, null));
-		analyser.getNameDeclaration().forEach(this::removeFragment);
+		analyser.getNameDeclaration()
+			.forEach(this::removeFragment);
 
 		onRewrite();
 

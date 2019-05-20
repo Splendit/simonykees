@@ -27,11 +27,11 @@ abstract class ArgumentAnalyser<T extends Expression> {
 	public List<Expression> getElements() {
 		return elements;
 	}
-	
+
 	public List<ExpressionStatement> getReplacedStatements() {
 		return Collections.emptyList();
 	}
-	
+
 	public List<VariableDeclarationFragment> getNameDeclaration() {
 		return Collections.emptyList();
 	}
