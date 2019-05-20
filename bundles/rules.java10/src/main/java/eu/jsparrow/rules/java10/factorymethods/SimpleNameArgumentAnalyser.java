@@ -5,6 +5,7 @@ import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -61,13 +62,45 @@ public class SimpleNameArgumentAnalyser extends ArgumentAnalyser<SimpleName> {
 		}
 		nameDeclarationFragment = fragment;
 
-		// find the method name to look for i.e. (add/put)
 		String methodName = findInsertMethodName(type);
 		int arity = methodName.equals(PUT) ? 2 : 1;
-		List<Expression> insertedElements = findInsertedElements(statements.subList(0, index), name, methodName, arity);
-		if (insertedElements != null) {
-			elements = insertedElements;
+		List<SimpleName> nonRemovable = findNonRemovableUsages(statements.subList(0, index), name, methodName, arity);
+		if (!nonRemovable.isEmpty()) {
+			return;
 		}
+
+		elements = findInsertedElements(statements.subList(0, index), name, methodName, arity);
+	}
+
+	private List<SimpleName> findNonRemovableUsages(List<Statement> statements, SimpleName name, String methodName,
+			int arity) {
+		List<SimpleName> allNonRemovableUsages = new ArrayList<>();
+		for (Statement statement : statements) {
+
+			LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(name);
+			statement.accept(visitor);
+			List<SimpleName> usages = visitor.getUsages();
+			if (statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+				List<SimpleName> nonRemovable = usages.stream()
+					.filter(usage -> usage.getLocationInParent() != MethodInvocation.EXPRESSION_PROPERTY)
+					.collect(Collectors.toList());
+				allNonRemovableUsages.addAll(nonRemovable);
+				allNonRemovableUsages.addAll(usages.stream()
+					.filter(usage -> usage.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY)
+					.filter(usage -> !isInsertStatement(methodName, arity, statement, usage))
+					.collect(Collectors.toList()));
+
+			} else {
+				List<SimpleName> nonRemovable = usages.stream()
+					.filter(usage -> usage.getLocationInParent() != VariableDeclarationFragment.NAME_PROPERTY)
+					.collect(Collectors.toList());
+				allNonRemovableUsages.addAll(nonRemovable);
+
+			}
+		}
+
+		return allNonRemovableUsages;
+
 	}
 
 	private List<Expression> findInsertedElements(List<Statement> statements, SimpleName name, String methodName,
@@ -76,12 +109,11 @@ public class SimpleNameArgumentAnalyser extends ArgumentAnalyser<SimpleName> {
 		List<ExpressionStatement> insertStatements = new ArrayList<>();
 		for (Statement statement : statements) {
 			if (statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-				List<Expression> arguments = isInsertStatement(methodName, arity, statement, name);
+				ExpressionStatement expressionStatement = (ExpressionStatement) statement;
+				List<Expression> arguments = findMethodArguments(methodName, arity, expressionStatement, name);
 				if (!arguments.isEmpty()) {
 					insertStatements.add((ExpressionStatement) statement);
 					insertedElements.addAll(arguments);
-				} else if (uses(statement, name)) {
-					return null;
 				}
 			}
 		}
@@ -108,12 +140,8 @@ public class SimpleNameArgumentAnalyser extends ArgumentAnalyser<SimpleName> {
 		return null;
 	}
 
-	private List<Expression> isInsertStatement(String expectedNamename, int arity, Statement statement,
-			SimpleName methodInvocationExpression) {
-		if (statement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
-			return Collections.emptyList();
-		}
-		ExpressionStatement expressionStatement = (ExpressionStatement) statement;
+	private List<Expression> findMethodArguments(String expectedMethodname, int arity,
+			ExpressionStatement expressionStatement, SimpleName methodInvocationExpression) {
 		Expression expression = expressionStatement.getExpression();
 		if (expression.getNodeType() != ASTNode.METHOD_INVOCATION) {
 			return Collections.emptyList();
@@ -131,10 +159,36 @@ public class SimpleNameArgumentAnalyser extends ArgumentAnalyser<SimpleName> {
 		}
 		List<Expression> methodArgments = convertToTypedList(methodInvocation.arguments(), Expression.class);
 		int methodArity = methodArgments.size();
-		if (!expectedNamename.equals(methodName.getIdentifier()) || arity != methodArity) {
+		if (!expectedMethodname.equals(methodName.getIdentifier()) || arity != methodArity) {
 			return Collections.emptyList();
 		}
 		return methodArgments;
+	}
+
+	private boolean isInsertStatement(String expectedNamename, int arity, Statement statement,
+			SimpleName methodInvocationExpression) {
+		if (statement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
+			return false;
+		}
+		ExpressionStatement expressionStatement = (ExpressionStatement) statement;
+		Expression expression = expressionStatement.getExpression();
+		if (expression.getNodeType() != ASTNode.METHOD_INVOCATION) {
+			return false;
+		}
+		MethodInvocation methodInvocation = (MethodInvocation) expression;
+		SimpleName methodName = methodInvocation.getName();
+		Expression methodExpression = methodInvocation.getExpression();
+		if (methodExpression == null || methodExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return false;
+		}
+		SimpleName methodExpressionName = (SimpleName) methodExpression;
+		if (!methodExpressionName.getIdentifier()
+			.equals(methodInvocationExpression.getIdentifier())) {
+			return false;
+		}
+		List<Expression> methodArgments = convertToTypedList(methodInvocation.arguments(), Expression.class);
+		int methodArity = methodArgments.size();
+		return expectedNamename.equals(methodName.getIdentifier()) && arity == methodArity;
 	}
 
 	private VariableDeclarationFragment findDeclarationFragment(VariableDeclarationStatement declaration,

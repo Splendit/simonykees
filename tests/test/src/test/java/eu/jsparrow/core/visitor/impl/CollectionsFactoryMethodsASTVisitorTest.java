@@ -143,6 +143,25 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		
 		assertMatch(createBlock(expected), fixture.getMethodBlock());
 	}
+
+	@Test
+	public void visit_emptyMap_shouldTransform() throws Exception {
+		
+		String original = "" +
+				"		Map<String, String> map = new HashMap<>();\n" + 
+				"		Map<String, String> m = Collections.unmodifiableMap(map);";
+		String expected = "Map<String, String> m = Map.of();";
+		fixture.addImport(JAVA_UTIL_MAP);
+		fixture.addImport(JAVA_UTIL_COLLECTIONS);
+		fixture.addImport(JAVA_UTIL_HASH_MAP);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
 	
 	@Test
 	public void visit_skipUnrelatedStatements_shouldTransform() throws Exception {
@@ -186,6 +205,72 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_missingDeclaration_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"		Map<String, String> map = new HashMap<>();\n" +
+				"		if(true) {" + 
+				"			map.put(\"1\", \"one\");\n" + 
+				"			map.put(\"2\", \"two\");\n" + 
+				"			Map<String, String> m = Collections.unmodifiableMap(map);\n" + 
+				"		}";
+
+		fixture.addImport(JAVA_UTIL_MAP);
+		fixture.addImport(JAVA_UTIL_COLLECTIONS);
+		fixture.addImport(JAVA_UTIL_HASH_MAP);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_unremovableStatement_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"		Map<String, String> map = new HashMap<>();\n" +
+				"		if(true) {" + 
+				"			map.put(\"1\", \"one\");\n" + 
+				"		}\n" +
+				"		map.put(\"2\", \"two\");\n" + 
+				"		Map<String, String> m = Collections.unmodifiableMap(map);\n" + 
+				"		";
+
+		fixture.addImport(JAVA_UTIL_MAP);
+		fixture.addImport(JAVA_UTIL_COLLECTIONS);
+		fixture.addImport(JAVA_UTIL_HASH_MAP);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_unremovableDeclaration_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"		Map<String, String> map = new HashMap<>();\n" +
+				"		Map<String, String> map2 = map;\n" +
+				"		map.put(\"1\", \"one\");\n" + 
+				"		map.put(\"2\", \"two\");\n" + 
+				"		Map<String, String> m = Collections.unmodifiableMap(map);\n" + 
+				"		";
+
+		fixture.addImport(JAVA_UTIL_MAP);
+		fixture.addImport(JAVA_UTIL_COLLECTIONS);
+		fixture.addImport(JAVA_UTIL_HASH_MAP);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
 		
 		fixture.accept(visitor);
 		
