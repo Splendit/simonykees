@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -36,9 +37,31 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 		}
 		Expression argument = arguments.get(0);
 
-		UnmodifiableArgumentAnalyser analyzer = new UnmodifiableArgumentAnalyser(argument);
+		ArgumentAnalyser<?> analyser = null; 
+		if (argument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+			ClassInstanceCreation anonymousClass = (ClassInstanceCreation) argument;
+			AnonymousClassArgumentAnalyser anonymousClassAnalyser = new AnonymousClassArgumentAnalyser();
+			anonymousClassAnalyser.analyzeArgument(anonymousClass);
+			analyser = anonymousClassAnalyser;
 
-		List<Expression> elements = analyzer.getElements();
+		} else if (argument.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			MethodInvocation argumentMethod = (MethodInvocation) argument;
+			MethodInvocationArgumentAnalyser methodInvocationanalyser = new MethodInvocationArgumentAnalyser();
+			methodInvocationanalyser.analyzeArgument(argumentMethod);
+			analyser = methodInvocationanalyser;
+
+		} else if (argument.getNodeType() == ASTNode.SIMPLE_NAME) {
+			SimpleNameArgumentAnalyser simpleNameAnalyser = new SimpleNameArgumentAnalyser();
+			SimpleName name = (SimpleName) argument;
+			simpleNameAnalyser.analyzeArgument(name);
+			analyser = simpleNameAnalyser;
+		}
+
+		if(analyser == null) {
+			return true;
+		}
+
+		List<Expression> elements = analyser.getElements();
 		if (elements == null) {
 			return true;
 		}
@@ -58,12 +81,10 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 
 		Expression factoryMethod = createCollectionFactoryMethod(expressionTypeName, newArguments);
 		astRewrite.replace(methodInvocation, factoryMethod, null);
-		analyzer.getReplacedStatements().forEach(stm -> astRewrite.remove(stm, null));
-		VariableDeclarationFragment declarationFragment = analyzer.getNameDeclaration();
-		if(declarationFragment != null) {			
-			removeFragment(declarationFragment);
-		}
-		
+		analyser.getReplacedStatements()
+			.forEach(statement -> astRewrite.remove(statement, null));
+		analyser.getNameDeclaration().forEach(this::removeFragment);
+
 		onRewrite();
 
 		return true;
@@ -71,15 +92,13 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 
 	private void removeFragment(VariableDeclarationFragment nameDeclaration) {
 		VariableDeclarationStatement statement = (VariableDeclarationStatement) nameDeclaration.getParent();
-		int fragmentsSize = statement.fragments().size();
-		if(fragmentsSize > 1) {
+		int fragmentsSize = statement.fragments()
+			.size();
+		if (fragmentsSize > 1) {
 			astRewrite.remove(nameDeclaration, null);
-			
 		} else {
 			astRewrite.remove(statement, null);
 		}
-		
-		
 	}
 
 	private boolean isNullSafe(List<Expression> elements) {
