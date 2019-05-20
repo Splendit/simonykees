@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.java10.factorymethods;
+package eu.jsparrow.rules.java10.factory.methods;
 
 import java.util.List;
 import java.util.stream.Collectors;

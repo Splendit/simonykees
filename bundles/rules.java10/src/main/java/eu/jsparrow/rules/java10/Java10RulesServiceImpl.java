@@ -8,7 +8,7 @@ import org.osgi.service.component.annotations.Component;
 
 import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.java10.factorymethods.CollectionsFactoryMethodsRule;
+import eu.jsparrow.rules.java10.factory.methods.CollectionsFactoryMethodsRule;
 
 /**
  * Implementor of {@link RuleService}. Currently provides only
