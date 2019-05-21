@@ -32,6 +32,9 @@ public class AnonymousClassArgumentAnalyser extends ArgumentAnalyser<ClassInstan
 			return;
 		}
 		AnonymousClassDeclaration anonymousClassDeclaration = classInstanceCreation.getAnonymousClassDeclaration();
+		if(anonymousClassDeclaration == null) {
+			return;
+		}
 		List<BodyDeclaration> bodyDeclarations = convertToTypedList(anonymousClassDeclaration.bodyDeclarations(),
 				BodyDeclaration.class);
 		if (bodyDeclarations.size() != 1) {

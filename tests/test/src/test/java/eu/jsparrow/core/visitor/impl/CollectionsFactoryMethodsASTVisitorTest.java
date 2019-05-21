@@ -29,9 +29,9 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 	private CollectionsFactoryMethodsASTVisitor visitor;
 	
 	@BeforeEach
-	public void setUp() {
+	public void setUp() throws Exception {
 		visitor = new CollectionsFactoryMethodsASTVisitor();
-
+		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 	}
 	
 	@Test
@@ -41,7 +41,6 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		String expected = "List<String> list = List.of(\"1\", \"2\");";
 		fixture.addImport(JAVA_UTIL_ARRAYS);
 		fixture.addImport(JAVA_UTIL_LIST);
-		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
@@ -60,11 +59,26 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 				"		}});";
 		String expected = "List<String> list = List.of(\"1\", \"2\");";
 		fixture.addImport(JAVA_UTIL_LIST);
-		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 		fixture.addImport(JAVA_UTIL_ARRAY_LIST);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_emptyUnmodifiableList_shouldTransform() throws Exception {
+		
+		String original = "List<String> list = Collections.unmodifiableList(new ArrayList<String>() {{\n" + 
+				"		}});";
+		String expected = "List<String> list = List.of();";
+		fixture.addImport(JAVA_UTIL_LIST);
+		fixture.addImport(JAVA_UTIL_ARRAY_LIST);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
 		
 		fixture.accept(visitor);
 		
@@ -80,7 +94,6 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 				"		}});";
 		String expected = "Map<String, String> map = Map.of(\"1\", \"one\", \"2\", \"two\");";
 		fixture.addImport(JAVA_UTIL_MAP);
-		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -97,7 +110,6 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		String original = "List<String> list = Collections.unmodifiableList(Arrays.asList(\"1\", \"2\", null));";
 		fixture.addImport(JAVA_UTIL_ARRAYS);
 		fixture.addImport(JAVA_UTIL_LIST);
-		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
@@ -113,7 +125,6 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		String original = "List<String> list = Collections.emptyList();";
 		fixture.addImport(JAVA_UTIL_ARRAYS);
 		fixture.addImport(JAVA_UTIL_LIST);
-		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
@@ -133,7 +144,6 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 				"		Map<String, String> m = Collections.unmodifiableMap(map);";
 		String expected = "Map<String, String> m = Map.of(\"1\", \"one\", \"2\", \"two\");";
 		fixture.addImport(JAVA_UTIL_MAP);
-		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -152,7 +162,6 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 				"		Map<String, String> m = Collections.unmodifiableMap(map);";
 		String expected = "Map<String, String> m = Map.of();";
 		fixture.addImport(JAVA_UTIL_MAP);
-		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -178,7 +187,6 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 				"		map3.put(\"3\", \"three\");\n" +
 				"		Map<String, String> m = Map.of(\"1\", \"one\", \"2\", \"two\");";
 		fixture.addImport(JAVA_UTIL_MAP);
-		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -200,7 +208,6 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 				"		map.put(\"4\", \"5\");";
 
 		fixture.addImport(JAVA_UTIL_MAP);
-		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -222,7 +229,6 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 				"		}";
 
 		fixture.addImport(JAVA_UTIL_MAP);
-		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -245,7 +251,6 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 				"		";
 
 		fixture.addImport(JAVA_UTIL_MAP);
-		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -267,8 +272,64 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 				"		";
 
 		fixture.addImport(JAVA_UTIL_MAP);
-		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 		fixture.addImport(JAVA_UTIL_HASH_MAP);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
+	/*
+	 * Anonymous Class Argument - Negative tests. 
+	 */
+	
+	@Test
+	public void visit_missingAnonymousClass_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"List<String> list2 = Collections.unmodifiableList(new ArrayList<>());";
+
+		fixture.addImport(JAVA_UTIL_LIST);
+		fixture.addImport(JAVA_UTIL_ARRAY_LIST);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_usingAddAll_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"		List<String> list1 = Collections.unmodifiableList(new ArrayList<String>() {{\n" + 
+				"			add(\"value\");\n" + 
+				"			add(\"value2\");\n" + 
+				"			addAll(Arrays.asList(\"\" , \"\"));\n" + 
+				"		}});";
+
+		fixture.addImport(JAVA_UTIL_LIST);
+		fixture.addImport(JAVA_UTIL_ARRAY_LIST);
+		fixture.addImport(JAVA_UTIL_ARRAYS);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_unmodifiableCollection_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"Collection<String> collection = Collections.unmodifiableCollection(new ArrayList<String>() {{}});";
+
+		fixture.addImport(java.util.Collection.class.getName());
+		fixture.addImport(JAVA_UTIL_ARRAY_LIST);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
