@@ -20,6 +20,17 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * A visitor for converting
+ * {@link java.util.Collections#unmodifiableList(List)},
+ * {@link java.util.Collections#unmodifiableSet(Set)} and
+ * {@link java.util.Collections#unmodifiableMap(Map)} with factory methods for
+ * collections introduced in {@code Java 9}, respectively {@code List.of},
+ * {@code Set.of} and {@code Map.of}.
+ * 
+ * @since 3.6.0
+ *
+ */
 public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String UNMODIFIABLE_LIST = "unmodifiableList"; //$NON-NLS-1$

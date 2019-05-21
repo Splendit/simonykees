@@ -9,6 +9,12 @@ import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
+/**
+ * @see CollectionsFactoryMethodsASTVisitor
+ * 
+ * @since 3.6.0
+ *
+ */
 public class CollectionsFactoryMethodsRule extends RefactoringRuleImpl<CollectionsFactoryMethodsASTVisitor> {
 
 	public CollectionsFactoryMethodsRule() {

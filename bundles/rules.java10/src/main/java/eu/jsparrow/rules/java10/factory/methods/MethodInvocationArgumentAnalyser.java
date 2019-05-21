@@ -8,6 +8,19 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Analyzes collection initialization of this form:
+ * 
+ * <pre>
+ * {@code List<String> list1 = Collections.unmodifiableList(Arrays.asList("1", "2"));}
+ * </pre>
+ * 
+ * Verifies the precondition for transforming this pattern to an initialization
+ * using factory methods for collections. Saves the inserted elements.
+ * 
+ * @since 3.6.0
+ *
+ */
 public class MethodInvocationArgumentAnalyser extends ArgumentAnalyser<MethodInvocation> {
 
 	@Override

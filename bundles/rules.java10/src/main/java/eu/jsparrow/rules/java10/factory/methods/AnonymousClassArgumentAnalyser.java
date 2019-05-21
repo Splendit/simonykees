@@ -22,6 +22,26 @@ import org.eclipse.jdt.core.dom.Type;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Analyzes collection initialization of this form:
+ * 
+ * <pre>
+ * <code>
+ * {@code
+ * 	List<String> list = Collections.unmodifiableList(new ArrayList<String>() {{
+ * 		add("1");
+ * 		add("2");
+ * 	}});}
+ * </code>
+ * </pre>
+ * 
+ * Verifies the precondition for transforming this pattern to an initialization
+ * using factory methods for collections. Saves the inserted elements.
+ * 
+ * 
+ * @since 3.6.0
+ *
+ */
 public class AnonymousClassArgumentAnalyser extends ArgumentAnalyser<ClassInstanceCreation> {
 
 	@Override
@@ -32,7 +52,7 @@ public class AnonymousClassArgumentAnalyser extends ArgumentAnalyser<ClassInstan
 			return;
 		}
 		AnonymousClassDeclaration anonymousClassDeclaration = classInstanceCreation.getAnonymousClassDeclaration();
-		if(anonymousClassDeclaration == null) {
+		if (anonymousClassDeclaration == null) {
 			return;
 		}
 		List<BodyDeclaration> bodyDeclarations = convertToTypedList(anonymousClassDeclaration.bodyDeclarations(),

@@ -24,6 +24,25 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
+/**
+ * Analyzes collection initialization of this form:
+ * 
+ * <pre>
+ * <code>
+ * {@code
+ * List<String> list = new ArrayList<>();
+ * list.add("1");
+ * list.add("2");
+ * list = Collections.unmodifiableList("1", "2");}
+ * </code>
+ * </pre>
+ * 
+ * Verifies the precondition for transforming this pattern to an initialization
+ * using factory methods for collections. Saves the inserted elements.
+ * 
+ * @since 3.6.0
+ *
+ */
 public class SimpleNameArgumentAnalyser extends ArgumentAnalyser<SimpleName> {
 
 	private VariableDeclarationFragment nameDeclarationFragment = null;
