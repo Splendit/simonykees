@@ -43,4 +43,8 @@ abstract class ArgumentAnalyser<T extends Expression> {
 						? PUT
 						: ADD;
 	}
+	
+	public boolean requiresNewDeclaration() {
+		return false;
+	}
 }

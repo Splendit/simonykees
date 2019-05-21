@@ -2,13 +2,6 @@ package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,9 +12,10 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 	
 	private static final String JAVA_UTIL_MAP = java.util.Map.class.getName();
 	private static final String JAVA_UTIL_LIST = java.util.List.class.getName();
-	private static final String JAVA_UTIL_LINKED_LIST = java.util.LinkedList.class.getName();
+	private static final String JAVA_UTIL_SET = java.util.Set.class.getName();
 	private static final String JAVA_UTIL_ARRAY_LIST = java.util.ArrayList.class.getName();
 	private static final String JAVA_UTIL_HASH_MAP = java.util.HashMap.class.getName();
+	private static final String JAVA_UTIL_HASH_SET = java.util.HashSet.class.getName();
 	private static final String JAVA_UTIL_ARRAYS = java.util.Arrays.class.getName();
 	private static final String JAVA_UTIL_COLLECTIONS = java.util.Collections.class.getName();
 
@@ -62,10 +56,28 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		fixture.addImport(JAVA_UTIL_ARRAY_LIST);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
-		
-		
+
 		fixture.accept(visitor);
+
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_immutableSetOfAnonymousHashSet_shouldTransform() throws Exception {
 		
+		String original = "" +
+				"		Set<String> set = Collections.unmodifiableSet(new HashSet<String>() {{\n" + 
+				"			add(\"1\");\n" + 
+				"			add(\"2\");\n" + 
+				"		}});";
+		String expected = "Set<String> set = Set.of(\"1\", \"2\");";
+		fixture.addImport(JAVA_UTIL_SET);
+		fixture.addImport(JAVA_UTIL_HASH_SET);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
 		assertMatch(createBlock(expected), fixture.getMethodBlock());
 	}
 	
@@ -86,6 +98,26 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 	}
 	
 	@Test
+	public void visit_reassigningCollection_shouldTransform() throws Exception {
+		String original = "" +
+				"		Map<String, String> map = new HashMap<>();\n" + 
+				"		map.put(\"\", \"\");\n" + 
+				"		map = Collections.unmodifiableMap(map);" + 
+				"		";
+		String expected = "" + 
+				"		Map<String, String> map = Map.of(\"\", \"\");";
+
+		fixture.addImport(JAVA_UTIL_MAP);
+		fixture.addImport(JAVA_UTIL_HASH_MAP);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
+	
+	@Test
 	public void visit_immutableMapOfAnonymousArrayList_shouldTransform() throws Exception {
 		
 		String original = "Map<String, String> map = Collections.unmodifiableMap(new HashMap<String, String>() {{\n" + 
@@ -97,7 +129,6 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
-		
 		
 		fixture.accept(visitor);
 		
@@ -197,6 +228,67 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		assertMatch(createBlock(expected), fixture.getMethodBlock());
 	}
 	
+	/*
+	 * Anonymous Class Argument - Negative tests. 
+	 */
+	
+	@Test
+	public void visit_missingAnonymousClass_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"List<String> list2 = Collections.unmodifiableList(new ArrayList<>());";
+
+		fixture.addImport(JAVA_UTIL_LIST);
+		fixture.addImport(JAVA_UTIL_ARRAY_LIST);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_usingAddAll_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"		List<String> list1 = Collections.unmodifiableList(new ArrayList<String>() {{\n" + 
+				"			add(\"value\");\n" + 
+				"			add(\"value2\");\n" + 
+				"			addAll(Arrays.asList(\"\" , \"\"));\n" + 
+				"		}});";
+
+		fixture.addImport(JAVA_UTIL_LIST);
+		fixture.addImport(JAVA_UTIL_ARRAY_LIST);
+		fixture.addImport(JAVA_UTIL_ARRAYS);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_unmodifiableCollection_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"Collection<String> collection = Collections.unmodifiableCollection(new ArrayList<String>() {{}});";
+
+		fixture.addImport(java.util.Collection.class.getName());
+		fixture.addImport(JAVA_UTIL_ARRAY_LIST);
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
+	/*
+	 * Simple name argument - negative test cases 
+	 */
+	
 	@Test
 	public void visit_reuseAfterUnmodifiableInvocation_shouldNotTransform() throws Exception {
 		
@@ -281,18 +373,19 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		assertMatch(createBlock(original), fixture.getMethodBlock());
 	}
 	
-	/*
-	 * Anonymous Class Argument - Negative tests. 
-	 */
-	
 	@Test
-	public void visit_missingAnonymousClass_shouldNotTransform() throws Exception {
+	public void visit_nonEmptyInitializer_shouldNotTransform() throws Exception {
 		
 		String original = "" +
-				"List<String> list2 = Collections.unmodifiableList(new ArrayList<>());";
+				"		Map<String, String> map2 = new HashMap<>();\n" +
+				"		Map<String, String> map = new HashMap<>(map2);\n" +
+				"		map.put(\"1\", \"one\");\n" + 
+				"		map.put(\"2\", \"two\");\n" + 
+				"		Map<String, String> m = Collections.unmodifiableMap(map);\n" + 
+				"		";
 
-		fixture.addImport(JAVA_UTIL_LIST);
-		fixture.addImport(JAVA_UTIL_ARRAY_LIST);
+		fixture.addImport(JAVA_UTIL_MAP);
+		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
@@ -302,62 +395,22 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 	}
 	
 	@Test
-	public void visit_usingAddAll_shouldNotTransform() throws Exception {
+	public void visit_nonEmptyInitializer2_shouldNotTransform() throws Exception {
 		
 		String original = "" +
-				"		List<String> list1 = Collections.unmodifiableList(new ArrayList<String>() {{\n" + 
-				"			add(\"value\");\n" + 
-				"			add(\"value2\");\n" + 
-				"			addAll(Arrays.asList(\"\" , \"\"));\n" + 
-				"		}});";
+				"		Map<String, String> map = new HashMap<String, String>(){{put(\"\", \"\");}};\n" +
+				"		map.put(\"1\", \"one\");\n" + 
+				"		map.put(\"2\", \"two\");\n" + 
+				"		Map<String, String> m = Collections.unmodifiableMap(map);\n";
 
-		fixture.addImport(JAVA_UTIL_LIST);
-		fixture.addImport(JAVA_UTIL_ARRAY_LIST);
-		fixture.addImport(JAVA_UTIL_ARRAYS);
+		fixture.addImport(JAVA_UTIL_MAP);
+		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
 		fixture.accept(visitor);
 		
 		assertMatch(createBlock(original), fixture.getMethodBlock());
-	}
-	
-	@Test
-	public void visit_unmodifiableCollection_shouldNotTransform() throws Exception {
-		
-		String original = "" +
-				"Collection<String> collection = Collections.unmodifiableCollection(new ArrayList<String>() {{}});";
-
-		fixture.addImport(java.util.Collection.class.getName());
-		fixture.addImport(JAVA_UTIL_ARRAY_LIST);
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		
-		fixture.accept(visitor);
-		
-		assertMatch(createBlock(original), fixture.getMethodBlock());
-	}
-	
-	private void sampleCode() {
-		List<String> list = Collections.unmodifiableList(Arrays.asList("1", "2"));
-		list = Collections.unmodifiableList(new ArrayList<String>() {{
-			add("1");
-			add("2");
-		}});
-		
-		Collections.emptyList();
-		
-		Map<String, String> map2 = Collections.unmodifiableMap(new HashMap<String, String>() {{
-			put("1", "one");
-			put("2", "two");
-		}});
-		
-		Map<String, String> map = new HashMap<>();
-		map.put("1", "one");
-		map.put("2", "two");
-		Map<String, String> m = Collections.unmodifiableMap(map);
-		map.put("4", "5");
-		
 	}
 
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
@@ -27,6 +28,7 @@ public class SimpleNameArgumentAnalyser extends ArgumentAnalyser<SimpleName> {
 
 	private VariableDeclarationFragment nameDeclarationFragment = null;
 	private List<ExpressionStatement> replacedStatements = new ArrayList<>();
+	private boolean requiresNewDeclaration = false;
 
 	@Override
 	public void analyzeArgument(SimpleName name) {
@@ -70,6 +72,30 @@ public class SimpleNameArgumentAnalyser extends ArgumentAnalyser<SimpleName> {
 		}
 
 		elements = findInsertedElements(statements.subList(0, index), name, methodName, arity);
+
+		updateRequiresDeclarationFlag(unmodifiableCollectionStatement, name);
+	}
+
+	private void updateRequiresDeclarationFlag(Statement unmodifiableCollectionStatement, SimpleName name) {
+		if (unmodifiableCollectionStatement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
+			return;
+		}
+
+		ExpressionStatement expressionStatement = (ExpressionStatement) unmodifiableCollectionStatement;
+		Expression expression = expressionStatement.getExpression();
+		if (expression.getNodeType() != ASTNode.ASSIGNMENT) {
+			return;
+		}
+
+		Assignment assignment = (Assignment) expression;
+		Expression left = assignment.getLeftHandSide();
+		if (left.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return;
+		}
+
+		SimpleName leftName = (SimpleName) left;
+		String leftIdentifier = leftName.getIdentifier();
+		this.requiresNewDeclaration = leftIdentifier.equals(name.getIdentifier());
 	}
 
 	private List<SimpleName> findNonRemovableUsages(List<Statement> statements, SimpleName name, String methodName,
@@ -98,9 +124,7 @@ public class SimpleNameArgumentAnalyser extends ArgumentAnalyser<SimpleName> {
 
 			}
 		}
-
 		return allNonRemovableUsages;
-
 	}
 
 	private List<Expression> findInsertedElements(List<Statement> statements, SimpleName name, String methodName,
@@ -233,6 +257,11 @@ public class SimpleNameArgumentAnalyser extends ArgumentAnalyser<SimpleName> {
 	@Override
 	public List<ExpressionStatement> getReplacedStatements() {
 		return this.replacedStatements;
+	}
+
+	@Override
+	public boolean requiresNewDeclaration() {
+		return this.requiresNewDeclaration;
 	}
 
 }

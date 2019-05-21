@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -35,28 +37,8 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 		if (arguments.size() != 1) {
 			return true;
 		}
-		Expression argument = arguments.get(0);
 
-		ArgumentAnalyser<?> analyser = null;
-		if (argument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-			ClassInstanceCreation anonymousClass = (ClassInstanceCreation) argument;
-			AnonymousClassArgumentAnalyser anonymousClassAnalyser = new AnonymousClassArgumentAnalyser();
-			anonymousClassAnalyser.analyzeArgument(anonymousClass);
-			analyser = anonymousClassAnalyser;
-
-		} else if (argument.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			MethodInvocation argumentMethod = (MethodInvocation) argument;
-			MethodInvocationArgumentAnalyser methodInvocationanalyser = new MethodInvocationArgumentAnalyser();
-			methodInvocationanalyser.analyzeArgument(argumentMethod);
-			analyser = methodInvocationanalyser;
-
-		} else if (argument.getNodeType() == ASTNode.SIMPLE_NAME) {
-			SimpleNameArgumentAnalyser simpleNameAnalyser = new SimpleNameArgumentAnalyser();
-			SimpleName name = (SimpleName) argument;
-			simpleNameAnalyser.analyzeArgument(name);
-			analyser = simpleNameAnalyser;
-		}
-
+		ArgumentAnalyser<?> analyser = analyzeArgument(arguments.get(0));
 		if (analyser == null) {
 			return true;
 		}
@@ -80,15 +62,64 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 			.collect(Collectors.toList());
 
 		Expression factoryMethod = createCollectionFactoryMethod(expressionTypeName, newArguments);
-		astRewrite.replace(methodInvocation, factoryMethod, null);
+		replaceWithFactoryMethod(methodInvocation, analyser, factoryMethod);
+
+		onRewrite();
+		return true;
+	}
+
+	private ArgumentAnalyser<?> analyzeArgument(Expression argument) {
+		if (argument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+			ClassInstanceCreation anonymousClass = (ClassInstanceCreation) argument;
+			AnonymousClassArgumentAnalyser anonymousClassAnalyser = new AnonymousClassArgumentAnalyser();
+			anonymousClassAnalyser.analyzeArgument(anonymousClass);
+			return anonymousClassAnalyser;
+
+		} else if (argument.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			MethodInvocation argumentMethod = (MethodInvocation) argument;
+			MethodInvocationArgumentAnalyser methodInvocationanalyser = new MethodInvocationArgumentAnalyser();
+			methodInvocationanalyser.analyzeArgument(argumentMethod);
+			return methodInvocationanalyser;
+
+		} else if (argument.getNodeType() == ASTNode.SIMPLE_NAME) {
+			SimpleNameArgumentAnalyser simpleNameAnalyser = new SimpleNameArgumentAnalyser();
+			SimpleName name = (SimpleName) argument;
+			simpleNameAnalyser.analyzeArgument(name);
+			return simpleNameAnalyser;
+		}
+		return null;
+	}
+
+	private void replaceWithFactoryMethod(MethodInvocation methodInvocation, ArgumentAnalyser<?> analyser,
+			Expression factoryMethod) {
+		if (analyser.requiresNewDeclaration()) {
+			VariableDeclarationStatement newVariableDeclaration = createNewVariableDeclaration(analyser, factoryMethod);
+			Statement statement = ASTNodeUtil.getSpecificAncestor(methodInvocation, Statement.class);
+			astRewrite.replace(statement, newVariableDeclaration, null);
+		} else {
+			astRewrite.replace(methodInvocation, factoryMethod, null);
+		}
 		analyser.getReplacedStatements()
 			.forEach(statement -> astRewrite.remove(statement, null));
 		analyser.getNameDeclaration()
 			.forEach(this::removeFragment);
+	}
 
-		onRewrite();
+	private VariableDeclarationStatement createNewVariableDeclaration(ArgumentAnalyser<?> analyser,
+			Expression factoryMethod) {
+		VariableDeclarationFragment fragment = analyser.getNameDeclaration()
+			.get(0);
+		VariableDeclarationStatement oldDeclaration = (VariableDeclarationStatement) fragment.getParent();
+		Type type = oldDeclaration.getType();
+		SimpleName name = fragment.getName();
+		AST ast = astRewrite.getAST();
+		VariableDeclarationFragment newFragment = ast.newVariableDeclarationFragment();
+		newFragment.setName((SimpleName) astRewrite.createCopyTarget(name));
+		newFragment.setInitializer(factoryMethod);
+		VariableDeclarationStatement newDeclaration = ast.newVariableDeclarationStatement(newFragment);
+		newDeclaration.setType((Type) astRewrite.createCopyTarget(type));
 
-		return true;
+		return newDeclaration;
 	}
 
 	private void removeFragment(VariableDeclarationFragment nameDeclaration) {
