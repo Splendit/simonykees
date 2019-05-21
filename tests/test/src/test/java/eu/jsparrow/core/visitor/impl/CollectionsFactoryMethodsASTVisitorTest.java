@@ -124,7 +124,7 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 				"			put(\"1\", \"one\");\n" + 
 				"			put(\"2\", \"two\");\n" + 
 				"		}});";
-		String expected = "Map<String, String> map = Map.of(\"1\", \"one\", \"2\", \"two\");";
+		String expected = "Map<String, String> map = Map.ofEntries(entry(\"1\", \"one\"), entry(\"2\", \"two\"));";
 		fixture.addImport(JAVA_UTIL_MAP);
 		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);
@@ -173,7 +173,7 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 				"		map.put(\"1\", \"one\");\n" + 
 				"		map.put(\"2\", \"two\");\n" + 
 				"		Map<String, String> m = Collections.unmodifiableMap(map);";
-		String expected = "Map<String, String> m = Map.of(\"1\", \"one\", \"2\", \"two\");";
+		String expected = "Map<String, String> m = Map.ofEntries(entry(\"1\", \"one\"), entry(\"2\", \"two\"));";
 		fixture.addImport(JAVA_UTIL_MAP);
 		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);
@@ -216,7 +216,7 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture 
 		String expected = "" +
 				"		Map<String, String> map3 = new HashMap<>();\n" +
 				"		map3.put(\"3\", \"three\");\n" +
-				"		Map<String, String> m = Map.of(\"1\", \"one\", \"2\", \"two\");";
+				"		Map<String, String> m = Map.ofEntries(entry(\"1\", \"one\"), entry(\"2\", \"two\"));";
 		fixture.addImport(JAVA_UTIL_MAP);
 		fixture.addImport(JAVA_UTIL_HASH_MAP);
 		fixture.addMethodBlock(original);

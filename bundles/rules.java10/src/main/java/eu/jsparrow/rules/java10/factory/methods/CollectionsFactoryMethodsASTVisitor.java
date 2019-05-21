@@ -1,20 +1,26 @@
 package eu.jsparrow.rules.java10.factory.methods;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -26,7 +32,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * {@link java.util.Collections#unmodifiableSet(Set)} and
  * {@link java.util.Collections#unmodifiableMap(Map)} with factory methods for
  * collections introduced in {@code Java 9}, respectively {@code List.of},
- * {@code Set.of} and {@code Map.of}.
+ * {@code Set.of} and {@code Map.ofEntries}.
  * 
  * @since 3.6.0
  *
@@ -36,6 +42,14 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 	private static final String UNMODIFIABLE_LIST = "unmodifiableList"; //$NON-NLS-1$
 	private static final String UNMODIFIABLE_SET = "unmodifiableSet"; //$NON-NLS-1$
 	private static final String UNMODIFIABLE_MAP = "unmodifiableMap"; //$NON-NLS-1$
+	
+	private Set<String> staticImports = new HashSet<>();
+	
+	@Override
+	public void endVisit(CompilationUnit compilationUnit) {
+		staticImports.stream().forEach(staticImport -> addStaticImport(compilationUnit, staticImport));
+		staticImports.clear();
+	}
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
@@ -71,12 +85,44 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 		List<Expression> newArguments = elements.stream()
 			.map(element -> (Expression) astRewrite.createCopyTarget(element))
 			.collect(Collectors.toList());
-
-		Expression factoryMethod = createCollectionFactoryMethod(expressionTypeName, newArguments);
+		String factoryMethodName = "of"; //$NON-NLS-1$
+		if(expressionTypeName.equals(java.util.Map.class.getSimpleName()) && newArguments.size() > 2) {
+			factoryMethodName = "ofEntries"; //$NON-NLS-1$
+			newArguments = createMapOfEntriesArguments(newArguments);
+			staticImports.add(java.util.Map.class.getName() + ".entry"); //$NON-NLS-1$
+		}
+		
+		Expression factoryMethod = createCollectionFactoryMethod(expressionTypeName, factoryMethodName, newArguments);
 		replaceWithFactoryMethod(methodInvocation, analyser, factoryMethod);
 
 		onRewrite();
 		return true;
+	}
+
+	private void addStaticImport(CompilationUnit compilationUnit, String name) {
+		ListRewrite importsRewriter = astRewrite.getListRewrite(compilationUnit, CompilationUnit.IMPORTS_PROPERTY);
+		AST ast = compilationUnit.getAST();
+		ImportDeclaration importDeclaration = ast.newImportDeclaration();
+		importDeclaration.setStatic(true);
+		importDeclaration.setName(ast.newName(name));
+		importsRewriter.insertLast(importDeclaration, null);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private List<Expression> createMapOfEntriesArguments(List<Expression> newArguments) {
+		AST ast = astRewrite.getAST();
+		List<Expression> entries = new ArrayList<>();
+		for(int i = 0; i < newArguments.size(); i+=2) {
+			Expression key = newArguments.get(i);
+			Expression value = newArguments.get(i+1);
+			MethodInvocation entry = ast.newMethodInvocation();
+			entry.setName(ast.newSimpleName("entry")); //$NON-NLS-1$
+			List entryArguments = entry.arguments();
+			entryArguments.add(key);
+			entryArguments.add(value);
+			entries.add(entry);
+		}
+		return entries;
 	}
 
 	private ArgumentAnalyser<?> analyzeArgument(Expression argument) {
@@ -183,14 +229,18 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 	}
 
 	@SuppressWarnings("unchecked")
-	private Expression createCollectionFactoryMethod(String type, List<Expression> arguments) {
+	private Expression createCollectionFactoryMethod(String type, String factoryMethodName, List<Expression> arguments) {
 		AST ast = getASTRewrite().getAST();
 		SimpleName invocationExpression = ast.newSimpleName(type);
 		MethodInvocation invocation = ast.newMethodInvocation();
-		invocation.setName(ast.newSimpleName("of")); //$NON-NLS-1$
+		invocation.setName(ast.newSimpleName(factoryMethodName));
 		invocation.setExpression(invocationExpression);
 		invocation.arguments()
 			.addAll(arguments);
+		
+		/*
+		 * TODO: in case of maps, Create ofEntries(entry(), entry(), ....) in case of Map
+		 */
 		return invocation;
 
 	}
