@@ -11,8 +11,9 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.java10.factory.methods.CollectionsFactoryMethodsRule;
 
 /**
- * Implementor of {@link RuleService}. Currently provides only
- * {@link LocalVariableTypeInferenceRule}.
+ * Implementor of {@link RuleService}. Currently provides
+ * {@link LocalVariableTypeInferenceRule} and
+ * {@link CollectionsFactoryMethodsRule}.
  *
  * @author Hans-Jörg Schrödl
  *

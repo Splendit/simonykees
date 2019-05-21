@@ -237,10 +237,7 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 		invocation.setExpression(invocationExpression);
 		invocation.arguments()
 			.addAll(arguments);
-		
-		/*
-		 * TODO: in case of maps, Create ofEntries(entry(), entry(), ....) in case of Map
-		 */
+	
 		return invocation;
 
 	}
