@@ -22,8 +22,8 @@ public class CollectionsFactoryMethodsRule extends RefactoringRuleImpl<Collectio
 		this.visitorClass = CollectionsFactoryMethodsASTVisitor.class;
 		this.id = "CollectionsFactoryMethods"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.CollectionsFactoryMethodsRule_name,
-				Messages.CollectionsFactoryMethodsRule_description,
-				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_9, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
+				Messages.CollectionsFactoryMethodsRule_description, Duration.ofMinutes(5),
+				Arrays.asList(Tag.JAVA_1_9, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
 	}
 
 	@Override

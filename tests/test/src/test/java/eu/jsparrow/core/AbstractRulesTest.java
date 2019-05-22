@@ -1,6 +1,5 @@
 package eu.jsparrow.core;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -67,18 +66,19 @@ public abstract class AbstractRulesTest {
 			root = createRootPackageFragment();
 		}
 		rulesList = new ArrayList<>();
-		List<RefactoringRule> allRules = RulesContainer.getAllRules(false).stream()
-				/*
-				 * we cannot apply Local Variable Type Inference rule until we upgrade to java
-				 * 10.
-				 */
-				.filter(r -> JavaCore.compareJavaVersions(JavaCore.VERSION_1_8, r.getRequiredJavaVersion()) >= 0)
-				.collect(Collectors.toList());
+		List<RefactoringRule> allRules = RulesContainer.getAllRules(false)
+			.stream()
+			/*
+			 * we cannot apply Local Variable Type Inference rule until we
+			 * upgrade to java 10.
+			 */
+			.filter(r -> JavaCore.compareJavaVersions(JavaCore.VERSION_1_8, r.getRequiredJavaVersion()) >= 0)
+			.collect(Collectors.toList());
 
 		StandardLoggerRule standardLoggerRule = new StandardLoggerRule();
 		Map<String, String> options = standardLoggerRule.getDefaultOptions();
-		options.put("new-logging-statement", "error");
-		options.put("system-out-print-exception", "error");
+		options.put("new-logging-statement", "error"); //$NON-NLS-1$ //$NON-NLS-2$
+		options.put("system-out-print-exception", "error"); //$NON-NLS-1$ //$NON-NLS-2$
 		standardLoggerRule.activateOptions(options);
 		rulesList.add(standardLoggerRule);
 		rulesList.addAll(allRules);
@@ -93,12 +93,14 @@ public abstract class AbstractRulesTest {
 
 	/**
 	 * loads all pairs of Paths for the postRule domain defined by the
-	 * postRuleDirectory to assure that only pairs are loaded that are defined in
-	 * the realm of the postRuleDirectory.
+	 * postRuleDirectory to assure that only pairs are loaded that are defined
+	 * in the realm of the postRuleDirectory.
 	 * 
-	 * @param postRuleDirectory directory of the reference sources
+	 * @param postRuleDirectory
+	 *            directory of the reference sources
 	 * @return the object array list used for tests
-	 * @throws IOException if path could not be found junit test default
+	 * @throws IOException
+	 *             if path could not be found junit test default
 	 */
 	protected static List<Object[]> load(String postRuleDirectory) throws IOException {
 		List<Object[]> data = new ArrayList<>();
@@ -106,8 +108,10 @@ public abstract class AbstractRulesTest {
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(postRuleDirectory),
 				RulesTestUtil.RULE_SUFFIX)) {
 			for (Path postRulePath : directoryStream) {
-				Path preRulePath = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, postRulePath.getFileName().toString());
-				data.add(new Object[] { preRulePath.getFileName().toString(), preRulePath, postRulePath });
+				Path preRulePath = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, postRulePath.getFileName()
+					.toString());
+				data.add(new Object[] { preRulePath.getFileName()
+					.toString(), preRulePath, postRulePath });
 			}
 		}
 
@@ -138,11 +142,13 @@ public abstract class AbstractRulesTest {
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules);
 
 		/*
-		 * A default progress monitor implementation, used just for testing purposes
+		 * A default progress monitor implementation, used just for testing
+		 * purposes
 		 */
 		IProgressMonitor monitor = new NullProgressMonitor();
 
-		rules.stream().forEach(rule -> rule.calculateEnabledForProject(packageFragment.getJavaProject()));
+		rules.stream()
+			.forEach(rule -> rule.calculateEnabledForProject(packageFragment.getJavaProject()));
 
 		refactoringPipeline.prepareRefactoring(compilationUnits, monitor);
 		refactoringPipeline.doRefactoring(monitor);
@@ -187,7 +193,8 @@ public abstract class AbstractRulesTest {
 		String packageString = "eu.jsparrow.sample.utilities"; //$NON-NLS-1$
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 		for (Path utilityPath : loadUtilityClasses(UTILITY_DIRECTORY)) {
-			String utilityClassName = utilityPath.getFileName().toString();
+			String utilityClassName = utilityPath.getFileName()
+				.toString();
 			String utilitySource = new String(Files.readAllBytes(utilityPath), StandardCharsets.UTF_8);
 			packageFragment.createCompilationUnit(utilityClassName, utilitySource, true, null);
 		}
@@ -199,7 +206,8 @@ public abstract class AbstractRulesTest {
 
 		@Override
 		public boolean visit(FieldDeclaration field) {
-			if (ASTNode.ANONYMOUS_CLASS_DECLARATION == field.getParent().getNodeType()) {
+			if (ASTNode.ANONYMOUS_CLASS_DECLARATION == field.getParent()
+				.getNodeType()) {
 				fragments.addAll(ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class));
 			}
 			return true;

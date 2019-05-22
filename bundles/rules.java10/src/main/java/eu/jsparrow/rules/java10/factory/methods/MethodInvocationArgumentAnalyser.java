@@ -12,7 +12,10 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * Analyzes collection initialization of this form:
  * 
  * <pre>
- * {@code List<String> list = Collections.unmodifiableList(Arrays.asList("1", "2"));}
+ * {
+ * 	&#64;code
+ * 	List<String> list = Collections.unmodifiableList(Arrays.asList("1", "2"));
+ * }
  * </pre>
  * 
  * Verifies the precondition for transforming this pattern to an initialization

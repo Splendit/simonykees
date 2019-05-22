@@ -3,6 +3,7 @@ package eu.jsparrow.rules.java10.factory.methods;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,12 +43,13 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 	private static final String UNMODIFIABLE_LIST = "unmodifiableList"; //$NON-NLS-1$
 	private static final String UNMODIFIABLE_SET = "unmodifiableSet"; //$NON-NLS-1$
 	private static final String UNMODIFIABLE_MAP = "unmodifiableMap"; //$NON-NLS-1$
-	
+
 	private Set<String> staticImports = new HashSet<>();
-	
+
 	@Override
 	public void endVisit(CompilationUnit compilationUnit) {
-		staticImports.stream().forEach(staticImport -> addStaticImport(compilationUnit, staticImport));
+		staticImports.stream()
+			.forEach(staticImport -> addStaticImport(compilationUnit, staticImport));
 		staticImports.clear();
 	}
 
@@ -86,12 +88,12 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 			.map(element -> (Expression) astRewrite.createCopyTarget(element))
 			.collect(Collectors.toList());
 		String factoryMethodName = "of"; //$NON-NLS-1$
-		if(expressionTypeName.equals(java.util.Map.class.getSimpleName()) && newArguments.size() > 2) {
+		if (expressionTypeName.equals(java.util.Map.class.getSimpleName()) && newArguments.size() > 2) {
 			factoryMethodName = "ofEntries"; //$NON-NLS-1$
 			newArguments = createMapOfEntriesArguments(newArguments);
 			staticImports.add(java.util.Map.class.getName() + ".entry"); //$NON-NLS-1$
 		}
-		
+
 		Expression factoryMethod = createCollectionFactoryMethod(expressionTypeName, factoryMethodName, newArguments);
 		replaceWithFactoryMethod(methodInvocation, analyser, factoryMethod);
 
@@ -112,9 +114,9 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 	private List<Expression> createMapOfEntriesArguments(List<Expression> newArguments) {
 		AST ast = astRewrite.getAST();
 		List<Expression> entries = new ArrayList<>();
-		for(int i = 0; i < newArguments.size(); i+=2) {
+		for (int i = 0; i < newArguments.size(); i += 2) {
 			Expression key = newArguments.get(i);
-			Expression value = newArguments.get(i+1);
+			Expression value = newArguments.get(i + 1);
 			MethodInvocation entry = ast.newMethodInvocation();
 			entry.setName(ast.newSimpleName("entry")); //$NON-NLS-1$
 			List entryArguments = entry.arguments();
@@ -229,7 +231,8 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 	}
 
 	@SuppressWarnings("unchecked")
-	private Expression createCollectionFactoryMethod(String type, String factoryMethodName, List<Expression> arguments) {
+	private Expression createCollectionFactoryMethod(String type, String factoryMethodName,
+			List<Expression> arguments) {
 		AST ast = getASTRewrite().getAST();
 		SimpleName invocationExpression = ast.newSimpleName(type);
 		MethodInvocation invocation = ast.newMethodInvocation();
@@ -237,7 +240,7 @@ public class CollectionsFactoryMethodsASTVisitor extends AbstractASTRewriteASTVi
 		invocation.setExpression(invocationExpression);
 		invocation.arguments()
 			.addAll(arguments);
-	
+
 		return invocation;
 
 	}

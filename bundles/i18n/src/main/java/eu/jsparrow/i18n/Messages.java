@@ -94,9 +94,7 @@ public class Messages extends NLS {
 	public static String CollectionRemoveAllRule_description;
 	public static String CollectionRemoveAllRule_name;
 	public static String CollectionsFactoryMethodsRule_description;
-
 	public static String CollectionsFactoryMethodsRule_name;
-
 	public static String CompareInput_ancestorName;
 	public static String CompareInput_leftName;
 	public static String CompareInput_rightName;
