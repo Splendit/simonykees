@@ -6,6 +6,7 @@ import java.net.URL;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -41,6 +42,9 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	private static final int defaultIndex = 1;
 	private static final String[] dialogButtonLabels = { Messages.ui_ok };
 	private static final String splenditUrl = Messages.HelpMessageDialog_homepage_url;
+	private static final String documentationUrl = Messages.HelpMessageDialog_documentation_url;
+	private static final String supportMail = Messages.HelpMessageDialog_support_mail;
+	private static final String supportUrl = Messages.HelpMessageDialog_support_url;
 
 	private String messageText;
 
@@ -52,7 +56,11 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	}
 
 	public static boolean openDefaultHelpMessageDialog(Shell parentShell) {
-		String messageText = dialogInformationMessage + System.lineSeparator() + splenditUrl;
+		// String messageText = dialogInformationMessage +
+		// System.lineSeparator() + splenditUrl;
+		String messageText = NLS.bind(dialogInformationMessage,
+				new String[] { documentationUrl, splenditUrl, supportMail, supportUrl });
+
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText,
 				MessageDialog.INFORMATION, defaultIndex, dialogButtonLabels).open() == 0;
 	}
@@ -129,12 +137,14 @@ public class SimonykeesMessageDialog extends MessageDialog {
 			link.addSelectionListener(new SelectionAdapter() {
 
 				@Override
-				public void widgetSelected(SelectionEvent arg0) {
+				public void widgetSelected(SelectionEvent event) {
 					try {
+						String urlString = event.text;
+						URL url = new URL(urlString);
 						PlatformUI.getWorkbench()
 							.getBrowserSupport()
 							.getExternalBrowser()
-							.openURL(new URL(arg0.text));
+							.openURL(url);
 					} catch (PartInitException | MalformedURLException e) {
 						logger.error(Messages.SimonykeesMessageDialog_open_browser_error_message, e);
 					}
