@@ -35,16 +35,16 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	private static final Logger logger = LoggerFactory.getLogger(SimonykeesMessageDialog.class);
 
 	private static final String MAIL_BUGREPORT = Messages.SimonykeesMessageDialog_bugreport_email;
-	private static final String dialogTitle = Messages.aa_codename;
-	private static final Image dialogTitleImage = null;
-	private static final String dialogInformationMessage = Messages.HelpMessageDialog_default_message;
-	private static final String dialogErrorMessage = Messages.SimonykeesMessageDialog_default_error_message;
-	private static final int defaultIndex = 1;
-	private static final String[] dialogButtonLabels = { Messages.ui_ok };
-	private static final String splenditUrl = Messages.HelpMessageDialog_homepage_url;
-	private static final String documentationUrl = Messages.HelpMessageDialog_documentation_url;
-	private static final String supportMail = Messages.HelpMessageDialog_support_mail;
-	private static final String supportUrl = Messages.HelpMessageDialog_support_url;
+	private static final String DIALOG_TITLE = Messages.aa_codename;
+	private static final Image DIALOG_TITLE_IMAGE = null;
+	private static final String DIALOG_INFORMATION_MESSAGE = Messages.HelpMessageDialog_default_message;
+	private static final String DIALOG_ERROR_MESSAGE = Messages.SimonykeesMessageDialog_default_error_message;
+	private static final int DEFAULT_INDEX = 1;
+	private static final String[] DIALOG_BUTTON_LABELS = { Messages.ui_ok };
+	private static final String SPLENDIT_URL = Messages.HelpMessageDialog_homepage_url;
+	private static final String DOCUMENTATION_URL = Messages.HelpMessageDialog_documentation_url;
+	private static final String SUPPORT_MAIL = Messages.HelpMessageDialog_support_mail;
+	private static final String SUPPORT_URL = Messages.HelpMessageDialog_support_url;
 
 	private String messageText;
 
@@ -56,45 +56,43 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	}
 
 	public static boolean openDefaultHelpMessageDialog(Shell parentShell) {
-		// String messageText = dialogInformationMessage +
-		// System.lineSeparator() + splenditUrl;
-		String messageText = NLS.bind(dialogInformationMessage,
-				new String[] { documentationUrl, splenditUrl, supportMail, supportUrl });
+		String messageText = NLS.bind(DIALOG_INFORMATION_MESSAGE,
+				new String[] { DOCUMENTATION_URL, SPLENDIT_URL, SUPPORT_MAIL, SUPPORT_URL });
 
-		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText,
-				MessageDialog.INFORMATION, defaultIndex, dialogButtonLabels).open() == 0;
+		return new SimonykeesMessageDialog(parentShell, DIALOG_TITLE, DIALOG_TITLE_IMAGE, messageText,
+				MessageDialog.INFORMATION, DEFAULT_INDEX, DIALOG_BUTTON_LABELS).open() == 0;
 	}
 
 	public static boolean openMessageDialog(Shell parentShell, String message, int dialogImage) {
-		return openMessageDialog(parentShell, message, dialogImage, dialogTitle);
+		return openMessageDialog(parentShell, message, dialogImage, DIALOG_TITLE);
 	}
 
 	public static boolean openMessageDialog(Shell parentShell, String message, int dialogImage, String title) {
 		String messageText = message;
-		return new SimonykeesMessageDialog(parentShell, title, dialogTitleImage, messageText, dialogImage, defaultIndex,
-				dialogButtonLabels).open() == 0;
+		return new SimonykeesMessageDialog(parentShell, title, DIALOG_TITLE_IMAGE, messageText, dialogImage, DEFAULT_INDEX,
+				DIALOG_BUTTON_LABELS).open() == 0;
 	}
 
 	public static boolean openConfirmDialog(Shell parentShell, String message) {
-		return openConfirmDialog(parentShell, message, dialogTitle);
+		return openConfirmDialog(parentShell, message, DIALOG_TITLE);
 	}
 
 	public static boolean openConfirmDialog(Shell parentShell, String message, String title) {
 		String messageText = message;
-		return new SimonykeesMessageDialog(parentShell, title, dialogTitleImage, messageText, MessageDialog.CONFIRM,
-				defaultIndex, new String[] { Messages.ui_cancel, Messages.ui_ok }).open() == 1;
+		return new SimonykeesMessageDialog(parentShell, title, DIALOG_TITLE_IMAGE, messageText, MessageDialog.CONFIRM,
+				DEFAULT_INDEX, new String[] { Messages.ui_cancel, Messages.ui_ok }).open() == 1;
 	}
 
 	public static boolean openErrorMessageDialog(Shell parentShell, SimonykeesException simonykeesException) {
-		return openErrorMessageDialog(parentShell, simonykeesException, dialogTitle);
+		return openErrorMessageDialog(parentShell, simonykeesException, DIALOG_TITLE);
 	}
 
 	public static boolean openErrorMessageDialog(Shell parentShell, SimonykeesException simonykeesException,
 			String title) {
-		String messageText = ((simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage)
+		String messageText = ((simonykeesException != null) ? simonykeesException.getUiMessage() : DIALOG_ERROR_MESSAGE)
 				+ System.lineSeparator() + MAIL_BUGREPORT;
-		return new SimonykeesMessageDialog(parentShell, title, dialogTitleImage, messageText, MessageDialog.ERROR,
-				defaultIndex, dialogButtonLabels).open() == 0;
+		return new SimonykeesMessageDialog(parentShell, title, DIALOG_TITLE_IMAGE, messageText, MessageDialog.ERROR,
+				DEFAULT_INDEX, DIALOG_BUTTON_LABELS).open() == 0;
 	}
 
 	/**
@@ -111,12 +109,12 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	 *         parameter
 	 */
 	public static int openQuestionWithCancelDialog(Shell parentShell, String question, String[] dialogButtons) {
-		return openQuestionWithCancelDialog(parentShell, question, dialogButtons, dialogTitle);
+		return openQuestionWithCancelDialog(parentShell, question, dialogButtons, DIALOG_TITLE);
 	}
 
 	public static int openQuestionWithCancelDialog(Shell parentShell, String question, String[] dialogButtons,
 			String title) {
-		return new SimonykeesMessageDialog(parentShell, title, dialogTitleImage, question,
+		return new SimonykeesMessageDialog(parentShell, title, DIALOG_TITLE_IMAGE, question,
 				MessageDialog.QUESTION_WITH_CANCEL, dialogButtons.length, dialogButtons).open();
 	}
 
