@@ -19,4 +19,5 @@ Require-Bundle: eu.jsparrow.logging,
  org.eclipse.core.resources;bundle-version="[3.11.1,4.0.0)"
 Service-Component: OSGI-INF/eu.jsparrow.rules.java10.Java10RulesServiceImpl.xml
 Bundle-ActivationPolicy: lazy
-Export-Package: eu.jsparrow.rules.java10
+Export-Package: eu.jsparrow.rules.java10,
+ eu.jsparrow.rules.java10.factory.methods
