@@ -5,18 +5,25 @@ import java.time.Duration;
 import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.ReorderModifiersASTVisitor;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
+/**
+ * @see ReorderModifiersASTVisitor
+ * 
+ * @since 3.6.0
+ *
+ */
 public class ReorderModifiersRule extends RefactoringRuleImpl<ReorderModifiersASTVisitor> {
 
 	public ReorderModifiersRule() {
 		this.visitorClass = ReorderModifiersASTVisitor.class;
-		this.id = "ReorderModifiers";
-		this.ruleDescription = new RuleDescription("Reorder Modifiers",
-				"Reorders Modifiers of Fields and Methods according to java conventions", Duration.ofMinutes(2),
-				Tag.READABILITY);
+		this.id = "ReorderModifiers"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.ReorderModifiersRule_name,
+				Messages.ReorderModifiersRule_description, Duration.ofMinutes(2),
+				Tag.READABILITY, Tag.CODING_CONVENTIONS);
 	}
 
 	@Override

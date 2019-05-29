@@ -369,6 +369,8 @@ public class Messages extends NLS {
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_leaveAsIs;
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase;
 	public static String RenamingRulePreviewWizardPage_RenameFields;
+	public static String ReorderModifiersRule_description;
+	public static String ReorderModifiersRule_name;
 	public static String SelectRulesWizardHandler_allready_running;
 	public static String SelectRulesWizardHandler_finishButtonText;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
