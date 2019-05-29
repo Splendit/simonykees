@@ -5,7 +5,6 @@ public class ReorderModifiersRule {
 	/*
 	 * Three modifiers
 	 */
-	
 	public static final String FINAL_STATIC_PUBLIC = "";  
 	public static final String STATIC_FINAL_PUBLIC = "";  
 	public static final String FINAL_PUBLIC_STATIC = "";  
@@ -16,14 +15,12 @@ public class ReorderModifiersRule {
 	/*
 	 * Two modifiers
 	 */
-	
 	public final String FINAL_PUBLIC = "";
 	public final String PUBLIC_FINAL = "";
 	
 	/*
 	 * One modifier
 	 */
-	
 	public String PUBLIC = "";
 	static String STATIC = "", STATIC2;
 	final String FINAL = "", FINAL2 = "";
@@ -32,5 +29,28 @@ public class ReorderModifiersRule {
 	 * No modifier
 	 */
 	String noModifier;
+	
+	protected static final synchronized void staticPublicFinalSynchronizedMethod() {
+		/*
+		 * should reorder modifiers
+		 */
+	}
+	
+	private static class PrivateStaticClass {
+		/*
+		 * Should reorder modifiers
+		 */
+	}
+	
+	/*
+	 * Modifiers in interface methods
+	 */
+	interface ModifiersInInterfaceMethods {
+		public default void defaultMethod () {
+			/*
+			 * Should reorder modifiers
+			 */
+		}
+	}
 
 }
