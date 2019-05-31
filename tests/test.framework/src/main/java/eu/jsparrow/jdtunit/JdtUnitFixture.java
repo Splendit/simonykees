@@ -154,7 +154,7 @@ public class JdtUnitFixture {
 	}
 
 	/**
-	 * Adds an import statement to the stub file.
+	 * Adds a normal single import statement to the stub file.
 	 * 
 	 * @param name
 	 *            the import as fully qualified string, e.g. at.splendit.MyClass
@@ -163,8 +163,26 @@ public class JdtUnitFixture {
 	 * @throws Exception
 	 */
 	public void addImport(String name) throws JavaModelException, BadLocationException {
+		addImport(name, false, false);
+	}
+
+	/**
+	 * Adds an import statement to the stub file.
+	 * 
+	 * @param name
+	 *            the import as fully qualified string, e.g. at.splendit.MyClass
+	 * @param isStatic
+	 *            whether this import is a static import
+	 * @param isOnDemand
+	 *            whether this import is an on demand import
+	 * @throws JavaModelException
+	 * @throws BadLocationException
+	 */
+	public void addImport(String name, boolean isStatic, boolean isOnDemand) throws JavaModelException, BadLocationException {
 		ImportDeclaration im = ast.newImportDeclaration();
 		im.setName(ast.newName(name));
+		im.setOnDemand(isOnDemand);
+		im.setStatic(isStatic);
 		astRoot.imports()
 			.add(im);
 		this.astRoot = this.saveChanges();
