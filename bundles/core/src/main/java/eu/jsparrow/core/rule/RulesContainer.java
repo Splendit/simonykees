@@ -68,6 +68,7 @@ import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
+import eu.jsparrow.core.rule.impl.UseListSortRule;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
@@ -134,6 +135,7 @@ public class RulesContainer {
 				new GuardConditionRule(), new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(),
 				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
 				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
+				new UseListSortRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

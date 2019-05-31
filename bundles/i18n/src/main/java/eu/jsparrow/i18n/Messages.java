@@ -497,6 +497,10 @@ public class Messages extends NLS {
 	public static String UpdateLicenseDialog_error_licenseInvalid;
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
+	public static String UseListSortRule_description;
+
+	public static String UseListSortRule_name;
+
 	public static String UseStringBuilderAppendRule_description;
 	public static String UseStringBuilderAppendRule_name;
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
