@@ -70,5 +70,21 @@ public class UseListSortASTVisitorTest extends UsesJDTUnitFixture {
 		
 		assertMatch(createBlock(original), fixture.getMethodBlock());
 	}
+	
+	@Test
+	public void visit_baseCaseWithComparatorDeclaredInMethodArgument_shouldTransofrm() throws Exception {
+		String original = "" + 
+				"	List<String> strings = Collections.emptyList();\n" + 
+				"	Collections.sort(strings, (String string1, String string2) -> string1.compareTo(string2));";
+		String expected = "" + 
+				"	List<String> strings = Collections.emptyList();\n" + 
+				"	strings.sort((String string1, String string2) -> string1.compareTo(string2));";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
 
 }
