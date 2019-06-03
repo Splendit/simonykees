@@ -429,7 +429,7 @@ public class OptionalIfPresentRule {
 
 	class IoNonSonoOpzionale {
 		private final Logger logger1 = LoggerFactory.getLogger(IoNonSonoOpzionale.class);
-		final public String value = "";
+		public final String value = "";
 
 		public boolean isPresent() {
 			return false;
