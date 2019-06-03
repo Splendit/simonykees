@@ -65,7 +65,7 @@ public class UseListSortASTVisitor extends AbstractASTRewriteASTVisitor {
 			 */
 			astRewrite.set(methodInvocation, MethodInvocation.EXPRESSION_PROPERTY, newExpression, null);
 		} else {
-			astRewrite.replace(methodInvocation.getExpression(), newExpression, null);
+			astRewrite.replace(expression, newExpression, null);
 		}
 		onRewrite();
 
