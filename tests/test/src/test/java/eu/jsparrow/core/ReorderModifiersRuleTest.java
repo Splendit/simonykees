@@ -15,18 +15,18 @@ import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
 public class ReorderModifiersRuleTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "ReorderModifiersRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "reorderModifiers";
-	
+
 	private ReorderModifiersRule rule;
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		rule = new ReorderModifiersRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
-	
+
 	@Test
 	public void testTransformationWithDefaultFile() throws Exception {
 		Path preRule = getPreRuleFile(SAMPLE_FILE);

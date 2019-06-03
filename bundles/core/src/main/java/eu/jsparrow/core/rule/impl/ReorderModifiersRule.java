@@ -22,8 +22,8 @@ public class ReorderModifiersRule extends RefactoringRuleImpl<ReorderModifiersAS
 		this.visitorClass = ReorderModifiersASTVisitor.class;
 		this.id = "ReorderModifiers"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.ReorderModifiersRule_name,
-				Messages.ReorderModifiersRule_description, Duration.ofMinutes(2),
-				Tag.READABILITY, Tag.CODING_CONVENTIONS);
+				Messages.ReorderModifiersRule_description, Duration.ofMinutes(2), Tag.READABILITY,
+				Tag.CODING_CONVENTIONS);
 	}
 
 	@Override
