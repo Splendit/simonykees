@@ -178,7 +178,8 @@ public class JdtUnitFixture {
 	 * @throws JavaModelException
 	 * @throws BadLocationException
 	 */
-	public void addImport(String name, boolean isStatic, boolean isOnDemand) throws JavaModelException, BadLocationException {
+	public void addImport(String name, boolean isStatic, boolean isOnDemand)
+			throws JavaModelException, BadLocationException {
 		ImportDeclaration im = ast.newImportDeclaration();
 		im.setName(ast.newName(name));
 		im.setOnDemand(isOnDemand);

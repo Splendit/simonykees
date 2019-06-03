@@ -39,8 +39,8 @@ public class UseListSortASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		ITypeBinding delaringClass = methodBinding.getDeclaringClass();
-		if (!ClassRelationUtil.isContentOfType(delaringClass, JAVA_UTIL_COLLECTIONS)) {
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		if (!ClassRelationUtil.isContentOfType(declaringClass, JAVA_UTIL_COLLECTIONS)) {
 			return true;
 		}
 
