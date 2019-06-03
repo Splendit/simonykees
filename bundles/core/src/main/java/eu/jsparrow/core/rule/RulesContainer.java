@@ -58,6 +58,7 @@ import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
+import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
@@ -135,6 +136,7 @@ public class RulesContainer {
 				new GuardConditionRule(), new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(),
 				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
 				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
+				new ReorderModifiersRule(),
 				new UseListSortRule(),
 
 				/*
