@@ -136,8 +136,7 @@ public class RulesContainer {
 				new GuardConditionRule(), new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(),
 				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
 				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
-				new ReorderModifiersRule(),
-				new UseListSortRule(),
+				new ReorderModifiersRule(), new UseListSortRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

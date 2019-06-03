@@ -14,59 +14,61 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * Replaces static invocation of {@link Collections#sort(List, java.util.Comparator)} with {@link List#sort(java.util.Comparator)}.
+ * Replaces static invocation of
+ * {@link Collections#sort(List, java.util.Comparator)} with
+ * {@link List#sort(java.util.Comparator)}.
  * 
  * @since 3.6.0
  */
 public class UseListSortASTVisitor extends AbstractASTRewriteASTVisitor {
-	
+
 	private static final String SORT = "sort"; //$NON-NLS-1$
 	private static final String JAVA_UTIL_LIST = java.util.List.class.getName();
 	private static final String JAVA_UTIL_COLLECTIONS = java.util.Collections.class.getName();
 	private static final String JAVA_UTIL_COMPARATOR = java.util.Comparator.class.getName();
-	
+
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		SimpleName methodName = methodInvocation.getName();
-		if(!SORT.equals(methodName.getIdentifier())) {
+		if (!SORT.equals(methodName.getIdentifier())) {
 			return true;
 		}
-		List<Expression>arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		if(arguments.size() != 2) {
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+		if (arguments.size() != 2) {
 			return true;
 		}
-		
+
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		ITypeBinding delaringClass = methodBinding.getDeclaringClass();
-		if(!ClassRelationUtil.isContentOfType(delaringClass, JAVA_UTIL_COLLECTIONS)) {
+		if (!ClassRelationUtil.isContentOfType(delaringClass, JAVA_UTIL_COLLECTIONS)) {
 			return true;
 		}
-		
+
 		Expression firstArgument = arguments.get(0);
-		ITypeBinding firstArgumentType= firstArgument.resolveTypeBinding();
-		if(!ClassRelationUtil.isInheritingContentOfTypes(firstArgumentType, Collections.singletonList(JAVA_UTIL_LIST)) && 
-				!ClassRelationUtil.isContentOfType(firstArgumentType, JAVA_UTIL_LIST)) {
+		ITypeBinding firstArgumentType = firstArgument.resolveTypeBinding();
+		if (!ClassRelationUtil.isInheritingContentOfTypes(firstArgumentType, Collections.singletonList(JAVA_UTIL_LIST))
+				&& !ClassRelationUtil.isContentOfType(firstArgumentType, JAVA_UTIL_LIST)) {
 			return true;
 		}
-		
+
 		Expression secondArgument = arguments.get(1);
 		ITypeBinding secondArgumentType = secondArgument.resolveTypeBinding();
-		if(!ClassRelationUtil.isContentOfType(secondArgumentType, JAVA_UTIL_COMPARATOR)) {
+		if (!ClassRelationUtil.isContentOfType(secondArgumentType, JAVA_UTIL_COMPARATOR)) {
 			return true;
 		}
-		
+
 		Expression newExpression = (Expression) astRewrite.createMoveTarget(firstArgument);
 		Expression expression = methodInvocation.getExpression();
-		if(expression == null) {
+		if (expression == null) {
 			/*
 			 * The method could be statically imported
 			 */
 			astRewrite.set(methodInvocation, MethodInvocation.EXPRESSION_PROPERTY, newExpression, null);
-		} else {			
+		} else {
 			astRewrite.replace(methodInvocation.getExpression(), newExpression, null);
 		}
 		onRewrite();
-		
+
 		return false;
 	}
 
