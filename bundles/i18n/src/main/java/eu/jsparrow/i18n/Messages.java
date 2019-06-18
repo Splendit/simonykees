@@ -74,7 +74,6 @@ public class Messages extends NLS {
 	public static String StartDialog_customizeLabel;
 	public static String StartDialog_feedbackLabel;
 	public static String StartDialog_goodToKnowLabel;
-	public static String StartDialog_guidlinesLinkLabel;
 	public static String StartDialog_licenseLinkLabel;
 	public static String StartDialog_likeItLabel;
 	public static String StartDialog_marketplaceLinkLabel;
@@ -129,10 +128,11 @@ public class Messages extends NLS {
 	public static String EnhancedForLoopToStreamSumRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
+	public static String HelpMessageDialog_documentation_url;
+	public static String HelpMessageDialog_support_mail;
+	public static String HelpMessageDialog_support_url;
 	public static String MapGetOrDefaultRule_description;
-
 	public static String MapGetOrDefaultRule_name;
-
 	public static String MavenProjectImporter_collectingProjectInfo;
 	public static String MavenProjectImporter_createingJavaProjects;
 	public static String MavenProjectImporter_creatingSingleJavaProject;
