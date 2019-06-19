@@ -1,7 +1,9 @@
 package eu.jsparrow.maven.mojo;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -14,18 +16,19 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Proxy;
 import org.eclipse.sisu.Parameters;
 import org.osgi.framework.BundleException;
 
 import eu.jsparrow.maven.adapter.BundleStarter;
-import eu.jsparrow.maven.adapter.DependencyManager;
 import eu.jsparrow.maven.adapter.MavenAdapter;
 import eu.jsparrow.maven.adapter.MavenParameters;
-import eu.jsparrow.maven.adapter.StandaloneLoader;
 import eu.jsparrow.maven.adapter.StatisticsMetadata;
 import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.i18n.Messages;
+import eu.jsparrow.maven.util.JavaVersion;
+import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
  * Runs jSparrow on the Maven project.
@@ -36,9 +39,6 @@ import eu.jsparrow.maven.i18n.Messages;
  */
 @Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
 public class RefactorMojo extends AbstractMojo {
-
-	private static final String JAVA_VERSION_PROPERTY_CONSTANT = "java.version"; //$NON-NLS-1$
-	private static final String JAVA_VERSION_1_8 = "1.8"; //$NON-NLS-1$
 
 	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession mavenSession;
@@ -55,8 +55,8 @@ public class RefactorMojo extends AbstractMojo {
 	/**
 	 * Path to the configuration file.
 	 */
-	@Parameter(defaultValue = "jsparrow.yml", property = "configFile")
-	private File configFile;
+	@Parameter(property = "configFile")
+	private File configFileOverride;
 
 	/**
 	 * Selected profile. Overrides the settings in the configuration file.
@@ -94,27 +94,27 @@ public class RefactorMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 		Log log = getLog();
 
-		// With version 1.0.0 of jSparrow Maven Plugin, only JDK 8 is supported.
-		String javaVersion = System.getProperty(JAVA_VERSION_PROPERTY_CONSTANT);
-		if (!javaVersion.startsWith(JAVA_VERSION_1_8)) {
-			log.warn(Messages.RefactorMojo_supportJDK8);
-			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8);
+		if (!JavaVersion.isJava8or11()) {
+			log.warn(Messages.RefactorMojo_supportJDK8and11);
+			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8and11);
 		}
 
 		String mode = StandaloneMode.REFACTOR.name();
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration, statisticsMetadata);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
-		DependencyManager dependencyManager = new DependencyManager(log, mavenHome);
-		List<MavenProject> projects = mavenSession.getAllProjects();
+		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);
-		StandaloneLoader loader = new StandaloneLoader(project, bundleStarter);
+		File fallbackConfigFile = Paths.get(project.getBasedir()
+			.getAbsolutePath(), "jsparrow.yml") //$NON-NLS-1$
+			.toFile();
+		Stream<Proxy> proxies = ProxyUtil.getHttpProxies(mavenSession);
 
 		try {
-			WorkingDirectory workingDirectory = mavenAdapter.setUpConfiguration(parameters, projects, configFile);
-			addShutdownHook(bundleStarter, workingDirectory, dependencyManager.getOutputFolderName(),
-					mavenAdapter.isJsparrowRunningFlag());
-			loader.loadStandalone(mavenAdapter, dependencyManager);
+			WorkingDirectory workingDirectory = mavenAdapter.setUpConfiguration(parameters, projects,
+					configFileOverride, fallbackConfigFile, proxies);
+			addShutdownHook(bundleStarter, workingDirectory, mavenAdapter.isJsparrowRunningFlag());
+			bundleStarter.runStandalone(mavenAdapter.getConfiguration());
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());
@@ -140,13 +140,13 @@ public class RefactorMojo extends AbstractMojo {
 	 *            raised.
 	 */
 	private void addShutdownHook(BundleStarter starter, WorkingDirectory workingDirectory,
-			String dependenciesFolderName, boolean jSparrowStartedFlag) {
+			boolean jSparrowStartedFlag) {
 
 		Runtime.getRuntime()
 			.addShutdownHook(new Thread(() -> {
 				starter.shutdownFramework();
 				if (!jSparrowStartedFlag) {
-					workingDirectory.cleanUp(dependenciesFolderName);
+					workingDirectory.cleanUp();
 				}
 			}));
 	}

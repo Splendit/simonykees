@@ -1,43 +1,40 @@
 package eu.jsparrow.maven.adapter;
 
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.AGENT_URL;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.ALL_PROJECT_IDENTIFIERS;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.CONFIG_FILE_PATH;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.CONFIG_FILE_OVERRIDE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.DEBUG_ENABLED;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.FRAMEWORK_STORAGE_VALUE;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.HAS_PARENT;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.LICENSE_KEY;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.LIST_RULES_SELECTED_ID;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.NATURE_IDS;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.OSGI_INSTANCE_AREA_CONSTANT;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.PROJECT_JAVA_VERSION;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.PROJECT_NAME_CONSTANT;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.PROJECT_PATH_CONSTANT;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.PROXY_SETTINGS;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.ROOT_CONFIG_PATH;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.ROOT_PROJECT_BASE_PATH;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.SELECTED_PROFILE;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.SOURCE_FOLDER;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.STANDALONE_MODE_KEY;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.USER_DIR;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.USE_DEFAULT_CONFIGURATION;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Proxy;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Constants;
 
 import eu.jsparrow.maven.i18n.Messages;
+import eu.jsparrow.maven.util.MavenProjectUtil;
+import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
  * Sets up the configuration used for starting the equinox framework.
@@ -60,7 +57,6 @@ public class MavenAdapter {
 	private MavenProject rootProject;
 	private Set<String> sessionProjects;
 	private boolean jsparrowAlreadyRunningError = false;
-	private boolean projectConfigurationAdded = false;
 
 	public MavenAdapter(MavenProject rootProject, Log log) {
 		this.rootProject = rootProject;
@@ -77,8 +73,12 @@ public class MavenAdapter {
 	 *            a set of parameters provided from the mojo.
 	 * @param projects
 	 *            the list of all projects in the current session
-	 * @param defaultYamlFile
+	 * @param configFileOverride
+	 *            path to the provided yml configuration file.
+	 * @param fallbackConfigFile
 	 *            the default {@code jsparrow.yml} file.
+	 * @param proxies
+	 *            list of proxy configurations for equinox
 	 * @return an instance of {@link WorkingDirectory} for managing the working
 	 *         directory of the equinox framework.
 	 * @throws InterruptedException
@@ -88,25 +88,32 @@ public class MavenAdapter {
 	 *             current session.
 	 */
 	public WorkingDirectory setUpConfiguration(MavenParameters parameters, List<MavenProject> projects,
-			File defaultYamlFile) throws InterruptedException, MojoExecutionException {
+			File configFileOverride, File fallbackConfigFile, Stream<Proxy> proxies)
+			throws InterruptedException, MojoExecutionException {
+
+		log.info(Messages.MavenAdapter_setUpConfiguration);
 
 		setProjectIds(projects);
+		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
+		
 		WorkingDirectory workingDirectory = setUpConfiguration(parameters);
 		String rootProjectIdentifier = MavenProjectUtil.findProjectIdentifier(rootProject);
+
 		if (workingDirectory.isJsparrowStarted(rootProjectIdentifier)) {
 			jsparrowAlreadyRunningError = true;
 			log.error(NLS.bind(Messages.MavenAdapter_jSparrowAlreadyRunning, rootProject.getArtifactId()));
 			throw new MojoExecutionException(Messages.MavenAdapter_jSparrowIsAlreadyRunning);
 		}
-		configuration.put(ROOT_CONFIG_PATH, defaultYamlFile.getAbsolutePath());
+
+		configuration.put(ROOT_CONFIG_PATH, fallbackConfigFile.getAbsolutePath());
+		configuration.put(CONFIG_FILE_OVERRIDE,
+				(configFileOverride == null) ? null : configFileOverride.getAbsolutePath());
+		configuration.put(ROOT_PROJECT_BASE_PATH, rootProject.getBasedir()
+			.getAbsolutePath());
+
 		workingDirectory.lockProjects();
-		for (MavenProject mavenProject : projects) {
-			if (!MavenProjectUtil.isAggregateProject(mavenProject)) {
-				addProjectConfiguration(mavenProject, defaultYamlFile);
-				projectConfigurationAdded = true;
-			}
-		}
-		log.info(Messages.MavenAdapter_allProjectsLoaded);
+
+		log.info(Messages.MavenAdapter_configurationSetUp);
 		return workingDirectory;
 	}
 
@@ -125,99 +132,13 @@ public class MavenAdapter {
 		addInitialConfiguration(parameters);
 		return prepareWorkingDirectory();
 	}
-
-	/**
-	 * Adds the following values to the configuration
-	 * <ul>
-	 * <li>project identifier computed by
-	 * {@link #joinWithComma(String, String)}</li>
-	 * <li>project path</li>
-	 * <li>project name</li>
-	 * <li>yml file path</li>
-	 * <li>compiler compliance java version of the project</li>
-	 * </ul>
-	 * 
-	 * @param project
-	 *            the maven project to store the configuration for
-	 * @param defaultYamlFile
-	 *            the expected jsparrow.yml file
-	 */
-	private void addProjectConfiguration(MavenProject project, File defaultYamlFile) {
-		log.info(String.format(Messages.MavenAdapter_addingProjectConfiguration, project.getName()));
-
-		File baseDir = project.getBasedir();
-		String projectPath = baseDir.getAbsolutePath();
-		String projectIdentifier = MavenProjectUtil.findProjectIdentifier(project);
-		String artifactId = project.getArtifactId();
-		String sourcePath = MavenProjectUtil.findSourceDirectory(project);
-		Boolean hasParent = project.hasParent();
-
-		String allIdentifiers = getAllProjectIdentifiers();
-		configuration.put(ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
-		configuration.put(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
-		configuration.put(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, artifactId);
-		String yamlFilePath = findYamlFilePath(project, defaultYamlFile);
-		log.info(Messages.MavenAdapter_jSparrowConfigurationFile + yamlFilePath);
-		configuration.put(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
-		configuration.put(PROJECT_JAVA_VERSION + DOT + projectIdentifier,
-				MavenProjectUtil.getCompilerCompliance(project));
-		configuration.put(NATURE_IDS + DOT + projectIdentifier, MavenProjectUtil.findNatureIds(project));
-		configuration.put(SOURCE_FOLDER + DOT + projectIdentifier, sourcePath);
-		configuration.put(HAS_PARENT + DOT + projectIdentifier, hasParent.toString());
-
+	
+	
+	public WorkingDirectory setUpConfiguration(MavenParameters parameters, Stream<Proxy> proxies) throws InterruptedException {
+		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
+		return setUpConfiguration(parameters);
 	}
-
-	/**
-	 * Finds the path of the corresponding yaml configuration file of the
-	 * project. If the provided yamlFile exists, its path is immediately
-	 * returned. Otherwise, finds the yaml file in the closest ancestor until
-	 * reaching the {@link #rootProject}.
-	 * 
-	 * @param project
-	 *            the project to find the configuration file for.
-	 * @param defaultYamlFile
-	 *            the default yaml file if one on the project base directory
-	 *            does not exist
-	 * @return the path of the corresponding yaml file
-	 */
-	protected String findYamlFilePath(MavenProject project, File defaultYamlFile) {
-		String yamlFileName = defaultYamlFile.getName();
-		File baseDir = project.getBasedir();
-		Path yamlPath = joinPaths(yamlFileName, baseDir);
-		if (yamlPath.toFile()
-			.exists()) {
-			return yamlPath.toString();
-		}
-
-		MavenProject parent = project;
-		while ((parent = parent.getParent()) != null) {
-			File parentBaseDir = parent.getBasedir();
-			if (parent == rootProject || parentBaseDir == null) {
-				break;
-			}
-			Path parentYamlPath = joinPaths(yamlFileName, parentBaseDir);
-			if (parentYamlPath.toFile()
-				.exists()) {
-				return parentYamlPath.toString();
-			}
-		}
-		return defaultYamlFile.getAbsolutePath();
-	}
-
-	protected Path joinPaths(String yamlFileName, File parentBaseDir) {
-		return Paths.get(parentBaseDir.getAbsolutePath(), yamlFileName);
-	}
-
-	protected String joinWithComma(String left, String right) {
-		if (left.isEmpty()) {
-			return right;
-		}
-		return left + "," + right; //$NON-NLS-1$
-	}
-
-	private String getAllProjectIdentifiers() {
-		return configuration.getOrDefault(ALL_PROJECT_IDENTIFIERS, ""); //$NON-NLS-1$
-	}
+	
 
 	void addInitialConfiguration(MavenParameters config) {
 		boolean useDefaultConfig = config.getUseDefaultConfig();
@@ -258,6 +179,7 @@ public class MavenAdapter {
 	 */
 	public WorkingDirectory prepareWorkingDirectory() throws InterruptedException {
 
+		log.debug(Messages.MavenAdapter_prepareWorkingDirectory);
 		File directory = createJsparrowTempDirectory();
 
 		if (directory.exists() || directory.mkdirs()) {
@@ -270,6 +192,8 @@ public class MavenAdapter {
 		} else {
 			throw new InterruptedException(Messages.MavenAdapter_couldnotCreateTempFolder);
 		}
+
+		log.debug(Messages.MavenAdapter_workingDirectoryPrepared);
 		return createWorkingDirectory(directory);
 	}
 
@@ -286,9 +210,11 @@ public class MavenAdapter {
 	}
 
 	public void setProjectIds(List<MavenProject> allProjects) {
+		log.debug(Messages.MavenAdapter_setProjectIds);
 		this.sessionProjects = allProjects.stream()
 			.map(MavenProjectUtil::findProjectIdentifier)
 			.collect(Collectors.toSet());
+		log.debug(Messages.MavenAdapter_projectIdsSet);
 	}
 
 	public boolean isJsparrowRunningFlag() {
@@ -297,10 +223,6 @@ public class MavenAdapter {
 
 	public Map<String, String> getConfiguration() {
 		return configuration;
-	}
-
-	public boolean isProjectConfigurationAdded() {
-		return projectConfigurationAdded;
 	}
 
 }

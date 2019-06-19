@@ -3,7 +3,6 @@ package eu.jsparrow.rules.common.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.resources.IMarker;
@@ -12,6 +11,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -97,8 +97,8 @@ public final class RefactoringUtil {
 		astParser.setKind(ASTParser.K_COMPILATION_UNIT);
 		astParser.setSource(compilationUnit);
 		astParser.setResolveBindings(true);
-		Map<String, String> options = JdtVersionBindingUtil.findCompilerOptions(JdtVersionBindingUtil.findCurrentJDTVersion());
-		astParser.setCompilerOptions(options);
+		IJavaProject iJavaProject = compilationUnit.getJavaProject();
+		astParser.setCompilerOptions(iJavaProject.getOptions(true));
 		return (CompilationUnit) astParser.createAST(null);
 	}
 

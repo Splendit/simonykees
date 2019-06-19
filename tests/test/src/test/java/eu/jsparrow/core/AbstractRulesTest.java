@@ -1,6 +1,6 @@
 package eu.jsparrow.core;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,10 +26,12 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -48,7 +52,7 @@ public abstract class AbstractRulesTest {
 
 	protected static String javaVersion = JavaCore.VERSION_1_8;
 
-	protected List<RefactoringRule> rulesList = new ArrayList<>();
+	protected static List<RefactoringRule> rulesList = new ArrayList<>();
 
 	protected IJavaProject testproject;
 
@@ -56,17 +60,35 @@ public abstract class AbstractRulesTest {
 		super();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void classSetUp() throws Exception {
 		if (root == null) {
 			root = createRootPackageFragment();
 		}
+		rulesList = new ArrayList<>();
+		List<RefactoringRule> allRules = RulesContainer.getAllRules(false)
+			.stream()
+			/*
+			 * we cannot apply Local Variable Type Inference rule until we
+			 * upgrade to java 10.
+			 */
+			.filter(r -> JavaCore.compareJavaVersions(JavaCore.VERSION_1_8, r.getRequiredJavaVersion()) >= 0)
+			.collect(Collectors.toList());
+
+		StandardLoggerRule standardLoggerRule = new StandardLoggerRule();
+		Map<String, String> options = standardLoggerRule.getDefaultOptions();
+		options.put("new-logging-statement", "error"); //$NON-NLS-1$ //$NON-NLS-2$
+		options.put("system-out-print-exception", "error"); //$NON-NLS-1$ //$NON-NLS-2$
+		standardLoggerRule.activateOptions(options);
+		rulesList.add(standardLoggerRule);
+		rulesList.addAll(allRules);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void classTearDown() {
 		root = null;
 		javaVersion = JavaCore.VERSION_1_8;
+		rulesList = new ArrayList<>();
 	}
 
 	/**

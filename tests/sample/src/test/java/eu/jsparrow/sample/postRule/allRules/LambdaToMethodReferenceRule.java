@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,19 +55,19 @@ public class LambdaToMethodReferenceRule {
 	Function<AmbiguousMethods, String> testingAmb2 = (AmbiguousMethods i) -> i.testAmbiguity();
 
 	public void referenceToStaticMethod() {
-		Collections.sort(personList, Person::compareByAge);
+		personList.sort(Person::compareByAge);
 
-		Collections.sort(personList, Person::compareByAge);
+		personList.sort(Person::compareByAge);
 
 		/* save me */
 		// I don't want to break anything...
-		Collections.sort(personList, Person // I don't want to break anything...
+		personList.sort(Person // I don't want to break anything...
 		::compareByAge);
 
 		/* save me */
-		Collections.sort(personList, Person::compareByAge);
+		personList.sort(Person::compareByAge);
 
-		Collections.sort(personList, Person::compareByAge);
+		personList.sort(Person::compareByAge);
 
 		/*
 		 * save me
@@ -79,13 +78,13 @@ public class LambdaToMethodReferenceRule {
 
 		personList.forEach(System.out::println);
 
-		Collections.sort(personList, (Person a, Person b) -> Person.compareByAge(a.getParent2(), b));
+		personList.sort((Person a, Person b) -> Person.compareByAge(a.getParent2(), b));
 
-		Collections.sort(personList, (a, b) -> Person.compareByAge(a, b.getParent1()));
+		personList.sort((a, b) -> Person.compareByAge(a, b.getParent1()));
 
-		Collections.sort(personList, (Person a, Person b) -> Person.compareByAge(a, b.getParent2()));
+		personList.sort((Person a, Person b) -> Person.compareByAge(a, b.getParent2()));
 
-		Collections.sort(personList, (a, b) -> Person.compareByAge(a.getParent1(), b));
+		personList.sort((a, b) -> Person.compareByAge(a.getParent1(), b));
 
 		// SIM-454 bugfix static methods
 		personList.stream()
@@ -107,23 +106,23 @@ public class LambdaToMethodReferenceRule {
 	public void referenceToInstanceMethod() {
 		ComparisonProvider comparisonProvider = new ComparisonProvider();
 
-		Collections.sort(personList, comparisonProvider::compareByName);
+		personList.sort(comparisonProvider::compareByName);
 
-		Collections.sort(personList, comparisonProvider::compareByName);
+		personList.sort(comparisonProvider::compareByName);
 
-		Collections.sort(personList, comparisonProvider::compareByName);
+		personList.sort(comparisonProvider::compareByName);
 
-		Collections.sort(personList, comparisonProvider::compareByName);
+		personList.sort(comparisonProvider::compareByName);
 
-		Collections.sort(personList, comparisonProvider::compareByName);
+		personList.sort(comparisonProvider::compareByName);
 
-		Collections.sort(personList, (Person a, Person b) -> comparisonProvider.compareByName(a.getParent2(), b));
+		personList.sort((Person a, Person b) -> comparisonProvider.compareByName(a.getParent2(), b));
 
-		Collections.sort(personList, (a, b) -> comparisonProvider.compareByName(a, b.getParent1()));
+		personList.sort((a, b) -> comparisonProvider.compareByName(a, b.getParent1()));
 
-		Collections.sort(personList, (Person a, Person b) -> comparisonProvider.compareByName(a, b.getParent2()));
+		personList.sort((Person a, Person b) -> comparisonProvider.compareByName(a, b.getParent2()));
 
-		Collections.sort(personList, (a, b) -> comparisonProvider.compareByName(a.getParent1(), b));
+		personList.sort((a, b) -> comparisonProvider.compareByName(a.getParent1(), b));
 	}
 
 	public void referenceToLocalMethod() {
@@ -274,6 +273,16 @@ public class LambdaToMethodReferenceRule {
 
 	}
 
+	/*
+	 * SIM-1450
+	 */
+	private static Object createDeepCopy(byte[][] value) {
+		// see org.eclipse.mdm.api.base.model.Value
+		return Arrays.stream(value)
+			.map(v -> v.clone())
+			.toArray(byte[][]::new);
+	}
+
 	public void saveTypeArguments(String input) {
 		List<Person> persons = new ArrayList<>();
 		persons.stream()
@@ -380,7 +389,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	private void doSomething(Object o) {
-
+		o.getClass();
 	}
 
 	private Person getRandomPerson() {
@@ -388,7 +397,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	private void setIterator(Iterator iterator) {
-
+		iterator.next();
 	}
 
 	public void discardedReturnType_shouldNotTranform() {

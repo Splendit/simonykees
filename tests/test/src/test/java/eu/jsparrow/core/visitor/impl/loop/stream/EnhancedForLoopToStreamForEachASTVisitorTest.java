@@ -3,8 +3,8 @@ package eu.jsparrow.core.visitor.impl.loop.stream;
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
 import org.eclipse.jdt.core.dom.Block;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamForEachASTVisitor;
@@ -14,7 +14,7 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesJDTUnitFix
 	
 	private EnhancedForLoopToStreamForEachASTVisitor visitor;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		visitor = new EnhancedForLoopToStreamForEachASTVisitor();
 	}
@@ -69,6 +69,57 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesJDTUnitFix
 		String expectedBlock = "" + 
 				"		List<String> strings = new ArrayList<String>();\n" + 
 				"		strings.forEach(string -> {\n" + 
+				"			int hashCode = string.hashCode();\n" + 
+				"		});";
+
+		fixture.addImport("java.util.List");
+		fixture.addImport("java.util.ArrayList");
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expected = createBlock(expectedBlock);
+		assertMatch(expected, fixture.getMethodBlock());
+		
+	}
+	
+	@Test
+	public void modifierers_should_not_be_lost() throws Exception {
+		
+		String block = "" +
+				"		List<String> strings = new ArrayList<String>();\n" + 
+				"		for(final Object string : strings) {\n" + 
+				"			int hashCode = string.hashCode();\n" + 
+				"		}";
+		String expectedBlock = "" + 
+				"		List<String> strings = new ArrayList<String>();\n" + 
+				"		strings.forEach((final Object string) -> {\n" + 
+				"			int hashCode = string.hashCode();\n" + 
+				"		});";
+
+		fixture.addImport("java.util.List");
+		fixture.addImport("java.util.ArrayList");
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expected = createBlock(expectedBlock);
+		assertMatch(expected, fixture.getMethodBlock());
+		
+	}
+	
+	@Test
+	public void annotations_should_not_be_lost() throws Exception {
+		String block = "" +
+				"		List<String> strings = new ArrayList<String>();\n" + 
+				"		for(@InitParam(name = \"\", value = \"\") Object string : strings) {\n" + 
+				"			int hashCode = string.hashCode();\n" + 
+				"		}";
+		String expectedBlock = "" + 
+				"		List<String> strings = new ArrayList<String>();\n" + 
+				"		strings.forEach((@InitParam(name = \"\", value = \"\")  Object string) -> {\n" + 
 				"			int hashCode = string.hashCode();\n" + 
 				"		});";
 

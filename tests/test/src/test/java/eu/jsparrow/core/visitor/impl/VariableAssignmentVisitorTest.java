@@ -1,7 +1,8 @@
 package eu.jsparrow.core.visitor.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
@@ -9,8 +10,8 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.rules.common.visitor.helper.VariableAssignmentVisitor;
 
@@ -22,7 +23,7 @@ public class VariableAssignmentVisitorTest extends UsesJDTUnitFixture {
 	private VariableAssignmentVisitor visitor;
 	private String identifier = "date";
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fixture.addImport(JAVA_UTIL_DATE);
 		ImportDeclaration dateImport = fixture.getImports()

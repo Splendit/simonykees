@@ -226,4 +226,21 @@ public class TestCornerCasesTryWithResourceRule {
 
 		}
 	}
+
+	public void test_closeWithoutExpression_shouldTransformAndKeepClose() {
+		// SIM-1451
+		String path = "some/Funny/Path";
+		try (OutputStream uniqueName001 = new FileOutputStream(path)) {
+			close();
+			uniqueName001.flush();
+
+		} catch (IOException fileNotFoundException) {
+			logger.error(fileNotFoundException.getMessage(), fileNotFoundException);
+
+		}
+	}
+
+	private void close() {
+		// do nothing
+	}
 }

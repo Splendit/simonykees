@@ -5,10 +5,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.registration.helper.DummyRegistrationModel;
 import eu.jsparrow.registration.helper.JsonHelper;
@@ -18,10 +16,7 @@ public class RegisterRequestTest {
 	private RegisterRequest registerRequest;
 	HttpClientWrapper httpClientWrapper;
 	
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
-	@Before
+	@BeforeEach
 	public void setUp() {
 		httpClientWrapper = mock(HttpClientWrapper.class);
 		registerRequest = new RegisterRequest(httpClientWrapper);

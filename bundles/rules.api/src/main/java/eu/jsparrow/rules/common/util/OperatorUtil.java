@@ -1,12 +1,15 @@
 package eu.jsparrow.rules.common.util;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import eu.jsparrow.rules.common.visitor.helper.SimpleExpressionVisitor;
@@ -92,19 +95,20 @@ public class OperatorUtil {
 	 * 
 	 * @param infixExpression
 	 *            the expression to be inverted
-	 * @param ast
-	 *            the ast for creating the negated expression
 	 * @param astRewrite
 	 *            a rewriter for recording the changes
+	 * @param ast
+	 *            the ast for creating the negated expression
 	 * @return a new infix expression equivalent with the negated form of the
 	 *         provided expression.
 	 */
-	public static Expression negateInfixExpression(InfixExpression infixExpression, AST ast, ASTRewrite astRewrite) {
+	public static Expression negateInfixExpression(InfixExpression infixExpression, ASTRewrite astRewrite) {
+		AST ast = astRewrite.getAST();
 		InfixExpression.Operator operator = infixExpression.getOperator();
 		InfixExpression.Operator newOperator = null;
 
 		if (!isSimpleExpression(infixExpression)) {
-			return createNegatedParenthesized(ast, infixExpression, astRewrite);
+			return createNegatedParenthesized(infixExpression, astRewrite);
 		}
 
 		if (EQUALS_EQUALS.equals(operator)) {
@@ -122,7 +126,7 @@ public class OperatorUtil {
 		}
 
 		if (newOperator == null) {
-			return createNegatedParenthesized(ast, infixExpression, astRewrite);
+			return createNegatedParenthesized(infixExpression, astRewrite);
 		}
 
 		InfixExpression guardInfixExpression = ast.newInfixExpression();
@@ -145,16 +149,28 @@ public class OperatorUtil {
 	 * @return if the above condition is satisfied.
 	 */
 	public static boolean isSimpleExpression(InfixExpression expression) {
-		SimpleExpressionVisitor visitor = new SimpleExpressionVisitor();
 		Expression left = expression.getLeftOperand();
-		left.accept(visitor);
-		boolean isSimpleLeftOperand = visitor.isSimple();
+		boolean isSimpleLeftOperand = isSimpleExpression(left);
 		if (!isSimpleLeftOperand) {
 			return false;
 		}
-		visitor = new SimpleExpressionVisitor();
 		Expression right = expression.getRightOperand();
-		right.accept(visitor);
+		return isSimpleExpression(right);
+	}
+
+	/**
+	 * Checks whether an expression contains other {@link InfixExpression}s,
+	 * {@link PrefixExpression}s or {@link PostfixExpression}s.
+	 * 
+	 * @see SimpleExpressionVisitor
+	 * 
+	 * @param expression
+	 *            the expression to be checked
+	 * @return if the above condition is met.
+	 */
+	public static boolean isSimpleExpression(Expression expression) {
+		SimpleExpressionVisitor visitor = new SimpleExpressionVisitor();
+		expression.accept(visitor);
 		return visitor.isSimple();
 	}
 
@@ -165,21 +181,143 @@ public class OperatorUtil {
 	 * 
 	 * <b>Note:</b> the returned expression must not be discarded!
 	 * 
-	 * @param ast
-	 *            an ast to create the new expression
 	 * @param expression
 	 *            expression to be negated
 	 * @param astRewrite
 	 *            an {@link ASTRewrite} to register the changes
+	 * 
 	 * @return the negated expression of type {@link PrefixExpression}.
 	 */
-	public static Expression createNegatedParenthesized(AST ast, Expression expression, ASTRewrite astRewrite) {
+	public static Expression createNegatedParenthesized(Expression expression, ASTRewrite astRewrite) {
+		AST ast = astRewrite.getAST();
 		PrefixExpression guardPrefixExpression = ast.newPrefixExpression();
 		guardPrefixExpression.setOperator(NOT);
 		ParenthesizedExpression parenthesizedExpression = ast.newParenthesizedExpression();
 		parenthesizedExpression.setExpression((Expression) astRewrite.createCopyTarget(expression));
 		guardPrefixExpression.setOperand(parenthesizedExpression);
 		return guardPrefixExpression;
+	}
+
+	/**
+	 * Creates a new {@link Expression} with the inverted logic by:
+	 * <ul>
+	 * <li>evaluating a new operator for {@link InfixExpression}s. See
+	 * {@link #negateInfixExpression()}</li>
+	 * <li>removing the existing negation operator {@link #NOT} in
+	 * {@link PrefixExpression}s</li>
+	 * <li>inverting the boolean literals</li>
+	 * <li>or inserting a new negation operator {@link #NOT}</li>
+	 * </ul>
+	 * 
+	 * @param expression
+	 *            expression to be negated
+	 * @return a new uparented negated expression.
+	 */
+	public static Expression createNegatedExpression(Expression expression, ASTRewrite astRewrite) {
+		int expressionType = expression.getNodeType();
+		AST ast = expression.getAST();
+		if (ASTNode.INFIX_EXPRESSION == expressionType) {
+			InfixExpression infixExpression = (InfixExpression) expression;
+			return negateInfixExpression(infixExpression, astRewrite);
+		}
+
+		if (ASTNode.PREFIX_EXPRESSION == expressionType) {
+			PrefixExpression prefixExpression = (PrefixExpression) expression;
+			PrefixExpression.Operator operator = prefixExpression.getOperator();
+
+			Expression negatedExpression;
+			if (NOT.equals(operator)) {
+				Expression body = prefixExpression.getOperand();
+				if (ASTNode.PARENTHESIZED_EXPRESSION == body.getNodeType()) {
+					ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression) body;
+					body = parenthesizedExpression.getExpression();
+				}
+				negatedExpression = (Expression) astRewrite.createCopyTarget(body);
+			} else {
+				negatedExpression = createNegatedParenthesized(expression, astRewrite);
+			}
+			return negatedExpression;
+		}
+
+		if (ASTNode.METHOD_INVOCATION == expressionType || ASTNode.SIMPLE_NAME == expressionType) {
+			return negate(astRewrite, expression);
+		}
+
+		if (ASTNode.BOOLEAN_LITERAL != expressionType) {
+			return createNegatedParenthesized(expression, astRewrite);
+		}
+
+		BooleanLiteral booleanLiteral = (BooleanLiteral) expression;
+		if (booleanLiteral.booleanValue()) {
+			return ast.newBooleanLiteral(false);
+		}
+		return ast.newBooleanLiteral(true);
+	}
+
+	/**
+	 * Adds a {@link PrefixExpression.Operator#NOT} in front of the given
+	 * expression.
+	 * 
+	 * @param astRewrite
+	 *            the {@link ASTRewrite} to create a copy of the given
+	 *            expression
+	 * @param expression
+	 *            expression to be negated
+	 * @return a new unparented {@link Expression} negated with the
+	 *         {@link PrefixExpression.Operator#NOT}.
+	 */
+	public static PrefixExpression negate(ASTRewrite astRewrite, Expression expression) {
+		AST ast = astRewrite.getAST();
+		PrefixExpression prefixExpression = ast.newPrefixExpression();
+		prefixExpression.setOperator(NOT);
+		prefixExpression.setOperand((Expression) astRewrite.createCopyTarget(expression));
+		return prefixExpression;
+	}
+
+	/**
+	 * Checks if the given expression is a null-check of the given variable,
+	 * i.e. any of the forms {@code variableName==null} or
+	 * {@code null==variableName}.
+	 * 
+	 * @param variableName
+	 *            name of the variable being null-checked
+	 * @param expression
+	 *            expression comparing the a variable to {@code null}
+	 * @return {@code true} if the expression has any of the forms mentioned
+	 *         above or {@code false} otherwise.
+	 */
+	public static boolean isNullCheck(SimpleName variableName, Expression expression) {
+		if (expression.getNodeType() != ASTNode.INFIX_EXPRESSION) {
+			return false;
+		}
+		InfixExpression infixExpression = (InfixExpression) expression;
+
+		if (infixExpression.hasExtendedOperands()) {
+			return false;
+		}
+
+		InfixExpression.Operator operator = infixExpression.getOperator();
+		if (operator != InfixExpression.Operator.EQUALS) {
+			return false;
+		}
+		Expression right = infixExpression.getRightOperand();
+		Expression left = infixExpression.getLeftOperand();
+
+		return isSecondOperandMatchingNull(left, right, variableName)
+				|| isSecondOperandMatchingNull(right, left, variableName);
+	}
+
+	private static boolean isSecondOperandMatchingNull(Expression first, Expression second,
+			SimpleName assignedVariableName) {
+		if (second.getNodeType() != ASTNode.NULL_LITERAL) {
+			return false;
+		}
+		if (first.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return false;
+		}
+		SimpleName leftName = (SimpleName) first;
+		return leftName.getIdentifier()
+			.equals(assignedVariableName.getIdentifier());
 	}
 
 }

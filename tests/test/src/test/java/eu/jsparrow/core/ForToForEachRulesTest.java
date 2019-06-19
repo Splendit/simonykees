@@ -1,16 +1,16 @@
 package eu.jsparrow.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.eclipse.jdt.core.JavaCore;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.rule.impl.ForToForEachRule;
 import eu.jsparrow.core.util.RulesTestUtil;
@@ -25,7 +25,7 @@ public class ForToForEachRulesTest extends SingleRuleTest {
 
 	private ForToForEachRule rule;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		rule = new ForToForEachRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");

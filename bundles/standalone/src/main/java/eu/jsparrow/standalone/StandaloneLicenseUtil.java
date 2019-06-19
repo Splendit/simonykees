@@ -19,6 +19,7 @@ import eu.jsparrow.license.api.LicenseService;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
+import eu.jsparrow.standalone.exceptions.StandaloneException;
 
 public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 
@@ -58,7 +59,7 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 	}
 
 	@Override
-	public boolean validate(String key, String validationBaseUrl) {
+	public boolean validate(String key, String validationBaseUrl) throws StandaloneException {
 		if (key == null || key.isEmpty()) {
 			logger.error("No License Key has been specified."); //$NON-NLS-1$
 			return false;
@@ -83,7 +84,7 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 	}
 
 	@Override
-	public void licenseInfo(String key, String validationBaseUrl) {
+	public void licenseInfo(String key, String validationBaseUrl) throws StandaloneException {
 
 		if (key == null || key.isEmpty()) {
 			logger.error("No License Key has been specified."); //$NON-NLS-1$
@@ -116,7 +117,8 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 		logger.info(info);
 	}
 
-	private LicenseValidationResult tryGetValidationResult(String key, String validationBaseUrl) {
+	private LicenseValidationResult tryGetValidationResult(String key, String validationBaseUrl)
+			throws StandaloneException {
 		String sessionId = Integer.toString(random.nextInt());
 		LicenseValidationResult result = null;
 		try {
@@ -124,12 +126,10 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 			String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
 			String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
 
-			model = factoryService.createNewFloatingModel(key, sessionId, productNr, moduleNr, validationBaseUrl);
-			result = licenseService.validate(model);
+			model = factoryService.createNewFloatingModel(key, sessionId, productNr, moduleNr);
+			result = licenseService.validate(model, validationBaseUrl);
 		} catch (ValidationException | IOException e) {
-			logger.debug("Licensing Error:", e); //$NON-NLS-1$
-			logger.error("Licensing Error: {}", e.getMessage()); //$NON-NLS-1$
-			return null;
+			throw new StandaloneException(e.getMessage(), e);
 		}
 		return result;
 	}
@@ -145,10 +145,10 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 	}
 
 	@Override
-	public void stop() {
+	public void stop(String validationBaseUrl) {
 		try {
 			if (model != null) {
-				licenseService.checkIn(model);
+				licenseService.checkIn(model, validationBaseUrl);
 			}
 		} catch (ValidationException e) {
 			logger.debug("Failed to check in License: ", e); //$NON-NLS-1$

@@ -2,6 +2,7 @@ package eu.jsparrow.sample.preRule;
 
 import static eu.jsparrow.sample.utilities.StringUtils.doesntDoAnything;
 
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -272,6 +273,14 @@ public class LambdaToMethodReferenceRule {
 		
 	}
 	
+	/*
+	 * SIM-1450
+	 */
+	private static Object createDeepCopy(byte[][] value, Class<?> valueClass) {
+		// see org.eclipse.mdm.api.base.model.Value
+		return Arrays.stream(value).map(v -> v.clone()).toArray(byte[][]::new);
+	}
+	
 	class NestedClass {
 		public void referencingMethodInNestedClass() {
 			List<Person> persons = new ArrayList<>();
@@ -397,7 +406,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	private void doSomething(Object o) {
-
+		o.getClass();
 	}
 
 	private Person getRandomPerson() {
@@ -405,7 +414,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	private void setIterator(Iterator iterator) {
-
+		iterator.next();
 	}
 
 	class Employee<T> extends Person {

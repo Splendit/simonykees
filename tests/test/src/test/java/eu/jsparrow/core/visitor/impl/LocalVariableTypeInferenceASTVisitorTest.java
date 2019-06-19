@@ -3,8 +3,8 @@ package eu.jsparrow.core.visitor.impl;
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
 import org.eclipse.jdt.core.dom.Block;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.rules.java10.LocalVariableTypeInferenceASTVisitor;
 
@@ -22,7 +22,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 
 	private LocalVariableTypeInferenceASTVisitor visitor;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		visitor = new LocalVariableTypeInferenceASTVisitor();
 	}
@@ -352,6 +352,19 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture
 	@Test
 	public void visit_arrayInitializer_shouldNotTransform() throws Exception {
 		String block = "String []names[] = {{}};";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expectedBlock = createBlock(block);
+		assertMatch(expectedBlock, fixture.getMethodBlock());
+
+	}
+	
+	@Test
+	public void visit_methodReferenceInitializer_shouldNotTransform() throws Exception {
+		String block = "Runnable r = this::hashCode;";
 		fixture.addMethodBlock(block);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 

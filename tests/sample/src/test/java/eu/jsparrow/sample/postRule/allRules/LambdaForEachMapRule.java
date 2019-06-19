@@ -504,16 +504,17 @@ public class LambdaForEachMapRule {
 		List<T> keys = new ArrayList<>();
 		refs.stream()
 			.forEach(ref -> {
-				final T testKey = refToKeyT(ref);
+				final T testKey = refToKeyT();
 				keys.add(testKey);
 			});
 	}
 
-	private <T> T refToKeyT(Person ref) {
+	private <T> T refToKeyT() {
 		return null;
 	}
 
 	private <T> List<T> refToKey(Person ref) {
+		ref.getBirthday();
 		return new ArrayList<>();
 	}
 

@@ -1,11 +1,7 @@
 package eu.jsparrow.rules.common.util;
 
-import java.util.Map;
-
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.osgi.framework.Bundle;
@@ -20,6 +16,7 @@ import org.osgi.framework.Version;
 public class JdtVersionBindingUtil {
 
 	private static final String ORG_ECLIPSE_JDT = "org.eclipse.jdt"; //$NON-NLS-1$
+	private static final String JDT_JAVA_11_SUPPORT = "3.16.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_10_SUPPORT = "3.14.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_9_SUPPORT = "3.13.2"; //$NON-NLS-1$
 	private static final String JDT_LEAST_SUPPORTED = "3.12.0"; //$NON-NLS-1$
@@ -62,38 +59,15 @@ public class JdtVersionBindingUtil {
 	 */
 	@SuppressWarnings("deprecation")
 	public static int findJLSLevel(Version jdtVersion) {
-		if (isJava10Supported(jdtVersion)) {
+		
+		if (isJava11Supported(jdtVersion)) {
+			return AST.JLS11;
+		} else if (isJava10Supported(jdtVersion)) {
 			return AST.JLS10;
 		} else if (isJava9Supported(jdtVersion)) {
 			return AST.JLS9;
 		}
 		return AST.JLS8;
-	}
-
-	/**
-	 * Finds the compiler options for the {@link ASTParser} based on the given
-	 * JDT version.
-	 * 
-	 * @param jdtVersion
-	 *            the JDT version of the current {@link Platform}.
-	 * @return options corresponding to {@link JavaCore#VERSION_10} if the JDT
-	 *         version corresponds to Photon; options corresponding to
-	 *         {@link JavaCore#VERSION_9} if the JDT version corresponds to
-	 *         Oxygen; or options corresponding to {@link JavaCore#VERSION_8} if
-	 *         the JDT version corresponds to Neon.
-	 */
-	public static Map<String, String> findCompilerOptions(Version jdtVersion) {
-		String javaVersion = JavaCore.VERSION_1_8;
-		if (isJava10Supported(jdtVersion)) {
-			javaVersion = JavaCore.VERSION_10;
-		} else if (isJava9Supported(jdtVersion)) {
-			javaVersion = JavaCore.VERSION_9;
-		}
-		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, javaVersion);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, javaVersion);
-		options.put(JavaCore.COMPILER_SOURCE, javaVersion);
-		return options;
 	}
 
 	/**
@@ -114,6 +88,10 @@ public class JdtVersionBindingUtil {
 		return TryStatement.RESOURCES_PROPERTY;
 	}
 
+	private static boolean isJava11Supported(Version jdtVersion) {
+		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_11_SUPPORT)) >= 0;
+	}
+	
 	private static boolean isJava10Supported(Version jdtVersion) {
 		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_10_SUPPORT)) >= 0;
 	}
@@ -121,5 +99,4 @@ public class JdtVersionBindingUtil {
 	private static boolean isJava9Supported(Version jdtVersion) {
 		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_9_SUPPORT)) >= 0;
 	}
-
 }

@@ -62,21 +62,6 @@ public class WorkingDirectoryTest {
 	}
 
 	@Test
-	public void cleanUp_multipleProjectsInLock_shouldDeleteProjectRelatedFiles() throws IOException {
-		writeToLockFile(rootProjectId + "\n" + "another-project-id");
-
-		File deps = temporaryDirectory.newFolder("temp_jsparrow" + File.separator + "deps");
-		File projectRelated = new File(deps.getPath() + File.separator + artifactId);
-		projectRelated.createNewFile();
-
-		workingDirectory.cleanUp("deps");
-
-		assertTrue(jsparrowTempFolder.exists());
-		assertFalse(Files.exists(projectRelated.toPath()));
-
-	}
-
-	@Test
 	public void lockProjects_shouldSaveAllIdsInLock() throws IOException {
 		Set<String> projectIds = new HashSet<>();
 		projectIds.add("root-project.id");

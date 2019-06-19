@@ -1,13 +1,14 @@
 package eu.jsparrow.license.netlicensing.validation.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
@@ -26,7 +27,7 @@ public class NetlicensingValidationParametersFactoryTest {
 	private NetlicensingValidationParametersFactory parametersFactory;
 	private ZonedDateTime expireDate;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		parametersFactory = new NetlicensingValidationParametersFactory();
 		expireDate = ZonedDateTime.now()

@@ -1,17 +1,11 @@
 package eu.jsparrow.standalone;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -23,7 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.logging.LoggingUtil;
+import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
+import eu.jsparrow.standalone.util.ProxyUtils;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -43,7 +39,8 @@ public class Activator implements BundleActivator {
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
-	// SIM-1406 org.eclipse.equinox.ds has been replaced with org.apache.felix.scr
+	// SIM-1406 org.eclipse.equinox.ds has been replaced with
+	// org.apache.felix.scr
 	private static final String EQUINOX_DS_BUNDLE_NAME = "org.apache.felix.scr"; //$NON-NLS-1$
 
 	private RefactoringInvoker refactoringInvoker;
@@ -68,9 +65,10 @@ public class Activator implements BundleActivator {
 
 		startDeclarativeServices(context);
 		// Put both together because it looks nicer
-		String startMessage = String.format("%s %n %s", Messages.Activator_start, loadBanner()); //$NON-NLS-1$
+		String startMessage = String.format("%s", Messages.Activator_start); //$NON-NLS-1$
 		logger.info(startMessage);
 		registerShutdownHook(context);
+		ProxyUtils.configureProxy(context);
 		StandaloneMode mode = parseMode(context);
 		String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID_KEY);
 		switch (mode) {
@@ -91,9 +89,11 @@ public class Activator implements BundleActivator {
 		default:
 			String errorMsg = "No mode has been selected!"; //$NON-NLS-1$
 			logger.error(errorMsg);
-			setExitErrorMessage(context, errorMsg);
+			setExitErrorMessageAndCleanUp(context, errorMsg);
 		}
 	}
+
+	
 
 	@Override
 	public void stop(BundleContext context) {
@@ -115,18 +115,17 @@ public class Activator implements BundleActivator {
 		logger.info(Messages.Activator_stop);
 	}
 
-	private String loadBanner() {
-		InputStream in = getClass().getResourceAsStream("/banner.txt"); //$NON-NLS-1$
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		return reader.lines()
-			.collect(Collectors.joining("\n")); //$NON-NLS-1$
-	}
-
 	private void printLicenseInfo(BundleContext context) {
 		licenseService = getStandaloneLicenseUtilService();
 		String key = getLicenseKey(context);
 		String agentUrl = getAgentUrl(context);
-		licenseService.licenseInfo(key, agentUrl);
+		try {
+			licenseService.licenseInfo(key, agentUrl);
+		} catch (StandaloneException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+			setExitErrorMessage(context, e.getMessage());
+		}
 	}
 
 	private void listRules(String listRulesId) {
@@ -139,20 +138,22 @@ public class Activator implements BundleActivator {
 
 	private void refactor(BundleContext context) {
 		try {
+
 			String key = getLicenseKey(context);
 			String agentUrl = getAgentUrl(context);
+
 			licenseService = getStandaloneLicenseUtilService();
 			if (licenseService.validate(key, agentUrl)) {
 				refactoringInvoker.startRefactoring(context);
 			} else {
 				String message = Messages.StandaloneActivator_noValidLicenseFound;
 				logger.error(message);
-				setExitErrorMessage(context, message);
+				setExitErrorMessageAndCleanUp(context, message);
 			}
 		} catch (StandaloneException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
-			setExitErrorMessage(context, e.getMessage());
+			setExitErrorMessageAndCleanUp(context, e.getMessage());
 		}
 	}
 
@@ -164,15 +165,10 @@ public class Activator implements BundleActivator {
 	private void cleanUp(BundleContext context) {
 		StandaloneMode mode = parseMode(context);
 		if (licenseService != null && (mode == StandaloneMode.REFACTOR || mode == StandaloneMode.LICENSE_INFO)) {
-			licenseService.stop();
+			licenseService.stop(getAgentUrl(context));
 		}
-		try {
-			refactoringInvoker.cleanUp();
-		} catch (IOException | CoreException e) {
-			logger.debug(e.getMessage(), e);
-			logger.error(e.getMessage());
-			setExitErrorMessage(context, e.getMessage());
-		}
+
+		refactoringInvoker.cleanUp();
 	}
 
 	private StandaloneMode parseMode(BundleContext context) {
@@ -206,6 +202,12 @@ public class Activator implements BundleActivator {
 		ctx.ungetService(infoRev);
 
 		return envInfo;
+	}
+
+	public void setExitErrorMessageAndCleanUp(BundleContext ctx, String exitMessage) {
+		cleanUp(ctx);
+
+		setExitErrorMessage(ctx, exitMessage);
 	}
 
 	public void setExitErrorMessage(BundleContext ctx, String exitMessage) {
@@ -252,7 +254,7 @@ public class Activator implements BundleActivator {
 
 		YAMLStandaloneConfig yamlStandaloneConfig = null;
 
-		Optional<String> configFile = new ConfigFinder().getYAMLFilePath(filePath);
+		Optional<String> configFile = new ConfigFinder().getYAMLFilePath(filePath, ConfigType.CONFIG_FILE);
 		if (configFile.isPresent()) {
 			try {
 				yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(configFile.get()));

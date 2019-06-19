@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.util.RulesTestUtil;
@@ -34,7 +34,7 @@ public abstract class SingleRuleTest {
 
 	protected IJavaProject testProject;
 
-	@BeforeClass
+	@BeforeAll
 	public static void classSetUp() throws Exception {
 		root = RulesTestUtil.getPackageFragementRoot(JavaCore.VERSION_1_8);
 	}

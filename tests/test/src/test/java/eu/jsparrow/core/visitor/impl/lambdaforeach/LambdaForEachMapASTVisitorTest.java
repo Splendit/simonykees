@@ -3,8 +3,8 @@ package eu.jsparrow.core.visitor.impl.lambdaforeach;
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
 import org.eclipse.jdt.core.dom.Block;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachMapASTVisitor;
@@ -14,7 +14,7 @@ public class LambdaForEachMapASTVisitorTest extends UsesJDTUnitFixture {
 	
 	private LambdaForEachMapASTVisitor visitor;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		visitor = new LambdaForEachMapASTVisitor();
 	}

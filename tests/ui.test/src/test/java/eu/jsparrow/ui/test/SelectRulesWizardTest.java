@@ -1,6 +1,6 @@
 package eu.jsparrow.ui.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -10,9 +10,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.jdtunit.JdtUnitFixture;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
@@ -32,7 +32,7 @@ public class SelectRulesWizardTest {
 	private JdtUnitFixture fixture = new JdtUnitFixture();
 	private IPackageFragment baseFragment = null;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fixture.setUp();
 
@@ -49,7 +49,7 @@ public class SelectRulesWizardTest {
 		fixture.addCompilationUnit(sub2Fragment, "Class12.java");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws CoreException {
 		fixture.tearDown();
 	}

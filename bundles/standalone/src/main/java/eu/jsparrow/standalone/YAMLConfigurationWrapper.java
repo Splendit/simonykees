@@ -53,10 +53,9 @@ public class YAMLConfigurationWrapper {
 				throw new StandaloneException(e.getMessage(), e);
 			}
 		} else {
-			logger.warn(
-					"No configuration file has been found at the given path [{}]. Loading the default configuration.", //$NON-NLS-1$
+			String exceptionMessage = NLS.bind(Messages.YAMLConfigurationWrapper_configurationFileNotFoundAtPath,
 					configFilePath);
-			return getDefaultYamlConfig();
+			throw new StandaloneException(exceptionMessage);
 		}
 
 		updateSelectedProfile(config, profile);
@@ -105,6 +104,10 @@ public class YAMLConfigurationWrapper {
 	}
 
 	private boolean isYamlFilePresent(String configFilePath) {
+		if (configFilePath == null || configFilePath.isEmpty()) {
+			return false;
+		}
+
 		return new File(configFilePath).exists();
 	}
 

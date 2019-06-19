@@ -511,6 +511,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	private ParameterizedSampleType<?> createParaeterizedInstance(String value) {
+		value.chars();
 		return new ParameterizedSampleType<ReturnTypeSampleChild>();
 	}
 
