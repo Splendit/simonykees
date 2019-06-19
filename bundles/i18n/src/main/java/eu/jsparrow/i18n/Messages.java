@@ -92,6 +92,8 @@ public class Messages extends NLS {
 	public static String CollapseIfStatementsRule_name;
 	public static String CollectionRemoveAllRule_description;
 	public static String CollectionRemoveAllRule_name;
+	public static String CollectionsFactoryMethodsRule_description;
+	public static String CollectionsFactoryMethodsRule_name;
 	public static String CompareInput_ancestorName;
 	public static String CompareInput_leftName;
 	public static String CompareInput_rightName;
@@ -367,6 +369,8 @@ public class Messages extends NLS {
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_leaveAsIs;
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase;
 	public static String RenamingRulePreviewWizardPage_RenameFields;
+	public static String ReorderModifiersRule_description;
+	public static String ReorderModifiersRule_name;
 	public static String SelectRulesWizardHandler_allready_running;
 	public static String SelectRulesWizardHandler_finishButtonText;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
@@ -495,6 +499,8 @@ public class Messages extends NLS {
 	public static String UpdateLicenseDialog_error_licenseInvalid;
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
+	public static String UseListSortRule_description;
+	public static String UseListSortRule_name;
 	public static String UseStringBuilderAppendRule_description;
 	public static String UseStringBuilderAppendRule_name;
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
