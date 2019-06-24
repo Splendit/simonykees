@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -24,7 +25,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -164,7 +164,7 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		}
 
 		int initializerNodeType = initializer.getNodeType();
-		if (ASTNode.LAMBDA_EXPRESSION == initializerNodeType || ASTNode.ARRAY_INITIALIZER == initializerNodeType 
+		if (ASTNode.LAMBDA_EXPRESSION == initializerNodeType || ASTNode.ARRAY_INITIALIZER == initializerNodeType
 				|| initializer instanceof MethodReference) {
 			return false;
 		}
@@ -274,7 +274,8 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 			return false;
 		}
 
-		if (isUsedInOverloadedMethod(variableName)) {
+		if (!ClassRelationUtil.compareITypeBinding(typeBinding, initializerType)
+				&& isUsedInOverloadedMethod(variableName)) {
 			return false;
 		}
 
@@ -345,8 +346,27 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		List<SimpleName> usages = visitor.getUsages();
 		return usages.stream()
 			.filter(name -> name.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY)
-			.map(parameter -> MethodInvocation.class.cast(parameter.getParent()))
-			.anyMatch(ASTNodeUtil::isOverloaded);
+			.anyMatch(name -> this.isOverloadedInParameter(MethodInvocation.class.cast(name.getParent()), name));
+	}
+
+	private boolean isOverloadedInParameter(MethodInvocation methodInvocation, SimpleName parameter) {
+		List<IMethodBinding> overloads = ClassRelationUtil.findOverloadedMethods(methodInvocation);
+		if(overloads.isEmpty()) {
+			return false;
+		}
+
+		int position = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
+			.indexOf(parameter);
+		if(position < 0) {
+			return false;
+		}
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
+
+		return overloads.stream()
+			.anyMatch(method -> ClassRelationUtil.isOverloadedOnParameter(methodBinding, method, position));
 	}
 
 	private boolean areRawCompatible(ITypeBinding initializerType, ITypeBinding declarationType) {

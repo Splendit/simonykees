@@ -4,7 +4,7 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.compareBoxedITypeB
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.compareITypeBinding;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.findInheretedMethods;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.findOverloadedMethods;
-import static eu.jsparrow.rules.common.util.ClassRelationUtil.isOverloadedOnParamter;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isOverloadedOnParameter;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isVisibleIn;
 
 import java.util.ArrayList;
@@ -309,7 +309,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		}
 
 		boolean isOverloadedWrapperMethod = overloadedWrapperMethods.stream()
-			.anyMatch(method -> isOverloadedOnParamter(wrapperMethodBinding, method, index));
+			.anyMatch(method -> isOverloadedOnParameter(wrapperMethodBinding, method, index));
 
 		if (isOverloadedWrapperMethod && discardsReturnedType(methodInvocation)) {
 			return true;
