@@ -45,11 +45,11 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
-import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
@@ -141,25 +141,37 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	}
 
 	private void saveStatisticsData() {
+		/*
+		 * statistics data is only saved, when the java system property
+		 * eu.jsparrow.statistics.save.path is set to a path. if it's empty or
+		 * null, nothing will be saved.
+		 */
+		String path = System.getProperty("eu.jsparrow.statistics.save.path"); //$NON-NLS-1$
+		if (path == null || path.isEmpty()) {
+			return;
+		}
+
 		RefactoringPipeline refactoringPipeline = summaryWizardPageModel.getRefactoringPipeline();
-		
-		ObjectMapper om = new ObjectMapper();
-		final Path filePath = Paths.get(System.getProperty("user.home"), "Desktop", "statistics", refactoringPipeline.getProjectName(), Instant.now().getEpochSecond() + ".json");
-		
+
 		StandaloneStatisticsData statisticsData = new StandaloneStatisticsData(refactoringPipeline.getFileCount(),
 				refactoringPipeline.getProjectName(), refactoringPipeline.getStatisticsMetadata(), refactoringPipeline);
-		
+
 		statisticsData.setMetricData();
-		statisticsData.setEndTime(refactoringPipeline.getFinishTime().getEpochSecond());
+		statisticsData.setEndTime(refactoringPipeline.getFinishTime()
+			.getEpochSecond());
 		Optional<JsparrowMetric> metric = statisticsData.getMetricData();
 		metric.ifPresent(m -> {
 			try {
+				ObjectMapper om = new ObjectMapper();
+				final Path filePath = Paths.get(path, refactoringPipeline.getProjectName(), Instant.now()
+					.getEpochSecond() + ".json"); //$NON-NLS-1$
+
 				File file = filePath.toFile();
-				file.getParentFile().mkdirs();
+				file.getParentFile()
+					.mkdirs();
 				om.writeValue(filePath.toFile(), m);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.debug(e.getMessage(), e);
 			}
 		});
 	}

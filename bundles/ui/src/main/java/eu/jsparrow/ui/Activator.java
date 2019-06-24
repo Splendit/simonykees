@@ -57,7 +57,7 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-
+		
 		/*
 		 * JNA first tries to read from jna.boot.library.path. If system
 		 * property jna.boot.library.path is set to wrong version from another
