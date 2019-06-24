@@ -56,6 +56,7 @@ public class RefactoringInvoker {
 	public static final String STATISTICS_START_TIME = "STATISTICS_START_TIME"; //$NON-NLS-1$
 	public static final String STATISTICS_REPO_OWNER = "STATISTICS_REPO_OWNER"; //$NON-NLS-1$
 	public static final String STATISTICS_REPO_NAME = "STATISTICS_REPO_NAME"; //$NON-NLS-1$
+	public static final String STATISTICS_SEND = "STATISTICS_SEND"; //$NON-NLS-1$
 
 	private boolean abort = false;
 	private YAMLConfigurationWrapper yamlConfigurationWrapper = new YAMLConfigurationWrapper();
@@ -92,7 +93,7 @@ public class RefactoringInvoker {
 		prepareRefactoring();
 		computeRefactoring();
 		commitRefactoring();
-		collectAndSendStatisticData();
+		collectAndSendStatisticData(context);
 	}
 
 	/**
@@ -155,7 +156,12 @@ public class RefactoringInvoker {
 		}
 	}
 
-	private void collectAndSendStatisticData() {
+	private void collectAndSendStatisticData(BundleContext context) {
+		boolean sendStatistics = Boolean.parseBoolean(context.getProperty(STATISTICS_SEND));
+		if(!sendStatistics) {
+			return;
+		}
+		
 		boolean computedStatistics = standaloneConfigs.stream()
 			.map(StandaloneConfig::getStatisticsData)
 			.filter(Objects::nonNull)

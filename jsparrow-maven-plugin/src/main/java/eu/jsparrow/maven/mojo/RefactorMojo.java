@@ -17,7 +17,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Proxy;
-import org.eclipse.sisu.Parameters;
 import org.osgi.framework.BundleException;
 
 import eu.jsparrow.maven.adapter.BundleStarter;
@@ -91,6 +90,9 @@ public class RefactorMojo extends AbstractMojo {
 	@Parameter(property = "repoName")
 	private String repoName;
 
+	@Parameter(property = "sendStatistics")
+	private boolean sendStatistics;
+
 	public void execute() throws MojoExecutionException {
 		Log log = getLog();
 
@@ -101,7 +103,8 @@ public class RefactorMojo extends AbstractMojo {
 
 		String mode = StandaloneMode.REFACTOR.name();
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
-		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration, statisticsMetadata);
+		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration,
+				statisticsMetadata, sendStatistics);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);

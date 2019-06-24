@@ -19,13 +19,15 @@ public class MavenParameters {
 	private String license = ""; //$NON-NLS-1$
 	private String url = ""; //$NON-NLS-1$
 	private StatisticsMetadata statisticsMetadata;
+	private boolean sendStatistics;
 
 	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault,
-			StatisticsMetadata statisticsMetadata) {
+			StatisticsMetadata statisticsMetadata, boolean sendStatistics) {
 		this(mode, license, url);
 		this.profile = profile;
 		this.useDefaultConfig = useDefault;
 		this.statisticsMetadata = statisticsMetadata;
+		this.sendStatistics = sendStatistics;
 	}
 
 	public MavenParameters(String mode, String license, String url) {
@@ -73,6 +75,14 @@ public class MavenParameters {
 
 	public void setStatisticsMetadata(StatisticsMetadata statisticsMetadata) {
 		this.statisticsMetadata = statisticsMetadata;
+	}
+
+	public boolean isSendStatistics() {
+		return sendStatistics;
+	}
+
+	public void setSendStatistics(boolean sendStatistics) {
+		this.sendStatistics = sendStatistics;
 	}
 
 }

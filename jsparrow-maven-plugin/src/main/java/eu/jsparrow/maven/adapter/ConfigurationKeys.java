@@ -24,9 +24,10 @@ public class ConfigurationKeys {
 	public static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$
 	public static final String CONFIG_FILE_OVERRIDE = "CONFIG.FILE.OVERRIDE"; //$NON-NLS-1$
 	public static final String PROXY_SETTINGS = "PROXY.SETTINGS"; //$NON-NLS-1$
-	public static final String STATISTICS_START_TIME = "STATISTICS_START_TIME";
-	public static final String STATISTICS_REPO_OWNER = "STATISTICS_REPO_OWNER";
-	public static final String STATISTICS_REPO_NAME = "STATISTICS_REPO_NAME";
+	public static final String STATISTICS_START_TIME = "STATISTICS_START_TIME"; //$NON-NLS-1$
+	public static final String STATISTICS_REPO_OWNER = "STATISTICS_REPO_OWNER"; //$NON-NLS-1$
+	public static final String STATISTICS_REPO_NAME = "STATISTICS_REPO_NAME"; //$NON-NLS-1$
+	public static final String STATISTICS_SEND = "STATISTICS_SEND"; //$NON-NLS-1$
 
 	private ConfigurationKeys() {
 		/*

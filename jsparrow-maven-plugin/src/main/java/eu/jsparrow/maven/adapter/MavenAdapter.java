@@ -15,6 +15,11 @@ import static eu.jsparrow.maven.adapter.ConfigurationKeys.SELECTED_PROFILE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.STANDALONE_MODE_KEY;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.USER_DIR;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.USE_DEFAULT_CONFIGURATION;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_SEND;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_START_TIME;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_REPO_NAME;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_REPO_OWNER;
+
 
 import java.io.File;
 import java.util.HashMap;
@@ -47,10 +52,6 @@ import eu.jsparrow.maven.util.ProxyUtil;
 public class MavenAdapter {
 
 	public static final String DOT = "."; //$NON-NLS-1$
-
-	public static final String STATISTICS_START_TIME = "STATISTICS_START_TIME"; //$NON-NLS-1$
-	public static final String STATISTICS_REPO_OWNER = "STATISTICS_REPO_OWNER"; //$NON-NLS-1$
-	public static final String STATISTICS_REPO_NAME = "STATISTICS_REPO_NAME"; //$NON-NLS-1$
 	
 	private Log log;
 	private Map<String, String> configuration = new HashMap<>();
@@ -110,6 +111,7 @@ public class MavenAdapter {
 				(configFileOverride == null) ? null : configFileOverride.getAbsolutePath());
 		configuration.put(ROOT_PROJECT_BASE_PATH, rootProject.getBasedir()
 			.getAbsolutePath());
+		configuration.put(STATISTICS_SEND, Boolean.toString(parameters.isSendStatistics()));
 
 		workingDirectory.lockProjects();
 
