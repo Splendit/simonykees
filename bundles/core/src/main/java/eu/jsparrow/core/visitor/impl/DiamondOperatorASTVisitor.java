@@ -82,7 +82,6 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					 */
 					ASTNode declarationStatement = parent.getParent();
 					Type lhsType = null;
-					
 
 					if (ASTNode.VARIABLE_DECLARATION_STATEMENT == declarationStatement.getNodeType()) {
 						lhsType = ((VariableDeclarationStatement) declarationStatement).getType();

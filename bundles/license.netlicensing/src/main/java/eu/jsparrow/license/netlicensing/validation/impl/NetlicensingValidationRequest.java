@@ -62,7 +62,6 @@ public class NetlicensingValidationRequest {
 		} catch (NetLicensingException e) {
 			throw new ValidationException(ExceptionMessages.Netlicensing_validationException_unknownError, e);
 		}
-	
 	}
 
 	private Context createAPIContextCall(String validationBaseUrl) {
