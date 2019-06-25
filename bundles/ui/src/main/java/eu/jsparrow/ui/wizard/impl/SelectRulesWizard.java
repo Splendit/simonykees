@@ -67,6 +67,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	private final List<RefactoringRule> rules;
 
 	private RefactoringPipeline refactoringPipeline;
+	private StandaloneStatisticsMetadata statisticsMetadata;
 
 	public SelectRulesWizard(List<IJavaElement> javaElements, RefactoringPipeline refactoringPipeline,
 			List<RefactoringRule> rules) {
@@ -126,14 +127,12 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				
-				prepareStatisticsMetadata();
-				
+
+				statisticsMetadata = prepareStatisticsMetadata();
+
 				preRefactoring();
 				IStatus refactoringStatus = doRefactoring(monitor, refactoringPipeline);
 				postRefactoring();
-				
-				refactoringPipeline.setFinishTime(Instant.now());
 
 				return refactoringStatus;
 			}
@@ -163,36 +162,24 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 		return true;
 	}
-	
-	private void prepareStatisticsMetadata() {
+
+	private StandaloneStatisticsMetadata prepareStatisticsMetadata() {
 		IJavaElement javaElement = javaElements.get(0);
 		String repoName = ""; //$NON-NLS-1$
-		
-		
+
 		IJavaElement parent;
-		while(javaElement != null && !(javaElement instanceof IJavaProject)) {
+		while (javaElement != null && !(javaElement instanceof IJavaProject)) {
 			parent = javaElement.getParent();
 			javaElement = parent;
 		}
-		
+
 		if (javaElement != null) {
-			repoName = ((IJavaProject) javaElement).getProject().getName();
+			repoName = ((IJavaProject) javaElement).getProject()
+				.getName();
 		}
-		
-		StandaloneStatisticsMetadata metadata = new StandaloneStatisticsMetadata();
-		metadata.setRepoOwner("Splendit-Internal-Measurement"); //$NON-NLS-1$
-		metadata.setStartTime(Instant.now().getEpochSecond());
-		metadata.setRepoName(repoName);
-		refactoringPipeline.setStatisticsMetadata(metadata);
-		refactoringPipeline.setProjectName(repoName);
-		
-		try {
-			List<ICompilationUnit> compilationUnits = new LinkedList<>();
-			collectICompilationUnits(compilationUnits, javaElements, new NullProgressMonitor());
-			refactoringPipeline.setFileCount(compilationUnits.size());
-		} catch (JavaModelException e) {
-			logger.debug(e.getMessage(), e);
-		}
+
+		return new StandaloneStatisticsMetadata(Instant.now()
+			.getEpochSecond(), "Splendit-Internal-Measurement", repoName); //$NON-NLS-1$
 	}
 
 	/**
@@ -216,7 +203,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline);
+				RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline, statisticsMetadata);
 				final WizardDialog dialog = new WizardDialog(shell, previewWizard) {
 
 					@Override
@@ -341,14 +328,14 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 			throws JavaModelException {
 		String packageName = packageFragment.getElementName();
 		IJavaElement parent = packageFragment.getParent();
-		if (parent != null && parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && !StringUtils.isEmpty(packageName)) {
+		if (parent != null && parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT
+				&& !StringUtils.isEmpty(packageName)) {
 			IPackageFragmentRoot root = (IPackageFragmentRoot) parent;
 			for (IJavaElement packageElement : root.getChildren()) {
 				if (packageElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 					IPackageFragment pkg = (IPackageFragment) packageElement;
 					if (!pkg.getElementName()
-						.equals(packageName) && StringUtils
-							.startsWith(pkg.getElementName(), packageName)) {
+						.equals(packageName) && StringUtils.startsWith(pkg.getElementName(), packageName)) {
 						addCompilationUnit(result, pkg.getCompilationUnits());
 					}
 				}

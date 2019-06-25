@@ -50,6 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
@@ -87,7 +88,17 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	private int displayHeight;
 
 	private boolean enabledFinishButton;
+	private StandaloneStatisticsMetadata statisticsMetadata;
+	private long endTime;
 
+	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
+			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton, 
+			StandaloneStatisticsMetadata statisticsMetadata) {
+		this(refactoringPipeline, wizardModel, enabledFinishButton);
+		this.statisticsMetadata = statisticsMetadata;
+		this.endTime = Instant.now().getEpochSecond();
+	}
+	
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton) {
 		super("wizardPage"); //$NON-NLS-1$
@@ -100,6 +111,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			.getPrimaryMonitor()
 			.getBounds().height;
 	}
+
 
 	/**
 	 * Create contents of the wizard.
@@ -152,18 +164,19 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		}
 
 		RefactoringPipeline refactoringPipeline = summaryWizardPageModel.getRefactoringPipeline();
+		
 
 		StandaloneStatisticsData statisticsData = new StandaloneStatisticsData(refactoringPipeline.getFileCount(),
-				refactoringPipeline.getProjectName(), refactoringPipeline.getStatisticsMetadata(), refactoringPipeline);
+				statisticsMetadata.getRepoName(), statisticsMetadata, refactoringPipeline);
 
 		statisticsData.setMetricData();
-		statisticsData.setEndTime(refactoringPipeline.getFinishTime()
-			.getEpochSecond());
+		
+		statisticsData.setEndTime(endTime);
 		Optional<JsparrowMetric> metric = statisticsData.getMetricData();
 		metric.ifPresent(m -> {
 			try {
 				ObjectMapper om = new ObjectMapper();
-				final Path filePath = Paths.get(path, refactoringPipeline.getProjectName(), Instant.now()
+				final Path filePath = Paths.get(path, statisticsMetadata.getRepoName(), Instant.now()
 					.getEpochSecond() + ".json"); //$NON-NLS-1$
 
 				File file = filePath.toFile();

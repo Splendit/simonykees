@@ -1,6 +1,5 @@
 package eu.jsparrow.core.refactorer;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,10 +67,7 @@ public class RefactoringPipeline {
 
 	private WorkingCopyOwnerDecorator workingCopyOwner;
 	
-	private StandaloneStatisticsMetadata statisticsMetadata;
 	private int fileCount;
-	private String projectName;
-	private Instant finishTime;
 
 	/**
 	 * Constructor without parameters, used to create RefactoringPipeline before
@@ -195,7 +191,7 @@ public class RefactoringPipeline {
 	 */
 	public List<ICompilationUnit> prepareRefactoring(List<ICompilationUnit> compilationUnits, IProgressMonitor monitor)
 			throws RefactoringException {
-
+		this.fileCount = compilationUnits.size();
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		try {
@@ -290,6 +286,7 @@ public class RefactoringPipeline {
 	 */
 	public List<ICompilationUnit> createRefactoringStates(List<ICompilationUnit> compilationUnits)
 			throws JavaModelException {
+		this.fileCount = compilationUnits.size();
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		for (ICompilationUnit compilationUnit : compilationUnits) {
@@ -656,36 +653,8 @@ public class RefactoringPipeline {
 		return refactoringStates;
 	}
 
-	public StandaloneStatisticsMetadata getStatisticsMetadata() {
-		return statisticsMetadata;
-	}
-
-	public void setStatisticsMetadata(StandaloneStatisticsMetadata statisticsMetadata) {
-		this.statisticsMetadata = statisticsMetadata;
-	}
-
 	public int getFileCount() {
 		return fileCount;
-	}
-
-	public void setFileCount(int fileCount) {
-		this.fileCount = fileCount;
-	}
-
-	public String getProjectName() {
-		return projectName;
-	}
-
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
-	}
-
-	public Instant getFinishTime() {
-		return finishTime;
-	}
-
-	public void setFinishTime(Instant finishTime) {
-		this.finishTime = finishTime;
 	}
 
 }
