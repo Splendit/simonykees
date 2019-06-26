@@ -103,7 +103,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 				So we are currently creating a new exception to improve the user interaction. 
 			
 			*/
-			throw new ValidationException(ExceptionMessages.NetlicensingLicenseValidation_0,e);
+			throw new ValidationException(ExceptionMessages.NetlicensingLicenseValidation_LinkageError,e);
 		}
 
 	}
