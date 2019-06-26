@@ -34,6 +34,7 @@ public class ExceptionMessages extends NLS {
 	public static String Netlicensing_validationException_failedtoConnectToServer;
 	public static String Netlicensing_validationException_productNumberNotExisting;
 	public static String Netlicensing_validationException_unknownError;
+	public static String NetlicensingLicenseValidation_0;
 	public static String PersistenceManager_decryption_error;
 	public static String PersistenceManager_encryption_error;
 	public static String SimonykeesException_default_ui_message;

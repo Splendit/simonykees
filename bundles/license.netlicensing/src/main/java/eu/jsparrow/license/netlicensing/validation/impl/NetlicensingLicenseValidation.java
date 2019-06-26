@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
+import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
@@ -20,8 +21,7 @@ import eu.jsparrow.license.netlicensing.validation.LicenseValidation;
  */
 public class NetlicensingLicenseValidation implements LicenseValidation {
 
-	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
-		.lookupClass());
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private NetlicensingLicenseModel model;
 
@@ -35,7 +35,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		ResponseEvaluator responseEvaluator = initState(model);
 		this.validationRequest = new NetlicensingValidationRequest(responseEvaluator);
 	}
-	
+
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model, String endpoint) {
 		ResponseEvaluator responseEvaluator = initState(model);
 		this.validationRequest = new NetlicensingValidationRequest(responseEvaluator, endpoint);
@@ -69,10 +69,9 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		}
 
 		/*
-		 * If no license type is defined we need to send one validation call
-		 * first to get the license type. We need to do this because
-		 * NetLicensing doesn't return the correct validation result for unknown
-		 * license types.
+		 * If no license type is defined we need to send one validation call first to
+		 * get the license type. We need to do this because NetLicensing doesn't return
+		 * the correct validation result for unknown license types.
 		 */
 		if (model.getType() == LicenseType.NONE) {
 			updateModelType();
@@ -88,15 +87,24 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 	}
 
 	private void updateModelType() throws ValidationException {
-		LicenseValidationResult result = validationRequest.send(model.getKey(),
-				parametersFactory.createVerifyParameters(model));
-		/*
-		 * The validation result contains the actual license type so we update
-		 * the license model with the license type so the next request will
-		 * return a validation result specific to this license type.
-		 */
-		model = new NetlicensingLicenseModel(model.getKey(), model.getSecret(), model.getProductNr(),
-				model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate());
+		try {
+			LicenseValidationResult result = validationRequest.send(model.getKey(),
+					parametersFactory.createVerifyParameters(model));
+			/*
+			 * The validation result contains the actual license type so we update the
+			 * license model with the license type so the next request will return a
+			 * validation result specific to this license type.
+			 */
+			model = new NetlicensingLicenseModel(model.getKey(), model.getSecret(), model.getProductNr(),
+					model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate());
+		} catch (LinkageError | ClassCastException e) {
+			/* SIM-1573 Feedback Improvement
+				We where not able to reproduce the class path collision in the OSGi environment.
+				So we are currently creating a new exception to improve the user interaction. 
+			
+			*/
+			throw new ValidationException(ExceptionMessages.NetlicensingLicenseValidation_0,e);
+		}
 
 	}
 
