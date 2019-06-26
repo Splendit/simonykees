@@ -98,12 +98,13 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 			model = new NetlicensingLicenseModel(model.getKey(), model.getSecret(), model.getProductNr(),
 					model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate());
 		} catch (LinkageError | ClassCastException e) {
-			/* SIM-1573 Feedback Improvement
-				We where not able to reproduce the class path collision in the OSGi environment.
-				So we are currently creating a new exception to improve the user interaction. 
-			
-			*/
-			throw new ValidationException(ExceptionMessages.NetlicensingLicenseValidation_0,e);
+			/*
+			 * SIM-1573 Feedback Improvement We where not able to reproduce the class path
+			 * collision in the OSGi environment. So we are currently creating a new
+			 * exception to improve the user interaction.
+			 * 
+			 */
+			throw new ValidationException(ExceptionMessages.NetlicensingLicenseValidation_LinkageError, e);
 		}
 
 	}
