@@ -63,11 +63,11 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		return ruleTimes;
 	}
 
-	public int getIssuesFixed() {
+	public Integer getIssuesFixed() {
 		return this.issuesFixed;
 	}
 
-	public void setIssuesFixed(int issuesFixed) {
+	public void setIssuesFixed(Integer issuesFixed) {
 		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed); //$NON-NLS-1$
 	}
 
