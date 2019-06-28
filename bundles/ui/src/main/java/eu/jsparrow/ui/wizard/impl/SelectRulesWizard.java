@@ -1,10 +1,14 @@
 package eu.jsparrow.ui.wizard.impl;
 
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -28,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -37,7 +42,6 @@ import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which
@@ -63,6 +67,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	private final List<RefactoringRule> rules;
 
 	private RefactoringPipeline refactoringPipeline;
+	private StandaloneStatisticsMetadata statisticsMetadata;
 
 	public SelectRulesWizard(List<IJavaElement> javaElements, RefactoringPipeline refactoringPipeline,
 			List<RefactoringRule> rules) {
@@ -122,6 +127,9 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+
+				statisticsMetadata = prepareStatisticsMetadata();
+
 				preRefactoring();
 				IStatus refactoringStatus = doRefactoring(monitor, refactoringPipeline);
 				postRefactoring();
@@ -155,6 +163,25 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		return true;
 	}
 
+	private StandaloneStatisticsMetadata prepareStatisticsMetadata() {
+		IJavaElement javaElement = javaElements.get(0);
+		String repoName = ""; //$NON-NLS-1$
+
+		IJavaElement parent;
+		while (javaElement != null && !(javaElement instanceof IJavaProject)) {
+			parent = javaElement.getParent();
+			javaElement = parent;
+		}
+
+		if (javaElement != null) {
+			repoName = ((IJavaProject) javaElement).getProject()
+				.getName();
+		}
+
+		return new StandaloneStatisticsMetadata(Instant.now()
+			.getEpochSecond(), "Splendit-Internal-Measurement", repoName); //$NON-NLS-1$
+	}
+
 	/**
 	 * Method used to open RefactoringPreviewWizard from non UI thread
 	 */
@@ -176,7 +203,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline);
+				RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline, statisticsMetadata);
 				final WizardDialog dialog = new WizardDialog(shell, previewWizard) {
 
 					@Override
@@ -301,14 +328,14 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 			throws JavaModelException {
 		String packageName = packageFragment.getElementName();
 		IJavaElement parent = packageFragment.getParent();
-		if (parent != null && parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && !StringUtils.isEmpty(packageName)) {
+		if (parent != null && parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT
+				&& !StringUtils.isEmpty(packageName)) {
 			IPackageFragmentRoot root = (IPackageFragmentRoot) parent;
 			for (IJavaElement packageElement : root.getChildren()) {
 				if (packageElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 					IPackageFragment pkg = (IPackageFragment) packageElement;
 					if (!pkg.getElementName()
-						.equals(packageName) && StringUtils
-							.startsWith(pkg.getElementName(), packageName)) {
+						.equals(packageName) && StringUtils.startsWith(pkg.getElementName(), packageName)) {
 						addCompilationUnit(result, pkg.getCompilationUnits());
 					}
 				}

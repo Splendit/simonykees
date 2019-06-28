@@ -66,6 +66,8 @@ public class RefactoringPipeline {
 	private boolean multipleProjects = false;
 
 	private WorkingCopyOwnerDecorator workingCopyOwner;
+	
+	private int fileCount;
 
 	/**
 	 * Constructor without parameters, used to create RefactoringPipeline before
@@ -189,7 +191,7 @@ public class RefactoringPipeline {
 	 */
 	public List<ICompilationUnit> prepareRefactoring(List<ICompilationUnit> compilationUnits, IProgressMonitor monitor)
 			throws RefactoringException {
-
+		this.fileCount = compilationUnits.size();
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		try {
@@ -284,6 +286,7 @@ public class RefactoringPipeline {
 	 */
 	public List<ICompilationUnit> createRefactoringStates(List<ICompilationUnit> compilationUnits)
 			throws JavaModelException {
+		this.fileCount = compilationUnits.size();
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		for (ICompilationUnit compilationUnit : compilationUnits) {
@@ -648,6 +651,10 @@ public class RefactoringPipeline {
 	 */
 	public List<RefactoringState> getRefactoringStates() {
 		return refactoringStates;
+	}
+
+	public int getFileCount() {
+		return fileCount;
 	}
 
 }

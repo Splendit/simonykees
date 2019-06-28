@@ -19,6 +19,7 @@ import org.eclipse.ui.PlatformUI;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -51,7 +52,13 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	protected RefactoringSummaryWizardPage summaryPage;
 	
 	private LicenseUtil licenseUtil = LicenseUtil.get();
+	private StandaloneStatisticsMetadata statisticsMetadata;
 
+	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline, StandaloneStatisticsMetadata standaloneStatisticsMetadata) {
+		this(refactoringPipeline);
+		this.statisticsMetadata = standaloneStatisticsMetadata;
+	}
+	
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
 		this.refactoringPipeline = refactoringPipeline;
@@ -91,7 +98,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.size() == 1
 				&& refactoringPipeline.getRules()
 					.get(0) instanceof StandardLoggerRule)) {
-			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish());
+			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsMetadata);
 			addPage(summaryPage);
 		}
 	}

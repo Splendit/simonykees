@@ -1,6 +1,7 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
@@ -28,6 +30,8 @@ import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
@@ -61,6 +65,10 @@ public class StandaloneConfig {
 	protected RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 	private boolean abort = false;
 	private YAMLConfig yamlConfig;
+	protected StandaloneStatisticsMetadata statisticsMetadata;
+
+	// standalone statistics data
+	protected StandaloneStatisticsData statisticsData;
 
 	/**
 	 * Constructor that calls collecting the compilation units.
@@ -79,14 +87,15 @@ public class StandaloneConfig {
 	 * @throws StandaloneException
 	 *             if the project cannot be created
 	 */
-	public StandaloneConfig(IJavaProject javaProject, String path, YAMLConfig yamlConfig)
-			throws CoreException, StandaloneException {
+	public StandaloneConfig(IJavaProject javaProject, String path, YAMLConfig yamlConfig,
+			StandaloneStatisticsMetadata statisticsMetadata) throws CoreException, StandaloneException {
 
 		this.javaProject = javaProject;
 		this.projectName = javaProject.getProject()
 			.getName();
 		this.path = path;
 		this.yamlConfig = yamlConfig;
+		this.statisticsMetadata = statisticsMetadata;
 		setUp();
 	}
 
@@ -99,6 +108,9 @@ public class StandaloneConfig {
 	protected void setUp() throws CoreException {
 		List<ICompilationUnit> compilationUnits = findProjectCompilationUnits();
 		compilationUnitsProvider = new CompilationUnitProvider(compilationUnits, yamlConfig.getExcludes());
+
+		statisticsData = new StandaloneStatisticsData(compilationUnits.size(), projectName, statisticsMetadata,
+				refactoringPipeline);
 	}
 
 	/**
@@ -201,6 +213,7 @@ public class StandaloneConfig {
 		rules.addAll(selectedAutomaticRules);
 
 		applyRules(rules);
+		statisticsData.setMetricData();
 	}
 
 	private Optional<StandardLoggerRule> setUpLoggerRule(Map<String, String> options) {
@@ -268,6 +281,8 @@ public class StandaloneConfig {
 		logger.info(logInfo);
 		try {
 			refactoringPipeline.commitRefactoring();
+			statisticsData.setEndTime(Instant.now()
+				.getEpochSecond());
 		} catch (RefactoringException | ReconcileException e) {
 			throw new StandaloneException(String.format("Cannot commit refactoring on %s", projectName), e); //$NON-NLS-1$
 		}
@@ -300,6 +315,14 @@ public class StandaloneConfig {
 	protected IProject getProject(IWorkspace workspace, String name) {
 		return workspace.getRoot()
 			.getProject(name);
+	}
+
+	public StandaloneStatisticsData getStatisticsData() {
+		return statisticsData;
+	}
+
+	protected IJavaProject createJavaProject(IProject project) {
+		return JavaCore.create(project);
 	}
 
 	/**

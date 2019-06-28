@@ -1,9 +1,14 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -15,7 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
+import eu.jsparrow.core.http.JsonUtil;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
+import eu.jsparrow.core.statistic.entity.JsparrowData;
+import eu.jsparrow.core.statistic.entity.JsparrowMetric;
+import eu.jsparrow.core.statistic.entity.JsparrowRuleData;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.ConfigFinder.ConfigType;
@@ -42,6 +53,10 @@ public class RefactoringInvoker {
 	private static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
 	private static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_OVERRIDE = "CONFIG.FILE.OVERRIDE"; //$NON-NLS-1$
+	public static final String STATISTICS_START_TIME = "STATISTICS_START_TIME"; //$NON-NLS-1$
+	public static final String STATISTICS_REPO_OWNER = "STATISTICS_REPO_OWNER"; //$NON-NLS-1$
+	public static final String STATISTICS_REPO_NAME = "STATISTICS_REPO_NAME"; //$NON-NLS-1$
+	public static final String STATISTICS_SEND = "STATISTICS_SEND"; //$NON-NLS-1$
 
 	private boolean abort = false;
 	private YAMLConfigurationWrapper yamlConfigurationWrapper = new YAMLConfigurationWrapper();
@@ -78,6 +93,7 @@ public class RefactoringInvoker {
 		prepareRefactoring();
 		computeRefactoring();
 		commitRefactoring();
+		collectAndSendStatisticData(context);
 	}
 
 	/**
@@ -138,6 +154,78 @@ public class RefactoringInvoker {
 			logger.info(logInfo);
 			throw new StandaloneException(logInfo);
 		}
+	}
+
+	private void collectAndSendStatisticData(BundleContext context) {
+		boolean sendStatistics = Boolean.parseBoolean(context.getProperty(STATISTICS_SEND));
+		if(!sendStatistics) {
+			return;
+		}
+		
+		boolean computedStatistics = standaloneConfigs.stream()
+			.map(StandaloneConfig::getStatisticsData)
+			.filter(Objects::nonNull)
+			.map(StandaloneStatisticsData::getMetricData)
+			.anyMatch(Optional::isPresent);
+
+		if (!computedStatistics) {
+			return;
+		}
+
+		JsparrowMetric metricData = new JsparrowMetric();
+		JsparrowData projectData = new JsparrowData();
+		Map<String, JsparrowRuleData> rulesData = new HashMap<>();
+
+		for (StandaloneConfig config : standaloneConfigs) {
+			JsparrowMetric metrics = config.getStatisticsData()
+				.getMetricData()
+				.orElse(null);
+			if (metrics == null) {
+				continue;
+			}
+			metricData.setuuid(metrics.getuuid());
+			metricData.setTimestamp(metrics.getTimestamp());
+			metricData.setRepoName(metrics.getRepoName());
+			metricData.setRepoOwner(metrics.getRepoOwner());
+
+			JsparrowData currentProjectData = metrics.getData();
+			projectData.setTimestampGitHubStart(currentProjectData.getTimestampGitHubStart());
+			projectData.setTimestampJSparrowFinish(currentProjectData.getTimestampJSparrowFinish());
+			projectData.setProjectName(metrics.getRepoName());
+
+			projectData
+				.setTotalFilesChanged(projectData.getTotalFilesChanged() + currentProjectData.getTotalFilesChanged());
+			projectData.setTotalFilesCount(projectData.getTotalFilesCount() + currentProjectData.getTotalFilesCount());
+			projectData
+				.setTotalIssuesFixed(projectData.getTotalIssuesFixed() + currentProjectData.getTotalIssuesFixed());
+			projectData.setTotalTimeSaved(projectData.getTotalTimeSaved() + currentProjectData.getTotalTimeSaved());
+
+			String logInfo = String.format("Project  : %s, totalIssues: %s, totalTime: %s, totalFiles: %s ", //$NON-NLS-1$
+					currentProjectData.getProjectName(), currentProjectData.getTotalIssuesFixed(),
+					currentProjectData.getTotalTimeSaved(), currentProjectData.getTotalFilesChanged());
+			logger.debug(logInfo);
+
+			for (JsparrowRuleData ruleData : currentProjectData.getRules()) {
+				if (rulesData.containsKey(ruleData.getRuleId())) {
+					JsparrowRuleData currentRule = rulesData.get(ruleData.getRuleId());
+					currentRule.setFilesChanged(currentRule.getFilesChanged() + ruleData.getFilesChanged());
+					currentRule.setIssuesFixed(currentRule.getIssuesFixed() + ruleData.getIssuesFixed());
+					rulesData.put(ruleData.getRuleId(), currentRule);
+				} else {
+					rulesData.put(ruleData.getRuleId(), ruleData);
+				}
+			}
+		}
+		projectData.setRules(new ArrayList<>(rulesData.values()));
+		metricData.setData(projectData);
+
+		String logInfo = String.format("FinalData: %s, totalIssues: %s, totalTime: %s, totalFiles: %s ", //$NON-NLS-1$
+				projectData.getProjectName(), projectData.getTotalIssuesFixed(), projectData.getTotalTimeSaved(),
+				projectData.getTotalFilesChanged());
+		logger.debug(logInfo);
+
+		String json = JsonUtil.generateJSON(metricData);
+		JsonUtil.sendJsonToAwsStatisticsService(json);
 	}
 
 	/**
@@ -266,6 +354,8 @@ public class RefactoringInvoker {
 		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
 				excludedModulesFilePath).get();
 
+		StandaloneStatisticsMetadata metadata = extractStatisticsMetadata(context);
+
 		for (IJavaProject javaProject : importedProjects) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
 			verifyAbortFlag(abortMessage);
@@ -300,7 +390,7 @@ public class RefactoringInvoker {
 				YAMLConfig config = getConfiguration(context, javaProject.getProject()
 					.getLocation()
 					.toFile());
-				StandaloneConfig standaloneConfig = new StandaloneConfig(javaProject, path, config);
+				StandaloneConfig standaloneConfig = new StandaloneConfig(javaProject, path, config, metadata);
 
 				standaloneConfigs.add(standaloneConfig);
 
@@ -319,6 +409,21 @@ public class RefactoringInvoker {
 
 	public MavenProjectImporter getImporter() {
 		return importer;
+	}
+
+	private StandaloneStatisticsMetadata extractStatisticsMetadata(BundleContext context) {
+		String repoOwner = context.getProperty(STATISTICS_REPO_OWNER);
+		String repoName = context.getProperty(STATISTICS_REPO_NAME);
+
+		String gitHubStartTimeString = context.getProperty(STATISTICS_START_TIME);
+
+		long timestampGitHubStart = -1;
+		if (gitHubStartTimeString != null && !gitHubStartTimeString.isEmpty()) {
+			Instant gitHubStartTime = Instant.parse(context.getProperty(STATISTICS_START_TIME));
+			timestampGitHubStart = gitHubStartTime.getEpochSecond();
+		}
+
+		return new StandaloneStatisticsMetadata(timestampGitHubStart, repoOwner, repoName);
 	}
 
 	public void setImporter(MavenProjectImporter importer) {

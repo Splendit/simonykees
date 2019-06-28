@@ -12,7 +12,7 @@ Execute
 	
 ## missing dependencies in eclipse ##
 
-Read instructions at: [Eclipse](https://confluence.splendit.loc/display/Tutorials/Eclipse)
+Read instructions at: [Eclipse](https://confluence.splendit.loc/display/Tutorials/Setup+Eclipse+for+jSparrow)
 
 ## build ##
 
@@ -94,3 +94,7 @@ This usage of profiles would result in
 - Copying of the class file is done in the POM of the **license.netlicensing module**.
 - Default profile is **test**
 - Creating a test or production version has no bearing on obfuscation! 
+
+## Statistics
+
+to save the statistics to a .json file, please specify the destination path as the following Java system property `-Deu.jsparrow.statistics.save.path`. This can be done in `eclipse.ini` by adding this property after the `-vmargs` argument. For testing (runtime-eclipse applicaton), the java system properties can be configured in the run/debug configurations.

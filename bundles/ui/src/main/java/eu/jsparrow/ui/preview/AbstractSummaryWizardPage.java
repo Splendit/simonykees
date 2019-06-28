@@ -1,7 +1,13 @@
 package eu.jsparrow.ui.preview;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
 
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
@@ -40,7 +46,12 @@ import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
+import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
+import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
@@ -77,7 +88,17 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	private int displayHeight;
 
 	private boolean enabledFinishButton;
+	private StandaloneStatisticsMetadata statisticsMetadata;
+	private long endTime;
 
+	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
+			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton, 
+			StandaloneStatisticsMetadata statisticsMetadata) {
+		this(refactoringPipeline, wizardModel, enabledFinishButton);
+		this.statisticsMetadata = statisticsMetadata;
+		this.endTime = Instant.now().getEpochSecond();
+	}
+	
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton) {
 		super("wizardPage"); //$NON-NLS-1$
@@ -90,6 +111,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			.getPrimaryMonitor()
 			.getBounds().height;
 	}
+
 
 	/**
 	 * Create contents of the wizard.
@@ -119,12 +141,52 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		if (visible) {
 			setStatusInfo();
 			summaryWizardPageModel.updateData();
+
+			saveStatisticsData();
+
 			createCompareInputControl();
 			// We must wait to set selection until control is visible
 			setInitialFileSelection();
 
 		}
 		super.setVisible(visible);
+	}
+
+	private void saveStatisticsData() {
+		/*
+		 * statistics data is only saved, when the java system property
+		 * eu.jsparrow.statistics.save.path is set to a path. if it's empty or
+		 * null, nothing will be saved.
+		 */
+		String path = System.getProperty("eu.jsparrow.statistics.save.path"); //$NON-NLS-1$
+		if (path == null || path.isEmpty()) {
+			return;
+		}
+
+		RefactoringPipeline refactoringPipeline = summaryWizardPageModel.getRefactoringPipeline();
+		
+
+		StandaloneStatisticsData statisticsData = new StandaloneStatisticsData(refactoringPipeline.getFileCount(),
+				statisticsMetadata.getRepoName(), statisticsMetadata, refactoringPipeline);
+
+		statisticsData.setMetricData();
+		
+		statisticsData.setEndTime(endTime);
+		Optional<JsparrowMetric> metric = statisticsData.getMetricData();
+		metric.ifPresent(m -> {
+			try {
+				ObjectMapper om = new ObjectMapper();
+				final Path filePath = Paths.get(path, statisticsMetadata.getRepoName(), Instant.now()
+					.getEpochSecond() + ".json"); //$NON-NLS-1$
+
+				File file = filePath.toFile();
+				file.getParentFile()
+					.mkdirs();
+				om.writeValue(filePath.toFile(), m);
+			} catch (IOException e) {
+				logger.debug(e.getMessage(), e);
+			}
+		});
 	}
 
 	protected void addHeader() {
