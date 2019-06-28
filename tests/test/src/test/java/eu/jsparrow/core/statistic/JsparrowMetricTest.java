@@ -42,6 +42,6 @@ public class JsparrowMetricTest {
 		String result = JsonUtil.generateJSON(jm);
 		// assertEquals(expected, result);
 
-		JsonUtil.sendJson(result);
+		JsonUtil.sendJsonToAwsStatisticsService(result);
 	}
 }

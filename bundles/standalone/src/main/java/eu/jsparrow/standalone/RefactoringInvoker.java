@@ -225,7 +225,7 @@ public class RefactoringInvoker {
 		logger.debug(logInfo);
 
 		String json = JsonUtil.generateJSON(metricData);
-		JsonUtil.sendJson(json);
+		JsonUtil.sendJsonToAwsStatisticsService(json);
 	}
 
 	/**

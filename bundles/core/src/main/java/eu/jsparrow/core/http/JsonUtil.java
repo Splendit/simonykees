@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -15,6 +14,13 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Provides methods for serializing objects to JSON and vice versa. Additionally
+ * it contains methods for sending statistics data.
+ * 
+ * @sicne 2.7.0
+ *
+ */
 public class JsonUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(JsonUtil.class);
@@ -35,7 +41,7 @@ public class JsonUtil {
 			ObjectMapper mapper = new ObjectMapper();
 			return mapper.writeValueAsString(o);
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		return null;
 	}
@@ -47,36 +53,31 @@ public class JsonUtil {
 			return mapper.writerWithDefaultPrettyPrinter()
 				.writeValueAsString(o);
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		return null;
 	}
 
-	public static void sendJson(String json) {
-		// String targeturl =
-		// "https://nxiikrr4xl.execute-api.eu-central-1.amazonaws.com/testing/upload-data";
-		String targeturl = "https://nxiikrr4xl.execute-api.eu-central-1.amazonaws.com/testing/post-new-data"; //$NON-NLS-1$
-
+	private static void sendJson(String json, String targetUrl) {
 		URL myurl;
 		try {
-			myurl = new URL(targeturl);
+			myurl = new URL(targetUrl);
 			HttpURLConnection con = (HttpURLConnection) myurl.openConnection();
 			con.setDoOutput(true);
 			con.setDoInput(true);
 
-			con.setRequestProperty("Content-Type", "application/json;");
-			con.setRequestProperty("Accept", "application/json,text/plain");
-			con.setRequestProperty("Method", "POST");
+			con.setRequestProperty("Content-Type", "application/json;"); //$NON-NLS-1$ //$NON-NLS-2$
+			con.setRequestProperty("Accept", "application/json,text/plain"); //$NON-NLS-1$ //$NON-NLS-2$
+			con.setRequestProperty("Method", "POST"); //$NON-NLS-1$ //$NON-NLS-2$
 			OutputStream os;
 			os = con.getOutputStream();
 
-			os.write(json.toString()
-				.getBytes(StandardCharsets.UTF_8.name()));
+			os.write(json.getBytes(StandardCharsets.UTF_8.name()));
 			os.close();
 
 			StringBuilder sb = new StringBuilder();
-			int HttpResult = con.getResponseCode();
-			if (HttpResult == HttpURLConnection.HTTP_OK) {
+			int httpResult = con.getResponseCode();
+			if (httpResult == HttpURLConnection.HTTP_OK) {
 				BufferedReader br = new BufferedReader(
 						new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8.name()));
 
@@ -91,10 +92,14 @@ public class JsonUtil {
 				logger.debug("Response code: " + con.getResponseCode()); //$NON-NLS-1$
 				logger.debug("Response message: " + con.getResponseMessage()); //$NON-NLS-1$
 			}
-		} catch (MalformedURLException e) {
-			logger.error("MalformedURLException", e); //$NON-NLS-1$
 		} catch (IOException e) {
-			logger.error("IOException", e); //$NON-NLS-1$
+			logger.error(e.getMessage(), e);
 		}
+	}
+
+	public static void sendJsonToAwsStatisticsService(String json) {
+		String targeturl = "https://nxiikrr4xl.execute-api.eu-central-1.amazonaws.com/testing/post-new-data"; //$NON-NLS-1$
+
+		sendJson(json, targeturl);
 	}
 }

@@ -1,5 +1,11 @@
 package eu.jsparrow.core.refactorer;
 
+/**
+ * Model for representing metadata for project's statistics.
+ * 
+ * @since 2.7.0
+ *
+ */
 public class StandaloneStatisticsMetadata {
 
 	private long startTime;
