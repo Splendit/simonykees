@@ -151,7 +151,7 @@ timestamps {
 
                     break
                 default:
-
+                    pushToGithub()
                     runStandardSteps()
 
                     break
