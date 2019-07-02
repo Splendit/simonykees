@@ -9,7 +9,7 @@ public class ValidationException extends Exception{
 	
 	private static final long serialVersionUID = -5463841225580702458L;
 
-	public ValidationException(Exception e) {
+	public ValidationException(Throwable e) {
 		super(e);
 	}
 	
@@ -17,7 +17,7 @@ public class ValidationException extends Exception{
 		super(message);
 	}
 	
-	public ValidationException(String message, Exception e) {
+	public ValidationException(String message, Throwable e) {
 		super(message,e);
 	}
 

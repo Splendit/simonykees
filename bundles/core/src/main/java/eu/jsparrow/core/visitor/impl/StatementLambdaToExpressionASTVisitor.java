@@ -1,7 +1,7 @@
 package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.findOverloadedMethods;
-import static eu.jsparrow.rules.common.util.ClassRelationUtil.isOverloadedOnParamter;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isOverloadedOnParameter;
 
 import java.util.List;
 
@@ -87,7 +87,7 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		return overloads.stream()
-			.anyMatch(overloadingMethod -> isOverloadedOnParamter(methodBinding, overloadingMethod, index));
+			.anyMatch(overloadingMethod -> isOverloadedOnParameter(methodBinding, overloadingMethod, index));
 	}
 
 	private boolean returnsValue(Expression expression) {

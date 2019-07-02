@@ -479,7 +479,7 @@ public class ClassRelationUtil {
 	 * @return {@code true} the condition is satisfied and {@code false}
 	 *         otherwise.
 	 */
-	public static boolean isOverloadedOnParamter(IMethodBinding methodBinding, IMethodBinding overloadedMethod,
+	public static boolean isOverloadedOnParameter(IMethodBinding methodBinding, IMethodBinding overloadedMethod,
 			int paramterIndex) {
 		ITypeBinding[] methodParameterTypes = methodBinding.getParameterTypes();
 		ITypeBinding[] overloadedMethodParameterTypes = overloadedMethod.getParameterTypes();

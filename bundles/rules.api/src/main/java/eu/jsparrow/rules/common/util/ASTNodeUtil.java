@@ -1,7 +1,6 @@
 package eu.jsparrow.rules.common.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
@@ -579,37 +578,6 @@ public class ASTNodeUtil {
 				.collect(Collectors.toList()));
 		}
 		return names;
-	}
-
-	/**
-	 * Checks whether the given method is an overloaded one. Finds all methods
-	 * declared on the same class and the inherited methods, and verifies if
-	 * there is at least one other method with the same name.
-	 * 
-	 * @param methodInvocation
-	 *            the binding of the method to be checked.
-	 * 
-	 * @return {@code true} if the above condition is met or {@code false}
-	 *         otherwise.
-	 */
-	public static boolean isOverloaded(MethodInvocation methodInvocation) {
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		if (methodBinding == null) {
-			return false;
-		}
-
-		ITypeBinding delcaringClass = methodBinding.getDeclaringClass();
-		List<IMethodBinding> inheritedMethods = ClassRelationUtil.findInheretedMethods(delcaringClass);
-		IMethodBinding[] declaredMethods = delcaringClass.getDeclaredMethods();
-		List<IMethodBinding> allmethods = new ArrayList<>();
-		allmethods.addAll(inheritedMethods);
-		allmethods.addAll(Arrays.asList(declaredMethods));
-		String identifier = methodInvocation.getName()
-			.getIdentifier();
-
-		return allmethods.stream()
-			.map(IMethodBinding::getName)
-			.anyMatch(identifier::equals);
 	}
 
 	/**
