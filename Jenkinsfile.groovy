@@ -378,7 +378,7 @@ void uploadMappingFile(Profile profile) {
         stage(stageName) {
         	// TODO there has to be a nicer way to get the version (and then the directory), when we already have the qualifier
           // tag-deployment.sh uses the same mechanism
-    		def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu.jsparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" releng/eu.jsparrow.site.photon/target/p2content.xml").trim()
+    		def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu\\.jsparrow\\.photon\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" releng/eu.jsparrow.site.photon/target/p2content.xml").trim()
     		def directory = "${buildNumber}${profile.qualifier}"
             uploadMappingFiles(directory)
         }
