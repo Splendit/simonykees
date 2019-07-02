@@ -155,6 +155,7 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 
 		AbstractASTRewriteASTVisitor rule = visitorFactory();
+		// Set the generated nodes. // TODO
 		rule.setASTRewrite(astRewrite);
 		rule.setCompilationUnit(workingCopy.getHandleIdentifier());
 		try {

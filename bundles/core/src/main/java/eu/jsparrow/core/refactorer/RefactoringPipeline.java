@@ -573,6 +573,7 @@ public class RefactoringPipeline {
 			.setWorkRemaining(refactoringStates.size());
 
 		CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
+		// Make a lombok rule -> give the generated nodes. // TODO
 		for (RefactoringRule rule : rules) {
 			subMonitor.subTask(rule.getRuleDescription()
 				.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
