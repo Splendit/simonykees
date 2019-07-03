@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.loop.stream;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -18,7 +19,9 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 
 import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.util.OperatorUtil;
 
 /**
@@ -41,6 +44,11 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		ITypeBinding expressionBinding = loopExpression.resolveTypeBinding();
 
 		if (parameterTypeBinding == null || expressionBinding == null) {
+			return true;
+		}
+		
+		if(!ClassRelationUtil.isContentOfType(expressionBinding, java.util.Collection.class.getName()) &&
+				!ClassRelationUtil.isInheritingContentOfTypes(expressionBinding, Collections.singletonList(java.util.Collection.class.getName()))) {
 			return true;
 		}
 
@@ -68,6 +76,11 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		if (!isIfStatementWithBreakBody(firstStatement)) {
 			return true;
 		}
+		
+		if(containsFlowBreakerStatements(bodyStatements.subList(1, bodyStatements.size()))) {
+			return true;
+		}
+		
 		IfStatement ifStatement = (IfStatement)firstStatement;
 		ExpressionStatement streamStatement = createStreamStatement(loopParameter.getName(), loopExpression, ifStatement, body);
 		astRewrite.replace(enhancedForStatement, streamStatement, null);
@@ -75,6 +88,17 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		onRewrite();
 
 		return true;
+	}
+
+	private boolean containsFlowBreakerStatements(List<Statement> statements) {
+		for(Statement statement : statements) {
+			FlowBreakersVisitor visitor = new FlowBreakersVisitor();
+			statement.accept(visitor);
+			if(visitor.hasFlowBreakerStatement()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")
