@@ -21,6 +21,7 @@ import eu.jsparrow.core.rule.impl.BufferedReaderLinesRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.core.rule.impl.CollapseIfStatementsRule;
 import eu.jsparrow.core.rule.impl.CollectionRemoveAllRule;
+import eu.jsparrow.core.rule.impl.CollectionsFactoryMethodsRule;
 import eu.jsparrow.core.rule.impl.DateDeprecatedRule;
 import eu.jsparrow.core.rule.impl.DiamondOperatorRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamAnyMatchRule;
@@ -137,7 +138,7 @@ public class RulesContainer {
 				new GuardConditionRule(), new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(),
 				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
 				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
-				new ReorderModifiersRule(), new UseListSortRule(),
+				new ReorderModifiersRule(), new UseListSortRule(), new CollectionsFactoryMethodsRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

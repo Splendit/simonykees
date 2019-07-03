@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.java10.factory.methods;
+package eu.jsparrow.core.visitor.factory.methods;
 
 import java.util.ArrayList;
 import java.util.HashSet;
