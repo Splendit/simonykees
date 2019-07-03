@@ -2,10 +2,12 @@ package eu.jsparrow.core.visitor.loop.stream;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -23,6 +25,8 @@ import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.util.OperatorUtil;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
 /**
  * 
@@ -46,9 +50,10 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		if (parameterTypeBinding == null || expressionBinding == null) {
 			return true;
 		}
-		
-		if(!ClassRelationUtil.isContentOfType(expressionBinding, java.util.Collection.class.getName()) &&
-				!ClassRelationUtil.isInheritingContentOfTypes(expressionBinding, Collections.singletonList(java.util.Collection.class.getName()))) {
+
+		if (!ClassRelationUtil.isContentOfType(expressionBinding, java.util.Collection.class.getName())
+				&& !ClassRelationUtil.isInheritingContentOfTypes(expressionBinding,
+						Collections.singletonList(java.util.Collection.class.getName()))) {
 			return true;
 		}
 
@@ -62,11 +67,11 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		}
 
 		Block body = (Block) bodyStatement;
-		
-		if(containsNonEffectivelyFinalVariable(body)) {
+
+		if (containsNonEffectivelyFinalVariable(body)) {
 			return true;
 		}
-		
+
 		List<Statement> bodyStatements = ASTNodeUtil.convertToTypedList(body.statements(), Statement.class);
 		if (bodyStatements.size() <= 1) {
 			return true;
@@ -76,25 +81,61 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		if (!isIfStatementWithBreakBody(firstStatement)) {
 			return true;
 		}
-		
-		if(containsFlowBreakerStatements(bodyStatements.subList(1, bodyStatements.size()))) {
+
+		if (containsFlowBreakerStatements(bodyStatements.subList(1, bodyStatements.size()))) {
 			return true;
 		}
-		
-		IfStatement ifStatement = (IfStatement)firstStatement;
-		ExpressionStatement streamStatement = createStreamStatement(loopParameter.getName(), loopExpression, ifStatement, body);
+
+		if (containsReferenceTo(body, loopExpression) || loopExpression.getNodeType() == ASTNode.QUALIFIED_NAME) {
+			return false;
+		}
+
+		IfStatement ifStatement = (IfStatement) firstStatement;
+		ExpressionStatement streamStatement = createStreamStatement(loopParameter.getName(), loopExpression,
+				ifStatement, body);
 		astRewrite.replace(enhancedForStatement, streamStatement, null);
-		//TODO: take care of comments.
+		saveComments(enhancedForStatement, loopExpression, ifStatement);
 		onRewrite();
 
 		return true;
 	}
 
+	private void saveComments(EnhancedForStatement enhancedForStatement, Expression loopExpression,
+			IfStatement ifStatement) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> allComments = commentRewriter.findRelatedComments(enhancedForStatement);
+		List<Comment> loopExpressionComments = commentRewriter.findRelatedComments(loopExpression);
+		List<Comment> conditionComments = commentRewriter.findRelatedComments(ifStatement.getExpression());
+		Block body = (Block) enhancedForStatement.getBody();
+		List<Comment> copiedStatementComments = ASTNodeUtil.convertToTypedList(body.statements(), Statement.class)
+			.stream()
+			.skip(1)
+			.map(commentRewriter::findRelatedComments)
+			.flatMap(List::stream)
+			.collect(Collectors.toList());
+		allComments.removeAll(loopExpressionComments);
+		allComments.removeAll(conditionComments);
+		allComments.removeAll(copiedStatementComments);
+		commentRewriter.saveBeforeStatement(enhancedForStatement, allComments);
+	}
+
+	private boolean containsReferenceTo(Block body, Expression loopExpression) {
+		if (loopExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return false;
+		}
+
+		SimpleName simpleName = (SimpleName) loopExpression;
+		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(simpleName);
+		body.accept(visitor);
+		return !visitor.getUsages()
+			.isEmpty();
+	}
+
 	private boolean containsFlowBreakerStatements(List<Statement> statements) {
-		for(Statement statement : statements) {
+		for (Statement statement : statements) {
 			FlowBreakersVisitor visitor = new FlowBreakersVisitor();
 			statement.accept(visitor);
-			if(visitor.hasFlowBreakerStatement()) {
+			if (visitor.hasFlowBreakerStatement()) {
 				return true;
 			}
 		}
@@ -121,13 +162,31 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		MethodInvocation forEach = ast.newMethodInvocation();
 		forEach.setExpression(takeWhile);
 		forEach.setName(ast.newSimpleName("forEach")); //$NON-NLS-1$
-		astRewrite.remove(ifStatement, null);
-		Block newNode = (Block)ASTNode.copySubtree(ast, loopBody);
-		newNode.statements().remove(0);
-		LambdaExpression forEachBody = NodeBuilder.newLambdaExpression(ast, newNode, parameter.getIdentifier());
+		Statement forEachLambdaBody = createForEachLambdaBody(loopBody);
+		LambdaExpression forEachBody = NodeBuilder.newLambdaExpression(ast, forEachLambdaBody,
+				parameter.getIdentifier());
 		forEach.arguments()
 			.add(forEachBody);
 		return ast.newExpressionStatement(forEach);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Statement createForEachLambdaBody(Block loopBody) {
+		AST ast = loopBody.getAST();
+		List<Statement> originalBodyStatements = ASTNodeUtil.convertToTypedList(loopBody.statements(), Statement.class);
+		// drop the if statement
+		originalBodyStatements.remove(0);
+
+		if (originalBodyStatements.size() > 1) {
+			Block newBlock = ast.newBlock();
+			for (Statement statement : originalBodyStatements) {
+				newBlock.statements()
+					.add((Statement) astRewrite.createMoveTarget(statement));
+			}
+			return newBlock;
+		}
+
+		return (Statement) astRewrite.createMoveTarget(originalBodyStatements.get(0));
 	}
 
 	private boolean isIfStatementWithBreakBody(Statement statement) {
