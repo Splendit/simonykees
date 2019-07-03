@@ -29,6 +29,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
 /**
+ * A visitor for replacing for-loops with {@code Stream::takeWhile}.
  * 
  * @since 3.7.0
  *

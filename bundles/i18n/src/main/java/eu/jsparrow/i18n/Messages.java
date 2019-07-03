@@ -126,6 +126,10 @@ public class Messages extends NLS {
 	public static String EnumsWithoutEqualsRule_description;
 	public static String EnhancedForLoopToStreamSumRule_description;
 	public static String EnhancedForLoopToStreamSumRule_name;
+	public static String EnhancedForLoopToStreamTakeWhileRule_description;
+
+	public static String EnhancedForLoopToStreamTakeWhileRule_name;
+
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
 	public static String HelpMessageDialog_documentation_url;
