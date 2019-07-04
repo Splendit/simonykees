@@ -21,12 +21,14 @@ import eu.jsparrow.core.rule.impl.BufferedReaderLinesRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.core.rule.impl.CollapseIfStatementsRule;
 import eu.jsparrow.core.rule.impl.CollectionRemoveAllRule;
+import eu.jsparrow.core.rule.impl.CollectionsFactoryMethodsRule;
 import eu.jsparrow.core.rule.impl.DateDeprecatedRule;
 import eu.jsparrow.core.rule.impl.DiamondOperatorRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamAnyMatchRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamFindFirstRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamForEachRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamSumRule;
+import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamTakeWhileRule;
 import eu.jsparrow.core.rule.impl.EnumsWithoutEqualsRule;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
@@ -136,7 +138,7 @@ public class RulesContainer {
 				new GuardConditionRule(), new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(),
 				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
 				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
-				new ReorderModifiersRule(), new UseListSortRule(),
+				new ReorderModifiersRule(), new UseListSortRule(), new CollectionsFactoryMethodsRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
@@ -149,12 +151,12 @@ public class RulesContainer {
 				/*
 				 * Loops and streams
 				 */
-				new WhileToForEachRule(), new ForToForEachRule(), new EnhancedForLoopToStreamForEachRule(),
-				new BufferedReaderLinesRule(), new LambdaForEachIfWrapperToFilterRule(),
-				new StatementLambdaToExpressionRule(), new LambdaForEachCollectRule(), new LambdaForEachMapRule(),
-				new FlatMapInsteadOfNestedLoopsRule(), new EnhancedForLoopToStreamAnyMatchRule(),
-				new EnhancedForLoopToStreamFindFirstRule(), new EnhancedForLoopToStreamSumRule(),
-				new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
+				new WhileToForEachRule(), new ForToForEachRule(), new EnhancedForLoopToStreamTakeWhileRule(),
+				new EnhancedForLoopToStreamForEachRule(), new BufferedReaderLinesRule(),
+				new LambdaForEachIfWrapperToFilterRule(), new StatementLambdaToExpressionRule(),
+				new LambdaForEachCollectRule(), new LambdaForEachMapRule(), new FlatMapInsteadOfNestedLoopsRule(),
+				new EnhancedForLoopToStreamAnyMatchRule(), new EnhancedForLoopToStreamFindFirstRule(),
+				new EnhancedForLoopToStreamSumRule(), new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
 
 				/*
 				 * String manipulations. This rule must be applied after

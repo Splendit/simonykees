@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.ThrowStatement;
 
 /**
  * A visitor for checking if an {@link ASTNode} contains any of flow control
- * statements: {@link BreakStatement}, {@link BreakStatement},
+ * statements: {@link ReturnStatement}, {@link BreakStatement},
  * {@link ContinueStatement} or {@link ThrowStatement}.
  * 
  * @since 2.6
