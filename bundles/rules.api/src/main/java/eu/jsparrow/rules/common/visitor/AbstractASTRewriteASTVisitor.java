@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -30,6 +31,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	protected String compilationUnitSource = EMPTY_STRING;
 
+	private List<ASTNode> nodesToIgnore;
 	private CompilationUnit compilationUnit;
 	private CommentRewriter commentRewriter;
 
@@ -121,5 +123,23 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	
 	protected CommentRewriter getCommentRewriter() {
 		return this.commentRewriter;
+	}
+
+	public List<ASTNode> getNodesToIgnore() {
+		return nodesToIgnore;
+	}
+
+	public void setNodesToIgnore(List<ASTNode> nodesToIgnore) {
+		this.nodesToIgnore = nodesToIgnore;
+	}
+
+	/**
+	 * We ignore all nodes that are in the list of nodes to be ignored. 
+	 */
+	@Override
+	public boolean preVisit2(ASTNode node) {
+//		int count = nodesToIgnore.size();
+		boolean ignoreThisNode = nodesToIgnore != null && nodesToIgnore.contains(node);
+		return !ignoreThisNode;
 	}
 }

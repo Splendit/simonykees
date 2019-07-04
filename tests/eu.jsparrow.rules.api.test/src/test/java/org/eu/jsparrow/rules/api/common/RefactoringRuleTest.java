@@ -71,7 +71,7 @@ public class RefactoringRuleTest {
 		ICompilationUnit workingCopy = new CompilationUnitBuilder(fragment).setContent("")
 			.build();
 
-		DocumentChange result = rule.applyRule(workingCopy, RefactoringUtil.parse(workingCopy));
+		DocumentChange result = rule.applyRule(workingCopy, RefactoringUtil.parse(workingCopy), null);
 
 		assertNull(result);
 	}

@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
@@ -34,6 +35,7 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
+import eu.jsparrow.rules.common.visitor.helper.GeneratedNodeASTVisitor;
 
 /**
  * This class manages the selected {@link RefactoringRule}s and the selected
@@ -66,7 +68,7 @@ public class RefactoringPipeline {
 	private boolean multipleProjects = false;
 
 	private WorkingCopyOwnerDecorator workingCopyOwner;
-	
+
 	private int fileCount;
 
 	/**
@@ -376,6 +378,9 @@ public class RefactoringPipeline {
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 		for (RefactoringState state : refactoringStates) {
 			subMonitor.subTask(state.getWorkingCopyName());
+
+			// TODO: for each state, we want to get the generated nodes
+
 			/*
 			 * Sends new child of subMonitor which takes in progress bar size of
 			 * 1 of rules size In method that part of progress bar is split to
@@ -441,7 +446,8 @@ public class RefactoringPipeline {
 				if (rule.equals(currentRule)) {
 					refactoringState.addRuleToIgnoredRules(currentRule);
 				} else if (!ignoredRules.contains(rule)) {
-					astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, rule, false);
+					// TODO add nodesToIgnore
+					astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, rule, false, null);
 				}
 				if (subMonitor.isCanceled()) {
 					return;
@@ -489,7 +495,9 @@ public class RefactoringPipeline {
 				refactoringState.removeRuleFromIgnoredRules(currentRule);
 			}
 			if (!ignoredRules.contains(refactoringRule)) {
-				astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, refactoringRule, false);
+				// TODO add nodesToIgnore
+				astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, refactoringRule, false,
+						null);
 			}
 		}
 
@@ -573,12 +581,18 @@ public class RefactoringPipeline {
 			.setWorkRemaining(refactoringStates.size());
 
 		CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
+
+		GeneratedNodeASTVisitor generatedNodeASTVisitor = new GeneratedNodeASTVisitor();
+		astRoot.accept(generatedNodeASTVisitor);
+		List<ASTNode> nodesToIgnore = generatedNodeASTVisitor.getNodesToIgnore();
+
 		// Make a lombok rule -> give the generated nodes. // TODO
 		for (RefactoringRule rule : rules) {
 			subMonitor.subTask(rule.getRuleDescription()
 				.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 
-			astRoot = applyToRefactoringState(refactoringState, returnListNotWorkingRules, astRoot, rule, true);
+			astRoot = applyToRefactoringState(refactoringState, returnListNotWorkingRules, astRoot, rule, true,
+					nodesToIgnore);
 
 			/*
 			 * If cancel is pressed on progress monitor, abort all and return,
@@ -594,11 +608,12 @@ public class RefactoringPipeline {
 
 	private CompilationUnit applyToRefactoringState(RefactoringState refactoringState,
 			List<NotWorkingRuleModel> returnListNotWorkingRules, CompilationUnit astRoot, RefactoringRule rule,
-			boolean initialApply) {
+			boolean initialApply, List<ASTNode> nodesToIgnore) {
 		CompilationUnit newAstRoot = astRoot;
 
 		try {
-			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, newAstRoot, initialApply);
+			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, newAstRoot, initialApply,
+					nodesToIgnore);
 			if (hasChanges) {
 				Version jdtVersion = JdtVersionBindingUtil.findCurrentJDTVersion();
 				ICompilationUnit workingCopy = refactoringState.getWorkingCopy();

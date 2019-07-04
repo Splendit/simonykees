@@ -1,10 +1,12 @@
 package eu.jsparrow.dummies;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
@@ -52,7 +54,7 @@ public class DummyRule implements RefactoringRule {
 	}
 
 	@Override
-	public DocumentChange applyRule(ICompilationUnit workingCopy, CompilationUnit astRoot)
+	public DocumentChange applyRule(ICompilationUnit workingCopy, CompilationUnit astRoot, List<ASTNode> nodesToIgnore)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 		return null;
 	}
