@@ -53,7 +53,8 @@ public class UseListSortASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		Expression secondArgument = arguments.get(1);
 		ITypeBinding secondArgumentType = secondArgument.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(secondArgumentType, JAVA_UTIL_COMPARATOR)) {
+		if (!ClassRelationUtil.isContentOfType(secondArgumentType, JAVA_UTIL_COMPARATOR) 
+				&& !ClassRelationUtil.isInheritingContentOfTypes(secondArgumentType, Collections.singletonList(JAVA_UTIL_COMPARATOR))) {
 			return true;
 		}
 

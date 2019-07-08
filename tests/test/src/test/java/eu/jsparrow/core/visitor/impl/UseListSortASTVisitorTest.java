@@ -72,13 +72,40 @@ public class UseListSortASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
-	public void visit_baseCaseWithComparatorDeclaredInMethodArgument_shouldTransofrm() throws Exception {
+	public void visit_baseCaseWithComparatorDeclaredInMethodArgument_shouldTransform() throws Exception {
 		String original = "" + 
 				"	List<String> strings = Collections.emptyList();\n" + 
 				"	Collections.sort(strings, (String string1, String string2) -> string1.compareTo(string2));";
 		String expected = "" + 
 				"	List<String> strings = Collections.emptyList();\n" + 
 				"	strings.sort((String string1, String string2) -> string1.compareTo(string2));";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
+	
+	
+	@Test
+	public void visit_baseCaseWithAnonymousClassInArgument_shouldTransform() throws Exception {
+		String original = "" + 
+				"	List<String> strings = Collections.emptyList();\n" + 
+				"	Collections.sort(strings, new Comparator<String>() {\n" + 
+				"		@Override\n" + 
+				"		public int compare(String o1, String o2) {\n" + 
+				"			return o1.compareTo(o2);\n" + 
+				"		}\n" + 
+				"	});";
+		String expected = "" + 
+				"	List<String> strings = Collections.emptyList();\n" + 
+				"	strings.sort(new Comparator<String>() {\n" + 
+				"		@Override\n" + 
+				"		public int compare(String o1, String o2) {\n" + 
+				"			return o1.compareTo(o2);\n" + 
+				"		}\n" + 
+				"	});";
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		
