@@ -378,8 +378,6 @@ public class RefactoringPipeline {
 		for (RefactoringState state : refactoringStates) {
 			subMonitor.subTask(state.getWorkingCopyName());
 
-			// TODO: for each state, we want to get the generated nodes
-
 			/*
 			 * Sends new child of subMonitor which takes in progress bar size of
 			 * 1 of rules size In method that part of progress bar is split to
@@ -580,13 +578,11 @@ public class RefactoringPipeline {
 
 		CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
 
-		RemoveGeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
-
-		// Make a lombok rule -> give the generated nodes. // TODO
 		for (RefactoringRule rule : rules) {
 			subMonitor.subTask(rule.getRuleDescription()
 				.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 
+			RemoveGeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
 			astRoot = applyToRefactoringState(refactoringState, returnListNotWorkingRules, astRoot, rule, true);
 
 			/*
