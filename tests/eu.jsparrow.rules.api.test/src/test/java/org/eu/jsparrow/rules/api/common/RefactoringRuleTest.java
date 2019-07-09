@@ -1,6 +1,5 @@
 package org.eu.jsparrow.rules.api.common;
 
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -71,7 +70,7 @@ public class RefactoringRuleTest {
 		ICompilationUnit workingCopy = new CompilationUnitBuilder(fragment).setContent("")
 			.build();
 
-		DocumentChange result = rule.applyRule(workingCopy, RefactoringUtil.parse(workingCopy), null);
+		DocumentChange result = rule.applyRule(workingCopy, RefactoringUtil.parse(workingCopy));
 
 		assertNull(result);
 	}

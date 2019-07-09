@@ -8,7 +8,6 @@ import java.util.Map;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
@@ -112,7 +111,8 @@ public class RefactoringState {
 	 *            {@link RefactoringRule} to be applied
 	 * @param astRoot
 	 *            the compilation unit for applying the rule to
-	 * @param nodesToIgnore TODO
+	 * @param nodesToIgnore
+	 *            TODO
 	 * @return true if there was any change, false otherwise
 	 * @throws JavaModelException
 	 *             if this element does not exist or if an exception occurs
@@ -122,10 +122,9 @@ public class RefactoringState {
 	 *             is not present and the reflective construction fails.
 	 * @throws RefactoringException
 	 */
-	public boolean addRuleAndGenerateDocumentChanges(RefactoringRule rule,
-			CompilationUnit astRoot, boolean initialApply, List<ASTNode> nodesToIgnore)
-			throws JavaModelException, ReflectiveOperationException, RefactoringException {
-		DocumentChange documentChange = rule.applyRule(workingCopy, astRoot, nodesToIgnore);
+	public boolean addRuleAndGenerateDocumentChanges(RefactoringRule rule, CompilationUnit astRoot,
+			boolean initialApply) throws JavaModelException, ReflectiveOperationException, RefactoringException {
+		DocumentChange documentChange = rule.applyRule(workingCopy, astRoot);
 		if (documentChange != null) {
 			changes.put(rule, documentChange);
 			if (initialApply) {

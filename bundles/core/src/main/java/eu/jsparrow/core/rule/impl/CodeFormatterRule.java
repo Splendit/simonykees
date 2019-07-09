@@ -2,7 +2,6 @@ package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -10,7 +9,6 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jface.text.Document;
@@ -54,7 +52,7 @@ public class CodeFormatterRule extends RefactoringRuleImpl<AbstractASTRewriteAST
 	}
 
 	@Override
-	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy, CompilationUnit astRoot, List<ASTNode> nodesToIgnore)
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy, CompilationUnit astRoot)
 			throws ReflectiveOperationException, JavaModelException {
 
 		try {

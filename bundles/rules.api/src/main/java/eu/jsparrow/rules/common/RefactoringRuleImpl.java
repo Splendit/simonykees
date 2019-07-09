@@ -1,12 +1,9 @@
 package eu.jsparrow.rules.common;
 
-import java.util.List;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.Document;
@@ -133,14 +130,14 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 	 * 
 	 */
 	@Override
-	public final DocumentChange applyRule(ICompilationUnit workingCopy, CompilationUnit astRoot,
-			List<ASTNode> nodesToIgnore) throws ReflectiveOperationException, JavaModelException, RefactoringException {
+	public final DocumentChange applyRule(ICompilationUnit workingCopy, CompilationUnit astRoot)
+			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 
 		String bind = NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.getRuleDescription()
 			.getName(), workingCopy.getElementName());
 		logger.trace(bind);
 
-		return applyRuleImpl(workingCopy, astRoot, nodesToIgnore);
+		return applyRuleImpl(workingCopy, astRoot);
 	}
 
 	/**
@@ -154,8 +151,8 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 	 * @throws JavaModelException
 	 * @throws RefactoringException
 	 */
-	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy, CompilationUnit astRoot,
-			List<ASTNode> nodesToIgnore) throws ReflectiveOperationException, JavaModelException, RefactoringException {
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy, CompilationUnit astRoot)
+			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 
 		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 
@@ -163,7 +160,6 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 		// Set the generated nodes. // TODO
 		rule.setASTRewrite(astRewrite);
 		rule.setCompilationUnit(workingCopy.getHandleIdentifier());
-		rule.setNodesToIgnore(nodesToIgnore);
 		try {
 			astRoot.accept(rule);
 		} catch (RuntimeException e) {

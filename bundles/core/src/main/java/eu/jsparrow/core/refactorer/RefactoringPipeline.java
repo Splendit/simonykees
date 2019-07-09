@@ -35,7 +35,8 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
-import eu.jsparrow.rules.common.visitor.helper.GeneratedNodeASTVisitor;
+import eu.jsparrow.rules.common.util.RemoveGeneratedNodesUtil;
+import eu.jsparrow.rules.common.visitor.helper.DeleteGeneratedNodeASTVisitor;
 
 /**
  * This class manages the selected {@link RefactoringRule}s and the selected
@@ -446,8 +447,8 @@ public class RefactoringPipeline {
 				if (rule.equals(currentRule)) {
 					refactoringState.addRuleToIgnoredRules(currentRule);
 				} else if (!ignoredRules.contains(rule)) {
-					// TODO add nodesToIgnore
-					astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, rule, false, null);
+					// TODO need to delete generated nodes here?
+					astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, rule, false);
 				}
 				if (subMonitor.isCanceled()) {
 					return;
@@ -495,9 +496,8 @@ public class RefactoringPipeline {
 				refactoringState.removeRuleFromIgnoredRules(currentRule);
 			}
 			if (!ignoredRules.contains(refactoringRule)) {
-				// TODO add nodesToIgnore
-				astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, refactoringRule, false,
-						null);
+				// TODO need to delete generated nodes here?
+				astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, refactoringRule, false);
 			}
 		}
 
@@ -582,17 +582,14 @@ public class RefactoringPipeline {
 
 		CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
 
-		GeneratedNodeASTVisitor generatedNodeASTVisitor = new GeneratedNodeASTVisitor();
-		astRoot.accept(generatedNodeASTVisitor);
-		List<ASTNode> nodesToIgnore = generatedNodeASTVisitor.getNodesToIgnore();
+		RemoveGeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
 
 		// Make a lombok rule -> give the generated nodes. // TODO
 		for (RefactoringRule rule : rules) {
 			subMonitor.subTask(rule.getRuleDescription()
 				.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 
-			astRoot = applyToRefactoringState(refactoringState, returnListNotWorkingRules, astRoot, rule, true,
-					nodesToIgnore);
+			astRoot = applyToRefactoringState(refactoringState, returnListNotWorkingRules, astRoot, rule, true);
 
 			/*
 			 * If cancel is pressed on progress monitor, abort all and return,
@@ -608,12 +605,11 @@ public class RefactoringPipeline {
 
 	private CompilationUnit applyToRefactoringState(RefactoringState refactoringState,
 			List<NotWorkingRuleModel> returnListNotWorkingRules, CompilationUnit astRoot, RefactoringRule rule,
-			boolean initialApply, List<ASTNode> nodesToIgnore) {
+			boolean initialApply) {
 		CompilationUnit newAstRoot = astRoot;
 
 		try {
-			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, newAstRoot, initialApply,
-					nodesToIgnore);
+			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, newAstRoot, initialApply);
 			if (hasChanges) {
 				Version jdtVersion = JdtVersionBindingUtil.findCurrentJDTVersion();
 				ICompilationUnit workingCopy = refactoringState.getWorkingCopy();
