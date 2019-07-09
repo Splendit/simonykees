@@ -111,8 +111,6 @@ public class RefactoringState {
 	 *            {@link RefactoringRule} to be applied
 	 * @param astRoot
 	 *            the compilation unit for applying the rule to
-	 * @param nodesToIgnore
-	 *            TODO
 	 * @return true if there was any change, false otherwise
 	 * @throws JavaModelException
 	 *             if this element does not exist or if an exception occurs

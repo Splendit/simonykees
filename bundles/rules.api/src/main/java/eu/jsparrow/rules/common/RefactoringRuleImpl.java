@@ -144,8 +144,7 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 	 * This method may be overridden.
 	 * 
 	 * @param workingCopy
-	 * @param nodesToIgnore
-	 *            TODO
+	 * 
 	 * @return
 	 * @throws ReflectiveOperationException
 	 * @throws JavaModelException
@@ -157,7 +156,6 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 
 		AbstractASTRewriteASTVisitor rule = visitorFactory();
-		// Set the generated nodes. // TODO
 		rule.setASTRewrite(astRewrite);
 		rule.setCompilationUnit(workingCopy.getHandleIdentifier());
 		try {
