@@ -443,7 +443,7 @@ public class RefactoringPipeline {
 				if (rule.equals(currentRule)) {
 					refactoringState.addRuleToIgnoredRules(currentRule);
 				} else if (!ignoredRules.contains(rule)) {
-					// TODO need to delete generated nodes here?
+					RemoveGeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
 					astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, rule, false);
 				}
 				if (subMonitor.isCanceled()) {
@@ -492,7 +492,7 @@ public class RefactoringPipeline {
 				refactoringState.removeRuleFromIgnoredRules(currentRule);
 			}
 			if (!ignoredRules.contains(refactoringRule)) {
-				// TODO need to delete generated nodes here?
+				RemoveGeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
 				astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, refactoringRule, false);
 			}
 		}
