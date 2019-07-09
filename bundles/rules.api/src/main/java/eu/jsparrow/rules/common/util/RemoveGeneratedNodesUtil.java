@@ -3,7 +3,7 @@ package eu.jsparrow.rules.common.util;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import eu.jsparrow.rules.common.visitor.helper.DeleteGeneratedNodeASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.RemoveGeneratedNodesASTVisitor;
 
 /**
  * This class is used to remove {@link ASTNode}s that contain the
@@ -23,7 +23,7 @@ public class RemoveGeneratedNodesUtil {
 	private static boolean needsChecking = true;
 
 	/**
-	 * See {@link DeleteGeneratedNodeASTVisitor} for more details.
+	 * See {@link RemoveGeneratedNodesASTVisitor} for more details.
 	 * 
 	 * @param astRoot
 	 *            the {@link CompilationUnit} where generated nodes should be
@@ -31,7 +31,7 @@ public class RemoveGeneratedNodesUtil {
 	 */
 	public static void removeAllGeneratedNodes(CompilationUnit astRoot) {
 		if (needsChecking) {
-			DeleteGeneratedNodeASTVisitor visitor = new DeleteGeneratedNodeASTVisitor();
+			RemoveGeneratedNodesASTVisitor visitor = new RemoveGeneratedNodesASTVisitor();
 			astRoot.accept(visitor);
 
 			if (!visitor.isHasIsGeneratedField()) {

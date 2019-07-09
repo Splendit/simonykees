@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
  * {@link FieldDeclaration} instances that contain the 'isGenerated' field and
  * have the value set to true, will be identified and deleted from the AST.
  * <p>
- * If the first {@link ASTNode} does not contain the `$isGenerated` field, no
- * further checks have to be done since Lombok would have added that field to
+ * If the first {@link ASTNode} does not contain the {@code $isGenerated} field,
+ * no further checks have to be done since Lombok would have added that field to
  * all nodes.
  * <p>
  * More information can be found in SIM-1578 and related tickets.
@@ -24,9 +24,9 @@ import org.slf4j.LoggerFactory;
  * @author Ludwig Werzowa
  * @since 3.7.0
  */
-public class DeleteGeneratedNodeASTVisitor extends ASTVisitor {
+public class RemoveGeneratedNodesASTVisitor extends ASTVisitor {
 
-	private static final Logger logger = LoggerFactory.getLogger(DeleteGeneratedNodeASTVisitor.class);
+	private static final Logger logger = LoggerFactory.getLogger(RemoveGeneratedNodesASTVisitor.class);
 
 	private boolean hasIsGeneratedField = true;
 
@@ -67,7 +67,7 @@ public class DeleteGeneratedNodeASTVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Will return false if no `$isGenerated` field is present in a node.
+	 * Will return false if no {@code $isGenerated} field is present in a node.
 	 * 
 	 * That name makes sense, if you think about it.
 	 * 
