@@ -15,7 +15,6 @@ import eu.jsparrow.rules.common.visitor.helper.RemoveGeneratedNodesASTVisitor;
  * Background: We need to remove those Lombok generated nodes because rewriting
  * them in any visitor will result in a MalformedTreeException (see SIM-1578).
  * 
- * @author Ludwig Werzowa
  * @since 3.7.0
  */
 public class RemoveGeneratedNodesUtil {

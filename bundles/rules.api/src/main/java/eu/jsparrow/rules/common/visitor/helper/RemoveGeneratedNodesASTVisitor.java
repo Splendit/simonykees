@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
  * <p>
  * More information can be found in SIM-1578 and related tickets.
  * 
- * @author Ludwig Werzowa
  * @since 3.7.0
  */
 public class RemoveGeneratedNodesASTVisitor extends ASTVisitor {
