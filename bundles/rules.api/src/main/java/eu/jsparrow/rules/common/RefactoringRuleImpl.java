@@ -144,6 +144,7 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 	 * This method may be overridden.
 	 * 
 	 * @param workingCopy
+	 * 
 	 * @return
 	 * @throws ReflectiveOperationException
 	 * @throws JavaModelException

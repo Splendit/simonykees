@@ -120,9 +120,8 @@ public class RefactoringState {
 	 *             is not present and the reflective construction fails.
 	 * @throws RefactoringException
 	 */
-	public boolean addRuleAndGenerateDocumentChanges(RefactoringRule rule,
-			CompilationUnit astRoot, boolean initialApply)
-			throws JavaModelException, ReflectiveOperationException, RefactoringException {
+	public boolean addRuleAndGenerateDocumentChanges(RefactoringRule rule, CompilationUnit astRoot,
+			boolean initialApply) throws JavaModelException, ReflectiveOperationException, RefactoringException {
 		DocumentChange documentChange = rule.applyRule(workingCopy, astRoot);
 		if (documentChange != null) {
 			changes.put(rule, documentChange);

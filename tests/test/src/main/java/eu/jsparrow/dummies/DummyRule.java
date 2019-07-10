@@ -30,7 +30,7 @@ public class DummyRule implements RefactoringRule {
 	public boolean isEnabled() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean isFree() {
 		return false;

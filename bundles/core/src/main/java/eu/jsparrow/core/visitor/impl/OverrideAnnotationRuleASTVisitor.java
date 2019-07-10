@@ -30,7 +30,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final String OVERRIDE_SIMPLE_NAME = Override.class.getSimpleName();
+	private static final String OVERRIDE_SIMPLE_NAME = java.lang.Override.class.getSimpleName();
 	private static final String JAVA_LANG_OVERRIDE = java.lang.Override.class.getName();
 
 	@Override
