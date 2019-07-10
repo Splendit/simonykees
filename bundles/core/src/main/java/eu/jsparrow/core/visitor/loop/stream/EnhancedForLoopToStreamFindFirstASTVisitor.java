@@ -105,6 +105,9 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			return true;
 		}
 		SingleVariableDeclaration loopParameter = forLoop.getParameter();
+		if(isGeneratedNode(loopParameter.getType())) {
+			return true;
+		}
 
 		IfStatement ifStatement = isConvertableInterruptedLoop(forLoop);
 		if (ifStatement == null) {

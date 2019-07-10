@@ -61,7 +61,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 		SimpleName parameterName = parameter.getName();
 		ITypeBinding parameterTypeBinding = parameterName.resolveTypeBinding();
 		
-		if(GeneratedNodesUtil.findPropertyValue(parameterType, "$isGenerated")) { //$NON-NLS-1$
+		if(isGeneratedNode(parameterType)) {
 			return;
 		}
 

@@ -114,6 +114,10 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		if (!analyzer.foundExtractableMapStatement()) {
 			return true;
 		}
+		
+		if(isGeneratedNode(analyzer.getNewForEachParameterType())) {
+			return true;
+		}
 
 		// get the extractable information from analyzer
 		ASTNode extractableBlock = analyzer.getExtractableBlock();
