@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
@@ -59,6 +60,10 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 		Statement statement = enhancedForStatementNode.getBody();
 		SimpleName parameterName = parameter.getName();
 		ITypeBinding parameterTypeBinding = parameterName.resolveTypeBinding();
+		
+		if(GeneratedNodesUtil.findPropertyValue(parameterType, "$isGenerated")) { //$NON-NLS-1$
+			return;
+		}
 
 		if (isConditionalExpression(expression)) {
 			return;

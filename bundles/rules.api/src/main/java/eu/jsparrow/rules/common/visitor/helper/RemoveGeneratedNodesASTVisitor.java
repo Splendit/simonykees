@@ -5,7 +5,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
-import eu.jsparrow.rules.common.util.RemoveGeneratedNodesUtil;
+import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 
 /**
  * This helper class is used to find and delete generated {@link ASTNode}s
@@ -31,8 +31,8 @@ public class RemoveGeneratedNodesASTVisitor extends ASTVisitor {
 		boolean retVal = false;
 
 		if (hasIsGeneratedField) {
-			hasIsGeneratedField = RemoveGeneratedNodesUtil.hasProperty(node, IS_GENERATED_PROPERTY);
-			retVal = RemoveGeneratedNodesUtil.findPropertyValue(node, IS_GENERATED_PROPERTY);
+			hasIsGeneratedField = GeneratedNodesUtil.hasProperty(node, IS_GENERATED_PROPERTY);
+			retVal = GeneratedNodesUtil.findPropertyValue(node, IS_GENERATED_PROPERTY);
 		}
 
 		return retVal;

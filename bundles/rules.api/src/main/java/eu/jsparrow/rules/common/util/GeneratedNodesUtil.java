@@ -21,13 +21,13 @@ import eu.jsparrow.rules.common.visitor.helper.RemoveGeneratedNodesASTVisitor;
  * 
  * @since 3.7.0
  */
-public class RemoveGeneratedNodesUtil {
+public class GeneratedNodesUtil {
 
-	private static final Logger logger = LoggerFactory.getLogger(RemoveGeneratedNodesUtil.class);
+	private static final Logger logger = LoggerFactory.getLogger(GeneratedNodesUtil.class);
 
 	private static boolean needsChecking = true;
 
-	private RemoveGeneratedNodesUtil() {
+	private GeneratedNodesUtil() {
 		/*
 		 * Hide the public constructor.
 		 */
