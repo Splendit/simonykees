@@ -53,16 +53,18 @@ public class RemoveGeneratedNodesASTVisitor extends ASTVisitor {
 	public boolean visit(MethodDeclaration node) {
 		if (isGenerated(node)) {
 			node.delete();
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean visit(FieldDeclaration node) {
 		if (isGenerated(node)) {
 			node.delete();
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 	/**
