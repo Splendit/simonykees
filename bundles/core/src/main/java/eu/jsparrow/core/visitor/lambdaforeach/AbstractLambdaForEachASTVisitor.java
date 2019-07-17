@@ -17,7 +17,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
-import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
@@ -134,9 +133,5 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 			}
 		}
 		return parameter;
-	}
-	
-	protected boolean isGeneratedNode(ASTNode node) {
-		return GeneratedNodesUtil.findPropertyValue(node, "$isGenerated"); //$NON-NLS-1$
 	}
 }

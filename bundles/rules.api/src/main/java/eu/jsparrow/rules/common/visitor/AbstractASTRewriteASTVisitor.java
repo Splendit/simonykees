@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
@@ -121,5 +123,9 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	
 	protected CommentRewriter getCommentRewriter() {
 		return this.commentRewriter;
+	}
+
+	protected boolean isGeneratedNode(ASTNode node) {
+		return GeneratedNodesUtil.findPropertyValue(node, "$isGenerated"); //$NON-NLS-1$
 	}
 }
