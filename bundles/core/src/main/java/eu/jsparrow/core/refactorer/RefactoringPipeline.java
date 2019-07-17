@@ -34,7 +34,7 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
-import eu.jsparrow.rules.common.util.RemoveGeneratedNodesUtil;
+import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 
 /**
  * This class manages the selected {@link RefactoringRule}s and the selected
@@ -443,7 +443,7 @@ public class RefactoringPipeline {
 				if (rule.equals(currentRule)) {
 					refactoringState.addRuleToIgnoredRules(currentRule);
 				} else if (!ignoredRules.contains(rule)) {
-					RemoveGeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
+					GeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
 					astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, rule, false);
 				}
 				if (subMonitor.isCanceled()) {
@@ -492,7 +492,7 @@ public class RefactoringPipeline {
 				refactoringState.removeRuleFromIgnoredRules(currentRule);
 			}
 			if (!ignoredRules.contains(refactoringRule)) {
-				RemoveGeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
+				GeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
 				astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, refactoringRule, false);
 			}
 		}
@@ -582,7 +582,7 @@ public class RefactoringPipeline {
 			subMonitor.subTask(rule.getRuleDescription()
 				.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 
-			RemoveGeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
+			GeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
 			astRoot = applyToRefactoringState(refactoringState, returnListNotWorkingRules, astRoot, rule, true);
 
 			/*

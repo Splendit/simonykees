@@ -1,13 +1,11 @@
 package eu.jsparrow.rules.common.visitor.helper;
 
-import java.lang.reflect.Field;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 
 /**
  * This helper class is used to find and delete generated {@link ASTNode}s
@@ -25,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RemoveGeneratedNodesASTVisitor extends ASTVisitor {
 
-	private static final Logger logger = LoggerFactory.getLogger(RemoveGeneratedNodesASTVisitor.class);
+	private static final String IS_GENERATED_PROPERTY = "$isGenerated"; //$NON-NLS-1$
 
 	private boolean hasIsGeneratedField = true;
 
@@ -33,17 +31,8 @@ public class RemoveGeneratedNodesASTVisitor extends ASTVisitor {
 		boolean retVal = false;
 
 		if (hasIsGeneratedField) {
-			Field field = null;
-			try {
-				field = node.getClass()
-					.getField("$isGenerated"); //$NON-NLS-1$
-				retVal = (boolean) field.getBoolean(node);
-			} catch (NoSuchFieldException e) {
-				hasIsGeneratedField = false;
-				logger.debug("No $isGenerated field present. No further checks for it will be performed."); //$NON-NLS-1$
-			} catch (SecurityException | IllegalAccessException | IllegalArgumentException e) {
-				logger.error("Unable to access node", e); //$NON-NLS-1$
-			}
+			hasIsGeneratedField = GeneratedNodesUtil.hasProperty(node, IS_GENERATED_PROPERTY);
+			retVal = GeneratedNodesUtil.findPropertyValue(node, IS_GENERATED_PROPERTY);
 		}
 
 		return retVal;

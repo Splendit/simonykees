@@ -44,6 +44,9 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 
 		SingleVariableDeclaration loopParameter = enhancedForStatement.getParameter();
 		Type parameterType = loopParameter.getType();
+		if(isGeneratedNode(parameterType)) {
+			return true;
+		}
 		Expression loopExpression = enhancedForStatement.getExpression();
 		ITypeBinding parameterTypeBinding = parameterType.resolveBinding();
 		ITypeBinding expressionBinding = loopExpression.resolveTypeBinding();

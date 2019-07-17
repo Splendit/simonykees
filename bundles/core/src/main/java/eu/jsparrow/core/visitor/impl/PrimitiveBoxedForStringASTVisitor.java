@@ -189,11 +189,11 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 
 	@Override
 	public boolean visit(StringLiteral node) {
-
+		
 		/*
 		 * i Third case: 4 + ""
 		 */
-		if ("".equals(node.getLiteralValue()) && ASTNode.INFIX_EXPRESSION == node.getParent() //$NON-NLS-1$
+		if (isEmptyLiteral(node) && ASTNode.INFIX_EXPRESSION == node.getParent()
 			.getNodeType()) {
 			InfixExpression infixExpression = (InfixExpression) node.getParent();
 			if (InfixExpression.Operator.PLUS == infixExpression.getOperator()) {
@@ -244,5 +244,10 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 			}
 		}
 		return true;
+	}
+
+	private boolean isEmptyLiteral(StringLiteral node) {
+		String escapedValue = node.getEscapedValue();
+		return "\"\"".equals(escapedValue); //$NON-NLS-1$
 	}
 }
