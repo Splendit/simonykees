@@ -96,12 +96,12 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 		SimpleName name = node.getName();
 
 		Type type = findType(node);
-		if(isGeneratedNode(type)) {			
-			return true;
-		}
-
 		if (type == null || type.isVar()) {
 			return false;
+		}
+		
+		if(isGeneratedNode(type)) {
+			return true;
 		}
 
 		boolean satisfiedPrecondition = verifyDeclarationPrecondition(initializer, name);
