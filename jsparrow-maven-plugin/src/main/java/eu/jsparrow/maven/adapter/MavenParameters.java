@@ -1,5 +1,6 @@
 package eu.jsparrow.maven.adapter;
 
+import java.time.Instant;
 import java.util.Optional;
 
 /**
@@ -17,11 +18,16 @@ public class MavenParameters {
 	private String ruleId;
 	private String license = ""; //$NON-NLS-1$
 	private String url = ""; //$NON-NLS-1$
+	private StatisticsMetadata statisticsMetadata;
+	private boolean sendStatistics;
 
-	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault) {
+	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault,
+			StatisticsMetadata statisticsMetadata, boolean sendStatistics) {
 		this(mode, license, url);
 		this.profile = profile;
 		this.useDefaultConfig = useDefault;
+		this.statisticsMetadata = statisticsMetadata;
+		this.sendStatistics = sendStatistics;
 	}
 
 	public MavenParameters(String mode, String license, String url) {
@@ -61,6 +67,22 @@ public class MavenParameters {
 
 	public String getUrl() {
 		return url;
+	}
+
+	public StatisticsMetadata getStatisticsMetadata() {
+		return statisticsMetadata;
+	}
+
+	public void setStatisticsMetadata(StatisticsMetadata statisticsMetadata) {
+		this.statisticsMetadata = statisticsMetadata;
+	}
+
+	public boolean isSendStatistics() {
+		return sendStatistics;
+	}
+
+	public void setSendStatistics(boolean sendStatistics) {
+		this.sendStatistics = sendStatistics;
 	}
 
 }

@@ -96,6 +96,11 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 		if (isConditionalExpression(enhancedForStatement.getExpression())) {
 			return true;
 		}
+		
+		SingleVariableDeclaration loopParameter = enhancedForStatement.getParameter();
+		if(isGeneratedNode(loopParameter.getType())) {
+			return true;
+		}
 
 		IfStatement ifStatement = isConvertableInterruptedLoop(enhancedForStatement);
 		if (ifStatement == null) {

@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -89,6 +90,11 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 		if (!isCollection(expression) || isConditionalExpression(expression)) {
 			return true;
 		}
+		
+		SingleVariableDeclaration loopParameter = loopNode.getParameter();
+		if(isGeneratedNode(loopParameter.getType())) {
+			return true;
+		}
 
 		/*
 		 * The body of the loop must consist of a single statement
@@ -102,7 +108,7 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 		 * The expression statement must be an addition operation of the loop
 		 * variable and a variable for keeping the result.
 		 */
-		SimpleName sumVariableName = findResultVariableName(loopNode.getParameter(), expressionStatement).orElse(null);
+		SimpleName sumVariableName = findResultVariableName(loopParameter, expressionStatement).orElse(null);
 		if (sumVariableName == null) {
 			return true;
 		}

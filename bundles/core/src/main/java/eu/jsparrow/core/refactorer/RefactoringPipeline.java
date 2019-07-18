@@ -34,6 +34,7 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
+import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 
 /**
  * This class manages the selected {@link RefactoringRule}s and the selected
@@ -66,6 +67,8 @@ public class RefactoringPipeline {
 	private boolean multipleProjects = false;
 
 	private WorkingCopyOwnerDecorator workingCopyOwner;
+
+	private int fileCount;
 
 	/**
 	 * Constructor without parameters, used to create RefactoringPipeline before
@@ -189,7 +192,7 @@ public class RefactoringPipeline {
 	 */
 	public List<ICompilationUnit> prepareRefactoring(List<ICompilationUnit> compilationUnits, IProgressMonitor monitor)
 			throws RefactoringException {
-
+		this.fileCount = compilationUnits.size();
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		try {
@@ -284,6 +287,7 @@ public class RefactoringPipeline {
 	 */
 	public List<ICompilationUnit> createRefactoringStates(List<ICompilationUnit> compilationUnits)
 			throws JavaModelException {
+		this.fileCount = compilationUnits.size();
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		for (ICompilationUnit compilationUnit : compilationUnits) {
@@ -373,6 +377,7 @@ public class RefactoringPipeline {
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 		for (RefactoringState state : refactoringStates) {
 			subMonitor.subTask(state.getWorkingCopyName());
+
 			/*
 			 * Sends new child of subMonitor which takes in progress bar size of
 			 * 1 of rules size In method that part of progress bar is split to
@@ -438,6 +443,7 @@ public class RefactoringPipeline {
 				if (rule.equals(currentRule)) {
 					refactoringState.addRuleToIgnoredRules(currentRule);
 				} else if (!ignoredRules.contains(rule)) {
+					GeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
 					astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, rule, false);
 				}
 				if (subMonitor.isCanceled()) {
@@ -486,6 +492,7 @@ public class RefactoringPipeline {
 				refactoringState.removeRuleFromIgnoredRules(currentRule);
 			}
 			if (!ignoredRules.contains(refactoringRule)) {
+				GeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
 				astRoot = applyToRefactoringState(refactoringState, notWorkingRules, astRoot, refactoringRule, false);
 			}
 		}
@@ -570,10 +577,12 @@ public class RefactoringPipeline {
 			.setWorkRemaining(refactoringStates.size());
 
 		CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
+
 		for (RefactoringRule rule : rules) {
 			subMonitor.subTask(rule.getRuleDescription()
 				.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 
+			GeneratedNodesUtil.removeAllGeneratedNodes(astRoot);
 			astRoot = applyToRefactoringState(refactoringState, returnListNotWorkingRules, astRoot, rule, true);
 
 			/*
@@ -648,6 +657,10 @@ public class RefactoringPipeline {
 	 */
 	public List<RefactoringState> getRefactoringStates() {
 		return refactoringStates;
+	}
+
+	public int getFileCount() {
+		return fileCount;
 	}
 
 }

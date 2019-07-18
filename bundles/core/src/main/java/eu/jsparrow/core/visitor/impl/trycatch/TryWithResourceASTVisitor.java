@@ -76,6 +76,10 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 				break;
 			}
 
+			if(isGeneratedNode(varDeclStatmentNode.getType())) {				
+				break;
+			}
+
 			List<VariableDeclarationFragment> fragments = convertToTypedList(varDeclStatmentNode.fragments(),
 					VariableDeclarationFragment.class);
 

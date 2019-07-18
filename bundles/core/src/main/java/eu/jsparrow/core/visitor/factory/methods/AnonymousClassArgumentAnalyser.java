@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.java10.factory.methods;
+package eu.jsparrow.core.visitor.factory.methods;
 
 import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
 

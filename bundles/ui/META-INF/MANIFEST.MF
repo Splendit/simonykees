@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow UI
 Bundle-SymbolicName: eu.jsparrow.ui;singleton:=true
-Bundle-Version: 3.6.1.qualifier
+Bundle-Version: 3.7.0.qualifier
 Bundle-Activator: eu.jsparrow.ui.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
@@ -35,6 +35,8 @@ Require-Bundle: eu.jsparrow.i18n,
  org.eclipse.osgi.services;bundle-version="[3.5.100,4.0.0)",
  org.eclipse.ui.forms;bundle-version="[3.7.0,4.0.0)",
  com.github.oshi.core;bundle-version="3.4.3",
- eu.jsparrow.crypto
+ eu.jsparrow.crypto,
+ com.fasterxml.jackson.core.jackson-databind,
+ com.fasterxml.jackson.core.jackson-core
 Bundle-Vendor: Splendit IT-Consulting GmbH
  

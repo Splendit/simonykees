@@ -5,7 +5,7 @@ import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.rules.java10.factory.methods.CollectionsFactoryMethodsASTVisitor;
+import eu.jsparrow.core.visitor.factory.methods.CollectionsFactoryMethodsASTVisitor;
 
 @SuppressWarnings("nls")
 public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture {

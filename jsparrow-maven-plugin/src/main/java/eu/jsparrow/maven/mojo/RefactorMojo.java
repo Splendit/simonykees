@@ -22,6 +22,7 @@ import org.osgi.framework.BundleException;
 import eu.jsparrow.maven.adapter.BundleStarter;
 import eu.jsparrow.maven.adapter.MavenAdapter;
 import eu.jsparrow.maven.adapter.MavenParameters;
+import eu.jsparrow.maven.adapter.StatisticsMetadata;
 import eu.jsparrow.maven.adapter.WorkingDirectory;
 import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.i18n.Messages;
@@ -80,6 +81,18 @@ public class RefactorMojo extends AbstractMojo {
 	@Parameter(property = "url")
 	private String url;
 
+	@Parameter(property = "startTime")
+	private String startTime;
+
+	@Parameter(property = "repoOwner")
+	private String repoOwner;
+
+	@Parameter(property = "repoName")
+	private String repoName;
+
+	@Parameter(property = "sendStatistics")
+	private boolean sendStatistics;
+
 	public void execute() throws MojoExecutionException {
 		Log log = getLog();
 
@@ -89,7 +102,9 @@ public class RefactorMojo extends AbstractMojo {
 		}
 
 		String mode = StandaloneMode.REFACTOR.name();
-		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration);
+		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
+		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration,
+				statisticsMetadata, sendStatistics);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);

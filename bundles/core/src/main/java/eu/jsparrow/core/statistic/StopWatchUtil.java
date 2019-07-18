@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.util;
+package eu.jsparrow.core.statistic;
 
 import org.apache.commons.lang3.time.StopWatch;
 

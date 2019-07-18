@@ -189,6 +189,11 @@ rules:
   - RemoveModifiersInInterfaceProperties
   - CollapseIfStatements
   - RemoveUnusedParameter
+  - MapGetOrDefault
+  - UseListSort
+  - ReorderModifiers
+  - CollectionsFactoryMethods
+  - EnhancedForLoopToStreamTakeWhile
 
 excludes:
   excludeClasses: []

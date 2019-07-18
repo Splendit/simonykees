@@ -15,7 +15,7 @@ import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
 public class RefactoringPreviewWizardPageModel extends BaseModel {
 
-	private int issuesFixed;
+	private Integer issuesFixed;
 
 	private Duration timeSaved;
 
@@ -36,11 +36,11 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 		return changedFiles;
 	}
 
-	public int getIssuesFixed() {
+	public Integer getIssuesFixed() {
 		return issuesFixed;
 	}
 
-	public void setIssuesFixed(int issuesFixed) {
+	public void setIssuesFixed(Integer issuesFixed) {
 		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed); //$NON-NLS-1$
 	}
 

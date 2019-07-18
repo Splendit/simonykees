@@ -7,8 +7,8 @@ import org.eclipse.jface.wizard.Wizard;
 
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.statistic.StopWatchUtil;
 import eu.jsparrow.rules.common.exception.RefactoringException;
-import eu.jsparrow.ui.util.StopWatchUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**

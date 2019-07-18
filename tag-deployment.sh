@@ -14,9 +14,9 @@ if [ -z ${dir+x} ]; then echo "Executed with wrong argument '$1' or argument is 
 if [ -n ${2+x} ]; then subdir="$2"/; fi
 
 # building the tag
-tag=`pcregrep -o1 "name='eu\.jsparrow\.feature\.feature\.group' range='\[.*,(.*-\d{4})" releng/eu.jsparrow.site.neon/target/p2content.xml`
+tag=`pcregrep -o1 "name='eu\.jsparrow\.photon\.feature\.feature\.group' range='\[.*,(.*-\d{4})" releng/eu.jsparrow.site.photon/target/p2content.xml`
 echo tag=$tag
-suffix=`pcregrep -o1 "name='(\w+\.\w+\.\w+)\.feature\.group' range='\[.*,(.*-\d{4})" releng/eu.jsparrow.site.neon/target/p2content.xml`
+suffix=`pcregrep -o1 "name='(\w+\.\w+\.\w+\.\w+)\.feature\.group' range='\[.*,(.*-\d{4})" releng/eu.jsparrow.site.photon/target/p2content.xml`
 echo suffix=$suffix
 completeTag=$dir$subdir$tag-$suffix
 echo completeTag=$completeTag

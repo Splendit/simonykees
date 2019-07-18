@@ -65,7 +65,10 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 	public boolean visit(VariableDeclarationStatement variableDeclarationStatement) {
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil
 			.convertToTypedList(variableDeclarationStatement.fragments(), VariableDeclarationFragment.class);
-		
+
+		if(isGeneratedNode(variableDeclarationStatement.getType())) {
+			return true;
+		}
 
 		if (fragments.size() > 1) {
 

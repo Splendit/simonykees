@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>releng</artifactId>
-		<version>3.6.1-SNAPSHOT</version>
+		<version>3.7.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>eu.jsparrow.site.photon</artifactId>
@@ -19,9 +19,10 @@
 		<maven.deploy.skip>false</maven.deploy.skip>
 	</properties>
 
-	<build>
-		<plugins>
-			<!-- coping the repository from ../site/target/repository to this repository -->
+
+	<!-- This plugin is only required when you combine multiple update sites 
+		for version conflicts for dependencies -->
+			<!-- coping the repository from ../site/target/repository to this repository 
 			<plugin>
 				<groupId>org.eclipse.tycho.extras</groupId>
 				<artifactId>tycho-p2-extras-plugin</artifactId>
@@ -46,6 +47,6 @@
 					</execution>
 				</executions>
 			</plugin>
-		</plugins>
-	</build>
+
+	-->
 </project>
