@@ -346,6 +346,10 @@ public class Messages extends NLS {
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
 	public static String RemoveNewStringConstructorRule_name;
+	public static String RemoveNullCheckBeforeInstanceofRule_description;
+
+	public static String RemoveNullCheckBeforeInstanceofRule_name;
+
 	public static String RemoveUnusedParameterRule_description;
 
 	public static String RemoveUnusedParameterRule_name;
