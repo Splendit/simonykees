@@ -78,4 +78,17 @@ public class UseCollectionsSingletonListASTVisitorTest extends UsesJDTUnitFixtur
 		assertMatch(createBlock(original), fixture.getMethodBlock());
 	}
 	
+
+	
+	@Test
+	public void visit_usingArrayAsArgument_shouldNotTransform() throws Exception {
+		String original = "String[]array = {}; List<String> strings = Arrays.asList(array);";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
 }

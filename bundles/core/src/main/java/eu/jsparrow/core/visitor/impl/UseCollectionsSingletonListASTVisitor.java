@@ -48,6 +48,14 @@ public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTV
 			return true;
 		}
 		
+		if(arguments.size() == 1) {
+			Expression argument = arguments.get(0);
+			ITypeBinding argumentType = argument.resolveTypeBinding();
+			if(argumentType == null || argumentType.isArray()) {
+				return false;
+			}
+		}
+		
 		AST ast = astRewrite.getAST();
 		String newMethodIdentifier = arguments.isEmpty() ? EMPTY_LIST : SINGLETON_LIST;
 		SimpleName newMethodName = ast.newSimpleName(newMethodIdentifier);
