@@ -1,7 +1,7 @@
 package eu.jsparrow.sample.postRule.allRules;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -122,7 +122,7 @@ public class TestRemoveNewStringConstructorRule {
 	}
 
 	public String testConvertInLambdaExpressionBody(String input) {
-		List<String> list = Arrays.asList(input);
+		List<String> list = Collections.singletonList(input);
 		String result = list.stream()
 			.map(t -> t)
 			.collect(Collectors.joining());

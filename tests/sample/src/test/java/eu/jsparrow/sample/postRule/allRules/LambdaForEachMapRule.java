@@ -334,7 +334,7 @@ public class LambdaForEachMapRule {
 		numbers.stream()
 			.filter(n -> n.doubleValue() > 0)
 			.forEach((Number n) -> {
-				List<Number> nums = Arrays.asList(n);
+				List<Number> nums = Collections.singletonList(n);
 				Double d = (Double) nums.get(0);
 				String s = d.toString();
 				sb.append(nums.toString());

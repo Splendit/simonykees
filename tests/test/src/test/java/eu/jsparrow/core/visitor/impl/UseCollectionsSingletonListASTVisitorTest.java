@@ -43,7 +43,7 @@ public class UseCollectionsSingletonListASTVisitorTest extends UsesJDTUnitFixtur
 	@Test
 	public void visit_asListStaticImport_shouldTransform() throws Exception {
 		String original = "List<String> strings = asList(\"value\");";
-		String expected = "List<String> strings = singletonList(\"value\");";
+		String expected = "List<String> strings = Collections.singletonList(\"value\");";
 		fixture.addImport(java.util.Arrays.class.getName() + ".asList", true, false);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -57,7 +57,7 @@ public class UseCollectionsSingletonListASTVisitorTest extends UsesJDTUnitFixtur
 	@Test
 	public void visit_asListEmptyListStaticImport_shouldTransform() throws Exception {
 		String original = "List<String> strings = asList();";
-		String expected = "List<String> strings = emptyList();";
+		String expected = "List<String> strings = Collections.emptyList();";
 		fixture.addImport(java.util.Arrays.class.getName() + ".asList", true, false);
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
