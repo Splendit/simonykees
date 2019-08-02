@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.Statement;
 
-import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;

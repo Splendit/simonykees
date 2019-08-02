@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;

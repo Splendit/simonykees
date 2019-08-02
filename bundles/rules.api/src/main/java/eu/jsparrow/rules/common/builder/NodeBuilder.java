@@ -1,4 +1,4 @@
-package eu.jsparrow.core.builder;
+package eu.jsparrow.rules.common.builder;
 
 import java.util.List;
 
@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
@@ -395,5 +396,12 @@ public class NodeBuilder {
 		}
 	
 		return lambdaExpression;
+	}
+	
+	public static ImportDeclaration newImportDeclaration(AST ast, String qualifiedName, boolean isStatic) {
+		ImportDeclaration importDeclaration = ast.newImportDeclaration();
+		importDeclaration.setName(ast.newName(qualifiedName));
+		importDeclaration.setStatic(isStatic);
+		return importDeclaration;
 	}
 }
