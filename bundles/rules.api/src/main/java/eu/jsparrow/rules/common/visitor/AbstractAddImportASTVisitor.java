@@ -14,8 +14,8 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 
+import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-
 
 /**
  * Extended {@link AbstractASTRewriteASTVisitor} where a list of java classes
@@ -31,32 +31,36 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	protected static final String DOT_REGEX = "\\" + DOT; //$NON-NLS-1$
 
 	protected Set<String> addImports;
+	private Set<String> staticImports;
 
 	protected AbstractAddImportASTVisitor() {
 		super();
 		this.addImports = new HashSet<>();
+		this.staticImports = new HashSet<>();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void endVisit(CompilationUnit node) {
 
 		addImports.stream()
-			.filter(iterator -> !StringUtils.startsWith(iterator, JAVA_LANG_PACKAGE))
-			.forEach(iterator -> {
-				ImportDeclaration newImport = node.getAST()
-					.newImportDeclaration();
-				newImport.setName(node.getAST()
-					.newName(iterator));
-				if (node.imports()
-					.stream()
-					.noneMatch(importDeclaration -> (new ASTMatcher()).match((ImportDeclaration) importDeclaration,
-							newImport))) {
-					astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY)
-						.insertLast(newImport, null);
-				}
-			});
+			.filter(qualifiedName -> !StringUtils.startsWith(qualifiedName, JAVA_LANG_PACKAGE))
+			.map(qualifiedName -> NodeBuilder.newImportDeclaration(node.getAST(), qualifiedName, false))
+			.filter(newImport -> isNotExistingImport(node, newImport))
+			.forEach(newImport -> astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY)
+				.insertLast(newImport, null));
+		staticImports.stream()
+			.map(qualifiedName -> NodeBuilder.newImportDeclaration(node.getAST(), qualifiedName, true))
+			.filter(newImport -> isNotExistingImport(node, newImport))
+			.forEach(newImport -> astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY)
+				.insertLast(newImport, null));
 		super.endVisit(node);
+	}
+
+	@SuppressWarnings("unchecked")
+	private boolean isNotExistingImport(CompilationUnit node, ImportDeclaration newImport) {
+		return node.imports()
+			.stream()
+			.noneMatch(importDeclaration -> (new ASTMatcher()).match((ImportDeclaration) importDeclaration, newImport));
 	}
 
 	/**
@@ -128,5 +132,16 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		}
 
 		return isInSamePackage;
+	}
+
+	/**
+	 * Records a static import to be inserted if it does not exist. Does not
+	 * support on demand imports.
+	 * 
+	 * @param qualifiedName
+	 *            the qualified name of the static import.
+	 */
+	protected void addStaticImport(String qualifiedName) {
+		this.staticImports.add(qualifiedName);
 	}
 }
