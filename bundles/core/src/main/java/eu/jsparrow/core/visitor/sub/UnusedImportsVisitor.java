@@ -76,8 +76,7 @@ public class UnusedImportsVisitor extends ASTVisitor {
 	public boolean visit(SimpleName simpleName) {
 		if (!excludes.contains(simpleName)) {
 			ITypeBinding type = simpleName.resolveTypeBinding();
-			if (type != null && type.getQualifiedName()
-				.startsWith(importDeclarationName)) {
+			if (type != null && importDeclarationName.equals(type.getQualifiedName())) {
 				usageFound = true;
 				return false;
 			}

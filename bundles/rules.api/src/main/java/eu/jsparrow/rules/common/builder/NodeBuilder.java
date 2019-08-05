@@ -118,7 +118,6 @@ public class NodeBuilder {
 		return newMethodInvocation(ast, optionalExpression, methodName);
 	}
 
-
 	/**
 	 * 
 	 * @param ast
@@ -367,21 +366,24 @@ public class NodeBuilder {
 	}
 
 	/**
-	 * Creates a {@link LambdaExpression} node. 
+	 * Creates a {@link LambdaExpression} node.
 	 * 
-	 * @param ast an AST instance for creating the new node
-	 * @param lambdaBody a new node to be plugged in the lambda body
-	 * @param identifier the name of the lambda parameter
-	 * @return a new {@link LambdaExpression} node. 
+	 * @param ast
+	 *            an AST instance for creating the new node
+	 * @param lambdaBody
+	 *            a new node to be plugged in the lambda body
+	 * @param identifier
+	 *            the name of the lambda parameter
+	 * @return a new {@link LambdaExpression} node.
 	 */
 	@SuppressWarnings("unchecked")
 	public static LambdaExpression newLambdaExpression(AST ast, ASTNode lambdaBody, String identifier) {
-	
+
 		LambdaExpression lambdaExpression = ast.newLambdaExpression();
 		SimpleName parameter = ast.newSimpleName(identifier);
 		VariableDeclarationFragment parameterDeclaration = ast.newVariableDeclarationFragment();
 		parameterDeclaration.setName(parameter);
-	
+
 		lambdaExpression.setParentheses(false);
 		lambdaExpression.parameters()
 			.add(parameterDeclaration);
@@ -394,10 +396,21 @@ public class NodeBuilder {
 				.add(lambdaBody);
 			lambdaExpression.setBody(newBlock);
 		}
-	
+
 		return lambdaExpression;
 	}
-	
+
+	/**
+	 * Creates a new import statement with the given qualified name.
+	 * 
+	 * @param ast
+	 *            the {@link AST} where the new node belongs to
+	 * @param qualifiedName
+	 *            the qualified name of the import
+	 * @param isStatic
+	 *            a flag indicating whether the import is static
+	 * @return the newly created {@link ImportDeclaration}.
+	 */
 	public static ImportDeclaration newImportDeclaration(AST ast, String qualifiedName, boolean isStatic) {
 		ImportDeclaration importDeclaration = ast.newImportDeclaration();
 		importDeclaration.setName(ast.newName(qualifiedName));
