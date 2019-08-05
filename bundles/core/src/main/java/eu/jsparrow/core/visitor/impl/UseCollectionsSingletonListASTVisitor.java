@@ -32,6 +32,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTVisitor {
 
+	private static final String JAVA_UTIL = "java.util"; //$NON-NLS-1$
 	private static final String COLLECTIONS = "Collections"; //$NON-NLS-1$
 	private static final String AS_LIST = "asList"; //$NON-NLS-1$
 	private static final String SINGLETON_LIST = "singletonList"; //$NON-NLS-1$
@@ -39,19 +40,28 @@ public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTV
 	private static final String ARRAYS_FULLY_QUALIFIED_NAME = java.util.Arrays.class.getName();
 
 	private List<ASTNode> replacedNames = new ArrayList<>();
+	private boolean isCollectionsImportedOnDemand = false;
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		super.visit(compilationUnit);
-		return ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
-			.stream()
+		List<ImportDeclaration> imports = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
+				ImportDeclaration.class);
+
+		isCollectionsImportedOnDemand = imports.stream()
+			.filter(importDeclaration -> !importDeclaration.isStatic())
+			.filter(ImportDeclaration::isOnDemand)
+			.anyMatch(importDeclaration -> JAVA_UTIL.equals(importDeclaration.getName()
+				.getFullyQualifiedName()));
+
+		return imports.stream()
 			.filter(importDeclaration -> !importDeclaration.isOnDemand())
 			.filter(importDeclaration -> !importDeclaration.isStatic())
 			.noneMatch(importDeclaration -> {
 				QualifiedName qualifiedName = (QualifiedName) importDeclaration.getName();
 				SimpleName name = qualifiedName.getName();
 				Name qualifier = qualifiedName.getQualifier();
-				return COLLECTIONS.equals(name.getIdentifier()) && !"java.util".equals(qualifier.getFullyQualifiedName()); //$NON-NLS-1$
+				return COLLECTIONS.equals(name.getIdentifier()) && !JAVA_UTIL.equals(qualifier.getFullyQualifiedName()); // $NON-NLS-1$
 			});
 	}
 
@@ -119,7 +129,9 @@ public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTV
 		SimpleName newExpressionName = ast.newSimpleName(COLLECTIONS);
 
 		Expression originalExpression = methodInvocation.getExpression();
-		addImports.add(java.util.Collections.class.getName());
+		if(!isCollectionsImportedOnDemand) {			
+			addImports.add(java.util.Collections.class.getName());
+		}
 		if (originalExpression != null) {
 			astRewrite.replace(originalExpression, newExpressionName, null);
 			Expression simpleName = originalExpression.getNodeType() == ASTNode.QUALIFIED_NAME
