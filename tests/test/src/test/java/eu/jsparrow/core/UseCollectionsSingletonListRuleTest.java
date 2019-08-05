@@ -18,7 +18,8 @@ import eu.jsparrow.core.util.RulesTestUtil;
 @SuppressWarnings("nls")
 public class UseCollectionsSingletonListRuleTest extends SingleRuleTest {
 	
-	private static final String SAMPLE_FILE = "UseCollectionsSingletonListRule.java";
+	private static final String SAMPLE_FILE = "UseCollectionsSingletonListRule.java";	
+	private static final String SAMPLE_FILE_IMPORTS = "UseCollectionsSingletonListFixImportsRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "collectionsSingleton";
 
 	private UseCollectionsSingletonListRule rule;
@@ -28,11 +29,22 @@ public class UseCollectionsSingletonListRuleTest extends SingleRuleTest {
 		rule = new UseCollectionsSingletonListRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
-	
+
 	@Test
 	public void testTransformationWithDefaultFile() throws Exception {
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testTransformationWithDefaultOptimizedImportsFile() throws Exception {
+		Path preRule = getPreRuleFile(SAMPLE_FILE_IMPORTS);
+		Path postRule = getPostRuleFile(SAMPLE_FILE_IMPORTS, POSTRULE_SUBDIRECTORY);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 

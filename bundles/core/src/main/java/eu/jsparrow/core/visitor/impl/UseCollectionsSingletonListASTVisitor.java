@@ -61,6 +61,9 @@ public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTV
 				QualifiedName qualifiedName = (QualifiedName) importDeclaration.getName();
 				SimpleName name = qualifiedName.getName();
 				Name qualifier = qualifiedName.getQualifier();
+				/*
+				 * Another Collections type, not in java.util, is imported.   
+				 */
 				return COLLECTIONS.equals(name.getIdentifier()) && !JAVA_UTIL.equals(qualifier.getFullyQualifiedName()); // $NON-NLS-1$
 			});
 	}
