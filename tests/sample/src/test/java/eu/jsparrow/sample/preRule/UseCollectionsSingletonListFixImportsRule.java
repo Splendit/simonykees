@@ -13,7 +13,6 @@ public class UseCollectionsSingletonListFixImportsRule {
 		List<String> emptyList = Arrays.asList();
 	}
 	
-	
 	public void usingStaticImport() {
 		List<String> list = asList("value");
 		List<String> emptyList = asList();

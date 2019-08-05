@@ -10,7 +10,6 @@ public class UseCollectionsSingletonListFixImportsRule {
 		List<String> emptyList = Collections.emptyList();
 	}
 	
-	
 	public void usingStaticImport() {
 		List<String> list = Collections.singletonList("value");
 		List<String> emptyList = Collections.emptyList();
