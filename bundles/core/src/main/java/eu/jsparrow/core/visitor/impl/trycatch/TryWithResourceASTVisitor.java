@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.osgi.framework.Version;
 
-import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;

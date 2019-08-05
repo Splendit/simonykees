@@ -1,9 +1,9 @@
 package eu.jsparrow.core.visitor.loop.bufferedreader;
 
-import static eu.jsparrow.core.builder.NodeBuilder.newExpressionStatement;
-import static eu.jsparrow.core.builder.NodeBuilder.newLambdaExpression;
-import static eu.jsparrow.core.builder.NodeBuilder.newMethodInvocation;
-import static eu.jsparrow.core.builder.NodeBuilder.newSimpleName;
+import static eu.jsparrow.rules.common.builder.NodeBuilder.newExpressionStatement;
+import static eu.jsparrow.rules.common.builder.NodeBuilder.newLambdaExpression;
+import static eu.jsparrow.rules.common.builder.NodeBuilder.newMethodInvocation;
+import static eu.jsparrow.rules.common.builder.NodeBuilder.newSimpleName;
 
 import java.util.ArrayList;
 import java.util.Collections;

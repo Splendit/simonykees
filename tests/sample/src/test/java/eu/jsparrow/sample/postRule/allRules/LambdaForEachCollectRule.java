@@ -1,7 +1,7 @@
 package eu.jsparrow.sample.postRule.allRules;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -168,7 +168,7 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String collectRawList(String input) {
-		List raw = Arrays.asList(input);
+		List raw = Collections.singletonList(input);
 		List<Object> typedList = new ArrayList<>();
 		raw.stream()
 			.forEach(typedList::add);

@@ -20,8 +20,8 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 
-import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.visitor.sub.FlowBreakersVisitor;
+import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.util.OperatorUtil;
