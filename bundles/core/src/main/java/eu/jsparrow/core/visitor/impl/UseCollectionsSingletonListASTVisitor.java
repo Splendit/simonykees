@@ -62,7 +62,7 @@ public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTV
 				SimpleName name = qualifiedName.getName();
 				Name qualifier = qualifiedName.getQualifier();
 				/*
-				 * Another Collections type, not in java.util, is imported.   
+				 * Another Collections type, not in java.util, is imported.
 				 */
 				return COLLECTIONS.equals(name.getIdentifier()) && !JAVA_UTIL.equals(qualifier.getFullyQualifiedName()); // $NON-NLS-1$
 			});
@@ -132,7 +132,7 @@ public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTV
 		SimpleName newExpressionName = ast.newSimpleName(COLLECTIONS);
 
 		Expression originalExpression = methodInvocation.getExpression();
-		if(!isCollectionsImportedOnDemand) {			
+		if (!isCollectionsImportedOnDemand) {
 			addImports.add(java.util.Collections.class.getName());
 		}
 		if (originalExpression != null) {

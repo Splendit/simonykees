@@ -18,14 +18,12 @@ import eu.jsparrow.rules.common.Tag;
  *
  */
 public class UseCollectionsSingletonListRule extends RefactoringRuleImpl<UseCollectionsSingletonListASTVisitor> {
-	
+
 	public UseCollectionsSingletonListRule() {
 		this.id = "UseCollectionsSingletonList"; //$NON-NLS-1$
 		this.visitorClass = UseCollectionsSingletonListASTVisitor.class;
-		this.ruleDescription = new RuleDescription(
-				Messages.UseCollectionsSingletonListRule_name,
-				Messages.UseCollectionsSingletonListRule_description, 
-				Duration.ofMinutes(2), 
+		this.ruleDescription = new RuleDescription(Messages.UseCollectionsSingletonListRule_name,
+				Messages.UseCollectionsSingletonListRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_3, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.PERFORMANCE));
 	}
 

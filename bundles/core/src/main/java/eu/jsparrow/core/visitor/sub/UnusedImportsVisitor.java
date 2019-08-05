@@ -13,8 +13,8 @@ import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 /**
- * Checks if an import statement is used at least once. Supports normal single type import 
- * and normal static method imports. 
+ * Checks if an import statement is used at least once. Supports normal single
+ * type import and normal static method imports.
  * 
  * @since 3.8.0
  *
@@ -47,31 +47,30 @@ public class UnusedImportsVisitor extends ASTVisitor {
 	public boolean visit(ImportDeclaration importDeclaration) {
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		if(!isStatic) {
+		if (!isStatic) {
 			return true;
 		}
 		SimpleName methodName = methodInvocation.getName();
-		if(excludes.contains(methodName)) {
+		if (excludes.contains(methodName)) {
 			return true;
 		}
-		
+
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		if(methodBinding != null) {
+		if (methodBinding != null) {
 			ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 			String fullyQualifiedMethodName = declaringClass.getQualifiedName() + "." + methodBinding.getName(); //$NON-NLS-1$
-			if(fullyQualifiedMethodName.equals(importDeclarationName)) {
+			if (fullyQualifiedMethodName.equals(importDeclarationName)) {
 				usageFound = true;
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
-	
+
 	@Override
 	public boolean visit(SimpleName simpleName) {
 		if (!excludes.contains(simpleName)) {
@@ -86,7 +85,7 @@ public class UnusedImportsVisitor extends ASTVisitor {
 
 	/**
 	 * 
-	 * @return if at least one usage of the given import was found. 
+	 * @return if at least one usage of the given import was found.
 	 */
 	public boolean isUsageFound() {
 		return usageFound;
