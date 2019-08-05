@@ -28,7 +28,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * {@link java.util.Collections#singletonList(Object)} in case the number of
  * arguments is respectively 0 or 1.
  * 
- * @since 3.7.0
+ * @since 3.8.0
  */
 public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTVisitor {
 

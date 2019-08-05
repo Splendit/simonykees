@@ -14,7 +14,7 @@ import eu.jsparrow.rules.common.Tag;
 /**
  * @see UseCollectionsSingletonListASTVisitor
  * 
- * @since 3.7.0
+ * @since 3.8.0
  *
  */
 public class UseCollectionsSingletonListRule extends RefactoringRuleImpl<UseCollectionsSingletonListASTVisitor> {

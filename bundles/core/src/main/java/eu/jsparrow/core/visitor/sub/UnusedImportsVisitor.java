@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * Checks if an import statement is used at least once. Supports normal single type import 
  * and normal static method imports. 
  * 
- * @since 3.7.0
+ * @since 3.8.0
  *
  */
 public class UnusedImportsVisitor extends ASTVisitor {
