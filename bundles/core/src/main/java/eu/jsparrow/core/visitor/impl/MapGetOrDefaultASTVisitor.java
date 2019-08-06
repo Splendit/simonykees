@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -152,7 +153,7 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		Expression condition = ifStatement.getExpression();
-		if (!OperatorUtil.isNullCheck(assignedVariableName, condition)) {
+		if (!OperatorUtil.isNullCheck(assignedVariableName, condition, InfixExpression.Operator.EQUALS)) {
 			return null;
 		}
 
