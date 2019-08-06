@@ -1,6 +1,7 @@
 package eu.jsparrow.sample.postRule.allRules;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +19,8 @@ public class FlatMapInsteadOfNestedLoopsRule {
 	private static final Logger logger = LoggerFactory.getLogger(FlatMapInsteadOfNestedLoopsRule.class);
 
 	public void test() {
-		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
+		List<List<List<String>>> matrix2 = Collections
+			.singletonList(Collections.singletonList(Arrays.asList("asdf", "jkl")));
 		// I don't want to break anything
 		// I don't want to break anything
 		// inner comment one
@@ -40,8 +42,8 @@ public class FlatMapInsteadOfNestedLoopsRule {
 			.map(element -> StringUtils.substring(element, 0, 1))
 			.forEach(logger::info);
 
-		List<List<List<List<String>>>> matrix3 = Arrays
-			.asList(Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl"))));
+		List<List<List<List<String>>>> matrix3 = Collections
+			.singletonList(Collections.singletonList(Collections.singletonList(Arrays.asList("asdf", "jkl"))));
 		matrix3.stream()
 			.filter(row -> !row.isEmpty())
 			.flatMap(List::stream)
@@ -53,7 +55,7 @@ public class FlatMapInsteadOfNestedLoopsRule {
 			.map(element -> StringUtils.substring(element, 0, 1))
 			.forEach(logger::info);
 
-		List<List<String>> matrix = Arrays.asList(Arrays.asList("asdf", "jkl"));
+		List<List<String>> matrix = Collections.singletonList(Arrays.asList("asdf", "jkl"));
 		matrix.stream()
 			.filter(row -> !row.isEmpty())
 			.forEach(row -> {
@@ -132,7 +134,8 @@ public class FlatMapInsteadOfNestedLoopsRule {
 	}
 
 	public void testAvoidingOuterMostLoop() {
-		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
+		List<List<List<String>>> matrix2 = Collections
+			.singletonList(Collections.singletonList(Arrays.asList("asdf", "jkl")));
 		matrix2.stream()
 			.filter(row -> !row.isEmpty())
 			.forEach(row -> {
@@ -152,7 +155,8 @@ public class FlatMapInsteadOfNestedLoopsRule {
 	}
 
 	public void testAvoidInnerMostLoop() {
-		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
+		List<List<List<String>>> matrix2 = Collections
+			.singletonList(Collections.singletonList(Arrays.asList("asdf", "jkl")));
 		matrix2.stream()
 			.filter(first -> !first.isEmpty())
 			.flatMap(List::stream)
@@ -169,8 +173,8 @@ public class FlatMapInsteadOfNestedLoopsRule {
 	}
 
 	public void testQuartedNestedStreams() {
-		List<List<List<List<String>>>> matrix3 = Arrays
-			.asList(Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl"))));
+		List<List<List<List<String>>>> matrix3 = Collections
+			.singletonList(Collections.singletonList(Collections.singletonList(Arrays.asList("asdf", "jkl"))));
 		/*
 		 * Some statement just to avoid transformation
 		 */

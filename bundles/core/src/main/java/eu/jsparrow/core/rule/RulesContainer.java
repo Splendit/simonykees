@@ -71,6 +71,7 @@ import eu.jsparrow.core.rule.impl.StringFormatLineSeparatorRule;
 import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
+import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
@@ -140,6 +141,7 @@ public class RulesContainer {
 				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
 				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
 				new ReorderModifiersRule(), new UseListSortRule(), new CollectionsFactoryMethodsRule(),
+				new UseCollectionsSingletonListRule(),
 				new RemoveNullCheckBeforeInstanceofRule(),
 
 				/*
