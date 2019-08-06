@@ -141,8 +141,7 @@ public class RulesContainer {
 				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
 				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
 				new ReorderModifiersRule(), new UseListSortRule(), new CollectionsFactoryMethodsRule(),
-				new UseCollectionsSingletonListRule(),
-				new RemoveNullCheckBeforeInstanceofRule(),
+				new UseCollectionsSingletonListRule(), new RemoveNullCheckBeforeInstanceofRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
