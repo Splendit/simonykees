@@ -140,7 +140,6 @@ public class RulesContainer {
 				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
 				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
 				new ReorderModifiersRule(), new UseListSortRule(), new CollectionsFactoryMethodsRule(),
-				// TODO consider ordering
 				new RemoveNullCheckBeforeInstanceofRule(),
 
 				/*

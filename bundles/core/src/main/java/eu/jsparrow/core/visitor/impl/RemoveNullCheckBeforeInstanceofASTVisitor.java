@@ -12,6 +12,24 @@ import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
+ * A visitor to remove null checks in conjunction with {@link InstanceofExpression}. 
+ * <p/>
+ * The following code: 
+ * <pre>
+ * {@code 
+ * 	boolean isUser = x != null && x instanceof User;
+ * 	boolean isNotUser = y == null || !(y instanceof User);
+ * }
+ * </pre>
+ * 
+ * is transformed to: 
+ * <pre>
+ * {@code 
+ * 	boolean isUser = x instanceof User;
+ * 	boolean isNotUser = !(y instanceof User);
+ * }
+ * </pre>
+ * 
  * @since 3.8.0
  */
 public class RemoveNullCheckBeforeInstanceofASTVisitor extends AbstractASTRewriteASTVisitor {

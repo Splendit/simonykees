@@ -12,7 +12,7 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
- * TODO: Add JavaDoc
+ * @see RemoveNullCheckBeforeInstanceofASTVisitor
  * 
  * @since 3.8.0
  */
@@ -22,7 +22,6 @@ public class RemoveNullCheckBeforeInstanceofRule
 	public RemoveNullCheckBeforeInstanceofRule() {
 		this.visitorClass = RemoveNullCheckBeforeInstanceofASTVisitor.class;
 		this.id = "RemoveNullCheckBeforeInstanceof"; //$NON-NLS-1$
-		// TODO change tags
 		this.ruleDescription = new RuleDescription(Messages.RemoveNullCheckBeforeInstanceofRule_name,
 				Messages.RemoveNullCheckBeforeInstanceofRule_description, Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
