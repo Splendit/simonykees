@@ -283,7 +283,7 @@ public class OperatorUtil {
 	 * @param expression
 	 *            expression comparing the a variable to {@code null}
 	 * @param expectedOperator
-	 *            the {@link InfixExpression.Operator} used in the null check
+	 *            the {@link InfixExpression.Operator} used in the null-check
 	 * @return {@code true} if the expression has any of the forms mentioned
 	 *         above or {@code false} otherwise.
 	 */

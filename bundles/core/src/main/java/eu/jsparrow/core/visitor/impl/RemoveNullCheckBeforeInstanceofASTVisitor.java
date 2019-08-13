@@ -12,7 +12,7 @@ import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * A visitor to remove null checks in conjunction with
+ * A visitor to remove null-checks in conjunction with
  * {@link InstanceofExpression}.
  * <p/>
  * The following code:
