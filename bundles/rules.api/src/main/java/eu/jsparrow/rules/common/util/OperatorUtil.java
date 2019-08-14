@@ -248,10 +248,8 @@ public class OperatorUtil {
 		}
 
 		BooleanLiteral booleanLiteral = (BooleanLiteral) expression;
-		if (booleanLiteral.booleanValue()) {
-			return ast.newBooleanLiteral(false);
-		}
-		return ast.newBooleanLiteral(true);
+		boolean value = !booleanLiteral.booleanValue();
+		return ast.newBooleanLiteral(value);
 	}
 
 	/**
@@ -276,17 +274,21 @@ public class OperatorUtil {
 
 	/**
 	 * Checks if the given expression is a null-check of the given variable,
-	 * i.e. any of the forms {@code variableName==null} or
-	 * {@code null==variableName}.
+	 * i.e. any of the forms {@code variableName==null},
+	 * {@code variableName!=null}, {@code null==variableName}, or
+	 * {@code null!=variableName}.
 	 * 
 	 * @param variableName
 	 *            name of the variable being null-checked
 	 * @param expression
 	 *            expression comparing the a variable to {@code null}
+	 * @param expectedOperator
+	 *            the {@link InfixExpression.Operator} used in the null-check
 	 * @return {@code true} if the expression has any of the forms mentioned
 	 *         above or {@code false} otherwise.
 	 */
-	public static boolean isNullCheck(SimpleName variableName, Expression expression) {
+	public static boolean isNullCheck(SimpleName variableName, Expression expression,
+			InfixExpression.Operator expectedOperator) {
 		if (expression.getNodeType() != ASTNode.INFIX_EXPRESSION) {
 			return false;
 		}
@@ -297,7 +299,7 @@ public class OperatorUtil {
 		}
 
 		InfixExpression.Operator operator = infixExpression.getOperator();
-		if (operator != InfixExpression.Operator.EQUALS) {
+		if (operator != expectedOperator) {
 			return false;
 		}
 		Expression right = infixExpression.getRightOperand();

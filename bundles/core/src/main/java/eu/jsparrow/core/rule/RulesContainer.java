@@ -57,6 +57,7 @@ import eu.jsparrow.core.rule.impl.RemoveEmptyStatementRule;
 import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
 import eu.jsparrow.core.rule.impl.RemoveModifiersInInterfacePropertiesRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
+import eu.jsparrow.core.rule.impl.RemoveNullCheckBeforeInstanceofRule;
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
@@ -70,6 +71,7 @@ import eu.jsparrow.core.rule.impl.StringFormatLineSeparatorRule;
 import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
+import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
@@ -135,10 +137,11 @@ public class RulesContainer {
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new MapGetOrDefaultRule(),
 				new DateDeprecatedRule(), new RemoveDoubleNegationRule(), new OptionalIfPresentRule(),
-				new GuardConditionRule(), new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(),
-				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
-				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
-				new ReorderModifiersRule(), new UseListSortRule(), new CollectionsFactoryMethodsRule(),
+				new RemoveNullCheckBeforeInstanceofRule(), new GuardConditionRule(), new CollapseIfStatementsRule(),
+				new RemoveExplicitCallToSuperRule(), new RemoveEmptyStatementRule(),
+				new RemoveUnnecessaryThrownExceptionsRule(), new RemoveModifiersInInterfacePropertiesRule(),
+				new RemoveUnusedParameterRule(), new ReorderModifiersRule(), new UseListSortRule(),
+				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
