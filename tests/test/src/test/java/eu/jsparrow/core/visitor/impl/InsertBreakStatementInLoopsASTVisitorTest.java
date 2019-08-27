@@ -148,6 +148,82 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesJDTUnitFixtur
 		assertMatch(createBlock(expected), fixture.getMethodBlock());
 	}
 	
+	@Test
+	public void visit_missingCurlyBraces_shouldTransform() throws Exception {
+		String original = "" +
+				"        boolean contains = true;\n" + 
+				"        List<String> values = Arrays.asList(\"value1\", \"value2\", \"3\");\n" + 
+				"        for (String value : values) \n" + 
+				"            if (value.isEmpty()) {\n" + 
+				"                contains = false;\n" + 
+				"            }\n" + 
+				"        ";
+		String expected = "" +
+				"        boolean contains = true;\n" + 
+				"        List<String> values = Arrays.asList(\"value1\", \"value2\", \"3\");\n" + 
+				"        for (String value : values) \n" + 
+				"            if (value.isEmpty()) {\n" + 
+				"                contains = false;\n" +
+				"                break;\n" + 
+				"            }\n" + 
+				"        ";
+		
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_missingBracesInIf_shouldTransform() throws Exception {
+		String original = "" +
+				"        boolean contains = true;\n" + 
+				"        List<String> values = Arrays.asList(\"value1\", \"value2\", \"3\");\n" + 
+				"        for (String value : values) \n" + 
+				"            if (value.isEmpty()) \n" + 
+				"                contains = false;\n";
+		String expected = "" +
+				"        boolean contains = true;\n" + 
+				"        List<String> values = Arrays.asList(\"value1\", \"value2\", \"3\");\n" + 
+				"        for (String value : values) \n" + 
+				"            if (value.isEmpty()) {\n" + 
+				"                contains = false;\n" + 
+				"                break;\n" +
+				"            }\n"; 
+		
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_iteratingOverCollection_shouldTransform() throws Exception {
+		String original = "" +
+				"        boolean contains = false;\n" + 
+				"        Collection<String> collection = Collections.singletonList(\"value\");\n" + 
+				"        for (String value : collection) {\n" + 
+				"            if (collection.contains(value)) {\n" + 
+				"                contains = true;\n" + 
+				"            }\n" + 
+				"        }";
+		String expected = "" +
+				"        boolean contains = false;\n" + 
+				"        Collection<String> collection = Collections.singletonList(\"value\");\n" + 
+				"        for (String value : collection) {\n" + 
+				"            if (collection.contains(value)) {\n" + 
+				"                contains = true;\n" +
+				"                break;\n" + 
+				"            }\n" + 
+				"        }";
+		
+		fixture.addImport("java.util.Collection");
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
+	
 	/*
 	 * Negative test cases
 	 */
@@ -257,30 +333,14 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesJDTUnitFixtur
 	}
 	
 	@Test
-	public void visit_missingCurlyBraces_shouldNotTransform() throws Exception {
-		String original = "" +
-				"        boolean contains = true;\n" + 
-				"        List<String> values = Arrays.asList(\"value1\", \"value2\", \"3\");\n" + 
-				"        for (String value : values) \n" + 
-				"            if (value.isEmpty()) {\n" + 
-				"                contains = false;\n" + 
-				"            }\n" + 
-				"        ";
-		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(createBlock(original), fixture.getMethodBlock());
-	}
-	
-	@Test
-	public void visit_missingBracesInIf_shouldNotTransform() throws Exception {
+	public void visit_missingAssignment_shouldNotTransform() throws Exception {
 		String original = "" +
 				"        boolean contains = true;\n" + 
 				"        List<String> values = Arrays.asList(\"value1\", \"value2\", \"3\");\n" + 
 				"        for (String value : values) {\n" + 
-				"            if (value.isEmpty()) \n" + 
-				"                contains = false;\n" + 
+				"            if (value.isEmpty()) {\n" + 
+				"                System.out.print(value);\n" + 
+				"            }\n" + 
 				"        }";
 		
 		fixture.addMethodBlock(original);
@@ -290,13 +350,30 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesJDTUnitFixtur
 	}
 	
 	@Test
-	public void visit_missingAssignment_shouldNotTransform() throws Exception {
+	public void visit_conditionWithIncrementOperator_shouldNotTransform() throws Exception {
 		String original = "" +
-				"        boolean contains = true;\n" + 
-				"        List<String> values = Arrays.asList(\"value1\", \"value2\", \"3\");\n" + 
-				"        for (String value : values) {\n" + 
-				"            if (value.isEmpty()) {\n" + 
-				"                System.out.print(value);\n" + 
+				"        boolean contains = false;\n" + 
+				"        List<Integer> values = Collections.emptyList();\n" + 
+				"        for (int value : values) {\n" + 
+				"            if (++value == 2) {\n" + 
+				"                contains = true;\n" + 
+				"            }\n" + 
+				"        }";
+		
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		assertMatch(createBlock(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_conditionWithPostfixExpression_shouldNotTransform() throws Exception {
+		String original = "" +
+				"        boolean contains = false;\n" + 
+				"        List<Integer> values = Collections.emptyList();\n" + 
+				"        for (int value : values) {\n" + 
+				"            if (value++ == 2) {\n" + 
+				"                contains = true;\n" + 
 				"            }\n" + 
 				"        }";
 		

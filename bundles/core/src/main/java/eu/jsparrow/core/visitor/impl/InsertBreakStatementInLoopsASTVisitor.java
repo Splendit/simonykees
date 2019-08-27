@@ -26,24 +26,23 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Inserts a {@link BreakStatement} break statement in the for-loops whose sole
+ * purpose is to compute a boolean value without causing any side effects.
+ * 
+ * @since 3.9.0
+ *
+ */
 public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	@SuppressWarnings("nls")
 	private List<String> safeCollectionMethods = Collections
 		.unmodifiableList(Arrays.asList("isEmpty", "contains", "containsKey", "containsValue"));
 
 	@Override
 	public boolean visit(EnhancedForStatement forStatement) {
-		Statement body = forStatement.getBody();
-		if (body.getNodeType() != ASTNode.BLOCK) {
-			return true;
-		}
-		Block block = (Block) body;
-		List<IfStatement> bodyStatements = ASTNodeUtil.returnTypedList(block.statements(), IfStatement.class);
-		if (bodyStatements.size() != 1) {
-			return true;
-		}
-		IfStatement ifStatement = bodyStatements.get(0);
-		if (ifStatement.getElseStatement() != null) {
+		IfStatement ifStatement = findSingleBodyStatement(forStatement.getBody());
+		if (ifStatement == null || ifStatement.getElseStatement() != null) {
 			return true;
 		}
 
@@ -53,48 +52,78 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 		}
 
 		Statement thenStatement = ifStatement.getThenStatement();
-		if (thenStatement.getNodeType() != ASTNode.BLOCK) {
-			return true;
-		}
+		if (thenStatement.getNodeType() == ASTNode.BLOCK) {
 
-		Block ifBodyBlock = (Block) thenStatement;
-		List<ExpressionStatement> ifBodyStatements = ASTNodeUtil.returnTypedList(ifBodyBlock.statements(),
-				ExpressionStatement.class);
-		if (ifBodyStatements.size() != 1) {
-			return true;
-		}
+			Block ifBodyBlock = (Block) thenStatement;
+			List<ExpressionStatement> ifBodyStatements = ASTNodeUtil.returnTypedList(ifBodyBlock.statements(),
+					ExpressionStatement.class);
+			if (ifBodyStatements.size() != 1) {
+				return true;
+			}
 
-		ExpressionStatement expressionStatement = ifBodyStatements.get(0);
-		Expression expression = expressionStatement.getExpression();
-		if (expression.getNodeType() != ASTNode.ASSIGNMENT) {
-			return true;
-		}
+			ExpressionStatement expressionStatement = ifBodyStatements.get(0);
+			if(!isBooleanLiteralAssignment(expressionStatement)) {
+				return true;
+			}
 
-		Assignment assignment = ((Assignment) expression);
-		Expression rhs = assignment.getRightHandSide();
-		if (rhs.getNodeType() != ASTNode.BOOLEAN_LITERAL) {
-			return true;
+			AST ast = forStatement.getAST();
+			BreakStatement breakStatement = ast.newBreakStatement();
+			ListRewrite listRewrite = astRewrite.getListRewrite(ifBodyBlock, Block.STATEMENTS_PROPERTY);
+			listRewrite.insertLast(breakStatement, null);
+			onRewrite();
+		} else if (thenStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+			ExpressionStatement expressionStatement = (ExpressionStatement) thenStatement;
+			if(!isBooleanLiteralAssignment(expressionStatement)) {
+				return true;
+			}
+			
+			AST ast = forStatement.getAST();
+			Block newBlock = ast.newBlock();
+			ExpressionStatement expressionStatementCopy = (ExpressionStatement)astRewrite.createMoveTarget(expressionStatement);
+			BreakStatement breakStatement = ast.newBreakStatement();
+			@SuppressWarnings("unchecked")
+			List<Statement> statements = newBlock.statements();
+			statements.add(expressionStatementCopy);
+			statements.add(breakStatement);
+			astRewrite.replace(thenStatement, newBlock, null);
+			onRewrite();
 		}
-
-		AST ast = forStatement.getAST();
-		BreakStatement breakStatement = ast.newBreakStatement();
-		ListRewrite listRewrite = astRewrite.getListRewrite(ifBodyBlock, Block.STATEMENTS_PROPERTY);
-		listRewrite.insertLast(breakStatement, null);
-		onRewrite();
 
 		return true;
 	}
 
+	private boolean isBooleanLiteralAssignment(ExpressionStatement expressionStatement) {
+		Expression expression = expressionStatement.getExpression();
+		if (expression.getNodeType() != ASTNode.ASSIGNMENT) {
+			return false;
+		}
+
+		Assignment assignment = ((Assignment) expression);
+		Expression rhs = assignment.getRightHandSide();
+		return rhs.getNodeType() == ASTNode.BOOLEAN_LITERAL;
+	}
+
+	private IfStatement findSingleBodyStatement(Statement body) {
+		if (body.getNodeType() != ASTNode.BLOCK) {
+			return body.getNodeType() == ASTNode.IF_STATEMENT ? (IfStatement) body : null;
+		}
+		Block block = (Block) body;
+		List<IfStatement> bodyStatements = ASTNodeUtil.returnTypedList(block.statements(), IfStatement.class);
+		if (bodyStatements.size() != 1) {
+			return null;
+		}
+		return bodyStatements.get(0);
+	}
+
 	private boolean hasSideEffects(Expression expression) {
 
-		if (isLiteral(expression) || expression.getNodeType() == ASTNode.SIMPLE_NAME) {
+		if (ASTNodeUtil.isLiteral(expression) || expression.getNodeType() == ASTNode.SIMPLE_NAME) {
 			return false;
 		}
 
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
 			return hasSideEffects(methodInvocation);
-
 		}
 
 		if (expression.getNodeType() == ASTNode.INFIX_EXPRESSION) {
@@ -109,6 +138,10 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 
 		if (expression.getNodeType() == ASTNode.PREFIX_EXPRESSION) {
 			PrefixExpression prefixExpression = (PrefixExpression) expression;
+			PrefixExpression.Operator operator = prefixExpression.getOperator();
+			if(operator == PrefixExpression.Operator.INCREMENT || operator == PrefixExpression.Operator.DECREMENT) {
+				return true;
+			}
 			return hasSideEffects(prefixExpression.getOperand());
 		}
 		return true;
@@ -119,10 +152,10 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 		if (miExpression != null && ASTNode.SIMPLE_NAME != miExpression.getNodeType()) {
 			return true;
 		}
-		
+
 		boolean hasSafeArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.stream()
-			.allMatch(argument -> isLiteral(argument) || argument.getNodeType() == ASTNode.SIMPLE_NAME);
+			.allMatch(argument -> ASTNodeUtil.isLiteral(argument) || argument.getNodeType() == ASTNode.SIMPLE_NAME);
 		if (!hasSafeArguments) {
 			return true;
 		}
@@ -139,16 +172,8 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 				|| ClassRelationUtil.isContentOfType(declaringClass, java.util.Collection.class.getName())) {
 			String methodName = methodBinding.getName();
 			return !safeCollectionMethods.contains(methodName);
-
 		}
 		return true;
-	}
-
-	private boolean isLiteral(Expression expression) {
-		int nodeType = expression.getNodeType();
-		return nodeType == ASTNode.BOOLEAN_LITERAL || nodeType == ASTNode.CHARACTER_LITERAL
-				|| nodeType == ASTNode.NULL_LITERAL || nodeType == ASTNode.NUMBER_LITERAL
-				|| nodeType == ASTNode.STRING_LITERAL;
 	}
 
 }
