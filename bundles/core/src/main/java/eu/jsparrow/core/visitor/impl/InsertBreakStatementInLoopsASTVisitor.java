@@ -27,8 +27,8 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * Inserts a {@link BreakStatement} break statement in the for-loops whose sole
- * purpose is to compute a boolean value without causing any side effects.
+ * Inserts a {@link BreakStatement} in the for-loops whose sole purpose is to
+ * compute a {@link Boolean} value without causing any side effects.
  * 
  * @since 3.9.0
  *
@@ -62,7 +62,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 			}
 
 			ExpressionStatement expressionStatement = ifBodyStatements.get(0);
-			if(!isBooleanLiteralAssignment(expressionStatement)) {
+			if (!isBooleanLiteralAssignment(expressionStatement)) {
 				return true;
 			}
 
@@ -73,13 +73,14 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 			onRewrite();
 		} else if (thenStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
 			ExpressionStatement expressionStatement = (ExpressionStatement) thenStatement;
-			if(!isBooleanLiteralAssignment(expressionStatement)) {
+			if (!isBooleanLiteralAssignment(expressionStatement)) {
 				return true;
 			}
-			
+
 			AST ast = forStatement.getAST();
 			Block newBlock = ast.newBlock();
-			ExpressionStatement expressionStatementCopy = (ExpressionStatement)astRewrite.createMoveTarget(expressionStatement);
+			ExpressionStatement expressionStatementCopy = (ExpressionStatement) astRewrite
+				.createMoveTarget(expressionStatement);
 			BreakStatement breakStatement = ast.newBreakStatement();
 			@SuppressWarnings("unchecked")
 			List<Statement> statements = newBlock.statements();
@@ -98,7 +99,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 			return false;
 		}
 
-		Assignment assignment = ((Assignment) expression);
+		Assignment assignment = (Assignment) expression;
 		Expression rhs = assignment.getRightHandSide();
 		return rhs.getNodeType() == ASTNode.BOOLEAN_LITERAL;
 	}
@@ -139,7 +140,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 		if (expression.getNodeType() == ASTNode.PREFIX_EXPRESSION) {
 			PrefixExpression prefixExpression = (PrefixExpression) expression;
 			PrefixExpression.Operator operator = prefixExpression.getOperator();
-			if(operator == PrefixExpression.Operator.INCREMENT || operator == PrefixExpression.Operator.DECREMENT) {
+			if (operator == PrefixExpression.Operator.INCREMENT || operator == PrefixExpression.Operator.DECREMENT) {
 				return true;
 			}
 			return hasSideEffects(prefixExpression.getOperand());

@@ -243,9 +243,7 @@ public class Messages extends NLS {
 	public static String InefficientConstructorRule_description;
 	public static String InefficientConstructorRule_name;
 	public static String InsertBreakStatementInLoopsRule_description;
-
 	public static String InsertBreakStatementInLoopsRule_name;
-
 	public static String MultiVariableDeclarationLineRule_name;
 	public static String MultiVariableDeclarationLineRule_description;
 	public static String Java5Profile_profileName;

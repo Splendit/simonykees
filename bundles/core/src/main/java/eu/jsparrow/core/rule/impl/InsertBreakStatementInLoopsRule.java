@@ -18,15 +18,14 @@ import eu.jsparrow.rules.common.Tag;
  *
  */
 public class InsertBreakStatementInLoopsRule extends RefactoringRuleImpl<InsertBreakStatementInLoopsASTVisitor> {
-	
+
 	public InsertBreakStatementInLoopsRule() {
 		this.visitorClass = InsertBreakStatementInLoopsASTVisitor.class;
 		this.id = "InsertBreakStatementInLoops"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.InsertBreakStatementInLoopsRule_name, 
+		this.ruleDescription = new RuleDescription(Messages.InsertBreakStatementInLoopsRule_name,
 				Messages.InsertBreakStatementInLoopsRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_5, Tag.LOOP, Tag.PERFORMANCE));
 	}
-
 
 	@Override
 	protected String provideRequiredJavaVersion() {
