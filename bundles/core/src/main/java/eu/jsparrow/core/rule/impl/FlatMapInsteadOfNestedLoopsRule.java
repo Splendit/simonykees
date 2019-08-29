@@ -23,7 +23,7 @@ public class FlatMapInsteadOfNestedLoopsRule extends RefactoringRuleImpl<FlatMap
 		this.visitorClass = FlatMapInsteadOfNestedLoopsASTVisitor.class;
 		this.id = "FlatMapInsteadOfNestedLoops"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.FlatMapInsteadOfNestedLoopsRule_name,
-				Messages.FlatMapInsteadOfNestedLoopsRule_name, Duration.ofMinutes(15),
+				Messages.FlatMapInsteadOfNestedLoopsRule_description, Duration.ofMinutes(15),
 				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP));
 	}
 
