@@ -11,3 +11,9 @@ The JMP offers the possibility to send statistics to our AWS DynamoDB Intance. F
   - `-DrepoOwner="<repo-owner>"`: The company or repository owner of the project
   - `-DrepoName="<repo-name>"`: The name of the project or repository
   - `-DsendStatistics`: When set, the statistics will be send to AWS DynamoDB
+  
+Example:
+
+```bash
+mvn eu.jsparrow:jsparrow-maven-plugin:2.3.0:refactor -DstartTime="2019-06-24T09:39:23.192945Z" -DrepoOwner="neo4j" -DrepoName="neo4j" -DsendStatistics -X
+```
