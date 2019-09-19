@@ -601,4 +601,6 @@ public class ASTNodeUtil {
 		IMethodBinding methodDeclaration = methodBinding.getMethodDeclaration();
 		return methodDeclaration != null && methodDeclaration.isGenericMethod();
 	}
+
+
 }

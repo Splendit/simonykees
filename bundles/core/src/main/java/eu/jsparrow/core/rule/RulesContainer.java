@@ -38,6 +38,7 @@ import eu.jsparrow.core.rule.impl.GuardConditionRule;
 import eu.jsparrow.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import eu.jsparrow.core.rule.impl.IndexOfToContainsRule;
 import eu.jsparrow.core.rule.impl.InefficientConstructorRule;
+import eu.jsparrow.core.rule.impl.InsertBreakStatementInLoopsRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachCollectRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
@@ -154,12 +155,13 @@ public class RulesContainer {
 				/*
 				 * Loops and streams
 				 */
-				new WhileToForEachRule(), new ForToForEachRule(), new EnhancedForLoopToStreamTakeWhileRule(),
-				new EnhancedForLoopToStreamForEachRule(), new BufferedReaderLinesRule(),
-				new LambdaForEachIfWrapperToFilterRule(), new StatementLambdaToExpressionRule(),
-				new LambdaForEachCollectRule(), new LambdaForEachMapRule(), new FlatMapInsteadOfNestedLoopsRule(),
-				new EnhancedForLoopToStreamAnyMatchRule(), new EnhancedForLoopToStreamFindFirstRule(),
-				new EnhancedForLoopToStreamSumRule(), new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
+				new WhileToForEachRule(), new ForToForEachRule(), new InsertBreakStatementInLoopsRule(),
+				new EnhancedForLoopToStreamTakeWhileRule(), new EnhancedForLoopToStreamForEachRule(),
+				new BufferedReaderLinesRule(), new LambdaForEachIfWrapperToFilterRule(),
+				new StatementLambdaToExpressionRule(), new LambdaForEachCollectRule(), new LambdaForEachMapRule(),
+				new FlatMapInsteadOfNestedLoopsRule(), new EnhancedForLoopToStreamAnyMatchRule(),
+				new EnhancedForLoopToStreamFindFirstRule(), new EnhancedForLoopToStreamSumRule(),
+				new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
 
 				/*
 				 * String manipulations. This rule must be applied after

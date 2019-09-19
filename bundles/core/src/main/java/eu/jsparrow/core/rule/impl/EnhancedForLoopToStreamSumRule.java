@@ -24,7 +24,7 @@ public class EnhancedForLoopToStreamSumRule extends RefactoringRuleImpl<Enhanced
 		this.visitorClass = EnhancedForLoopToStreamSumASTVisitor.class;
 		this.id = "EnhancedForLoopToStreamSum"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.EnhancedForLoopToStreamSumRule_name,
-				Messages.EnhancedForLoopToStreamSumRule_name, Duration.ofMinutes(10),
+				Messages.EnhancedForLoopToStreamSumRule_description, Duration.ofMinutes(10),
 				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP));
 	}
 
