@@ -602,16 +602,5 @@ public class ASTNodeUtil {
 		return methodDeclaration != null && methodDeclaration.isGenericMethod();
 	}
 
-	/**
-	 * @param expression
-	 *            expression to be checked
-	 * @return if the expression is a literal, e.g. string, number, character,
-	 *         boolean, null or type literal.
-	 */
-	public static boolean isLiteral(Expression expression) {
-		int nodeType = expression.getNodeType();
-		return nodeType == ASTNode.BOOLEAN_LITERAL || nodeType == ASTNode.CHARACTER_LITERAL
-				|| nodeType == ASTNode.NULL_LITERAL || nodeType == ASTNode.NUMBER_LITERAL
-				|| nodeType == ASTNode.STRING_LITERAL || nodeType == ASTNode.TYPE_LITERAL;
-	}
+
 }

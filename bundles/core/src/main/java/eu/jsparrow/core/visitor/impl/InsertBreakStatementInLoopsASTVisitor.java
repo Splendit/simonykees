@@ -118,7 +118,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 
 	private boolean hasSideEffects(Expression expression) {
 
-		if (ASTNodeUtil.isLiteral(expression) || expression.getNodeType() == ASTNode.SIMPLE_NAME) {
+		if (isLiteral(expression) || expression.getNodeType() == ASTNode.SIMPLE_NAME) {
 			return false;
 		}
 
@@ -156,7 +156,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 
 		boolean hasSafeArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.stream()
-			.allMatch(argument -> ASTNodeUtil.isLiteral(argument) || argument.getNodeType() == ASTNode.SIMPLE_NAME);
+			.allMatch(argument -> isLiteral(argument) || argument.getNodeType() == ASTNode.SIMPLE_NAME);
 		if (!hasSafeArguments) {
 			return true;
 		}
@@ -175,6 +175,22 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 			return !safeCollectionMethods.contains(methodName);
 		}
 		return true;
+	}
+	
+	/**
+	 * @param expression
+	 *            expression to be checked
+	 * @return if the expression is a literal, e.g. string, number, character,
+	 *         boolean, null or type literal.
+	 */
+	private static boolean isLiteral(Expression expression) {
+		/*
+		 * TODO: fix the obfuscation and move this back to ASTNodeUtil class. 
+		 */
+		int nodeType = expression.getNodeType();
+		return nodeType == ASTNode.BOOLEAN_LITERAL || nodeType == ASTNode.CHARACTER_LITERAL
+				|| nodeType == ASTNode.NULL_LITERAL || nodeType == ASTNode.NUMBER_LITERAL
+				|| nodeType == ASTNode.STRING_LITERAL || nodeType == ASTNode.TYPE_LITERAL;
 	}
 
 }
