@@ -41,7 +41,7 @@ public class AbstractOptionalASTVisitor extends AbstractASTRewriteASTVisitor {
 		return visitor.containsReferencesToExternalNonFinalVariables();
 	}
 
-	protected boolean containsUnhandeledException(Statement thenStatement) {
+	protected boolean containsUnhandledException(Statement thenStatement) {
 		UnhandledExceptionVisitor visitor = new UnhandledExceptionVisitor();
 		thenStatement.accept(visitor);
 		return visitor.throwsException();

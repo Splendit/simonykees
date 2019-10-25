@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -15,6 +16,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
@@ -31,9 +33,6 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 		if (!IS_PRESENT.equals(name.getIdentifier())) {
 			return true;
 		}
-		if (methodInvocation.getLocationInParent() != IfStatement.EXPRESSION_PROPERTY) {
-			return true;
-		}
 
 		Expression expression = methodInvocation.getExpression();
 		if (expression == null) {
@@ -46,21 +45,14 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 			return true;
 		}
 
+		if (methodInvocation.getLocationInParent() != IfStatement.EXPRESSION_PROPERTY) {
+			return true;
+		}
 		IfStatement ifStatement = (IfStatement) methodInvocation.getParent();
+
 		// analyze thenStatement
 		Statement thenStatement = ifStatement.getThenStatement();
-
-		boolean hasReturnStatement = containsFlowControlStatement(thenStatement);
-		if (hasReturnStatement) {
-			return true;
-		}
-
-		boolean hasUnhandledException = containsUnhandeledException(thenStatement);
-		if (hasUnhandledException) {
-			return true;
-		}
-
-		if (containsNonEffectivelyFinal(thenStatement)) {
+		if (!isConvertibleToLambdaBody(thenStatement)) {
 			return true;
 		}
 
@@ -76,19 +68,12 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 
 		// analyze else statement
 		Statement elseStatement = ifStatement.getElseStatement();
-		if (elseStatement.getNodeType() == ASTNode.IF_STATEMENT) {
+		if (elseStatement.getNodeType() != ASTNode.BLOCK
+				&& elseStatement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
 			return true;
 		}
 
-		if (containsNonEffectivelyFinal(elseStatement)) {
-			return true;
-		}
-
-		if (containsUnhandeledException(elseStatement)) {
-			return true;
-		}
-
-		if (containsFlowControlStatement(elseStatement)) {
+		if (!isConvertibleToLambdaBody(elseStatement)) {
 			return true;
 		}
 
@@ -97,16 +82,49 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 			return true;
 		}
 
+		ASTNode elseBody = unwrapOrElseBody(elseStatement);
 		ExpressionStatement ifPresentOrElse = constructIfPresentOrElse(methodInvocation, thenStatement,
-				nonDiscardedGetExpressions, elseStatement, identifier);
+				nonDiscardedGetExpressions, elseBody, identifier);
 		astRewrite.replace(ifStatement, ifPresentOrElse, null);
 		removedNodes.clear();
 		return true;
 	}
 
+	private ASTNode unwrapOrElseBody(Statement elseStatement) {
+		if (elseStatement.getNodeType() == ASTNode.BLOCK) {
+			Block block = (Block) elseStatement;
+			List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
+			if (statements.size() == 1) {
+				Statement statement = statements.get(0);
+				if (statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+					ExpressionStatement expressionStatement = (ExpressionStatement) statement;
+					return expressionStatement.getExpression();
+				}
+			}
+		} else if (elseStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+			ExpressionStatement expressionStatement = (ExpressionStatement) elseStatement;
+			return expressionStatement.getExpression();
+		}
+		return elseStatement;
+	}
+
+	private boolean isConvertibleToLambdaBody(Statement thenStatement) {
+		boolean hasReturnStatement = containsFlowControlStatement(thenStatement);
+		if (hasReturnStatement) {
+			return false;
+		}
+
+		boolean hasUnhandledException = containsUnhandledException(thenStatement);
+		if (hasUnhandledException) {
+			return false;
+		}
+
+		return !containsNonEffectivelyFinal(thenStatement);
+	}
+
 	@SuppressWarnings("unchecked")
 	private ExpressionStatement constructIfPresentOrElse(MethodInvocation methodInvocation, Statement thenStatement,
-			List<MethodInvocation> nonDiscardedGetExpressions, Statement elseStatement, String identifier) {
+			List<MethodInvocation> nonDiscardedGetExpressions, ASTNode elseStatement, String identifier) {
 		IfPresentBodyFactoryVisitor ifPresentBodyFactoryVisitor = new IfPresentBodyFactoryVisitor(
 				nonDiscardedGetExpressions, identifier, astRewrite);
 		thenStatement.accept(ifPresentBodyFactoryVisitor);

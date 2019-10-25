@@ -84,7 +84,7 @@ public class OptionalIfPresentASTVisitor extends AbstractOptionalASTVisitor {
 		/*
 		 * Check for unhandled exceptions
 		 */
-		boolean hasUnhandledException = containsUnhandeledException(thenStatement);
+		boolean hasUnhandledException = containsUnhandledException(thenStatement);
 		if (hasUnhandledException) {
 			return true;
 		}
