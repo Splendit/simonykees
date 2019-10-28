@@ -14,7 +14,7 @@ import eu.jsparrow.rules.common.Tag;
 /**
  * @see OptionalIfPresentOrElseASTVisitor
  * 
- * @since 3.9.0 FIXME
+ * @since 3.10.0
  *
  */
 public class OptionalIfPresentOrElseRule extends RefactoringRuleImpl<OptionalIfPresentOrElseASTVisitor>{

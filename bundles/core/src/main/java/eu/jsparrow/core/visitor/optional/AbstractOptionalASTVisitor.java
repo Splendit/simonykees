@@ -27,9 +27,9 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * A parent class for visitors of {@link java.util.Optional} rules. 
+ * A parent class for visitors of {@link java.util.Optional} rules.
  * 
- * @since 3.9.0
+ * @since 3.10.0
  */
 public class AbstractOptionalASTVisitor extends AbstractASTRewriteASTVisitor {
 

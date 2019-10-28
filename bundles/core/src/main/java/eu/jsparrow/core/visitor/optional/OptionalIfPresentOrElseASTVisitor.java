@@ -27,7 +27,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * check followed by an else-statement with a single 'ifPresentOrElse'
  * invocation.
  * 
- * @since 3.9.0 FIXME
+ * @since 3.10.0
  *
  */
 public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisitor {
