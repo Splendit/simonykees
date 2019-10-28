@@ -26,6 +26,11 @@ import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * A parent class for visitors of {@link java.util.Optional} rules. 
+ * 
+ * @since 3.9.0
+ */
 public class AbstractOptionalASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	protected static final String OPTIONAL_FULLY_QUALIFIED_NAME = java.util.Optional.class.getName();
