@@ -71,8 +71,8 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 
 		// analyze else statement
 		Statement elseStatement = ifStatement.getElseStatement();
-		if (elseStatement.getNodeType() != ASTNode.BLOCK
-				&& elseStatement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
+		if (elseStatement == null || (elseStatement.getNodeType() != ASTNode.BLOCK
+				&& elseStatement.getNodeType() != ASTNode.EXPRESSION_STATEMENT)) {
 			return true;
 		}
 
