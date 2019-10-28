@@ -111,7 +111,7 @@ public class OptionalIfPresentASTVisitor extends AbstractOptionalASTVisitor {
 		IfPresentBodyFactoryVisitor visitor = new IfPresentBodyFactoryVisitor(nonDiscardedGetExpressions, identifier,
 				astRewrite);
 		thenStatement.accept(visitor);
-		ASTNode lambdaBody = unwrapBody(thenStatement);
+		ASTNode lambdaBody = unwrapLambdaBody(thenStatement);
 		LambdaExpression lambda = NodeBuilder.newLambdaExpression(methodInvocation.getAST(),
 				astRewrite.createCopyTarget(lambdaBody), identifier);
 
@@ -150,36 +150,7 @@ public class OptionalIfPresentASTVisitor extends AbstractOptionalASTVisitor {
 
 		return ast.newExpressionStatement(ifPresent);
 	}
-
-	/**
-	 * Converts the body into an {@link Expression} if it consists a single
-	 * {@link ExpressionStatement}. . * <b>ATTENTION:</b> deletes all nodes in
-	 * {@code removedNodes}!
-	 * 
-	 * @param body
-	 *            the node to be transformed
-	 * @return the unwrapped {@link Expression} if the body consist of one
-	 *         {@link ExpressionStatement} or the unchanged body otherwise.
-	 */
-	private ASTNode unwrapBody(Statement body) {
-
-		ASTNode lambdaBody = body;
-		if (ASTNode.BLOCK == body.getNodeType()) {
-			Block block = (Block) body;
-			List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
-			if (statements.size() == 1) {
-				Statement singleBodyStatement = statements.get(0);
-				if (ASTNode.EXPRESSION_STATEMENT == singleBodyStatement.getNodeType()) {
-					ExpressionStatement expressionStatement = (ExpressionStatement) singleBodyStatement;
-					lambdaBody = expressionStatement.getExpression();
-				}
-			}
-		} else if (ASTNode.EXPRESSION_STATEMENT == body.getNodeType()) {
-			lambdaBody = ((ExpressionStatement) body).getExpression();
-		}
-		return lambdaBody;
-	}
-
+	
 	protected boolean isIsPresentMethod(MethodInvocation methodInvocation) {
 		if (!methodInvocation.arguments()
 			.isEmpty() || methodInvocation.getExpression() == null) {

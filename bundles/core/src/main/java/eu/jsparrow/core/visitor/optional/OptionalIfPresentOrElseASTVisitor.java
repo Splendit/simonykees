@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -16,7 +15,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
@@ -93,24 +91,6 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 		astRewrite.replace(ifStatement, ifPresentOrElse, null);
 		removedNodes.clear();
 		return true;
-	}
-
-	private ASTNode unwrapLambdaBody(Statement body) {
-		if (body.getNodeType() == ASTNode.BLOCK) {
-			Block block = (Block) body;
-			List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
-			if (statements.size() == 1) {
-				Statement statement = statements.get(0);
-				if (statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-					ExpressionStatement expressionStatement = (ExpressionStatement) statement;
-					return expressionStatement.getExpression();
-				}
-			}
-		} else if (body.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-			ExpressionStatement expressionStatement = (ExpressionStatement) body;
-			return expressionStatement.getExpression();
-		}
-		return body;
 	}
 
 	private boolean isConvertibleToLambdaBody(Statement thenStatement) {

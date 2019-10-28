@@ -6,7 +6,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -62,20 +64,20 @@ public class AbstractOptionalASTVisitor extends AbstractASTRewriteASTVisitor {
 		List<String> referencedFields = findAllReferencedFields(thenStatement).stream()
 			.map(SimpleName::getIdentifier)
 			.collect(Collectors.toList());
-	
+
 		Optional<SimpleName> identifier = getExpressions.stream()
 			.filter(e -> e.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY)
 			.map(ASTNode::getParent)
 			.map(fragment -> ((VariableDeclarationFragment) fragment).getName())
 			.findFirst()
 			.filter(name -> !referencedFields.contains(name.getIdentifier()));
-	
+
 		String name = identifier.map(SimpleName::getIdentifier)
 			.orElse(""); //$NON-NLS-1$
 		if (countDeclaredVariables(thenStatement, name) > 1) {
 			return computeUniqueIdentifier(thenStatement);
 		}
-	
+
 		identifier.ifPresent(this::safeDeleteInitializer);
 		return identifier.map(SimpleName::getIdentifier)
 			.orElse(computeUniqueIdentifier(thenStatement));
@@ -98,14 +100,14 @@ public class AbstractOptionalASTVisitor extends AbstractASTRewriteASTVisitor {
 			return ""; //$NON-NLS-1$
 		}
 		scope.lazyLoadScopeNames(enclosingScope);
-	
+
 		String newName = DEFAULT_LAMBDA_PARAMETER_NAME;
 		int suffix = 1;
 		while (scope.isInScope(newName)) {
 			newName = DEFAULT_LAMBDA_PARAMETER_NAME + suffix;
 			suffix++;
 		}
-	
+
 		return newName;
 	}
 
@@ -137,21 +139,21 @@ public class AbstractOptionalASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	protected void safeDeleteInitializer(SimpleName name) {
-	
+
 		if (VariableDeclarationFragment.NAME_PROPERTY != name.getLocationInParent()) {
 			return;
 		}
 		VariableDeclarationFragment fragment = (VariableDeclarationFragment) name.getParent();
-	
+
 		Expression initializer = fragment.getInitializer();
 		if (initializer == null) {
 			return;
 		}
-	
+
 		if (VariableDeclarationStatement.FRAGMENTS_PROPERTY != fragment.getLocationInParent()) {
 			return;
 		}
-	
+
 		VariableDeclarationStatement declarationStatement = (VariableDeclarationStatement) fragment.getParent();
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(declarationStatement.fragments(),
 				VariableDeclarationFragment.class);
@@ -161,10 +163,37 @@ public class AbstractOptionalASTVisitor extends AbstractASTRewriteASTVisitor {
 			declarationStatement.delete();
 			return;
 		}
-	
+
 		astRewrite.remove(fragment, null);
 		removedNodes.add(fragment);
 		fragment.delete();
 	}
 
+	/**
+	 * Converts the body into an {@link Expression} if it consists a single
+	 * {@link ExpressionStatement}. . * <b>ATTENTION:</b> deletes all nodes in
+	 * {@code removedNodes}!
+	 * 
+	 * @param body
+	 *            the node to be transformed
+	 * @return the unwrapped {@link Expression} if the body consist of one
+	 *         {@link ExpressionStatement} or the unchanged body otherwise.
+	 */
+	protected ASTNode unwrapLambdaBody(Statement body) {
+		if (body.getNodeType() == ASTNode.BLOCK) {
+			Block block = (Block) body;
+			List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
+			if (statements.size() == 1) {
+				Statement statement = statements.get(0);
+				if (statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+					ExpressionStatement expressionStatement = (ExpressionStatement) statement;
+					return expressionStatement.getExpression();
+				}
+			}
+		} else if (body.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+			ExpressionStatement expressionStatement = (ExpressionStatement) body;
+			return expressionStatement.getExpression();
+		}
+		return body;
+	}
 }
