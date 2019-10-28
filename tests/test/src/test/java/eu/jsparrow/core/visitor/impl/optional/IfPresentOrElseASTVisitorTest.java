@@ -31,9 +31,9 @@ public class IfPresentOrElseASTVisitorTest extends UsesJDTUnitFixture {
 				"		}";
 		String expected = "" +
 				"		Optional<String> optional = Optional.empty();\n" +
-				"		optional.ifPresentOrElse(value -> {\n" + 
-				"			System.out.print(value);\n" + 
-				"		}, () -> System.out.println(\"No value\"));";
+				"		optional.ifPresentOrElse(\n" +
+				"			value -> System.out.print(value),\n" + 
+				"			() -> System.out.println(\"No value\"));";
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 
@@ -235,9 +235,9 @@ public class IfPresentOrElseASTVisitorTest extends UsesJDTUnitFixture {
 				"		}";
 		String expected = "" +
 				"		Optional<String> optional = Optional.empty();\n" +
-				"		optional.ifPresentOrElse(value -> {\n" + 
-				"			System.out.print(value);\n" + 
-				"		}, () -> { });";
+				"		optional.ifPresentOrElse(" +
+				"			value -> System.out.print(value), \n" + 
+				"			() -> { });";
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 
@@ -257,9 +257,9 @@ public class IfPresentOrElseASTVisitorTest extends UsesJDTUnitFixture {
 				"			System.out.println(\"No value\");";
 		String expected = "" +
 				"		Optional<String> optional = Optional.empty();\n" +
-				"		optional.ifPresentOrElse(value -> {\n" + 
-				"			System.out.print(value);\n" + 
-				"		}, () -> System.out.println(\"No value\"));";
+				"		optional.ifPresentOrElse(\n" + 
+				"			value -> System.out.print(value),\n" + 
+				"			() -> System.out.println(\"No value\"));";
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 

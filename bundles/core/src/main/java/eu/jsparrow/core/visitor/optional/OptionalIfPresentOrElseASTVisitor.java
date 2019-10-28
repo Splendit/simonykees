@@ -82,7 +82,7 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 			return true;
 		}
 
-		ASTNode elseBody = unwrapOrElseBody(elseStatement);
+		ASTNode elseBody = unwrapOrLambdaBody(elseStatement);
 		ExpressionStatement ifPresentOrElse = constructIfPresentOrElse(methodInvocation, thenStatement,
 				nonDiscardedGetExpressions, elseBody, identifier);
 		astRewrite.replace(ifStatement, ifPresentOrElse, null);
@@ -90,9 +90,9 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 		return true;
 	}
 
-	private ASTNode unwrapOrElseBody(Statement elseStatement) {
-		if (elseStatement.getNodeType() == ASTNode.BLOCK) {
-			Block block = (Block) elseStatement;
+	private ASTNode unwrapOrLambdaBody(Statement body) {
+		if (body.getNodeType() == ASTNode.BLOCK) {
+			Block block = (Block) body;
 			List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
 			if (statements.size() == 1) {
 				Statement statement = statements.get(0);
@@ -101,11 +101,11 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 					return expressionStatement.getExpression();
 				}
 			}
-		} else if (elseStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-			ExpressionStatement expressionStatement = (ExpressionStatement) elseStatement;
+		} else if (body.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+			ExpressionStatement expressionStatement = (ExpressionStatement) body;
 			return expressionStatement.getExpression();
 		}
-		return elseStatement;
+		return body;
 	}
 
 	private boolean isConvertibleToLambdaBody(Statement thenStatement) {
@@ -128,9 +128,11 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 		IfPresentBodyFactoryVisitor ifPresentBodyFactoryVisitor = new IfPresentBodyFactoryVisitor(
 				nonDiscardedGetExpressions, identifier, astRewrite);
 		thenStatement.accept(ifPresentBodyFactoryVisitor);
+		
+		ASTNode then = unwrapOrLambdaBody(thenStatement);
 
 		LambdaExpression lambda = NodeBuilder.newLambdaExpression(methodInvocation.getAST(),
-				astRewrite.createCopyTarget(thenStatement), identifier);
+				astRewrite.createCopyTarget(then), identifier);
 		AST ast = methodInvocation.getAST();
 		LambdaExpression orElseLambda = ast.newLambdaExpression();
 		orElseLambda.setBody(astRewrite.createCopyTarget(elseStatement));
