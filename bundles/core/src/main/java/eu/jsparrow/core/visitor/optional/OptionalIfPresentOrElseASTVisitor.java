@@ -20,9 +20,14 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
+ * It is common to have an else-statement following an Optional.isPresent check.
+ * One of the extensions of the Optional API in Java 9 is
+ * Optional.ifPresentOrElse, which performs either a Consumer or a Runnable
+ * depending on the presence of the value. This rule replaces an 'isPresent'
+ * check followed by an else-statement with a single 'ifPresentOrElse'
+ * invocation.
  * 
- * 
- * @since 3.10.0
+ * @since 3.9.0 FIXME
  *
  */
 public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisitor {
@@ -82,7 +87,7 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 			return true;
 		}
 
-		ASTNode elseBody = unwrapOrLambdaBody(elseStatement);
+		ASTNode elseBody = unwrapLambdaBody(elseStatement);
 		ExpressionStatement ifPresentOrElse = constructIfPresentOrElse(methodInvocation, thenStatement,
 				nonDiscardedGetExpressions, elseBody, identifier);
 		astRewrite.replace(ifStatement, ifPresentOrElse, null);
@@ -90,7 +95,7 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 		return true;
 	}
 
-	private ASTNode unwrapOrLambdaBody(Statement body) {
+	private ASTNode unwrapLambdaBody(Statement body) {
 		if (body.getNodeType() == ASTNode.BLOCK) {
 			Block block = (Block) body;
 			List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
@@ -128,11 +133,10 @@ public class OptionalIfPresentOrElseASTVisitor extends AbstractOptionalASTVisito
 		IfPresentBodyFactoryVisitor ifPresentBodyFactoryVisitor = new IfPresentBodyFactoryVisitor(
 				nonDiscardedGetExpressions, identifier, astRewrite);
 		thenStatement.accept(ifPresentBodyFactoryVisitor);
-		
-		ASTNode then = unwrapOrLambdaBody(thenStatement);
 
+		ASTNode thenLambdaBody = unwrapLambdaBody(thenStatement);
 		LambdaExpression lambda = NodeBuilder.newLambdaExpression(methodInvocation.getAST(),
-				astRewrite.createCopyTarget(then), identifier);
+				astRewrite.createCopyTarget(thenLambdaBody), identifier);
 		AST ast = methodInvocation.getAST();
 		LambdaExpression orElseLambda = ast.newLambdaExpression();
 		orElseLambda.setBody(astRewrite.createCopyTarget(elseStatement));

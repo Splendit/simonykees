@@ -43,6 +43,32 @@ public class IfPresentOrElseASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
+	public void visit_multiStatementLambdaBody_shouldTransform() throws Exception {
+		String original = "" +
+				" 		Optional<String> optional = Optional.empty();\n" + 
+				"		if(optional.isPresent()) {\n" + 
+				"			String value = optional.get();\n" + 
+				"			System.out.print(value);\n" +
+				"			System.out.print(value);\n" + 
+				"		} else {\n" + 
+				"			System.out.println(\"No value\");\n" + 
+				"		}";
+		String expected = "" +
+				"		Optional<String> optional = Optional.empty();\n" +
+				"		optional.ifPresentOrElse(value -> {\n" +
+				"				System.out.print(value);\n" +
+				"				System.out.print(value);\n" +
+				"			}, () -> System.out.println(\"No value\"));";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertMatch(createBlock(expected), fixture.getMethodBlock());
+	}
+	
+	
+	@Test
 	public void visit_throwsStatement_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		Optional<String> optional = Optional.empty();" +
