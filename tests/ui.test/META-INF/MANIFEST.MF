@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.ui.test
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow UI Test Fragment
 Bundle-SymbolicName: eu.jsparrow.ui.test
-Bundle-Version: 3.10.0.qualifier
+Bundle-Version: 3.11.0.qualifier
 Fragment-Host: eu.jsparrow.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
