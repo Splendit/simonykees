@@ -37,16 +37,16 @@ public class SelectRulesWizardTest {
 		fixture.setUp();
 
 		baseFragment = fixture.addPackageFragment(PACKAGE_PREFIX);
-		fixture.addCompilationUnit(baseFragment, "Class1.java");
+		fixture.addCompilationUnit(baseFragment, "Class1");
 
 		IPackageFragment sub1Fragment = fixture.addPackageFragment(PACKAGE_PREFIX + ".sub1");
-		fixture.addCompilationUnit(sub1Fragment, "Class11.java");
+		fixture.addCompilationUnit(sub1Fragment, "Class11");
 
 		IPackageFragment subsubFragment = fixture.addPackageFragment(PACKAGE_PREFIX + ".sub1.subsub");
-		fixture.addCompilationUnit(subsubFragment, "Class111.java");
+		fixture.addCompilationUnit(subsubFragment, "Class111");
 
 		IPackageFragment sub2Fragment = fixture.addPackageFragment(PACKAGE_PREFIX + ".sub2");
-		fixture.addCompilationUnit(sub2Fragment, "Class12.java");
+		fixture.addCompilationUnit(sub2Fragment, "Class12");
 	}
 
 	@AfterEach
