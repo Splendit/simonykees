@@ -5,12 +5,12 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
-import eu.jsparrow.jdtunit.JdtUnitFixture;
+import eu.jsparrow.jdtunit.JdtUnitFixtureProject;
 import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 /**
- * This test helper provides a plain {@link JdtUnitFixture} project. Any classes
+ * This test helper provides a plain {@link JdtUnitFixtureProject} project. Any classes
  * or methods have to be populated manually in your tests using the methods of
  * {@link JdtUnitFixtureClass}. For the simple version with pre-populated class
  * and method (the only version until November 2019), have a look at
@@ -18,11 +18,11 @@ import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
  */
 public abstract class UsesExtendedJDTUnitFixture {
 
-	protected static JdtUnitFixture fixtureProject;
+	protected static JdtUnitFixtureProject fixtureProject;
 
 	@BeforeAll
 	public static void setUpClass() throws Exception {
-		fixtureProject = new JdtUnitFixture();
+		fixtureProject = new JdtUnitFixtureProject();
 		fixtureProject.setUp();
 	}
 

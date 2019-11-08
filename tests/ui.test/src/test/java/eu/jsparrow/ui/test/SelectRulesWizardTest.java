@@ -14,7 +14,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.jdtunit.JdtUnitFixture;
+import eu.jsparrow.jdtunit.JdtUnitFixtureProject;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 
@@ -29,7 +29,7 @@ public class SelectRulesWizardTest {
 
 	private static final String PACKAGE_PREFIX = "eu.japsarrow.test";
 
-	private JdtUnitFixture fixture = new JdtUnitFixture();
+	private JdtUnitFixtureProject fixture = new JdtUnitFixtureProject();
 	private IPackageFragment baseFragment = null;
 
 	@BeforeEach

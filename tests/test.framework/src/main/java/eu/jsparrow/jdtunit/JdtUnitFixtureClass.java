@@ -47,9 +47,9 @@ public class JdtUnitFixtureClass {
 	private String className;
 
 	private TypeDeclaration typeDeclaration;
-	private JdtUnitFixture fixtureProject;
+	private JdtUnitFixtureProject fixtureProject;
 
-	public JdtUnitFixtureClass(JdtUnitFixture fixtureProject, IPackageFragment packageFragment, String className)
+	public JdtUnitFixtureClass(JdtUnitFixtureProject fixtureProject, IPackageFragment packageFragment, String className)
 			throws JdtUnitException {
 		this.packageFragment = packageFragment;
 		this.className = className;

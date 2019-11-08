@@ -44,7 +44,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  *
  */
 @SuppressWarnings({ "nls", "unchecked" })
-public class JdtUnitFixture {
+public class JdtUnitFixtureProject {
 
 	private static final String PROJECT_FIXTURE_NAME = "FixtureProject";
 
@@ -59,7 +59,7 @@ public class JdtUnitFixture {
 	
 	private final HashMap<String, JdtUnitFixtureClass> classes = new HashMap<>();
 
-	public JdtUnitFixture() {
+	public JdtUnitFixtureProject() {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 	}

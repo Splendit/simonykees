@@ -8,12 +8,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
-import eu.jsparrow.jdtunit.JdtUnitFixture;
+import eu.jsparrow.jdtunit.JdtUnitFixtureProject;
 import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 /**
- * This test helper provides a {@link JdtUnitFixture} project pre-populated with
+ * This test helper provides a {@link JdtUnitFixtureProject} project pre-populated with
  * a {@link JdtUnitFixtureClass} and a single method. This simulates the simple
  * approach, which we have used until November 2019. By November 2019, the
  * {@link JdtUnitFixutre} has been extended to also support the addition of
@@ -26,13 +26,13 @@ public abstract class UsesJDTUnitFixture {
 
 	private static final String METHOD_FIXTURE_NAME = "FixtureMethod"; //$NON-NLS-1$
 
-	protected static JdtUnitFixture fixtureProject;
+	protected static JdtUnitFixtureProject fixtureProject;
 	protected static JdtUnitFixtureClass fixture;
 	protected static MethodDeclaration fixtureMethod;
 
 	@BeforeAll
 	public static void setUpClass() throws Exception {
-		fixtureProject = new JdtUnitFixture();
+		fixtureProject = new JdtUnitFixtureProject();
 		fixtureProject.setUp();
 
 		fixture = fixtureProject.addCompilationUnit(CLASS_FIXTURE_NAME);
