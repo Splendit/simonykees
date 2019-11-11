@@ -13,14 +13,15 @@ import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 /**
- * This test helper provides a {@link JdtUnitFixtureProject} project pre-populated with
- * a {@link JdtUnitFixtureClass} and a single method. This simulates the simple
- * approach, which we have used until November 2019. By November 2019, the
- * {@link JdtUnitFixutre} has been extended to also support the addition of
- * classes and multiple methods per class. To achieve this, please use {@link UsesExtendedJDTUnitFixture} instead.
+ * This test helper provides a {@link JdtUnitFixtureProject} project
+ * pre-populated with a {@link JdtUnitFixtureClass} and a single method. This
+ * simulates the simple approach, which we have used until November 2019. By
+ * November 2019, the {@link JdtUnitFixutre} has been extended to also support
+ * the addition of classes and multiple methods per class. To achieve this,
+ * please use {@link UsesExtendedJDTUnitFixture} instead.
  *
  */
-public abstract class UsesJDTUnitFixture {
+public abstract class UsesSimpleJDTUnitFixture {
 
 	private static final String CLASS_FIXTURE_NAME = "FixtureClass"; //$NON-NLS-1$
 
@@ -32,6 +33,21 @@ public abstract class UsesJDTUnitFixture {
 
 	@BeforeAll
 	public static void setUpClass() throws Exception {
+		/*
+		 * TODO:
+		 * 
+		 * rename UsesJDTUnitFixture to UsesSimpleJDTUnitFixture
+		 * 
+		 * rename UsesExtendedJDTUnitFixture to UsesJDTUnitFixture
+		 * 
+		 * use inheritance to keep it clean: UsesSimpleJDTUnitFixture extends
+		 * UsesJDTUnitFixture
+		 * 
+		 * cleanup code
+		 * 
+		 * update javadoc
+		 */
+
 		fixtureProject = new JdtUnitFixtureProject();
 		fixtureProject.setUp();
 

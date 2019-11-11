@@ -15,7 +15,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @SuppressWarnings({ "nls" })
-public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
+public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	public static Stream<Arguments> createDates() {
 		return Stream.of(Arguments.of("99.00, 1, 1", "1900 + 99.00, 1, 1" ),

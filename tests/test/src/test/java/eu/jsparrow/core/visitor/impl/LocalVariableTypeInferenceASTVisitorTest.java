@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.rules.java10.LocalVariableTypeInferenceASTVisitor;
 
 @SuppressWarnings("nls")
-public class LocalVariableTypeInferenceASTVisitorTest extends UsesJDTUnitFixture {
+public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private static final String JAVA_UTIL_MAP = java.util.Map.class.getName();
 	private static final String JAVA_UTIL_LIST = java.util.List.class.getName();

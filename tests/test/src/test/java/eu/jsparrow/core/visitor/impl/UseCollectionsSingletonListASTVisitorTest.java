@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("nls")
-public class UseCollectionsSingletonListASTVisitorTest extends UsesJDTUnitFixture {
+public class UseCollectionsSingletonListASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private UseCollectionsSingletonListASTVisitor visitor;
 	

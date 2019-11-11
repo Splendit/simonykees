@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.rules.common.visitor.helper.VariableAssignmentVisitor;
 
 @SuppressWarnings("nls")
-public class VariableAssignmentVisitorTest extends UsesJDTUnitFixture {
+public class VariableAssignmentVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private static final String JAVA_UTIL_DATE = java.util.Date.class.getName();
 

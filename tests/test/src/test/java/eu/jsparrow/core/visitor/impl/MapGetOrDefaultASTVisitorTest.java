@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("nls")
-public class MapGetOrDefaultASTVisitorTest extends UsesJDTUnitFixture {
+public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private MapGetOrDefaultASTVisitor visitor;
 	

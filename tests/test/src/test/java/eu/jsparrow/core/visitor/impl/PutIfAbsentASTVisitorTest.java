@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
 @SuppressWarnings("nls")
-public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
+public class PutIfAbsentASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private PutIfAbsentASTVisitor visitor;
 	

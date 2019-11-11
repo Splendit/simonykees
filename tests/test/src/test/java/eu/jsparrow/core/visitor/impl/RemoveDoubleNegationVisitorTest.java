@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("nls")
-public class RemoveDoubleNegationVisitorTest extends UsesJDTUnitFixture {
+public class RemoveDoubleNegationVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private RemoveDoubleNegationASTVisitor visitor;
 

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "nls" })
-public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
+public class CollapseIfStatementsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private CollapseIfStatementsASTVisitor visitor;
 	

@@ -6,11 +6,11 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
+import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.bufferedreader.BufferedReaderLinesASTVisitor;
 
 @SuppressWarnings("nls")
-public class BufferedReaderLinesForLoopsASTVisitorTest extends UsesJDTUnitFixture  {
+public class BufferedReaderLinesForLoopsASTVisitorTest extends UsesSimpleJDTUnitFixture  {
 	
 	private BufferedReaderLinesASTVisitor visitor;
 

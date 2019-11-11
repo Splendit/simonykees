@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("nls")
-public class InsertBreakStatementInLoopsASTVisitorTest extends UsesJDTUnitFixture {
+public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
 	private InsertBreakStatementInLoopsASTVisitor visitor;
 	

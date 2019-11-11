@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.visitor.factory.methods.CollectionsFactoryMethodsASTVisitor;
 
 @SuppressWarnings("nls")
-public class CollectionsFactoryMethodsASTVisitorTest extends UsesJDTUnitFixture {
+public class CollectionsFactoryMethodsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
 	private static final String JAVA_UTIL_MAP = java.util.Map.class.getName();
 	private static final String JAVA_UTIL_LIST = java.util.List.class.getName();

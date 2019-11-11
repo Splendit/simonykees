@@ -6,11 +6,11 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
+import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachMapASTVisitor;
 
 @SuppressWarnings("nls")
-public class LambdaForEachMapASTVisitorTest extends UsesJDTUnitFixture {
+public class LambdaForEachMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
 	private LambdaForEachMapASTVisitor visitor;
 	

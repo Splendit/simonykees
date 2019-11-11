@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
 @SuppressWarnings("nls")
-public class StatementLambdaToExpressionASTVisitorTest extends UsesJDTUnitFixture {
+public class StatementLambdaToExpressionASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private StatementLambdaToExpressionASTVisitor visitor;
 

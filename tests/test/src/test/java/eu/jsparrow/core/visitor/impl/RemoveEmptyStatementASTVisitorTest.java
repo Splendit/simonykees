@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("nls")
-public class RemoveEmptyStatementASTVisitorTest extends UsesJDTUnitFixture {
+public class RemoveEmptyStatementASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private RemoveEmptyStatementASTVisitor visitor;
 

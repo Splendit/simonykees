@@ -14,7 +14,7 @@ import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
  * or methods have to be populated manually in your tests using the methods of
  * {@link JdtUnitFixtureClass}. For the simple version with pre-populated class
  * and method (the only version until November 2019), have a look at
- * {@link UsesJDTUnitFixture}.
+ * {@link UsesSimpleJDTUnitFixture}.
  */
 public abstract class UsesExtendedJDTUnitFixture {
 

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
 @SuppressWarnings({ "nls" })
-public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesJDTUnitFixture {
+public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private PrimitiveObjectUseEqualsASTVisitor visitor;
 	

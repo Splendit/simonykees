@@ -5,11 +5,11 @@ import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
+import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.optional.OptionalIfPresentOrElseASTVisitor;
 
 @SuppressWarnings("nls")
-public class IfPresentOrElseASTVisitorTest extends UsesJDTUnitFixture {
+public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
 	private OptionalIfPresentOrElseASTVisitor visitor;
 	

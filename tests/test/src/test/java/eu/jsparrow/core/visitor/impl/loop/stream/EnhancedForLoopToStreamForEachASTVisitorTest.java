@@ -6,11 +6,11 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
+import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamForEachASTVisitor;
 
 @SuppressWarnings("nls")
-public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesJDTUnitFixture {
+public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
 	private EnhancedForLoopToStreamForEachASTVisitor visitor;
 	

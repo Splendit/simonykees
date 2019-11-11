@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
  *
  */
 @SuppressWarnings("nls")
-public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
+public class UseStringBuilderAppendASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private UseStringBuilderAppendASTVisitor visitor;
 

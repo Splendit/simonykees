@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
 @SuppressWarnings({ "nls" })
-public class EnumsWithoutEqualsASTVisitorTest extends UsesJDTUnitFixture {
+public class EnumsWithoutEqualsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private EnumsWithoutEqualsASTVisitor visitor;
 	
