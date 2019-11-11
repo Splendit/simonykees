@@ -18,7 +18,7 @@ import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
  * simulates the simple approach, which we have used until November 2019. By
  * November 2019, the {@link JdtUnitFixutre} has been extended to also support
  * the addition of classes and multiple methods per class. To achieve this,
- * please use {@link UsesExtendedJDTUnitFixture} instead.
+ * please use {@link UsesJDTUnitFixture} instead.
  *
  */
 public abstract class UsesSimpleJDTUnitFixture {

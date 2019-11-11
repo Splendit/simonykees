@@ -16,7 +16,7 @@ import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
  * and method (the only version until November 2019), have a look at
  * {@link UsesSimpleJDTUnitFixture}.
  */
-public abstract class UsesExtendedJDTUnitFixture {
+public abstract class UsesJDTUnitFixture {
 
 	protected static JdtUnitFixtureProject fixtureProject;
 
