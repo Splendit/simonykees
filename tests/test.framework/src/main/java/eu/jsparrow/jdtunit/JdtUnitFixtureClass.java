@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
@@ -298,6 +299,15 @@ public class JdtUnitFixtureClass {
 	 */
 	public boolean hasChanged() {
 		return hasChanged;
+	}
+
+	/**
+	 * Deletes this compilation unit
+	 * 
+	 * @throws JavaModelException
+	 */
+	void delete() throws JavaModelException {
+		compilationUnit.delete(true, new NullProgressMonitor());
 	}
 
 	private void createCompilationUnit() throws JdtUnitException {

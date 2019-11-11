@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import eu.jsparrow.jdtunit.util.JavaProjectBuilder;
@@ -52,6 +53,19 @@ public class JdtUnitFixtureProject {
 			.build();
 
 		packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
+	}
+
+	/**
+	 * Removes all classes from the stubbed project
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void clear() throws JavaModelException {
+		for (JdtUnitFixtureClass clazz : classes.values()) {
+			clazz.delete();
+		}
+
+		classes.clear();
 	}
 
 	/**
