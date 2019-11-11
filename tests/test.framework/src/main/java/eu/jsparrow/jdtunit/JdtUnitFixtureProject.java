@@ -1,62 +1,33 @@
 package eu.jsparrow.jdtunit;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.text.edits.TextEdit;
 
-import eu.jsparrow.jdtunit.util.CompilationUnitBuilder;
 import eu.jsparrow.jdtunit.util.JavaProjectBuilder;
 import eu.jsparrow.jdtunit.util.PackageFragmentBuilder;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * <p>
- * Fixture class that stubs a JDT compilation unit. Within that compilation unit
- * ASTNodes can be inserted and deleted. In order to get working type bindings
- * for any AST created within the stubbed compilation unit a full java project
- * is created in code.
- * </p>
- * 
- * @author Hans-Jörg Schrödl
+ * Class for stubbing a fixture project with the possibility to add several
+ * compilation units.
  *
  */
-@SuppressWarnings({ "nls", "unchecked" })
+@SuppressWarnings({ "nls" })
 public class JdtUnitFixtureProject {
 
 	private static final String PROJECT_FIXTURE_NAME = "FixtureProject";
-
 	private static final String PACKAGE_FIXTURE_NAME = "fixturepackage";
-
-	
 
 	private IJavaProject javaProject;
 	private IPackageFragment packageFragment;
 
 	protected final HashMap<String, String> options = new HashMap<>();
-	
+
 	private final HashMap<String, JdtUnitFixtureClass> classes = new HashMap<>();
 
 	public JdtUnitFixtureProject() {
@@ -65,12 +36,10 @@ public class JdtUnitFixtureProject {
 	}
 
 	/**
-	 * Creates the fixture. Elements set up are:
+	 * Creates the fixture project. Elements set up are:
 	 * <ul>
 	 * <li>A stub java project
 	 * <li>A stub package within that project
-	 * <li>A stub file within that package
-	 * <li>A class containing a single method within that file
 	 * </ul>
 	 * 
 	 * @throws JdtUnitException
@@ -85,7 +54,6 @@ public class JdtUnitFixtureProject {
 		packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
 	}
 
-
 	/**
 	 * Removes the fixture by deleting the stubbed elements.
 	 * 
@@ -96,19 +64,59 @@ public class JdtUnitFixtureProject {
 			.delete(true, null);
 	}
 
+	/**
+	 * Adds a new package fragment to the stubbed project
+	 * 
+	 * @param name
+	 *            name of the new package
+	 * @return
+	 * @throws JdtUnitException
+	 */
 	public IPackageFragment addPackageFragment(String name) throws JdtUnitException {
 		return new PackageFragmentBuilder(javaProject).setName(name)
 			.build();
 	}
 
+	/**
+	 * Adds a new compilation unit to the default stubbed package in the stubbed
+	 * project
+	 * 
+	 * @param className
+	 *            name of the new compilation unit
+	 * @return
+	 * @throws JdtUnitException
+	 */
 	public JdtUnitFixtureClass addCompilationUnit(String className) throws JdtUnitException {
 		return addCompilationUnit(packageFragment, className);
 	}
-	
-	public JdtUnitFixtureClass addCompilationUnit(IPackageFragment packageFragment, String className) throws JdtUnitException {
+
+	/**
+	 * Adds a new compilation unit to the specified package of the stubbed
+	 * project
+	 * 
+	 * @param packageFragment
+	 *            package for adding the compilation unit
+	 * @param className
+	 *            name of the new compilation unit
+	 * @return
+	 * @throws JdtUnitException
+	 */
+	public JdtUnitFixtureClass addCompilationUnit(IPackageFragment packageFragment, String className)
+			throws JdtUnitException {
 		JdtUnitFixtureClass clazz = new JdtUnitFixtureClass(this, packageFragment, className);
 		classes.put(className, clazz);
 		return clazz;
+	}
+
+	/**
+	 * Returns the specified compilation unit, if it exists
+	 * 
+	 * @param className
+	 *            name of the compilation unit
+	 * @return
+	 */
+	public Optional<JdtUnitFixtureClass> getCompilationUnit(String className) {
+		return Optional.ofNullable(classes.get(className));
 	}
 
 	public HashMap<String, String> getOptions() {

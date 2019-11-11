@@ -6,10 +6,9 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 
-import eu.jsparrow.jdtunit.JdtUnitFixtureProject;
 import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
+import eu.jsparrow.jdtunit.JdtUnitFixtureProject;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 /**
@@ -33,24 +32,9 @@ public abstract class UsesSimpleJDTUnitFixture {
 
 	@BeforeAll
 	public static void setUpClass() throws Exception {
-		/*
-		 * TODO:
-		 * 
-		 * rename UsesJDTUnitFixture to UsesSimpleJDTUnitFixture
-		 * 
-		 * rename UsesExtendedJDTUnitFixture to UsesJDTUnitFixture
-		 * 
-		 * use inheritance to keep it clean: UsesSimpleJDTUnitFixture extends
-		 * UsesJDTUnitFixture
-		 * 
-		 * cleanup code
-		 * 
-		 * update javadoc
-		 */
-
 		fixtureProject = new JdtUnitFixtureProject();
 		fixtureProject.setUp();
-
+		
 		fixture = fixtureProject.addCompilationUnit(CLASS_FIXTURE_NAME);
 		fixture.addMethod(METHOD_FIXTURE_NAME);
 	}
@@ -60,19 +44,12 @@ public abstract class UsesSimpleJDTUnitFixture {
 		fixtureProject.tearDown();
 	}
 
-	@BeforeEach
-	public void setUpTest() throws Exception {
-
-	}
-
 	@AfterEach
 	public void tearDownTest() throws Exception {
-		fixture.clear();
-
+		fixture.clear(true);
 	}
 
 	protected Block createBlock(String string) throws Exception {
 		return ASTNodeBuilder.createBlock(string);
 	}
-
 }

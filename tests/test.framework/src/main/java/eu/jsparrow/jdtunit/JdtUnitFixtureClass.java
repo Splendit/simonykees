@@ -2,6 +2,7 @@ package eu.jsparrow.jdtunit;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -26,62 +27,49 @@ import org.eclipse.text.edits.TextEdit;
 import eu.jsparrow.jdtunit.util.CompilationUnitBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
-@SuppressWarnings("unchecked")
+/**
+ * <p>
+ * Fixture class that stubs a JDT compilation unit. Within that compilation unit
+ * ASTNodes can be inserted and deleted.
+ * 
+ * In order to get working type bindings for any AST created within the stubbed
+ * compilation unit a full java project is created in code. This is done in
+ * {@link JdtUnitFixtureProject}.
+ * 
+ * {@link JdtUnitFixtureClass} can only be created using the
+ * {@link JdtUnitFixtureProject#addCompilationUnit()} method.
+ * </p>
+ * 
+ * @author Hans-Jörg Schrödl
+ *
+ */
+@SuppressWarnings({ "unchecked", "nls" })
 public class JdtUnitFixtureClass {
 
 	private static final String DEFAULT_METHOD_FIXTURE_NAME = "FixtureMethod";
 
+	private JdtUnitFixtureProject fixtureProject;
 	private ICompilationUnit compilationUnit;
+	private IPackageFragment packageFragment;
 
 	private CompilationUnit astRoot;
-
 	private AST ast;
-
 	private ASTRewrite astRewrite;
 
-	private boolean hasChanged = false;
+	private String className;
+	private TypeDeclaration typeDeclaration;
 
 	private HashMap<String, MethodDeclaration> methods = new HashMap<>();
 
-	private IPackageFragment packageFragment;
-	private String className;
+	private boolean hasChanged = false;
 
-	private TypeDeclaration typeDeclaration;
-	private JdtUnitFixtureProject fixtureProject;
-
-	public JdtUnitFixtureClass(JdtUnitFixtureProject fixtureProject, IPackageFragment packageFragment, String className)
+	JdtUnitFixtureClass(JdtUnitFixtureProject fixtureProject, IPackageFragment packageFragment, String className)
 			throws JdtUnitException {
 		this.packageFragment = packageFragment;
 		this.className = className;
 		this.fixtureProject = fixtureProject;
 
 		createCompilationUnit();
-	}
-
-	private void createCompilationUnit() throws JdtUnitException {
-		compilationUnit = new CompilationUnitBuilder(packageFragment).setName(className + ".java") //$NON-NLS-1$
-			.build();
-
-		ASTParser parser = ASTParser.newParser(AST.JLS10);
-		parser.setSource(compilationUnit);
-		parser.setResolveBindings(false);
-		astRoot = (CompilationUnit) parser.createAST(null);
-		astRoot.recordModifications();
-
-		ast = astRoot.getAST();
-
-		PackageDeclaration pd = ast.newPackageDeclaration();
-		Name astName = ast.newName(packageFragment.getElementName());
-		pd.setName(astName);
-		astRoot.setPackage(pd);
-
-		typeDeclaration = ast.newTypeDeclaration();
-		typeDeclaration.setInterface(false);
-		typeDeclaration.modifiers()
-			.add(ast.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD));
-		typeDeclaration.setName(ast.newSimpleName(className));
-		astRoot.types()
-			.add(typeDeclaration);
 	}
 
 	/**
@@ -127,11 +115,32 @@ public class JdtUnitFixtureClass {
 		return ASTNodeUtil.convertToTypedList(astRoot.imports(), ImportDeclaration.class);
 	}
 
+	/**
+	 * Adds a new empty method to the compilation unit. This method's contents
+	 * can then be changed by invoking
+	 * {@link JdtUnitFixtureClass#addMethodBlock(MethodDeclaration, String).
+	 * 
+	 * @param methodName
+	 * @return the newly created {@link MethodDeclaration}
+	 * @throws JavaModelException
+	 * @throws BadLocationException
+	 * @throws JdtUnitException
+	 */
 	public MethodDeclaration addMethod(String methodName)
 			throws JavaModelException, BadLocationException, JdtUnitException {
 		return addMethod(methodName, null);
 	}
 
+	/**
+	 * Adds a new method to the compilation unit
+	 * 
+	 * @param methodName
+	 * @param statements
+	 * @return the newly created {@link MethodDeclaration}
+	 * @throws JavaModelException
+	 * @throws BadLocationException
+	 * @throws JdtUnitException
+	 */
 	public MethodDeclaration addMethod(String methodName, String statements)
 			throws JavaModelException, BadLocationException, JdtUnitException {
 		MethodDeclaration methodDeclaration = ast.newMethodDeclaration();
@@ -148,6 +157,27 @@ public class JdtUnitFixtureClass {
 		return methodDeclaration;
 	}
 
+	/**
+	 * Returns the method with the specified name
+	 * 
+	 * @param name
+	 *            name of the method to return
+	 * @return
+	 */
+	public Optional<MethodDeclaration> getMethod(String name) {
+		return Optional.ofNullable(methods.get(name));
+	}
+
+	/**
+	 * Adds statements to the stub method and saves the compilation unit with
+	 * the changes.
+	 * 
+	 * @param statements
+	 *            the statements to add separated by semicolons
+	 * @throws JavaModelException
+	 * @throws BadLocationException
+	 * @throws JdtUnitException
+	 */
 	public void addMethodBlock(String statements) throws JavaModelException, BadLocationException, JdtUnitException {
 		MethodDeclaration methodDeclaration = methods.get(DEFAULT_METHOD_FIXTURE_NAME);
 		addMethodBlock(methodDeclaration, statements);
@@ -157,6 +187,8 @@ public class JdtUnitFixtureClass {
 	 * Adds statements to the stub method and saves the compilation unit with
 	 * the changes.
 	 * 
+	 * @param methodDeclaration
+	 *            method declaration to which the statements should be added to
 	 * @param statements
 	 *            the statements to add separated by semicolons
 	 * @throws BadLocationException
@@ -173,15 +205,37 @@ public class JdtUnitFixtureClass {
 		this.astRoot = this.saveChanges();
 	}
 
-	private CompilationUnit saveChanges() throws JavaModelException, BadLocationException {
-		Document document = new Document(compilationUnit.getSource());
-		TextEdit res = astRoot.rewrite(document, fixtureProject.getOptions());
-		res.apply(document);
-		compilationUnit.getBuffer()
-			.setContents(document.get());
+	/**
+	 * Returns the body of the default stub method.
+	 * 
+	 * @return
+	 */
+	public Block getMethodBlock() {
+		return getMethodBlock(DEFAULT_METHOD_FIXTURE_NAME);
+	}
 
-		refreshFixtures();
-		return astRoot;
+	/**
+	 * Returns the body of the sub method
+	 * 
+	 * @param methodDeclaration
+	 *            method declaration from which to get the body
+	 * @return
+	 */
+	public Block getMethodBlock(MethodDeclaration methodDeclaration) {
+		return getMethodBlock(methodDeclaration.getName()
+			.getIdentifier());
+	}
+
+	/**
+	 * Returns the body of the stub method.
+	 * 
+	 * @param methodName
+	 *            name of the method, from which to get the body
+	 * @return
+	 */
+	public Block getMethodBlock(String methodName) {
+		MethodDeclaration methodDeclaration = methods.get(methodName);
+		return methodDeclaration.getBody();
 	}
 
 	/**
@@ -204,6 +258,80 @@ public class JdtUnitFixtureClass {
 		astRoot = saveChanges(edit);
 	}
 
+	/**
+	 * Resets the Fixture to its default state
+	 * 
+	 * @param keepDefaultMethod
+	 *            when true, the default method is kept. When false, the default
+	 *            method is removed.
+	 * @throws BadLocationException
+	 * @throws JavaModelException
+	 * 
+	 */
+	public void clear(boolean keepDefaultMethod) throws JavaModelException, BadLocationException {
+		astRoot.imports()
+			.clear();
+		methods.values()
+			.stream()
+			.filter(keepDefaultMethod ? method -> !method.getName()
+				.getIdentifier()
+				.equals(DEFAULT_METHOD_FIXTURE_NAME) : method -> false)
+			.forEach(MethodDeclaration::delete);
+		methods.clear();
+
+		saveChanges();
+	}
+
+	/**
+	 * Getter for the ASTRewrite for the stub AST
+	 * 
+	 * @return
+	 */
+	public ASTRewrite getAstRewrite() {
+		return astRewrite;
+	}
+
+	/**
+	 * Convenience method to check if any edits happened on the stub AST.
+	 * 
+	 * @return True if the AST was changed since setup, false otherwise
+	 */
+	public boolean hasChanged() {
+		return hasChanged;
+	}
+
+	private void createCompilationUnit() throws JdtUnitException {
+		compilationUnit = new CompilationUnitBuilder(packageFragment).setName(className + ".java")
+			.build();
+
+		ASTParser parser = ASTParser.newParser(AST.JLS11);
+		parser.setSource(compilationUnit);
+		parser.setResolveBindings(false);
+		astRoot = (CompilationUnit) parser.createAST(null);
+		astRoot.recordModifications();
+
+		ast = astRoot.getAST();
+
+		PackageDeclaration pd = ast.newPackageDeclaration();
+		Name astName = ast.newName(packageFragment.getElementName());
+		pd.setName(astName);
+		astRoot.setPackage(pd);
+
+		typeDeclaration = ast.newTypeDeclaration();
+		typeDeclaration.setInterface(false);
+		typeDeclaration.modifiers()
+			.add(ast.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD));
+		typeDeclaration.setName(ast.newSimpleName(className));
+		astRoot.types()
+			.add(typeDeclaration);
+	}
+
+	private CompilationUnit saveChanges() throws JavaModelException, BadLocationException {
+		Document document = new Document(compilationUnit.getSource());
+		TextEdit res = astRoot.rewrite(document, fixtureProject.getOptions());
+		return saveChanges(res);
+	}
+
 	private CompilationUnit saveChanges(TextEdit textEdit) throws JavaModelException, BadLocationException {
 		Document document = new Document(compilationUnit.getSource());
 		textEdit.apply(document);
@@ -215,7 +343,7 @@ public class JdtUnitFixtureClass {
 	}
 
 	private void refreshFixtures() {
-		ASTParser parser = ASTParser.newParser(AST.JLS10);
+		ASTParser parser = ASTParser.newParser(AST.JLS11);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(true);
 
@@ -229,32 +357,8 @@ public class JdtUnitFixtureClass {
 		hasChanged = false;
 	}
 
-	public Block getMethodBlock() {
-		return getMethodBlock(DEFAULT_METHOD_FIXTURE_NAME);
-	}
-
-	/**
-	 * Returns the body of the stub method.
-	 * 
-	 * @return
-	 */
-	public Block getMethodBlock(MethodDeclaration methodDeclaration) {
-		return getMethodBlock(methodDeclaration.getName()
-			.getIdentifier());
-	}
-
-	/**
-	 * Returns the body of the stub method.
-	 * 
-	 * @return
-	 */
-	public Block getMethodBlock(String methodName) {
-		MethodDeclaration methodDeclaration = methods.get(methodName);
-		return methodDeclaration.getBody();
-	}
-
 	private Block createBlockFromString(String string) throws JdtUnitException {
-		ASTParser astParser = ASTParser.newParser(AST.JLS10);
+		ASTParser astParser = ASTParser.newParser(AST.JLS11);
 		astParser.setSource(string.toCharArray());
 		astParser.setKind(ASTParser.K_STATEMENTS);
 		ASTNode result = astParser.createAST(null);
@@ -282,43 +386,4 @@ public class JdtUnitFixtureClass {
 		return methodDeclarationMap;
 	}
 
-	/**
-	 * Resets the Fixture to its default state
-	 * 
-	 * @throws BadLocationException
-	 * @throws JavaModelException
-	 * 
-	 * @throws Exception
-	 */
-	public void clear() throws JavaModelException, BadLocationException {
-		astRoot.imports()
-			.clear();
-		methods.values()
-			.stream()
-			.filter(method -> !method.getName()
-				.getIdentifier()
-				.contentEquals(DEFAULT_METHOD_FIXTURE_NAME))
-			.forEach(MethodDeclaration::delete);
-		methods.clear();
-
-		saveChanges();
-	}
-
-	/**
-	 * Getter for the ASTRewrite for the stub AST
-	 * 
-	 * @return
-	 */
-	public ASTRewrite getAstRewrite() {
-		return astRewrite;
-	}
-
-	/**
-	 * Convenience method to check if any edits happened on the stub AST.
-	 * 
-	 * @return True if the AST was changed since setup, false otherwise
-	 */
-	public boolean hasChanged() {
-		return hasChanged;
-	}
 }
