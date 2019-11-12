@@ -1,14 +1,20 @@
 package eu.jsparrow.jdtunit;
 
-
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+@SuppressWarnings("nls")
 public final class Matchers {
 
+	/*
+	 * TODO: replace with a custom implementation of hamcrest's TypeSafeMatcher
+	 * (https://www.baeldung.com/hamcrest-custom-matchers)
+	 */
 	private Matchers() {
 
 	}
@@ -25,7 +31,21 @@ public final class Matchers {
 	public static void assertMatch(Block expected, ASTNode actual) {
 		ASTMatcher astMatcher = new ASTMatcher();
 		if (!astMatcher.match(expected, actual)) {
-			fail("ASTNodes do not match. expected:" + expected.toString() +", actual:"+ actual.toString()); //$NON-NLS-1$
+			fail("ASTNodes do not match. expected:" + expected.toString() + ", actual:" + actual.toString());
+		}
+	}
+
+	public static void assertMatch(CompilationUnit expected, ASTNode actual) {
+		ASTMatcher astMatcher = new ASTMatcher();
+		if (!astMatcher.match(expected, actual)) {
+			fail("ASTNodes do not match. expected:" + expected.toString() + ", actual:" + actual.toString());
+		}
+	}
+
+	public static void assertMatch(TypeDeclaration expected, ASTNode actual) {
+		ASTMatcher astMatcher = new ASTMatcher();
+		if (!astMatcher.match(expected, actual)) {
+			fail("ASTNodes do not match. expected:" + expected.toString() + ", actual:" + actual.toString());
 		}
 	}
 }
