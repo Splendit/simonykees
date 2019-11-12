@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.bufferedreader.BufferedReaderLinesASTVisitor;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
 public class BufferedReaderLinesForLoopsASTVisitorTest extends UsesSimpleJDTUnitFixture  {
@@ -45,7 +46,7 @@ public class BufferedReaderLinesForLoopsASTVisitorTest extends UsesSimpleJDTUnit
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 	
@@ -74,7 +75,7 @@ public class BufferedReaderLinesForLoopsASTVisitorTest extends UsesSimpleJDTUnit
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 	
@@ -95,7 +96,7 @@ public class BufferedReaderLinesForLoopsASTVisitorTest extends UsesSimpleJDTUnit
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(original);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(original);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 	
@@ -115,7 +116,7 @@ public class BufferedReaderLinesForLoopsASTVisitorTest extends UsesSimpleJDTUnit
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(original);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(original);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 	
@@ -136,7 +137,7 @@ public class BufferedReaderLinesForLoopsASTVisitorTest extends UsesSimpleJDTUnit
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(original);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(original);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 	
@@ -157,7 +158,7 @@ public class BufferedReaderLinesForLoopsASTVisitorTest extends UsesSimpleJDTUnit
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(original);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(original);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 }

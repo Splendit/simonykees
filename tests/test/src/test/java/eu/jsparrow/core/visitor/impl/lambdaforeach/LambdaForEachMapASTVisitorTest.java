@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachMapASTVisitor;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
 public class LambdaForEachMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
@@ -40,7 +41,7 @@ public class LambdaForEachMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -76,7 +77,7 @@ public class LambdaForEachMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedBlock);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedBlock);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	

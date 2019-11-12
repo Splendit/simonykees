@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.bufferedreader.BufferedReaderLinesASTVisitor;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 /**
  * Visitor tests for {@link BufferedReaderLinesASTVisitor}.
@@ -53,7 +54,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 		
 	}
@@ -90,7 +91,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 		
 	}
@@ -122,7 +123,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 		
 	}
@@ -143,7 +144,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -164,7 +165,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -184,7 +185,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -204,7 +205,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -225,7 +226,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -244,7 +245,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -263,7 +264,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -282,7 +283,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -301,7 +302,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -320,7 +321,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -339,7 +340,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -358,7 +359,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -379,7 +380,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -401,7 +402,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(block), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(block), fixture.getMethodBlock());
 	}
 	
 	
@@ -423,7 +424,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest  extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(original);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(original);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 		
 	}

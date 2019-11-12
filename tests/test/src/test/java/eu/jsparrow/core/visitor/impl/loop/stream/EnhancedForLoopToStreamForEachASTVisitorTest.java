@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamForEachASTVisitor;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
 public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
@@ -34,7 +35,7 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -54,7 +55,7 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -79,7 +80,7 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedBlock);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedBlock);
 		assertMatch(expected, fixture.getMethodBlock());
 		
 	}
@@ -105,7 +106,7 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedBlock);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedBlock);
 		assertMatch(expected, fixture.getMethodBlock());
 		
 	}
@@ -130,7 +131,7 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesSimpleJDTU
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedBlock);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedBlock);
 		assertMatch(expected, fixture.getMethodBlock());
 		
 	}

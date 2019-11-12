@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 import eu.jsparrow.rules.java10.LocalVariableTypeInferenceASTVisitor;
 
 @SuppressWarnings("nls")
@@ -37,7 +38,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(varDeclaration);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(varDeclaration);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -52,7 +53,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(varDeclaration);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(varDeclaration);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 	
@@ -67,7 +68,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 	
@@ -81,7 +82,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -95,7 +96,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -109,7 +110,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expectedBlockContent);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expectedBlockContent);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -122,7 +123,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock("var map = new HashMap();");
+		Block expected = ASTNodeBuilder.createBlockFromString("var map = new HashMap();");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -135,7 +136,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -148,7 +149,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -160,7 +161,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -173,7 +174,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -186,7 +187,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -199,7 +200,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -212,7 +213,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -224,7 +225,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -239,7 +240,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expectedContent);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -254,7 +255,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -268,7 +269,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -281,7 +282,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -294,7 +295,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -306,7 +307,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -319,7 +320,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -332,7 +333,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
-		Block expectedBlock = createBlock("var name = new ArrayList<String>();");
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString("var name = new ArrayList<String>();");
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -344,7 +345,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock("var names = new String[][]{};");
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString("var names = new String[][]{};");
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 
 	}
@@ -357,7 +358,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 
 	}
@@ -370,7 +371,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 
 	}
@@ -383,7 +384,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock("String names[][] = {}; for(var t : names) { }");
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString("String names[][] = {}; for(var t : names) { }");
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -398,7 +399,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -413,7 +414,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock("var names = true ? new ArrayList<String>() : new LinkedList<String>();");
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString("var names = true ? new ArrayList<String>() : new LinkedList<String>();");
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -424,7 +425,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 }

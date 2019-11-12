@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings({ "nls" })
 public class EnumsWithoutEqualsASTVisitorTest extends UsesSimpleJDTUnitFixture {
@@ -28,7 +29,7 @@ public class EnumsWithoutEqualsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock("RoundingMode roundingMode; if(roundingMode == RoundingMode.UP){}");
+		Block expected = ASTNodeBuilder.createBlockFromString("RoundingMode roundingMode; if(roundingMode == RoundingMode.UP){}");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -40,7 +41,7 @@ public class EnumsWithoutEqualsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock("RoundingMode roundingMode; if(RoundingMode.UP == roundingMode){}");
+		Block expected = ASTNodeBuilder.createBlockFromString("RoundingMode roundingMode; if(RoundingMode.UP == roundingMode){}");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -52,7 +53,7 @@ public class EnumsWithoutEqualsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock("RoundingMode roundingMode; if(RoundingMode.UP != roundingMode){}");
+		Block expected = ASTNodeBuilder.createBlockFromString("RoundingMode roundingMode; if(RoundingMode.UP != roundingMode){}");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 

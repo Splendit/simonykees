@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamAnyMatchASTVisitor;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 /**
  * Visitor tests for {@link EnhancedForLoopToStreamAnyMatchASTVisitor}.
@@ -51,7 +52,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -76,7 +77,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -106,7 +107,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -131,7 +132,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -162,7 +163,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -187,7 +188,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 }

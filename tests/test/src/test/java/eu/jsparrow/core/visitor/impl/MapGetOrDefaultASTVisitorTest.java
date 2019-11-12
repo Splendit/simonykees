@@ -5,6 +5,8 @@ import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+
 @SuppressWarnings("nls")
 public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
@@ -33,7 +35,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(expected), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -52,7 +54,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(expected), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -71,7 +73,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(expected), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
 	}
 	
 	
@@ -93,7 +95,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(expected), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -113,7 +115,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(expected), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -131,7 +133,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	/*
@@ -154,7 +156,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -171,7 +173,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -188,7 +190,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -204,7 +206,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -217,7 +219,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -233,7 +235,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -249,7 +251,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -265,7 +267,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -282,7 +284,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -300,7 +302,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -321,7 +323,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 		
 	}
 }

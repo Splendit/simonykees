@@ -6,6 +6,8 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+
 @SuppressWarnings("nls")
 public class RemoveToStringOnStringASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
@@ -22,7 +24,7 @@ public class RemoveToStringOnStringASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 		
-		Block expected = createBlock("System.out.println((\"abc\" + System.getProperty(\"line.separator\", \"\\n\")).hashCode());");
+		Block expected = ASTNodeBuilder.createBlockFromString("System.out.println((\"abc\" + System.getProperty(\"line.separator\", \"\\n\")).hashCode());");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 }

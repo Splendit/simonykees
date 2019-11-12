@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.optional.OptionalIfPresentOrElseASTVisitor;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
 public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
@@ -39,7 +40,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(expected), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -64,7 +65,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(expected), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
 	}
 	
 	
@@ -85,7 +86,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -105,7 +106,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -127,7 +128,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -148,7 +149,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -169,7 +170,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -189,7 +190,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -210,7 +211,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -230,7 +231,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -247,7 +248,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -269,7 +270,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(expected), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -291,7 +292,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(expected), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
 	}
 	
 	@Test
@@ -310,7 +311,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		assertMatch(createBlock(original), fixture.getMethodBlock());
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 
 }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamTakeWhileASTVisitor;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
 public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJDTUnitFixture {
@@ -39,7 +40,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -60,7 +61,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -82,7 +83,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -106,7 +107,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -136,7 +137,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -161,7 +162,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -181,7 +182,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -202,7 +203,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -219,7 +220,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -238,7 +239,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -256,7 +257,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -275,7 +276,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -295,7 +296,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -315,7 +316,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -337,7 +338,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -355,7 +356,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -374,7 +375,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 }

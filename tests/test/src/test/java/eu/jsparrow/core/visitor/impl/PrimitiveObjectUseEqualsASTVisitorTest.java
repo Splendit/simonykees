@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings({ "nls" })
 public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesSimpleJDTUnitFixture {
@@ -29,7 +30,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesSimpleJDTUnitFix
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(String.format(template, "a.equals(b)"));
+		Block expected = ASTNodeBuilder.createBlockFromString(String.format(template, "a.equals(b)"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -40,7 +41,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesSimpleJDTUnitFix
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(String.format(template, "!a.equals(b)"));
+		Block expected = ASTNodeBuilder.createBlockFromString(String.format(template, "!a.equals(b)"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -51,7 +52,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesSimpleJDTUnitFix
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(String.format(template, "new Integer(1).equals(new Integer(2))"));
+		Block expected = ASTNodeBuilder.createBlockFromString(String.format(template, "new Integer(1).equals(new Integer(2))"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -62,7 +63,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesSimpleJDTUnitFix
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(String.format(template, "\"String1\".equals(\"String2\")"));
+		Block expected = ASTNodeBuilder.createBlockFromString(String.format(template, "\"String1\".equals(\"String2\")"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -140,7 +141,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesSimpleJDTUnitFix
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(String.format(template, "((Integer)a).equals(b)"));
+		Block expected = ASTNodeBuilder.createBlockFromString(String.format(template, "((Integer)a).equals(b)"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -151,7 +152,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesSimpleJDTUnitFix
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(String.format(template, "a.equals((Integer)b)"));
+		Block expected = ASTNodeBuilder.createBlockFromString(String.format(template, "a.equals((Integer)b)"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 

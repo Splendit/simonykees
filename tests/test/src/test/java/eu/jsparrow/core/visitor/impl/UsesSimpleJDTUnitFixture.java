@@ -1,7 +1,6 @@
 package eu.jsparrow.core.visitor.impl;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.BeforeAll;
 
 import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
 import eu.jsparrow.jdtunit.JdtUnitFixtureProject;
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 /**
  * This test helper provides a {@link JdtUnitFixtureProject} project
@@ -34,7 +32,7 @@ public abstract class UsesSimpleJDTUnitFixture {
 	public static void setUpClass() throws Exception {
 		fixtureProject = new JdtUnitFixtureProject();
 		fixtureProject.setUp();
-		
+
 		fixture = fixtureProject.addCompilationUnit(CLASS_FIXTURE_NAME);
 		fixture.addMethod(METHOD_FIXTURE_NAME);
 	}
@@ -47,9 +45,5 @@ public abstract class UsesSimpleJDTUnitFixture {
 	@AfterEach
 	public void tearDownTest() throws Exception {
 		fixture.clear(true);
-	}
-
-	protected Block createBlock(String string) throws Exception {
-		return ASTNodeBuilder.createBlockFromString(string);
 	}
 }

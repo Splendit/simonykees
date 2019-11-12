@@ -14,6 +14,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+
 @SuppressWarnings({ "nls" })
 public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
@@ -41,7 +43,7 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock(
+		Block expected = ASTNodeBuilder.createBlockFromString(
 				"Calendar calendar = Calendar.getInstance(); calendar.set(" + dateConfigPost + "); Date d = calendar.getTime();");
 		assertMatch(expected, fixture.getMethodBlock());
 		ImportDeclaration expectedAddedImport = fixture.getAstRewrite()
@@ -63,7 +65,7 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock(
+		Block expected = ASTNodeBuilder.createBlockFromString(
 				"Calendar calendar = Calendar.getInstance(); calendar.set(" + dateConfigPost + "); calendar.getTime();");
 		assertMatch(expected, fixture.getMethodBlock());
 		ImportDeclaration expectedAddedImport = fixture.getAstRewrite()
@@ -85,7 +87,7 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock("new String(\"Hellow\"); Calendar calendar = Calendar.getInstance(); calendar.set("
+		Block expected = ASTNodeBuilder.createBlockFromString("new String(\"Hellow\"); Calendar calendar = Calendar.getInstance(); calendar.set("
 				+ dateConfigPost + "); Date d = calendar.getTime();");
 		assertMatch(expected, fixture.getMethodBlock());
 		ImportDeclaration expectedAddedImport = fixture.getAstRewrite()
@@ -106,7 +108,7 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		fixture.addMethodBlock("if(true) new Date(" + dateConfigPre + ");");
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
-		Block expected = createBlock(
+		Block expected = ASTNodeBuilder.createBlockFromString(
 				"if(true){ Calendar calendar = Calendar.getInstance(); calendar.set(" + dateConfigPost + "); calendar.getTime();}");
 		assertMatch(expected, fixture.getMethodBlock());
 		ImportDeclaration expectedAddedImport = fixture.getAstRewrite()
@@ -128,7 +130,7 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock(
+		Block expected = ASTNodeBuilder.createBlockFromString(
 				"int calendar; double calendar2; Calendar calendar3 = Calendar.getInstance(); calendar3.set(" + dateConfigPost + "); Date calendar1 = calendar3.getTime();");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
@@ -140,7 +142,7 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock(
+		Block expected = ASTNodeBuilder.createBlockFromString(
 				"Calendar calendar = Calendar.getInstance(); "
 				+ "calendar.set(" + dateConfigPost + "); "
 				+ "Date d = calendar.getTime();"
@@ -158,7 +160,7 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock(
+		Block expected = ASTNodeBuilder.createBlockFromString(
 				"Date date = new Date();");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
