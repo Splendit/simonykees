@@ -50,6 +50,6 @@ public abstract class UsesSimpleJDTUnitFixture {
 	}
 
 	protected Block createBlock(String string) throws Exception {
-		return ASTNodeBuilder.createBlock(string);
+		return ASTNodeBuilder.createBlockFromString(string);
 	}
 }

@@ -32,6 +32,6 @@ public abstract class UsesJDTUnitFixture {
 	}
 
 	protected Block createBlock(String string) throws Exception {
-		return ASTNodeBuilder.createBlock(string);
+		return ASTNodeBuilder.createBlockFromString(string);
 	}
 }
