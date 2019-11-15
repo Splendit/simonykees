@@ -25,6 +25,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEdit;
 
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 import eu.jsparrow.jdtunit.util.CompilationUnitBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -65,11 +66,11 @@ public class JdtUnitFixtureClass {
 	private boolean hasChanged = false;
 
 	JdtUnitFixtureClass(JdtUnitFixtureProject fixtureProject, IPackageFragment packageFragment, String className)
-			throws JdtUnitException {
+			throws JdtUnitException, JavaModelException, BadLocationException {
 		this.packageFragment = packageFragment;
 		this.className = className;
 		this.fixtureProject = fixtureProject;
-
+		
 		createCompilationUnit();
 	}
 
@@ -129,11 +130,12 @@ public class JdtUnitFixtureClass {
 	 */
 	public MethodDeclaration addMethod(String methodName)
 			throws JavaModelException, BadLocationException, JdtUnitException {
-		return addMethod(methodName, null);
+		return addMethod(methodName, null, null);
 	}
 
 	/**
-	 * Adds a new method to the compilation unit
+	 * Adds a new method with default modifiers and the given statements to the
+	 * compilation unit
 	 * 
 	 * @param methodName
 	 * @param statements
@@ -144,11 +146,52 @@ public class JdtUnitFixtureClass {
 	 */
 	public MethodDeclaration addMethod(String methodName, String statements)
 			throws JavaModelException, BadLocationException, JdtUnitException {
+		return addMethod(methodName, statements, null);
+	}
+
+	/**
+	 * Adds a new empty method with the specified modifiers to the compilation
+	 * unit
+	 * 
+	 * @param methodName
+	 * @param modifiers
+	 * @return
+	 * @throws JavaModelException
+	 * @throws BadLocationException
+	 * @throws JdtUnitException
+	 */
+	public MethodDeclaration addMethod(String methodName, List<Modifier> modifiers)
+			throws JavaModelException, BadLocationException, JdtUnitException {
+		return addMethod(methodName, null, modifiers);
+	}
+
+	/**
+	 * Adds a new method with the given statements and modifiers to the
+	 * compilation unit
+	 * 
+	 * @param methodName
+	 * @param statements
+	 * @param modifiers
+	 * @return
+	 * @throws JavaModelException
+	 * @throws BadLocationException
+	 * @throws JdtUnitException
+	 */
+	public MethodDeclaration addMethod(String methodName, String statements, List<Modifier> modifiers)
+			throws JavaModelException, BadLocationException, JdtUnitException {
 		MethodDeclaration methodDeclaration = ast.newMethodDeclaration();
 		methodDeclaration.setName(ast.newSimpleName(methodName));
+
+		if (modifiers != null && !modifiers.isEmpty()) {
+			methodDeclaration.modifiers()
+				.addAll(modifiers);
+		}
+
 		typeDeclaration.bodyDeclarations()
 			.add(methodDeclaration);
 
+		//this.astRoot = this.saveChanges();
+		
 		if (statements != null && !statements.isEmpty()) {
 			addMethodBlock(methodDeclaration, statements);
 		}
@@ -199,7 +242,8 @@ public class JdtUnitFixtureClass {
 	 */
 	public void addMethodBlock(MethodDeclaration methodDeclaration, String statements)
 			throws JavaModelException, BadLocationException, JdtUnitException {
-		ASTNode convertedAstNodeWithMethodBody = ASTNode.copySubtree(ast, createBlockFromString(statements));
+		ASTNode convertedAstNodeWithMethodBody = ASTNode.copySubtree(ast,
+				ASTNodeBuilder.createBlockFromString(statements));
 		Block block = (Block) convertedAstNodeWithMethodBody;
 
 		methodDeclaration.setBody(block);
@@ -239,6 +283,25 @@ public class JdtUnitFixtureClass {
 		return methodDeclaration.getBody();
 	}
 
+	public void addTypeDeclarationFromString(String typeDeclarationName, String typeDeclarationString)
+			throws JdtUnitException, JavaModelException, BadLocationException {
+		ASTNode convertedAstNodeWithMethodBody = ASTNode.copySubtree(ast,
+				ASTNodeBuilder.createTypeDeclarationFromString(typeDeclarationName, typeDeclarationString));
+		typeDeclaration = (TypeDeclaration) convertedAstNodeWithMethodBody;
+
+		astRoot.types()
+			.clear();
+		methods.clear();
+		astRoot.types()
+			.add(typeDeclaration);
+		
+		this.astRoot = this.saveChanges();
+	}
+	
+	public TypeDeclaration getTypeDeclaration() {
+		return typeDeclaration;
+	}
+
 	/**
 	 * Accepts an ASTVisitor at the root of the stub file. If the visitor makes
 	 * changes to the AST these changes are saved.
@@ -267,9 +330,10 @@ public class JdtUnitFixtureClass {
 	 *            method is removed.
 	 * @throws BadLocationException
 	 * @throws JavaModelException
+	 * @throws JdtUnitException
 	 * 
 	 */
-	public void clear(boolean keepDefaultMethod) throws JavaModelException, BadLocationException {
+	public void clear(boolean keepDefaultMethod) throws JavaModelException, BadLocationException, JdtUnitException {
 		astRoot.imports()
 			.clear();
 		methods.values()
@@ -310,7 +374,7 @@ public class JdtUnitFixtureClass {
 		compilationUnit.delete(true, new NullProgressMonitor());
 	}
 
-	private void createCompilationUnit() throws JdtUnitException {
+	private void createCompilationUnit() throws JdtUnitException, JavaModelException, BadLocationException {
 		compilationUnit = new CompilationUnitBuilder(packageFragment).setName(className + ".java")
 			.build();
 
@@ -334,6 +398,8 @@ public class JdtUnitFixtureClass {
 		typeDeclaration.setName(ast.newSimpleName(className));
 		astRoot.types()
 			.add(typeDeclaration);
+		
+		//this.astRoot = this.saveChanges();
 	}
 
 	private CompilationUnit saveChanges() throws JavaModelException, BadLocationException {
@@ -364,23 +430,8 @@ public class JdtUnitFixtureClass {
 			.get(0);
 		methods = convertMethodDeclarationArrayToMap(typeDecl.getMethods());
 		astRewrite = ASTRewrite.create(astRoot.getAST());
+		typeDeclaration = (TypeDeclaration) astRoot.types().get(0);
 		hasChanged = false;
-	}
-
-	private Block createBlockFromString(String string) throws JdtUnitException {
-		ASTParser astParser = ASTParser.newParser(AST.JLS11);
-		astParser.setSource(string.toCharArray());
-		astParser.setKind(ASTParser.K_STATEMENTS);
-		ASTNode result = astParser.createAST(null);
-		if ((result.getFlags() & ASTNode.MALFORMED) == ASTNode.MALFORMED) {
-			throw new JdtUnitException(String.format("Malformed statements. Failed to parse '%s'.", string));
-		}
-		Block block = (Block) result;
-		if (block.statements()
-			.isEmpty()) {
-			throw new JdtUnitException("Can not create an empty block. There might be syntax errors");
-		}
-		return block;
 	}
 
 	private HashMap<String, MethodDeclaration> convertMethodDeclarationArrayToMap(
@@ -396,4 +447,7 @@ public class JdtUnitFixtureClass {
 		return methodDeclarationMap;
 	}
 
+	public ICompilationUnit getICompilationUnit() {
+		return compilationUnit;
+	}
 }

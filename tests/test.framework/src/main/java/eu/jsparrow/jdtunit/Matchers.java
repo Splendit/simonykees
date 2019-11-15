@@ -31,21 +31,21 @@ public final class Matchers {
 	public static void assertMatch(Block expected, ASTNode actual) {
 		ASTMatcher astMatcher = new ASTMatcher();
 		if (!astMatcher.match(expected, actual)) {
-			fail("ASTNodes do not match. expected:" + expected.toString() + ", actual:" + actual.toString());
+			fail("ASTNodes do not match. expected:\n" + expected.toString() + "\n, actual:\n" + actual.toString());
 		}
 	}
 
 	public static void assertMatch(CompilationUnit expected, ASTNode actual) {
 		ASTMatcher astMatcher = new ASTMatcher();
 		if (!astMatcher.match(expected, actual)) {
-			fail("ASTNodes do not match. expected:" + expected.toString() + ", actual:" + actual.toString());
+			fail("ASTNodes do not match. expected:\n" + expected.toString() + "\n, actual:\n" + actual.toString());
 		}
 	}
 
 	public static void assertMatch(TypeDeclaration expected, ASTNode actual) {
 		ASTMatcher astMatcher = new ASTMatcher();
 		if (!astMatcher.match(expected, actual)) {
-			fail("ASTNodes do not match. expected:" + expected.toString() + ", actual:" + actual.toString());
+			fail("ASTNodes do not match. expected:\n" + expected.toString() + "\n, actual:\n" + actual.toString());
 		}
 	}
 }

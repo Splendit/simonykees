@@ -42,8 +42,11 @@ public class ASTNodeBuilder {
 		return block;
 	}
 
-	public static TypeDeclaration createTypeDeclarationFromString(String string) throws JdtUnitException {
+	public static TypeDeclaration createTypeDeclarationFromString(String typeDeclarationName, String string)
+			throws JdtUnitException {
 		TypeDeclaration typeDeclaration = prepareAstNode(string, TypeDeclaration.class);
+		typeDeclaration.setName(typeDeclaration.getAST()
+			.newSimpleName(typeDeclarationName));
 		if (typeDeclaration.bodyDeclarations()
 			.isEmpty()) {
 			throw new JdtUnitException("Cannot create an empty type declaration. There might be syntax errors");

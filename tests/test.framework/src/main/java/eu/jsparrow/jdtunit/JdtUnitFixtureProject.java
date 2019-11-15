@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jface.text.BadLocationException;
 
 import eu.jsparrow.jdtunit.util.JavaProjectBuilder;
 import eu.jsparrow.jdtunit.util.PackageFragmentBuilder;
@@ -51,7 +52,7 @@ public class JdtUnitFixtureProject {
 		javaProject = new JavaProjectBuilder().name(PROJECT_FIXTURE_NAME)
 			.options(options)
 			.build();
-
+		
 		packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
 	}
 
@@ -99,8 +100,10 @@ public class JdtUnitFixtureProject {
 	 *            name of the new compilation unit
 	 * @return
 	 * @throws JdtUnitException
+	 * @throws BadLocationException 
+	 * @throws JavaModelException 
 	 */
-	public JdtUnitFixtureClass addCompilationUnit(String className) throws JdtUnitException {
+	public JdtUnitFixtureClass addCompilationUnit(String className) throws JdtUnitException, JavaModelException, BadLocationException {
 		return addCompilationUnit(packageFragment, className);
 	}
 
@@ -114,9 +117,11 @@ public class JdtUnitFixtureProject {
 	 *            name of the new compilation unit
 	 * @return
 	 * @throws JdtUnitException
+	 * @throws BadLocationException 
+	 * @throws JavaModelException 
 	 */
 	public JdtUnitFixtureClass addCompilationUnit(IPackageFragment packageFragment, String className)
-			throws JdtUnitException {
+			throws JdtUnitException, JavaModelException, BadLocationException {
 		JdtUnitFixtureClass clazz = new JdtUnitFixtureClass(this, packageFragment, className);
 		classes.put(className, clazz);
 		return clazz;
@@ -137,4 +142,7 @@ public class JdtUnitFixtureProject {
 		return options;
 	}
 
+	public IJavaProject getJavaProject() {
+		return javaProject;
+	}
 }
