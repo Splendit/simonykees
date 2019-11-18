@@ -29,6 +29,20 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * This visitor checks, if the current class is a utility class. This is defined
+ * by the following:
+ * <ul>
+ * <li>no constructor is declared</li>
+ * <li>only static methods are defined</li>
+ * <li>a main method isn't present</li>
+ * <li>the default constructor isn't invoked anywhere</li>
+ * </ul>
+ * If it is a utility class, the default constructor will be hidden by
+ * introducing a private constructor.
+ *
+ * @since 3.11.0
+ */
 @SuppressWarnings({ "unchecked", "nls" })
 public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractASTRewriteASTVisitor {
 

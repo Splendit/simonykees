@@ -52,7 +52,7 @@ public class JdtUnitFixtureProject {
 		javaProject = new JavaProjectBuilder().name(PROJECT_FIXTURE_NAME)
 			.options(options)
 			.build();
-		
+
 		packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
 	}
 
@@ -100,10 +100,11 @@ public class JdtUnitFixtureProject {
 	 *            name of the new compilation unit
 	 * @return
 	 * @throws JdtUnitException
-	 * @throws BadLocationException 
-	 * @throws JavaModelException 
+	 * @throws BadLocationException
+	 * @throws JavaModelException
 	 */
-	public JdtUnitFixtureClass addCompilationUnit(String className) throws JdtUnitException, JavaModelException, BadLocationException {
+	public JdtUnitFixtureClass addCompilationUnit(String className)
+			throws JdtUnitException, JavaModelException, BadLocationException {
 		return addCompilationUnit(packageFragment, className);
 	}
 
@@ -117,8 +118,8 @@ public class JdtUnitFixtureProject {
 	 *            name of the new compilation unit
 	 * @return
 	 * @throws JdtUnitException
-	 * @throws BadLocationException 
-	 * @throws JavaModelException 
+	 * @throws BadLocationException
+	 * @throws JavaModelException
 	 */
 	public JdtUnitFixtureClass addCompilationUnit(IPackageFragment packageFragment, String className)
 			throws JdtUnitException, JavaModelException, BadLocationException {

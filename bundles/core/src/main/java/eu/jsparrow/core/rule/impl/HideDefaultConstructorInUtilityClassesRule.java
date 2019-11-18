@@ -11,6 +11,11 @@ import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
+/**
+ * see {@link HideDefaultConstructorInUtilityClassesASTVisitor}
+ * 
+ * @since 3.11.0
+ */
 public class HideDefaultConstructorInUtilityClassesRule
 		extends RefactoringRuleImpl<HideDefaultConstructorInUtilityClassesASTVisitor> {
 
@@ -19,8 +24,8 @@ public class HideDefaultConstructorInUtilityClassesRule
 		this.visitorClass = HideDefaultConstructorInUtilityClassesASTVisitor.class;
 		this.id = "HideDefaultConstructorInUtilityClasses"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.HideDefaultConstructorInUtilityClassesRule_name,
-				Messages.HideDefaultConstructorInUtilityClassesRule_description,
-				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS));
+				Messages.HideDefaultConstructorInUtilityClassesRule_description, Duration.ofMinutes(5),
+				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS));
 	}
 
 	@Override

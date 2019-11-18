@@ -70,7 +70,7 @@ public class JdtUnitFixtureClass {
 		this.packageFragment = packageFragment;
 		this.className = className;
 		this.fixtureProject = fixtureProject;
-		
+
 		createCompilationUnit();
 	}
 
@@ -190,8 +190,6 @@ public class JdtUnitFixtureClass {
 		typeDeclaration.bodyDeclarations()
 			.add(methodDeclaration);
 
-		//this.astRoot = this.saveChanges();
-		
 		if (statements != null && !statements.isEmpty()) {
 			addMethodBlock(methodDeclaration, statements);
 		}
@@ -283,6 +281,16 @@ public class JdtUnitFixtureClass {
 		return methodDeclaration.getBody();
 	}
 
+	/**
+	 * Adds the body of a {@link TypeDeclaration}. This can be a string with
+	 * field and/or method declarations.
+	 * 
+	 * @param typeDeclarationName
+	 * @param typeDeclarationString
+	 * @throws JdtUnitException
+	 * @throws JavaModelException
+	 * @throws BadLocationException
+	 */
 	public void addTypeDeclarationFromString(String typeDeclarationName, String typeDeclarationString)
 			throws JdtUnitException, JavaModelException, BadLocationException {
 		ASTNode convertedAstNodeWithMethodBody = ASTNode.copySubtree(ast,
@@ -294,10 +302,10 @@ public class JdtUnitFixtureClass {
 		methods.clear();
 		astRoot.types()
 			.add(typeDeclaration);
-		
+
 		this.astRoot = this.saveChanges();
 	}
-	
+
 	public TypeDeclaration getTypeDeclaration() {
 		return typeDeclaration;
 	}
@@ -398,8 +406,6 @@ public class JdtUnitFixtureClass {
 		typeDeclaration.setName(ast.newSimpleName(className));
 		astRoot.types()
 			.add(typeDeclaration);
-		
-		//this.astRoot = this.saveChanges();
 	}
 
 	private CompilationUnit saveChanges() throws JavaModelException, BadLocationException {
@@ -430,7 +436,8 @@ public class JdtUnitFixtureClass {
 			.get(0);
 		methods = convertMethodDeclarationArrayToMap(typeDecl.getMethods());
 		astRewrite = ASTRewrite.create(astRoot.getAST());
-		typeDeclaration = (TypeDeclaration) astRoot.types().get(0);
+		typeDeclaration = (TypeDeclaration) astRoot.types()
+			.get(0);
 		hasChanged = false;
 	}
 
