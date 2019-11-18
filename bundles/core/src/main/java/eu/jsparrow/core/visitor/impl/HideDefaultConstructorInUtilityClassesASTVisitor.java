@@ -5,15 +5,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -41,7 +43,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * <li>the default constructor isn't invoked anywhere</li>
  * </ul>
  * If it is a utility class, the default constructor will be hidden by
- * introducing a private constructor.
+ * introducing a private constructor, which throws an
+ * {@link IllegalStateException} should it be invoked.
  *
  * @since 3.11.0
  */
@@ -49,6 +52,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	public static final Logger logger = LoggerFactory.getLogger(HideDefaultConstructorInUtilityClassesASTVisitor.class);
+
+	private static final String EXCEPTION_MESSAGE = "Utility class";
 
 	public HideDefaultConstructorInUtilityClassesASTVisitor() {
 
@@ -82,7 +87,22 @@ public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractAS
 			.getIdentifier();
 		SimpleName className = ast.newSimpleName(classNameString);
 		Modifier privateModifier = ast.newModifier(Modifier.ModifierKeyword.PRIVATE_KEYWORD);
-		Block emptyBody = ast.newBlock();
+		Type illegalStateExceptionType = ast.newSimpleType(ast.newName("IllegalStateException"));
+
+		StringLiteral exceptionMessageLiteral = ast.newStringLiteral();
+		exceptionMessageLiteral.setLiteralValue(EXCEPTION_MESSAGE);
+
+		ClassInstanceCreation classInstanceCreation = ast.newClassInstanceCreation();
+		classInstanceCreation.setType(illegalStateExceptionType);
+		astRewrite.getListRewrite(classInstanceCreation, ClassInstanceCreation.ARGUMENTS_PROPERTY)
+			.insertFirst(exceptionMessageLiteral, null);
+
+		ThrowStatement throwStatement = ast.newThrowStatement();
+		throwStatement.setExpression(classInstanceCreation);
+
+		Block throwBody = ast.newBlock();
+		astRewrite.getListRewrite(throwBody, Block.STATEMENTS_PROPERTY)
+			.insertFirst(throwStatement, null);
 
 		MethodDeclaration privateConstructor = astRewrite.getAST()
 			.newMethodDeclaration();
@@ -90,7 +110,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractAS
 		privateConstructor.setName(className);
 		privateConstructor.modifiers()
 			.add(privateModifier);
-		privateConstructor.setBody(emptyBody);
+		privateConstructor.setBody(throwBody);
 
 		astRewrite.getListRewrite(typeDeclaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY)
 			.insertFirst(privateConstructor, null);

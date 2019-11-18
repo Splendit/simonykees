@@ -516,6 +516,7 @@ class Other {
 class ClassWithStaticOverloadedMethods {
 
 	private ClassWithStaticOverloadedMethods() {
+		throw new IllegalStateException("Utility class");
 	}
 
 	public static void wrap(CheckedRunnable runable) {

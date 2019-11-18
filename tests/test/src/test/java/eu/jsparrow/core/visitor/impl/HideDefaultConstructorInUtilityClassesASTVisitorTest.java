@@ -2,8 +2,6 @@ package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -16,6 +14,10 @@ import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJDTUnitFixture {
 
 	private static final String DEFAULT_TYPE_DECLARATION_NAME = "TestCU";
+	
+	private static final String ADDED_CONSTRUCTOR = "private TestCU() {"
+												  + "	throw new IllegalStateException(\"Utility class\");"
+												  + "}";
 
 	private HideDefaultConstructorInUtilityClassesASTVisitor visitor;
 	private JdtUnitFixtureClass defaultFixture;
@@ -35,8 +37,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 	@Test
 	public void test_allCriteriaSatisfied_shouldTransform() throws Exception {
 		String actual = "public static void sayHallo() {" + "    System.out.println(\"Hallo\");" + "}";
-		String expected = "private TestCU() {" + "}" + "" + "public static void sayHallo() {"
-				+ "    System.out.println(\"Hallo\");" + "}";
+		String expected = ADDED_CONSTRUCTOR + actual;
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actual);
 
@@ -104,7 +105,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 				+ "	System.out.println(\"method named main, but wrong signature\");" + "}" + ""
 				+ "public static void test() {" + "	System.out.println(\"test method\");" + "}";
 
-		String expected = "private TestCU() {" + "}" + "" + actual;
+		String expected = ADDED_CONSTRUCTOR + actual;
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actual);
 
@@ -135,7 +136,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 				+ "public static void test() {" + "}" + "" + "public static String combine() {"
 				+ "	return testString + testInteger;" + "}";
 
-		String expected = "private TestCU() {" + "}" + actual;
+		String expected = ADDED_CONSTRUCTOR + actual;
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actual);
 
@@ -177,7 +178,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 	public void test_onlyStaticFiledsArePresent_shouldTransform() throws Exception {
 		String actual = "public static Integer field;";
 
-		String expected = "private TestCU() {" + "}" + actual;
+		String expected = ADDED_CONSTRUCTOR + actual;
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actual);
 
