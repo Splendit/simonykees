@@ -515,6 +515,9 @@ class Other {
 
 class ClassWithStaticOverloadedMethods {
 
+	private ClassWithStaticOverloadedMethods() {
+	}
+
 	public static void wrap(CheckedRunnable runable) {
 
 	}
