@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.impl;
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -150,6 +151,47 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 	public void test_nonStaticFieldsArePresent_shouldNotTransform() throws Exception {
 		String actualAndExpected = "public String testString;" + "public static Integer testInteger;" + ""
 				+ "public static void test() {" + "}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected);
+
+		visitor.setASTRewrite(defaultFixture.getAstRewrite());
+		defaultFixture.accept(visitor);
+
+		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected),
+				defaultFixture.getTypeDeclaration());
+	}
+
+	@Test
+	public void test_noMethodsAndNoFieldsArePresent_shouldNotTransform() throws Exception {
+		String actualAndExpected = "class InnerTestCU {" + "}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected);
+
+		visitor.setASTRewrite(defaultFixture.getAstRewrite());
+		defaultFixture.accept(visitor);
+
+		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected),
+				defaultFixture.getTypeDeclaration());
+	}
+
+	@Test
+	public void test_onlyStaticFiledsArePresent_shouldTransform() throws Exception {
+		String actual = "public static Integer field;";
+
+		String expected = "private TestCU() {" + "}" + actual;
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actual);
+
+		visitor.setASTRewrite(defaultFixture.getAstRewrite());
+		defaultFixture.accept(visitor);
+
+		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, expected),
+				defaultFixture.getTypeDeclaration());
+	}
+
+	@Test
+	public void test_onlyStaticAndNonStaticFiledsArePresent_shouldNotTransform() throws Exception {
+		String actualAndExpected = "public static Integer field;" + "public String stringField;";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected);
 

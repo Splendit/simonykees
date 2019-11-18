@@ -61,6 +61,10 @@ public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractAS
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 
+		if (typeDeclaration.getFields().length == 0 && typeDeclaration.getMethods().length == 0) {
+			return false;
+		}
+
 		if (!isValidUtilityClass(typeDeclaration)) {
 			return false;
 		}
