@@ -24,8 +24,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 	public void setUp() throws Exception {
 		defaultFixture = fixtureProject.addCompilationUnit("TestCU");
 
-		visitor = new HideDefaultConstructorInUtilityClassesASTVisitor(
-				new IJavaElement[] { fixtureProject.getJavaProject() });
+		visitor = new HideDefaultConstructorInUtilityClassesASTVisitor();
 	}
 
 	@AfterEach
@@ -52,7 +51,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 	@Disabled
 	/*
 	 * TODO: search engine works for normal eclipse instances but for some
-	 * reason not with the fixtureproject. This has to be investigated and fixed
+	 * reason not with the fixture project. This has to be investigated and fixed
 	 */
 	public void test_defaultConstructorInvokedInOtherClass_shouldNotTransform() throws Exception {
 		String actualAndExpected = "public static void test() {" + "}";
@@ -71,7 +70,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 	}
 
 	@Test
-	public void test_nonStaticMethodPresent_shoudldNotTransform() throws Exception {
+	public void test_nonStaticMethodPresent_shouldNotTransform() throws Exception {
 		String acutalAndExpected = "public static void test() {" + "	System.out.println(\"test\");" + "}" + ""
 				+ "public String nonStaticMethod() {" + "	return \"non-static method\";" + "}";
 

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -48,14 +50,8 @@ public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractAS
 
 	public static final Logger logger = LoggerFactory.getLogger(HideDefaultConstructorInUtilityClassesASTVisitor.class);
 
-	IJavaElement[] searchScopeArray;
-
 	public HideDefaultConstructorInUtilityClassesASTVisitor() {
 
-	}
-
-	protected HideDefaultConstructorInUtilityClassesASTVisitor(IJavaElement[] searchScope) {
-		this.searchScopeArray = searchScope;
 	}
 
 	@Override
@@ -81,14 +77,12 @@ public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractAS
 			return false;
 		}
 
+		AST ast = astRewrite.getAST();
 		String classNameString = typeDeclaration.getName()
 			.getIdentifier();
-		SimpleName className = astRewrite.getAST()
-			.newSimpleName(classNameString);
-		Modifier privateModifier = astRewrite.getAST()
-			.newModifier(Modifier.ModifierKeyword.PRIVATE_KEYWORD);
-		Block emptyBody = astRewrite.getAST()
-			.newBlock();
+		SimpleName className = ast.newSimpleName(classNameString);
+		Modifier privateModifier = ast.newModifier(Modifier.ModifierKeyword.PRIVATE_KEYWORD);
+		Block emptyBody = ast.newBlock();
 
 		MethodDeclaration privateConstructor = astRewrite.getAST()
 			.newMethodDeclaration();
@@ -133,7 +127,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractAS
 		SearchPattern searchPattern = SearchPattern.createPattern(qualifiedName, IJavaSearchConstants.CONSTRUCTOR,
 				IJavaSearchConstants.REFERENCES, SearchPattern.R_EXACT_MATCH);
 
-		IJavaSearchScope searchScope = createSearchScope();
+		IJavaSearchScope searchScope = SearchEngine.createWorkspaceScope();
 
 		SearchRequestor searchRequestor = createSearchRequestor(matches);
 
@@ -150,8 +144,10 @@ public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractAS
 			return false;
 		}
 
-		int modifiers = methodDeclaration.getModifiers();
-		if (!Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers)) {
+		@SuppressWarnings("rawtypes")
+		List modifiers = methodDeclaration.modifiers();
+		if (!ASTNodeUtil.hasModifier(modifiers, Modifier::isStatic)
+				|| !ASTNodeUtil.hasModifier(modifiers, Modifier::isPublic)) {
 			return false;
 		}
 
@@ -176,19 +172,8 @@ public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractAS
 			return false;
 		}
 
-		if (!"java.lang.String[]".equals(paramTypeBinding.getQualifiedName())) {
-			return false;
-		}
-
-		return true;
-	}
-
-	private IJavaSearchScope createSearchScope() {
-		if (searchScopeArray != null && searchScopeArray.length != 0) {
-			return SearchEngine.createJavaSearchScope(searchScopeArray);
-		} else {
-			return SearchEngine.createWorkspaceScope();
-		}
+		return ClassRelationUtil.isContentOfType(paramTypeBinding.getElementType(), java.lang.String.class.getName())
+				&& paramTypeBinding.getDimensions() == 1;
 	}
 
 	private SearchRequestor createSearchRequestor(List<SearchMatch> matches) {
