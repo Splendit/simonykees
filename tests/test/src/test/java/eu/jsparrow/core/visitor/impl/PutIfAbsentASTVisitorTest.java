@@ -8,9 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
-public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
+public class PutIfAbsentASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private PutIfAbsentASTVisitor visitor;
 	
@@ -28,7 +29,7 @@ public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -41,7 +42,7 @@ public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -54,7 +55,7 @@ public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -67,7 +68,7 @@ public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -80,7 +81,7 @@ public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -93,7 +94,7 @@ public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -106,7 +107,7 @@ public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -119,7 +120,7 @@ public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -132,7 +133,7 @@ public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -146,7 +147,7 @@ public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -160,7 +161,7 @@ public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock("Map map; map.putIfAbsent(1, 2);");
+		Block expected = ASTNodeBuilder.createBlockFromString("Map map; map.putIfAbsent(1, 2);");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -173,7 +174,7 @@ public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock("Map map; map.putIfAbsent(1, 2);");
+		Block expected = ASTNodeBuilder.createBlockFromString("Map map; map.putIfAbsent(1, 2);");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	

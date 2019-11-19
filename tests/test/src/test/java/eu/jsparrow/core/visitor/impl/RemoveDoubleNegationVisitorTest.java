@@ -6,8 +6,10 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+
 @SuppressWarnings("nls")
-public class RemoveDoubleNegationVisitorTest extends UsesJDTUnitFixture {
+public class RemoveDoubleNegationVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private RemoveDoubleNegationASTVisitor visitor;
 
@@ -22,7 +24,7 @@ public class RemoveDoubleNegationVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock("boolean a = true;");
+		Block expected = ASTNodeBuilder.createBlockFromString("boolean a = true;");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -32,7 +34,7 @@ public class RemoveDoubleNegationVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock("boolean a = !true;");
+		Block expected = ASTNodeBuilder.createBlockFromString("boolean a = !true;");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -42,7 +44,7 @@ public class RemoveDoubleNegationVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock("boolean a = true;");
+		Block expected = ASTNodeBuilder.createBlockFromString("boolean a = true;");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -52,7 +54,7 @@ public class RemoveDoubleNegationVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock("boolean a = !true;");
+		Block expected = ASTNodeBuilder.createBlockFromString("boolean a = !true;");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -62,7 +64,7 @@ public class RemoveDoubleNegationVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock("boolean a = true;");
+		Block expected = ASTNodeBuilder.createBlockFromString("boolean a = true;");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -72,7 +74,7 @@ public class RemoveDoubleNegationVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock("boolean a = !true;");
+		Block expected = ASTNodeBuilder.createBlockFromString("boolean a = !true;");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -82,7 +84,7 @@ public class RemoveDoubleNegationVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock("int i = 0; boolean a = ++i == 0;");
+		Block expected = ASTNodeBuilder.createBlockFromString("int i = 0; boolean a = ++i == 0;");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 

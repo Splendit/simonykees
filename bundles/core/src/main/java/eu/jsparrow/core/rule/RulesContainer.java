@@ -35,6 +35,7 @@ import eu.jsparrow.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import eu.jsparrow.core.rule.impl.ForToForEachRule;
 import eu.jsparrow.core.rule.impl.FunctionalInterfaceRule;
 import eu.jsparrow.core.rule.impl.GuardConditionRule;
+import eu.jsparrow.core.rule.impl.HideDefaultConstructorInUtilityClassesRule;
 import eu.jsparrow.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import eu.jsparrow.core.rule.impl.IndexOfToContainsRule;
 import eu.jsparrow.core.rule.impl.InefficientConstructorRule;
@@ -144,6 +145,7 @@ public class RulesContainer {
 				new RemoveUnnecessaryThrownExceptionsRule(), new RemoveModifiersInInterfacePropertiesRule(),
 				new RemoveUnusedParameterRule(), new ReorderModifiersRule(), new UseListSortRule(),
 				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
+				new HideDefaultConstructorInUtilityClassesRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

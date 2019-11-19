@@ -14,14 +14,14 @@ public class ASTNodeUtilTest {
 
 	@Test
 	public void containsWildCards_wildCardTypeTree_nodeExists() throws Exception {
-		ASTNode astNode = ASTNodeBuilder.createBlock("List<? extends String> aList;"); //$NON-NLS-1$
+		ASTNode astNode = ASTNodeBuilder.createBlockFromString("List<? extends String> aList;"); //$NON-NLS-1$
 
 		assertTrue(ASTNodeUtil.containsWildCards(astNode));
 	}
 
 	@Test
 	public void containsWildCards_noWildCardTypeTree_noNodeExists() throws Exception {
-		ASTNode astNode = ASTNodeBuilder.createBlock("List<String> aList;"); //$NON-NLS-1$
+		ASTNode astNode = ASTNodeBuilder.createBlockFromString("List<String> aList;"); //$NON-NLS-1$
 
 		assertFalse(ASTNodeUtil.containsWildCards(astNode));
 	}
