@@ -7,8 +7,10 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+
 @SuppressWarnings({ "nls" })
-public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
+public class CollapseIfStatementsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private CollapseIfStatementsASTVisitor visitor;
 	
@@ -43,7 +45,7 @@ public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedBlock);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedBlock);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -75,7 +77,7 @@ public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedBlock);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedBlock);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -105,7 +107,7 @@ public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedBlock);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedBlock);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -134,7 +136,7 @@ public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedBlock);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedBlock);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -161,7 +163,7 @@ public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedBlock);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedBlock);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -189,7 +191,7 @@ public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedBlock);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedBlock);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	
@@ -217,7 +219,7 @@ public class CollapseIfStatementsASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedBlock);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedBlock);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 	

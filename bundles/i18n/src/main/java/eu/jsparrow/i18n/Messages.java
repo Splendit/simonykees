@@ -135,6 +135,10 @@ public class Messages extends NLS {
 	public static String HelpMessageDialog_documentation_url;
 	public static String HelpMessageDialog_support_mail;
 	public static String HelpMessageDialog_support_url;
+	public static String HideDefaultConstructorInUtilityClassesRule_description;
+
+	public static String HideDefaultConstructorInUtilityClassesRule_name;
+
 	public static String MapGetOrDefaultRule_description;
 	public static String MapGetOrDefaultRule_name;
 	public static String MavenProjectImporter_collectingProjectInfo;

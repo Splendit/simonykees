@@ -6,8 +6,10 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+
 @SuppressWarnings("nls")
-public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFixture {
+public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private RemoveNullCheckBeforeInstanceofASTVisitor visitor;
 
@@ -25,7 +27,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -38,7 +40,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -51,7 +53,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -64,7 +66,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -77,7 +79,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -90,7 +92,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -103,7 +105,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(expectedContent);
+		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -115,7 +117,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -127,7 +129,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -139,7 +141,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -151,7 +153,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -163,7 +165,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -175,7 +177,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -187,7 +189,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -199,7 +201,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -212,7 +214,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -224,7 +226,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesJDTUnitFi
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 

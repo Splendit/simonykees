@@ -6,9 +6,9 @@ import static org.hamcrest.Matchers.hasSize;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
+import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 
-public class TwrReferencedVariablesASTVisitorTest extends UsesJDTUnitFixture {
+public class TwrReferencedVariablesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
 	private TwrReferencedVariablesASTVisitor visitor;
 	

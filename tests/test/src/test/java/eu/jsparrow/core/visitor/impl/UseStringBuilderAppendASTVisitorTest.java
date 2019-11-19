@@ -6,6 +6,8 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+
 /**
  * Tests for {@link UseStringBuilderAppendASTVisitor}.
  * 
@@ -13,7 +15,7 @@ import org.junit.jupiter.api.Test;
  *
  */
 @SuppressWarnings("nls")
-public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
+public class UseStringBuilderAppendASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private UseStringBuilderAppendASTVisitor visitor;
 
@@ -31,7 +33,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -43,7 +45,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -58,7 +60,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -73,7 +75,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -87,7 +89,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -101,7 +103,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -115,7 +117,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -131,7 +133,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -143,7 +145,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -155,7 +157,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -171,7 +173,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -183,7 +185,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -197,7 +199,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -209,7 +211,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 }

@@ -6,8 +6,10 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+
 @SuppressWarnings("nls")
-public class RemoveEmptyStatementASTVisitorTest extends UsesJDTUnitFixture {
+public class RemoveEmptyStatementASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private RemoveEmptyStatementASTVisitor visitor;
 
@@ -25,7 +27,7 @@ public class RemoveEmptyStatementASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -38,7 +40,7 @@ public class RemoveEmptyStatementASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -51,7 +53,7 @@ public class RemoveEmptyStatementASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -64,7 +66,7 @@ public class RemoveEmptyStatementASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -77,7 +79,7 @@ public class RemoveEmptyStatementASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(expected);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(expected);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -89,7 +91,7 @@ public class RemoveEmptyStatementASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -102,7 +104,7 @@ public class RemoveEmptyStatementASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 
@@ -115,7 +117,7 @@ public class RemoveEmptyStatementASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expectedBlock = createBlock(block);
+		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expectedBlock, fixture.getMethodBlock());
 	}
 }

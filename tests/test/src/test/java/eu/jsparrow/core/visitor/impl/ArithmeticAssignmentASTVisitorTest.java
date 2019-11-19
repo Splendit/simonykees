@@ -10,9 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings({ "nls" })
-public class ArithmeticAssignmentASTVisitorTest extends UsesJDTUnitFixture {
+public class ArithmeticAssignmentASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private ArithmethicAssignmentASTVisitor visitor;
 
@@ -28,7 +29,7 @@ public class ArithmeticAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock("int a;  a += 3;");
+		Block expected = ASTNodeBuilder.createBlockFromString("int a;  a += 3;");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 

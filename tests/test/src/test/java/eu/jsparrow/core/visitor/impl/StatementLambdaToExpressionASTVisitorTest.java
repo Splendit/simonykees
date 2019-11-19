@@ -8,9 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
-public class StatementLambdaToExpressionASTVisitorTest extends UsesJDTUnitFixture {
+public class StatementLambdaToExpressionASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	private StatementLambdaToExpressionASTVisitor visitor;
 
@@ -31,7 +32,7 @@ public class StatementLambdaToExpressionASTVisitorTest extends UsesJDTUnitFixtur
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(String.format(blockTemplate, "new String()"));
+		Block expected = ASTNodeBuilder.createBlockFromString(String.format(blockTemplate, "new String()"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -45,7 +46,7 @@ public class StatementLambdaToExpressionASTVisitorTest extends UsesJDTUnitFixtur
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(String.format(blockTemplate, "new String()"));
+		Block expected = ASTNodeBuilder.createBlockFromString(String.format(blockTemplate, "new String()"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -58,7 +59,7 @@ public class StatementLambdaToExpressionASTVisitorTest extends UsesJDTUnitFixtur
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -71,7 +72,7 @@ public class StatementLambdaToExpressionASTVisitorTest extends UsesJDTUnitFixtur
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock(block);
+		Block expected = ASTNodeBuilder.createBlockFromString(block);
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 
@@ -83,7 +84,7 @@ public class StatementLambdaToExpressionASTVisitorTest extends UsesJDTUnitFixtur
 
 		fixture.accept(visitor);
 
-		Block expected = createBlock("new ArrayList<>().stream().filter(element -> true);");
+		Block expected = ASTNodeBuilder.createBlockFromString("new ArrayList<>().stream().filter(element -> true);");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 

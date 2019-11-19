@@ -16,7 +16,7 @@ public class WildCardTypeASTVisitorTest {
 	public void visitor_wildCardTypeTree_nodeFound() throws Exception {
 		WildCardTypeASTVisitor visitor = new WildCardTypeASTVisitor();
 
-		ASTNode astNode = ASTNodeBuilder.createBlock("List<? extends String> aList;"); //$NON-NLS-1$
+		ASTNode astNode = ASTNodeBuilder.createBlockFromString("List<? extends String> aList;"); //$NON-NLS-1$
 
 		astNode.accept(visitor);
 
@@ -28,7 +28,7 @@ public class WildCardTypeASTVisitorTest {
 	public void visitor_noWildCardTypeTree_noNodeFound() throws Exception {
 		WildCardTypeASTVisitor visitor = new WildCardTypeASTVisitor();
 
-		ASTNode astNode = ASTNodeBuilder.createBlock("List<String> aList;"); //$NON-NLS-1$
+		ASTNode astNode = ASTNodeBuilder.createBlockFromString("List<String> aList;"); //$NON-NLS-1$
 
 		astNode.accept(visitor);
 
