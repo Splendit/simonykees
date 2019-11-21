@@ -199,6 +199,7 @@ rules:
   - InsertBreakStatementInLoops
   - UseListSort
   - OptionalIfPresentOrElse
+  - HideDefaultConstructorInUtilityClasses
 
 excludes:
   excludeClasses: []
