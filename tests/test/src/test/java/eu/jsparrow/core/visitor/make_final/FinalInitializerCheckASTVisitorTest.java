@@ -269,6 +269,52 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		assertTrue(isValidCandidates(candidates, "a"));
 	}
 
+	@Test
+	public void nonStaticfield_assignedMultipleTimesInInitialiser_shouldNotBeCandidate() throws Exception {
+		String typeContent = "private String a;" + "{" + "	a = \"asdf\";" + "	a = \"jkl\";" + "}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		visitor.setASTRewrite(defaultFixture.getAstRewrite());
+
+		defaultFixture.accept(visitor);
+
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+
+		assertFalse(isValidCandidates(candidates));
+	}
+
+	@Test
+	public void nonStaticfield_assignedMultipleTimesInConstructor_shouldNotBeCandidate() throws Exception {
+		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_NAME + "() {" + "	a = \"asdf\";"
+				+ "	a = \"jkl\";" + "}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		visitor.setASTRewrite(defaultFixture.getAstRewrite());
+
+		defaultFixture.accept(visitor);
+
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+
+		assertFalse(isValidCandidates(candidates));
+	}
+
+	@Test
+	public void nonStaticfield_assignedMultipleTimesInMultipleConstructor_shouldNotBeCandidate() throws Exception {
+		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_NAME + "() {" + "	a = \"asdf\";"
+				+ "	a = \"jkl\";" + "}" + "public " + DEFAULT_TYPE_NAME + "(String asdf) {" + "	a = \"asdf\";" + "}"
+				+ "public " + DEFAULT_TYPE_NAME + "(String asdf, String jkl) {" + "	a = \"asdf\";" + "	a = \"jkl\";"
+				+ "}";
+
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		visitor.setASTRewrite(defaultFixture.getAstRewrite());
+
+		defaultFixture.accept(visitor);
+
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+
+		assertFalse(isValidCandidates(candidates));
+	}
+
 	private boolean isValidCandidates(List<FieldDeclaration> candidates, String... correctFieldNames) {
 		if (candidates.isEmpty()) {
 			return false;

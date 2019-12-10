@@ -55,6 +55,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractASTRewriteASTVisito
 	private final List<VariableDeclarationFragment> nonStaticInitializerInitializers = new ArrayList<>();
 	private final List<VariableDeclarationFragment> staticInitializerInitializers = new ArrayList<>();
 	private final Map<Integer, List<VariableDeclarationFragment>> constructorInitializers = new HashMap<>();
+	private List<VariableDeclarationFragment> multiplyAssignedDeclarations = new ArrayList<>();
 
 	private List<VariableDeclarationFragment> tempAssignmentsInBlocks;
 
@@ -132,7 +133,11 @@ public class FinalInitializerCheckASTVisitor extends AbstractASTRewriteASTVisito
 		}
 
 		if (variableDeclarationFragment != null) {
-			tempAssignmentsInBlocks.add(variableDeclarationFragment);
+			if (tempAssignmentsInBlocks.contains(variableDeclarationFragment)) {
+				multiplyAssignedDeclarations.add(variableDeclarationFragment);
+			} else {
+				tempAssignmentsInBlocks.add(variableDeclarationFragment);
+			}
 		}
 
 		return false;
@@ -196,8 +201,9 @@ public class FinalInitializerCheckASTVisitor extends AbstractASTRewriteASTVisito
 				VariableDeclarationFragment.class);
 
 		return fragments.stream()
-			.allMatch(fragment -> fieldInitializers.contains(fragment)
-					^ staticInitializerInitializers.contains(fragment));
+			.allMatch(fragment -> (fieldInitializers.contains(fragment)
+					^ staticInitializerInitializers.contains(fragment))
+					&& !multiplyAssignedDeclarations.contains(fragment));
 	}
 
 	private boolean isNonStaticFinalCandidate(FieldDeclaration fieldDeclaration) {
@@ -213,8 +219,10 @@ public class FinalInitializerCheckASTVisitor extends AbstractASTRewriteASTVisito
 					.stream()
 					.allMatch((Map.Entry<Integer, List<VariableDeclarationFragment>> entry) -> entry.getValue()
 						.contains(fragment));
+				boolean multiplyAssigned = multiplyAssignedDeclarations.contains(fragment);
 
-				return (declaration ^ initializer ^ constructor) ^ (declaration && initializer && constructor);
+				return ((declaration ^ initializer ^ constructor) ^ (declaration && initializer && constructor))
+						&& !multiplyAssigned;
 			});
 	}
 }
