@@ -11,19 +11,14 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * This is a helper visitor for finding {@link FieldDeclaration}s that could be
@@ -47,7 +42,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  *
  * @since 3.12.0
  */
-public class FinalInitializerCheckASTVisitor extends AbstractASTRewriteASTVisitor {
+public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisitor {
 
 	private final List<FieldDeclaration> fieldDeclarations = new ArrayList<>();
 
@@ -117,20 +112,9 @@ public class FinalInitializerCheckASTVisitor extends AbstractASTRewriteASTVisito
 	@Override
 	public boolean visit(Assignment assignment) {
 		Expression leftHandSide = assignment.getLeftHandSide();
-		CompilationUnit compilationUnit = ASTNodeUtil.getSpecificAncestor(assignment, CompilationUnit.class);
 
-		VariableDeclarationFragment variableDeclarationFragment;
-		switch (leftHandSide.getNodeType()) {
-		case ASTNode.FIELD_ACCESS:
-			variableDeclarationFragment = getVariableDeclarationFragment(compilationUnit, (FieldAccess) leftHandSide);
-			break;
-		case ASTNode.QUALIFIED_NAME:
-		case ASTNode.SIMPLE_NAME:
-			variableDeclarationFragment = getVariableDeclarationFragment(compilationUnit, (Name) leftHandSide);
-			break;
-		default:
-			variableDeclarationFragment = null;
-		}
+		VariableDeclarationFragment variableDeclarationFragment = extractFieldDeclarationFragmentFromExpression(
+				leftHandSide);
 
 		if (variableDeclarationFragment != null) {
 			if (tempAssignmentsInBlocks.contains(variableDeclarationFragment)) {
@@ -141,31 +125,6 @@ public class FinalInitializerCheckASTVisitor extends AbstractASTRewriteASTVisito
 		}
 
 		return false;
-	}
-
-	private VariableDeclarationFragment getVariableDeclarationFragment(CompilationUnit compilationUnit,
-			FieldAccess fieldAccess) {
-		IVariableBinding binding = fieldAccess.resolveFieldBinding();
-		return getVariableDeclarationFragmentFromBinding(compilationUnit, binding);
-	}
-
-	private VariableDeclarationFragment getVariableDeclarationFragment(CompilationUnit compilationUnit, Name name) {
-		IBinding binding = name.resolveBinding();
-		return getVariableDeclarationFragmentFromBinding(compilationUnit, binding);
-	}
-
-	private VariableDeclarationFragment getVariableDeclarationFragmentFromBinding(CompilationUnit compilationUnit,
-			IBinding binding) {
-		if (binding == null) {
-			return null;
-		}
-
-		ASTNode bindingNode = compilationUnit.findDeclaringNode(binding);
-		if (bindingNode instanceof VariableDeclarationFragment) {
-			return (VariableDeclarationFragment) bindingNode;
-		}
-
-		return null;
 	}
 
 	/**
