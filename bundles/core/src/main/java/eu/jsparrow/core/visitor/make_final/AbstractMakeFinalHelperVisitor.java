@@ -12,6 +12,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * This is an abstract base class for all helper visitors for
+ * {@link MakeFiledsAndVariablesFinalASTVisitor}. It provides methods for
+ * getting {@link VariableDeclarationFragment}s from {@link IBinding}s.
+ *
+ * @since 3.12.0
+ */
 public class AbstractMakeFinalHelperVisitor extends AbstractASTRewriteASTVisitor {
 
 	protected VariableDeclarationFragment extractFieldDeclarationFragmentFromExpression(Expression expression) {
