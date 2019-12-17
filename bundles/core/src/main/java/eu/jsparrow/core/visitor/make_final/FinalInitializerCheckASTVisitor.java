@@ -63,9 +63,11 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
 				VariableDeclarationFragment.class);
 
-		fieldInitializers = fragments.stream()
+		List<VariableDeclarationFragment> tempFieldInitializers = fragments.stream()
 			.filter(f -> f.getInitializer() != null)
 			.collect(Collectors.toList());
+
+		fieldInitializers.addAll(tempFieldInitializers);
 
 		return true;
 	}
@@ -117,7 +119,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 				leftHandSide);
 
 		if (variableDeclarationFragment != null) {
-			if (tempAssignmentsInBlocks.contains(variableDeclarationFragment)) {
+			if (isAlreadyAssigned(variableDeclarationFragment)) {
 				multiplyAssignedDeclarations.add(variableDeclarationFragment);
 			} else {
 				tempAssignmentsInBlocks.add(variableDeclarationFragment);
@@ -183,5 +185,13 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 				return ((declaration ^ initializer ^ constructor) ^ (declaration && initializer && constructor))
 						&& !multiplyAssigned;
 			});
+	}
+
+	private boolean isAlreadyAssigned(VariableDeclarationFragment fragment) {
+		return fieldInitializers.contains(fragment) || staticInitializerInitializers.contains(fragment)
+				|| nonStaticInitializerInitializers.contains(fragment) || constructorInitializers.entrySet()
+					.stream()
+					.map((Map.Entry<Integer, List<VariableDeclarationFragment>> entry) -> entry.getValue())
+					.anyMatch(list -> list.contains(fragment));
 	}
 }
