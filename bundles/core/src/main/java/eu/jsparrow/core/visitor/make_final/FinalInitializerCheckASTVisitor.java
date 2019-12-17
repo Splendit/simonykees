@@ -55,9 +55,16 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	private List<VariableDeclarationFragment> tempAssignmentsInBlocks;
 
 	private int constructorCount = 0;
+	private boolean isInConstructor = false;
 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
+		boolean isAlreadyFinal = ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isFinal);
+		
+		if(isAlreadyFinal) {
+			return true;
+		}
+		
 		fieldDeclarations.add(fieldDeclaration);
 
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
@@ -96,6 +103,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 		}
 
 		tempAssignmentsInBlocks = new LinkedList<>();
+		isInConstructor = true;
 
 		return true;
 	}
@@ -108,6 +116,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 
 		constructorInitializers.put(constructorCount, tempAssignmentsInBlocks);
 		tempAssignmentsInBlocks = null;
+		isInConstructor = false;
 		constructorCount++;
 	}
 
@@ -119,7 +128,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 				leftHandSide);
 
 		if (variableDeclarationFragment != null) {
-			if (isAlreadyAssigned(variableDeclarationFragment)) {
+			if (!isInConstructor && isAlreadyAssigned(variableDeclarationFragment)) {
 				multiplyAssignedDeclarations.add(variableDeclarationFragment);
 			} else {
 				tempAssignmentsInBlocks.add(variableDeclarationFragment);

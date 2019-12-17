@@ -309,6 +309,22 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+
+		assertFalse(isValidCandidates(candidates));
+	}
+	
+	@Test
+	public void nonStaticField_isAlreadyFinal_shouldNotBeCandidate() throws Exception {
+		String typeContent = "private final String a = \"asdf\";"
+						   + "public void test() {"
+						   + "	System.out.println(a);"
+						   + "}";
+		
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		visitor.setASTRewrite(defaultFixture.getAstRewrite());
+
+		defaultFixture.accept(visitor);
 
 		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
 
