@@ -27,7 +27,7 @@ public class TestBracketsToControlRule {
 	}
 
 	public static void thestWhileLoop() {
-		String st = null;
+		final String st = null;
 		while (st != null) {
 		}
 		do {
@@ -35,8 +35,8 @@ public class TestBracketsToControlRule {
 	}
 
 	public static void testIf() {
-		String s = "a";
-		String t = "bb";
+		final String s = "a";
+		final String t = "bb";
 		if (s.equals("a")) {
 			if (t.equals("b")) {
 				do {

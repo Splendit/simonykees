@@ -10,7 +10,7 @@ public class TestInefficientConstructorBooleanRule {
 
 	public Boolean booleanTrueLiteralTest() {
 		// I don't want to break anything
-		Boolean t = Boolean // I don't want to break anything
+		final Boolean t = Boolean // I don't want to break anything
 			.valueOf(true);
 		/* leading comment */
 		/* internal comment */

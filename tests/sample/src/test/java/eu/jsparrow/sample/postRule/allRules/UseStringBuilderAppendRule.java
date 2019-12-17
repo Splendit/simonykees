@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public class UseStringBuilderAppendRule {
 
 	@SuppressWarnings("nl" + "s")
-	private String annotatedField = "";
+	private final String annotatedField = "";
 
 	@MyCustomAnnotation(name = "Chaitanya", address = "Angra, " + "India")
 	private void annotatedMethod() {
@@ -24,7 +24,7 @@ public class UseStringBuilderAppendRule {
 		/* 10 */
 		/* 11 */
 		/* 16 */
-		String value = new StringBuilder().append("left" /* 2 */)
+		final String value = new StringBuilder().append("left" /* 2 */)
 			.append(/* 3 */ "right" /* 4 */)
 			.append("expanded1" /* 7 */)
 			.append(/* 8 */ "expanded2" /* 9 */)

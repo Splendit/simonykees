@@ -62,7 +62,7 @@ public class TestRemoveNewStringConstructorRule {
 	}
 
 	public String testNewStringOnByteArray(String input) {
-		byte[] bytes = input.getBytes();
+		final byte[] bytes = input.getBytes();
 		return new String(bytes);
 	}
 
@@ -85,14 +85,14 @@ public class TestRemoveNewStringConstructorRule {
 	}
 
 	public String testCharArrayInput(String input) {
-		char[] charArray = input.toCharArray();
-		String result = new String(charArray);
+		final char[] charArray = input.toCharArray();
+		final String result = new String(charArray);
 		return result;
 	}
 
 	public String testCharArrayInputOffest(String input) {
-		char[] charArray = input.toCharArray();
-		String result = new String(charArray, 0, 1);
+		final char[] charArray = input.toCharArray();
+		final String result = new String(charArray, 0, 1);
 		return result;
 	}
 
@@ -108,7 +108,7 @@ public class TestRemoveNewStringConstructorRule {
 
 	public String testConvertInsideBlock(String input) {
 		String result = "";
-		boolean condition = !StringUtils.isEmpty(input) && StringUtils.isEmpty(result);
+		final boolean condition = !StringUtils.isEmpty(input) && StringUtils.isEmpty(result);
 		if (condition) {
 			result = input;
 		}
@@ -116,14 +116,14 @@ public class TestRemoveNewStringConstructorRule {
 	}
 
 	public String testConvertInputParameter(String input) {
-		BigDecimal number = new BigDecimal("10.05");
+		final BigDecimal number = new BigDecimal("10.05");
 		Integer.valueOf("123");
 		return input + number;
 	}
 
 	public String testConvertInLambdaExpressionBody(String input) {
-		List<String> list = Collections.singletonList(input);
-		String result = list.stream()
+		final List<String> list = Collections.singletonList(input);
+		final String result = list.stream()
 			.map(t -> t)
 			.collect(Collectors.joining());
 		return result;

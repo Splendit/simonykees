@@ -14,7 +14,7 @@ public class StringLiteralEqualityCheckRule {
 	public boolean swapExpressionWithStringLiteral(String input) {
 		"StringLiteralEqualityCheckRule".equals(getClass().getName());
 
-		boolean swap = input // don't break the semicolon
+		final boolean swap = input // don't break the semicolon
 			.equals("input" // don't break the line
 			);
 		return swap;
@@ -23,17 +23,17 @@ public class StringLiteralEqualityCheckRule {
 	public boolean swapExpressionWithStringLiteralIgnoreCase(String input) {
 		StringUtils.equalsIgnoreCase(getClass().getName(), "StringLiteralEqualityCheckRule");
 
-		boolean swap = "input".equals(input);
+		final boolean swap = "input".equals(input);
 		return swap;
 	}
 
 	public boolean swapMethodInvocationExpresion() {
-		boolean swap = "value".equals(getValue());
+		final boolean swap = "value".equals(getValue());
 		return swap;
 	}
 
 	public boolean swapMethodInvocationExpresionIgnoreCase() {
-		boolean swap = StringUtils.equalsIgnoreCase(getValue(), "vAlue");
+		final boolean swap = StringUtils.equalsIgnoreCase(getValue(), "vAlue");
 		return swap;
 	}
 
@@ -42,17 +42,17 @@ public class StringLiteralEqualityCheckRule {
 	}
 
 	public boolean literalAlreadyOnLHS() {
-		String value = "lhs-literal";
+		final String value = "lhs-literal";
 		return "lhs-literal".equals(value);
 	}
 
 	public boolean literalAlreadyOnLHSIgnoreCase() {
-		String value = "lhs-literal";
+		final String value = "lhs-literal";
 		return StringUtils.equalsIgnoreCase("lhs-literal", value);
 	}
 
 	public boolean nonStringEqualityCheck() {
-		Foo foo = new Foo("foo");
+		final Foo foo = new Foo("foo");
 		return foo.equals("foo");
 	}
 
@@ -61,8 +61,8 @@ public class StringLiteralEqualityCheckRule {
 	}
 
 	public boolean someCommentsInBetween() {
-		String foo = "cornerCaseWithCommentsInBetween";
-		boolean swap =
+		final String foo = "cornerCaseWithCommentsInBetween";
+		final boolean swap =
 				// please dont loose me
 				foo // comparing equality with a copy of init value
 					.equals("cornerCaseWithCommentsInBetween" // I may be useful
@@ -72,8 +72,8 @@ public class StringLiteralEqualityCheckRule {
 	}
 
 	public boolean someCommentsInBetween2() {
-		String foo = "cornerCaseWithCommentsInBetween";
-		boolean swap =
+		final String foo = "cornerCaseWithCommentsInBetween";
+		final boolean swap =
 				// comparing equality with a copy of init value
 				foo // please dont loose me
 					.equals("cornerCaseWithCommentsInBetween");
@@ -82,7 +82,7 @@ public class StringLiteralEqualityCheckRule {
 	}
 
 	public boolean compareStringExpression() {
-		String fooConcat = "fooconcatexpression";
+		final String fooConcat = "fooconcatexpression";
 		return fooConcat.equals(new StringBuilder().append("foo")
 			.append("concat")
 			.append("expression")
@@ -90,7 +90,7 @@ public class StringLiteralEqualityCheckRule {
 	}
 
 	public boolean compareStringExpression2() {
-		String fooConcat = "fooconcatexpression";
+		final String fooConcat = "fooconcatexpression";
 		return "fooconcatexpression".equals((new StringBuilder().append("foo")
 			.append("concat")
 			.append("expression")
@@ -98,8 +98,8 @@ public class StringLiteralEqualityCheckRule {
 	}
 
 	public boolean checkingCustomComparable() {
-		String val = "customComparable";
-		ComparableString foo = new ComparableString(val);
+		final String val = "customComparable";
+		final ComparableString foo = new ComparableString(val);
 
 		return foo.equals("customComparable");
 	}
@@ -109,7 +109,7 @@ public class StringLiteralEqualityCheckRule {
 	}
 
 	class Foo {
-		private String foo;
+		private final String foo;
 
 		public Foo(String foo) {
 			this.foo = foo;
@@ -136,7 +136,7 @@ public class StringLiteralEqualityCheckRule {
 
 	class ComparableString implements Comparable<String> {
 
-		private String foo;
+		private final String foo;
 
 		public ComparableString(String foo) {
 			this.foo = foo;
@@ -153,7 +153,7 @@ public class StringLiteralEqualityCheckRule {
 
 		@Override
 		public int compareTo(String o) {
-			String result = "malicous-prefix" + foo;
+			final String result = "malicous-prefix" + foo;
 			return result.compareTo(o);
 		}
 

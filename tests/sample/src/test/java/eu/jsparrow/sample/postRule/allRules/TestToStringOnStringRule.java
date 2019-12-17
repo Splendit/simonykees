@@ -28,7 +28,7 @@ public class TestToStringOnStringRule {
 	}
 
 	public String testToStringOnStringVariable() {
-		String s = "theStringS";
+		final String s = "theStringS";
 
 		return s;
 
@@ -49,7 +49,7 @@ public class TestToStringOnStringRule {
 		s = StringUtils.substring(s, 0)// save me
 			.toString();
 
-		String input = "noInput";
+		final String input = "noInput";
 		s = new StringBuilder().append(StringUtils.substring(s, 0) // save me
 			.toString())
 			.append(input)
@@ -100,7 +100,7 @@ public class TestToStringOnStringRule {
 	}
 
 	public String testToStringOnOtherTypes(String input) {
-		String sampleString = numberSampleMethod().toString();
+		final String sampleString = numberSampleMethod().toString();
 		return sampleString + numberSampleMethod().toString();
 	}
 
@@ -110,7 +110,7 @@ public class TestToStringOnStringRule {
 	}
 
 	public String testToStringInNestedConcatOperations(String input) {
-		String val = new StringBuilder().append(input)
+		final String val = new StringBuilder().append(input)
 			.append("some-other-nasty-string")
 			.append("abc")
 			.append('c')
@@ -119,15 +119,15 @@ public class TestToStringOnStringRule {
 	}
 
 	public String testToStringInLambdaExpressionBody(String input) {
-		List<String> stringList = Arrays.asList(input, "foo");
-		String result = stringList.stream()
+		final List<String> stringList = Arrays.asList(input, "foo");
+		final String result = stringList.stream()
 			.map(s -> s + ";")
 			.collect(Collectors.joining(","));
 		return result;
 	}
 
 	public String testToStringOnMethodInvocationParameters(String input) {
-		String result = sampleMethod(input);
+		final String result = sampleMethod(input);
 		return result;
 	}
 
@@ -174,7 +174,7 @@ public class TestToStringOnStringRule {
 	}
 
 	public String testChainMethodInvocatioonToString(String input) {
-		String className = this.getClass()
+		final String className = this.getClass()
 			.getName();
 		return input + className;
 	}

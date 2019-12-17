@@ -17,8 +17,8 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String loopingOverLists(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		// save leading comments
 		/* expression comment */
 		list.forEach(t -> {
@@ -30,8 +30,8 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String nestedLoops(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		list.forEach(t -> {
 			logger.info(t);
 			sb.append(t);
@@ -41,8 +41,8 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String tripleNestedLoops(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		list.forEach(t -> {
 			logger.info(t);
 			sb.append(t);
@@ -59,9 +59,9 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String cascadedLoops(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
-		List<String> list2 = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final List<String> list2 = generateList(input);
 		list.forEach(t -> {
 			logger.info(t);
 			sb.append(t);
@@ -76,13 +76,13 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String indexAccessedBeforeLoop(String input) {
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		int i = 0;
 		i = 1;
-		List<String> list = generateList(input);
+		final List<String> list = generateList(input);
 		i = 0;
 		while (i < list.size()) {
-			String t = list.get(i);
+			final String t = list.get(i);
 			logger.info(t);
 			sb.append(t);
 			i++;
@@ -91,11 +91,11 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String indexAccessedInsideLoop(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		int i = 0;
 		while (i < list.size()) {
-			String t = list.get(i);
+			final String t = list.get(i);
 			logger.info(t);
 			sb.append(t + i);
 			i++;
@@ -104,11 +104,11 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String indexAccessedAfterLoop(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		int i = 0;
 		while (i < list.size()) {
-			String t = list.get(i);
+			final String t = list.get(i);
 			logger.info(t);
 			sb.append(t);
 			i++;
@@ -118,8 +118,8 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String prefixIndexUpdate(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		list.forEach(t -> {
 			logger.info(t);
 			sb.append(t);
@@ -128,8 +128,8 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String infixIndexUpdate(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		list.forEach(t -> {
 			logger.info(t);
 			sb.append(t);
@@ -138,8 +138,8 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String assignmentIndexUpdate(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		list.forEach(t -> {
 			logger.info(t);
 			sb.append(t);
@@ -148,12 +148,12 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String loopInIfBody(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		int i = 0;
 		if (list.size() > 0) {
 			while (i < list.size()) {
-				String t = list.get(i);
+				final String t = list.get(i);
 				logger.info(t);
 				sb.append(t);
 				i += 1;
@@ -163,12 +163,12 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String confusingIndexUpdate(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		int i = 0;
 		int j = 0;
 		while (i < list.size()) {
-			String t = list.get(i);
+			final String t = list.get(i);
 			logger.info(t);
 			sb.append(t);
 			i += 1;
@@ -178,12 +178,12 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String incorrectIndexInitialization(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		int i = 1;
 		int j = 0;
 		while (i < list.size()) {
-			String t = list.get(i);
+			final String t = list.get(i);
 			logger.info(t);
 			sb.append(t);
 			j++;
@@ -193,12 +193,12 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String incorrectIndexUpdate(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		int i = 0;
 		int j = 0;
 		while (i < list.size()) {
-			String t = list.get(i);
+			final String t = list.get(i);
 			logger.info(t);
 			sb.append(t);
 			j++;
@@ -208,11 +208,11 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String incorrectIndexInfixUpdate(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		int i = 0;
 		while (i < list.size()) {
-			String t = list.get(i);
+			final String t = list.get(i);
 			logger.info(t);
 			sb.append(t);
 			i += 2;
@@ -221,8 +221,8 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String confusingIteratorName(String iterator) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(iterator);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(iterator);
 		list.forEach(aList -> {
 			logger.info(aList);
 			sb.append(aList);
@@ -231,8 +231,8 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String avoidEmptyStatement(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		int i = 0;
 		while (i < list.size()) {
 			sb.append(list.get(i));
@@ -244,14 +244,14 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String rawIteratingObject(String input) {
-		List<List<String>> listOfLists = new ArrayList<>();
-		StringBuilder sb = new StringBuilder();
+		final List<List<String>> listOfLists = new ArrayList<>();
+		final StringBuilder sb = new StringBuilder();
 
 		int i = 0;
 		while (i < listOfLists.size()) {
-			List rawIterator = listOfLists.get(i);
+			final List rawIterator = listOfLists.get(i);
 			// Incorrect casting to double
-			Double d = (Double) rawIterator.get(0);
+			final Double d = (Double) rawIterator.get(0);
 			sb.append(d);
 			i++;
 		}
@@ -260,7 +260,7 @@ public class TestWhileToForEachListRule {
 	}
 
 	public <T extends Foo> void listOfTypeArguments() {
-		List<T> elements = new ArrayList<>();
+		final List<T> elements = new ArrayList<>();
 		elements.forEach(foo -> {
 			foo.toString();
 			foo.isFoo();
@@ -268,22 +268,22 @@ public class TestWhileToForEachListRule {
 	}
 
 	public String qualifiedNameType() {
-		List<java.lang.Boolean> javaLangBooleans = new ArrayList<>();
-		StringBuilder sb = new StringBuilder();
+		final List<java.lang.Boolean> javaLangBooleans = new ArrayList<>();
+		final StringBuilder sb = new StringBuilder();
 		javaLangBooleans.forEach(sb::append);
 		return sb.toString();
 	}
 
 	public String unQualifiedNameType() {
-		List<Boolean> myBooleans = new ArrayList<>();
-		StringBuilder sb = new StringBuilder();
+		final List<Boolean> myBooleans = new ArrayList<>();
+		final StringBuilder sb = new StringBuilder();
 		myBooleans.forEach(sb::append);
 		return sb.toString();
 	}
 
 	public String intKeyWord(String input) {
-		List<Double> ints = new ArrayList<>();
-		StringBuilder sb = new StringBuilder();
+		final List<Double> ints = new ArrayList<>();
+		final StringBuilder sb = new StringBuilder();
 		ints.forEach(sb::append);
 		return sb.toString();
 	}

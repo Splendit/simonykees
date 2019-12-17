@@ -43,9 +43,9 @@ public class RearrangeClassMembersRule {
 	protected String protectedAnnotatedFoo;
 	{
 		{
-			Days a = Days.Mon;
+			final Days a = Days.Mon;
 			// some useless block
-			int t = 0;
+			final int t = 0;
 			for (int i = 0; i < t; i++) {
 				foo = "foo-value";
 			}

@@ -7,7 +7,7 @@ import java.util.List;
 public class EnhancedForLoopToStreamSumRule {
 
 	public int forToStreamSum(String input) {
-		List<Integer> numbers = generateIntList(input);
+		final List<Integer> numbers = generateIntList(input);
 		// comment after sum
 		// comment before
 		// comment after numbers
@@ -20,7 +20,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public int forToStreamSumPlusOperation(String input) {
-		List<Integer> numbers = generateIntList(input);
+		final List<Integer> numbers = generateIntList(input);
 		int sum = numbers.stream()
 			.mapToInt(Integer::intValue)
 			.sum();
@@ -28,8 +28,8 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public int multipleDeclarationFragments(String input) {
-		List<Integer> numbers = generateIntList(input);
-		int sum2 = 0;
+		final List<Integer> numbers = generateIntList(input);
+		final int sum2 = 0;
 		int sum = numbers.stream()
 			.mapToInt(Integer::intValue)
 			.sum();
@@ -37,9 +37,9 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public int multipleDeclarationStatements(String input) {
-		List<Integer> numbers = generateIntList(input);
-		int sum2 = 0;
-		double sum3 = 1;
+		final List<Integer> numbers = generateIntList(input);
+		final int sum2 = 0;
+		final double sum3 = 1;
 		int sum = numbers.stream()
 			.mapToInt(Integer::intValue)
 			.sum();
@@ -47,7 +47,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public int wrongInit(String input) {
-		List<Integer> numbers = generateIntList(input);
+		final List<Integer> numbers = generateIntList(input);
 		int sum = 1;
 		for (int n : numbers) {
 			sum += n;
@@ -56,7 +56,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public int modifiedSumVariable(String input) {
-		List<Integer> numbers = generateIntList(input);
+		final List<Integer> numbers = generateIntList(input);
 		int sum = 0;
 		sum = 1;
 		for (int n : numbers) {
@@ -66,7 +66,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public int multipleStatementsInLoopBody(String input) {
-		List<Integer> numbers = generateIntList(input);
+		final List<Integer> numbers = generateIntList(input);
 		int sum = 0;
 		int sum2 = 0;
 		for (int n : numbers) {
@@ -77,7 +77,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public int forToStreamSumSingleBodyStatement(String input) {
-		List<Integer> numbers = generateIntList(input);
+		final List<Integer> numbers = generateIntList(input);
 		int sum = numbers.stream()
 			.mapToInt(Integer::intValue)
 			.sum();
@@ -89,7 +89,7 @@ public class EnhancedForLoopToStreamSumRule {
 	 */
 
 	public double boxedIntegerSum(String input) {
-		List<Integer> numbers = generateIntList(input);
+		final List<Integer> numbers = generateIntList(input);
 		Integer sum = numbers.stream()
 			.mapToInt(Integer::intValue)
 			.sum();
@@ -97,7 +97,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public long boxedLongSum(String input) {
-		List<Long> numbers = generateLongList(input);
+		final List<Long> numbers = generateLongList(input);
 		Long sum = numbers.stream()
 			.mapToLong(Long::longValue)
 			.sum();
@@ -105,7 +105,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public double boxedDoubleSum(String input) {
-		List<Double> numbers = generateDoubleList(input);
+		final List<Double> numbers = generateDoubleList(input);
 		Double sum = numbers.stream()
 			.mapToDouble(Double::doubleValue)
 			.sum();
@@ -113,7 +113,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public double zeroDotZeroLiteral(String input) {
-		List<Double> numbers = generateDoubleList(input);
+		final List<Double> numbers = generateDoubleList(input);
 		Double sum = numbers.stream()
 			.mapToDouble(Double::doubleValue)
 			.sum();
@@ -121,7 +121,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public double zeroDotZeroZeroLiteral(String input) {
-		List<Double> numbers = generateDoubleList(input);
+		final List<Double> numbers = generateDoubleList(input);
 		Double sum = numbers.stream()
 			.mapToDouble(Double::doubleValue)
 			.sum();
@@ -133,7 +133,7 @@ public class EnhancedForLoopToStreamSumRule {
 	 */
 
 	public double sumListOfDoubles(String input) {
-		List<Double> numbers = generateDoubleList(input);
+		final List<Double> numbers = generateDoubleList(input);
 		double sum = numbers.stream()
 			.mapToDouble(Double::doubleValue)
 			.sum();
@@ -141,7 +141,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public long sumListOfLongs(String input) {
-		List<Long> numbers = generateLongList(input);
+		final List<Long> numbers = generateLongList(input);
 		long sum = numbers.stream()
 			.mapToLong(Long::longValue)
 			.sum();
@@ -149,7 +149,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public int sumListOfShorts(String input) {
-		List<Short> numbers = new ArrayList<>();
+		final List<Short> numbers = new ArrayList<>();
 		int sum = numbers.stream()
 			.mapToInt(Short::intValue)
 			.sum();
@@ -157,7 +157,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public double sumListOfFloats(String input) {
-		List<Float> numbers = new ArrayList<>();
+		final List<Float> numbers = new ArrayList<>();
 		double sum = numbers.stream()
 			.mapToDouble(Float::doubleValue)
 			.sum();
@@ -165,7 +165,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public double sumListOfBytes(String input) {
-		List<Byte> numbers = new ArrayList<>();
+		final List<Byte> numbers = new ArrayList<>();
 		double sum = numbers.stream()
 			.mapToDouble(Byte::doubleValue)
 			.sum();
@@ -176,7 +176,7 @@ public class EnhancedForLoopToStreamSumRule {
 	 * unsupported sum type
 	 */
 	public short unSupportedType(String input) {
-		List<Short> numbers = new ArrayList<>();
+		final List<Short> numbers = new ArrayList<>();
 		short sum = 0;
 		for (short s : numbers) {
 			sum += s;
@@ -190,7 +190,7 @@ public class EnhancedForLoopToStreamSumRule {
 	 */
 
 	public int incompatibleTypes(String input) {
-		List<Double> numbers = generateDoubleList(input);
+		final List<Double> numbers = generateDoubleList(input);
 		int sum = numbers.stream()
 			.mapToInt(Double::intValue)
 			.sum();
@@ -198,7 +198,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public int incompatibleTypes2(String input) {
-		List<Integer> numbers = generateIntList(input);
+		final List<Integer> numbers = generateIntList(input);
 		int sum = numbers.stream()
 			.mapToInt(Integer::intValue)
 			.sum();
@@ -206,7 +206,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public double incompatibleTypes3(String input) {
-		List<Integer> numbers = generateIntList(input);
+		final List<Integer> numbers = generateIntList(input);
 		double sum = numbers.stream()
 			.mapToDouble(Integer::doubleValue)
 			.sum();
@@ -214,7 +214,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public double incompatibleTypes4(String input) {
-		List<Long> numbers = generateLongList(input);
+		final List<Long> numbers = generateLongList(input);
 		double sum = numbers.stream()
 			.mapToDouble(Long::doubleValue)
 			.sum();
@@ -222,7 +222,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public long incompatibleTypes5(String input) {
-		List<Double> numbers = generateDoubleList(input);
+		final List<Double> numbers = generateDoubleList(input);
 		long sum = numbers.stream()
 			.mapToLong(Double::longValue)
 			.sum();
@@ -230,7 +230,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public long incompatibleTypes6(String input) {
-		List<Integer> numbers = generateIntList(input);
+		final List<Integer> numbers = generateIntList(input);
 		long sum = numbers.stream()
 			.mapToLong(Integer::longValue)
 			.sum();
@@ -238,7 +238,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	private List<Long> generateLongList(String input) {
-		List<Long> intList = new ArrayList<>();
+		final List<Long> intList = new ArrayList<>();
 		for (Byte aByte : input.getBytes()) {
 			intList.add(aByte.longValue());
 		}
@@ -246,7 +246,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	private List<Double> generateDoubleList(String input) {
-		List<Double> intList = new ArrayList<>();
+		final List<Double> intList = new ArrayList<>();
 		for (Byte aByte : input.getBytes()) {
 			intList.add(aByte.doubleValue());
 		}
@@ -254,7 +254,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	private List<Integer> generateIntList(String input) {
-		List<Integer> intList = new ArrayList<>();
+		final List<Integer> intList = new ArrayList<>();
 		for (Byte aByte : input.getBytes()) {
 			intList.add(aByte.intValue());
 		}
@@ -267,7 +267,7 @@ public class EnhancedForLoopToStreamSumRule {
 	 */
 
 	public int multipleOperands(String input) {
-		List<Integer> numbers = generateIntList(input);
+		final List<Integer> numbers = generateIntList(input);
 		int sum = 0;
 		for (int n : numbers) {
 			sum = sum + n + 2;
@@ -276,7 +276,7 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	public int multipleOperandsAssignmentExp(String input) {
-		List<Integer> numbers = generateIntList(input);
+		final List<Integer> numbers = generateIntList(input);
 		int sum = 0;
 		for (int n : numbers) {
 			sum += n + 2;

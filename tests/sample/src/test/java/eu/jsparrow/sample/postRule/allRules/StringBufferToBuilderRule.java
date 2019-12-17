@@ -7,12 +7,12 @@ package eu.jsparrow.sample.postRule.allRules;
  */
 @SuppressWarnings({ "nls", "unused" })
 public class StringBufferToBuilderRule {
-	private StringBuffer stringBuffer1 = new StringBuffer();
-	private StringBuffer stringBuffer2;
-	private StringBuffer stringBuffer3 = new StringBuffer();
+	private final StringBuffer stringBuffer1 = new StringBuffer();
+	private final StringBuffer stringBuffer2;
+	private final StringBuffer stringBuffer3 = new StringBuffer();
 	private StringBuffer stringBuffer4;
 	private StringBuffer stringBuffer5;
-	private StringBuffer stringBuffer6 = new StringBuffer();
+	private final StringBuffer stringBuffer6 = new StringBuffer();
 
 	public StringBuffer stringBuffer7 = new StringBuffer();
 
@@ -50,7 +50,7 @@ public class StringBufferToBuilderRule {
 		StringBuilder localStringBuffer1 = new StringBuilder();
 		StringBuilder localStringBuffer2 = null;
 		StringBuilder localStringBuffer3 = null;
-		StringBuffer localStringBuffer4 = new StringBuffer();
+		final StringBuffer localStringBuffer4 = new StringBuffer();
 
 		if (localStringBuffer2 == null) {
 			localStringBuffer2 = new StringBuilder();
@@ -75,7 +75,7 @@ public class StringBufferToBuilderRule {
 		StringBuilder localStringBuffer1 = new StringBuilder();
 		StringBuffer localStringBuffer2 = stringBufferArg;
 		StringBuilder localStringBuffer3 = null;
-		StringBuffer localStringBuffer4 = new StringBuffer();
+		final StringBuffer localStringBuffer4 = new StringBuffer();
 
 		if (localStringBuffer2 == null) {
 			localStringBuffer2 = new StringBuffer();
@@ -137,7 +137,7 @@ public class StringBufferToBuilderRule {
 
 	private void test7() {
 		StringBuilder localStringBuffer1 = new StringBuilder();
-		StringBuffer localStringBuffer2 = new StringBuffer();
+		final StringBuffer localStringBuffer2 = new StringBuffer();
 
 		test6(localStringBuffer2);
 		localStringBuffer1.append("asdf");
@@ -152,14 +152,14 @@ public class StringBufferToBuilderRule {
 	}
 
 	public StringBuffer getLocalStringBuffer1() {
-		StringBuffer localStringBuffer3 = new StringBuffer();
+		final StringBuffer localStringBuffer3 = new StringBuffer();
 		localStringBuffer3.append("asdf")
 			.append("jkl");
 		return localStringBuffer3;
 	}
 
 	private StringBuffer getLocalStringBuffer2() {
-		StringBuffer localStringBuffer4 = new StringBuffer();
+		final StringBuffer localStringBuffer4 = new StringBuffer();
 		localStringBuffer4.append("asdf")
 			.append("jkl");
 		return localStringBuffer4;
@@ -178,21 +178,21 @@ public class StringBufferToBuilderRule {
 	}
 
 	private StringBuffer returnSimpleName_shouldNotTransform() {
-		StringBuffer localStringBuffer4 = new StringBuffer();
+		final StringBuffer localStringBuffer4 = new StringBuffer();
 		localStringBuffer4.append("asdf")
 			.append("jkl");
 		return localStringBuffer4;
 	}
 
 	private StringBuffer returnMethodInvocation_shouldNotTransform() {
-		StringBuffer localStringBuffer4 = new StringBuffer();
+		final StringBuffer localStringBuffer4 = new StringBuffer();
 		localStringBuffer4.append("asdf")
 			.append("jkl");
 		return localStringBuffer4.append("zxc");
 	}
 
 	private StringBuffer returnMethodInvocationChain_shouldNotTransform() {
-		StringBuffer localStringBuffer4 = new StringBuffer();
+		final StringBuffer localStringBuffer4 = new StringBuffer();
 		localStringBuffer4.append("asdf")
 			.append("jkl");
 		return localStringBuffer4.append("zxc")
@@ -208,31 +208,31 @@ public class StringBufferToBuilderRule {
 		StringBuilder localStringBuffer1 = new StringBuilder();
 		localStringBuffer1.append("asdf")
 			.append("jkl");
-		String localStringBuffer2;
+		final String localStringBuffer2;
 		localStringBuffer2 = localStringBuffer1.toString();
 	}
 
 	private void assignSimpleName_shouldNotTransform() {
-		StringBuffer localStringBuffer1 = new StringBuffer();
+		final StringBuffer localStringBuffer1 = new StringBuffer();
 		localStringBuffer1.append("asdf")
 			.append("jkl");
-		StringBuffer localStringBuffer2;
+		final StringBuffer localStringBuffer2;
 		localStringBuffer2 = localStringBuffer1;
 	}
 
 	private void assignMethodInvocation_shouldNotTransform() {
-		StringBuffer localStringBuffer1 = new StringBuffer();
+		final StringBuffer localStringBuffer1 = new StringBuffer();
 		localStringBuffer1.append("asdf")
 			.append("jkl");
-		StringBuffer localStringBuffer2;
+		final StringBuffer localStringBuffer2;
 		localStringBuffer2 = localStringBuffer1.append("zxc");
 	}
 
 	private void assignMethodInvocationChain_shouldNotTransform() {
-		StringBuffer localStringBuffer1 = new StringBuffer();
+		final StringBuffer localStringBuffer1 = new StringBuffer();
 		localStringBuffer1.append("asdf")
 			.append("jkl");
-		StringBuffer localStringBuffer2;
+		final StringBuffer localStringBuffer2;
 		localStringBuffer2 = localStringBuffer1.append("zxc")
 			.append("")
 			.insert(0, true);
@@ -246,28 +246,28 @@ public class StringBufferToBuilderRule {
 		StringBuilder localStringBuffer1 = new StringBuilder();
 		localStringBuffer1.append("asdf")
 			.append("jkl");
-		String result = localStringBuffer1.toString();
+		final String result = localStringBuffer1.toString();
 	}
 
 	private void initializerSimpleName_shouldNotTransform() {
-		StringBuffer localStringBuffer1 = new StringBuffer();
+		final StringBuffer localStringBuffer1 = new StringBuffer();
 		localStringBuffer1.append("asdf")
 			.append("jkl");
-		StringBuffer localStringBuffer2 = localStringBuffer1;
+		final StringBuffer localStringBuffer2 = localStringBuffer1;
 	}
 
 	private void initializerMethodInvocation_shouldNotTransform() {
-		StringBuffer localStringBuffer1 = new StringBuffer();
+		final StringBuffer localStringBuffer1 = new StringBuffer();
 		localStringBuffer1.append("asdf")
 			.append("jkl");
-		StringBuffer localStringBuffer2 = localStringBuffer1.append("zxc");
+		final StringBuffer localStringBuffer2 = localStringBuffer1.append("zxc");
 	}
 
 	private void initializerMethodInvocationChain_shouldNotTransform() {
-		StringBuffer localStringBuffer1 = new StringBuffer();
+		final StringBuffer localStringBuffer1 = new StringBuffer();
 		localStringBuffer1.append("asdf")
 			.append("jkl");
-		StringBuffer localStringBuffer2 = localStringBuffer1.append("zxc")
+		final StringBuffer localStringBuffer2 = localStringBuffer1.append("zxc")
 			.append("")
 			.insert(0, true);
 	}

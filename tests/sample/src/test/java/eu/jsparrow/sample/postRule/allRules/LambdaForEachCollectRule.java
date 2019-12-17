@@ -13,8 +13,8 @@ public class LambdaForEachCollectRule {
 	List<String> listField = new ArrayList<>();
 
 	public String convertForEachToCollect(String input) {
-		List<String> oStrings = new ArrayList<>();
-		List<String> objectList = new ArrayList<>();
+		final List<String> oStrings = new ArrayList<>();
+		final List<String> objectList = new ArrayList<>();
 
 		/* lambda param comment */
 		/* lambda body */
@@ -29,8 +29,8 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String convertForEachExpressionToCollect(String input) {
-		List<String> oStrings = new ArrayList<>();
-		List<String> objectList = new ArrayList<>();
+		final List<String> oStrings = new ArrayList<>();
+		final List<String> objectList = new ArrayList<>();
 
 		oStrings.addAll(objectList.stream()
 			.map(o -> o)
@@ -41,10 +41,10 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String multiDeclarationFragment(String input) {
-		List<String> oStrings = new ArrayList<>();
-		List<String> ostrings2;
-		List<String> ostrings3 = new ArrayList<>();
-		List<String> objectList = new ArrayList<>();
+		final List<String> oStrings = new ArrayList<>();
+		final List<String> ostrings2;
+		final List<String> ostrings3 = new ArrayList<>();
+		final List<String> objectList = new ArrayList<>();
 
 		oStrings.addAll(objectList.stream()
 			.map(o -> StringUtils.substring(o, 0))
@@ -55,8 +55,8 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String nonEmptyCollection(String input) {
-		List<String> oStrings = new ArrayList<>();
-		List<String> objectList = new ArrayList<>();
+		final List<String> oStrings = new ArrayList<>();
+		final List<String> objectList = new ArrayList<>();
 
 		oStrings.add("");
 		oStrings.addAll(objectList.stream()
@@ -68,8 +68,8 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String addAfterForEach(String input) {
-		List<String> oStrings = new ArrayList<>();
-		List<String> objectList = new ArrayList<>();
+		final List<String> oStrings = new ArrayList<>();
+		final List<String> objectList = new ArrayList<>();
 
 		oStrings.addAll(objectList.stream()
 			.map(o -> StringUtils.substring(o, 0))
@@ -81,8 +81,8 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String blockBody(String input) {
-		List<String> oStrings = new ArrayList<>();
-		List<String> objectList = new ArrayList<>();
+		final List<String> oStrings = new ArrayList<>();
+		final List<String> objectList = new ArrayList<>();
 
 		oStrings.addAll(objectList.stream()
 			.map(o -> StringUtils.substring(o, 0))
@@ -93,8 +93,8 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String multipleBodyStatements(String input) {
-		List<String> oStrings = new ArrayList<>();
-		List<String> objectList = new ArrayList<>();
+		final List<String> oStrings = new ArrayList<>();
+		final List<String> objectList = new ArrayList<>();
 
 		objectList.stream()
 			.map(o -> StringUtils.substring(o, 0))
@@ -110,9 +110,9 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String referencingOtherLocalVars(String input) {
-		List<String> oStrings = new ArrayList<>();
-		List<String> objectList = new ArrayList<>();
-		String s = "";
+		final List<String> oStrings = new ArrayList<>();
+		final List<String> objectList = new ArrayList<>();
+		final String s = "";
 		oStrings.addAll(objectList.stream()
 			.filter(oString -> oString.equals(s))
 			.map(o -> StringUtils.substring(o, 0))
@@ -123,10 +123,10 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String nestedBlocks(String input) {
-		List<String> oStrings = new ArrayList<>();
+		final List<String> oStrings = new ArrayList<>();
 		{
-			List<String> objectList = new ArrayList<>();
-			String s = "";
+			final List<String> objectList = new ArrayList<>();
+			final String s = "";
 			if (StringUtils.isEmpty(s)) {
 				oStrings.addAll(objectList.stream()
 					.filter(oString -> oString.equals(s))
@@ -140,8 +140,8 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String addingToFieldMethod(String input) {
-		List<String> objectList = new ArrayList<>();
-		String s = "";
+		final List<String> objectList = new ArrayList<>();
+		final String s = "";
 		listField.addAll(objectList.stream()
 			.filter(oString -> oString.equals(s))
 			.map(o -> StringUtils.substring(o, 0))
@@ -152,8 +152,8 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String thisAddInvocation(String input) {
-		List<String> objectList = new ArrayList<>();
-		String s = "";
+		final List<String> objectList = new ArrayList<>();
+		final String s = "";
 		objectList.stream()
 			.filter(oString -> oString.equals(s))
 			.map(o -> StringUtils.substring(o, 0))
@@ -168,8 +168,8 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String collectRawList(String input) {
-		List raw = Collections.singletonList(input);
-		List<Object> typedList = new ArrayList<>();
+		final List raw = Collections.singletonList(input);
+		final List<Object> typedList = new ArrayList<>();
 		raw.stream()
 			.forEach(typedList::add);
 

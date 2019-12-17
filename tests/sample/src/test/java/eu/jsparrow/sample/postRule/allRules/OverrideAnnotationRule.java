@@ -18,7 +18,7 @@ public abstract class OverrideAnnotationRule<T> {
 	}
 
 	public String dontOverride(Object object, String string) {
-		String s = "I am not expecting anybody to override me";
+		final String s = "I am not expecting anybody to override me";
 		return new StringBuilder().append(s)
 			.append(string)
 			.append(object)

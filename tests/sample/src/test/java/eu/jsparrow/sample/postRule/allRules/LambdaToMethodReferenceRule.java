@@ -104,7 +104,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	public void referenceToInstanceMethod() {
-		ComparisonProvider comparisonProvider = new ComparisonProvider();
+		final ComparisonProvider comparisonProvider = new ComparisonProvider();
 
 		personList.sort(comparisonProvider::compareByName);
 
@@ -186,7 +186,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	public void referenceToInstanceMethodOfArbitraryType() {
-		String[] stringArray = { "Barbara", "James", "Mary", "John", "Patricia", "Robert", "Michael", "Linda" };
+		final String[] stringArray = { "Barbara", "James", "Mary", "John", "Patricia", "Robert", "Michael", "Linda" };
 
 		Arrays.sort(stringArray, String::compareToIgnoreCase);
 
@@ -200,15 +200,15 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	public void referenceToConstructor() {
-		Set<Person> persSet1 = transferElements(personList, HashSet::new);
+		final Set<Person> persSet1 = transferElements(personList, HashSet::new);
 
-		Set<Person> persSet2 = transferElements(personList, HashSet::new);
+		final Set<Person> persSet2 = transferElements(personList, HashSet::new);
 
-		Set<Person> persSet3 = transferElements(personList, HashSet::new);
+		final Set<Person> persSet3 = transferElements(personList, HashSet::new);
 
-		Set<Person> persSet4 = transferElements(personList, HashSet<Person>::new);
+		final Set<Person> persSet4 = transferElements(personList, HashSet<Person>::new);
 
-		Runnable t = () -> new Runnable() {
+		final Runnable t = () -> new Runnable() {
 
 			@Override
 			public void run() {
@@ -217,12 +217,12 @@ public class LambdaToMethodReferenceRule {
 			}
 		};
 
-		Set<Person> persSet5 = transferElements(personList, HashSet<Person>::new);
+		final Set<Person> persSet5 = transferElements(personList, HashSet<Person>::new);
 
 		/*
 		 * SIM-464 bugfix
 		 */
-		List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 0);
+		final List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 0);
 
 		list.stream()
 			.map((Integer iterator) -> new java.awt.geom.Ellipse2D.Double(iterator, 2.0, 4.0, 4.0));
@@ -243,7 +243,7 @@ public class LambdaToMethodReferenceRule {
 	 * type
 	 */
 	public void referenceToParameterizedType() {
-		Map<String, String> map = new HashMap<>();
+		final Map<String, String> map = new HashMap<>();
 
 		map.entrySet()
 			.stream()
@@ -284,40 +284,40 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	public void saveTypeArguments(String input) {
-		List<Person> persons = new ArrayList<>();
+		final List<Person> persons = new ArrayList<>();
 		persons.stream()
 			.map(Person::getName)
 			.forEach(this::<String>consumeString);
 	}
 
 	public void missingTypeArguments3(String input) {
-		List<NestedClass> persons = new ArrayList<>();
+		final List<NestedClass> persons = new ArrayList<>();
 		persons.stream()
 			.map(NestedClass::<String>consumeObject);
 	}
 
 	public void missingTypeArguments2(String input) {
-		List<Person> persons = new ArrayList<>();
+		final List<Person> persons = new ArrayList<>();
 		persons.stream()
 			.map(Employee<String>::new);
 	}
 
 	public void missingTypeArguments(String input) {
-		List<NestedClass> persons = new ArrayList<>();
+		final List<NestedClass> persons = new ArrayList<>();
 		persons.stream()
 			.map(NestedClass::consumeObject);
 	}
 
 	public void captureTypes(String input) {
-		List<? extends Person> persons = new ArrayList<>();
-		List<String> names = persons.stream()
+		final List<? extends Person> persons = new ArrayList<>();
+		final List<String> names = persons.stream()
 			.map(Person::getName)
 			.collect(Collectors.toList());
 	}
 
 	public void captureOfParameterizedTypes(String input) {
-		List<? extends Employee<String>> persons = new ArrayList<>();
-		List<String> names = persons.stream()
+		final List<? extends Employee<String>> persons = new ArrayList<>();
+		final List<String> names = persons.stream()
 			.map(Employee::getName)
 			.collect(Collectors.toList());
 	}
@@ -327,7 +327,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	public void usingQualifiedName() {
-		List<UsingApacheNumberUtils> numberUtils = new ArrayList<>();
+		final List<UsingApacheNumberUtils> numberUtils = new ArrayList<>();
 		/*
 		 * Expecting the transformation to use a fully qualified name.
 		 */
@@ -335,11 +335,11 @@ public class LambdaToMethodReferenceRule {
 			.map(UsingApacheNumberUtils::getNumber)
 			.map(org.apache.commons.lang3.math.NumberUtils::toString);
 
-		List<List<String>> javaLists = new ArrayList<>();
+		final List<List<String>> javaLists = new ArrayList<>();
 		javaLists.stream()
 			.map(eu.jsparrow.sample.utilities.List::new);
 
-		List<eu.jsparrow.sample.utilities.List<String>> customLists = new ArrayList<>();
+		final List<eu.jsparrow.sample.utilities.List<String>> customLists = new ArrayList<>();
 		customLists.stream()
 			.map(eu.jsparrow.sample.utilities.List::size);
 	}
@@ -364,22 +364,22 @@ public class LambdaToMethodReferenceRule {
 		/*
 		 * SIM-1400
 		 */
-		Employee employee = new Employee("John", LocalDate.now()
+		final Employee employee = new Employee("John", LocalDate.now()
 			.minusYears(123));
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		final ExecutorService executorService = Executors.newSingleThreadExecutor();
 		executorService.submit(() -> employee.getName());
 	}
 
 	public void addMissingImports() {
 
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		final ExecutorService executorService = Executors.newSingleThreadExecutor();
 		executorService.submit(StringUtils::doesntDoAnything);
 	}
 
 	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(
 			SOURCE sourceCollection, Supplier<DEST> collectionFactory) {
 
-		DEST result = collectionFactory.get();
+		final DEST result = collectionFactory.get();
 		sourceCollection.forEach(result::add);
 		return result;
 	}
@@ -404,20 +404,20 @@ public class LambdaToMethodReferenceRule {
 		/*
 		 * SIM-1401
 		 */
-		Queue queue = new Queue();
+		final Queue queue = new Queue();
 		queue.withLock(() -> {
 			getRandomPerson();
 		});
 	}
 
 	public void noDiscardedReturnType_shouldTransform() {
-		Queue queue = new Queue();
+		final Queue queue = new Queue();
 		queue.withLock(() -> doSomething(2));
 	}
 
 	class NestedClass {
 		public void referencingMethodInNestedClass() {
-			List<Person> persons = new ArrayList<>();
+			final List<Person> persons = new ArrayList<>();
 			persons.stream()
 				.map(Person::getName)
 				.forEach(name -> consumeString(name));

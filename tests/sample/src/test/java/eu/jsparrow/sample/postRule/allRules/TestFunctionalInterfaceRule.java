@@ -10,39 +10,39 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "nls", "unused", "rawtypes" })
 public class TestFunctionalInterfaceRule {
 
-	private static Logger log = LoggerFactory.getLogger(TestFunctionalInterfaceRule.class);
+	private static final Logger log = LoggerFactory.getLogger(TestFunctionalInterfaceRule.class);
 
 	private final String FINAL_STRING_FIELD;
 	private final String NOT_INITIALIZED_FIELD;
 
-	private AFunctionalInterface usingUnDeclaredField = new AFunctionalInterface() {
+	private final AFunctionalInterface usingUnDeclaredField = new AFunctionalInterface() {
 		@Override
 		public void method(int a) {
-			String s = FINAL_INITIALIZED_STRING_FIELD;
+			final String s = FINAL_INITIALIZED_STRING_FIELD;
 		}
 	};
 
 	private final String FINAL_INITIALIZED_STRING_FIELD = "initialized";
 
-	private AFunctionalInterface usingUnInitializedField = new AFunctionalInterface() {
+	private final AFunctionalInterface usingUnInitializedField = new AFunctionalInterface() {
 		@Override
 		public void method(int a) {
-			String s = FINAL_STRING_FIELD;
+			final String s = FINAL_STRING_FIELD;
 		}
 	};
 
-	private AFunctionalInterface usingInitializedField = (int a) -> {
+	private final AFunctionalInterface usingInitializedField = (int a) -> {
 		/*
 		 * Using initialized field
 		 */
-		String s = FINAL_INITIALIZED_STRING_FIELD;
+		final String s = FINAL_INITIALIZED_STRING_FIELD;
 	};
 
-	private AFunctionalInterface usingWildcardsInBody = new AFunctionalInterface() {
+	private final AFunctionalInterface usingWildcardsInBody = new AFunctionalInterface() {
 
 		@Override
 		public void method(int a) {
-			List<List<? extends Number>> numbers = new ArrayList<>();
+			final List<List<? extends Number>> numbers = new ArrayList<>();
 			numbers.stream()
 				.map(List::hashCode)
 				.mapToInt(Integer::intValue)
@@ -58,52 +58,52 @@ public class TestFunctionalInterfaceRule {
 	};
 
 	{
-		int a;
-		AFunctionalInterface aFunctionalInterface = (int a1) -> {
+		final int a;
+		final AFunctionalInterface aFunctionalInterface = (int a1) -> {
 		};
 	}
 
 	public TestFunctionalInterfaceRule() {
-		AFunctionalInterface foo = new AFunctionalInterface() {
+		final AFunctionalInterface foo = new AFunctionalInterface() {
 
 			@Override
 			public void method(int a) {
-				String sthToLog = a + FINAL_STRING_FIELD;
+				final String sthToLog = a + FINAL_STRING_FIELD;
 
 			}
 		};
 		FINAL_STRING_FIELD = "irritating";
 
-		AFunctionalInterface foo2 = (int a) -> {
-			String sthToLog = a + FINAL_STRING_FIELD;
+		final AFunctionalInterface foo2 = (int a) -> {
+			final String sthToLog = a + FINAL_STRING_FIELD;
 
 		};
 
-		AFunctionalInterface foo3 = (int a) -> {
-			String t = declaredfterConstructor;
+		final AFunctionalInterface foo3 = (int a) -> {
+			final String t = declaredfterConstructor;
 
 		};
 
 		if (foo3 != null) {
-			AFunctionalInterface foo4 = new AFunctionalInterface() {
+			final AFunctionalInterface foo4 = new AFunctionalInterface() {
 				@Override
 				public void method(int a) {
-					String sthToLog = a + NOT_INITIALIZED_FIELD;
+					final String sthToLog = a + NOT_INITIALIZED_FIELD;
 				}
 			};
 		} else {
-			AFunctionalInterface foo5 = new AFunctionalInterface() {
+			final AFunctionalInterface foo5 = new AFunctionalInterface() {
 				@Override
 				public void method(int a) {
-					String sthToLog = a + NOT_INITIALIZED_FIELD;
+					final String sthToLog = a + NOT_INITIALIZED_FIELD;
 				}
 			};
 		}
 
 		if (foo != null) {
 			NOT_INITIALIZED_FIELD = "";
-			AFunctionalInterface inNestedBlock = (int a) -> {
-				String sthToLog = a + NOT_INITIALIZED_FIELD;
+			final AFunctionalInterface inNestedBlock = (int a) -> {
+				final String sthToLog = a + NOT_INITIALIZED_FIELD;
 
 			};
 		} else {
@@ -113,8 +113,8 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	public void usingUnassignedFieldInMethod() {
-		AFunctionalInterface foo2 = (int a) -> {
-			String sthToLog = a + FINAL_STRING_FIELD;
+		final AFunctionalInterface foo2 = (int a) -> {
+			final String sthToLog = a + FINAL_STRING_FIELD;
 
 		};
 	}
@@ -122,15 +122,15 @@ public class TestFunctionalInterfaceRule {
 	@Test
 	public void test1() {
 
-		Runnable runnable = () -> log.debug("xx");
+		final Runnable runnable = () -> log.debug("xx");
 
 		runnable.run();
 
-		MyClass mYClass = new MyClass(() -> log.debug("xy"));
+		final MyClass mYClass = new MyClass(() -> log.debug("xy"));
 
 		mYClass.test();
 
-		NonFunctionalInterface nonFunctionalInterface = new NonFunctionalInterface() {
+		final NonFunctionalInterface nonFunctionalInterface = new NonFunctionalInterface() {
 
 			@Override
 			public void method(int a) {
@@ -145,60 +145,60 @@ public class TestFunctionalInterfaceRule {
 
 		nonFunctionalInterface.method();
 
-		AFunctionalInterface aFunctionalInterface = (int a) -> {
+		final AFunctionalInterface aFunctionalInterface = (int a) -> {
 		};
 
-		AFunctionalInterface aFunctionalInterface2 = (int a) -> {
+		final AFunctionalInterface aFunctionalInterface2 = (int a) -> {
 		};
 
 		aFunctionalInterface.method(0);
 	}
 
 	public void clashingLocalVariableNames(int l) {
-		int a;
-		int a1;
+		final int a;
+		final int a1;
 		a = 5;
 		a1 = 6;
-		int a4 = 8;
+		final int a4 = 8;
 
 		if (a4 > 0) {
-			int k = 0;
+			final int k = 0;
 			for (int a2 = 0; a2 < 10; a2++) {
-				int c;
+				final int c;
 
 				if (a1 == 6) {
-					boolean b = true;
-					boolean d = false;
-					int m = 1;
+					final boolean b = true;
+					final boolean d = false;
+					final int m = 1;
 				}
 
-				AFunctionalInterface foo = (int a3) -> {
-					int b = a3;
+				final AFunctionalInterface foo = (int a3) -> {
+					final int b = a3;
 				};
 
-				AFunctionalInterface foo2 = (int m) -> {
-					int b = m;
+				final AFunctionalInterface foo2 = (int m) -> {
+					final int b = m;
 				};
 
-				AFunctionalInterface foo3 = (int k1) -> {
-					int b = k1;
+				final AFunctionalInterface foo3 = (int k1) -> {
+					final int b = k1;
 				};
 
-				AFunctionalInterface foo4 = (int c1) -> {
-					int b = c1;
+				final AFunctionalInterface foo4 = (int c1) -> {
+					final int b = c1;
 				};
 
-				AFunctionalInterface foo5 = (int l1) -> {
-					int b = l1;
+				final AFunctionalInterface foo5 = (int l1) -> {
+					final int b = l1;
 				};
 			}
 
-			int b;
+			final int b;
 		}
 
-		int a3 = 7;
+		final int a3 = 7;
 
-		AFunctionalInterface aFunctionalInterface2 = (int b) -> {
+		final AFunctionalInterface aFunctionalInterface2 = (int b) -> {
 		};
 
 	}
@@ -215,11 +215,11 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	public void nestedLambdaExpressions(String input) {
-		int repeatedName = 0;
-		AFunctionalInterface foo = (int repeatedName1) -> {
+		final int repeatedName = 0;
+		final AFunctionalInterface foo = (int repeatedName1) -> {
 			if (repeatedName1 > 0) {
 
-				AFunctionalInterface innerFoo = (int repeatedName2) -> {
+				final AFunctionalInterface innerFoo = (int repeatedName2) -> {
 					int c = repeatedName2;
 					c++;
 				};
@@ -229,47 +229,47 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	public void cascadedLambdaExpressions(String input) {
-		AFunctionalInterface foo = (int a) -> {
+		final AFunctionalInterface foo = (int a) -> {
 			if (a > 0) {
-				int b = a;
+				final int b = a;
 			}
 
 		};
 
-		AFunctionalInterface innerFoo = (int a) -> {
+		final AFunctionalInterface innerFoo = (int a) -> {
 			int b = a;
 			b++;
 		};
 	}
 
 	public String redeclaringLocalVariableInAnEnclosingScope(String input) {
-		String local = input;
-		int a = 0;
-		int toString = a;
+		final String local = input;
+		final int a = 0;
+		final int toString = a;
 
-		AFunctionalInterface foo = (int a1) -> {
-			String toString1 = "toString";
-			String local1 = Integer.toString(a1);
-			String input1 = local1;
+		final AFunctionalInterface foo = (int a1) -> {
+			final String toString1 = "toString";
+			final String local1 = Integer.toString(a1);
+			final String input1 = local1;
 		};
 
 		return local;
 	}
 
 	public String nestedRedeclaringLocalVariableInAnEnclosingScope(String input) {
-		String local = input;
-		int a = 0;
-		int toString = a;
+		final String local = input;
+		final int a = 0;
+		final int toString = a;
 
-		AFunctionalInterface foo = (int a1) -> {
-			String toString1 = "toString";
-			String local1 = Integer.toString(a1);
-			String input1 = local1;
+		final AFunctionalInterface foo = (int a1) -> {
+			final String toString1 = "toString";
+			final String local1 = Integer.toString(a1);
+			final String input1 = local1;
 
-			AFunctionalInterface foo1 = (int a2) -> {
-				String toString2 = "toString";
-				String local2 = Integer.toString(a2);
-				String input2 = local2;
+			final AFunctionalInterface foo1 = (int a2) -> {
+				final String toString2 = "toString";
+				final String local2 = Integer.toString(a2);
+				final String input2 = local2;
 			};
 		};
 
@@ -278,50 +278,50 @@ public class TestFunctionalInterfaceRule {
 
 	public String commentFreeAnonymousClass(String input) {
 
-		String local = input;
-		AFunctionalInterface fooComments = new AFunctionalInterface() {
+		final String local = input;
+		final AFunctionalInterface fooComments = new AFunctionalInterface() {
 
 			@Override
 			public void method(int fooComments) {
-				String toString = "toString";
+				final String toString = "toString";
 
 			}
 			/* } */
 		};
 
-		AFunctionalInterface fooComments2 = new AFunctionalInterface() {
+		final AFunctionalInterface fooComments2 = new AFunctionalInterface() {
 
 			/**
 			 * what happens with javadoc?
 			 */
 			@Override
 			public void method(int fooComments) {
-				String toString = "toString";
+				final String toString = "toString";
 			}
 
 			// some important comment. shall not be removed!
 		};
 
-		AFunctionalInterface fooComments3 = (int fooComments1) -> {
-			String toString = "toString";
+		final AFunctionalInterface fooComments3 = (int fooComments1) -> {
+			final String toString = "toString";
 
 		};
 
-		AFunctionalInterface fooComments4 = new AFunctionalInterface() {
+		final AFunctionalInterface fooComments4 = new AFunctionalInterface() {
 			/* block comment */
 			@Override
 			public void method(int fooComments) {
-				String toString = "toString";
+				final String toString = "toString";
 
 			}
 
 		};
 
-		AFunctionalInterface fooComments5 = new AFunctionalInterface() {
+		final AFunctionalInterface fooComments5 = new AFunctionalInterface() {
 			// line comment
 			@Override
 			public void method(int fooComments) {
-				String toString = "toString";
+				final String toString = "toString";
 
 			}
 
@@ -331,12 +331,12 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	public void renamingVarInCatchClause(String e) {
-		AFunctionalInterface foo = (int param) -> {
-			String toString = "toString";
+		final AFunctionalInterface foo = (int param) -> {
+			final String toString = "toString";
 			try {
 
 			} catch (Exception e1) {
-				String sthToLog = new StringBuilder().append(e1.getMessage())
+				final String sthToLog = new StringBuilder().append(e1.getMessage())
 					.append(toString())
 					.append(param)
 					.toString();

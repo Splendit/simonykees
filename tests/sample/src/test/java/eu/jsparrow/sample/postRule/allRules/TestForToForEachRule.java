@@ -18,17 +18,17 @@ public class TestForToForEachRule {
 	}
 
 	private List<Integer> generateHashCodeList(String input) {
-		List<String> foo = generateList(input);
-		List<Integer> fooHashCodes = foo.stream()
+		final List<String> foo = generateList(input);
+		final List<Integer> fooHashCodes = foo.stream()
 			.map(String::hashCode)
 			.collect(Collectors.toList());
 		return fooHashCodes;
 	}
 
 	public String unsafeIteratorName(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
-		String aL = "I am here to confuse you ~_^ ";
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String aL = "I am here to confuse you ~_^ ";
 
 		// comment inside
 		// comment after
@@ -40,8 +40,8 @@ public class TestForToForEachRule {
 	}
 
 	public String emptyLoopCondition(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> foo = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
 		for (Iterator<String> iterator = foo.iterator();;) {
 			if (!iterator.hasNext()) {
 				break;
@@ -52,14 +52,14 @@ public class TestForToForEachRule {
 	}
 
 	public String testConvertIteratorToForEachTemp(String input) {
-		List<String> foo = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		Iterator<String> iterator = foo.iterator();
+		final Iterator<String> iterator = foo.iterator();
 		{
 			for (; iterator.hasNext();) {
 				// I have my comments
-				String s = iterator.next();
+				final String s = iterator.next();
 				sb.append(s);
 			}
 		}
@@ -67,8 +67,8 @@ public class TestForToForEachRule {
 	}
 
 	public String testConvertIteratorToForEachTemp2(String input) {
-		List<String> foo = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		foo.forEach(sb::append);
 
@@ -76,32 +76,32 @@ public class TestForToForEachRule {
 	}
 
 	public String testConvertIteratorToForEach(String input) {
-		List<String> foo = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		foo.forEach(sb::append);
 		return sb.toString();
 	}
 
 	public String testReferencingIterator(String input) {
-		List<String> foo = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
 			iterator.forEachRemaining(remaining -> remaining = "foo");
-			String s = iterator.next();
+			final String s = iterator.next();
 			sb.append(s);
 		}
 		return sb.toString();
 	}
 
 	public String testIteratorToForEachIncrementStatement(String input) {
-		List<String> foo = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		int i = 0;
 		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext(); i++) {
-			String s = iterator.next();
+			final String s = iterator.next();
 			sb.append(new StringBuilder().append(s)
 				.append(",")
 				.append(i)
@@ -113,13 +113,13 @@ public class TestForToForEachRule {
 	}
 
 	public String testIteratorToForEachNestedIf(String input) {
-		List<String> foo = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
-			String s = iterator.next();
+			final String s = iterator.next();
 			if (iterator.hasNext()) {
-				String t = iterator.next();
+				final String t = iterator.next();
 				sb.append(t);
 			}
 			sb.append(s + ",");
@@ -129,8 +129,8 @@ public class TestForToForEachRule {
 	}
 
 	public String testNestedIteratorToForEach(String input) {
-		List<String> foo = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		foo.forEach(s -> {
 			foo.forEach(t -> sb.append(t + ","));
@@ -141,33 +141,33 @@ public class TestForToForEachRule {
 	}
 
 	public String testMultipleIteratorToForEach(String input) {
-		List<String> foo = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		for (Iterator<String> iterator = foo.iterator(), it2 = foo.iterator(); iterator.hasNext();) {
-			String anotherString = "foo";
-			String s = iterator.next();
-			String t = it2.next();
+			final String anotherString = "foo";
+			final String s = iterator.next();
+			final String t = it2.next();
 			sb.append(s + t);
 		}
 		return sb.toString();
 	}
 
 	public String testIteratorDiscardValue(String input) {
-		List<String> foo = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		foo.forEach(aFoo -> {
-			String anotherString = "foo";
+			final String anotherString = "foo";
 			sb.append(anotherString);
 		});
 		return sb.toString();
 	}
 
 	public String testIterateNumberCollection(String input) {
-		List<? extends Number> foo = generateHashCodeList(input);
+		final List<? extends Number> foo = generateHashCodeList(input);
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		foo.forEach(s -> sb.append(s.toString()));
 
@@ -175,13 +175,13 @@ public class TestForToForEachRule {
 	}
 
 	public String testCollectionBiggerIterationStep(String input) {
-		List<? extends Number> foo = generateHashCodeList(input);
+		final List<? extends Number> foo = generateHashCodeList(input);
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		int i;
 		for (i = 0; i < foo.size(); i += 2) {
-			Number s = foo.get(i);
+			final Number s = foo.get(i);
 			sb.append(s.toString());
 		}
 
@@ -190,7 +190,7 @@ public class TestForToForEachRule {
 
 	public String testIteratingIndexMoreLevels(String input) {
 		a = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < a.size(); i++) {
 			sb.append(this.a.get(i));
 
@@ -202,8 +202,8 @@ public class TestForToForEachRule {
 		if (value == null) {
 			return null;
 		}
-		Map<String, Object> map = new LinkedHashMap<>();
-		List<Object> list = (List<Object>) value;
+		final Map<String, Object> map = new LinkedHashMap<>();
+		final List<Object> list = (List<Object>) value;
 		for (int i = 0; i < list.size(); i++) {
 			map.put(Integer.toString(i), list.get(i));
 		}
@@ -211,8 +211,8 @@ public class TestForToForEachRule {
 	}
 
 	public boolean testDoubleLoop() {
-		List<Double> coordinates = new ArrayList<>();
-		Point point = new Point();
+		final List<Double> coordinates = new ArrayList<>();
+		final Point point = new Point();
 
 		for (int i = 0; i < coordinates.size(); i++) {
 			final Double coordinate = coordinates.get(i);
@@ -225,21 +225,21 @@ public class TestForToForEachRule {
 	}
 
 	public boolean testIteratingNonJavaIterators() {
-		MyCollection<Number> myCollection = new MyCollection<>();
+		final MyCollection<Number> myCollection = new MyCollection<>();
 
 		for (Iterator<Number> iterator = myCollection.iterator(); iterator.hasNext();) {
-			Number c = iterator.next();
+			final Number c = iterator.next();
 			// do nothing
 		}
 		return false;
 	}
 
 	public String rawIterable(String input) {
-		List foo = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List foo = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
-			String s = iterator.next();
+			final String s = iterator.next();
 			sb.append(s);
 		}
 		return sb.toString();
@@ -258,7 +258,7 @@ public class TestForToForEachRule {
 	 */
 	private class MyCollection<T> {
 		private final int size = 5;
-		private int index = 0;
+		private final int index = 0;
 
 		public boolean hasNext() {
 			return index < size;
