@@ -42,7 +42,6 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
 
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 		defaultFixture.accept(visitor);
 
 		List<VariableDeclarationFragment> assignedFragments = visitor.getAssigendVariableDeclarationFragments();
@@ -57,7 +56,6 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
 
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 		defaultFixture.accept(visitor);
 
 		List<VariableDeclarationFragment> assignedFragments = visitor.getAssigendVariableDeclarationFragments();
@@ -73,7 +71,6 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
 
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 		defaultFixture.accept(visitor);
 
 		List<VariableDeclarationFragment> assignedFragments = visitor.getAssigendVariableDeclarationFragments();
@@ -87,7 +84,6 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
 
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 		defaultFixture.accept(visitor);
 
 		List<VariableDeclarationFragment> assignedFragments = visitor.getAssigendVariableDeclarationFragments();
@@ -103,7 +99,6 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
 
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 		defaultFixture.accept(visitor);
 
 		List<VariableDeclarationFragment> assignedFragments = visitor.getAssigendVariableDeclarationFragments();
@@ -118,7 +113,6 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
 
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 		defaultFixture.accept(visitor);
 
 		List<VariableDeclarationFragment> assignedFragments = visitor.getAssigendVariableDeclarationFragments();

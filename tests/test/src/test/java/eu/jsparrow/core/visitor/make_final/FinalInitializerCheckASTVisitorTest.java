@@ -43,7 +43,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 				+ "() {" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -57,7 +56,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private static String a, b = \"asdf\";";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -72,7 +70,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 				+ "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -86,7 +83,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private static String a = \"asdf\";" + "static {" + "	a = \"jkl\";" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -101,7 +97,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private static String a = \"asdf\", b;" + "static {" + "	b = \"jkl\";" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -115,7 +110,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private static String a, b;" + "static {" + "	a = \"asdf\";" + "	b = \"jkl\";" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -129,7 +123,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private String a;";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -143,7 +136,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "public String a = \"asdf\";";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -157,7 +149,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "public String a, b = \"asdf\";";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -171,7 +162,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private String a;" + "{" + "	a = \"asdf\";" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -185,7 +175,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_NAME + "() {" + "	a = \"asdf\";" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -200,7 +189,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 				+ "public " + DEFAULT_TYPE_NAME + "(String asdf) {" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -216,7 +204,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 				+ DEFAULT_TYPE_NAME + "(String asdf, String jkl) {" + "	a = \"asdf\";" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -230,7 +217,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private String a = \"asdf\";" + "{" + "	a = \"jkl\";" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -245,7 +231,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 				+ DEFAULT_TYPE_NAME + "() {" + "	a = \"\";" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -260,7 +245,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 				+ "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -274,7 +258,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private String a;" + "{" + "	a = \"asdf\";" + "	a = \"jkl\";" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -289,7 +272,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	a = \"jkl\";" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 
@@ -306,7 +288,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 				+ "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
@@ -322,7 +303,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 						   + "}";
 		
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 
 		defaultFixture.accept(visitor);
 

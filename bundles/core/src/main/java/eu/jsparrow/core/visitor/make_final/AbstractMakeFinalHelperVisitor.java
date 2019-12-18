@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.make_final;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -10,7 +11,6 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * This is an abstract base class for all helper visitors for
@@ -19,7 +19,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  *
  * @since 3.12.0
  */
-public class AbstractMakeFinalHelperVisitor extends AbstractASTRewriteASTVisitor {
+public abstract class AbstractMakeFinalHelperVisitor extends ASTVisitor {
 
 	protected VariableDeclarationFragment extractFieldDeclarationFragmentFromExpression(Expression expression) {
 		CompilationUnit compilationUnit = ASTNodeUtil.getSpecificAncestor(expression, CompilationUnit.class);

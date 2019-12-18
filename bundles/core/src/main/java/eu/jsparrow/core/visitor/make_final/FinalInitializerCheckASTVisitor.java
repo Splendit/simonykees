@@ -60,11 +60,11 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
 		boolean isAlreadyFinal = ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isFinal);
-		
-		if(isAlreadyFinal) {
+
+		if (isAlreadyFinal) {
 			return true;
 		}
-		
+
 		fieldDeclarations.add(fieldDeclaration);
 
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
@@ -200,7 +200,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 		return fieldInitializers.contains(fragment) || staticInitializerInitializers.contains(fragment)
 				|| nonStaticInitializerInitializers.contains(fragment) || constructorInitializers.entrySet()
 					.stream()
-					.map((Map.Entry<Integer, List<VariableDeclarationFragment>> entry) -> entry.getValue())
+					.map(Map.Entry::getValue)
 					.anyMatch(list -> list.contains(fragment));
 	}
 }
