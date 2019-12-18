@@ -23,7 +23,7 @@ public class DiamondOperatorRule {
 
 	private String concatRawTypeList(List objects) {
 		objects.add(new Object());
-		Object val = objects.stream()
+		final Object val = objects.stream()
 			.map(Object::toString)
 			.collect(Collectors.joining(", "));
 		return val.toString();
@@ -41,33 +41,33 @@ public class DiamondOperatorRule {
 	}
 
 	public void inferListType() {
-		List<String> list = new ArrayList<>();
+		final List<String> list = new ArrayList<>();
 		list.add(BigDecimal.TEN.toString());
 	}
 
 	public void inferMapTypes() {
-		Map<String, Object> map = new HashMap<>();
-		Integer ten = Integer.valueOf(10);
+		final Map<String, Object> map = new HashMap<>();
+		final Integer ten = Integer.valueOf(10);
 		map.put(BigDecimal.TEN.toString(), ten);
 	}
 
 	public void inferGenericTypes() {
-		List<? extends Number> list = new ArrayList<Number>();
+		final List<? extends Number> list = new ArrayList<Number>();
 	}
 
 	public void multipleDeclarationStatement(String input) {
-		List<String> list1 = new ArrayList<>();
-		List<String> list2 = new ArrayList<>();
-		List<String> list3 = new ArrayList<>();
+		final List<String> list1 = new ArrayList<>();
+		final List<String> list2 = new ArrayList<>();
+		final List<String> list3 = new ArrayList<>();
 		list1.add(input);
 		list2.add(input);
 		list3.add(input);
 	}
 
 	public void lasyInstatiation(String input) {
-		List<String> list;
-		Map<String, GenericSample<String>> map;
-		Integer ten = Integer.valueOf(10);
+		final List<String> list;
+		final Map<String, GenericSample<String>> map;
+		final Integer ten = Integer.valueOf(10);
 		if (ten <= 0) {
 			return;
 		}
@@ -78,23 +78,23 @@ public class DiamondOperatorRule {
 	}
 
 	public void multipleMapDeclarationStatement(String input) {
-		Map<String, Number> map1 = new HashMap<>();
-		Map<String, Number> map2 = new HashMap<>();
-		Map<String, Number> map3 = new HashMap<>();
+		final Map<String, Number> map1 = new HashMap<>();
+		final Map<String, Number> map2 = new HashMap<>();
+		final Map<String, Number> map3 = new HashMap<>();
 		map1.put(input, 10);
 		map2.put(input, 11);
 		map3.put(input, 12);
 	}
 
 	public void blockWithMapAndLists(String input) {
-		List<String> list = new ArrayList<>();
-		List<Integer> numList = new ArrayList<>();
-		Map<String, Integer> map = new HashMap<>();
-		Set<String> set = new HashSet<>();
+		final List<String> list = new ArrayList<>();
+		final List<Integer> numList = new ArrayList<>();
+		final Map<String, Integer> map = new HashMap<>();
+		final Set<String> set = new HashSet<>();
 		if (!list.isEmpty()) {
 			return;
 		}
-		Set<Integer> numSet = new HashSet<>();
+		final Set<Integer> numSet = new HashSet<>();
 		list.add(input);
 		numSet.add(input.hashCode());
 		numList.add(input.length());
@@ -103,17 +103,17 @@ public class DiamondOperatorRule {
 	}
 
 	public String userDefinedGeneric(String input) {
-		GenericSample<String> userDefinedGeneric = new GenericSample<>(input);
+		final GenericSample<String> userDefinedGeneric = new GenericSample<>(input);
 
 		return userDefinedGeneric.getValue();
 	}
 
 	public void nestedGenericTypes(String input) {
-		GenericSample<String> userDefined = new GenericSample<>(input);
-		List<GenericSample<String>> list = new ArrayList<>();
+		final GenericSample<String> userDefined = new GenericSample<>(input);
+		final List<GenericSample<String>> list = new ArrayList<>();
 		list.add(userDefined);
 
-		Map<String, GenericSample<String>> map = new HashMap<>();
+		final Map<String, GenericSample<String>> map = new HashMap<>();
 		map.put(input, userDefined);
 	}
 
@@ -123,36 +123,36 @@ public class DiamondOperatorRule {
 	}
 
 	public void collectionArgumentInConstructor(String input) {
-		ArrayList<String> ndCollection = new ArrayList<>(new ArrayList<String>(1));
+		final ArrayList<String> ndCollection = new ArrayList<>(new ArrayList<String>(1));
 	}
 
 	public String anonymousGenericInstatiation(String input) {
-		Foo<String> foo = new Foo<String>(input) {
+		final Foo<String> foo = new Foo<String>(input) {
 		};
 		return foo.getValue();
 	}
 
 	public void testOverloadWithTypeVariables_shouldNotChange(String input) {
-		Foo<String> foo = new Foo<String>(input) {
+		final Foo<String> foo = new Foo<String>(input) {
 		};
-		List<GenericSample> result = foo.genericOverloaded(new ArrayList<GenericSample>());
-		List<GenericSample> result2 = foo.genericOverloaded(new ArrayList<GenericSample>(), 0);
+		final List<GenericSample> result = foo.genericOverloaded(new ArrayList<GenericSample>());
+		final List<GenericSample> result2 = foo.genericOverloaded(new ArrayList<GenericSample>(), 0);
 	}
 
 	public void testNormalOverloading_shouldChangeInJava8(String input) {
-		Foo<String> foo = new Foo<String>(input) {
+		final Foo<String> foo = new Foo<String>(input) {
 		};
-		List<GenericSample> result = foo.genericOverloaded(new ArrayList<>(), input);
-		List<GenericSample> result2 = foo.genericOverloaded(new ArrayList<>(), input, 0);
+		final List<GenericSample> result = foo.genericOverloaded(new ArrayList<>(), input);
+		final List<GenericSample> result2 = foo.genericOverloaded(new ArrayList<>(), input, 0);
 	}
 
 	public void savingComments() {
 		/* Some comment here */
-		List<String> myList = new ArrayList<>();
+		final List<String> myList = new ArrayList<>();
 	}
 
 	private class GenericSample<T> {
-		private T t;
+		private final T t;
 
 		public GenericSample(T t) {
 			this.t = t;
@@ -166,7 +166,7 @@ public class DiamondOperatorRule {
 	private abstract class Foo<T> {
 		private T t;
 		private List<T> field = new ArrayList<>();
-		private List<String>[] arrayList;
+		private final List<String>[] arrayList;
 
 		public Foo(T t) {
 			setValue(t);
@@ -230,14 +230,14 @@ public class DiamondOperatorRule {
 			/*
 			 * Should not be changed
 			 */
-			List<GenericSample> result = genericOverloaded(new ArrayList<GenericSample>());
-			List<GenericSample> result2 = genericOverloaded(new ArrayList<GenericSample>(), 0);
+			final List<GenericSample> result = genericOverloaded(new ArrayList<GenericSample>());
+			final List<GenericSample> result2 = genericOverloaded(new ArrayList<GenericSample>(), 0);
 
 			/*
 			 * Should be changed in java 8
 			 */
-			List<GenericSample> result3 = genericOverloaded(new ArrayList<>(), input);
-			List<GenericSample> result4 = genericOverloaded(new ArrayList<>(), input, 0);
+			final List<GenericSample> result3 = genericOverloaded(new ArrayList<>(), input);
+			final List<GenericSample> result4 = genericOverloaded(new ArrayList<>(), input, 0);
 		}
 	}
 

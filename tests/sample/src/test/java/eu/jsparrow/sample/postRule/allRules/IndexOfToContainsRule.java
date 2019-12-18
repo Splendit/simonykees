@@ -19,8 +19,8 @@ public class IndexOfToContainsRule {
 	private static final Logger logger = LoggerFactory.getLogger(IndexOfToContainsRule.class);
 
 	public void testList() {
-		List<String> l = new ArrayList<>();
-		String s = "searchString";
+		final List<String> l = new ArrayList<>();
+		final String s = "searchString";
 
 		// not contains
 		if (!l.contains(s)) {
@@ -114,7 +114,7 @@ public class IndexOfToContainsRule {
 			logger.info(s);
 		}
 
-		int index = l.indexOf(s);
+		final int index = l.indexOf(s);
 		logger.info("object found at index: " + index);
 
 		/*
@@ -140,7 +140,7 @@ public class IndexOfToContainsRule {
 	}
 
 	public void testString() {
-		String s = "Hello World";
+		final String s = "Hello World";
 
 		// not contains
 		if (!StringUtils.contains(s, "ello")) {
@@ -248,7 +248,7 @@ public class IndexOfToContainsRule {
 			logger.info(s);
 		}
 
-		int index = StringUtils.indexOf(s, "ello");
+		final int index = StringUtils.indexOf(s, "ello");
 		logger.info("substring found at index: " + index);
 	}
 }

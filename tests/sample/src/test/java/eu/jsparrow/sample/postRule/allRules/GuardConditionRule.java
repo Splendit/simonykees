@@ -106,9 +106,9 @@ public class GuardConditionRule {
 	}
 
 	public void voidMethod_compoundCondition_shouldTransform() {
-		boolean a = true;
-		boolean b = condition();
-		boolean c = numericCondition() == 1;
+		final boolean a = true;
+		final boolean b = condition();
+		final boolean c = numericCondition() == 1;
 		if (!(a == b == c)) {
 			return;
 		}
@@ -117,9 +117,9 @@ public class GuardConditionRule {
 	}
 
 	public void voidMethod_logicalExpression_shouldTransform() {
-		boolean a = true;
-		boolean b = condition();
-		boolean c = numericCondition() == 1;
+		final boolean a = true;
+		final boolean b = condition();
+		final boolean c = numericCondition() == 1;
 		if (!(a && b || c)) {
 			return;
 		}
@@ -128,9 +128,9 @@ public class GuardConditionRule {
 	}
 
 	public void voidMethod_negatedLogicalExpression_shouldTransform() {
-		boolean a = true;
-		boolean b = condition();
-		boolean c = numericCondition() == 1;
+		final boolean a = true;
+		final boolean b = condition();
+		final boolean c = numericCondition() == 1;
 		if (a && b || c) {
 			return;
 		}
@@ -163,7 +163,7 @@ public class GuardConditionRule {
 	}
 
 	public void voidMethod_infixBooleanExpression_shouldTransform(Object object) {
-		boolean a = false;
+		final boolean a = false;
 		if (!(condition() && a)) {
 			return;
 		}

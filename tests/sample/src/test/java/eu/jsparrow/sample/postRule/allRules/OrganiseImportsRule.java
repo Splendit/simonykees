@@ -13,7 +13,7 @@ public class OrganiseImportsRule {
 	}
 
 	public String b(String s) {
-		List<String> list = new ArrayList<>();
+		final List<String> list = new ArrayList<>();
 		list.add(s);
 		return list.get(list.indexOf(s));
 	}

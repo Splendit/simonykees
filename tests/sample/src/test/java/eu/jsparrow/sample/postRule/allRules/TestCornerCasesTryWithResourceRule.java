@@ -26,18 +26,18 @@ public class TestCornerCasesTryWithResourceRule {
 	private static final Logger logger = LoggerFactory.getLogger(TestCornerCasesTryWithResourceRule.class);
 
 	public StringReader lostStreamsWithoutTry() {
-		StringReader a = new StringReader("lalelu");
+		final StringReader a = new StringReader("lalelu");
 		return a;
 	}
 
 	public Object lostStreamsWithTry(String input) {
-		Object result;
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		ObjectOutput out;
+		final Object result;
+		final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		final ObjectOutput out;
 		try {
 			out = new ObjectOutputStream(buffer);
 			out.writeObject(input);
-			ObjectInput in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()));
+			final ObjectInput in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()));
 			result = in.readObject();
 			in.close();
 		} catch (ClassNotFoundException | IOException e) {
@@ -139,7 +139,7 @@ public class TestCornerCasesTryWithResourceRule {
 
 	public void wekaNotInitialized() {
 		try (ByteArrayInputStream istream = new ByteArrayInputStream(null)) {
-			ObjectInputStream p;
+			final ObjectInputStream p;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -165,7 +165,7 @@ public class TestCornerCasesTryWithResourceRule {
 
 	public void catchResourceCloseExceptions(String path) {
 		try {
-			OutputStream ostream = new FileOutputStream(path);
+			final OutputStream ostream = new FileOutputStream(path);
 			// Flush and close the stream.
 			try {
 				ostream.flush();
@@ -185,7 +185,7 @@ public class TestCornerCasesTryWithResourceRule {
 		try {
 
 			path = path + "getting/sad";
-			OutputStream uniqueName001 = new FileOutputStream(path);
+			final OutputStream uniqueName001 = new FileOutputStream(path);
 			// Flush and close the stream.
 			uniqueName001.flush();
 			uniqueName001.close();
@@ -197,7 +197,7 @@ public class TestCornerCasesTryWithResourceRule {
 	}
 
 	public void resourceUsingLocalDeclarations() {
-		String path = "some/Funny/Path";
+		final String path = "some/Funny/Path";
 		try (OutputStream uniqueName001 = new FileOutputStream(path)) {
 
 			// Flush and close the stream.
@@ -210,7 +210,7 @@ public class TestCornerCasesTryWithResourceRule {
 	}
 
 	public void savingComments() {
-		String path = "some/Funny/Path";
+		final String path = "some/Funny/Path";
 		/*
 		 * Block comment on resource
 		 */
@@ -229,7 +229,7 @@ public class TestCornerCasesTryWithResourceRule {
 
 	public void test_closeWithoutExpression_shouldTransformAndKeepClose() {
 		// SIM-1451
-		String path = "some/Funny/Path";
+		final String path = "some/Funny/Path";
 		try (OutputStream uniqueName001 = new FileOutputStream(path)) {
 			close();
 			uniqueName001.flush();

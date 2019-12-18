@@ -34,13 +34,13 @@ public abstract class TestFunctionalInterface2Rule {
 	};
 
 	public void setFields(Object fields) {
-		Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
+		final Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
 				(Object proxy, Method method, Object[] args) -> method.invoke(fields, args));
 		this.fields = proxyFields;
 	}
 
 	public void setFields2(Object fields) {
-		Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
+		final Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
 				new InvocationHandler() {
 
 					@Override
@@ -57,7 +57,7 @@ public abstract class TestFunctionalInterface2Rule {
 	}
 
 	public void testNotCorrectTypeVarDecl() {
-		Object o = new Runnable() {
+		final Object o = new Runnable() {
 			@Override
 			public void run() {
 			}
@@ -65,12 +65,12 @@ public abstract class TestFunctionalInterface2Rule {
 	}
 
 	public void testCorrectTypeVarDecl() {
-		Runnable r = () -> {
+		final Runnable r = () -> {
 		};
 	}
 
 	public void testNotCorrectTypeAssignment() {
-		Object o;
+		final Object o;
 		o = new Runnable() {
 			@Override
 			public void run() {
@@ -79,7 +79,7 @@ public abstract class TestFunctionalInterface2Rule {
 	}
 
 	public void testCorrectTypeAssignment() {
-		Runnable r;
+		final Runnable r;
 		r = () -> {
 		};
 	}
@@ -171,12 +171,12 @@ public abstract class TestFunctionalInterface2Rule {
 	}
 
 	public void testCorrectClassInstanciation() {
-		MyRunnableClass myRunnableClass = new MyRunnableClass(() -> {
+		final MyRunnableClass myRunnableClass = new MyRunnableClass(() -> {
 		});
 	}
 
 	public void testNotCorrectClassInstanciation() {
-		MyClass myClass = new MyClass(new Runnable() {
+		final MyClass myClass = new MyClass(new Runnable() {
 
 			@Override
 			public void run() {

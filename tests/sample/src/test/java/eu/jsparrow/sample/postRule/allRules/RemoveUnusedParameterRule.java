@@ -63,7 +63,7 @@ public class RemoveUnusedParameterRule {
 	}
 
 	private void invokeTransformedMethods() {
-		String first = "first";
+		final String first = "first";
 		visit_multipleUnusedParameters_shouldTranform("second");
 		visit_privateMethod_shouldTransform();
 		visit_sameSignatureWithInnerclassMethod_shouldTransformInInnerClass(first);
@@ -79,7 +79,7 @@ public class RemoveUnusedParameterRule {
 	}
 
 	private void secondaryInvocations() {
-		String first = "first";
+		final String first = "first";
 		visit_multipleUnusedParameters_shouldTranform("second");
 		visit_privateMethod_shouldTransform();
 		visit_sameSignatureWithInnerclassMethod_shouldTransformInInnerClass(first);
@@ -92,7 +92,7 @@ public class RemoveUnusedParameterRule {
 		}
 
 		public void invokeInInnerClass() {
-			String first = "first";
+			final String first = "first";
 			visit_sameSignatureWithInnerclassMethod_shouldTransformInInnerClass();
 			visit_overloadedInInnerClass_shouldNotTransform(first);
 			visit_overloadedInInnerClass_shouldNotTransform(1);

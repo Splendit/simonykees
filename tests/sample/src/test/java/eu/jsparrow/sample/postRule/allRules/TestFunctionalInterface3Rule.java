@@ -7,7 +7,7 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	static {
-		Runnable r = new Runnable() {
+		final Runnable r = new Runnable() {
 			@Override
 			public void run() {
 				hashCode();
@@ -21,7 +21,7 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	static {
-		Runnable r = new Runnable() {
+		final Runnable r = new Runnable() {
 			@Override
 			public void run() {
 				getClass();
@@ -31,12 +31,12 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	{
-		Runnable r = this::hashCode;
+		final Runnable r = this::hashCode;
 		r.run();
 	}
 
 	{
-		Runnable r = () -> getClass();
+		final Runnable r = () -> getClass();
 		r.run();
 	}
 

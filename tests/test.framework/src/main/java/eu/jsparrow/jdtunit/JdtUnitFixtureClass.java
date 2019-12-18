@@ -389,7 +389,7 @@ public class JdtUnitFixtureClass {
 		ASTParser parser = ASTParser.newParser(AST.JLS11);
 		parser.setSource(compilationUnit);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(false);
+		parser.setResolveBindings(true);
 		astRoot = (CompilationUnit) parser.createAST(null);
 		astRoot.recordModifications();
 

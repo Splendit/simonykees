@@ -20,9 +20,9 @@ public class TestWhileToForEachRule {
 	}
 
 	public String unsafeIteratorName(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
-		String aL = "I am here to confuse you!";
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String aL = "I am here to confuse you!";
 		//
 		l //
 			.forEach(sb::append);
@@ -30,8 +30,8 @@ public class TestWhileToForEachRule {
 	}
 
 	public String loopingOverArrays(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = { "-", input, "." };
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = { "-", input, "." };
 		for (String t : array) {
 			logger.info(t);
 			sb.append(t);
@@ -40,8 +40,8 @@ public class TestWhileToForEachRule {
 	}
 
 	public String loopingOverLists(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
 		list.forEach(t -> {
 			logger.info(t);
 			sb.append(t);
@@ -50,18 +50,18 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileToFor(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		l.forEach(sb::append);
 		return sb.toString();
 	}
 
 	public String testWhileToFor2(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		Iterator<String> iterator = l.iterator();
+		final Iterator<String> iterator = l.iterator();
 		while (iterator.hasNext()) {
 			String s = iterator.next();
 			s = iterator.next();
@@ -71,10 +71,10 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileToFor3(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		Iterator<String> iterator = l.iterator();
+		final Iterator<String> iterator = l.iterator();
 		while (iterator.hasNext()) {
 			String s = iterator.next();
 			s = iterator.next();
@@ -85,12 +85,12 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileToFor4(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		Iterator<String> iterator = l.iterator();
+		final Iterator<String> iterator = l.iterator();
 		while (iterator.hasNext()) {
-			String s = iterator.next();
+			final String s = iterator.next();
 			sb.append(s);
 			iterator.remove();
 			iterator.forEachRemaining(null);
@@ -99,12 +99,12 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileToFor5(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		String s;
 		for (String aL : l) {
-			Object k;
+			final Object k;
 			s = aL;
 			sb.append(s);
 		}
@@ -112,13 +112,13 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileToFor6(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		String s;
 		s = "lalelu";
 		for (String aL : l) {
-			Object k;
+			final Object k;
 			s = aL;
 			sb.append(s);
 		}
@@ -126,12 +126,12 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileToFor7(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		String s;
 		for (String aL : l) {
-			Object k;
+			final Object k;
 			s = aL;
 			sb.append(s);
 		}
@@ -140,12 +140,12 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileToFor8(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		String s = "";
 		for (String aL : l) {
-			Object k;
+			final Object k;
 			s = aL;
 			sb.append(s);
 		}
@@ -154,10 +154,10 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testNextOnlyIterator(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		Iterator<String> stringIterator = l.iterator();
+		final Iterator<String> stringIterator = l.iterator();
 		String s = null;
 		while ((s = stringIterator.next()) != null) {
 			sb.append(s);
@@ -166,8 +166,8 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testNestedWhileLoops(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		l.forEach(outerVal -> {
 			sb.append(outerVal);
@@ -179,12 +179,12 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testNestedWhileLoopsSingleBodyStatement(String input) {
-		List<String> l = generateList(input);
-		List<String> innerList = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final List<String> innerList = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		Iterator<String> innerIt = innerList.iterator();
-		Iterator<String> iterator = l.iterator();
+		final Iterator<String> innerIt = innerList.iterator();
+		final Iterator<String> iterator = l.iterator();
 
 		while (iterator.hasNext()) {
 			while (innerIt.hasNext()) {
@@ -196,11 +196,11 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testNestedWhileLoopsSingleBodyStatement2(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		Iterator<String> innerIt = l.iterator();
-		Iterator<String> iterator = l.iterator();
+		final Iterator<String> innerIt = l.iterator();
+		final Iterator<String> iterator = l.iterator();
 
 		l.forEach(outerKey -> {
 			while (innerIt.hasNext()) {
@@ -212,9 +212,9 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testCascadedWhilesToFor(String input) {
-		List<String> l = generateList(input);
-		List<String> k = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final List<String> k = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		l.forEach(sb::append);
 
@@ -224,10 +224,10 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testTripleNestedWhilesToFor(String input) {
-		List<String> l = generateList(input);
-		List<String> k = generateList(input);
-		List<String> m = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final List<String> k = generateList(input);
+		final List<String> m = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		l.forEach(outerVal -> {
 			sb.append(outerVal);
@@ -245,16 +245,16 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testNestedIfWhilesToFor(String input) {
-		List<String> l = generateList(input);
-		List<String> k = generateList(input);
-		List<String> m = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final List<String> k = generateList(input);
+		final List<String> m = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		l.forEach(outerVal -> {
 			sb.append(outerVal);
 
-			Iterator<String> kIterator = k.iterator();
-			String kVal;
+			final Iterator<String> kIterator = k.iterator();
+			final String kVal;
 			if ((kVal = kIterator.next()) != null) {
 				sb.append(kVal);
 
@@ -266,14 +266,14 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileLoopsMultipleDeclaration(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		l.forEach(m -> {
-			String n = "nothing";
-			Integer i = 1;
-			String o = "-";
-			String p = "something";
+			final String n = "nothing";
+			final Integer i = 1;
+			final String o = "-";
+			final String p = "something";
 			sb.append(n);
 			sb.append(m);
 			sb.append(o);
@@ -285,11 +285,11 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileLoopsIgnoreIterator(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		l.forEach(aL -> {
-			String p = "foo";
+			final String p = "foo";
 			sb.append(p);
 		});
 
@@ -297,23 +297,23 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileLoopsNoIteratingVariable(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		String s;
-		String foo = "foo";
+		final String s;
+		final String foo = "foo";
 		l.forEach(sb::append);
 
 		return sb.toString();
 	}
 
 	public String testWhileLoopsRawList(String input) {
-		List l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		Iterator<String> iterator = l.iterator();
-		String s;
-		String foo = "foo";
+		final Iterator<String> iterator = l.iterator();
+		final String s;
+		final String foo = "foo";
 		while (iterator.hasNext()) {
 			sb.append(iterator.next());
 		}
@@ -322,9 +322,9 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testQualifiedNameIterator(String input) {
-		Foo foo = new Foo();
+		final Foo foo = new Foo();
 		foo.l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		foo.l.forEach(sb::append);
 
@@ -332,12 +332,12 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileLoopsCompoundCondition(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		Iterator<String> iterator = l.iterator();
+		final Iterator<String> iterator = l.iterator();
 		String s;
-		String foo = "foo";
+		final String foo = "foo";
 		while (iterator.hasNext() && !StringUtils.isEmpty(foo)) {
 			if (l.size() > 0) {
 				s = iterator.next();
@@ -352,9 +352,9 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileLoopsWithSwitchCase(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
-		String fooCase = "foo";
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String fooCase = "foo";
 
 		for (String s : l) {
 			switch (fooCase) {
@@ -377,11 +377,11 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileLoopsWithNestedTryCatch(String input) {
-		List<String> l = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		String s;
-		String foo = "foo";
+		final String foo = "foo";
 		String suffix = "";
 		String prefix = "";
 		for (String aL : l) {
@@ -403,14 +403,14 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileLoopsWithNestedLambda(String input) {
-		List<String> l = generateList(input);
-		List<String> k = generateList(input);
+		final List<String> l = generateList(input);
+		final List<String> k = generateList(input);
 		List<String> result = new ArrayList<>();
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
-		String foo = "foo";
-		String suffix = "";
-		String prefix = "";
+		final String foo = "foo";
+		final String suffix = "";
+		final String prefix = "";
 		for (String s : l) {
 			result = k.stream()
 				.map(key -> new StringBuilder().append(s)
@@ -426,15 +426,15 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testWhileLoopsNumericIterator(String input) {
-		List<String> l = generateList(input);
-		List<Number> numbers = l.stream()
+		final List<String> l = generateList(input);
+		final List<Number> numbers = l.stream()
 			.map(String::hashCode)
 			.collect(Collectors.toList());
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		numbers.forEach(s -> {
-			String foo = "foo";
+			final String foo = "foo";
 			sb.append(s);
 		});
 		return sb.toString();
@@ -442,14 +442,14 @@ public class TestWhileToForEachRule {
 
 	// SIM-211
 	public String testIteratorReuse(String input) {
-		List<String> l1 = generateList(input);
-		List<String> l2 = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> l1 = generateList(input);
+		final List<String> l2 = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		Iterator iterator = l1.iterator();
 		while (iterator.hasNext()) {
-			String s = (String) iterator.next();
-			int i = StringUtils.length(s);
+			final String s = (String) iterator.next();
+			final int i = StringUtils.length(s);
 			sb.append(s)
 				.append(i);
 		}
@@ -457,8 +457,8 @@ public class TestWhileToForEachRule {
 		iterator = l2.iterator();
 
 		while (iterator.hasNext()) {
-			String s = (String) iterator.next();
-			int i = StringUtils.length(s);
+			final String s = (String) iterator.next();
+			final int i = StringUtils.length(s);
 			sb.append(s)
 				.append(i);
 		}
@@ -467,13 +467,13 @@ public class TestWhileToForEachRule {
 	}
 
 	public String testNonIterableCollection(String input) {
-		StringBuilder sb = new StringBuilder();
-		FooCollection<Number> numbers = new FooCollection<>();
-		Iterator<Number> iterator = numbers.iterator();
+		final StringBuilder sb = new StringBuilder();
+		final FooCollection<Number> numbers = new FooCollection<>();
+		final Iterator<Number> iterator = numbers.iterator();
 
 		while (iterator.hasNext()) {
-			String foo = "foo";
-			Number s = iterator.next();
+			final String foo = "foo";
+			final Number s = iterator.next();
 			sb.append(s);
 		}
 		return sb.toString();
@@ -484,7 +484,7 @@ public class TestWhileToForEachRule {
 	 */
 	private class FooCollection<T> {
 		private final int size = 5;
-		private int index = 0;
+		private final int index = 0;
 
 		public boolean hasNext() {
 			return index < size;

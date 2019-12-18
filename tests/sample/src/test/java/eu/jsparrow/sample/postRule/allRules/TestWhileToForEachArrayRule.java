@@ -13,8 +13,8 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String loopingOverLists(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		for (String t : array) {
 			logger.info(t);
 			sb.append(t);
@@ -23,8 +23,8 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String nestedLoops(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		for (String t : array) {
 			logger.info(t);
 			sb.append(t);
@@ -36,8 +36,8 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String tripleNestedLoops(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		for (String t : array) {
 			logger.info(t);
 			sb.append(t);
@@ -54,9 +54,9 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String cascadedLoops(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
-		String[] array2 = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
+		final String[] array2 = generateList(input);
 		for (String t : array) {
 			logger.info(t);
 			sb.append(t);
@@ -71,13 +71,13 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String indexAccessedBeforeLoop(String input) {
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		int i = 0;
 		i = 1;
-		String[] array = generateList(input);
+		final String[] array = generateList(input);
 		i = 0;
 		while (i < array.length) {
-			String t = array[i];
+			final String t = array[i];
 			logger.info(t);
 			sb.append(t);
 			i++;
@@ -86,11 +86,11 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String indexAccessedInsideLoop(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		int i = 0;
 		while (i < array.length) {
-			String t = array[i];
+			final String t = array[i];
 			logger.info(t);
 			sb.append(t + i);
 			i++;
@@ -99,11 +99,11 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String indexAccessedAfterLoop(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		int i = 0;
 		while (i < array.length) {
-			String t = array[i];
+			final String t = array[i];
 			logger.info(t);
 			sb.append(t);
 			i++;
@@ -113,8 +113,8 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String prefixIndexUpdate(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		for (String t : array) {
 			logger.info(t);
 			sb.append(t);
@@ -123,8 +123,8 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String infixIndexUpdate(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		for (String t : array) {
 			logger.info(t);
 			sb.append(t);
@@ -133,8 +133,8 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String assignmentIndexUpdate(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		for (String t : array) {
 			logger.info(t);
 			sb.append(t);
@@ -143,12 +143,12 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String loopInIfBody(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		int i = 0;
 		if (array.length > 0) {
 			while (i < array.length) {
-				String t = array[i];
+				final String t = array[i];
 				logger.info(t);
 				sb.append(t);
 				i += 1;
@@ -158,12 +158,12 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String confusingIndexUpdate(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		int i = 0;
 		int j = 0;
 		while (i < array.length) {
-			String t = array[i];
+			final String t = array[i];
 			logger.info(t);
 			sb.append(t);
 			i += 1;
@@ -173,12 +173,12 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String incorrectIndexInitialization(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		int i = 1;
 		int j = 0;
 		while (i < array.length) {
-			String t = array[i];
+			final String t = array[i];
 			logger.info(t);
 			sb.append(t);
 			j++;
@@ -188,12 +188,12 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String incorrectIndexUpdate(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		int i = 0;
 		int j = 0;
 		while (i < array.length) {
-			String t = array[i];
+			final String t = array[i];
 			logger.info(t);
 			sb.append(t);
 			j++;
@@ -203,11 +203,11 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String incorrectIndexInfixUpdate(String input) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(input);
 		int i = 0;
 		while (i < array.length) {
-			String t = array[i];
+			final String t = array[i];
 			logger.info(t);
 			sb.append(t);
 			i += 2;
@@ -216,8 +216,8 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String confusingIteratorName(String iterator) {
-		StringBuilder sb = new StringBuilder();
-		String[] array = generateList(iterator);
+		final StringBuilder sb = new StringBuilder();
+		final String[] array = generateList(iterator);
 		for (String anArray : array) {
 			logger.info(anArray);
 			sb.append(anArray);
@@ -231,9 +231,9 @@ public class TestWhileToForEachArrayRule {
 		while (i < array.length) {
 			int j = 0;
 			while (j < i) {
-				Object o1 = array[i];
-				Object o2 = array[j];
-				boolean condition = o1 != null && o2 != null && o1.equals(o2);
+				final Object o1 = array[i];
+				final Object o2 = array[j];
+				final boolean condition = o1 != null && o2 != null && o1.equals(o2);
 				if (condition) {
 					return true;
 				}
@@ -245,8 +245,8 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String qualifiedNameType() {
-		java.lang.Boolean[] javaLangBooleans = { true, true, false };
-		StringBuilder sb = new StringBuilder();
+		final java.lang.Boolean[] javaLangBooleans = { true, true, false };
+		final StringBuilder sb = new StringBuilder();
 		for (java.lang.Boolean javaLangBoolean : javaLangBooleans) {
 			sb.append(javaLangBoolean);
 		}
@@ -254,8 +254,8 @@ public class TestWhileToForEachArrayRule {
 	}
 
 	public String unQualifiedNameType() {
-		Boolean[] myBooleans = {};
-		StringBuilder sb = new StringBuilder();
+		final Boolean[] myBooleans = {};
+		final StringBuilder sb = new StringBuilder();
 		for (Boolean myBoolean : myBooleans) {
 			sb.append(myBoolean);
 		}

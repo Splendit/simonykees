@@ -17,7 +17,7 @@ public class TestStandardLoggerRule {
 	private final String e = "I am not an exception";
 
 	public void printingExceptionsAndPrimitives(String input) {
-		Exception e = new Exception("Made up exception...");
+		final Exception e = new Exception("Made up exception...");
 		logger1.error(String.valueOf(new Exception()));
 		System.out.println();
 		logger1.info(String.valueOf(6));

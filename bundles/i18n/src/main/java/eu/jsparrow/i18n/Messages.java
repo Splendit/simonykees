@@ -139,6 +139,10 @@ public class Messages extends NLS {
 
 	public static String HideDefaultConstructorInUtilityClassesRule_name;
 
+	public static String MakeFiledsAndVariablesFinalRule_description;
+
+	public static String MakeFiledsAndVariablesFinalRule_name;
+
 	public static String MapGetOrDefaultRule_description;
 	public static String MapGetOrDefaultRule_name;
 	public static String MavenProjectImporter_collectingProjectInfo;

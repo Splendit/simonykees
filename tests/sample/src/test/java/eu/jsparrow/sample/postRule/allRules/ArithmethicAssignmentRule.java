@@ -7,10 +7,10 @@ package eu.jsparrow.sample.postRule.allRules;
 @SuppressWarnings("nls")
 public class ArithmethicAssignmentRule {
 
-	private int int_a = 3;
-	private int int_c = 3;
-	private int int_b = 3;
-	private int int_q = 3;
+	private final int int_a = 3;
+	private final int int_c = 3;
+	private final int int_b = 3;
+	private final int int_q = 3;
 
 	public String a(String i) {
 		i = i + "aaa";
