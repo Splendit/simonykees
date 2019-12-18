@@ -27,7 +27,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  *
  * @since 3.12.0
  */
-public class MakeFiledsAndVariablesFinalASTVisitor extends AbstractASTRewriteASTVisitor {
+public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private Set<FieldDeclaration> finalCandidateFields = new HashSet<>();
 

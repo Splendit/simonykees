@@ -12,19 +12,19 @@ import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
-public class MakeFiledsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixture {
+public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixture {
 
 	private static final String DEFAULT_TYPE_NAME = "TestCU";
 	private static final String DEFAULT_METHOD_NAME = "FixtureMethod";
 
-	private MakeFiledsAndVariablesFinalASTVisitor visitor;
+	private MakeFieldsAndVariablesFinalASTVisitor visitor;
 	private JdtUnitFixtureClass defaultFixture;
 
 	@BeforeEach
 	public void setUp() throws Exception {
 		defaultFixture = fixtureProject.addCompilationUnit(DEFAULT_TYPE_NAME);
 
-		visitor = new MakeFiledsAndVariablesFinalASTVisitor();
+		visitor = new MakeFieldsAndVariablesFinalASTVisitor();
 	}
 
 	@AfterEach

@@ -4,7 +4,7 @@ import java.time.Duration;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import eu.jsparrow.core.visitor.make_final.MakeFiledsAndVariablesFinalASTVisitor;
+import eu.jsparrow.core.visitor.make_final.MakeFieldsAndVariablesFinalASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
@@ -12,17 +12,17 @@ import eu.jsparrow.rules.common.Tag;
 
 /**
  * 
- * @see MakeFiledsAndVariablesFinalASTVisitor
+ * @see MakeFieldsAndVariablesFinalASTVisitor
  * 
  * @since 3.12.0
  */
-public class MakeFiledsAndVariablesFinalRule extends RefactoringRuleImpl<MakeFiledsAndVariablesFinalASTVisitor> {
+public class MakeFieldsAndVariablesFinalRule extends RefactoringRuleImpl<MakeFieldsAndVariablesFinalASTVisitor> {
 
 	public static final String RULE_ID = "MakeFieldsAndVariablesFinal"; //$NON-NLS-1$
 
-	public MakeFiledsAndVariablesFinalRule() {
+	public MakeFieldsAndVariablesFinalRule() {
 		super();
-		this.visitorClass = MakeFiledsAndVariablesFinalASTVisitor.class;
+		this.visitorClass = MakeFieldsAndVariablesFinalASTVisitor.class;
 		this.id = RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.MakeFiledsAndVariablesFinalRule_name,
 				Messages.MakeFiledsAndVariablesFinalRule_description,

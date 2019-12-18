@@ -14,7 +14,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * This is an abstract base class for all helper visitors for
- * {@link MakeFiledsAndVariablesFinalASTVisitor}. It provides methods for
+ * {@link MakeFieldsAndVariablesFinalASTVisitor}. It provides methods for
  * getting {@link VariableDeclarationFragment}s from {@link IBinding}s.
  *
  * @since 3.12.0
