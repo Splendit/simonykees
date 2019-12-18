@@ -18,7 +18,7 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class MakeFiledsAndVariablesFinalRule extends RefactoringRuleImpl<MakeFiledsAndVariablesFinalASTVisitor> {
 
-	public static final String RULE_ID = "MakeFiledsAndVariablesFinal"; //$NON-NLS-1$
+	public static final String RULE_ID = "MakeFieldsAndVariablesFinal"; //$NON-NLS-1$
 
 	public MakeFiledsAndVariablesFinalRule() {
 		super();
