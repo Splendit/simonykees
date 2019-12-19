@@ -51,22 +51,22 @@ public class TestPrimitiveBoxedForStringWithExpressionsRule {
 
 		/* declaration comment */
 		/* toString expression comment */
-		String savingCmments = /* leading comment */ Integer
+		final String savingCmments = /* leading comment */ Integer
 			.toString(/* ctor arg comment */ 5 + input
 					+ intSampleMethod("2")) /* trailing comment */ ;
 
-		String result = Integer.toString(5 + input + intSampleMethod("2"))
+		final String result = Integer.toString(5 + input + intSampleMethod("2"))
 				+ Integer.toString(input + intSampleMethod());
 		return result;
 	}
 
 	public String testNestedIntegerBoxing(int input) {
-		String val = Integer.toString(Integer.valueOf(input) + 1);
+		final String val = Integer.toString(Integer.valueOf(input) + 1);
 		return val;
 	}
 
 	public String testMethodInvocationIntegerBoxing(int input) {
-		String val = Integer.toString(intSampleMethod(Integer.toString(3)) + 4);
+		final String val = Integer.toString(intSampleMethod(Integer.toString(3)) + 4);
 		return val;
 	}
 

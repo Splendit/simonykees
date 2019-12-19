@@ -28,7 +28,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public void statementsInBetween(List<String> strings) {
-		String b = "b";
+		final String b = "b";
 		if (strings.contains("a")) {
 			strings.add(b);
 		}
@@ -37,7 +37,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public void statementsBefore(List<String> strings) {
-		String b = "b";
+		final String b = "b";
 		if (strings.contains("a")) {
 			strings.add(b);
 		}
@@ -49,7 +49,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 		boolean containsEmpty = strings.stream()
 			.anyMatch(StringUtils::isEmpty);
 
-		String b = "b";
+		final String b = "b";
 		if (strings.contains("a")) {
 			strings.add(b);
 		}
@@ -108,7 +108,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 				containsEmpty = true;
 				break;
 			}
-			String[] parts = value.split("\\.");
+			final String[] parts = value.split("\\.");
 			if (parts.length == 0) {
 				return;
 			}
@@ -154,7 +154,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public void compoundCondition(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		boolean containsEmpty = strings.stream()
 			.anyMatch(emptyString::equals);
 	}
@@ -172,7 +172,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public void loopWithSingleBodyStatement(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		boolean containsEmpty = strings.stream()
 			.anyMatch(emptyString::equals);
 	}
@@ -182,7 +182,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	 */
 
 	public boolean loopWithReturnStatement(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		// comment before the for loop
 		// comment before return statement
 		return strings.stream()
@@ -201,18 +201,18 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public boolean statementsBetweenLoopAndReturnStatement(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		for (String value : strings) {
 			if (emptyString.equals(value)) {
 				return true;
 			}
 		}
-		String nonEmptyString = "I dont let you convert to anyMatch";
+		final String nonEmptyString = "I dont let you convert to anyMatch";
 		return false;
 	}
 
 	public boolean mixedReturnValues(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		return strings.stream()
 			.filter(emptyString::equals)
 			.findFirst()
@@ -221,7 +221,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public boolean mixedReturnValues2(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		return strings.stream()
 			.filter(emptyString::equals)
 			.findFirst()
@@ -230,20 +230,20 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public boolean mixedReturnValues3(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		return strings.stream()
 			.noneMatch(emptyString::equals);
 	}
 
 	public boolean irrelevantStatementsBeforeLoop(List<String> strings) {
-		String emptyString = "";
-		String nonEmpty = "I dont stop you from converting to anyMatch";
+		final String emptyString = "";
+		final String nonEmpty = "I dont stop you from converting to anyMatch";
 		return strings.stream()
 			.anyMatch(emptyString::equals);
 	}
 
 	public boolean noIfWrapperAroundReturn(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		for (String value : strings) {
 			return true;
 		}
@@ -251,7 +251,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public boolean noReturnStatementInsideIf(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		strings.stream()
 			.filter(value -> !emptyString.equals(value))
 			.map(value -> StringUtils.substring(value, 0, 1))
@@ -261,10 +261,10 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public boolean multipleStatementsInsideIf(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		for (String value : strings) {
 			if (!emptyString.equals(value)) {
-				String prefix = StringUtils.substring(value, 0, 1);
+				final String prefix = StringUtils.substring(value, 0, 1);
 				return true;
 			}
 		}
@@ -272,19 +272,19 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public boolean ifWithSingleBodyStatement(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		return strings.stream()
 			.anyMatch(emptyString::equals);
 	}
 
 	public boolean singleBodyStatementEverywhere(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		return strings.stream()
 			.anyMatch(emptyString::equals);
 	}
 
 	public void emptyReturnStatements(List<String> strings) {
-		String emptyString = "";
+		final String emptyString = "";
 		for (String value : strings) {
 			if (emptyString.equals(value)) {
 				return;
@@ -295,7 +295,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public boolean unhandledException(List<String> strings) throws Exception {
-		String emptyString = "";
+		final String emptyString = "";
 		for (String value : strings) {
 			if (compareEquals(emptyString, value)) {
 				return true;

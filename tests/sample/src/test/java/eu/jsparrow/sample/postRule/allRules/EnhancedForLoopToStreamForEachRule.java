@@ -34,7 +34,7 @@ public class EnhancedForLoopToStreamForEachRule {
 	}
 
 	public List<List<String>> stringListList = Arrays.asList(stringList1, stringList2);
-	private TestClass testClassField = new TestClass();
+	private final TestClass testClassField = new TestClass();
 	private int intField = 0;
 	protected Map<String, Map<String, String>> validationConfigurations = new HashMap<>();
 
@@ -179,7 +179,7 @@ public class EnhancedForLoopToStreamForEachRule {
 
 		stringList1.forEach(s -> testClassField.testIntField += s.length());
 
-		TestClass testClassLocal = new TestClass();
+		final TestClass testClassLocal = new TestClass();
 		EnhancedForLoopToStreamForEachRule rule = new EnhancedForLoopToStreamForEachRule();
 
 		stringList1.forEach(s -> testClassLocal.testIntField++);
@@ -191,7 +191,7 @@ public class EnhancedForLoopToStreamForEachRule {
 		rule.intField = 12;
 		rule.testClassField.testIntField = 1;
 		for (Map.Entry<String, Map<String, String>> entry : validationConfigurations.entrySet()) {
-			Map<String, String> clone = new HashMap<>(entry.getValue()
+			final Map<String, String> clone = new HashMap<>(entry.getValue()
 				.size());
 			entry.getValue()
 				.entrySet()
@@ -208,7 +208,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			stringList2.forEach(n -> {
 				sb.append(n + ",");
 				stringList3.forEach(r -> {
-					String t = s;
+					final String t = s;
 					sb.append(r + t);
 				});
 			});
@@ -220,14 +220,14 @@ public class EnhancedForLoopToStreamForEachRule {
 			for (String n : stringList2) {
 				sb.append(n + ",");
 				for (String r : stringList3) {
-					String t = s;
+					final String t = s;
 					sb.append(r + t);
 				}
 			}
 		}
 
-		int testClassStringListSize = testClassLocal.stringList.size();
-		LinkedList<String> stringListLocal = new LinkedList<>();
+		final int testClassStringListSize = testClassLocal.stringList.size();
+		final LinkedList<String> stringListLocal = new LinkedList<>();
 		for (int i = 0; i < testClassStringListSize; i++) {
 			for (String s : stringListLocal) {
 				if (StringUtils.contains(testClassLocal.stringList.get(i), s)) {
@@ -241,11 +241,11 @@ public class EnhancedForLoopToStreamForEachRule {
 		 * SIM-472 bugfix
 		 */
 		stringList1.forEach(s -> {
-			TestClass tc = new TestClass();
+			final TestClass tc = new TestClass();
 		});
 
 		for (String s : stringList1) {
-			TestClass tc = new TestClass(1);
+			final TestClass tc = new TestClass(1);
 		}
 
 		for (Object o : (List) stringList1) {
@@ -256,7 +256,7 @@ public class EnhancedForLoopToStreamForEachRule {
 	}
 
 	public void rawIterator() {
-		List<Class> classes = stringList1.stream()
+		final List<Class> classes = stringList1.stream()
 			.map(String::getClass)
 			.collect(Collectors.toList());
 		for (Class clazz : classes) {
@@ -265,14 +265,14 @@ public class EnhancedForLoopToStreamForEachRule {
 	}
 
 	public void captureTypeIterator() {
-		List<List<? extends Person>> persons = new ArrayList<>();
+		final List<List<? extends Person>> persons = new ArrayList<>();
 		for (List<? extends Person> clazz : persons) {
 			logger.info(String.valueOf(clazz));
 		}
 	}
 
 	public void wildCardTypeIterator() {
-		List<List<? extends Person>> persons = new ArrayList<>();
+		final List<List<? extends Person>> persons = new ArrayList<>();
 		for (Class clazz : getWildCardSet()) {
 			logger.info(String.valueOf(clazz));
 		}
@@ -287,40 +287,40 @@ public class EnhancedForLoopToStreamForEachRule {
 	}
 
 	private void collectionOfDoubles() {
-		List<Double> doubles = new ArrayList<>();
+		final List<Double> doubles = new ArrayList<>();
 
 		doubles.stream()
 			.mapToDouble(Double::valueOf)
 			.forEach(d -> {
-				double halfD = d / 2;
+				final double halfD = d / 2;
 				logger.info(String.valueOf(halfD + d));
 			});
 	}
 
 	private void collectionOfInts() {
-		List<Integer> doubles = new ArrayList<>();
+		final List<Integer> doubles = new ArrayList<>();
 		doubles.stream()
 			.mapToInt(Integer::valueOf)
 			.forEach(i -> {
-				int plusTwo = i + 2;
+				final int plusTwo = i + 2;
 				logger.info(String.valueOf(plusTwo + i));
 			});
 	}
 
 	private void collectionOfLongs() {
-		List<Long> longs = new ArrayList<>();
+		final List<Long> longs = new ArrayList<>();
 		longs.stream()
 			.mapToLong(Long::valueOf)
 			.forEach(l -> {
-				long minusTwo = l - 2;
+				final long minusTwo = l - 2;
 				logger.info(String.valueOf(minusTwo + l));
 			});
 	}
 
 	private void boxedIteratingVariable() {
-		List<Double> doubles = new ArrayList<>();
+		final List<Double> doubles = new ArrayList<>();
 		doubles.forEach(d -> {
-			double halfD = d / 2;
+			final double halfD = d / 2;
 			logger.info(String.valueOf(halfD + d));
 		});
 	}

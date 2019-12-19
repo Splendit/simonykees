@@ -13,12 +13,12 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String multiDimensionArrayUnderIf(String input) {
 
-		String[][] ms = { { "3", "1", "2" }, { "5", "6", "7" }, { "8", "9", "4" } };
-		StringBuilder sb = new StringBuilder();
+		final String[][] ms = { { "3", "1", "2" }, { "5", "6", "7" }, { "8", "9", "4" } };
+		final StringBuilder sb = new StringBuilder();
 		int i = 0;
 		if (sb != null) {
 			for (String[] inner : ms) {
-				String[] another = inner;
+				final String[] another = inner;
 				// comment after inner
 				for (String anInner : inner // comment after inner
 				) {
@@ -32,9 +32,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String testForToForEachWithArray(String input) {
 
-		List<String> foo = generateList(input);
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final String[] ms = (String[]) foo.toArray();
+		final StringBuilder sb = new StringBuilder();
 
 		for (String s : ms) {
 			sb.append(s);
@@ -45,9 +45,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String testingComments(String input) {
 
-		List<String> foo = generateList(input);
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final String[] ms = (String[]) foo.toArray();
+		final StringBuilder sb = new StringBuilder();
 
 		/* leading comment */
 		/* condition */
@@ -63,9 +63,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String emptyInitStatement(String input) {
 
-		List<String> foo = generateList(input);
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final String[] ms = (String[]) foo.toArray();
+		final StringBuilder sb = new StringBuilder();
 		for (String s : ms) {
 			sb.append(s);
 		}
@@ -75,9 +75,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String doubleInitialization(String input) {
 
-		List<String> foo = generateList(input);
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final String[] ms = (String[]) foo.toArray();
+		final StringBuilder sb = new StringBuilder();
 		for (String s : ms) {
 			sb.append(s);
 		}
@@ -87,9 +87,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String emptyUdater(String input) {
 
-		List<String> foo = generateList(input);
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final String[] ms = (String[]) foo.toArray();
+		final StringBuilder sb = new StringBuilder();
 		for (String s : ms) {
 			sb.append(s);
 		}
@@ -99,9 +99,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String emptyInfixUpdater(String input) {
 
-		List<String> foo = generateList(input);
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final String[] ms = (String[]) foo.toArray();
+		final StringBuilder sb = new StringBuilder();
 		for (String s : ms) {
 			sb.append(s);
 		}
@@ -111,12 +111,12 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String referencedIndex(String input) {
 
-		List<String> foo = generateList(input);
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final String[] ms = (String[]) foo.toArray();
+		final StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (i = 0; i < ms.length; i += 1) {
-			String s = ms[i % 2];
+			final String s = ms[i % 2];
 			sb.append(s);
 		}
 
@@ -125,12 +125,12 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String modifiedIndex(String input) {
 
-		List<String> foo = generateList(input);
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final String[] ms = (String[]) foo.toArray();
+		final StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (i = 0; i < ms.length; i += 1) {
-			String s = ms[i];
+			final String s = ms[i];
 			i++;
 			sb.append(s);
 		}
@@ -140,25 +140,25 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String referencedIndexOutsideLoop(String input) {
 
-		List<String> foo = generateList(input);
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final String[] ms = (String[]) foo.toArray();
+		final StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (i = 0; i < ms.length; i += 1) {
-			String s = ms[i];
+			final String s = ms[i];
 			sb.append(s);
 		}
 
-		int c = i;
+		final int c = i;
 
 		return sb.toString();
 	}
 
 	public String nestedLoops(String input) {
 
-		List<String> foo = generateList(input);
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final String[] ms = (String[]) foo.toArray();
+		final StringBuilder sb = new StringBuilder();
 		for (String s : ms) {
 			for (String m : ms) {
 				sb.append(m);
@@ -171,9 +171,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String singleBodyStatementNestedLoops(String input) {
 
-		List<String> foo = generateList(input);
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final String[] ms = (String[]) foo.toArray();
+		final StringBuilder sb = new StringBuilder();
 		for (String m : ms) {
 			for (String m1 : ms) {
 				sb.append(m1 + m);
@@ -185,9 +185,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String singleBodyStatementNestedLoops2(String input) {
 
-		List<String> foo = generateList(input);
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final String[] ms = (String[]) foo.toArray();
+		final StringBuilder sb = new StringBuilder();
 
 		for (String iterator : ms) {
 			for (String m : ms) {
@@ -200,11 +200,11 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String customArrayType(String input) {
 
-		List<String> foo = generateList(input);
-		MyCollection[] ms = { new MyCollection<>(), new MyCollection<>() };
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final MyCollection[] ms = { new MyCollection<>(), new MyCollection<>() };
+		final StringBuilder sb = new StringBuilder();
 		for (MyCollection m : ms) {
-			String s = m.toString();
+			final String s = m.toString();
 			sb.append(s);
 		}
 
@@ -213,9 +213,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String confusingDeclaringIndex(String input) {
 
-		List<String> foo = generateList(input);
-		MyCollection[] ms = { new MyCollection<>(), new MyCollection<>() };
-		StringBuilder sb = new StringBuilder();
+		final List<String> foo = generateList(input);
+		final MyCollection[] ms = { new MyCollection<>(), new MyCollection<>() };
+		final StringBuilder sb = new StringBuilder();
 
 		if (foo.isEmpty()) {
 			int i = 1;
@@ -224,11 +224,11 @@ public class TestForToForEachArrayIteratingIndexRule {
 			int i = 2;
 			i++;
 		}
-		Runnable r = () -> {
-			int i1 = 0;
+		final Runnable r = () -> {
+			final int i1 = 0;
 		};
 		for (MyCollection m : ms) {
-			String s = m.toString();
+			final String s = m.toString();
 			sb.append(s);
 		}
 
@@ -237,9 +237,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String clashingWithMethodParamter(String iterator) {
 
-		String[] ms = { "3", "1", "2" };
-		StringBuilder sb = new StringBuilder();
-		String iterator1;
+		final String[] ms = { "3", "1", "2" };
+		final StringBuilder sb = new StringBuilder();
+		final String iterator1;
 		for (String m : ms) {
 			sb.append(m);
 		}
@@ -249,10 +249,10 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String multiDimensionArray(String input) {
 
-		String[][] ms = { { "3", "1", "2" }, { "5", "6", "7" }, { "8", "9", "4" } };
-		StringBuilder sb = new StringBuilder();
+		final String[][] ms = { { "3", "1", "2" }, { "5", "6", "7" }, { "8", "9", "4" } };
+		final StringBuilder sb = new StringBuilder();
 		for (String[] inner : ms) {
-			String[] another = inner;
+			final String[] another = inner;
 			for (String anInner : inner) {
 				sb.append(anInner);
 			}
@@ -263,8 +263,8 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String assigningArrayAccess(String input) {
 
-		String[] ms = { "", "", "" };
-		StringBuilder sb = new StringBuilder();
+		final String[] ms = { "", "", "" };
+		final StringBuilder sb = new StringBuilder();
 
 		for (int i = 0; i < ms.length; i += 1) {
 			ms[i] = "-";
@@ -279,9 +279,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String cascadedLoopsSameIndexName(String input) {
 
-		String[] ms = { "1", "2", "3" };
-		String[] ms2 = { "4", "5", "6" };
-		StringBuilder sb = new StringBuilder();
+		final String[] ms = { "1", "2", "3" };
+		final String[] ms2 = { "4", "5", "6" };
+		final StringBuilder sb = new StringBuilder();
 
 		for (String m : ms) {
 			sb.append(m);
@@ -296,8 +296,8 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String confusingIteratingIndex(String input) {
 
-		String[] ms = { "1", "2", "3" };
-		StringBuilder sb = new StringBuilder();
+		final String[] ms = { "1", "2", "3" };
+		final StringBuilder sb = new StringBuilder();
 		int i = 1;
 		for (int j = 0; i < ms.length; i += 1) {
 			sb.append(ms[i]);
@@ -308,8 +308,8 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String confusingIteratingIndex2(String input) {
 
-		String[] ms = {};
-		StringBuilder sb = new StringBuilder();
+		final String[] ms = {};
+		final StringBuilder sb = new StringBuilder();
 		int j = 0;
 		if (ms.length == 0) {
 			for (int i = 0; i < ms.length; j++) {
@@ -322,8 +322,8 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String confusingIteratingIndex3(String input) {
 
-		String[] ms = { "1", "2", "3" };
-		StringBuilder sb = new StringBuilder();
+		final String[] ms = { "1", "2", "3" };
+		final StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (int j = 0; i < ms.length; i += 1) {
 			sb.append(ms[i]);
@@ -335,8 +335,8 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String confusingIteratingIndex4(String input) {
 
-		String[] ms = { "1", "2", "3" };
-		StringBuilder sb = new StringBuilder();
+		final String[] ms = { "1", "2", "3" };
+		final StringBuilder sb = new StringBuilder();
 		int j = 0;
 		for (int i = 0; i < ms.length; j++) {
 			sb.append(ms[i]);
@@ -349,9 +349,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 	public String compoundCondition(String input) {
 
-		String[] ms = {};
-		StringBuilder sb = new StringBuilder();
-		int j = 0;
+		final String[] ms = {};
+		final StringBuilder sb = new StringBuilder();
+		final int j = 0;
 		if (ms.length == 0) {
 			for (int i = 0; i < ms.length || i == 2; i++) {
 				sb.append(ms[i]);
@@ -365,9 +365,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 		// jFreeChart corner case
 		for (int i = 0; i < array.length; i++) {
 			for (int j = 0; j < i; j++) {
-				Object o1 = array[i];
-				Object o2 = array[j];
-				boolean condition = o1 != null && o2 != null && o1.equals(o2);
+				final Object o1 = array[i];
+				final Object o2 = array[j];
+				final boolean condition = o1 != null && o2 != null && o1.equals(o2);
 				if (condition) {
 					return true;
 				}
@@ -377,8 +377,8 @@ public class TestForToForEachArrayIteratingIndexRule {
 	}
 
 	public String qualifiedNameType() {
-		java.lang.Boolean[] javaLangBooleans = { true, true, false };
-		StringBuilder sb = new StringBuilder();
+		final java.lang.Boolean[] javaLangBooleans = { true, true, false };
+		final StringBuilder sb = new StringBuilder();
 		for (java.lang.Boolean javaLangBoolean : javaLangBooleans) {
 			sb.append(javaLangBoolean);
 		}
@@ -386,8 +386,8 @@ public class TestForToForEachArrayIteratingIndexRule {
 	}
 
 	public String unQualifiedNameType() {
-		Boolean[] javaLangBooleans = {};
-		StringBuilder sb = new StringBuilder();
+		final Boolean[] javaLangBooleans = {};
+		final StringBuilder sb = new StringBuilder();
 		for (Boolean javaLangBoolean : javaLangBooleans) {
 			sb.append(javaLangBoolean);
 		}
@@ -395,8 +395,8 @@ public class TestForToForEachArrayIteratingIndexRule {
 	}
 
 	public String arrayOfInnerTypesFromOtherClasses(String input) {
-		Wrapper.Foo[] foos = { Wrapper.createFoo(input) };
-		StringBuilder sb = new StringBuilder();
+		final Wrapper.Foo[] foos = { Wrapper.createFoo(input) };
+		final StringBuilder sb = new StringBuilder();
 		for (Wrapper.Foo foo : foos) {
 			sb.append(foo.toString());
 		}
@@ -421,7 +421,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 	 */
 	private class MyCollection<T> {
 		private final int size = 5;
-		private int index = 0;
+		private final int index = 0;
 
 		public boolean hasNext() {
 			return index < size;
@@ -474,7 +474,7 @@ class Wrapper {
 	}
 
 	class Foo {
-		private String foo;
+		private final String foo;
 
 		public Foo(String foo) {
 			this.foo = foo;

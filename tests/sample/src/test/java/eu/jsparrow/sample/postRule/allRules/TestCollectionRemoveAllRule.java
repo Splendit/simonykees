@@ -12,7 +12,7 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testIfCollectionIsEmpty(String input) {
-		List<String> resultList = generateList(input);
+		final List<String> resultList = generateList(input);
 
 		/* invocation comment */
 		/* param comment */
@@ -21,7 +21,7 @@ public class TestCollectionRemoveAllRule {
 		resultList // I don't want to break anything
 			.clear();
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		resultList.stream()
 			.forEach(sb::append);
@@ -30,13 +30,13 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testProperCollectionIsEmpty(String input) {
-		List<String> resultList = generateList(input);
-		List<String> resultList2 = generateList(input);
+		final List<String> resultList = generateList(input);
+		final List<String> resultList2 = generateList(input);
 		resultList2.add("d");
 
 		resultList.removeAll(resultList2);
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		resultList2.stream()
 			.forEach(sb::append);
@@ -45,9 +45,9 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testConvertMultipleCollections(String input) {
-		List<String> resultList1 = generateList(input);
-		List<String> resultList2 = generateList(input);
-		List<String> resultList3 = generateList(input);
+		final List<String> resultList1 = generateList(input);
+		final List<String> resultList2 = generateList(input);
+		final List<String> resultList3 = generateList(input);
 
 		resultList2.add("d");
 
@@ -55,7 +55,7 @@ public class TestCollectionRemoveAllRule {
 		resultList2.clear();
 		resultList3.clear();
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		resultList1.stream()
 			.forEach(sb::append);
@@ -68,15 +68,15 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testNestedIf(String input) {
-		List<String> resultList = generateList(input);
-		List<String> resultList2 = generateList(input);
+		final List<String> resultList = generateList(input);
+		final List<String> resultList2 = generateList(input);
 		resultList2.add("d");
 
 		if (resultList2.isEmpty()) {
 			resultList.clear();
 		}
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		resultList2.stream()
 			.forEach(sb::append);
@@ -85,8 +85,8 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testNestedFor(String input) {
-		List<String> resultList = generateList(input);
-		List<String> resultList2 = generateList(input);
+		final List<String> resultList = generateList(input);
+		final List<String> resultList2 = generateList(input);
 		resultList2.add("d");
 
 		resultList2.forEach(s -> {
@@ -95,7 +95,7 @@ public class TestCollectionRemoveAllRule {
 			}
 		});
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		resultList2.stream()
 			.forEach(sb::append);
@@ -104,8 +104,8 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testNestedLambda(String input) {
-		List<String> resultList = generateList(input);
-		List<String> resultList2 = generateList(input);
+		final List<String> resultList = generateList(input);
+		final List<String> resultList2 = generateList(input);
 		resultList2.add("d");
 
 		resultList2.forEach(s -> {
@@ -114,7 +114,7 @@ public class TestCollectionRemoveAllRule {
 			}
 		});
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		resultList2.stream()
 			.forEach(sb::append);
@@ -123,8 +123,8 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testConvertInSwitchCase(String input) {
-		List<String> resultList = generateList(input);
-		List<String> resultList2 = generateList(input);
+		final List<String> resultList = generateList(input);
+		final List<String> resultList2 = generateList(input);
 		resultList2.add("d");
 
 		switch (resultList2.size()) {
@@ -138,7 +138,7 @@ public class TestCollectionRemoveAllRule {
 			resultList.clear();
 		}
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		resultList2.stream()
 			.forEach(sb::append);
@@ -147,8 +147,8 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testConvertInWhileLoop(String input) {
-		List<String> resultList = generateList(input);
-		List<String> resultList2 = generateList(input);
+		final List<String> resultList = generateList(input);
+		final List<String> resultList2 = generateList(input);
 		resultList2.add("d");
 
 		for (String s : resultList2) {
@@ -162,7 +162,7 @@ public class TestCollectionRemoveAllRule {
 			}
 		}
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		resultList.stream()
 			.forEach(sb::append);
 
@@ -170,11 +170,11 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testEmptyCollection(String input) {
-		List<String> resultList = generateList(input);
+		final List<String> resultList = generateList(input);
 
 		resultList.removeAll(new ArrayList<String>());
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		resultList.stream()
 			.forEach(sb::append);
@@ -183,12 +183,12 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testModifiedCollection(String input) {
-		List<String> resultList = generateList(input);
+		final List<String> resultList = generateList(input);
 
 		resultList.removeAll(resultList.stream()
 			.collect(Collectors.toList()));
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		resultList.stream()
 			.forEach(sb::append);
@@ -197,12 +197,12 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testReferencedCollection(String input) {
-		List<String> resultList = generateList(input);
-		List<String> resultList2 = resultList;
+		final List<String> resultList = generateList(input);
+		final List<String> resultList2 = resultList;
 
 		resultList.removeAll(resultList2);
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		resultList.stream()
 			.forEach(sb::append);
@@ -211,15 +211,15 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testNumericCollection(String input) {
-		List<String> resultList = generateList(input);
-		List<Number> numericList = resultList.stream()
+		final List<String> resultList = generateList(input);
+		final List<Number> numericList = resultList.stream()
 			.map(String::hashCode)
 			.collect(Collectors.toList());
 
 		resultList.clear();
 		numericList.clear();
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		numericList.stream()
 			.forEach(sb::append);
@@ -228,8 +228,8 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testMultipleConvertionPerLine(String input) {
-		List<String> resultList = generateList(input);
-		List<Number> numericList = resultList.stream()
+		final List<String> resultList = generateList(input);
+		final List<Number> numericList = resultList.stream()
 			.map(String::hashCode)
 			.collect(Collectors.toList());
 
@@ -238,7 +238,7 @@ public class TestCollectionRemoveAllRule {
 		numericList.clear();
 		numericList.removeAll(resultList);
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		numericList.stream()
 			.forEach(sb::append);
@@ -249,7 +249,7 @@ public class TestCollectionRemoveAllRule {
 	}
 
 	public String testSavingComments(String input) {
-		List<String> resultList = generateList(input);
+		final List<String> resultList = generateList(input);
 
 		// to not be lost
 		resultList.clear();
@@ -260,7 +260,7 @@ public class TestCollectionRemoveAllRule {
 		// to not be lost
 		resultList.clear();
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
 		resultList.stream()
 			.forEach(sb::append);

@@ -115,7 +115,7 @@ public class TestPrimitiveBoxedForStringWithVariablesRule {
 
 		if (!StringUtils.isEmpty((Integer.toString(input)))) {
 			result = Integer.toString(intSampleMethod("5") + Integer.valueOf(3) + input);
-			Integer res = input + Integer.valueOf(1);
+			final Integer res = input + Integer.valueOf(1);
 			result = result + res.toString();
 		}
 

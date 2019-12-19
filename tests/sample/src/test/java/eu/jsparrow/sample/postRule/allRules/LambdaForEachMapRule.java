@@ -17,8 +17,8 @@ public class LambdaForEachMapRule {
 	}
 
 	public String unwrapFromCollection(String input) {
-		List<String> list = Arrays.asList(input + "non", "non-empty");
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = Arrays.asList(input + "non", "non-empty");
+		final StringBuilder sb = new StringBuilder();
 
 		// save me 1
 		// comment after s.substring(1)
@@ -55,8 +55,8 @@ public class LambdaForEachMapRule {
 	}
 
 	public String unwrapOneExpression(String input) {
-		List<String> list = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		// save me 1
 		// save me 2
@@ -69,8 +69,8 @@ public class LambdaForEachMapRule {
 	}
 
 	public String longTypedStream(String input) {
-		List<Long> list = Arrays.asList(5L, 3L, 2L);
-		StringBuilder sb = new StringBuilder();
+		final List<Long> list = Arrays.asList(5L, 3L, 2L);
+		final StringBuilder sb = new StringBuilder();
 
 		list.stream()
 			.filter(l -> l > 0)
@@ -81,8 +81,8 @@ public class LambdaForEachMapRule {
 	}
 
 	public String doubleTypedStream(String input) {
-		List<Double> list = Arrays.asList(5D, 3D, 2D);
-		StringBuilder sb = new StringBuilder();
+		final List<Double> list = Arrays.asList(5D, 3D, 2D);
+		final StringBuilder sb = new StringBuilder();
 
 		list.stream()
 			.filter(d -> d > 0)
@@ -93,8 +93,8 @@ public class LambdaForEachMapRule {
 	}
 
 	public String intTypedStream(String input) {
-		List<Integer> list = Arrays.asList(5, 3, 2);
-		StringBuilder sb = new StringBuilder();
+		final List<Integer> list = Arrays.asList(5, 3, 2);
+		final StringBuilder sb = new StringBuilder();
 
 		list.stream()
 			.filter(i -> i > 0)
@@ -105,20 +105,20 @@ public class LambdaForEachMapRule {
 	}
 
 	public String unwrapMultipleExpressions(String input) {
-		List<String> list = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		// save me 2
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
 			.map(s -> {
 				// save me 1
-				int i = 10;
+				final int i = 10;
 				return StringUtils.substring(s, 1) + i;
 			})
 			.forEach(subString -> {
 				// save me 3
-				String lower = StringUtils.lowerCase(subString);
+				final String lower = StringUtils.lowerCase(subString);
 				// save me 4
 				sb.append(lower);
 			});
@@ -127,53 +127,53 @@ public class LambdaForEachMapRule {
 	}
 
 	public String unsplittableBody(String input) {
-		List<String> list = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
 			.forEach(s -> {
-				int i = 10;
-				String subString = StringUtils.substring(s, 1) + i;
-				String lower = StringUtils.lowerCase(subString);
+				final int i = 10;
+				final String subString = StringUtils.substring(s, 1) + i;
+				final String lower = StringUtils.lowerCase(subString);
 				sb.append(lower + i);
 			});
 		return sb.toString();
 	}
 
 	public String unsplittableBody2(String input) {
-		List<String> list = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
 			.forEach(s -> {
-				int i = 10;
-				int c = 0;
-				String subString = new StringBuilder().append(StringUtils.substring(s, 1))
+				final int i = 10;
+				final int c = 0;
+				final String subString = new StringBuilder().append(StringUtils.substring(s, 1))
 					.append(i)
 					.append(c)
 					.toString();
-				String lower = StringUtils.lowerCase(subString);
+				final String lower = StringUtils.lowerCase(subString);
 				sb.append(lower + c);
 			});
 		return sb.toString();
 	}
 
 	public String unsplittableBody3(String input) {
-		List<String> list = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
 			.forEach(s -> {
-				int i = 10;
-				int c = 0;
-				String subString = new StringBuilder().append(StringUtils.substring(s, 1))
+				final int i = 10;
+				final int c = 0;
+				final String subString = new StringBuilder().append(StringUtils.substring(s, 1))
 					.append(i)
 					.append(c)
 					.toString();
-				String lower = StringUtils.lowerCase(subString);
+				final String lower = StringUtils.lowerCase(subString);
 				sb.append(lower);
 				if (StringUtils.isEmpty(lower)) {
 					sb.append(s);
@@ -183,13 +183,13 @@ public class LambdaForEachMapRule {
 	}
 
 	public String mapToDifferentType(String input) {
-		List<String> list = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
 			.mapToInt(s -> {
-				int offset = 10;
+				final int offset = 10;
 				return StringUtils.indexOf(s, "i") + offset;
 			})
 			.forEach(pos -> sb.append(Integer.toString(pos)));
@@ -197,8 +197,8 @@ public class LambdaForEachMapRule {
 	}
 
 	public String mapToDifferentTypeSingleBodyExpression(String input) {
-		List<String> list = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
@@ -208,10 +208,10 @@ public class LambdaForEachMapRule {
 	}
 
 	public String ifStatementAfterMappingVar(String input) {
-		List<String> list = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		int offset = 10;
+		final int offset = 10;
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
 			.mapToInt(s -> {
@@ -229,10 +229,10 @@ public class LambdaForEachMapRule {
 	}
 
 	public String ifStatementBeforeMappingVar(String input) {
-		List<String> list = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		int offset = 10;
+		final int offset = 10;
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
 			.mapToInt(s -> {
@@ -249,10 +249,10 @@ public class LambdaForEachMapRule {
 	}
 
 	public String saveComments(String input) {
-		List<String> list = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		int offset = 10;
+		final int offset = 10;
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
 			.mapToInt(s -> {
@@ -271,16 +271,16 @@ public class LambdaForEachMapRule {
 	}
 
 	public String saveComments2(String input) {
-		List<String> list = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
-		int offset = 10;
+		final int offset = 10;
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
 			.mapToInt(s -> {
-				int i;// not important
+				final int i;// not important
 				// not used
-				int j;
+				final int j;
 				return StringUtils.indexOf(s, "i");
 			})
 			.forEach(pos -> {
@@ -291,8 +291,8 @@ public class LambdaForEachMapRule {
 	}
 
 	public String multipleDeclarationFragments(String input) {
-		List<String> list = generateList(input);
-		StringBuilder sb = new StringBuilder();
+		final List<String> list = generateList(input);
+		final StringBuilder sb = new StringBuilder();
 
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
@@ -301,7 +301,7 @@ public class LambdaForEachMapRule {
 				return StringUtils.indexOf(s, "i");
 			})
 			.forEach(pos -> {
-				int c = 0;
+				final int c = 0;
 				sb.append("c");
 				sb.append(pos + "d");
 			});
@@ -309,16 +309,16 @@ public class LambdaForEachMapRule {
 	}
 
 	public String explicitParameterType() {
-		List<Number> numbers = new ArrayList<>();
+		final List<Number> numbers = new ArrayList<>();
 		numbers.add(2.3);
 		numbers.add(4.5);
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		numbers.stream()
 			.filter(n -> n.doubleValue() > 0)
 			.map((Number n) -> (Double) n)
-			.forEach((Double d) -> {
-				String s = d.toString();
+			.forEach((final Double d) -> {
+				final String s = d.toString();
 				sb.append(s);
 			});
 
@@ -326,17 +326,17 @@ public class LambdaForEachMapRule {
 	}
 
 	public String explicitParameterizedArgumentType() {
-		List<Number> numbers = new ArrayList<>();
+		final List<Number> numbers = new ArrayList<>();
 		numbers.add(2.3);
 		numbers.add(4.5);
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		numbers.stream()
 			.filter(n -> n.doubleValue() > 0)
 			.forEach((Number n) -> {
-				List<Number> nums = Collections.singletonList(n);
-				Double d = (Double) nums.get(0);
-				String s = d.toString();
+				final List<Number> nums = Collections.singletonList(n);
+				final Double d = (Double) nums.get(0);
+				final String s = d.toString();
 				sb.append(nums.toString());
 			});
 
@@ -344,17 +344,17 @@ public class LambdaForEachMapRule {
 	}
 
 	public String explicitArrayArgumentType() {
-		List<Number> numbers = new ArrayList<>();
+		final List<Number> numbers = new ArrayList<>();
 		numbers.add(2.3);
 		numbers.add(4.5);
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		numbers.stream()
 			.filter(n -> n.doubleValue() > 0)
 			.forEach((Number n) -> {
-				Number[] nums = { n };
-				Double d = (Double) nums[0];
-				String s = d.toString();
+				final Number[] nums = { n };
+				final Double d = (Double) nums[0];
+				final String s = d.toString();
 				sb.append(nums.toString());
 			});
 
@@ -362,11 +362,11 @@ public class LambdaForEachMapRule {
 	}
 
 	public String explicitPrimitiveType() {
-		List<Number> numbers = new ArrayList<>();
+		final List<Number> numbers = new ArrayList<>();
 		numbers.add(2.3);
 		numbers.add(4.5);
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		numbers.stream()
 			.filter(n -> n.doubleValue() > 0)
 			.mapToInt((Number n) -> (int) n / 2)
@@ -377,13 +377,13 @@ public class LambdaForEachMapRule {
 
 	public String rawType() {
 
-		List rawList = generateRawListOfStrings();
-		StringBuilder sb = new StringBuilder();
+		final List rawList = generateRawListOfStrings();
+		final StringBuilder sb = new StringBuilder();
 		rawList.stream()
 			.filter(o -> o != null)
 			.forEach((Object n) -> {
-				String s = (String) n;
-				Number d = (int) Integer.valueOf(s) / 2;
+				final String s = (String) n;
+				final Number d = (int) Integer.valueOf(s) / 2;
 				sb.append(d);
 			});
 
@@ -392,13 +392,13 @@ public class LambdaForEachMapRule {
 
 	public String finalLocalVariable() {
 
-		List<Object> rawList = generateRawListOfStrings();
-		StringBuilder sb = new StringBuilder();
+		final List<Object> rawList = generateRawListOfStrings();
+		final StringBuilder sb = new StringBuilder();
 		rawList.stream()
 			.filter(o -> o != null)
 			.map((Object n) -> (String) n)
 			.forEach((final String s) -> {
-				Number d = (int) Integer.valueOf(s) / 2;
+				final Number d = (int) Integer.valueOf(s) / 2;
 				sb.append(d);
 			});
 
@@ -407,14 +407,14 @@ public class LambdaForEachMapRule {
 
 	public String annotatedLocalVariable() {
 
-		List<Object> rawList = generateRawListOfStrings();
-		StringBuilder sb = new StringBuilder();
+		final List<Object> rawList = generateRawListOfStrings();
+		final StringBuilder sb = new StringBuilder();
 		rawList.stream()
 			.filter(o -> o != null)
 			.forEach((Object n) -> {
 				@Deprecated
 				final String s = (String) n;
-				Number d = (int) Integer.valueOf(s) / 2;
+				final Number d = (int) Integer.valueOf(s) / 2;
 
 				sb.append(d);
 			});
@@ -424,13 +424,13 @@ public class LambdaForEachMapRule {
 
 	public String rawTypeFromMethodInvocation() {
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		this.generateRawListOfStrings()
 			.stream()
 			.filter(o -> o != null)
 			.forEach((Object n) -> {
-				String s = (String) n;
-				Number d = (int) Integer.valueOf(s) / 2;
+				final String s = (String) n;
+				final Number d = (int) Integer.valueOf(s) / 2;
 				sb.append(d);
 			});
 
@@ -438,7 +438,7 @@ public class LambdaForEachMapRule {
 	}
 
 	public <T> void mapToGenericType(List<Person> refs) {
-		List<List<T>> keys = new ArrayList<>();
+		final List<List<T>> keys = new ArrayList<>();
 		refs.stream()
 			.forEach(ref -> {
 				final List<T> testKey = refToKey(ref);
@@ -447,7 +447,7 @@ public class LambdaForEachMapRule {
 	}
 
 	public <T> void mapToNestedType(List<Person> refs) {
-		List<List<String>> keys = new ArrayList<>();
+		final List<List<String>> keys = new ArrayList<>();
 		refs.stream()
 			.forEach(ref -> {
 				final List<String> testKey = Collections.singletonList(ref.getName());
@@ -456,11 +456,11 @@ public class LambdaForEachMapRule {
 	}
 
 	public void parameterizedMapMethod() {
-		StringBuilder sb = new StringBuilder();
-		List<Wrapper> wrappers = new ArrayList<>();
+		final StringBuilder sb = new StringBuilder();
+		final List<Wrapper> wrappers = new ArrayList<>();
 		wrappers.stream()
 			.forEach(wrapp -> {
-				InnerClass innerClass = wrapp.getInnerClass();
+				final InnerClass innerClass = wrapp.getInnerClass();
 				useInnerClass(innerClass);
 				sb.append(innerClass.getName());
 			});
@@ -470,27 +470,27 @@ public class LambdaForEachMapRule {
 		/*
 		 * Similar to corner case in SIM-728
 		 */
-		StringBuilder sb = new StringBuilder();
-		List<Wrapper> wrappers = new ArrayList<>();
+		final StringBuilder sb = new StringBuilder();
+		final List<Wrapper> wrappers = new ArrayList<>();
 		wrappers.forEach(wrapp -> {
 			// Wrapper::getInnerClass is a generic method
-			InnerClass innerClass = wrapp.getInnerClass();
-			String toString = wrapp.toString();
+			final InnerClass innerClass = wrapp.getInnerClass();
+			final String toString = wrapp.toString();
 			sb.append(innerClass.getName() + toString);
 		});
 	}
 
 	public void unusedVariablesInitializedWithGenericMethod() {
-		StringBuilder sb = new StringBuilder();
-		List<Wrapper> wrappers = new ArrayList<>();
+		final StringBuilder sb = new StringBuilder();
+		final List<Wrapper> wrappers = new ArrayList<>();
 		wrappers.stream()
 			.map(wrapp -> {
 				/*
 				 * The generic method is not used as initializer of the mapping
 				 * variable.
 				 */
-				InnerClass innerClass = wrapp.getInnerClass();
-				String strInnerClass = innerClass.toString();
+				final InnerClass innerClass = wrapp.getInnerClass();
+				final String strInnerClass = innerClass.toString();
 				return wrapp.toString() + strInnerClass;
 			})
 			.forEach(sb::append);
@@ -501,7 +501,7 @@ public class LambdaForEachMapRule {
 	}
 
 	public <T> void mapToTypeVariable(List<Person> refs) {
-		List<T> keys = new ArrayList<>();
+		final List<T> keys = new ArrayList<>();
 		refs.stream()
 			.forEach(ref -> {
 				final T testKey = refToKeyT();
@@ -519,7 +519,7 @@ public class LambdaForEachMapRule {
 	}
 
 	private List generateRawListOfStrings() {
-		List rawList = Arrays.asList("2.3", "4.5");
+		final List rawList = Arrays.asList("2.3", "4.5");
 		return rawList;
 	}
 

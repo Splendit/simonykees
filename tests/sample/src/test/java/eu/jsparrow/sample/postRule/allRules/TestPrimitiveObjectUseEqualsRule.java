@@ -4,8 +4,8 @@ package eu.jsparrow.sample.postRule.allRules;
 public class TestPrimitiveObjectUseEqualsRule {
 
 	public void testIntegerShouldRefactor() {
-		Integer a = Integer.valueOf(1);
-		Integer b = Integer.valueOf(2);
+		final Integer a = Integer.valueOf(1);
+		final Integer b = Integer.valueOf(2);
 
 		if (a.equals(b)) {
 		}
@@ -48,8 +48,8 @@ public class TestPrimitiveObjectUseEqualsRule {
 	}
 
 	public void testStringShouldRefactor() {
-		String a = "a";
-		String b = "b";
+		final String a = "a";
+		final String b = "b";
 
 		if (a.equals(b)) {
 		}
@@ -107,8 +107,8 @@ public class TestPrimitiveObjectUseEqualsRule {
 	}
 
 	public void testActualPrimitivesShouldNotRefactor() {
-		int a = 1;
-		int b = 2;
+		final int a = 1;
+		final int b = 2;
 		if (a == b) {
 		}
 
@@ -132,8 +132,8 @@ public class TestPrimitiveObjectUseEqualsRule {
 	}
 
 	public void testOtherInfixShouldNotRefactor() {
-		Integer a = Integer.valueOf(1);
-		Integer b = Integer.valueOf(2);
+		final Integer a = Integer.valueOf(1);
+		final Integer b = Integer.valueOf(2);
 
 		if (a >= b) {
 		}
@@ -149,8 +149,8 @@ public class TestPrimitiveObjectUseEqualsRule {
 	}
 
 	public void testCastedExpressionShouldNotRefactor() {
-		int c = 0;
-		Integer d = Integer.valueOf(1);
+		final int c = 0;
+		final Integer d = Integer.valueOf(1);
 		if (((Integer) c).equals(d)) {
 		}
 		if (d.equals((Integer) c)) {

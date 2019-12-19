@@ -20,19 +20,19 @@ public class MultiVariableDeclarationLineRule {
 	List<Integer> list2;
 
 	public String methodWithVariables() {
-		Integer foo = 0;
-		Integer foo2;
-		Integer foo3 = Integer.valueOf(0);
+		final Integer foo = 0;
+		final Integer foo2;
+		final Integer foo3 = Integer.valueOf(0);
 		final List<? extends String> strings;
 		final List<? extends String> strings2 = new ArrayList<>();
 		if (foo > 0) {
-			int e;
-			int f = 0;
+			final int e;
+			final int f = 0;
 
 			list.stream()
 				.map(element -> {
-					int x;
-					int y = -20;
+					final int x;
+					final int y = -20;
 
 					return element;
 				});
@@ -42,21 +42,21 @@ public class MultiVariableDeclarationLineRule {
 
 	public void saveComments() {
 		// unlinked comment
-		int a;
-		int b;
+		final int a;
+		final int b;
 
 		// unlinked comment after c
-		int c; // trailing comment
-		int d // comment after d
+		final int c; // trailing comment
+		final int d // comment after d
 		;
-		int e
+		final int e
 		// comment after e
 		;
 
 		// I don't want to break anything...
-		int // I don't want to break anything...
+		final int // I don't want to break anything...
 		f;
-		int g;
+		final int g;
 	}
 
 	enum Foo {

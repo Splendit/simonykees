@@ -20,8 +20,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	private String globalKey = "";
 
 	public String convertToFindFirstBreak(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> values = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> values = generateList(input);
 		// comment before loop
 		// comment after loop head
 		// comment inside 1
@@ -38,8 +38,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String focingTailingMap(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> values = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> values = generateList(input);
 		String key = values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
@@ -51,7 +51,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String methodInvocationAsInitializer(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		String key = values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
@@ -61,8 +61,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String irrelevantAssignment(String input) {
-		StringBuilder sb = new StringBuilder();
-		List<String> values = generateList(input);
+		final StringBuilder sb = new StringBuilder();
+		final List<String> values = generateList(input);
 		String key = values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
@@ -74,9 +74,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String multipleDeclarationFragment(String input) {
-		StringBuilder sb = new StringBuilder();
-		String anotherKey = input;
-		List<String> values = generateList(anotherKey);
+		final StringBuilder sb = new StringBuilder();
+		final String anotherKey = input;
+		final List<String> values = generateList(anotherKey);
 		String key = values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
@@ -87,9 +87,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String referencedVariable(String input) {
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		String key = "";
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		key = "key";
 		for (String value : values) {
 			if (value.length() > 4) {
@@ -103,9 +103,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String multipleIfThenBodyStatements(String input) {
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		String key = "";
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		for (String value : values) {
 			if (value.length() > 4) {
 				sb.append(value.length());
@@ -119,9 +119,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String multipleLoopBodyStatements(String input) {
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		String key = "";
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		for (String value : values) {
 			if (value.length() > 4) {
 				key = value;
@@ -135,9 +135,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String elseClause(String input) {
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		String key = "";
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		for (String value : values) {
 			if (value.length() > 4) {
 				key = value;
@@ -152,9 +152,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String missingDeclarationFragment(String input) {
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		for (String value : values) {
 			if (value.length() > 4) {
 				globalKey = value;
@@ -168,7 +168,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 
 	public String missingBreakStatement(String input) {
 		String localKey = "localKey";
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		for (String value : values) {
 			if (value.length() > 4) {
 				localKey = value;
@@ -180,7 +180,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 
 	public String missingIfStatement(String input) {
 		String localKey = "localKey";
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		for (String value : values) {
 			localKey = value;
 			break;
@@ -190,7 +190,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String nonEffectivelyFinalCondition(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		String localKey = "localKey";
 		String key = "key";
 		key = "";
@@ -205,7 +205,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String referencingFinalVariable(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		final String key = "key";
 		String localKey = values.stream()
 			.filter(value -> value.equals(key))
@@ -216,9 +216,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String throwException(String input) throws Exception {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		String localKey = "localKey";
-		String key = "key";
+		final String key = "key";
 		for (String value : values) {
 			if (compareAndThrowException(value, key)) {
 				localKey = value;
@@ -230,7 +230,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String assigningNullValue(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		String localKey = "localKey";
 		final String key = "key";
 		for (String value : values) {
@@ -244,7 +244,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitBreakCasting00(String input) {
-		List<Integer> values = new ArrayList<>();
+		final List<Integer> values = new ArrayList<>();
 		int defaultIndex = values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
@@ -254,7 +254,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitBreakCasting01(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		int defaultIndex = values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
@@ -265,8 +265,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitBreakCasting20(String input) {
-		double defaultValue = -1.0;
-		List<Integer> values = new ArrayList<>();
+		final double defaultValue = -1.0;
+		final List<Integer> values = new ArrayList<>();
 		double defaultIndex = values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
@@ -277,8 +277,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitBreakCasting21(String input) {
-		double defaultValue = -1.0;
-		List<Integer> values = new ArrayList<>();
+		final double defaultValue = -1.0;
+		final List<Integer> values = new ArrayList<>();
 		double defaultIndex = values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
@@ -289,9 +289,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitBreakCasting30(String input) {
-		double defaultValue = -1.0;
-		double defaultIndex = defaultValue;
-		List<Double> values = new ArrayList<>();
+		final double defaultValue = -1.0;
+		final double defaultIndex = defaultValue;
+		final List<Double> values = new ArrayList<>();
 		// comment before loop
 		// comment inside
 		return values.stream()
@@ -301,8 +301,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitBreakCasting31(String input) {
-		int defaultValue = -1;
-		List<Double> values = new ArrayList<>();
+		final int defaultValue = -1;
+		final List<Double> values = new ArrayList<>();
 		double defaultIndex = values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
@@ -316,7 +316,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	 */
 
 	public String convertToFindFirstReturn(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		logger.info("I dont care what happens next!");
 		return values.stream()
 			.filter(value -> value.length() > 4)
@@ -325,7 +325,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String missingBrackets(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		return values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
@@ -333,7 +333,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String missingBrackets2(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		return values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
@@ -341,7 +341,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String forcingTailingMap(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		return values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
@@ -350,7 +350,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String returningIrrelevantValue(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		return values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
@@ -359,7 +359,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String missingReturnValue(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		values.stream()
 			.filter(value -> value.length() > 4)
 			.forEach(value -> {
@@ -370,9 +370,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String throwException2(String input) throws Exception {
-		List<String> values = generateList(input);
-		String localKey = "localKey";
-		String key = "key";
+		final List<String> values = generateList(input);
+		final String localKey = "localKey";
+		final String key = "key";
 		for (String value : values) {
 			if (compareAndThrowException(value, key)) {
 				return value;
@@ -383,7 +383,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String methodInvocationAsReturnExpression(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		return values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
@@ -391,7 +391,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public String returningNullValue(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		for (String value : values) {
 			if (value.length() > 4) {
 				return null;
@@ -402,8 +402,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitReturnCasting00(String input) {
-		int defaultIndex = -1;
-		List<Integer> values = new ArrayList<>();
+		final int defaultIndex = -1;
+		final List<Integer> values = new ArrayList<>();
 		return values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
@@ -411,8 +411,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitReturnCasting01(String input) {
-		int defaultIndex = -1;
-		List<String> values = generateList(input);
+		final int defaultIndex = -1;
+		final List<String> values = generateList(input);
 		return values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
@@ -421,8 +421,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitReturnCasting10(String input) {
-		int defaultIndex = -1;
-		List<Double> values = new ArrayList<>();
+		final int defaultIndex = -1;
+		final List<Double> values = new ArrayList<>();
 		return values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
@@ -430,8 +430,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitReturnCasting11(String input) {
-		int defaultIndex = -1;
-		List<Double> values = new ArrayList<>();
+		final int defaultIndex = -1;
+		final List<Double> values = new ArrayList<>();
 		return values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
@@ -440,8 +440,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitReturnCasting20(String input) {
-		double defaultIndex = -1;
-		List<Integer> values = new ArrayList<>();
+		final double defaultIndex = -1;
+		final List<Integer> values = new ArrayList<>();
 		return values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
@@ -450,8 +450,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitReturnCasting21(String input) {
-		double defaultIndex = -1;
-		List<Integer> values = new ArrayList<>();
+		final double defaultIndex = -1;
+		final List<Integer> values = new ArrayList<>();
 		return values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
@@ -460,8 +460,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitReturnCasting30(String input) {
-		double defaultIndex = -1;
-		List<Double> values = new ArrayList<>();
+		final double defaultIndex = -1;
+		final List<Double> values = new ArrayList<>();
 		return values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
@@ -469,8 +469,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public double implicitReturnCasting31(String input) {
-		double defaultIndex = -1;
-		List<Double> values = new ArrayList<>();
+		final double defaultIndex = -1;
+		final List<Double> values = new ArrayList<>();
 		return values.stream()
 			.filter(value -> value > 4)
 			.findFirst()
@@ -482,7 +482,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		/*
 		 * SIM-798
 		 */
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		return values.stream()
 			.filter(value -> value.equals(input))
 			.findFirst()
@@ -491,7 +491,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public ReturnTypeSample returnSubtypeOrSibling_shouldNotTransform(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		for (String value : values) {
 			if (value.equals(input)) {
 				return new ReturnTypeSampleChild(value);
@@ -501,7 +501,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 
 	public Object mapToParameterizedType_shouldNotTransform(String input) {
-		List<String> values = generateList(input);
+		final List<String> values = generateList(input);
 		for (String value : values) {
 			if (value.equals(input)) {
 				return createParaeterizedInstance(value);
@@ -538,7 +538,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 			/*
 			 * SIM-1336
 			 */
-			ReturnTypeSample typeSample = new ReturnTypeSample("");
+			final ReturnTypeSample typeSample = new ReturnTypeSample("");
 			return getAllTypeSamples().stream()
 				.filter(value -> value.equals(typeSample))
 				.findFirst()

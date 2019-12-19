@@ -109,7 +109,7 @@ public class TestTryWithResourceRule {
 	}
 
 	public void assignedResource5(String path) {
-		BufferedReader br;
+		final BufferedReader br;
 		try {
 			br = new BufferedReader(new FileReader(path));
 			BufferedReader br2 = new BufferedReader(new FileReader(path));
@@ -125,10 +125,10 @@ public class TestTryWithResourceRule {
 	}
 
 	public void assignedResource6(String path) {
-		BufferedReader br;
+		final BufferedReader br;
 		try {
 			br = new BufferedReader(new FileReader(path));
-			BufferedReader br2;
+			final BufferedReader br2;
 			br2 = new BufferedReader(new FileReader(path));
 			br2.readLine();
 			br.readLine();
@@ -143,7 +143,7 @@ public class TestTryWithResourceRule {
 	public void assignedResource7(String path) {
 
 		try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-			BufferedReader br2;
+			final BufferedReader br2;
 			br2 = new BufferedReader(new FileReader(path));
 			br2.readLine();
 			br.readLine();
@@ -159,7 +159,7 @@ public class TestTryWithResourceRule {
 		try (BufferedReader br = new BufferedReader(new FileReader(path));
 				BufferedReader br2 = new BufferedReader(new FileReader(path))) {
 			try {
-				BufferedReader br3 = new BufferedReader(new FileReader(path));
+				final BufferedReader br3 = new BufferedReader(new FileReader(path));
 				br3.read();
 				br3.close();
 			} catch (IOException e) {

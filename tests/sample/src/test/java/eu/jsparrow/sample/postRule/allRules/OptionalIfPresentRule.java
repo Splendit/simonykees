@@ -16,7 +16,7 @@ public class OptionalIfPresentRule {
 	private final String value2 = "";
 
 	{
-		Optional<String> input = Optional.empty();
+		final Optional<String> input = Optional.empty();
 		input.ifPresent(logger::info);
 	}
 
@@ -151,7 +151,7 @@ public class OptionalIfPresentRule {
 	public void multipleInitialiyers_shouldTransform(Optional<String> input) {
 		input.ifPresent(value -> {
 			// comment under isPresent
-			String second = "";
+			final String second = "";
 			logger.info(value);
 			logger.info(second);
 		});
@@ -161,7 +161,7 @@ public class OptionalIfPresentRule {
 		if (!input.isPresent()) {
 			return;
 		}
-		String value = "";
+		final String value = "";
 		logger.info(value);
 	}
 
@@ -169,7 +169,7 @@ public class OptionalIfPresentRule {
 		if (!input.isPresent()) {
 			return;
 		}
-		String value = users.get(0);
+		final String value = users.get(0);
 		logger.info(value);
 	}
 
@@ -178,7 +178,7 @@ public class OptionalIfPresentRule {
 			return;
 		}
 		// comment under isPresent
-		String value = "";
+		final String value = "";
 		get();
 		logger.info(value);
 	}
@@ -188,7 +188,7 @@ public class OptionalIfPresentRule {
 		if (!input.isPresent()) {
 			return;
 		}
-		String value = input.get();
+		final String value = input.get();
 		logger.info(value);
 		throwSomething();
 	}
@@ -215,7 +215,7 @@ public class OptionalIfPresentRule {
 
 	public void multipleGet_shouldTransform(Optional<String> input) {
 		input.ifPresent(value -> {
-			String value2 = value;
+			final String value2 = value;
 			logger.info(value);
 			logger.info(value2);
 			if (!StringUtils.isEmpty(value) && !StringUtils.isEmpty(value2)) {
@@ -227,23 +227,23 @@ public class OptionalIfPresentRule {
 	public void multipleGetConflictingNames_shouldTransform(Optional<String> input, int i) {
 		input.ifPresent(value1 -> {
 			if (i == 0) {
-				String value = value1;
+				final String value = value1;
 				logger.info(value);
 			} else {
-				String value = value1;
+				final String value = value1;
 				logger.info(value + i);
 			}
 		});
 	}
 
 	public void multipleOptionals_shouldTransform(Optional<String> input) {
-		Optional<String> user = Optional.ofNullable("user-name");
+		final Optional<String> user = Optional.ofNullable("user-name");
 		input.ifPresent(value -> {
 			// this is a field access - should not be renamed
 			logger.info(value2);
 			// this is a local declaration - should be removed
-			String value2 = value;
-			String value3 = user.get();
+			final String value2 = value;
+			final String value3 = user.get();
 			logger.info(value);
 			logger.info(value2);
 			if (!StringUtils.isEmpty(value) && !StringUtils.isEmpty(value2)) {
@@ -257,15 +257,15 @@ public class OptionalIfPresentRule {
 	}
 
 	public void avoidExternalNameConflicts_shouldTransform() {
-		String value = "I could crash with the lambda parameter";
-		Optional<String> user = Optional.ofNullable(value);
+		final String value = "I could crash with the lambda parameter";
+		final Optional<String> user = Optional.ofNullable(value);
 		user.ifPresent(logger::info);
 	}
 
 	public void avoidInternalNameConflicts_shouldTransform() {
-		Optional<String> user = Optional.ofNullable("John Snow");
+		final Optional<String> user = Optional.ofNullable("John Snow");
 		user.ifPresent(value1 -> {
-			String value = "I could crash with the lambda parameter";
+			final String value = "I could crash with the lambda parameter";
 			logger.info(new StringBuilder().append(value)
 				.append(":")
 				.append(value1)
@@ -274,13 +274,13 @@ public class OptionalIfPresentRule {
 	}
 
 	public void avoidShadowingFields_shouldTransform() {
-		Optional<String> user = Optional.ofNullable("John Snow");
+		final Optional<String> user = Optional.ofNullable("John Snow");
 		user.ifPresent(value -> {
 			logger.info(new StringBuilder().append(value2)
 				.append(":")
 				.append(value)
 				.toString());
-			String value2 = value;
+			final String value2 = value;
 			logger.info(value2);
 		});
 	}
@@ -289,16 +289,16 @@ public class OptionalIfPresentRule {
 		if (!input.isPresent()) {
 			return;
 		}
-		String value = input.get();
+		final String value = input.get();
 		logger.info(value);
 	}
 
 	public void multipleConditions_shouldNotTransform(Optional<String> input) {
-		boolean beTrue = true;
+		final boolean beTrue = true;
 		if (!(input.isPresent() && beTrue)) {
 			return;
 		}
-		String value = input.get();
+		final String value = input.get();
 		logger.info(value);
 	}
 
@@ -308,13 +308,13 @@ public class OptionalIfPresentRule {
 		if (!input.isPresent()) {
 			return;
 		}
-		String value = input.get();
+		final String value = input.get();
 		logger.info(value + i);
 	}
 
 	public void elseStatement_shouldNotTransform(Optional<String> input) {
 		if (input.isPresent()) {
-			String value = input.get();
+			final String value = input.get();
 			logger.info(value);
 		} else {
 			// do nothing
@@ -323,7 +323,7 @@ public class OptionalIfPresentRule {
 
 	public void returnStatementInBody_shouldNotTransform(Optional<String> input) {
 		if (input.isPresent()) {
-			String value = input.get();
+			final String value = input.get();
 			logger.info(value);
 			return;
 		}
@@ -334,9 +334,9 @@ public class OptionalIfPresentRule {
 
 	public void breakStatementInBody_shouldNotTransform(List<String> users) {
 		for (String user : users) {
-			Optional<String> name = findUserName(user);
+			final Optional<String> name = findUserName(user);
 			if (name.isPresent()) {
-				String value = name.get();
+				final String value = name.get();
 				logger.info(value);
 				break;
 			}
@@ -345,9 +345,9 @@ public class OptionalIfPresentRule {
 
 	public void continueStatementInBody_shouldNotTransform(List<String> users) {
 		for (String user : users) {
-			Optional<String> name = findUserName(user);
+			final Optional<String> name = findUserName(user);
 			if (name.isPresent()) {
-				String value = name.get();
+				final String value = name.get();
 				logger.info(value);
 				continue;
 			}
@@ -356,9 +356,9 @@ public class OptionalIfPresentRule {
 
 	public void throwStatementInBody_shouldNotTransform(List<String> users) {
 		for (String user : users) {
-			Optional<String> name = findUserName(user);
+			final Optional<String> name = findUserName(user);
 			if (name.isPresent()) {
-				String value = name.get();
+				final String value = name.get();
 				logger.info(value);
 				if (StringUtils.isEmpty(value)) {
 					throw new NoSuchElementException();
@@ -372,23 +372,23 @@ public class OptionalIfPresentRule {
 	public void clashingWithPropertyOnQualifiedName_shouldTransform(Optional<String> input) {
 		final IoNonSonoOpzionale user = new IoNonSonoOpzionale();
 		input.ifPresent(value1 -> {
-			String value = value1;
+			final String value = value1;
 			user.value.length();
 			logger.info(value);
 		});
 	}
 
 	public void discardedSingleOptionalGet_shouldNotTransform() {
-		Optional<String> input = findUserName("");
+		final Optional<String> input = findUserName("");
 		if (!input.isPresent()) {
 			return;
 		}
 		input.get();
-		String myVar = "somewar";
+		final String myVar = "somewar";
 	}
 
 	public void discardedOptionalGet_shouldTransform() {
-		Optional<String> input = findUserName("");
+		final Optional<String> input = findUserName("");
 		input.ifPresent(myVar -> {
 			input.get();
 			findUserName(myVar);
@@ -396,13 +396,13 @@ public class OptionalIfPresentRule {
 	}
 
 	public void unusedAssignmentWithOptionalGet_shouldTransform() {
-		Optional<String> input = findUserName("");
+		final Optional<String> input = findUserName("");
 		input.ifPresent(myVar -> {
 		});
 	}
 
 	public void internalNonFinalVariables_shouldTransform() {
-		Optional<String> input = findUserName("");
+		final Optional<String> input = findUserName("");
 		input.ifPresent(value -> {
 			for (int i = 0; i < 15; i++) {
 				if (true) {
@@ -441,7 +441,7 @@ public class OptionalIfPresentRule {
 
 		public void clashingWithFieldAccess_shouldTransform(Optional<String> input) {
 			input.ifPresent(value1 -> {
-				String value = value1;
+				final String value = value1;
 				this.value.length();
 				logger1.info(value);
 			});

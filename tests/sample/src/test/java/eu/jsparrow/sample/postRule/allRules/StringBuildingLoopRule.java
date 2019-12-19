@@ -13,7 +13,7 @@ public class StringBuildingLoopRule {
 	String result = "";
 
 	public String collectionOfStrings(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		// I don't want to break the result initializer
 		// I don't want to break anything
 		// save me
@@ -24,7 +24,7 @@ public class StringBuildingLoopRule {
 	}
 
 	public String missingCurlyBrackets(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		String result = collectionOfStrings.stream()
 			.collect(Collectors.joining());
 
@@ -32,8 +32,8 @@ public class StringBuildingLoopRule {
 	}
 
 	public String statementsBetweenDecAndLoop(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
-		String anotherDecl = "";
+		final List<String> collectionOfStrings = generateStringList(input);
+		final String anotherDecl = "";
 		if (collectionOfStrings.isEmpty()) {
 			collectionOfStrings.add(anotherDecl);
 		}
@@ -43,8 +43,8 @@ public class StringBuildingLoopRule {
 	}
 
 	public String multipleFragments(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
-		String anotherDecl = "";
+		final List<String> collectionOfStrings = generateStringList(input);
+		final String anotherDecl = "";
 		if (collectionOfStrings.isEmpty()) {
 			collectionOfStrings.add(anotherDecl);
 		}
@@ -54,9 +54,9 @@ public class StringBuildingLoopRule {
 	}
 
 	public String modifiedResultVariable(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		String result = "";
-		String anotherDecl = "";
+		final String anotherDecl = "";
 		if (collectionOfStrings.isEmpty()) {
 			collectionOfStrings.add(anotherDecl);
 			result = "-";
@@ -67,7 +67,7 @@ public class StringBuildingLoopRule {
 	}
 
 	public String nonemptyInitialization(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		String result = "-";
 		result += collectionOfStrings.stream()
 			.collect(Collectors.joining());
@@ -75,12 +75,12 @@ public class StringBuildingLoopRule {
 	}
 
 	public String parentBlockDeclaration(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		/*
 		 * The result variable is not declared in the same block with the loop.
 		 */
 		String result = "";
-		String anotherDecl = "";
+		final String anotherDecl = "";
 		if (collectionOfStrings.isEmpty()) {
 			collectionOfStrings.add(anotherDecl);
 
@@ -91,14 +91,14 @@ public class StringBuildingLoopRule {
 	}
 
 	public String irrelevantDelaration(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		/*
 		 * Another result variable is declared in a nested block which is not
 		 * visible in the scope of the loop.
 		 */
 
 		if (collectionOfStrings.isEmpty()) {
-			String result = "-";
+			final String result = "-";
 			collectionOfStrings.add(result);
 		}
 		String result = collectionOfStrings.stream()
@@ -108,11 +108,11 @@ public class StringBuildingLoopRule {
 	}
 
 	public String collectingToAField(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		/*
 		 * The result variable is not declared in the same block with the loop.
 		 */
-		String anotherDecl = "";
+		final String anotherDecl = "";
 
 		collectionOfStrings.add(anotherDecl);
 
@@ -122,7 +122,7 @@ public class StringBuildingLoopRule {
 	}
 
 	public String plusEqualsOperator(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		String result = collectionOfStrings.stream()
 			.collect(Collectors.joining());
 
@@ -130,14 +130,14 @@ public class StringBuildingLoopRule {
 	}
 
 	public String collectingArrayOfStrings(String input) {
-		String[] arrayOfStrings = generateArray(input);
+		final String[] arrayOfStrings = generateArray(input);
 		String result = Arrays.stream(arrayOfStrings)
 			.collect(Collectors.joining());
 		return result;
 	}
 
 	public String collectingArrayOfNumbers(String input) {
-		Double[] arrayOfStrings = { 2.1, 3.5 };
+		final Double[] arrayOfStrings = { 2.1, 3.5 };
 		String result = Arrays.stream(arrayOfStrings)
 			.map(Object::toString)
 			.collect(Collectors.joining());
@@ -145,7 +145,7 @@ public class StringBuildingLoopRule {
 	}
 
 	public String savingAnnotationOverArray(String input) {
-		String[] arrayOfStrings = generateArray(input);
+		final String[] arrayOfStrings = generateArray(input);
 		@Deprecated
 		String result = Arrays.stream(arrayOfStrings)
 			.collect(Collectors.joining());
@@ -153,7 +153,7 @@ public class StringBuildingLoopRule {
 	}
 
 	public String savingAnnotationsOverCollection(String input) {
-		List<String> listOfStrings = generateStringList(input);
+		final List<String> listOfStrings = generateStringList(input);
 		@Deprecated
 		String result = listOfStrings.stream()
 			.collect(Collectors.joining());
@@ -178,19 +178,19 @@ public class StringBuildingLoopRule {
 	 */
 
 	public String newStringBuilderName(String input) {
-		String[] arrayOfStrings = generateArray(input);
-		String resultSb = "";
-		String resultSb1 = "";
+		final String[] arrayOfStrings = generateArray(input);
+		final String resultSb = "";
+		final String resultSb1 = "";
 		String result = Arrays.stream(arrayOfStrings)
 			.collect(Collectors.joining());
 		return result;
 	}
 
 	public String newStringBuilderName2(String input) {
-		String[] arrayOfStrings = generateArray(input);
-		String resultSb = "";
+		final String[] arrayOfStrings = generateArray(input);
+		final String resultSb = "";
 		if (StringUtils.isEmpty(resultSb)) {
-			String resultSb1 = "";
+			final String resultSb1 = "";
 		}
 		String result = Arrays.stream(arrayOfStrings)
 			.collect(Collectors.joining());
@@ -198,14 +198,14 @@ public class StringBuildingLoopRule {
 	}
 
 	public String cascadedLoops(String input) {
-		String[] arrayOfStrings = generateArray(input);
-		List<String> listOfStrings = generateStringList(input);
-		String resultSb = "";
-		String resultSb1 = "";
+		final String[] arrayOfStrings = generateArray(input);
+		final List<String> listOfStrings = generateStringList(input);
+		final String resultSb = "";
+		final String resultSb1 = "";
 		String result = Arrays.stream(arrayOfStrings)
 			.collect(Collectors.joining());
 
-		String anotherResult = "";
+		final String anotherResult = "";
 		result += listOfStrings.stream()
 			.collect(Collectors.joining());
 
@@ -213,8 +213,8 @@ public class StringBuildingLoopRule {
 	}
 
 	public String clashWithParameterName(String resultSb) {
-		String[] arrayOfStrings = generateArray(resultSb);
-		List<String> listOfStrings = generateStringList(resultSb);
+		final String[] arrayOfStrings = generateArray(resultSb);
+		final List<String> listOfStrings = generateStringList(resultSb);
 		String result = Arrays.stream(arrayOfStrings)
 			.collect(Collectors.joining());
 
@@ -226,7 +226,7 @@ public class StringBuildingLoopRule {
 	 */
 
 	public String colectionOfIntegers(String input) {
-		List<Integer> collectionOfints = new ArrayList<>();
+		final List<Integer> collectionOfints = new ArrayList<>();
 		String result = collectionOfints.stream()
 			.map(Object::toString)
 			.collect(Collectors.joining());
@@ -234,7 +234,7 @@ public class StringBuildingLoopRule {
 	}
 
 	public String colectionOfDoubles(String input) {
-		List<Double> collectionOfints = new ArrayList<>();
+		final List<Double> collectionOfints = new ArrayList<>();
 		String result = collectionOfints.stream()
 			.map(Object::toString)
 			.collect(Collectors.joining());
@@ -246,7 +246,7 @@ public class StringBuildingLoopRule {
 	 */
 
 	public String multipleStatementsInBody(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		String result = "";
 		for (String val : collectionOfStrings) {
 			result = result + val;
@@ -258,9 +258,9 @@ public class StringBuildingLoopRule {
 	}
 
 	public String ignoringLoopVariable(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		String result = "";
-		String anotherVal = "-";
+		final String anotherVal = "-";
 		for (String val : collectionOfStrings) {
 			result = result + anotherVal;
 		}
@@ -268,9 +268,9 @@ public class StringBuildingLoopRule {
 	}
 
 	public String ignoringTheCollectedResult(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		String result = "";
-		String anotherVal = "-";
+		final String anotherVal = "-";
 		for (String val : collectionOfStrings) {
 			result = anotherVal + val;
 		}
@@ -278,8 +278,8 @@ public class StringBuildingLoopRule {
 	}
 
 	public String ignoringTheCollectedResult2(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
-		String result = "";
+		final List<String> collectionOfStrings = generateStringList(input);
+		final String result = "";
 		String anotherVal = "-";
 		for (String val : collectionOfStrings) {
 			anotherVal = result + val;
@@ -288,7 +288,7 @@ public class StringBuildingLoopRule {
 	}
 
 	public String joinCharacter(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		String result = "";
 		for (String val : collectionOfStrings) {
 			result = new StringBuilder().append(result)
@@ -300,7 +300,7 @@ public class StringBuildingLoopRule {
 	}
 
 	public int distinguishBetweenMathPlusAndConcat(String input) {
-		List<Integer> collectionOfints = new ArrayList<>();
+		final List<Integer> collectionOfints = new ArrayList<>();
 		/*
 		 * The operator in the loop is not concatenation, but is a normal
 		 * arithmetic operation
@@ -312,7 +312,7 @@ public class StringBuildingLoopRule {
 	}
 
 	public String loopAsSingleBodyStatement(String input) {
-		List<String> collectionOfStrings = generateStringList(input);
+		final List<String> collectionOfStrings = generateStringList(input);
 		String result = "";
 		/*
 		 * Transformation possible only for java 8 and above

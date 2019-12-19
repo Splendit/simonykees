@@ -3,12 +3,11 @@ Automatic-Module-Name: eu.jsparrow.license.api
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Api
 Bundle-SymbolicName: eu.jsparrow.license.api
-Bundle-Version: 3.11.0.qualifier
+Bundle-Version: 3.12.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.apache.commons.lang3;bundle-version="[3.1.0,4.0.0)",
  eu.jsparrow.logging,
  org.eclipse.equinox.security;bundle-version="[1.2.0,2.0.0)",
- org.eclipse.equinox.util;bundle-version="[1.0.500,2.0.0)",
  eu.jsparrow.i18n
 Export-Package: eu.jsparrow.license.api,
  eu.jsparrow.license.api.exception,

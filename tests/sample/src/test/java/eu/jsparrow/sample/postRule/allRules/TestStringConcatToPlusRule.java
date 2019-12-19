@@ -34,10 +34,11 @@ public class TestStringConcatToPlusRule {
 
 		// 3. --------------- --------------- --------------- ---------------
 
-		int b = "".compareTo(input.concat("abc" // don't break the semicolon
+		final int b = "".compareTo(input.concat("abc" // don't break the
+														// semicolon
 		));
 
-		String c = input.concat("abc" // don't break the semicolon
+		final String c = input.concat("abc" // don't break the semicolon
 		) + "";
 
 		// 4. --------------- --------------- --------------- ---------------
@@ -113,12 +114,12 @@ public class TestStringConcatToPlusRule {
 	}
 
 	public String testConcatWithNumber(String input) {
-		Number number = new BigDecimal("10.00");
+		final Number number = new BigDecimal("10.00");
 		return input + number.toString();
 	}
 
 	public String testConcatWithStreamResult(String input) {
-		List<String> values = Arrays.asList("val1", "val2", input);
+		final List<String> values = Arrays.asList("val1", "val2", input);
 		return new StringBuilder().append(input)
 			.append(values.stream()
 				.filter(s -> s.equals(input))
@@ -157,7 +158,7 @@ public class TestStringConcatToPlusRule {
 
 	public String testConcatInsideCodeBlock(String input, String parameter) {
 		String result = "";
-		List<String> values = Arrays.asList("val1", "val2", input);
+		final List<String> values = Arrays.asList("val1", "val2", input);
 
 		if ("".equals(result)) {
 			result = result + input;
@@ -194,7 +195,7 @@ public class TestStringConcatToPlusRule {
 	}
 
 	public String testConcatInMethodInvocationParam(String input, String param) {
-		boolean startsWitParam = input.startsWith((param + "a"), 0);
+		final boolean startsWitParam = input.startsWith((param + "a"), 0);
 		return input + Boolean.toString(startsWitParam);
 	}
 

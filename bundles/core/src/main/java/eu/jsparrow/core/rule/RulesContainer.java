@@ -44,6 +44,7 @@ import eu.jsparrow.core.rule.impl.LambdaForEachCollectRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
+import eu.jsparrow.core.rule.impl.MakeFieldsAndVariablesFinalRule;
 import eu.jsparrow.core.rule.impl.MapGetOrDefaultRule;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
@@ -145,7 +146,7 @@ public class RulesContainer {
 				new RemoveUnnecessaryThrownExceptionsRule(), new RemoveModifiersInInterfacePropertiesRule(),
 				new RemoveUnusedParameterRule(), new ReorderModifiersRule(), new UseListSortRule(),
 				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
-				new HideDefaultConstructorInUtilityClassesRule(),
+				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

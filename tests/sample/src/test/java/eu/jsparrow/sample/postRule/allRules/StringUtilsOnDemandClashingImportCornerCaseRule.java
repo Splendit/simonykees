@@ -14,9 +14,9 @@ import eu.jsparrow.sample.utilities.NumberUtils;
 public class StringUtilsOnDemandClashingImportCornerCaseRule {
 
 	public int testIndexOf(String testString) {
-		NumberUtils numUtil;
+		final NumberUtils numUtil;
 		NumberUtils.explode();
-		List<String> list;
+		final List<String> list;
 		return testString.indexOf("e");
 	}
 

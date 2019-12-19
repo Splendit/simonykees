@@ -18,11 +18,11 @@ import eu.jsparrow.sample.utilities.StringUtils;
 public class StringUtilsClashingImportCornerCaseRule {
 
 	public int testIndexOf(String testString) {
-		StringUtils stringUtils;
+		final StringUtils stringUtils;
 		StringUtils.doesntDoAnything();
-		NumberUtils numUtil;
+		final NumberUtils numUtil;
 		NumberUtils.explode();
-		List<String> list;
+		final List<String> list;
 		return testString.indexOf("e");
 	}
 }

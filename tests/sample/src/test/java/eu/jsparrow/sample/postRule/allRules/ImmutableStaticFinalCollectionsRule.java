@@ -91,7 +91,7 @@ public class ImmutableStaticFinalCollectionsRule {
 
 	public static final List<String> CONSTANT_LIST_4 = new LinkedList<>();
 
-	private static List<String> CONSTANT_LIST_5 = new LinkedList<>();
+	private static final List<String> CONSTANT_LIST_5 = new LinkedList<>();
 
 	static {
 		CONSTANT_LIST_2.add("foo");
@@ -112,7 +112,7 @@ public class ImmutableStaticFinalCollectionsRule {
 
 	private final List<String> CONSTANT_LIST_6 = new LinkedList<>();
 
-	private Map<String, Integer> idToNumber = EMPTY_INITIALIZER;
+	private final Map<String, Integer> idToNumber = EMPTY_INITIALIZER;
 
 	public void test() {
 		CONSTANT_LIST_3.add("foo");
@@ -120,7 +120,7 @@ public class ImmutableStaticFinalCollectionsRule {
 	}
 
 	public void usingFieldInAssingment() {
-		Map<String, Integer> idToNumber;
+		final Map<String, Integer> idToNumber;
 		idToNumber = USED_IN_ASSIGNMENT_EXPRESSION;
 	}
 

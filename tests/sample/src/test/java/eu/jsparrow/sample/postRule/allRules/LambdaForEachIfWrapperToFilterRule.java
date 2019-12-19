@@ -83,7 +83,7 @@ public class LambdaForEachIfWrapperToFilterRule {
 
 		intList.stream()
 			.forEach(i -> {
-				int j;
+				final int j;
 				if ((j = getRandomNuber()) > 0) {
 					logger.info(String.valueOf(i + j));
 				}
@@ -125,7 +125,7 @@ public class LambdaForEachIfWrapperToFilterRule {
 	}
 
 	public void ifWithExpressionStatementBody(String input) {
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
 			.forEach(sb::append);

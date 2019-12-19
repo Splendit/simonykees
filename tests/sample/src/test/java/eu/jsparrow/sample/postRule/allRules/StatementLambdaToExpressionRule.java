@@ -20,7 +20,7 @@ public class StatementLambdaToExpressionRule {
 
 	public Function<Function, Function> f = (Function function) -> function.compose(function);
 
-	private Function<Function, Function> g = (Function function) -> function.compose(function);
+	private final Function<Function, Function> g = (Function function) -> function.compose(function);
 
 	private String elementString;
 
@@ -69,14 +69,14 @@ public class StatementLambdaToExpressionRule {
 		/*
 		 * SIM-1401
 		 */
-		Queue queue = new Queue();
+		final Queue queue = new Queue();
 		queue.withLock(() -> {
 			generateNumber();
 		});
 	}
 
 	public void noDiscardedReturnType_shouldTransform() {
-		Queue queue = new Queue();
+		final Queue queue = new Queue();
 		queue.withLock(() -> doSomething(2));
 	}
 

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("nls")
 public class TestMultiCatchRule {
 
-	private static Logger log = LoggerFactory.getLogger(TestMultiCatchRule.class);
+	private static final Logger log = LoggerFactory.getLogger(TestMultiCatchRule.class);
 
 	@Test
 	public void tryWithResourceCommentBugTest() {

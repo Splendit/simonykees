@@ -19,30 +19,30 @@ public class StringUtilsRefactorRule {
 	}
 
 	public String testTrim(String testString) {
-		String val = /* test */StringUtils.trim(testString);
+		final String val = /* test */StringUtils.trim(testString);
 		return StringUtils.trim(testString);
 	}
 
 	public boolean testEquals(String testString) {
-		String sometimesExpectedString = testString.replaceAll("a", "b");
+		final String sometimesExpectedString = testString.replaceAll("a", "b");
 
 		return testString.equals(sometimesExpectedString);
 	}
 
 	public boolean testEqualsIgnoreCase(String testString) {
-		String sometimesExpectedString = testString.replaceAll("a", "b");
+		final String sometimesExpectedString = testString.replaceAll("a", "b");
 
 		return StringUtils.equalsIgnoreCase(testString, sometimesExpectedString);
 	}
 
 	public boolean testEndsWith(String testString) {
-		String sometimesExpectedString = "With";
+		final String sometimesExpectedString = "With";
 
 		return StringUtils.endsWith(testString, sometimesExpectedString);
 	}
 
 	public boolean testStartWith(String testString) {
-		String sometimesExpectedString = "start";
+		final String sometimesExpectedString = "start";
 		testString.startsWith(sometimesExpectedString, 1);
 		return StringUtils.startsWith(testString, sometimesExpectedString);
 	}
@@ -55,7 +55,7 @@ public class StringUtilsRefactorRule {
 	}
 
 	public boolean testContains(String testString) {
-		String sometimesExpectedString = "tain";
+		final String sometimesExpectedString = "tain";
 
 		return StringUtils.contains(testString, sometimesExpectedString);
 	}
@@ -86,7 +86,7 @@ public class StringUtilsRefactorRule {
 	}
 
 	public String testSplitCornerCaseLimit(String testString) {
-		int limit = 3;
+		final int limit = 3;
 
 		testString = complexSplit(testString, "?", limit);
 		testString = complexSplit(testString, "|", limit);
@@ -119,42 +119,42 @@ public class StringUtilsRefactorRule {
 	}
 
 	public String testReplaceCornerCaseCharSequence(String testString) {
-		CharSequence c1 = new StringBuilder("a");
-		CharSequence c2 = new StringBuilder("b");
+		final CharSequence c1 = new StringBuilder("a");
+		final CharSequence c2 = new StringBuilder("b");
 
 		// FIXME see SIM-85
 		return testString.replace(String.valueOf(c1), String.valueOf(c2));
 	}
 
 	public String testReplaceCornerCaseChar(String testString) {
-		char c1 = 'a';
-		char c2 = 'b';
+		final char c1 = 'a';
+		final char c2 = 'b';
 
 		// FIXME see SIM-85
 		return testString.replace(String.valueOf(c1), String.valueOf(c2));
 	}
 
 	public boolean testEqualsCornerCase(String testString) {
-		Object o = "s";
+		final Object o = "s";
 
 		return testString.equals(String.valueOf(o)); // FIXME see SIM-86
 	}
 
 	public boolean testStartsWithCornerCase(String testString) {
-		String prefix = "a";
-		int toffset = 1;
+		final String prefix = "a";
+		final int toffset = 1;
 
 		return testString.startsWith(prefix, toffset);
 	}
 
 	public String testUpperCaseCornerCase(String testString) {
-		Locale l = Locale.GERMAN;
+		final Locale l = Locale.GERMAN;
 		StringUtils.upperCase(testString);
 		return StringUtils.upperCase(testString, l);
 	}
 
 	public String testLowerCaseCornerCase(String testString) {
-		Locale l = Locale.GERMAN;
+		final Locale l = Locale.GERMAN;
 		StringUtils.lowerCase(testString);
 		return StringUtils.lowerCase(testString, l);
 	}

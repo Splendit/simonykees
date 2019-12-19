@@ -3,7 +3,7 @@ package eu.jsparrow.sample.postRule.allRules;
 public class LocalVariableTypeInferenceRule {
 
 	public void visit_initializedWithSubtypeAndUsedInOverloadedMethod_shouldNotTransform() {
-		Number number = Integer.valueOf(4);
+		final Number number = Integer.valueOf(4);
 		overloadedMethod(number);
 	}
 

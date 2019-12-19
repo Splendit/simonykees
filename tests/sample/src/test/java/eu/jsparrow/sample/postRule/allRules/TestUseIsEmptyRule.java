@@ -15,35 +15,35 @@ import java.util.Map;
 public class TestUseIsEmptyRule {
 
 	public void withDefaultInteger() {
-		Map<String, String> m = new HashMap<>();
+		final Map<String, String> m = new HashMap<>();
 		if (m.isEmpty()) {
 		}
 
-		Collection<String> l = new ArrayList<>();
+		final Collection<String> l = new ArrayList<>();
 		if (l.isEmpty()) {
 		}
 
-		String s = "";
+		final String s = "";
 		if (s.isEmpty()) {
 		}
 	}
 
 	public void withSwitchedOperands() {
-		Map<String, String> m = new HashMap<>();
+		final Map<String, String> m = new HashMap<>();
 		if (m.isEmpty()) {
 		}
 
-		Collection<String> l = new ArrayList<>();
+		final Collection<String> l = new ArrayList<>();
 		if (l.isEmpty()) {
 		}
 
-		String s = "";
+		final String s = "";
 		if (s.isEmpty()) {
 		}
 	}
 
 	public void withOddNumbers() {
-		String s = "";
+		final String s = "";
 		if (s.isEmpty()) {
 		}
 		if (s.isEmpty()) {
@@ -59,7 +59,7 @@ public class TestUseIsEmptyRule {
 	}
 
 	public void withOdderNumbers() {
-		String s = "";
+		final String s = "";
 		if (s.isEmpty()) {
 		}
 		if (s.isEmpty()) {
@@ -75,7 +75,7 @@ public class TestUseIsEmptyRule {
 	}
 
 	public void withOdderNumbersNoChange() {
-		String s = "";
+		final String s = "";
 		if (s
 			.length() == -0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001) {
 		}
@@ -95,8 +95,8 @@ public class TestUseIsEmptyRule {
 	}
 
 	public void withOthersShouldNotChange() {
-		String s = "";
-		int i = 0;
+		final String s = "";
+		final int i = 0;
 		if (s.length() == i) {
 		}
 		if (s.length() == 0.1d) {
@@ -106,7 +106,7 @@ public class TestUseIsEmptyRule {
 	}
 
 	public void withDefaultInteger_savingComments() {
-		Map<String, String> m = new HashMap<>();
+		final Map<String, String> m = new HashMap<>();
 		/* save me */
 		if (m.isEmpty()) {
 		}
