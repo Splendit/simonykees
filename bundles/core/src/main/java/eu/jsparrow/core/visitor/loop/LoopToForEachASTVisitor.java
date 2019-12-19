@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -340,6 +341,12 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 					.size() == 1) {
 					astRewrite.remove(declStatement, null);
 					relatedComments = comRewrite.findRelatedComments(declStatement);
+				}
+			} else if (remove.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
+				VariableDeclarationExpression declExpression = (VariableDeclarationExpression) remove.getParent();
+				if(declExpression.fragments().size() == 1) {
+					astRewrite.remove(declExpression, null);
+					relatedComments = comRewrite.findRelatedComments(declExpression);
 				}
 			}
 			astRewrite.remove(remove, null);
