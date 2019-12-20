@@ -332,26 +332,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		}
 
 		// remove the redundant nodes
-		toBeRemoved.forEach(remove -> {
-			CommentRewriter comRewrite = getCommentRewriter();
-			List<Comment> relatedComments = comRewrite.findRelatedComments(remove);
-			if (remove.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-				VariableDeclarationStatement declStatement = (VariableDeclarationStatement) remove.getParent();
-				if (declStatement.fragments()
-					.size() == 1) {
-					astRewrite.remove(declStatement, null);
-					relatedComments = comRewrite.findRelatedComments(declStatement);
-				}
-			} else if (remove.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
-				VariableDeclarationExpression declExpression = (VariableDeclarationExpression) remove.getParent();
-				if(declExpression.fragments().size() == 1) {
-					astRewrite.remove(declExpression, null);
-					relatedComments = comRewrite.findRelatedComments(declExpression);
-				}
-			}
-			astRewrite.remove(remove, null);
-			comRewrite.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(remove, Statement.class), relatedComments);
-		});
+		toBeRemoved.forEach(this::removeDeclarationFragment);
 
 		AST ast = astRewrite.getAST();
 
@@ -374,6 +355,28 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		getCommentRewriter().saveLeadingComment(loop);
 		getCommentRewriter().saveBeforeStatement(loop, getHeaderComments(loop));
 		onRewrite();
+	}
+
+	private void removeDeclarationFragment(ASTNode remove) {
+		CommentRewriter comRewrite = getCommentRewriter();
+		List<Comment> relatedComments = comRewrite.findRelatedComments(remove);
+		if (remove.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+			VariableDeclarationStatement declStatement = (VariableDeclarationStatement) remove.getParent();
+			if (declStatement.fragments()
+				.size() == 1) {
+				astRewrite.remove(declStatement, null);
+				relatedComments = comRewrite.findRelatedComments(declStatement);
+			}
+		} else if (remove.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
+			VariableDeclarationExpression declExpression = (VariableDeclarationExpression) remove.getParent();
+			if(declExpression.fragments().size() == 1) {
+				astRewrite.remove(declExpression, null);
+				relatedComments = comRewrite.findRelatedComments(declExpression);
+			}
+		}
+		astRewrite.remove(remove, null);
+		Statement enclosingStatement = ASTNodeUtil.getSpecificAncestor(remove, Statement.class);
+		comRewrite.saveBeforeStatement(enclosingStatement, relatedComments);
 	}
 	
 	protected abstract List<Comment> getHeaderComments(T loop);
