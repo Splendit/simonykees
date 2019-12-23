@@ -115,13 +115,11 @@ public class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	public void test_usingParameterType_shouldTransform() throws Exception {
 		String original = "" + 
-				"	public void usingParameterType() {\n" + 
 				"		Optional<String> optional = Optional.of(\"value\");\n" + 
 				"		optional.ifPresent((String value) -> {\n" + 
 				"			String test = value.replace(\"t\", \"o\"); \n" + 
 				"			System.out.print(test);\n" + 
-				"		});\n" + 
-				"	}";
+				"		});";
 		String expected = "" +
 				"		Optional<String> optional = Optional.of(\"value\");\n" + 
 				"		optional.map((String value) -> value.replace(\"t\", \"o\")).ifPresent((String test) -> System.out.print(test));";

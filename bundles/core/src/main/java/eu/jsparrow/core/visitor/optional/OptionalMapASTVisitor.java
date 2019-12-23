@@ -13,11 +13,34 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.lambdaforeach.ForEachBodyAnalyzer;
+import eu.jsparrow.core.visitor.sub.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * 
+ * Extracts an {@code Optional::map} from the body of the consumer used in
+ * {@code Optional::ifPresent}. This makes complicated code blocks easier to
+ * read and reuse. Example: 
+ * <pre>
+ * 	optional.ifPresent(value -> {
+ *		String test = value.replace("t", "o");
+ *		System.out.print(test);
+ *	});
+ * </pre>
+ * 
+ * is transformed to: 
+ * <pre>
+ * 	optional
+ * 		.map(value -> value.replace("t", "o"))
+ * 		.ifPresent(test -> System.out.print(test));
+ * </pre>
+ * 
+ * 
+ * @since 3.13.0
+ *
+ */
 public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 
 	@SuppressWarnings("unchecked")
@@ -57,10 +80,10 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 		 */
 
 		SimpleName parameter = findParameterName(lambdaExpression);
-		if(parameter == null) {
+		if (parameter == null) {
 			return false;
 		}
-		
+
 		ForEachBodyAnalyzer analyzer = new ForEachBodyAnalyzer(parameter, block, astRewrite);
 		if (!analyzer.foundExtractableMapStatement()) {
 			return true;
@@ -89,29 +112,27 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 		astRewrite.replace(lambdaBody, remainingBlock, null);
 		astRewrite.replace(parameter, newParameterName, null);
 		onRewrite();
+		//TODO: save comments
 
-		Type parameterType = extractSingleParameterType(lambdaExpression);
+		Type parameterType = LambdaNodeUtil.extractSingleParameterType(lambdaExpression);
 		if (parameterType == null) {
 			return true;
 		}
 
 		Type newType = analyzer.getNewForEachParameterType();
 		if (newType.isPrimitiveType()) {
-			/*
-			 * implicit boxing! primitives are not allowed in forEach
-			 */
-			astRewrite.replace((ASTNode) lambdaExpression.parameters()
-				.get(0), newParameterName, null);
+			astRewrite.replace((ASTNode)lambdaExpression.parameters()
+					.get(0), newParameterName, null);
 		} else {
 			astRewrite.replace(parameterType, newType, null);
 			Modifier modifier = analyzer.getNewForEachParameterModifier();
-			insertModifier(lambdaExpression, modifier);
+			LambdaNodeUtil.insertModifier(lambdaExpression, modifier, astRewrite);
 		}
 
 		return true;
 	}
 
-	private SimpleName findParameterName(LambdaExpression lambdaExpression) {
+	public static SimpleName findParameterName(LambdaExpression lambdaExpression) {
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
 				VariableDeclarationFragment.class);
 		if (fragments.size() == 1) {
@@ -123,56 +144,12 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 				SingleVariableDeclaration.class);
 
 		if (declarations.size() == 1) {
-			return declarations.get(0).getName();
+			return declarations.get(0)
+				.getName();
 		}
-		
+
 		return null;
 	}
 
-	/**
-	 * Extracts the {@link Type} of the parameter of the lambda expression, if
-	 * any.
-	 * 
-	 * @param lambdaExpression
-	 *            lambda expression to be checked
-	 * 
-	 * @return the {@link Type} of the parameter if the lambda expression has
-	 *         only one parameter expressed as a
-	 *         {@link SingleVariableDeclaration}, or {@code null} otherwise.
-	 */
-	private Type extractSingleParameterType(LambdaExpression lambdaExpression) {
-		Type parameter = null;
-
-		List<SingleVariableDeclaration> declarations = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
-				SingleVariableDeclaration.class);
-		if (declarations.size() == 1) {
-			SingleVariableDeclaration declaration = declarations.get(0);
-			parameter = declaration.getType();
-		}
-
-		return parameter;
-	}
-
-	/**
-	 * Inserts the modifier to the parameter of the lambda expression if it has
-	 * only one parameter represented with a {@link SingleVariableDeclaration}.
-	 * 
-	 * @param lambdaExpression
-	 *            a node representing a lambda expression
-	 * @param modifier
-	 *            the modifier to be inserted
-	 */
-	private void insertModifier(LambdaExpression lambdaExpression, Modifier modifier) {
-		if (modifier != null) {
-			List<SingleVariableDeclaration> params = ASTNodeUtil.convertToTypedList(lambdaExpression.parameters(),
-					SingleVariableDeclaration.class);
-			if (params.size() == 1) {
-				SingleVariableDeclaration param = params.get(0);
-				ListRewrite paramRewriter = astRewrite.getListRewrite(param,
-						SingleVariableDeclaration.MODIFIERS2_PROPERTY);
-				paramRewriter.insertFirst(astRewrite.createCopyTarget(modifier), null);
-			}
-		}
-	}
 
 }

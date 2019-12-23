@@ -18,11 +18,11 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.sub.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -157,7 +157,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		/*
 		 * Replace the type of the parameter if any
 		 */
-		Type type = extractSingleParameterType(lambdaExpression);
+		Type type = LambdaNodeUtil.extractSingleParameterType(lambdaExpression);
 		if (type != null) {
 			Type newType = analyzer.getNewForEachParameterType();
 			if (newType.isPrimitiveType()) {
@@ -169,7 +169,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			} else {
 				astRewrite.replace(type, newType, null);
 				Modifier modifier = analyzer.getNewForEachParameterModifier();
-				insertModifier(lambdaExpression, modifier);
+				LambdaNodeUtil.insertModifier(lambdaExpression, modifier, astRewrite);
 			}
 		}
 
@@ -210,28 +210,6 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	}
 
 	/**
-	 * Inserts the modifier to the parameter of the lambda expression if it has
-	 * only one parameter represented with a {@link SingleVariableDeclaration}.
-	 * 
-	 * @param lambdaExpression
-	 *            a node representing a lambda expression
-	 * @param modifier
-	 *            the modifier to be inserted
-	 */
-	private void insertModifier(LambdaExpression lambdaExpression, Modifier modifier) {
-		if (modifier != null) {
-			List<SingleVariableDeclaration> params = ASTNodeUtil.convertToTypedList(lambdaExpression.parameters(),
-					SingleVariableDeclaration.class);
-			if (params.size() == 1) {
-				SingleVariableDeclaration param = params.get(0);
-				ListRewrite paramRewriter = astRewrite.getListRewrite(param,
-						SingleVariableDeclaration.MODIFIERS2_PROPERTY);
-				paramRewriter.insertFirst(astRewrite.createCopyTarget(modifier), null);
-			}
-		}
-	}
-
-	/**
 	 * Creates a new lambda expression with the given parameter name and the
 	 * body.
 	 * 
@@ -266,29 +244,5 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			return (Block) body;
 		}
 		return null;
-	}
-
-	/**
-	 * Extracts the {@link Type} of the parameter of the lambda expression, if
-	 * any.
-	 * 
-	 * @param lambdaExpression
-	 *            lambda expression to be checked
-	 * 
-	 * @return the {@link Type} of the parameter if the lambda expression has
-	 *         only one parameter expressed as a
-	 *         {@link SingleVariableDeclaration}, or {@code null} otherwise.
-	 */
-	private Type extractSingleParameterType(LambdaExpression lambdaExpression) {
-		Type parameter = null;
-
-		List<SingleVariableDeclaration> declarations = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
-				SingleVariableDeclaration.class);
-		if (declarations.size() == 1) {
-			SingleVariableDeclaration declaration = declarations.get(0);
-			parameter = declaration.getType();
-		}
-
-		return parameter;
 	}
 }
