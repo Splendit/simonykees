@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.visitor.lambdaforeach.ForEachBodyAnalyzer;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -73,7 +72,7 @@ public class LambdaNodeUtil {
 		}
 	}
 	
-	public static void saveComments(CommentRewriter helper, ForEachBodyAnalyzer analyzer, Statement parentStatement) {
+	public static void saveComments(CommentRewriter helper, LambdaExpressionBodyAnalyzer analyzer, Statement parentStatement) {
 		helper.saveRelatedComments(analyzer.getMapVariableDeclaration(), parentStatement);
 		List<Statement> remainingStatements = analyzer.getRemainingStatements();
 		if (remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0)

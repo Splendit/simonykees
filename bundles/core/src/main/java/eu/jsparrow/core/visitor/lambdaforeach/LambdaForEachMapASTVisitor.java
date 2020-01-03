@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.sub.LambdaExpressionBodyAnalyzer;
 import eu.jsparrow.core.visitor.sub.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -100,7 +101,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		/*
 		 * use the analyzer for checking for extractable part in the forEach
 		 */
-		ForEachBodyAnalyzer analyzer = new ForEachBodyAnalyzer(parameter, body, astRewrite);
+		LambdaExpressionBodyAnalyzer analyzer = new LambdaExpressionBodyAnalyzer(parameter, body, astRewrite);
 
 		if (!analyzer.foundExtractableMapStatement()) {
 			return true;

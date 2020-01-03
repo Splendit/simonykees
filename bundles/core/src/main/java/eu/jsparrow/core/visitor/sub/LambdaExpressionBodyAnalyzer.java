@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.lambdaforeach;
+package eu.jsparrow.core.visitor.sub;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  * @since 1.2
  *
  */
-public class ForEachBodyAnalyzer {
+public class LambdaExpressionBodyAnalyzer {
 	
 	private static final String MAP = "map"; //$NON-NLS-1$
 	private static final String MAP_TO_INT = "mapToInt"; //$NON-NLS-1$
@@ -55,7 +55,7 @@ public class ForEachBodyAnalyzer {
 	private VariableDeclarationStatement mapVariableDeclaration;
 	private ExpressionStatement replacedRemainingStatement;
 
-	public ForEachBodyAnalyzer(SimpleName parameter, Block block, ASTRewrite astRewrite) {
+	public LambdaExpressionBodyAnalyzer(SimpleName parameter, Block block, ASTRewrite astRewrite) {
 		List<Statement> statements = ASTNodeUtil.returnTypedList(block.statements(), Statement.class);
 		boolean mapVariableFound = false;
 

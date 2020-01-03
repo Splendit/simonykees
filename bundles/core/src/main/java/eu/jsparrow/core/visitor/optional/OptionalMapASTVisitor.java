@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import eu.jsparrow.core.visitor.lambdaforeach.ForEachBodyAnalyzer;
+import eu.jsparrow.core.visitor.sub.LambdaExpressionBodyAnalyzer;
 import eu.jsparrow.core.visitor.sub.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -69,6 +69,10 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 		}
 
 		MethodInvocation methodInvocation = (MethodInvocation) lambdaExpression.getParent();
+		if(methodInvocation.getExpression() == null) {
+			return false;
+		}
+		
 		boolean isOptionalIfPresent = hasRightTypeAndName(methodInvocation, java.util.Optional.class.getName(),
 				IF_PRESENT);
 		if (!isOptionalIfPresent) {
@@ -85,7 +89,7 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 			return false;
 		}
 
-		ForEachBodyAnalyzer analyzer = new ForEachBodyAnalyzer(parameter, block, astRewrite);
+		LambdaExpressionBodyAnalyzer analyzer = new LambdaExpressionBodyAnalyzer(parameter, block, astRewrite);
 		if (!analyzer.foundExtractableMapStatement()) {
 			return true;
 		}
@@ -102,7 +106,7 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 
 	@SuppressWarnings("unchecked")
 	private void replace(LambdaExpression lambdaExpression, MethodInvocation methodInvocation, SimpleName parameter,
-			ForEachBodyAnalyzer analyzer) {
+			LambdaExpressionBodyAnalyzer analyzer) {
 		ASTNode lambdaBody = lambdaExpression.getBody();
 		ASTNode extractableBlock = analyzer.getExtractableBlock();
 		ASTNode remainingBlock = analyzer.getRemainingBlock();
@@ -122,8 +126,8 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 		astRewrite.replace(parameter, newParameterName, null);
 		onRewrite();
 
-		LambdaNodeUtil.saveComments(getCommentRewriter(), analyzer,
-				ASTNodeUtil.getSpecificAncestor(lambdaExpression, Statement.class));
+//		LambdaNodeUtil.saveComments(getCommentRewriter(), analyzer,
+//				ASTNodeUtil.getSpecificAncestor(lambdaExpression, Statement.class));
 
 		Type parameterType = LambdaNodeUtil.extractSingleParameterType(lambdaExpression);
 		if (parameterType == null) {
