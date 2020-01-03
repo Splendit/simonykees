@@ -16,6 +16,13 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
+/**
+ * A helper class for extracting information from {@link LambdaExpression}
+ * nodes.
+ * 
+ * @since 3.13.0
+ *
+ */
 public class LambdaNodeUtil {
 
 	private LambdaNodeUtil() {
@@ -71,8 +78,19 @@ public class LambdaNodeUtil {
 			}
 		}
 	}
-	
-	public static void saveComments(CommentRewriter helper, LambdaExpressionBodyAnalyzer analyzer, Statement parentStatement) {
+
+	/**
+	 * Save comments after extracting a map out of a lambda expression body.
+	 * 
+	 * @param helper
+	 *            helper object for rewriting comments
+	 * @param analyzer
+	 *            analyzer of a lambda expression body
+	 * @param parentStatement
+	 *            parent statement to save the comments to.
+	 */
+	public static void saveComments(CommentRewriter helper, LambdaExpressionBodyAnalyzer analyzer,
+			Statement parentStatement) {
 		helper.saveRelatedComments(analyzer.getMapVariableDeclaration(), parentStatement);
 		List<Statement> remainingStatements = analyzer.getRemainingStatements();
 		if (remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0)

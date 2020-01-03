@@ -126,8 +126,8 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 		astRewrite.replace(parameter, newParameterName, null);
 		onRewrite();
 
-//		LambdaNodeUtil.saveComments(getCommentRewriter(), analyzer,
-//				ASTNodeUtil.getSpecificAncestor(lambdaExpression, Statement.class));
+		LambdaNodeUtil.saveComments(getCommentRewriter(), analyzer,
+				ASTNodeUtil.getSpecificAncestor(lambdaExpression, Statement.class));
 
 		Type parameterType = LambdaNodeUtil.extractSingleParameterType(lambdaExpression);
 		if (parameterType == null) {
