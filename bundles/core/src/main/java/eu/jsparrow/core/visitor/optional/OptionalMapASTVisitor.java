@@ -40,7 +40,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * </pre>
  * 
  * 
- * @since 3.13.0
+ * @since 3.14.0
  *
  */
 public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {

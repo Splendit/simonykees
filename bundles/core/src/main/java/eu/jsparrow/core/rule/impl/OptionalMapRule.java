@@ -15,14 +15,14 @@ import eu.jsparrow.rules.common.Tag;
  * 
  * @see OptionalMapASTVisitor
  * 
- * @since 3.13.0
+ * @since 3.14.0
  *
  */
 public class OptionalMapRule extends RefactoringRuleImpl<OptionalMapASTVisitor> {
 
 	public OptionalMapRule() {
 		this.visitorClass = OptionalMapASTVisitor.class;
-		this.id = "OptionalIfPresent"; //$NON-NLS-1$
+		this.id = "OptionalMap"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.OptionalMapRule_name,
 				Messages.OptionalMapRule_description, 
 				Duration.ofMinutes(2),
