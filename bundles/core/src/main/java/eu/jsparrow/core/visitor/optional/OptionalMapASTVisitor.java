@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -22,19 +23,20 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * 
  * Extracts an {@code Optional::map} from the body of the consumer used in
  * {@code Optional::ifPresent}. This makes complicated code blocks easier to
- * read and reuse. Example: 
+ * read and reuse. Example:
+ * 
  * <pre>
- * 	optional.ifPresent(value -> {
- *		String test = value.replace("t", "o");
- *		System.out.print(test);
- *	});
+ * optional.ifPresent(value -> {
+ * 	String test = value.replace("t", "o");
+ * 	System.out.print(test);
+ * });
  * </pre>
  * 
- * is transformed to: 
+ * is transformed to:
+ * 
  * <pre>
- * 	optional
- * 		.map(value -> value.replace("t", "o"))
- * 		.ifPresent(test -> System.out.print(test));
+ * optional.map(value -> value.replace("t", "o"))
+ * 	.ifPresent(test -> System.out.print(test));
  * </pre>
  * 
  * 
@@ -43,7 +45,6 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(LambdaExpression lambdaExpression) {
 
@@ -57,7 +58,7 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 		Block block = (Block) lambdaBody;
 		if (block.statements()
 			.size() < 2) {
-			return true;
+			return false;
 		}
 
 		/*
@@ -93,11 +94,19 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 			return true;
 		}
 
+		// Introduce optional map
+		replace(lambdaExpression, methodInvocation, parameter, analyzer);
+
+		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void replace(LambdaExpression lambdaExpression, MethodInvocation methodInvocation, SimpleName parameter,
+			ForEachBodyAnalyzer analyzer) {
+		ASTNode lambdaBody = lambdaExpression.getBody();
 		ASTNode extractableBlock = analyzer.getExtractableBlock();
 		ASTNode remainingBlock = analyzer.getRemainingBlock();
 		SimpleName newParameterName = analyzer.getNewForEachParameterName();
-
-		// Introduce optional map
 		Expression optionalExpression = methodInvocation.getExpression();
 		AST ast = methodInvocation.getAST();
 		MethodInvocation mapInvocation = ast.newMethodInvocation();
@@ -112,24 +121,24 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 		astRewrite.replace(lambdaBody, remainingBlock, null);
 		astRewrite.replace(parameter, newParameterName, null);
 		onRewrite();
-		//TODO: save comments
+
+		LambdaNodeUtil.saveComments(getCommentRewriter(), analyzer,
+				ASTNodeUtil.getSpecificAncestor(lambdaExpression, Statement.class));
 
 		Type parameterType = LambdaNodeUtil.extractSingleParameterType(lambdaExpression);
 		if (parameterType == null) {
-			return true;
+			return;
 		}
 
 		Type newType = analyzer.getNewForEachParameterType();
 		if (newType.isPrimitiveType()) {
-			astRewrite.replace((ASTNode)lambdaExpression.parameters()
-					.get(0), newParameterName, null);
+			astRewrite.replace((ASTNode) lambdaExpression.parameters()
+				.get(0), newParameterName, null);
 		} else {
 			astRewrite.replace(parameterType, newType, null);
 			Modifier modifier = analyzer.getNewForEachParameterModifier();
 			LambdaNodeUtil.insertModifier(lambdaExpression, modifier, astRewrite);
 		}
-
-		return true;
 	}
 
 	public static SimpleName findParameterName(LambdaExpression lambdaExpression) {
@@ -150,6 +159,5 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 
 		return null;
 	}
-
 
 }

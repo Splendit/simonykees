@@ -1,15 +1,21 @@
 package eu.jsparrow.core.visitor.sub;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.lambdaforeach.ForEachBodyAnalyzer;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 public class LambdaNodeUtil {
 
@@ -64,6 +70,19 @@ public class LambdaNodeUtil {
 						SingleVariableDeclaration.MODIFIERS2_PROPERTY);
 				paramRewriter.insertFirst(astRewrite.createCopyTarget(modifier), null);
 			}
+		}
+	}
+	
+	public static void saveComments(CommentRewriter helper, ForEachBodyAnalyzer analyzer, Statement parentStatement) {
+		helper.saveRelatedComments(analyzer.getMapVariableDeclaration(), parentStatement);
+		List<Statement> remainingStatements = analyzer.getRemainingStatements();
+		if (remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0)
+			.getNodeType()) {
+			Statement rs = remainingStatements.get(0);
+			List<Comment> rsComments = new ArrayList<>();
+			rsComments.addAll(helper.findLeadingComments(rs));
+			rsComments.addAll(helper.findTrailingComments(rs));
+			helper.saveBeforeStatement(parentStatement, rsComments);
 		}
 	}
 

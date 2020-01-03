@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -24,7 +23,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.sub.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * Extracts, if possible, a part of the body of the lambda expression occurring
@@ -151,7 +149,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		 * replace the parameter of the forEach lambda expression
 		 */
 		astRewrite.replace(parameter, newForEachParamName, null);
-		saveComments(methodInvocation, analyzer);
+		LambdaNodeUtil.saveComments(getCommentRewriter(), analyzer,findParentStatement(methodInvocation));
 		onRewrite();
 
 		/*
@@ -184,21 +182,6 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		ITypeBinding expressionType = expression.resolveTypeBinding();
 
 		return expressionType != null && expressionType.isRawType();
-	}
-
-	private void saveComments(MethodInvocation methodInvocation, ForEachBodyAnalyzer analyzer) {
-		Statement parentStatement = findParentStatement(methodInvocation);
-		CommentRewriter helper = getCommentRewriter();
-		helper.saveRelatedComments(analyzer.getMapVariableDeclaration(), parentStatement);
-		List<Statement> remainingStatements = analyzer.getRemainingStatements();
-		if (remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0)
-			.getNodeType()) {
-			Statement rs = remainingStatements.get(0);
-			List<Comment> rsComments = new ArrayList<>();
-			rsComments.addAll(helper.findLeadingComments(rs));
-			rsComments.addAll(helper.findTrailingComments(rs));
-			helper.saveBeforeStatement(parentStatement, rsComments);
-		}
 	}
 
 	private Statement findParentStatement(MethodInvocation methodInvocation) {
