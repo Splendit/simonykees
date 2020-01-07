@@ -201,6 +201,7 @@ rules:
   - OptionalIfPresentOrElse
   - HideDefaultConstructorInUtilityClasses
   - MakeFieldsAndVariablesFinal
+  - OptionalMap
 
 excludes:
   excludeClasses: []

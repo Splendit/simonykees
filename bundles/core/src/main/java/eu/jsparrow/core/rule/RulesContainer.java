@@ -50,6 +50,7 @@ import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
 import eu.jsparrow.core.rule.impl.OptionalIfPresentOrElseRule;
 import eu.jsparrow.core.rule.impl.OptionalIfPresentRule;
+import eu.jsparrow.core.rule.impl.OptionalMapRule;
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
@@ -141,12 +142,13 @@ public class RulesContainer {
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new MapGetOrDefaultRule(),
 				new DateDeprecatedRule(), new RemoveDoubleNegationRule(), new OptionalIfPresentRule(),
-				new OptionalIfPresentOrElseRule(), new RemoveNullCheckBeforeInstanceofRule(), new GuardConditionRule(),
-				new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(), new RemoveEmptyStatementRule(),
-				new RemoveUnnecessaryThrownExceptionsRule(), new RemoveModifiersInInterfacePropertiesRule(),
-				new RemoveUnusedParameterRule(), new ReorderModifiersRule(), new UseListSortRule(),
-				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
-				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
+				new OptionalMapRule(), new OptionalIfPresentOrElseRule(), new RemoveNullCheckBeforeInstanceofRule(),
+				new GuardConditionRule(), new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(),
+				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
+				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
+				new ReorderModifiersRule(), new UseListSortRule(), new CollectionsFactoryMethodsRule(),
+				new UseCollectionsSingletonListRule(), new HideDefaultConstructorInUtilityClassesRule(),
+				new MakeFieldsAndVariablesFinalRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

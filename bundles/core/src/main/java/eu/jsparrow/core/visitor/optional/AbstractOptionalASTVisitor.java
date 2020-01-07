@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
@@ -26,6 +27,7 @@ import eu.jsparrow.core.visitor.sub.ReferencedFieldsVisitor;
 import eu.jsparrow.core.visitor.sub.UnhandledExceptionVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -195,5 +197,14 @@ public class AbstractOptionalASTVisitor extends AbstractASTRewriteASTVisitor {
 			return expressionStatement.getExpression();
 		}
 		return body;
+	}
+
+	protected Boolean hasRightTypeAndName(MethodInvocation methodInvocation, String type, String name) {
+		List<String> fullyQualifiedOptionalName = generateFullyQualifiedNameList(type);
+		Boolean epxressionTypeMatches = ClassRelationUtil.isContentOfTypes(methodInvocation.getExpression()
+			.resolveTypeBinding(), fullyQualifiedOptionalName);
+		Boolean methodNameMatches = StringUtils.equals(name, methodInvocation.getName()
+			.getFullyQualifiedName());
+		return epxressionTypeMatches && methodNameMatches;
 	}
 }

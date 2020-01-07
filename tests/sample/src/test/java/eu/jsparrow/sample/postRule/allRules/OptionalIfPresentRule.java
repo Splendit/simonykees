@@ -275,14 +275,14 @@ public class OptionalIfPresentRule {
 
 	public void avoidShadowingFields_shouldTransform() {
 		final Optional<String> user = Optional.ofNullable("John Snow");
-		user.ifPresent(value -> {
+		user.map(value -> {
 			logger.info(new StringBuilder().append(value2)
 				.append(":")
 				.append(value)
 				.toString());
-			final String value2 = value;
-			logger.info(value2);
-		});
+			return value;
+		})
+			.ifPresent(logger::info);
 	}
 
 	public void fakeOptional_shouldNotTransform(IoNonSonoOpzionale input) {
@@ -371,11 +371,11 @@ public class OptionalIfPresentRule {
 
 	public void clashingWithPropertyOnQualifiedName_shouldTransform(Optional<String> input) {
 		final IoNonSonoOpzionale user = new IoNonSonoOpzionale();
-		input.ifPresent(value1 -> {
-			final String value = value1;
-			user.value.length();
-			logger.info(value);
-		});
+		input.map(value1 -> value1)
+			.ifPresent(value -> {
+				user.value.length();
+				logger.info(value);
+			});
 	}
 
 	public void discardedSingleOptionalGet_shouldNotTransform() {
@@ -440,11 +440,11 @@ public class OptionalIfPresentRule {
 		}
 
 		public void clashingWithFieldAccess_shouldTransform(Optional<String> input) {
-			input.ifPresent(value1 -> {
-				final String value = value1;
-				this.value.length();
-				logger1.info(value);
-			});
+			input.map(value1 -> value1)
+				.ifPresent(value -> {
+					this.value.length();
+					logger1.info(value);
+				});
 		}
 	}
 

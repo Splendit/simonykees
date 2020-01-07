@@ -263,6 +263,10 @@ public class Messages extends NLS {
 	public static String OptionalIfPresentOrElseRule_name;
 	public static String OptionalIfPresentRule_description;
 	public static String OptionalIfPresentRule_name;
+	public static String OptionalMapRule_description;
+
+	public static String OptionalMapRule_name;
+
 	public static String OrganiseImportsRule_description;
 	public static String OrganiseImportsRule_name;
 	public static String OverrideAnnotationRule_description;

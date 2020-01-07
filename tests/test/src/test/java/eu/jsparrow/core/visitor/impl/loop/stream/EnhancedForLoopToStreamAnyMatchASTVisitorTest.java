@@ -31,7 +31,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 	 */
 	
 	@Test
-	public void visit_loopWithBreakToAllMatch_shouldTranform() throws Exception {
+	public void visit_loopWithBreakToAllMatch_shouldTransform() throws Exception {
 		
 		String block = "" +
 				"	List<String> strings = new ArrayList<>();\n" +
