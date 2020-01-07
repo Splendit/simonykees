@@ -24,11 +24,11 @@ public class OptionalMapRule extends RefactoringRuleImpl<OptionalMapASTVisitor> 
 		this.visitorClass = OptionalMapASTVisitor.class;
 		this.id = "OptionalMap"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.OptionalMapRule_name,
-				Messages.OptionalMapRule_description, 
+				Messages.OptionalMapRule_description,
 				Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_8, Tag.CODING_CONVENTIONS, Tag.LAMBDA));
+				Arrays.asList(Tag.JAVA_1_8, Tag.CODING_CONVENTIONS, Tag.LAMBDA, Tag.READABILITY));
 	}
-	
+
 	@Override
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_8;
