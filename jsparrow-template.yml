@@ -200,6 +200,7 @@ rules:
   - UseListSort
   - OptionalIfPresentOrElse
   - HideDefaultConstructorInUtilityClasses
+  - MakeFieldsAndVariablesFinal
 
 excludes:
   excludeClasses: []
