@@ -40,7 +40,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * </pre>
  * 
  * 
- * @since 3.14.0
+ * @since 3.13.0
  *
  */
 public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
@@ -80,8 +80,7 @@ public class OptionalMapASTVisitor extends AbstractOptionalASTVisitor {
 		}
 
 		/*
-		 * 3. Check the requirements for extracting a variable. See Use
-		 * Stream::map.
+		 * Check the requirements for extracting a variable. 
 		 */
 
 		SimpleName parameter = findParameterName(lambdaExpression);

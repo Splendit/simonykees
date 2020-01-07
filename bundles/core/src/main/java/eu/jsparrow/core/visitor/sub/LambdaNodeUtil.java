@@ -20,7 +20,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * A helper class for extracting information from {@link LambdaExpression}
  * nodes.
  * 
- * @since 3.14.0
+ * @since 3.13.0
  *
  */
 public class LambdaNodeUtil {
@@ -33,26 +33,29 @@ public class LambdaNodeUtil {
 
 	/**
 	 * Extracts the {@link Type} of the parameter of the lambda expression, if
-	 * any.
+	 * the given lambda expression has exactly one parameter whose type is given
+	 * explicitly. e.g. {@code (User user) -> consume(user)}.
 	 * 
 	 * @param lambdaExpression
 	 *            lambda expression to be checked
 	 * 
 	 * @return the {@link Type} of the parameter if the lambda expression has
 	 *         only one parameter expressed as a
-	 *         {@link SingleVariableDeclaration}, or {@code null} otherwise.
+	 *         {@link SingleVariableDeclaration}, or {@code null} the lambda
+	 *         expression does not have exactly one parameter or if the
+	 *         parameter type is implicit.
 	 */
 	public static Type extractSingleParameterType(LambdaExpression lambdaExpression) {
-		Type parameter = null;
+		Type parameterType = null;
 
 		List<SingleVariableDeclaration> declarations = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
 				SingleVariableDeclaration.class);
 		if (declarations.size() == 1) {
 			SingleVariableDeclaration declaration = declarations.get(0);
-			parameter = declaration.getType();
+			parameterType = declaration.getType();
 		}
 
-		return parameter;
+		return parameterType;
 	}
 
 	/**
