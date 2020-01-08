@@ -43,8 +43,27 @@ public class OptionalFilterASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
 	}
 	
-	//TODO: Using explicit types
-	// 
+	@Test
+	public void visit_usingExplicitTypes_shouldTransform() throws Exception {
+		String original = "" + 
+				"		Optional<String> optional = Optional.empty();\n" + 
+				"		optional.ifPresent((String value) -> {\n" + 
+				"			if (!value.isEmpty()) {\n" + 
+				"				System.out.println(value);\n" + 
+				"			}\n" + 
+				"		});";
+		String expected = "" +
+				"		Optional<String> optional = Optional.empty();\n" + 
+				"		optional.filter((String value) -> !value.isEmpty()).ifPresent((String value) -> {\n" + 
+				"			System.out.println(value);\n" + 
+				"		});";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+	}
 	
 	/*
 	 * Negative Test Cases
@@ -75,8 +94,20 @@ public class OptionalFilterASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"		Optional<String> optional = Optional.of(\"value\");\n" + 
 				"		optional.ifPresent(value -> {\n" + 
 				"			String test = value.replace(\"t\", \"o\");\n" + 
-				"			System.out.print(test);\n" + 
-				"			System.out.print(value);\n" + 
+				"		});";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_emptyLambdaBody_shouldNotTransform() throws Exception {
+		String original = "" + 
+				"		Optional<String> optional = Optional.of(\"value\");\n" + 
+				"		optional.ifPresent(value -> {\n" + 
 				"		});";
 		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -138,5 +169,44 @@ public class OptionalFilterASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
+	
+	@Test
+	public void visit_singleExpressionLambdaBody_shouldNotTransform() throws Exception {
+		String original = "" + 
+				"		Optional<String> optional = Optional.empty();\n" + 
+				"		optional.ifPresent(value -> System.out.println(value));";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_lambdaNotAsMethodArgument_shouldNotTransform() throws Exception {
+		String original = "" + 
+				"		Runnable r = () -> {};";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_lambdaNotAsOptionalIfPresent_shouldNotTransform() throws Exception {
+		String original = "" + 
+				"		Optional<String> optional = Optional.empty();\n" + 
+				"		optional.filter(value -> !value.isEmpty());";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+	}
+
 
 }
