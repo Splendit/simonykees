@@ -3,16 +3,13 @@ package eu.jsparrow.core.visitor.sub;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
@@ -111,31 +108,6 @@ public class LambdaNodeUtil {
 			rsComments.addAll(helper.findTrailingComments(rs));
 			helper.saveBeforeStatement(parentStatement, rsComments);
 		}
-	}
-	
-	/**
-	 * Creates a new instance of {@link MethodInvocation} with a single lambda
-	 * expression as parameter
-	 * 
-	 * @param ast
-	 *            the ast where the new invocation belongs to
-	 * @param methodExpression
-	 *            expression for the new method
-	 * @param methodName
-	 *            new method name
-	 * @param methodParam
-	 *            new method parameter
-	 * @return new method instance.
-	 */
-	@SuppressWarnings("unchecked")
-	public static MethodInvocation createMethodInvocation(AST ast, Expression methodExpression, SimpleName methodName,
-			LambdaExpression methodParam) {
-		MethodInvocation methodInvocation = ast.newMethodInvocation();
-		methodInvocation.setExpression(methodExpression);
-		methodInvocation.setName(methodName);
-		methodInvocation.arguments()
-			.add(methodParam);
-		return methodInvocation;
 	}
 
 	/**
