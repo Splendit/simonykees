@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.optional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -20,6 +21,30 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
+/**
+ * Extracts an {@link Optional#filter(Predicate)} from the consumer used in {@link Optional#ifPresent(Consumer)}. 
+ * For example:
+ * 
+ * <pre>
+ *	oUser.ifPresent(user -> {
+ *		if (isSpecial(user)) {
+ *			sendMail(user.getMail());
+ *		}
+ *	});
+ * </pre>
+ * 
+ * is transformed to: 
+ * <pre>
+ *	oUser.filter(user -> isSpecial(user)).ifPresent(user -> {
+ *		sendMail(user.getMail());
+ *	});
+ * </pre>
+ * 
+ * This transformation is feasible only if the entire consumer's body is wrapped into an if-statement. 
+ * 
+ * @since 3.13.0
+ *
+ */
 public class OptionalFilterASTVisitor extends AbstractOptionalASTVisitor {
 
 	@Override

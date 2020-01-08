@@ -259,6 +259,10 @@ public class Messages extends NLS {
 	public static String Netlicensing_persistenceError_failedtoLoad;
 	public static String Netlicensing_persistenceError_failedToSave;
 	public static String Netlicensing_validationResult_freeLicenseExpired0;
+	public static String OptionalFilterRule_description;
+
+	public static String OptionalFilterRule_name;
+
 	public static String OptionalIfPresentOrElseRule_description;
 	public static String OptionalIfPresentOrElseRule_name;
 	public static String OptionalIfPresentRule_description;
