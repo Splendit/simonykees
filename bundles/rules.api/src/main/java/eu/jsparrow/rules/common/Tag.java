@@ -50,7 +50,7 @@ public enum Tag {
 		return tagName;
 	}
 
-	public static Tag getTageForName(String name) {
+	public static Tag getTagForName(String name) {
 		return Arrays.stream(values())
 			.filter(tag -> tag.getTagNames()
 				.contains(name))
