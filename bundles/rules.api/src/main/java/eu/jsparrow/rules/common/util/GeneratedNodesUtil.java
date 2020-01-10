@@ -67,7 +67,7 @@ public class GeneratedNodesUtil {
 			clazz.getField(propertyName);
 			hasField = true;
 		} catch (NoSuchFieldException | SecurityException e) {
-			logger.debug("No {} field present.", propertyName); //$NON-NLS-1$
+			logger.trace("No {} field present.", propertyName); //$NON-NLS-1$
 		}
 		return hasField;
 	}
@@ -90,7 +90,7 @@ public class GeneratedNodesUtil {
 				.getField(propertyName);
 			retVal = (boolean) field.getBoolean(node);
 		} catch (NoSuchFieldException e) {
-			logger.debug("No {} field present.", propertyName); //$NON-NLS-1$
+			logger.trace("No {} field present.", propertyName); //$NON-NLS-1$
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException e) {
 			logger.error("Unable to access node", e); //$NON-NLS-1$
 		}
