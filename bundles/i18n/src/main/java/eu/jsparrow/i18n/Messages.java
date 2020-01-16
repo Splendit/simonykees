@@ -127,22 +127,16 @@ public class Messages extends NLS {
 	public static String EnhancedForLoopToStreamSumRule_description;
 	public static String EnhancedForLoopToStreamSumRule_name;
 	public static String EnhancedForLoopToStreamTakeWhileRule_description;
-
 	public static String EnhancedForLoopToStreamTakeWhileRule_name;
-
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
 	public static String HelpMessageDialog_documentation_url;
 	public static String HelpMessageDialog_support_mail;
 	public static String HelpMessageDialog_support_url;
 	public static String HideDefaultConstructorInUtilityClassesRule_description;
-
 	public static String HideDefaultConstructorInUtilityClassesRule_name;
-
 	public static String MakeFiledsAndVariablesFinalRule_description;
-
 	public static String MakeFiledsAndVariablesFinalRule_name;
-
 	public static String MapGetOrDefaultRule_description;
 	public static String MapGetOrDefaultRule_name;
 	public static String MavenProjectImporter_collectingProjectInfo;
@@ -198,7 +192,6 @@ public class Messages extends NLS {
 	public static String LicenseType_node_locked;
 	public static String LicenseType_subscription;
 	public static String LicenseType_try_and_buy;
-
 	public static String LicenseUtil_EmptyLicense;
 	public static String LicenseUtil_invalidLicenseFormat;
 	public static String LicenseValidator_cannot_reach_license_provider_on_validation_call;
@@ -260,17 +253,13 @@ public class Messages extends NLS {
 	public static String Netlicensing_persistenceError_failedToSave;
 	public static String Netlicensing_validationResult_freeLicenseExpired0;
 	public static String OptionalFilterRule_description;
-
 	public static String OptionalFilterRule_name;
-
 	public static String OptionalIfPresentOrElseRule_description;
 	public static String OptionalIfPresentOrElseRule_name;
 	public static String OptionalIfPresentRule_description;
 	public static String OptionalIfPresentRule_name;
 	public static String OptionalMapRule_description;
-
 	public static String OptionalMapRule_name;
-
 	public static String OrganiseImportsRule_description;
 	public static String OrganiseImportsRule_name;
 	public static String OverrideAnnotationRule_description;
@@ -367,13 +356,9 @@ public class Messages extends NLS {
 	public static String RemoveNewStringConstructorRule_description;
 	public static String RemoveNewStringConstructorRule_name;
 	public static String RemoveNullCheckBeforeInstanceofRule_description;
-
 	public static String RemoveNullCheckBeforeInstanceofRule_name;
-
 	public static String RemoveUnusedParameterRule_description;
-
 	public static String RemoveUnusedParameterRule_name;
-
 	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
 	public static String RenameFieldsRuleWizardHandler_performFinish_jobName;
 	public static String RenameFieldsRuleWizardPage_description;
@@ -526,9 +511,7 @@ public class Messages extends NLS {
 	public static String UpdateLicenseDialog_error_couldNotValidate;
 	public static String UpdateLicenseDialog_error_licenseInvalid;
 	public static String UseCollectionsSingletonListRule_description;
-
 	public static String UseCollectionsSingletonListRule_name;
-
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String UseListSortRule_description;
