@@ -24,8 +24,12 @@ public enum Tag {
 	JAVA_1_6("1.6", "6"),
 	JAVA_1_7("1.7", "7"),
 	JAVA_1_8("1.8", "8"),
-	JAVA_1_9("1.9","9"),
-	JAVA_1_10("1.10", "10"),
+	JAVA_9("9"),
+	JAVA_10("10"),
+	JAVA_11("11"),
+	JAVA_12("12"),
+	JAVA_13("13"),
+	JAVA_14("14"),
 	EMPTY(),
 	STRING_MANIPULATION("string manipulation"),
 	FORMATTING("formatting", "organize"),
@@ -46,7 +50,7 @@ public enum Tag {
 		return tagName;
 	}
 
-	public static Tag getTageForName(String name) {
+	public static Tag getTagForName(String name) {
 		return Arrays.stream(values())
 			.filter(tag -> tag.getTagNames()
 				.contains(name))

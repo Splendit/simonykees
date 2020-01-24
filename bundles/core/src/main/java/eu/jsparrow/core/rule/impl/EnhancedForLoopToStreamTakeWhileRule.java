@@ -25,7 +25,7 @@ public class EnhancedForLoopToStreamTakeWhileRule extends RefactoringRuleImpl<En
 		this.id = "EnhancedForLoopToStreamTakeWhile"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.EnhancedForLoopToStreamTakeWhileRule_name,
 				Messages.EnhancedForLoopToStreamTakeWhileRule_description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_9, Tag.LOOP, Tag.LAMBDA));
+				Arrays.asList(Tag.JAVA_9, Tag.LOOP, Tag.LAMBDA));
 	}
 
 	@Override
