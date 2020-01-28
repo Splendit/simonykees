@@ -74,10 +74,10 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 
 	private boolean containsTag(RefactoringRule object) {
 		for (String tag : appliedTags) {
-			if (null != Tag.getTageForName(tag)) {
+			if (null != Tag.getTagForName(tag)) {
 				if (object.getRuleDescription()
 					.getTags()
-					.contains(Tag.getTageForName(tag))) {
+					.contains(Tag.getTagForName(tag))) {
 					return true;
 				}
 			} else if (StringUtils.contains(StringUtils

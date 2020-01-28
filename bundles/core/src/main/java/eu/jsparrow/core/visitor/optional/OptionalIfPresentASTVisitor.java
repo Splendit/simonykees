@@ -5,10 +5,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -17,8 +15,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Usages of {@link Optional#isPresent()} combined with {@link Optional#get()}
@@ -157,14 +153,5 @@ public class OptionalIfPresentASTVisitor extends AbstractOptionalASTVisitor {
 			return false;
 		}
 		return hasRightTypeAndName(methodInvocation, OPTIONAL_FULLY_QUALIFIED_NAME, IS_PRESENT);
-	}
-
-	private Boolean hasRightTypeAndName(MethodInvocation methodInvocation, String type, String name) {
-		List<String> fullyQualifiedOptionalName = generateFullyQualifiedNameList(type);
-		Boolean epxressionTypeMatches = ClassRelationUtil.isContentOfTypes(methodInvocation.getExpression()
-			.resolveTypeBinding(), fullyQualifiedOptionalName);
-		Boolean methodNameMatches = StringUtils.equals(name, methodInvocation.getName()
-			.getFullyQualifiedName());
-		return epxressionTypeMatches && methodNameMatches;
 	}
 }

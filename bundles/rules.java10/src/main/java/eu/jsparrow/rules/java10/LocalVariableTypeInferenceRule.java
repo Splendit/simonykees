@@ -24,7 +24,7 @@ public class LocalVariableTypeInferenceRule extends RefactoringRuleImpl<LocalVar
 		this.id = "LocalVariableTypeInference"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.LocalVariableTypeInferenceRule_name,
 				Messages.LocalVariableTypeInferenceRule_description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_10, Tag.FORMATTING, Tag.READABILITY));
+				Arrays.asList(Tag.JAVA_10, Tag.FORMATTING, Tag.READABILITY));
 	}
 
 	@Override
