@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.test.framework
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Test Framework
 Bundle-SymbolicName: eu.jsparrow.test.framework
-Bundle-Version: 3.13.0.qualifier
+Bundle-Version: 3.14.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Splendit IT-Consulting GmbH
