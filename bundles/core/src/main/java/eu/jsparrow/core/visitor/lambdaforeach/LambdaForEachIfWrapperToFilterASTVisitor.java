@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -20,6 +19,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.sub.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
@@ -92,8 +92,8 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 						VariableDeclaration variableDeclarationCopy = (VariableDeclaration) ASTNode
 							.copySubtree(astRewrite.getAST(), variableDeclaration);
 
-						LambdaExpression filterLambda = createLambdaExpression(variableDeclarationCopy,
-								ifStatementExpression);
+						LambdaExpression filterLambda = LambdaNodeUtil.createLambdaExpression(astRewrite,
+								variableDeclarationCopy, ifStatementExpression);
 
 						/*
 						 * create filter() method invocation with filter lambda
@@ -122,8 +122,8 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 						 * create lambda expression for the new forEach() method
 						 */
 
-						LambdaExpression forEachLambda = createLambdaExpression(variableDeclarationCopy,
-								ifStatement.getThenStatement());
+						LambdaExpression forEachLambda = LambdaNodeUtil.createLambdaExpression(astRewrite,
+								variableDeclarationCopy, ifStatement.getThenStatement());
 
 						if (forEachLambda != null) {
 							/*
@@ -165,42 +165,6 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 			.stream()
 			.filter(comment -> !helper.isTrailing(comment, node))
 			.collect(Collectors.toList());
-	}
-
-	/**
-	 * creates a new instance of {@link LambdaExpression} with a single
-	 * parameter and the given body
-	 * 
-	 * @param parameter
-	 *            the only parameter of the new lambda expression
-	 * @param body
-	 *            the body of the new lambda expression, which must either be an
-	 *            {@link Expression} or a {@link Block}
-	 * @return the newly created {@link LambdaExpression} or null, if the body
-	 *         is not of type {@link Expression}, {@link ExpressionStatement} or
-	 *         {@link Block}.
-	 */
-	private LambdaExpression createLambdaExpression(VariableDeclaration parameter, ASTNode body) {
-
-		LambdaExpression lambda = astRewrite.getAST()
-			.newLambdaExpression();
-		lambda.setParentheses(false);
-
-		ListRewrite lambdaParamsListRewrite = astRewrite.getListRewrite(lambda, LambdaExpression.PARAMETERS_PROPERTY);
-		lambdaParamsListRewrite.insertFirst(parameter, null);
-		if (body.getNodeType() == ASTNode.BLOCK) {
-			lambda.setBody((Block) astRewrite.createCopyTarget(body));
-			return lambda;
-		} else if (body.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-			Expression expression = ((ExpressionStatement) body).getExpression();
-			lambda.setBody((Expression) astRewrite.createCopyTarget(expression));
-			return lambda;
-		} else if (body instanceof Expression) {
-			lambda.setBody((Expression) astRewrite.createCopyTarget(body));
-			return lambda;
-		}
-
-		return null;
 	}
 
 	/**

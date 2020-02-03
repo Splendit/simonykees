@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -104,6 +108,45 @@ public class LambdaNodeUtil {
 			rsComments.addAll(helper.findTrailingComments(rs));
 			helper.saveBeforeStatement(parentStatement, rsComments);
 		}
+	}
+
+	/**
+	 * Creates a new instance of {@link LambdaExpression} with a single
+	 * parameter and the given body
+	 * 
+	 * @param astRewrite
+	 *            a rewriter for creating the copies of the given data
+	 * @param parameter
+	 *            the only parameter of the new lambda expression
+	 * @param body
+	 *            the body of the new lambda expression, which must either be an
+	 *            {@link Expression} or a {@link Block}
+	 * @return the newly created {@link LambdaExpression} or null, if the body
+	 *         is not of type {@link Expression}, {@link ExpressionStatement} or
+	 *         {@link Block}.
+	 */
+	public static LambdaExpression createLambdaExpression(ASTRewrite astRewrite, VariableDeclaration parameter,
+			ASTNode body) {
+
+		LambdaExpression lambda = astRewrite.getAST()
+			.newLambdaExpression();
+		lambda.setParentheses(false);
+		ListRewrite lambdaParamsListRewrite = astRewrite.getListRewrite(lambda, LambdaExpression.PARAMETERS_PROPERTY);
+		lambdaParamsListRewrite.insertFirst(parameter, null);
+
+		if (body.getNodeType() == ASTNode.BLOCK) {
+			lambda.setBody((Block) astRewrite.createCopyTarget(body));
+			return lambda;
+		} else if (body.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+			Expression expression = ((ExpressionStatement) body).getExpression();
+			lambda.setBody((Expression) astRewrite.createCopyTarget(expression));
+			return lambda;
+		} else if (body instanceof Expression) {
+			lambda.setBody((Expression) astRewrite.createCopyTarget(body));
+			return lambda;
+		}
+
+		return null;
 	}
 
 }
