@@ -14,7 +14,7 @@ import eu.jsparrow.rules.common.Tag;
 /**
  * @see OptionalFilterASTVisitor
  * 
- * @since 3.13.0
+ * @since 3.14.0
  *
  */
 public class OptionalFilterRule extends RefactoringRuleImpl<OptionalFilterASTVisitor> {
