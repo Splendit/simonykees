@@ -1,7 +1,6 @@
 package eu.jsparrow.core.refactorer;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,7 +12,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -32,9 +30,9 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
+import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
-import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 
 /**
  * This class manages the selected {@link RefactoringRule}s and the selected
@@ -217,28 +215,8 @@ public class RefactoringPipeline {
 					.setWorkRemaining(compilationUnits.size());
 				subMonitor.setTaskName(""); //$NON-NLS-1$
 
-				IJavaProject javaProjekt = compilationUnits.get(0)
-					.getJavaProject();
-
 				for (ICompilationUnit compilationUnit : compilationUnits) {
 					subMonitor.subTask(compilationUnit.getElementName());
-
-					/*
-					 * Check if more than one project is selected. If it is,
-					 * show message to select only one project files. Temporary
-					 * workaround for Package explorer. There is filter for
-					 * Project explorer when selected project is not Java
-					 * project to not show the jSparrow, but solution for
-					 * multiple project selection is not done.
-					 * 
-					 * See SIM-496
-					 */
-					if (!compilationUnit.getJavaProject()
-						.equals(javaProjekt)) {
-						subMonitor.setCanceled(true);
-						multipleProjects = true;
-						return Collections.emptyList();
-					}
 
 					createRefactoringState(compilationUnit, containingErrorList);
 

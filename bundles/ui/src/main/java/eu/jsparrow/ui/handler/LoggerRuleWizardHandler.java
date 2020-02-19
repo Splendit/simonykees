@@ -2,10 +2,12 @@ package eu.jsparrow.ui.handler;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -76,9 +78,27 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 				return null;
 			}
 
-			List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
+			Map<IJavaProject, List<IJavaElement>> selectedJavaElements;
+			try {
+				selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
+			} catch (CoreException e) {
+				logger.error(e.getMessage(), e);
+				WizardMessageDialog.synchronizeWithUIShowError(new RefactoringException(
+						Messages.SelectRulesWizardHandler_getting_selected_resources_failed + e.getMessage(),
+						Messages.SelectRulesWizardHandler_user_getting_selected_resources_failed, e));
+				return null;
+			}
 			if (!selectedJavaElements.isEmpty()) {
-				IJavaProject selectedJavaProjekt = selectedJavaElements.get(0)
+				if (selectedJavaElements.size() != 1) {
+					synchronizeWithUIShowSelectionErrorMessage();
+					return false;
+				}
+
+				List<IJavaElement> selectedElements = selectedJavaElements.entrySet()
+					.iterator()
+					.next()
+					.getValue();
+				IJavaProject selectedJavaProjekt = selectedElements.get(0)
 					.getJavaProject();
 				StandardLoggerRule loggerRule = new StandardLoggerRule();
 
@@ -99,7 +119,7 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 									try {
 										List<ICompilationUnit> compilationUnits = new LinkedList<>();
 										SelectRulesWizard.collectICompilationUnits(compilationUnits,
-												selectedJavaElements, monitor);
+												selectedElements, monitor);
 										List<ICompilationUnit> containingErrorList = refactoringPipeline
 											.prepareRefactoring(compilationUnits, monitor);
 										if (monitor.isCanceled()) {
@@ -118,11 +138,11 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 											return Status.CANCEL_STATUS;
 										} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
 											synchronizeWithUIShowCompilationErrorMessage(containingErrorList, event,
-													refactoringPipeline, selectedJavaElements, loggerRule,
+													refactoringPipeline, selectedElements, loggerRule,
 													selectedJavaProjekt);
 										} else {
 											synchronizeWithUIShowLoggerRuleWizard(event, refactoringPipeline,
-													selectedJavaElements, loggerRule, selectedJavaProjekt);
+													selectedElements, loggerRule, selectedJavaProjekt);
 										}
 
 									} catch (RefactoringException e) {
@@ -234,6 +254,19 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 				} else {
 					Activator.setRunning(false);
 				}
+			});
+	}
+
+	private void synchronizeWithUIShowSelectionErrorMessage() {
+		Display.getDefault()
+			.syncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				MessageDialog.openError(shell, Messages.LoggerRuleWizardHandler_multipleProjectsSelected,
+						Messages.LoggerRuleWizardHandler_loggerRuleOnOneProjectOnly);
+
+				Activator.setRunning(false);
 			});
 	}
 }

@@ -2,10 +2,12 @@ package eu.jsparrow.ui.handler;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -72,69 +74,64 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 				return null;
 			}
 
-			List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
+			Map<IJavaProject, List<IJavaElement>> selectedJavaElements;
+			try {
+				selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
+			} catch (CoreException e) {
+				logger.error(e.getMessage(), e);
+				WizardMessageDialog.synchronizeWithUIShowError(new RefactoringException(
+						Messages.SelectRulesWizardHandler_getting_selected_resources_failed + e.getMessage(),
+						Messages.SelectRulesWizardHandler_user_getting_selected_resources_failed, e));
+				return null;
+			}
 			if (!selectedJavaElements.isEmpty()) {
-				IJavaProject selectedJavaProjekt = selectedJavaElements.get(0)
-					.getJavaProject();
 
-				if (null != selectedJavaProjekt) {
+				Job job = new Job(Messages.ProgressMonitor_verifying_project_information) {
 
-					Job job = new Job(Messages.ProgressMonitor_verifying_project_information) {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
-							RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
-
-							try {
-								List<ICompilationUnit> compilationUnits = new LinkedList<>();
-								SelectRulesWizard.collectICompilationUnits(compilationUnits, selectedJavaElements,
+						try {
+							List<ICompilationUnit> compilationUnits = new LinkedList<>();
+							for (Map.Entry<IJavaProject, List<IJavaElement>> entry : selectedJavaElements.entrySet()) {
+								SelectRulesWizard.collectICompilationUnits(compilationUnits, entry.getValue(),
 										monitor);
-								List<ICompilationUnit> containingErrorList = refactoringPipeline
-									.prepareRefactoring(compilationUnits, monitor);
-								if (monitor.isCanceled()) {
-									/*
-									 * Workaround that prevents selection of
-									 * multiple projects in the Package
-									 * Explorer.
-									 * 
-									 * See SIM-496
-									 */
-									if (refactoringPipeline.isMultipleProjects()) {
-										WizardMessageDialog.synchronizeWithUIShowMultiprojectMessage();
-									}
-									refactoringPipeline.clearStates();
-									Activator.setRunning(false);
-									return Status.CANCEL_STATUS;
-								} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
-									synchronizeWithUIShowCompilationErrorMessage(containingErrorList,
-											refactoringPipeline, selectedJavaElements, selectedJavaProjekt);
-								} else {
-									synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, selectedJavaElements,
-											selectedJavaProjekt);
-								}
-
-							} catch (RefactoringException e) {
-								logger.error(e.getMessage(), e);
-								WizardMessageDialog.synchronizeWithUIShowInfo(e);
+							}
+							List<ICompilationUnit> containingErrorList = refactoringPipeline
+								.prepareRefactoring(compilationUnits, monitor);
+							if (monitor.isCanceled()) {
+								refactoringPipeline.clearStates();
+								Activator.setRunning(false);
 								return Status.CANCEL_STATUS;
-							} catch (JavaModelException jme) {
-								logger.error(jme.getMessage(), jme);
-								WizardMessageDialog.synchronizeWithUIShowInfo(new RefactoringException(
-										ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-										ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed,
-										jme));
-								return Status.CANCEL_STATUS;
+							} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
+								synchronizeWithUIShowCompilationErrorMessage(containingErrorList,
+										refactoringPipeline, selectedJavaElements);
+							} else {
+								synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, selectedJavaElements);
 							}
 
-							return Status.OK_STATUS;
+						} catch (RefactoringException e) {
+							logger.error(e.getMessage(), e);
+							WizardMessageDialog.synchronizeWithUIShowInfo(e);
+							return Status.CANCEL_STATUS;
+						} catch (JavaModelException jme) {
+							logger.error(jme.getMessage(), jme);
+							WizardMessageDialog.synchronizeWithUIShowInfo(new RefactoringException(
+									ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+									ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed,
+									jme));
+							return Status.CANCEL_STATUS;
 						}
-					};
 
-					job.setUser(true);
-					job.schedule();
+						return Status.OK_STATUS;
+					}
+				};
 
-					return true;
-				}
+				job.setUser(true);
+				job.schedule();
+
+				return true;
 			} else {
 				// SIM-656
 				logger.error(Messages.SelectRulesWizardHandler_selectionNotPossible_ubuntuBug);
@@ -150,16 +147,16 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	 * Method used to open SelectRulesWizard from non UI thread
 	 */
 	private void synchronizeWithUIShowSelectRulesWizard(RefactoringPipeline refactoringPipeline,
-			List<IJavaElement> selectedJavaElements, IJavaProject selectedJavaProjekt) {
+			Map<IJavaProject, List<IJavaElement>> selectedJavaElements) {
 
 		Display.getDefault()
 			.asyncExec(() -> {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				// HandlerUtil.getActiveShell(event)
-				final WizardDialog dialog = new WizardDialog(shell, new SelectRulesWizard(selectedJavaElements,
-						refactoringPipeline, RulesContainer.getRulesForProject(selectedJavaProjekt, false))) {
+				final WizardDialog dialog = new WizardDialog(shell, new SelectRulesWizard(selectedJavaElements.keySet(),
+						refactoringPipeline,
+						RulesContainer.getRulesForProjects(selectedJavaElements.keySet(), false))) {
 					/*
 					 * Removed unnecessary empty space on the bottom of the
 					 * wizard intended for ProgressMonitor that is not used
@@ -220,8 +217,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	 * errors.
 	 */
 	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList,
-			RefactoringPipeline refactoringPipeline, List<IJavaElement> selectedJavaElements,
-			IJavaProject selectedJavaProjekt) {
+			RefactoringPipeline refactoringPipeline, Map<IJavaProject, List<IJavaElement>> selectedJavaElements) {
 		Display.getDefault()
 			.asyncExec(() -> {
 				Shell shell = PlatformUI.getWorkbench()
@@ -233,8 +229,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 				dialog.open();
 				if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
 					if (refactoringPipeline.hasRefactoringStates()) {
-						synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, selectedJavaElements,
-								selectedJavaProjekt);
+						synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, selectedJavaElements);
 					} else {
 						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitDialog();
 					}

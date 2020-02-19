@@ -2,13 +2,13 @@ package eu.jsparrow.ui.wizard.impl;
 
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -63,16 +63,16 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 	private SelectRulesWizardPageModel model;
 
-	private final List<IJavaElement> javaElements;
+	private final Collection<IJavaProject> javaProjects;
 	private final List<RefactoringRule> rules;
 
 	private RefactoringPipeline refactoringPipeline;
 	private StandaloneStatisticsMetadata statisticsMetadata;
 
-	public SelectRulesWizard(List<IJavaElement> javaElements, RefactoringPipeline refactoringPipeline,
+	public SelectRulesWizard(Collection<IJavaProject> javaProjects, RefactoringPipeline refactoringPipeline,
 			List<RefactoringRule> rules) {
 		super();
-		this.javaElements = javaElements;
+		this.javaProjects = javaProjects;
 		this.refactoringPipeline = refactoringPipeline;
 		this.rules = rules;
 		setNeedsProgressMonitor(true);
@@ -109,9 +109,9 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	public boolean performFinish() {
 		String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
 			.getSimpleName(),
-				this.javaElements.get(0)
-					.getJavaProject()
-					.getElementName());
+				this.javaProjects.stream()
+					.map(project -> project.getElementName())
+					.collect(Collectors.joining(";"))); //$NON-NLS-1$
 		logger.info(message);
 
 		final List<RefactoringRule> selectedRules = model.getSelectionAsList();
@@ -164,19 +164,10 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	}
 
 	private StandaloneStatisticsMetadata prepareStatisticsMetadata() {
-		IJavaElement javaElement = javaElements.get(0);
-		String repoName = ""; //$NON-NLS-1$
 
-		IJavaElement parent;
-		while (javaElement != null && !(javaElement instanceof IJavaProject)) {
-			parent = javaElement.getParent();
-			javaElement = parent;
-		}
-
-		if (javaElement != null) {
-			repoName = ((IJavaProject) javaElement).getProject()
-				.getName();
-		}
+		String repoName = this.javaProjects.stream()
+			.map(IJavaProject::getElementName)
+			.collect(Collectors.joining(";")); //$NON-NLS-1$
 
 		return new StandaloneStatisticsMetadata(Instant.now()
 			.getEpochSecond(), "Splendit-Internal-Measurement", repoName); //$NON-NLS-1$
@@ -193,17 +184,18 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 				logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass()
 					.getSimpleName(),
-						javaElements.get(0)
-							.getJavaProject()
-							.getElementName()));
-				logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes, javaElements.get(0)
-					.getJavaProject()
-					.getElementName(), refactoringPipeline.getRulesWithChangesAsString()));
+						javaProjects.stream()
+							.map(IJavaProject::getElementName)
+							.collect(Collectors.joining(";")))); //$NON-NLS-1$
+				logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes, javaProjects.stream()
+					.map(IJavaProject::getElementName)
+					.collect(Collectors.joining(";")), refactoringPipeline.getRulesWithChangesAsString())); //$NON-NLS-1$
 
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline, statisticsMetadata);
+				RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline,
+						statisticsMetadata);
 				final WizardDialog dialog = new WizardDialog(shell, previewWizard) {
 
 					@Override

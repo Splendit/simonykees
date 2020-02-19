@@ -212,6 +212,8 @@ public class Messages extends NLS {
 	public static String LocalVariableTypeInferenceRule_name;
 	public static String LoggerRuleWizard_title;
 	public static String LoggerRuleWizardHandler_info_supportedFrameworkFound;
+	public static String LoggerRuleWizardHandler_loggerRuleOnOneProjectOnly;
+	public static String LoggerRuleWizardHandler_multipleProjectsSelected;
 	public static String LoggerRuleWizardHandler_noLogger;
 	public static String LoggerRuleWizardPage_alwaysAddExceptionParamInLoggerStatement;
 	public static String LoggerRuleWizardPage_alwaysUsePrintStacktraceOptionForLoggingException;
@@ -371,7 +373,9 @@ public class Messages extends NLS {
 	public static String RemoveUnusedParameterRule_name;
 
 	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
+	public static String RenameFieldsRuleWizardHandler_multipleProjectsSelected;
 	public static String RenameFieldsRuleWizardHandler_performFinish_jobName;
+	public static String RenameFieldsRuleWizardHandler_renamingRuleOnOneProjectOnly;
 	public static String RenameFieldsRuleWizardPage_description;
 	public static String RenameFieldsRuleWizardPage_dollarSignReplacementLabelText;
 	public static String RenameFieldsRuleWizardPage_fieldTypeLabelText;
@@ -398,10 +402,12 @@ public class Messages extends NLS {
 	public static String SelectRulesWizardHandler_allready_running;
 	public static String SelectRulesWizardHandler_finishButtonText;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
+	public static String SelectRulesWizardHandler_getting_selected_resources_failed;
 	public static String SelectRulesWizardHandler_noFileWithoutError;
 	public static String SelectRulesWizardHandler_selectionNotPossible_ubuntuBug;
 	public static String SelectRulesWizardPage_addAllButtonLabel;
 	public static String SelectRulesWizardPage_addButtonLabel;
+	public static String SelectRulesWizardHandler_user_getting_selected_resources_failed;
 	public static String SelectRulesWizardPage_CustomProfileLabel;
 	public static String SelectRulesWizardPage_defaultDescriptionText;
 	public static String SelectRulesWizardPage_description;
