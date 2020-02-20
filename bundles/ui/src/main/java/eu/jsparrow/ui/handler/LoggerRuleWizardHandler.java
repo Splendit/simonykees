@@ -179,7 +179,7 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 				}
 			} else {
 				WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
-				logger.error(Messages.SelectRulesWizardHandler_selectionNotPossible_ubuntuBug);
+				logger.error(Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles);
 				Activator.setRunning(false);
 			}
 
