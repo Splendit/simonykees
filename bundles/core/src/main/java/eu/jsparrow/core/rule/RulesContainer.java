@@ -2,6 +2,7 @@ package eu.jsparrow.core.rule;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -213,4 +214,23 @@ public class RulesContainer {
 		return result;
 	}
 
+	public static List<RefactoringRule> getRulesForProjects(Collection<IJavaProject> selectedJavaProjects,
+			boolean isStandalone) {
+		List<RefactoringRule> rules = getAllRules(isStandalone);
+		List<RefactoringRule> result = new LinkedList<>();
+
+		for (RefactoringRule rule : rules) {
+
+			for (IJavaProject javaProject : selectedJavaProjects) {
+				rule.calculateEnabledForProject(javaProject);
+				if (!rule.isEnabled()) {
+					break;
+				}
+			}
+
+			result.add(rule);
+		}
+
+		return result;
+	}
 }
