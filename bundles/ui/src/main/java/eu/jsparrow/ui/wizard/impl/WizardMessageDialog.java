@@ -69,7 +69,7 @@ public class WizardMessageDialog {
 	 * Method used to open MessageDialog informing the user that selection
 	 * contains no Java files without compilation error from non UI thread
 	 */
-	public static void synchronizeWithUIShowWarningNoComlipationUnitDialog() {
+	public static void synchronizeWithUIShowWarningNoComlipationUnitWithoutErrorsDialog() {
 		Display.getDefault()
 			.asyncExec(() -> {
 				Shell shell = PlatformUI.getWorkbench()
@@ -90,6 +90,20 @@ public class WizardMessageDialog {
 					.getShell();
 				SimonykeesMessageDialog.openMessageDialog(shell,
 						Messages.SelectRulesWizardHandler_multipleProjectsWarning, MessageDialog.WARNING);
+
+				Activator.setRunning(false);
+			});
+	}
+
+	public static void synchronizedWithUIShowWarningNoCompilationUnitDialog() {
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				SimonykeesMessageDialog.openMessageDialog(shell,
+						Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles,
+						MessageDialog.WARNING);
 
 				Activator.setRunning(false);
 			});

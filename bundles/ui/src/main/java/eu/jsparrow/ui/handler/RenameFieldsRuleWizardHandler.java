@@ -138,6 +138,7 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 				return true;
 			} else {
 				// SIM-656
+				WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
 				logger.error(Messages.SelectRulesWizardHandler_selectionNotPossible_ubuntuBug);
 				Activator.setRunning(false);
 			}
@@ -208,7 +209,7 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 					if (!errorFreeICus.isEmpty()) {
 						synchronizeWithUIShowRenameFieldsRuleWizard(errorFreeICus);
 					} else {
-						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitDialog();
+						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitWithoutErrorsDialog();
 					}
 				} else {
 

@@ -177,6 +177,10 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 					}
 
 				}
+			} else {
+				WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
+				logger.error(Messages.SelectRulesWizardHandler_selectionNotPossible_ubuntuBug);
+				Activator.setRunning(false);
 			}
 
 		}
@@ -249,7 +253,7 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 						synchronizeWithUIShowLoggerRuleWizard(event, refactoringPipeline, selectedJavaElements,
 								loggerRule, selectedJavaProjekt);
 					} else {
-						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitDialog();
+						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitWithoutErrorsDialog();
 					}
 				} else {
 					Activator.setRunning(false);

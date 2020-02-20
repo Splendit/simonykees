@@ -550,6 +550,7 @@ public class Messages extends NLS {
 	public static String WelcomePage_title;
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
+	public static String WizardMessageDialog_selectionDidNotContainAnyJavaFiles;
 	public static String PutIfAbsentRule_description;
 	public static String PutIfAbsentRule_name;
 	public static String YAMLConfigurationWrapper_configurationFileNotFoundAtPath;

@@ -134,6 +134,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 				return true;
 			} else {
 				// SIM-656
+				WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
 				logger.error(Messages.SelectRulesWizardHandler_selectionNotPossible_ubuntuBug);
 				Activator.setRunning(false);
 			}
@@ -231,7 +232,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 					if (refactoringPipeline.hasRefactoringStates()) {
 						synchronizeWithUIShowSelectRulesWizard(refactoringPipeline, selectedJavaElements);
 					} else {
-						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitDialog();
+						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitWithoutErrorsDialog();
 					}
 				} else {
 					Activator.setRunning(false);
