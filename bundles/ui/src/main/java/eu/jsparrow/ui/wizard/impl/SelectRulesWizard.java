@@ -110,7 +110,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
 			.getSimpleName(),
 				this.javaProjects.stream()
-					.map(project -> project.getElementName())
+					.map(IJavaProject::getElementName)
 					.collect(Collectors.joining(";"))); //$NON-NLS-1$
 		logger.info(message);
 
