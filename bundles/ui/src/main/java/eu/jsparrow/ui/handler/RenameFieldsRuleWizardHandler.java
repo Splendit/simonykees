@@ -223,7 +223,7 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				MessageDialog.openError(shell, Messages.RenameFieldsRuleWizardHandler_multipleProjectsSelected,
+				MessageDialog.openWarning(shell, Messages.RenameFieldsRuleWizardHandler_multipleProjectsSelected,
 						Messages.RenameFieldsRuleWizardHandler_renamingRuleOnOneProjectOnly);
 
 				Activator.setRunning(false);

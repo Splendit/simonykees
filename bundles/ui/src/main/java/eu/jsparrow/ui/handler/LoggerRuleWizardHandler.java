@@ -267,7 +267,7 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				MessageDialog.openError(shell, Messages.LoggerRuleWizardHandler_multipleProjectsSelected,
+				MessageDialog.openWarning(shell, Messages.LoggerRuleWizardHandler_multipleProjectsSelected,
 						Messages.LoggerRuleWizardHandler_loggerRuleOnOneProjectOnly);
 
 				Activator.setRunning(false);
