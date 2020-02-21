@@ -42,7 +42,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  * 
  * This transformation is feasible only if the entire consumer's body is wrapped into an if-statement. 
  * 
- * @since 3.13.0
+ * @since 3.14.0
  *
  */
 public class OptionalFilterASTVisitor extends AbstractOptionalASTVisitor {
