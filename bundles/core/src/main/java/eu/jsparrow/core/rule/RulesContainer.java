@@ -144,14 +144,14 @@ public class RulesContainer {
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new MapGetOrDefaultRule(),
 				new DateDeprecatedRule(), new RemoveDoubleNegationRule(), new OptionalIfPresentRule(),
-				new OptionalMapRule(), new OptionalFilterRule(), new  OptionalIfPresentOrElseRule(), new RemoveNullCheckBeforeInstanceofRule(),
+				new OptionalMapRule(), new OptionalFilterRule(), new OptionalIfPresentOrElseRule(),
+				new RemoveNullCheckBeforeInstanceofRule(),
 				new GuardConditionRule(), new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(),
 				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
 				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
 				new ReorderModifiersRule(), new UseListSortRule(), new CollectionsFactoryMethodsRule(),
 				new UseCollectionsSingletonListRule(), new HideDefaultConstructorInUtilityClassesRule(),
-				new MakeFieldsAndVariablesFinalRule(),
-				new RemoveCollectionsAddAllRule(),
+				new MakeFieldsAndVariablesFinalRule(), new RemoveCollectionsAddAllRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
