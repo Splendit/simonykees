@@ -260,7 +260,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 	private SelectionAdapter getSelectionAdapterForRulesTableViewer(final TableColumn column,
 			final int index, SummaryPageRuleTableViewerComparator comparator) {
-		SelectionAdapter selectionAdapter = new SelectionAdapter() {
+		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				comparator.setColumn(index);
@@ -272,7 +272,6 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 				ruleTableViewer.refresh();
 			}
 		};
-		return selectionAdapter;
 	}
 
 	protected void addFilesSection() {
