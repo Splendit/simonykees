@@ -50,111 +50,114 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  */
 public class RemoveCollectionsAddAllASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private class AddAllAnalysisResult {
-
-		boolean isValid;
-
-		SimpleName addAllExpression;
-
-		Expression addAllArgument;
-
-		ExpressionStatement addAllStatement;
-
-		// VariableDeclarationFragment variableDeclarationFragment;
-
-		// String varName;
-
-		// Expression initializer;
-
-		ClassInstanceCreation instanceCreation;
-
-	}
-
 	private static final String JAVA_UTIL_COLLECTION = java.util.Collection.class.getName();
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 
-		AddAllAnalysisResult analysisResult = analyzeAddAllInvocationStatement(methodInvocation);
-		if (analysisResult.isValid) {
-			applyRule(analysisResult.addAllArgument, analysisResult.addAllStatement, analysisResult.instanceCreation);
+		AddAllAnalysisResult analysisResult = analyzeInvocation(methodInvocation);
+		if (analysisResult == null) {
+			return true;
 		}
+
+		VariableDeclarationStatement variableDeclarationBeforeAddAll = getVariableDeclarationBeforeAddAll(
+				analysisResult.addAllStatement);
+		if(variableDeclarationBeforeAddAll == null) {
+			return true;
+		}
+
+		ClassInstanceCreation instanceCreation = analyzeVariableDeclarationBeforeAddAll(
+				variableDeclarationBeforeAddAll, analysisResult.addAllExpression);
+
+		if (instanceCreation == null) {
+			return true;
+		}
+
+		applyRule(analysisResult.addAllArgument, analysisResult.addAllStatement, instanceCreation);
+
 		return true;
 	}
 
-	private AddAllAnalysisResult analyzeAddAllInvocationStatement(MethodInvocation methodInvocation) {
-
-		AddAllAnalysisResult analysisResult = new AddAllAnalysisResult();
+	private AddAllAnalysisResult analyzeInvocation(MethodInvocation methodInvocation) {
 
 		Expression invocationExpression = methodInvocation.getExpression();
 		if (invocationExpression == null) {
-			return analysisResult;
+			return null;
 		}
 
 		if (invocationExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return analysisResult;
+			return null;
 		}
 
-		analysisResult.addAllExpression = (SimpleName) invocationExpression;
+		SimpleName addAllExpression = (SimpleName) invocationExpression;
 
-		if (!isCollectionVariable(analysisResult.addAllExpression.resolveTypeBinding())) {
-			return analysisResult;
+		if (!isCollectionVariable(addAllExpression.resolveTypeBinding())) {
+			return null;
 		}
 
 		if (!"addAll".equals(methodInvocation.getName() //$NON-NLS-1$
 			.getIdentifier())) {
-			return analysisResult;
+			return null;
 		}
 
 		if (methodInvocation.arguments()
 			.size() != 1) {
-			return analysisResult;
+			return null;
 		}
 
-		analysisResult.addAllArgument = ASTNodeUtil
+		Expression addAllArgument = ASTNodeUtil
 			.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.get(0);
 
-		if (analysisResult.addAllArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-			SimpleName variableArgument = (SimpleName) analysisResult.addAllArgument;
+		if (addAllArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
+			SimpleName variableArgument = (SimpleName) addAllArgument;
 			if (variableArgument.getIdentifier()
-				.equals(analysisResult.addAllExpression.getIdentifier())) {
-				return analysisResult;
+				.equals(addAllExpression.getIdentifier())) {
+				return null;
 			}
 		}
 		
-
 		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return analysisResult;
+			return null;
 		}
+		ExpressionStatement addAllStatement = (ExpressionStatement) methodInvocation.getParent();
+		
+		return new AddAllAnalysisResult(addAllExpression, addAllArgument, addAllStatement);
+	}
 
-		analysisResult.addAllStatement = (ExpressionStatement) methodInvocation.getParent();
-		if (analysisResult.addAllStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return analysisResult;
+	private VariableDeclarationStatement getVariableDeclarationBeforeAddAll(ExpressionStatement addAllStatement) {
+
+		if (addAllStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return null;
 		}
+		Block parentBlock = (Block) addAllStatement.getParent();
 
-		Block addAllStatementParentBlock = (Block) analysisResult.addAllStatement.getParent();
-
-		int indexOfStatementBefore = addAllStatementParentBlock.statements()
-			.indexOf(analysisResult.addAllStatement) - 1;
+		int indexOfStatementBefore = parentBlock.statements()
+			.indexOf(addAllStatement) - 1;
 
 		if (indexOfStatementBefore < 0) {
-			return analysisResult;
+			return null;
 		}
 
 		Statement stmBefore = ASTNodeUtil
-			.convertToTypedList(addAllStatementParentBlock.statements(), Statement.class)
+			.convertToTypedList(parentBlock.statements(), Statement.class)
 			.get(indexOfStatementBefore);
 
 		if (stmBefore.getNodeType() != ASTNode.VARIABLE_DECLARATION_STATEMENT) {
-			return analysisResult;
+			return null;
 		}
 
-		VariableDeclarationStatement variableDeclarationBeforeAddAll = (VariableDeclarationStatement) stmBefore;
+		return (VariableDeclarationStatement) stmBefore;
+
+	}
+
+	private ClassInstanceCreation analyzeVariableDeclarationBeforeAddAll(
+			VariableDeclarationStatement variableDeclarationBeforeAddAll, SimpleName addAllExpression) {
+
 
 		if (variableDeclarationBeforeAddAll.fragments()
 			.size() != 1) {
-			return analysisResult;
+			return null;
 		}
 
 		VariableDeclarationFragment variableDeclarationFragment = ASTNodeUtil
@@ -166,39 +169,41 @@ public class RemoveCollectionsAddAllASTVisitor extends AbstractASTRewriteASTVisi
 			.getName()
 			.getIdentifier();
 
-		if (!analysisResult.addAllExpression.getIdentifier()
+		if (!addAllExpression.getIdentifier()
 			.equals(nameOfVariableDeclaredBeforeAddAll)) {
-			return analysisResult;
+			return null;
 		}
 
 		Expression initializer = variableDeclarationFragment.getInitializer();
 
-		if (initializer == null
-				|| initializer.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
-			return analysisResult;
+		if (initializer == null) {
+			return null;
 		}
 
-		analysisResult.instanceCreation = (ClassInstanceCreation) initializer;
+		if (initializer.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
+			return null;
+		}
 
-		if (!analysisResult.instanceCreation.arguments()
+		ClassInstanceCreation instanceCreation = (ClassInstanceCreation) initializer;
+
+		if (!instanceCreation.arguments()
 			.isEmpty()) {
-			return analysisResult;
+			return null;
 		}
 
-		if (analysisResult.instanceCreation.getAnonymousClassDeclaration() != null) {
-			return analysisResult;
+		if (instanceCreation.getAnonymousClassDeclaration() != null) {
+			return null;
 		}
 
-		IMethodBinding constructorBinding = analysisResult.instanceCreation.resolveConstructorBinding();
+		IMethodBinding constructorBinding = instanceCreation.resolveConstructorBinding();
 		ITypeBinding declaringClass = constructorBinding.getDeclaringClass();
 
 		if (!declaringClass.getQualifiedName()
 			.startsWith("java.util")) { //$NON-NLS-1$
-			return analysisResult;
+			return null;
 		}
 
-		analysisResult.isValid = true;
-		return analysisResult;
+		return instanceCreation;
 	}
 
 	private boolean isCollectionVariable(ITypeBinding typeBinding) {
@@ -229,6 +234,20 @@ public class RemoveCollectionsAddAllASTVisitor extends AbstractASTRewriteASTVisi
 
 		astRewrite.remove(expressionStatement, null);
 		onRewrite();
+	}
+	
+	private class AddAllAnalysisResult {
+
+		SimpleName addAllExpression;
+		Expression addAllArgument;
+		ExpressionStatement addAllStatement;
+		public AddAllAnalysisResult(SimpleName addAllExpression, Expression addAllArgument,
+				ExpressionStatement addAllStatement) {
+			this.addAllExpression = addAllExpression;
+			this.addAllArgument = addAllArgument;
+			this.addAllStatement = addAllStatement;
+		}
+		
 	}
 
 }

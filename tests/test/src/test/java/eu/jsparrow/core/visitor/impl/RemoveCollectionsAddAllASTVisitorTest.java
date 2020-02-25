@@ -10,7 +10,6 @@ import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
 public class RemoveCollectionsAddAllASTVisitorTest extends UsesSimpleJDTUnitFixture {
-	
 
 	private RemoveCollectionsAddAllASTVisitor visitor;
 
@@ -25,13 +24,8 @@ public class RemoveCollectionsAddAllASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(java.util.Arrays.class.getName());
 	}
 
-	/**
-	 * Expected to transform.
-	 * 
-	 * @throws Exception
-	 */
 	@Test
-	public void addAll_SetVariable_HashSetConstructor() throws Exception {
+	public void visit_InvokeAddAllOnSetVariable_shouldTransform() throws Exception {
 		String before = "Set<String> set = new HashSet<>();\n" +
 				"set.addAll(Arrays.asList(\"value1\", \"value2\"));";
 
@@ -44,13 +38,8 @@ public class RemoveCollectionsAddAllASTVisitorTest extends UsesSimpleJDTUnitFixt
 		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
 	}
 
-	/**
-	 * Expected to transform.
-	 * 
-	 * @throws Exception
-	 */
 	@Test
-	public void addAll_ListVariable_ArrayListConstructor() throws Exception {
+	public void visit_InvokeAddAllOnListVariable_shouldTransform() throws Exception {
 		String before = "List<String> list = new ArrayList<>();\n" +
 				"list.addAll(Arrays.asList(\"value1\", \"value2\"));";
 		String afterExpected = "List<String> list = new ArrayList<>(Arrays.asList(\"value1\", \"value2\"));";
@@ -63,7 +52,96 @@ public class RemoveCollectionsAddAllASTVisitorTest extends UsesSimpleJDTUnitFixt
 	}
 
 	@Test
-	public void visit_InvokeAddAll_OnArrayListAsCollection_shouldTransform() throws Exception {
+	public void visit_InvokeAddAllWithoutInvocationExpression_shouldNotTransform() throws Exception {
+
+		String before = "class ArrayListSubclass extends ArrayList {\n" + 
+				"    ArrayListSubclass() {\n" + 
+				"	    addAll(Arrays.asList(\"value1\", \"value2\"));\n" + 
+				"    }\n" + 
+				"}";
+
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+
+	}
+
+	@Test
+	public void visit_InvokeAddAllOnNotInitializedSet_shouldNotTransform() throws Exception {
+		String before = "Set<String> set;\n" +
+				"set.addAll(Arrays.asList(\"value1\", \"value2\"));";
+
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+	}
+
+	@Test
+	public void visit_InvokeAddAllNotInitializedWithConstructor_shouldNotTransform() throws Exception {
+		String before = "Set<String> set0 = new HashSet<>();\n" +
+				"Set<String> set1 = set0;\n" +
+				"set1.addAll(Arrays.asList(\"value1\", \"value2\"));";
+
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+	}
+
+	@Test
+	public void visit_InvokeContainsOnSet_shouldNotTransform() throws Exception {
+		String before = "Set<String> set = new HashSet<>();\n" +
+				"set.contains(\"value1\");";
+
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+	}
+
+	/**
+	 * Expected to transform.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void visit_InvokeAddAll_NotWithinBlock_shouldNotTransform() throws Exception {
+		String before = "Set<String> set = new HashSet<>();\n" +
+				"if(true)set.addAll(Arrays.asList(\"value1\", \"value2\"));";
+
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+	}
+
+	/**
+	 * Expected to transform.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void visit_InvokeAddAll_NotAfterVariableDeclaration_shouldNotTransform() throws Exception {
+		String before = "Set<String> set = new HashSet<>();\n" +
+				"set.contains(\"value1\");" +
+				"set.addAll(Arrays.asList(\"value1\", \"value2\"));";
+
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+	}
+
+	@Test
+	public void visit_InvokeAddAllOnArrayListAsCollection_shouldTransform() throws Exception {
 		String before = "Collection<String> collection = new ArrayList<>();\n" +
 				"collection.addAll(Arrays.asList(\"value1\", \"value2\"));";
 		String afterExpected = "Collection<String> collection = new ArrayList<>(Arrays.asList(\"value1\", \"value2\"));";
@@ -76,7 +154,7 @@ public class RemoveCollectionsAddAllASTVisitorTest extends UsesSimpleJDTUnitFixt
 	}
 
 	@Test
-	public void visit_InvokeAddAll_FirstInSubordinateBlock_shouldNotTransform() throws Exception {
+	public void visit_InvokeAddAllFirstInSubordinateBlock_shouldNotTransform() throws Exception {
 		String before = "Set<String> set = new HashSet<>();\n" +
 				"{\nset.addAll(Arrays.asList(\"value1\", \"value2\"));\n}";
 
@@ -149,7 +227,7 @@ public class RemoveCollectionsAddAllASTVisitorTest extends UsesSimpleJDTUnitFixt
 	}
 
 	@Test
-	public void visit_InvokeAddAll_AddListToItself_shouldNotTransform() throws Exception {
+	public void visit_InvokeAddAllAddingListToItself_shouldNotTransform() throws Exception {
 		String before = "List<String> list = new ArrayList<>();\n" +
 				"list.addAll(list);";
 
@@ -159,7 +237,7 @@ public class RemoveCollectionsAddAllASTVisitorTest extends UsesSimpleJDTUnitFixt
 		Block methodBlock = fixture.getMethodBlock();
 		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
 	}
-	
+
 	@Test
 	public void visit_InvokeAddAllOverload_shouldNotTransform() throws Exception {
 		String before = "ArrayList<String> list = new ArrayList<>();\n" +
@@ -171,7 +249,7 @@ public class RemoveCollectionsAddAllASTVisitorTest extends UsesSimpleJDTUnitFixt
 		Block methodBlock = fixture.getMethodBlock();
 		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
 	}
-	
+
 	@Test
 	public void visit_InvokeAddAllAssignedToBoolean_shouldNotTransform() throws Exception {
 		String before = "ArrayList<String> list = new ArrayList<>();\n" +
@@ -184,11 +262,10 @@ public class RemoveCollectionsAddAllASTVisitorTest extends UsesSimpleJDTUnitFixt
 		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
 	}
 
-
 	@Test
-	public void visit_InvokeAddAll_NoJavaUtilClassConstruction_shouldNotTransform() throws Exception {		
-		String before = "class ArrayListSubclass<T> extends ArrayList<T> {};\n" + 
-				"ArrayListSubclass<String> list = new ArrayListSubclass<>();\n" + 
+	public void visit_InvokeAddAllAfterNoJavaUtilClassConstruction_shouldNotTransform() throws Exception {
+		String before = "class ArrayListSubclass<T> extends ArrayList<T> {};\n" +
+				"ArrayListSubclass<String> list = new ArrayListSubclass<>();\n" +
 				"list.addAll(Arrays.asList(\"value1\", \"value2\"));";
 
 		fixture.addMethodBlock(before);
