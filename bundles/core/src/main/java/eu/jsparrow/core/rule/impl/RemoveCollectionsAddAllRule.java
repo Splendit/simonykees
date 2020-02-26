@@ -13,7 +13,7 @@ import eu.jsparrow.rules.common.Tag;
 
 /**
  * @see RemoveCollectionsAddAllASTVisitor
- * @since 3.14.0
+ * @since 3.15.0
  *
  */
 public class RemoveCollectionsAddAllRule extends RefactoringRuleImpl<RemoveCollectionsAddAllASTVisitor> {

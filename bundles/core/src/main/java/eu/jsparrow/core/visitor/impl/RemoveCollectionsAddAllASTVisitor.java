@@ -48,7 +48,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * 
  *
  * 
- * @since 3.14.0
+ * @since 3.15.0
  */
 public class RemoveCollectionsAddAllASTVisitor extends AbstractASTRewriteASTVisitor {
 
