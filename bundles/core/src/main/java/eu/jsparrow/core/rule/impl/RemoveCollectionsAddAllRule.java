@@ -22,8 +22,7 @@ public class RemoveCollectionsAddAllRule extends RefactoringRuleImpl<RemoveColle
 		this.visitorClass = RemoveCollectionsAddAllASTVisitor.class;
 		this.id = "RemoveCollectionsAddAll"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.RemoveCollectionsAddAllRule_name,
-				Messages.RemoveCollectionsAddAllRule_description,
-				Duration.ofMinutes(2),
+				Messages.RemoveCollectionsAddAllRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_2, Tag.READABILITY));
 
 	}
