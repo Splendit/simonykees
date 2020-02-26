@@ -59,6 +59,7 @@ import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
+import eu.jsparrow.core.rule.impl.RemoveCollectionsAddAllRule;
 import eu.jsparrow.core.rule.impl.RemoveDoubleNegationRule;
 import eu.jsparrow.core.rule.impl.RemoveEmptyStatementRule;
 import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
@@ -144,13 +145,14 @@ public class RulesContainer {
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new MapGetOrDefaultRule(),
 				new DateDeprecatedRule(), new RemoveDoubleNegationRule(), new OptionalIfPresentRule(),
-				new OptionalMapRule(), new OptionalFilterRule(), new  OptionalIfPresentOrElseRule(), new RemoveNullCheckBeforeInstanceofRule(),
-				new GuardConditionRule(), new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(),
-				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
-				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
-				new ReorderModifiersRule(), new UseListSortRule(), new CollectionsFactoryMethodsRule(),
-				new UseCollectionsSingletonListRule(), new HideDefaultConstructorInUtilityClassesRule(),
-				new MakeFieldsAndVariablesFinalRule(),
+				new OptionalMapRule(), new OptionalFilterRule(), new OptionalIfPresentOrElseRule(),
+				new RemoveNullCheckBeforeInstanceofRule(), new GuardConditionRule(), new CollapseIfStatementsRule(),
+				new RemoveExplicitCallToSuperRule(), new RemoveEmptyStatementRule(),
+				new RemoveUnnecessaryThrownExceptionsRule(), new RemoveModifiersInInterfacePropertiesRule(),
+				new RemoveUnusedParameterRule(), new ReorderModifiersRule(), new UseListSortRule(),
+				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
+				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
+				new RemoveCollectionsAddAllRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

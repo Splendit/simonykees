@@ -343,6 +343,8 @@ public class Messages extends NLS {
 	public static String RegistrationFormCheckBox_invalidDataText;
 	public static String RegistrationFormField_invalidDataText;
 	public static String RegistrationFormField_validDataText;
+	public static String RemoveCollectionsAddAllRule_description;
+	public static String RemoveCollectionsAddAllRule_name;
 	public static String RemoveDoubleNegationRule_description;
 	public static String RemoveDoubleNegationRule_name;
 	public static String RemoveDuplicatedThrowsRule_description;
