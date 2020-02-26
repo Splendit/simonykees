@@ -1,9 +1,14 @@
 package eu.jsparrow.core.visitor.impl;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -20,7 +25,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * Example:
  * <p>
  * {@code ((String)"HelloWorld").charAt(0);}<br>
- * is transformed to <br>
+ * is transformed to: <br>
  * {@code "HelloWorld".charAt(0);} <br>
  * 
  * @since 3.14.0
@@ -30,6 +35,40 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 
 	@Override
 	public boolean visit(CastExpression castExpression) {
+		Expression expression = castExpression.getExpression();
+		if(expression.getNodeType() == ASTNode.LAMBDA_EXPRESSION || expression.getNodeType() == ASTNode.EXPRESSION_METHOD_REFERENCE) {
+			StructuralPropertyDescriptor structuralProperty = castExpression.getLocationInParent();
+//			if(structuralProperty != Assignment.RIGHT_HAND_SIDE_PROPERTY && structuralProperty != VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+//				return false;
+//			}
+			
+			if(castExpression.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+				MethodInvocation parent = (MethodInvocation)castExpression.getParent();
+				List<Expression> arguments = ASTNodeUtil.convertToTypedList(parent.arguments(), Expression.class);
+				int castParamIndex = arguments.indexOf(castExpression);
+				//TODO: take care of negative index even though in theory would never happen. 
+				
+				
+				IMethodBinding iMethodBinding = parent.resolveMethodBinding();
+				ITypeBinding[] formalParameterTypes = iMethodBinding.getParameterTypes();
+				if(formalParameterTypes.length < arguments.size()) {
+					/*
+					 * Then the method must contain a varargs parameter e.g. void foo(Foo... args)
+					 * TODO: We should come up with a way to find out the formal parameter type
+					 */
+				} else {
+					ITypeBinding expectedFormalParameter = formalParameterTypes[castParamIndex];
+					if(expectedFormalParameter.getFunctionalInterfaceMethod() == null) {
+						// TODO: return. We can NOT remove the type casting. 
+					}
+					
+				}
+			} 
+			/*
+			 * TODO: do something similar with assignments and variable declaration fragments. 
+			 * TODO: let's not do anything if the parent is not either: assignment, initialization or parameter of a method invocation. 
+			 */
+		}
 		ITypeBinding typeFrom = castExpression.getExpression()
 			.resolveTypeBinding();
 		ITypeBinding typeTo = castExpression.getType()
@@ -70,10 +109,10 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		while (typeCastParent.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
 			typeCastParent = typeCastParent.getParent();
 		}
-		int TypeCastParentNodeType = typeCastParent
+		int typeCastParentNodeType = typeCastParent
 			.getNodeType();
-		if (TypeCastParentNodeType != ASTNode.VARIABLE_DECLARATION_FRAGMENT
-				&& TypeCastParentNodeType != ASTNode.ASSIGNMENT) {
+		if (typeCastParentNodeType != ASTNode.VARIABLE_DECLARATION_FRAGMENT
+				&& typeCastParentNodeType != ASTNode.ASSIGNMENT) {
 			return expressionToBeCasted;
 		}
 
