@@ -2,6 +2,7 @@ package eu.jsparrow.core.rule;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,6 +59,7 @@ import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
+import eu.jsparrow.core.rule.impl.RemoveCollectionsAddAllRule;
 import eu.jsparrow.core.rule.impl.RemoveDoubleNegationRule;
 import eu.jsparrow.core.rule.impl.RemoveEmptyStatementRule;
 import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
@@ -146,13 +148,13 @@ public class RulesContainer {
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new MapGetOrDefaultRule(),
 				new DateDeprecatedRule(), new RemoveDoubleNegationRule(), new OptionalIfPresentRule(),
 				new OptionalMapRule(), new OptionalFilterRule(), new OptionalIfPresentOrElseRule(),
-				new RemoveNullCheckBeforeInstanceofRule(),
-				new GuardConditionRule(), new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(),
-				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
-				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
-				new ReorderModifiersRule(), new UseListSortRule(), new CollectionsFactoryMethodsRule(),
-				new UseCollectionsSingletonListRule(), new HideDefaultConstructorInUtilityClassesRule(),
-				new MakeFieldsAndVariablesFinalRule(),				
+				new RemoveNullCheckBeforeInstanceofRule(), new GuardConditionRule(), new CollapseIfStatementsRule(),
+				new RemoveExplicitCallToSuperRule(), new RemoveEmptyStatementRule(),
+				new RemoveUnnecessaryThrownExceptionsRule(), new RemoveModifiersInInterfacePropertiesRule(),
+				new RemoveUnusedParameterRule(), new ReorderModifiersRule(), new UseListSortRule(),
+				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
+				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
+				new RemoveCollectionsAddAllRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
@@ -216,4 +218,23 @@ public class RulesContainer {
 		return result;
 	}
 
+	public static List<RefactoringRule> getRulesForProjects(Collection<IJavaProject> selectedJavaProjects,
+			boolean isStandalone) {
+		List<RefactoringRule> rules = getAllRules(isStandalone);
+		List<RefactoringRule> result = new LinkedList<>();
+
+		for (RefactoringRule rule : rules) {
+
+			for (IJavaProject javaProject : selectedJavaProjects) {
+				rule.calculateEnabledForProject(javaProject);
+				if (!rule.isEnabled()) {
+					break;
+				}
+			}
+
+			result.add(rule);
+		}
+
+		return result;
+	}
 }

@@ -8,9 +8,6 @@
 				<iterate ifEmpty="false">
 					<and>
 						<adapt type="org.eclipse.core.resources.IResource">
-							<test property="org.eclipse.core.resources.projectNature"
-								value="org.eclipse.jdt.core.javanature">
-							</test>
 						</adapt>
 						<or>
 							<adapt type="org.eclipse.jdt.core.IJavaProject" />
@@ -43,7 +40,7 @@
 			</menu>
 		</menuContribution>
 		<menuContribution
-			locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=org.eclipse.jdt.ui.refactoring.menu">
+			locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?endof=group.edit">
 			<menu icon="icons/jSparrow_active_icon_16.png" label="%menu.label">
 				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler"
 					label="%command.label.select_rules_wizard" style="push" />
@@ -51,11 +48,6 @@
 					label="%command.label.logger_rule_wizard" style="push" />
 				<command commandId="eu.jsparrow.ui.RenameFieldsRuleWizardHandler"
 					label="%command.label.rename_fields_rule_wizard" style="push" />
-				<visibleWhen>
-					<reference definitionId="eu.jsparrow.ui.filter.menuItemFilter">
-					</reference>
-
-				</visibleWhen>
 			</menu>
 		</menuContribution>
 		<menuContribution
