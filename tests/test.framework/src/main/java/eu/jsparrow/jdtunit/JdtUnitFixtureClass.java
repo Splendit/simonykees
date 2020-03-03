@@ -19,7 +19,11 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -27,6 +31,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 import eu.jsparrow.jdtunit.util.CompilationUnitBuilder;
+import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -457,5 +462,44 @@ public class JdtUnitFixtureClass {
 
 	public ICompilationUnit getICompilationUnit() {
 		return compilationUnit;
+	}
+
+	public void addDefaultFixtureMethod() throws JavaModelException, BadLocationException, JdtUnitException {
+		addMethod(DEFAULT_METHOD_FIXTURE_NAME);
+	}
+
+	public void addDefaultMethodGenericTypeParameter(List<String> typeNames) {
+		MethodDeclaration methodDeclaration = methods.get(DEFAULT_METHOD_FIXTURE_NAME);
+		for (String typeName : typeNames) {
+			TypeParameter typeParam = ast.newTypeParameter();
+			typeParam.setName(ast.newSimpleName(typeName));
+			methodDeclaration.typeParameters()
+				.add(typeParam);
+		}
+	}
+
+	public void addDefaultMethodFormalParameter(String simpleTypeName, String name) {
+		MethodDeclaration methodDeclaration = methods.get(DEFAULT_METHOD_FIXTURE_NAME);
+		SingleVariableDeclaration parameterDeclaration = NodeBuilder.newSingleVariableDeclaration(ast,
+				ast.newSimpleName(name), ast.newSimpleType(ast.newSimpleName(simpleTypeName)));
+		methodDeclaration.parameters()
+			.add(parameterDeclaration);
+	}
+
+	public void addDefaultMethodFormalGenericParameters(String type, List<String> typeArguments, String name) {
+		MethodDeclaration methodDeclaration = methods.get(DEFAULT_METHOD_FIXTURE_NAME);
+		ParameterizedType parameterizedType = ast
+			.newParameterizedType(ast.newSimpleType(ast.newSimpleName(type)));
+
+		for (String typeArgumentNane : typeArguments) {
+			Type typeArgument = (ast.newSimpleType(ast.newSimpleName(typeArgumentNane)));
+			parameterizedType.typeArguments()
+				.add(typeArgument);
+		}
+
+		SingleVariableDeclaration parameterDeclaration = NodeBuilder.newSingleVariableDeclaration(ast,
+				ast.newSimpleName(name), parameterizedType);
+		methodDeclaration.parameters()
+			.add(parameterDeclaration);
 	}
 }

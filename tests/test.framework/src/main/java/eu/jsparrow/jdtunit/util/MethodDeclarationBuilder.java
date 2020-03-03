@@ -44,13 +44,14 @@ public class MethodDeclarationBuilder {
 	}
 
 	/**
-	 * Add a {@ MethodDeclaration} of a given name to a
-	 * {@link JdtUnitFixtureClass} and create a {@link MethodDeclarationBuilder}
-	 * to be returned.
+	 * Add a method declaration to the class represented by the first parameter.
 	 * 
 	 * @param fixture
+	 *            a {@link JdtUnitFixtureClass} representing the class in which
+	 *            the method is declared.
 	 * @param methodName
-	 * @return a {@link MethodDeclarationBuilder} w
+	 *            a {@link String} representing the name of the method
+	 * @return a {@link MethodDeclarationBuilder}
 	 * @throws Exception
 	 *             if the method could not be created.
 	 */
@@ -60,12 +61,15 @@ public class MethodDeclarationBuilder {
 	}
 
 	/**
-	 * Add a parameter of the type specified by a String representing the simple
-	 * name of a Java class.
+	 * Add a parameter to the method declaration.
 	 * 
 	 * 
 	 * @param typeName
-	 * @return
+	 *            represents the type of the parameter which has no generic
+	 *            arguments and can also be a primitive type like for example
+	 *            {@code int}.
+	 * @return the {@code this}-reference to the given
+	 *         {@link MethodDeclarationBuilder}
 	 */
 	public MethodDeclarationBuilder withSimpleTypeParameter(String typeName) {
 		AST ast = methodDeclaration.getAST();
@@ -77,10 +81,6 @@ public class MethodDeclarationBuilder {
 		return addParameter(paramType);
 	}
 
-	/**
-	 * Add a parameter of the type specified by a String representing the simple
-	 * name of a Java class.
-	 */
 	@SuppressWarnings("unchecked")
 	private MethodDeclarationBuilder addParameter(Type paramType) {
 		AST ast = methodDeclaration.getAST();
@@ -95,9 +95,18 @@ public class MethodDeclarationBuilder {
 	}
 
 	/**
-	 * Add a parameter of a parametrized type. Both the argument for the type
-	 * name and the arguments for the type arguments are expected to represent
-	 * simple Java class names.
+	 * Add a parameter to the method declaration.
+	 * 
+	 * @param typeName
+	 *            represents the type of the parameter which can have generic
+	 *            arguments and is expected to be the simple name of a Java
+	 *            type.
+	 * @param typeArgumentIdentifiers
+	 *            represents the list of type arguments of the parameter type
+	 *            which are all expected to represent simple names of Java
+	 *            classes.
+	 * @return the {@code this}-reference to the given
+	 *         {@link MethodDeclarationBuilder}
 	 */
 	@SuppressWarnings("unchecked")
 	public MethodDeclarationBuilder withParameterizedTypeParameter(String typeName,
@@ -118,6 +127,9 @@ public class MethodDeclarationBuilder {
 
 	/**
 	 * Specifies that the last parameter will be a vararg parameter.
+	 * 
+	 * @return the {@code this}-reference to the given
+	 *         {@link MethodDeclarationBuilder}
 	 */
 	public MethodDeclarationBuilder withVarArgs() {
 		List<SingleVariableDeclaration> parameters = ASTNodeUtil.convertToTypedList(methodDeclaration.parameters(),

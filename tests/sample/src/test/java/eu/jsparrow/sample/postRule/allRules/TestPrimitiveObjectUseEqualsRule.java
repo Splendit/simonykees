@@ -155,7 +155,7 @@ public class TestPrimitiveObjectUseEqualsRule {
 		}
 		if (d.equals((Integer) c)) {
 		}
-		if (c == (Integer) d) {
+		if (c == d) {
 		}
 	}
 }

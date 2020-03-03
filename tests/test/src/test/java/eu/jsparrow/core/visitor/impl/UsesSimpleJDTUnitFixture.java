@@ -1,7 +1,6 @@
 package eu.jsparrow.core.visitor.impl;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,11 +21,8 @@ public abstract class UsesSimpleJDTUnitFixture {
 
 	private static final String CLASS_FIXTURE_NAME = "FixtureClass"; //$NON-NLS-1$
 
-	private static final String METHOD_FIXTURE_NAME = "FixtureMethod"; //$NON-NLS-1$
-
 	protected static JdtUnitFixtureProject fixtureProject;
 	protected static JdtUnitFixtureClass fixture;
-	protected static MethodDeclaration fixtureMethod;
 
 	@BeforeAll
 	public static void setUpClass() throws Exception {
@@ -34,7 +30,7 @@ public abstract class UsesSimpleJDTUnitFixture {
 		fixtureProject.setUp();
 
 		fixture = fixtureProject.addCompilationUnit(CLASS_FIXTURE_NAME);
-		fixture.addMethod(METHOD_FIXTURE_NAME);
+		fixture.addDefaultFixtureMethod();
 	}
 
 	@AfterAll

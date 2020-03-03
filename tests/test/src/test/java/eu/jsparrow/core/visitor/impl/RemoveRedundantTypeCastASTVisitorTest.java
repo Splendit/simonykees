@@ -2,7 +2,9 @@ package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -156,7 +158,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 	@Test
 	public void visit_CastStringLiteralToCharSequence_shouldNotTransform() throws Exception {
 		String before = "((CharSequence)\"xyz\").length();";
-		
+
 		fixture.addMethodBlock(before);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
@@ -193,7 +195,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 				"((List<String>)l).add(\"value1\");";
 		String after = "List<String> l = new ArrayList<>();\n" +
 				"l.add(\"value1\");";
-		
+
 		fixture.addImport(List.class.getName());
 		fixture.addImport(ArrayList.class.getName());
 		fixture.addMethodBlock(before);
@@ -206,7 +208,42 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 	@Test
 	public void visit_CastListOfJokerTypeToListOfJokerType_shouldNotTransform() throws Exception {
 		String before = "List<?> l = new ArrayList<>();" +
-				"((List<?>)l).size();";
+				"((List<?>) l).size();";
+
+		fixture.addImport(List.class.getName());
+		fixture.addImport(ArrayList.class.getName());
+
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+	}
+
+	@Test
+	public void visit_CastListParametrizedByTypeVariable_QuestionIfShouldTransform() throws Exception {
+
+		String before = "((List<T>) pList).size();";
+		String after = "pList.size();";
+
+		fixture.addImport(List.class.getName());
+		fixture.addImport(ArrayList.class.getName());
+
+		fixture.addDefaultMethodGenericTypeParameter(Collections.singletonList("T"));
+		fixture.addDefaultMethodFormalGenericParameters("List", Collections.singletonList("T"), "pList");
+		fixture.addMethodBlock(before);
+		
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+	}
+
+	@Test
+	public void visit_CastListOfListOfJokerTypeToListOfJokerType_shouldNotTransform() throws Exception {
+		String before = "List<List<?>> l = new ArrayList<>();" +
+				"((List<List<?>>) l).size();";
 
 		fixture.addImport(List.class.getName());
 		fixture.addImport(ArrayList.class.getName());
@@ -480,17 +517,65 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
 	}
-	
+
 	@Test
 	public void visit_lambdaAsMethodInvocationExpression_shouldNotTransform() throws Exception {
-		String before = ""+ 
-				"		Runnable r = () -> {};\n" + 
+		String before = "" +
+				"		Runnable r = () -> {};\n" +
 				"		((Runnable)() -> {}).run();";
+
 		fixture.addMethodBlock(before);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
+
 		Block methodBlock = fixture.getMethodBlock();
 		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
 	}
 
+	@Test
+	public void visit_MethodReference_shouldNotTransform() throws Exception {
+		String before = "Supplier<String> supplier = (Supplier<String> )i::toString;";
+
+		fixture.addImport(List.class.getName());
+		fixture.addImport(ArrayList.class.getName());
+		fixture.addImport(Supplier.class.getName());
+
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+	}
+
+	@Test
+	public void visit_DuplicateCastToLong_shouldTransform() throws Exception {
+		String before = "long l = (long)(long) 1;";
+		String after = "long l = (long) 1;";
+
+		fixture.addImport(Serializable.class.getName());
+
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+
+	}
+
+	@Test
+	public void visit_TypeIntersection_shouldNotTransform() throws Exception {
+		String before = "Object o = (Object & Serializable)(Object & Serializable) Integer.valueOf(1);";
+
+		fixture.addImport(Serializable.class.getName());
+
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+	}
+	
 }

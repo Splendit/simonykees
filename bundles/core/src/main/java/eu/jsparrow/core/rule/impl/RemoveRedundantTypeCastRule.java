@@ -14,7 +14,7 @@ import eu.jsparrow.rules.common.Tag;
 /**
  * @see RemoveRedundantTypeCastASTVisitor
  * 
- * @since 3.14.0
+ * @since 3.15.0
  *
  */
 public class RemoveRedundantTypeCastRule extends RefactoringRuleImpl<RemoveRedundantTypeCastASTVisitor> {
@@ -25,7 +25,7 @@ public class RemoveRedundantTypeCastRule extends RefactoringRuleImpl<RemoveRedun
 		this.ruleDescription = new RuleDescription(Messages.RemoveRedundantTypeCastRule_name,
 				Messages.RemoveRedundantTypeCastRule_description,
 				Duration.ofMinutes(1),
-				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.PERFORMANCE));
+				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY));
 	}
 
 	@Override

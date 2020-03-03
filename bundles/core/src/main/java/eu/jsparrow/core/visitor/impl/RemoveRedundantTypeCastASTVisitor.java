@@ -30,7 +30,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * is transformed to: <br>
  * {@code "HelloWorld".charAt(0);} <br>
  * 
- * @since 3.14.0
+ * @since 3.15.0
  *
  */
 public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisitor {
@@ -48,10 +48,37 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		ITypeBinding typeTo = castExpression.getType()
 			.resolveBinding();
 
+		if (typeTo.isIntersectionType()) {
+			return true;
+		}
+		
+		if(containsWildCardTypeArgument(typeTo)) {
+			return true;
+		}		
+
 		if (ClassRelationUtil.compareITypeBinding(typeFrom, typeTo)) {
 			applyRule(castExpression);
 		}
 		return true;
+	}
+	
+	private boolean containsWildCardTypeArgument(ITypeBinding typeBinding) {
+		ITypeBinding[] typeArguments = typeBinding.getTypeArguments();		
+		if(typeArguments == null) {
+			return false;
+		}
+		if(typeArguments.length == 0) {
+			return false;
+		}
+		for(ITypeBinding typeArgument : typeArguments) {
+			if(typeArgument.isWildcardType()) {
+				return true;
+			}
+			if(containsWildCardTypeArgument(typeArgument)) {
+				return true;
+			}
+		}
+		return false;		
 	}
 
 	private boolean isRedundantLambdaTypeCast(CastExpression castExpression) {
@@ -83,7 +110,7 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		ITypeBinding[] formalParameterTypes = iMethodBinding.getParameterTypes();
 
 		int lastParameterIndex = formalParameterTypes.length - 1;
-		if (iMethodBinding.isVarargs() && castParamIndex >= lastParameterIndex) {			
+		if (iMethodBinding.isVarargs() && castParamIndex >= lastParameterIndex) {
 			ITypeBinding lastFormalParamType = formalParameterTypes[lastParameterIndex];
 			boolean isArray = lastFormalParamType.isArray();
 			if (!isArray) {
@@ -106,7 +133,7 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 
 	}
 
-	private static ASTNode getASTNodeToBeReplaced(CastExpression typeCast) {
+	private ASTNode getASTNodeToBeReplaced(CastExpression typeCast) {
 		ASTNode nodeToBeReplaced = typeCast;
 		while (nodeToBeReplaced.getParent()
 			.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
@@ -115,7 +142,7 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		return nodeToBeReplaced;
 	}
 
-	private static ASTNode getASTNodeReplacement(CastExpression typeCast) {
+	private ASTNode getASTNodeReplacement(CastExpression typeCast) {
 		Expression expressionToBeCasted = typeCast.getExpression();
 		int typeCastArgumentNodeType = expressionToBeCasted.getNodeType();
 		if (typeCastArgumentNodeType != ASTNode.PARENTHESIZED_EXPRESSION) {
