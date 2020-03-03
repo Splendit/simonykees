@@ -49,7 +49,7 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(loopCondition);
 
 		if (iteratorName != null && ClassRelationUtil.isContentOfTypes(iteratorName.resolveTypeBinding(),
-				generateFullyQualifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
+				generateFullyQualifiedNameList(ITERATOR_FULLY_QUALIFIED_NAME))) {
 			handleLoopWithIterator(node, iteratorName);
 		} else if (ASTNode.INFIX_EXPRESSION == loopCondition.getNodeType()) {
 			handleInfixExpression(node, loopCondition);
@@ -66,7 +66,7 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 
 		// if the expression operator is '<' and lhs is a simple name...
 		if (InfixExpression.Operator.LESS.equals(infixExpression.getOperator())
-				&& Expression.SIMPLE_NAME == lhs.getNodeType()) {
+				&& ASTNode.SIMPLE_NAME == lhs.getNodeType()) {
 			SimpleName index = (SimpleName) lhs;
 
 			if (ASTNode.METHOD_INVOCATION == rhs.getNodeType()) {

@@ -20,7 +20,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
- * For loops with an iterator can be replaced with a forEach loop since 1.7
+ * For loops with an iterator can be replaced with a forEach loop since 1.5
  * 
  * @author Martin Huter, Ardit Ymeri
  * @since 0.9.2
@@ -52,7 +52,7 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 				return true;
 			}
 			if (ClassRelationUtil.isContentOfTypes(iteratorName.resolveTypeBinding(),
-					generateFullyQualifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
+					generateFullyQualifiedNameList(ITERATOR_FULLY_QUALIFIED_NAME))) {
 				handleLoopWithIterator(node, iteratorName);
 			}
 
@@ -64,7 +64,7 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 
 			// if the expression operator is '<' and lhs is a simple name...
 			if (InfixExpression.Operator.LESS.equals(infixExpression.getOperator())
-					&& Expression.SIMPLE_NAME == lhs.getNodeType()) {
+					&& ASTNode.SIMPLE_NAME == lhs.getNodeType()) {
 				SimpleName index = (SimpleName) lhs;
 
 				if (ASTNode.METHOD_INVOCATION == rhs.getNodeType()) {

@@ -55,7 +55,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  */
 public abstract class LoopToForEachASTVisitor<T extends Statement> extends AbstractAddImportASTVisitor {
 
-	protected static final String ITERATOR_FULLY_QUALLIFIED_NAME = java.util.Iterator.class.getName();
+	protected static final String ITERATOR_FULLY_QUALIFIED_NAME = java.util.Iterator.class.getName();
 	protected static final String ITERABLE_FULLY_QUALIFIED_NAME = java.lang.Iterable.class.getName();
 	protected static final String SIZE = "size"; //$NON-NLS-1$
 	protected static final String LENGTH = "length"; //$NON-NLS-1$
@@ -439,7 +439,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		return node.getStartPosition() + KEY_SEPARATOR + node.getLength();
 	}
 
-	protected void clearTempItroducedNames(Statement node) {
+	protected void clearTempIntroducedNames(Statement node) {
 		this.tempIntroducedNames.remove(generateTempIteratorKey(node));
 
 	}
@@ -507,7 +507,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			IteratingIndexVisitorFactory<T> factory) {
 
 		Expression conditionExpression = condition.getExpression();
-		if (conditionExpression != null && Expression.SIMPLE_NAME == conditionExpression.getNodeType()) {
+		if (conditionExpression != null && ASTNode.SIMPLE_NAME == conditionExpression.getNodeType()) {
 			SimpleName iterableNode = (SimpleName) conditionExpression;
 			ITypeBinding iterableTypeBinding = iterableNode.resolveTypeBinding();
 
@@ -618,6 +618,6 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			}
 		}
 
-		clearTempItroducedNames(loop);
+		clearTempIntroducedNames(loop);
 	}
 }
