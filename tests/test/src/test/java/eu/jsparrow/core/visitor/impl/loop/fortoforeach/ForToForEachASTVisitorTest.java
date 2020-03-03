@@ -2,6 +2,9 @@ package eu.jsparrow.core.visitor.impl.loop.fortoforeach;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -96,6 +99,26 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		fixture.accept(visitor);
 		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_updatingCollectionInsideLoop_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		List<String> list = new ArrayList<>();\n" + 
+				"		list.add(\"value\");\n" + 
+				"		for(int i = 0; i<list.size(); i++) {\n" + 
+				"			String value = list.get(i);\n" + 
+				"			if(list.size() < 5 && value.contains(\"0\")) {\n" + 
+				"				list.add(\"0\");\n" + 
+				"			}\n" + 
+				"		}";
+		fixture.addImport(java.util.List.class.getName());
+		fixture.addImport(java.util.ArrayList.class.getName());
+		fixture.addMethodBlock(original);
+		
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 
 }

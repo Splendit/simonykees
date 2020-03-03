@@ -530,6 +530,12 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 				LoopIteratingIndexASTVisitor indexVisitor = createIteratingIndexVisitor(index, iterableNode, loop,
 						outerBlock, factory);
 				outerBlock.accept(indexVisitor);
+				
+				IterableNodeVisitor iterableAnalyser = new IterableNodeVisitor(iterableNode);
+				body.accept(iterableAnalyser);
+				if(iterableAnalyser.isUpdated()) {
+					return;
+				}
 
 				if (indexVisitor.checkTransformPrecondition()) {
 					Type iteratorType = findIteratorType(loop, iterableTypeBinding);
