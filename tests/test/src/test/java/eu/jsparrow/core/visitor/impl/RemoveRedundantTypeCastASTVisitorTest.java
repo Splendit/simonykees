@@ -1,40 +1,30 @@
 package eu.jsparrow.core.visitor.impl;
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 import eu.jsparrow.jdtunit.util.MethodDeclarationBuilder;
 
 @SuppressWarnings("nls")
 public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
-	private RemoveRedundantTypeCastASTVisitor visitor;
-
-	@BeforeEach
-	public void setUp() {
-		visitor = new RemoveRedundantTypeCastASTVisitor();
-	}
+	 @BeforeEach
+	 public void setupTest() {
+		 this.visitor = new RemoveRedundantTypeCastASTVisitor();
+	 }
 
 	@Test
 	public void visit_CastStringLiteralToString_shouldTransform() throws Exception {
 		String before = "((String)\"HelloWorld\").charAt(0);";
 		String afterExpected = "\"HelloWorld\".charAt(0);";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+		assertChange(before, afterExpected);
 	}
 
 	@Test
@@ -44,11 +34,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		String afterExpected = "String helloWorld = \"HelloWorld\";\n" +
 				"helloWorld.charAt(0);";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+		assertChange(before, afterExpected);
 	}
 
 	@Test
@@ -56,11 +42,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		String before = "((String)\"HelloWorld\".substring(0)).charAt(0);";
 		String afterExpected = "\"HelloWorld\".substring(0).charAt(0);";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+		assertChange(before, afterExpected);
 	}
 
 	@Test
@@ -70,11 +52,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		String afterExpected = "int i = 2;\n" +
 				"int j = 2 * i;";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+		assertChange(before, afterExpected);
 	}
 
 	@Test
@@ -84,11 +62,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		String afterExpected = "int i = 1;\n" +
 				"int j = ++i;";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+		assertChange(before, afterExpected);
 	}
 
 	@Test
@@ -98,11 +72,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		String afterExpected = "int i = 1;\n" +
 				"int j = (i + 2);";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+		assertChange(before, afterExpected);
 	}
 
 	@Test
@@ -110,11 +80,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		String before = "long x = (long)1L;";
 		String afterExpected = "long x = 1L;";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+		assertChange(before, afterExpected);
 	}
 
 	@Test
@@ -122,11 +88,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		String before = "long x = (long)(1 + 100L);";
 		String afterExpected = "long x = 1 + 100L;";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+		assertChange(before, afterExpected);
 	}
 
 	@Test
@@ -134,11 +96,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		String before = "long x = ((((long)((long)((100 + 200L)) + 300))));";
 		String afterExpected = "long x = ((100 + 200L)) + 300;";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+		assertChange(before, afterExpected);
 	}
 
 	@Test
@@ -148,22 +106,14 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		String afterExpected = "long x = 100L;\n" +
 				"x = x += 200L;";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+		assertChange(before, afterExpected);
 	}
 
 	@Test
 	public void visit_CastStringLiteralToCharSequence_shouldNotTransform() throws Exception {
 		String before = "((CharSequence)\"xyz\").length();";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 	}
 
 	@Test
@@ -171,22 +121,14 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		String before = "CharSequence sequence = \"HelloWorld!\";\n" +
 				"((String)sequence).contains(\"World\");";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 	}
 
 	@Test
 	public void visit_CastIntLiteralToLong_shouldNotTransform() throws Exception {
 		String before = "long x = (long)1;";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 	}
 
 	@Test
@@ -198,11 +140,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		fixture.addImport(List.class.getName());
 		fixture.addImport(ArrayList.class.getName());
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+		assertChange(before, after);
 	}
 
 	@Test
@@ -213,11 +151,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(List.class.getName());
 		fixture.addImport(ArrayList.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 	}
 
 	@Test
@@ -231,13 +165,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		fixture.addDefaultMethodGenericTypeParameter(Collections.singletonList("T"));
 		fixture.addDefaultMethodFormalGenericParameters("List", Collections.singletonList("T"), "pList");
-		fixture.addMethodBlock(before);
-		
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+		assertChange(before, after);
 	}
 
 	@Test
@@ -247,11 +175,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		fixture.addImport(List.class.getName());
 		fixture.addImport(ArrayList.class.getName());
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 	}
 
 	@Test
@@ -263,11 +187,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		fixture.addImport(List.class.getName());
 		fixture.addImport(ArrayList.class.getName());
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+		assertChange(before, after);
 	}
 
 	@Test
@@ -277,11 +197,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		fixture.addImport(List.class.getName());
 		fixture.addImport(ArrayList.class.getName());
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 	}
 
 	@Test
@@ -293,11 +209,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		fixture.addImport(List.class.getName());
 		fixture.addImport(ArrayList.class.getName());
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+		assertChange(before, after);
 	}
 
 	@Test
@@ -307,11 +219,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		fixture.addImport(List.class.getName());
 		fixture.addImport(ArrayList.class.getName());
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 	}
 
 	@Test
@@ -321,11 +229,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		fixture.addImport(List.class.getName());
 		fixture.addImport(ArrayList.class.getName());
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 	}
 
 	@Test
@@ -336,11 +240,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(List.class.getName());
 		fixture.addImport(ArrayList.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 
 	}
 
@@ -356,12 +256,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(ArrayList.class.getName());
 		fixture.addImport(Supplier.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+		assertChange(before, after);
 	}
 
 	@Test
@@ -373,12 +268,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(ArrayList.class.getName());
 		fixture.addImport(Supplier.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+		assertChange(before, after);
 	}
 
 	@Test
@@ -392,12 +282,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(ArrayList.class.getName());
 		fixture.addImport(Supplier.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+		assertChange(before, after);
 	}
 
 	@Test
@@ -411,12 +296,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(ArrayList.class.getName());
 		fixture.addImport(Supplier.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 	}
 
 	@Test
@@ -427,12 +307,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(ArrayList.class.getName());
 		fixture.addImport(Supplier.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 
 	}
 
@@ -445,12 +320,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(ArrayList.class.getName());
 		fixture.addImport(Supplier.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 
 	}
 
@@ -467,12 +337,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(ArrayList.class.getName());
 		fixture.addImport(Supplier.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+		assertChange(before, after);
 	}
 
 	@Test
@@ -488,12 +353,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(ArrayList.class.getName());
 		fixture.addImport(Supplier.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+		assertChange(before, after);
 	}
 
 	@Test
@@ -510,12 +370,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(ArrayList.class.getName());
 		fixture.addImport(Supplier.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block methodBlock = fixture.getMethodBlock();
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+		assertChange(before, after);
 	}
 
 	@Test
@@ -524,12 +379,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 				"		Runnable r = () -> {};\n" +
 				"		((Runnable)() -> {}).run();";
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 	}
 
 	@Test
@@ -540,12 +390,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(ArrayList.class.getName());
 		fixture.addImport(Supplier.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 	}
 
 	@Test
@@ -555,12 +400,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		fixture.addImport(Serializable.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(after), methodBlock);
+		assertChange(before, after);
 
 	}
 
@@ -570,12 +410,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		fixture.addImport(Serializable.class.getName());
 
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertNoChange(before);
 	}
 	
 }
