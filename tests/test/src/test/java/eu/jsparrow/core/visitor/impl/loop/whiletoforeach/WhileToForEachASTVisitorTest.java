@@ -22,7 +22,6 @@ public class WhileToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		visitor = new WhileToForEachASTVisitor();
 	}
 	
-	
 	@Test
 	public void visit_whileLoopUpdatingIterator_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -43,6 +42,27 @@ public class WhileToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_reassigningIterator_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		List<String> list = new ArrayList<>();\n" + 
+				"		int i = 0;\n" + 
+				"		while(i < list.size()) {\n" + 
+				"			String value = list.get(i);\n" + 
+				"			if(value.contains(\"0\")) {\n" + 
+				"				list = new ArrayList<>();\n" + 
+				"			}\n" + 
+				"			System.out.println(value);\n" + 
+				"			i++;\n" + 
+				"		}";
+		fixture.addImport(java.util.List.class.getName());
+		fixture.addImport(java.util.ArrayList.class.getName());
+		fixture.addMethodBlock(original);
 		
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 }

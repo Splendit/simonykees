@@ -1,8 +1,11 @@
 package eu.jsparrow.core.visitor.loop;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 /**
  * A visitor for checking whether the values in a collection are (potentially)
@@ -27,10 +30,17 @@ public class IterableNodeVisitor extends ASTVisitor {
 		if (!identifier.equals(iterableNode.getIdentifier())) {
 			return true;
 		}
-		if (simpleName.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+
+		StructuralPropertyDescriptor propertyDescriptor = simpleName.getLocationInParent();
+		if (propertyDescriptor == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			updated = true;
 		}
-		if (simpleName.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {
+
+		if (propertyDescriptor == MethodInvocation.ARGUMENTS_PROPERTY
+				|| propertyDescriptor == ClassInstanceCreation.ARGUMENTS_PROPERTY) {
+			updated = true;
+		}
+		if (propertyDescriptor == MethodInvocation.EXPRESSION_PROPERTY) {
 			MethodInvocation methodInvocation = (MethodInvocation) simpleName.getParent();
 			if (isUpdateCollectionInvocation(methodInvocation)) {
 				updated = true;
@@ -48,8 +58,9 @@ public class IterableNodeVisitor extends ASTVisitor {
 	/**
 	 * @return if the collection is potentially updated. Reasons may include:
 	 *         <ul>
-	 *         <li>Methods starting with {@code add|clear|remove|replace|retain|set|sort} are
-	 *         invoked in the collection</li>
+	 *         <li>Methods starting with
+	 *         {@code add|clear|remove|replace|retain|set|sort} are invoked in
+	 *         the collection</li>
 	 *         <li>The collection is used as a parameter in another method
 	 *         invocation.
 	 *         </ul>

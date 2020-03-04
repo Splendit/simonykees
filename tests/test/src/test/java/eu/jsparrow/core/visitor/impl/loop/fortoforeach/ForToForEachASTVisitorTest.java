@@ -2,9 +2,6 @@ package eu.jsparrow.core.visitor.impl.loop.fortoforeach;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -118,6 +115,86 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_reassigningCollection_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"		List<String> list = new ArrayList<>();\n" + 
+				"		list.add(\"value\");\n" + 
+				"		for(int i = 0; i<list.size(); i++) {\n" + 
+				"			String value = list.get(i);\n" + 
+				"			if(list.size() < 5 && value.contains(\"0\")) {\n" + 
+				"				list = new ArrayList<>();\n" + 
+				"			}\n" + 
+				"		}";
+		fixture.addImport(java.util.List.class.getName());
+		fixture.addImport(java.util.ArrayList.class.getName());
+		fixture.addMethodBlock(original);
+		
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_passingCollectionAsParameter_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"		List<String> list = new ArrayList<>();\n" + 
+				"		for (int i =0; i<list.size(); i++) {\n" + 
+				"			String value = list.get(i);\n" + 
+				"			if(value.contains(\"0\")) {\n" + 
+				"				List<String> newList = new ArrayList<>();\n" + 
+				"				newList.addAll(list);\n" + 
+				"			}\n" + 
+				"		}";
+		fixture.addImport(java.util.List.class.getName());
+		fixture.addImport(java.util.ArrayList.class.getName());
+		fixture.addMethodBlock(original);
+		
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_passingCollectionAsConstructorParameter_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"		List<String> list = new ArrayList<>();\n" + 
+				"		for (int i =0; i<list.size(); i++) {\n" + 
+				"			String value = list.get(i);\n" + 
+				"			if(value.contains(\"0\")) {\n" + 
+				"				List<String> newList = new ArrayList<>(list);\n" + 
+				"			}\n" + 
+				"		}";
+		fixture.addImport(java.util.List.class.getName());
+		fixture.addImport(java.util.ArrayList.class.getName());
+		fixture.addMethodBlock(original);
+		
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_reassigningArrays_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		String[] list = new String[10];\n" + 
+				"		for (int i =0; i<list.length; i++) {\n" + 
+				"			String value = list[i];\n" + 
+				"			if(value.contains(\"1\")) {\n" + 
+				"				list = new String[3];\n" + 
+				"			}\n" + 
+				"		}";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
 		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
 
