@@ -9,7 +9,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 
 import eu.jsparrow.jdtunit.JdtUnitException;
 import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
@@ -65,10 +64,10 @@ public abstract class UsesSimpleJDTUnitFixture {
 
 	protected void assertChange(String before, String afterExpected)
 			throws JavaModelException, BadLocationException, JdtUnitException {
-				fixture.addMethodBlock(before);
-				visitor.setASTRewrite(fixture.getAstRewrite());
-				fixture.accept(visitor);
-				Block methodBlock = fixture.getMethodBlock();
-				assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
-			}
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+	}
 }

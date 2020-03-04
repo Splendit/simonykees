@@ -155,7 +155,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 	}
 
 	@Test
-	public void visit_CastListParametrizedByTypeVariable_QuestionIfShouldTransform() throws Exception {
+	public void visit_CastListParameterizedByTypeVariable_shouldTransform() throws Exception {
 
 		String before = "((List<T>) pList).size();";
 		String after = "pList.size();";
@@ -191,7 +191,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 	}
 
 	@Test
-	public void visit_CastRawtypeListToListOfString_shouldNotTransform() throws Exception {
+	public void visit_CastRawTypeListToListOfString_shouldNotTransform() throws Exception {
 		String before = "List l = new ArrayList<>();\n" +
 				"((List<String>)l).add(\"value1\");";
 

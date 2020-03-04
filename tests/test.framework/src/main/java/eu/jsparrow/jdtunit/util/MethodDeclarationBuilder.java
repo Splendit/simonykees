@@ -55,8 +55,7 @@ public class MethodDeclarationBuilder {
 	 * @throws Exception
 	 *             if the method could not be created.
 	 */
-	public static MethodDeclarationBuilder factory(JdtUnitFixtureClass fixture, String methodName)
-			throws Exception {
+	public static MethodDeclarationBuilder factory(JdtUnitFixtureClass fixture, String methodName) throws Exception {
 		return new MethodDeclarationBuilder(fixture, methodName);
 	}
 
@@ -109,8 +108,7 @@ public class MethodDeclarationBuilder {
 	 *         {@link MethodDeclarationBuilder}
 	 */
 	@SuppressWarnings("unchecked")
-	public MethodDeclarationBuilder withParameterizedTypeParameter(String typeName,
-			String... typeArgumentIdentifiers) {
+	public MethodDeclarationBuilder withParameterizedTypeParameter(String typeName, String... typeArgumentIdentifiers) {
 		if (typeArgumentIdentifiers.length == 0) {
 			return withSimpleTypeParameter(typeName);
 		}
