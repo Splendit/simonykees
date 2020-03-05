@@ -66,6 +66,7 @@ import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
 import eu.jsparrow.core.rule.impl.RemoveModifiersInInterfacePropertiesRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.rule.impl.RemoveNullCheckBeforeInstanceofRule;
+import eu.jsparrow.core.rule.impl.RemoveRedundantTypeCastRule;
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
@@ -152,7 +153,7 @@ public class RulesContainer {
 				new RemoveUnusedParameterRule(), new ReorderModifiersRule(), new UseListSortRule(),
 				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
 				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
-				new RemoveCollectionsAddAllRule(),
+				new RemoveCollectionsAddAllRule(), new RemoveRedundantTypeCastRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
