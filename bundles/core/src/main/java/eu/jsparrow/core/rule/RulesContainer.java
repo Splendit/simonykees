@@ -140,7 +140,6 @@ public class RulesContainer {
 				/*
 				 * Coding conventions
 				 */
-				new RemoveRedundantTypeCastRule(),
 				new TryWithResourceRule(), new MultiCatchRule(), new FunctionalInterfaceRule(),
 				new CollectionRemoveAllRule(), new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
 				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
@@ -154,7 +153,7 @@ public class RulesContainer {
 				new RemoveUnusedParameterRule(), new ReorderModifiersRule(), new UseListSortRule(),
 				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
 				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
-				new RemoveCollectionsAddAllRule(),
+				new RemoveCollectionsAddAllRule(), new RemoveRedundantTypeCastRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
