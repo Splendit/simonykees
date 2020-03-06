@@ -486,7 +486,8 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	protected abstract void analyzeBeforeLoopOccurrence(SimpleName simpleName);
 
 	public boolean checkTransformPrecondition() {
-		return !hasEmptyStatement && !hasRawTypeIterator && !indexReferencedInsideLoop && !indexReferencedOutsideLoop;
+		return !hasEmptyStatement && !hasRawTypeIterator && !indexReferencedInsideLoop && !indexReferencedOutsideLoop &&
+				!getIteratingObjectInitializers().isEmpty();
 	}
 
 }

@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
  * A visitor for checking whether the values in a collection are (potentially)
@@ -32,7 +33,9 @@ public class IterableNodeVisitor extends ASTVisitor {
 		}
 
 		StructuralPropertyDescriptor propertyDescriptor = simpleName.getLocationInParent();
-		if (propertyDescriptor == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+		if (propertyDescriptor == Assignment.LEFT_HAND_SIDE_PROPERTY 
+				|| propertyDescriptor == Assignment.RIGHT_HAND_SIDE_PROPERTY
+				|| propertyDescriptor == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
 			updated = true;
 		}
 
@@ -42,27 +45,31 @@ public class IterableNodeVisitor extends ASTVisitor {
 		}
 		if (propertyDescriptor == MethodInvocation.EXPRESSION_PROPERTY) {
 			MethodInvocation methodInvocation = (MethodInvocation) simpleName.getParent();
-			if (isUpdateCollectionInvocation(methodInvocation)) {
+			if (!isSafeCollectionOperation(methodInvocation)) {
 				updated = true;
 			}
 		}
 		return true;
 	}
-
-	private boolean isUpdateCollectionInvocation(MethodInvocation methodInvocation) {
+	
+	@SuppressWarnings("nls")
+	private boolean isSafeCollectionOperation(MethodInvocation methodInvocation) {
 		SimpleName methodName = methodInvocation.getName();
 		String identifier = methodName.getIdentifier();
-		return identifier.matches("^(add|clear|remove|replace|retain|set|sort).*$"); //$NON-NLS-1$
+		return identifier.matches("^("
+				+ "equals|hashCode|toString|"
+				+ "iterator|forEach|spliterator|" // iterator
+				+ "size|isEmpty|contains|equals|" // collection
+				+ "get|indexOf|lastIndexOf).*$"); // list/stack
 	}
 
 	/**
-	 * @return if the collection is potentially updated. Reasons may include:
+	 * @return if the iterable object is potentially updated. Reasons may include:
 	 *         <ul>
-	 *         <li>Methods starting with
-	 *         {@code add|clear|remove|replace|retain|set|sort} are invoked in
-	 *         the collection</li>
-	 *         <li>The collection is used as a parameter in another method
+	 *         <li>invocation of methods that might change contents of the iterable objects</li>
+	 *         <li>The iterable object is used as a parameter in another method
 	 *         invocation.
+	 *         <li>the iterable object is reassigned or is used to assign other objects</li>
 	 *         </ul>
 	 * 
 	 */

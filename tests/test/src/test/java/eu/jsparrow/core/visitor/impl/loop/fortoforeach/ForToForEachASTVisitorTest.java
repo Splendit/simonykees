@@ -15,8 +15,10 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	private ForToForEachASTVisitor visitor;
 
 	@BeforeEach
-	public void beforeEach() {
+	public void beforeEach() throws Exception {
 		visitor = new ForToForEachASTVisitor();
+		fixture.addImport(java.util.List.class.getName());
+		fixture.addImport(java.util.ArrayList.class.getName());
 	}
 	
 	@Test
@@ -109,8 +111,6 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"				list.add(\"0\");\n" + 
 				"			}\n" + 
 				"		}";
-		fixture.addImport(java.util.List.class.getName());
-		fixture.addImport(java.util.ArrayList.class.getName());
 		fixture.addMethodBlock(original);
 		
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -151,8 +151,6 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"				newList.addAll(list);\n" + 
 				"			}\n" + 
 				"		}";
-		fixture.addImport(java.util.List.class.getName());
-		fixture.addImport(java.util.ArrayList.class.getName());
 		fixture.addMethodBlock(original);
 		
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -171,8 +169,6 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"				List<String> newList = new ArrayList<>(list);\n" + 
 				"			}\n" + 
 				"		}";
-		fixture.addImport(java.util.List.class.getName());
-		fixture.addImport(java.util.ArrayList.class.getName());
 		fixture.addMethodBlock(original);
 		
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -197,5 +193,60 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		
 		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
 	}
-
+	
+	@Test
+	public void visit_assigningIterableToOtherIterable_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		List<String> list = new ArrayList<>();\n" + 
+				"		for (int i =0; i<list.size(); i++) {\n" + 
+				"			String value = list.get(i);\n" + 
+				"			if(value.contains(\"0\")) {\n" + 
+				"				List<String> newList = new ArrayList<>();\n" + 
+				"				newList = list;\n" + 
+				"			}\n" + 
+				"		}";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_iterableAsVariableInitializer_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		List<String> list = new ArrayList<>();\n" + 
+				"		for (int i =0; i<list.size(); i++) {\n" + 
+				"			String value = list.get(i);\n" + 
+				"			if(value.contains(\"0\")) {\n" + 
+				"				List<String> newList = list;\n" + 
+				"			}\n" + 
+				"		}";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_discardedIteratingIndex_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		List<String> list = new ArrayList<>();\n" + 
+				"		for (int i =0; i<list.size(); i++) {\n" + 
+				"			String value = list.get(0);\n" + 
+				"			if(value.contains(\"0\")) {\n" + 
+				"				System.out.println(value);\n" + 
+				"			}\n" + 
+				"		}";
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		
+		fixture.accept(visitor);
+		
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+	}
+	
 }

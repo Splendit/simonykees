@@ -188,7 +188,7 @@ sb.append(aFInterfaceRule);
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (String aFoo : foo) {
+		for (int j = 0; j < foo.size(); j++) {
 			int i = 0;
 			int k = 0;
 			String it = foo.get(i);

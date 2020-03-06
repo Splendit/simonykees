@@ -2,9 +2,6 @@ package eu.jsparrow.core.visitor.impl.loop.whiletoforeach;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
