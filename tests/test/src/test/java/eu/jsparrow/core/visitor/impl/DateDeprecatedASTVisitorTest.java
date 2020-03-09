@@ -1,20 +1,17 @@
 package eu.jsparrow.core.visitor.impl;
 
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings({ "nls" })
 public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
@@ -28,8 +25,6 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				);
 	}
 
-	private DateDeprecatedASTVisitor visitor;
-
 	@BeforeEach
 	public void setUp() throws Exception {
 		visitor = new DateDeprecatedASTVisitor();
@@ -39,13 +34,10 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	@ParameterizedTest
 	@MethodSource("createDates")
 	public void visit_newDate_YMD(String dateConfigPre, String dateConfigPost) throws Exception {
-		fixture.addMethodBlock("Date d = new Date(" + dateConfigPre + ");");
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(
-				"Calendar calendar = Calendar.getInstance(); calendar.set(" + dateConfigPost + "); Date d = calendar.getTime();");
-		assertMatch(expected, fixture.getMethodBlock());
+		String original = "Date d = new Date(" + dateConfigPre + ");";
+		String expected = "Calendar calendar = Calendar.getInstance(); calendar.set(" + dateConfigPost + "); Date d = calendar.getTime();";
+		assertChange(original, expected);
+		
 		ImportDeclaration expectedAddedImport = fixture.getAstRewrite()
 			.getAST()
 			.newImportDeclaration();
@@ -61,13 +53,10 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	@ParameterizedTest
 	@MethodSource("createDates")
 	public void visit_newDateExp_YMD(String dateConfigPre, String dateConfigPost) throws Exception {
-		fixture.addMethodBlock("new Date(" + dateConfigPre + ");");
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(
-				"Calendar calendar = Calendar.getInstance(); calendar.set(" + dateConfigPost + "); calendar.getTime();");
-		assertMatch(expected, fixture.getMethodBlock());
+		String original = "new Date(" + dateConfigPre + ");";
+		String expected = "Calendar calendar = Calendar.getInstance(); calendar.set(" + dateConfigPost + "); calendar.getTime();";
+		assertChange(original, expected);
+		
 		ImportDeclaration expectedAddedImport = fixture.getAstRewrite()
 			.getAST()
 			.newImportDeclaration();
@@ -83,13 +72,11 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	@ParameterizedTest
 	@MethodSource("createDates")
 	public void visit_newDate_YMD_extra_statement(String dateConfigPre, String dateConfigPost) throws Exception {
-		fixture.addMethodBlock("new String(\"Hellow\"); Date d = new Date(" + dateConfigPre + ");");
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString("new String(\"Hellow\"); Calendar calendar = Calendar.getInstance(); calendar.set("
-				+ dateConfigPost + "); Date d = calendar.getTime();");
-		assertMatch(expected, fixture.getMethodBlock());
+		String original = "new String(\"Hellow\"); Date d = new Date(" + dateConfigPre + ");";
+		String expected = "new String(\"Hellow\"); Calendar calendar = Calendar.getInstance(); calendar.set("
+				+ dateConfigPost + "); Date d = calendar.getTime();";
+		assertChange(original, expected);
+				
 		ImportDeclaration expectedAddedImport = fixture.getAstRewrite()
 			.getAST()
 			.newImportDeclaration();
@@ -105,12 +92,10 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	@ParameterizedTest
 	@MethodSource("createDates")
 	public void visit_newDate_YMD_single_statement(String dateConfigPre, String dateConfigPost) throws Exception {
-		fixture.addMethodBlock("if(true) new Date(" + dateConfigPre + ");");
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		Block expected = ASTNodeBuilder.createBlockFromString(
-				"if(true){ Calendar calendar = Calendar.getInstance(); calendar.set(" + dateConfigPost + "); calendar.getTime();}");
-		assertMatch(expected, fixture.getMethodBlock());
+		String original = "if(true) new Date(" + dateConfigPre + ");";
+		String expected = "if(true){ Calendar calendar = Calendar.getInstance(); calendar.set(" + dateConfigPost + "); calendar.getTime();}";
+		assertChange(original, expected);
+		
 		ImportDeclaration expectedAddedImport = fixture.getAstRewrite()
 			.getAST()
 			.newImportDeclaration();
@@ -126,42 +111,30 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	@ParameterizedTest
 	@MethodSource("createDates")
 	public void visit_newDate_YMD_avoidNameConflict(String dateConfigPre, String dateConfigPost) throws Exception {
-		fixture.addMethodBlock("int calendar; double calendar2; Date calendar1 = new Date(" + dateConfigPre + ");");
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
+		String original = "int calendar; double calendar2; Date calendar1 = new Date(" + dateConfigPre + ");";
+		String expected = "int calendar; double calendar2; Calendar calendar3 = Calendar.getInstance(); calendar3.set(" + dateConfigPost + "); Date calendar1 = calendar3.getTime();";
 
-		Block expected = ASTNodeBuilder.createBlockFromString(
-				"int calendar; double calendar2; Calendar calendar3 = Calendar.getInstance(); calendar3.set(" + dateConfigPost + "); Date calendar1 = calendar3.getTime();");
-		assertMatch(expected, fixture.getMethodBlock());
+		assertChange(original, expected);
 	}
 	
 	@ParameterizedTest
 	@MethodSource("createDates")
 	public void visit_newDate_YMD_multiIntroducedNames(String dateConfigPre, String dateConfigPost) throws Exception {
-		fixture.addMethodBlock("Date d = new Date(" + dateConfigPre + "); int calendar1; Date d2 = new Date(" + dateConfigPre + ");");
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(
+		String original = "Date d = new Date(" + dateConfigPre + "); int calendar1; Date d2 = new Date(" + dateConfigPre + ");";
+		String expected =
 				"Calendar calendar = Calendar.getInstance(); "
 				+ "calendar.set(" + dateConfigPost + "); "
 				+ "Date d = calendar.getTime();"
 				+ "int calendar1;"
 				+ "Calendar calendar2 = Calendar.getInstance();"
 				+ "calendar2.set(" + dateConfigPost +");"
-				+ "Date d2 = calendar2.getTime();");
-		assertMatch(expected, fixture.getMethodBlock());
+				+ "Date d2 = calendar2.getTime();";
+
+		assertChange(original, expected);
 	}
 	
-	@ParameterizedTest
-	@MethodSource("createDates")
+	@Test
 	public void visit_newDate_noParameters() throws Exception {
-		fixture.addMethodBlock("Date date = new Date();");
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(
-				"Date date = new Date();");
-		assertMatch(expected, fixture.getMethodBlock());
+		assertNoChange("Date date = new Date();");
 	}
 }

@@ -1,14 +1,10 @@
 package eu.jsparrow.core.visitor.impl.loop.stream;
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-
-import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamAnyMatchASTVisitor;
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 /**
  * Visitor tests for {@link EnhancedForLoopToStreamAnyMatchASTVisitor}.
@@ -18,8 +14,6 @@ import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
  */
 @SuppressWarnings("nls")
 public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDTUnitFixture {
-	
-	private EnhancedForLoopToStreamAnyMatchASTVisitor visitor;
 	
 	@BeforeEach
 	public void setUp() {
@@ -33,7 +27,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 	@Test
 	public void visit_loopWithBreakToAllMatch_shouldTransform() throws Exception {
 		
-		String block = "" +
+		String original = "" +
 				"	List<String> strings = new ArrayList<>();\n" +
 				"	boolean allEmpty = true;\n" +
 				"	for(String string : strings) {\n" + 
@@ -42,24 +36,19 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 				"			break;\n" +
 				"		}\n" +
 				"	}";
-		String expectedContent = "" +
+		String expected = "" +
 				"	List<String> strings=new ArrayList<>();\n" + 
 				"	boolean allEmpty=strings.stream().allMatch(string -> string.isEmpty());";
 		fixture.addImport("java.util.List");
 		fixture.addImport("java.util.ArrayList");
-		fixture.addMethodBlock(block);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
-		assertMatch(expected, fixture.getMethodBlock());
+		
+		assertChange(original, expected);
 	}
 	
 	@Test
 	public void visit_loopWithReturnToAllMatch_shouldTranform() throws Exception {
 		
-		String block = "" +
+		String original = "" +
 				"	List<String> strings = new ArrayList<>();\n" +
 				"	for(String string : strings) {\n" + 
 				"		if(!string.isEmpty()) {\n" + 
@@ -67,18 +56,13 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 				"		}\n" + 
 				"	}\n" + 
 				"	return true;";
-		String expectedContent = "" +
+		String expected = "" +
 				"	List<String> strings=new ArrayList<>();\n" + 
 				"	return strings.stream().allMatch(string -> string.isEmpty());";
 		fixture.addImport("java.util.List");
 		fixture.addImport("java.util.ArrayList");
-		fixture.addMethodBlock(block);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
-		assertMatch(expected, fixture.getMethodBlock());
+		
+		assertChange(original, expected);
 	}
 	
 	/*
@@ -88,7 +72,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 	@Test
 	public void visit_loopWithBreakToAnyMatch_shouldTranform() throws Exception {
 		
-		String block = "" +
+		String original = "" +
 				"	List<String> strings = new ArrayList<>();\n" +
 				"	boolean anyEmpty = false;\n" +
 				"	for(String string : strings) {\n" + 
@@ -97,24 +81,19 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 				"			break;\n" +
 				"		}\n" +
 				"	}";
-		String expectedContent = "" +
+		String expected = "" +
 				"	List<String> strings=new ArrayList<>();\n" + 
 				"	boolean anyEmpty=strings.stream().anyMatch(string -> string.isEmpty());";
 		fixture.addImport("java.util.List");
 		fixture.addImport("java.util.ArrayList");
-		fixture.addMethodBlock(block);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
-		assertMatch(expected, fixture.getMethodBlock());
+		
+		assertChange(original, expected);
 	}
 	
 	@Test
 	public void visit_loopWithReturnToAnyMatch_shouldTranform() throws Exception {
 		
-		String block = "" +
+		String original = "" +
 				"	List<String> strings = new ArrayList<>();\n" +
 				"	for(String string : strings) {\n" + 
 				"		if(string.isEmpty()) {\n" + 
@@ -122,18 +101,13 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 				"		}\n" + 
 				"	}\n" + 
 				"	return false;";
-		String expectedContent = "" +
+		String expected = "" +
 				"	List<String> strings=new ArrayList<>();\n" + 
 				"	return strings.stream().anyMatch(string -> string.isEmpty());";
 		fixture.addImport("java.util.List");
 		fixture.addImport("java.util.ArrayList");
-		fixture.addMethodBlock(block);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
-		assertMatch(expected, fixture.getMethodBlock());
+		
+		assertChange(original, expected);
 	}
 	
 	
@@ -144,7 +118,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 	@Test
 	public void visit_loopWithBreakToNoneMatch_shouldTranform() throws Exception {
 		
-		String block = "" +
+		String original = "" +
 				"	List<String> strings = new ArrayList<>();\n" +
 				"	boolean allNonEmpty = true;\n" +
 				"	for(String string : strings) {\n" + 
@@ -153,24 +127,19 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 				"			break;\n" +
 				"		}\n" +
 				"	}";
-		String expectedContent = "" +
+		String expected = "" +
 				"	List<String> strings=new ArrayList<>();\n" + 
 				"	boolean allNonEmpty=strings.stream().noneMatch(string -> string.isEmpty());";
 		fixture.addImport("java.util.List");
 		fixture.addImport("java.util.ArrayList");
-		fixture.addMethodBlock(block);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
-		assertMatch(expected, fixture.getMethodBlock());
+		
+		assertChange(original, expected);
 	}
 	
 	@Test
 	public void visit_loopWithRetunrToNoneMatch_shouldTranform() throws Exception {
 		
-		String block = "" +
+		String original = "" +
 				"	List<String> strings = new ArrayList<>();\n" +
 				"	for(String string : strings) {\n" + 
 				"		if(string.isEmpty()) {\n" + 
@@ -178,17 +147,12 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 				"		}\n" + 
 				"	}\n" + 
 				"	return true;";
-		String expectedContent = "" +
+		String expected = "" +
 				"	List<String> strings=new ArrayList<>();\n" + 
 				"	return strings.stream().noneMatch(string -> string.isEmpty());";
 		fixture.addImport("java.util.List");
 		fixture.addImport("java.util.ArrayList");
-		fixture.addMethodBlock(block);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(expectedContent);
-		assertMatch(expected, fixture.getMethodBlock());
+		
+		assertChange(original, expected);
 	}
 }
