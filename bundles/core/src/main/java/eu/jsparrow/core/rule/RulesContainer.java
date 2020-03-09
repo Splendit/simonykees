@@ -84,6 +84,7 @@ import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
+import eu.jsparrow.core.rule.impl.UseStringJoinRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.rules.api.RuleService;
@@ -175,10 +176,10 @@ public class RulesContainer {
 				new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
 
 				/*
-				 * String manipulations. This rule must be applied after
+				 * String manipulations. These rule must be applied after
 				 * StringBuildingLoopRule.
 				 */
-				new UseStringBuilderAppendRule(),
+				new UseStringBuilderAppendRule(), new UseStringJoinRule(), 
 
 				/*
 				 * Code formatting and organizing imports should always happen
