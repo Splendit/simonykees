@@ -36,8 +36,7 @@ public class DiamondOperatorRule {
 	private String concatTypedList(List<String> foo, int i, Map<String, List<String>> map) {
 		String.valueOf(i);
 		map.containsKey("");
-		return foo.stream()
-			.collect(Collectors.joining(","));
+		return String.join(",", foo);
 	}
 
 	public void inferListType() {

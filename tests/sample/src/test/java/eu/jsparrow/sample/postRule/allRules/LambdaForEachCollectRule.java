@@ -24,8 +24,7 @@ public class LambdaForEachCollectRule {
 			.map(o -> StringUtils.substring(o, 0)) // comment after map
 			.collect(Collectors.toList()));
 
-		return oStrings.stream()
-			.collect(Collectors.joining(","));
+		return String.join(",", oStrings);
 	}
 
 	public String convertForEachExpressionToCollect(String input) {
@@ -36,8 +35,7 @@ public class LambdaForEachCollectRule {
 			.map(o -> o)
 			.collect(Collectors.toList()));
 
-		return oStrings.stream()
-			.collect(Collectors.joining(","));
+		return String.join(",", oStrings);
 	}
 
 	public String multiDeclarationFragment(String input) {
@@ -50,8 +48,7 @@ public class LambdaForEachCollectRule {
 			.map(o -> StringUtils.substring(o, 0))
 			.collect(Collectors.toList()));
 
-		return oStrings.stream()
-			.collect(Collectors.joining(","));
+		return String.join(",", oStrings);
 	}
 
 	public String nonEmptyCollection(String input) {
@@ -63,8 +60,7 @@ public class LambdaForEachCollectRule {
 			.map(o -> StringUtils.substring(o, 0))
 			.collect(Collectors.toList()));
 
-		return oStrings.stream()
-			.collect(Collectors.joining(","));
+		return String.join(",", oStrings);
 	}
 
 	public String addAfterForEach(String input) {
@@ -76,8 +72,7 @@ public class LambdaForEachCollectRule {
 			.collect(Collectors.toList()));
 
 		oStrings.add("-");
-		return oStrings.stream()
-			.collect(Collectors.joining(","));
+		return String.join(",", oStrings);
 	}
 
 	public String blockBody(String input) {
@@ -88,8 +83,7 @@ public class LambdaForEachCollectRule {
 			.map(o -> StringUtils.substring(o, 0))
 			.collect(Collectors.toList()));
 
-		return oStrings.stream()
-			.collect(Collectors.joining(","));
+		return String.join(",", oStrings);
 	}
 
 	public String multipleBodyStatements(String input) {
@@ -105,8 +99,7 @@ public class LambdaForEachCollectRule {
 				}
 			});
 
-		return oStrings.stream()
-			.collect(Collectors.joining(","));
+		return String.join(",", oStrings);
 	}
 
 	public String referencingOtherLocalVars(String input) {
@@ -118,8 +111,7 @@ public class LambdaForEachCollectRule {
 			.map(o -> StringUtils.substring(o, 0))
 			.collect(Collectors.toList()));
 
-		return oStrings.stream()
-			.collect(Collectors.joining(","));
+		return String.join(",", oStrings);
 	}
 
 	public String nestedBlocks(String input) {
@@ -135,8 +127,7 @@ public class LambdaForEachCollectRule {
 			}
 		}
 
-		return oStrings.stream()
-			.collect(Collectors.joining(","));
+		return String.join(",", oStrings);
 	}
 
 	public String addingToFieldMethod(String input) {
@@ -147,8 +138,7 @@ public class LambdaForEachCollectRule {
 			.map(o -> StringUtils.substring(o, 0))
 			.collect(Collectors.toList()));
 
-		return listField.stream()
-			.collect(Collectors.joining(","));
+		return String.join(",", listField);
 	}
 
 	public String thisAddInvocation(String input) {
@@ -159,8 +149,7 @@ public class LambdaForEachCollectRule {
 			.map(o -> StringUtils.substring(o, 0))
 			.forEach(this::add);
 
-		return listField.stream()
-			.collect(Collectors.joining(","));
+		return String.join(",", listField);
 	}
 
 	private void add(String string) {
