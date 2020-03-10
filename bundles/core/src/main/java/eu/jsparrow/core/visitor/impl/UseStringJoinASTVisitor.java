@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.impl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -22,75 +23,33 @@ public class UseStringJoinASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 
-
-		//1
-		SimpleName name = methodInvocation.getName();
-		if (!"joining".equals(name.getIdentifier())) {
-			return true;
-		}
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-		if (!ClassRelationUtil.isContentOfType(declaringClass, java.util.stream.Collectors.class.getName())) {
-			return true;
-		}
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		if (arguments.size() > 1) {
-			return false;
-		}
-
-		//2
-		StructuralPropertyDescriptor structuralProperty = methodInvocation.getLocationInParent();
-		if (structuralProperty != MethodInvocation.ARGUMENTS_PROPERTY) {
-			return true;
-		}
-		MethodInvocation parentMethod = (MethodInvocation) methodInvocation.getParent();
-
-		if (!"collect".equals(parentMethod.getName() //$NON-NLS-1$
-			.getIdentifier())) {
-			return false;
-		}
-
-		IMethodBinding parentMethodBinding = parentMethod.resolveMethodBinding();
-		ITypeBinding parentMethodDeclaringClass = parentMethodBinding.getDeclaringClass();
-		if (!ClassRelationUtil.isContentOfType(parentMethodDeclaringClass, java.util.stream.Stream.class.getName())) {
-			return false;
-		}
-		List<Expression> collectionArguments = ASTNodeUtil.convertToTypedList(parentMethod.arguments(),
-				Expression.class);
-		if (collectionArguments.size() > 1) {
-			return false;
-		}
-		Expression collectionExpression = parentMethod.getExpression();
-		if (collectionExpression == null) {
-			return false;
-		}
-
-		if (collectionExpression.getNodeType() != ASTNode.METHOD_INVOCATION) {
+		if(!isCollectionJoining(methodInvocation)) {
 			return true;
 		}
 
-		MethodInvocation stream = (MethodInvocation) collectionExpression;
-		/*
-		 * Stream arguments needs to be 0 stream expression needs to be a
-		 * collection
-		 */
-
-		List<Expression> streamArguments = ASTNodeUtil.convertToTypedList(stream.arguments(), Expression.class);
-		if (!streamArguments.isEmpty()) {
-			return false;
+		MethodInvocation parentMethod = findParentCollectInvocation(methodInvocation).orElse(null);
+		if(parentMethod == null) {
+			return true;
 		}
-
-		IMethodBinding streamMethodBinding = stream.resolveMethodBinding();
-		ITypeBinding streamDeclaringClass = streamMethodBinding.getDeclaringClass();
-		if (!ClassRelationUtil.isContentOfType(streamDeclaringClass, java.util.Collection.class.getName())) {
-			return false;
+		MethodInvocation stream = findStreamInvocation(parentMethod).orElse(null);
+		if(stream == null) {
+			return true;
 		}
 
 		Expression streamExpression = stream.getExpression();
 		if (streamExpression == null) {
-			return false;
+			return true;
 		}
 
+		if(!analyzeStreamExpression(streamExpression)) {
+			return true;
+		}
+
+		refactor(parentMethod, streamExpression, ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class));
+		return true;
+	}
+
+	private boolean analyzeStreamExpression(Expression streamExpression) {
 		ITypeBinding streamExpressionTypeBinding = streamExpression.resolveTypeBinding();
 		ITypeBinding collectionErasure = streamExpressionTypeBinding.getErasure();
 
@@ -101,29 +60,81 @@ public class UseStringJoinASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		ITypeBinding[] typeParameters = streamExpressionTypeBinding.getTypeArguments();
-		/*
-		 * The collection erasure needs to be a java.util.Collection The
-		 * typeParameters needs to contain a single parameter of type String
-		 * 
-		 */
 		if (typeParameters.length != 1) {
-			return true;
-		}
-
-		ITypeBinding typeParameter = typeParameters[0];
-		if (!ClassRelationUtil.isContentOfType(typeParameter, java.lang.String.class.getName())) {
 			return false;
 		}
 
-		refactor(parentMethod, streamExpression, arguments);
+		ITypeBinding typeParameter = typeParameters[0];
+		return ClassRelationUtil.isContentOfType(typeParameter, java.lang.String.class.getName());
+	}
 
-		return true;
+	private Optional<MethodInvocation> findStreamInvocation(MethodInvocation parentMethod) {
+		Expression collectionExpression = parentMethod.getExpression();
+		if (collectionExpression == null) {
+			return Optional.empty();
+		}
+
+		if (collectionExpression.getNodeType() != ASTNode.METHOD_INVOCATION) {
+			return Optional.empty();
+		}
+
+		MethodInvocation stream = (MethodInvocation) collectionExpression;
+		List<Expression> streamArguments = ASTNodeUtil.convertToTypedList(stream.arguments(), Expression.class);
+		if (!streamArguments.isEmpty()) {
+			return Optional.empty();
+		}
+
+		IMethodBinding streamMethodBinding = stream.resolveMethodBinding();
+		ITypeBinding streamDeclaringClass = streamMethodBinding.getDeclaringClass();
+		if (!ClassRelationUtil.isContentOfType(streamDeclaringClass, java.util.Collection.class.getName())) {
+			return Optional.empty();
+		}
+		return Optional.of(stream);
+	}
+
+	private Optional<MethodInvocation> findParentCollectInvocation(MethodInvocation methodInvocation) {
+		StructuralPropertyDescriptor structuralProperty = methodInvocation.getLocationInParent();
+		if (structuralProperty != MethodInvocation.ARGUMENTS_PROPERTY) {
+			return Optional.empty();
+		}
+		MethodInvocation parentMethod = (MethodInvocation) methodInvocation.getParent();
+
+		if (!"collect".equals(parentMethod.getName() //$NON-NLS-1$
+			.getIdentifier())) {
+			return Optional.empty();
+		}
+
+		IMethodBinding parentMethodBinding = parentMethod.resolveMethodBinding();
+		ITypeBinding parentMethodDeclaringClass = parentMethodBinding.getDeclaringClass();
+		if (!ClassRelationUtil.isContentOfType(parentMethodDeclaringClass, java.util.stream.Stream.class.getName())) {
+			return Optional.empty();
+		}
+		List<Expression> collectionArguments = ASTNodeUtil.convertToTypedList(parentMethod.arguments(),
+				Expression.class);
+		if (collectionArguments.size() > 1) {
+			return Optional.empty();
+		}
+		return Optional.of(parentMethod);
+	}
+
+	private boolean isCollectionJoining(MethodInvocation methodInvocation) {
+		SimpleName name = methodInvocation.getName();
+		if (!"joining".equals(name.getIdentifier())) { //$NON-NLS-1$
+			return false;
+		}
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		if (!ClassRelationUtil.isContentOfType(declaringClass, java.util.stream.Collectors.class.getName())) {
+			return false;
+		}
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+		return arguments.size() <= 1;
 	}
 
 	private void refactor(MethodInvocation parentMethod, Expression collection, List<Expression> joinArguments) {
 		AST ast = parentMethod.getAST();
-		SimpleName expression = ast.newSimpleName("String");
-		SimpleName name = ast.newSimpleName("join");
+		SimpleName expression = ast.newSimpleName("String"); //$NON-NLS-1$
+		SimpleName name = ast.newSimpleName("join"); //$NON-NLS-1$
 		MethodInvocation stringJoin = NodeBuilder.newMethodInvocation(ast, expression, name);
 		Expression delimiter = joinArguments.isEmpty() ? ast.newStringLiteral()
 				: (Expression) astRewrite.createCopyTarget(joinArguments.get(0));
