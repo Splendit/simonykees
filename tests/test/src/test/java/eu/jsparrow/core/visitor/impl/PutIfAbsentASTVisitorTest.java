@@ -23,6 +23,9 @@ public class PutIfAbsentASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	public void visit_methodWithoutArguments_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.Map");
+		// Compilation error because:
+		//  - variable not initialized
+		//  - map#put(); is not defined
 		String block = "Map map; if (!map.containsKey(1)) { map.put(); }";
 		fixture.addMethodBlock(block);
 		visitor.setASTRewrite(fixture.getAstRewrite());
@@ -36,6 +39,9 @@ public class PutIfAbsentASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	public void visit_wrongMethodName_shouldNotReplace() throws Exception {
 		fixture.addImport("java.util.Map");
+		// Compilation error because:
+		//  - variable not initialized
+		//  - Map#PUT(Object, Object); is not defined		
 		String block = "Map map; if (!map.containsKey(1)) { map.PUT(1,2); }";
 		fixture.addMethodBlock(block);
 		visitor.setASTRewrite(fixture.getAstRewrite());

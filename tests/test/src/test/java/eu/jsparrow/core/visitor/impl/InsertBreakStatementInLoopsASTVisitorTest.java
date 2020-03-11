@@ -1,16 +1,10 @@
 package eu.jsparrow.core.visitor.impl;
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
-
 @SuppressWarnings("nls")
 public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnitFixture {
-	
-	private InsertBreakStatementInLoopsASTVisitor visitor;
 	
 	@BeforeEach
 	public void setUp() throws Exception {
@@ -40,10 +34,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -66,10 +57,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -92,10 +80,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -118,10 +103,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -144,10 +126,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -170,10 +149,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        ";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -193,10 +169,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"                break;\n" +
 				"            }\n"; 
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -220,10 +193,8 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"        }";
 		
 		fixture.addImport("java.util.Collection");
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+		
+		assertChange(original, expected);
 	}
 	
 	/*
@@ -241,10 +212,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -259,10 +227,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -277,10 +242,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            contains = true;\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -295,10 +257,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -312,11 +271,9 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
+
 	@Test
 	public void visit_objectCreationInIfCondition2_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -328,10 +285,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -345,10 +299,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -362,10 +313,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -379,9 +327,6 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 				"            }\n" + 
 				"        }";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 }
