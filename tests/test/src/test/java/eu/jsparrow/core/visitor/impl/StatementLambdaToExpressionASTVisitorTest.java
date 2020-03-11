@@ -1,19 +1,14 @@
 package eu.jsparrow.core.visitor.impl;
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
 public class StatementLambdaToExpressionASTVisitorTest extends UsesSimpleJDTUnitFixture {
-
-	private StatementLambdaToExpressionASTVisitor visitor;
 
 	private String blockTemplate = "new ArrayList<>().forEach(element -> %s);";
 
@@ -25,82 +20,46 @@ public class StatementLambdaToExpressionASTVisitorTest extends UsesSimpleJDTUnit
 
 	@Test
 	public void visit_simpleExpressionLambda_shouldReplace() throws Exception {
-		String lambda = "{ new String();}";
-		String block = String.format(blockTemplate, lambda);
-		fixture.addMethodBlock(block);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(String.format(blockTemplate, "new String()"));
-		assertMatch(expected, fixture.getMethodBlock());
+		assertChange(//
+				String.format(blockTemplate, "{ new String();}"), //
+				String.format(blockTemplate, "new String()"));
 	}
 
 	@Test
 	public void visit_simpleReturnLambda_shouldReplace() throws Exception {
-
-		String lambda = "{ new String(); return; }";
-		String block = String.format(blockTemplate, lambda);
-		fixture.addMethodBlock(block);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(String.format(blockTemplate, "new String()"));
-		assertMatch(expected, fixture.getMethodBlock());
+		assertChange(//
+				String.format(blockTemplate, "{ new String(); return; }"),
+				String.format(blockTemplate, "new String()"));
 	}
 
 	@Test
 	public void visit_tooManyStatements_shouldNotReplace() throws Exception {
-		String lambda = "{ new String(); new String(); return; }";
-		String block = String.format(blockTemplate, lambda);
-		fixture.addMethodBlock(block);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(block);
-		assertMatch(expected, fixture.getMethodBlock());
+		assertNoChange(String.format(blockTemplate, "{ new String(); new String(); return; }"));
 	}
 
 	@Test
 	public void visit_invalidStatement_shouldNotReplace() throws Exception {
-		String lambda = "{ int d = 0; }";
-		String block = String.format(blockTemplate, lambda);
-		fixture.addMethodBlock(block);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString(block);
-		assertMatch(expected, fixture.getMethodBlock());
+		assertNoChange(String.format(blockTemplate, "{ int d = 0; }"));
 	}
 
 	@Test
 	public void visit_simplePredicate_shouldReplace() throws Exception {
-		String block = "new ArrayList<>().stream().filter(element -> { return true; });";
-		fixture.addMethodBlock(block);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString("new ArrayList<>().stream().filter(element -> true);");
-		assertMatch(expected, fixture.getMethodBlock());
+		assertChange(//
+				"new ArrayList<>().stream().filter(element -> { return true; });",
+				"new ArrayList<>().stream().filter(element -> true);");
 	}
 
 	@Test
 	public void visit_whenReplacementHappens_ShouldUpdateListeners() throws Exception {
+		StatementLambdaToExpressionASTVisitor statementLambdaToExpressionASTVisitor = new StatementLambdaToExpressionASTVisitor();
 		ASTRewriteVisitorListenerStub listener = new ASTRewriteVisitorListenerStub();
-		visitor.addRewriteListener(listener);
-		String lambda = "{ new String();}";
-		String block = String.format(blockTemplate, lambda);
+		statementLambdaToExpressionASTVisitor.addRewriteListener(listener);
+
+		String block = String.format(blockTemplate, "{ new String();}");
 		fixture.addMethodBlock(block);
-
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
+		statementLambdaToExpressionASTVisitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(statementLambdaToExpressionASTVisitor);
 
 		assertTrue(listener.wasUpdated());
 	}
-
 }
