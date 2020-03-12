@@ -176,7 +176,7 @@ public class RulesContainer {
 				new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
 
 				/*
-				 * String manipulations. These rule must be applied after
+				 * String manipulations. These rules must be applied after
 				 * StringBuildingLoopRule.
 				 */
 				new UseStringBuilderAppendRule(), new UseStringJoinRule(), 
