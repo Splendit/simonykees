@@ -53,21 +53,21 @@ public abstract class UsesSimpleJDTUnitFixture {
 		fixture.clear(true);
 	}
 
-	protected void assertNoChange(String before) throws JavaModelException, BadLocationException, JdtUnitException {
-		fixture.addMethodBlock(before);
+	protected void assertNoChange(String original) throws JavaModelException, BadLocationException, JdtUnitException {
+		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
 		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), methodBlock);
 	}
 
-	protected void assertChange(String before, String afterExpected)
+	protected void assertChange(String original, String expected)
 			throws JavaModelException, BadLocationException, JdtUnitException {
-		fixture.addMethodBlock(before);
+		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+		assertMatch(ASTNodeBuilder.createBlockFromString(expected), methodBlock);
 	}
 }
