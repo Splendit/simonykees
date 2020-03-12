@@ -1,12 +1,7 @@
 package eu.jsparrow.core.visitor.impl;
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-
-import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 /**
  * Tests for {@link UseStringBuilderAppendASTVisitor}.
@@ -185,13 +180,6 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 	@Test
 	public void visit_expressionWithNullLiteral_shouldNotTransform() throws Exception {
-		String block = "String value = \"\" + null;";
-
-		fixture.addMethodBlock(block);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-
-		Block expectedBlock = ASTNodeBuilder.createBlockFromString(block);
-		assertMatch(expectedBlock, fixture.getMethodBlock());
+		assertNoChange("String value = \"\" + null;");
 	}
 }

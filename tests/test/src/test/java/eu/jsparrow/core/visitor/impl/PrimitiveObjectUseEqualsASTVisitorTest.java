@@ -51,8 +51,11 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesSimpleJDTUnitFix
 	}
 
 	@Test
-	public void visit_withExtendedOperands_ShouldNotReplace() throws Exception {
-		assertNoChange(String.format(template, "a == b == Boolean.TRUE"));
+	public void visit_withExtendedOperands_ShouldReplace() throws Exception {
+		
+		assertChange(//
+				String.format(template, "a == b == Boolean.TRUE"), //
+				String.format(template, "a.equals(b) == Boolean.TRUE"));
 	}
 
 	@Test

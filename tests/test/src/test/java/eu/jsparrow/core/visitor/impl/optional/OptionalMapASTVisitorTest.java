@@ -12,8 +12,6 @@ import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 @SuppressWarnings("nls")
 public class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
-	private OptionalMapASTVisitor visitor;
-	
 	@BeforeEach
 	public void beforeEach() throws Exception {
 		visitor = new OptionalMapASTVisitor();

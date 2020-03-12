@@ -1,18 +1,13 @@
 package eu.jsparrow.core.visitor.impl.loop.fortoforeach;
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.fortoforeach.ForToForEachASTVisitor;
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
 public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
-
-	private ForToForEachASTVisitor visitor;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -28,6 +23,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"			String s = ms[i];\n" + 
 				"			sb.append(s);\n" + 
 				"		}";
+		
 		String expected ="" +
 				"		String[] ms = {};\n" + 
 				"		StringBuilder sb = new StringBuilder();\n" + 
@@ -35,11 +31,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"			sb.append(s);\n" + 
 				"		}";
 		
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -52,6 +44,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"				bucketLength++;\n" + 
 				"			}\n" + 
 				"		}";
+		
 		String expected ="" +
 				"		Map<String, String>[] table = (Map<String, String>[])new HashMap[10];\n" + 
 				"		for (Map<String, String> map : table) {\n" + 
@@ -61,13 +54,10 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"			}\n" + 
 				"		}";
 		
-		fixture.addMethodBlock(original);
 		fixture.addImport("java.util.Map");
 		fixture.addImport("java.util.HashMap");
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+		
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -80,6 +70,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"				bucketLength++;\n" + 
 				"			}\n" + 
 				"		}";
+		
 		String expected ="" +
 				"		Map<String, String>[] table = (Map<String, String>[])new HashMap[10];\n" + 
 				"		for (Map<String, String> map : table) {\n" + 
@@ -89,13 +80,9 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"			}\n" + 
 				"		}";
 		
-		fixture.addMethodBlock(original);
 		fixture.addImport("java.util.Map");
 		fixture.addImport("java.util.HashMap");
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+		
+		assertChange(original, expected);
 	}
-
 }
