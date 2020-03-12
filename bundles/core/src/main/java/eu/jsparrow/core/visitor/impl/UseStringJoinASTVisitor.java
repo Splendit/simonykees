@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
-import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -21,13 +21,15 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * Replaces String concatenations using {@link Collector} with {@link StringJoiner}. 
- * For example, the following code: 
+ * Replaces stream {@link Collectors} that are used for concatenating the values
+ * of a collection with {@link StringJoiner}s. For example, the following code:
+ * 
  * <pre>
  *  {@code collection.stream().collect(Collectors.joining(","))}
  * </pre>
  * 
- * will be transformed to: 
+ * will be transformed to:
+ * 
  * <pre>
  * {@code String.join(",", collection)}
  * </pre>
@@ -40,16 +42,16 @@ public class UseStringJoinASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 
-		if(!isCollectionJoining(methodInvocation)) {
+		if (!isCollectionJoining(methodInvocation)) {
 			return true;
 		}
 
 		MethodInvocation parentMethod = findParentCollectInvocation(methodInvocation).orElse(null);
-		if(parentMethod == null) {
+		if (parentMethod == null) {
 			return true;
 		}
 		MethodInvocation stream = findStreamInvocation(parentMethod).orElse(null);
-		if(stream == null) {
+		if (stream == null) {
 			return true;
 		}
 
@@ -58,11 +60,12 @@ public class UseStringJoinASTVisitor extends AbstractASTRewriteASTVisitor {
 			return true;
 		}
 
-		if(!analyzeStreamExpression(streamExpression)) {
+		if (!analyzeStreamExpression(streamExpression)) {
 			return true;
 		}
 
-		refactor(parentMethod, streamExpression, ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class));
+		refactor(parentMethod, streamExpression,
+				ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class));
 		return true;
 	}
 
@@ -70,9 +73,9 @@ public class UseStringJoinASTVisitor extends AbstractASTRewriteASTVisitor {
 		ITypeBinding streamExpressionTypeBinding = streamExpression.resolveTypeBinding();
 		ITypeBinding collectionErasure = streamExpressionTypeBinding.getErasure();
 
-		if (!(ClassRelationUtil.isContentOfType(collectionErasure, java.util.Collection.class.getName())
-				|| ClassRelationUtil.isInheritingContentOfTypes(collectionErasure,
-						Collections.singletonList(java.util.Collection.class.getName())))) {
+		if (!ClassRelationUtil.isContentOfType(collectionErasure, java.util.Collection.class.getName())
+				&& !ClassRelationUtil.isInheritingContentOfTypes(collectionErasure,
+						Collections.singletonList(java.util.Collection.class.getName()))) {
 			return false;
 		}
 
