@@ -60,7 +60,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 			if (isVariableDeclarationExpression(iteratingIndexName, initializer)) {
 				indexInitializer.put(LOOP_INITIALIZER, initializer);
 				indexDeclaredInInitializer = true;
-			} else if (isAssignmetnToZero(iteratingIndexName, initializer)) {
+			} else if (isAssignmentToZero(iteratingIndexName, initializer)) {
 				indexInitializer.put(LOOP_INITIALIZER, initializer);
 			} else {
 				indexInitializer.put(LOOP_INITIALIZER_INCORRECT_EXPRESSION, initializer);
@@ -230,7 +230,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 		indexInitializer.put(key, node);
 	}
 
-	protected ForStatement getForStatment() {
+	protected ForStatement getForStatement() {
 		return this.forStatement;
 	}
 
@@ -288,7 +288,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 	 * @param simpleName
 	 */
 	@Override
-	protected void analyseBeforeLoopOccurrence(SimpleName simpleName) {
+	protected void analyzeBeforeLoopOccurrence(SimpleName simpleName) {
 
 		if (VariableDeclarationFragment.NAME_PROPERTY == simpleName.getLocationInParent()) {
 			VariableDeclarationFragment declarationFragment = (VariableDeclarationFragment) simpleName.getParent();

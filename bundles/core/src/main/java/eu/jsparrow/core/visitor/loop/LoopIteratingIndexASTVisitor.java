@@ -99,7 +99,7 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	 * @return {@code true} if the expression is an assignment to zero
 	 *         expression of a variable with the given simple name.
 	 */
-	protected boolean isAssignmetnToZero(SimpleName name, Expression expression) {
+	protected boolean isAssignmentToZero(SimpleName name, Expression expression) {
 		boolean isAssignmentOfIteratingIndex = false;
 		if (ASTNode.ASSIGNMENT == expression.getNodeType()) {
 			Assignment assignment = (Assignment) expression;
@@ -136,7 +136,7 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 		return iteratingObjectInitializers;
 	}
 
-	protected void addIteratingObjectInitializer(ASTNode node) {
+	private void addIteratingObjectInitializer(ASTNode node) {
 		iteratingObjectInitializers.add(node);
 	}
 
@@ -148,7 +148,7 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 		return insideLoop;
 	}
 
-	protected boolean isAfterLoop() {
+	private boolean isAfterLoop() {
 		return afterLoop;
 	}
 
@@ -160,12 +160,12 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 		return this.preferredNameFragment;
 	}
 
-	protected void setIndexReferencedInsideLoop() {
+	private void setIndexReferencedInsideLoop() {
 		this.indexReferencedInsideLoop = true;
 
 	}
 
-	protected void setHasEmptyStatement() {
+	private void setHasEmptyStatement() {
 		this.hasEmptyStatement = true;
 	}
 
@@ -244,7 +244,7 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 			}
 
 		} else if (ASTNode.PREFIX_EXPRESSION == expressionType) {
-			// covers the case: ++operand;
+			// covers the case: ++operand
 			PrefixExpression postfixExpression = (PrefixExpression) expression;
 			Expression operand = postfixExpression.getOperand();
 			if (ASTNode.SIMPLE_NAME == operand.getNodeType() && ((SimpleName) operand).getIdentifier()
@@ -307,7 +307,7 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	 * @return {@code true} if the parent of the simpleName is an
 	 *         {@link ArrayAccess} which matches with {@code iterableName}.
 	 */
-	protected boolean isReplaceableArrayAccess(SimpleName simpleName, SimpleName iterableName) {
+	private boolean isReplaceableArrayAccess(SimpleName simpleName, SimpleName iterableName) {
 		ASTNode node = simpleName.getParent();
 		boolean replacableAccess = false;
 		if (ASTNode.ARRAY_ACCESS == node.getNodeType()
@@ -337,7 +337,7 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 		}
 
 		if (isBeforeLoop()) {
-			analyseBeforeLoopOccurrence(simpleName);
+			analyzeBeforeLoopOccurrence(simpleName);
 		} else if (isInsideLoop() && !isLoopProperty(simpleName)) {
 
 			if (isReplaceableArrayAccess(simpleName, this.iterableName)) {
@@ -378,7 +378,7 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 
 		ASTNode parent = simpleName.getParent();
 		if (isBeforeLoop()) {
-			analyseBeforeLoopOccurrence(simpleName);
+			analyzeBeforeLoopOccurrence(simpleName);
 		} else if (isInsideLoop() && !isLoopProperty(simpleName)) {
 
 			if (ASTNode.METHOD_INVOCATION == parent.getNodeType()) {
@@ -483,10 +483,11 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 
 	protected abstract boolean isLoopProperty(SimpleName simpleName);
 
-	protected abstract void analyseBeforeLoopOccurrence(SimpleName simpleName);
+	protected abstract void analyzeBeforeLoopOccurrence(SimpleName simpleName);
 
 	public boolean checkTransformPrecondition() {
-		return !hasEmptyStatement && !hasRawTypeIterator && !indexReferencedInsideLoop && !indexReferencedOutsideLoop;
+		return !hasEmptyStatement && !hasRawTypeIterator && !indexReferencedInsideLoop && !indexReferencedOutsideLoop &&
+				!getIteratingObjectInitializers().isEmpty();
 	}
 
 }
