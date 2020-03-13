@@ -1,17 +1,10 @@
 package eu.jsparrow.core.visitor.impl;
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-
-import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
-
 @SuppressWarnings("nls")
 public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
-	
-	private UseStringJoinASTVisitor visitor;
 	
 	@BeforeEach
 	public void setUp() throws Exception {
@@ -29,12 +22,7 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		String expected = "" +
 				"List<String> values = new ArrayList<>();\n" + 
 				"String.join(\",\", values);";
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-		Block newBlock = ASTNodeBuilder.createBlockFromString(expected);
-		assertMatch(newBlock, fixture.getMethodBlock());
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -46,12 +34,7 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"List<String> values = new ArrayList<>();\n" + 
 				"String.join(\",\", values);";
 		fixture.addImport(java.util.stream.Collectors.class.getName() + ".joining", true, false);
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-		Block newBlock = ASTNodeBuilder.createBlockFromString(expected);
-		assertMatch(newBlock, fixture.getMethodBlock());
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -62,12 +45,7 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		String expected = "" +
 				"List<String> values = new ArrayList<>();\n" + 
 				"String.join(\"\", values);";
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(expected), fixture.getMethodBlock());
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -75,12 +53,7 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		String original = "" +
 				"List<String> values = new ArrayList<>();\n" + 
 				"values.stream().collect(Collectors.joining(\",\", \"pre\", \"suf\"));";
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -88,24 +61,14 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		String original = "" +
 				"List<Integer> integers = new ArrayList<>();\n" + 
 				"integers.stream().map(i -> Integer.toString(i)).collect(Collectors.joining(\",\"));";
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
 	public void visit_missingCollect_shouldNotTransform() throws Exception {
 		String original = "" +
 				"Collectors.joining(\",\");";
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -115,12 +78,7 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"Stream<String> stream = values.stream();\n" + 
 				"stream.collect(Collectors.joining());";
 		fixture.addImport(java.util.stream.Stream.class.getName());
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -133,12 +91,7 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"	public abstract void collect(Collector<CharSequence, ?, String> collector);\n" + 
 				"}";
 		fixture.addImport(java.util.stream.Collector.class.getName());
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -151,12 +104,7 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"	public abstract void collect2(Collector<CharSequence, ?, String> collector);\n" + 
 				"}";
 		fixture.addImport(java.util.stream.Collector.class.getName());
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -171,12 +119,7 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"	public abstract void collect(Collector<CharSequence, ?, String> collector);\n" + 
 				"}";
 		fixture.addImport(java.util.stream.Collector.class.getName());
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -191,12 +134,7 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"	public abstract LocalStream createStream();\n" + 
 				"}";
 		fixture.addImport(java.util.stream.Stream.class.getName());
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 	
 	@Test
@@ -207,13 +145,7 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"		stream().collect(Collectors.joining());\n" + 
 				"	}\n" + 
 				"}";
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
-	}
+		assertNoChange(original);	}
 	
 	@Test
 	public void visit_missingCollectExpression_shouldNotTransform() throws Exception {
@@ -224,12 +156,7 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"	}\n" + 
 				"}";
 		fixture.addImport(java.util.stream.Stream.class.getName());
-		fixture.addMethodBlock(original);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createBlockFromString(original), fixture.getMethodBlock());
+		assertNoChange(original);
 	}
 
 }
