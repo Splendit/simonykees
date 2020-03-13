@@ -109,6 +109,13 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		IMethodBinding iMethodBinding = parent.resolveMethodBinding();
 		ITypeBinding[] formalParameterTypes = iMethodBinding.getParameterTypes();
 
+		List<IMethodBinding> overloadedMethods = ClassRelationUtil.findOverloadedMethods(parent);
+		boolean isOverloaded = overloadedMethods.stream()
+			.anyMatch(method -> isOverloadedOnParameter(iMethodBinding, method, castParamIndex));
+		if (isOverloaded) {
+			return false;
+		}
+
 		int lastParameterIndex = formalParameterTypes.length - 1;
 		if (iMethodBinding.isVarargs() && castParamIndex >= lastParameterIndex) {
 			ITypeBinding lastFormalParamType = formalParameterTypes[lastParameterIndex];
