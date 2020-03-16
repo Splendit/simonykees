@@ -16,8 +16,8 @@ import eu.jsparrow.rules.common.Tag;
  * @since 3.15.0
  *
  */
-public class UseStringJoinRule extends RefactoringRuleImpl<UseStringJoinASTVisitor>{
-	
+public class UseStringJoinRule extends RefactoringRuleImpl<UseStringJoinASTVisitor> {
+
 	public UseStringJoinRule() {
 		this.visitorClass = UseStringJoinASTVisitor.class;
 		this.id = "UseStringJoin"; //$NON-NLS-1$
