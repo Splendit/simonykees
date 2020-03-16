@@ -124,8 +124,7 @@ public class TestStringConcatToPlusRule {
 			.append(values.stream()
 				.filter(s -> s.equals(input))
 				.collect(Collectors.joining(",")))
-			.append(values.stream()
-				.collect(Collectors.joining(";")))
+			.append(String.join(";", values))
 			.toString();
 	}
 
