@@ -413,4 +413,34 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		assertNoChange(before);
 	}
 	
+	@Test
+	public void visit_ambiguousOverloadedMethods_shouldNotTransform() throws Exception {
+		fixture.addImport(java.util.concurrent.Callable.class.getName());
+		fixture.addImport(java.util.function.Supplier.class.getName());
+		MethodDeclarationBuilder.factory(fixture, "overloaded")
+			.withParameterizedTypeParameter("Callable", "String");
+		MethodDeclarationBuilder.factory(fixture, "overloaded")
+			.withParameterizedTypeParameter("Supplier", "String");
+
+		String orignial = "overloaded((Supplier)()-> \"\");";
+
+		assertNoChange(orignial);
+	}
+	
+	@Test
+	public void visit_overloadedWithDifferentParameters_shouldTransform() throws Exception {
+		fixture.addImport(java.util.concurrent.Callable.class.getName());
+		fixture.addImport(java.util.function.Supplier.class.getName());
+		MethodDeclarationBuilder.factory(fixture, "overloaded")
+			.withParameterizedTypeParameter("Callable", "String")
+			.withSimpleTypeParameter("String");
+		MethodDeclarationBuilder.factory(fixture, "overloaded")
+			.withParameterizedTypeParameter("Supplier", "String");
+
+		String orignial = "overloaded((Supplier)()-> \"\");";
+		String expected = "overloaded(()-> \"\");";
+
+		assertChange(orignial, expected);
+	}
+	
 }
