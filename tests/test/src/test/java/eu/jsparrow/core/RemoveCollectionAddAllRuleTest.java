@@ -12,20 +12,20 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.rule.impl.RemoveCollectionsAddAllRule;
+import eu.jsparrow.core.rule.impl.RemoveCollectionAddAllRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
-public class RemoveCollectionsAddAllRuleTest extends SingleRuleTest {
+public class RemoveCollectionAddAllRuleTest extends SingleRuleTest {
 	
-	private static final String SAMPLE_FILE = "RemoveCollectionsAddAllRule.java";
-	private static final String POSTRULE_SUBDIRECTORY = "collectionsAddAll";
+	private static final String SAMPLE_FILE = "RemoveCollectionAddAllRule.java";
+	private static final String POSTRULE_SUBDIRECTORY = "collectionAddAll";
 
-	private RemoveCollectionsAddAllRule rule;
+	private RemoveCollectionAddAllRule rule;
 	
 	@BeforeEach
 	public void setUp() throws Exception {
-		rule = new RemoveCollectionsAddAllRule();
+		rule = new RemoveCollectionAddAllRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 		
 	}

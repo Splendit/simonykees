@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
-public class RemoveCollectionsAddAllASTVisitorTest extends UsesSimpleJDTUnitFixture {
+public class RemoveCollectionAddAllASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
-	private RemoveCollectionsAddAllASTVisitor visitor;
+	private RemoveCollectionAddAllASTVisitor visitor;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new RemoveCollectionsAddAllASTVisitor();
+		visitor = new RemoveCollectionAddAllASTVisitor();
 		fixture.addImport(java.util.Collection.class.getName());
 		fixture.addImport(java.util.List.class.getName());
 		fixture.addImport(java.util.Set.class.getName());

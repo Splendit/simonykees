@@ -204,7 +204,7 @@ rules:
   - OptionalMap
   - OptionalFilter
   - RemoveRedundantTypeCast
-  - RemoveCollectionsAddAll
+  - RemoveCollectionAddAll
   - UseStringJoin
 
 excludes:
