@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RemoveCollectionsAddAllRule {
+public class RemoveCollectionAddAllRule {
 
 	public void savingComments() {
 
