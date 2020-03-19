@@ -14,7 +14,7 @@ public class StatementLambdaToExpressionASTVisitorTest extends UsesSimpleJDTUnit
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new StatementLambdaToExpressionASTVisitor();
+		setVisitor(new StatementLambdaToExpressionASTVisitor());
 		fixture.addImport("java.util.ArrayList");
 	}
 

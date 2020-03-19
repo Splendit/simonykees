@@ -8,7 +8,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new MapGetOrDefaultASTVisitor();
+		setVisitor(new MapGetOrDefaultASTVisitor());
 		fixture.addImport("java.util.concurrent.ConcurrentHashMap");
 		
 	}

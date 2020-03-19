@@ -11,7 +11,7 @@ public class OptionalMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void beforeEach() throws Exception {
-		visitor = new OptionalMapASTVisitor();
+		setVisitor(new OptionalMapASTVisitor());
 		fixture.addImport("java.util.Optional");
 	}
 

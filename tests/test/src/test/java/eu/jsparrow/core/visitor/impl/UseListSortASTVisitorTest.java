@@ -8,7 +8,7 @@ public class UseListSortASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new UseListSortASTVisitor();
+		setVisitor(new UseListSortASTVisitor());
 		fixture.addImport(java.util.Collections.class.getName());
 		fixture.addImport(java.util.Comparator.class.getName());
 		fixture.addImport(java.util.List.class.getName());

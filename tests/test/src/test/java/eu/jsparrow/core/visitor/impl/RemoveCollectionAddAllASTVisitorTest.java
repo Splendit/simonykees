@@ -8,7 +8,7 @@ public class RemoveCollectionAddAllASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new RemoveCollectionAddAllASTVisitor();
+		setVisitor(new RemoveCollectionAddAllASTVisitor());
 		fixture.addImport(java.util.Collection.class.getName());
 		fixture.addImport(java.util.List.class.getName());
 		fixture.addImport(java.util.Set.class.getName());

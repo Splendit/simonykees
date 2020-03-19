@@ -11,7 +11,7 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesSimpleJDTU
 	
 	@BeforeEach
 	public void setUp() {
-		visitor = new EnhancedForLoopToStreamForEachASTVisitor();
+		setVisitor(new EnhancedForLoopToStreamForEachASTVisitor());
 	}
 	
 	@Test

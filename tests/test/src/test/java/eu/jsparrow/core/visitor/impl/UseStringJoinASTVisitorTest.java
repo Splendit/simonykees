@@ -8,7 +8,7 @@ public class UseStringJoinASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new UseStringJoinASTVisitor();
+		setVisitor(new UseStringJoinASTVisitor());
 		fixture.addImport(java.util.List.class.getName());
 		fixture.addImport(java.util.ArrayList.class.getName());
 		fixture.addImport(java.util.stream.Collectors.class.getName());

@@ -17,7 +17,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitorTest extends UsesSimpleJDT
 	
 	@BeforeEach
 	public void setUp() {
-		visitor = new EnhancedForLoopToStreamAnyMatchASTVisitor();
+		setVisitor(new EnhancedForLoopToStreamAnyMatchASTVisitor());
 	}
 	
 	/*

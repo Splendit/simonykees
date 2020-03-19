@@ -11,7 +11,7 @@ public class LambdaForEachMapASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() {
-		visitor = new LambdaForEachMapASTVisitor();
+		setVisitor(new LambdaForEachMapASTVisitor());
 	}
 
 	@Test

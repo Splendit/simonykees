@@ -8,7 +8,7 @@ public class UseCollectionsSingletonListASTVisitorTest extends UsesSimpleJDTUnit
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new UseCollectionsSingletonListASTVisitor();
+		setVisitor(new UseCollectionsSingletonListASTVisitor());
 		fixture.addImport(java.util.Arrays.class.getName());
 	}
 

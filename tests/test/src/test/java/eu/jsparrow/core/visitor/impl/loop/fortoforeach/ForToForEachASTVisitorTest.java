@@ -11,7 +11,7 @@ public class ForToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void beforeEach() throws Exception {
-		visitor = new ForToForEachASTVisitor();
+		setVisitor(new ForToForEachASTVisitor());
 		fixture.addImport(java.util.List.class.getName());
 		fixture.addImport(java.util.ArrayList.class.getName());
 	}

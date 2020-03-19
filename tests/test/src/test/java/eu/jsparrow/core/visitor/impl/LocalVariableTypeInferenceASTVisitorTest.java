@@ -19,7 +19,7 @@ public class LocalVariableTypeInferenceASTVisitorTest extends UsesSimpleJDTUnitF
 
 	@BeforeEach
 	public void setUp() {
-		visitor = new LocalVariableTypeInferenceASTVisitor();
+		setVisitor(new LocalVariableTypeInferenceASTVisitor());
 	}
 
 	@Test

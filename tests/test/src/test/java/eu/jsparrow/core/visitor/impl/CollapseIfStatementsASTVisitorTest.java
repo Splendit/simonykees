@@ -8,7 +8,7 @@ public class CollapseIfStatementsASTVisitorTest extends UsesSimpleJDTUnitFixture
 
 	@BeforeEach
 	public void setUp() {
-		this.visitor = new CollapseIfStatementsASTVisitor();
+		setVisitor(new CollapseIfStatementsASTVisitor());
 	}
 
 	@Test

@@ -11,7 +11,7 @@ public class WhileToForEachASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
 	@BeforeEach
 	public void beforeEach() {
-		visitor = new WhileToForEachASTVisitor();
+		setVisitor(new WhileToForEachASTVisitor());
 	}
 	
 	@Test

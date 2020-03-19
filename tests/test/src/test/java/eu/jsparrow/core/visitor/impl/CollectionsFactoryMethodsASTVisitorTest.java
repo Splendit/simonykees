@@ -19,7 +19,7 @@ public class CollectionsFactoryMethodsASTVisitorTest extends UsesSimpleJDTUnitFi
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new CollectionsFactoryMethodsASTVisitor();
+		setVisitor(new CollectionsFactoryMethodsASTVisitor());
 		fixture.addImport(JAVA_UTIL_COLLECTIONS);
 	}
 	

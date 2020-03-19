@@ -14,7 +14,7 @@ public class UseStringBuilderAppendASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 	@BeforeEach
 	public void setUp() {
-		visitor = new UseStringBuilderAppendASTVisitor();
+		setVisitor(new UseStringBuilderAppendASTVisitor());
 	}
 
 	@Test

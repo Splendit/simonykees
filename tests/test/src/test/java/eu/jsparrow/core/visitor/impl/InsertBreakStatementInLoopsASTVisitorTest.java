@@ -8,7 +8,7 @@ public class InsertBreakStatementInLoopsASTVisitorTest extends UsesSimpleJDTUnit
 	
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new InsertBreakStatementInLoopsASTVisitor();
+		setVisitor(new InsertBreakStatementInLoopsASTVisitor());
 		fixture.addImport("java.util.List");
 		fixture.addImport("java.util.Arrays");
 		fixture.addImport("java.util.Collections");

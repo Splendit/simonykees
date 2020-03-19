@@ -8,7 +8,7 @@ public class RemoveEmptyStatementASTVisitorTest extends UsesSimpleJDTUnitFixture
 
 	@BeforeEach
 	public void setUp() {
-		visitor = new RemoveEmptyStatementASTVisitor();
+		setVisitor(new RemoveEmptyStatementASTVisitor());
 	}
 
 	@Test

@@ -32,7 +32,7 @@ public abstract class UsesSimpleJDTUnitFixture {
 	protected static JdtUnitFixtureProject fixtureProject;
 	protected static JdtUnitFixtureClass fixture;
 
-	protected AbstractASTRewriteASTVisitor visitor;
+	private AbstractASTRewriteASTVisitor visitor;
 
 	@BeforeAll
 	public static void setUpClass() throws Exception {
@@ -51,6 +51,10 @@ public abstract class UsesSimpleJDTUnitFixture {
 	@AfterEach
 	public void tearDownTest() throws Exception {
 		fixture.clear(true);
+	}
+	
+	protected void setVisitor(AbstractASTRewriteASTVisitor visitor) {
+		this.visitor = visitor;
 	}
 
 	protected void assertNoChange(String original) throws JavaModelException, BadLocationException, JdtUnitException {

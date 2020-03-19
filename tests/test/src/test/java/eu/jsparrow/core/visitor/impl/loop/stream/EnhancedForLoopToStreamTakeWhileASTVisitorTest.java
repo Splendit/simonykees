@@ -11,7 +11,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitorTest extends UsesSimpleJD
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new EnhancedForLoopToStreamTakeWhileASTVisitor();
+		setVisitor(new EnhancedForLoopToStreamTakeWhileASTVisitor());
 		fixture.addImport("java.util.List");
 		fixture.addImport("java.util.ArrayList");
 	}

@@ -27,7 +27,7 @@ public class DateDeprecatedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new DateDeprecatedASTVisitor();
+		setVisitor(new DateDeprecatedASTVisitor());
 		fixture.addImport("java.util.Date");
 	}
 

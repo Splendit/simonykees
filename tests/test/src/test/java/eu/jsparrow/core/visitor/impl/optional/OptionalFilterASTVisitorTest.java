@@ -11,7 +11,7 @@ public class OptionalFilterASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void beforeEach() throws Exception {
-		visitor = new OptionalFilterASTVisitor();
+		setVisitor(new OptionalFilterASTVisitor());
 		fixture.addImport("java.util.Optional");
 	}
 

@@ -14,7 +14,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesSimpleJDTUnitFix
 
 	@BeforeEach
 	public void setUp() {
-		visitor = new PrimitiveObjectUseEqualsASTVisitor();
+		setVisitor(new PrimitiveObjectUseEqualsASTVisitor());
 	}
 
 	@Test

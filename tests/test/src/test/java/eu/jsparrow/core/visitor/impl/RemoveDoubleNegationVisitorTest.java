@@ -8,7 +8,7 @@ public class RemoveDoubleNegationVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new RemoveDoubleNegationASTVisitor();
+		setVisitor(new RemoveDoubleNegationASTVisitor());
 	}
 	
 	@Test

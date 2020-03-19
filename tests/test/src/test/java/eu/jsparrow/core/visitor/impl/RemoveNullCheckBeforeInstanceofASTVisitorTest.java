@@ -8,7 +8,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitorTest extends UsesSimpleJDT
 
 	@BeforeEach
 	public void setUp() {
-		visitor = new RemoveNullCheckBeforeInstanceofASTVisitor();
+		setVisitor(new RemoveNullCheckBeforeInstanceofASTVisitor());
 	}
 
 	@Test

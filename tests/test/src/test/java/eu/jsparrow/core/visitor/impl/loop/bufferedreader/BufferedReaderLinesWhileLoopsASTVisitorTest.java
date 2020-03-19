@@ -17,7 +17,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new BufferedReaderLinesASTVisitor();
+		setVisitor(new BufferedReaderLinesASTVisitor());
 		fixture.addImport("java.io.BufferedReader");
 		fixture.addImport("java.io.FileReader");
 	}

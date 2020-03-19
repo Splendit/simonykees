@@ -8,7 +8,7 @@ public class RemoveToStringOnStringASTVisitorTest extends UsesSimpleJDTUnitFixtu
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new RemoveToStringOnStringASTVisitor();
+		setVisitor(new RemoveToStringOnStringASTVisitor());
 	}
 
 	@Test

@@ -14,7 +14,7 @@ public class ArithmeticAssignmentASTVisitorTest extends UsesSimpleJDTUnitFixture
 	
 	@BeforeEach
 	public void setUp() {
-		visitor = new ArithmethicAssignmentASTVisitor();
+		setVisitor(new ArithmethicAssignmentASTVisitor());
 	}
 
 	@Test

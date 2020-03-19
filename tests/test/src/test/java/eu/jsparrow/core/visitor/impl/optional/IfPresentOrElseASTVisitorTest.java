@@ -11,7 +11,7 @@ public class IfPresentOrElseASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		visitor = new OptionalIfPresentOrElseASTVisitor();
+		setVisitor(new OptionalIfPresentOrElseASTVisitor());
 		fixture.addImport("java.util.Optional");
 	}
 

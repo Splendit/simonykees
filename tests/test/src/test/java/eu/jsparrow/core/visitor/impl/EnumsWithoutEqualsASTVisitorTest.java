@@ -12,7 +12,7 @@ public class EnumsWithoutEqualsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() {
-		visitor = new EnumsWithoutEqualsASTVisitor();
+		setVisitor(new EnumsWithoutEqualsASTVisitor());
 	}
 
 	@Test

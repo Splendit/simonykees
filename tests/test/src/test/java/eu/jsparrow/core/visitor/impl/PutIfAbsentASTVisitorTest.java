@@ -12,7 +12,7 @@ public class PutIfAbsentASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() {
-		visitor = new PutIfAbsentASTVisitor();
+		setVisitor(new PutIfAbsentASTVisitor());
 	}
 
 	@Test
