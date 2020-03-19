@@ -34,6 +34,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -42,6 +44,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,13 +95,14 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	private long endTime;
 
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
-			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton, 
+			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton,
 			StandaloneStatisticsMetadata statisticsMetadata) {
 		this(refactoringPipeline, wizardModel, enabledFinishButton);
 		this.statisticsMetadata = statisticsMetadata;
-		this.endTime = Instant.now().getEpochSecond();
+		this.endTime = Instant.now()
+			.getEpochSecond();
 	}
-	
+
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton) {
 		super("wizardPage"); //$NON-NLS-1$
@@ -112,10 +116,9 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			.getBounds().height;
 	}
 
-
 	/**
 	 * Create contents of the wizard.
-	 * 
+	 *
 	 * @param parent
 	 */
 	@Override
@@ -164,13 +167,12 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		}
 
 		RefactoringPipeline refactoringPipeline = summaryWizardPageModel.getRefactoringPipeline();
-		
 
 		StandaloneStatisticsData statisticsData = new StandaloneStatisticsData(refactoringPipeline.getFileCount(),
 				statisticsMetadata.getRepoName(), statisticsMetadata, refactoringPipeline);
 
 		statisticsData.setMetricData();
-		
+
 		statisticsData.setEndTime(endTime);
 		Optional<JsparrowMetric> metric = statisticsData.getMetricData();
 		metric.ifPresent(m -> {
@@ -225,23 +227,15 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
-		TableViewerColumn colRuleName = new TableViewerColumn(ruleTableViewer, SWT.NONE);
-		colRuleName.getColumn()
-			.setText(Messages.SummaryWizardPage_Rule);
-		colRuleName.getColumn()
-			.setResizable(false);
+		SummaryPageRuleTableViewerComparator comparator = new SummaryPageRuleTableViewerComparator();
+		ruleTableViewer.setComparator(comparator);
 
-		TableViewerColumn colTimes = new TableViewerColumn(ruleTableViewer, SWT.NONE);
-		colTimes.getColumn()
-			.setResizable(false);
-		colTimes.getColumn()
-			.setText(Messages.SummaryWizardPage_TimesApplied);
-
-		TableViewerColumn colTimeSaved = new TableViewerColumn(ruleTableViewer, SWT.NONE);
-		colTimeSaved.getColumn()
-			.setResizable(false);
-		colTimeSaved.getColumn()
-			.setText(Messages.SummaryWizardPage_TimeSaved);
+		TableViewerColumn colRuleName = createTableViewerColumn(Messages.SummaryWizardPage_Rule, 0,
+				comparator);
+		TableViewerColumn colTimes = createTableViewerColumn(Messages.SummaryWizardPage_TimesApplied, 1,
+				comparator);
+		TableViewerColumn colTimeSaved = createTableViewerColumn(Messages.SummaryWizardPage_TimeSaved, 2,
+				comparator);
 
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableComposite.setLayout(tableLayout);
@@ -249,6 +243,35 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		tableLayout.setColumnData(colTimes.getColumn(), new ColumnWeightData(20));
 		tableLayout.setColumnData(colTimeSaved.getColumn(), new ColumnWeightData(20));
 
+	}
+
+	private TableViewerColumn createTableViewerColumn(String title, int colNumber,
+			SummaryPageRuleTableViewerComparator comparator) {
+		TableViewerColumn tableViewerColumn = new TableViewerColumn(ruleTableViewer, SWT.NONE);
+		TableColumn column = tableViewerColumn.getColumn();
+
+		column.setResizable(false);
+		column.setText(title);
+		column.addSelectionListener(
+				getSelectionAdapterForRulesTableViewer(column, colNumber, comparator));
+
+		return tableViewerColumn;
+	}
+
+	private SelectionAdapter getSelectionAdapterForRulesTableViewer(final TableColumn column,
+			final int index, SummaryPageRuleTableViewerComparator comparator) {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				comparator.setColumn(index);
+				int dir = comparator.getDirection();
+				ruleTableViewer.getTable()
+					.setSortDirection(dir);
+				ruleTableViewer.getTable()
+					.setSortColumn(column);
+				ruleTableViewer.refresh();
+			}
+		};
 	}
 
 	protected void addFilesSection() {

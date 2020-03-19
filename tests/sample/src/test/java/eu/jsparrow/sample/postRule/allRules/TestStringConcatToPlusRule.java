@@ -74,7 +74,7 @@ public class TestStringConcatToPlusRule {
 	public String testConcatRecursionWithParamAndCast(String input, String param) {
 		/* save me */
 		return new StringBuilder().append(input)
-			.append((String) param)
+			.append(param)
 			.append(param)
 			.toString();
 	}
@@ -124,8 +124,7 @@ public class TestStringConcatToPlusRule {
 			.append(values.stream()
 				.filter(s -> s.equals(input))
 				.collect(Collectors.joining(",")))
-			.append(values.stream()
-				.collect(Collectors.joining(";")))
+			.append(String.join(";", values))
 			.toString();
 	}
 

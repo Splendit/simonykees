@@ -2,6 +2,7 @@ package eu.jsparrow.core.rule;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,12 +59,14 @@ import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
+import eu.jsparrow.core.rule.impl.RemoveCollectionAddAllRule;
 import eu.jsparrow.core.rule.impl.RemoveDoubleNegationRule;
 import eu.jsparrow.core.rule.impl.RemoveEmptyStatementRule;
 import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
 import eu.jsparrow.core.rule.impl.RemoveModifiersInInterfacePropertiesRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.rule.impl.RemoveNullCheckBeforeInstanceofRule;
+import eu.jsparrow.core.rule.impl.RemoveRedundantTypeCastRule;
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
@@ -81,6 +84,7 @@ import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
+import eu.jsparrow.core.rule.impl.UseStringJoinRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.rules.api.RuleService;
@@ -143,13 +147,14 @@ public class RulesContainer {
 				new BracketsToControlRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new MapGetOrDefaultRule(),
 				new DateDeprecatedRule(), new RemoveDoubleNegationRule(), new OptionalIfPresentRule(),
-				new OptionalMapRule(), new OptionalFilterRule(), new  OptionalIfPresentOrElseRule(), new RemoveNullCheckBeforeInstanceofRule(),
-				new GuardConditionRule(), new CollapseIfStatementsRule(), new RemoveExplicitCallToSuperRule(),
-				new RemoveEmptyStatementRule(), new RemoveUnnecessaryThrownExceptionsRule(),
-				new RemoveModifiersInInterfacePropertiesRule(), new RemoveUnusedParameterRule(),
-				new ReorderModifiersRule(), new UseListSortRule(), new CollectionsFactoryMethodsRule(),
-				new UseCollectionsSingletonListRule(), new HideDefaultConstructorInUtilityClassesRule(),
-				new MakeFieldsAndVariablesFinalRule(),
+				new OptionalMapRule(), new OptionalFilterRule(), new OptionalIfPresentOrElseRule(),
+				new RemoveNullCheckBeforeInstanceofRule(), new GuardConditionRule(), new CollapseIfStatementsRule(),
+				new RemoveExplicitCallToSuperRule(), new RemoveEmptyStatementRule(),
+				new RemoveUnnecessaryThrownExceptionsRule(), new RemoveModifiersInInterfacePropertiesRule(),
+				new RemoveUnusedParameterRule(), new ReorderModifiersRule(), new UseListSortRule(),
+				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
+				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
+				new RemoveCollectionAddAllRule(), new RemoveRedundantTypeCastRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
@@ -171,10 +176,10 @@ public class RulesContainer {
 				new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
 
 				/*
-				 * String manipulations. This rule must be applied after
+				 * String manipulations. These rules must be applied after
 				 * StringBuildingLoopRule.
 				 */
-				new UseStringBuilderAppendRule(),
+				new UseStringBuilderAppendRule(), new UseStringJoinRule(), 
 
 				/*
 				 * Code formatting and organizing imports should always happen
@@ -213,4 +218,23 @@ public class RulesContainer {
 		return result;
 	}
 
+	public static List<RefactoringRule> getRulesForProjects(Collection<IJavaProject> selectedJavaProjects,
+			boolean isStandalone) {
+		List<RefactoringRule> rules = getAllRules(isStandalone);
+		List<RefactoringRule> result = new LinkedList<>();
+
+		for (RefactoringRule rule : rules) {
+
+			for (IJavaProject javaProject : selectedJavaProjects) {
+				rule.calculateEnabledForProject(javaProject);
+				if (!rule.isEnabled()) {
+					break;
+				}
+			}
+
+			result.add(rule);
+		}
+
+		return result;
+	}
 }

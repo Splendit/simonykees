@@ -203,6 +203,9 @@ rules:
   - MakeFieldsAndVariablesFinal
   - OptionalMap
   - OptionalFilter
+  - RemoveRedundantTypeCast
+  - RemoveCollectionAddAll
+  - UseStringJoin
 
 excludes:
   excludeClasses: []

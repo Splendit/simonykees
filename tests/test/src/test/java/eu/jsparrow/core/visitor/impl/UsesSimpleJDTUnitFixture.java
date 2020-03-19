@@ -1,13 +1,20 @@
 package eu.jsparrow.core.visitor.impl;
 
+import static eu.jsparrow.jdtunit.Matchers.assertMatch;
+
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jface.text.BadLocationException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 
+import eu.jsparrow.jdtunit.JdtUnitException;
 import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
 import eu.jsparrow.jdtunit.JdtUnitFixtureProject;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * This test helper provides a {@link JdtUnitFixtureProject} project
@@ -22,11 +29,10 @@ public abstract class UsesSimpleJDTUnitFixture {
 
 	private static final String CLASS_FIXTURE_NAME = "FixtureClass"; //$NON-NLS-1$
 
-	private static final String METHOD_FIXTURE_NAME = "FixtureMethod"; //$NON-NLS-1$
-
 	protected static JdtUnitFixtureProject fixtureProject;
 	protected static JdtUnitFixtureClass fixture;
-	protected static MethodDeclaration fixtureMethod;
+
+	protected AbstractASTRewriteASTVisitor visitor;
 
 	@BeforeAll
 	public static void setUpClass() throws Exception {
@@ -34,7 +40,7 @@ public abstract class UsesSimpleJDTUnitFixture {
 		fixtureProject.setUp();
 
 		fixture = fixtureProject.addCompilationUnit(CLASS_FIXTURE_NAME);
-		fixture.addMethod(METHOD_FIXTURE_NAME);
+		fixture.addDefaultFixtureMethod();
 	}
 
 	@AfterAll
@@ -45,5 +51,23 @@ public abstract class UsesSimpleJDTUnitFixture {
 	@AfterEach
 	public void tearDownTest() throws Exception {
 		fixture.clear(true);
+	}
+
+	protected void assertNoChange(String before) throws JavaModelException, BadLocationException, JdtUnitException {
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+	}
+
+	protected void assertChange(String before, String afterExpected)
+			throws JavaModelException, BadLocationException, JdtUnitException {
+		fixture.addMethodBlock(before);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
 	}
 }

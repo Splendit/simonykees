@@ -1,12 +1,21 @@
 package eu.jsparrow.ui.util;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -54,18 +63,23 @@ public class WizardHandlerUtil {
 	 * @return <b>{@code List<IJavaElement}></b> that are selected with the
 	 *         given <b>{@code event}</b>
 	 */
-	public static List<IJavaElement> getSelectedJavaElements(ExecutionEvent event) {
+	public static Map<IJavaProject, List<IJavaElement>> getSelectedJavaElements(ExecutionEvent event)
+			throws CoreException {
 		final String activePartId = HandlerUtil.getActivePartId(event);
 
 		switch (activePartId) {
 		case EDITOR:
-			return getFromEditor(HandlerUtil.getActiveEditor(event));
+			Map<IJavaProject, List<IJavaElement>> retVal = new HashMap<>();
+			getFromEditor(HandlerUtil.getActiveEditor(event))
+				.ifPresent(javaElement -> retVal.put(javaElement.getJavaProject(),
+						Collections.singletonList(javaElement)));
+			return retVal;
 		case PACKAGE_EXPLORER:
 		case PROJECT_EXPLORER:
 			return getFromExplorer(getCurrentStructuredSelection(event));
 		default:
 			logger.error(NLS.bind(Messages.AbstractSimonykeesHandler_error_activePartId_unknown, activePartId));
-			return Collections.emptyList();
+			return Collections.emptyMap();
 		}
 	}
 
@@ -79,17 +93,17 @@ public class WizardHandlerUtil {
 	 *         an instance of {@link ICompilationUnit} or an empty list
 	 *         otherwise.
 	 */
-	private static List<IJavaElement> getFromEditor(IEditorPart editorPart) {
+	private static Optional<IJavaElement> getFromEditor(IEditorPart editorPart) {
 		final IEditorInput editorInput = editorPart.getEditorInput();
 		final IJavaElement javaElement = JavaUI.getEditorInputJavaElement(editorInput);
 		if (javaElement instanceof ICompilationUnit) {
-			return Collections.singletonList(javaElement);
+			return Optional.of(javaElement);
 		} else {
 			logger.error(
 					NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_editor, javaElement.getClass()
 						.getName()));
 		}
-		return Collections.emptyList();
+		return Optional.empty();
 	}
 
 	/**
@@ -103,18 +117,39 @@ public class WizardHandlerUtil {
 	 *         {@link IPackageFragmentRoot}, {@link IJavaProject} or
 	 *         {@link IProject}. Otherwise an empty list.
 	 */
-	private static List<IJavaElement> getFromExplorer(IStructuredSelection iStructuredSelection) {
-		final List<IJavaElement> javaElements = new ArrayList<>();
+	private static Map<IJavaProject, List<IJavaElement>> getFromExplorer(IStructuredSelection iStructuredSelection)
+			throws CoreException {
+		final Map<IJavaProject, List<IJavaElement>> javaElements = new HashMap<>();
 		for (Iterator<?> iterator = iStructuredSelection.iterator(); iterator.hasNext();) {
 			final Object object = iterator.next();
 			if (object instanceof ICompilationUnit || object instanceof IPackageFragment
 					|| object instanceof IPackageFragmentRoot || object instanceof IJavaProject) {
-				javaElements.add((IJavaElement) object);
-			} else if (object instanceof IProject) {
-				IProject project = (IProject) object;
-				if (hasNature(project, JavaCore.NATURE_ID)) {
-					javaElements.add(JavaCore.create(project));
+				IJavaElement javaElement = (IJavaElement) object;
+				IJavaProject iJavaProject = javaElement.getJavaProject();
+
+				if (!javaElements.containsKey(iJavaProject)) {
+					javaElements.put(iJavaProject, new LinkedList<>());
 				}
+
+				javaElements.get(iJavaProject)
+					.add(javaElement);
+
+			} else if (object instanceof IProject) {
+				IProject selectedProject = (IProject) object;
+
+				List<IProject> projects = getSubProjects(selectedProject);
+				projects.add(selectedProject);
+				projects.stream()
+					.filter(project -> hasNature(project, JavaCore.NATURE_ID))
+					.map(JavaCore::create)
+					.forEach(javaProject -> {
+						if (!javaElements.containsKey(javaProject)) {
+							javaElements.put(javaProject, new LinkedList<>());
+						}
+
+						javaElements.get(javaProject)
+							.add(javaProject);
+					});
 			} else {
 				logger.error(
 						NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_explorer, object.getClass()
@@ -122,6 +157,37 @@ public class WizardHandlerUtil {
 			}
 		}
 		return javaElements;
+	}
+
+	private static List<IProject> getSubProjects(IProject parentProject) throws CoreException {
+		List<IProject> projects = new LinkedList<>();
+
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IWorkspaceRoot root = workspace.getRoot();
+		IProject[] workspaceProjects = root.getProjects();
+
+		IResource[] childResources = parentProject.members();
+		for (IResource resource : childResources) {
+			Optional<IProject> optionalProject = Arrays.stream(workspaceProjects)
+				.filter(p -> p.getName()
+					.equals(resource.getName()))
+				.collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
+					if (list.size() != 1) {
+						return Optional.empty();
+					}
+
+					return Optional.ofNullable(list.get(0));
+				}));
+
+			if (optionalProject.isPresent()) {
+				IProject project = optionalProject.get();
+				projects.add(project);
+				List<IProject> subProjects = getSubProjects(project);
+				projects.addAll(subProjects);
+			}
+		}
+
+		return projects;
 	}
 
 	/**

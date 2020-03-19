@@ -17,16 +17,15 @@ public class StringBuildingLoopRule {
 		// I don't want to break the result initializer
 		// I don't want to break anything
 		// save me
-		String result = collectionOfStrings // I don't want to break anything
-			.stream()
-			.collect(Collectors.joining());
+		String result = String.join("", collectionOfStrings // I don't want to
+															// break anything
+		);
 		return result;
 	}
 
 	public String missingCurlyBrackets(String input) {
 		final List<String> collectionOfStrings = generateStringList(input);
-		String result = collectionOfStrings.stream()
-			.collect(Collectors.joining());
+		String result = String.join("", collectionOfStrings);
 
 		return result;
 	}
@@ -37,8 +36,7 @@ public class StringBuildingLoopRule {
 		if (collectionOfStrings.isEmpty()) {
 			collectionOfStrings.add(anotherDecl);
 		}
-		String result = collectionOfStrings.stream()
-			.collect(Collectors.joining());
+		String result = String.join("", collectionOfStrings);
 		return result;
 	}
 
@@ -48,8 +46,7 @@ public class StringBuildingLoopRule {
 		if (collectionOfStrings.isEmpty()) {
 			collectionOfStrings.add(anotherDecl);
 		}
-		String result = collectionOfStrings.stream()
-			.collect(Collectors.joining());
+		String result = String.join("", collectionOfStrings);
 		return result;
 	}
 
@@ -61,16 +58,14 @@ public class StringBuildingLoopRule {
 			collectionOfStrings.add(anotherDecl);
 			result = "-";
 		}
-		result += collectionOfStrings.stream()
-			.collect(Collectors.joining());
+		result += String.join("", collectionOfStrings);
 		return result;
 	}
 
 	public String nonemptyInitialization(String input) {
 		final List<String> collectionOfStrings = generateStringList(input);
 		String result = "-";
-		result += collectionOfStrings.stream()
-			.collect(Collectors.joining());
+		result += String.join("", collectionOfStrings);
 		return result;
 	}
 
@@ -84,8 +79,7 @@ public class StringBuildingLoopRule {
 		if (collectionOfStrings.isEmpty()) {
 			collectionOfStrings.add(anotherDecl);
 
-			result += collectionOfStrings.stream()
-				.collect(Collectors.joining());
+			result += String.join("", collectionOfStrings);
 		}
 		return result;
 	}
@@ -101,8 +95,7 @@ public class StringBuildingLoopRule {
 			final String result = "-";
 			collectionOfStrings.add(result);
 		}
-		String result = collectionOfStrings.stream()
-			.collect(Collectors.joining());
+		String result = String.join("", collectionOfStrings);
 
 		return result;
 	}
@@ -123,8 +116,7 @@ public class StringBuildingLoopRule {
 
 	public String plusEqualsOperator(String input) {
 		final List<String> collectionOfStrings = generateStringList(input);
-		String result = collectionOfStrings.stream()
-			.collect(Collectors.joining());
+		String result = String.join("", collectionOfStrings);
 
 		return result;
 	}
@@ -155,8 +147,7 @@ public class StringBuildingLoopRule {
 	public String savingAnnotationsOverCollection(String input) {
 		final List<String> listOfStrings = generateStringList(input);
 		@Deprecated
-		String result = listOfStrings.stream()
-			.collect(Collectors.joining());
+		String result = String.join("", listOfStrings);
 		return result;
 	}
 
@@ -206,8 +197,7 @@ public class StringBuildingLoopRule {
 			.collect(Collectors.joining());
 
 		final String anotherResult = "";
-		result += listOfStrings.stream()
-			.collect(Collectors.joining());
+		result += String.join("", listOfStrings);
 
 		return result + anotherResult;
 	}
@@ -319,8 +309,7 @@ public class StringBuildingLoopRule {
 		 */
 
 		if (collectionOfStrings.isEmpty()) {
-			result += collectionOfStrings.stream()
-				.collect(Collectors.joining());
+			result += String.join("", collectionOfStrings);
 		}
 		return result;
 	}

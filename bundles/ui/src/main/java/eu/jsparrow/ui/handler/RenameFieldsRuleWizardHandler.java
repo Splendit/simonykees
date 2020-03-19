@@ -2,17 +2,20 @@ package eu.jsparrow.ui.handler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -54,11 +57,11 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 	private static final Logger logger = LoggerFactory.getLogger(RenameFieldsRuleWizardHandler.class);
 
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
-	
+
 	public RenameFieldsRuleWizardHandler() {
-		
+
 	}
-	
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
@@ -67,22 +70,41 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 				.getActiveShell(), Messages.SelectRulesWizardHandler_allready_running, MessageDialog.INFORMATION);
 		} else {
 			Activator.setRunning(true);
-			
+
 			final Shell shell = HandlerUtil.getActiveShell(event);
-			if(!licenseUtil.checkAtStartUp(shell)) {
+			if (!licenseUtil.checkAtStartUp(shell)) {
 				Activator.setRunning(false);
 				return null;
 			}
 
-			List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
+			Map<IJavaProject, List<IJavaElement>> selectedJavaElements;
+			try {
+				selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
+			} catch (CoreException e) {
+				logger.error(e.getMessage(), e);
+				WizardMessageDialog.synchronizeWithUIShowError(new RefactoringException(
+						Messages.SelectRulesWizardHandler_getting_selected_resources_failed + e.getMessage(),
+						Messages.SelectRulesWizardHandler_user_getting_selected_resources_failed, e));
+				return null;
+			}
 			if (!selectedJavaElements.isEmpty()) {
+
+				if (selectedJavaElements.size() != 1) {
+					synchronizeWithUIShowSelectionErrorMessage();
+					return false;
+				}
 
 				Job job = new Job(Messages.RenameFieldsRuleWizardHandler_performFinish_jobName) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
+						List<IJavaElement> selectedElements = selectedJavaElements.entrySet()
+							.iterator()
+							.next()
+							.getValue();
+
 						List<ICompilationUnit> iCompilationUnits = new ArrayList<>();
 
-						boolean transformed = getCompilationUnits(iCompilationUnits, selectedJavaElements, monitor);
+						boolean transformed = getCompilationUnits(iCompilationUnits, selectedElements, monitor);
 						if (!transformed) {
 							return Status.CANCEL_STATUS;
 						}
@@ -115,8 +137,8 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 
 				return true;
 			} else {
-				// SIM-656
-				logger.error(Messages.SelectRulesWizardHandler_selectionNotPossible_ubuntuBug);
+				WizardMessageDialog.synchronizedWithUIShowWarningNoCompilationUnitDialog();
+				logger.error(Messages.WizardMessageDialog_selectionDidNotContainAnyJavaFiles);
 				Activator.setRunning(false);
 			}
 
@@ -186,12 +208,25 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 					if (!errorFreeICus.isEmpty()) {
 						synchronizeWithUIShowRenameFieldsRuleWizard(errorFreeICus);
 					} else {
-						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitDialog();
+						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitWithoutErrorsDialog();
 					}
 				} else {
 
 					Activator.setRunning(false);
 				}
+			});
+	}
+
+	private void synchronizeWithUIShowSelectionErrorMessage() {
+		Display.getDefault()
+			.syncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				MessageDialog.openWarning(shell, Messages.RenameFieldsRuleWizardHandler_multipleProjectsSelected,
+						Messages.RenameFieldsRuleWizardHandler_renamingRuleOnOneProjectOnly);
+
+				Activator.setRunning(false);
 			});
 	}
 

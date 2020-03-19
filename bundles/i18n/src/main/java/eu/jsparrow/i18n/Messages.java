@@ -205,6 +205,8 @@ public class Messages extends NLS {
 	public static String LocalVariableTypeInferenceRule_name;
 	public static String LoggerRuleWizard_title;
 	public static String LoggerRuleWizardHandler_info_supportedFrameworkFound;
+	public static String LoggerRuleWizardHandler_loggerRuleOnOneProjectOnly;
+	public static String LoggerRuleWizardHandler_multipleProjectsSelected;
 	public static String LoggerRuleWizardHandler_noLogger;
 	public static String LoggerRuleWizardPage_alwaysAddExceptionParamInLoggerStatement;
 	public static String LoggerRuleWizardPage_alwaysUsePrintStacktraceOptionForLoggingException;
@@ -341,6 +343,8 @@ public class Messages extends NLS {
 	public static String RegistrationFormCheckBox_invalidDataText;
 	public static String RegistrationFormField_invalidDataText;
 	public static String RegistrationFormField_validDataText;
+	public static String RemoveCollectionAddAllRule_description;
+	public static String RemoveCollectionAddAllRule_name;
 	public static String RemoveDoubleNegationRule_description;
 	public static String RemoveDoubleNegationRule_name;
 	public static String RemoveDuplicatedThrowsRule_description;
@@ -357,10 +361,14 @@ public class Messages extends NLS {
 	public static String RemoveNewStringConstructorRule_name;
 	public static String RemoveNullCheckBeforeInstanceofRule_description;
 	public static String RemoveNullCheckBeforeInstanceofRule_name;
+	public static String RemoveRedundantTypeCastRule_description;
+	public static String RemoveRedundantTypeCastRule_name;
 	public static String RemoveUnusedParameterRule_description;
 	public static String RemoveUnusedParameterRule_name;
 	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
+	public static String RenameFieldsRuleWizardHandler_multipleProjectsSelected;
 	public static String RenameFieldsRuleWizardHandler_performFinish_jobName;
+	public static String RenameFieldsRuleWizardHandler_renamingRuleOnOneProjectOnly;
 	public static String RenameFieldsRuleWizardPage_description;
 	public static String RenameFieldsRuleWizardPage_dollarSignReplacementLabelText;
 	public static String RenameFieldsRuleWizardPage_fieldTypeLabelText;
@@ -387,10 +395,12 @@ public class Messages extends NLS {
 	public static String SelectRulesWizardHandler_allready_running;
 	public static String SelectRulesWizardHandler_finishButtonText;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
+	public static String SelectRulesWizardHandler_getting_selected_resources_failed;
 	public static String SelectRulesWizardHandler_noFileWithoutError;
 	public static String SelectRulesWizardHandler_selectionNotPossible_ubuntuBug;
 	public static String SelectRulesWizardPage_addAllButtonLabel;
 	public static String SelectRulesWizardPage_addButtonLabel;
+	public static String SelectRulesWizardHandler_user_getting_selected_resources_failed;
 	public static String SelectRulesWizardPage_CustomProfileLabel;
 	public static String SelectRulesWizardPage_defaultDescriptionText;
 	public static String SelectRulesWizardPage_description;
@@ -518,6 +528,8 @@ public class Messages extends NLS {
 	public static String UseListSortRule_name;
 	public static String UseStringBuilderAppendRule_description;
 	public static String UseStringBuilderAppendRule_name;
+	public static String UseStringJoinRule_description;
+	public static String UseStringJoinRule_name;
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
 	public static String ValidateExecutor_validation_scheduler_started;
 	public static String WelcomeEditor_title;
@@ -531,6 +543,7 @@ public class Messages extends NLS {
 	public static String WelcomePage_title;
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
+	public static String WizardMessageDialog_selectionDidNotContainAnyJavaFiles;
 	public static String PutIfAbsentRule_description;
 	public static String PutIfAbsentRule_name;
 	public static String YAMLConfigurationWrapper_configurationFileNotFoundAtPath;
