@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>bundles</artifactId>
-		<version>3.15.0-SNAPSHOT</version>
+		<version>3.16.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>eu.jsparrow.i18n</artifactId>
