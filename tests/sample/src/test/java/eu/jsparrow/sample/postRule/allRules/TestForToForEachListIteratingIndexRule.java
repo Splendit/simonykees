@@ -178,7 +178,7 @@ public class TestForToForEachListIteratingIndexRule {
 		final List<String> foo = generateList(input);
 		final StringBuilder sb = new StringBuilder();
 
-		foo.forEach(aFoo -> {
+		for (int j = 0; j < foo.size(); j++) {
 			final int i = 0;
 			final int k = 0;
 			final String it = foo.get(i);
@@ -189,7 +189,7 @@ public class TestForToForEachListIteratingIndexRule {
 				.append(it2)
 				.append(";")
 				.toString());
-		});
+		}
 
 		return sb.toString();
 	}

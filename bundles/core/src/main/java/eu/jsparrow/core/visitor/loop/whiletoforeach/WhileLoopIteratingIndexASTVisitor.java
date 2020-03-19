@@ -146,7 +146,7 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 	 * @param simpleName
 	 */
 	@Override
-	protected void analyseBeforeLoopOccurrence(SimpleName simpleName) {
+	protected void analyzeBeforeLoopOccurrence(SimpleName simpleName) {
 
 		if (VariableDeclarationFragment.NAME_PROPERTY == simpleName.getLocationInParent()) {
 			VariableDeclarationFragment declarationFragment = (VariableDeclarationFragment) simpleName.getParent();

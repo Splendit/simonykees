@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.impl;
 
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isOverloadedOnParameter;
+
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -51,34 +53,34 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		if (typeTo.isIntersectionType()) {
 			return true;
 		}
-		
-		if(containsWildCardTypeArgument(typeTo)) {
+
+		if (containsWildCardTypeArgument(typeTo)) {
 			return true;
-		}		
+		}
 
 		if (ClassRelationUtil.compareITypeBinding(typeFrom, typeTo)) {
 			applyRule(castExpression);
 		}
 		return true;
 	}
-	
+
 	private boolean containsWildCardTypeArgument(ITypeBinding typeBinding) {
-		ITypeBinding[] typeArguments = typeBinding.getTypeArguments();		
-		if(typeArguments == null) {
+		ITypeBinding[] typeArguments = typeBinding.getTypeArguments();
+		if (typeArguments == null) {
 			return false;
 		}
-		if(typeArguments.length == 0) {
+		if (typeArguments.length == 0) {
 			return false;
 		}
-		for(ITypeBinding typeArgument : typeArguments) {
-			if(typeArgument.isWildcardType()) {
+		for (ITypeBinding typeArgument : typeArguments) {
+			if (typeArgument.isWildcardType()) {
 				return true;
 			}
-			if(containsWildCardTypeArgument(typeArgument)) {
+			if (containsWildCardTypeArgument(typeArgument)) {
 				return true;
 			}
 		}
-		return false;		
+		return false;
 	}
 
 	private boolean isRedundantLambdaTypeCast(CastExpression castExpression) {
@@ -108,6 +110,13 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		int castParamIndex = arguments.indexOf(castExpression);
 		IMethodBinding iMethodBinding = parent.resolveMethodBinding();
 		ITypeBinding[] formalParameterTypes = iMethodBinding.getParameterTypes();
+
+		List<IMethodBinding> overloadedMethods = ClassRelationUtil.findOverloadedMethods(parent);
+		boolean isOverloaded = overloadedMethods.stream()
+			.anyMatch(method -> isOverloadedOnParameter(iMethodBinding, method, castParamIndex));
+		if (isOverloaded) {
+			return false;
+		}
 
 		int lastParameterIndex = formalParameterTypes.length - 1;
 		if (iMethodBinding.isVarargs() && castParamIndex >= lastParameterIndex) {
@@ -152,8 +161,7 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		while (typeCastParent.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
 			typeCastParent = typeCastParent.getParent();
 		}
-		int typeCastParentNodeType = typeCastParent
-			.getNodeType();
+		int typeCastParentNodeType = typeCastParent.getNodeType();
 		if (typeCastParentNodeType != ASTNode.VARIABLE_DECLARATION_FRAGMENT
 				&& typeCastParentNodeType != ASTNode.ASSIGNMENT) {
 			return expressionToBeCasted;
