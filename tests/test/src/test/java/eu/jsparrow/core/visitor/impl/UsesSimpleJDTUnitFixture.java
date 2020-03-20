@@ -32,7 +32,7 @@ public abstract class UsesSimpleJDTUnitFixture {
 	protected static JdtUnitFixtureProject fixtureProject;
 	protected static JdtUnitFixtureClass fixture;
 
-	private AbstractASTRewriteASTVisitor visitor;
+	private AbstractASTRewriteASTVisitor visitor = new AbstractASTRewriteASTVisitor() {};
 
 	@BeforeAll
 	public static void setUpClass() throws Exception {
