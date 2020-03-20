@@ -1,32 +1,22 @@
 package eu.jsparrow.core.visitor.impl;
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
 public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJDTUnitFixture {
 
-	private static final String DEFAULT_TYPE_DECLARATION_NAME = "TestCU";
-	
-	private static final String ADDED_CONSTRUCTOR = "private TestCU() {"
+	private static final String ADDED_CONSTRUCTOR = "private  " + DEFAULT_TYPE_DECLARATION_NAME + "() {"
 												  + "	throw new IllegalStateException(\"Utility class\");"
 												  + "}";
 
-	private HideDefaultConstructorInUtilityClassesASTVisitor visitor;
-	private JdtUnitFixtureClass defaultFixture;
-
 	@BeforeEach
-	public void setUp() throws Exception {
-		defaultFixture = fixtureProject.addCompilationUnit("TestCU");
-
-		visitor = new HideDefaultConstructorInUtilityClassesASTVisitor();
+	public void setUpDefaultVisitor() throws Exception {
+		setDefaultVisitor(new HideDefaultConstructorInUtilityClassesASTVisitor());
 	}
 
 	@AfterEach
@@ -39,13 +29,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 		String actual = "public static void sayHallo() {" + "    System.out.println(\"Hallo\");" + "}";
 		String expected = ADDED_CONSTRUCTOR + actual;
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actual);
-
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, expected),
-				defaultFixture.getTypeDeclaration());
+		assertChange(actual, expected);
 	}
 
 	@Test
@@ -61,13 +45,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 		testClass2.addMethod("testMethodWithDefaultConstructorInvocation",
 				DEFAULT_TYPE_DECLARATION_NAME + " t = new " + DEFAULT_TYPE_DECLARATION_NAME + "();");
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected);
-
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected),
-				defaultFixture.getTypeDeclaration());
+		assertNoChange(actualAndExpected);
 	}
 
 	@Test
@@ -75,13 +53,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 		String acutalAndExpected = "public static void test() {" + "	System.out.println(\"test\");" + "}" + ""
 				+ "public String nonStaticMethod() {" + "	return \"non-static method\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, acutalAndExpected);
-
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, acutalAndExpected),
-				defaultFixture.getTypeDeclaration());
+		assertNoChange(acutalAndExpected);
 	}
 
 	@Test
@@ -90,13 +62,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 				+ "	System.out.println(\"Hello\" + test());" + "}" + "" + "public static String test() {"
 				+ "	return \"asdf\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected);
-
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected),
-				defaultFixture.getTypeDeclaration());
+		assertNoChange(actualAndExpected);
 	}
 
 	@Test
@@ -107,13 +73,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 
 		String expected = ADDED_CONSTRUCTOR + actual;
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actual);
-
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, expected),
-				defaultFixture.getTypeDeclaration());
+		assertChange(actual, expected);
 
 	}
 
@@ -121,13 +81,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 	public void test_constructorAlreadyPresent_shouldNotTransform() throws Exception {
 		String actualAndExpected = "public TestCU() {" + "}" + "public static void test() {" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected);
-
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected),
-				defaultFixture.getTypeDeclaration());
+		assertNoChange(actualAndExpected);
 	}
 
 	@Test
@@ -138,13 +92,7 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 
 		String expected = ADDED_CONSTRUCTOR + actual;
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actual);
-
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, expected),
-				defaultFixture.getTypeDeclaration());
+		assertChange(actual, expected);
 	}
 
 	@Test
@@ -152,53 +100,29 @@ public class HideDefaultConstructorInUtilityClassesASTVisitorTest extends UsesJD
 		String actualAndExpected = "public String testString;" + "public static Integer testInteger;" + ""
 				+ "public static void test() {" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected);
-
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected),
-				defaultFixture.getTypeDeclaration());
+		assertNoChange(actualAndExpected);
 	}
 
 	@Test
 	public void test_noMethodsAndNoFieldsArePresent_shouldNotTransform() throws Exception {
 		String actualAndExpected = "class InnerTestCU {" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected);
-
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected),
-				defaultFixture.getTypeDeclaration());
+		assertNoChange(actualAndExpected);
 	}
 
 	@Test
-	public void test_onlyStaticFiledsArePresent_shouldTransform() throws Exception {
+	public void test_onlyStaticFieldsArePresent_shouldTransform() throws Exception {
 		String actual = "public static Integer field;";
 
 		String expected = ADDED_CONSTRUCTOR + actual;
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actual);
-
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, expected),
-				defaultFixture.getTypeDeclaration());
+		assertChange(actual, expected);
 	}
 
 	@Test
-	public void test_onlyStaticAndNonStaticFiledsArePresent_shouldNotTransform() throws Exception {
+	public void test_onlyStaticAndNonStaticFieldsArePresent_shouldNotTransform() throws Exception {
 		String actualAndExpected = "public static Integer field;" + "public String stringField;";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected);
-
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actualAndExpected),
-				defaultFixture.getTypeDeclaration());
+		assertNoChange(actualAndExpected);
 	}
 }
