@@ -52,7 +52,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void staticField_twoFragments_onlyOneInitilaizedInDeclaration_shouldNotBeCandidate() throws Exception {
+	public void staticField_twoFragments_onlyOneInitializedInDeclaration_shouldNotBeCandidate() throws Exception {
 		String typeContent = "private static String a, b = \"asdf\";";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
@@ -226,7 +226,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void nonStaticField_initInDeclaratoionConstructorAndInitializer_shouldNotBeCandidate() throws Exception {
+	public void nonStaticField_initInDeclarationConstructorAndInitializer_shouldNotBeCandidate() throws Exception {
 		String typeContent = "private String a = \"asdf\";" + "{" + "	a = \"jkl\";" + "}" + "public "
 				+ DEFAULT_TYPE_NAME + "() {" + "	a = \"\";" + "}";
 
@@ -254,7 +254,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void nonStaticfield_assignedMultipleTimesInInitialiser_shouldNotBeCandidate() throws Exception {
+	public void nonStaticField_assignedMultipleTimesInInitializer_shouldNotBeCandidate() throws Exception {
 		String typeContent = "private String a;" + "{" + "	a = \"asdf\";" + "	a = \"jkl\";" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
@@ -267,7 +267,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void nonStaticfield_assignedMultipleTimesInConstructor_shouldNotBeCandidate() throws Exception {
+	public void nonStaticField_assignedMultipleTimesInConstructor_shouldNotBeCandidate() throws Exception {
 		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_NAME + "() {" + "	a = \"asdf\";"
 				+ "	a = \"jkl\";" + "}";
 
@@ -281,7 +281,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void nonStaticfield_assignedMultipleTimesInMultipleConstructor_shouldNotBeCandidate() throws Exception {
+	public void nonStaticField_assignedMultipleTimesInMultipleConstructor_shouldNotBeCandidate() throws Exception {
 		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_NAME + "() {" + "	a = \"asdf\";"
 				+ "	a = \"jkl\";" + "}" + "public " + DEFAULT_TYPE_NAME + "(String asdf) {" + "	a = \"asdf\";" + "}"
 				+ "public " + DEFAULT_TYPE_NAME + "(String asdf, String jkl) {" + "	a = \"asdf\";" + "	a = \"jkl\";"

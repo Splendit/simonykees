@@ -44,7 +44,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 	
 	@Test
-	public void visit_inversedNullCheck_shouldTransform() throws Exception {
+	public void visit_reversedNullCheck_shouldTransform() throws Exception {
 		String original = "" + 
 				"		ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();\n" + 
 				"		String value = map.get(\"key\");\n" + 
@@ -93,7 +93,7 @@ public class MapGetOrDefaultASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 	
 	@Test
-	public void visit_mapAllowingNulValues_shouldNotTransform() throws Exception {
+	public void visit_mapAllowingNullValues_shouldNotTransform() throws Exception {
 		fixture.addImport("java.util.HashMap");
 		
 		assertNoChange("" + 

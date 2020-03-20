@@ -269,7 +269,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingRHSmethodInvocation_shouldNotTransform() throws Exception {
+	public void visit_missingRHSMethodInvocation_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -285,7 +285,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingRHSreadLineInvocation_shouldNotTransform() throws Exception {
+	public void visit_missingRHSReadLineInvocation_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+
@@ -301,7 +301,7 @@ public class BufferedReaderLinesWhileLoopsASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_missingLHSsimpleName_shouldNotTransform() throws Exception {
+	public void visit_missingLHSSimpleName_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(\"file.name.txt\"))) {\n"
 				+

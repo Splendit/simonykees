@@ -15,7 +15,7 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesSimpleJDTU
 	}
 	
 	@Test
-	public void visit_rawCollection_shouldNotTranform() throws Exception {
+	public void visit_rawCollection_shouldNotTransform() throws Exception {
 		
 		String original = "" +
 				"		List strings = new ArrayList<String>();\n" + 
@@ -44,7 +44,7 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesSimpleJDTU
 	}
 	
 	@Test
-	public void visit_typedCollection_shouldTranform() throws Exception {
+	public void visit_typedCollection_shouldTransform() throws Exception {
 		
 		String original = "" +
 				"		List<String> strings = new ArrayList<String>();\n" + 
@@ -64,7 +64,7 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesSimpleJDTU
 	}
 	
 	@Test
-	public void modifierers_should_not_be_lost() throws Exception {
+	public void modifiers_should_not_be_lost() throws Exception {
 		
 		String original = "" +
 				"		List<String> strings = new ArrayList<String>();\n" + 

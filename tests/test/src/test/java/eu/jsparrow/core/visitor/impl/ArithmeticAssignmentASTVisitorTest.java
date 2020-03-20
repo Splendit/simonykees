@@ -28,7 +28,7 @@ public class ArithmeticAssignmentASTVisitorTest extends UsesSimpleJDTUnitFixture
 	}
 
 	@Test
-	public void visit__AssignmentWithAdd_ShouldUpdateListeners() throws Exception {
+	public void visit_AssignmentWithAdd_ShouldUpdateListeners() throws Exception {
 		ArithmethicAssignmentASTVisitor arithmethicAssignmentVisitor = new ArithmethicAssignmentASTVisitor();
 		ASTRewriteVisitorListenerStub listener = new ASTRewriteVisitorListenerStub();
 		arithmethicAssignmentVisitor.addRewriteListener(listener);
