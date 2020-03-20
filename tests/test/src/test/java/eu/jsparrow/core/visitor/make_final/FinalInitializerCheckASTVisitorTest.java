@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
-import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 @SuppressWarnings("nls")
@@ -23,11 +22,10 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	private static final String DEFAULT_TYPE_NAME = "TestCU";
 
 	private FinalInitializerCheckASTVisitor visitor;
-	private JdtUnitFixtureClass defaultFixture;
 
 	@BeforeEach
-	public void setUp() throws Exception {
-		defaultFixture = fixtureProject.addCompilationUnit(DEFAULT_TYPE_NAME);
+	public void setUpVisitor() throws Exception {
+//		defaultFixture = fixtureProject.addCompilationUnit(DEFAULT_TYPE_NAME);
 
 		visitor = new FinalInitializerCheckASTVisitor();
 	}
