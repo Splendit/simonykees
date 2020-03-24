@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -44,7 +45,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
 /**
- * Finds anonymous classes an converts it to lambdas, if they are functional
+ * Finds anonymous classes and converts them to lambdas, if they are functional
  * interfaces.
  * 
  * @author Martin Huter, Ardit Ymeri
@@ -122,11 +123,14 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 				ITypeBinding parentNodeTypeBinding = parentNode.getType()
 					.resolveBinding();
 				if (parentNodeTypeBinding != null) {
+
 					/*
-					 * check that only one Method is implemented, which is the
-					 * FunctionalInterfaceMethod
+					 * Get the Body of the functional interface method
+					 * implementation
 					 */
-					if (!checkOnlyFunctionalInterfaceMethodIsImplemented(node, parentNodeTypeBinding)) {
+					Block onlyFunctionalInterfaceMethodImplBody = getOnlyFunctionalInterfaceMethodImplBody(
+							node, parentNodeTypeBinding);
+					if (onlyFunctionalInterfaceMethodImplBody == null) {
 						return false;
 					}
 
@@ -143,7 +147,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					methodBlockASTVisitor.setASTRewrite(astRewrite);
 					node.accept(methodBlockASTVisitor);
 					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
-					
+
 					if (moveBlock == null || ASTNodeUtil.containsWildCards(moveBlock)) {
 						return true;
 					}
@@ -236,6 +240,17 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 							}
 						}
+
+						UnqualifiedFieldNamesVisitor unqualifiedConstantNamesVisitor = new UnqualifiedFieldNamesVisitor(
+								node);
+						onlyFunctionalInterfaceMethodImplBody.accept(unqualifiedConstantNamesVisitor);
+
+						unqualifiedConstantNamesVisitor.getSimpleNameReplacements()
+							.forEach(mapEntry -> {
+								SimpleName simpleName = mapEntry.getKey();
+								QualifiedName qualifiedName = mapEntry.getValue();
+								astRewrite.replace(simpleName, qualifiedName, null);
+							});
 
 						VariableDefinitionASTVisitor varVisistor = new VariableDefinitionASTVisitor(node,
 								relevantBlocks);
@@ -414,29 +429,43 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	 * @param parentNodeTypeBinding
 	 * @return
 	 */
-	private boolean checkOnlyFunctionalInterfaceMethodIsImplemented(AnonymousClassDeclaration node,
+	private Block getOnlyFunctionalInterfaceMethodImplBody(AnonymousClassDeclaration node,
 			ITypeBinding parentNodeTypeBinding) {
 		if (node == null) {
-			return false;
+			return null;
 		}
 
 		if (parentNodeTypeBinding == null || node.bodyDeclarations() == null
 				|| parentNodeTypeBinding.getFunctionalInterfaceMethod() == null) {
-			return false;
+			return null;
 		}
 
 		if (node.bodyDeclarations()
-			.size() == 1
-				&& node.bodyDeclarations()
-					.get(0) instanceof MethodDeclaration) {
-			return StringUtils.equals(parentNodeTypeBinding.getFunctionalInterfaceMethod()
-				.getName(),
-					((MethodDeclaration) node.bodyDeclarations()
-						.get(0)).getName()
-							.getIdentifier());
+			.size() != 1) {
+			return null;
 		}
 
-		return false;
+		if (!(node.bodyDeclarations()
+			.get(0) instanceof MethodDeclaration)) {
+			return null;
+		}
+
+		String functionalInterfaceMethodName = parentNodeTypeBinding.getFunctionalInterfaceMethod()
+			.getName();
+		MethodDeclaration methodDeclaration = (MethodDeclaration) node.bodyDeclarations()
+			.get(0);
+
+		if (methodDeclaration == null) {
+			return null;
+		}
+
+		if (StringUtils.equals(functionalInterfaceMethodName,
+				methodDeclaration.getName()
+					.getIdentifier())) {
+			return methodDeclaration.getBody();
+		}
+
+		return null;
 	}
 
 	/**
