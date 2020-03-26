@@ -38,6 +38,7 @@ public enum Tag {
 	READABILITY("readability"),
 	OLD_LANGUAGE_CONSTRUCTS("old language constructs"),
 	LAMBDA("lambda"),
+	SECURITY("security"),
 	FREE("free");
 
 	private List<String> tagName;

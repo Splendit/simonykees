@@ -71,6 +71,7 @@ import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
+import eu.jsparrow.core.rule.impl.ReplaceDynamicQueryByPreparedStatementRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
@@ -87,6 +88,7 @@ import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.UseStringJoinRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
+import eu.jsparrow.core.visitor.security.ReplaceDynamicQueryByPreparedStatementASTVisitor;
 import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
 
@@ -155,6 +157,11 @@ public class RulesContainer {
 				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
 				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
 				new RemoveCollectionAddAllRule(), new RemoveRedundantTypeCastRule(),
+				
+				/*
+				 * Security
+				 */
+				new ReplaceDynamicQueryByPreparedStatementRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
