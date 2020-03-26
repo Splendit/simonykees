@@ -242,7 +242,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						}
 
 						UnqualifiedFieldNamesVisitor unqualifiedConstantNamesVisitor = new UnqualifiedFieldNamesVisitor(
-								node);
+								parentNode);
 						onlyFunctionalInterfaceMethodImplBody.accept(unqualifiedConstantNamesVisitor);
 
 						unqualifiedConstantNamesVisitor.getSimpleNameReplacements()
@@ -435,8 +435,15 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			return null;
 		}
 
-		if (parentNodeTypeBinding == null || node.bodyDeclarations() == null
-				|| parentNodeTypeBinding.getFunctionalInterfaceMethod() == null) {
+		if (parentNodeTypeBinding == null) {
+			return null;
+		}
+
+		if (parentNodeTypeBinding.getFunctionalInterfaceMethod() == null) {
+			return null;
+		}
+
+		if (node.bodyDeclarations() == null) {
 			return null;
 		}
 
@@ -445,24 +452,19 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			return null;
 		}
 
-		if (!(node.bodyDeclarations()
-			.get(0) instanceof MethodDeclaration)) {
-			return null;
-		}
+		if (node.bodyDeclarations()
+			.get(0) instanceof MethodDeclaration) {
 
-		String functionalInterfaceMethodName = parentNodeTypeBinding.getFunctionalInterfaceMethod()
-			.getName();
-		MethodDeclaration methodDeclaration = (MethodDeclaration) node.bodyDeclarations()
-			.get(0);
+			MethodDeclaration methodDeclaration = (MethodDeclaration) node.bodyDeclarations()
+				.get(0);
+			String functionalInterfaceMethodName = parentNodeTypeBinding.getFunctionalInterfaceMethod()
+				.getName();
 
-		if (methodDeclaration == null) {
-			return null;
-		}
-
-		if (StringUtils.equals(functionalInterfaceMethodName,
-				methodDeclaration.getName()
-					.getIdentifier())) {
-			return methodDeclaration.getBody();
+			if (StringUtils.equals(functionalInterfaceMethodName,
+					methodDeclaration.getName()
+						.getIdentifier())) {
+				return methodDeclaration.getBody();
+			}
 		}
 
 		return null;

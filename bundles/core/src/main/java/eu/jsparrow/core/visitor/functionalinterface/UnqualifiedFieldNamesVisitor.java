@@ -1,21 +1,22 @@
 package eu.jsparrow.core.visitor.functionalinterface;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 
+import eu.jsparrow.core.visitor.sub.SimpleNameQualifier;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
@@ -27,37 +28,35 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 class UnqualifiedFieldNamesVisitor extends ASTVisitor {
 
-	private final List<ITypeBinding> ancestors;
-
 	private final Map<SimpleName, QualifiedName> simpleNameReplacementsMap = new HashMap<>();
+	
+	private final Type instanceCreationType;
+	
+	private final ITypeBinding instanceCreationResolvedTypeBinding;
 
-	UnqualifiedFieldNamesVisitor(AnonymousClassDeclaration anonymousClassDeclaration) {
-
-		ancestors = ClassRelationUtil.findAncestors(anonymousClassDeclaration.resolveBinding());
-		// Sometimes during debugging and collecting ancestors
-		// com.sun.jdi.ObjectCollectedException occurred while retrieving
-		// value.
-		ancestors.size();
+	UnqualifiedFieldNamesVisitor(ClassInstanceCreation instanceCreation) {
+		instanceCreationType = instanceCreation.getType();
+		instanceCreationResolvedTypeBinding = instanceCreationType.resolveBinding();
 	}
 
-	private void addToReplacementsMap(ITypeBinding declaringType, SimpleName simpleNameToReplace) {
-		AST astNode = simpleNameToReplace.getParent()
-			.getAST();
-		SimpleName qualifier = astNode.newSimpleName(declaringType.getName());
-		SimpleName simpleNameClone = astNode.newSimpleName(simpleNameToReplace.getIdentifier());
-		QualifiedName qualifiedName = astNode.newQualifiedName(qualifier, simpleNameClone);
+	private void addToReplacementsMap(SimpleName simpleNameToReplace) {
+		QualifiedName qualifiedName = SimpleNameQualifier.qualifyByType(instanceCreationType, simpleNameToReplace);
 		simpleNameReplacementsMap.put(simpleNameToReplace, qualifiedName);
 	}
 
 	@Override
-	public boolean visit(SimpleName node) {
-		ASTNode simpleNameParent = node.getParent();
+	public boolean visit(SimpleName simpleName) {
+		ASTNode simpleNameParent = simpleName.getParent();
 		if (simpleNameParent instanceof QualifiedName) {
 			return true;
 		}
 
-		IBinding binding = node.resolveBinding();
-		if (!(binding instanceof IVariableBinding)) {
+		IBinding binding = simpleName.resolveBinding();
+		if (binding == null) {
+			return true;
+		}
+
+		if (binding.getKind() != IBinding.VARIABLE) {
 			return true;
 		}
 
@@ -67,21 +66,14 @@ class UnqualifiedFieldNamesVisitor extends ASTVisitor {
 		}
 
 		ITypeBinding declaringClass = variableBinding.getDeclaringClass();
-		String declaringClassName = declaringClass.getQualifiedName();
+		boolean isInheritingDeclaringClass = ClassRelationUtil.isInheritingContentOfTypes(
+				instanceCreationResolvedTypeBinding,
+				Collections.singletonList(declaringClass.getQualifiedName()));
+		
+		boolean isDeclaringClass = ClassRelationUtil.isContentOfType(instanceCreationResolvedTypeBinding, declaringClass.getQualifiedName());
 
-		int i = 0;
-		boolean declaringClassIsSupertype = false;
-		while (i < ancestors.size() && !declaringClassIsSupertype) {
-			ITypeBinding superType = ancestors.get(i);
-			if (superType.getQualifiedName()
-				.equals(declaringClassName)) {
-				declaringClassIsSupertype = true;
-			}
-			i++;
-		}
-
-		if (declaringClassIsSupertype) {
-			addToReplacementsMap(declaringClass, node);
+		if (isInheritingDeclaringClass || isDeclaringClass) {
+			addToReplacementsMap(simpleName);
 		}
 
 		return true;
