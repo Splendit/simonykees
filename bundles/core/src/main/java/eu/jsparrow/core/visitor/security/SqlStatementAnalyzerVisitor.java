@@ -5,21 +5,27 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+/**
+ * 
+ * 
+ * @since 3.16.0
+ *
+ */
 public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 	
 	private ASTNode declaration;
 	private SimpleName statementName;
 	private Expression initializer;
 	private CompilationUnit compilationUnit;
-	private MethodInvocation getResultSet;
+	private MethodInvocation getResultSetInvocation;
 	private boolean unsafe = false;
 	private boolean beforeDeclaration = true;
-	private boolean beforeUsage = true;
 	
 	public SqlStatementAnalyzerVisitor(ASTNode declaration, SimpleName sqlStatement, CompilationUnit compilationUnit) {
 		this.declaration = declaration;
@@ -40,26 +46,40 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 		return true;
 	}
 	
+	private boolean isStatementReference(Expression expression) {
+		if(expression.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return false;
+		}
+		SimpleName simpleName = (SimpleName)expression;
+		if(!simpleName.getIdentifier().equals(statementName.getIdentifier())) {
+			return false;
+		}
+		IBinding binding = simpleName.resolveBinding();
+		ASTNode declaringNode = compilationUnit.findDeclaringNode(binding);
+		return declaringNode == declaration;
+	}
+	
 	@Override
 	public boolean visit(Assignment assignment) {
 		if(beforeDeclaration) {
 			return false;
 		}
-		if(initializer == null) {
-			Expression left = assignment.getLeftHandSide();
-			if(left.getNodeType() == ASTNode.SIMPLE_NAME) {
-				SimpleName leftName = (SimpleName)left;
-				if(leftName.getIdentifier().equals(this.statementName.getIdentifier())) {
-					ASTNode leftDeclaration = compilationUnit.findDeclaringNode(leftName.resolveBinding());
-					if(leftDeclaration == this.declaration) {
-						Expression right = assignment.getRightHandSide();
-						if(right.getNodeType() != ASTNode.NULL_LITERAL) {
-							this.initializer = right;
-							return false;
-						}
-					}
-				}
+		if(initializer != null) {
+			return true;
+		}
+			
+		Expression left = assignment.getLeftHandSide();
+		if(isStatementReference(left)) {
+			Expression right = assignment.getRightHandSide();
+			if(right.getNodeType() != ASTNode.NULL_LITERAL) {
+				this.initializer = right;
+				return false;
 			}
+		}
+		
+		Expression right = assignment.getRightHandSide();
+		if(isStatementReference(right)) {
+					unsafe = true;
 		}
 		
 		return true;
@@ -72,26 +92,16 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 		}
 		
 		if(simpleName == statementName) {
-			beforeUsage = false;
 			return false;
 		}
 		
-		if(simpleName.getIdentifier().equals(this.statementName.getIdentifier())) {
-			ASTNode declaringNode = compilationUnit.findDeclaringNode(simpleName.resolveBinding());
-			if(declaringNode == this.declaration) {
-				if(beforeUsage) {
-					unsafe = true;
+		if(isStatementReference(simpleName)) {
+			MethodInvocation getResultSet2 = findGetResultSet(simpleName);
+			if(getResultSet2 != null) {
+				if(this.getResultSetInvocation == null) {
+					this.getResultSetInvocation = getResultSet2;
 				} else {
-					if(this.getResultSet != null) {
-						unsafe = true;
-					} else {
-						MethodInvocation getResultSet = findGetResultSet(simpleName);
-						if(getResultSet != null) {
-							this.getResultSet = getResultSet;
-						} else {
-							unsafe = true;
-						}
-					}
+					unsafe = true;
 				}
 			}
 		}
@@ -118,6 +128,10 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 	
 	public Expression getInitializer() {
 		return initializer;
+	}
+	
+	public MethodInvocation getGetResultSetInvocation() {
+		return this.getResultSetInvocation;
 	}
 
 }

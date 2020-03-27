@@ -3,18 +3,23 @@ package eu.jsparrow.core.visitor.security;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * 
+ * @since 3.16.0
+ *
+ */
 public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractASTRewriteASTVisitor {
 	
 	@Override
@@ -70,40 +75,44 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAS
 		}
 		SimpleName query = (SimpleName)argument;
 		IBinding queryVariableBinding = query.resolveBinding();
-		ASTNode declaringNode = this.getCompilationUnit().findDeclaringNode(queryVariableBinding);
+		if(queryVariableBinding.getKind() != IBinding.VARIABLE) {
+			return true;
+		}
 		
+		ASTNode declaringNode = this.getCompilationUnit().findDeclaringNode(queryVariableBinding);
 		if(declaringNode == null || declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			return true;
 		}
-		VariableDeclarationFragment fragment = (VariableDeclarationFragment)declaringNode;
-		Expression initializer = fragment.getInitializer();
-		if(initializer == null) {
-			// TODO: do we want to check if the variable is assigned afterwards?
-			return true;
-		}
-		if(initializer.getNodeType() != ASTNode.INFIX_EXPRESSION) {
-			return true;
-		}
+		SqlVariableAnalyzerVisitor visitor = new SqlVariableAnalyzerVisitor(query, declaringNode, getCompilationUnit());
+		Block enclosingBlock = ASTNodeUtil.getSpecificAncestor(declaringNode, Block.class);
+		enclosingBlock.accept(visitor);
+		
+		List<Expression> queryComponents = visitor.getDynamicQueryComponents();
 		//TODO: create a class which analyzes the infix expression. extracts the arguments and is able to produce the new string with placeholders.
 		
 		
-		//TODO: analyze the method invocation expression
+
 		/*
-		 * Find the declaration of the sql statement. 
-		 * Make sure the initialization is a connection.createStatement();
+		 * Find the declaration of the SQL statement. 
+		 * Make sure the initialization is a connection.createStatement()
 		 * 
 		 */
 		
 		if(methodExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return true;
 		}
-		SimpleName sqlStatmement = (SimpleName)methodExpression;
-		ASTNode stmDeclaration = getCompilationUnit().findDeclaringNode(sqlStatmement.resolveBinding());
-		if(stmDeclaration.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return false;
+		SimpleName sqlStatement = (SimpleName)methodExpression;
+		ASTNode stmDeclaration = getCompilationUnit().findDeclaringNode(sqlStatement.resolveBinding());
+		SqlStatementAnalyzerVisitor sqlStatementVisitor = new SqlStatementAnalyzerVisitor(stmDeclaration, sqlStatement, getCompilationUnit());
+		Block stmDeclarationBlock = ASTNodeUtil.getSpecificAncestor(stmDeclaration, Block.class);
+		stmDeclarationBlock.accept(sqlStatementVisitor);
+		if(sqlStatementVisitor.isUnsafe()) {
+			return true;
 		}
-		VariableDeclarationFragment sqlStatementDeclarationFragment = (VariableDeclarationFragment)stmDeclaration;
-		Expression connectionCreateStatement = sqlStatementDeclarationFragment.getInitializer();
+		Expression connectionCreateStatement = sqlStatementVisitor.getInitializer();
+		if(connectionCreateStatement == null) {
+			return true;
+		}
 		
 		boolean isConnectionPrepareStatement = analyzeSqlStatementInitializer(connectionCreateStatement);
 		if(!isConnectionPrepareStatement) {

@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -15,6 +16,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * 
+ * @since 3.16.0
+ *
+ */
 public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	
 	private CompilationUnit compilationUnit;
@@ -25,9 +31,10 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	private boolean beforeUsage = true;
 	private boolean unsafe = false;
 	
-	public SqlVariableAnalyzerVisitor(SimpleName variableName, ASTNode declaration) {
+	public SqlVariableAnalyzerVisitor(SimpleName variableName, ASTNode declaration, CompilationUnit compilationUnit) {
 		this.variableName = variableName;
 		this.declarationFragment = declaration;
+		this.compilationUnit = compilationUnit;
 	}
 	
 	@Override
@@ -46,7 +53,7 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 	
 	@Override
@@ -59,8 +66,18 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 			beforeUsage = false;
 			return false;
 		}
+		
+		if(!variableName.getIdentifier().equals(simpleName.getIdentifier())) {
+			return false;
+		}
+		
+		IBinding binding = simpleName.resolveBinding();
+		if(binding.getKind() != IBinding.VARIABLE) {
+			return false;
+		}
 	
-		if(isNotReferenceToLocalVariable(simpleName, variableName)) {
+		ASTNode declaringNode = compilationUnit.findDeclaringNode(simpleName.resolveBinding());
+		if(declaringNode != declarationFragment) {
 			return false;
 		}
 		
@@ -81,20 +98,15 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 			unsafe = true;
 		}
 		
-		
-		
-		
-		
 		return true;
 	}
-
-	private boolean isNotReferenceToLocalVariable(SimpleName simpleName, SimpleName variableName2) {
-		/* TODO
-		 * Check the matching name
-		 * Check if it is a variable
-		 * Check if it is not part of a qualified name
-		 */
-		return false;
+	
+	public boolean isUnsafe() {
+		return unsafe;
+	}
+	
+	public List<Expression> getDynamicQueryComponents() {
+		return components;
 	}
 
 }
