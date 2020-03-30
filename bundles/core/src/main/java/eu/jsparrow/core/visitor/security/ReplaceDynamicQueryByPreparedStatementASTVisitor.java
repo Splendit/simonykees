@@ -1,15 +1,18 @@
 package eu.jsparrow.core.visitor.security;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
@@ -144,8 +147,35 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAS
 		 * Replace old query with the new one.
 		 */
 		replaceQuery(replaceableParameters);
+		List<ExpressionStatement> setParameterStatements = createSetParameterStatements(replaceableParameters, sqlStatement);
+		
+		
 		
 		return true;
+	}
+
+	private List<ExpressionStatement> createSetParameterStatements(List<ReplaceableParameter> replaceableParameters, Expression statementName) {
+		List<ExpressionStatement> statements = new ArrayList<>();
+		AST ast = astRewrite.getAST();
+		for(ReplaceableParameter parameter : replaceableParameters) {
+			Expression component = parameter.getParameter();
+			String setterName = parameter.getSetterName();
+			Expression statementNameCopy = (Expression) astRewrite.createCopyTarget(statementName);
+			MethodInvocation setter = ast.newMethodInvocation();
+			setter.setExpression(statementNameCopy);
+			setter.setName(ast.newSimpleName(setterName));
+			int position = parameter.getPosition();
+			NumberLiteral positionLiteral = ast.newNumberLiteral();
+			positionLiteral.setToken(String.valueOf(position));
+			Expression parameterExpression = (Expression) astRewrite.createCopyTarget(component);
+			@SuppressWarnings("unchecked")
+			List<Expression> setterArguments = setter.arguments();
+			setterArguments.add(positionLiteral);
+			setterArguments.add(parameterExpression);
+			ExpressionStatement setterExpressionStatement = ast.newExpressionStatement(setter);
+			statements.add(setterExpressionStatement);
+		}
+		return statements;
 	}
 
 	private void replaceQuery(List<ReplaceableParameter> replaceableParameters) {
@@ -153,7 +183,7 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAS
 		for(ReplaceableParameter parameter : replaceableParameters) {
 			StringLiteral previous = parameter.getPrevious();
 			StringLiteral next = parameter.getNext();
-			Expression compoExpression = parameter.getParameter();
+			Expression component = parameter.getParameter();
 			String oldPrevious = previous.getLiteralValue();
 			String newPrevious = oldPrevious.substring(0, oldPrevious.length()-1) + "?";
 			StringLiteral newPreviousLiteral = ast.newStringLiteral();
@@ -165,7 +195,7 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAS
 			newNextLiteral.setLiteralValue(newNext);
 			astRewrite.replace(next, newNextLiteral, null);
 			
-			astRewrite.remove(compoExpression, null);
+			astRewrite.remove(component, null);
 			//TODO: doulblecheck the side effects of removing the component. 
 		}
 		

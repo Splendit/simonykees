@@ -4,35 +4,40 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 public class ReplaceableParameter {
-	
+
 	private StringLiteral previous;
 	private StringLiteral next;
 	private Expression parameter;
-	public ReplaceableParameter(StringLiteral previous, StringLiteral next, Expression parameter) {
-		super();
+	private String setterName;
+	private int position;
+
+	public ReplaceableParameter(StringLiteral previous, StringLiteral next, Expression parameter, String setterName,
+			int position) {
 		this.previous = previous;
 		this.next = next;
 		this.parameter = parameter;
+		this.setterName = setterName;
+		this.position = position;
 	}
+
 	public StringLiteral getPrevious() {
 		return previous;
 	}
-	public void setPrevious(StringLiteral previous) {
-		this.previous = previous;
-	}
+
 	public StringLiteral getNext() {
 		return next;
 	}
-	public void setNext(StringLiteral next) {
-		this.next = next;
-	}
+
 	public Expression getParameter() {
 		return parameter;
 	}
-	public void setParameter(Expression parameter) {
-		this.parameter = parameter;
+
+	public String getSetterName() {
+		return setterName;
 	}
-	
-	
+
+	public int getPosition() {
+		return position;
+	}
 
 }
