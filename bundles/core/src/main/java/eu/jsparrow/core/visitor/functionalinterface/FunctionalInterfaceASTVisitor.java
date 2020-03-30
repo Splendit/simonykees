@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -38,6 +40,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.visitor.sub.TypeNameUtil;
 import eu.jsparrow.core.visitor.sub.VariableDefinitionASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -241,16 +244,24 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 							}
 						}
 
-						UnqualifiedFieldNamesVisitor unqualifiedConstantNamesVisitor = new UnqualifiedFieldNamesVisitor(
-								parentNode);
+						UnqualifiedFieldNamesVisitor unqualifiedConstantNamesVisitor = new UnqualifiedFieldNamesVisitor(node);
 						onlyFunctionalInterfaceMethodImplBody.accept(unqualifiedConstantNamesVisitor);
-
-						unqualifiedConstantNamesVisitor.getSimpleNameReplacements()
-							.forEach(mapEntry -> {
-								SimpleName simpleName = mapEntry.getKey();
-								QualifiedName qualifiedName = mapEntry.getValue();
+						
+						if(unqualifiedConstantNamesVisitor.hasSimpleNamesToQualify()) {
+							
+							Name qualifier = TypeNameUtil.getTypeName(classType);
+							if(qualifier == null) {
+								return true;
+							}
+							AST astNode = classType.getAST();
+							unqualifiedConstantNamesVisitor.getSimpleNames()
+							.forEach(simpleName -> {
+								Name qualifierClone = TypeNameUtil.cloneName(qualifier);
+								SimpleName simpleNameClone = astNode.newSimpleName(simpleName.getIdentifier());
+								QualifiedName qualifiedName = astNode.newQualifiedName(qualifierClone, simpleNameClone);
 								astRewrite.replace(simpleName, qualifiedName, null);
 							});
+						}
 
 						VariableDefinitionASTVisitor varVisistor = new VariableDefinitionASTVisitor(node,
 								relevantBlocks);

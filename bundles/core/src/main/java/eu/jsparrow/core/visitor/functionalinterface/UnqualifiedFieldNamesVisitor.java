@@ -1,22 +1,19 @@
 package eu.jsparrow.core.visitor.functionalinterface;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Type;
 
-import eu.jsparrow.core.visitor.sub.SimpleNameQualifier;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
@@ -28,20 +25,12 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 class UnqualifiedFieldNamesVisitor extends ASTVisitor {
 
-	private final Map<SimpleName, QualifiedName> simpleNameReplacementsMap = new HashMap<>();
-	
-	private final Type instanceCreationType;
-	
-	private final ITypeBinding instanceCreationResolvedTypeBinding;
+	private final List<SimpleName> simpleNames = new ArrayList<>();
 
-	UnqualifiedFieldNamesVisitor(ClassInstanceCreation instanceCreation) {
-		instanceCreationType = instanceCreation.getType();
-		instanceCreationResolvedTypeBinding = instanceCreationType.resolveBinding();
-	}
+	private final ITypeBinding anonymousClassTypeBinding;
 
-	private void addToReplacementsMap(SimpleName simpleNameToReplace) {
-		QualifiedName qualifiedName = SimpleNameQualifier.qualifyByType(instanceCreationType, simpleNameToReplace);
-		simpleNameReplacementsMap.put(simpleNameToReplace, qualifiedName);
+	UnqualifiedFieldNamesVisitor(AnonymousClassDeclaration anonymousClassDeclaration) {
+		anonymousClassTypeBinding = anonymousClassDeclaration.resolveBinding();
 	}
 
 	@Override
@@ -66,22 +55,21 @@ class UnqualifiedFieldNamesVisitor extends ASTVisitor {
 		}
 
 		ITypeBinding declaringClass = variableBinding.getDeclaringClass();
-		boolean isInheritingDeclaringClass = ClassRelationUtil.isInheritingContentOfTypes(
-				instanceCreationResolvedTypeBinding,
-				Collections.singletonList(declaringClass.getQualifiedName()));
-		
-		boolean isDeclaringClass = ClassRelationUtil.isContentOfType(instanceCreationResolvedTypeBinding, declaringClass.getQualifiedName());
-
-		if (isInheritingDeclaringClass || isDeclaringClass) {
-			addToReplacementsMap(simpleName);
+		if (ClassRelationUtil.isInheritingContentOfTypes(
+				anonymousClassTypeBinding,
+				Collections.singletonList(declaringClass.getQualifiedName()))) {
+			simpleNames.add(simpleName);
 		}
 
 		return true;
 	}
 
-	public Stream<Entry<SimpleName, QualifiedName>> getSimpleNameReplacements() {
-		return simpleNameReplacementsMap.entrySet()
-			.stream();
+	public Stream<SimpleName> getSimpleNames() {
+		return simpleNames.stream();
+	}
+
+	public boolean hasSimpleNamesToQualify() {
+		return !this.simpleNames.isEmpty();
 	}
 
 }
