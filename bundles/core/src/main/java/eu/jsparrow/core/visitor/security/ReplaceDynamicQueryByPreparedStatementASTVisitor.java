@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.security;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
@@ -10,6 +11,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -88,10 +90,13 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAS
 		enclosingBlock.accept(visitor);
 		
 		List<Expression> queryComponents = visitor.getDynamicQueryComponents();
-		//TODO: create a class which analyzes the infix expression. extracts the arguments and is able to produce the new string with placeholders.
+		QueryComponentsAnalyzer componentsAnalyzer = new QueryComponentsAnalyzer(queryComponents);
+		componentsAnalyzer.analyze();
+		List<ReplaceableParameter>replaceableParameters = componentsAnalyzer.getReplaceableParameters();
+		if(replaceableParameters.isEmpty()) {
+			return true;
+		}
 		
-		
-
 		/*
 		 * Find the declaration of the SQL statement. 
 		 * Make sure the initialization is a connection.createStatement()
@@ -135,7 +140,35 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAS
 		 * 		the new statement.executeQuery() method.  
 		 */
 		
+		/*
+		 * Replace old query with the new one.
+		 */
+		replaceQuery(replaceableParameters);
+		
 		return true;
+	}
+
+	private void replaceQuery(List<ReplaceableParameter> replaceableParameters) {
+		AST ast = astRewrite.getAST();
+		for(ReplaceableParameter parameter : replaceableParameters) {
+			StringLiteral previous = parameter.getPrevious();
+			StringLiteral next = parameter.getNext();
+			Expression compoExpression = parameter.getParameter();
+			String oldPrevious = previous.getLiteralValue();
+			String newPrevious = oldPrevious.substring(0, oldPrevious.length()-1) + "?";
+			StringLiteral newPreviousLiteral = ast.newStringLiteral();
+			newPreviousLiteral.setLiteralValue(newPrevious);
+			astRewrite.replace(previous, newPreviousLiteral, null);
+			
+			String newNext = next.getLiteralValue().replaceFirst("'", "");
+			StringLiteral newNextLiteral = ast.newStringLiteral();
+			newNextLiteral.setLiteralValue(newNext);
+			astRewrite.replace(next, newNextLiteral, null);
+			
+			astRewrite.remove(compoExpression, null);
+			//TODO: doulblecheck the side effects of removing the component. 
+		}
+		
 	}
 
 	private boolean analyzeSqlStatementInitializer(Expression sqlStatementInitializerExpression) {
@@ -149,7 +182,7 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAS
 			return false;
 		}
 		SimpleName createStatement = sqlStatementInitializer.getName();
-		if(!"createStatement".equals(createStatement.getIdentifier())) {
+		if(!"createStatement".equals(createStatement.getIdentifier())) { //$NON-NLS-1$
 			return false;
 		}
 		return sqlStatementInitializer.arguments().isEmpty();
