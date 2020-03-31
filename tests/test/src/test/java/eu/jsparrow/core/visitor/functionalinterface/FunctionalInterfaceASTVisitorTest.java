@@ -424,6 +424,174 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_AnonymousCallingNonQualifiedDefaultMethod_ShouldNotTransform() throws Exception {
+
+		String original = "" +
+				"	static interface InterfaceWithDefaultMethod {\n" +
+				"		default int getIntOne() {\n" +
+				"			return 1;\n" +
+				"		}\n" +
+				"		int exampleMethod();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_DefaultMethodInvocation() {\n" +
+				"		InterfaceWithDefaultMethod anonymous = new InterfaceWithDefaultMethod() {\n" +
+				"			@Override\n" +
+				"			public int exampleMethod() {\n" +
+				"				return getIntOne();\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}";
+
+		assertCodeNotChanged(original);
+	}
+
+	@Test
+	public void visit_AnonymousCallingThisDefaultMethod_ShouldNotTransform() throws Exception {
+
+		String original = "" +
+				"	static interface InterfaceWithDefaultMethod {\n" +
+				"		default int getIntOne() {\n" +
+				"			return 1;\n" +
+				"		}\n" +
+				"		int exampleMethod();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_DefaultMethodInvocation() {\n" +
+				"		InterfaceWithDefaultMethod anonymous = new InterfaceWithDefaultMethod() {\n" +
+				"			@Override\n" +
+				"			public int exampleMethod() {\n" +
+				"				return this.getIntOne();\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}";
+
+		assertCodeNotChanged(original);
+	}
+
+	@Test
+	public void visit_AnonymousCallingNonQualifiedHashCode_ShouldTransform() throws Exception {
+
+		String original = "" +
+				"	public interface InterfaceWithGetIntMethod {\n" +
+				"		int getInt();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_HashCodeInvocation() {\n" +
+				"		InterfaceWithGetIntMethod anonymous = new InterfaceWithGetIntMethod() {\n" +
+				"			@Override\n" +
+				"			public int getInt() {\n" +
+				"				return hashCode();\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}";
+
+		String expected = "" +
+				"	public interface InterfaceWithGetIntMethod {\n" +
+				"		int getInt();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_HashCodeInvocation() {\n" +
+				"		InterfaceWithGetIntMethod anonymous = () -> {\n" +
+				"				return hashCode();\n" +
+				"		};\n" +
+				"	}";
+
+		assertCodeChanged(original, expected);
+	}
+
+	@Test
+	public void visit_AnonymousCallingThisHashCode_ShouldTransform() throws Exception {
+
+		String original = "" +
+				"	public interface InterfaceWithGetIntMethod {\n" +
+				"		int getInt();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_HashCodeInvocation() {\n" +
+				"		InterfaceWithGetIntMethod anonymous = new InterfaceWithGetIntMethod() {\n" +
+				"			@Override\n" +
+				"			public int getInt() {\n" +
+				"				return this.hashCode();\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}";
+
+		String expected = "" +
+				"	public interface InterfaceWithGetIntMethod {\n" +
+				"		int getInt();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_HashCodeInvocation() {\n" +
+				"		InterfaceWithGetIntMethod anonymous = () -> {\n" +
+				"				return this.hashCode();\n" +
+				"		};\n" +
+				"	}";
+
+		assertCodeChanged(original, expected);
+	}
+	
+	@Test
+	public void visit_AnonymousCallingObjectHashCode_ShouldTransform() throws Exception {
+
+		String original = "" +
+				"	public interface InterfaceWithGetIntMethod {\n" +
+				"		int getInt();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_HashCodeInvocation() {\n" +
+				"		InterfaceWithGetIntMethod anonymous = new InterfaceWithGetIntMethod() {\n" +
+				"			@Override\n" +
+				"			public int getInt() {\n" +
+				"               Object o = new Object();\n" +
+				"				return o.hashCode();\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}";
+
+		String expected = "" +
+				"	public interface InterfaceWithGetIntMethod {\n" +
+				"		int getInt();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_HashCodeInvocation() {\n" +
+				"		InterfaceWithGetIntMethod anonymous = () -> {\n" +
+				"               Object o = new Object();\n" +
+				"				return o.hashCode();\n" +
+				"		};\n" +
+				"	}";
+
+		assertCodeChanged(original, expected);
+	}
+
+	@Test
+	public void visit_AnonymousCallingDefaultMethodWithQualifiedThis_ShouldTransform() throws Exception {
+
+		String original = "" +
+				"	public interface InterfaceWithGetIntMethod {\n" +
+				"		int getInt();\n" +
+				"	}\n" +
+				"   public int getAnotherInt() {\n"	+ 
+				"		return 10;\n" +
+				"   }\n" +
+				"	public void test() {\n" +
+				"		InterfaceWithGetIntMethod anonymous = new InterfaceWithGetIntMethod() {\n" +
+				"			@Override\n" +
+				"			public int getInt() {\n" +
+				"				return TestForSim1709.this.getAnotherInt();\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}";
+
+		String expected = "" +
+				"	public interface InterfaceWithGetIntMethod {\n" +
+				"		int getInt();\n" +
+				"	}\n" +
+				"   public int getAnotherInt() {\n"	+ 
+				"		return 10;\n" +
+				"   }\n" +				
+				"	public void test() {\n" +
+				"		InterfaceWithGetIntMethod anonymous = () -> {\n" +
+				"				return TestForSim1709.this.getAnotherInt();\n" +
+				"		};\n" +
+				"	}";
+
+		assertCodeChanged(original, expected);
+	}
+
+	@Test
 	public void visit_AnonymousWithTypeArguments_ShouldTransform() throws Exception {
 
 		String original = "" +

@@ -164,7 +164,13 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					if (onlyFunctionalInterfaceMethodImplBody == null) {
 						return false;
 					}
-
+					
+					DefaultMethodInvocationASTVisitor defaultMethodInvocationASTVisitor = new DefaultMethodInvocationASTVisitor(node);
+					onlyFunctionalInterfaceMethodImplBody.accept(defaultMethodInvocationASTVisitor);
+					if(defaultMethodInvocationASTVisitor.isFlagCancelTransformation()) {
+						return true;
+					}
+					
 					// find parent scope and variable declarations in it
 					List<ASTNode> relevantBlocks = new ArrayList<>();
 					ASTNode scope = findScope(node, relevantBlocks);
@@ -517,6 +523,8 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		return null;
 	}
+	
+
 
 	/**
 	 * Renames all occurrences of variables with conflicting names in the given
