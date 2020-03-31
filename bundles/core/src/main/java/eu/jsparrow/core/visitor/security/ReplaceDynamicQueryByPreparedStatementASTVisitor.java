@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.security;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -14,18 +15,25 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
  * 
  * @since 3.16.0
  *
  */
-public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractASTRewriteASTVisitor {
+public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAddImportASTVisitor {
 	
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
@@ -149,9 +157,57 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAS
 		replaceQuery(replaceableParameters);
 		List<ExpressionStatement> setParameterStatements = createSetParameterStatements(replaceableParameters, sqlStatement);
 		
+		MethodInvocation createStatementInvocation = (MethodInvocation)connectionCreateStatement;
+		VariableDeclarationFragment fragment = sqlStatementVisitor.getDeclarationFragment();
+		replaceStatementDeclaration(fragment, createStatementInvocation, query);
+		addSetters(sqlStatementVisitor.getInitializer(), setParameterStatements);
+		
+		if("executeQuery".equals(methodName.getIdentifier())) { //$NON-NLS-1$
+			ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class).forEach(node -> astRewrite.remove(node, null));
+			
+		} else {
+			/*
+			 *  TODO:
+			 *  Check for resultsets
+			 *  Shift the resultset declaration
+			 *  replace execute with executeQuery()
+			 */
+		}
 		
 		
 		return true;
+	}
+
+	private void addSetters(Expression initializer, List<ExpressionStatement> setParameterStatements) {
+		Statement statement =  ASTNodeUtil.getSpecificAncestor(initializer, Statement.class);
+		Block block = (Block)statement.getParent();//TODO: make sure the parent is a block in the analyzer part
+		ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+		List<ExpressionStatement> setters = new ArrayList<>(setParameterStatements);
+		Collections.reverse(setters);
+		setters.forEach(setter -> listRewrite.insertAfter(setter, statement, null));
+	}
+
+	private void replaceStatementDeclaration(VariableDeclarationFragment fragment, MethodInvocation createStatement,
+			SimpleName query) {
+		VariableDeclarationStatement statement = (VariableDeclarationStatement)fragment.getParent();
+		Block block = (Block)statement.getParent();
+		int numFragments = statement.fragments().size();
+		AST ast = astRewrite.getAST();
+		SimpleType preparedStatementType = ast.newSimpleType(ast.newSimpleName(java.sql.PreparedStatement.class.getSimpleName()));
+		if(numFragments > 1) {
+			//TODO: extract the fragment. Leave the remaining untouched
+		} else {
+			Type type = statement.getType();
+			astRewrite.replace(type, preparedStatementType, null);
+			
+		}
+		SimpleName name = createStatement.getName();
+		astRewrite.replace(name, ast.newSimpleName("prepareStatement"), null);
+		ListRewrite listRewrite = astRewrite.getListRewrite(createStatement, MethodInvocation.ARGUMENTS_PROPERTY);
+		listRewrite.insertFirst(astRewrite.createCopyTarget(query), null);
+		addImports.add(java.sql.PreparedStatement.class.getName());
+		//TODO: check for conflicitng imports before reaching this point.
+		
 	}
 
 	private List<ExpressionStatement> createSetParameterStatements(List<ReplaceableParameter> replaceableParameters, Expression statementName) {

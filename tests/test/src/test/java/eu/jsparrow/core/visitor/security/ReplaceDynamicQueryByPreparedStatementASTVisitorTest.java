@@ -40,11 +40,12 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitorTest extends UsesSi
 		String expected = "" +
 				"		String departmentId = \"40\";\n" + 
 				"        Connection connection = null;\n" + 
-				"        String query = \"SELECT employee_id, first_name FROM employee WHERE department_id =? ORDER BY last_name\";\n" + 
+				"        String query = \"SELECT employee_id, first_name FROM employee WHERE department_id =?\" + \" ORDER BY last_name\";\n" + 
 				"        query += \"\";\n" + 
 				"        PreparedStatement statement;\n" + 
 				"		try {\n" + 
 				"			statement = connection.prepareStatement(query);\n" + 
+				"			statement.setString(1, departmentId);" +			
 				"	        ResultSet resultSet = statement.executeQuery();\n" + 
 				"	        while(resultSet.next()) {\n" + 
 				"	        	String firstName = resultSet.getString(2);\n" + 

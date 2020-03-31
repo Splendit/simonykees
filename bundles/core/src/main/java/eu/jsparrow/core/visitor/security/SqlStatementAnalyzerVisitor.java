@@ -4,12 +4,14 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 /**
  * 
@@ -24,6 +26,7 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 	private Expression initializer;
 	private CompilationUnit compilationUnit;
 	private MethodInvocation getResultSetInvocation;
+	private VariableDeclarationFragment variableDeclarationFragment;
 	private boolean unsafe = false;
 	private boolean beforeDeclaration = true;
 	
@@ -33,14 +36,32 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 		this.compilationUnit = compilationUnit;
 	}
 	
+	@Override
+	public boolean preVisit2(ASTNode node) {
+		return !unsafe;
+	}
+	
 	@Override 
 	public boolean visit(VariableDeclarationFragment declarationFragment) {
 		if(this.declaration == declarationFragment) {
+			this.variableDeclarationFragment = declarationFragment;
 			beforeDeclaration = false;
 			Expression statementInitializer = declarationFragment.getInitializer();
 			if(initializer != null && initializer.getNodeType() != ASTNode.NULL_LITERAL) {
 				this.initializer = statementInitializer;
 			}
+			
+			boolean fragmentInStatement = declarationFragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY;
+			if(!fragmentInStatement) {
+				this.unsafe = true;
+			}
+			
+			VariableDeclarationStatement statement = (VariableDeclarationStatement)declarationFragment.getParent();
+			boolean statementInBlock = Block.STATEMENTS_PROPERTY == statement.getLocationInParent();
+			if(!statementInBlock) {
+				this.unsafe = true;
+			}
+			
 			return false;
 		}
 		return true;
@@ -132,6 +153,10 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 	
 	public MethodInvocation getGetResultSetInvocation() {
 		return this.getResultSetInvocation;
+	}
+
+	public VariableDeclarationFragment getDeclarationFragment() {
+		return variableDeclarationFragment;
 	}
 
 }
