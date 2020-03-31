@@ -32,7 +32,7 @@ public abstract class UsesSimpleJDTUnitFixture {
 	protected static JdtUnitFixtureProject fixtureProject;
 	protected static JdtUnitFixtureClass fixture;
 
-	protected AbstractASTRewriteASTVisitor visitor;
+	private AbstractASTRewriteASTVisitor visitor = new AbstractASTRewriteASTVisitor() {};
 
 	@BeforeAll
 	public static void setUpClass() throws Exception {
@@ -52,22 +52,26 @@ public abstract class UsesSimpleJDTUnitFixture {
 	public void tearDownTest() throws Exception {
 		fixture.clear(true);
 	}
-
-	protected void assertNoChange(String before) throws JavaModelException, BadLocationException, JdtUnitException {
-		fixture.addMethodBlock(before);
-		visitor.setASTRewrite(fixture.getAstRewrite());
-		fixture.accept(visitor);
-
-		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(before), methodBlock);
+	
+	protected void setVisitor(AbstractASTRewriteASTVisitor visitor) {
+		this.visitor = visitor;
 	}
 
-	protected void assertChange(String before, String afterExpected)
+	protected void assertNoChange(String original) throws JavaModelException, BadLocationException, JdtUnitException {
+		fixture.addMethodBlock(original);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+
+		Block methodBlock = fixture.getMethodBlock();
+		assertMatch(ASTNodeBuilder.createBlockFromString(original), methodBlock);
+	}
+
+	protected void assertChange(String original, String expected)
 			throws JavaModelException, BadLocationException, JdtUnitException {
-		fixture.addMethodBlock(before);
+		fixture.addMethodBlock(original);
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 		Block methodBlock = fixture.getMethodBlock();
-		assertMatch(ASTNodeBuilder.createBlockFromString(afterExpected), methodBlock);
+		assertMatch(ASTNodeBuilder.createBlockFromString(expected), methodBlock);
 	}
 }

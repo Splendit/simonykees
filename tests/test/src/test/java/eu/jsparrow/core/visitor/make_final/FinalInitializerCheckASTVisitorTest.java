@@ -14,20 +14,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
-import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 @SuppressWarnings("nls")
 public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 
-	private static final String DEFAULT_TYPE_NAME = "TestCU";
-
 	private FinalInitializerCheckASTVisitor visitor;
-	private JdtUnitFixtureClass defaultFixture;
 
 	@BeforeEach
-	public void setUp() throws Exception {
-		defaultFixture = fixtureProject.addCompilationUnit(DEFAULT_TYPE_NAME);
+	public void setUpVisitor() throws Exception {
+//		defaultFixture = fixtureProject.addCompilationUnit(DEFAULT_TYPE_NAME);
 
 		visitor = new FinalInitializerCheckASTVisitor();
 	}
@@ -39,10 +35,10 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 
 	@Test
 	public void staticField_initInDeclarationOnly_shouldBeCandidate() throws Exception {
-		String typeContent = "private static String a = \"asdf\";" + "static {" + "}" + "public " + DEFAULT_TYPE_NAME
+		String typeContent = "private static String a = \"asdf\";" + "static {" + "}" + "public " + DEFAULT_TYPE_DECLARATION_NAME
 				+ "() {" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -52,10 +48,10 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void staticField_twoFragments_onlyOneInitilaizedInDeclaration_shouldNotBeCandidate() throws Exception {
+	public void staticField_twoFragments_onlyOneInitializedInDeclaration_shouldNotBeCandidate() throws Exception {
 		String typeContent = "private static String a, b = \"asdf\";";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -69,7 +65,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private static String a;" + "private static String b;" + "static {" + "	a = \"test\";"
 				+ "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -82,7 +78,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	public void staticField_initInDeclarationAndStaticInitializer_shouldNotBeCandidate() throws Exception {
 		String typeContent = "private static String a = \"asdf\";" + "static {" + "	a = \"jkl\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -96,7 +92,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 			throws Exception {
 		String typeContent = "private static String a = \"asdf\", b;" + "static {" + "	b = \"jkl\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -109,7 +105,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	public void staticField_twoFragments_initInDeclarationAndStaticInitializer_shouldBeCandidate() throws Exception {
 		String typeContent = "private static String a, b;" + "static {" + "	a = \"asdf\";" + "	b = \"jkl\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -122,7 +118,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	public void nonStaticField_notInitialized_shouldNotBeCandidate() throws Exception {
 		String typeContent = "private String a;";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -135,7 +131,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	public void nonStaticField_initInDeclaration_shouldBeCandidate() throws Exception {
 		String typeContent = "public String a = \"asdf\";";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -148,7 +144,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	public void nonStaticField_twoFragments_onlyOneInitializedInDeclaration_shouldNotBeCandidate() throws Exception {
 		String typeContent = "public String a, b = \"asdf\";";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -161,7 +157,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	public void nonStaticField_initInInitializerOnly_shouldBeCandidate() throws Exception {
 		String typeContent = "private String a;" + "{" + "	a = \"asdf\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -172,9 +168,9 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 
 	@Test
 	public void nonStaticField_initInConstructorOnly_shouldBeCandidate() throws Exception {
-		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_NAME + "() {" + "	a = \"asdf\";" + "}";
+		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_DECLARATION_NAME + "() {" + "	a = \"asdf\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -185,10 +181,10 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 
 	@Test
 	public void nonStaticField_initInOneConstructorOnly_shouldNotBeCandidate() throws Exception {
-		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_NAME + "() {" + "	a = \"asdf\";" + "}"
-				+ "public " + DEFAULT_TYPE_NAME + "(String asdf) {" + "}";
+		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_DECLARATION_NAME + "() {" + "	a = \"asdf\";" + "}"
+				+ "public " + DEFAULT_TYPE_DECLARATION_NAME + "(String asdf) {" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -199,11 +195,11 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 
 	@Test
 	public void nonStaticField_initInAllConstructors_shouldBeCandidate() throws Exception {
-		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_NAME + "() {" + "	a = \"asdf\";" + "}"
-				+ "public " + DEFAULT_TYPE_NAME + "(String asdf) {" + "	a = \"asdf\";" + "}" + "public "
-				+ DEFAULT_TYPE_NAME + "(String asdf, String jkl) {" + "	a = \"asdf\";" + "}";
+		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_DECLARATION_NAME + "() {" + "	a = \"asdf\";" + "}"
+				+ "public " + DEFAULT_TYPE_DECLARATION_NAME + "(String asdf) {" + "	a = \"asdf\";" + "}" + "public "
+				+ DEFAULT_TYPE_DECLARATION_NAME + "(String asdf, String jkl) {" + "	a = \"asdf\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -216,7 +212,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	public void nonStaticField_initInDeclarationAndInitializer_shouldNotBeCandidate() throws Exception {
 		String typeContent = "private String a = \"asdf\";" + "{" + "	a = \"jkl\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -226,11 +222,11 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void nonStaticField_initInDeclaratoionConstructorAndInitializer_shouldNotBeCandidate() throws Exception {
+	public void nonStaticField_initInDeclarationConstructorAndInitializer_shouldNotBeCandidate() throws Exception {
 		String typeContent = "private String a = \"asdf\";" + "{" + "	a = \"jkl\";" + "}" + "public "
-				+ DEFAULT_TYPE_NAME + "() {" + "	a = \"\";" + "}";
+				+ DEFAULT_TYPE_DECLARATION_NAME + "() {" + "	a = \"\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -241,10 +237,10 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 
 	@Test
 	public void nonStaticField_accessUsingFieldAccess_initInConstructor_shouldBeCandidate() throws Exception {
-		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_NAME + "() {" + "	this.a = \"asdf\";"
+		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_DECLARATION_NAME + "() {" + "	this.a = \"asdf\";"
 				+ "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -254,10 +250,10 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void nonStaticfield_assignedMultipleTimesInInitialiser_shouldNotBeCandidate() throws Exception {
+	public void nonStaticField_assignedMultipleTimesInInitializer_shouldNotBeCandidate() throws Exception {
 		String typeContent = "private String a;" + "{" + "	a = \"asdf\";" + "	a = \"jkl\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -267,11 +263,11 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void nonStaticfield_assignedMultipleTimesInConstructor_shouldNotBeCandidate() throws Exception {
-		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_NAME + "() {" + "	a = \"asdf\";"
+	public void nonStaticField_assignedMultipleTimesInConstructor_shouldNotBeCandidate() throws Exception {
+		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_DECLARATION_NAME + "() {" + "	a = \"asdf\";"
 				+ "	a = \"jkl\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -281,13 +277,13 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void nonStaticfield_assignedMultipleTimesInMultipleConstructor_shouldNotBeCandidate() throws Exception {
-		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_NAME + "() {" + "	a = \"asdf\";"
-				+ "	a = \"jkl\";" + "}" + "public " + DEFAULT_TYPE_NAME + "(String asdf) {" + "	a = \"asdf\";" + "}"
-				+ "public " + DEFAULT_TYPE_NAME + "(String asdf, String jkl) {" + "	a = \"asdf\";" + "	a = \"jkl\";"
+	public void nonStaticField_assignedMultipleTimesInMultipleConstructor_shouldNotBeCandidate() throws Exception {
+		String typeContent = "private String a;" + "public " + DEFAULT_TYPE_DECLARATION_NAME + "() {" + "	a = \"asdf\";"
+				+ "	a = \"jkl\";" + "}" + "public " + DEFAULT_TYPE_DECLARATION_NAME + "(String asdf) {" + "	a = \"asdf\";" + "}"
+				+ "public " + DEFAULT_TYPE_DECLARATION_NAME + "(String asdf, String jkl) {" + "	a = \"asdf\";" + "	a = \"jkl\";"
 				+ "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
@@ -302,7 +298,7 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 						   + "	System.out.println(a);"
 						   + "}";
 		
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 

@@ -16,7 +16,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 	 @BeforeEach
 	 public void setupTest() {
-		 this.visitor = new RemoveRedundantTypeCastASTVisitor();
+		 setVisitor(new RemoveRedundantTypeCastASTVisitor());
 	 }
 
 	@Test
