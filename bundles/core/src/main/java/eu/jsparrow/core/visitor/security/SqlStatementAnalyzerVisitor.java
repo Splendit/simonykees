@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
  *
  */
 public class SqlStatementAnalyzerVisitor extends ASTVisitor {
-	
+
 	private ASTNode declaration;
 	private SimpleName statementName;
 	private Expression initializer;
@@ -29,114 +29,115 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 	private VariableDeclarationFragment variableDeclarationFragment;
 	private boolean unsafe = false;
 	private boolean beforeDeclaration = true;
-	
+
 	public SqlStatementAnalyzerVisitor(ASTNode declaration, SimpleName sqlStatement, CompilationUnit compilationUnit) {
 		this.declaration = declaration;
 		this.statementName = sqlStatement;
 		this.compilationUnit = compilationUnit;
 	}
-	
+
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		return !unsafe;
 	}
-	
-	@Override 
+
+	@Override
 	public boolean visit(VariableDeclarationFragment declarationFragment) {
-		if(this.declaration == declarationFragment) {
+		if (this.declaration == declarationFragment) {
 			this.variableDeclarationFragment = declarationFragment;
 			beforeDeclaration = false;
 			Expression statementInitializer = declarationFragment.getInitializer();
-			if(initializer != null && initializer.getNodeType() != ASTNode.NULL_LITERAL) {
+			if (statementInitializer != null && statementInitializer.getNodeType() != ASTNode.NULL_LITERAL) {
 				this.initializer = statementInitializer;
 			}
-			
-			boolean fragmentInStatement = declarationFragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY;
-			if(!fragmentInStatement) {
+
+			boolean fragmentInStatement = declarationFragment
+				.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY;
+			if (!fragmentInStatement) {
 				this.unsafe = true;
 			}
-			
-			VariableDeclarationStatement statement = (VariableDeclarationStatement)declarationFragment.getParent();
+
+			VariableDeclarationStatement statement = (VariableDeclarationStatement) declarationFragment.getParent();
 			boolean statementInBlock = Block.STATEMENTS_PROPERTY == statement.getLocationInParent();
-			if(!statementInBlock) {
+			if (!statementInBlock) {
 				this.unsafe = true;
 			}
-			
+
 			return false;
 		}
 		return true;
 	}
-	
+
 	private boolean isStatementReference(Expression expression) {
-		if(expression.getNodeType() != ASTNode.SIMPLE_NAME) {
+		if (expression.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return false;
 		}
-		SimpleName simpleName = (SimpleName)expression;
-		if(!simpleName.getIdentifier().equals(statementName.getIdentifier())) {
+		SimpleName simpleName = (SimpleName) expression;
+		if (!simpleName.getIdentifier()
+			.equals(statementName.getIdentifier())) {
 			return false;
 		}
 		IBinding binding = simpleName.resolveBinding();
 		ASTNode declaringNode = compilationUnit.findDeclaringNode(binding);
 		return declaringNode == declaration;
 	}
-	
+
 	@Override
 	public boolean visit(Assignment assignment) {
-		if(beforeDeclaration) {
+		if (beforeDeclaration) {
 			return false;
 		}
-		if(initializer != null) {
+		if (initializer != null) {
 			return true;
 		}
-			
+
 		Expression left = assignment.getLeftHandSide();
-		if(isStatementReference(left)) {
+		if (isStatementReference(left)) {
 			Expression right = assignment.getRightHandSide();
-			if(right.getNodeType() != ASTNode.NULL_LITERAL) {
+			if (right.getNodeType() != ASTNode.NULL_LITERAL) {
 				this.initializer = right;
 				return false;
 			}
 		}
-		
+
 		Expression right = assignment.getRightHandSide();
-		if(isStatementReference(right)) {
-					unsafe = true;
+		if (isStatementReference(right)) {
+			unsafe = true;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(SimpleName simpleName) {
-		if(beforeDeclaration) {
+		if (beforeDeclaration) {
 			return false;
 		}
-		
-		if(simpleName == statementName) {
+
+		if (simpleName == statementName) {
 			return false;
 		}
-		
-		if(isStatementReference(simpleName)) {
+
+		if (isStatementReference(simpleName)) {
 			MethodInvocation getResultSet2 = findGetResultSet(simpleName);
-			if(getResultSet2 != null) {
-				if(this.getResultSetInvocation == null) {
+			if (getResultSet2 != null) {
+				if (this.getResultSetInvocation == null) {
 					this.getResultSetInvocation = getResultSet2;
 				} else {
 					unsafe = true;
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
-	
+
 	private MethodInvocation findGetResultSet(SimpleName simpleName) {
 		StructuralPropertyDescriptor structuralDescriptor = simpleName.getLocationInParent();
-		if(structuralDescriptor == MethodInvocation.EXPRESSION_PROPERTY) {
-			MethodInvocation methodInvocation = (MethodInvocation)simpleName.getParent();
+		if (structuralDescriptor == MethodInvocation.EXPRESSION_PROPERTY) {
+			MethodInvocation methodInvocation = (MethodInvocation) simpleName.getParent();
 			SimpleName methodName = methodInvocation.getName();
-			if("getResultSet".equals(methodName.getIdentifier())) { //$NON-NLS-1$
+			if ("getResultSet".equals(methodName.getIdentifier())) { //$NON-NLS-1$
 				return methodInvocation;
 			}
 		}
@@ -146,11 +147,11 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 	public boolean isUnsafe() {
 		return unsafe;
 	}
-	
+
 	public Expression getInitializer() {
 		return initializer;
 	}
-	
+
 	public MethodInvocation getGetResultSetInvocation() {
 		return this.getResultSetInvocation;
 	}

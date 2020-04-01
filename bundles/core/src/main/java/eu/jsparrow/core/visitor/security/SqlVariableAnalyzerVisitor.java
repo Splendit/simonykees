@@ -22,7 +22,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  *
  */
 public class SqlVariableAnalyzerVisitor extends ASTVisitor {
-	
+
 	private CompilationUnit compilationUnit;
 	private SimpleName variableName;
 	private ASTNode declarationFragment;
@@ -31,80 +31,91 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	private boolean beforeUsage = true;
 	private boolean unsafe = false;
 	
+	// TODO: make sure the query variable is not used in other places
+
 	public SqlVariableAnalyzerVisitor(SimpleName variableName, ASTNode declaration, CompilationUnit compilationUnit) {
 		this.variableName = variableName;
 		this.declarationFragment = declaration;
 		this.compilationUnit = compilationUnit;
 	}
-	
+
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
-		if(this.declarationFragment == fragment) {
+		if (this.declarationFragment == fragment) {
 			beforeDeclaration = false;
 			Expression initializer = fragment.getInitializer();
-			if(initializer.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-				InfixExpression infixExpression = (InfixExpression)initializer;
+			if (initializer.getNodeType() == ASTNode.INFIX_EXPRESSION) {
+				InfixExpression infixExpression = (InfixExpression) initializer;
 				Expression left = infixExpression.getLeftOperand();
 				components.add(left);
 				Expression right = infixExpression.getRightOperand();
 				components.add(right);
-				if(infixExpression.hasExtendedOperands()) {
-					components.addAll(ASTNodeUtil.convertToTypedList(infixExpression.extendedOperands(), Expression.class));
+				if (infixExpression.hasExtendedOperands()) {
+					List<Expression> extendedOperands = ASTNodeUtil
+						.convertToTypedList(infixExpression.extendedOperands(), Expression.class);
+					components.addAll(extendedOperands);
 				}
+			} else if (initializer.getNodeType() == ASTNode.STRING_LITERAL) {
+				components.add(initializer);
+			} else {
+				unsafe = true;
 			}
+			return false;
 		}
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(SimpleName simpleName) {
-		if(beforeDeclaration) {
+		if (beforeDeclaration) {
 			return false;
 		}
-		
-		if(simpleName == variableName) {
+
+		if (simpleName == variableName) {
 			beforeUsage = false;
 			return false;
 		}
-		
-		if(!variableName.getIdentifier().equals(simpleName.getIdentifier())) {
+
+		if (!variableName.getIdentifier()
+			.equals(simpleName.getIdentifier())) {
 			return false;
 		}
-		
+
 		IBinding binding = simpleName.resolveBinding();
-		if(binding.getKind() != IBinding.VARIABLE) {
+		if (binding.getKind() != IBinding.VARIABLE) {
 			return false;
 		}
-	
+
 		ASTNode declaringNode = compilationUnit.findDeclaringNode(simpleName.resolveBinding());
-		if(declaringNode != declarationFragment) {
+		if (declaringNode != declarationFragment) {
 			return false;
 		}
-		
-		if(!beforeUsage) {
+
+		if (!beforeUsage) {
 			unsafe = true;
 			return false;
 		}
-		
+
 		StructuralPropertyDescriptor structuralDescriptor = simpleName.getLocationInParent();
-		if(structuralDescriptor == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+		if (structuralDescriptor == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) simpleName.getParent();
-			if(assignment.getOperator() == Assignment.Operator.PLUS_ASSIGN) {
+			if (assignment.getOperator() == Assignment.Operator.PLUS_ASSIGN) {
 				components.add(assignment.getRightHandSide());
 			} else {
 				unsafe = true;
 			}
+
 		} else {
 			unsafe = true;
 		}
-		
+
 		return true;
 	}
-	
+
 	public boolean isUnsafe() {
 		return unsafe;
 	}
-	
+
 	public List<Expression> getDynamicQueryComponents() {
 		return components;
 	}
