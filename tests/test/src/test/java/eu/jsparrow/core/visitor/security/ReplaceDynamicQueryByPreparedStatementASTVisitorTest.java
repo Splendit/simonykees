@@ -14,12 +14,17 @@ import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 public class ReplaceDynamicQueryByPreparedStatementASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
 	@BeforeEach
-	public void setUpVisitor() {
+	public void setUpVisitor() throws Exception {
 		setVisitor(new ReplaceDynamicQueryByPreparedStatementASTVisitor());
+		
+		fixture.addImport(java.sql.Connection.class.getName());
+		fixture.addImport(java.sql.Statement.class.getName());
+		fixture.addImport(java.sql.PreparedStatement.class.getName());
+		fixture.addImport(java.sql.ResultSet.class.getName());
 	}
 	
 	@Test
-	public void visit_() throws Exception {
+	public void visit_executeQuery_shouldTransform() throws Exception {
 		
 		String original = "" + 
 				"		String departmentId = \"40\";\n" + 
@@ -40,7 +45,7 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitorTest extends UsesSi
 		String expected = "" +
 				"		String departmentId = \"40\";\n" + 
 				"        Connection connection = null;\n" + 
-				"        String query = \"SELECT employee_id, first_name FROM employee WHERE department_id =?\" + \" ORDER BY last_name\";\n" + 
+				"        String query = \"SELECT employee_id, first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n" + 
 				"        query += \"\";\n" + 
 				"        PreparedStatement statement;\n" + 
 				"		try {\n" + 
@@ -55,12 +60,42 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitorTest extends UsesSi
 				"		}";
 		
 		
-		
-		fixture.addImport(java.sql.Connection.class.getName());
-		fixture.addImport(java.sql.Statement.class.getName());
-		fixture.addImport(java.sql.ResultSet.class.getName());
 		assertChange(original, expected);
-		
+	}
+	
+	@Test
+	public void visit_multipleConcatenationStatements_shouldTransform() throws Exception {
+		String original = "" +
+				"		try {\n" + 
+				"			String departmentId = \"40\";\n" + 
+				"	        Connection connection = null;\n" + 
+				"	        String query = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\";\n" + 
+				"	        query += departmentId;\n" + 
+				"	        query += \"' ORDER BY last_name\";\n" + 
+				"	        Statement statement = connection.createStatement();\n" + 
+				"	        ResultSet resultSet = statement.executeQuery(query);\n" + 
+				"	        while(resultSet.next()) {\n" + 
+				"	        	String firstName = resultSet.getString(2);\n" + 
+				"	        }\n" + 
+				"		} catch (Exception e) {\n" + 
+				"			\n" + 
+				"		}";
+		String expected = "" +
+				"		try {\n" + 
+				"			String departmentId = \"40\";\n" + 
+				"	        Connection connection = null;\n" + 
+				"	        String query = \"SELECT employee_id, first_name FROM employee WHERE department_id = ?\";\n" + 
+				"	        query += \" ORDER BY last_name\";\n" + 
+				"	        PreparedStatement statement = connection.prepareStatement(query);\n" + 
+				"			statement.setString(1, departmentId);" +	
+				"	        ResultSet resultSet = statement.executeQuery();\n" + 
+				"	        while(resultSet.next()) {\n" + 
+				"	        	String firstName = resultSet.getString(2);\n" + 
+				"	        }\n" + 
+				"		} catch (Exception e) {\n" + 
+				"			\n" + 
+				"		}";
+		assertChange(original, expected);
 		
 	}
 	
@@ -101,9 +136,6 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitorTest extends UsesSi
 			return;
 		}
 		
-		fixture.addImport(java.sql.Connection.class.getName());
-		fixture.addImport(java.sql.Statement.class.getName());
-		fixture.addImport(java.sql.ResultSet.class.getName());
 		
 		
 		
