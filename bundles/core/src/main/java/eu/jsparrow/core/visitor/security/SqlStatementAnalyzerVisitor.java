@@ -119,10 +119,10 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 		}
 
 		if (isStatementReference(simpleName)) {
-			MethodInvocation getResultSet2 = findGetResultSet(simpleName);
-			if (getResultSet2 != null) {
+			MethodInvocation getResultSet = findGetResultSet(simpleName);
+			if (getResultSet != null) {
 				if (this.getResultSetInvocation == null) {
-					this.getResultSetInvocation = getResultSet2;
+					this.getResultSetInvocation = getResultSet;
 				} else {
 					unsafe = true;
 				}
