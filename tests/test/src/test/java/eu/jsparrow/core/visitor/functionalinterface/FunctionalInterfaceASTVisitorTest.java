@@ -1,40 +1,24 @@
 package eu.jsparrow.core.visitor.functionalinterface;
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
-import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings("nls")
 public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 
-	private static final String DEFAULT_TYPE_NAME = "TestForSim1709";
-
-	private JdtUnitFixtureClass defaultFixture;
-
-	private FunctionalInterfaceASTVisitor functionalInterfaceASTVisitor;
-
 	@BeforeEach
 	public void setUp() throws Exception {
-		defaultFixture = fixtureProject.addCompilationUnit(DEFAULT_TYPE_NAME);
-		functionalInterfaceASTVisitor = new FunctionalInterfaceASTVisitor();
+		setDefaultVisitor(new FunctionalInterfaceASTVisitor());
 	}
 
 	@AfterEach
 	public void tearDown() throws Exception {
 		fixtureProject.clear();
-
 	}
-	
-	
-	/*
-	 * needed for coverage -- transformed although not compiler clean
-	 */
+
 	@Test
 	public void visit_AnonymousWithNonBoundSimpleName_ShouldTransform() throws Exception {
 
@@ -61,16 +45,11 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
-
+		assertChange(original, expected);
 	}
 
-
-	/*
-	 * needed for coverage -- transformed although not compiler clean
-	 */
 	@Test
-	public void visit_AnonymousWithQualifiedInterfaceName_ShouldTransform() throws Exception {
+	public void visit_AnonymousWithFullyQualifiedInterfaceName_ShouldTransform() throws Exception {
 
 		String original = "" +
 				"	static interface InterfaceForSim1709 {\n" +
@@ -78,8 +57,8 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		int exampleMethod();\n" +
 				"	}\n" +
 				"	public void test_NonQualified_InnerInterfaceConstant() {\n" +
-				"		fixturepackage.TestForSim1709.InterfaceForSim1709 anonymous = " +
-				"		new fixturepackage.TestForSim1709.InterfaceForSim1709() {\n" +
+				"		fixturepackage.TestCU.InterfaceForSim1709 anonymous = " +
+				"		new fixturepackage.TestCU.InterfaceForSim1709() {\n" +
 				"			@Override\n" +
 				"			public int exampleMethod() {\n" +
 				"				return INTERFACE_CONSTANT;\n" +
@@ -93,13 +72,44 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		int exampleMethod();\n" +
 				"	}\n" +
 				"	public void test_NonQualified_InnerInterfaceConstant() {\n" +
-				"		fixturepackage.TestForSim1709.InterfaceForSim1709 anonymous = () -> {\n" +
-				"			return fixturepackage.TestForSim1709.InterfaceForSim1709.INTERFACE_CONSTANT;" +
+				"		fixturepackage.TestCU.InterfaceForSim1709 anonymous = () -> {\n" +
+				"			return fixturepackage.TestCU.InterfaceForSim1709.INTERFACE_CONSTANT;" +
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
+		assertChange(original, expected);
+	}
 
+	@Test
+	public void visit_AnonymousWithPartlyQualifiedInterfaceName_ShouldTransform() throws Exception {
+
+		String original = "" +
+				"	static interface InterfaceForSim1709 {\n" +
+				"   	static final int INTERFACE_CONSTANT = -20;\n" +
+				"		int exampleMethod();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_InnerInterfaceConstant() {\n" +
+				"		TestCU.InterfaceForSim1709 anonymous = " +
+				"		new TestCU.InterfaceForSim1709() {\n" +
+				"			@Override\n" +
+				"			public int exampleMethod() {\n" +
+				"				return INTERFACE_CONSTANT;\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}";
+
+		String expected = "" +
+				"	static interface InterfaceForSim1709 {\n" +
+				"   	static final int INTERFACE_CONSTANT = -20;\n" +
+				"		int exampleMethod();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_InnerInterfaceConstant() {\n" +
+				"		TestCU.InterfaceForSim1709 anonymous = () -> {\n" +
+				"			return TestCU.InterfaceForSim1709.INTERFACE_CONSTANT;" +
+				"		};\n" +
+				"	}";
+
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -134,8 +144,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
-
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -167,8 +176,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
-
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -199,8 +207,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
-
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -231,8 +238,67 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
+		assertChange(original, expected);
+	}
 
+	@Test
+	public void visit_AnonymousWithThisInterfaceConstant_ShouldTransform() throws Exception {
+
+		String original = "" +
+				"	static interface InterfaceForSim1709 {\n" +
+				"		static final int INTERFACE_CONSTANT = -20;\n" +
+				"		int exampleMethod();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_InnerInterfaceConstant() {\n" +
+				"		InterfaceForSim1709 anonymous = new InterfaceForSim1709() {\n" +
+				"			@Override\n" +
+				"			public int exampleMethod() {\n" +
+				"				return this.INTERFACE_CONSTANT;\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}";
+
+		String expected = "" +
+				"	static interface InterfaceForSim1709 {\n" +
+				"		static final int INTERFACE_CONSTANT = -20;\n" +
+				"		int exampleMethod();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_InnerInterfaceConstant() {\n" +
+				"		InterfaceForSim1709 anonymous = () -> {\n" +
+				"			return InterfaceForSim1709.INTERFACE_CONSTANT;" +
+				"		};\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_AnonymousWithIntegerMaxValue_ShouldTransform() throws Exception {
+
+		String original = "" +
+				"	static interface InterfaceForSim1709 {\n" +
+				"		int exampleMethod();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_InnerInterfaceConstant() {\n" +
+				"		InterfaceForSim1709 anonymous = new InterfaceForSim1709() {\n" +
+				"			@Override\n" +
+				"			public int exampleMethod() {\n" +
+				"				return Integer.valueOf(1).MAX_VALUE;\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}";
+
+		String expected = "" +
+				"	static interface InterfaceForSim1709 {\n" +
+				"		int exampleMethod();\n" +
+				"	}\n" +
+				"	public void test_NonQualified_InnerInterfaceConstant() {\n" +
+				"		InterfaceForSim1709 anonymous = () -> {\n" +
+				"			return Integer.valueOf(1).MAX_VALUE;" +
+				"		};\n" +
+				"	}";
+
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -267,8 +333,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
-
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -301,8 +366,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
-
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -333,8 +397,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
-
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -357,21 +420,37 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeNotChanged(original);
+		assertNoChange(original);
 	}
 
-	private void assertCodeChanged(String original, String expected) throws Exception {
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, original);
+	@Test
+	public void visit_AnonymousWithTypeArguments_ShouldTransform() throws Exception {
 
-		functionalInterfaceASTVisitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(functionalInterfaceASTVisitor);
+		String original = "" +
+				"	static interface GenericInterface<T> {\n" +
+				"		String INTERFACECONSTANT = \"interface-constant\";" +
+				"		T getValue();\n" +
+				"	}" +
+				"	public void test_GenericInterface() {\n" +
+				"		GenericInterface<String> genericInterface = new GenericInterface<String>() {\n" +
+				"			@Override\n" +
+				"			public String getValue() {\n" +
+				"				return INTERFACECONSTANT;" +
+				"			}\n" +
+				"		};\n" +
+				"	}";
 
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_NAME, expected),
-				defaultFixture.getTypeDeclaration());
+		String expected = "" +
+				"	static interface GenericInterface<T> {\n" +
+				"		String INTERFACECONSTANT = \"interface-constant\";" +				
+				"		T getValue();\n" +
+				"	}" +
+				"	public void test_GenericInterface() {\n" +
+				"		GenericInterface<String> genericInterface = () -> {\n" +
+				"			return GenericInterface.INTERFACECONSTANT;" +
+				"		};\n" +
+				"	}";
+
+		assertChange(original, expected);
 	}
-
-	private void assertCodeNotChanged(String original) throws Exception {
-		assertCodeChanged(original, original);
-	}
-
 }

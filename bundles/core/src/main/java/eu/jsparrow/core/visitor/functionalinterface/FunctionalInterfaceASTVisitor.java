@@ -244,24 +244,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 							}
 						}
 
-						UnqualifiedFieldNamesVisitor unqualifiedConstantNamesVisitor = new UnqualifiedFieldNamesVisitor(node);
-						onlyFunctionalInterfaceMethodImplBody.accept(unqualifiedConstantNamesVisitor);
-						
-						if(unqualifiedConstantNamesVisitor.hasSimpleNamesToQualify()) {
-							
-							Name qualifier = TypeNameUtil.getTypeName(classType);
-							if(qualifier == null) {
-								return true;
-							}
-							AST astNode = classType.getAST();
-							unqualifiedConstantNamesVisitor.getSimpleNames()
-							.forEach(simpleName -> {
-								Name qualifierClone = TypeNameUtil.cloneName(qualifier);
-								SimpleName simpleNameClone = astNode.newSimpleName(simpleName.getIdentifier());
-								QualifiedName qualifiedName = astNode.newQualifiedName(qualifierClone, simpleNameClone);
-								astRewrite.replace(simpleName, qualifiedName, null);
-							});
-						}
+						qualifyUnqualifiedConstants(node, classType, onlyFunctionalInterfaceMethodImplBody);
 
 						VariableDefinitionASTVisitor varVisistor = new VariableDefinitionASTVisitor(node,
 								relevantBlocks);
@@ -301,6 +284,30 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			}
 		}
 		return true;
+
+	}
+
+	private void qualifyUnqualifiedConstants(AnonymousClassDeclaration node, Type classType,
+			Block onlyFunctionalInterfaceMethodImplBody) {
+		UnqualifiedFieldNamesVisitor unqualifiedConstantNamesVisitor = new UnqualifiedFieldNamesVisitor(node);
+		onlyFunctionalInterfaceMethodImplBody.accept(unqualifiedConstantNamesVisitor);
+
+		Name qualifier = TypeNameUtil.getTypeName(classType);
+		AST ast = classType.getAST();
+		
+		unqualifiedConstantNamesVisitor.getSimpleNames()
+			.forEach(simpleName -> {
+				Name qualifierClone = TypeNameUtil.cloneName(qualifier);
+				SimpleName simpleNameClone = ast.newSimpleName(simpleName.getIdentifier());
+				QualifiedName qualifiedName = ast.newQualifiedName(qualifierClone, simpleNameClone);
+				astRewrite.replace(simpleName, qualifiedName, null);
+			});
+
+		unqualifiedConstantNamesVisitor.getThisExpressionsOfStaticFields()
+			.forEach(thisExpression -> {
+				Name qualifierClone = TypeNameUtil.cloneName(qualifier);
+				astRewrite.replace(thisExpression, qualifierClone, null);
+			});
 
 	}
 
