@@ -87,17 +87,19 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 		if (beforeDeclaration) {
 			return false;
 		}
-		if (initializer != null) {
-			return true;
-		}
 
 		Expression left = assignment.getLeftHandSide();
 		if (isStatementReference(left)) {
-			Expression right = assignment.getRightHandSide();
-			if (right.getNodeType() != ASTNode.NULL_LITERAL) {
-				this.initializer = right;
-				return false;
+			if(initializer == null) {
+				Expression right = assignment.getRightHandSide();
+				if (right.getNodeType() != ASTNode.NULL_LITERAL) {
+					this.initializer = right;
+					return false;
+				}
+			} else {
+				unsafe = true;
 			}
+
 		}
 
 		Expression right = assignment.getRightHandSide();
@@ -126,6 +128,8 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 				} else {
 					unsafe = true;
 				}
+			} else if (simpleName.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+				unsafe = true;
 			}
 		}
 

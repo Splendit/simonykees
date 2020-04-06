@@ -3,9 +3,7 @@ package eu.jsparrow.core.visitor.security;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -78,25 +76,25 @@ public class QueryComponentsAnalyzer {
 		} else if (type.isArray() && "byte".equals(type.getComponentType() //$NON-NLS-1$
 			.getName())) {
 			return "setBytes";//$NON-NLS-1$
-		} else if ("boolean".equals(type.getComponentType() //$NON-NLS-1$
+		} else if ("boolean".equals(type //$NON-NLS-1$
 			.getName()) || isContentOfType(type, java.lang.Boolean.class.getName())) {
 			return "setBoolean";//$NON-NLS-1$
-		} else if ("byte".equals(type.getComponentType() //$NON-NLS-1$
+		} else if ("byte".equals(type //$NON-NLS-1$
 			.getName()) || isContentOfType(type, java.lang.Byte.class.getName())) {
 			return "setByte";//$NON-NLS-1$
-		} else if ("double".equals(type.getComponentType() //$NON-NLS-1$
+		} else if ("double".equals(type //$NON-NLS-1$
 			.getName()) || isContentOfType(type, java.lang.Double.class.getName())) {
 			return "setDouble";//$NON-NLS-1$
-		} else if ("float".equals(type.getComponentType() //$NON-NLS-1$
+		} else if ("float".equals(type //$NON-NLS-1$
 			.getName()) || isContentOfType(type, java.lang.Float.class.getName())) {
 			return "setFloat";//$NON-NLS-1$
-		} else if ("int".equals(type.getComponentType() //$NON-NLS-1$
+		} else if ("int".equals(type //$NON-NLS-1$
 			.getName()) || isContentOfType(type, java.lang.Integer.class.getName())) {
 			return "setInt";//$NON-NLS-1$
-		} else if ("long".equals(type.getComponentType() //$NON-NLS-1$
+		} else if ("long".equals(type //$NON-NLS-1$
 			.getName()) || isContentOfType(type, java.lang.Long.class.getName())) {
 			return "setLong";//$NON-NLS-1$
-		} else if ("short".equals(type.getComponentType() //$NON-NLS-1$
+		} else if ("short".equals(type //$NON-NLS-1$
 			.getName()) || isContentOfType(type, java.lang.Short.class.getName())) {
 			return "setShort";//$NON-NLS-1$
 		}
@@ -129,10 +127,6 @@ public class QueryComponentsAnalyzer {
 		StringLiteral stringLiteral = (StringLiteral) previous;
 		String value = stringLiteral.getLiteralValue();
 		return value.endsWith("'") ? stringLiteral : null; //$NON-NLS-1$
-	}
-
-	public Map<Expression, Expression> getReplacements() {
-		return new HashMap<>();
 	}
 
 	public List<ReplaceableParameter> getReplaceableParameters() {

@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -83,6 +84,10 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 
 		IBinding binding = simpleName.resolveBinding();
 		if (binding.getKind() != IBinding.VARIABLE) {
+			return false;
+		}
+		
+		if(((IVariableBinding)binding).isField()) {
 			return false;
 		}
 

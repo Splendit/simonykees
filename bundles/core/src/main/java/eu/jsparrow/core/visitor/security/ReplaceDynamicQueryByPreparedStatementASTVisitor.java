@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -125,6 +126,14 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 
 		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
 				ImportDeclaration.class);
+		
+		boolean existing = importDeclarations.stream()
+				.map(ImportDeclaration::getName)
+				.map(Name::getFullyQualifiedName)
+				.anyMatch(qualifiedName -> qualifiedName.equals(clazz.getName()));
+		if(existing) {
+			return true;
+		}
 
 		boolean clashing = importDeclarations.stream()
 			.map(ImportDeclaration::getName)
@@ -259,6 +268,11 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 		if (queryVariableBinding.getKind() != IBinding.VARIABLE) {
 			return null;
 		}
+		
+		IVariableBinding variableBinding = (IVariableBinding)queryVariableBinding;
+		if(variableBinding.isField()) {
+			return null;
+		}
 
 		ASTNode declaringNode = this.getCompilationUnit()
 			.findDeclaringNode(queryVariableBinding);
@@ -281,6 +295,12 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 		if (!EXECUTE.equals(methodName.getIdentifier()) && !EXECUTE_QUERY.equals(methodName.getIdentifier())) {
 			return false;
 		}
+		
+		Expression methodExpression = methodInvocation.getExpression();
+		if (methodExpression == null) {
+			return false;
+		}
+		
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		if (!ClassRelationUtil.isContentOfType(declaringClass, java.sql.Statement.class.getName())) {
@@ -296,11 +316,6 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 		ITypeBinding argumentTypeBinding = argument.resolveTypeBinding();
 		boolean isString = ClassRelationUtil.isContentOfType(argumentTypeBinding, java.lang.String.class.getName());
 		if (!isString) {
-			return false;
-		}
-
-		Expression methodExpression = methodInvocation.getExpression();
-		if (methodExpression == null) {
 			return false;
 		}
 
@@ -343,7 +358,7 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 			newDeclarationStatement.setType(preparedStatementType);
 			Block block = (Block) statement.getParent();
 			ListRewrite listRewrtie = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-			listRewrtie.insertAfter(newDeclarationStatement, statement, null);
+			listRewrtie.insertBefore(newDeclarationStatement, statement, null);
 		} else {
 			Type type = statement.getType();
 			astRewrite.replace(type, preparedStatementType, null);
@@ -387,6 +402,7 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 			StringLiteral previous = parameter.getPrevious();
 			StringLiteral next = parameter.getNext();
 			Expression component = parameter.getParameter();
+
 			String oldPrevious = previous.getLiteralValue();
 			String newPrevious = oldPrevious.substring(0, oldPrevious.length() - 1) + " ?"; //$NON-NLS-1$
 			StringLiteral newPreviousLiteral = ast.newStringLiteral();
@@ -406,7 +422,6 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 				astRewrite.remove(component, null);
 			}
 		}
-
 	}
 
 	private boolean analyzeSqlStatementInitializer(Expression sqlStatementInitializerExpression) {
