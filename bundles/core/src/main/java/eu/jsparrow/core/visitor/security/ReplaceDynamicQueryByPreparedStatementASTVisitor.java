@@ -37,7 +37,8 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
- * Replaces a dynamic query with a prepared statement. For example, the following code: 
+ * Replaces a dynamic query with a prepared statement. For example, the
+ * following code:
  * 
  * <pre>
  * String query = "SELECT first_name FROM employee WHERE department_id ='" + departmentId + "' ORDER BY last_name";
@@ -46,7 +47,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * ResultSet resultSet = statement.getResultSet();
  * </pre>
  * 
- * is transformed to: 
+ * is transformed to:
  * 
  * <pre>
  * String query = "SELECT first_name FROM employee WHERE department_id = ?" + " ORDER BY last_name";
@@ -100,7 +101,7 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 			return true;
 		}
 
-		// 5 Perform the replacement.
+		// Perform the replacement.
 		replaceQuery(replaceableParameters);
 		List<ExpressionStatement> setParameterStatements = createSetParameterStatements(replaceableParameters,
 				sqlStatement);
@@ -130,54 +131,6 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 		return true;
 	}
 
-	private boolean isSafeToAddImport(CompilationUnit compilationUnit, Class<?> clazz) {
-		DeclaredTypesASTVisitor visitor = new DeclaredTypesASTVisitor();
-		compilationUnit.accept(visitor);
-		boolean matchesInnerClassName = visitor.getDeclaredTypes()
-			.keySet()
-			.stream()
-			.anyMatch(name -> name.equals(clazz.getSimpleName()));
-		if (matchesInnerClassName) {
-			return false;
-		}
-
-		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
-				ImportDeclaration.class);
-		
-		boolean existing = importDeclarations.stream()
-				.map(ImportDeclaration::getName)
-				.map(Name::getFullyQualifiedName)
-				.anyMatch(qualifiedName -> qualifiedName.equals(clazz.getName()));
-		if(existing) {
-			return true;
-		}
-
-		boolean clashing = importDeclarations.stream()
-			.map(ImportDeclaration::getName)
-			.filter(Name::isQualifiedName)
-			.map(name -> (QualifiedName) name)
-			.map(QualifiedName::getName)
-			.anyMatch(importedName -> clazz.getSimpleName()
-				.equals(importedName.getIdentifier()));
-		if (clashing) {
-			return false;
-		}
-
-		clashing = importDeclarations.stream()
-			.map(ImportDeclaration::getName)
-			.filter(Name::isSimpleName)
-			.anyMatch(name -> clazz.getSimpleName()
-				.equals(((SimpleName) name).getIdentifier()));
-
-		if (clashing) {
-			return false;
-		}
-
-		return importDeclarations.stream()
-			.noneMatch(importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration, clazz.getName()));
-
-	}
-
 	private void removeGetResultSetInvocation(MethodInvocation getResultSetInvocation,
 			MethodInvocation methodInvocation) {
 		StructuralPropertyDescriptor propertyDescriptor = getResultSetInvocation.getLocationInParent();
@@ -201,7 +154,6 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 		} else {
 			astRewrite.remove(getResultSetInvocation.getParent(), null);
 		}
-
 	}
 
 	private boolean isRemovableGetResultSet(MethodInvocation getResultSetInvocation,
@@ -285,9 +237,9 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 		if (queryVariableBinding.getKind() != IBinding.VARIABLE) {
 			return null;
 		}
-		
-		IVariableBinding variableBinding = (IVariableBinding)queryVariableBinding;
-		if(variableBinding.isField()) {
+
+		IVariableBinding variableBinding = (IVariableBinding) queryVariableBinding;
+		if (variableBinding.isField()) {
 			return null;
 		}
 
@@ -312,12 +264,12 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 		if (!EXECUTE.equals(methodName.getIdentifier()) && !EXECUTE_QUERY.equals(methodName.getIdentifier())) {
 			return false;
 		}
-		
+
 		Expression methodExpression = methodInvocation.getExpression();
 		if (methodExpression == null) {
 			return false;
 		}
-		
+
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		if (!ClassRelationUtil.isContentOfType(declaringClass, java.sql.Statement.class.getName())) {
@@ -457,6 +409,53 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 		}
 		return sqlStatementInitializer.arguments()
 			.isEmpty();
+	}
+
+	private boolean isSafeToAddImport(CompilationUnit compilationUnit, Class<?> clazz) {
+		DeclaredTypesASTVisitor visitor = new DeclaredTypesASTVisitor();
+		compilationUnit.accept(visitor);
+		boolean matchesInnerClassName = visitor.getDeclaredTypes()
+			.keySet()
+			.stream()
+			.anyMatch(name -> name.equals(clazz.getSimpleName()));
+		if (matchesInnerClassName) {
+			return false;
+		}
+
+		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
+				ImportDeclaration.class);
+
+		boolean existing = importDeclarations.stream()
+			.map(ImportDeclaration::getName)
+			.map(Name::getFullyQualifiedName)
+			.anyMatch(qualifiedName -> qualifiedName.equals(clazz.getName()));
+		if (existing) {
+			return true;
+		}
+
+		boolean clashing = importDeclarations.stream()
+			.map(ImportDeclaration::getName)
+			.filter(Name::isQualifiedName)
+			.map(name -> (QualifiedName) name)
+			.map(QualifiedName::getName)
+			.anyMatch(importedName -> clazz.getSimpleName()
+				.equals(importedName.getIdentifier()));
+		if (clashing) {
+			return false;
+		}
+
+		clashing = importDeclarations.stream()
+			.map(ImportDeclaration::getName)
+			.filter(Name::isSimpleName)
+			.anyMatch(name -> clazz.getSimpleName()
+				.equals(((SimpleName) name).getIdentifier()));
+
+		if (clashing) {
+			return false;
+		}
+
+		return importDeclarations.stream()
+			.noneMatch(importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration, clazz.getName()));
 	}
 
 }

@@ -11,7 +11,6 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitorTest extends UsesSi
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
 		setVisitor(new ReplaceDynamicQueryByPreparedStatementASTVisitor());
-		
 		fixture.addImport(java.sql.Connection.class.getName());
 		fixture.addImport(java.sql.Statement.class.getName());
 		fixture.addImport(java.sql.PreparedStatement.class.getName());
