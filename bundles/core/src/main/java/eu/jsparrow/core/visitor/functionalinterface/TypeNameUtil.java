@@ -1,7 +1,6 @@
-package eu.jsparrow.core.visitor.sub;
+package eu.jsparrow.core.visitor.functionalinterface;
 
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.ParameterizedType;
@@ -54,41 +53,39 @@ public class TypeNameUtil {
 	 * @param type
 	 *            expected to be a non-null instance of {@link Type}
 	 *            representing a Java type.
-	 * @return {@link Name} representing the corresponding Java type.
+	 * @return {@link Name} representing the corresponding Java type or null if
+	 *         no {@link Name} could be found.
 	 */
-	public static Name getTypeName(Type type) {
+	public static Name extractName(Type type) {
 		AST ast = type.getAST();
 
-		if (type.isSimpleType()) {
-			SimpleType simpleType = (SimpleType) type;
-			return cloneName(simpleType.getName());
-
-		}
-
 		if (type.isNameQualifiedType()) {
-			NameQualifiedType nqt = (NameQualifiedType) type;
-			Name qualifierClone = cloneName(nqt.getQualifier());
-			SimpleName simpleNameClone = ast.newSimpleName(nqt.getName()
+			NameQualifiedType nameQualifiedType = (NameQualifiedType) type;
+			Name qualifierClone = cloneName(nameQualifiedType.getQualifier());
+			SimpleName simpleNameClone = ast.newSimpleName(nameQualifiedType.getName()
 				.getIdentifier());
 			return ast.newQualifiedName(qualifierClone, simpleNameClone);
 		}
 
 		if (type.isQualifiedType()) {
 			QualifiedType qualifiedType = (QualifiedType) type;
-			Name typeQualifyer = getTypeName(qualifiedType.getQualifier());
+			Name typeQualifyer = extractName(qualifiedType.getQualifier());
 			SimpleName simpleTypeName = ast.newSimpleName(qualifiedType.getName()
 				.getIdentifier());
 			return ast.newQualifiedName(typeQualifyer, simpleTypeName);
 		}
-		
-		if(type.isParameterizedType()) {
-			ParameterizedType parameterizedType =  (ParameterizedType)type;
-			Type erasure = parameterizedType.getType();
-			return getTypeName(erasure);
+
+		if (type.isSimpleType()) {
+			SimpleType simpleType = (SimpleType) type;
+			return cloneName(simpleType.getName());
 		}
 
-		ITypeBinding typeBinding = type.resolveBinding();
-		String qualifiedName = typeBinding.getQualifiedName();
-		return ast.newName(qualifiedName);
+		if (type.isParameterizedType()) {
+			ParameterizedType parameterizedType = (ParameterizedType) type;
+			Type erasure = parameterizedType.getType();
+			return extractName(erasure);
+		}
+
+		return null;
 	}
 }

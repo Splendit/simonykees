@@ -442,7 +442,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 
 		String expected = "" +
 				"	static interface GenericInterface<T> {\n" +
-				"		String INTERFACECONSTANT = \"interface-constant\";" +				
+				"		String INTERFACECONSTANT = \"interface-constant\";" +
 				"		T getValue();\n" +
 				"	}" +
 				"	public void test_GenericInterface() {\n" +
@@ -453,4 +453,44 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
+
+	@Test
+	public void visit_AnonymousWithNameQualifiedType_ShouldTransform() throws Exception {
+		defaultFixture.addImport(java.lang.annotation.Target.class.getName());
+		String original = "" +
+				"	@Target(value = { java.lang.annotation.ElementType.TYPE_USE })\n" + 
+				"	@interface ExampleAnnotation {\n" + 
+				"	}\n" + 
+				"	interface EnclosingInterface {\n" + 
+				"		interface InnerInterface {\n" + 
+				"			String INNER_INTERFACE_CONSTANT = \"inner-interface-constant\";\n" + 
+				"			void exampleMethod();\n" + 
+				"		}\n" + 
+				"	}\n" + 
+				"	public void test_NameQualifiedType() {\n" + 
+				"		EnclosingInterface.@ExampleAnnotation InnerInterface xInnerInterface = new EnclosingInterface.@ExampleAnnotation InnerInterface() {\n" + 
+				"			@Override\n" + 
+				"			public void exampleMethod() {\n" + 
+				"				System.out.println(INNER_INTERFACE_CONSTANT);\n" + 
+				"			}\n" + 
+				"		};\n" + 
+				"	}";
+		String expected = "" +
+				"	@Target(value = { java.lang.annotation.ElementType.TYPE_USE })\n" + 
+				"	@interface ExampleAnnotation {\n" + 
+				"	}\n" + 
+				"	interface EnclosingInterface {\n" + 
+				"		interface InnerInterface {\n" + 
+				"			String INNER_INTERFACE_CONSTANT = \"inner-interface-constant\";\n" + 
+				"			void exampleMethod();\n" + 
+				"		}\n" + 
+				"	}\n" + 
+				"	public void test_NameQualifiedType(){\n" + 
+				"		EnclosingInterface.@ExampleAnnotation InnerInterface xInnerInterface=() -> {\n" + 
+				"			System.out.println(EnclosingInterface.InnerInterface.INNER_INTERFACE_CONSTANT);\n" + 
+				"		};\n" + 
+				"	}";
+		assertChange(original, expected);
+	}
+
 }

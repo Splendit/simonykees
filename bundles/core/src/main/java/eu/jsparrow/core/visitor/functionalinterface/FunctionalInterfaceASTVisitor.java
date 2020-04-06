@@ -40,7 +40,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.visitor.sub.TypeNameUtil;
 import eu.jsparrow.core.visitor.sub.VariableDefinitionASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -243,8 +242,12 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 							}
 						}
-
-						qualifyUnqualifiedConstants(node, classType, onlyFunctionalInterfaceMethodImplBody);
+						Name qualifier = TypeNameUtil.extractName(classType);	
+						if(qualifier == null) {
+							return true;
+						}
+						
+						qualifyUnqualifiedConstants(node, qualifier, onlyFunctionalInterfaceMethodImplBody);
 
 						VariableDefinitionASTVisitor varVisistor = new VariableDefinitionASTVisitor(node,
 								relevantBlocks);
@@ -287,13 +290,12 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	}
 
-	private void qualifyUnqualifiedConstants(AnonymousClassDeclaration node, Type classType,
+	private void qualifyUnqualifiedConstants(AnonymousClassDeclaration node, Name qualifier,
 			Block onlyFunctionalInterfaceMethodImplBody) {
 		UnqualifiedFieldNamesVisitor unqualifiedConstantNamesVisitor = new UnqualifiedFieldNamesVisitor(node);
 		onlyFunctionalInterfaceMethodImplBody.accept(unqualifiedConstantNamesVisitor);
 
-		Name qualifier = TypeNameUtil.getTypeName(classType);
-		AST ast = classType.getAST();
+		AST ast = node.getAST();
 		
 		unqualifiedConstantNamesVisitor.getSimpleNames()
 			.forEach(simpleName -> {
@@ -308,7 +310,6 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 				Name qualifierClone = TypeNameUtil.cloneName(qualifier);
 				astRewrite.replace(thisExpression, qualifierClone, null);
 			});
-
 	}
 
 	/**
