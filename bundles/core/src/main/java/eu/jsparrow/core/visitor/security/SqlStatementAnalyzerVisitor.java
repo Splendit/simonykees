@@ -14,7 +14,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 /**
- * 
+ * A helper visitor for analyzing the creation and references of a
+ * {@link java.sql.Statement}.
  * 
  * @since 3.16.0
  *
@@ -90,7 +91,7 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 
 		Expression left = assignment.getLeftHandSide();
 		if (isStatementReference(left)) {
-			if(initializer == null) {
+			if (initializer == null) {
 				Expression right = assignment.getRightHandSide();
 				if (right.getNodeType() != ASTNode.NULL_LITERAL) {
 					this.initializer = right;
@@ -148,18 +149,42 @@ public class SqlStatementAnalyzerVisitor extends ASTVisitor {
 		return null;
 	}
 
+	/**
+	 * 
+	 * @return if it is not safe to replace the {@link java.sql.Statement} with
+	 *         a {@link java.sql.PreparedStatement}.
+	 */
 	public boolean isUnsafe() {
 		return unsafe;
 	}
 
+	/**
+	 * 
+	 * @return the expression used for initializing the original
+	 *         {@link java.sql.Statement}.
+	 */
 	public Expression getInitializer() {
 		return initializer;
 	}
 
+	/**
+	 * 
+	 * @return the first invocation of {@link java.sql.Statement#getResultSet()}
+	 *         after invoking {@link java.sql.Statement#execute(String)}. In
+	 *         case more than one invocation of
+	 *         {@link java.sql.Statement#getResultSet()} occurs, then the flag
+	 *         {@link #unsafe} will be set to {@code true}.
+	 */
 	public MethodInvocation getGetResultSetInvocation() {
 		return this.getResultSetInvocation;
 	}
 
+	/**
+	 * 
+	 * @return the {@link VariableDeclarationFragment} of the
+	 *         {@link java.sql.Statement} to be replaced with
+	 *         {@link java.sql.PreparedStatement}.
+	 */
 	public VariableDeclarationFragment getDeclarationFragment() {
 		return variableDeclarationFragment;
 	}

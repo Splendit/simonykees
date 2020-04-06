@@ -37,6 +37,23 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
+ * Replaces a dynamic query with a prepared statement. For example, the following code: 
+ * 
+ * <pre>
+ * String query = "SELECT first_name FROM employee WHERE department_id ='" + departmentId + "' ORDER BY last_name";
+ * Statement statement = connection.createStatement();
+ * statement.execute(query);
+ * ResultSet resultSet = statement.getResultSet();
+ * </pre>
+ * 
+ * is transformed to: 
+ * 
+ * <pre>
+ * String query = "SELECT first_name FROM employee WHERE department_id = ?" + " ORDER BY last_name";
+ * PreparedStatement statement = connection.prepareStatement(query);
+ * statement.setString(1, departmentId);
+ * ResultSet resultSet = statement.executeQuery();
+ * </pre>
  * 
  * @since 3.16.0
  *

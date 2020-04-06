@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
+ * A helper visitor for analyzing the declaration and references of the variable
+ * representing a dynamic SQL query.
  * 
  * @since 3.16.0
  *
@@ -31,8 +33,6 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	private boolean beforeDeclaration = true;
 	private boolean beforeUsage = true;
 	private boolean unsafe = false;
-	
-	// TODO: make sure the query variable is not used in other places
 
 	public SqlVariableAnalyzerVisitor(SimpleName variableName, ASTNode declaration, CompilationUnit compilationUnit) {
 		this.variableName = variableName;
@@ -86,8 +86,8 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		if (binding.getKind() != IBinding.VARIABLE) {
 			return false;
 		}
-		
-		if(((IVariableBinding)binding).isField()) {
+
+		if (((IVariableBinding) binding).isField()) {
 			return false;
 		}
 

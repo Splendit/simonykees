@@ -11,6 +11,14 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
+/**
+ * Finds the components of a dynamic query that can be replaced with parameters
+ * of a prepared statement. Additionally, computes which setter method should be
+ * used for the corresponding parameter.
+ * 
+ * @since 3.16.0
+ *
+ */
 public class QueryComponentsAnalyzer {
 
 	private List<Expression> components;
@@ -20,15 +28,17 @@ public class QueryComponentsAnalyzer {
 		this.components = components;
 	}
 
-	public boolean analyze() {
+	/**
+	 * Constructs a list of {@link ReplaceableParameter}s out of the
+	 * {@link #components} of the query.
+	 * 
+	 * @return
+	 */
+	public void analyze() {
 		List<Expression> nonLiteralComponents = components.stream()
 			.filter(component -> component.getNodeType() != ASTNode.STRING_LITERAL)
 			.collect(Collectors.toList());
 
-		/*
-		 * 1. If it is final variable then skip it. 2.Prepare a list of
-		 * parameters and the affected literals.
-		 */
 		int position = 1;
 		for (Expression component : nonLiteralComponents) {
 			int index = components.indexOf(component);
@@ -44,59 +54,51 @@ public class QueryComponentsAnalyzer {
 				}
 			}
 		}
-
-		return true;
 	}
 
+	@SuppressWarnings("nls")
 	private String findSetterName(Expression component) {
 		ITypeBinding type = component.resolveTypeBinding();
 
 		if (isContentOfType(type, java.sql.Array.class.getName())) {
-			return "setArray"; //$NON-NLS-1$
+			return "setArray";
 		} else if (isContentOfType(type, java.math.BigDecimal.class.getName())) {
-			return "setBigDecimal"; //$NON-NLS-1$
+			return "setBigDecimal";
 		} else if (isContentOfType(type, java.sql.Blob.class.getName())) {
-			return "setBlob"; //$NON-NLS-1$
+			return "setBlob";
 		} else if (isContentOfType(type, java.sql.Clob.class.getName())) {
-			return "setClob"; //$NON-NLS-1$
+			return "setClob";
 		} else if (isContentOfType(type, java.sql.Date.class.getName())) {
-			return "setDate"; //$NON-NLS-1$
+			return "setDate";
 		} else if (isContentOfType(type, java.lang.Object.class.getName())) {
-			return "setObject"; //$NON-NLS-1$
+			return "setObject";
 		} else if (isContentOfType(type, java.sql.Ref.class.getName())) {
-			return "setRef"; //$NON-NLS-1$
+			return "setRef";
 		} else if (isContentOfType(type, java.lang.String.class.getName())) {
-			return "setString"; //$NON-NLS-1$
+			return "setString";
 		} else if (isContentOfType(type, java.sql.Time.class.getName())) {
-			return "setTime"; //$NON-NLS-1$
+			return "setTime";
 		} else if (isContentOfType(type, java.sql.Timestamp.class.getName())) {
-			return "setTimestamp"; //$NON-NLS-1$
+			return "setTimestamp";
 		} else if (isContentOfType(type, java.net.URL.class.getName())) {
-			return "setURL"; //$NON-NLS-1$
-		} else if (type.isArray() && "byte".equals(type.getComponentType() //$NON-NLS-1$
+			return "setURL";
+		} else if (type.isArray() && "byte".equals(type.getComponentType()
 			.getName())) {
-			return "setBytes";//$NON-NLS-1$
-		} else if ("boolean".equals(type //$NON-NLS-1$
-			.getName()) || isContentOfType(type, java.lang.Boolean.class.getName())) {
-			return "setBoolean";//$NON-NLS-1$
-		} else if ("byte".equals(type //$NON-NLS-1$
-			.getName()) || isContentOfType(type, java.lang.Byte.class.getName())) {
-			return "setByte";//$NON-NLS-1$
-		} else if ("double".equals(type //$NON-NLS-1$
-			.getName()) || isContentOfType(type, java.lang.Double.class.getName())) {
-			return "setDouble";//$NON-NLS-1$
-		} else if ("float".equals(type //$NON-NLS-1$
-			.getName()) || isContentOfType(type, java.lang.Float.class.getName())) {
-			return "setFloat";//$NON-NLS-1$
-		} else if ("int".equals(type //$NON-NLS-1$
-			.getName()) || isContentOfType(type, java.lang.Integer.class.getName())) {
-			return "setInt";//$NON-NLS-1$
-		} else if ("long".equals(type //$NON-NLS-1$
-			.getName()) || isContentOfType(type, java.lang.Long.class.getName())) {
-			return "setLong";//$NON-NLS-1$
-		} else if ("short".equals(type //$NON-NLS-1$
-			.getName()) || isContentOfType(type, java.lang.Short.class.getName())) {
-			return "setShort";//$NON-NLS-1$
+			return "setBytes";
+		} else if ("boolean".equals(type.getName()) || isContentOfType(type, java.lang.Boolean.class.getName())) {
+			return "setBoolean";
+		} else if ("byte".equals(type.getName()) || isContentOfType(type, java.lang.Byte.class.getName())) {
+			return "setByte";
+		} else if ("double".equals(type.getName()) || isContentOfType(type, java.lang.Double.class.getName())) {
+			return "setDouble";
+		} else if ("float".equals(type.getName()) || isContentOfType(type, java.lang.Float.class.getName())) {
+			return "setFloat";
+		} else if ("int".equals(type.getName()) || isContentOfType(type, java.lang.Integer.class.getName())) {
+			return "setInt";
+		} else if ("long".equals(type.getName()) || isContentOfType(type, java.lang.Long.class.getName())) {
+			return "setLong";
+		} else if ("short".equals(type.getName()) || isContentOfType(type, java.lang.Short.class.getName())) {
+			return "setShort";
 		}
 		return null;
 	}
@@ -129,6 +131,9 @@ public class QueryComponentsAnalyzer {
 		return value.endsWith("'") ? stringLiteral : null; //$NON-NLS-1$
 	}
 
+	/**
+	 * @return the list of {@link ReplaceableParameter}s constructed by {@link #analyze()}.
+	 */
 	public List<ReplaceableParameter> getReplaceableParameters() {
 		return this.parameters;
 	}

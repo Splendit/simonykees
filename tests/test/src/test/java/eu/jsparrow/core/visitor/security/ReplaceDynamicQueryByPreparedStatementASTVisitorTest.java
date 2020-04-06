@@ -267,4 +267,27 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitorTest extends UsesSi
                 "} catch (Exception e) {}";
         assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_discardedResultSet_shouldTransform() throws Exception {
+		String original = "" +
+				"int id = 40;\n" + 
+				"Connection connection = null;\n" + 
+				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + id + \"' ORDER BY last_name\";\n" + 
+				"try {\n" + 
+				"    Statement statement = connection.createStatement();\n" + 
+				"    statement.execute(query);\n" + 
+				"    statement.getResultSet();\n" + 
+				"} catch (Exception e) {}";
+		String expected = "" +
+				"int id = 40;\n" + 
+				"Connection connection = null;\n" + 
+				"String query = \"SELECT first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n" + 
+				"try {\n" + 
+				"    PreparedStatement statement = connection.prepareStatement(query);\n" + 
+				"    statement.setInt(1, id);\n" + 
+				"    statement.executeQuery();\n" + 
+				"} catch (Exception e) {}";
+		assertChange(original, expected);
+	}
 }
