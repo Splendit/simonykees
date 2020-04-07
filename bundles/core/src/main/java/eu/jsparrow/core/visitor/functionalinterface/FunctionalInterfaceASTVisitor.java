@@ -29,8 +29,11 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
@@ -87,6 +90,34 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		if (binding != null && binding.isTopLevel()) {
 			safeToUseFields.clear();
 		}
+	}
+
+	private Name extractName(Type type) {
+		
+		if (type.isParameterizedType()) {
+			return extractName(((ParameterizedType) type).getType());
+		}
+		if (type.isSimpleType()) {
+			return (Name) astRewrite.createCopyTarget(((SimpleType) type).getName());
+		}
+		if (type.isNameQualifiedType()) {
+			AST ast = type.getAST();
+			NameQualifiedType nameQualifiedType = (NameQualifiedType) type;
+			astRewrite.createCopyTarget(nameQualifiedType.getQualifier());
+			Name qualifierClone = (Name) astRewrite.createCopyTarget(nameQualifiedType.getQualifier());
+			SimpleName simpleNameClone = ast.newSimpleName(nameQualifiedType.getName()
+				.getIdentifier());
+			return ast.newQualifiedName(qualifierClone, simpleNameClone);
+		}
+		return null;
+	}
+
+	private boolean canExtractName(Type type) {
+		
+		if (type.isParameterizedType()) {
+			return canExtractName(((ParameterizedType) type).getType());
+		}
+		return type.isSimpleType() || type.isNameQualifiedType();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -242,12 +273,12 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 							}
 						}
-						Name qualifier = TypeNameUtil.extractName(classType);	
-						if(qualifier == null) {
+
+						if (!canExtractName(classType)) {
 							return true;
 						}
-						
-						qualifyUnqualifiedConstants(node, qualifier, onlyFunctionalInterfaceMethodImplBody);
+
+						qualifyUnqualifiedConstants(node, classType, onlyFunctionalInterfaceMethodImplBody);
 
 						VariableDefinitionASTVisitor varVisistor = new VariableDefinitionASTVisitor(node,
 								relevantBlocks);
@@ -290,16 +321,16 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	}
 
-	private void qualifyUnqualifiedConstants(AnonymousClassDeclaration node, Name qualifier,
+	private void qualifyUnqualifiedConstants(AnonymousClassDeclaration node, Type type,
 			Block onlyFunctionalInterfaceMethodImplBody) {
 		UnqualifiedFieldNamesVisitor unqualifiedConstantNamesVisitor = new UnqualifiedFieldNamesVisitor(node);
 		onlyFunctionalInterfaceMethodImplBody.accept(unqualifiedConstantNamesVisitor);
 
 		AST ast = node.getAST();
-		
+
 		unqualifiedConstantNamesVisitor.getSimpleNames()
 			.forEach(simpleName -> {
-				Name qualifierClone = TypeNameUtil.cloneName(qualifier);
+				Name qualifierClone = extractName(type);
 				SimpleName simpleNameClone = ast.newSimpleName(simpleName.getIdentifier());
 				QualifiedName qualifiedName = ast.newQualifiedName(qualifierClone, simpleNameClone);
 				astRewrite.replace(simpleName, qualifiedName, null);
@@ -307,7 +338,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		unqualifiedConstantNamesVisitor.getThisExpressionsOfStaticFields()
 			.forEach(thisExpression -> {
-				Name qualifierClone = TypeNameUtil.cloneName(qualifier);
+				Name qualifierClone = extractName(type);
 				astRewrite.replace(thisExpression, qualifierClone, null);
 			});
 	}
