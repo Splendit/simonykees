@@ -442,7 +442,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeNotChanged(original);
+		assertNoChange(original);
 	}
 
 	@Test
@@ -464,7 +464,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeNotChanged(original);
+		assertNoChange(original);
 	}
 
 	@Test
@@ -493,7 +493,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -522,7 +522,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
+		assertChange(original, expected);
 	}
 	
 	@Test
@@ -553,7 +553,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -588,7 +588,7 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"		};\n" +
 				"	}";
 
-		assertCodeChanged(original, expected);
+		assertChange(original, expected);
 	}
 
 	@Test

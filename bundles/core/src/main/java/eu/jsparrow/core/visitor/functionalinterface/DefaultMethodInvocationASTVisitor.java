@@ -14,8 +14,6 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class DefaultMethodInvocationASTVisitor extends ASTVisitor {
 
-	private static final String JAVA_LANG_OBJECT = java.lang.Object.class.getName();
-
 	private final ITypeBinding anonymousClassTypeBinding;
 
 	private boolean flagCancelTransformation;
@@ -24,34 +22,53 @@ public class DefaultMethodInvocationASTVisitor extends ASTVisitor {
 		anonymousClassTypeBinding = anonymousClassDeclaration.resolveBinding();
 	}
 
+	private boolean isObjectMethod(MethodInvocation node) {
+		if (node.resolveMethodBinding() == null) {
+			return false;
+		}
+		if (node.resolveMethodBinding()
+			.getDeclaringClass() == null) {
+			return false;
+		}
+		String qualifiedName = node.resolveMethodBinding()
+			.getDeclaringClass()
+			.getQualifiedName();
+
+		if (qualifiedName == null) {
+			return false;
+		}
+		return qualifiedName.equals(java.lang.Object.class.getName());
+	}
+
 	@Override
 	public boolean visit(MethodInvocation node) {
 
+		if (isObjectMethod(node)) {
+			return true;
+		}
+
 		Expression expression = node.getExpression();
 		if (expression == null) {
-			String declaringClassQualifiedName = node.resolveMethodBinding()
-				.getDeclaringClass()
-				.getQualifiedName();
-			if (!declaringClassQualifiedName.equals(JAVA_LANG_OBJECT) &&
-					ClassRelationUtil.isInheritingContentOfTypes(
-							anonymousClassTypeBinding,
-							Collections.singletonList(declaringClassQualifiedName))) {
-				flagCancelTransformation = true;
+			ITypeBinding declaringClass = node.resolveMethodBinding()
+				.getDeclaringClass();
+			String declaringClassQualifiedName = declaringClass.getQualifiedName();
+			if (declaringClass.isParameterizedType()) {
+				declaringClassQualifiedName = declaringClass.getErasure()
+					.getQualifiedName();
 
+			}
+			if (ClassRelationUtil.isInheritingContentOfTypes(
+					anonymousClassTypeBinding,
+					Collections.singletonList(declaringClassQualifiedName))) {
+				flagCancelTransformation = true;
 			}
 
 		} else if (expression.getNodeType() == ASTNode.THIS_EXPRESSION) {
 			ThisExpression thisExpression = (ThisExpression) expression;
 			if (thisExpression.getQualifier() == null) {
-				String declaringClassQualifiedName = node.resolveMethodBinding()
-					.getDeclaringClass()
-					.getQualifiedName();
-				if (!declaringClassQualifiedName.equals(JAVA_LANG_OBJECT)) {
-					flagCancelTransformation = true;
-				}
+				flagCancelTransformation = true;
 			}
 		}
-
 		return !flagCancelTransformation;
 	}
 
