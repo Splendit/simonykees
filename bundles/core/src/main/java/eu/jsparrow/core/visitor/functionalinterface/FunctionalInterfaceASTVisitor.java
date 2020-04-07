@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -190,7 +189,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						// find variable declarations inside the method block
 						BlockVariableDeclarationsASTVisitor varDeclarationVisitor = new BlockVariableDeclarationsASTVisitor();
 						moveBlock.accept(varDeclarationVisitor);
-						List<SimpleName> blockLocalVarNames = varDeclarationVisitor.getBlockVariableDelcarations();
+						List<SimpleName> blockLocalVarNames = varDeclarationVisitor.getBlockVariableDeclarations();
 
 						int scopeNodeType = scope.getNodeType();
 
@@ -225,7 +224,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 							 * initializer of a field
 							 */
 
-							PublicVarialbeReferencesASTVisitor fieldReferencesVisitor = new PublicVarialbeReferencesASTVisitor();
+							PublicVariableReferencesASTVisitor fieldReferencesVisitor = new PublicVariableReferencesASTVisitor();
 							node.accept(fieldReferencesVisitor);
 							List<SimpleName> unAssignedReferences = fieldReferencesVisitor
 								.getUnassignedVariableReferences();
@@ -249,7 +248,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 								 */
 								List<SimpleName> assignedVariables = findAssignedVariablesTillNodeOccurrence(
 										methodDeclaration, relevantBlocks, node);
-								PublicVarialbeReferencesASTVisitor fieldReferencesVisitor = new PublicVarialbeReferencesASTVisitor();
+								PublicVariableReferencesASTVisitor fieldReferencesVisitor = new PublicVariableReferencesASTVisitor();
 								node.accept(fieldReferencesVisitor);
 								/*
 								 * List of public variables in the body of the
@@ -654,39 +653,4 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		return commentFree;
 	}
-}
-
-/**
- * A visitor for checking whether a node is an ancestor of the anonymous class
- * given in the construct.
- * 
- * @author Ardit Ymeri
- * @since 2.0
- *
- */
-class AnonymousClassNodeWrapperVisitor extends ASTVisitor {
-	private AnonymousClassDeclaration node;
-	private boolean isAncestorOfNode = false;
-
-	public AnonymousClassNodeWrapperVisitor(AnonymousClassDeclaration node) {
-		this.node = node;
-	}
-
-	@Override
-	public boolean visit(AnonymousClassDeclaration node) {
-		if (this.node == node) {
-			isAncestorOfNode = true;
-		}
-		return true;
-	}
-
-	@Override
-	public boolean preVisit2(ASTNode node) {
-		return !isAncestorOfNode;
-	}
-
-	public boolean isAncestor() {
-		return isAncestorOfNode;
-	}
-
 }

@@ -40,7 +40,7 @@ class BlockVariableDeclarationsASTVisitor extends ASTVisitor {
 		return true;
 	}
 
-	public List<SimpleName> getBlockVariableDelcarations() {
+	public List<SimpleName> getBlockVariableDeclarations() {
 		return blockVariableNames;
 	}
 }
