@@ -100,9 +100,8 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			return (Name) astRewrite.createCopyTarget(((SimpleType) type).getName());
 		}
 		if (type.isNameQualifiedType()) {
-			AST ast = type.getAST();
+			AST ast = astRewrite.getAST();
 			NameQualifiedType nameQualifiedType = (NameQualifiedType) type;
-			astRewrite.createCopyTarget(nameQualifiedType.getQualifier());
 			Name qualifierClone = (Name) astRewrite.createCopyTarget(nameQualifiedType.getQualifier());
 			SimpleName simpleNameClone = ast.newSimpleName(nameQualifiedType.getName()
 				.getIdentifier());

@@ -492,5 +492,43 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"	}";
 		assertChange(original, expected);
 	}
-
+	
+	@Test
+	public void visit_innerClassFieldAccess_shouldTransform() throws Exception {
+		String original = "" +
+				"interface Foo {\n" + 
+				"	Runnable sampleMethod();\n" + 
+				"}\n" + 
+				"public void foo() {\n" + 
+				"	Foo foo = new Foo () {\n" + 
+				"		public Runnable sampleMethod() {\n" + 
+				"			return new Runnable() {\n" + 
+				"				String string = \"\";\n" + 
+				"				@Override\n" + 
+				"				public void run() {\n" + 
+				"					System.out.println(this.string);\n" + 
+				"					\n" + 
+				"				}\n" + 
+				"			};\n" + 
+				"		}\n" + 
+				"	};\n" + 
+				"}";
+		String expected = "" +
+				"interface Foo {\n" + 
+				"	Runnable sampleMethod();\n" + 
+				"}\n" + 
+				"public void foo() {\n" + 
+				"	Foo foo = () -> {\n" + 
+				"		return new Runnable() {\n" + 
+				"			String string = \"\";\n" + 
+				"			@Override\n" + 
+				"			public void run() {\n" + 
+				"				System.out.println(this.string);\n" + 
+				"			}\n" + 
+				"		};\n" + 
+				"	};\n" + 
+				"}";
+		assertChange(original, expected);
+		
+	}
 }

@@ -53,16 +53,6 @@ class UnqualifiedFieldNamesVisitor extends ASTVisitor {
 			}
 		}
 
-		if (simpleNameParent.getNodeType() == ASTNode.FIELD_ACCESS) {
-			FieldAccess fieldAccess = (FieldAccess) simpleNameParent;
-
-			Expression fieldAccessExpression = fieldAccess.getExpression();
-			if (fieldAccessExpression.getNodeType() == ASTNode.THIS_EXPRESSION) {
-				thisExpressionsOfStaticFields.add((ThisExpression) fieldAccessExpression);
-			}
-			return true;
-		}
-
 		IBinding binding = simpleName.resolveBinding();
 		if (binding == null) {
 			return true;
@@ -84,9 +74,19 @@ class UnqualifiedFieldNamesVisitor extends ASTVisitor {
 			declaringClassErasureName = declaringClass.getErasure().getQualifiedName();
 		}
 		
-		if (ClassRelationUtil.isInheritingContentOfTypes(
+		if (!ClassRelationUtil.isInheritingContentOfTypes(
 				anonymousClassTypeBinding,
 				Collections.singletonList(declaringClassErasureName))) {
+			return true;
+		}
+		
+		if (simpleNameParent.getNodeType() == ASTNode.FIELD_ACCESS) {
+			FieldAccess fieldAccess = (FieldAccess) simpleNameParent;
+			Expression fieldAccessExpression = fieldAccess.getExpression();
+			if (fieldAccessExpression.getNodeType() == ASTNode.THIS_EXPRESSION) {
+				thisExpressionsOfStaticFields.add((ThisExpression) fieldAccessExpression);
+			}
+		} else {
 			simpleNames.add(simpleName);
 		}
 
