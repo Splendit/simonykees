@@ -76,8 +76,8 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitorNegativeTest extend
 		String original = "" +
 				"String departmentId = \"40\";\n" + 
 				"Connection connection = null;\n" + 
-				"String quote = \"'\";\n" + 
-				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + departmentId + quote + \" ORDER BY last_name\";\n" + 
+				"String zero = \"0\";\n" + 
+				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + departmentId + zero + \"' ORDER BY last_name\";\n" + 
 				"try {\n" + 
 				"    Statement statement = connection.createStatement();\n" + 
 				"    statement.executeQuery(query);\n" + 
