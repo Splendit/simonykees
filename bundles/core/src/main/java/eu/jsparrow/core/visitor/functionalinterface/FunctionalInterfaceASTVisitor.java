@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -27,7 +27,12 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
+import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
@@ -44,7 +49,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
 /**
- * Finds anonymous classes an converts it to lambdas, if they are functional
+ * Finds anonymous classes and converts them to lambdas, if they are functional
  * interfaces.
  * 
  * @author Martin Huter, Ardit Ymeri
@@ -86,6 +91,33 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 	}
 
+	private Name extractName(Type type) {
+		
+		if (type.isParameterizedType()) {
+			return extractName(((ParameterizedType) type).getType());
+		}
+		if (type.isSimpleType()) {
+			return (Name) astRewrite.createCopyTarget(((SimpleType) type).getName());
+		}
+		if (type.isNameQualifiedType()) {
+			AST ast = astRewrite.getAST();
+			NameQualifiedType nameQualifiedType = (NameQualifiedType) type;
+			Name qualifierClone = (Name) astRewrite.createCopyTarget(nameQualifiedType.getQualifier());
+			SimpleName simpleNameClone = ast.newSimpleName(nameQualifiedType.getName()
+				.getIdentifier());
+			return ast.newQualifiedName(qualifierClone, simpleNameClone);
+		}
+		return null;
+	}
+
+	private boolean canExtractName(Type type) {
+		
+		if (type.isParameterizedType()) {
+			return canExtractName(((ParameterizedType) type).getType());
+		}
+		return type.isSimpleType() || type.isNameQualifiedType();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
@@ -122,11 +154,14 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 				ITypeBinding parentNodeTypeBinding = parentNode.getType()
 					.resolveBinding();
 				if (parentNodeTypeBinding != null) {
+
 					/*
-					 * check that only one Method is implemented, which is the
-					 * FunctionalInterfaceMethod
+					 * Get the Body of the functional interface method
+					 * implementation
 					 */
-					if (!checkOnlyFunctionalInterfaceMethodIsImplemented(node, parentNodeTypeBinding)) {
+					Block onlyFunctionalInterfaceMethodImplBody = getOnlyFunctionalInterfaceMethodImplBody(
+							node, parentNodeTypeBinding);
+					if (onlyFunctionalInterfaceMethodImplBody == null) {
 						return false;
 					}
 
@@ -143,7 +178,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					methodBlockASTVisitor.setASTRewrite(astRewrite);
 					node.accept(methodBlockASTVisitor);
 					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
-					
+
 					if (moveBlock == null || ASTNodeUtil.containsWildCards(moveBlock)) {
 						return true;
 					}
@@ -153,7 +188,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						// find variable declarations inside the method block
 						BlockVariableDeclarationsASTVisitor varDeclarationVisitor = new BlockVariableDeclarationsASTVisitor();
 						moveBlock.accept(varDeclarationVisitor);
-						List<SimpleName> blockLocalVarNames = varDeclarationVisitor.getBlockVariableDelcarations();
+						List<SimpleName> blockLocalVarNames = varDeclarationVisitor.getBlockVariableDeclarations();
 
 						int scopeNodeType = scope.getNodeType();
 
@@ -188,7 +223,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 							 * initializer of a field
 							 */
 
-							PublicVarialbeReferencesASTVisitor fieldReferencesVisitor = new PublicVarialbeReferencesASTVisitor();
+							PublicVariableReferencesASTVisitor fieldReferencesVisitor = new PublicVariableReferencesASTVisitor();
 							node.accept(fieldReferencesVisitor);
 							List<SimpleName> unAssignedReferences = fieldReferencesVisitor
 								.getUnassignedVariableReferences();
@@ -212,7 +247,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 								 */
 								List<SimpleName> assignedVariables = findAssignedVariablesTillNodeOccurrence(
 										methodDeclaration, relevantBlocks, node);
-								PublicVarialbeReferencesASTVisitor fieldReferencesVisitor = new PublicVarialbeReferencesASTVisitor();
+								PublicVariableReferencesASTVisitor fieldReferencesVisitor = new PublicVariableReferencesASTVisitor();
 								node.accept(fieldReferencesVisitor);
 								/*
 								 * List of public variables in the body of the
@@ -236,6 +271,12 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 							}
 						}
+
+						if (!canExtractName(classType)) {
+							return true;
+						}
+
+						qualifyUnqualifiedConstants(node, classType, onlyFunctionalInterfaceMethodImplBody);
 
 						VariableDefinitionASTVisitor varVisistor = new VariableDefinitionASTVisitor(node,
 								relevantBlocks);
@@ -276,6 +317,28 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 		return true;
 
+	}
+
+	private void qualifyUnqualifiedConstants(AnonymousClassDeclaration node, Type type,
+			Block onlyFunctionalInterfaceMethodImplBody) {
+		UnqualifiedFieldNamesVisitor unqualifiedConstantNamesVisitor = new UnqualifiedFieldNamesVisitor(node);
+		onlyFunctionalInterfaceMethodImplBody.accept(unqualifiedConstantNamesVisitor);
+
+		AST ast = node.getAST();
+
+		unqualifiedConstantNamesVisitor.getSimpleNames()
+			.forEach(simpleName -> {
+				Name qualifierClone = extractName(type);
+				SimpleName simpleNameClone = ast.newSimpleName(simpleName.getIdentifier());
+				QualifiedName qualifiedName = ast.newQualifiedName(qualifierClone, simpleNameClone);
+				astRewrite.replace(simpleName, qualifiedName, null);
+			});
+
+		unqualifiedConstantNamesVisitor.getThisExpressionsOfStaticFields()
+			.forEach(thisExpression -> {
+				Name qualifierClone = extractName(type);
+				astRewrite.replace(thisExpression, qualifierClone, null);
+			});
 	}
 
 	/**
@@ -414,29 +477,45 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	 * @param parentNodeTypeBinding
 	 * @return
 	 */
-	private boolean checkOnlyFunctionalInterfaceMethodIsImplemented(AnonymousClassDeclaration node,
+	private Block getOnlyFunctionalInterfaceMethodImplBody(AnonymousClassDeclaration node,
 			ITypeBinding parentNodeTypeBinding) {
 		if (node == null) {
-			return false;
+			return null;
 		}
 
-		if (parentNodeTypeBinding == null || node.bodyDeclarations() == null
-				|| parentNodeTypeBinding.getFunctionalInterfaceMethod() == null) {
-			return false;
+		if (parentNodeTypeBinding == null) {
+			return null;
+		}
+
+		if (parentNodeTypeBinding.getFunctionalInterfaceMethod() == null) {
+			return null;
+		}
+
+		if (node.bodyDeclarations() == null) {
+			return null;
 		}
 
 		if (node.bodyDeclarations()
-			.size() == 1
-				&& node.bodyDeclarations()
-					.get(0) instanceof MethodDeclaration) {
-			return StringUtils.equals(parentNodeTypeBinding.getFunctionalInterfaceMethod()
-				.getName(),
-					((MethodDeclaration) node.bodyDeclarations()
-						.get(0)).getName()
-							.getIdentifier());
+			.size() != 1) {
+			return null;
 		}
 
-		return false;
+		if (node.bodyDeclarations()
+			.get(0) instanceof MethodDeclaration) {
+
+			MethodDeclaration methodDeclaration = (MethodDeclaration) node.bodyDeclarations()
+				.get(0);
+			String functionalInterfaceMethodName = parentNodeTypeBinding.getFunctionalInterfaceMethod()
+				.getName();
+
+			if (StringUtils.equals(functionalInterfaceMethodName,
+					methodDeclaration.getName()
+						.getIdentifier())) {
+				return methodDeclaration.getBody();
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -573,39 +652,4 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		return commentFree;
 	}
-}
-
-/**
- * A visitor for checking whether a node is an ancestor of the anonymous class
- * given in the construct.
- * 
- * @author Ardit Ymeri
- * @since 2.0
- *
- */
-class AnonymousClassNodeWrapperVisitor extends ASTVisitor {
-	private AnonymousClassDeclaration node;
-	private boolean isAncestorOfNode = false;
-
-	public AnonymousClassNodeWrapperVisitor(AnonymousClassDeclaration node) {
-		this.node = node;
-	}
-
-	@Override
-	public boolean visit(AnonymousClassDeclaration node) {
-		if (this.node == node) {
-			isAncestorOfNode = true;
-		}
-		return true;
-	}
-
-	@Override
-	public boolean preVisit2(ASTNode node) {
-		return !isAncestorOfNode;
-	}
-
-	public boolean isAncestor() {
-		return isAncestorOfNode;
-	}
-
 }

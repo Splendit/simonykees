@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * @since 2.0
  *
  */
-public class PublicVarialbeReferencesASTVisitor extends ASTVisitor {
+public class PublicVariableReferencesASTVisitor extends ASTVisitor {
 
 	private List<SimpleName> publicVariableReferences = new ArrayList<>();
 	private Set<String> localVariableNames = new HashSet<>();
