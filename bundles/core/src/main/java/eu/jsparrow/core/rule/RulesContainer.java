@@ -71,7 +71,7 @@ import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
-import eu.jsparrow.core.rule.impl.ReplaceDynamicQueryByPreparedStatementRule;
+import eu.jsparrow.core.rule.impl.UseParameterizedQueryRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
@@ -88,7 +88,6 @@ import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.UseStringJoinRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
-import eu.jsparrow.core.visitor.security.ReplaceDynamicQueryByPreparedStatementASTVisitor;
 import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
 
@@ -161,7 +160,7 @@ public class RulesContainer {
 				/*
 				 * Security
 				 */
-				new ReplaceDynamicQueryByPreparedStatementRule(),
+				new UseParameterizedQueryRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

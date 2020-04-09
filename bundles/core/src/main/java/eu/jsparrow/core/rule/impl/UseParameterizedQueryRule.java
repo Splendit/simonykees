@@ -5,24 +5,24 @@ import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import eu.jsparrow.core.visitor.security.ReplaceDynamicQueryByPreparedStatementASTVisitor;
+import eu.jsparrow.core.visitor.security.UseParameterizedQueryASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
- * @see ReplaceDynamicQueryByPreparedStatementASTVisitor
+ * @see UseParameterizedQueryASTVisitor
  * 
  * @since 3.16.0
  *
  */
-public class ReplaceDynamicQueryByPreparedStatementRule
-		extends RefactoringRuleImpl<ReplaceDynamicQueryByPreparedStatementASTVisitor> {
+public class UseParameterizedQueryRule
+		extends RefactoringRuleImpl<UseParameterizedQueryASTVisitor> {
 
-	public ReplaceDynamicQueryByPreparedStatementRule() {
-		this.visitorClass = ReplaceDynamicQueryByPreparedStatementASTVisitor.class;
-		this.id = "ReplaceDynamicQueryByPreparedStatement"; //$NON-NLS-1$
+	public UseParameterizedQueryRule() {
+		this.visitorClass = UseParameterizedQueryASTVisitor.class;
+		this.id = "UseParameterizedQuery"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.ReplaceDynamicQueryByPreparedStatementRule_name,
 				Messages.ReplaceDynamicQueryByPreparedStatementRule_description, Duration.ofMinutes(10),
 				Arrays.asList(Tag.JAVA_1_1, Tag.SECURITY));

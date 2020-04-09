@@ -59,7 +59,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.16.0
  *
  */
-public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAddImportASTVisitor {
+public class UseParameterizedQueryASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String EXECUTE = "execute"; //$NON-NLS-1$
 	private static final String EXECUTE_QUERY = "executeQuery"; //$NON-NLS-1$
@@ -127,6 +127,7 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitor extends AbstractAd
 		if (getResultSetInvocation != null) {
 			removeGetResultSetInvocation(getResultSetInvocation, methodInvocation);
 		}
+		onRewrite();
 
 		return true;
 	}

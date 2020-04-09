@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 
 @SuppressWarnings("nls")
-public class ReplaceDynamicQueryByPreparedStatementASTVisitorNegativeTest extends UsesSimpleJDTUnitFixture {
+public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
-		setVisitor(new ReplaceDynamicQueryByPreparedStatementASTVisitor());
+		setVisitor(new UseParameterizedQueryASTVisitor());
 		fixture.addImport(java.sql.Connection.class.getName());
 		fixture.addImport(java.sql.Statement.class.getName());
 		fixture.addImport(java.sql.ResultSet.class.getName());
