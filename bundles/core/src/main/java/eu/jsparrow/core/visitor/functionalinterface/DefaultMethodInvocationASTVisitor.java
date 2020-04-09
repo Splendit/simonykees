@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -22,52 +23,34 @@ public class DefaultMethodInvocationASTVisitor extends ASTVisitor {
 		anonymousClassTypeBinding = anonymousClassDeclaration.resolveBinding();
 	}
 
-	private boolean isObjectMethod(MethodInvocation node) {
-		if (node.resolveMethodBinding() == null) {
-			return false;
-		}
-		if (node.resolveMethodBinding()
-			.getDeclaringClass() == null) {
-			return false;
-		}
-		String qualifiedName = node.resolveMethodBinding()
-			.getDeclaringClass()
-			.getQualifiedName();
-
-		if (qualifiedName == null) {
-			return false;
-		}
-		return qualifiedName.equals(java.lang.Object.class.getName());
-	}
-
 	@Override
 	public boolean visit(MethodInvocation node) {
+		Expression expression = node.getExpression();
+		if(expression != null) {
+			if (expression.getNodeType() != ASTNode.THIS_EXPRESSION) {
+				return true;
+			}
+			ThisExpression thisExpression = (ThisExpression)expression;
+			if(thisExpression.getQualifier() != null) {
+				return true;
+			}			
+		}		
 
-		if (isObjectMethod(node)) {
+		IMethodBinding methodBinding = node.resolveMethodBinding();
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		String declaringClassQualifiedName = declaringClass.getQualifiedName();
+		if (declaringClass.isParameterizedType()) {
+			declaringClassQualifiedName = declaringClass.getErasure()
+				.getQualifiedName();
+		}
+		if (declaringClassQualifiedName.equals(java.lang.Object.class.getName())) {
 			return true;
 		}
 
-		Expression expression = node.getExpression();
-		if (expression == null) {
-			ITypeBinding declaringClass = node.resolveMethodBinding()
-				.getDeclaringClass();
-			String declaringClassQualifiedName = declaringClass.getQualifiedName();
-			if (declaringClass.isParameterizedType()) {
-				declaringClassQualifiedName = declaringClass.getErasure()
-					.getQualifiedName();
-
-			}
-			if (ClassRelationUtil.isInheritingContentOfTypes(
-					anonymousClassTypeBinding,
-					Collections.singletonList(declaringClassQualifiedName))) {
-				flagCancelTransformation = true;
-			}
-
-		} else if (expression.getNodeType() == ASTNode.THIS_EXPRESSION) {
-			ThisExpression thisExpression = (ThisExpression) expression;
-			if (thisExpression.getQualifier() == null) {
-				flagCancelTransformation = true;
-			}
+		if (ClassRelationUtil.isInheritingContentOfTypes(
+				anonymousClassTypeBinding,
+				Collections.singletonList(declaringClassQualifiedName))) {
+			flagCancelTransformation = true;
 		}
 		return !flagCancelTransformation;
 	}
