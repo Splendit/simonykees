@@ -45,25 +45,27 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		if (this.declarationFragment == fragment) {
 			beforeDeclaration = false;
 			Expression initializer = fragment.getInitializer();
-			if (initializer.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-				InfixExpression infixExpression = (InfixExpression) initializer;
-				Expression left = infixExpression.getLeftOperand();
-				components.add(left);
-				Expression right = infixExpression.getRightOperand();
-				components.add(right);
-				if (infixExpression.hasExtendedOperands()) {
-					List<Expression> extendedOperands = ASTNodeUtil
-						.convertToTypedList(infixExpression.extendedOperands(), Expression.class);
-					components.addAll(extendedOperands);
-				}
-			} else if (initializer.getNodeType() == ASTNode.STRING_LITERAL) {
-				components.add(initializer);
-			} else {
-				unsafe = true;
-			}
+			storeComponents(initializer);
 			return false;
 		}
 		return true;
+	}
+
+	private void storeComponents(Expression initializer) {
+		if (initializer.getNodeType() == ASTNode.INFIX_EXPRESSION) {
+			InfixExpression infixExpression = (InfixExpression) initializer;
+			Expression left = infixExpression.getLeftOperand();
+			components.add(left);
+			Expression right = infixExpression.getRightOperand();
+			components.add(right);
+			if (infixExpression.hasExtendedOperands()) {
+				List<Expression> extendedOperands = ASTNodeUtil
+					.convertToTypedList(infixExpression.extendedOperands(), Expression.class);
+				components.addAll(extendedOperands);
+			}
+		} else {
+			components.add(initializer);
+		}
 	}
 
 	@Override
@@ -105,7 +107,7 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		if (structuralDescriptor == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) simpleName.getParent();
 			if (assignment.getOperator() == Assignment.Operator.PLUS_ASSIGN) {
-				components.add(assignment.getRightHandSide());
+				storeComponents(assignment.getRightHandSide());
 			} else {
 				unsafe = true;
 			}

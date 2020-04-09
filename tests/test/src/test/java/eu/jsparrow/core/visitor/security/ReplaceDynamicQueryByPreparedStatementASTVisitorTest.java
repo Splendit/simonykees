@@ -289,4 +289,33 @@ public class ReplaceDynamicQueryByPreparedStatementASTVisitorTest extends UsesSi
 				"} catch (Exception e) {}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_multipleParametersMultipleConcatenationLines_shouldTransform () throws Exception {
+		String original = "" +
+				"class Foo {\n" + 
+				"	public void sampleMethod(Connection connection, String departmentId, int id) throws Exception {\n" + 
+				"        String query = \"SELECT first_name FROM employee WHERE\";\n" + 
+				"        query += \" id > '\" + id + \"'\";\n" + 
+				"        query += \" AND department_id ='\" + departmentId + \"'\";\n" + 
+				"        query += \" ORDER BY last_name\";\n" + 
+				"        Statement statement = connection.createStatement();\n" + 
+				"        ResultSet resultSet = statement.executeQuery(query);\n" + 
+				"	}\n" + 
+				"}";
+		String expected = "" +
+				"class Foo {\n" + 
+				"	public void sampleMethod(Connection connection, String departmentId, int id) throws Exception {\n" + 
+				"        String query = \"SELECT first_name FROM employee WHERE\";\n" + 
+				"        query += \" id >  ?\" + \"\";\n" + 
+				"        query += \" AND department_id = ?\" + \"\";\n" + 
+				"        query += \" ORDER BY last_name\";\n" + 
+				"        PreparedStatement statement = connection.prepareStatement(query);\n" + 
+				"		 statement.setInt(1, id);\n" + 
+				"		 statement.setString(2, departmentId);\n" + 
+				"        ResultSet resultSet = statement.executeQuery();\n" + 
+				"	}\n" + 
+				"}";
+		assertChange(original, expected);
+	}
 }
