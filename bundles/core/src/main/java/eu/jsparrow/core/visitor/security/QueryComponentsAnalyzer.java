@@ -1,9 +1,9 @@
 package eu.jsparrow.core.visitor.security;
 
-import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -59,48 +59,51 @@ public class QueryComponentsAnalyzer {
 	@SuppressWarnings("nls")
 	private String findSetterName(Expression component) {
 		ITypeBinding type = component.resolveTypeBinding();
+		String key = computeSetterKey(type);
+		Map<String, String> settersMap = new HashMap<>();
+		settersMap.put(java.sql.Array.class.getName(), "setArray");
+		settersMap.put(java.math.BigDecimal.class.getName(), "setBigDecimal");
+		settersMap.put(java.sql.Blob.class.getName(), "setBlob");
+		settersMap.put(java.sql.Clob.class.getName(), "setClob");
+		settersMap.put(java.sql.Date.class.getName(), "setDate");
+		settersMap.put(java.lang.Object.class.getName(), "setObject");
+		settersMap.put(java.sql.Ref.class.getName(), "setRef");
+		settersMap.put(java.lang.String.class.getName(), "setString");
+		settersMap.put(java.sql.Time.class.getName(), "setTime");
+		settersMap.put(java.sql.Timestamp.class.getName(), "setTimestamp");
+		settersMap.put(java.net.URL.class.getName(), "setURL");
 
-		if (isContentOfType(type, java.sql.Array.class.getName())) {
-			return "setArray";
-		} else if (isContentOfType(type, java.math.BigDecimal.class.getName())) {
-			return "setBigDecimal";
-		} else if (isContentOfType(type, java.sql.Blob.class.getName())) {
-			return "setBlob";
-		} else if (isContentOfType(type, java.sql.Clob.class.getName())) {
-			return "setClob";
-		} else if (isContentOfType(type, java.sql.Date.class.getName())) {
-			return "setDate";
-		} else if (isContentOfType(type, java.lang.Object.class.getName())) {
-			return "setObject";
-		} else if (isContentOfType(type, java.sql.Ref.class.getName())) {
-			return "setRef";
-		} else if (isContentOfType(type, java.lang.String.class.getName())) {
-			return "setString";
-		} else if (isContentOfType(type, java.sql.Time.class.getName())) {
-			return "setTime";
-		} else if (isContentOfType(type, java.sql.Timestamp.class.getName())) {
-			return "setTimestamp";
-		} else if (isContentOfType(type, java.net.URL.class.getName())) {
-			return "setURL";
-		} else if (type.isArray() && "byte".equals(type.getComponentType()
-			.getName())) {
-			return "setBytes";
-		} else if ("boolean".equals(type.getName()) || isContentOfType(type, java.lang.Boolean.class.getName())) {
-			return "setBoolean";
-		} else if ("byte".equals(type.getName()) || isContentOfType(type, java.lang.Byte.class.getName())) {
-			return "setByte";
-		} else if ("double".equals(type.getName()) || isContentOfType(type, java.lang.Double.class.getName())) {
-			return "setDouble";
-		} else if ("float".equals(type.getName()) || isContentOfType(type, java.lang.Float.class.getName())) {
-			return "setFloat";
-		} else if ("int".equals(type.getName()) || isContentOfType(type, java.lang.Integer.class.getName())) {
-			return "setInt";
-		} else if ("long".equals(type.getName()) || isContentOfType(type, java.lang.Long.class.getName())) {
-			return "setLong";
-		} else if ("short".equals(type.getName()) || isContentOfType(type, java.lang.Short.class.getName())) {
-			return "setShort";
+		settersMap.put("bytes", "setBytes");
+
+		settersMap.put("boolean", "setBoolean");
+		settersMap.put(java.lang.Boolean.class.getName(), "setBoolean");
+		settersMap.put("byte", "setByte");
+		settersMap.put(java.lang.Byte.class.getName(), "setByte");
+		settersMap.put("double", "setDouble");
+		settersMap.put(java.lang.Double.class.getName(), "setDouble");
+		settersMap.put("float", "setFloat");
+		settersMap.put(java.lang.Float.class.getName(), "setFloat");
+		settersMap.put("int", "setInt");
+		settersMap.put(java.lang.Integer.class.getName(), "setInt");
+		settersMap.put("long", "setLong");
+		settersMap.put(java.lang.Long.class.getName(), "setLong");
+		settersMap.put("short", "setShort");
+		settersMap.put(java.lang.Short.class.getName(), "setShort");
+
+		return settersMap.get(key);
+	}
+
+	private String computeSetterKey(ITypeBinding type) {
+		if (type.isPrimitive()) {
+			return type.getName();
 		}
-		return null;
+
+		if (type.isArray() && "byte".equals(type.getComponentType() //$NON-NLS-1$
+			.getName())) {
+			return "bytes"; //$NON-NLS-1$
+		}
+		return type.getErasure()
+			.getQualifiedName();
 	}
 
 	private StringLiteral findNext(int index) {
@@ -132,7 +135,8 @@ public class QueryComponentsAnalyzer {
 	}
 
 	/**
-	 * @return the list of {@link ReplaceableParameter}s constructed by {@link #analyze()}.
+	 * @return the list of {@link ReplaceableParameter}s constructed by
+	 *         {@link #analyze()}.
 	 */
 	public List<ReplaceableParameter> getReplaceableParameters() {
 		return this.parameters;
