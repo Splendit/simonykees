@@ -318,4 +318,47 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 				"}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_infixExpressions_shouldTransform () throws Exception {
+		String original = "" +
+				"class Foo {\n" + 
+				"	public void sampleMethod(Connection connection, String departmentId1, String departmentId2) throws Exception {\n" + 
+				"	    String query = \"\" + \n" + 
+				"	            \"SELECT\" +\n" + 
+				"	            \"   employee_id\" +\n" + 
+				"	            \"   , first_name\" +\n" + 
+				"	            \"   FROM\" +\n" + 
+				"	            \"       employee\" +\n" + 
+				"	            \"   WHERE\" + \n" + 
+				"	            \"       department_id =\" + \"'\" + departmentId1 + \"'\" + \n" + 
+				"	            \"   OR\" +\n" + 
+				"	            \"       department_id =\" + \"'\" + departmentId2 + \"'\" + \n" + 
+				"	            \"   ORDER BY last_name\";\n" + 
+				"	    Statement statement = connection.createStatement();\n" + 
+				"	    ResultSet resultSet = statement.executeQuery(query);\n" + 
+				"	}\n" + 
+				"}";
+		String expected = "" +
+				"class Foo {\n" + 
+				"	public void sampleMethod(Connection connection, String departmentId1, String departmentId2) throws Exception {\n" + 
+				"	    String query = \"\" + \n" + 
+				"	            \"SELECT\" +\n" + 
+				"	            \"   employee_id\" +\n" + 
+				"	            \"   , first_name\" +\n" + 
+				"	            \"   FROM\" +\n" + 
+				"	            \"       employee\" +\n" + 
+				"	            \"   WHERE\" + \n" + 
+				"	            \"       department_id =\" + \" ?\" + \"\" + \n" + 
+				"	            \"   OR\" +\n" + 
+				"	            \"       department_id =\" + \" ?\" + \"\" + \n" + 
+				"	            \"   ORDER BY last_name\";\n" + 
+				"	    PreparedStatement statement = connection.prepareStatement(query);\n" + 
+				"		statement.setString(1, departmentId1);\n" + 
+				"		statement.setString(2, departmentId2);\n" + 
+				"	    ResultSet resultSet = statement.executeQuery();\n" + 
+				"	}\n" + 
+				"}";
+		assertChange(original, expected);
+	}
 }

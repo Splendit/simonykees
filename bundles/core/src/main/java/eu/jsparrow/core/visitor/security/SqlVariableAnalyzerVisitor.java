@@ -55,13 +55,13 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		if (initializer.getNodeType() == ASTNode.INFIX_EXPRESSION) {
 			InfixExpression infixExpression = (InfixExpression) initializer;
 			Expression left = infixExpression.getLeftOperand();
-			components.add(left);
+			storeComponents(left);
 			Expression right = infixExpression.getRightOperand();
-			components.add(right);
+			storeComponents(right);
 			if (infixExpression.hasExtendedOperands()) {
 				List<Expression> extendedOperands = ASTNodeUtil
 					.convertToTypedList(infixExpression.extendedOperands(), Expression.class);
-				components.addAll(extendedOperands);
+				extendedOperands.forEach(this::storeComponents);
 			}
 		} else {
 			components.add(initializer);
