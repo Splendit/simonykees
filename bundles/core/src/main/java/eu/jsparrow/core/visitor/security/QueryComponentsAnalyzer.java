@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.security;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,41 @@ public class QueryComponentsAnalyzer {
 
 	private List<Expression> components;
 	private List<ReplaceableParameter> parameters = new ArrayList<>();
+
+	@SuppressWarnings("nls")
+	private static final Map<String, String> SETTERS_MAP = Collections.unmodifiableMap(new HashMap<String, String>() {
+		private static final long serialVersionUID = 572293158475249398L;
+		{
+			put(java.sql.Array.class.getName(), "setArray");
+			put(java.math.BigDecimal.class.getName(), "setBigDecimal");
+			put(java.sql.Blob.class.getName(), "setBlob");
+			put(java.sql.Clob.class.getName(), "setClob");
+			put(java.sql.Date.class.getName(), "setDate");
+			put(java.lang.Object.class.getName(), "setObject");
+			put(java.sql.Ref.class.getName(), "setRef");
+			put(java.lang.String.class.getName(), "setString");
+			put(java.sql.Time.class.getName(), "setTime");
+			put(java.sql.Timestamp.class.getName(), "setTimestamp");
+			put(java.net.URL.class.getName(), "setURL");
+
+			put("bytes", "setBytes");
+
+			put("boolean", "setBoolean");
+			put(java.lang.Boolean.class.getName(), "setBoolean");
+			put("byte", "setByte");
+			put(java.lang.Byte.class.getName(), "setByte");
+			put("double", "setDouble");
+			put(java.lang.Double.class.getName(), "setDouble");
+			put("float", "setFloat");
+			put(java.lang.Float.class.getName(), "setFloat");
+			put("int", "setInt");
+			put(java.lang.Integer.class.getName(), "setInt");
+			put("long", "setLong");
+			put(java.lang.Long.class.getName(), "setLong");
+			put("short", "setShort");
+			put(java.lang.Short.class.getName(), "setShort");
+		}
+	});
 
 	public QueryComponentsAnalyzer(List<Expression> components) {
 		this.components = components;
@@ -56,41 +92,10 @@ public class QueryComponentsAnalyzer {
 		}
 	}
 
-	@SuppressWarnings("nls")
 	private String findSetterName(Expression component) {
 		ITypeBinding type = component.resolveTypeBinding();
 		String key = computeSetterKey(type);
-		Map<String, String> settersMap = new HashMap<>();
-		settersMap.put(java.sql.Array.class.getName(), "setArray");
-		settersMap.put(java.math.BigDecimal.class.getName(), "setBigDecimal");
-		settersMap.put(java.sql.Blob.class.getName(), "setBlob");
-		settersMap.put(java.sql.Clob.class.getName(), "setClob");
-		settersMap.put(java.sql.Date.class.getName(), "setDate");
-		settersMap.put(java.lang.Object.class.getName(), "setObject");
-		settersMap.put(java.sql.Ref.class.getName(), "setRef");
-		settersMap.put(java.lang.String.class.getName(), "setString");
-		settersMap.put(java.sql.Time.class.getName(), "setTime");
-		settersMap.put(java.sql.Timestamp.class.getName(), "setTimestamp");
-		settersMap.put(java.net.URL.class.getName(), "setURL");
-
-		settersMap.put("bytes", "setBytes");
-
-		settersMap.put("boolean", "setBoolean");
-		settersMap.put(java.lang.Boolean.class.getName(), "setBoolean");
-		settersMap.put("byte", "setByte");
-		settersMap.put(java.lang.Byte.class.getName(), "setByte");
-		settersMap.put("double", "setDouble");
-		settersMap.put(java.lang.Double.class.getName(), "setDouble");
-		settersMap.put("float", "setFloat");
-		settersMap.put(java.lang.Float.class.getName(), "setFloat");
-		settersMap.put("int", "setInt");
-		settersMap.put(java.lang.Integer.class.getName(), "setInt");
-		settersMap.put("long", "setLong");
-		settersMap.put(java.lang.Long.class.getName(), "setLong");
-		settersMap.put("short", "setShort");
-		settersMap.put(java.lang.Short.class.getName(), "setShort");
-
-		return settersMap.get(key);
+		return SETTERS_MAP.get(key);
 	}
 
 	private String computeSetterKey(ITypeBinding type) {
