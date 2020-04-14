@@ -71,6 +71,7 @@ import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
+import eu.jsparrow.core.rule.impl.UseParameterizedQueryRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
@@ -155,6 +156,11 @@ public class RulesContainer {
 				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
 				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
 				new RemoveCollectionAddAllRule(), new RemoveRedundantTypeCastRule(),
+				
+				/*
+				 * Security
+				 */
+				new UseParameterizedQueryRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
