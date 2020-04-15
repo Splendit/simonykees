@@ -424,174 +424,6 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_AnonymousCallingNonQualifiedDefaultMethod_ShouldNotTransform() throws Exception {
-
-		String original = "" +
-				"	static interface InterfaceWithDefaultMethod {\n" +
-				"		default int getIntOne() {\n" +
-				"			return 1;\n" +
-				"		}\n" +
-				"		int exampleMethod();\n" +
-				"	}\n" +
-				"	public void test_NonQualified_DefaultMethodInvocation() {\n" +
-				"		InterfaceWithDefaultMethod anonymous = new InterfaceWithDefaultMethod() {\n" +
-				"			@Override\n" +
-				"			public int exampleMethod() {\n" +
-				"				return getIntOne();\n" +
-				"			}\n" +
-				"		};\n" +
-				"	}";
-
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_AnonymousCallingThisDefaultMethod_ShouldNotTransform() throws Exception {
-
-		String original = "" +
-				"	static interface InterfaceWithDefaultMethod {\n" +
-				"		default int getIntOne() {\n" +
-				"			return 1;\n" +
-				"		}\n" +
-				"		int exampleMethod();\n" +
-				"	}\n" +
-				"	public void test_NonQualified_DefaultMethodInvocation() {\n" +
-				"		InterfaceWithDefaultMethod anonymous = new InterfaceWithDefaultMethod() {\n" +
-				"			@Override\n" +
-				"			public int exampleMethod() {\n" +
-				"				return this.getIntOne();\n" +
-				"			}\n" +
-				"		};\n" +
-				"	}";
-
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_AnonymousCallingNonQualifiedHashCode_ShouldTransform() throws Exception {
-
-		String original = "" +
-				"	public interface InterfaceWithGetIntMethod {\n" +
-				"		int getInt();\n" +
-				"	}\n" +
-				"	public void test_NonQualified_HashCodeInvocation() {\n" +
-				"		InterfaceWithGetIntMethod anonymous = new InterfaceWithGetIntMethod() {\n" +
-				"			@Override\n" +
-				"			public int getInt() {\n" +
-				"				return hashCode();\n" +
-				"			}\n" +
-				"		};\n" +
-				"	}";
-
-		String expected = "" +
-				"	public interface InterfaceWithGetIntMethod {\n" +
-				"		int getInt();\n" +
-				"	}\n" +
-				"	public void test_NonQualified_HashCodeInvocation() {\n" +
-				"		InterfaceWithGetIntMethod anonymous = () -> {\n" +
-				"				return hashCode();\n" +
-				"		};\n" +
-				"	}";
-
-		assertChange(original, expected);
-	}
-
-	@Test
-	public void visit_AnonymousCallingThisHashCode_ShouldTransform() throws Exception {
-
-		String original = "" +
-				"	public interface InterfaceWithGetIntMethod {\n" +
-				"		int getInt();\n" +
-				"	}\n" +
-				"	public void test_NonQualified_HashCodeInvocation() {\n" +
-				"		InterfaceWithGetIntMethod anonymous = new InterfaceWithGetIntMethod() {\n" +
-				"			@Override\n" +
-				"			public int getInt() {\n" +
-				"				return this.hashCode();\n" +
-				"			}\n" +
-				"		};\n" +
-				"	}";
-
-		String expected = "" +
-				"	public interface InterfaceWithGetIntMethod {\n" +
-				"		int getInt();\n" +
-				"	}\n" +
-				"	public void test_NonQualified_HashCodeInvocation() {\n" +
-				"		InterfaceWithGetIntMethod anonymous = () -> {\n" +
-				"				return this.hashCode();\n" +
-				"		};\n" +
-				"	}";
-
-		assertChange(original, expected);
-	}
-	
-	@Test
-	public void visit_AnonymousCallingObjectHashCode_ShouldTransform() throws Exception {
-
-		String original = "" +
-				"	public interface InterfaceWithGetIntMethod {\n" +
-				"		int getInt();\n" +
-				"	}\n" +
-				"	public void test_NonQualified_HashCodeInvocation() {\n" +
-				"		InterfaceWithGetIntMethod anonymous = new InterfaceWithGetIntMethod() {\n" +
-				"			@Override\n" +
-				"			public int getInt() {\n" +
-				"               Object o = new Object();\n" +
-				"				return o.hashCode();\n" +
-				"			}\n" +
-				"		};\n" +
-				"	}";
-
-		String expected = "" +
-				"	public interface InterfaceWithGetIntMethod {\n" +
-				"		int getInt();\n" +
-				"	}\n" +
-				"	public void test_NonQualified_HashCodeInvocation() {\n" +
-				"		InterfaceWithGetIntMethod anonymous = () -> {\n" +
-				"               Object o = new Object();\n" +
-				"				return o.hashCode();\n" +
-				"		};\n" +
-				"	}";
-
-		assertChange(original, expected);
-	}
-
-	@Test
-	public void visit_AnonymousCallingDefaultMethodWithQualifiedThis_ShouldTransform() throws Exception {
-
-		String original = "" +
-				"	public interface InterfaceWithGetIntMethod {\n" +
-				"		int getInt();\n" +
-				"	}\n" +
-				"   public int getAnotherInt() {\n"	+ 
-				"		return 10;\n" +
-				"   }\n" +
-				"	public void test() {\n" +
-				"		InterfaceWithGetIntMethod anonymous = new InterfaceWithGetIntMethod() {\n" +
-				"			@Override\n" +
-				"			public int getInt() {\n" +
-				"				return TestForSim1709.this.getAnotherInt();\n" +
-				"			}\n" +
-				"		};\n" +
-				"	}";
-
-		String expected = "" +
-				"	public interface InterfaceWithGetIntMethod {\n" +
-				"		int getInt();\n" +
-				"	}\n" +
-				"   public int getAnotherInt() {\n"	+ 
-				"		return 10;\n" +
-				"   }\n" +				
-				"	public void test() {\n" +
-				"		InterfaceWithGetIntMethod anonymous = () -> {\n" +
-				"				return TestForSim1709.this.getAnotherInt();\n" +
-				"		};\n" +
-				"	}";
-
-		assertChange(original, expected);
-	}
-
-	@Test
 	public void visit_AnonymousWithTypeArguments_ShouldTransform() throws Exception {
 
 		String original = "" +
@@ -626,77 +458,77 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 	public void visit_AnonymousWithNameQualifiedType_ShouldTransform() throws Exception {
 		defaultFixture.addImport(java.lang.annotation.Target.class.getName());
 		String original = "" +
-				"	@Target(value = { java.lang.annotation.ElementType.TYPE_USE })\n" + 
-				"	@interface ExampleAnnotation {\n" + 
-				"	}\n" + 
-				"	interface EnclosingInterface {\n" + 
-				"		interface InnerInterface {\n" + 
-				"			String INNER_INTERFACE_CONSTANT = \"inner-interface-constant\";\n" + 
-				"			void exampleMethod();\n" + 
-				"		}\n" + 
-				"	}\n" + 
-				"	public void test_NameQualifiedType() {\n" + 
-				"		EnclosingInterface.@ExampleAnnotation InnerInterface xInnerInterface = new EnclosingInterface.@ExampleAnnotation InnerInterface() {\n" + 
-				"			@Override\n" + 
-				"			public void exampleMethod() {\n" + 
-				"				System.out.println(INNER_INTERFACE_CONSTANT);\n" + 
-				"			}\n" + 
-				"		};\n" + 
+				"	@Target(value = { java.lang.annotation.ElementType.TYPE_USE })\n" +
+				"	@interface ExampleAnnotation {\n" +
+				"	}\n" +
+				"	interface EnclosingInterface {\n" +
+				"		interface InnerInterface {\n" +
+				"			String INNER_INTERFACE_CONSTANT = \"inner-interface-constant\";\n" +
+				"			void exampleMethod();\n" +
+				"		}\n" +
+				"	}\n" +
+				"	public void test_NameQualifiedType() {\n" +
+				"		EnclosingInterface.@ExampleAnnotation InnerInterface xInnerInterface = new EnclosingInterface.@ExampleAnnotation InnerInterface() {\n"
+				+
+				"			@Override\n" +
+				"			public void exampleMethod() {\n" +
+				"				System.out.println(INNER_INTERFACE_CONSTANT);\n" +
+				"			}\n" +
+				"		};\n" +
 				"	}";
 		String expected = "" +
-				"	@Target(value = { java.lang.annotation.ElementType.TYPE_USE })\n" + 
-				"	@interface ExampleAnnotation {\n" + 
-				"	}\n" + 
-				"	interface EnclosingInterface {\n" + 
-				"		interface InnerInterface {\n" + 
-				"			String INNER_INTERFACE_CONSTANT = \"inner-interface-constant\";\n" + 
-				"			void exampleMethod();\n" + 
-				"		}\n" + 
-				"	}\n" + 
-				"	public void test_NameQualifiedType(){\n" + 
-				"		EnclosingInterface.@ExampleAnnotation InnerInterface xInnerInterface=() -> {\n" + 
-				"			System.out.println(EnclosingInterface.InnerInterface.INNER_INTERFACE_CONSTANT);\n" + 
-				"		};\n" + 
+				"	@Target(value = { java.lang.annotation.ElementType.TYPE_USE })\n" +
+				"	@interface ExampleAnnotation {\n" +
+				"	}\n" +
+				"	interface EnclosingInterface {\n" +
+				"		interface InnerInterface {\n" +
+				"			String INNER_INTERFACE_CONSTANT = \"inner-interface-constant\";\n" +
+				"			void exampleMethod();\n" +
+				"		}\n" +
+				"	}\n" +
+				"	public void test_NameQualifiedType(){\n" +
+				"		EnclosingInterface.@ExampleAnnotation InnerInterface xInnerInterface=() -> {\n" +
+				"			System.out.println(EnclosingInterface.InnerInterface.INNER_INTERFACE_CONSTANT);\n" +
+				"		};\n" +
 				"	}";
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_innerClassFieldAccess_shouldTransform() throws Exception {
 		String original = "" +
-				"interface Foo {\n" + 
-				"	Runnable sampleMethod();\n" + 
-				"}\n" + 
-				"public void foo() {\n" + 
-				"	Foo foo = new Foo () {\n" + 
-				"		public Runnable sampleMethod() {\n" + 
-				"			return new Runnable() {\n" + 
-				"				String string = \"\";\n" + 
-				"				@Override\n" + 
-				"				public void run() {\n" + 
-				"					System.out.println(this.string);\n" + 
-				"					\n" + 
-				"				}\n" + 
-				"			};\n" + 
-				"		}\n" + 
-				"	};\n" + 
+				"interface Foo {\n" +
+				"	Runnable sampleMethod();\n" +
+				"}\n" +
+				"public void foo() {\n" +
+				"	Foo foo = new Foo () {\n" +
+				"		public Runnable sampleMethod() {\n" +
+				"			return new Runnable() {\n" +
+				"				String string = \"\";\n" +
+				"				@Override\n" +
+				"				public void run() {\n" +
+				"					System.out.println(this.string);\n" +
+				"					\n" +
+				"				}\n" +
+				"			};\n" +
+				"		}\n" +
+				"	};\n" +
 				"}";
 		String expected = "" +
-				"interface Foo {\n" + 
-				"	Runnable sampleMethod();\n" + 
-				"}\n" + 
-				"public void foo() {\n" + 
-				"	Foo foo = () -> {\n" + 
-				"		return new Runnable() {\n" + 
-				"			String string = \"\";\n" + 
-				"			@Override\n" + 
-				"			public void run() {\n" + 
-				"				System.out.println(this.string);\n" + 
-				"			}\n" + 
-				"		};\n" + 
-				"	};\n" + 
+				"interface Foo {\n" +
+				"	Runnable sampleMethod();\n" +
+				"}\n" +
+				"public void foo() {\n" +
+				"	Foo foo = () -> {\n" +
+				"		return new Runnable() {\n" +
+				"			String string = \"\";\n" +
+				"			@Override\n" +
+				"			public void run() {\n" +
+				"				System.out.println(this.string);\n" +
+				"			}\n" +
+				"		};\n" +
+				"	};\n" +
 				"}";
 		assertChange(original, expected);
-		
 	}
 }
