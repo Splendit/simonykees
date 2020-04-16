@@ -8,23 +8,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
-import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 @SuppressWarnings("nls")
 public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixture {
 
-	private static final String DEFAULT_TYPE_NAME = "TestCU";
 	private static final String DEFAULT_METHOD_NAME = "FixtureMethod";
 
-	private MakeFieldsAndVariablesFinalASTVisitor visitor;
-	private JdtUnitFixtureClass defaultFixture;
 
 	@BeforeEach
-	public void setUp() throws Exception {
-		defaultFixture = fixtureProject.addCompilationUnit(DEFAULT_TYPE_NAME);
-
-		visitor = new MakeFieldsAndVariablesFinalASTVisitor();
+	public void setUpDefaultVisitor() throws Exception {
+		setDefaultVisitor(new MakeFieldsAndVariablesFinalASTVisitor());
 	}
 
 	@AfterEach
@@ -82,7 +77,7 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				+ "	System.out.println(staticFieldEffectivelyFinal);"
 				+ "}";
 
-		checkMatch(actual, expected);
+		assertChange(actual, expected);
 	}
 
 	@Test
@@ -92,9 +87,10 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 
 		String expected = "final int i = 0;"
 				+ "System.out.println(i);";
-
+		
 		MethodDeclaration method = defaultFixture.addMethod(DEFAULT_METHOD_NAME, actual);
 
+		AbstractASTRewriteASTVisitor visitor = getDefaultVisitor();
 		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 		defaultFixture.accept(visitor);
 
@@ -106,8 +102,8 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 		String actualAndExpected = "int i = 0;"
 				+ "System.out.println(i++);";
 
+		AbstractASTRewriteASTVisitor visitor = getDefaultVisitor();
 		MethodDeclaration method = defaultFixture.addMethod(DEFAULT_METHOD_NAME, actualAndExpected);
-
 		visitor.setASTRewrite(defaultFixture.getAstRewrite());
 		defaultFixture.accept(visitor);
 
@@ -128,7 +124,7 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				+ "	System.out.println(a);"
 				+ "}";
 
-		checkMatch(actual, expected);
+		assertChange(actual, expected);
 	}
 
 	@Test
@@ -140,7 +136,7 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				+ "	System.out.println(a);"
 				+ "}";
 
-		checkMatch(actualAndExpected);
+		assertNoChange(actualAndExpected);
 	}
 
 	@Test
@@ -157,7 +153,7 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				+ "	System.out.println(a);"
 				+ "}";
 
-		checkMatch(actual, expected);
+		assertChange(actual, expected);
 	}
 
 	@Test
@@ -169,14 +165,14 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				+ "	System.out.println(a);"
 				+ "}";
 
-		checkMatch(actualAndExpected);
+		assertNoChange(actualAndExpected);
 	}
 
 	@Test
 	public void privateField_initInConstructor_accessWithName_isEffectivelyFinal_shouldTransform() throws Exception {
 		String actual = "private String test;"
 				+ ""
-				+ "public " + DEFAULT_TYPE_NAME + "() {"
+				+ "public " + DEFAULT_TYPE_DECLARATION_NAME + "() {"
 				+ "	test = \"asdf\";"
 				+ "}"
 				+ ""
@@ -186,7 +182,7 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 
 		String expected = "private final String test;"
 				+ ""
-				+ "public " + DEFAULT_TYPE_NAME + "() {"
+				+ "public " + DEFAULT_TYPE_DECLARATION_NAME + "() {"
 				+ "	test = \"asdf\";"
 				+ "}"
 				+ ""
@@ -194,14 +190,14 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				+ "	System.out.println(test);"
 				+ "}";
 
-		checkMatch(actual, expected);
+		assertChange(actual, expected);
 	}
 
 	@Test
 	public void privateFiled_initInConstructor_accessWithFieldAccess_shouldTransform() throws Exception {
 		String actual = "private String test;"
 				+ ""
-				+ "public " + DEFAULT_TYPE_NAME + "() {"
+				+ "public " + DEFAULT_TYPE_DECLARATION_NAME + "() {"
 				+ "	this.test = \"asdf\";"
 				+ "}"
 				+ ""
@@ -211,7 +207,7 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 
 		String expected = "private final String test;"
 				+ ""
-				+ "public " + DEFAULT_TYPE_NAME + "() {"
+				+ "public " + DEFAULT_TYPE_DECLARATION_NAME + "() {"
 				+ "	this.test = \"asdf\";"
 				+ "}"
 				+ ""
@@ -219,20 +215,20 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				+ "	System.out.println(this.test);"
 				+ "}";
 
-		checkMatch(actual, expected);
+		assertChange(actual, expected);
 	}
 
 	@Test
 	public void privateField_initInOneConstructorOnly_shouldNotTransform() throws Exception {
 		String actualAndExpected = "private String a;"
-				+ "public " + DEFAULT_TYPE_NAME + "() {"
+				+ "public " + DEFAULT_TYPE_DECLARATION_NAME + "() {"
 				+ "	a = \"asdf\";"
 				+ "}"
-				+ "public " + DEFAULT_TYPE_NAME + "(String b) {"
+				+ "public " + DEFAULT_TYPE_DECLARATION_NAME + "(String b) {"
 				+ "	System.out.println(a);"
 				+ "}";
 
-		checkMatch(actualAndExpected);
+		assertNoChange(actualAndExpected);
 	}
 
 	@Test
@@ -245,7 +241,7 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				+ "	a = \"jkl\";"
 				+ "}";
 
-		checkMatch(actualAndExpected);
+		assertNoChange(actualAndExpected);
 	}
 
 	@Test
@@ -266,7 +262,7 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				+ "	System.out.println(a);"
 				+ "}";
 
-		checkMatch(actual, expected);
+		assertChange(actual, expected);
 	}
 
 	@Test
@@ -287,7 +283,7 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				+ "	System.out.println(a);"
 				+ "}";
 
-		checkMatch(actual, expected);
+		assertChange(actual, expected);
 	}
 
 	@Test
@@ -304,20 +300,20 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				+ "	System.out.println(a);"
 				+ "}";
 
-		checkMatch(actualAndExpected);
+		assertNoChange(actualAndExpected);
 	}
 
 	@Test
 	public void privateField_initInConstructors_alteredByPrefixExpression_shouldNotTransform() throws Exception {
 		String actualAndExpected = "private int a;"
-				+ "public " + DEFAULT_TYPE_NAME + "() {"
+				+ "public " + DEFAULT_TYPE_DECLARATION_NAME + "() {"
 				+ "	a = 1;"
 				+ "}"
 				+ "private void increase() {"
 				+ "	++a;"
 				+ "}";
 
-		checkMatch(actualAndExpected);
+		assertNoChange(actualAndExpected);
 	}
 
 	@Test
@@ -332,20 +328,6 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				+ "	System.out.println(-a);"
 				+ "}";
 
-		checkMatch(actual, expected);
-	}
-
-	private void checkMatch(String actualAndExpected) throws Exception {
-		checkMatch(actualAndExpected, actualAndExpected);
-	}
-
-	private void checkMatch(String actual, String expected) throws Exception {
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, actual);
-
-		visitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(visitor);
-
-		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_NAME, expected),
-				defaultFixture.getTypeDeclaration());
+		assertChange(actual, expected);
 	}
 }

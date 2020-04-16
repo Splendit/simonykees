@@ -13,19 +13,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
-import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
 
 @SuppressWarnings("nls")
 public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
-	private static final String DEFAULT_TYPE_NAME = "TestCU";
-
 	private PrivateFieldAssignmentASTVisitor visitor;
-	private JdtUnitFixtureClass defaultFixture;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		defaultFixture = fixtureProject.addCompilationUnit(DEFAULT_TYPE_NAME);
 
 		visitor = new PrivateFieldAssignmentASTVisitor();
 	}
@@ -40,7 +35,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private String a, b, c, d;" + "public void test1() {" + "	a = \"asdf\";"
 				+ "	b = \"jkl\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -54,7 +49,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private String a;" + "public void test1() {" + "	a = \"asdf\";" + "}"
 				+ "public void test2() {" + "	a = \"jkl\";" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -69,7 +64,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 				+ "public void test2() {" + "	System.out.println(b);" + "}" + "public void test3() {"
 				+ "	System.out.println(c);" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -82,7 +77,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 	public void test_prefix_1() throws Exception {
 		String typeContent = "private int a, b, c;" + "public void test1() {" + "	++a;" + "	--b;" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -97,7 +92,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	System.out.println(~b);" + "	System.out.println(-c);" + "	System.out.println(!d);"
 				+ "	System.out.println(++e);" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 
@@ -111,7 +106,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 		String typeContent = "private int a, b, c;" + "public void test1() {" + "	a++;" + "	b--;"
 				+ "	System.out.println(c);" + "}";
 
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_NAME, typeContent);
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
 

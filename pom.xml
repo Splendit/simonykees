@@ -5,7 +5,7 @@
 
 	<groupId>at.splendit</groupId>
 	<artifactId>eu.jsparrow</artifactId>
-	<version>3.15.0-SNAPSHOT</version>
+	<version>3.16.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
 	<description>jSparrow Parent</description>
@@ -260,7 +260,7 @@
 			<plugin>
 				<groupId>eu.jsparrow</groupId>
 				<artifactId>jsparrow-maven-plugin</artifactId>
-				<version>2.12.0</version>
+				<version>2.13.0</version>
 			</plugin>
 
 			<plugin>

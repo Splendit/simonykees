@@ -1,56 +1,40 @@
 package eu.jsparrow.core.visitor.impl;
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 @SuppressWarnings({ "nls" })
 public class ArithmeticAssignmentASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
-	private ArithmethicAssignmentASTVisitor visitor;
-
+	
 	@BeforeEach
 	public void setUp() {
-		visitor = new ArithmethicAssignmentASTVisitor();
+		setVisitor(new ArithmethicAssignmentASTVisitor());
 	}
 
 	@Test
 	public void visit_AssignmentWithAdd_ShouldReplaceAddAssignment() throws Exception {
-		fixture.addMethodBlock("int a;  a = a + 3;");
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		Block expected = ASTNodeBuilder.createBlockFromString("int a;  a += 3;");
-		assertMatch(expected, fixture.getMethodBlock());
+		assertChange("int a = 0;  a = a + 3;", "int a = 0;  a += 3;");
 	}
 
 	@Test
-	public void visit_AlreadyAddAssignment_ShouldNotReplace() throws Exception {
-		fixture.addMethodBlock("int a;  a += 3;");
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
-
-		assertFalse(fixture.hasChanged());
+	public void visit_AlreadyAddAssignment_ShouldNotReplace() throws Exception {		
+		assertNoChange("int a = 0;  a += 3;");
 	}
 
 	@Test
-	public void visit__AssignmentWithAdd_ShouldUpdateListeners() throws Exception {
+	public void visit_AssignmentWithAdd_ShouldUpdateListeners() throws Exception {
+		ArithmethicAssignmentASTVisitor arithmethicAssignmentVisitor = new ArithmethicAssignmentASTVisitor();
 		ASTRewriteVisitorListenerStub listener = new ASTRewriteVisitorListenerStub();
-		visitor.addRewriteListener(listener);
-		fixture.addMethodBlock("int a;  a = a + 3;");
-		visitor.setASTRewrite(fixture.getAstRewrite());
-
-		fixture.accept(visitor);
+		arithmethicAssignmentVisitor.addRewriteListener(listener);
+		fixture.addMethodBlock("int a = 0;  a = a + 3;");
+		arithmethicAssignmentVisitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(arithmethicAssignmentVisitor);
 
 		assertTrue(listener.wasUpdated());
 	}
