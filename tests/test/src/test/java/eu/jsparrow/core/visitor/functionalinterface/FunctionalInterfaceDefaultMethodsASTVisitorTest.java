@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.functionalinterface;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -159,7 +158,6 @@ public class FunctionalInterfaceDefaultMethodsASTVisitorTest extends UsesJDTUnit
 		assertChange(original, expected);
 	}
 
-	@Ignore
 	@Test
 	public void visit_RecursiveExampleMethodInvocation_shouldNotTransform() throws Exception {
 		String original = "" + //

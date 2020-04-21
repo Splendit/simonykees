@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.visitor.sub.MethodInvocationsVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDefinitionASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -159,15 +160,19 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					 * Get the Body of the functional interface method
 					 * implementation
 					 */
-					Block onlyFunctionalInterfaceMethodImplBody = getOnlyFunctionalInterfaceMethodImplBody(
+					MethodDeclaration onlyFunctionalInterfaceMethod = getOnlyFunctionalInterfaceMethodImpl(
 							node, parentNodeTypeBinding);
-					if (onlyFunctionalInterfaceMethodImplBody == null) {
+					if (onlyFunctionalInterfaceMethod == null) {
 						return false;
 					}
-					
+					Block onlyFunctionalInterfaceMethodImplBody = onlyFunctionalInterfaceMethod.getBody();
 					DefaultMethodInvocationASTVisitor defaultMethodInvocationASTVisitor = new DefaultMethodInvocationASTVisitor(node);
 					onlyFunctionalInterfaceMethodImplBody.accept(defaultMethodInvocationASTVisitor);
 					if(defaultMethodInvocationASTVisitor.isFlagCancelTransformation()) {
+						return true;
+					}
+					
+					if(hasRecursiveCalls(onlyFunctionalInterfaceMethod)) {
 						return true;
 					}
 					
@@ -325,6 +330,15 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	}
 
+	private boolean hasRecursiveCalls(MethodDeclaration methodDeclaration) {		
+		IMethodBinding methodBinding = methodDeclaration.resolveBinding();
+		Block body = methodDeclaration.getBody();
+		MethodInvocationsVisitor visitor = new MethodInvocationsVisitor(methodBinding);
+		body.accept(visitor);
+		boolean noRecursiveCalls = visitor.getMethodInvocations().isEmpty();
+		return !noRecursiveCalls;
+	}
+
 	private void qualifyUnqualifiedConstants(AnonymousClassDeclaration node, Type type,
 			Block onlyFunctionalInterfaceMethodImplBody) {
 		UnqualifiedFieldNamesVisitor unqualifiedConstantNamesVisitor = new UnqualifiedFieldNamesVisitor(node);
@@ -477,13 +491,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			.collect(Collectors.toList());
 	}
 
-	/**
-	 * 
-	 * @param node
-	 * @param parentNodeTypeBinding
-	 * @return
-	 */
-	private Block getOnlyFunctionalInterfaceMethodImplBody(AnonymousClassDeclaration node,
+	private MethodDeclaration getOnlyFunctionalInterfaceMethodImpl(AnonymousClassDeclaration node,
 			ITypeBinding parentNodeTypeBinding) {
 		if (node == null) {
 			return null;
@@ -517,7 +525,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			if (StringUtils.equals(functionalInterfaceMethodName,
 					methodDeclaration.getName()
 						.getIdentifier())) {
-				return methodDeclaration.getBody();
+				return methodDeclaration;
 			}
 		}
 
