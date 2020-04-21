@@ -2,14 +2,12 @@ package eu.jsparrow.core.visitor.functionalinterface;
 
 import java.util.Collections;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -26,68 +24,43 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 public class DefaultMethodInvocationASTVisitor extends ASTVisitor {
 
-	private final AnonymousClassDeclaration anonymousClassDeclaration;
-
 	private final ITypeBinding anonymousClassTypeBinding;
 
 	private boolean flagCancelTransformation;
 
 	public DefaultMethodInvocationASTVisitor(AnonymousClassDeclaration anonymousClassDeclaration) {
-		this.anonymousClassDeclaration = anonymousClassDeclaration;
 		anonymousClassTypeBinding = anonymousClassDeclaration.resolveBinding();
-	}
-
-	private AnonymousClassDeclaration findSurroundingAnonymousClassDeclaration(MethodInvocation methodInvocation) {
-		ASTNode parent = methodInvocation.getParent();
-		while (parent != null) {
-			if (parent.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
-				return (AnonymousClassDeclaration) parent;
-			}
-			parent = parent.getParent();
-		}
-		return null;
 	}
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-
-		AnonymousClassDeclaration surroundingAnonymous = findSurroundingAnonymousClassDeclaration(node);
-		if (surroundingAnonymous != this.anonymousClassDeclaration) {
-			return true;
-		}
-
-		Expression expression = node.getExpression();
-		if (expression != null) {
-			if (expression.getNodeType() != ASTNode.THIS_EXPRESSION) {
-				return true;
-			}
-			ThisExpression thisExpression = (ThisExpression) expression;
-			if (thisExpression.getQualifier() != null) {
-				return true;
-			}
-		}
-
 		IMethodBinding methodBinding = node.resolveMethodBinding();
-		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-		if(declaringClass == anonymousClassTypeBinding) {
-			flagCancelTransformation = true;
-			return false;
-		}
-		String declaringClassQualifiedName = declaringClass.getQualifiedName();
-		if (declaringClass.isParameterizedType()) {
-			declaringClassQualifiedName = declaringClass.getErasure()
+		int modifiers = methodBinding.getModifiers();
+
+		if (Modifier.isDefault(modifiers)) {
+			ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+			String declaringClassQualifiedName = declaringClass.getErasure()
 				.getQualifiedName();
-		}
-		if (declaringClassQualifiedName.equals(java.lang.Object.class.getName())) {
-			return true;
+
+			boolean isInheritingContentOfTypes = ClassRelationUtil.isInheritingContentOfTypes(
+					anonymousClassTypeBinding,
+					Collections.singletonList(declaringClassQualifiedName));
+
+			if (isInheritingContentOfTypes) {
+				flagCancelTransformation = true;
+				return false;
+			}
 		}
 
-		if (ClassRelationUtil.isInheritingContentOfTypes(
-				anonymousClassTypeBinding,
-				Collections.singletonList(declaringClassQualifiedName))) {
-			flagCancelTransformation = true;
-		}
-		return !flagCancelTransformation;
+		// for (IMethodBinding declaredMethod :
+		// anonymousClassTypeBinding.getDeclaredMethods()) {
+		// if (declaredMethod.isEqualTo(methodBinding)) {
+		// flagCancelTransformation = true;
+		// return false;
+		// }
+		//
+		// }
+		return true;
 	}
 
 	public boolean isFlagCancelTransformation() {
