@@ -2,8 +2,10 @@ package eu.jsparrow.core.visitor.functionalinterface;
 
 import java.util.Collections;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -12,7 +14,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- * Finds invocations of methods which prohibit transformation of a functional
+ * Finds invocations of default methods which prohibit transformation of a functional
  * anonymous class to a lambda.
  * <p>
  * A method invocation will prohibit the transformation of a functional
@@ -36,9 +38,10 @@ public class DefaultMethodInvocationASTVisitor extends ASTVisitor {
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
 		int modifiers = methodBinding.getModifiers();
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 
 		if (Modifier.isDefault(modifiers)) {
-			ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+			
 			String declaringClassQualifiedName = declaringClass.getErasure()
 				.getQualifiedName();
 
@@ -51,15 +54,15 @@ public class DefaultMethodInvocationASTVisitor extends ASTVisitor {
 				return false;
 			}
 		}
-
-		// for (IMethodBinding declaredMethod :
-		// anonymousClassTypeBinding.getDeclaredMethods()) {
-		// if (declaredMethod.isEqualTo(methodBinding)) {
-		// flagCancelTransformation = true;
-		// return false;
-		// }
-		//
-		// }
+		
+		if(ClassRelationUtil.isContentOfType(declaringClass, java.lang.Object.class.getName())) {
+			Expression expression = node.getExpression();
+			if(expression == null || expression.getNodeType() == ASTNode.THIS_EXPRESSION) {
+				flagCancelTransformation = true;
+				return false;
+			}
+		}
+		
 		return true;
 	}
 

@@ -131,7 +131,7 @@ public class FunctionalInterfaceDefaultMethodsASTVisitorTest extends UsesJDTUnit
 	}
 
 	@Test
-	public void visit_HashCodeInvocation_shouldTransform() throws Exception {
+	public void visit_HashCodeInvocation_shouldNotTransform() throws Exception {
 		String original = "" + //
 				"	interface InterfaceWithExampleMethod{\n" +
 				"		int exampleMethod();\n" +
@@ -145,17 +145,25 @@ public class FunctionalInterfaceDefaultMethodsASTVisitorTest extends UsesJDTUnit
 				"		};\n" +
 				"	}";
 
-		String expected = "" + //
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_HashCodeInvocationUsingThisKeyword_shouldNotTransform() throws Exception {
+		String original = "" + //
 				"	interface InterfaceWithExampleMethod{\n" +
 				"		int exampleMethod();\n" +
 				"	}\n" +
 				"	public void test() {\n" +
-				"		InterfaceWithExampleMethod interfaceWithExampleMethod = () -> {\n" +
-				"			return hashCode();\n" +
+				"		InterfaceWithExampleMethod interfaceWithExampleMethod = new InterfaceWithExampleMethod() {\n" +
+				"			@Override\n" +
+				"			public int exampleMethod() {\n" +
+				"				return this.hashCode();\n" +
+				"			}\n" +
 				"		};\n" +
 				"	}";
 
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 
 	@Test
