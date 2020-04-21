@@ -31,18 +31,32 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	{
-		final Runnable r = this::hashCode;
+		final Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				hashCode();
+			}
+		};
 		r.run();
 	}
 
 	{
-		final Runnable r = () -> getClass();
+		final Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				getClass();
+			}
+		};
 		r.run();
 	}
 
 	@Override
 	public int hashCode() {
 		return 0;
+	}
+
+	private void sampleMethod() {
+
 	}
 
 	private static Runnable staticGetRunnableHash() {
@@ -55,7 +69,16 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	public Runnable getRunnableHash() {
-		return this::hashCode;
+		return new Runnable() {
+			@Override
+			public void run() {
+				hashCode();
+			}
+		};
+	}
+
+	public Runnable runSampleMethod() {
+		return this::sampleMethod;
 	}
 
 	private static Runnable staticGetRunnable() {
@@ -68,7 +91,12 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	public Runnable getRunnable() {
-		return () -> getClass();
+		return new Runnable() {
+			@Override
+			public void run() {
+				getClass();
+			}
+		};
 	}
 
 }
