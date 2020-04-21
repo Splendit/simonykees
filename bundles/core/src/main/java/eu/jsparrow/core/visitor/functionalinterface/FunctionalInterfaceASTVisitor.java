@@ -93,7 +93,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	private Name extractName(Type type) {
-		
+
 		if (type.isParameterizedType()) {
 			return extractName(((ParameterizedType) type).getType());
 		}
@@ -112,7 +112,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	private boolean canExtractName(Type type) {
-		
+
 		if (type.isParameterizedType()) {
 			return canExtractName(((ParameterizedType) type).getType());
 		}
@@ -160,22 +160,23 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					 * Get the Body of the functional interface method
 					 * implementation
 					 */
-					MethodDeclaration onlyFunctionalInterfaceMethod = getOnlyFunctionalInterfaceMethodImpl(
-							node, parentNodeTypeBinding);
+					MethodDeclaration onlyFunctionalInterfaceMethod = getOnlyFunctionalInterfaceMethodImpl(node,
+							parentNodeTypeBinding);
 					if (onlyFunctionalInterfaceMethod == null) {
 						return false;
 					}
 					Block onlyFunctionalInterfaceMethodImplBody = onlyFunctionalInterfaceMethod.getBody();
-					DefaultMethodInvocationASTVisitor defaultMethodInvocationASTVisitor = new DefaultMethodInvocationASTVisitor(node);
+					DefaultMethodInvocationASTVisitor defaultMethodInvocationASTVisitor = new DefaultMethodInvocationASTVisitor(
+							node);
 					onlyFunctionalInterfaceMethodImplBody.accept(defaultMethodInvocationASTVisitor);
-					if(defaultMethodInvocationASTVisitor.isFlagCancelTransformation()) {
+					if (defaultMethodInvocationASTVisitor.isFlagCancelTransformation()) {
 						return true;
 					}
-					
-					if(hasRecursiveCalls(onlyFunctionalInterfaceMethod)) {
+
+					if (hasRecursiveCalls(onlyFunctionalInterfaceMethod)) {
 						return true;
 					}
-					
+
 					// find parent scope and variable declarations in it
 					List<ASTNode> relevantBlocks = new ArrayList<>();
 					ASTNode scope = findScope(node, relevantBlocks);
@@ -330,12 +331,13 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	}
 
-	private boolean hasRecursiveCalls(MethodDeclaration methodDeclaration) {		
+	private boolean hasRecursiveCalls(MethodDeclaration methodDeclaration) {
 		IMethodBinding methodBinding = methodDeclaration.resolveBinding();
 		Block body = methodDeclaration.getBody();
 		MethodInvocationsVisitor visitor = new MethodInvocationsVisitor(methodBinding);
 		body.accept(visitor);
-		boolean noRecursiveCalls = visitor.getMethodInvocations().isEmpty();
+		boolean noRecursiveCalls = visitor.getMethodInvocations()
+			.isEmpty();
 		return !noRecursiveCalls;
 	}
 
@@ -522,17 +524,14 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			String functionalInterfaceMethodName = parentNodeTypeBinding.getFunctionalInterfaceMethod()
 				.getName();
 
-			if (StringUtils.equals(functionalInterfaceMethodName,
-					methodDeclaration.getName()
-						.getIdentifier())) {
+			if (StringUtils.equals(functionalInterfaceMethodName, methodDeclaration.getName()
+				.getIdentifier())) {
 				return methodDeclaration;
 			}
 		}
 
 		return null;
 	}
-	
-
 
 	/**
 	 * Renames all occurrences of variables with conflicting names in the given
