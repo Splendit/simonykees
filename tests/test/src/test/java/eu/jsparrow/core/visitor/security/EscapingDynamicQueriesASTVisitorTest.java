@@ -76,9 +76,6 @@ public class EscapingDynamicQueriesASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				TRY_EXECUTING_QUERY;
 
 		assertChange(original, expected);
-//		for(ImportDeclaration i : fixture.getImports()) {
-//			System.out.println(i.getName().getFullyQualifiedName());
-//		}
 
 	}
 

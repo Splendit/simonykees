@@ -32,8 +32,8 @@ public class EscapingDynamicQueriesNegativeASTVisitorTest extends UsesSimpleJDTU
 	public void visit_LocalClassCodec_shouldNotTransform() throws Exception {
 
 		String original = "" + //
-				"		class Codec {\n" + 
-				"		}\n" + 
+				"		class Codec {\n" +
+				"		}\n" +
 				"		String departmentId = \"40\";\n" +
 				"		String query = " +
 				"			\"SELECT employee_id, first_name FROM employee WHERE department_id ='\" + " +
@@ -44,5 +44,4 @@ public class EscapingDynamicQueriesNegativeASTVisitorTest extends UsesSimpleJDTU
 		assertNoChange(original);
 	}
 
-	
 }

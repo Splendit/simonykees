@@ -11,15 +11,9 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
@@ -30,11 +24,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.visitor.loop.DeclaredTypesASTVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
-import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
  * Replaces a dynamic query with a prepared statement. For example, the
@@ -59,14 +51,11 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.16.0
  *
  */
-public class UseParameterizedQueryASTVisitor extends AbstractAddImportASTVisitor {
-
-	private static final String EXECUTE = "execute"; //$NON-NLS-1$
-	private static final String EXECUTE_QUERY = "executeQuery"; //$NON-NLS-1$
+public class UseParameterizedQueryASTVisitor extends DynamicQueryASTVisitor {
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
-		boolean safeToAddImport = isSafeToAddImport(compilationUnit, java.sql.PreparedStatement.class);
+		boolean safeToAddImport = isSafeToAddImport(compilationUnit, java.sql.PreparedStatement.class.getName());
 		if (!safeToAddImport) {
 			return false;
 		}
@@ -75,16 +64,11 @@ public class UseParameterizedQueryASTVisitor extends AbstractAddImportASTVisitor
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-
-		boolean hasRightTypeAndName = analyzeStatementExecuteQuery(methodInvocation);
-		if (!hasRightTypeAndName) {
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(methodInvocation);
+		if (sqlVariableVisitor == null) {
 			return true;
 		}
 
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = analyzeSqlVariableReferences(methodInvocation);
-		if (sqlVariableVisitor == null || sqlVariableVisitor.isUnsafe()) {
-			return true;
-		}
 		List<ReplaceableParameter> replaceableParameters = analyzeQueryComponents(sqlVariableVisitor);
 		if (replaceableParameters.isEmpty()) {
 			return true;
@@ -231,77 +215,6 @@ public class UseParameterizedQueryASTVisitor extends AbstractAddImportASTVisitor
 		return componentsAnalyzer.getReplaceableParameters();
 	}
 
-	private SqlVariableAnalyzerVisitor analyzeSqlVariableReferences(MethodInvocation methodInvocation) {
-		SimpleName query = (SimpleName) methodInvocation.arguments()
-			.get(0);
-		IBinding queryVariableBinding = query.resolveBinding();
-		if (queryVariableBinding.getKind() != IBinding.VARIABLE) {
-			return null;
-		}
-
-		IVariableBinding variableBinding = (IVariableBinding) queryVariableBinding;
-		if (variableBinding.isField()) {
-			return null;
-		}
-
-		ASTNode declaringNode = this.getCompilationUnit()
-			.findDeclaringNode(queryVariableBinding);
-		if (declaringNode == null || declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return null;
-		}
-
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = new SqlVariableAnalyzerVisitor(query, declaringNode,
-				getCompilationUnit());
-		Block enclosingBlock = ASTNodeUtil.getSpecificAncestor(declaringNode, Block.class);
-		enclosingBlock.accept(sqlVariableVisitor);
-		if (sqlVariableVisitor.isUnsafe()) {
-			return null;
-		}
-		return sqlVariableVisitor;
-	}
-
-	private boolean analyzeStatementExecuteQuery(MethodInvocation methodInvocation) {
-		SimpleName methodName = methodInvocation.getName();
-		if (!EXECUTE.equals(methodName.getIdentifier()) && !EXECUTE_QUERY.equals(methodName.getIdentifier())) {
-			return false;
-		}
-
-		Expression methodExpression = methodInvocation.getExpression();
-		if (methodExpression == null) {
-			return false;
-		}
-
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-		if (!ClassRelationUtil.isContentOfType(declaringClass, java.sql.Statement.class.getName())) {
-			return false;
-		}
-
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		if (arguments.size() != 1) {
-			return false;
-		}
-
-		Expression argument = arguments.get(0);
-		ITypeBinding argumentTypeBinding = argument.resolveTypeBinding();
-		boolean isString = ClassRelationUtil.isContentOfType(argumentTypeBinding, java.lang.String.class.getName());
-		if (!isString) {
-			return false;
-		}
-
-		if (argument.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return false;
-		}
-
-		if (EXECUTE.equals(methodName.getIdentifier())
-				&& methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return false;
-		}
-
-		ITypeBinding methodExpressionTypeBinding = methodExpression.resolveTypeBinding();
-		return ClassRelationUtil.isContentOfType(methodExpressionTypeBinding, java.sql.Statement.class.getName());
-	}
-
 	private void addSetters(Expression initializer, List<ExpressionStatement> setParameterStatements) {
 		Statement statement = ASTNodeUtil.getSpecificAncestor(initializer, Statement.class);
 		Block block = (Block) statement.getParent();
@@ -412,51 +325,7 @@ public class UseParameterizedQueryASTVisitor extends AbstractAddImportASTVisitor
 			.isEmpty();
 	}
 
-	private boolean isSafeToAddImport(CompilationUnit compilationUnit, Class<?> clazz) {
-		DeclaredTypesASTVisitor visitor = new DeclaredTypesASTVisitor();
-		compilationUnit.accept(visitor);
-		boolean matchesInnerClassName = visitor.getDeclaredTypes()
-			.keySet()
-			.stream()
-			.anyMatch(name -> name.equals(clazz.getSimpleName()));
-		if (matchesInnerClassName) {
-			return false;
-		}
 
-		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
-				ImportDeclaration.class);
 
-		boolean existing = importDeclarations.stream()
-			.map(ImportDeclaration::getName)
-			.map(Name::getFullyQualifiedName)
-			.anyMatch(qualifiedName -> qualifiedName.equals(clazz.getName()));
-		if (existing) {
-			return true;
-		}
-
-		boolean clashing = importDeclarations.stream()
-			.map(ImportDeclaration::getName)
-			.filter(Name::isQualifiedName)
-			.map(name -> (QualifiedName) name)
-			.map(QualifiedName::getName)
-			.anyMatch(importedName -> clazz.getSimpleName()
-				.equals(importedName.getIdentifier()));
-		if (clashing) {
-			return false;
-		}
-
-		clashing = importDeclarations.stream()
-			.map(ImportDeclaration::getName)
-			.filter(Name::isSimpleName)
-			.anyMatch(name -> clazz.getSimpleName()
-				.equals(((SimpleName) name).getIdentifier()));
-
-		if (clashing) {
-			return false;
-		}
-
-		return importDeclarations.stream()
-			.noneMatch(importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration, clazz.getName()));
-	}
 
 }
