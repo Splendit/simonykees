@@ -27,7 +27,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 
-	private static final List<String> IMPORTS_FOR_ESCAPE = Collections.unmodifiableList(Arrays.asList(
+	public static final List<String> IMPORTS_FOR_ESCAPE = Collections.unmodifiableList(Arrays.asList(
 			"org.owasp.esapi.codecs.Codec", //$NON-NLS-1$
 			"org.owasp.esapi.codecs.OracleCodec", //$NON-NLS-1$
 			"org.owasp.esapi.ESAPI" //$NON-NLS-1$
