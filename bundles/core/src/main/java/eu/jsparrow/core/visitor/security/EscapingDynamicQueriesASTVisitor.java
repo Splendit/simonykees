@@ -6,17 +6,26 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -27,11 +36,36 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 
+	private static final String ORACLE_CODEC_NAME = "ORACLE_CODEC"; //$NON-NLS-1$
+
+	private final LiveVariableScope liveVariableScope = new LiveVariableScope();
+
 	public static final List<String> IMPORTS_FOR_ESCAPE = Collections.unmodifiableList(Arrays.asList(
 			"org.owasp.esapi.codecs.Codec", //$NON-NLS-1$
 			"org.owasp.esapi.codecs.OracleCodec", //$NON-NLS-1$
 			"org.owasp.esapi.ESAPI" //$NON-NLS-1$
 	));
+
+	@Override
+	public void endVisit(TypeDeclaration typeDeclaration) {
+		liveVariableScope.clearLocalVariablesScope(typeDeclaration);
+		liveVariableScope.clearFieldScope(typeDeclaration);
+	}
+
+	@Override
+	public void endVisit(MethodDeclaration methodDeclaration) {
+		liveVariableScope.clearLocalVariablesScope(methodDeclaration);
+	}
+
+	@Override
+	public void endVisit(FieldDeclaration fieldDeclaration) {
+		liveVariableScope.clearLocalVariablesScope(fieldDeclaration);
+	}
+
+	@Override
+	public void endVisit(Initializer initializer) {
+		liveVariableScope.clearLocalVariablesScope(initializer);
+	}
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
@@ -60,47 +94,73 @@ public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 		if (statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return true;
 		}
-
 		Block enclosingBlock = (Block) statement.getParent();
+
+		ASTNode enclosingScope = this.liveVariableScope.findEnclosingScope(statement)
+			.orElse(null);
+		liveVariableScope.lazyLoadScopeNames(enclosingScope);
+		String oracleCodecName = createOracleCodecName();
+		liveVariableScope.addName(enclosingScope, oracleCodecName);
+
+		VariableDeclarationStatement oracleCodecDeclarationStatement = createOracleCODECDeclarationStatement(
+				oracleCodecName);
+
 		ListRewrite listRewrite = astRewrite.getListRewrite(enclosingBlock, Block.STATEMENTS_PROPERTY);
-		listRewrite.insertBefore(createOracleCODECDeclarationStatement(), statement, null);
+		listRewrite.insertBefore(oracleCodecDeclarationStatement, statement, null);
 
 		for (Expression expressionToEscape : expressionsToEscape) {
-			astRewrite.replace(expressionToEscape, createEscapeExpression(expressionToEscape), null);
+			astRewrite.replace(expressionToEscape, createEscapeExpression(oracleCodecName, expressionToEscape), null);
 		}
 		onRewrite();
 		return true;
 	}
 
 	@SuppressWarnings("nls")
-	private Expression createEscapeExpression(Expression expressionToEscape) {
-
+	private Expression createEscapeExpression(String oracleCodecName, Expression expressionToEscape) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation encoderInvocationOfESAPI = NodeBuilder.newMethodInvocation(ast, ast.newSimpleName("ESAPI"),
 				"encoder");
 		SimpleName encodeForSQLName = ast.newSimpleName("encodeForSQL");
 		List<Expression> arguments = new ArrayList<>();
-		arguments.add(ast.newSimpleName("ORACLE_CODEC"));
+		arguments.add(ast.newSimpleName(oracleCodecName));
 		arguments.add((Expression) astRewrite.createCopyTarget(expressionToEscape));
 		return NodeBuilder.newMethodInvocation(ast, encoderInvocationOfESAPI, encodeForSQLName, arguments);
 	}
 
+	private String createOracleCodecName() {
+		String name = ORACLE_CODEC_NAME;
+		int suffix = 1;
+		while (liveVariableScope.isInScope(name)) {
+			name = ORACLE_CODEC_NAME + suffix;
+			suffix++;
+		}
+		return name;
+	}
+
 	@SuppressWarnings("nls")
-	private VariableDeclarationStatement createOracleCODECDeclarationStatement() {
+	private VariableDeclarationStatement createOracleCODECDeclarationStatement(String oracleCodecName) {
 		for (String qualifiedName : IMPORTS_FOR_ESCAPE) {
 			addImports.add(qualifiedName);
 		}
 		AST ast = astRewrite.getAST();
+
 		VariableDeclarationFragment fragment = ast.newVariableDeclarationFragment();
-		fragment.setName(ast.newSimpleName("ORACLE_CODEC"));
+		fragment.setName(ast.newSimpleName(oracleCodecName));
 		ClassInstanceCreation oracleCODECinitializer = ast.newClassInstanceCreation();
 		oracleCODECinitializer.setType(ast.newSimpleType(ast.newSimpleName("OracleCodec")));
 		fragment.setInitializer(oracleCODECinitializer);
 		VariableDeclarationStatement oracleCODECDeclarationStatement = ast.newVariableDeclarationStatement(fragment);
-		oracleCODECDeclarationStatement.setType(ast.newSimpleType(ast.newSimpleName("Codec")));
+
+		SimpleType codecSimpleType = ast.newSimpleType(ast.newSimpleName("Codec"));
+		ParameterizedType codecParameterizedType = ast.newParameterizedType(codecSimpleType);
+		Type characterTypeArg = ast.newSimpleType(ast.newSimpleName(Character.class.getSimpleName()));
+		@SuppressWarnings("unchecked")
+		List<Type> typeArguments = codecParameterizedType.typeArguments();
+		typeArguments.add(characterTypeArg);
+		oracleCODECDeclarationStatement.setType(codecParameterizedType);
+
 		return oracleCODECDeclarationStatement;
 	}
-
 
 	private List<Expression> analyzeQueryComponents(SqlVariableAnalyzerVisitor sqlVariableVisitor) {
 		List<Expression> queryComponents = sqlVariableVisitor.getDynamicQueryComponents();
