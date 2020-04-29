@@ -3,7 +3,11 @@ package eu.jsparrow.core.visitor.security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -12,10 +16,14 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
@@ -25,6 +33,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.loop.DeclaredTypesASTVisitor;
 import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -36,9 +45,13 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 
+	private final Map<Block, String> mapBlockToOracleCodecVariable = new HashMap<>();
+
 	private static final String ORACLE_CODEC_NAME = "ORACLE_CODEC"; //$NON-NLS-1$
 
 	private final LiveVariableScope liveVariableScope = new LiveVariableScope();
+
+	private final Set<String> conflictingOracleCodecNames = new HashSet<>();
 
 	public static final List<String> IMPORTS_FOR_ESCAPE = Collections.unmodifiableList(Arrays.asList(
 			"org.owasp.esapi.codecs.Codec", //$NON-NLS-1$
@@ -50,31 +63,74 @@ public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 	public void endVisit(TypeDeclaration typeDeclaration) {
 		liveVariableScope.clearLocalVariablesScope(typeDeclaration);
 		liveVariableScope.clearFieldScope(typeDeclaration);
+		mapBlockToOracleCodecVariable.clear();
 	}
 
 	@Override
 	public void endVisit(MethodDeclaration methodDeclaration) {
 		liveVariableScope.clearLocalVariablesScope(methodDeclaration);
+		mapBlockToOracleCodecVariable.clear();
 	}
 
 	@Override
 	public void endVisit(FieldDeclaration fieldDeclaration) {
 		liveVariableScope.clearLocalVariablesScope(fieldDeclaration);
+		mapBlockToOracleCodecVariable.clear();
 	}
 
 	@Override
 	public void endVisit(Initializer initializer) {
 		liveVariableScope.clearLocalVariablesScope(initializer);
+		mapBlockToOracleCodecVariable.clear();
 	}
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
+
+		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
+				ImportDeclaration.class);
+		//
+		importDeclarations.stream()
+			.map(ImportDeclaration::getName)
+			.filter(Name::isQualifiedName)
+			.map(name -> (QualifiedName) name)
+			.map(QualifiedName::getName)
+			.map(SimpleName::getIdentifier)
+			.filter(name -> name.startsWith(ORACLE_CODEC_NAME))
+			.forEach(conflictingOracleCodecNames::add);
+
+		importDeclarations.stream()
+			.map(ImportDeclaration::getName)
+			.filter(Name::isSimpleName)
+			.map(name -> (SimpleName) name)
+			.map(SimpleName::getIdentifier)
+			.filter(name -> name.startsWith(ORACLE_CODEC_NAME))
+			.forEach(conflictingOracleCodecNames::add);
+
+		// oracleCodecNamesFromTypeDeclarations
+
+		DeclaredTypesASTVisitor declaredTypesVisitor = new DeclaredTypesASTVisitor();
+		compilationUnit.accept(declaredTypesVisitor);
+
+		declaredTypesVisitor.getAllTypes()
+			.stream()
+			.map(ITypeBinding::getName)
+			.filter(name -> name.startsWith(ORACLE_CODEC_NAME))
+			.forEach(conflictingOracleCodecNames::add);
+		;
+
 		for (String qualifiedName : IMPORTS_FOR_ESCAPE) {
 			if (!isSafeToAddImport(compilationUnit, qualifiedName)) {
 				return false;
 			}
 		}
 		return super.visit(compilationUnit);
+	}
+
+	@Override
+	public void endVisit(CompilationUnit compilationUnit) {
+		conflictingOracleCodecNames.clear();
+		super.endVisit(compilationUnit);
 	}
 
 	@Override
@@ -99,14 +155,19 @@ public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 		ASTNode enclosingScope = this.liveVariableScope.findEnclosingScope(statement)
 			.orElse(null);
 		liveVariableScope.lazyLoadScopeNames(enclosingScope);
-		String oracleCodecName = createOracleCodecName();
-		liveVariableScope.addName(enclosingScope, oracleCodecName);
+		if (liveVariableScope.isInScope("ESAPI")) { //$NON-NLS-1$
+			return true;
+		}
 
-		VariableDeclarationStatement oracleCodecDeclarationStatement = createOracleCODECDeclarationStatement(
-				oracleCodecName);
-
-		ListRewrite listRewrite = astRewrite.getListRewrite(enclosingBlock, Block.STATEMENTS_PROPERTY);
-		listRewrite.insertBefore(oracleCodecDeclarationStatement, statement, null);
+		String oracleCodecName = mapBlockToOracleCodecVariable.computeIfAbsent(enclosingBlock, block -> {
+			String newName = createOracleCodecName();
+			liveVariableScope.addName(enclosingScope, newName);
+			VariableDeclarationStatement oracleCodecDeclarationStatement = createOracleCODECDeclarationStatement(
+					newName);
+			ListRewrite listRewrite = astRewrite.getListRewrite(enclosingBlock, Block.STATEMENTS_PROPERTY);
+			listRewrite.insertBefore(oracleCodecDeclarationStatement, statement, null);
+			return newName;
+		});
 
 		for (Expression expressionToEscape : expressionsToEscape) {
 			astRewrite.replace(expressionToEscape, createEscapeExpression(oracleCodecName, expressionToEscape), null);
@@ -130,7 +191,7 @@ public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 	private String createOracleCodecName() {
 		String name = ORACLE_CODEC_NAME;
 		int suffix = 1;
-		while (liveVariableScope.isInScope(name)) {
+		while (liveVariableScope.isInScope(name) || conflictingOracleCodecNames.contains(name)) {
 			name = ORACLE_CODEC_NAME + suffix;
 			suffix++;
 		}
