@@ -409,7 +409,7 @@ public class TestForToForEachListIteratingIndexRule {
 		final StringBuilder sb = new StringBuilder();
 
 		// FIXME SIM-212
-		foo.forEach(s -> sb.append(s.toString()));
+		foo.forEach((Number s) -> sb.append(s.toString()));
 
 		return sb.toString();
 	}
@@ -516,7 +516,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 	public <T extends Foo> void captureOfTypeArguments() {
 		final List<? extends T> elements = new ArrayList<>();
-		elements.forEach(foo -> {
+		elements.forEach((T foo) -> {
 			foo.toString();
 			foo.isFoo();
 		});
