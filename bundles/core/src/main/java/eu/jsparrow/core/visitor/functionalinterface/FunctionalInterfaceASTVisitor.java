@@ -165,18 +165,10 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					if (onlyFunctionalInterfaceMethod == null) {
 						return false;
 					}
+					if(hasInvocationsOfInstanceMethods(node, onlyFunctionalInterfaceMethod)) {
+						return true;
+					}
 					Block onlyFunctionalInterfaceMethodImplBody = onlyFunctionalInterfaceMethod.getBody();
-					DefaultMethodInvocationASTVisitor defaultMethodInvocationASTVisitor = new DefaultMethodInvocationASTVisitor(
-							node);
-					onlyFunctionalInterfaceMethodImplBody.accept(defaultMethodInvocationASTVisitor);
-					if (defaultMethodInvocationASTVisitor.isFlagCancelTransformation()) {
-						return true;
-					}
-
-					if (hasRecursiveCalls(onlyFunctionalInterfaceMethod)) {
-						return true;
-					}
-
 					// find parent scope and variable declarations in it
 					List<ASTNode> relevantBlocks = new ArrayList<>();
 					ASTNode scope = findScope(node, relevantBlocks);
@@ -329,6 +321,19 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 		return true;
 
+	}
+
+	private boolean hasInvocationsOfInstanceMethods(AnonymousClassDeclaration node,
+			MethodDeclaration onlyFunctionalInterfaceMethod) {
+		Block onlyFunctionalInterfaceMethodImplBody = onlyFunctionalInterfaceMethod.getBody();
+		DefaultMethodInvocationASTVisitor defaultMethodInvocationASTVisitor = new DefaultMethodInvocationASTVisitor(
+				node);
+		onlyFunctionalInterfaceMethodImplBody.accept(defaultMethodInvocationASTVisitor);
+		if (defaultMethodInvocationASTVisitor.isFlagCancelTransformation()) {
+			return true;
+		}
+		
+		return hasRecursiveCalls(onlyFunctionalInterfaceMethod);
 	}
 
 	private boolean hasRecursiveCalls(MethodDeclaration methodDeclaration) {
