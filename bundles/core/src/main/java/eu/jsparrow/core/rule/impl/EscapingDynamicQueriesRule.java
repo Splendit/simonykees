@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.core.visitor.security.EscapingDynamicQueriesASTVisitor;
-import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
@@ -38,7 +36,8 @@ public class EscapingDynamicQueriesRule extends RefactoringRuleImpl<EscapingDyna
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 
-		for (String fullyQuallifiedClassName : EscapingDynamicQueriesASTVisitor.IMPORTS_FOR_ESCAPE) {
+	
+		for (String fullyQuallifiedClassName : EscapingDynamicQueriesASTVisitor.CODEC_TYPES_QUALIFIED_NAMES) {
 			try {
 				if (project.findType(fullyQuallifiedClassName) == null) {
 					return false;

@@ -27,7 +27,24 @@ public class DynamicQueryASTVisitor extends AbstractAddImportASTVisitor {
 	protected static final String EXECUTE = "execute"; //$NON-NLS-1$
 	protected static final String EXECUTE_QUERY = "executeQuery"; //$NON-NLS-1$
 
-	private boolean isImportClashing(List<ImportDeclaration> importDeclarations, String simpleTypeName) {
+	protected boolean existsTypeDeclarationWithSimpleName(CompilationUnit compilationUnit, String simpleTypeName) {
+		DeclaredTypesASTVisitor visitor = new DeclaredTypesASTVisitor();
+		compilationUnit.accept(visitor);
+		return visitor.getAllTypes()
+			.stream()
+			.map(ITypeBinding::getName)
+			.anyMatch(name -> name.equals(simpleTypeName));
+	}
+
+	protected boolean isImportAlreadyExisting(List<ImportDeclaration> importDeclarations, String qualifiedTypeName) {
+		return importDeclarations
+			.stream()
+			.map(ImportDeclaration::getName)
+			.map(Name::getFullyQualifiedName)
+			.anyMatch(qualifiedName -> qualifiedName.equals(qualifiedTypeName));
+	}
+
+	protected boolean isImportClashing(List<ImportDeclaration> importDeclarations, String simpleTypeName) {
 		boolean clashing = importDeclarations.stream()
 			.map(ImportDeclaration::getName)
 			.filter(Name::isQualifiedName)
@@ -44,38 +61,6 @@ public class DynamicQueryASTVisitor extends AbstractAddImportASTVisitor {
 					.equals(((SimpleName) name).getIdentifier()));
 		}
 		return clashing;
-	}
-
-	protected boolean isSafeToAddImport(CompilationUnit compilationUnit, String qualifiedTypeName) {
-		int lastIndexOfDot = qualifiedTypeName.lastIndexOf('.');
-		String simpleTypeName = qualifiedTypeName.substring(lastIndexOfDot + 1);
-
-		DeclaredTypesASTVisitor visitor = new DeclaredTypesASTVisitor();
-		compilationUnit.accept(visitor);
-		boolean existsTypeDeclarationWithSimpleName = visitor.getAllTypes()
-			.stream()
-			.map(ITypeBinding::getName)
-			.anyMatch(name -> name.equals(simpleTypeName));
-		if (existsTypeDeclarationWithSimpleName) {
-			return false;
-		}
-
-		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
-				ImportDeclaration.class);
-
-		boolean importAlreadyExisting = importDeclarations.stream()
-			.map(ImportDeclaration::getName)
-			.map(Name::getFullyQualifiedName)
-			.anyMatch(qualifiedName -> qualifiedName.equals(qualifiedTypeName));
-		if (importAlreadyExisting) {
-			return true;
-		}
-		if (isImportClashing(importDeclarations, simpleTypeName)) {
-			return false;
-		}
-		return importDeclarations.stream()
-			.noneMatch(
-					importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration, qualifiedTypeName));
 	}
 
 	private SqlVariableAnalyzerVisitor analyzeSqlVariableReferences(MethodInvocation methodInvocation) {
@@ -162,4 +147,32 @@ public class DynamicQueryASTVisitor extends AbstractAddImportASTVisitor {
 		return sqlVariableVisitor;
 	}
 
+	protected String getSimpleName(String qualifiedName) {
+		int lastIndexOfDot = qualifiedName.lastIndexOf('.');
+		if (lastIndexOfDot == -1) {
+			return qualifiedName;
+		}
+		return qualifiedName.substring(lastIndexOfDot + 1);
+	}
+
+	protected boolean isSafeToAddImport(CompilationUnit compilationUnit, String qualifiedTypeName) {
+
+		String simpleTypeName = getSimpleName(qualifiedTypeName);
+
+		if (existsTypeDeclarationWithSimpleName(compilationUnit, simpleTypeName)) {
+			return false;
+		}
+		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
+				ImportDeclaration.class);
+
+		if (isImportAlreadyExisting(importDeclarations, qualifiedTypeName)) {
+			return true;
+		}
+		if (isImportClashing(importDeclarations, simpleTypeName)) {
+			return false;
+		}
+		return importDeclarations.stream()
+			.noneMatch(
+					importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration, qualifiedTypeName));
+	}
 }

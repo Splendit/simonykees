@@ -16,7 +16,7 @@ public class EscapingDynamicQueriesNegativeASTVisitorTest extends UsesJDTUnitFix
 			"			ResultSet results = statement.executeQuery(query);\n" +
 			"		} catch (SQLException e) {\n" +
 			"			e.printStackTrace();\n" +
-			"		}\n";;
+			"		}\n";
 
 	@BeforeEach
 	public void setUp() throws Exception {
@@ -84,70 +84,6 @@ public class EscapingDynamicQueriesNegativeASTVisitorTest extends UsesJDTUnitFix
 		assertNoChange(original);
 	}
 
-	@Test
-	public void visit_InnerClassESAPI_shouldNotTransform() throws Exception {
-		String original = "" +
-				"	class ESAPI {\n" +
-				"	}" +
-				"	public void test() {\n" +
-				"		String userName = \"userID\";\n" +
-				"		String query = \n" +
-				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-				"				userName + \n" +
-				"				\"'\";		\n" +
-				TRY_EXECUTE +
-				"	}";
-		assertNoChange(original);
-	}
 
-	@Test
-	public void visit_ImportStaticESAPI_shouldNotTransform() throws Exception {
-		boolean isOnDemand = false;
-		boolean isStatic = true;
-		defaultFixture.addImport("examplePackage.Constants.ESAPI", isStatic, isOnDemand);
-		String original = "" +
-				"	public void test() {\n" +
-				"		String userName = \"userID\";\n" +
-				"		String query = \n" +
-				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-				"				userName + \n" +
-				"				\"'\";		\n" +
-				TRY_EXECUTE +
-				"	}";
 
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_StaticFinalFieldESAPI_shouldNotTransform() throws Exception {
-
-		String original = "" +
-				"	static final int ESAPI = 0;" +
-				"	public void test() {\n" +
-				"		String userName = \"userID\";\n" +
-				"		String query = \n" +
-				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-				"				userName + \n" +
-				"				\"'\";		\n" +
-				TRY_EXECUTE +
-				"	}";
-
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_LocalClassESAPI_shouldNotTransform() throws Exception {
-		String original = "" +
-				"	class ESAPI {\n" +
-				"	}\n" +
-				"	public void test() {\n" +
-				"		String userName = \"userID\";\n" +
-				"		String query = \n" +
-				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-				"				userName + \n" +
-				"				\"'\";		\n" +
-				TRY_EXECUTE +
-				"	}";
-		assertNoChange(original);
-	}
 }

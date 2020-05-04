@@ -324,8 +324,4 @@ public class UseParameterizedQueryASTVisitor extends DynamicQueryASTVisitor {
 		return sqlStatementInitializer.arguments()
 			.isEmpty();
 	}
-
-
-
-
 }

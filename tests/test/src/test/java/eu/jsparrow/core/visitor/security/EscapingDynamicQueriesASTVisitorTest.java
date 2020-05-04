@@ -325,4 +325,94 @@ public class EscapingDynamicQueriesASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
+	@Test
+	public void visit_ImportStaticESAPI_shouldTransform() throws Exception {
+		boolean isOnDemand = false;
+		boolean isStatic = true;
+		defaultFixture.addImport("examplePackage.Constants.ESAPI", isStatic, isOnDemand);
+		String original = "" +
+				"	public void test() {\n" +
+				"		String userName = \"userID\";\n" +
+				"		String query = \n" +
+				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"				userName + \n" +
+				"				\"'\";		\n" +
+				tryExecute("query") +
+				"	}";
+
+		String expected = "" +
+				"	public void test() {\n" +
+				"		String userName = \"userID\";\n" +
+				"		Codec<Character> ORACLE_CODEC=new OracleCodec();\n" +
+				"		String query = \n" +
+				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"				org.owasp.esapi.ESAPI.encoder().encodeForSQL(ORACLE_CODEC,userName) + \n" +
+				"				\"'\";		\n" +
+				tryExecute("query") +
+				"	}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_LocalClassESAPI_shouldTransform() throws Exception {
+		String original = "" +
+				"	void testWithLocalClassESAPI() {\n" +
+				"		class ESAPI {\n" +
+				"		}\n" +
+				"	}\n" +
+				"	void test() {\n" +
+				"		String userName = \"userID\";\n" +
+				"		String query = \n" +
+				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"				userName + \n" +
+				"				\"'\";\n" +
+				tryExecute("query") +
+				"	}";
+
+		String expected = "" +
+				"	void testWithLocalClassESAPI() {\n" +
+				"		class ESAPI {\n" +
+				"		}\n" +
+				"	}\n" +
+				"	void test() {\n" +
+				"		String userName = \"userID\";\n" +
+				"		Codec<Character> ORACLE_CODEC=new OracleCodec();\n" +
+				"		String query = \n" +
+				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"				org.owasp.esapi.ESAPI.encoder().encodeForSQL(ORACLE_CODEC,userName) + \n" +
+				"				\"'\";\n" +
+				tryExecute("query") +
+				"	}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_StaticFinalFieldESAPI_shouldNotTransform() throws Exception {
+
+		String original = "" +
+				"	static final int ESAPI = 0;" +
+				"	public void test() {\n" +
+				"		String userName = \"userID\";\n" +
+				"		String query = \n" +
+				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"				userName + \n" +
+				"				\"'\";		\n" +
+				tryExecute("query") +
+				"	}";
+
+		String expected = "" +
+				"	static final int ESAPI = 0;" +
+				"	public void test() {\n" +
+				"		String userName = \"userID\";\n" +
+				"		Codec<Character> ORACLE_CODEC=new OracleCodec();\n" +
+				"		String query = \n" +
+				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"				org.owasp.esapi.ESAPI.encoder().encodeForSQL(ORACLE_CODEC,userName) + \n" +
+				"				\"'\";		\n" +
+				tryExecute("query") +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
 }

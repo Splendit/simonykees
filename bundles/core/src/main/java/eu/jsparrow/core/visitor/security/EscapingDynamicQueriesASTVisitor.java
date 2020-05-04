@@ -45,19 +45,35 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 
-	private final Map<Block, String> mapBlockToOracleCodecVariable = new HashMap<>();
+	private static final String QUALIFIED_NAME_CODEC = "org.owasp.esapi.codecs.Codec"; //$NON-NLS-1$
 
-	private static final String ORACLE_CODEC_NAME = "ORACLE_CODEC"; //$NON-NLS-1$
+	private static final String QUALIFIED_NAME_ORACLE_CODEC = "org.owasp.esapi.codecs.OracleCodec"; //$NON-NLS-1$
+
+	private static final String QUALIFIED_NAME_ESAPI = "org.owasp.esapi.ESAPI"; //$NON-NLS-1$
+
+	private static final String VAR_NAME_ORACLE_CODEC = "ORACLE_CODEC"; //$NON-NLS-1$
+
+	public static final List<String> CODEC_TYPES_QUALIFIED_NAMES = Collections.unmodifiableList(Arrays.asList(
+			QUALIFIED_NAME_CODEC,
+			QUALIFIED_NAME_ORACLE_CODEC,
+			QUALIFIED_NAME_ESAPI));
+
+	private final Map<Block, String> mapBlockToOracleCodecVariable = new HashMap<>();
 
 	private final LiveVariableScope liveVariableScope = new LiveVariableScope();
 
-	private final Set<String> conflictingOracleCodecNames = new HashSet<>();
+	/**
+	 * stores the simple names from imports which start with "RACLE_CODEC"
+	 */
+	private final Set<String> importedSimpleNamesStartingWithOracleCodec = new HashSet<>();
 
-	public static final List<String> IMPORTS_FOR_ESCAPE = Collections.unmodifiableList(Arrays.asList(
-			"org.owasp.esapi.codecs.Codec", //$NON-NLS-1$
-			"org.owasp.esapi.codecs.OracleCodec", //$NON-NLS-1$
-			"org.owasp.esapi.ESAPI" //$NON-NLS-1$
-	));
+	/**
+	 * stores the simple names of type declarations which start with
+	 * ORACLE_CODEC
+	 */
+	private final Set<String> simpleTypeNamesStartingWithOracleCodec = new HashSet<>();
+
+	private final Set<String> codecTypesAbleToBeImported = new HashSet<>();
 
 	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
@@ -89,47 +105,53 @@ public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 
 		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
 				ImportDeclaration.class);
-		//
-		importDeclarations.stream()
-			.map(ImportDeclaration::getName)
-			.filter(Name::isQualifiedName)
-			.map(name -> (QualifiedName) name)
-			.map(QualifiedName::getName)
-			.map(SimpleName::getIdentifier)
-			.filter(name -> name.startsWith(ORACLE_CODEC_NAME))
-			.forEach(conflictingOracleCodecNames::add);
 
-		importDeclarations.stream()
-			.map(ImportDeclaration::getName)
-			.filter(Name::isSimpleName)
-			.map(name -> (SimpleName) name)
-			.map(SimpleName::getIdentifier)
-			.filter(name -> name.startsWith(ORACLE_CODEC_NAME))
-			.forEach(conflictingOracleCodecNames::add);
+		loadImportedOracleCodecNames(importDeclarations);
+		loadSimpleTypeNamesStartingWithOracleCodec(compilationUnit);
 
-		// oracleCodecNamesFromTypeDeclarations
+		for (String fullyQuallifiedClassName : EscapingDynamicQueriesASTVisitor.CODEC_TYPES_QUALIFIED_NAMES) {
+			if (isSafeToAddImport(compilationUnit, fullyQuallifiedClassName)) {
+				codecTypesAbleToBeImported.add(fullyQuallifiedClassName);
+			}
+		}
+		return super.visit(compilationUnit);
+	}
 
+	private void loadSimpleTypeNamesStartingWithOracleCodec(CompilationUnit compilationUnit) {
 		DeclaredTypesASTVisitor declaredTypesVisitor = new DeclaredTypesASTVisitor();
 		compilationUnit.accept(declaredTypesVisitor);
 
 		declaredTypesVisitor.getAllTypes()
 			.stream()
 			.map(ITypeBinding::getName)
-			.filter(name -> name.startsWith(ORACLE_CODEC_NAME))
-			.forEach(conflictingOracleCodecNames::add);
-		;
+			.filter(name -> name.startsWith(VAR_NAME_ORACLE_CODEC))
+			.forEach(simpleTypeNamesStartingWithOracleCodec::add);
+	}
 
-		for (String qualifiedName : IMPORTS_FOR_ESCAPE) {
-			if (!isSafeToAddImport(compilationUnit, qualifiedName)) {
-				return false;
-			}
-		}
-		return super.visit(compilationUnit);
+	private void loadImportedOracleCodecNames(List<ImportDeclaration> importDeclarations) {
+		importDeclarations.stream()
+			.map(ImportDeclaration::getName)
+			.filter(Name::isQualifiedName)
+			.map(name -> (QualifiedName) name)
+			.map(QualifiedName::getName)
+			.map(SimpleName::getIdentifier)
+			.filter(name -> name.startsWith(VAR_NAME_ORACLE_CODEC))
+			.forEach(importedSimpleNamesStartingWithOracleCodec::add);
+
+		importDeclarations.stream()
+			.map(ImportDeclaration::getName)
+			.filter(Name::isSimpleName)
+			.map(name -> (SimpleName) name)
+			.map(SimpleName::getIdentifier)
+			.filter(name -> name.startsWith(VAR_NAME_ORACLE_CODEC))
+			.forEach(importedSimpleNamesStartingWithOracleCodec::add);
 	}
 
 	@Override
 	public void endVisit(CompilationUnit compilationUnit) {
-		conflictingOracleCodecNames.clear();
+		codecTypesAbleToBeImported.clear();
+		simpleTypeNamesStartingWithOracleCodec.clear();
+		importedSimpleNamesStartingWithOracleCodec.clear();
 		super.endVisit(compilationUnit);
 	}
 
@@ -154,10 +176,11 @@ public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 
 		ASTNode enclosingScope = this.liveVariableScope.findEnclosingScope(statement)
 			.orElse(null);
-		liveVariableScope.lazyLoadScopeNames(enclosingScope);
-		if (liveVariableScope.isInScope("ESAPI")) { //$NON-NLS-1$
+		if (enclosingScope == null) {
 			return true;
 		}
+
+		liveVariableScope.lazyLoadScopeNames(enclosingScope);
 
 		String oracleCodecName = mapBlockToOracleCodecVariable.computeIfAbsent(enclosingBlock, block -> {
 			String newName = createOracleCodecName();
@@ -176,10 +199,21 @@ public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 		return true;
 	}
 
+	private Name createTypeName(String qualifiedName) {
+		AST ast = astRewrite.getAST();
+		String simpleName = getSimpleName(qualifiedName);
+		if (codecTypesAbleToBeImported.contains(qualifiedName) && !liveVariableScope.isInScope(simpleName)) {
+			addImports.add(qualifiedName);
+			return ast.newSimpleName(simpleName);
+		}
+		return ast.newName(qualifiedName);
+	}
+
 	@SuppressWarnings("nls")
 	private Expression createEscapeExpression(String oracleCodecName, Expression expressionToEscape) {
 		AST ast = astRewrite.getAST();
-		MethodInvocation encoderInvocationOfESAPI = NodeBuilder.newMethodInvocation(ast, ast.newSimpleName("ESAPI"),
+		MethodInvocation encoderInvocationOfESAPI = NodeBuilder.newMethodInvocation(ast,
+				createTypeName(QUALIFIED_NAME_ESAPI),
 				"encoder");
 		SimpleName encodeForSQLName = ast.newSimpleName("encodeForSQL");
 		List<Expression> arguments = new ArrayList<>();
@@ -189,30 +223,29 @@ public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 	}
 
 	private String createOracleCodecName() {
-		String name = ORACLE_CODEC_NAME;
+		String name = VAR_NAME_ORACLE_CODEC;
 		int suffix = 1;
-		while (liveVariableScope.isInScope(name) || conflictingOracleCodecNames.contains(name)) {
-			name = ORACLE_CODEC_NAME + suffix;
+		while (liveVariableScope.isInScope(name) ||
+				importedSimpleNamesStartingWithOracleCodec.contains(name) ||
+				simpleTypeNamesStartingWithOracleCodec.contains(name)) {
+			name = VAR_NAME_ORACLE_CODEC + suffix;
 			suffix++;
 		}
 		return name;
 	}
 
-	@SuppressWarnings("nls")
 	private VariableDeclarationStatement createOracleCODECDeclarationStatement(String oracleCodecName) {
-		for (String qualifiedName : IMPORTS_FOR_ESCAPE) {
-			addImports.add(qualifiedName);
-		}
 		AST ast = astRewrite.getAST();
 
 		VariableDeclarationFragment fragment = ast.newVariableDeclarationFragment();
 		fragment.setName(ast.newSimpleName(oracleCodecName));
 		ClassInstanceCreation oracleCODECinitializer = ast.newClassInstanceCreation();
-		oracleCODECinitializer.setType(ast.newSimpleType(ast.newSimpleName("OracleCodec")));
+
+		oracleCODECinitializer.setType(ast.newSimpleType(createTypeName(QUALIFIED_NAME_ORACLE_CODEC)));
 		fragment.setInitializer(oracleCODECinitializer);
 		VariableDeclarationStatement oracleCODECDeclarationStatement = ast.newVariableDeclarationStatement(fragment);
 
-		SimpleType codecSimpleType = ast.newSimpleType(ast.newSimpleName("Codec"));
+		SimpleType codecSimpleType = ast.newSimpleType(createTypeName(QUALIFIED_NAME_CODEC));
 		ParameterizedType codecParameterizedType = ast.newParameterizedType(codecSimpleType);
 		Type characterTypeArg = ast.newSimpleType(ast.newSimpleName(Character.class.getSimpleName()));
 		@SuppressWarnings("unchecked")
@@ -229,5 +262,4 @@ public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 		componentsAnalyzer.analyze();
 		return componentsAnalyzer.getExpressionsToEscape();
 	}
-
 }
