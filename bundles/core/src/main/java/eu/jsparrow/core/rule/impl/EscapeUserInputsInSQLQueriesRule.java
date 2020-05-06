@@ -10,7 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
-import eu.jsparrow.core.visitor.security.EscapingDynamicQueriesASTVisitor;
+import eu.jsparrow.core.visitor.security.EscapeUserInputsInSQLQueriesASTVisitor;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
@@ -20,24 +21,23 @@ import eu.jsparrow.rules.common.Tag;
  * @since 3.17.0
  *
  */
-public class EscapingDynamicQueriesRule extends RefactoringRuleImpl<EscapingDynamicQueriesASTVisitor> {
+public class EscapeUserInputsInSQLQueriesRule extends RefactoringRuleImpl<EscapeUserInputsInSQLQueriesASTVisitor> {
 
-	Logger logger = LoggerFactory.getLogger(EscapingDynamicQueriesRule.class);
+	Logger logger = LoggerFactory.getLogger(EscapeUserInputsInSQLQueriesRule.class);
 
-	public EscapingDynamicQueriesRule() {
-		this.visitorClass = EscapingDynamicQueriesASTVisitor.class;
-		this.id = "EscapingDynamicQueries"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription("Escaping Dynamic Queries", //$NON-NLS-1$
-				"This rule escapes parameters in dynamic queries.", //$NON-NLS-1$
-				Duration.ofMinutes(5),
+	public EscapeUserInputsInSQLQueriesRule() {
+		this.visitorClass = EscapeUserInputsInSQLQueriesASTVisitor.class;
+		this.id = "EscapeUserInputsInSQLQueries"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.EscapeUserInputsInSQLQueriesRule_name,
+				Messages.EscapeUserInputsInSQLQueriesRule_description,
+				Duration.ofMinutes(10),
 				Arrays.asList(Tag.JAVA_1_1, Tag.SECURITY));
 	}
 
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 
-	
-		for (String fullyQuallifiedClassName : EscapingDynamicQueriesASTVisitor.CODEC_TYPES_QUALIFIED_NAMES) {
+		for (String fullyQuallifiedClassName : EscapeUserInputsInSQLQueriesASTVisitor.CODEC_TYPES_QUALIFIED_NAMES) {
 			try {
 				if (project.findType(fullyQuallifiedClassName) == null) {
 					return false;

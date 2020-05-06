@@ -72,7 +72,7 @@ import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedQueryRule;
-import eu.jsparrow.core.rule.impl.EscapingDynamicQueriesRule;
+import eu.jsparrow.core.rule.impl.EscapeUserInputsInSQLQueriesRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
@@ -162,7 +162,7 @@ public class RulesContainer {
 				 * Security
 				 */
 				new UseParameterizedQueryRule(),
-				new EscapingDynamicQueriesRule(),
+				new EscapeUserInputsInSQLQueriesRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

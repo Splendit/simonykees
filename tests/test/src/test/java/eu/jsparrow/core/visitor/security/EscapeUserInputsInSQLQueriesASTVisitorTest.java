@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
 @SuppressWarnings("nls")
-public class EscapingDynamicQueriesASTVisitorTest extends UsesJDTUnitFixture {
+public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		setDefaultVisitor(new EscapingDynamicQueriesASTVisitor());
+		setDefaultVisitor(new EscapeUserInputsInSQLQueriesASTVisitor());
 		defaultFixture.addImport(java.sql.Connection.class.getName());
 		defaultFixture.addImport(java.sql.Statement.class.getName());
 		defaultFixture.addImport(java.sql.ResultSet.class.getName());

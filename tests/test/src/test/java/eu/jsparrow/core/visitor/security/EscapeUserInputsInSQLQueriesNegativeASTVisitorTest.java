@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
 @SuppressWarnings("nls")
-public class EscapingDynamicQueriesNegativeASTVisitorTest extends UsesJDTUnitFixture {
+public class EscapeUserInputsInSQLQueriesNegativeASTVisitorTest extends UsesJDTUnitFixture {
 
 	private static final String TRY_EXECUTE = "" +
 			"		try {\n" +
@@ -20,7 +20,7 @@ public class EscapingDynamicQueriesNegativeASTVisitorTest extends UsesJDTUnitFix
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		setDefaultVisitor(new EscapingDynamicQueriesASTVisitor());
+		setDefaultVisitor(new EscapeUserInputsInSQLQueriesASTVisitor());
 		defaultFixture.addImport(java.sql.Connection.class.getName());
 		defaultFixture.addImport(java.sql.Statement.class.getName());
 		defaultFixture.addImport(java.sql.ResultSet.class.getName());

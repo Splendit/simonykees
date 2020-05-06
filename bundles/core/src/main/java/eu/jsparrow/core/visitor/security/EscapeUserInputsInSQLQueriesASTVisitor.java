@@ -43,7 +43,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.17.0
  *
  */
-public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
+public class EscapeUserInputsInSQLQueriesASTVisitor extends DynamicQueryASTVisitor {
 
 	private static final String QUALIFIED_NAME_CODEC = "org.owasp.esapi.codecs.Codec"; //$NON-NLS-1$
 
@@ -109,7 +109,7 @@ public class EscapingDynamicQueriesASTVisitor extends DynamicQueryASTVisitor {
 		loadImportedOracleCodecNames(importDeclarations);
 		loadSimpleTypeNamesStartingWithOracleCodec(compilationUnit);
 
-		for (String fullyQuallifiedClassName : EscapingDynamicQueriesASTVisitor.CODEC_TYPES_QUALIFIED_NAMES) {
+		for (String fullyQuallifiedClassName : EscapeUserInputsInSQLQueriesASTVisitor.CODEC_TYPES_QUALIFIED_NAMES) {
 			if (isSafeToAddImport(compilationUnit, fullyQuallifiedClassName)) {
 				codecTypesAbleToBeImported.add(fullyQuallifiedClassName);
 			}
