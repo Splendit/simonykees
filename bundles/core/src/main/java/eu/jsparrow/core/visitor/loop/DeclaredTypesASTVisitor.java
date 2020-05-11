@@ -29,7 +29,7 @@ public class DeclaredTypesASTVisitor extends ASTVisitor {
 
 	public DeclaredTypesASTVisitor() {
 		typesMap = new HashMap<>();
-		allTypes =  new ArrayList<>();
+		allTypes = new ArrayList<>();
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class DeclaredTypesASTVisitor extends ASTVisitor {
 		return true;
 	}
 
-	private void storeDeclaredTypes(AbstractTypeDeclaration typeDeclaration) {		
+	private void storeDeclaredTypes(AbstractTypeDeclaration typeDeclaration) {
 		ITypeBinding binding = typeDeclaration.resolveBinding();
 		allTypes.add(binding);
 		List<ITypeBinding> innerTypes = Arrays.asList(binding.getDeclaredTypes());
@@ -71,13 +71,15 @@ public class DeclaredTypesASTVisitor extends ASTVisitor {
 	 * @return the list of the type bindings top level types.
 	 */
 	public List<ITypeBinding> getTopLevelTypes() {
-		return allTypes.stream().filter(ITypeBinding::isTopLevel).collect(Collectors.toList());
+		return allTypes.stream()
+			.filter(ITypeBinding::isTopLevel)
+			.collect(Collectors.toList());
 	}
 
 	/**
 	 * 
-	 * @return a list containing all type bindings, including inner types
-	 *         and also local types.
+	 * @return a list containing all type bindings, including inner types and
+	 *         also local types.
 	 */
 	public List<ITypeBinding> getAllTypes() {
 		return allTypes;

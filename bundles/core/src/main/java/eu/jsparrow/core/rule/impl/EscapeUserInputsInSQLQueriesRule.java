@@ -18,6 +18,8 @@ import eu.jsparrow.rules.common.Tag;
 
 /**
  * 
+ * @see EscapeUserInputsInSQLQueriesASTVisitor
+ * 
  * @since 3.17.0
  *
  */
@@ -30,7 +32,7 @@ public class EscapeUserInputsInSQLQueriesRule extends RefactoringRuleImpl<Escape
 		this.id = "EscapeUserInputsInSQLQueries"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.EscapeUserInputsInSQLQueriesRule_name,
 				Messages.EscapeUserInputsInSQLQueriesRule_description,
-				Duration.ofMinutes(10),
+				Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_1, Tag.SECURITY));
 	}
 

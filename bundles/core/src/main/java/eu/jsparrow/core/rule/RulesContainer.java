@@ -157,7 +157,7 @@ public class RulesContainer {
 				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
 				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
 				new RemoveCollectionAddAllRule(), new RemoveRedundantTypeCastRule(),
-				
+
 				/*
 				 * Security
 				 */
@@ -187,7 +187,7 @@ public class RulesContainer {
 				 * String manipulations. These rules must be applied after
 				 * StringBuildingLoopRule.
 				 */
-				new UseStringBuilderAppendRule(), new UseStringJoinRule(), 
+				new UseStringBuilderAppendRule(), new UseStringJoinRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen

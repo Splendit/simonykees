@@ -39,40 +39,50 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
+ * Used for preventing injection of SQL code by the escaping of user input which
+ * may contain SQL code coming form an attack and changing the intent of a
+ * query.
+ * <p>
+ * The visitor looks for variables which store SQL queries. Then it analyzes the
+ * concatenation of the query string for user input. Each user input of the type
+ * String is wrapped by an invocation of
+ * {@code ESAPI.encoder().encodeForSql(...)}.
+ * <p>
+ * Example:
+ * <p>
+ * {@code String query = "SELECT * FROM employee WHERE id ='" + id + "' ORDER BY last_name"; }
+ * <p>
+ * is transformed to
+ * <p>
+ * {@code Codec<Character> oracleCodec = new OracleCodec();} <br>
+ * {@code String query = "SELECT * FROM employee WHERE id ='" + ESAPI.encoder().encodeForSQL(oracleCodec, id) + "' ORDER BY last_name";}
+ * <p>
  * 
  * @since 3.17.0
+ * 
  *
  */
-public class EscapeUserInputsInSQLQueriesASTVisitor extends DynamicQueryASTVisitor {
+public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQueryASTVisitor {
 
 	private static final String QUALIFIED_NAME_CODEC = "org.owasp.esapi.codecs.Codec"; //$NON-NLS-1$
-
 	private static final String QUALIFIED_NAME_ORACLE_CODEC = "org.owasp.esapi.codecs.OracleCodec"; //$NON-NLS-1$
-
 	private static final String QUALIFIED_NAME_ESAPI = "org.owasp.esapi.ESAPI"; //$NON-NLS-1$
-
 	private static final String VAR_NAME_ORACLE_CODEC = "ORACLE_CODEC"; //$NON-NLS-1$
-
 	public static final List<String> CODEC_TYPES_QUALIFIED_NAMES = Collections.unmodifiableList(Arrays.asList(
 			QUALIFIED_NAME_CODEC,
 			QUALIFIED_NAME_ORACLE_CODEC,
 			QUALIFIED_NAME_ESAPI));
-
 	private final Map<Block, String> mapBlockToOracleCodecVariable = new HashMap<>();
-
 	private final LiveVariableScope liveVariableScope = new LiveVariableScope();
-
 	/**
 	 * stores the simple names from imports which start with "RACLE_CODEC"
 	 */
 	private final Set<String> importedSimpleNamesStartingWithOracleCodec = new HashSet<>();
-
 	/**
 	 * stores the simple names of type declarations which start with
 	 * ORACLE_CODEC
 	 */
 	private final Set<String> simpleTypeNamesStartingWithOracleCodec = new HashSet<>();
-
 	private final Set<String> codecTypesAbleToBeImported = new HashSet<>();
 
 	@Override
@@ -202,7 +212,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends DynamicQueryASTVisit
 	private Name createTypeName(String qualifiedName) {
 		AST ast = astRewrite.getAST();
 		String simpleName = getSimpleName(qualifiedName);
-		if (codecTypesAbleToBeImported.contains(qualifiedName) && !liveVariableScope.isInScope(simpleName)) {
+		if (codecTypesAbleToBeImported.contains(qualifiedName)) {
 			addImports.add(qualifiedName);
 			return ast.newSimpleName(simpleName);
 		}
@@ -212,9 +222,16 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends DynamicQueryASTVisit
 	@SuppressWarnings("nls")
 	private Expression createEscapeExpression(String oracleCodecName, Expression expressionToEscape) {
 		AST ast = astRewrite.getAST();
-		MethodInvocation encoderInvocationOfESAPI = NodeBuilder.newMethodInvocation(ast,
-				createTypeName(QUALIFIED_NAME_ESAPI),
-				"encoder");
+		Name nameESAPI;
+		String simpleNameESAPI = "ESAPI";
+		if (codecTypesAbleToBeImported.contains(QUALIFIED_NAME_ESAPI)
+				&& !liveVariableScope.isInScope(simpleNameESAPI)) {
+			addImports.add(QUALIFIED_NAME_ESAPI);
+			nameESAPI = ast.newSimpleName(simpleNameESAPI);
+		} else {
+			nameESAPI = ast.newName(QUALIFIED_NAME_ESAPI);
+		}
+		MethodInvocation encoderInvocationOfESAPI = NodeBuilder.newMethodInvocation(ast, nameESAPI, "encoder");
 		SimpleName encodeForSQLName = ast.newSimpleName("encodeForSQL");
 		List<Expression> arguments = new ArrayList<>();
 		arguments.add(ast.newSimpleName(oracleCodecName));

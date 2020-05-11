@@ -51,7 +51,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * @since 3.16.0
  *
  */
-public class UseParameterizedQueryASTVisitor extends DynamicQueryASTVisitor {
+public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisitor {
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {

@@ -22,12 +22,12 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
-public class DynamicQueryASTVisitor extends AbstractAddImportASTVisitor {
+public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportASTVisitor {
 
 	protected static final String EXECUTE = "execute"; //$NON-NLS-1$
 	protected static final String EXECUTE_QUERY = "executeQuery"; //$NON-NLS-1$
 
-	protected boolean existsTypeDeclarationWithSimpleName(CompilationUnit compilationUnit, String simpleTypeName) {
+	protected boolean containsTypeDeclarationWithName(CompilationUnit compilationUnit, String simpleTypeName) {
 		DeclaredTypesASTVisitor visitor = new DeclaredTypesASTVisitor();
 		compilationUnit.accept(visitor);
 		return visitor.getAllTypes()
@@ -36,7 +36,7 @@ public class DynamicQueryASTVisitor extends AbstractAddImportASTVisitor {
 			.anyMatch(name -> name.equals(simpleTypeName));
 	}
 
-	protected boolean isImportAlreadyExisting(List<ImportDeclaration> importDeclarations, String qualifiedTypeName) {
+	protected boolean containsImport(List<ImportDeclaration> importDeclarations, String qualifiedTypeName) {
 		return importDeclarations
 			.stream()
 			.map(ImportDeclaration::getName)
@@ -50,15 +50,16 @@ public class DynamicQueryASTVisitor extends AbstractAddImportASTVisitor {
 			.filter(Name::isQualifiedName)
 			.map(name -> (QualifiedName) name)
 			.map(QualifiedName::getName)
-			.anyMatch(importedName -> simpleTypeName
-				.equals(importedName.getIdentifier()));
+			.map(SimpleName::getIdentifier)
+			.anyMatch(simpleTypeName::equals);
 
 		if (!clashing) {
 			clashing = importDeclarations.stream()
 				.map(ImportDeclaration::getName)
 				.filter(Name::isSimpleName)
-				.anyMatch(name -> simpleTypeName
-					.equals(((SimpleName) name).getIdentifier()));
+				.map(name -> (SimpleName) name)
+				.map(SimpleName::getIdentifier)
+				.anyMatch(simpleTypeName::equals);
 		}
 		return clashing;
 	}
@@ -159,13 +160,13 @@ public class DynamicQueryASTVisitor extends AbstractAddImportASTVisitor {
 
 		String simpleTypeName = getSimpleName(qualifiedTypeName);
 
-		if (existsTypeDeclarationWithSimpleName(compilationUnit, simpleTypeName)) {
+		if (containsTypeDeclarationWithName(compilationUnit, simpleTypeName)) {
 			return false;
 		}
 		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
 				ImportDeclaration.class);
 
-		if (isImportAlreadyExisting(importDeclarations, qualifiedTypeName)) {
+		if (containsImport(importDeclarations, qualifiedTypeName)) {
 			return true;
 		}
 		if (isImportClashing(importDeclarations, simpleTypeName)) {
