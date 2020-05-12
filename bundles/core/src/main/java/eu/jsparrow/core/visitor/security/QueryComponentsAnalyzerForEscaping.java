@@ -24,13 +24,12 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * @since 3.16.0
  *
  */
-public class QueryComponentsAnalyzerForEscaping {
+public class QueryComponentsAnalyzerForEscaping extends AbstractQueryComponentsAnalyzer {
 
-	private List<Expression> components;
 	private List<Expression> expressionsToEscape = new ArrayList<>();
 
 	public QueryComponentsAnalyzerForEscaping(List<Expression> components) {
-		this.components = components;
+		super(components);
 	}
 
 	/**
@@ -100,36 +99,6 @@ public class QueryComponentsAnalyzerForEscaping {
 		return ClassRelationUtil.isContentOfTypes(expressionTypeBinding, encoderBaseTypeList) ||
 				ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, encoderBaseTypeList);
 
-	}
-
-	// the same as in QueryComponentsAnalyzer
-	private StringLiteral findNext(int index) {
-		int nextIndex = index + 1;
-		if (components.size() <= nextIndex) {
-			return null;
-		}
-		Expression next = components.get(nextIndex);
-		if (next.getNodeType() != ASTNode.STRING_LITERAL) {
-			return null;
-		}
-		StringLiteral literal = (StringLiteral) next;
-		String value = literal.getLiteralValue();
-		return value.startsWith("'") ? literal : null; //$NON-NLS-1$
-	}
-
-	// the same as in QueryComponentsAnalyzer
-	private StringLiteral findPrevious(int index) {
-		int previousIndex = index - 1;
-		if (previousIndex < 0) {
-			return null;
-		}
-		Expression previous = components.get(previousIndex);
-		if (previous.getNodeType() != ASTNode.STRING_LITERAL) {
-			return null;
-		}
-		StringLiteral stringLiteral = (StringLiteral) previous;
-		String value = stringLiteral.getLiteralValue();
-		return value.endsWith("'") ? stringLiteral : null; //$NON-NLS-1$
 	}
 
 	/**
