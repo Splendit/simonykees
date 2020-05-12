@@ -22,11 +22,27 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
+/**
+ * Intended to be extended by AST visitor classes which analyze SQL queries and
+ * transform Java code in order to reduce vulnerability by injection of SQL code
+ * by user input.
+ * <p>
+ * For example, a common functionality is the decision whether a class can be
+ * imported or not.
+ * 
+ * @since 3.17.0
+ *
+ */
 public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportASTVisitor {
 
 	protected static final String EXECUTE = "execute"; //$NON-NLS-1$
 	protected static final String EXECUTE_QUERY = "executeQuery"; //$NON-NLS-1$
 
+	/**
+	 * 
+	 * @return true if a type with the given simple name is declared in the
+	 *         given CompilationUnit.
+	 */
 	protected boolean containsTypeDeclarationWithName(CompilationUnit compilationUnit, String simpleTypeName) {
 		DeclaredTypesASTVisitor visitor = new DeclaredTypesASTVisitor();
 		compilationUnit.accept(visitor);
@@ -36,6 +52,11 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 			.anyMatch(name -> name.equals(simpleTypeName));
 	}
 
+	/**
+	 * 
+	 * @return true if a given type is already imported into the given
+	 *         CompilationUnit.
+	 */
 	protected boolean containsImport(List<ImportDeclaration> importDeclarations, String qualifiedTypeName) {
 		return importDeclarations
 			.stream()
@@ -44,6 +65,11 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 			.anyMatch(qualifiedName -> qualifiedName.equals(qualifiedTypeName));
 	}
 
+	/**
+	 * 
+	 * @return true if the simple name of a given type will cause conflicts when
+	 *         imported into the given CompilationUnit.
+	 */
 	protected boolean isImportClashing(List<ImportDeclaration> importDeclarations, String simpleTypeName) {
 		boolean clashing = importDeclarations.stream()
 			.map(ImportDeclaration::getName)
@@ -62,35 +88,6 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 				.anyMatch(simpleTypeName::equals);
 		}
 		return clashing;
-	}
-
-	private SqlVariableAnalyzerVisitor analyzeSqlVariableReferences(MethodInvocation methodInvocation) {
-		SimpleName query = (SimpleName) methodInvocation.arguments()
-			.get(0);
-		IBinding queryVariableBinding = query.resolveBinding();
-		if (queryVariableBinding.getKind() != IBinding.VARIABLE) {
-			return null;
-		}
-
-		IVariableBinding variableBinding = (IVariableBinding) queryVariableBinding;
-		if (variableBinding.isField()) {
-			return null;
-		}
-
-		ASTNode declaringNode = this.getCompilationUnit()
-			.findDeclaringNode(queryVariableBinding);
-		if (declaringNode == null || declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return null;
-		}
-
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = new SqlVariableAnalyzerVisitor(query, declaringNode,
-				getCompilationUnit());
-		Block enclosingBlock = ASTNodeUtil.getSpecificAncestor(declaringNode, Block.class);
-		enclosingBlock.accept(sqlVariableVisitor);
-		if (sqlVariableVisitor.isUnsafe()) {
-			return null;
-		}
-		return sqlVariableVisitor;
 	}
 
 	private boolean analyzeStatementExecuteQuery(MethodInvocation methodInvocation) {
@@ -135,27 +132,71 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 		return ClassRelationUtil.isContentOfType(methodExpressionTypeBinding, java.sql.Statement.class.getName());
 	}
 
+	/**
+	 * 
+	 * @param methodInvocation
+	 *            parameter which is examined whether or not it represents an
+	 *            execute- or an executeQuery- invocation on a statement object.
+	 * @return a SqlVariableAnalyzerVisitor if a query is found which can be
+	 *         transformed, otherwise null.
+	 */
 	protected SqlVariableAnalyzerVisitor createSqlVariableAnalyzerVisitor(MethodInvocation methodInvocation) {
 		boolean hasRightTypeAndName = analyzeStatementExecuteQuery(methodInvocation);
 		if (!hasRightTypeAndName) {
 			return null;
 		}
 
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = analyzeSqlVariableReferences(methodInvocation);
-		if (sqlVariableVisitor == null || sqlVariableVisitor.isUnsafe()) {
+		SimpleName query = (SimpleName) methodInvocation.arguments()
+			.get(0);
+		IBinding queryVariableBinding = query.resolveBinding();
+		if (queryVariableBinding.getKind() != IBinding.VARIABLE) {
+			return null;
+		}
+
+		IVariableBinding variableBinding = (IVariableBinding) queryVariableBinding;
+		if (variableBinding.isField()) {
+			return null;
+		}
+
+		ASTNode declaringNode = this.getCompilationUnit()
+			.findDeclaringNode(queryVariableBinding);
+		if (declaringNode == null || declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			return null;
+		}
+
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = new SqlVariableAnalyzerVisitor(query, declaringNode,
+				getCompilationUnit());
+		Block enclosingBlock = ASTNodeUtil.getSpecificAncestor(declaringNode, Block.class);
+		enclosingBlock.accept(sqlVariableVisitor);
+		if (sqlVariableVisitor.isUnsafe()) {
 			return null;
 		}
 		return sqlVariableVisitor;
 	}
 
-	protected String getSimpleName(String qualifiedName) {
-		int lastIndexOfDot = qualifiedName.lastIndexOf('.');
+	/**
+	 * 
+	 * @param name
+	 *            expected to be the either a simple or a qualified class name.
+	 * @return the simple name of the class corresponding the name given by the
+	 *         parameter.
+	 */
+	protected String getSimpleName(String name) {
+		int lastIndexOfDot = name.lastIndexOf('.');
 		if (lastIndexOfDot == -1) {
-			return qualifiedName;
+			return name;
 		}
-		return qualifiedName.substring(lastIndexOfDot + 1);
+		return name.substring(lastIndexOfDot + 1);
 	}
 
+	/**
+	 * 
+	 * @param compilationUnit
+	 *            where the import is intended to be carried out
+	 * @param qualifiedTypeName
+	 *            class to be imported
+	 * @return true if the import can be carried out, otherwise false.
+	 */
 	protected boolean isSafeToAddImport(CompilationUnit compilationUnit, String qualifiedTypeName) {
 
 		String simpleTypeName = getSimpleName(qualifiedTypeName);

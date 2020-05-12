@@ -61,11 +61,11 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 
 		String expected = declareRequestField +
 				"	void test() {\n" +
-				"		Codec<Character> ORACLE_CODEC = new OracleCodec();\n" +
+				"		Codec<Character> oracleCodec = new OracleCodec();\n" +
 				"		String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-				"				ESAPI.encoder().encodeForSQL(ORACLE_CODEC, req.getParameter(\"userID\")) + \n" +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec, req.getParameter(\"userID\")) + \n" +
 				"				\"' and user_password = '\" + \n" +
-				"				ESAPI.encoder().encodeForSQL(ORACLE_CODEC, req.getParameter(\"pwd\")) + \n" +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec, req.getParameter(\"pwd\")) + \n" +
 				"				\"'\";\n" +
 				tryExecute("query") +
 				"	}";
@@ -107,11 +107,11 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 				"	void test() {			\n" +
 				"		String userName = \"userName\";\n" +
 				"		String userPWD = \"userPWD\";\n" +
-				"		Codec<Character> ORACLE_CODEC = new OracleCodec();\n" +
+				"		Codec<Character> oracleCodec = new OracleCodec();\n" +
 				"		String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-				"				ESAPI.encoder().encodeForSQL(ORACLE_CODEC, userName) + \n" +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec, userName) + \n" +
 				"				\"' and user_password = '\" + \n" +
-				"				ESAPI.encoder().encodeForSQL(ORACLE_CODEC, userPWD) + \n" +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec, userPWD) + \n" +
 				"				\"'\";\n" +
 				tryExecute("query") +
 				"	}";
@@ -138,11 +138,11 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 				"	private String userName = \"userName\";\n" +
 				"	private String userPWD = \"userPWD\";\n" +
 				"	void test() {\n" +
-				"		Codec<Character> ORACLE_CODEC = new OracleCodec();\n" +
+				"		Codec<Character> oracleCodec = new OracleCodec();\n" +
 				"		String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-				"				ESAPI.encoder().encodeForSQL(ORACLE_CODEC, this.userName) + \n" +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec, this.userName) + \n" +
 				"				\"' and user_password = '\" + \n" +
-				"				ESAPI.encoder().encodeForSQL(ORACLE_CODEC, this.userPWD) + \n" +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec, this.userPWD) + \n" +
 				"				\"'\";\n" +
 				tryExecute("query") +
 				"	}";
@@ -167,14 +167,14 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 		String expected = "" +
 				"	public void test() {\n" +
 				"		String userName = \"userName\";\n" +
-				"		Codec<Character> ORACLE_CODEC = new OracleCodec();\n" +
+				"		Codec<Character> oracleCodec = new OracleCodec();\n" +
 				"		String query = " +
 				"			\"SELECT user_id FROM user_data WHERE user_name = '\" + " +
-				"			ESAPI.encoder().encodeForSQL(ORACLE_CODEC, userName) + " +
+				"			ESAPI.encoder().encodeForSQL(oracleCodec, userName) + " +
 				"			\"'\";\n" +
 				"		String query1 = " +
 				"			\"SELECT user_id FROM user_data WHERE user_name = '\" + " +
-				"			ESAPI.encoder().encodeForSQL(ORACLE_CODEC, userName) + " +
+				"			ESAPI.encoder().encodeForSQL(oracleCodec, userName) + " +
 				"			\"'\";\n" +
 				tryExecute("query") +
 				tryExecute("query1") +
@@ -206,18 +206,18 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 				"	public void test() {\n" +
 				"		String userName = \"userName\";\n" +
 				"		{\n" +
-				"			Codec<Character> ORACLE_CODEC = new OracleCodec();\n" +
+				"			Codec<Character> oracleCodec = new OracleCodec();\n" +
 				"			String query = " +
 				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + " +
-				"				ESAPI.encoder().encodeForSQL(ORACLE_CODEC, userName) + " +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec, userName) + " +
 				"				\"'\";\n" +
 				tryExecute("query") +
 				"		}\n" +
 				"		{\n" +
-				"			Codec<Character> ORACLE_CODEC1 = new OracleCodec();\n" +
+				"			Codec<Character> oracleCodec1 = new OracleCodec();\n" +
 				"			String query1 = " +
 				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + " +
-				"				ESAPI.encoder().encodeForSQL(ORACLE_CODEC1, userName) + " +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec1, userName) + " +
 				"				\"'\";\n" +
 				tryExecute("query1") +
 				"		}\n" +
@@ -230,7 +230,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 	public void visit_ORACLE_CODECAsIntLocalVariable_shouldTransform() throws Exception {
 		String original = "" +
 				"	public void test() {\n" +
-				"		int ORACLE_CODEC = 0;\n" +
+				"		int oracleCodec = 0;\n" +
 				"		String userName = \"userName\";\n" +
 				"		String query = " +
 				"			\"SELECT user_id FROM user_data WHERE user_name = '\" + userName + \"'\";\n" +
@@ -238,12 +238,12 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 				"		}";
 		String expected = "" +
 				"	public void test() {\n" +
-				"		int ORACLE_CODEC = 0;\n" +
+				"		int oracleCodec = 0;\n" +
 				"		String userName = \"userName\";\n" +
-				"		Codec<Character> ORACLE_CODEC1 = new OracleCodec();\n" +
+				"		Codec<Character> oracleCodec1 = new OracleCodec();\n" +
 				"		String query = " +
 				"			\"SELECT user_id FROM user_data WHERE user_name = '\" + " +
-				"			ESAPI.encoder().encodeForSQL(ORACLE_CODEC1, userName) + " +
+				"			ESAPI.encoder().encodeForSQL(oracleCodec1, userName) + " +
 				"			\"'\";\n" +
 				tryExecute("query") +
 				"		}";
@@ -251,9 +251,9 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_ORACLE_CODECAsInnerClass_shouldTransform() throws Exception {
+	public void visit_OracleCodecAsInnerClass_shouldTransform() throws Exception {
 		String original = "" +
-				"               class ORACLE_CODEC {\n" +
+				"               class OracleCodec {\n" +
 				"               }\n" +
 				"               public void test() {\n" +
 				"                       String userName = \"userName\";\n" +
@@ -269,13 +269,13 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 				"                       }\n" +
 				"               }";
 		String expected = "" +
-				"               class ORACLE_CODEC {\n" +
+				"               class OracleCodec {\n" +
 				"               }\n" +
 				"               public void test() {\n" +
 				"                       String userName = \"userName\";\n" +
-				"                       Codec<Character> ORACLE_CODEC1 = new OracleCodec();\n" +
+				"                       Codec<Character> oracleCodec = new org.owasp.esapi.codecs.OracleCodec();\n" +
 				"                       String query = \n" +
-				"                                       \"SELECT user_id FROM user_data WHERE user_name = '\" + ESAPI.encoder().encodeForSQL(ORACLE_CODEC1, userName)  + \"'\";                 \n"
+				"                                       \"SELECT user_id FROM user_data WHERE user_name = '\" + ESAPI.encoder().encodeForSQL(oracleCodec, userName)  + \"'\";                 \n"
 				+
 				"                       try {\n" +
 				"                               Connection connection = null;\n" +
@@ -290,8 +290,8 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_ORACLE_CODECAsImportedClass_shouldTransform() throws Exception {
-		defaultFixture.addImport("examplePackage.ORACLE_CODEC");
+	public void visit_OracleCodecAsImportedClass_shouldTransform() throws Exception {
+		defaultFixture.addImport("examplePackage.OracleCodec");
 		String original = "" +
 				"               public void test() {\n" +
 				"                       String userName = \"userName\";\n" +
@@ -309,9 +309,9 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 		String expected = "" +
 				"               public void test() {\n" +
 				"                       String userName = \"userName\";\n" +
-				"                       Codec<Character> ORACLE_CODEC1 = new OracleCodec();\n" +
+				"                       Codec<Character> oracleCodec = new org.owasp.esapi.codecs.OracleCodec();\n" +
 				"                       String query = \n" +
-				"                                       \"SELECT user_id FROM user_data WHERE user_name = '\" + ESAPI.encoder().encodeForSQL(ORACLE_CODEC1, userName)  + \"'\";                 \n"
+				"                                       \"SELECT user_id FROM user_data WHERE user_name = '\" + ESAPI.encoder().encodeForSQL(oracleCodec, userName)  + \"'\";                 \n"
 				+
 				"                       try {\n" +
 				"                               Connection connection = null;\n" +
@@ -343,10 +343,10 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 		String expected = "" +
 				"	public void test() {\n" +
 				"		String userName = \"userID\";\n" +
-				"		Codec<Character> ORACLE_CODEC=new OracleCodec();\n" +
+				"		Codec<Character> oracleCodec=new OracleCodec();\n" +
 				"		String query = \n" +
 				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-				"				org.owasp.esapi.ESAPI.encoder().encodeForSQL(ORACLE_CODEC,userName) + \n" +
+				"				org.owasp.esapi.ESAPI.encoder().encodeForSQL(oracleCodec,userName) + \n" +
 				"				\"'\";		\n" +
 				tryExecute("query") +
 				"	}";
@@ -376,10 +376,10 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 				"	}\n" +
 				"	void test() {\n" +
 				"		String userName = \"userID\";\n" +
-				"		Codec<Character> ORACLE_CODEC=new OracleCodec();\n" +
+				"		Codec<Character> oracleCodec=new OracleCodec();\n" +
 				"		String query = \n" +
 				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-				"				org.owasp.esapi.ESAPI.encoder().encodeForSQL(ORACLE_CODEC,userName) + \n" +
+				"				org.owasp.esapi.ESAPI.encoder().encodeForSQL(oracleCodec,userName) + \n" +
 				"				\"'\";\n" +
 				tryExecute("query") +
 				"	}";
@@ -404,10 +404,10 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 				"	static final int ESAPI = 0;" +
 				"	public void test() {\n" +
 				"		String userName = \"userID\";\n" +
-				"		Codec<Character> ORACLE_CODEC=new OracleCodec();\n" +
+				"		Codec<Character> oracleCodec=new OracleCodec();\n" +
 				"		String query = \n" +
 				"				\"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-				"				org.owasp.esapi.ESAPI.encoder().encodeForSQL(ORACLE_CODEC,userName) + \n" +
+				"				org.owasp.esapi.ESAPI.encoder().encodeForSQL(oracleCodec,userName) + \n" +
 				"				\"'\";		\n" +
 				tryExecute("query") +
 				"	}";
