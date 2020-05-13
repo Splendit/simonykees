@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -17,9 +16,6 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -74,8 +70,14 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 			QUALIFIED_NAME_ESAPI));
 	private final Map<Block, String> mapBlockToOracleCodecVariable = new HashMap<>();
 	private final LiveVariableScope liveVariableScope = new LiveVariableScope();
-	private final Set<String> importedStaticFieldNames = new HashSet<>();
 	private final Set<String> codecTypesAbleToBeImported = new HashSet<>();
+
+	@Override
+	public void endVisit(CompilationUnit compilationUnit) {
+		liveVariableScope.clearCompilationUnitScope(compilationUnit);
+		codecTypesAbleToBeImported.clear();
+		super.endVisit(compilationUnit);
+	}
 
 	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
@@ -105,31 +107,12 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 
-		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
-				ImportDeclaration.class);
-
-		importDeclarations.stream()
-			.filter(ImportDeclaration::isStatic)
-			.map(ImportDeclaration::resolveBinding)
-			.filter(Objects::nonNull)
-			.filter(binding -> binding.getKind() == IBinding.VARIABLE)
-			.map(binding -> (IVariableBinding) binding)
-			.map(IVariableBinding::getName)
-			.forEach(importedStaticFieldNames::add);
-
 		for (String fullyQuallifiedClassName : EscapeUserInputsInSQLQueriesASTVisitor.CODEC_TYPES_QUALIFIED_NAMES) {
 			if (isSafeToAddImport(compilationUnit, fullyQuallifiedClassName)) {
 				codecTypesAbleToBeImported.add(fullyQuallifiedClassName);
 			}
 		}
 		return super.visit(compilationUnit);
-	}
-
-	@Override
-	public void endVisit(CompilationUnit compilationUnit) {
-		codecTypesAbleToBeImported.clear();
-		importedStaticFieldNames.clear();
-		super.endVisit(compilationUnit);
 	}
 
 	@Override
@@ -143,9 +126,9 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		if (expressionsToEscape.isEmpty()) {
 			return true;
 		}
-		Expression expression0 = sqlVariableVisitor.getDynamicQueryComponents()
+		Expression expression = sqlVariableVisitor.getDynamicQueryComponents()
 			.get(0);
-		Statement statement = ASTNodeUtil.getSpecificAncestor(expression0, Statement.class);
+		Statement statement = ASTNodeUtil.getSpecificAncestor(expression, Statement.class);
 		if (statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return true;
 		}
@@ -209,8 +192,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	private String createOracleCodecName() {
 		String name = VAR_NAME_ORACLE_CODEC;
 		int suffix = 1;
-		while (liveVariableScope.isInScope(name) ||
-				importedStaticFieldNames.contains(name)) {
+		while (liveVariableScope.isInScope(name)) {
 			name = VAR_NAME_ORACLE_CODEC + suffix;
 			suffix++;
 		}

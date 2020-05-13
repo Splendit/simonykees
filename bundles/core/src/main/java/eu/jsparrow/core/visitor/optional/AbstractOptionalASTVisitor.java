@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -111,6 +112,12 @@ public class AbstractOptionalASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return newName;
+	}
+
+	@Override
+	public void endVisit(CompilationUnit compilationUnit) {
+		this.scope.clearCompilationUnitScope(compilationUnit);
+		super.endVisit(compilationUnit);
 	}
 
 	@Override
