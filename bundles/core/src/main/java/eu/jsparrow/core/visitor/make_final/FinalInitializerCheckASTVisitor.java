@@ -25,10 +25,10 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * made {@code final}. There are a few criteria which this visitor checks:
  * <ul>
  * <li><strong>{@code static final} fields</strong> must be initialised at the
- * declaration or in a static initialiser but not in both.</li>
+ * declaration or in a static initializer but not in both.</li>
  * <li><strong>non-static {@code final} fields</strong> must be initialised in
  * only one of the following parts: at the declaration, in a non-static class
- * initialiser or at the end of ALL constructors.</li>
+ * initializer or at the end of ALL constructors.</li>
  * </ul>
  * 
  * <strong>How to use:</strong>
@@ -187,12 +187,17 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 
 				boolean constructor = !constructorInitializers.isEmpty() && constructorInitializers.entrySet()
 					.stream()
-					.allMatch((Map.Entry<Integer, List<VariableDeclarationFragment>> entry) -> entry.getValue()
-						.contains(fragment));
+					.map(Map.Entry::getValue)
+					.allMatch((List<VariableDeclarationFragment> entry) -> entry.contains(fragment));
+				boolean atLeastOneConstructor = constructorInitializers.entrySet()
+					.stream()
+					.map(Map.Entry::getValue)
+					.anyMatch((List<VariableDeclarationFragment> entry) -> entry.contains(fragment));
+
 				boolean multiplyAssigned = multiplyAssignedDeclarations.contains(fragment);
 
 				return ((declaration ^ initializer ^ constructor) ^ (declaration && initializer && constructor))
-						&& !multiplyAssigned;
+						&& !multiplyAssigned && !(!constructor && atLeastOneConstructor);
 			});
 	}
 
