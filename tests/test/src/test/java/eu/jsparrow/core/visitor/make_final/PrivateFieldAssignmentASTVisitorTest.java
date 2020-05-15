@@ -39,7 +39,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.accept(visitor);
 
-		List<VariableDeclarationFragment> assignedFragments = visitor.getAssigendVariableDeclarationFragments();
+		List<VariableDeclarationFragment> assignedFragments = visitor.getAssignedVariableDeclarationFragments();
 
 		assertTrue(checkAssignedFragments(assignedFragments, "a", "b"));
 	}
@@ -53,7 +53,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.accept(visitor);
 
-		List<VariableDeclarationFragment> assignedFragments = visitor.getAssigendVariableDeclarationFragments();
+		List<VariableDeclarationFragment> assignedFragments = visitor.getAssignedVariableDeclarationFragments();
 
 		assertTrue(checkAssignedFragments(assignedFragments, "a"));
 	}
@@ -68,7 +68,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.accept(visitor);
 
-		List<VariableDeclarationFragment> assignedFragments = visitor.getAssigendVariableDeclarationFragments();
+		List<VariableDeclarationFragment> assignedFragments = visitor.getAssignedVariableDeclarationFragments();
 
 		assertTrue(checkAssignedFragments(assignedFragments));
 	}
@@ -81,7 +81,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.accept(visitor);
 
-		List<VariableDeclarationFragment> assignedFragments = visitor.getAssigendVariableDeclarationFragments();
+		List<VariableDeclarationFragment> assignedFragments = visitor.getAssignedVariableDeclarationFragments();
 
 		assertTrue(checkAssignedFragments(assignedFragments, "a", "b"));
 	}
@@ -96,7 +96,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.accept(visitor);
 
-		List<VariableDeclarationFragment> assignedFragments = visitor.getAssigendVariableDeclarationFragments();
+		List<VariableDeclarationFragment> assignedFragments = visitor.getAssignedVariableDeclarationFragments();
 
 		assertTrue(checkAssignedFragments(assignedFragments, "e"));
 	}
@@ -110,7 +110,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		defaultFixture.accept(visitor);
 
-		List<VariableDeclarationFragment> assignedFragments = visitor.getAssigendVariableDeclarationFragments();
+		List<VariableDeclarationFragment> assignedFragments = visitor.getAssignedVariableDeclarationFragments();
 
 		assertTrue(checkAssignedFragments(assignedFragments, "a", "b"));
 	}

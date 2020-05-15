@@ -40,7 +40,7 @@ public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteAST
 		typeDeclaration.accept(privateFieldAssignmentVisitor);
 
 		List<VariableDeclarationFragment> assignedFragments = privateFieldAssignmentVisitor
-			.getAssigendVariableDeclarationFragments();
+			.getAssignedVariableDeclarationFragments();
 
 		finalCandidateFields = finaInitializerCheckVisitor.getFinalCandidates()
 			.stream()

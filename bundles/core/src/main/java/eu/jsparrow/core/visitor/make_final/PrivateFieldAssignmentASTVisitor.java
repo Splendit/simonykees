@@ -1,17 +1,27 @@
 package eu.jsparrow.core.visitor.make_final;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * This helper visitor collects all fields that have been declared and assigned
@@ -23,13 +33,47 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 public class PrivateFieldAssignmentASTVisitor extends AbstractMakeFinalHelperVisitor {
 
 	private final List<VariableDeclarationFragment> assignedFragments = new ArrayList<>();
+	private Map<ASTNode, List<VariableDeclarationFragment>> currentlySkipped = new HashMap<>();
 
 	/*
-	 * Initialisers are already checked in another precondition.
+	 * Initializers are already checked in another precondition.
+	 * 
+	 * No body... they are not!!!!
+	 * 
 	 */
 	@Override
 	public boolean visit(Initializer initializer) {
-		return false;
+		storeCurrentlySkipped(initializer);
+		return true;
+	}
+
+	private void storeCurrentlySkipped(ASTNode initializer) {
+		ASTNode parent = initializer.getParent();
+		if (parent.getNodeType() == ASTNode.TYPE_DECLARATION) {
+
+			TypeDeclaration typeDeclaration = (TypeDeclaration) initializer.getParent();
+			List<VariableDeclarationFragment> declaredInType = Arrays.stream(typeDeclaration.getFields())
+				.flatMap(filed -> ASTNodeUtil.convertToTypedList(filed.fragments(), VariableDeclarationFragment.class)
+					.stream())
+				.collect(Collectors.toList());
+			currentlySkipped.put(initializer, declaredInType);
+		} else if (parent.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
+			AnonymousClassDeclaration anonymousClass = (AnonymousClassDeclaration) initializer.getParent();
+			List<VariableDeclarationFragment> declaredInAnonymousClass = ASTNodeUtil
+				.convertToTypedList(anonymousClass.bodyDeclarations(), BodyDeclaration.class)
+				.stream()
+				.filter(bodyDeclaration -> bodyDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION)
+				.map(bodyDeclaration -> (FieldDeclaration) bodyDeclaration)
+				.flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
+					.stream())
+				.collect(Collectors.toList());
+			currentlySkipped.put(initializer, declaredInAnonymousClass);
+		}
+	}
+
+	@Override
+	public void endVisit(Initializer initializer) {
+		currentlySkipped.remove(initializer);
 	}
 
 	/*
@@ -37,7 +81,15 @@ public class PrivateFieldAssignmentASTVisitor extends AbstractMakeFinalHelperVis
 	 */
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
-		return !methodDeclaration.isConstructor();
+		if(methodDeclaration.isConstructor()) {
+			storeCurrentlySkipped(methodDeclaration);
+		}
+		return true;
+	}
+	
+	@Override
+	public void endVisit(MethodDeclaration methodDeclaration) {
+		currentlySkipped.remove(methodDeclaration);
 	}
 
 	@Override
@@ -77,16 +129,24 @@ public class PrivateFieldAssignmentASTVisitor extends AbstractMakeFinalHelperVis
 		VariableDeclarationFragment variableDeclarationFragment = extractFieldDeclarationFragmentFromExpression(
 				expression);
 
-		if (variableDeclarationFragment != null && !assignedFragments.contains(variableDeclarationFragment)) {
+		if (variableDeclarationFragment != null && !assignedFragments.contains(variableDeclarationFragment)
+				&& !isCurrentlySkipped(variableDeclarationFragment)) {
 			assignedFragments.add(variableDeclarationFragment);
 		}
+	}
+
+	private boolean isCurrentlySkipped(VariableDeclarationFragment variableDeclarationFragment) {
+		return currentlySkipped.values()
+			.stream()
+			.flatMap(List::stream)
+			.anyMatch(skipped -> skipped == variableDeclarationFragment);
 	}
 
 	/**
 	 * @return the collected {@link VariableDeclarationFragment}s, which are
 	 *         assigned somewhere in the corresponding class
 	 */
-	public List<VariableDeclarationFragment> getAssigendVariableDeclarationFragments() {
+	public List<VariableDeclarationFragment> getAssignedVariableDeclarationFragments() {
 		return assignedFragments;
 	}
 }
