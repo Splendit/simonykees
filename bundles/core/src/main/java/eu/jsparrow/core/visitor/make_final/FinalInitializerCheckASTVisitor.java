@@ -103,7 +103,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
 		if (!methodDeclaration.isConstructor()) {
-			return false;
+			return isInConstructor;
 		}
 		currentConstructor = methodDeclaration;
 		tempAssignmentsInBlocks = new LinkedList<>();

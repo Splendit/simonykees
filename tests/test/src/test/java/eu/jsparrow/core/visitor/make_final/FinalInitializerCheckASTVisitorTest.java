@@ -306,6 +306,24 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertFalse(isValidCandidates(candidates));
 	}
+	
+	@Test 
+	public void nonStaticField_isReassignedInAnonymousClassInConstructor_shouldNotBeCandidate() throws Exception {
+		String typeContent = "" +
+				"	private boolean reassignedInConstractorInnerClass = false;\n" + 
+				"	public " + DEFAULT_TYPE_DECLARATION_NAME +  "() {\n" + 
+				"		final Runnable runnable = new Runnable() {\n" + 
+				"			@Override\n" + 
+				"			public void run() {\n" + 
+				"				reassignedInConstractorInnerClass = true;\n" + 
+				"			}" + 
+				"		};" + 
+				"	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+		defaultFixture.accept(visitor);
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+		assertTrue(candidates.isEmpty());
+	}
 
 	private boolean isValidCandidates(List<FieldDeclaration> candidates, String... correctFieldNames) {
 		if (candidates.isEmpty()) {
