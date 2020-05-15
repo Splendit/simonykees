@@ -114,6 +114,33 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertTrue(checkAssignedFragments(assignedFragments, "a", "b"));
 	}
+	
+	@Test
+	public void test_initializerInMethodBody_shouldFindAssignment() throws Exception {
+		String typeContent = "" +
+				"	private int intValue = 0;\n" + 
+				"	\n" + 
+				"	private void sampleMethod() {\n" + 
+				"		final Runnable updateIntValue = new Runnable() {\n" + 
+				"			public void run() {\n" + 
+				"				final Runnable r = new Runnable() {\n" + 
+				"					\n" + 
+				"					{\n" + 
+				"						intValue = 1;\n" + 
+				"					}\n" + 
+				"					\n" + 
+				"					public void run() {}\n" + 
+				"				};\n" + 
+				"			}\n" + 
+				"		};\n" + 
+				"	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+
+		defaultFixture.accept(visitor);
+
+		List<VariableDeclarationFragment> assignedFragments = visitor.getAssignedVariableDeclarationFragments();
+		assertTrue(checkAssignedFragments(assignedFragments, "intValue"));
+	}
 
 	private boolean checkAssignedFragments(List<VariableDeclarationFragment> assignedFragments,
 			String... correctFragmentNames) {

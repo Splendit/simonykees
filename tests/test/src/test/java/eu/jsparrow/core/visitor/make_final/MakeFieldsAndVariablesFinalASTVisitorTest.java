@@ -330,4 +330,10 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 
 		assertChange(actual, expected);
 	}
+	
+	@Test
+	public void privateField_volatile_shouldNotTransform() throws Exception {
+		String actual = "private volatile int a = 1;";
+		assertNoChange(actual);
+	}
 }

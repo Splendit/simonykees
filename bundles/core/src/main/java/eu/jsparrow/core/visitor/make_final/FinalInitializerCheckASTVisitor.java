@@ -58,7 +58,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 
 	private int constructorCount = 0;
 	private boolean isInConstructor = false;
-	private MethodDeclaration currentConstructor;
+	private ASTNode currentConstructor;
 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
@@ -86,6 +86,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	@Override
 	public boolean visit(Initializer initializer) {
 		tempAssignmentsInBlocks = new LinkedList<>();
+		currentConstructor = initializer;
 		return true;
 	}
 
@@ -98,6 +99,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 		}
 
 		tempAssignmentsInBlocks = null;
+		currentConstructor = null;
 	}
 
 	@Override
@@ -156,7 +158,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 			return false;
 		}
 		ExpressionStatement statement = (ExpressionStatement)assignment.getParent();
-		return statement.getParent() != currentConstructor;
+		return statement.getParent().getParent() != currentConstructor;
 	}
 
 	/**
@@ -194,8 +196,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 		return fragments.stream()
 			.allMatch(fragment -> (fieldInitializers.contains(fragment)
 					^ staticInitializerInitializers.contains(fragment))
-					&& !multiplyAssignedDeclarations.contains(fragment)
-					&& !nonRootAssignment.contains(fragment));
+					&& !multiplyAssignedDeclarations.contains(fragment));
 	}
 
 	private boolean isNonStaticFinalCandidate(FieldDeclaration fieldDeclaration) {
