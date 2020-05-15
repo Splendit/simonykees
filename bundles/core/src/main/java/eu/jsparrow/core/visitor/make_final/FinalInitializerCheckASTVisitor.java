@@ -62,9 +62,10 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
-		boolean isAlreadyFinal = ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isFinal);
+		int modifiers = fieldDeclaration.getModifiers();
+		boolean isFinalOrVolatile = Modifier.isFinal(modifiers) || Modifier.isVolatile(modifiers);
 
-		if (isAlreadyFinal) {
+		if (isFinalOrVolatile) {
 			return true;
 		}
 
