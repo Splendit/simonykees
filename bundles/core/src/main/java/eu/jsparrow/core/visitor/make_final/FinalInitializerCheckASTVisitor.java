@@ -192,8 +192,17 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	private boolean isStaticFinalCandidate(FieldDeclaration fieldDeclaration) {
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
 				VariableDeclarationFragment.class);
+		
+		/*
+		 * This is the only visitor analyzing constructors
+		 */
+		boolean reassignedInConstructor = constructorInitializers.values()
+			.stream()
+			.flatMap(List::stream)
+			.anyMatch(fragments::contains);
 
-		return fragments.stream()
+
+		return !reassignedInConstructor && fragments.stream()
 			.allMatch(fragment -> (fieldInitializers.contains(fragment)
 					^ staticInitializerInitializers.contains(fragment))
 					&& !multiplyAssignedDeclarations.contains(fragment));

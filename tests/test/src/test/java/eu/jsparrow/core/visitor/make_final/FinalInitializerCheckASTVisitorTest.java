@@ -361,6 +361,20 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
 		assertTrue(candidates.isEmpty());
 	}
+	
+	@Test
+	public void staticField_reassigningInConstructor_shouldNotBeCandidate() throws Exception {
+		String typeContent = "" + 
+				"	private static double DOUBLE_VALUE = 0.0;\n" + 
+				"	\n" + 
+				"	public " + DEFAULT_TYPE_DECLARATION_NAME + " (double value) {\n" + 
+				"		DOUBLE_VALUE = value;\n" + 
+				"	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+		defaultFixture.accept(visitor);
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+		assertTrue(candidates.isEmpty());
+	}
 
 	private boolean isValidCandidates(List<FieldDeclaration> candidates, String... correctFieldNames) {
 		if (candidates.isEmpty()) {
