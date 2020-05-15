@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -33,11 +34,17 @@ public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteAST
 
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
+		ASTNode enclosingNode;
+		if(typeDeclaration.isMemberTypeDeclaration() || typeDeclaration.isLocalTypeDeclaration()) {
+			enclosingNode = typeDeclaration.getParent();
+		} else {
+			enclosingNode = typeDeclaration;
+		}
 		FinalInitializerCheckASTVisitor finaInitializerCheckVisitor = new FinalInitializerCheckASTVisitor();
-		typeDeclaration.accept(finaInitializerCheckVisitor);
+		enclosingNode.accept(finaInitializerCheckVisitor);
 
 		PrivateFieldAssignmentASTVisitor privateFieldAssignmentVisitor = new PrivateFieldAssignmentASTVisitor();
-		typeDeclaration.accept(privateFieldAssignmentVisitor);
+		enclosingNode.accept(privateFieldAssignmentVisitor);
 
 		List<VariableDeclarationFragment> assignedFragments = privateFieldAssignmentVisitor
 			.getAssignedVariableDeclarationFragments();
