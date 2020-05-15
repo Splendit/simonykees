@@ -41,7 +41,7 @@ public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteAST
 			enclosingNode = typeDeclaration;
 		}
 		FinalInitializerCheckASTVisitor finaInitializerCheckVisitor = new FinalInitializerCheckASTVisitor();
-		enclosingNode.accept(finaInitializerCheckVisitor);
+		typeDeclaration.accept(finaInitializerCheckVisitor);
 
 		PrivateFieldAssignmentASTVisitor privateFieldAssignmentVisitor = new PrivateFieldAssignmentASTVisitor();
 		enclosingNode.accept(privateFieldAssignmentVisitor);

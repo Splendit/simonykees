@@ -38,37 +38,11 @@ public class PrivateFieldAssignmentASTVisitor extends AbstractMakeFinalHelperVis
 	/*
 	 * Initializers are already checked in another precondition.
 	 * 
-	 * No body... they are not!!!!
-	 * 
 	 */
 	@Override
 	public boolean visit(Initializer initializer) {
 		storeCurrentlySkipped(initializer);
 		return true;
-	}
-
-	private void storeCurrentlySkipped(ASTNode initializer) {
-		ASTNode parent = initializer.getParent();
-		if (parent.getNodeType() == ASTNode.TYPE_DECLARATION) {
-
-			TypeDeclaration typeDeclaration = (TypeDeclaration) initializer.getParent();
-			List<VariableDeclarationFragment> declaredInType = Arrays.stream(typeDeclaration.getFields())
-				.flatMap(filed -> ASTNodeUtil.convertToTypedList(filed.fragments(), VariableDeclarationFragment.class)
-					.stream())
-				.collect(Collectors.toList());
-			currentlySkipped.put(initializer, declaredInType);
-		} else if (parent.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
-			AnonymousClassDeclaration anonymousClass = (AnonymousClassDeclaration) initializer.getParent();
-			List<VariableDeclarationFragment> declaredInAnonymousClass = ASTNodeUtil
-				.convertToTypedList(anonymousClass.bodyDeclarations(), BodyDeclaration.class)
-				.stream()
-				.filter(bodyDeclaration -> bodyDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION)
-				.map(bodyDeclaration -> (FieldDeclaration) bodyDeclaration)
-				.flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
-					.stream())
-				.collect(Collectors.toList());
-			currentlySkipped.put(initializer, declaredInAnonymousClass);
-		}
 	}
 
 	@Override
@@ -148,5 +122,29 @@ public class PrivateFieldAssignmentASTVisitor extends AbstractMakeFinalHelperVis
 	 */
 	public List<VariableDeclarationFragment> getAssignedVariableDeclarationFragments() {
 		return assignedFragments;
+	}
+	
+	private void storeCurrentlySkipped(ASTNode initializer) {
+		ASTNode parent = initializer.getParent();
+		if (parent.getNodeType() == ASTNode.TYPE_DECLARATION) {
+
+			TypeDeclaration typeDeclaration = (TypeDeclaration) initializer.getParent();
+			List<VariableDeclarationFragment> declaredInType = Arrays.stream(typeDeclaration.getFields())
+				.flatMap(filed -> ASTNodeUtil.convertToTypedList(filed.fragments(), VariableDeclarationFragment.class)
+					.stream())
+				.collect(Collectors.toList());
+			currentlySkipped.put(initializer, declaredInType);
+		} else if (parent.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
+			AnonymousClassDeclaration anonymousClass = (AnonymousClassDeclaration) initializer.getParent();
+			List<VariableDeclarationFragment> declaredInAnonymousClass = ASTNodeUtil
+				.convertToTypedList(anonymousClass.bodyDeclarations(), BodyDeclaration.class)
+				.stream()
+				.filter(bodyDeclaration -> bodyDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION)
+				.map(bodyDeclaration -> (FieldDeclaration) bodyDeclaration)
+				.flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
+					.stream())
+				.collect(Collectors.toList());
+			currentlySkipped.put(initializer, declaredInAnonymousClass);
+		}
 	}
 }
