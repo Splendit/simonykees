@@ -72,6 +72,7 @@ import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedQueryRule;
+import eu.jsparrow.core.rule.impl.EscapeUserInputsInSQLQueriesRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
@@ -156,11 +157,12 @@ public class RulesContainer {
 				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
 				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
 				new RemoveCollectionAddAllRule(), new RemoveRedundantTypeCastRule(),
-				
+
 				/*
 				 * Security
 				 */
 				new UseParameterizedQueryRule(),
+				new EscapeUserInputsInSQLQueriesRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
@@ -185,7 +187,7 @@ public class RulesContainer {
 				 * String manipulations. These rules must be applied after
 				 * StringBuildingLoopRule.
 				 */
-				new UseStringBuilderAppendRule(), new UseStringJoinRule(), 
+				new UseStringBuilderAppendRule(), new UseStringJoinRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen
