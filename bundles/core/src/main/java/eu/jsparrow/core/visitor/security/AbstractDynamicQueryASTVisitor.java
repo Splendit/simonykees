@@ -6,7 +6,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -90,7 +89,7 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 		return clashing;
 	}
 
-	private boolean analyzeStatementExecuteQuery(MethodInvocation methodInvocation) {
+	protected boolean analyzeStatementExecuteQuery(MethodInvocation methodInvocation) {
 		SimpleName methodName = methodInvocation.getName();
 		if (!EXECUTE.equals(methodName.getIdentifier()) && !EXECUTE_QUERY.equals(methodName.getIdentifier())) {
 			return false;
@@ -120,11 +119,6 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 		}
 
 		if (argument.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return false;
-		}
-
-		if (EXECUTE.equals(methodName.getIdentifier())
-				&& methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return false;
 		}
 

@@ -324,4 +324,14 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		return sqlStatementInitializer.arguments()
 			.isEmpty();
 	}
+
+	@Override
+	protected boolean analyzeStatementExecuteQuery(MethodInvocation methodInvocation) {
+		if (super.analyzeStatementExecuteQuery(methodInvocation)) {
+			return !(EXECUTE.equals(methodInvocation.getName()
+				.getIdentifier())
+					&& methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY);
+		}
+		return false;
+	}
 }

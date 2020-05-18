@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
@@ -15,10 +14,10 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * 
  * @since 3.17.0
  */
-public class SimpleNamesAsVariableOrQualifierVisitor extends ASTVisitor {
+public class SimpleNamesAsQualifierVisitor extends ASTVisitor {
 	private List<SimpleName> variableDeclarations;
 
-	public SimpleNamesAsVariableOrQualifierVisitor() {
+	public SimpleNamesAsQualifierVisitor() {
 		variableDeclarations = new ArrayList<>();
 	}
 
@@ -26,13 +25,7 @@ public class SimpleNamesAsVariableOrQualifierVisitor extends ASTVisitor {
 	public boolean visit(SimpleName simpleName) {
 		if (simpleName.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY) {
 			variableDeclarations.add(simpleName);
-		} else {
-			IBinding resolvedBinding = simpleName.resolveBinding();
-			if (resolvedBinding != null && resolvedBinding.getKind() == IBinding.VARIABLE
-					&& simpleName.isDeclaration()) {
-				variableDeclarations.add(simpleName);
-			}
-		}
+		} 
 		return true;
 	}
 

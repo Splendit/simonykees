@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -100,38 +99,36 @@ public class LiveVariableScope {
 			if (localVariableNames.containsKey(scope)) {
 				return;
 			}
-			List<String> declaredInScope;
-			SimpleNamesAsVariableOrQualifierVisitor declarationsVisitor = new SimpleNamesAsVariableOrQualifierVisitor();
+			List<String> declaredInScope = new ArrayList<>();
+			VariableDeclarationsVisitor declarationsVisitor = new VariableDeclarationsVisitor();
 			scope.accept(declarationsVisitor);
-			declaredInScope = declarationsVisitor.getVariableDeclarationNames()
+			declarationsVisitor.getVariableDeclarationNames()
 				.stream()
 				.map(SimpleName::getIdentifier)
-				.collect(Collectors.toList());
+				.forEach(declaredInScope::add);
+			SimpleNamesAsQualifierVisitor simpleNamesAsQualifierVisitor = new SimpleNamesAsQualifierVisitor();
+			scope.accept(simpleNamesAsQualifierVisitor);
+			simpleNamesAsQualifierVisitor.getVariableDeclarationNames()
+				.stream()
+				.map(SimpleName::getIdentifier)
+				.forEach(declaredInScope::add);
 
 			this.localVariableNames.put(scope, declaredInScope);
-
-			if (TypeDeclaration.BODY_DECLARATIONS_PROPERTY != scope.getLocationInParent()) {
-				return;
-			}
-			loadFieldNames((TypeDeclaration) scope.getParent());
+			loadFieldNames(ASTNodeUtil.getSpecificAncestor(scope, TypeDeclaration.class));
 		}
+		loadImportedStaticFieldNames(ASTNodeUtil.getSpecificAncestor(scope, CompilationUnit.class));
 	}
 
 	private void loadFieldNames(TypeDeclaration typeDeclaration) {
-		if (fieldNames.containsKey(typeDeclaration)) {
+		if (typeDeclaration == null || fieldNames.containsKey(typeDeclaration)) {
 			return;
 		}
 		List<String> names = ASTNodeUtil.findFieldNames(typeDeclaration);
 		fieldNames.put(typeDeclaration, names);
-		TypeDeclaration enclosingType = ASTNodeUtil.getSpecificAncestor(typeDeclaration, TypeDeclaration.class);
-		if (enclosingType != null) {
-			loadFieldNames(enclosingType);
-		} else {
-			loadImportedStarticFieldNames(ASTNodeUtil.getSpecificAncestor(typeDeclaration, CompilationUnit.class));
-		}
+		loadFieldNames(ASTNodeUtil.getSpecificAncestor(typeDeclaration, TypeDeclaration.class));
 	}
 
-	private void loadImportedStarticFieldNames(CompilationUnit compilationUnit) {
+	private void loadImportedStaticFieldNames(CompilationUnit compilationUnit) {
 		if (importedStaticFieldNames.containsKey(compilationUnit)) {
 			return;
 		}
