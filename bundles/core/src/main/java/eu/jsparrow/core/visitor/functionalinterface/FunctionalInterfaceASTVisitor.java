@@ -43,7 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.visitor.sub.MethodInvocationsVisitor;
-import eu.jsparrow.core.visitor.sub.ThisExpressionVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDefinitionASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
