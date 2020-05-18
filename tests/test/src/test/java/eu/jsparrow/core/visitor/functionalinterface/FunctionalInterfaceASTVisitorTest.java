@@ -531,4 +531,24 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 				"}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_usingThisExpression_shouldNotTransform() throws Exception {
+		String original = "" + 
+				"class Foo {\n" + 
+				"	public void usingThisKeywordInMap() {\n" + 
+				"		Runnable r = new Runnable() {\n" + 
+				"			\n" + 
+				"			@Override\n" + 
+				"			public void run() {\n" + 
+				"				consumeRunnable(this);\n" + 
+				"				\n" + 
+				"			}\n" + 
+				"		};\n" + 
+				"	}\n" + 
+				"	\n" + 
+				"	private void consumeRunnable(Runnable runnable) {}\n" + 
+				"}";
+		assertNoChange(original);
+	}
 }
