@@ -46,7 +46,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 			.map(Name::getFullyQualifiedName)
 			.anyMatch(qualifiedName::equals));
 	}
-	
+
 	private void assertNotContainsImport(String qualifiedName) {
 		assertFalse(defaultFixture.getImports()
 			.stream()
@@ -260,43 +260,74 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 	@Test
 	public void visit_oracleCodecAsIntFieldOfEnclosingClass_shouldTransform() throws Exception {
 
-		assertChange(//
-				"" +
-						"	int oracleCodec = 0;\n" +
-						"	String userName = \"userName\";\n" +
-						"	class InnerClass {\n" +
-						"		void test() {\n" +
-						"			String query = \"SELECT user_id FROM user_data WHERE user_name = '\" +\n" +
-						"				userName + \n" +
-						"				\"'\";\n" +
-						tryExecute("query") +
-						"		}\n" +
-						"	}\n" +
-						"	void test() {\n" +
-						"		String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-						"			userName + \n" +
-						"			\"'\";\n" +
-						tryExecute("query") +
-						"	}",
-				"" +
-						"	int oracleCodec = 0;\n" +
-						"	String userName = \"userName\";\n" +
-						"	class InnerClass {\n" +
-						"		void test() {\n" +
-						"			Codec<Character> oracleCodec1 = new OracleCodec();\n" +
-						"			String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-						"					ESAPI.encoder().encodeForSQL(oracleCodec1, userName) + \n" +
-						"					\"'\";\n" +
-						tryExecute("query") +
-						"		}\n" +
-						"	}\n" +
-						"	void test() {\n" +
-						"		Codec<Character> oracleCodec1 = new OracleCodec();\n" +
-						"		String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
-						"				ESAPI.encoder().encodeForSQL(oracleCodec1, userName) + \n" +
-						"				\"'\";\n" +
-						tryExecute("query") +
-						"	}");
+		String original = "" +
+				"	int oracleCodec = 0;\n" +
+				"	String userName = \"userName\";\n" +
+				"	class InnerClass {\n" +
+				"		void test() {\n" +
+				"			String query = \"SELECT user_id FROM user_data WHERE user_name = '\" +\n" +
+				"				userName + \n" +
+				"				\"'\";\n" +
+				tryExecute("query") +
+				"		}\n" +
+				"	}\n" +
+				"	void test() {\n" +
+				"		String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"			userName + \n" +
+				"			\"'\";\n" +
+				tryExecute("query") +
+				"	}";
+
+		String expected = "" +
+				"	int oracleCodec = 0;\n" +
+				"	String userName = \"userName\";\n" +
+				"	class InnerClass {\n" +
+				"		void test() {\n" +
+				"			Codec<Character> oracleCodec1 = new OracleCodec();\n" +
+				"			String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"					ESAPI.encoder().encodeForSQL(oracleCodec1, userName) + \n" +
+				"					\"'\";\n" +
+				tryExecute("query") +
+				"		}\n" +
+				"	}\n" +
+				"	void test() {\n" +
+				"		Codec<Character> oracleCodec1 = new OracleCodec();\n" +
+				"		String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec1, userName) + \n" +
+				"				\"'\";\n" +
+				tryExecute("query") +
+				"	}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_oracleCodecConflictingWithClassAsQualifier_shouldTransform() throws Exception {
+		String original = "" +
+				"		static class oracleCodec {\n" +
+				"			static final int CONST = 1;\n" +
+				"		}\n" +
+				"		public void test() {\n" +
+				"			String userName = \"userName\";\n" +
+				"			String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"					userName + \n" +
+				"					\"'\";\n" +
+				tryExecute("query") +
+				"			System.out.println(oracleCodec.CONST);\n" +
+				"		}";
+		String expected = "" +
+				"		static class oracleCodec {\n" +
+				"			static final int CONST = 1;\n" +
+				"		}\n" +
+				"		public void test() {\n" +
+				"			String userName = \"userName\";\n" +
+				"			Codec<Character> oracleCodec1 = new OracleCodec();\n" +
+				"			String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"					ESAPI.encoder().encodeForSQL(oracleCodec1, userName) + \n" +
+				"					\"'\";\n" +
+				tryExecute("query") +
+				"			System.out.println(oracleCodec.CONST);\n" +
+				"		}";
+		assertChange(original, expected);
 	}
 
 	@Test

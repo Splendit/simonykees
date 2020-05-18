@@ -101,7 +101,7 @@ public class LiveVariableScope {
 				return;
 			}
 			List<String> declaredInScope;
-			VariableDeclarationsVisitor declarationsVisitor = new VariableDeclarationsVisitor();
+			SimpleNamesAsVariableOrQualifierVisitor declarationsVisitor = new SimpleNamesAsVariableOrQualifierVisitor();
 			scope.accept(declarationsVisitor);
 			declaredInScope = declarationsVisitor.getVariableDeclarationNames()
 				.stream()
@@ -178,16 +178,26 @@ public class LiveVariableScope {
 	 * 
 	 * @param scope
 	 *            key
+	 * 
 	 * @param name
 	 *            value
 	 */
 	public void addName(ASTNode scope, String name) {
-		List<String> storedLocalNames = localVariableNames.get(scope);
-		if (storedLocalNames == null) {
-			storedLocalNames = new ArrayList<>();
+		if (ASTNode.TYPE_DECLARATION == scope.getNodeType()) {
+			List<String> storedFieldNames = fieldNames.get(scope);
+			if (storedFieldNames == null) {
+				storedFieldNames = new ArrayList<>();
+			}
+			storedFieldNames.add(name);
+			fieldNames.put((TypeDeclaration) scope, storedFieldNames);
+		} else {
+			List<String> storedLocalNames = localVariableNames.get(scope);
+			if (storedLocalNames == null) {
+				storedLocalNames = new ArrayList<>();
+			}
+			storedLocalNames.add(name);
+			localVariableNames.put(scope, storedLocalNames);
 		}
-		storedLocalNames.add(name);
-		localVariableNames.put(scope, storedLocalNames);
 	}
 
 	public void clearLocalVariablesScope(ASTNode scope) {
