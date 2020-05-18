@@ -22,7 +22,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
- * Intended to be extended by AST visitor classes which analyze SQL queries and
+ * Intended to be extended by {@link org.eclipse.jdt.core.dom.ASTVisitor} classes which analyze SQL queries and
  * transform Java code in order to reduce vulnerability by injection of SQL code
  * by user input.
  * <p>
@@ -40,7 +40,7 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	/**
 	 * 
 	 * @return true if a type with the given simple name is declared in the
-	 *         given CompilationUnit.
+	 *         given {@link CompilationUnit}.
 	 */
 	protected boolean containsTypeDeclarationWithName(CompilationUnit compilationUnit, String simpleTypeName) {
 		DeclaredTypesASTVisitor visitor = new DeclaredTypesASTVisitor();
@@ -54,7 +54,7 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	/**
 	 * 
 	 * @return true if a given type is already imported into the given
-	 *         CompilationUnit.
+	 *         {@link CompilationUnit}.
 	 */
 	protected boolean containsImport(List<ImportDeclaration> importDeclarations, String qualifiedTypeName) {
 		return importDeclarations
@@ -67,7 +67,7 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	/**
 	 * 
 	 * @return true if the simple name of a given type will cause conflicts when
-	 *         imported into the given CompilationUnit.
+	 *         imported into the given {@link CompilationUnit}.
 	 */
 	protected boolean isImportClashing(List<ImportDeclaration> importDeclarations, String simpleTypeName) {
 		boolean clashing = importDeclarations.stream()
@@ -132,7 +132,7 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	 *            parameter which is examined whether or not it represents an
 	 *            execute- or an executeQuery- invocation on a statement object.
 	 * @return a SqlVariableAnalyzerVisitor if a query is found which can be
-	 *         transformed, otherwise null.
+	 *         transformed, otherwise {@code null}.
 	 */
 	protected SqlVariableAnalyzerVisitor createSqlVariableAnalyzerVisitor(MethodInvocation methodInvocation) {
 		boolean hasRightTypeAndName = analyzeStatementExecuteQuery(methodInvocation);

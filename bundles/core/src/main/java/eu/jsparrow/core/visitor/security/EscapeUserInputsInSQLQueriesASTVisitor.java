@@ -35,7 +35,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * Used for preventing injection of SQL code by the escaping of user input which
+ * Used for preventing injection of SQL code by escaping of the user input that
  * may contain SQL code coming form an attack and changing the intent of a
  * query.
  * <p>
@@ -73,41 +73,9 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	private final Set<String> codecTypesAbleToBeImported = new HashSet<>();
 
 	@Override
-	public void endVisit(CompilationUnit compilationUnit) {
-		liveVariableScope.clearCompilationUnitScope(compilationUnit);
-		codecTypesAbleToBeImported.clear();
-		super.endVisit(compilationUnit);
-	}
-
-	@Override
-	public void endVisit(TypeDeclaration typeDeclaration) {
-		liveVariableScope.clearLocalVariablesScope(typeDeclaration);
-		liveVariableScope.clearFieldScope(typeDeclaration);
-		mapBlockToOracleCodecVariable.clear();
-	}
-
-	@Override
-	public void endVisit(MethodDeclaration methodDeclaration) {
-		liveVariableScope.clearLocalVariablesScope(methodDeclaration);
-		mapBlockToOracleCodecVariable.clear();
-	}
-
-	@Override
-	public void endVisit(FieldDeclaration fieldDeclaration) {
-		liveVariableScope.clearLocalVariablesScope(fieldDeclaration);
-		mapBlockToOracleCodecVariable.clear();
-	}
-
-	@Override
-	public void endVisit(Initializer initializer) {
-		liveVariableScope.clearLocalVariablesScope(initializer);
-		mapBlockToOracleCodecVariable.clear();
-	}
-
-	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 
-		for (String fullyQuallifiedClassName : EscapeUserInputsInSQLQueriesASTVisitor.CODEC_TYPES_QUALIFIED_NAMES) {
+		for (String fullyQuallifiedClassName : CODEC_TYPES_QUALIFIED_NAMES) {
 			if (isSafeToAddImport(compilationUnit, fullyQuallifiedClassName)) {
 				codecTypesAbleToBeImported.add(fullyQuallifiedClassName);
 			}
@@ -157,6 +125,38 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		}
 		onRewrite();
 		return true;
+	}
+	
+	@Override
+	public void endVisit(CompilationUnit compilationUnit) {
+		liveVariableScope.clearCompilationUnitScope(compilationUnit);
+		codecTypesAbleToBeImported.clear();
+		super.endVisit(compilationUnit);
+	}
+
+	@Override
+	public void endVisit(TypeDeclaration typeDeclaration) {
+		liveVariableScope.clearLocalVariablesScope(typeDeclaration);
+		liveVariableScope.clearFieldScope(typeDeclaration);
+		mapBlockToOracleCodecVariable.clear();
+	}
+
+	@Override
+	public void endVisit(MethodDeclaration methodDeclaration) {
+		liveVariableScope.clearLocalVariablesScope(methodDeclaration);
+		mapBlockToOracleCodecVariable.clear();
+	}
+
+	@Override
+	public void endVisit(FieldDeclaration fieldDeclaration) {
+		liveVariableScope.clearLocalVariablesScope(fieldDeclaration);
+		mapBlockToOracleCodecVariable.clear();
+	}
+
+	@Override
+	public void endVisit(Initializer initializer) {
+		liveVariableScope.clearLocalVariablesScope(initializer);
+		mapBlockToOracleCodecVariable.clear();
 	}
 
 	private Name createTypeName(String qualifiedName) {

@@ -25,7 +25,7 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class EscapeUserInputsInSQLQueriesRule extends RefactoringRuleImpl<EscapeUserInputsInSQLQueriesASTVisitor> {
 
-	Logger logger = LoggerFactory.getLogger(EscapeUserInputsInSQLQueriesRule.class);
+	private static final Logger logger = LoggerFactory.getLogger(EscapeUserInputsInSQLQueriesRule.class);
 
 	public EscapeUserInputsInSQLQueriesRule() {
 		this.visitorClass = EscapeUserInputsInSQLQueriesASTVisitor.class;

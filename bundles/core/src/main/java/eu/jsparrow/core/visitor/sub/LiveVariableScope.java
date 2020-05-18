@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.sub;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+
+import static eu.jsparrow.rules.common.util.ASTNodeUtil.getSpecificAncestor;
 
 /**
  * Stores the names of local variables and fields declared in a scope and,
@@ -49,17 +52,17 @@ public class LiveVariableScope {
 	 *         optional otherwise.
 	 */
 	public Optional<ASTNode> findEnclosingScope(ASTNode node) {
-		Initializer initalizer = ASTNodeUtil.getSpecificAncestor(node, Initializer.class);
+		Initializer initalizer = getSpecificAncestor(node, Initializer.class);
 		if (initalizer != null) {
 			return Optional.of(initalizer);
 		}
 
-		MethodDeclaration methodDeclaration = ASTNodeUtil.getSpecificAncestor(node, MethodDeclaration.class);
+		MethodDeclaration methodDeclaration = getSpecificAncestor(node, MethodDeclaration.class);
 		if (methodDeclaration != null) {
 			return Optional.of(methodDeclaration);
 		}
 
-		FieldDeclaration fieldDeclaration = ASTNodeUtil.getSpecificAncestor(node, FieldDeclaration.class);
+		FieldDeclaration fieldDeclaration = getSpecificAncestor(node, FieldDeclaration.class);
 		if (fieldDeclaration != null) {
 			return Optional.of(fieldDeclaration.getParent());
 		}
@@ -93,39 +96,49 @@ public class LiveVariableScope {
 	 */
 	public void lazyLoadScopeNames(ASTNode scope) {
 
+		loadImportedStaticFieldNames(getSpecificAncestor(scope, CompilationUnit.class));
+
 		if (ASTNode.TYPE_DECLARATION == scope.getNodeType()) {
-			loadFieldNames((TypeDeclaration) scope);
-		} else {
-			if (localVariableNames.containsKey(scope)) {
-				return;
-			}
-			List<String> declaredInScope = new ArrayList<>();
-			VariableDeclarationsVisitor declarationsVisitor = new VariableDeclarationsVisitor();
-			scope.accept(declarationsVisitor);
-			declarationsVisitor.getVariableDeclarationNames()
-				.stream()
-				.map(SimpleName::getIdentifier)
-				.forEach(declaredInScope::add);
-			SimpleNamesAsQualifierVisitor simpleNamesAsQualifierVisitor = new SimpleNamesAsQualifierVisitor();
-			scope.accept(simpleNamesAsQualifierVisitor);
-			simpleNamesAsQualifierVisitor.getVariableDeclarationNames()
-				.stream()
-				.map(SimpleName::getIdentifier)
-				.forEach(declaredInScope::add);
-
-			this.localVariableNames.put(scope, declaredInScope);
-			loadFieldNames(ASTNodeUtil.getSpecificAncestor(scope, TypeDeclaration.class));
-		}
-		loadImportedStaticFieldNames(ASTNodeUtil.getSpecificAncestor(scope, CompilationUnit.class));
-	}
-
-	private void loadFieldNames(TypeDeclaration typeDeclaration) {
-		if (typeDeclaration == null || fieldNames.containsKey(typeDeclaration)) {
+			Map<AbstractTypeDeclaration, List<String>> fields = findFieldNames((TypeDeclaration) scope);
+			this.fieldNames.putAll(fields);
 			return;
 		}
+
+		if (localVariableNames.containsKey(scope)) {
+			return;
+		}
+		List<String> declaredInScope = new ArrayList<>();
+		VariableDeclarationsVisitor declarationsVisitor = new VariableDeclarationsVisitor();
+		scope.accept(declarationsVisitor);
+		declarationsVisitor.getVariableDeclarationNames()
+			.stream()
+			.map(SimpleName::getIdentifier)
+			.forEach(declaredInScope::add);
+		SimpleNamesAsQualifierVisitor simpleNamesAsQualifierVisitor = new SimpleNamesAsQualifierVisitor();
+		scope.accept(simpleNamesAsQualifierVisitor);
+		simpleNamesAsQualifierVisitor.getVariableDeclarationNames()
+			.stream()
+			.map(SimpleName::getIdentifier)
+			.forEach(declaredInScope::add);
+
+		this.localVariableNames.put(scope, declaredInScope);
+		Map<AbstractTypeDeclaration, List<String>> fields = findFieldNames(
+				getSpecificAncestor(scope, TypeDeclaration.class));
+		this.fieldNames.putAll(fields);
+
+	}
+
+	private Map<AbstractTypeDeclaration, List<String>> findFieldNames(TypeDeclaration typeDeclaration) {
+		Map<AbstractTypeDeclaration, List<String>> map = new HashMap<>();
+		if (typeDeclaration == null || fieldNames.containsKey(typeDeclaration)) {
+			return Collections.emptyMap();
+		}
 		List<String> names = ASTNodeUtil.findFieldNames(typeDeclaration);
-		fieldNames.put(typeDeclaration, names);
-		loadFieldNames(ASTNodeUtil.getSpecificAncestor(typeDeclaration, TypeDeclaration.class));
+		map.put(typeDeclaration, names);
+		Map<AbstractTypeDeclaration, List<String>> outerFieldNames = findFieldNames(
+				getSpecificAncestor(typeDeclaration, TypeDeclaration.class));
+		map.putAll(outerFieldNames);
+		return map;
 	}
 
 	private void loadImportedStaticFieldNames(CompilationUnit compilationUnit) {
@@ -152,22 +165,31 @@ public class LiveVariableScope {
 
 	/**
 	 * Checks whether the given identifier matches the values in
-	 * {@link #fieldNames} or {@link #localVariableNames}.
+	 * {@link #fieldNames}, {@link #localVariableNames}, or
+	 * {@link #importedStaticFieldNames}.
 	 * 
 	 * @param name
 	 *            identifier to be checked
 	 * @return if a match is found.
 	 */
 	public boolean isInScope(String name) {
-		return importedStaticFieldNames.values()
+		boolean matchesStaticImport = importedStaticFieldNames.values()
 			.stream()
-			.anyMatch(names -> names.contains(name)) ||
-				fieldNames.values()
-					.stream()
-					.anyMatch(names -> names.contains(name))
-				|| localVariableNames.values()
-					.stream()
-					.anyMatch(names -> names.contains(name));
+			.anyMatch(names -> names.contains(name));
+		if (matchesStaticImport) {
+			return true;
+		}
+
+		boolean matchesField = fieldNames.values()
+			.stream()
+			.anyMatch(names -> names.contains(name));
+		if (matchesField) {
+			return true;
+		}
+
+		return localVariableNames.values()
+			.stream()
+			.anyMatch(names -> names.contains(name));
 	}
 
 	/**

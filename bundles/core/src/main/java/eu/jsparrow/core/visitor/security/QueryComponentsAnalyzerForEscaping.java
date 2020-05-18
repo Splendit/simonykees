@@ -21,7 +21,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 /**
  * Finds the components of a dynamic query that can be escaped.
  * 
- * @since 3.16.0
+ * @since 3.17.0
  *
  */
 public class QueryComponentsAnalyzerForEscaping extends AbstractQueryComponentsAnalyzer {

@@ -22,9 +22,9 @@ public abstract class AbstractQueryComponentsAnalyzer {
 	}
 
 	/**
-	 * @return A StringLiteral starting with "'" if such a StringLiteralit is
+	 * @return A StringLiteral starting with {@code "'"} if such a StringLiteralit is
 	 *         the component following the component specified by the index,
-	 *         otherwise null.
+	 *         otherwise {@code null}.
 	 */
 	protected StringLiteral findNext(int index) {
 		int nextIndex = index + 1;
@@ -41,9 +41,9 @@ public abstract class AbstractQueryComponentsAnalyzer {
 	}
 
 	/**
-	 * @return A StringLiteral ending with "'" if such a StringLiteralit is
+	 * @return A StringLiteral ending with {@code "'"} if such a StringLiteralit is
 	 *         the component preceding the component specified by the index,
-	 *         otherwise null.
+	 *         otherwise {@code null}.
 	 */
 	protected StringLiteral findPrevious(int index) {
 		int previousIndex = index - 1;
