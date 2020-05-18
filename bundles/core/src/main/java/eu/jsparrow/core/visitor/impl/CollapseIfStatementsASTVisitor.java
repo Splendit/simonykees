@@ -144,7 +144,6 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 
 	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
-		aliveVariableScope.clearLocalVariablesScope(typeDeclaration);
 		aliveVariableScope.clearFieldScope(typeDeclaration);
 	}
 

@@ -122,7 +122,6 @@ public class AbstractOptionalASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
-		this.scope.clearLocalVariablesScope(typeDeclaration);
 		this.scope.clearFieldScope(typeDeclaration);
 	}
 

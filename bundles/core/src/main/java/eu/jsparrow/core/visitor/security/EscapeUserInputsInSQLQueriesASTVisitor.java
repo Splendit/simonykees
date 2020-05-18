@@ -136,7 +136,6 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 
 	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
-		liveVariableScope.clearLocalVariablesScope(typeDeclaration);
 		liveVariableScope.clearFieldScope(typeDeclaration);
 		mapBlockToOracleCodecVariable.clear();
 	}
