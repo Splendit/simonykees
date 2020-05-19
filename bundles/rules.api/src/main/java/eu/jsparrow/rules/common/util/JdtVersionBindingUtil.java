@@ -16,6 +16,9 @@ import org.osgi.framework.Version;
 public class JdtVersionBindingUtil {
 
 	private static final String ORG_ECLIPSE_JDT = "org.eclipse.jdt"; //$NON-NLS-1$
+	private static final String JDT_JAVA_14_SUPPORT = "3.21.0"; //$NON-NLS-1$
+	private static final String JDT_JAVA_13_SUPPORT = "3.20.0"; //$NON-NLS-1$
+	private static final String JDT_JAVA_12_SUPPORT = "3.18.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_11_SUPPORT = "3.16.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_10_SUPPORT = "3.14.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_9_SUPPORT = "3.13.2"; //$NON-NLS-1$
@@ -33,8 +36,8 @@ public class JdtVersionBindingUtil {
 	 * {@link Platform}.
 	 * 
 	 * @return the {@link Version} of {@value #ORG_ECLIPSE_JDT} bundle on the
-	 *         current platform or {@value #JDT_LEAST_SUPPORTED} if none is found
-	 *         since it corresponds to the least eclipse version that we
+	 *         current platform or {@value #JDT_LEAST_SUPPORTED} if none is
+	 *         found since it corresponds to the least eclipse version that we
 	 *         support.
 	 */
 	public static Version findCurrentJDTVersion() {
@@ -53,14 +56,46 @@ public class JdtVersionBindingUtil {
 	 * 
 	 * @param jdtVersion
 	 *            the JDT version on the current platform
-	 * @return {@link AST#JLS10} if the JDT version corresponds to Photon;
-	 *         {@link AST#JLS9} if the version corresponds to Oxygen; or
-	 *         {@link AST#JLS8} if the version corresponds to Neon.
+	 * @return
+	 *         <ul>
+	 *         <li>{@link AST#JLS13} if the JDT version corresponds to 3.20.0
+	 *         (2019-12);</li>
+	 *         <li>{@link AST#JLS12} if the JDT version corresponds to 3.18.0
+	 *         (2019-06);</li>
+	 *         <li>{@link AST#JLS11} if the JDT version corresponds to 3.16.0
+	 *         (2018-12);</li>
+	 *         <li>{@link AST#JLS10} if the JDT version corresponds to
+	 *         Photon;</li>
+	 *         <li>{@link AST#JLS9} if the version corresponds to Oxygen;
+	 *         or</li>
+	 *         <li>{@link AST#JLS8} if the version corresponds to Neon.</li>
+	 *         </ul>
 	 */
 	@SuppressWarnings("deprecation")
 	public static int findJLSLevel(Version jdtVersion) {
-		
-		if (isJava11Supported(jdtVersion)) {
+		if (isJava14Supported(jdtVersion)) {
+			/*
+			 * @since 3.21.0 -> 20-03
+			 */
+			return 14;//FIXME replace with AST.JLS14 when switching to eclipse 20-03
+		} else if (isJava13Supported(jdtVersion)) {
+			/*
+			 * @since 3.20.0 -> 19-12
+			 */
+			return AST.JLS13;
+		} else if (isJava12Supported(jdtVersion)) {
+			/*
+			 * @since 3.19.0 -> 2019-09
+			 * 
+			 * @since 3.18.0 -> 2019-06
+			 */
+			return AST.JLS12;
+		} else if (isJava11Supported(jdtVersion)) {
+			/*
+			 * @since 3.17.0 -> 2019-03
+			 * 
+			 * @since 3.16.0 -> 2018-12
+			 */
 			return AST.JLS11;
 		} else if (isJava10Supported(jdtVersion)) {
 			return AST.JLS10;
@@ -88,10 +123,22 @@ public class JdtVersionBindingUtil {
 		return TryStatement.RESOURCES_PROPERTY;
 	}
 
+	private static boolean isJava14Supported(Version jdtVersion) {
+		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_14_SUPPORT)) >= 0;
+	}
+
+	private static boolean isJava13Supported(Version jdtVersion) {
+		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_13_SUPPORT)) >= 0;
+	}
+
+	private static boolean isJava12Supported(Version jdtVersion) {
+		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_12_SUPPORT)) >= 0;
+	}
+
 	private static boolean isJava11Supported(Version jdtVersion) {
 		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_11_SUPPORT)) >= 0;
 	}
-	
+
 	private static boolean isJava10Supported(Version jdtVersion) {
 		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_10_SUPPORT)) >= 0;
 	}
