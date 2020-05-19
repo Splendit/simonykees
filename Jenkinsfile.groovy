@@ -75,8 +75,6 @@ timestamps {
             switch (env.BRANCH_NAME.tokenize("/")[0]) {
                 case "develop":
 
-                    pushToGithub()
-
                     runStandardSteps()
 
                     runSonarQubeAnalysis()
@@ -94,8 +92,6 @@ timestamps {
                     tagCommit(env.BRANCH_NAME, "main")
                     break
                 case "master":
-
-                    pushToGithub()
 
                     runStandardSteps()
 
@@ -120,8 +116,6 @@ timestamps {
                     tagCommit(env.BRANCH_NAME, "main")
                     break
                 case "master-jmp":
-
-                    pushToGithub()
 
                     runStandardSteps()
 
@@ -198,6 +192,10 @@ void pushToGithub() {
 }
 
 void runStandardSteps() {
+
+    // this has been added to the standard steps, see SIM-1737
+    pushToGithub();
+
     compileEclipsePlugin()
     compileMavenPlugin()
     runIntegrationTests()
