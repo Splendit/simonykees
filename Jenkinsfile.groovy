@@ -183,7 +183,7 @@ void pushToGithub() {
             println "Pushing to GitHub..."
             sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
                 // pushing the repository to github
-                sh("git push $backupOrigin HEAD:$env.BRANCH_NAME")
+                sh("git push $backupOrigin HEAD:refs/heads/$env.BRANCH_NAME")
             }
         }
     } else {
