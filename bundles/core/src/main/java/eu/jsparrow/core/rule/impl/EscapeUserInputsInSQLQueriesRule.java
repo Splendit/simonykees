@@ -56,5 +56,10 @@ public class EscapeUserInputsInSQLQueriesRule extends RefactoringRuleImpl<Escape
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_1;
 	}
+	
+	@Override
+	public String requiredLibraries() {
+		return "The Enterprise Security API (ESAPI)"; //$NON-NLS-1$
+	}
 
 }
