@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -134,10 +135,15 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 			.map(IfStatement::getExpression)
 			.allMatch(OperatorUtil::isSimpleExpression);
 	}
+	
+	@Override
+	public void endVisit(CompilationUnit compilationUnit) {
+		aliveVariableScope.clearCompilationUnitScope(compilationUnit);
+		super.endVisit(compilationUnit);
+	}
 
 	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
-		aliveVariableScope.clearLocalVariablesScope(typeDeclaration);
 		aliveVariableScope.clearFieldScope(typeDeclaration);
 	}
 

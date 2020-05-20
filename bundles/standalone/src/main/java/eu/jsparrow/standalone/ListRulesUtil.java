@@ -1,5 +1,6 @@
 package eu.jsparrow.standalone;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -7,8 +8,6 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Splitter;
 
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.Messages;
@@ -140,10 +139,10 @@ public class ListRulesUtil {
 		List<RefactoringRule> allRules;
 
 		if (ruleId != null) {
-			List<String> ruleIds = Splitter.on(",") //$NON-NLS-1$
-				.trimResults()
-				.omitEmptyStrings()
-				.splitToList(ruleId);
+			List<String> ruleIds = Arrays.stream(ruleId.split(",")) //$NON-NLS-1$
+				.map(String::trim)
+				.filter(value -> !value.isEmpty())
+				.collect(Collectors.toList());
 
 			allRules = getAllRulesFromContainer().stream()
 				.filter(rule -> ruleIds.contains(rule.getId()))

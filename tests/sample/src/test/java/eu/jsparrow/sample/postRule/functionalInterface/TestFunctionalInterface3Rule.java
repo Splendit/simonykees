@@ -6,6 +6,10 @@ public abstract class TestFunctionalInterface3Rule {
 	public int hashCode() {
 		return 0;
 	}
+	
+	private void sampleMethod() {
+		
+	}
 
 	private static Runnable staticGetRunnableHash() {
 		return new Runnable() {
@@ -21,10 +25,20 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	public Runnable getRunnableHash() {
-		return () -> {
-			hashCode();
+		return new Runnable() {
+			@Override
+			public void run() {
+				hashCode();
+			}
 		};
 	}
+	
+	public Runnable runSampleMethod() {
+		return () -> {
+			sampleMethod();
+		};
+	}
+
 
 	static {
 		Runnable r = new Runnable() {
@@ -37,8 +51,11 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	{
-		Runnable r = () -> {
-			hashCode();
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				hashCode();
+			}
 		};
 		r.run();
 	}
@@ -57,8 +74,11 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	public Runnable getRunnable() {
-		return () -> {
-			getClass();
+		return new Runnable() {
+			@Override
+			public void run() {
+				getClass();
+			}
 		};
 	}
 
@@ -73,8 +93,11 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	{
-		Runnable r = () -> {
-			getClass();
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				getClass();
+			}
 		};
 		r.run();
 	}

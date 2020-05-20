@@ -20,9 +20,9 @@ import org.eclipse.jdt.core.dom.StringLiteral;
  * @since 3.16.0
  *
  */
-public class QueryComponentsAnalyzer {
+public class QueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer {
 
-	private List<Expression> components;
+
 	private List<ReplaceableParameter> parameters = new ArrayList<>();
 
 	@SuppressWarnings("nls")
@@ -60,8 +60,8 @@ public class QueryComponentsAnalyzer {
 		}
 	});
 
-	public QueryComponentsAnalyzer(List<Expression> components) {
-		this.components = components;
+	QueryComponentsAnalyzer(List<Expression> components) {
+		super(components);
 	}
 
 	/**
@@ -109,34 +109,6 @@ public class QueryComponentsAnalyzer {
 		}
 		return type.getErasure()
 			.getQualifiedName();
-	}
-
-	private StringLiteral findNext(int index) {
-		int nextIndex = index + 1;
-		if (components.size() <= nextIndex) {
-			return null;
-		}
-		Expression next = components.get(nextIndex);
-		if (next.getNodeType() != ASTNode.STRING_LITERAL) {
-			return null;
-		}
-		StringLiteral literal = (StringLiteral) next;
-		String value = literal.getLiteralValue();
-		return value.startsWith("'") ? literal : null; //$NON-NLS-1$
-	}
-
-	private StringLiteral findPrevious(int index) {
-		int previousIndex = index - 1;
-		if (previousIndex < 0) {
-			return null;
-		}
-		Expression previous = components.get(previousIndex);
-		if (previous.getNodeType() != ASTNode.STRING_LITERAL) {
-			return null;
-		}
-		StringLiteral stringLiteral = (StringLiteral) previous;
-		String value = stringLiteral.getLiteralValue();
-		return value.endsWith("'") ? stringLiteral : null; //$NON-NLS-1$
 	}
 
 	/**

@@ -458,77 +458,97 @@ public class FunctionalInterfaceASTVisitorTest extends UsesJDTUnitFixture {
 	public void visit_AnonymousWithNameQualifiedType_ShouldTransform() throws Exception {
 		defaultFixture.addImport(java.lang.annotation.Target.class.getName());
 		String original = "" +
-				"	@Target(value = { java.lang.annotation.ElementType.TYPE_USE })\n" + 
-				"	@interface ExampleAnnotation {\n" + 
-				"	}\n" + 
-				"	interface EnclosingInterface {\n" + 
-				"		interface InnerInterface {\n" + 
-				"			String INNER_INTERFACE_CONSTANT = \"inner-interface-constant\";\n" + 
-				"			void exampleMethod();\n" + 
-				"		}\n" + 
-				"	}\n" + 
-				"	public void test_NameQualifiedType() {\n" + 
-				"		EnclosingInterface.@ExampleAnnotation InnerInterface xInnerInterface = new EnclosingInterface.@ExampleAnnotation InnerInterface() {\n" + 
-				"			@Override\n" + 
-				"			public void exampleMethod() {\n" + 
-				"				System.out.println(INNER_INTERFACE_CONSTANT);\n" + 
-				"			}\n" + 
-				"		};\n" + 
+				"	@Target(value = { java.lang.annotation.ElementType.TYPE_USE })\n" +
+				"	@interface ExampleAnnotation {\n" +
+				"	}\n" +
+				"	interface EnclosingInterface {\n" +
+				"		interface InnerInterface {\n" +
+				"			String INNER_INTERFACE_CONSTANT = \"inner-interface-constant\";\n" +
+				"			void exampleMethod();\n" +
+				"		}\n" +
+				"	}\n" +
+				"	public void test_NameQualifiedType() {\n" +
+				"		EnclosingInterface.@ExampleAnnotation InnerInterface xInnerInterface = new EnclosingInterface.@ExampleAnnotation InnerInterface() {\n"
+				+
+				"			@Override\n" +
+				"			public void exampleMethod() {\n" +
+				"				System.out.println(INNER_INTERFACE_CONSTANT);\n" +
+				"			}\n" +
+				"		};\n" +
 				"	}";
 		String expected = "" +
-				"	@Target(value = { java.lang.annotation.ElementType.TYPE_USE })\n" + 
-				"	@interface ExampleAnnotation {\n" + 
-				"	}\n" + 
-				"	interface EnclosingInterface {\n" + 
-				"		interface InnerInterface {\n" + 
-				"			String INNER_INTERFACE_CONSTANT = \"inner-interface-constant\";\n" + 
-				"			void exampleMethod();\n" + 
-				"		}\n" + 
-				"	}\n" + 
-				"	public void test_NameQualifiedType(){\n" + 
-				"		EnclosingInterface.@ExampleAnnotation InnerInterface xInnerInterface=() -> {\n" + 
-				"			System.out.println(EnclosingInterface.InnerInterface.INNER_INTERFACE_CONSTANT);\n" + 
-				"		};\n" + 
+				"	@Target(value = { java.lang.annotation.ElementType.TYPE_USE })\n" +
+				"	@interface ExampleAnnotation {\n" +
+				"	}\n" +
+				"	interface EnclosingInterface {\n" +
+				"		interface InnerInterface {\n" +
+				"			String INNER_INTERFACE_CONSTANT = \"inner-interface-constant\";\n" +
+				"			void exampleMethod();\n" +
+				"		}\n" +
+				"	}\n" +
+				"	public void test_NameQualifiedType(){\n" +
+				"		EnclosingInterface.@ExampleAnnotation InnerInterface xInnerInterface=() -> {\n" +
+				"			System.out.println(EnclosingInterface.InnerInterface.INNER_INTERFACE_CONSTANT);\n" +
+				"		};\n" +
 				"	}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_innerClassFieldAccess_shouldTransform() throws Exception {
+		String original = "" +
+				"interface Foo {\n" +
+				"	Runnable sampleMethod();\n" +
+				"}\n" +
+				"public void foo() {\n" +
+				"	Foo foo = new Foo () {\n" +
+				"		public Runnable sampleMethod() {\n" +
+				"			return new Runnable() {\n" +
+				"				String string = \"\";\n" +
+				"				@Override\n" +
+				"				public void run() {\n" +
+				"					System.out.println(this.string);\n" +
+				"					\n" +
+				"				}\n" +
+				"			};\n" +
+				"		}\n" +
+				"	};\n" +
+				"}";
+		String expected = "" +
+				"interface Foo {\n" +
+				"	Runnable sampleMethod();\n" +
+				"}\n" +
+				"public void foo() {\n" +
+				"	Foo foo = () -> {\n" +
+				"		return new Runnable() {\n" +
+				"			String string = \"\";\n" +
+				"			@Override\n" +
+				"			public void run() {\n" +
+				"				System.out.println(this.string);\n" +
+				"			}\n" +
+				"		};\n" +
+				"	};\n" +
+				"}";
 		assertChange(original, expected);
 	}
 	
 	@Test
-	public void visit_innerClassFieldAccess_shouldTransform() throws Exception {
-		String original = "" +
-				"interface Foo {\n" + 
-				"	Runnable sampleMethod();\n" + 
-				"}\n" + 
-				"public void foo() {\n" + 
-				"	Foo foo = new Foo () {\n" + 
-				"		public Runnable sampleMethod() {\n" + 
-				"			return new Runnable() {\n" + 
-				"				String string = \"\";\n" + 
-				"				@Override\n" + 
-				"				public void run() {\n" + 
-				"					System.out.println(this.string);\n" + 
-				"					\n" + 
-				"				}\n" + 
-				"			};\n" + 
-				"		}\n" + 
-				"	};\n" + 
-				"}";
-		String expected = "" +
-				"interface Foo {\n" + 
-				"	Runnable sampleMethod();\n" + 
-				"}\n" + 
-				"public void foo() {\n" + 
-				"	Foo foo = () -> {\n" + 
-				"		return new Runnable() {\n" + 
-				"			String string = \"\";\n" + 
+	public void visit_usingThisExpression_shouldNotTransform() throws Exception {
+		String original = "" + 
+				"class Foo {\n" + 
+				"	public void usingThisKeywordInMap() {\n" + 
+				"		Runnable r = new Runnable() {\n" + 
+				"			\n" + 
 				"			@Override\n" + 
 				"			public void run() {\n" + 
-				"				System.out.println(this.string);\n" + 
+				"				consumeRunnable(this);\n" + 
+				"				\n" + 
 				"			}\n" + 
 				"		};\n" + 
-				"	};\n" + 
+				"	}\n" + 
+				"	\n" + 
+				"	private void consumeRunnable(Runnable runnable) {}\n" + 
 				"}";
-		assertChange(original, expected);
-		
+		assertNoChange(original);
 	}
 }

@@ -83,17 +83,6 @@
 		<initializer
 			class="eu.jsparrow.ui.preference.SimonykeesPreferenceInitializer" />
 	</extension>
-	<extension point="org.eclipse.epp.logging.aeri.ide.servers">
-		<server
-			class="org.eclipse.epp.internal.logging.aeri.ide.server.mars.ServerConnection"
-			description="Help improve jSparrow by sending error reports to us."
-			icon16="icons/jSparrow_active_icon_16.png" icon32="icons/jSparrow_active_icon_32.png"
-			id="at.splendit.jsparrow" name="jSparrow">
-			<link href="https://jsparrow.eu/" rel="provider" title="jSparrow" />
-			<link href="https://aer.ctrlflow.com/jsparrow/community/discovery"
-				rel="discovery" title="Discovery URL" />
-		</server>
-	</extension>
 	<extension point="org.eclipse.ui.startup">
 		<startup class="eu.jsparrow.ui.startup.Startup" />
 	</extension>

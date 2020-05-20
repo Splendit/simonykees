@@ -6,6 +6,10 @@ public abstract class TestFunctionalInterface3Rule {
 	public int hashCode() {
 		return 0;
 	}
+	
+	private void sampleMethod() {
+		
+	}
 
 	private static Runnable staticGetRunnableHash() {
 		return new Runnable() {
@@ -28,6 +32,16 @@ public abstract class TestFunctionalInterface3Rule {
 			}
 		};
 	}
+	
+	public Runnable runSampleMethod() {
+		return new Runnable() {
+			@Override
+			public void run() {
+				sampleMethod();
+			}
+		};
+	}
+
 
 	static {
 		Runnable r = new Runnable() {
