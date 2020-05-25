@@ -169,7 +169,7 @@ public class TestForToForEachRule {
 
 		final StringBuilder sb = new StringBuilder();
 
-		foo.forEach(s -> sb.append(s.toString()));
+		foo.forEach((Number s) -> sb.append(s.toString()));
 
 		return sb.toString();
 	}
