@@ -155,7 +155,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 
 	private boolean isInNestedBlock(Assignment assignment) {
 		if(assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return false;
+			return true;
 		}
 		ExpressionStatement statement = (ExpressionStatement)assignment.getParent();
 		return statement.getParent().getParent() != currentConstructor;
