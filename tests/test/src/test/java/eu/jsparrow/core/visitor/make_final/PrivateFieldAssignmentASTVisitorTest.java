@@ -181,6 +181,7 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 		assertTrue(checkAssignedFragments(assignedFragments, "intValue"));
 	}
 
+
 	private boolean checkAssignedFragments(List<VariableDeclarationFragment> assignedFragments,
 			String... correctFragmentNames) {
 		if (assignedFragments.size() != correctFragmentNames.length) {

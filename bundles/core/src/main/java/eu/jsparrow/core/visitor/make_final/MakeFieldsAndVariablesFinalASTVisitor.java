@@ -41,8 +41,8 @@ public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteAST
 		} else {
 			enclosingNode = typeDeclaration;
 		}
-		FinalInitializerCheckASTVisitor finaInitializerCheckVisitor = new FinalInitializerCheckASTVisitor();
-		typeDeclaration.accept(finaInitializerCheckVisitor);
+		FinalInitializerCheckASTVisitor finalInitializerCheckVisitor = new FinalInitializerCheckASTVisitor();
+		typeDeclaration.accept(finalInitializerCheckVisitor);
 
 		PrivateFieldAssignmentASTVisitor privateFieldAssignmentVisitor = new PrivateFieldAssignmentASTVisitor(typeDeclaration);
 		enclosingNode.accept(privateFieldAssignmentVisitor);
@@ -50,7 +50,7 @@ public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteAST
 		List<VariableDeclarationFragment> assignedFragments = privateFieldAssignmentVisitor
 			.getAssignedVariableDeclarationFragments();
 
-		finalCandidateFields = finaInitializerCheckVisitor.getFinalCandidates()
+		finalCandidateFields = finalInitializerCheckVisitor.getFinalCandidates()
 			.stream()
 			.filter((FieldDeclaration candidate) -> ASTNodeUtil.hasModifier(candidate.modifiers(), Modifier::isPrivate))
 			.flatMap(fieldDeclaration -> ASTNodeUtil

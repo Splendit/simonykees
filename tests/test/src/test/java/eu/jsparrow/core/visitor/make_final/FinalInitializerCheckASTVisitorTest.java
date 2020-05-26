@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
-@SuppressWarnings("nls")
 public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 
 	private FinalInitializerCheckASTVisitor visitor;

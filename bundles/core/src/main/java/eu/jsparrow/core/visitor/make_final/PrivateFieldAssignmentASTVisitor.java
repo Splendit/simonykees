@@ -8,12 +8,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -133,22 +130,12 @@ public class PrivateFieldAssignmentASTVisitor extends AbstractMakeFinalHelperVis
 		ASTNode parent = initializer.getParent();
 		if (parent.getNodeType() == ASTNode.TYPE_DECLARATION) {
 
-			TypeDeclaration typeDeclaration = (TypeDeclaration) initializer.getParent();
-			List<VariableDeclarationFragment> declaredInType = Arrays.stream(typeDeclaration.getFields())
+			TypeDeclaration typeDeclarationParent = (TypeDeclaration) initializer.getParent();
+			List<VariableDeclarationFragment> declaredInType = Arrays.stream(typeDeclarationParent.getFields())
 					.flatMap(filed -> ASTNodeUtil
 							.convertToTypedList(filed.fragments(), VariableDeclarationFragment.class).stream())
 					.collect(Collectors.toList());
 			currentlySkipped.put(initializer, declaredInType);
-		} else if (parent.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
-			AnonymousClassDeclaration anonymousClass = (AnonymousClassDeclaration) initializer.getParent();
-			List<VariableDeclarationFragment> declaredInAnonymousClass = ASTNodeUtil
-					.convertToTypedList(anonymousClass.bodyDeclarations(), BodyDeclaration.class).stream()
-					.filter(bodyDeclaration -> bodyDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION)
-					.map(bodyDeclaration -> (FieldDeclaration) bodyDeclaration)
-					.flatMap(field -> ASTNodeUtil
-							.convertToTypedList(field.fragments(), VariableDeclarationFragment.class).stream())
-					.collect(Collectors.toList());
-			currentlySkipped.put(initializer, declaredInAnonymousClass);
 		}
 	}
 }

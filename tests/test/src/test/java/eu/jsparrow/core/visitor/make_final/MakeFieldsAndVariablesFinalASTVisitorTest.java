@@ -11,7 +11,6 @@ import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
-@SuppressWarnings("nls")
 public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixture {
 
 	private static final String DEFAULT_METHOD_NAME = "FixtureMethod";
@@ -332,8 +331,50 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 	}
 	
 	@Test
+	public void privateField_reassignInnerInnerFieldInRootClassMethod_shouldNotTransform() throws Exception {
+		String actual = "" +
+				"public static class InnerClassWithConstructor {\n" + 
+				"	public static class InnerInnerClass {\n" + 
+				"		private int intValue = 0;\n" + 
+				"	}\n" + 
+				"}\n" + 
+				"private void sampleMethod() {\n" + 
+				"	final InnerClassWithConstructor.InnerInnerClass xInnerInnerClass = new InnerClassWithConstructor.InnerInnerClass();\n" + 
+				"	xInnerInnerClass.intValue = 1;\n" + 
+				"}";
+		assertNoChange(actual);
+	}
+	
+	@Test
 	public void privateField_volatile_shouldNotTransform() throws Exception {
 		String actual = "private volatile int a = 1;";
 		assertNoChange(actual);
+	}
+	
+	@Test
+	public void privateField_initializerInAnonymousClass_shouldNotTransform() throws Exception {
+		
+		String actual = "" +
+				"public Runnable runnable = new Runnable() {\n" + 
+				"	private String finalField = \"\";\n" + 
+				"	@Override\n" + 
+				"	public void run() {}\n" + 
+				"};";
+		assertNoChange(actual);
+	}
+	
+	@Test
+	public void privateField_reassignOuterFieldInInnerConstructor_shouldNotTransform() throws Exception {
+		
+		String original = "" +
+				"private String value = \"\";\n" + 
+				"public class InnerClass {\n" + 
+				"	private final String value2;\n" + 
+				"	public InnerClass() {\n" + 
+				"		value = \"2\";\n" + 
+				"		value2 = \"3\";\n" + 
+				"	}\n" + 
+				"}";
+		assertNoChange(original);
 	}
 }
