@@ -85,7 +85,8 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(methodInvocation);
+		Expression queryMethodArgument = analyzeStatementExecuteQuery(methodInvocation);
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(queryMethodArgument, methodInvocation);
 		if (sqlVariableVisitor == null) {
 			return true;
 		}
@@ -126,7 +127,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		onRewrite();
 		return true;
 	}
-	
+
 	@Override
 	public void endVisit(CompilationUnit compilationUnit) {
 		liveVariableScope.clearCompilationUnitScope(compilationUnit);

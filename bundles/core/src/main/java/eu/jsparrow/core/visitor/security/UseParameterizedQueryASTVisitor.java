@@ -64,7 +64,8 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(methodInvocation);
+		Expression queryMethodArgument = analyzeStatementExecuteQuery(methodInvocation);
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(queryMethodArgument, methodInvocation);
 		if (sqlVariableVisitor == null) {
 			return true;
 		}
@@ -326,8 +327,8 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 	}
 
 	@Override
-	protected boolean analyzeStatementExecuteQuery(MethodInvocation methodInvocation) {
-		if (super.analyzeStatementExecuteQuery(methodInvocation)) {
+	protected boolean hasRequiredName(MethodInvocation methodInvocation) {
+		if (super.hasRequiredName(methodInvocation)) {
 			return !(EXECUTE.equals(methodInvocation.getName()
 				.getIdentifier())
 					&& methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY);

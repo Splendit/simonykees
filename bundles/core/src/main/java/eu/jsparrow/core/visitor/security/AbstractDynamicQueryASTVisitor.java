@@ -22,9 +22,9 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
- * Intended to be extended by {@link org.eclipse.jdt.core.dom.ASTVisitor} classes which analyze SQL queries and
- * transform Java code in order to reduce vulnerability by injection of SQL code
- * by user input.
+ * Intended to be extended by {@link org.eclipse.jdt.core.dom.ASTVisitor}
+ * classes which analyze SQL queries and transform Java code in order to reduce
+ * vulnerability by injection of SQL code by user input.
  * <p>
  * For example, a common functionality is the decision whether a class can be
  * imported or not.
@@ -36,6 +36,42 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 
 	protected static final String EXECUTE = "execute"; //$NON-NLS-1$
 	protected static final String EXECUTE_QUERY = "executeQuery"; //$NON-NLS-1$
+
+	/**
+	 * 
+	 * @param methodInvocation
+	 * @return the expression representing the argument if the method invocation
+	 *         has exactly one {@link String} argument, otherwise null.
+	 */
+	protected Expression getStringExpressionAsTheOnlyArgument(MethodInvocation methodInvocation) {
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+		if (arguments.size() != 1) {
+			return null;
+		}
+
+		Expression argument = arguments.get(0);
+		ITypeBinding argumentTypeBinding = argument.resolveTypeBinding();
+		boolean isString = ClassRelationUtil.isContentOfType(argumentTypeBinding, java.lang.String.class.getName());
+		if (!isString) {
+			return null;
+		}
+		return argument;
+	}
+
+	protected boolean hasRequiredName(MethodInvocation methodInvocation) {
+		String identifier = methodInvocation.getName()
+			.getIdentifier();
+		return EXECUTE.equals(identifier) || EXECUTE_QUERY.equals(identifier);
+	}
+
+	protected boolean hasRequiredMethodExpressionType(ITypeBinding methodExpressionTypeBinding) {
+		return ClassRelationUtil.isContentOfType(methodExpressionTypeBinding, java.sql.Statement.class.getName());
+	}
+
+	protected boolean hasRequiredDeclaringClass(IMethodBinding methodBinding) {
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		return ClassRelationUtil.isContentOfType(declaringClass, java.sql.Statement.class.getName());
+	}
 
 	/**
 	 * 
@@ -89,41 +125,21 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 		return clashing;
 	}
 
-	protected boolean analyzeStatementExecuteQuery(MethodInvocation methodInvocation) {
-		SimpleName methodName = methodInvocation.getName();
-		if (!EXECUTE.equals(methodName.getIdentifier()) && !EXECUTE_QUERY.equals(methodName.getIdentifier())) {
-			return false;
+	protected Expression analyzeStatementExecuteQuery(MethodInvocation methodInvocation) {
+		if (!hasRequiredName(methodInvocation)) {
+			return null;
 		}
 
 		Expression methodExpression = methodInvocation.getExpression();
-		if (methodExpression == null) {
-			return false;
+		if (methodExpression == null || !hasRequiredMethodExpressionType(methodExpression.resolveTypeBinding())) {
+			return null;
 		}
 
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-		if (!ClassRelationUtil.isContentOfType(declaringClass, java.sql.Statement.class.getName())) {
-			return false;
+		if (!hasRequiredDeclaringClass(methodInvocation.resolveMethodBinding())) {
+			return null;
 		}
 
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		if (arguments.size() != 1) {
-			return false;
-		}
-
-		Expression argument = arguments.get(0);
-		ITypeBinding argumentTypeBinding = argument.resolveTypeBinding();
-		boolean isString = ClassRelationUtil.isContentOfType(argumentTypeBinding, java.lang.String.class.getName());
-		if (!isString) {
-			return false;
-		}
-
-		if (argument.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return false;
-		}
-
-		ITypeBinding methodExpressionTypeBinding = methodExpression.resolveTypeBinding();
-		return ClassRelationUtil.isContentOfType(methodExpressionTypeBinding, java.sql.Statement.class.getName());
+		return getStringExpressionAsTheOnlyArgument(methodInvocation);
 	}
 
 	/**
@@ -134,14 +150,19 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	 * @return a SqlVariableAnalyzerVisitor if a query is found which can be
 	 *         transformed, otherwise {@code null}.
 	 */
-	protected SqlVariableAnalyzerVisitor createSqlVariableAnalyzerVisitor(MethodInvocation methodInvocation) {
-		boolean hasRightTypeAndName = analyzeStatementExecuteQuery(methodInvocation);
-		if (!hasRightTypeAndName) {
+	protected SqlVariableAnalyzerVisitor createSqlVariableAnalyzerVisitor(Expression queryMethodArgument,
+			MethodInvocation methodInvocation) {
+
+		if (queryMethodArgument == null) {
 			return null;
 		}
 
-		SimpleName query = (SimpleName) methodInvocation.arguments()
-			.get(0);
+		if (queryMethodArgument.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return null;
+		}
+
+		SimpleName query = (SimpleName) queryMethodArgument;
+
 		IBinding queryVariableBinding = query.resolveBinding();
 		if (queryVariableBinding.getKind() != IBinding.VARIABLE) {
 			return null;
