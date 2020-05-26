@@ -34,6 +34,11 @@ public class PrivateFieldAssignmentASTVisitor extends AbstractMakeFinalHelperVis
 
 	private final List<VariableDeclarationFragment> assignedFragments = new ArrayList<>();
 	private Map<ASTNode, List<VariableDeclarationFragment>> currentlySkipped = new HashMap<>();
+	private TypeDeclaration typeDeclaration;
+
+	public PrivateFieldAssignmentASTVisitor(TypeDeclaration typeDeclaration) {
+		this.typeDeclaration = typeDeclaration;
+	}
 
 	/*
 	 * Initializers are already checked in another precondition.
@@ -41,7 +46,9 @@ public class PrivateFieldAssignmentASTVisitor extends AbstractMakeFinalHelperVis
 	 */
 	@Override
 	public boolean visit(Initializer initializer) {
-		storeCurrentlySkipped(initializer);
+		if (initializer.getParent() == this.typeDeclaration) {
+			storeCurrentlySkipped(initializer);
+		}
 		return true;
 	}
 
@@ -55,12 +62,12 @@ public class PrivateFieldAssignmentASTVisitor extends AbstractMakeFinalHelperVis
 	 */
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
-		if(methodDeclaration.isConstructor()) {
+		if (methodDeclaration.getParent() == this.typeDeclaration && methodDeclaration.isConstructor()) {
 			storeCurrentlySkipped(methodDeclaration);
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void endVisit(MethodDeclaration methodDeclaration) {
 		currentlySkipped.remove(methodDeclaration);
@@ -110,10 +117,8 @@ public class PrivateFieldAssignmentASTVisitor extends AbstractMakeFinalHelperVis
 	}
 
 	private boolean isCurrentlySkipped(VariableDeclarationFragment variableDeclarationFragment) {
-		return currentlySkipped.values()
-			.stream()
-			.flatMap(List::stream)
-			.anyMatch(skipped -> skipped == variableDeclarationFragment);
+		return currentlySkipped.values().stream().flatMap(List::stream)
+				.anyMatch(skipped -> skipped == variableDeclarationFragment);
 	}
 
 	/**
@@ -123,27 +128,26 @@ public class PrivateFieldAssignmentASTVisitor extends AbstractMakeFinalHelperVis
 	public List<VariableDeclarationFragment> getAssignedVariableDeclarationFragments() {
 		return assignedFragments;
 	}
-	
+
 	private void storeCurrentlySkipped(ASTNode initializer) {
 		ASTNode parent = initializer.getParent();
 		if (parent.getNodeType() == ASTNode.TYPE_DECLARATION) {
 
 			TypeDeclaration typeDeclaration = (TypeDeclaration) initializer.getParent();
 			List<VariableDeclarationFragment> declaredInType = Arrays.stream(typeDeclaration.getFields())
-				.flatMap(filed -> ASTNodeUtil.convertToTypedList(filed.fragments(), VariableDeclarationFragment.class)
-					.stream())
-				.collect(Collectors.toList());
+					.flatMap(filed -> ASTNodeUtil
+							.convertToTypedList(filed.fragments(), VariableDeclarationFragment.class).stream())
+					.collect(Collectors.toList());
 			currentlySkipped.put(initializer, declaredInType);
 		} else if (parent.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
 			AnonymousClassDeclaration anonymousClass = (AnonymousClassDeclaration) initializer.getParent();
 			List<VariableDeclarationFragment> declaredInAnonymousClass = ASTNodeUtil
-				.convertToTypedList(anonymousClass.bodyDeclarations(), BodyDeclaration.class)
-				.stream()
-				.filter(bodyDeclaration -> bodyDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION)
-				.map(bodyDeclaration -> (FieldDeclaration) bodyDeclaration)
-				.flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
-					.stream())
-				.collect(Collectors.toList());
+					.convertToTypedList(anonymousClass.bodyDeclarations(), BodyDeclaration.class).stream()
+					.filter(bodyDeclaration -> bodyDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION)
+					.map(bodyDeclaration -> (FieldDeclaration) bodyDeclaration)
+					.flatMap(field -> ASTNodeUtil
+							.convertToTypedList(field.fragments(), VariableDeclarationFragment.class).stream())
+					.collect(Collectors.toList());
 			currentlySkipped.put(initializer, declaredInAnonymousClass);
 		}
 	}

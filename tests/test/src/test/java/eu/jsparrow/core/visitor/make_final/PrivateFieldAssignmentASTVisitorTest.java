@@ -14,15 +14,13 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
-@SuppressWarnings("nls")
 public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 
 	private PrivateFieldAssignmentASTVisitor visitor;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-
-		visitor = new PrivateFieldAssignmentASTVisitor();
+		visitor = new PrivateFieldAssignmentASTVisitor(defaultFixture.getTypeDeclaration());
 	}
 
 	@AfterEach
@@ -134,6 +132,47 @@ public class PrivateFieldAssignmentASTVisitorTest extends UsesJDTUnitFixture {
 				"			}\n" + 
 				"		};\n" + 
 				"	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+
+		defaultFixture.accept(visitor);
+
+		List<VariableDeclarationFragment> assignedFragments = visitor.getAssignedVariableDeclarationFragments();
+		assertTrue(checkAssignedFragments(assignedFragments, "intValue"));
+	}
+
+	@Test
+	public void test_reassignInnerInnerFieldInOuterConstructor_shouldFindAssignment() throws Exception {
+		String typeContent = "" +
+				"public static class InnerClassWithConstructor {\n" + 
+				"	InnerClassWithConstructor(){\n" + 
+				"		InnerClassWithConstructor.InnerInnerClass xInnerInnerClass = new InnerClassWithConstructor.InnerInnerClass();\n" + 
+				"		xInnerInnerClass.intValue = 1;\n" + 
+				"	}\n" + 
+				"	public static class InnerInnerClass {\n" + 
+				"		private int intValue = 0;\n" + 
+				"	}\n" + 
+				"}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+
+		defaultFixture.accept(visitor);
+
+		List<VariableDeclarationFragment> assignedFragments = visitor.getAssignedVariableDeclarationFragments();
+		assertTrue(checkAssignedFragments(assignedFragments, "intValue"));
+	}
+
+	@Test
+	public void test_reassignInnerInnerFieldInRootClassMethod_shouldFindAssignment() throws Exception {
+		
+		String typeContent = "" +
+				"public static class InnerClassWithConstructor {\n" + 
+				"	public static class InnerInnerClass {\n" + 
+				"		private int intValue = 0;\n" + 
+				"	}\n" + 
+				"}\n" + 
+				"private void sampleMethod() {\n" + 
+				"	final InnerClassWithConstructor.InnerInnerClass xInnerInnerClass = new InnerClassWithConstructor.InnerInnerClass();\n" + 
+				"	xInnerInnerClass.intValue = 1;\n" + 
+				"}";
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
 		defaultFixture.accept(visitor);
