@@ -16,6 +16,8 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -128,12 +130,30 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	}
 
 	@Override
+	public boolean visit(PrefixExpression infixExpression) {
+		analyzeStateChanges(infixExpression.getOperand());
+		return true;
+	}
+
+	@Override
+	public boolean visit(PostfixExpression postfixExpression) {
+		Expression expression = postfixExpression.getOperand();
+		analyzeStateChanges(expression);
+		return true;
+	}
+
+	@Override
 	public boolean visit(Assignment assignment) {
 		Expression leftHandSide = assignment.getLeftHandSide();
+		analyzeStateChanges(leftHandSide);
+		return true;
+	}
+
+	private void analyzeStateChanges(Expression leftHandSide) {
 		VariableDeclarationFragment variableDeclarationFragment = extractFieldDeclarationFragmentFromExpression(
 				leftHandSide);
 
-		if (isInNestedBlock(assignment)) {
+		if (isInNestedBlock(leftHandSide.getParent())) {
 			/*
 			 * Otherwise, wee need control flow analysis to determine if the
 			 * field is assigned exactly once in each branch of the control
@@ -149,11 +169,9 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 				tempAssignmentsInBlocks.add(variableDeclarationFragment);
 			}
 		}
-
-		return false;
 	}
 
-	private boolean isInNestedBlock(Assignment assignment) {
+	private boolean isInNestedBlock(ASTNode assignment) {
 		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return true;
 		}
