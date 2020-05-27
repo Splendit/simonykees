@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -131,25 +132,26 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 
 	@Override
 	public boolean visit(PrefixExpression infixExpression) {
-		analyzeStateChanges(infixExpression.getOperand());
+		Expression expression = infixExpression.getOperand();
+		VariableDeclarationFragment variableDeclarationFragment = extractFieldDeclarationFragmentFromExpression(
+				expression);
+		multiplyAssignedDeclarations.add(variableDeclarationFragment);
 		return true;
 	}
 
 	@Override
 	public boolean visit(PostfixExpression postfixExpression) {
 		Expression expression = postfixExpression.getOperand();
-		analyzeStateChanges(expression);
+		VariableDeclarationFragment variableDeclarationFragment = extractFieldDeclarationFragmentFromExpression(
+				expression);
+		multiplyAssignedDeclarations.add(variableDeclarationFragment);
+
 		return true;
 	}
 
 	@Override
 	public boolean visit(Assignment assignment) {
 		Expression leftHandSide = assignment.getLeftHandSide();
-		analyzeStateChanges(leftHandSide);
-		return true;
-	}
-
-	private void analyzeStateChanges(Expression leftHandSide) {
 		VariableDeclarationFragment variableDeclarationFragment = extractFieldDeclarationFragmentFromExpression(
 				leftHandSide);
 
@@ -169,6 +171,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 				tempAssignmentsInBlocks.add(variableDeclarationFragment);
 			}
 		}
+		return true;
 	}
 
 	private boolean isInNestedBlock(ASTNode assignment) {
@@ -217,7 +220,9 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 		 */
 		boolean reassignedInConstructor = constructorInitializers.values()
 			.stream()
+			.filter(Objects::nonNull)
 			.flatMap(List::stream)
+			.filter(Objects::nonNull)
 			.anyMatch(fragments::contains);
 
 		return !reassignedInConstructor && fragments.stream()
