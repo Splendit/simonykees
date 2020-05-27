@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -35,16 +35,12 @@ public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteAST
 
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
-		ASTNode enclosingNode;
-		if(typeDeclaration.isMemberTypeDeclaration() || typeDeclaration.isLocalTypeDeclaration()) {
-			enclosingNode = ASTNodeUtil.getSpecificAncestor(typeDeclaration, CompilationUnit.class);
-		} else {
-			enclosingNode = typeDeclaration;
-		}
+		ASTNode enclosingNode = findEnclosingType(typeDeclaration);
 		FinalInitializerCheckASTVisitor finalInitializerCheckVisitor = new FinalInitializerCheckASTVisitor();
 		typeDeclaration.accept(finalInitializerCheckVisitor);
 
-		PrivateFieldAssignmentASTVisitor privateFieldAssignmentVisitor = new PrivateFieldAssignmentASTVisitor(typeDeclaration);
+		PrivateFieldAssignmentASTVisitor privateFieldAssignmentVisitor = new PrivateFieldAssignmentASTVisitor(
+				typeDeclaration);
 		enclosingNode.accept(privateFieldAssignmentVisitor);
 
 		List<VariableDeclarationFragment> assignedFragments = privateFieldAssignmentVisitor
@@ -61,6 +57,23 @@ public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteAST
 			.collect(Collectors.toSet());
 
 		return true;
+	}
+
+	private ASTNode findEnclosingType(TypeDeclaration typeDeclaration) {
+		ASTNode enclosingNode;
+		if (typeDeclaration.isMemberTypeDeclaration()) {
+			enclosingNode = typeDeclaration.getParent();
+			while (enclosingNode.getParent() != null && enclosingNode.getParent()
+				.getNodeType() != ASTNode.COMPILATION_UNIT) {
+				enclosingNode = enclosingNode.getParent();
+			}
+		} else if (typeDeclaration.isLocalTypeDeclaration()) {
+			TypeDeclarationStatement parent = (TypeDeclarationStatement) typeDeclaration.getParent();
+			enclosingNode = parent.getParent();
+		} else {
+			enclosingNode = typeDeclaration;
+		}
+		return enclosingNode;
 	}
 
 	@Override

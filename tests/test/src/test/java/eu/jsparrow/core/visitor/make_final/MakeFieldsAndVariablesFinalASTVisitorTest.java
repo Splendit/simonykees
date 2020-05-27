@@ -377,4 +377,39 @@ public class MakeFieldsAndVariablesFinalASTVisitorTest extends UsesJDTUnitFixtur
 				"}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	public void privateField_localClass_shouldTransform() throws Exception {
+		String original = "" + 
+				"private void sampleMethod(String value) {\n" + 
+				"	class Local {\n" + 
+				"		private String value = \"\";\n" + 
+				"	}\n" + 
+				"	final Local local = new Local();\n" + 
+				"	System.out.println(local.value);\n" + 
+				"}";
+		String expected = "" + 
+				"private void sampleMethod(String value) {\n" + 
+				"	class Local {\n" + 
+				"		private final String value = \"\";\n" + 
+				"	}\n" + 
+				"	final Local local = new Local();\n" + 
+				"	System.out.println(local.value);\n" + 
+				"}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void privateField_reassignLocalClassField_shouldNotTransform() throws Exception {
+		String original = "" + 
+				"private void sampleMethod(String value) {\n" + 
+				"	class Local {\n" + 
+				"		private String value = \"\";\n" + 
+				"	}\n" + 
+				"	final Local local = new Local();\n" + 
+				"	local.value = \"2\";\n" + 
+				"	\n" + 
+				"}";
+		assertNoChange(original);
+	}
 }

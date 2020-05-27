@@ -132,12 +132,12 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 		Expression leftHandSide = assignment.getLeftHandSide();
 		VariableDeclarationFragment variableDeclarationFragment = extractFieldDeclarationFragmentFromExpression(
 				leftHandSide);
-		
-		if(isInNestedBlock(assignment)) {
+
+		if (isInNestedBlock(assignment)) {
 			/*
-			 * Otherwise, wee need control flow analysis to determine 
-			 * if the field is assigned exactly once in each 
-			 * branch of the control flow. 
+			 * Otherwise, wee need control flow analysis to determine if the
+			 * field is assigned exactly once in each branch of the control
+			 * flow.
 			 */
 			nonRootAssignment.add(variableDeclarationFragment);
 		}
@@ -154,11 +154,12 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	}
 
 	private boolean isInNestedBlock(Assignment assignment) {
-		if(assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return true;
 		}
-		ExpressionStatement statement = (ExpressionStatement)assignment.getParent();
-		return statement.getParent().getParent() != currentConstructor;
+		ExpressionStatement statement = (ExpressionStatement) assignment.getParent();
+		return statement.getParent()
+			.getParent() != currentConstructor;
 	}
 
 	/**
@@ -192,7 +193,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	private boolean isStaticFinalCandidate(FieldDeclaration fieldDeclaration) {
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
 				VariableDeclarationFragment.class);
-		
+
 		/*
 		 * This is the only visitor analyzing constructors
 		 */
@@ -200,7 +201,6 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 			.stream()
 			.flatMap(List::stream)
 			.anyMatch(fragments::contains);
-
 
 		return !reassignedInConstructor && fragments.stream()
 			.allMatch(fragment -> (fieldInitializers.contains(fragment)
@@ -228,7 +228,6 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 
 				boolean multiplyAssigned = multiplyAssignedDeclarations.contains(fragment);
 				boolean hasNonRootAssignment = nonRootAssignment.contains(fragment);
-				
 
 				return ((declaration ^ initializer ^ constructor) ^ (declaration && initializer && constructor))
 						&& !multiplyAssigned && !(!constructor && atLeastOneConstructor) && !hasNonRootAssignment;
