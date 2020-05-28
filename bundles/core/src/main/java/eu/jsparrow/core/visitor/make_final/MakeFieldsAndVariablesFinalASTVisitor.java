@@ -6,10 +6,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -33,16 +35,18 @@ public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteAST
 
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
-		FinalInitializerCheckASTVisitor finaInitializerCheckVisitor = new FinalInitializerCheckASTVisitor();
-		typeDeclaration.accept(finaInitializerCheckVisitor);
+		ASTNode enclosingNode = findEnclosingType(typeDeclaration);
+		FinalInitializerCheckASTVisitor finalInitializerCheckVisitor = new FinalInitializerCheckASTVisitor();
+		typeDeclaration.accept(finalInitializerCheckVisitor);
 
-		PrivateFieldAssignmentASTVisitor privateFieldAssignmentVisitor = new PrivateFieldAssignmentASTVisitor();
-		typeDeclaration.accept(privateFieldAssignmentVisitor);
+		PrivateFieldAssignmentASTVisitor privateFieldAssignmentVisitor = new PrivateFieldAssignmentASTVisitor(
+				typeDeclaration);
+		enclosingNode.accept(privateFieldAssignmentVisitor);
 
 		List<VariableDeclarationFragment> assignedFragments = privateFieldAssignmentVisitor
-			.getAssigendVariableDeclarationFragments();
+			.getAssignedVariableDeclarationFragments();
 
-		finalCandidateFields = finaInitializerCheckVisitor.getFinalCandidates()
+		finalCandidateFields = finalInitializerCheckVisitor.getFinalCandidates()
 			.stream()
 			.filter((FieldDeclaration candidate) -> ASTNodeUtil.hasModifier(candidate.modifiers(), Modifier::isPrivate))
 			.flatMap(fieldDeclaration -> ASTNodeUtil
@@ -53,6 +57,23 @@ public class MakeFieldsAndVariablesFinalASTVisitor extends AbstractASTRewriteAST
 			.collect(Collectors.toSet());
 
 		return true;
+	}
+
+	private ASTNode findEnclosingType(TypeDeclaration typeDeclaration) {
+		ASTNode enclosingNode;
+		if (typeDeclaration.isMemberTypeDeclaration()) {
+			enclosingNode = typeDeclaration.getParent();
+			while (enclosingNode.getParent() != null && enclosingNode.getParent()
+				.getNodeType() != ASTNode.COMPILATION_UNIT) {
+				enclosingNode = enclosingNode.getParent();
+			}
+		} else if (typeDeclaration.isLocalTypeDeclaration()) {
+			TypeDeclarationStatement parent = (TypeDeclarationStatement) typeDeclaration.getParent();
+			enclosingNode = parent.getParent();
+		} else {
+			enclosingNode = typeDeclaration;
+		}
+		return enclosingNode;
 	}
 
 	@Override
