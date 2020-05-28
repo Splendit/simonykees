@@ -144,14 +144,12 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 
 	/**
 	 * 
-	 * @param methodInvocation
-	 *            parameter which is examined whether or not it represents an
-	 *            execute- or an executeQuery- invocation on a statement object.
+	 * @param queryMethodArgument
+	 *            parameter which is examined whether or not it is a local variable storing an SQL query.
 	 * @return a SqlVariableAnalyzerVisitor if a query is found which can be
 	 *         transformed, otherwise {@code null}.
 	 */
-	protected SqlVariableAnalyzerVisitor createSqlVariableAnalyzerVisitor(Expression queryMethodArgument,
-			MethodInvocation methodInvocation) {
+	protected SqlVariableAnalyzerVisitor createSqlVariableAnalyzerVisitor(Expression queryMethodArgument) {
 
 		if (queryMethodArgument == null) {
 			return null;

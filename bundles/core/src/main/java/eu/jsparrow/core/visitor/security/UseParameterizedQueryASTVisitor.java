@@ -65,7 +65,7 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		Expression queryMethodArgument = analyzeStatementExecuteQuery(methodInvocation);
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(queryMethodArgument, methodInvocation);
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(queryMethodArgument);
 		if (sqlVariableVisitor == null) {
 			return true;
 		}
