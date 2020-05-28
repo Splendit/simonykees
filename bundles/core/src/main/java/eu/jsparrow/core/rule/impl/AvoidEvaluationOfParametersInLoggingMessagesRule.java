@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import eu.jsparrow.core.visitor.impl.AvoidEvaluationOfParametersInLoggingMessagesASTVisitor;
 import eu.jsparrow.core.visitor.impl.RemoveCollectionAddAllASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
@@ -16,10 +17,11 @@ import eu.jsparrow.rules.common.Tag;
  * @since 3.18.0
  *
  */
-public class AvoidEvaluationOfParametersInLoggingMessagesRule extends RefactoringRuleImpl<RemoveCollectionAddAllASTVisitor> {
+public class AvoidEvaluationOfParametersInLoggingMessagesRule
+		extends RefactoringRuleImpl<AvoidEvaluationOfParametersInLoggingMessagesASTVisitor> {
 
 	public AvoidEvaluationOfParametersInLoggingMessagesRule() {
-		this.visitorClass = RemoveCollectionAddAllASTVisitor.class;
+		this.visitorClass = AvoidEvaluationOfParametersInLoggingMessagesASTVisitor.class;
 		this.id = "AvoidEvaluationOfParametersInLoggingMessages"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.AvoidEvaluationOfParametersInLoggingMessagesRule_name,
 				Messages.AvoidEvaluationOfParametersInLoggingMessagesRule_description, Duration.ofMinutes(2),
