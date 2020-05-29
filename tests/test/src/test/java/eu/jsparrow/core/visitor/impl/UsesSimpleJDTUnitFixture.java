@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.impl;
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jface.text.BadLocationException;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 
+import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.jdtunit.JdtUnitException;
 import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
 import eu.jsparrow.jdtunit.JdtUnitFixtureProject;
@@ -51,6 +53,11 @@ public abstract class UsesSimpleJDTUnitFixture {
 	@AfterEach
 	public void tearDownTest() throws Exception {
 		fixture.clear(true);
+	}
+	
+	protected void  addDependency(String groupId, String artifactId, String version) throws Exception {
+		IClasspathEntry classPathEntry = RulesTestUtil.generateMavenEntryFromDepedencyString(groupId, artifactId, version);
+		fixtureProject.addClasspathEntry(classPathEntry);
 	}
 	
 	protected void setVisitor(AbstractASTRewriteASTVisitor visitor) {
