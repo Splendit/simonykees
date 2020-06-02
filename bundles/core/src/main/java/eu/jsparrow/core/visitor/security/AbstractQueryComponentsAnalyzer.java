@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.security;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -15,6 +16,8 @@ import org.eclipse.jdt.core.dom.StringLiteral;
  */
 public abstract class AbstractQueryComponentsAnalyzer {
 
+	protected static final String SIMPLE_QUOTATION_MARK = "'"; //$NON-NLS-1$
+
 	protected List<Expression> components;
 
 	AbstractQueryComponentsAnalyzer(List<Expression> components) {
@@ -22,9 +25,39 @@ public abstract class AbstractQueryComponentsAnalyzer {
 	}
 
 	/**
-	 * @return A StringLiteral starting with {@code "'"} if such a StringLiteralit is
-	 *         the component following the component specified by the index,
-	 *         otherwise {@code null}.
+	 * 
+	 * @return a list of all components of the dynamic query which are not
+	 *         instances of {@link StringLiteral}.
+	 */
+	protected List<Expression> collectNonLiteralComponents() {
+		return components.stream()
+			.filter(component -> component.getNodeType() != ASTNode.STRING_LITERAL)
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * @return true if the given {@link StringLiteral} starts with {@code "'"},
+	 *         otherwise false.
+	 */
+	protected boolean isValidNext(StringLiteral literal) {
+		return literal.getLiteralValue()
+			.startsWith(SIMPLE_QUOTATION_MARK);
+	}
+
+	/**
+	 * @return true if the given {@link StringLiteral} ends with {@code "'"},
+	 *         otherwise false.
+	 */
+	protected boolean isValidPrevious(StringLiteral literal) {
+		return literal.getLiteralValue()
+			.endsWith(SIMPLE_QUOTATION_MARK);
+	}
+
+	/**
+	 * @return A {@link StringLiteral} following the component at the specified
+	 *         index and fulfilling the conditions checked by
+	 *         {@link #isValidNext(StringLiteral)}, or null if no such
+	 *         {@link StringLiteral} can be found.
 	 */
 	protected StringLiteral findNext(int index) {
 		int nextIndex = index + 1;
@@ -36,14 +69,14 @@ public abstract class AbstractQueryComponentsAnalyzer {
 			return null;
 		}
 		StringLiteral literal = (StringLiteral) next;
-		String value = literal.getLiteralValue();
-		return value.startsWith("'") ? literal : null; //$NON-NLS-1$
+		return isValidNext(literal) ? literal : null;
 	}
 
 	/**
-	 * @return A StringLiteral ending with {@code "'"} if such a StringLiteralit is
-	 *         the component preceding the component specified by the index,
-	 *         otherwise {@code null}.
+	 * @return A {@link StringLiteral} preceding the component at the specified
+	 *         index and fulfilling the conditions checked by
+	 *         {@link #isValidPrevious(StringLiteral)}, or null if no such
+	 *         {@link StringLiteral} can be found.
 	 */
 	protected StringLiteral findPrevious(int index) {
 		int previousIndex = index - 1;
@@ -54,9 +87,8 @@ public abstract class AbstractQueryComponentsAnalyzer {
 		if (previous.getNodeType() != ASTNode.STRING_LITERAL) {
 			return null;
 		}
-		StringLiteral stringLiteral = (StringLiteral) previous;
-		String value = stringLiteral.getLiteralValue();
-		return value.endsWith("'") ? stringLiteral : null; //$NON-NLS-1$
+		StringLiteral literal = (StringLiteral) previous;
+		return isValidPrevious(literal) ? literal : null;
 	}
 
 }

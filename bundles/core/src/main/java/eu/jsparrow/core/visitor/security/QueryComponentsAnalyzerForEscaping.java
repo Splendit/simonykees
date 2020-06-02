@@ -3,7 +3,6 @@ package eu.jsparrow.core.visitor.security;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -39,10 +38,7 @@ public class QueryComponentsAnalyzerForEscaping extends AbstractQueryComponentsA
 	 * @return
 	 */
 	public void analyze() {
-		List<Expression> nonLiteralComponents = components.stream()
-			.filter(component -> component.getNodeType() != ASTNode.STRING_LITERAL)
-			.collect(Collectors.toList());
-
+		List<Expression> nonLiteralComponents = collectNonLiteralComponents();
 		for (Expression component : nonLiteralComponents) {
 			if (isComponentToEscape(component)) {
 				this.expressionsToEscape.add(component);

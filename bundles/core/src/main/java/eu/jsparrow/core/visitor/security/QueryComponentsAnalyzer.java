@@ -5,9 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -21,7 +19,6 @@ import org.eclipse.jdt.core.dom.StringLiteral;
  *
  */
 public class QueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer {
-
 
 	private List<ReplaceableParameter> parameters = new ArrayList<>();
 
@@ -71,10 +68,7 @@ public class QueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer {
 	 * @return
 	 */
 	public void analyze() {
-		List<Expression> nonLiteralComponents = components.stream()
-			.filter(component -> component.getNodeType() != ASTNode.STRING_LITERAL)
-			.collect(Collectors.toList());
-
+		List<Expression> nonLiteralComponents = collectNonLiteralComponents();
 		int position = 1;
 		for (Expression component : nonLiteralComponents) {
 			int index = components.indexOf(component);

@@ -46,6 +46,10 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 		}
 		
 		InfixExpression infixExpression = (InfixExpression) queryMethodArgument;
+		
+		DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
+		
+		componentStore.storeComponents(infixExpression);
 
 		return true;
 	}
