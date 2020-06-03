@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
-@SuppressWarnings("nls")
 public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 
 	private FinalInitializerCheckASTVisitor visitor;
@@ -305,6 +304,121 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
 
 		assertFalse(isValidCandidates(candidates));
+	}
+	
+	@Test 
+	public void nonStaticField_isReassignedInAnonymousClassInConstructor_shouldNotBeCandidate() throws Exception {
+		String typeContent = "" +
+				"	private boolean reassignedInConstractorInnerClass = false;\n" + 
+				"	public " + DEFAULT_TYPE_DECLARATION_NAME +  "() {\n" + 
+				"		final Runnable runnable = new Runnable() {\n" + 
+				"			@Override\n" + 
+				"			public void run() {\n" + 
+				"				reassignedInConstractorInnerClass = true;\n" + 
+				"			}" + 
+				"		};" + 
+				"	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+		defaultFixture.accept(visitor);
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+		assertTrue(candidates.isEmpty());
+	}
+	
+	@Test
+	public void nonStaticField_initInAllButOneCtor_shouldNotBeCandidate() throws Exception {
+		String typeContent = "" +
+				"	private boolean value;\n" + 
+				"	{" + 
+				"		value = true;\n" + 
+				"	}" + 
+				"	public " + DEFAULT_TYPE_DECLARATION_NAME + "(String value) {" + 
+				"	}" + 
+				"	public " + DEFAULT_TYPE_DECLARATION_NAME + "(boolean value) {" + 
+				"		this.value = value;\n" + 
+				"	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+		defaultFixture.accept(visitor);
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+		assertTrue(candidates.isEmpty());
+		
+	}
+	
+	@Test
+	public void nonStaticField_nestedBlockAssignment_shouldNotBeCandidate() throws Exception {
+		String typeContent = "" +
+				"	private double doubleValue;\n" + 
+				"	public " + DEFAULT_TYPE_DECLARATION_NAME + "(String value) {\n" + 
+				"		if(!value.isEmpty()) {\n" + 
+				"			doubleValue = value.length();\n" + 
+				"		}\n" + 
+				"	}\n" + 
+				"	public " + DEFAULT_TYPE_DECLARATION_NAME + "(double value) {\n" + 
+				"		doubleValue = value;\n" + 
+				"	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+		defaultFixture.accept(visitor);
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+		assertTrue(candidates.isEmpty());
+	}
+
+	@Test
+	public void nonStaticField_nestedBlockAssignmentWithinParentheses_shouldNotBeCandidate() throws Exception {
+		String typeContent = "" +
+				"	private double doubleValue;\n" + 
+				"	public " + DEFAULT_TYPE_DECLARATION_NAME + "(String value) {\n" + 
+				"		if(!value.isEmpty()) {\n" + 
+				"			double size = (doubleValue = value.length());\n" + 
+				"		}\n" + 
+				"	}\n" + 
+				"	public " + DEFAULT_TYPE_DECLARATION_NAME + "(double value) {\n" + 
+				"		doubleValue = value;\n" + 
+				"	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+		defaultFixture.accept(visitor);
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+		assertTrue(candidates.isEmpty());
+	}
+
+	@Test
+	public void staticField_reassigningInConstructor_shouldNotBeCandidate() throws Exception {
+		String typeContent = "" + 
+				"	private static double DOUBLE_VALUE = 0.0;\n" + 
+				"	\n" + 
+				"	public " + DEFAULT_TYPE_DECLARATION_NAME + " (double value) {\n" + 
+				"		DOUBLE_VALUE = value;\n" + 
+				"	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+		defaultFixture.accept(visitor);
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+		assertTrue(candidates.isEmpty());
+	}
+	
+	@Test
+	public void nonStaticField_incrementWithPrefixExpression_shouldNotBeCandidate() throws Exception {
+		String typeContent = "" + 
+				"	private int value = 0;\n" + 
+				"	\n" + 
+				"	public " + DEFAULT_TYPE_DECLARATION_NAME + " () {\n" + 
+				"		++value;\n" + 
+				"	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+		defaultFixture.accept(visitor);
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+		assertTrue(candidates.isEmpty());
+	}
+	
+	@Test
+	public void nonStaticField_incrementWithPostfixExpression_shouldNotBeCandidate() throws Exception {
+		String typeContent = "" + 
+				"	private int value = 0;\n" + 
+				"	\n" + 
+				"	public " + DEFAULT_TYPE_DECLARATION_NAME + " () {\n" + 
+				"		value++;\n" + 
+				"	}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+		defaultFixture.accept(visitor);
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+		assertTrue(candidates.isEmpty());
 	}
 
 	private boolean isValidCandidates(List<FieldDeclaration> candidates, String... correctFieldNames) {
