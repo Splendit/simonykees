@@ -27,16 +27,14 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 	private static final List<String> LOGGER_TYPES = Collections.unmodifiableList(
 			Arrays.asList("org.slf4j.Logger", "org.apache.logging.log4j.Logger", "ch.qos.logback.classic.Logger"));
 
+	private static final String THROWABLE_TYPE = Throwable.class.getName();
+	private static final List<String> THROWABLE_TYPES = Collections
+		.unmodifiableList(Arrays.asList(THROWABLE_TYPE));
+
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 
-		// we want an InfixExpression, which should always be 1 argument
-		/*
-		 * TODO: we might want to also include cases like that:
-		 * http://slf4j.org/faq.html#paramException. Here the "pre" state might look
-		 * like this: logger.error("Failed to format " + s, e);
-		 */
-		if (methodInvocation.arguments().size() != 1 || methodInvocation.getExpression() == null) {
+		if (methodInvocation.getExpression() == null) {
 			return true;
 		}
 
@@ -48,19 +46,17 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		}
 
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		boolean isString = ClassRelationUtil.isContentOfType(arguments.get(0).resolveTypeBinding(),
-				String.class.getName());
-		boolean isInfix = (arguments.get(0).getNodeType() == ASTNode.INFIX_EXPRESSION);
-
-		if (!isString || !isInfix) {
+		if (!argumentsAllowRefactoring(arguments)) {
 			return true;
 		}
 
 		InfixExpression infix = (InfixExpression) arguments.get(0);
 
-		String method = methodInvocation.toString(); // TODO just for debugging -> remove
+		String method = methodInvocation.toString(); // TODO just for debugging
+														// -> remove
 
-		boolean isLeftOperandStringLiteral = ASTNode.STRING_LITERAL == infix.getLeftOperand().getNodeType();
+		boolean isLeftOperandStringLiteral = ASTNode.STRING_LITERAL == infix.getLeftOperand()
+			.getNodeType();
 
 		if (!isLeftOperandStringLiteral) {
 			return true;
@@ -69,15 +65,17 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		StringLiteral currentLiteral = (StringLiteral) infix.getLeftOperand();
 
 		/*
-		 * TODO this check needs to be more sophisticated. it needs to look at the
-		 * complete infix expression. Example: logger.info("A " + 1 + " B {}", 2);
+		 * TODO this check needs to be more sophisticated. it needs to look at
+		 * the complete infix expression. Example: logger.info("A " + 1 +
+		 * " B {}", 2);
 		 */
 		boolean isStringLiteralWithoutArguments = !StringUtils.contains(currentLiteral.getLiteralValue(), "{}"); //$NON-NLS-1$
 
 		/*
 		 * TODO this needs to be extended for string literals etc.
 		 */
-		boolean isRightOperandSimpleName = ASTNode.SIMPLE_NAME == infix.getRightOperand().getNodeType();
+		boolean isRightOperandSimpleName = ASTNode.SIMPLE_NAME == infix.getRightOperand()
+			.getNodeType();
 
 		if (!isStringLiteralWithoutArguments || !isRightOperandSimpleName) {
 			return true;
@@ -86,14 +84,62 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		AST ast = astRewrite.getAST();
 		StringLiteral newLiteral = ast.newStringLiteral();
 		newLiteral.setLiteralValue(currentLiteral.getLiteralValue() + "{}"); //$NON-NLS-1$
-		
+
 		SimpleName newArgument = (SimpleName) infix.getRightOperand();
-		
+
 		astRewrite.replace(infix, newLiteral, null);
-		
+
 		ListRewrite listRewriter = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
-		
+
 		listRewriter.insertAfter(newArgument, newLiteral, null);
+
+		return true;
+	}
+
+	/**
+	 * We want an {@link InfixExpression} as first argument and optionally a
+	 * {@link Throwable} as second argument (see
+	 * http://slf4j.org/faq.html#paramException).
+	 * <p/>
+	 * Allowed examples:
+	 * 
+	 * <pre>
+	 * <code>
+	 * logger.info("Print " + message + " and " + otherMessage); // 1 argument (InfixExpression)
+	 * logger.error("Failed to format " + s, e); // 2 arguments (InfixExpression + Throwable)
+	 * </code>
+	 * </pre>
+	 * 
+	 * @param arguments
+	 *            {@link MethodInvocation} arguments
+	 * @return true if the arguments allow refactoring, false otherwise
+	 */
+	private boolean argumentsAllowRefactoring(List<Expression> arguments) {
+
+		// 2 arguments only allowed if the second one is a Throwable
+		if (arguments.size() == 2) {
+			boolean isSecondArgumentThrowableSubtype = ClassRelationUtil.isInheritingContentOfTypes(arguments.get(1)
+				.resolveTypeBinding(),
+					THROWABLE_TYPES);
+			boolean isSecondArgumentThrowableType = ClassRelationUtil.isContentOfType(arguments.get(1)
+				.resolveTypeBinding(),
+					THROWABLE_TYPE);
+			if (!isSecondArgumentThrowableSubtype && !isSecondArgumentThrowableType) {
+				return false;
+			}
+		} else if (arguments.size() != 1) {
+			return false;
+		}
+
+		boolean isFirstArgumentString = ClassRelationUtil.isContentOfType(arguments.get(0)
+			.resolveTypeBinding(),
+				String.class.getName());
+		boolean isFirstArgumentInfix = (arguments.get(0)
+			.getNodeType() == ASTNode.INFIX_EXPRESSION);
+
+		if (!isFirstArgumentString || !isFirstArgumentInfix) {
+			return false;
+		}
 
 		return true;
 	}

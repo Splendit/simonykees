@@ -3,7 +3,6 @@ package eu.jsparrow.sample.postRule.avoidEvaluation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "unused", "nls" })
 public class AvoidEvaluationOfParametersInLoggingMessages {
 
 	private static final Logger logger = LoggerFactory.getLogger(AvoidEvaluationOfParametersInLoggingMessages.class);
@@ -23,8 +22,24 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 	}
 
 	/**
-	 * Testing all log levels. None of the statements should be transformed, since
-	 * they do not start with a String literal.
+	 * Testing all the log levels with an additional {@link Throwable} as
+	 * argument. All statements should be transformed to use a parameter instead
+	 * of the '+'
+	 * 
+	 * @param something
+	 */
+	public void logSomethingWithThrowable(String something, Throwable t, Exception e, RuntimeException r, Error err,
+			NullPointerException npe) {
+		logger.trace("Print {}", something, t);
+		logger.debug("Print {}", something, e);
+		logger.info("Print {}", something, r);
+		logger.warn("Print {}", something, err);
+		logger.error("Print {}", something, npe);
+	}
+
+	/**
+	 * Testing all log levels. None of the statements should be transformed,
+	 * since they do not start with a String literal.
 	 * 
 	 * @param something
 	 */
@@ -43,8 +58,8 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 	}
 
 	/**
-	 * None of the statements should be transformed, since they already contain a
-	 * parameter.
+	 * None of the statements should be transformed, since they already contain
+	 * a parameter.
 	 * 
 	 * @param something
 	 */
@@ -56,7 +71,14 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 		logger.info("A {} " + c + " {}", "B", "D", e); // A B {c} D {e}
 		logger.info("A " + "B " + c + " {}", "D", e); // A B {c} D {e}
 		logger.info("A " + 1 + " B {}", 2); // A 1 B 2
-		logger.info("A " + 1 + " B {}" + " C" + " {} {}", 2, 3, "D " + 4); // A 1 B 2 C 3 D 4
+		logger.info("A " + 1 + " B {}" + " C" + " {} {}", 2, 3, "D " + 4); // A
+																			// 1
+																			// B
+																			// 2
+																			// C
+																			// 3
+																			// D
+																			// 4
 	}
 
 }
