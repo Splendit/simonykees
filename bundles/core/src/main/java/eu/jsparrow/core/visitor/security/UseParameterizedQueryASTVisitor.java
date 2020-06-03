@@ -1,23 +1,18 @@
 package eu.jsparrow.core.visitor.security;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -216,15 +211,6 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		return componentsAnalyzer.getReplaceableParameters();
 	}
 
-	private void addSetters(Expression initializer, List<ExpressionStatement> setParameterStatements) {
-		Statement statement = ASTNodeUtil.getSpecificAncestor(initializer, Statement.class);
-		Block block = (Block) statement.getParent();
-		ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-		List<ExpressionStatement> setters = new ArrayList<>(setParameterStatements);
-		Collections.reverse(setters);
-		setters.forEach(setter -> listRewrite.insertAfter(setter, statement, null));
-	}
-
 	private void replaceStatementDeclaration(VariableDeclarationFragment fragment, MethodInvocation createStatement,
 			SimpleName query) {
 		VariableDeclarationStatement statement = (VariableDeclarationStatement) fragment.getParent();
@@ -255,59 +241,6 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 
 	}
 
-	private List<ExpressionStatement> createSetParameterStatements(List<ReplaceableParameter> replaceableParameters,
-			Expression statementName) {
-		List<ExpressionStatement> statements = new ArrayList<>();
-		AST ast = astRewrite.getAST();
-		for (ReplaceableParameter parameter : replaceableParameters) {
-			Expression component = parameter.getParameter();
-			String setterName = parameter.getSetterName();
-			Expression statementNameCopy = (Expression) astRewrite.createCopyTarget(statementName);
-			MethodInvocation setter = ast.newMethodInvocation();
-			setter.setExpression(statementNameCopy);
-			setter.setName(ast.newSimpleName(setterName));
-			int position = parameter.getPosition();
-			NumberLiteral positionLiteral = ast.newNumberLiteral();
-			positionLiteral.setToken(String.valueOf(position));
-			Expression parameterExpression = (Expression) astRewrite.createCopyTarget(component);
-			@SuppressWarnings("unchecked")
-			List<Expression> setterArguments = setter.arguments();
-			setterArguments.add(positionLiteral);
-			setterArguments.add(parameterExpression);
-			ExpressionStatement setterExpressionStatement = ast.newExpressionStatement(setter);
-			statements.add(setterExpressionStatement);
-		}
-		return statements;
-	}
-
-	private void replaceQuery(List<ReplaceableParameter> replaceableParameters) {
-		AST ast = astRewrite.getAST();
-		for (ReplaceableParameter parameter : replaceableParameters) {
-			StringLiteral previous = parameter.getPrevious();
-			StringLiteral next = parameter.getNext();
-			Expression component = parameter.getParameter();
-
-			String oldPrevious = previous.getLiteralValue();
-			String newPrevious = oldPrevious.substring(0, oldPrevious.length() - 1) + " ?"; //$NON-NLS-1$
-			StringLiteral newPreviousLiteral = ast.newStringLiteral();
-			newPreviousLiteral.setLiteralValue(newPrevious);
-			astRewrite.replace(previous, newPreviousLiteral, null);
-
-			String newNext = next.getLiteralValue()
-				.replaceFirst("'", ""); //$NON-NLS-1$//$NON-NLS-2$
-			StringLiteral newNextLiteral = ast.newStringLiteral();
-			newNextLiteral.setLiteralValue(newNext);
-			astRewrite.replace(next, newNextLiteral, null);
-
-			if (component.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-				Assignment assignment = (Assignment) component.getParent();
-				astRewrite.remove(assignment.getParent(), null);
-			} else {
-				astRewrite.remove(component, null);
-			}
-		}
-	}
-
 	private boolean analyzeSqlStatementInitializer(Expression sqlStatementInitializerExpression) {
 		if (sqlStatementInitializerExpression.getNodeType() != ASTNode.METHOD_INVOCATION) {
 			return false;
@@ -335,4 +268,19 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		}
 		return false;
 	}
+
+	@Override
+	protected String getNewPreviousLiteralValue(ReplaceableParameter parameter) {
+		String oldPrevious = parameter.getPrevious()
+			.getLiteralValue();
+		return oldPrevious.substring(0, oldPrevious.length() - 1) + " ?"; //$NON-NLS-1$
+	}
+
+	@Override
+	protected String getNewNextLiteralValue(ReplaceableParameter parameter) {
+		return parameter.getNext()
+			.getLiteralValue()
+			.replaceFirst("'", ""); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
 }

@@ -5,10 +5,14 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -44,13 +48,56 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 		if (queryMethodArgument == null || queryMethodArgument.getNodeType() != ASTNode.INFIX_EXPRESSION) {
 			return true;
 		}
-		
-		InfixExpression infixExpression = (InfixExpression) queryMethodArgument;
-		
-		DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
-		
-		componentStore.storeComponents(infixExpression);
 
+		InfixExpression infixExpression = (InfixExpression) queryMethodArgument;
+
+		DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
+
+		componentStore.storeComponents(infixExpression);
+		List<Expression> queryComponents = componentStore.getComponents();
+		JPAQueryComponentsAnalyzer componentsAnalyzer = new JPAQueryComponentsAnalyzer(queryComponents);
+		
+		if(componentsAnalyzer.getWhereKeywordPosition() < 0) {
+			return true;
+		}
+		componentsAnalyzer.analyze();
+		List<ReplaceableParameter> replaceableParameters = componentsAnalyzer.getReplaceableParameters();
+		if (replaceableParameters.isEmpty()) {
+			return true;
+		}
+
+		if (methodInvocation.getLocationInParent() != VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			return true;
+		}
+
+		VariableDeclarationFragment queryDeclarationFragment = (VariableDeclarationFragment) methodInvocation
+			.getParent();
+
+		if (queryDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+			return true;
+		}
+
+		VariableDeclarationStatement queryDeclarationStatement = (VariableDeclarationStatement) queryDeclarationFragment
+			.getParent();
+
+		if (queryDeclarationStatement.fragments()
+			.size() != 1) {
+			return true;
+		}
+
+		ITypeBinding queryTypeBinding = queryDeclarationStatement.getType()
+			.resolveBinding();
+
+		if (!ClassRelationUtil.isContentOfType(queryTypeBinding, "javax.persistence.Query")) { //$NON-NLS-1$
+			return true;
+		}
+
+		SimpleName querySimpleName = queryDeclarationFragment.getName();
+
+		replaceQuery(replaceableParameters);
+		List<ExpressionStatement> setParameterStatements = createSetParameterStatements(replaceableParameters,
+				querySimpleName);
+		addSetters(methodInvocation, setParameterStatements);
 		return true;
 	}
 
@@ -69,6 +116,13 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 	protected boolean hasRequiredDeclaringClass(IMethodBinding methodBinding) {
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		return ClassRelationUtil.isContentOfType(declaringClass, ENTITY_MANAGER_QUALIFIED_NAME);
+	}
+
+	@Override
+	protected String getNewPreviousLiteralValue(ReplaceableParameter parameter) {
+		String oldPrevious = parameter.getPrevious()
+			.getLiteralValue();
+		return oldPrevious + " ?" + parameter.getPosition(); //$NON-NLS-1$
 	}
 
 }

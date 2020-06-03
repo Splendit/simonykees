@@ -105,5 +105,4 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	public List<Expression> getDynamicQueryComponents() {
 		return componentStore.getComponents();
 	}
-
 }

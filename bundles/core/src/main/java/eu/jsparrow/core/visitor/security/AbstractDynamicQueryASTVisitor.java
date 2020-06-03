@@ -1,11 +1,16 @@
 package eu.jsparrow.core.visitor.security;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -13,8 +18,12 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.loop.DeclaredTypesASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -145,7 +154,8 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	/**
 	 * 
 	 * @param queryMethodArgument
-	 *            parameter which is examined whether or not it is a local variable storing an SQL query.
+	 *            parameter which is examined whether or not it is a local
+	 *            variable storing an SQL query.
 	 * @return a SqlVariableAnalyzerVisitor if a query is found which can be
 	 *         transformed, otherwise {@code null}.
 	 */
@@ -230,4 +240,85 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 			.noneMatch(
 					importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration, qualifiedTypeName));
 	}
+
+	/**
+	 * @return by default the old literal value of the previous string literal
+	 *         unless this method is overridden in order to return a different
+	 *         value.
+	 */
+	protected String getNewPreviousLiteralValue(ReplaceableParameter parameter) {
+		return parameter.getPrevious()
+			.getLiteralValue();
+	}
+
+	/**
+	 * @return by default the old literal value of the next string literal
+	 *         unless this method is overridden in order to return a different
+	 *         value.
+	 */
+	protected String getNewNextLiteralValue(ReplaceableParameter parameter) {
+		return parameter.getNext()
+			.getLiteralValue();
+	}
+
+	private void replaceStringLiteral(StringLiteral oldLiteral, String newLiteralValue) {
+		if (newLiteralValue.equals(oldLiteral.getLiteralValue())) {
+			return;
+		}
+		AST ast = astRewrite.getAST();
+		StringLiteral newLiteral = ast.newStringLiteral();
+		newLiteral.setLiteralValue(newLiteralValue);
+		astRewrite.replace(oldLiteral, newLiteral, null);
+	}
+
+	protected void replaceQuery(List<ReplaceableParameter> replaceableParameters) {
+
+		for (ReplaceableParameter parameter : replaceableParameters) {
+			replaceStringLiteral(parameter.getPrevious(), getNewPreviousLiteralValue(parameter));
+			replaceStringLiteral(parameter.getNext(), getNewNextLiteralValue(parameter));
+
+			Expression component = parameter.getParameter();
+			if (component.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+				Assignment assignment = (Assignment) component.getParent();
+				astRewrite.remove(assignment.getParent(), null);
+			} else {
+				astRewrite.remove(component, null);
+			}
+		}
+	}
+
+	protected List<ExpressionStatement> createSetParameterStatements(List<ReplaceableParameter> replaceableParameters,
+			SimpleName statementName) {
+		List<ExpressionStatement> statements = new ArrayList<>();
+		AST ast = astRewrite.getAST();
+		for (ReplaceableParameter parameter : replaceableParameters) {
+			Expression component = parameter.getParameter();
+			String setterName = parameter.getSetterName();
+			SimpleName statementNameCopy = (SimpleName) astRewrite.createCopyTarget(statementName);
+			MethodInvocation setter = ast.newMethodInvocation();
+			setter.setExpression(statementNameCopy);
+			setter.setName(ast.newSimpleName(setterName));
+			int position = parameter.getPosition();
+			NumberLiteral positionLiteral = ast.newNumberLiteral();
+			positionLiteral.setToken(String.valueOf(position));
+			Expression parameterExpression = (Expression) astRewrite.createCopyTarget(component);
+			@SuppressWarnings("unchecked")
+			List<Expression> setterArguments = setter.arguments();
+			setterArguments.add(positionLiteral);
+			setterArguments.add(parameterExpression);
+			ExpressionStatement setterExpressionStatement = ast.newExpressionStatement(setter);
+			statements.add(setterExpressionStatement);
+		}
+		return statements;
+	}
+
+	protected void addSetters(Expression initializer, List<ExpressionStatement> setParameterStatements) {
+		Statement statement = ASTNodeUtil.getSpecificAncestor(initializer, Statement.class);
+		Block block = (Block) statement.getParent();
+		ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+		List<ExpressionStatement> setters = new ArrayList<>(setParameterStatements);
+		Collections.reverse(setters);
+		setters.forEach(setter -> listRewrite.insertAfter(setter, statement, null));
+	}
+
 }

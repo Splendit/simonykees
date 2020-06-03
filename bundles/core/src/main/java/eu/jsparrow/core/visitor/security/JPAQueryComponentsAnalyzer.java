@@ -35,9 +35,6 @@ public class JPAQueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer 
 	 * @return
 	 */
 	public void analyze() {
-		if (whereKeywordPosition < 0) {
-			return;
-		}
 		List<Expression> nonLiteralComponents = collectNonLiteralComponents();
 		int position = 1;
 		for (Expression component : nonLiteralComponents) {
@@ -105,4 +102,7 @@ public class JPAQueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer 
 		return this.parameters;
 	}
 
+	public int getWhereKeywordPosition() {
+		return whereKeywordPosition;
+	}
 }
