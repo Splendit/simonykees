@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +11,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -52,9 +52,6 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 
 		InfixExpression infix = (InfixExpression) arguments.get(0);
 
-		String method = methodInvocation.toString(); // TODO just for debugging
-														// -> remove
-
 		boolean isLeftOperandStringLiteral = ASTNode.STRING_LITERAL == infix.getLeftOperand()
 			.getNodeType();
 
@@ -72,28 +69,47 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		boolean isStringLiteralWithoutArguments = !StringUtils.contains(currentLiteral.getLiteralValue(), "{}"); //$NON-NLS-1$
 
 		/*
-		 * TODO this needs to be extended for string literals etc.
+		 * TODO this has no real purpose yet. Something like that will be used though to make an example like this work:
+		 * Pre:
+		 * logger.info("A " + 1 + " B " + 2 + " C " + 3 + " D " + 4);
+		 * Post (currently):
+		 * logger.info("A {}{}{}{}{}{}{}",1," B ",2," C ",3," D ",4);
+		 * Post (improved):
+		 * logger.info("A {} B {} C {} D {}", 1, 2, 3, 4);
 		 */
-		boolean isRightOperandSimpleName = ASTNode.SIMPLE_NAME == infix.getRightOperand()
-			.getNodeType();
+		boolean isRightOperandValid = isRightOperandAllowedType(infix.getRightOperand());
 
-		if (!isStringLiteralWithoutArguments || !isRightOperandSimpleName) {
+		if (!isStringLiteralWithoutArguments || !isRightOperandValid) {
 			return true;
 		}
 
 		AST ast = astRewrite.getAST();
-		StringLiteral newLiteral = ast.newStringLiteral();
-		newLiteral.setLiteralValue(currentLiteral.getLiteralValue() + "{}"); //$NON-NLS-1$
 
-		SimpleName newArgument = (SimpleName) infix.getRightOperand();
+		List<Expression> newArguments = getNewArguments(infix);
+
+		StringLiteral newLiteral = ast.newStringLiteral();
+		// TODO check if the repeat has the right number when a Throwable arg is present
+		newLiteral.setLiteralValue(currentLiteral.getLiteralValue() + StringUtils.repeat("{}", newArguments.size())); //$NON-NLS-1$
 
 		astRewrite.replace(infix, newLiteral, null);
 
 		ListRewrite listRewriter = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 
-		listRewriter.insertAfter(newArgument, newLiteral, null);
+		for (Expression newArgument : newArguments) {
+			listRewriter.insertLast(newArgument, null);
+		}
 
 		return true;
+	}
+
+	private List<Expression> getNewArguments(InfixExpression infix) {
+
+		List<Expression> arguments = new ArrayList<>();
+
+		arguments.add(infix.getRightOperand());
+		arguments.addAll(infix.extendedOperands());
+
+		return arguments;
 	}
 
 	/**
@@ -142,6 +158,21 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		}
 
 		return true;
+	}
+
+	private boolean isRightOperandAllowedType(Expression expression) {
+		int nodeType = expression.getNodeType();
+
+		switch (nodeType) {
+
+		case ASTNode.SIMPLE_NAME:
+		case ASTNode.STRING_LITERAL:
+		case ASTNode.NUMBER_LITERAL:
+			return true;
+
+		default:
+			return false;
+		}
 	}
 
 }
