@@ -140,7 +140,13 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 		}
 
 		Expression methodExpression = methodInvocation.getExpression();
-		if (methodExpression == null || !hasRequiredMethodExpressionType(methodExpression.resolveTypeBinding())) {
+		if (methodExpression == null) {
+			return null;
+		}
+
+		boolean hasRequiredMethodExpressionType = hasRequiredMethodExpressionType(
+				methodExpression.resolveTypeBinding());
+		if (!hasRequiredMethodExpressionType) {
 			return null;
 		}
 
@@ -275,7 +281,11 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 
 		for (ReplaceableParameter parameter : replaceableParameters) {
 			replaceStringLiteral(parameter.getPrevious(), getNewPreviousLiteralValue(parameter));
-			replaceStringLiteral(parameter.getNext(), getNewNextLiteralValue(parameter));
+
+			StringLiteral next = parameter.getNext();
+			if (next != null) {
+				replaceStringLiteral(next, getNewNextLiteralValue(parameter));
+			}
 
 			Expression component = parameter.getParameter();
 			if (component.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {

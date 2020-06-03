@@ -56,8 +56,8 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 		componentStore.storeComponents(infixExpression);
 		List<Expression> queryComponents = componentStore.getComponents();
 		JPAQueryComponentsAnalyzer componentsAnalyzer = new JPAQueryComponentsAnalyzer(queryComponents);
-		
-		if(componentsAnalyzer.getWhereKeywordPosition() < 0) {
+
+		if (componentsAnalyzer.getWhereKeywordPosition() < 0) {
 			return true;
 		}
 		componentsAnalyzer.analyze();
@@ -98,6 +98,7 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 		List<ExpressionStatement> setParameterStatements = createSetParameterStatements(replaceableParameters,
 				querySimpleName);
 		addSetters(methodInvocation, setParameterStatements);
+		onRewrite();
 		return true;
 	}
 
@@ -109,7 +110,9 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 
 	@Override
 	protected boolean hasRequiredMethodExpressionType(ITypeBinding methodExpressionTypeBinding) {
-		return ClassRelationUtil.isInheritingContentOfTypes(methodExpressionTypeBinding, ENTITY_MANAGER_SINGLETON_LIST);
+		return ClassRelationUtil.isContentOfType(methodExpressionTypeBinding, ENTITY_MANAGER_QUALIFIED_NAME)
+				|| ClassRelationUtil.isInheritingContentOfTypes(methodExpressionTypeBinding,
+						ENTITY_MANAGER_SINGLETON_LIST);
 	}
 
 	@Override
