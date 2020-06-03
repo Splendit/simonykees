@@ -1,9 +1,13 @@
 package eu.jsparrow.jdtunit;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
@@ -19,7 +23,6 @@ import eu.jsparrow.jdtunit.util.PackageFragmentBuilder;
  * compilation units.
  *
  */
-@SuppressWarnings({ "nls" })
 public class JdtUnitFixtureProject {
 
 	private static final String PROJECT_FIXTURE_NAME = "FixtureProject";
@@ -126,6 +129,30 @@ public class JdtUnitFixtureProject {
 		JdtUnitFixtureClass clazz = new JdtUnitFixtureClass(this, packageFragment, className);
 		classes.put(className, clazz);
 		return clazz;
+	}
+
+	/**
+	 * Adds a new dependency to the classpath of the fixture project.
+	 * 
+	 * @param classpathEntry
+	 *            the classpath entry representing the dependency to be added.
+	 * @throws JavaModelException
+	 *             if the classpath of the project cannot be retrieved or
+	 *             modified.
+	 */
+	public void addClasspathEntry(IClasspathEntry classpathEntry) throws JavaModelException {
+		if (javaProject != null) {
+			IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
+			IClasspathEntry[] newEntries;
+			if (oldEntries.length != 0) {
+				Set<IClasspathEntry> set = new HashSet<>(Arrays.asList(oldEntries));
+				set.add(classpathEntry);
+				newEntries = set.toArray(new IClasspathEntry[set.size()]);
+			} else {
+				newEntries = new IClasspathEntry[] { classpathEntry };
+			}
+			javaProject.setRawClasspath(newEntries, null);
+		}
 	}
 
 	/**
