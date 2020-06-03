@@ -20,29 +20,31 @@ public class StandardLoggerASTVisitorTest extends UsesJDTUnitFixture {
 		options.put("system-err-print-exception", "error");
 		options.put("new-logging-statement", "error");
 		options.put("attach-exception-object", Boolean.TRUE.toString());
-		
+
 		addDependency("org.slf4j", "slf4j-api", "1.7.25");
-		setDefaultVisitor(new StandardLoggerASTVisitor( "org.slf4j.Logger", options));
+		setDefaultVisitor(new StandardLoggerASTVisitor("org.slf4j.Logger", options));
 
 	}
 
 	@Test
 	public void visit_existingLogger_shouldTransform() throws Exception {
-		
+
 		defaultFixture.addImport("org.slf4j.Logger");
 		defaultFixture.addImport("org.slf4j.LoggerFactory");
-		
+
 		String original = "" +
-				"private static final Logger logger = LoggerFactory.getLogger(" + DEFAULT_TYPE_DECLARATION_NAME + ".class);\n" + 
-				"\n" + 
-				"private void sampleMethod() {\n" + 
-				"	System.out.println(\"Sample value\");\n" + 
+				"private static final Logger logger = LoggerFactory.getLogger(" + DEFAULT_TYPE_DECLARATION_NAME
+				+ ".class);\n" +
+				"\n" +
+				"private void sampleMethod() {\n" +
+				"	System.out.println(\"Sample value\");\n" +
 				"}";
 		String expected = "" +
-				"private static final Logger logger = LoggerFactory.getLogger(" + DEFAULT_TYPE_DECLARATION_NAME + ".class);\n" + 
-				"\n" + 
-				"private void sampleMethod() {\n" + 
-				"	logger.info(\"Sample value\");\n" + 
+				"private static final Logger logger = LoggerFactory.getLogger(" + DEFAULT_TYPE_DECLARATION_NAME
+				+ ".class);\n" +
+				"\n" +
+				"private void sampleMethod() {\n" +
+				"	logger.info(\"Sample value\");\n" +
 				"}";
 		assertChange(original, expected);
 

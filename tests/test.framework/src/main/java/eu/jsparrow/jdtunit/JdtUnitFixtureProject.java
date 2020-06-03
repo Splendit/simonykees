@@ -132,7 +132,7 @@ public class JdtUnitFixtureProject {
 	}
 
 	/**
-	 * Adds a new dependency to the classp path of the fixture project.
+	 * Adds a new dependency to the classpath of the fixture project.
 	 * 
 	 * @param classpathEntry
 	 *            the classpath entry representing the dependency to be added.

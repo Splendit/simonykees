@@ -34,7 +34,8 @@ public abstract class UsesSimpleJDTUnitFixture {
 	protected static JdtUnitFixtureProject fixtureProject;
 	protected static JdtUnitFixtureClass fixture;
 
-	private AbstractASTRewriteASTVisitor visitor = new AbstractASTRewriteASTVisitor() {};
+	private AbstractASTRewriteASTVisitor visitor = new AbstractASTRewriteASTVisitor() {
+	};
 
 	@BeforeAll
 	public static void setUpClass() throws Exception {
@@ -54,12 +55,13 @@ public abstract class UsesSimpleJDTUnitFixture {
 	public void tearDownTest() throws Exception {
 		fixture.clear(true);
 	}
-	
-	protected void  addDependency(String groupId, String artifactId, String version) throws Exception {
-		IClasspathEntry classPathEntry = RulesTestUtil.generateMavenEntryFromDepedencyString(groupId, artifactId, version);
+
+	protected void addDependency(String groupId, String artifactId, String version) throws Exception {
+		IClasspathEntry classPathEntry = RulesTestUtil.generateMavenEntryFromDepedencyString(groupId, artifactId,
+				version);
 		fixtureProject.addClasspathEntry(classPathEntry);
 	}
-	
+
 	protected void setVisitor(AbstractASTRewriteASTVisitor visitor) {
 		this.visitor = visitor;
 	}
