@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -12,7 +14,6 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -66,33 +67,17 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 			return true;
 		}
 
-		if (methodInvocation.getLocationInParent() != VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+		SimpleName querySimpleName = findJPAQuerySimpleName(methodInvocation);
+		JPAQueryVariableAnalyzerASTVisitor queryVariableAnalyzerVisitor = new JPAQueryVariableAnalyzerASTVisitor(querySimpleName, methodInvocation);
+		
+		Block blockOfLocalVariableDeclaration = queryVariableAnalyzerVisitor.getBlockOfLocalVariableDeclaration();
+		if(blockOfLocalVariableDeclaration == null) {
 			return true;
 		}
-
-		VariableDeclarationFragment queryDeclarationFragment = (VariableDeclarationFragment) methodInvocation
-			.getParent();
-
-		if (queryDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+		blockOfLocalVariableDeclaration.accept(queryVariableAnalyzerVisitor);
+		if(queryVariableAnalyzerVisitor.isUnsafe()) {
 			return true;
 		}
-
-		VariableDeclarationStatement queryDeclarationStatement = (VariableDeclarationStatement) queryDeclarationFragment
-			.getParent();
-
-		if (queryDeclarationStatement.fragments()
-			.size() != 1) {
-			return true;
-		}
-
-		ITypeBinding queryTypeBinding = queryDeclarationStatement.getType()
-			.resolveBinding();
-
-		if (!ClassRelationUtil.isContentOfType(queryTypeBinding, "javax.persistence.Query")) { //$NON-NLS-1$
-			return true;
-		}
-
-		SimpleName querySimpleName = queryDeclarationFragment.getName();
 
 		replaceQuery(replaceableParameters);
 		List<ExpressionStatement> setParameterStatements = createSetParameterStatements(replaceableParameters,
@@ -100,6 +85,32 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 		addSetters(methodInvocation, setParameterStatements);
 		onRewrite();
 		return true;
+	}
+
+	private SimpleName findJPAQuerySimpleName(MethodInvocation methodInvocation) {
+		SimpleName simpleQueryName = null;
+		if (methodInvocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+
+			VariableDeclarationFragment queryDeclarationFragment = (VariableDeclarationFragment) methodInvocation
+				.getParent();
+			simpleQueryName = queryDeclarationFragment.getName();
+
+		} else if (methodInvocation.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			Assignment assignment = (Assignment) methodInvocation.getParent();
+			Expression leftHandSide = assignment.getLeftHandSide();
+			if (leftHandSide.getNodeType() == ASTNode.SIMPLE_NAME) {
+				simpleQueryName = (SimpleName) leftHandSide;
+			}
+		}
+		if (simpleQueryName == null) {
+			return null;
+		}
+		ITypeBinding queryTypeBinding = simpleQueryName.resolveTypeBinding();
+
+		if (ClassRelationUtil.isContentOfType(queryTypeBinding, "javax.persistence.Query")) { //$NON-NLS-1$
+			return simpleQueryName;
+		}
+		return null;
 	}
 
 	@Override
