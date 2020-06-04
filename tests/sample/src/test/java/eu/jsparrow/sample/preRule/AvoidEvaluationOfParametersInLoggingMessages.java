@@ -64,6 +64,8 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 	 * @param something
 	 */
 	public void logSomething_noChange_containsArgument(String b, String c, Exception e) {
+		logger.info("A " + 1 + " B {}" + 2);
+		logger.info("A " + 1 + " B {}", 2);
 		logger.info("A {} " + c, b); // A {b} {c}
 		logger.error("A {} " + c, b, e); // A {b} {c} {e}
 		logger.info("A {} " + "C" + " {}", "B", "D"); // A B C D
@@ -82,7 +84,24 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 	}
 
 	public void test(String something, Exception e) {
-		logger.debug(something + " is being printed", e);
-		logger.debug("{} is being printed", something, e);
+		// pre: 	logger.info("A " + 1 + " B " + 2);
+		// target:  logger.info("A {} B {}", 1, 2);
+		logger.info("A " + 1 + " B " + 2);
+
+		logger.info("A {}{}{}", 1, " B {}", 2);
+
+		logger.info("A {}{}{}", 1, " B {}", 2, "C");
+
+		logger.info("A {}" + 1 + " B " + 2);
+
+		logger.info("A {}{}{}{}", 1, " B ", 2);
+
+		logger.info("A {}{}{}{}", 1, " B ", 2, " C");
+		
+		logger.info("A " + 1 + " B " + 2 + " C " + 3 + " D " + 4);
+		
+		logger.info("A " + "X" + " B " + 2 + " C " + 3 + " D " + 4);
+		
+		logger.info("A " + "B " + 1);
 	}
 }

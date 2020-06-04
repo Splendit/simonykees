@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.rule.impl.AvoidEvaluationOfParametersInLoggingMessagesRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-@SuppressWarnings("nls")
 public class AvoidEvaluationOfParametersInLoggingMessagesTest extends SingleRuleTest {
 	
 	private static final String SAMPLE_FILE = "AvoidEvaluationOfParametersInLoggingMessages.java";

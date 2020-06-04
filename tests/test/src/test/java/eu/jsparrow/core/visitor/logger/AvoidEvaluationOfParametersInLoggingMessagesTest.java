@@ -26,7 +26,7 @@ public class AvoidEvaluationOfParametersInLoggingMessagesTest extends UsesJDTUni
 				+ ".class);\n" +
 				"\n" +
 				"private void sampleMethod() {\n" +
-				"	logger.info(\"A \" + 1 + \" B \" + 2 + \" C \" + 3 + \" D \" + 4);\n" +
+				"	logger.info(\"A \" + 1 + \" B \" + 2);\n" +
 				"}";
 		String expected = "" +
 				"private static final Logger logger = LoggerFactory.getLogger(" + DEFAULT_TYPE_DECLARATION_NAME

@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -61,21 +62,18 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 
 		StringLiteral currentLiteral = (StringLiteral) infix.getLeftOperand();
 
-		/*
-		 * TODO this check needs to be more sophisticated. it needs to look at
-		 * the complete infix expression. Example: logger.info("A " + 1 +
-		 * " B {}", 2);
-		 */
-		boolean isStringLiteralWithoutArguments = !StringUtils.contains(currentLiteral.getLiteralValue(), "{}"); //$NON-NLS-1$
+		ParameterCheckAstVisitor visitor = new ParameterCheckAstVisitor();
+		infix.accept(visitor);
+
+		String tmp = currentLiteral.getLiteralValue();
+		boolean isStringLiteralWithoutArguments = visitor.isSafe();
 
 		/*
-		 * TODO this has no real purpose yet. Something like that will be used though to make an example like this work:
-		 * Pre:
-		 * logger.info("A " + 1 + " B " + 2 + " C " + 3 + " D " + 4);
-		 * Post (currently):
-		 * logger.info("A {}{}{}{}{}{}{}",1," B ",2," C ",3," D ",4);
-		 * Post (improved):
-		 * logger.info("A {} B {} C {} D {}", 1, 2, 3, 4);
+		 * TODO this has no real purpose yet. Something like that will be used
+		 * though to make an example like this work: Pre: logger.info("A " + 1 +
+		 * " B " + 2 + " C " + 3 + " D " + 4); Post (currently):
+		 * logger.info("A {}{}{}{}{}{}{}",1," B ",2," C ",3," D ",4); Post
+		 * (improved): logger.info("A {} B {} C {} D {}", 1, 2, 3, 4);
 		 */
 		boolean isRightOperandValid = isRightOperandAllowedType(infix.getRightOperand());
 
@@ -83,26 +81,65 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 			return true;
 		}
 
+		List<Expression> newArguments = new ArrayList<>();
+		List<StringLiteral> newStringLiterals = new ArrayList<>();
+
 		AST ast = astRewrite.getAST();
 
-		List<Expression> newArguments = getNewArguments(infix);
+		// boolean lastArgumentWasStringLiteral = true;
+		StringLiteral lastLiteral = ast.newStringLiteral();
+		lastLiteral.setLiteralValue(currentLiteral.getLiteralValue());
+		for (Expression argument : getAllArguments(infix)) {
+			if (ASTNode.STRING_LITERAL == argument.getNodeType()) {
+				newStringLiterals.add(lastLiteral);
+				lastLiteral = ast.newStringLiteral();
+				lastLiteral.setLiteralValue(((StringLiteral) argument).getLiteralValue());
+			} else {
+				lastLiteral.setLiteralValue(lastLiteral.getLiteralValue() + "{}"); //$NON-NLS-1$
+				newArguments.add(argument);
+			}
+		}
+		newStringLiterals.add(lastLiteral);
 
-		StringLiteral newLiteral = ast.newStringLiteral();
-		// TODO check if the repeat has the right number when a Throwable arg is present
-		newLiteral.setLiteralValue(currentLiteral.getLiteralValue() + StringUtils.repeat("{}", newArguments.size())); //$NON-NLS-1$
-
-		astRewrite.replace(infix, newLiteral, null);
+		ASTNode newNode;
+		if (newStringLiterals.size() == 1) {
+			newNode = newStringLiterals.get(0);
+		} else if (newStringLiterals.size() > 1) {
+			InfixExpression newInfix = ast.newInfixExpression();
+			newInfix.setLeftOperand(newStringLiterals.get(0));
+			newInfix.setRightOperand(newStringLiterals.get(1));
+			if (newStringLiterals.size() > 2) {
+				for (int i = 2; i < newStringLiterals.size(); i++) {
+					newInfix.extendedOperands()
+						.add(newStringLiterals.get(i));
+				}
+			}
+			newNode = newInfix;
+		} else {
+			// we have a problem
+			return true;
+		}
+		
+		astRewrite.replace(infix, newNode, null);
 
 		ListRewrite listRewriter = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 
+		/*
+		 * Reversing the arguments is done for the following reason: We cannot
+		 * use insertLast (where we would not have to change the order) because
+		 * there might be a Throwable as an argument after the InfixExpression
+		 * and we want to add all items of this list before that. This version
+		 * works regardless of whether or not there is a Throwable.
+		 */
+		Collections.reverse(newArguments);
 		for (Expression newArgument : newArguments) {
-			listRewriter.insertLast(newArgument, null);
+			listRewriter.insertAfter(newArgument, newNode, null);
 		}
 
 		return true;
 	}
 
-	private List<Expression> getNewArguments(InfixExpression infix) {
+	private List<Expression> getAllArguments(InfixExpression infix) {
 
 		List<Expression> arguments = new ArrayList<>();
 
@@ -172,6 +209,31 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 
 		default:
 			return false;
+		}
+	}
+
+	/**
+	 * This visitor is used to check whether all {@link StringLiteral} operands
+	 * of an {@link InfixExpression} are free of parameters '{}'
+	 */
+	private class ParameterCheckAstVisitor extends ASTVisitor {
+		private boolean safe = true;
+
+		@Override
+		public boolean visit(StringLiteral node) {
+			if (StringUtils.contains(node.getLiteralValue(), "{}")) { //$NON-NLS-1$
+				safe = false;
+			}
+			return safe;
+		}
+
+		public boolean isSafe() {
+			return safe;
+		}
+
+		@Override
+		public boolean preVisit2(ASTNode node) {
+			return safe;
 		}
 	}
 
