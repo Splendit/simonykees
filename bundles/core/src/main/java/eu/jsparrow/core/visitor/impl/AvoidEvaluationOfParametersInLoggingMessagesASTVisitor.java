@@ -68,9 +68,7 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 
 		boolean isStringLiteralWithoutArguments = visitor.isSafe();
 
-		boolean isRightOperandValid = isRightOperandAllowedType(infix.getRightOperand());
-
-		if (!isStringLiteralWithoutArguments || !isRightOperandValid) {
+		if (!isStringLiteralWithoutArguments) {
 			return true;
 		}
 
@@ -232,34 +230,6 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		switch (nodeType) {
 		case ASTNode.STRING_LITERAL:
 			return true;
-		default:
-			return false;
-		}
-	}
-
-	/**
-	 * XXX: We might consider not having those restrictions. This is safer
-	 * though.
-	 * 
-	 * @param expression
-	 * @return whether or not the rightOperand is of one of the allowed types.
-	 */
-	private boolean isRightOperandAllowedType(Expression expression) {
-		int nodeType = expression.getNodeType();
-
-		switch (nodeType) {
-
-		case ASTNode.SIMPLE_NAME:
-		case ASTNode.STRING_LITERAL:
-		case ASTNode.NUMBER_LITERAL:
-		case ASTNode.QUALIFIED_NAME: // e.g., BigDecimal.ONE
-		case ASTNode.METHOD_INVOCATION: // e.g., Instant.now()
-			// e.g., "This" + ("is" + "Sparta")
-		case ASTNode.PARENTHESIZED_EXPRESSION:
-		case ASTNode.CHARACTER_LITERAL: // e.g., "c: " + 'c'
-		case ASTNode.BOOLEAN_LITERAL: // e.g., "b: " + true
-			return true;
-
 		default:
 			return false;
 		}
