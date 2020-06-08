@@ -10,8 +10,8 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * A helper class for the storage of the components of a string concatenation
- * result which represents a dynamic query.
+ * A helper class for the storage of the components of the string concatenation
+ * of a dynamic query.
  * 
  * @since 3.18.0
  *

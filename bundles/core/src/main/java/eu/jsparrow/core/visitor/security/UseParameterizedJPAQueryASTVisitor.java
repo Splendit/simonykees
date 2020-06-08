@@ -61,8 +61,7 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 		if (componentsAnalyzer.getWhereKeywordPosition() < 0) {
 			return true;
 		}
-		componentsAnalyzer.analyze();
-		List<ReplaceableParameter> replaceableParameters = componentsAnalyzer.getReplaceableParameters();
+		List<ReplaceableParameter> replaceableParameters = componentsAnalyzer.createReplaceableParameterList();
 		if (replaceableParameters.isEmpty()) {
 			return true;
 		}

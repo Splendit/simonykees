@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.security;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -19,8 +18,6 @@ public class JPAQueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer 
 
 	private static final String SETTER_NAME = "setParameter"; //$NON-NLS-1$
 
-	private List<ReplaceableParameter> parameters = new ArrayList<>();
-
 	private final int whereKeywordPosition;
 
 	JPAQueryComponentsAnalyzer(List<Expression> components) {
@@ -28,29 +25,21 @@ public class JPAQueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer 
 		whereKeywordPosition = findWhereKeywordPosition();
 	}
 
-	/**
-	 * Constructs a list of {@link ReplaceableParameter}s out of the
-	 * {@link #components} of the query.
-	 * 
-	 * @return
-	 */
-	public void analyze() {
-		List<Expression> nonLiteralComponents = collectNonLiteralComponents();
-		int position = 1;
-		for (Expression component : nonLiteralComponents) {
-			int index = components.indexOf(component);
-			if (index > whereKeywordPosition) {
-				StringLiteral previous = findPrevious(index);
-				if (previous != null) {
-					StringLiteral next = findNext(index);
-					if (next != null || index == components.size() - 1) {
-						this.parameters
-							.add(new ReplaceableParameter(previous, next, component, SETTER_NAME, position));
-						position++;
-					}
-				}
-			}
+	@Override
+	protected ReplaceableParameter createReplaceableParameter(int componentIndex, int parameterPosition) {
+		if (componentIndex <= whereKeywordPosition) {
+			return null;
 		}
+		StringLiteral previous = findPrevious(componentIndex);
+		if (previous == null) {
+			return null;
+		}
+		StringLiteral next = findNext(componentIndex);
+		if (next == null && componentIndex < components.size() - 1) {
+			return null;
+		}
+		Expression nonLiteralComponent = components.get(componentIndex);
+		return new ReplaceableParameter(previous, next, nonLiteralComponent, SETTER_NAME, parameterPosition);
 	}
 
 	private int findWhereKeywordPosition() {
@@ -92,14 +81,6 @@ public class JPAQueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer 
 		return literal.getLiteralValue()
 			.trim()
 			.endsWith("="); //$NON-NLS-1$
-	}
-
-	/**
-	 * @return the list of {@link ReplaceableParameter}s constructed by
-	 *         {@link #analyze()}.
-	 */
-	public List<ReplaceableParameter> getReplaceableParameters() {
-		return this.parameters;
 	}
 
 	public int getWhereKeywordPosition() {

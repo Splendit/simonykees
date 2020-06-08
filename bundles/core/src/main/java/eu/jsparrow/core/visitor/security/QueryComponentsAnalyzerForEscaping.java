@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.security;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,55 +24,52 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 public class QueryComponentsAnalyzerForEscaping extends AbstractQueryComponentsAnalyzer {
 
-	private List<Expression> expressionsToEscape = new ArrayList<>();
-
 	public QueryComponentsAnalyzerForEscaping(List<Expression> components) {
 		super(components);
 	}
 
-	/**
-	 * Constructs a list of {@link ReplaceableParameter}s out of the
-	 * {@link #components} of the query.
-	 * 
-	 * @return
-	 */
-	public void analyze() {
-		List<Expression> nonLiteralComponents = collectNonLiteralComponents();
-		for (Expression component : nonLiteralComponents) {
-			if (isComponentToEscape(component)) {
-				this.expressionsToEscape.add(component);
-			}
+	@Override
+	protected ReplaceableParameter createReplaceableParameter(int componentIndex, int parameterPosition) {
+		StringLiteral previous = findPrevious(componentIndex);
+		if (previous == null) {
+			return null;
 		}
-	}
-
-	private boolean isComponentToEscape(Expression component) {
-		int index = components.indexOf(component);
-		StringLiteral stringLiteralBefore = findPrevious(index);
-		StringLiteral stringLiteralAfter = findNext(index);
-		if (stringLiteralBefore == null || stringLiteralAfter == null) {
-			return false;
+		StringLiteral next = findNext(componentIndex);
+		if (next == null) {
+			return null;
 		}
+		Expression nonLiteralComponent = components.get(componentIndex);
 
-		ITypeBinding expressionTypeBinding = component.resolveTypeBinding();
+		ITypeBinding expressionTypeBinding = nonLiteralComponent.resolveTypeBinding();
 		if (!ClassRelationUtil.isContentOfType(expressionTypeBinding, java.lang.String.class.getName())) {
-			return false;
+			return null;
 		}
 
-		if (component.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			return !isEncodeForSQLInvocation((MethodInvocation) component);
-		}
+		if (nonLiteralComponent.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			MethodInvocation invocation = (MethodInvocation) nonLiteralComponent;
+			if (isEncodeForSQLInvocation(invocation)) {
+				return null;
+			}
+		} else {
+			IVariableBinding variableBinding = null;
+			if (nonLiteralComponent.getNodeType() == ASTNode.FIELD_ACCESS) {
+				variableBinding = ((FieldAccess) nonLiteralComponent).resolveFieldBinding();
 
-		IVariableBinding variableBinding = null;
-		if (component.getNodeType() == ASTNode.FIELD_ACCESS) {
-			variableBinding = ((FieldAccess) component).resolveFieldBinding();
+			} else if (nonLiteralComponent.getNodeType() == ASTNode.SIMPLE_NAME) {
+				IBinding simpleNameBinding = ((SimpleName) nonLiteralComponent).resolveBinding();
+				if (simpleNameBinding.getKind() == IBinding.VARIABLE) {
+					variableBinding = (IVariableBinding) simpleNameBinding;
+				}
+			}
+			if (variableBinding == null) {
+				return null;
+			}
 
-		} else if (component.getNodeType() == ASTNode.SIMPLE_NAME) {
-			IBinding simpleNameBinding = ((SimpleName) component).resolveBinding();
-			if (simpleNameBinding.getKind() == IBinding.VARIABLE) {
-				variableBinding = (IVariableBinding) simpleNameBinding;
+			if (Modifier.isFinal(variableBinding.getModifiers())) {
+				return null;
 			}
 		}
-		return variableBinding != null && !Modifier.isFinal(variableBinding.getModifiers());
+		return new ReplaceableParameter(previous, next, nonLiteralComponent, null, parameterPosition);
 	}
 
 	private boolean isEncodeForSQLInvocation(MethodInvocation methodInvocation) {
@@ -96,13 +92,4 @@ public class QueryComponentsAnalyzerForEscaping extends AbstractQueryComponentsA
 				ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, encoderBaseTypeList);
 
 	}
-
-	/**
-	 * @return the list of {@link Expression}s constructed by
-	 *         {@link #analyze()}.
-	 */
-	public List<Expression> getExpressionsToEscape() {
-		return this.expressionsToEscape;
-	}
-
 }

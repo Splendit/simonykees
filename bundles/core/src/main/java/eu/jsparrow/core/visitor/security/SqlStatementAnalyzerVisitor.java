@@ -5,13 +5,17 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 /**
- * A helper visitor for analyzing the creation and references of a
- * {@link java.sql.Statement}.
+ * 
+ * 
+ * A helper visitor for analyzing the creation and the references on a local
+ * variable of the type {@link java.sql.Statement}.
+ * 
+ * @see AbstractDBQueryUsageASTVisitor
  * 
  * @since 3.16.0
  *
  */
-public class SqlStatementAnalyzerVisitor extends AbstractLocalVariableUsageASTVisitor {
+public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor {
 
 	private MethodInvocation getResultSetInvocation;
 
@@ -30,7 +34,7 @@ public class SqlStatementAnalyzerVisitor extends AbstractLocalVariableUsageASTVi
 		}
 		return null;
 	}
-	
+
 	@Override
 	protected boolean isOtherUnsafeVariableReference(SimpleName simpleName) {
 		MethodInvocation getResultSet = findGetResultSet(simpleName);

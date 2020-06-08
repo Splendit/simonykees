@@ -4,10 +4,10 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -16,13 +16,16 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * A helper visitor for analyzing the creation and references of a local
- * variable.
+ * A helper visitor which analyzes the creation and usage of local variables
+ * used for the execution of database queries.
+ * 
+ * Subclasses of this class are intended to be used by visitor classes in
+ * connection with the fixing of potential SQL injection.
  * 
  * @since 3.18.0
  *
  */
-public abstract class AbstractLocalVariableUsageASTVisitor extends ASTVisitor {
+public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	protected final VariableDeclarationFragment localVariableDeclarationFragment;
 	protected final Block blockOfLocalVariableDeclaration;
 	protected final SimpleName variableName;
@@ -32,10 +35,10 @@ public abstract class AbstractLocalVariableUsageASTVisitor extends ASTVisitor {
 	protected boolean unsafe = false;
 	protected boolean beforeDeclaration = true;
 
-	protected AbstractLocalVariableUsageASTVisitor(SimpleName sqlStatement, MethodInvocation methodInvocation) {
-		this.variableName = sqlStatement;
+	protected AbstractDBQueryUsageASTVisitor(SimpleName databaseQuery, MethodInvocation methodInvocation) {
+		this.variableName = databaseQuery;
 		this.compilationUnit = ASTNodeUtil.getSpecificAncestor(methodInvocation, CompilationUnit.class);
-		ASTNode statementDeclaringNode = compilationUnit.findDeclaringNode(sqlStatement.resolveBinding());
+		ASTNode statementDeclaringNode = compilationUnit.findDeclaringNode(databaseQuery.resolveBinding());
 		localVariableDeclarationFragment = findLocalVariableDeclarationFragment(methodInvocation,
 				statementDeclaringNode);
 		blockOfLocalVariableDeclaration = findBlockOfLocalVariableDeclaration(localVariableDeclarationFragment);
@@ -46,13 +49,15 @@ public abstract class AbstractLocalVariableUsageASTVisitor extends ASTVisitor {
 
 	private VariableDeclarationFragment findLocalVariableDeclarationFragment(MethodInvocation methodInvocation,
 			ASTNode statementDeclaringNode) {
-		MethodDeclaration methodSurroundingDeclaration = ASTNodeUtil.getSpecificAncestor(statementDeclaringNode,
-				MethodDeclaration.class);
-		if (methodSurroundingDeclaration == null) {
+
+		BodyDeclaration methodSurroundingDeclaration = ASTNodeUtil.getSpecificAncestor(statementDeclaringNode,
+				BodyDeclaration.class);
+		if (methodSurroundingDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION &&
+				methodSurroundingDeclaration.getNodeType() != ASTNode.INITIALIZER) {
 			return null;
 		}
-		MethodDeclaration methodSurroundingInvocation = ASTNodeUtil.getSpecificAncestor(methodInvocation,
-				MethodDeclaration.class);
+		BodyDeclaration methodSurroundingInvocation = ASTNodeUtil.getSpecificAncestor(methodInvocation,
+				BodyDeclaration.class);
 		if (methodSurroundingInvocation != methodSurroundingDeclaration) {
 			return null;
 		}

@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.security;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +18,6 @@ import org.eclipse.jdt.core.dom.StringLiteral;
  *
  */
 public class QueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer {
-
-	private List<ReplaceableParameter> parameters = new ArrayList<>();
 
 	@SuppressWarnings("nls")
 	private static final Map<String, String> SETTERS_MAP = Collections.unmodifiableMap(new HashMap<String, String>() {
@@ -61,29 +58,22 @@ public class QueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer {
 		super(components);
 	}
 
-	/**
-	 * Constructs a list of {@link ReplaceableParameter}s out of the
-	 * {@link #components} of the query.
-	 * 
-	 * @return
-	 */
-	public void analyze() {
-		List<Expression> nonLiteralComponents = collectNonLiteralComponents();
-		int position = 1;
-		for (Expression component : nonLiteralComponents) {
-			int index = components.indexOf(component);
-			StringLiteral previous = findPrevious(index);
-			if (previous != null) {
-				StringLiteral next = findNext(index);
-				if (next != null) {
-					String setterName = findSetterName(component);
-					if (setterName != null) {
-						this.parameters.add(new ReplaceableParameter(previous, next, component, setterName, position));
-						position++;
-					}
-				}
-			}
+	@Override
+	protected ReplaceableParameter createReplaceableParameter(int componentIndex, int parameterPosition) {
+		StringLiteral previous = findPrevious(componentIndex);
+		if (previous == null) {
+			return null;
 		}
+		StringLiteral next = findNext(componentIndex);
+		if (next == null) {
+			return null;
+		}
+		Expression nonLiteralComponent = components.get(componentIndex);
+		String setterName = findSetterName(nonLiteralComponent);
+		if (setterName == null) {
+			return null;
+		}
+		return new ReplaceableParameter(previous, next, nonLiteralComponent, setterName, parameterPosition);
 	}
 
 	private String findSetterName(Expression component) {
@@ -103,14 +93,6 @@ public class QueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer {
 		}
 		return type.getErasure()
 			.getQualifiedName();
-	}
-
-	/**
-	 * @return the list of {@link ReplaceableParameter}s constructed by
-	 *         {@link #analyze()}.
-	 */
-	public List<ReplaceableParameter> getReplaceableParameters() {
-		return this.parameters;
 	}
 
 }

@@ -6,8 +6,18 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+/**
+ * 
+ * A helper visitor for analyzing the creation and references on a local
+ * variable of the type {@code javax.persistence.Query}.
+ * 
+ * @see AbstractDBQueryUsageASTVisitor
+ * 
+ * @since 3.18.0
+ *
+ */
 @SuppressWarnings("nls")
-public class JPAQueryVariableAnalyzerASTVisitor extends AbstractLocalVariableUsageASTVisitor {
+public class JPAQueryVariableAnalyzerASTVisitor extends AbstractDBQueryUsageASTVisitor {
 
 	private static final String SET_PARAMETER = "setParameter";
 	private static final List<String> EXECUTION_METHOD_NAMES = Arrays.asList("getResultList", "getSingleResult",

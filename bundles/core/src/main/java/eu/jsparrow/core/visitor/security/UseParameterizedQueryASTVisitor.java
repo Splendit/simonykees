@@ -211,8 +211,7 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 	private List<ReplaceableParameter> analyzeQueryComponents(SqlVariableAnalyzerVisitor sqlVariableVisitor) {
 		List<Expression> queryComponents = sqlVariableVisitor.getDynamicQueryComponents();
 		QueryComponentsAnalyzer componentsAnalyzer = new QueryComponentsAnalyzer(queryComponents);
-		componentsAnalyzer.analyze();
-		return componentsAnalyzer.getReplaceableParameters();
+		return componentsAnalyzer.createReplaceableParameterList();
 	}
 
 	private void replaceStatementDeclaration(VariableDeclarationFragment fragment, MethodInvocation createStatement,

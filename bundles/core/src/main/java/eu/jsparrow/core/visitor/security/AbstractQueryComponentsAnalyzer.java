@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.security;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,17 +23,6 @@ public abstract class AbstractQueryComponentsAnalyzer {
 
 	AbstractQueryComponentsAnalyzer(List<Expression> components) {
 		this.components = components;
-	}
-
-	/**
-	 * 
-	 * @return a list of all components of the dynamic query which are not
-	 *         instances of {@link StringLiteral}.
-	 */
-	protected List<Expression> collectNonLiteralComponents() {
-		return components.stream()
-			.filter(component -> component.getNodeType() != ASTNode.STRING_LITERAL)
-			.collect(Collectors.toList());
 	}
 
 	/**
@@ -90,5 +80,32 @@ public abstract class AbstractQueryComponentsAnalyzer {
 		StringLiteral literal = (StringLiteral) previous;
 		return isValidPrevious(literal) ? literal : null;
 	}
+
+	/**
+	 * Constructs a list of {@link ReplaceableParameter}s out of the
+	 * {@link #components} of the query.
+	 * 
+	 * @return
+	 */
+	public List<ReplaceableParameter> createReplaceableParameterList() {
+		List<Expression> nonLiteralComponents = components.stream()
+			.filter(component1 -> component1.getNodeType() != ASTNode.STRING_LITERAL)
+			.collect(Collectors.toList());
+
+		List<ReplaceableParameter> parameters = new ArrayList<>();
+
+		int parameterPosition = 1;
+		for (Expression component : nonLiteralComponents) {
+			int componentIndex = components.indexOf(component);
+			ReplaceableParameter parameter = createReplaceableParameter(componentIndex, parameterPosition);
+			if (parameter != null) {
+				parameters.add(parameter);
+				parameterPosition++;
+			}
+		}
+		return parameters;
+	}
+
+	protected abstract ReplaceableParameter createReplaceableParameter(int componentIndex, int parameterPosition);
 
 }

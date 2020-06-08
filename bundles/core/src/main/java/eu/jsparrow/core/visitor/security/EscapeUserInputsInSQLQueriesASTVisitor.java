@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -224,7 +225,8 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	private List<Expression> analyzeQueryComponents(SqlVariableAnalyzerVisitor sqlVariableVisitor) {
 		List<Expression> queryComponents = sqlVariableVisitor.getDynamicQueryComponents();
 		QueryComponentsAnalyzerForEscaping componentsAnalyzer = new QueryComponentsAnalyzerForEscaping(queryComponents);
-		componentsAnalyzer.analyze();
-		return componentsAnalyzer.getExpressionsToEscape();
+		return componentsAnalyzer.createReplaceableParameterList().stream()
+				.map(ReplaceableParameter::getParameter)
+				.collect(Collectors.toList());
 	}
 }
