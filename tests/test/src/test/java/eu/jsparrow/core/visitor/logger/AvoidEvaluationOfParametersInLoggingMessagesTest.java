@@ -20,20 +20,22 @@ public class AvoidEvaluationOfParametersInLoggingMessagesTest extends UsesJDTUni
 
 		defaultFixture.addImport("org.slf4j.Logger");
 		defaultFixture.addImport("org.slf4j.LoggerFactory");
+		defaultFixture.addImport("java.math.BigDecimal");
+		defaultFixture.addImport("java.time.Instant");
 
 		String original = "" +
 				"private static final Logger logger = LoggerFactory.getLogger(" + DEFAULT_TYPE_DECLARATION_NAME
 				+ ".class);\n" +
 				"\n" +
 				"private void sampleMethod() {\n" +
-				"	logger.info(\"A \" + 1 + \" B \" + 2);\n" +
+				"	logger.info(\"This \" + (\"is \" + \"Sparta\"));\n" +
 				"}";
 		String expected = "" +
 				"private static final Logger logger = LoggerFactory.getLogger(" + DEFAULT_TYPE_DECLARATION_NAME
 				+ ".class);\n" +
 				"\n" +
 				"private void sampleMethod() {\n" +
-				"	logger.info(\"A {} B {} C {} D {}\", 1, 2, 3, 4);\n" +
+				"	logger.info(\"This {}\", (\"is \" + \"Sparta\"));\n" +
 				"}";
 		assertChange(original, expected);
 

@@ -32,6 +32,7 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 	private static final List<String> THROWABLE_TYPES = Collections
 		.unmodifiableList(Arrays.asList(THROWABLE_TYPE));
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 
@@ -47,14 +48,14 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		}
 
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+		
 		if (!argumentsAllowRefactoring(arguments)) {
 			return true;
 		}
 
 		InfixExpression infix = (InfixExpression) arguments.get(0);
 
-		boolean isLeftOperandStringLiteral = ASTNode.STRING_LITERAL == infix.getLeftOperand()
-			.getNodeType();
+		boolean isLeftOperandStringLiteral = isLeftOperandAllowedType(infix.getLeftOperand());
 
 		if (!isLeftOperandStringLiteral) {
 			return true;
@@ -65,16 +66,8 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		ParameterCheckAstVisitor visitor = new ParameterCheckAstVisitor();
 		infix.accept(visitor);
 
-		String tmp = currentLiteral.getLiteralValue();
 		boolean isStringLiteralWithoutArguments = visitor.isSafe();
 
-		/*
-		 * TODO this has no real purpose yet. Something like that will be used
-		 * though to make an example like this work: Pre: logger.info("A " + 1 +
-		 * " B " + 2 + " C " + 3 + " D " + 4); Post (currently):
-		 * logger.info("A {}{}{}{}{}{}{}",1," B ",2," C ",3," D ",4); Post
-		 * (improved): logger.info("A {} B {} C {} D {}", 1, 2, 3, 4);
-		 */
 		boolean isRightOperandValid = isRightOperandAllowedType(infix.getRightOperand());
 
 		if (!isStringLiteralWithoutArguments || !isRightOperandValid) {
@@ -86,21 +79,34 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 
 		AST ast = astRewrite.getAST();
 
-		// boolean lastArgumentWasStringLiteral = true;
+		/*
+		 * Logic to concatenate StringLiterals and introduce parameters.
+		 */
+		boolean lastArgumentWasStringLiteral = true;
 		StringLiteral lastLiteral = ast.newStringLiteral();
 		lastLiteral.setLiteralValue(currentLiteral.getLiteralValue());
 		for (Expression argument : getAllArguments(infix)) {
 			if (ASTNode.STRING_LITERAL == argument.getNodeType()) {
-				newStringLiterals.add(lastLiteral);
-				lastLiteral = ast.newStringLiteral();
-				lastLiteral.setLiteralValue(((StringLiteral) argument).getLiteralValue());
+				String argumentLiteralValue = ((StringLiteral) argument).getLiteralValue();
+				if (lastArgumentWasStringLiteral) {
+					newStringLiterals.add(lastLiteral);
+					lastLiteral = ast.newStringLiteral();
+					lastLiteral.setLiteralValue(argumentLiteralValue);
+				} else {
+					lastLiteral.setLiteralValue(lastLiteral.getLiteralValue() + argumentLiteralValue);
+				}
+				lastArgumentWasStringLiteral = true;
 			} else {
 				lastLiteral.setLiteralValue(lastLiteral.getLiteralValue() + "{}"); //$NON-NLS-1$
 				newArguments.add(argument);
+				lastArgumentWasStringLiteral = false;
 			}
 		}
 		newStringLiterals.add(lastLiteral);
 
+		/*
+		 * Prepare the node to replace the original InfixExpression
+		 */
 		ASTNode newNode;
 		if (newStringLiterals.size() == 1) {
 			newNode = newStringLiterals.get(0);
@@ -119,12 +125,14 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 			// we have a problem
 			return true;
 		}
-		
+
 		astRewrite.replace(infix, newNode, null);
 
 		ListRewrite listRewriter = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 
 		/*
+		 * Adding the collected arguments.
+		 * 
 		 * Reversing the arguments is done for the following reason: We cannot
 		 * use insertLast (where we would not have to change the order) because
 		 * there might be a Throwable as an argument after the InfixExpression
@@ -139,6 +147,7 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<Expression> getAllArguments(InfixExpression infix) {
 
 		List<Expression> arguments = new ArrayList<>();
@@ -197,6 +206,44 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		return true;
 	}
 
+	/**
+	 * We only allow {@link StringLiteral}s as leftOperand.
+	 * <p/>
+	 * <b>Note:</b> Cases such as this:
+	 * 
+	 * <pre>
+	 * <code>logger.info("s: " + "s" + " i: " + 1 + ".");</code>
+	 * </pre>
+	 * 
+	 * ..will produce an {@link InfixExpression} as leftOperand with content:
+	 * 
+	 * <pre>
+	 * <code>"s: " + "s" + " i: "</code>
+	 * </pre>
+	 * 
+	 * ..and therefore no transformation will take place.
+	 * <p/>
+	 * We decided to not support those cases because it could get complicated
+	 * real fast (e.g., further nesting of InfixExpressions).
+	 */
+	private boolean isLeftOperandAllowedType(Expression expression) {
+		int nodeType = expression.getNodeType();
+
+		switch (nodeType) {
+		case ASTNode.STRING_LITERAL:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/**
+	 * XXX: We might consider not having those restrictions. This is safer
+	 * though.
+	 * 
+	 * @param expression
+	 * @return whether or not the rightOperand is of one of the allowed types.
+	 */
 	private boolean isRightOperandAllowedType(Expression expression) {
 		int nodeType = expression.getNodeType();
 
@@ -205,6 +252,9 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		case ASTNode.SIMPLE_NAME:
 		case ASTNode.STRING_LITERAL:
 		case ASTNode.NUMBER_LITERAL:
+		case ASTNode.QUALIFIED_NAME: // e.g., BigDecimal.ONE
+		case ASTNode.METHOD_INVOCATION: // e.g., Instant.now()
+		case ASTNode.PARENTHESIZED_EXPRESSION: // e.g., "This" + ("is" + "Sparta")
 			return true;
 
 		default:

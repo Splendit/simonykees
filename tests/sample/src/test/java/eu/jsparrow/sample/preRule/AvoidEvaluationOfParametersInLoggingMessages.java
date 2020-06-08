@@ -1,5 +1,8 @@
 package eu.jsparrow.sample.preRule;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +16,7 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 	 * 
 	 * @param something
 	 */
-	public void logSomething(String something) {
+	public void visit_allLogLevels_shouldTransform(String something) {
 		logger.trace("Print " + something);
 		logger.debug("Print " + something);
 		logger.info("Print " + something);
@@ -27,8 +30,14 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 	 * of the '+'
 	 * 
 	 * @param something
+	 * @param t
+	 * @param e
+	 * @param r
+	 * @param err
+	 * @param npe
 	 */
-	public void logSomethingWithThrowable(String something, Throwable t, Exception e, RuntimeException r, Error err,
+	public void visit_throwableParameter_shouldTransform(String something, Throwable t, Exception e, RuntimeException r,
+			Error err,
 			NullPointerException npe) {
 		logger.trace("Print " + something, t);
 		logger.debug("Print " + something, e);
@@ -43,18 +52,47 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 	 * 
 	 * @param something
 	 */
-	public void logSomething_noChange_wrongOrder(String something) {
+	public void visit_wrongOrderOfParameters_shouldNotTransform(String something, Exception e) {
 		logger.trace(something + " is being printed");
 		logger.debug(something + " is being printed");
 		logger.info(something + " is being printed");
 		logger.warn(something + " is being printed");
-		logger.error(something + " is being printed");
+		logger.error(something + " is being printed", e);
 	}
 
-	public void logSomething_change_addParameters() {
+	public void visit_combinableStringLiterals_shouldTransform() {
+		logger.info("A " + 1 + " B " + 2);
 		logger.info("A " + 1 + " B " + 2 + " C " + 3 + " D " + 4);
 		logger.info("A " + 1 + " B " + 2 + " C " + 3 + " D " + 4 + " E " + new Exception("5").getMessage());
-		logger.info("A " + 1 + " B " + 2 + " C " + 3 + " D " + 4 + " E ", new Exception("5"));
+		logger.info("A " + 1 + " B " + 2 + " C " + 3 + " D " + 4 + " E", new Exception("5"));
+	}
+
+	public void visit_variousTypes_shouldTransform(String s, int i, BigDecimal bd) {
+		logger.info("s: " + s + " i: " + i + " bd: " + bd);
+		logger.info("s: " + "s" + " i: " + 1);
+		logger.info("i: '" + 1 + "'");
+		logger.info("bd: '" + BigDecimal.ONE + "'");
+	}
+
+	public void visit_variousTypes_shouldNotTransform(String s, int i, BigDecimal bd) {
+		logger.info("s: " + "s" + " i: " + 1 + " bd: " + BigDecimal.ONE);
+		logger.info("s: " + "s" + " i: " + 1 + ".");
+		logger.info("s: '" + "s" + "'");
+	}
+
+	public void visit_methodsCalls_shouldTransform() {
+		logger.info("Time: " + Instant.now());
+		logger.info("My String " + String.format("is %s", "formatted"));
+	}
+
+	public void visit_brackets_shouldTransform() {
+		logger.info("This " + ("is " + "Sparta"));
+		logger.info("The time is: " + ((String) Instant.now()
+			.toString()).toLowerCase() + ".");
+	}
+
+	public void visit_brackets_shouldNotTransform() {
+		logger.info(("This " + "is " + "Sparta"));
 	}
 
 	/**
@@ -73,35 +111,8 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 		logger.info("A {} " + c + " {}", "B", "D", e); // A B {c} D {e}
 		logger.info("A " + "B " + c + " {}", "D", e); // A B {c} D {e}
 		logger.info("A " + 1 + " B {}", 2); // A 1 B 2
-		logger.info("A " + 1 + " B {}" + " C" + " {} {}", 2, 3, "D " + 4); // A
-																			// 1
-																			// B
-																			// 2
-																			// C
-																			// 3
-																			// D
-																			// 4
+		// A 1 B 2 C 3 D 4
+		logger.info("A " + 1 + " B {}" + " C" + " {} {}", 2, 3, "D " + 4);
 	}
 
-	public void test(String something, Exception e) {
-		// pre: 	logger.info("A " + 1 + " B " + 2);
-		// target:  logger.info("A {} B {}", 1, 2);
-		logger.info("A " + 1 + " B " + 2);
-
-		logger.info("A {}{}{}", 1, " B {}", 2);
-
-		logger.info("A {}{}{}", 1, " B {}", 2, "C");
-
-		logger.info("A {}" + 1 + " B " + 2);
-
-		logger.info("A {}{}{}{}", 1, " B ", 2);
-
-		logger.info("A {}{}{}{}", 1, " B ", 2, " C");
-		
-		logger.info("A " + 1 + " B " + 2 + " C " + 3 + " D " + 4);
-		
-		logger.info("A " + "X" + " B " + 2 + " C " + 3 + " D " + 4);
-		
-		logger.info("A " + "B " + 1);
-	}
 }
