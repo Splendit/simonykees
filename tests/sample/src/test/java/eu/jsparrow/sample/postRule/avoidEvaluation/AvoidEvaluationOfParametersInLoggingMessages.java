@@ -67,11 +67,13 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 		logger.info("A {} B {} C {} D {} E", 1, 2, 3, 4, new Exception("5"));
 	}
 
-	public void visit_variousTypes_shouldTransform(String s, int i, BigDecimal bd) {
-		logger.info("s: {} i: {} bd: {}", s, i, bd);
+	public void visit_variousTypes_shouldTransform(String s, int i, BigDecimal bd, char c, boolean b) {
+		logger.info("s: {} i: {} bd: {} c: {} b: {}", s, i, bd, c, b);
 		logger.info("s: " + "s" + " i: {}", 1);
 		logger.info("i: '{}'", 1);
 		logger.info("bd: '{}'", BigDecimal.ONE);
+		logger.info("c: '{}'", 'c');
+		logger.info("b: '{}'", true);
 	}
 
 	public void visit_variousTypes_shouldNotTransform(String s, int i, BigDecimal bd) {
@@ -85,14 +87,16 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 		logger.info("My String {}", String.format("is %s", "formatted"));
 	}
 
-	public void visit_brackets_shouldTransform() {
+	public void visit_parenthesis_shouldTransform() {
 		logger.info("This {}", ("is " + "Sparta"));
+		logger.info("true {}", (1 < 2));
 		logger.info("The time is: {}.", ((String) Instant.now()
 			.toString()).toLowerCase());
 	}
 
 	public void visit_brackets_shouldNotTransform() {
 		logger.info(("This " + "is " + "Sparta"));
+		logger.info(("This " + "is ") + "Sparta");
 	}
 
 	/**

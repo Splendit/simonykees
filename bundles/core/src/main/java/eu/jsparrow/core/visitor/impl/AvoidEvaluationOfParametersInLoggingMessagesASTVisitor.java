@@ -48,7 +48,7 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		}
 
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		
+
 		if (!argumentsAllowRefactoring(arguments)) {
 			return true;
 		}
@@ -254,7 +254,10 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		case ASTNode.NUMBER_LITERAL:
 		case ASTNode.QUALIFIED_NAME: // e.g., BigDecimal.ONE
 		case ASTNode.METHOD_INVOCATION: // e.g., Instant.now()
-		case ASTNode.PARENTHESIZED_EXPRESSION: // e.g., "This" + ("is" + "Sparta")
+			// e.g., "This" + ("is" + "Sparta")
+		case ASTNode.PARENTHESIZED_EXPRESSION:
+		case ASTNode.CHARACTER_LITERAL: // e.g., "c: " + 'c'
+		case ASTNode.BOOLEAN_LITERAL: // e.g., "b: " + true
 			return true;
 
 		default:

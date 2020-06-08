@@ -27,15 +27,15 @@ public class AvoidEvaluationOfParametersInLoggingMessagesTest extends UsesJDTUni
 				"private static final Logger logger = LoggerFactory.getLogger(" + DEFAULT_TYPE_DECLARATION_NAME
 				+ ".class);\n" +
 				"\n" +
-				"private void sampleMethod() {\n" +
-				"	logger.info(\"This \" + (\"is \" + \"Sparta\"));\n" +
+				"private void sampleMethod(String s, int i, BigDecimal bd, char c) {\n" +
+				"	logger.info(\"s: \" + s + \" i: \" + i + \" bd: \" + bd + \" c: \" + c);\n" +
 				"}";
 		String expected = "" +
 				"private static final Logger logger = LoggerFactory.getLogger(" + DEFAULT_TYPE_DECLARATION_NAME
 				+ ".class);\n" +
 				"\n" +
-				"private void sampleMethod() {\n" +
-				"	logger.info(\"This {}\", (\"is \" + \"Sparta\"));\n" +
+				"private void sampleMethod(String s, int i, BigDecimal bd, char c) {\n" +
+				"	logger.info(\"s: {} i: {} bd: {} c: {}\", s, i, bd, c);\n" +
 				"}";
 		assertChange(original, expected);
 
