@@ -1,4 +1,4 @@
-package eu.jsparrow.sample.preRule.avoidEvaluation.slf4j;
+package eu.jsparrow.sample.postRule.avoidEvaluation;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -6,9 +6,9 @@ import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AvoidEvaluationOfParametersInLoggingMessages {
+public class AvoidEvaluationOfParametersInSlf4j {
 
-	private static final Logger logger = LoggerFactory.getLogger(AvoidEvaluationOfParametersInLoggingMessages.class);
+	private static final Logger logger = LoggerFactory.getLogger(AvoidEvaluationOfParametersInSlf4j.class);
 
 	/**
 	 * Testing all the log levels. All statements should be transformed to use a
@@ -17,11 +17,11 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 	 * @param something
 	 */
 	public void visit_allLogLevels_shouldTransform(String something) {
-		logger.trace("Print " + something);
-		logger.debug("Print " + something);
-		logger.info("Print " + something);
-		logger.warn("Print " + something);
-		logger.error("Print " + something);
+		logger.trace("Print {}", something);
+		logger.debug("Print {}", something);
+		logger.info("Print {}", something);
+		logger.warn("Print {}", something);
+		logger.error("Print {}", something);
 	}
 
 	/**
@@ -39,11 +39,11 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 	public void visit_throwableParameter_shouldTransform(String something, Throwable t, Exception e, RuntimeException r,
 			Error err,
 			NullPointerException npe) {
-		logger.trace("Print " + something, t);
-		logger.debug("Print " + something, e);
-		logger.info("Print " + something, r);
-		logger.warn("Print " + something, err);
-		logger.error("Print " + something, npe);
+		logger.trace("Print {}", something, t);
+		logger.debug("Print {}", something, e);
+		logger.info("Print {}", something, r);
+		logger.warn("Print {}", something, err);
+		logger.error("Print {}", something, npe);
 	}
 
 	/**
@@ -61,19 +61,19 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 	}
 
 	public void visit_combinableStringLiterals_shouldTransform() {
-		logger.info("A " + 1 + " B " + 2);
-		logger.info("A " + 1 + " B " + 2 + " C " + 3 + " D " + 4);
-		logger.info("A " + 1 + " B " + 2 + " C " + 3 + " D " + 4 + " E " + new Exception("5").getMessage());
-		logger.info("A " + 1 + " B " + 2 + " C " + 3 + " D " + 4 + " E", new Exception("5"));
+		logger.info("A {} B {}", 1, 2);
+		logger.info("A {} B {} C {} D {}", 1, 2, 3, 4);
+		logger.info("A {} B {} C {} D {} E {}", 1, 2, 3, 4, new Exception("5").getMessage());
+		logger.info("A {} B {} C {} D {} E", 1, 2, 3, 4, new Exception("5"));
 	}
 
 	public void visit_variousTypes_shouldTransform(String s, int i, BigDecimal bd, char c, boolean b) {
-		logger.info("s: " + s + " i: " + i + " bd: " + bd + " c: " + c + " b: " + b);
-		logger.info("s: " + "s" + " i: " + 1);
-		logger.info("i: '" + 1 + "'");
-		logger.info("bd: '" + BigDecimal.ONE + "'");
-		logger.info("c: '" + 'c' + "'");
-		logger.info("b: '" + true + "'");
+		logger.info("s: {} i: {} bd: {} c: {} b: {}", s, i, bd, c, b);
+		logger.info("s: " + "s" + " i: {}", 1);
+		logger.info("i: '{}'", 1);
+		logger.info("bd: '{}'", BigDecimal.ONE);
+		logger.info("c: '{}'", 'c');
+		logger.info("b: '{}'", true);
 	}
 
 	public void visit_variousTypes_shouldNotTransform(String s, int i, BigDecimal bd) {
@@ -83,15 +83,15 @@ public class AvoidEvaluationOfParametersInLoggingMessages {
 	}
 
 	public void visit_methodsCalls_shouldTransform() {
-		logger.info("Time: " + Instant.now());
-		logger.info("My String " + String.format("is %s", "formatted"));
+		logger.info("Time: {}", Instant.now());
+		logger.info("My String {}", String.format("is %s", "formatted"));
 	}
 
 	public void visit_parenthesis_shouldTransform() {
-		logger.info("This " + ("is " + "Sparta"));
-		logger.info("true " + (1 < 2));
-		logger.info("The time is: " + ((String) Instant.now()
-			.toString()).toLowerCase() + ".");
+		logger.info("This {}", ("is " + "Sparta"));
+		logger.info("true {}", (1 < 2));
+		logger.info("The time is: {}.", ((String) Instant.now()
+			.toString()).toLowerCase());
 	}
 
 	public void visit_brackets_shouldNotTransform() {

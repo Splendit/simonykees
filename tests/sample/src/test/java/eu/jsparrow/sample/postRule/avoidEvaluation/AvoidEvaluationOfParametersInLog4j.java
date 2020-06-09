@@ -1,14 +1,14 @@
-package eu.jsparrow.sample.postRule.avoidEvaluation.slf4j;
+package eu.jsparrow.sample.postRule.avoidEvaluation;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class AvoidEvaluationOfParametersInLoggingMessages {
+public class AvoidEvaluationOfParametersInLog4j {
 
-	private static final Logger logger = LoggerFactory.getLogger(AvoidEvaluationOfParametersInLoggingMessages.class);
+	private static final Logger logger = LogManager.getLogger(AvoidEvaluationOfParametersInLog4j.class);
 
 	/**
 	 * Testing all the log levels. All statements should be transformed to use a
