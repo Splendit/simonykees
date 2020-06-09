@@ -19,8 +19,8 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 
 	private MethodInvocation getResultSetInvocation;
 
-	public SqlStatementAnalyzerVisitor(SimpleName sqlStatement, MethodInvocation methodInvocation) {
-		super(sqlStatement, methodInvocation);
+	public SqlStatementAnalyzerVisitor(SimpleName sqlStatement) {
+		super(sqlStatement);
 	}
 
 	private MethodInvocation findGetResultSet(SimpleName simpleName) {

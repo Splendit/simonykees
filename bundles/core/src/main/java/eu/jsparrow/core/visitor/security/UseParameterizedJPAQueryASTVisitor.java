@@ -18,9 +18,16 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- * Replaces string concatenations in dynamic JPQL queries which contain user
- * input by parameterizing the given query in order to remove injection
- * vulnerabilities.
+ * A query string in the language JPQL (Java Persistence Query Language) defined
+ * by JPA may be constructed by concatenating string literals with user defined
+ * expressions and this may cause vulnerabilities to injection attacks because
+ * the user input may be interpreted as JPQL code.
+ * <P>
+ * This visitor looks for queries of the type javax.persistence.Query which are
+ * created by the createQuery method of javax.persistence.EntityManager.
+ * Vulnerable components found in the concatenation of the JPQL query string
+ * concatenation are replaced by parameterizing, using the setParameter method
+ * of javax.persistence.Query.
  * 
  * <pre>
  * Query jpqlQuery = entityManager.createQuery("Select order from Orders order where order.id = " + orderId); *
@@ -58,23 +65,24 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 		List<Expression> queryComponents = componentStore.getComponents();
 		JPAQueryComponentsAnalyzer componentsAnalyzer = new JPAQueryComponentsAnalyzer(queryComponents);
 
-		if (componentsAnalyzer.getWhereKeywordPosition() < 0) {
-			return true;
-		}
 		List<ReplaceableParameter> replaceableParameters = componentsAnalyzer.createReplaceableParameterList();
 		if (replaceableParameters.isEmpty()) {
 			return true;
 		}
 
 		SimpleName querySimpleName = findJPAQuerySimpleName(methodInvocation);
-		JPAQueryVariableAnalyzerASTVisitor queryVariableAnalyzerVisitor = new JPAQueryVariableAnalyzerASTVisitor(querySimpleName, methodInvocation);
-		
+		JPAQueryVariableAnalyzerASTVisitor queryVariableAnalyzerVisitor = new JPAQueryVariableAnalyzerASTVisitor(
+				querySimpleName);
+
 		Block blockOfLocalVariableDeclaration = queryVariableAnalyzerVisitor.getBlockOfLocalVariableDeclaration();
-		if(blockOfLocalVariableDeclaration == null) {
+		if (blockOfLocalVariableDeclaration == null) {
 			return true;
 		}
 		blockOfLocalVariableDeclaration.accept(queryVariableAnalyzerVisitor);
-		if(queryVariableAnalyzerVisitor.isUnsafe()) {
+		if (queryVariableAnalyzerVisitor.isUnsafe()) {
+			return true;
+		}
+		if (queryVariableAnalyzerVisitor.getExecutionInvocation() == null) {
 			return true;
 		}
 

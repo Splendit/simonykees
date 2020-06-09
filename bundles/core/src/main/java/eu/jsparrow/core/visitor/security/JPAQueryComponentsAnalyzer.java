@@ -18,16 +18,21 @@ public class JPAQueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer 
 
 	private static final String SETTER_NAME = "setParameter"; //$NON-NLS-1$
 
-	private final int whereKeywordPosition;
+	private final int indexOfStringContainingWhereKeyword;
 
 	JPAQueryComponentsAnalyzer(List<Expression> components) {
 		super(components);
-		whereKeywordPosition = findWhereKeywordPosition();
+		indexOfStringContainingWhereKeyword = findWhereKeywordPosition();
 	}
 
 	@Override
 	protected ReplaceableParameter createReplaceableParameter(int componentIndex, int parameterPosition) {
-		if (componentIndex <= whereKeywordPosition) {
+
+		if (indexOfStringContainingWhereKeyword < 0) {
+			return null;
+		}
+
+		if (componentIndex <= indexOfStringContainingWhereKeyword) {
 			return null;
 		}
 		StringLiteral previous = findPrevious(componentIndex);
@@ -67,7 +72,15 @@ public class JPAQueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer 
 	 */
 	@Override
 	protected boolean isValidNext(StringLiteral literal) {
-		return !literal.getLiteralValue()
+		String literalValue = literal.getLiteralValue();
+		if (literalValue.isEmpty()) {
+			return false;
+		}
+		if (!Character.isWhitespace(literalValue.charAt(0))) {
+			return false;
+		}
+
+		return !literalValue
 			.trim()
 			.startsWith(SIMPLE_QUOTATION_MARK);
 	}
@@ -83,7 +96,4 @@ public class JPAQueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer 
 			.endsWith("="); //$NON-NLS-1$
 	}
 
-	public int getWhereKeywordPosition() {
-		return whereKeywordPosition;
-	}
 }

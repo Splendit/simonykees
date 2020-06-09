@@ -25,8 +25,8 @@ public class JPAQueryVariableAnalyzerASTVisitor extends AbstractDBQueryUsageASTV
 
 	private MethodInvocation executionInvocation;
 
-	protected JPAQueryVariableAnalyzerASTVisitor(SimpleName sqlStatement, MethodInvocation methodInvocation) {
-		super(sqlStatement, methodInvocation);
+	protected JPAQueryVariableAnalyzerASTVisitor(SimpleName sqlStatement) {
+		super(sqlStatement);
 	}
 
 	@Override
@@ -50,4 +50,7 @@ public class JPAQueryVariableAnalyzerASTVisitor extends AbstractDBQueryUsageASTV
 		return false;
 	}
 
+	public MethodInvocation getExecutionInvocation() {
+		return executionInvocation;
+	}
 }

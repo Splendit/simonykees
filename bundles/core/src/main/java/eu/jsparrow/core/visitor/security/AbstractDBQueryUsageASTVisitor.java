@@ -4,7 +4,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -35,32 +34,19 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	protected boolean unsafe = false;
 	protected boolean beforeDeclaration = true;
 
-	protected AbstractDBQueryUsageASTVisitor(SimpleName databaseQuery, MethodInvocation methodInvocation) {
+	protected AbstractDBQueryUsageASTVisitor(SimpleName databaseQuery) {
 		this.variableName = databaseQuery;
-		this.compilationUnit = ASTNodeUtil.getSpecificAncestor(methodInvocation, CompilationUnit.class);
+		this.compilationUnit = ASTNodeUtil.getSpecificAncestor(databaseQuery, CompilationUnit.class);
 		ASTNode statementDeclaringNode = compilationUnit.findDeclaringNode(databaseQuery.resolveBinding());
-		localVariableDeclarationFragment = findLocalVariableDeclarationFragment(methodInvocation,
-				statementDeclaringNode);
+		localVariableDeclarationFragment = findLocalVariableDeclarationFragment(statementDeclaringNode);		
 		blockOfLocalVariableDeclaration = findBlockOfLocalVariableDeclaration(localVariableDeclarationFragment);
 		if (this.localVariableDeclarationFragment == null || this.blockOfLocalVariableDeclaration == null) {
 			this.unsafe = true;
 		}
 	}
 
-	private VariableDeclarationFragment findLocalVariableDeclarationFragment(MethodInvocation methodInvocation,
-			ASTNode statementDeclaringNode) {
+	private VariableDeclarationFragment findLocalVariableDeclarationFragment(ASTNode statementDeclaringNode) {
 
-		BodyDeclaration methodSurroundingDeclaration = ASTNodeUtil.getSpecificAncestor(statementDeclaringNode,
-				BodyDeclaration.class);
-		if (methodSurroundingDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION &&
-				methodSurroundingDeclaration.getNodeType() != ASTNode.INITIALIZER) {
-			return null;
-		}
-		BodyDeclaration methodSurroundingInvocation = ASTNodeUtil.getSpecificAncestor(methodInvocation,
-				BodyDeclaration.class);
-		if (methodSurroundingInvocation != methodSurroundingDeclaration) {
-			return null;
-		}
 		if (statementDeclaringNode.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
 			return null;
 		}
@@ -161,6 +147,8 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 
 		if (isVariableReference(simpleName)) {
 			if (simpleName.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+				unsafe = true;
+			} else if (simpleName.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
 				unsafe = true;
 			} else {
 				unsafe = isOtherUnsafeVariableReference(simpleName);
