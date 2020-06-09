@@ -1,4 +1,4 @@
-package eu.jsparrow.sample.postRule.avoidEvaluation;
+package eu.jsparrow.sample.postRule.avoidEvaluation.log4j;
 
 import java.math.BigDecimal;
 import java.time.Instant;

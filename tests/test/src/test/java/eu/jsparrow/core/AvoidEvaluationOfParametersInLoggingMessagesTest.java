@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +17,8 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 public class AvoidEvaluationOfParametersInLoggingMessagesTest extends SingleRuleTest {
 	
-	private static final String SAMPLE_FILE = "AvoidEvaluationOfParametersInLoggingMessages.java";
-	private static final String POSTRULE_SUBDIRECTORY = "avoidEvaluation";
+	private static final String SAMPLE_FILE = "avoidEvaluation/slf4j/AvoidEvaluationOfParametersInLoggingMessages.java";
+	private static final String POSTRULE_SUBDIRECTORY = "avoidEvaluation/slf4j";
 
 	private AvoidEvaluationOfParametersInLoggingMessagesRule rule;
 	
