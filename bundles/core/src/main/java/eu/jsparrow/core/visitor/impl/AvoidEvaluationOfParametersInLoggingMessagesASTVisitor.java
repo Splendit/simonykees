@@ -20,7 +20,41 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
+ * Concatenated arguments in a logging message lead to a concatenation even if
+ * the logging level is too low to show a message. This leads to a needless
+ * performance reduction and is classified as "Major" code smell by sonarcloud
+ * (https://sonarcloud.io/organizations/default/rules?open=java%3AS2629&q=S2629).
+ * <p/>
+ * By using the built-in string formatting of loggers, an evaluation will only
+ * happen when the logging level permits the message to be displayed.
+ * <p/>
+ * This visitor finds cases where an {@link InfixExpression} may be replaced
+ * with logger arguments.
+ * <p/>
+ * Examples:
+ * 
+ * <pre>
+ * <code>
+ * // Pre:
+ * logger.info("A " + 1 + " B " + 2);
+ * // Post:
+ * logger.info("A {} B {}", 1, 2);
+ * 
+ * // Pre:
+ * logger.info("A " + 1 + " B " + 2 + " C " + 3 + " D " + 4 + " E", new Exception("5"));
+ * // Post:
+ * logger.info("A {} B {} C {} D {} E", 1, 2, 3, 4, new Exception("5"));
+ * 
+ * // Pre:
+ * logger.info("bd: '" + BigDecimal.ONE + "'");
+ * // Post:
+ * logger.info("bd: '{}'", BigDecimal.ONE);
+ * </code>
+ * </pre>
+ * 
  * @since 3.18.0
+ * 
+ *        Implemented in SIM-1744 (see ticket for additional comments).
  */
 public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends AbstractASTRewriteASTVisitor {
 
@@ -53,6 +87,7 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 			return true;
 		}
 
+		// here we already know it is an InfixExpression
 		InfixExpression infix = (InfixExpression) arguments.get(0);
 
 		boolean isLeftOperandStringLiteral = isLeftOperandAllowedType(infix.getLeftOperand());
@@ -78,7 +113,7 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		AST ast = astRewrite.getAST();
 
 		/*
-		 * Logic to concatenate StringLiterals and introduce parameters.
+		 * Logic to concatenate StringLiterals and introduce parameters
 		 */
 		boolean lastArgumentWasStringLiteral = true;
 		StringLiteral lastLiteral = ast.newStringLiteral();
