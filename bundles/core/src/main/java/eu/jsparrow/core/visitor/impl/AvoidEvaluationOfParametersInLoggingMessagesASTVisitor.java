@@ -137,6 +137,11 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		}
 		newStringLiterals.add(lastLiteral);
 
+		// no refactoring took place
+		if (newArguments.isEmpty()) {
+			return true;
+		}
+
 		/*
 		 * Prepare the node to replace the original InfixExpression
 		 */
@@ -176,6 +181,8 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		for (Expression newArgument : newArguments) {
 			listRewriter.insertAfter(newArgument, newNode, null);
 		}
+
+		onRewrite();
 
 		return true;
 	}
