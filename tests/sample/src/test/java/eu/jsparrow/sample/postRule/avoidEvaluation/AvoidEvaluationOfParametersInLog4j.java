@@ -77,9 +77,46 @@ public class AvoidEvaluationOfParametersInLog4j {
 	}
 
 	public void visit_variousTypes_shouldNotTransform(String s, int i, BigDecimal bd) {
-		logger.info("s: " + "s" + " i: " + 1 + " bd: " + BigDecimal.ONE);
-		logger.info("s: " + "s" + " i: " + 1 + ".");
 		logger.info("s: '" + "s" + "'");
+	}
+
+	/**
+	 * Note: This behavior is strange. This is a collection of cases where the
+	 * leftOperand of an InfixExpression gets interpreted as InfixExpression
+	 * instead of a StringLiteral. There are very similar cases where the
+	 * leftOperand is interpreted as StringLiteral.
+	 * <p/>
+	 * If something breaks here, it might indicate that something in JDT
+	 * changed.
+	 * <p/>
+	 * The problem seems to always happen under the following conditions:
+	 * <ol>
+	 * <li>There have to be at least 4 Expressions</li>
+	 * <li>The first two have to be of node type StringLiteral</li>
+	 * <li>The third has to be of something else than StringLiteral</li>
+	 * <li>The fourth can be of any type</li>
+	 * </ol>
+	 * 
+	 * @param o
+	 */
+	public void visit_leftOperandInfixExpression_someTransform(Object o) {
+		logger.info("my " + " number " + 1 + " problem "); // no change
+		logger.info("my " + " number " + " problem {}", 1); // change
+		logger.info("my {} number " + " problem ", 1); // change
+		logger.info("my " + " number {}", 1); // change
+
+		logger.info("door " + " number " + 1 + 1); // no change
+		logger.info("door {}{} number ", 1, 1); // change
+
+		logger.info("my " + " number " + 1 + BigDecimal.ONE); // no change
+		logger.info("1" + "1" + BigDecimal.ONE + BigDecimal.ONE); // no change
+		logger.info("my {} number {}", BigDecimal.ONE, 1); // change
+
+		logger.info("my " + " number " + o + " problem "); // no change
+		logger.info("my {} number " + " problem ", o); // change
+		logger.info("my number {} problem ", o); // change
+		logger.info("my " + " number {}", o); // change
+
 	}
 
 	public void visit_methodsCalls_shouldTransform() {
