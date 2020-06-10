@@ -20,8 +20,8 @@ public class AvoidEvaluationOfParametersInLoggingMessagesRuleTest extends Single
 	 * Note: We support logback but since logback implements slf4j interfaces,
 	 * there is no reason to have separate sample files for it.
 	 */
-	private static final String SAMPLE_FILE_SLF4J = "AvoidEvaluationOfParametersInSlf4j.java";
-	private static final String SAMPLE_FILE_LOG4J = "AvoidEvaluationOfParametersInLog4j.java";
+	private static final String SAMPLE_FILE_SLF4J = "AvoidEvaluationOfParametersInSlf4jRule.java";
+	private static final String SAMPLE_FILE_LOG4J = "AvoidEvaluationOfParametersInLog4jRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "avoidEvaluation";
 
 	private AvoidEvaluationOfParametersInLoggingMessagesRule rule;
