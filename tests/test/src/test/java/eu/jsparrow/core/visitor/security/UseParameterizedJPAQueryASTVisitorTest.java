@@ -38,6 +38,47 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 	}
 
 	@Test
+	public void visit_useRelationalGT_shouldTransform() throws Exception {
+		String original = "" +
+				"			int price = 1000;\n" +
+				"			EntityManager entityManager = null;\n" +
+				"			Query jpqlQuery = entityManager.createQuery(\"Select order from Orders order where order.price > \" + price);\n"
+				+
+				"			jpqlQuery.getResultList();";
+		String expected = "" +
+				"			int price = 1000;\n" +
+				"			EntityManager entityManager = null;\n" +
+				"			Query jpqlQuery = entityManager.createQuery(\"Select order from Orders order where order.price >  ?1\");\n"
+				+
+				"			jpqlQuery.setParameter(1, price);\n" +
+				"			jpqlQuery.getResultList();";
+
+		assertChange(original, expected);
+
+	}
+
+	@Test
+	public void visit_useRelationalLT_shouldTransform() throws Exception {
+		String original = "" +
+				"			int price = 1000;\n" +
+				"			EntityManager entityManager = null;\n" +
+				"			Query jpqlQuery = entityManager.createQuery(\"Select order from Orders order where order.price < \" + price);\n"
+				+
+				"			jpqlQuery.getResultList();";
+
+		String expected = "" +
+				"			int price = 1000;\n" +
+				"			EntityManager entityManager = null;\n" +
+				"			Query jpqlQuery = entityManager.createQuery(\"Select order from Orders order where order.price <  ?1\");\n"
+				+
+				"			jpqlQuery.setParameter(1, price);\n" +
+				"			jpqlQuery.getResultList();";
+
+		assertChange(original, expected);
+
+	}
+
+	@Test
 	public void visit_createQueryInInitializer_shouldTransform() throws Exception {
 
 		String original = "" + //
@@ -152,11 +193,12 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 				"			jpqlQuery.executeUpdate();";
 
 		String expected = "" +
-				"	EntityManager entityManager=null;\n" + 
-				"		int salary=100000000;\n" + 
-				"		int persId=111111111;\n" + 
-				"		Query jpqlQuery=entityManager.createQuery(\"UPDATE employee SET salary  = \" + salary + \" WHERE id =  ?1\");\n" + 
-				"		jpqlQuery.setParameter(1,persId);\n" + 
+				"	EntityManager entityManager=null;\n" +
+				"		int salary=100000000;\n" +
+				"		int persId=111111111;\n" +
+				"		Query jpqlQuery=entityManager.createQuery(\"UPDATE employee SET salary  = \" + salary + \" WHERE id =  ?1\");\n"
+				+
+				"		jpqlQuery.setParameter(1,persId);\n" +
 				"		jpqlQuery.executeUpdate();";
 
 		assertChange(original, expected);

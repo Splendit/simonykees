@@ -23,29 +23,39 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 		fixtureProject.clear();
 	}
 
-	/*
 	@Test
-	public void visit__shouldNotTransform() throws Exception {
+	public void visit_MethodHasNoExpression_shouldNotTransform() throws Exception {
 		String original = "" +
+				"		Query createQuery(String query) {\n" + 
+				"			return null;\n" + 
+				"		}\n" + 
+				"		void test() {\n" + 
+				"			String orderId = \"100000000\";\n" + 
+				"			EntityManager entityManager = null;\n" + 
+				"			Query jpqlQuery = createQuery(\"Select order from Orders order where order.id = \" + orderId);\n" + 
+				"			jpqlQuery.getResultList();\n" + 
+				"		}\n" + 
 				"";
+
 		assertNoChange(original);
-	}*/
+	}
 
 	@Test
 	public void visit_MethodHasNotRequiredExpressionType_shouldNotTransform() throws Exception {
 		String original = "" +
-				"		static class FakeEntityManager {\n" + 
-				"			Query createQuery(String query) {\n" + 
-				"				return null;\n" + 
-				"			}\n" + 
-				"		}\n" + 
-				"		void test() {\n" + 
-				"			String orderId = \"100000000\";\n" + 
-				"			FakeEntityManager entityManager = new FakeEntityManager();\n" + 
-				"			Query jpqlQuery = entityManager.createQuery(\"Select order from Orders order where order.id = \" + orderId);\n" + 
-				"			jpqlQuery.getResultList();\n" + 
+				"		static class FakeEntityManager {\n" +
+				"			Query createQuery(String query) {\n" +
+				"				return null;\n" +
+				"			}\n" +
+				"		}\n" +
+				"		void test() {\n" +
+				"			String orderId = \"100000000\";\n" +
+				"			FakeEntityManager entityManager = new FakeEntityManager();\n" +
+				"			Query jpqlQuery = entityManager.createQuery(\"Select order from Orders order where order.id = \" + orderId);\n"
+				+
+				"			jpqlQuery.getResultList();\n" +
 				"		}";
-		
+
 		assertNoChange(original);
 	}
 
@@ -73,6 +83,37 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 				+
 				"			jpqlQuery.getResultList();\n" +
 				"		}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_EmptyStringLiteralAfterInput_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"		String orderId = \"1\";\n" +
+				"		EntityManager entityManager = null;\n" +
+				"		Query jpqlQuery = entityManager\n" +
+				"				.createQuery(\"Select order from Orders order where order.id  = \" + orderId + \"\");\n"
+				+
+				"			jpqlQuery.getResultList();\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_StringLiteralWithQuotationMarkAfterInput_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"		String orderId = \"1\";\n" +
+				"		EntityManager entityManager = null;\n" +
+				"		Query jpqlQuery = entityManager\n" +
+				"				.createQuery(\"Select order from Orders order where order.id  = \" + orderId + \" '\");\n"
+				+
+				"		jpqlQuery.getResultList();\n" +
+				"		}";
+
 		assertNoChange(original);
 	}
 
@@ -268,6 +309,42 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 				"			jpqlQuery.setParameter(1, firstName);\n" +
 				"			jpqlQuery.getResultList();\n" +
 				"		}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_QualifiedQueryVariable_shouldNotTransform() throws Exception {
+
+		String original = "" +
+				"		void test() {\n" +
+				"			class LocalClass {\n" +
+				"				 Query jpqlQuery;\n" +
+				"			}\n" +
+				"			String orderId = \"100000000\";\n" +
+				"			EntityManager entityManager = null;\n" +
+				"			LocalClass localClass = new LocalClass();\n" +
+				"			localClass.jpqlQuery = entityManager.createQuery(\"Select order from Orders order where order.id = \" + orderId);\n"
+				+
+				"			localClass.jpqlQuery.getResultList();\n" +
+				"		}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_QueryVariableWithSubsequentSetParameter_shouldNotTransform() throws Exception {
+
+		String original = "" +
+				"	void test() {\n" +
+				"		String orderId = \"100000000\";\n" +
+				"		EntityManager entityManager = null;\n" +
+				"		Query jpqlQuery = entityManager\n" +
+				"				.createQuery(\"Select order from Orders order where order.id = \" + orderId + \" or order.id = ?1\")\n"
+				+
+				"				.setParameter(1, \"200000000\");\n" +
+				"		jpqlQuery.getResultList();\n" +
+				"	}";
 
 		assertNoChange(original);
 	}

@@ -89,11 +89,14 @@ public class JPAQueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer 
 	 * @return true if the given {@link StringLiteral} ends with {@code "="} and
 	 *         optional subsequent white spaces, otherwise false.
 	 */
+	@SuppressWarnings("nls")
 	@Override
 	protected boolean isValidPrevious(StringLiteral literal) {
-		return literal.getLiteralValue()
-			.trim()
-			.endsWith("="); //$NON-NLS-1$
+		String trimmedLiteralValue = literal.getLiteralValue()
+			.trim();
+		return trimmedLiteralValue.endsWith("=") ||
+				trimmedLiteralValue.endsWith("<") ||
+				trimmedLiteralValue.endsWith(">");
 	}
 
 }

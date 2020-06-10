@@ -71,6 +71,9 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 		}
 
 		SimpleName querySimpleName = findJPAQuerySimpleName(methodInvocation);
+		if(querySimpleName == null) {
+			return true;
+		}
 		JPAQueryVariableAnalyzerASTVisitor queryVariableAnalyzerVisitor = new JPAQueryVariableAnalyzerASTVisitor(
 				querySimpleName);
 
