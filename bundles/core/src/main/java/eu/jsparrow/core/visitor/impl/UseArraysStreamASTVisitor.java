@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -28,6 +30,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	
+	@SuppressWarnings("nls")
 	private static final List<String> BLOCKED_LIST = Collections.unmodifiableList(Arrays.asList(
 			"mapToInt",
 			"mapToLong",
@@ -49,7 +53,7 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		boolean hasRightType = isMethodDeclaredOnType(methodInvocation, "asList", java.util.Arrays.class.getName());
+		boolean hasRightType = isMethodDeclaredOnType(methodInvocation, "asList", java.util.Arrays.class.getName()); //$NON-NLS-1$
 		if (!hasRightType) {
 			return true;
 		}
@@ -58,7 +62,7 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 			return true;
 		}
 		MethodInvocation parent = (MethodInvocation) methodInvocation.getParent();
-		if (!isMethodDeclaredOnType(parent, "stream", java.util.Collection.class.getName())) {
+		if (!isMethodDeclaredOnType(parent, "stream", java.util.Collection.class.getName())) { //$NON-NLS-1$
 			return false;
 		}
 
@@ -76,44 +80,39 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 			/*
 			 * HERE create the new array and make the proper replacement
 			 */
+			AST ast = methodInvocation.getAST();
+			ArrayCreation arrayCreation = ast.newArrayCreation();
+			// FIXME: make sure the type of the argument is a simple type,
+			// without wildcards, boundaries, etc...
+			Code primitiveType = PrimitiveType.toCode(argumentTypeBinding.getName());
+			ArrayType arrayType = ast.newArrayType(ast.newPrimitiveType(primitiveType));
+			arrayCreation.setType(arrayType);
+			ArrayInitializer initializer = ast.newArrayInitializer();
+			@SuppressWarnings("unchecked")
+			List<Expression> initializerExpressions = initializer.expressions();
+			arguments.stream()
+				.map(arg -> (Expression) astRewrite.createMoveTarget(arg))
+				.forEach(initializerExpressions::add);
+			arrayCreation.setInitializer(initializer);
+
 			
-			if (!methodChain.isEmpty()) {
-
-				MethodInvocation last = methodChain.get(methodChain.size() - 1);
-				IMethodBinding lastMethodBinding = last.resolveMethodBinding();
-				ITypeBinding lastReturnType = lastMethodBinding.getReturnType();
-				boolean isVoid = "void".equals(lastReturnType.getName());
-
-				for (MethodInvocation method : methodChain) {
-					ITypeBinding typeBinding = method.resolveTypeBinding();
-					ITypeBinding[] typeArguments = typeBinding.getTypeArguments();
-					if (typeArguments.length == 1) {
-						ITypeBinding typeArgument = typeArguments[0];
-						if (hasSpecializedStream(typeArgument)) {
-							boolean compatible = isCompatibleWithUnboxedParameter(method);
-							if (!compatible) {
-								return true;
-							}
-						}
-					}
-				}
-
-			}
-			// 1. the last element in the method chain should be forEach
-			// 2. every method in the chain should be a higher order function
-			// 3. the tricky part: the parameter should never be used as a boxed
-			// primitive. otherwise, there will be a compilation error.
-			return false;
+			ListRewrite listRewrite = astRewrite.getListRewrite(parent, MethodInvocation.ARGUMENTS_PROPERTY);
+			listRewrite.insertFirst(arrayCreation, null);
+			Expression experssion = methodInvocation.getExpression();//FIXMEexpression can be null
+			astRewrite.replace(parent.getExpression(), astRewrite.createCopyTarget(experssion), null);
+			onRewrite();
+			
+			return true;
 		} else {
 
 			AST ast = methodInvocation.getAST();
 			Expression expression = ast.newSimpleName(java.util.stream.Stream.class.getSimpleName());
 			ListRewrite listRewrite = astRewrite.getListRewrite(parent, MethodInvocation.ARGUMENTS_PROPERTY);
-			arguments.forEach(arg -> listRewrite.insertFirst(astRewrite.createMoveTarget(arg), null));
+			arguments.forEach(arg -> listRewrite.insertLast(astRewrite.createMoveTarget(arg), null));
 
 			// FIXME: make sure that java.util.Stream is imported.
 			astRewrite.replace(parent.getExpression(), expression, null);
-			astRewrite.replace(parent.getName(), ast.newSimpleName("of"), null);
+			astRewrite.replace(parent.getName(), ast.newSimpleName("of"), null); //$NON-NLS-1$
 			onRewrite();
 			return true;
 
@@ -122,12 +121,8 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private boolean isCompatibleWithSpecializedStream(List<MethodInvocation> methodChain, MethodInvocation parent) {
 		ITypeBinding typeBinding = parent.resolveTypeBinding();
-		ITypeBinding[] typeArguments = typeBinding.getTypeArguments();
-		if (typeArguments.length == 0) {
-			return false;
-		}
 		boolean compatible = true;
-		ITypeBinding initialStreamType = typeArguments[0];
+		
 		for (MethodInvocation method : methodChain) {
 			boolean compatibleWithUnboxed = isCompatibleWithUnboxedParameter(method);
 			if (!compatibleWithUnboxed) {
@@ -250,7 +245,7 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 			// FIXME: make sure that java.util.Stream is imported.
 			Expression experssion = methodInvocation.getExpression();
 			ListRewrite listRewrite = astRewrite.getListRewrite(parent, MethodInvocation.ARGUMENTS_PROPERTY);
-			listRewrite.insertFirst(astRewrite.createCopyTarget(argument), null);
+			listRewrite.insertLast(astRewrite.createCopyTarget(argument), null);
 			astRewrite.replace(parent.getExpression(), astRewrite.createCopyTarget(experssion), null);
 			onRewrite();
 		}
@@ -297,6 +292,32 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		return ClassRelationUtil.isContentOfType(declaringClass, expectedType);
+	}
+	
+	private boolean checkMethodChain(List<MethodInvocation> methodChain) {
+		if (!methodChain.isEmpty()) {
+
+			MethodInvocation last = methodChain.get(methodChain.size() - 1);
+			IMethodBinding lastMethodBinding = last.resolveMethodBinding();
+			ITypeBinding lastReturnType = lastMethodBinding.getReturnType();
+			boolean isVoid = "void".equals(lastReturnType.getName());
+
+			for (MethodInvocation method : methodChain) {
+				ITypeBinding typeBinding = method.resolveTypeBinding();
+				ITypeBinding[] typeArguments = typeBinding.getTypeArguments();
+				if (typeArguments.length == 1) {
+					ITypeBinding typeArgument = typeArguments[0];
+					if (hasSpecializedStream(typeArgument)) {
+						boolean compatible = isCompatibleWithUnboxedParameter(method);
+						if (!compatible) {
+							return true;
+						}
+					}
+				}
+			}
+
+		}
+		return false;
 	}
 
 	class UnboxCompatibilityVisitor extends ASTVisitor {

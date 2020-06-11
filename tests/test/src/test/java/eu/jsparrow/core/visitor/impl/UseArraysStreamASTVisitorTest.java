@@ -21,7 +21,7 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"Arrays.asList(values).stream();";
 		String expected = "" +
 				"String[] values = new String[] {\"1\", \"2\", \"3\"};\n" + 
-				"Arrays.stream(values);";
+				"Stream.of(values);";
 		assertChange(original, expected);
 	}
 	
@@ -32,7 +32,17 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		String original = "" +
 				"Arrays.asList(\"1\", \"2\", \"3\").stream();";
 		String expected = "" +
-				"Arrays.stream(new String[] {\"1\", \"2\", \"3\"});";
+				"Stream.of(\"1\", \"2\", \"3\");";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_intVarArgs_shouldTransform() throws Exception {
+		fixture.addImport("java.util.Arrays");
+		String original = "" +
+				"Arrays.asList(1, 2, 3).stream();";
+		String expected = "" +
+				"Arrays.stream(new int[] {1, 2, 3});";
 		assertChange(original, expected);
 	}
 	
@@ -46,6 +56,11 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	private void sampleCode2() {
 		Arrays.asList("1", "2", "3").stream();
 		Arrays.stream(new String[] {"1", "2", "3"});
+	}
+	
+	private void sampleCodeWithSpezialedStream() {
+		Arrays.asList(1, 2, 3).stream();
+		Arrays.stream(new int[] {1, 2, 3});
 	}
 
 }
