@@ -24,7 +24,7 @@ public class UseArraysStreamRule extends RefactoringRuleImpl<UseArraysStreamASTV
 		this.visitorClass = UseArraysStreamASTVisitor.class;
 		this.ruleDescription = new RuleDescription(Messages.UseArraysStreamRule_name,
 				Messages.UseArraysStreamRule_description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_8, Tag.PERFORMANCE));
+				Arrays.asList(Tag.JAVA_1_8, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS));
 	}
 
 	@Override
