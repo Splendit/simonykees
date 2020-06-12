@@ -29,6 +29,12 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
+/**
+ * 
+ * 
+ * @since 3.18.0
+ *
+ */
 public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 
 	@SuppressWarnings("nls")
@@ -81,58 +87,59 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 			if(experssion == null && !isSafeToAddImport(getCompilationUnit(), java.util.Arrays.class.getName())) {
 				return true;
 			}
-			
-			/*
-			 * HERE create the new array and make the proper replacement
-			 */
-			AST ast = methodInvocation.getAST();
-			ArrayCreation arrayCreation = ast.newArrayCreation();
-			Code primitiveType = PrimitiveType.toCode(argumentTypeBinding.getName());
-			ArrayType arrayType = ast.newArrayType(ast.newPrimitiveType(primitiveType));
-			arrayCreation.setType(arrayType);
-			ArrayInitializer initializer = ast.newArrayInitializer();
-			@SuppressWarnings("unchecked")
-			List<Expression> initializerExpressions = initializer.expressions();
-			arguments.stream()
-				.map(arg -> (Expression) astRewrite.createMoveTarget(arg))
-				.forEach(initializerExpressions::add);
-			arrayCreation.setInitializer(initializer);
-
-			ListRewrite listRewrite = astRewrite.getListRewrite(parent, MethodInvocation.ARGUMENTS_PROPERTY);
-			listRewrite.insertFirst(arrayCreation, null);
-			
-			if(experssion != null) {
-				astRewrite.replace(parent.getExpression(), astRewrite.createCopyTarget(experssion), null);
-			} else {
-				addImports.add(java.util.Arrays.class.getName());
-				SimpleName newExpression = ast.newSimpleName(Arrays.class.getSimpleName());
-				astRewrite.replace(parent.getExpression(), newExpression, null);
-			}
-			
+			replaceWithArraysStream(parent, arguments, argumentTypeBinding, experssion);
 			onRewrite();
 			return true;
 		} else {
-			
 			if(!isSafeToAddImport(getCompilationUnit(), java.util.stream.Stream.class.getName())) {
 				return true;
 			}
-
-			AST ast = methodInvocation.getAST();
-			Expression expression = ast.newSimpleName(java.util.stream.Stream.class.getSimpleName());
-			ListRewrite listRewrite = astRewrite.getListRewrite(parent, MethodInvocation.ARGUMENTS_PROPERTY);
-			arguments.forEach(arg -> listRewrite.insertLast(astRewrite.createMoveTarget(arg), null));
-
-			addImports.add(java.util.stream.Stream.class.getName());
-			astRewrite.replace(parent.getExpression(), expression, null);
-			astRewrite.replace(parent.getName(), ast.newSimpleName("of"), null); //$NON-NLS-1$
+			replaceWithStreamOf(parent, arguments);
 			onRewrite();
 			return true;
-
 		}
 	}
 
-	private boolean isCompatibleWithSpecializedStream(List<MethodInvocation> methodChain, MethodInvocation parent) {
-		ITypeBinding typeBinding = parent.resolveTypeBinding();
+	private void replaceWithStreamOf(MethodInvocation parent, List<Expression> arguments) {
+		AST ast = parent.getAST();
+		Expression expression = ast.newSimpleName(java.util.stream.Stream.class.getSimpleName());
+		ListRewrite listRewrite = astRewrite.getListRewrite(parent, MethodInvocation.ARGUMENTS_PROPERTY);
+		arguments.forEach(arg -> listRewrite.insertLast(astRewrite.createMoveTarget(arg), null));
+
+		addImports.add(java.util.stream.Stream.class.getName());
+		astRewrite.replace(parent.getExpression(), expression, null);
+		astRewrite.replace(parent.getName(), ast.newSimpleName("of"), null); //$NON-NLS-1$
+	}
+
+	private void replaceWithArraysStream(MethodInvocation stream, List<Expression> arguments,
+			ITypeBinding argumentTypeBinding, Expression experssion) {
+		AST ast = stream.getAST();
+		ArrayCreation arrayCreation = ast.newArrayCreation();
+		Code primitiveType = PrimitiveType.toCode(argumentTypeBinding.getName());
+		ArrayType arrayType = ast.newArrayType(ast.newPrimitiveType(primitiveType));
+		arrayCreation.setType(arrayType);
+		ArrayInitializer initializer = ast.newArrayInitializer();
+		@SuppressWarnings("unchecked")
+		List<Expression> initializerExpressions = initializer.expressions();
+		arguments.stream()
+			.map(arg -> (Expression) astRewrite.createMoveTarget(arg))
+			.forEach(initializerExpressions::add);
+		arrayCreation.setInitializer(initializer);
+
+		ListRewrite listRewrite = astRewrite.getListRewrite(stream, MethodInvocation.ARGUMENTS_PROPERTY);
+		listRewrite.insertFirst(arrayCreation, null);
+		
+		if(experssion != null) {
+			astRewrite.replace(stream.getExpression(), astRewrite.createCopyTarget(experssion), null);
+		} else {
+			addImports.add(java.util.Arrays.class.getName());
+			SimpleName newExpression = ast.newSimpleName(Arrays.class.getSimpleName());
+			astRewrite.replace(stream.getExpression(), newExpression, null);
+		}
+	}
+
+	private boolean isCompatibleWithSpecializedStream(List<MethodInvocation> methodChain, MethodInvocation stream) {
+		ITypeBinding typeBinding = stream.resolveTypeBinding();
 		boolean compatible = true;
 
 		for (MethodInvocation method : methodChain) {
@@ -177,16 +184,6 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 		VariableDeclarationFragment parameter = parameters.get(0);
 		UnboxCompatibilityVisitor visitor = new UnboxCompatibilityVisitor(parameter.getName());
 		lambdaBody.accept(visitor);
-
-		/*
-		 * 1. Make sure the parameter is a lambda expression and it is the only
-		 * parameter
-		 * 
-		 * 2. Create a visitor for the body of the lambda expression. Make sure
-		 * the parameter is never used as expression of a method invocation. ->
-		 * The big question: when is a boxed primitive not compatible with the
-		 * primitive value
-		 */
 		return !visitor.isIncompatible();
 	}
 
@@ -205,7 +202,6 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 				chain.addAll(extractStreamChain(parent));
 			}
 		}
-
 		return chain;
 	}
 
@@ -251,11 +247,9 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 			if (binding.getKind() != IBinding.VARIABLE) {
 				return false;
 			}
-
 			List<StructuralPropertyDescriptor> properties = findStructuralProperties(simpleName);
 			incompatible = properties.stream()
 				.anyMatch(property -> property == MethodInvocation.EXPRESSION_PROPERTY);
-
 			return false;
 		}
 
