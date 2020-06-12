@@ -22,15 +22,15 @@ import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
-public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
+public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 
-	
 	@SuppressWarnings("nls")
 	private static final List<String> BLOCKED_LIST = Collections.unmodifiableList(Arrays.asList(
 			"mapToInt",
@@ -75,15 +75,18 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (!argumentTypeBinding.isArray() && hasSpecializedStream(argumentTypeBinding)) {
 			List<MethodInvocation> methodChain = extractStreamChain(parent);
 			if (!isCompatibleWithSpecializedStream(methodChain, parent)) {
-				return false;
+				return true;
 			}
+			Expression experssion = methodInvocation.getExpression();
+			if(experssion == null && !isSafeToAddImport(getCompilationUnit(), java.util.Arrays.class.getName())) {
+				return true;
+			}
+			
 			/*
 			 * HERE create the new array and make the proper replacement
 			 */
 			AST ast = methodInvocation.getAST();
 			ArrayCreation arrayCreation = ast.newArrayCreation();
-			// FIXME: make sure the type of the argument is a simple type,
-			// without wildcards, boundaries, etc...
 			Code primitiveType = PrimitiveType.toCode(argumentTypeBinding.getName());
 			ArrayType arrayType = ast.newArrayType(ast.newPrimitiveType(primitiveType));
 			arrayCreation.setType(arrayType);
@@ -95,22 +98,31 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 				.forEach(initializerExpressions::add);
 			arrayCreation.setInitializer(initializer);
 
-			
 			ListRewrite listRewrite = astRewrite.getListRewrite(parent, MethodInvocation.ARGUMENTS_PROPERTY);
 			listRewrite.insertFirst(arrayCreation, null);
-			Expression experssion = methodInvocation.getExpression();//FIXMEexpression can be null
-			astRewrite.replace(parent.getExpression(), astRewrite.createCopyTarget(experssion), null);
-			onRewrite();
 			
+			if(experssion != null) {
+				astRewrite.replace(parent.getExpression(), astRewrite.createCopyTarget(experssion), null);
+			} else {
+				addImports.add(java.util.Arrays.class.getName());
+				SimpleName newExpression = ast.newSimpleName(Arrays.class.getSimpleName());
+				astRewrite.replace(parent.getExpression(), newExpression, null);
+			}
+			
+			onRewrite();
 			return true;
 		} else {
+			
+			if(!isSafeToAddImport(getCompilationUnit(), java.util.stream.Stream.class.getName())) {
+				return true;
+			}
 
 			AST ast = methodInvocation.getAST();
 			Expression expression = ast.newSimpleName(java.util.stream.Stream.class.getSimpleName());
 			ListRewrite listRewrite = astRewrite.getListRewrite(parent, MethodInvocation.ARGUMENTS_PROPERTY);
 			arguments.forEach(arg -> listRewrite.insertLast(astRewrite.createMoveTarget(arg), null));
 
-			// FIXME: make sure that java.util.Stream is imported.
+			addImports.add(java.util.stream.Stream.class.getName());
 			astRewrite.replace(parent.getExpression(), expression, null);
 			astRewrite.replace(parent.getName(), ast.newSimpleName("of"), null); //$NON-NLS-1$
 			onRewrite();
@@ -122,14 +134,19 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 	private boolean isCompatibleWithSpecializedStream(List<MethodInvocation> methodChain, MethodInvocation parent) {
 		ITypeBinding typeBinding = parent.resolveTypeBinding();
 		boolean compatible = true;
-		
+
 		for (MethodInvocation method : methodChain) {
 			boolean compatibleWithUnboxed = isCompatibleWithUnboxedParameter(method);
 			if (!compatibleWithUnboxed) {
 				compatible = false;
 			}
 			ITypeBinding newStreamType = method.resolveTypeBinding();
-			if (!compatible || ClassRelationUtil.compareITypeBinding(typeBinding, newStreamType)) {
+			if (!"void".equals(newStreamType.getName()) //$NON-NLS-1$
+					&& !ClassRelationUtil.compareITypeBinding(typeBinding, newStreamType)) {
+				compatible = false;
+			}
+
+			if (!compatible) {
 				break;
 			}
 		}
@@ -152,9 +169,15 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		LambdaExpression lambdaExpression = (LambdaExpression) argument;
 		ASTNode lambdaBody = lambdaExpression.getBody();
-		UnboxCompatibilityVisitor visitor = new UnboxCompatibilityVisitor(name);
+		List<VariableDeclarationFragment> parameters = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
+				VariableDeclarationFragment.class);
+		if (parameters.size() != 1) {
+			return false;
+		}
+		VariableDeclarationFragment parameter = parameters.get(0);
+		UnboxCompatibilityVisitor visitor = new UnboxCompatibilityVisitor(parameter.getName());
 		lambdaBody.accept(visitor);
-		
+
 		/*
 		 * 1. Make sure the parameter is a lambda expression and it is the only
 		 * parameter
@@ -189,9 +212,9 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 	private boolean hasSpecializedStream(ITypeBinding argumentTypeBinding) {
 		String typeName = argumentTypeBinding.getName();
 		switch (typeName) {
-		case "int":
-		case "double":
-		case "long":
+		case "int": //$NON-NLS-1$
+		case "double": //$NON-NLS-1$
+		case "long": //$NON-NLS-1$
 			return true;
 		default:
 			return false;
@@ -230,7 +253,8 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 			}
 
 			List<StructuralPropertyDescriptor> properties = findStructuralProperties(simpleName);
-			incompatible = properties.stream().anyMatch(property -> property == MethodInvocation.EXPRESSION_PROPERTY);
+			incompatible = properties.stream()
+				.anyMatch(property -> property == MethodInvocation.EXPRESSION_PROPERTY);
 
 			return false;
 		}
@@ -247,7 +271,7 @@ public class UseArraysStreamASTVisitor extends AbstractASTRewriteASTVisitor {
 			}
 			return properties;
 		}
-		
+
 		public boolean isIncompatible() {
 			return incompatible;
 		}
