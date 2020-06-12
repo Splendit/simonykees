@@ -41,6 +41,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
+import eu.jsparrow.rules.common.visitor.helper.DeclaredTypesASTVisitor;
 
 /**
  * A superclass of the visitors converting a loop ({@link ForStatement} or
