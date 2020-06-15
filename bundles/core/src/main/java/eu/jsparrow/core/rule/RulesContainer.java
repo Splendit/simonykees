@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
+import eu.jsparrow.core.rule.impl.AvoidConcatenationInLoggingStatementsRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
 import eu.jsparrow.core.rule.impl.BufferedReaderLinesRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
@@ -81,6 +82,7 @@ import eu.jsparrow.core.rule.impl.StringFormatLineSeparatorRule;
 import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
+import eu.jsparrow.core.rule.impl.UseArraysStreamRule;
 import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
@@ -174,6 +176,7 @@ public class RulesContainer {
 				new RemoveToStringOnStringRule(), new StringUtilsRule(), new StringLiteralEqualityCheckRule(),
 				new StringConcatToPlusRule(), new UseIsEmptyOnCollectionsRule(), new ArithmethicAssignmentRule(),
 				new StringBufferToBuilderRule(), new PrimitiveObjectUseEqualsRule(),
+				new AvoidConcatenationInLoggingStatementsRule(),
 				/*
 				 * Loops and streams
 				 */
@@ -183,7 +186,7 @@ public class RulesContainer {
 				new StatementLambdaToExpressionRule(), new LambdaForEachCollectRule(), new LambdaForEachMapRule(),
 				new FlatMapInsteadOfNestedLoopsRule(), new EnhancedForLoopToStreamAnyMatchRule(),
 				new EnhancedForLoopToStreamFindFirstRule(), new EnhancedForLoopToStreamSumRule(),
-				new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
+				new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(), new UseArraysStreamRule(),
 
 				/*
 				 * String manipulations. These rules must be applied after
