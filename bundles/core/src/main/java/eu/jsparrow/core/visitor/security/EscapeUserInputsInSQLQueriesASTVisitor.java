@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -92,7 +91,8 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 			return true;
 		}
 
-		List<Expression> expressionsToEscape = analyzeQueryComponents(sqlVariableVisitor);
+		List<Expression> queryComponents = sqlVariableVisitor.getDynamicQueryComponents();
+		List<Expression> expressionsToEscape = new QueryComponentsAnalyzerForEscaping(queryComponents).createListOfExpressionsToEscape();
 		if (expressionsToEscape.isEmpty()) {
 			return true;
 		}
@@ -220,13 +220,5 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		oracleCODECDeclarationStatement.setType(codecParameterizedType);
 
 		return oracleCODECDeclarationStatement;
-	}
-
-	private List<Expression> analyzeQueryComponents(SqlVariableAnalyzerVisitor sqlVariableVisitor) {
-		List<Expression> queryComponents = sqlVariableVisitor.getDynamicQueryComponents();
-		QueryComponentsAnalyzerForEscaping componentsAnalyzer = new QueryComponentsAnalyzerForEscaping(queryComponents);
-		return componentsAnalyzer.createReplaceableParameterList().stream()
-				.map(ReplaceableParameter::getParameter)
-				.collect(Collectors.toList());
 	}
 }

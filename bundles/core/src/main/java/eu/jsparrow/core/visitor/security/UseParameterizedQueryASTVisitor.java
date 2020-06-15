@@ -166,14 +166,17 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 
 	private SqlStatementAnalyzerVisitor analyzeSqlStatementUsages(SimpleName sqlStatement,
 			MethodInvocation methodInvocation) {
-
-		SqlStatementAnalyzerVisitor sqlStatementVisitor = new SqlStatementAnalyzerVisitor(sqlStatement);
-
-		Block stmDeclarationBlock = sqlStatementVisitor.getBlockOfLocalVariableDeclaration();
-		if (stmDeclarationBlock == null) {
+		
+		Block surroundingBody = this.findSurroundingBody(methodInvocation);
+		if (surroundingBody == null) {
 			return null;
 		}
-		stmDeclarationBlock.accept(sqlStatementVisitor);
+		SqlStatementAnalyzerVisitor sqlStatementVisitor = new SqlStatementAnalyzerVisitor(sqlStatement);
+		surroundingBody.accept(sqlStatementVisitor);
+		
+		if(!sqlStatementVisitor.hasFoundDeclaration()) {
+			return null;
+		}
 		if (sqlStatementVisitor.isUnsafe()) {
 			return null;
 		}

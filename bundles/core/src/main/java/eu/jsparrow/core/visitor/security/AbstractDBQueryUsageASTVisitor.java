@@ -26,10 +26,9 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	protected final VariableDeclarationFragment localVariableDeclarationFragment;
-	protected final Block blockOfLocalVariableDeclaration;
 	protected final SimpleName variableName;
 	protected final CompilationUnit compilationUnit;
-
+	protected final ASTNode statementDeclaringNode;
 	protected Expression initializer;
 	protected boolean unsafe = false;
 	protected boolean beforeDeclaration = true;
@@ -37,10 +36,10 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	protected AbstractDBQueryUsageASTVisitor(SimpleName databaseQuery) {
 		this.variableName = databaseQuery;
 		this.compilationUnit = ASTNodeUtil.getSpecificAncestor(databaseQuery, CompilationUnit.class);
-		ASTNode statementDeclaringNode = compilationUnit.findDeclaringNode(databaseQuery.resolveBinding());
+		this.statementDeclaringNode = compilationUnit.findDeclaringNode(databaseQuery.resolveBinding());
+		
 		localVariableDeclarationFragment = findLocalVariableDeclarationFragment(statementDeclaringNode);		
-		blockOfLocalVariableDeclaration = findBlockOfLocalVariableDeclaration(localVariableDeclarationFragment);
-		if (this.localVariableDeclarationFragment == null || this.blockOfLocalVariableDeclaration == null) {
+		if (this.localVariableDeclarationFragment == null) {
 			this.unsafe = true;
 		}
 	}
@@ -51,17 +50,6 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 			return null;
 		}
 		return (VariableDeclarationFragment) statementDeclaringNode;
-	}
-
-	private Block findBlockOfLocalVariableDeclaration(VariableDeclarationFragment declarationFragment) {
-		if (declarationFragment == null) {
-			return null;
-		}
-		ASTNode declaration = declarationFragment.getParent();
-		if (declaration.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return null;
-		}
-		return (Block) declaration.getParent();
 	}
 
 	protected boolean isVariableReference(Expression expression) {
@@ -185,9 +173,9 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 		return localVariableDeclarationFragment;
 	}
 
-	public Block getBlockOfLocalVariableDeclaration() {
-		return blockOfLocalVariableDeclaration;
+	public boolean hasFoundDeclaration() {
+		return !beforeDeclaration;
 	}
-
+	
 	protected abstract boolean isOtherUnsafeVariableReference(SimpleName simpleName);
 }

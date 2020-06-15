@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -16,6 +17,9 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -329,6 +333,47 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 		List<ExpressionStatement> setters = new ArrayList<>(setParameterStatements);
 		Collections.reverse(setters);
 		setters.forEach(setter -> listRewrite.insertAfter(setter, statement, null));
+	}
+
+	/**
+	 * 
+	 *
+	 * @param methodInvocation
+	 * @return This method looks for the next ancestor of the
+	 *         {@link MethodInvocation} given by the parameter which is either a
+	 *         {@link BodyDeclaration} or a {@link LambdaExpression}. If the
+	 *         ancestor is a method is a declaration or an initializer or a
+	 *         lambda expression with a body, then the corresponding body is
+	 *         returned. Otherwise null is returned, for example, if the
+	 *         ancestor found is a field declaration.
+	 */
+	protected Block findSurroundingBody(MethodInvocation methodInvocation) {
+
+		BodyDeclaration bodyDeclaration = ASTNodeUtil.getSpecificAncestor(methodInvocation, BodyDeclaration.class);
+
+		ASTNode parent = methodInvocation.getParent();
+		while (parent != null) {
+			if (parent == bodyDeclaration) {
+				if (parent.getNodeType() == ASTNode.METHOD_DECLARATION) {
+					MethodDeclaration method = (MethodDeclaration) parent;
+					return method.getBody();
+				} else if (parent.getNodeType() == ASTNode.INITIALIZER) {
+					Initializer initializer = (Initializer) parent;
+					return initializer.getBody();
+				}
+				return null;
+			} else if (parent.getNodeType() == ASTNode.LAMBDA_EXPRESSION) {
+				LambdaExpression lambda = (LambdaExpression) parent;
+				ASTNode lambdaBody = lambda.getBody();
+				if (lambdaBody.getNodeType() == ASTNode.BLOCK) {
+					return (Block) lambdaBody;
+				}
+				return null;
+			}
+			parent = parent.getParent();
+		}
+		return null;
+
 	}
 
 }

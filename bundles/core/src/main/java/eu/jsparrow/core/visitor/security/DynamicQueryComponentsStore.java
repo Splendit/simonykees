@@ -18,7 +18,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class DynamicQueryComponentsStore {
 
-	private final List<Expression> components = new ArrayList<>();
+	private List<Expression> components = new ArrayList<>();
 
 	/**
 	 * Recursive Method dividing a {@link String} concatenation expression into

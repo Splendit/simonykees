@@ -71,17 +71,21 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 		}
 
 		SimpleName querySimpleName = findJPAQuerySimpleName(methodInvocation);
-		if(querySimpleName == null) {
+		if (querySimpleName == null) {
 			return true;
 		}
+		Block surroundingBody = this.findSurroundingBody(methodInvocation);
+		if (surroundingBody == null) {
+			return true;
+		}
+
 		JPAQueryVariableAnalyzerASTVisitor queryVariableAnalyzerVisitor = new JPAQueryVariableAnalyzerASTVisitor(
 				querySimpleName);
 
-		Block blockOfLocalVariableDeclaration = queryVariableAnalyzerVisitor.getBlockOfLocalVariableDeclaration();
-		if (blockOfLocalVariableDeclaration == null) {
+		surroundingBody.accept(queryVariableAnalyzerVisitor);
+		if(!queryVariableAnalyzerVisitor.hasFoundDeclaration()) {
 			return true;
 		}
-		blockOfLocalVariableDeclaration.accept(queryVariableAnalyzerVisitor);
 		if (queryVariableAnalyzerVisitor.isUnsafe()) {
 			return true;
 		}

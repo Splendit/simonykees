@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.security;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -91,5 +92,13 @@ public class QueryComponentsAnalyzerForEscaping extends AbstractQueryComponentsA
 		return ClassRelationUtil.isContentOfTypes(expressionTypeBinding, encoderBaseTypeList) ||
 				ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, encoderBaseTypeList);
 
+	}
+
+	public List<Expression> createListOfExpressionsToEscape() {
+
+		return createReplaceableParameterList()
+			.stream()
+			.map(ReplaceableParameter::getParameter)
+			.collect(Collectors.toList());
 	}
 }
