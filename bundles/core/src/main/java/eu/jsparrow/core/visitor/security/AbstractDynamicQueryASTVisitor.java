@@ -17,9 +17,9 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
- * Intended to be extended by {@link org.eclipse.jdt.core.dom.ASTVisitor} classes which analyze SQL queries and
- * transform Java code in order to reduce vulnerability by injection of SQL code
- * by user input.
+ * Intended to be extended by {@link org.eclipse.jdt.core.dom.ASTVisitor}
+ * classes which analyze SQL queries and transform Java code in order to reduce
+ * vulnerability by injection of SQL code by user input.
  * <p>
  * For example, a common functionality is the decision whether a class can be
  * imported or not.

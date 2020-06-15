@@ -190,7 +190,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			.map(QualifiedName::getName)
 			.map(SimpleName::getIdentifier)
 			.anyMatch(simpleTypeName::equals);
-	
+
 		if (!clashing) {
 			clashing = importDeclarations.stream()
 				.map(ImportDeclaration::getName)
@@ -226,15 +226,15 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * @return true if the import can be carried out, otherwise false.
 	 */
 	protected boolean isSafeToAddImport(CompilationUnit compilationUnit, String qualifiedTypeName) {
-	
+
 		String simpleTypeName = getSimpleName(qualifiedTypeName);
-	
+
 		if (containsTypeDeclarationWithName(compilationUnit, simpleTypeName)) {
 			return false;
 		}
 		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
 				ImportDeclaration.class);
-	
+
 		if (containsImport(importDeclarations, qualifiedTypeName)) {
 			return true;
 		}

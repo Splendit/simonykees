@@ -18,7 +18,7 @@ import eu.jsparrow.rules.common.Tag;
  *
  */
 public class UseArraysStreamRule extends RefactoringRuleImpl<UseArraysStreamASTVisitor> {
-	
+
 	public UseArraysStreamRule() {
 		this.id = "UseArraysStream"; //$NON-NLS-1$
 		this.visitorClass = UseArraysStreamASTVisitor.class;

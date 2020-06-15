@@ -370,7 +370,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			}
 		} else if (remove.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
 			VariableDeclarationExpression declExpression = (VariableDeclarationExpression) remove.getParent();
-			if(declExpression.fragments().size() == 1) {
+			if (declExpression.fragments()
+				.size() == 1) {
 				astRewrite.remove(declExpression, null);
 				relatedComments = comRewrite.findRelatedComments(declExpression);
 			}
@@ -379,7 +380,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		Statement enclosingStatement = ASTNodeUtil.getSpecificAncestor(remove, Statement.class);
 		comRewrite.saveBeforeStatement(enclosingStatement, relatedComments);
 	}
-	
+
 	protected abstract List<Comment> getHeaderComments(T loop);
 
 	/**
@@ -476,10 +477,10 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 				LoopIteratingIndexASTVisitor indexVisitor = createIteratingIndexVisitor(index, iterableNode, loop,
 						outerBlock, factory);
 				outerBlock.accept(indexVisitor);
-				
+
 				IterableNodeVisitor visitor = new IterableNodeVisitor(iterableNode);
 				body.accept(visitor);
-				if(visitor.isUpdated()) {
+				if (visitor.isUpdated()) {
 					return;
 				}
 
@@ -537,10 +538,10 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 				LoopIteratingIndexASTVisitor indexVisitor = createIteratingIndexVisitor(index, iterableNode, loop,
 						outerBlock, factory);
 				outerBlock.accept(indexVisitor);
-				
+
 				IterableNodeVisitor iterableAnalyser = new IterableNodeVisitor(iterableNode);
 				body.accept(iterableAnalyser);
-				if(iterableAnalyser.isUpdated()) {
+				if (iterableAnalyser.isUpdated()) {
 					return;
 				}
 
