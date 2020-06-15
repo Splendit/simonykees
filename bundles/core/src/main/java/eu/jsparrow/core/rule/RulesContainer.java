@@ -83,6 +83,7 @@ import eu.jsparrow.core.rule.impl.StringFormatLineSeparatorRule;
 import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
+import eu.jsparrow.core.rule.impl.UseArraysStreamRule;
 import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
@@ -183,7 +184,7 @@ public class RulesContainer {
 				new StatementLambdaToExpressionRule(), new LambdaForEachCollectRule(), new LambdaForEachMapRule(),
 				new FlatMapInsteadOfNestedLoopsRule(), new EnhancedForLoopToStreamAnyMatchRule(),
 				new EnhancedForLoopToStreamFindFirstRule(), new EnhancedForLoopToStreamSumRule(),
-				new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
+				new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(), new UseArraysStreamRule(),
 
 				/*
 				 * String manipulations. These rules must be applied after

@@ -526,6 +526,8 @@ public class Messages extends NLS {
 	public static String UpdateLicenseDialog_error_couldNotSave;
 	public static String UpdateLicenseDialog_error_couldNotValidate;
 	public static String UpdateLicenseDialog_error_licenseInvalid;
+	public static String UseArraysStreamRule_description;
+	public static String UseArraysStreamRule_name;
 	public static String UseCollectionsSingletonListRule_description;
 	public static String UseCollectionsSingletonListRule_name;
 	public static String UseIsEmptyOnCollectionsRule_description;
