@@ -204,4 +204,29 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 		assertChange(original, expected);
 	}
 
+	@Test
+	public void visit_createQueryWithinLambda_shouldTransform() throws Exception {
+		String original = "" +
+				"	class TestQueryInLambda {\n" + 
+				"		private Runnable r = () -> {\n" + 
+				"			String orderId = \"100000000\";\n" + 
+				"			EntityManager entityManager = null;\n" + 
+				"			Query jpqlQuery = entityManager.createQuery(\"Select order from Orders order where order.id = \" + orderId);\n" + 
+				"			jpqlQuery.getResultList();\n" + 
+				"		};\n" + 
+				"	}";
+		String expected = "" +
+				"	class TestQueryInLambda {\n" + 
+				"		private Runnable r = () -> {\n" + 
+				"			String orderId = \"100000000\";\n" + 
+				"			EntityManager entityManager = null;\n" + 
+				"			Query jpqlQuery = entityManager.createQuery(\"Select order from Orders order where order.id =  ?1\");\n" + 
+				"			jpqlQuery.setParameter(1, orderId);\n" + 
+				"			jpqlQuery.getResultList();\n" + 
+				"		};\n" + 
+				"	}";
+		
+		assertChange(original, expected);
+	}
+
 }

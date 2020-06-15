@@ -28,7 +28,6 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	protected final VariableDeclarationFragment localVariableDeclarationFragment;
 	protected final SimpleName variableName;
 	protected final CompilationUnit compilationUnit;
-	protected final ASTNode statementDeclaringNode;
 	protected Expression initializer;
 	protected boolean unsafe = false;
 	protected boolean beforeDeclaration = true;
@@ -36,9 +35,8 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	protected AbstractDBQueryUsageASTVisitor(SimpleName databaseQuery) {
 		this.variableName = databaseQuery;
 		this.compilationUnit = ASTNodeUtil.getSpecificAncestor(databaseQuery, CompilationUnit.class);
-		this.statementDeclaringNode = compilationUnit.findDeclaringNode(databaseQuery.resolveBinding());
-		
-		localVariableDeclarationFragment = findLocalVariableDeclarationFragment(statementDeclaringNode);		
+		ASTNode statementDeclaringNode = compilationUnit.findDeclaringNode(databaseQuery.resolveBinding());
+		localVariableDeclarationFragment = findLocalVariableDeclarationFragment(statementDeclaringNode);
 		if (this.localVariableDeclarationFragment == null) {
 			this.unsafe = true;
 		}
@@ -47,6 +45,10 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	private VariableDeclarationFragment findLocalVariableDeclarationFragment(ASTNode statementDeclaringNode) {
 
 		if (statementDeclaringNode.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+			return null;
+		}
+		VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) statementDeclaringNode.getParent();
+		if(variableDeclarationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY ) {
 			return null;
 		}
 		return (VariableDeclarationFragment) statementDeclaringNode;
@@ -78,19 +80,6 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 			Expression statementInitializer = declarationFragment.getInitializer();
 			if (statementInitializer != null && statementInitializer.getNodeType() != ASTNode.NULL_LITERAL) {
 				this.initializer = statementInitializer;
-			}
-
-			boolean fragmentInStatement = declarationFragment
-				.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY;
-			if (!fragmentInStatement) {
-				this.unsafe = true;
-				return false;
-			}
-
-			VariableDeclarationStatement statement = (VariableDeclarationStatement) declarationFragment.getParent();
-			boolean statementInBlock = Block.STATEMENTS_PROPERTY == statement.getLocationInParent();
-			if (!statementInBlock) {
-				this.unsafe = true;
 			}
 			return false;
 		}
@@ -173,9 +162,14 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 		return localVariableDeclarationFragment;
 	}
 
+	/**
+	 * 
+	 * @return true if the visitor could find the local variable declaration
+	 *         fragment corresponding to {@link #variableName}, otherwise false.
+	 */
 	public boolean hasFoundDeclaration() {
 		return !beforeDeclaration;
 	}
-	
+
 	protected abstract boolean isOtherUnsafeVariableReference(SimpleName simpleName);
 }

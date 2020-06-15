@@ -66,6 +66,12 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 		return argument;
 	}
 
+	/**
+	 * 
+	 * @param methodInvocation
+	 * @return true if the method name is either {@code execute} or
+	 *         {@code executeQuery}
+	 */
 	protected boolean hasRequiredName(MethodInvocation methodInvocation) {
 		String identifier = methodInvocation.getName()
 			.getIdentifier();

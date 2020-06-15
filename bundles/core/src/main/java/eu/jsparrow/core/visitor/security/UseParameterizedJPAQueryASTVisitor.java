@@ -83,7 +83,7 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 				querySimpleName);
 
 		surroundingBody.accept(queryVariableAnalyzerVisitor);
-		if(!queryVariableAnalyzerVisitor.hasFoundDeclaration()) {
+		if (!queryVariableAnalyzerVisitor.hasFoundDeclaration()) {
 			return true;
 		}
 		if (queryVariableAnalyzerVisitor.isUnsafe()) {
@@ -111,6 +111,9 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 
 		} else if (methodInvocation.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) methodInvocation.getParent();
+			if(assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY ) {
+				return null;
+			}
 			Expression leftHandSide = assignment.getLeftHandSide();
 			if (leftHandSide.getNodeType() == ASTNode.SIMPLE_NAME) {
 				simpleQueryName = (SimpleName) leftHandSide;
@@ -127,6 +130,11 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 		return null;
 	}
 
+	/**
+	 * 
+	 * @param methodInvocation
+	 * @return true if the method name is {@code createQuery}.
+	 */
 	@Override
 	protected boolean hasRequiredName(MethodInvocation methodInvocation) {
 		return CREATE_QUERY.equals(methodInvocation.getName()

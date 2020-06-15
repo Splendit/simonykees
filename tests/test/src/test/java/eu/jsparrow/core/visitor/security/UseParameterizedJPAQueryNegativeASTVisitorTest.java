@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
-import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 
 public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitFixture {
 
@@ -26,15 +25,16 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 	@Test
 	public void visit_MethodHasNoExpression_shouldNotTransform() throws Exception {
 		String original = "" +
-				"		Query createQuery(String query) {\n" + 
-				"			return null;\n" + 
-				"		}\n" + 
-				"		void test() {\n" + 
-				"			String orderId = \"100000000\";\n" + 
-				"			EntityManager entityManager = null;\n" + 
-				"			Query jpqlQuery = createQuery(\"Select order from Orders order where order.id = \" + orderId);\n" + 
-				"			jpqlQuery.getResultList();\n" + 
-				"		}\n" + 
+				"		Query createQuery(String query) {\n" +
+				"			return null;\n" +
+				"		}\n" +
+				"		void test() {\n" +
+				"			String orderId = \"100000000\";\n" +
+				"			EntityManager entityManager = null;\n" +
+				"			Query jpqlQuery = createQuery(\"Select order from Orders order where order.id = \" + orderId);\n"
+				+
+				"			jpqlQuery.getResultList();\n" +
+				"		}\n" +
 				"";
 
 		assertNoChange(original);
@@ -346,6 +346,35 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 				"		jpqlQuery.getResultList();\n" +
 				"	}";
 
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_createQueryInFieldDeclaration_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	EntityManager entityManager = null;\n" +
+				"	String orderId = \"100000000\";		\n" +
+				"	Query jpqlQuery = entityManager.createQuery(\"Select order from Orders order where order.id = \" + orderId);\n"
+				+
+				"	void test() {\n" +
+				"		jpqlQuery.getResultList();\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_CreateQueryInAssignmentChain_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		void test() {\n" +
+				"			String orderId = \"100000000\";\n" +
+				"			EntityManager entityManager = null;\n" +
+				"			Query jpqlQuery1;\n" +
+				"			Query jpqlQuery2;\n" +
+				"			jpqlQuery1 = jpqlQuery2 = entityManager\n" +
+				"					.createQuery(\"Select order from Orders order where order.id = \" + orderId);\n" +
+				"			jpqlQuery2.getResultList();\n" +
+				"		}";
 		assertNoChange(original);
 	}
 
