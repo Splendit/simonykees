@@ -3,15 +3,15 @@ package eu.jsparrow.core.visitor.logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.impl.AvoidEvaluationOfParametersInLoggingMessagesASTVisitor;
+import eu.jsparrow.core.visitor.impl.AvoidConcatenationInLoggingStatementsASTVisitor;
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
-public class AvoidEvaluationOfParametersInLoggingMessagesTest extends UsesJDTUnitFixture {
+public class AvoidConcatenationInLoggingMessagesTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
 		addDependency("org.slf4j", "slf4j-api", "1.7.25");
-		setDefaultVisitor(new AvoidEvaluationOfParametersInLoggingMessagesASTVisitor());
+		setDefaultVisitor(new AvoidConcatenationInLoggingStatementsASTVisitor());
 
 	}
 

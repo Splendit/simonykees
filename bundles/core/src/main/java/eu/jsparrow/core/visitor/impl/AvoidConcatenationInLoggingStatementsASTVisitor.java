@@ -59,7 +59,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * 
  *        Implemented in SIM-1744 (see ticket for additional comments).
  */
-public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends AbstractASTRewriteASTVisitor {
+public class AvoidConcatenationInLoggingStatementsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@SuppressWarnings("nls")
 	private static final List<String> LOGGER_TYPES = Collections.unmodifiableList(
