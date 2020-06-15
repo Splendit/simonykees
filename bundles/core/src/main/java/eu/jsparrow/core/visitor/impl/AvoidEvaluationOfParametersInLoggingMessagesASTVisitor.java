@@ -23,7 +23,9 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * Concatenated arguments in a logging message lead to a concatenation even if
  * the logging level is too low to show a message. This leads to a needless
  * performance reduction and is classified as "Major" code smell by sonarcloud
- * (https://sonarcloud.io/organizations/default/rules?open=java%3AS2629&q=S2629).
+ * <a href=
+ * "https://sonarcloud.io/organizations/default/rules?open=java%3AS2629&q=S2629">
+ * S2629</a>.
  * <p/>
  * By using the built-in string formatting of loggers, an evaluation will only
  * happen when the logging level permits the message to be displayed.
@@ -48,6 +50,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * // Pre:
  * logger.info("bd: '" + BigDecimal.ONE + "'");
  * // Post:
+ * 
  * logger.info("bd: '{}'", BigDecimal.ONE);
  * </code>
  * </pre>
@@ -70,46 +73,16 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 
-		if (methodInvocation.getExpression() == null) {
-			return true;
-		}
+		InfixExpression infix = getOnlyValidInfixExpressions(methodInvocation);
 
-		Expression expression = methodInvocation.getExpression();
-		boolean isLoggerType = ClassRelationUtil.isContentOfTypes(expression.resolveTypeBinding(), LOGGER_TYPES);
-
-		if (!isLoggerType) {
-			return true;
-		}
-
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-
-		if (!argumentsAllowRefactoring(arguments)) {
-			return true;
-		}
-
-		// here we already know it is an InfixExpression
-		InfixExpression infix = (InfixExpression) arguments.get(0);
-
-		boolean isLeftOperandStringLiteral = isLeftOperandAllowedType(infix.getLeftOperand());
-
-		if (!isLeftOperandStringLiteral) {
-			return true;
-		}
-
-		StringLiteral currentLiteral = (StringLiteral) infix.getLeftOperand();
-
-		ParameterCheckAstVisitor visitor = new ParameterCheckAstVisitor();
-		infix.accept(visitor);
-
-		boolean isStringLiteralWithoutArguments = visitor.isSafe();
-
-		if (!isStringLiteralWithoutArguments) {
+		if (infix == null) {
 			return true;
 		}
 
 		List<Expression> newArguments = new ArrayList<>();
 		List<StringLiteral> newStringLiterals = new ArrayList<>();
 
+		StringLiteral currentLiteral = (StringLiteral) infix.getLeftOperand();
 		AST ast = astRewrite.getAST();
 
 		/*
@@ -187,6 +160,51 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		return true;
 	}
 
+	/**
+	 * All the boring checks are done here.
+	 * 
+	 * @param methodInvocation
+	 *            the {@link MethodInvocation} to check
+	 * @return an {@link InfixExpression} if all checks pass, null otherwise
+	 */
+	private InfixExpression getOnlyValidInfixExpressions(MethodInvocation methodInvocation) {
+		if (methodInvocation.getExpression() == null) {
+			return null;
+		}
+
+		Expression expression = methodInvocation.getExpression();
+		boolean isLoggerType = ClassRelationUtil.isContentOfTypes(expression.resolveTypeBinding(), LOGGER_TYPES);
+
+		if (!isLoggerType) {
+			return null;
+		}
+
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+
+		if (!argumentsAllowRefactoring(arguments)) {
+			return null;
+		}
+
+		// here we already know it is an InfixExpression
+		InfixExpression infix = (InfixExpression) arguments.get(0);
+
+		boolean isLeftOperandStringLiteral = isLeftOperandAllowedType(infix.getLeftOperand());
+
+		if (!isLeftOperandStringLiteral) {
+			return null;
+		}
+
+		ParameterCheckASTVisitor visitor = new ParameterCheckASTVisitor();
+		infix.accept(visitor);
+
+		boolean isStringLiteralWithoutArguments = visitor.isSafe();
+
+		if (!isStringLiteralWithoutArguments) {
+			return null;
+		}
+		return infix;
+	}
+
 	@SuppressWarnings("unchecked")
 	private List<Expression> getAllArguments(InfixExpression infix) {
 
@@ -239,11 +257,7 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 		boolean isFirstArgumentInfix = (arguments.get(0)
 			.getNodeType() == ASTNode.INFIX_EXPRESSION);
 
-		if (!isFirstArgumentString || !isFirstArgumentInfix) {
-			return false;
-		}
-
-		return true;
+		return isFirstArgumentString && isFirstArgumentInfix;
 	}
 
 	/**
@@ -269,19 +283,14 @@ public class AvoidEvaluationOfParametersInLoggingMessagesASTVisitor extends Abst
 	private boolean isLeftOperandAllowedType(Expression expression) {
 		int nodeType = expression.getNodeType();
 
-		switch (nodeType) {
-		case ASTNode.STRING_LITERAL:
-			return true;
-		default:
-			return false;
-		}
+		return ASTNode.STRING_LITERAL == nodeType;
 	}
 
 	/**
 	 * This visitor is used to check whether all {@link StringLiteral} operands
 	 * of an {@link InfixExpression} are free of parameters '{}'
 	 */
-	private class ParameterCheckAstVisitor extends ASTVisitor {
+	private class ParameterCheckASTVisitor extends ASTVisitor {
 		private boolean safe = true;
 
 		@Override
