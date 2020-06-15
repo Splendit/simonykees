@@ -70,7 +70,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * </ul>
  * 
  * @since 3.18.0
- *
+ * 
+ *        Implemented in SIM-1747
  */
 public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 
