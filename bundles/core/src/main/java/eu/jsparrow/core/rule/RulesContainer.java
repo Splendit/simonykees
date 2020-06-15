@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
+import eu.jsparrow.core.rule.impl.AvoidConcatenationInLoggingStatementsRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
 import eu.jsparrow.core.rule.impl.BufferedReaderLinesRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
@@ -172,6 +173,7 @@ public class RulesContainer {
 				new RemoveToStringOnStringRule(), new StringUtilsRule(), new StringLiteralEqualityCheckRule(),
 				new StringConcatToPlusRule(), new UseIsEmptyOnCollectionsRule(), new ArithmethicAssignmentRule(),
 				new StringBufferToBuilderRule(), new PrimitiveObjectUseEqualsRule(),
+				new AvoidConcatenationInLoggingStatementsRule(),
 				/*
 				 * Loops and streams
 				 */

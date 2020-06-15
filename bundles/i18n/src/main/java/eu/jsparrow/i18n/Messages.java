@@ -50,6 +50,8 @@ public class Messages extends NLS {
 	public static String Activator_standalone_noRulesSelected;
 	public static String ArithmethicAssignmentRule_description;
 	public static String ArithmethicAssignmentRule_name;
+	public static String AvoidConcatenationInLoggingStatementsRule_description;
+	public static String AvoidConcatenationInLoggingStatementsRule_name;
 	public static String BracketsToControlRule_description;
 	public static String BracketsToControlRule_name;
 	public static String BufferedReaderLinesRule_description;
