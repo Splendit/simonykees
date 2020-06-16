@@ -32,6 +32,7 @@ import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamForEachRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamSumRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamTakeWhileRule;
 import eu.jsparrow.core.rule.impl.EnumsWithoutEqualsRule;
+import eu.jsparrow.core.rule.impl.EscapeUserInputsInSQLQueriesRule;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import eu.jsparrow.core.rule.impl.ForToForEachRule;
@@ -72,8 +73,6 @@ import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
-import eu.jsparrow.core.rule.impl.UseParameterizedQueryRule;
-import eu.jsparrow.core.rule.impl.EscapeUserInputsInSQLQueriesRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
@@ -87,6 +86,8 @@ import eu.jsparrow.core.rule.impl.UseArraysStreamRule;
 import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
+import eu.jsparrow.core.rule.impl.UseParameterizedQueryRule;
+import eu.jsparrow.core.rule.impl.UseParameterizedJPAQueryRule;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.UseStringJoinRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
@@ -164,6 +165,7 @@ public class RulesContainer {
 				 * Security
 				 */
 				new UseParameterizedQueryRule(),
+				new UseParameterizedJPAQueryRule(),
 				new EscapeUserInputsInSQLQueriesRule(),
 
 				/*

@@ -1,7 +1,6 @@
 package eu.jsparrow.core.visitor.security;
 
 import java.util.List;
-import java.util.ArrayList;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -10,12 +9,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * A helper visitor for analyzing the declaration and references of the variable
@@ -29,7 +25,7 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	private CompilationUnit compilationUnit;
 	private SimpleName variableName;
 	private ASTNode declarationFragment;
-	private List<Expression> components = new ArrayList<>();
+	private final DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
 	private boolean beforeDeclaration = true;
 	private boolean beforeUsage = true;
 	private boolean unsafe = false;
@@ -45,27 +41,10 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		if (this.declarationFragment == fragment) {
 			beforeDeclaration = false;
 			Expression initializer = fragment.getInitializer();
-			storeComponents(initializer);
+			componentStore.storeComponents(initializer);
 			return false;
 		}
 		return true;
-	}
-
-	private void storeComponents(Expression initializer) {
-		if (initializer.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-			InfixExpression infixExpression = (InfixExpression) initializer;
-			Expression left = infixExpression.getLeftOperand();
-			storeComponents(left);
-			Expression right = infixExpression.getRightOperand();
-			storeComponents(right);
-			if (infixExpression.hasExtendedOperands()) {
-				List<Expression> extendedOperands = ASTNodeUtil
-					.convertToTypedList(infixExpression.extendedOperands(), Expression.class);
-				extendedOperands.forEach(this::storeComponents);
-			}
-		} else {
-			components.add(initializer);
-		}
 	}
 
 	@Override
@@ -107,7 +86,7 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		if (structuralDescriptor == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) simpleName.getParent();
 			if (assignment.getOperator() == Assignment.Operator.PLUS_ASSIGN) {
-				storeComponents(assignment.getRightHandSide());
+				componentStore.storeComponents(assignment.getRightHandSide());
 			} else {
 				unsafe = true;
 			}
@@ -124,7 +103,6 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	}
 
 	public List<Expression> getDynamicQueryComponents() {
-		return components;
+		return componentStore.getComponents();
 	}
-
 }

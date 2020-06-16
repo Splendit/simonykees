@@ -85,12 +85,15 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(methodInvocation);
+		Expression queryMethodArgument = analyzeStatementExecuteQuery(methodInvocation);
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(queryMethodArgument);
 		if (sqlVariableVisitor == null) {
 			return true;
 		}
 
-		List<Expression> expressionsToEscape = analyzeQueryComponents(sqlVariableVisitor);
+		List<Expression> queryComponents = sqlVariableVisitor.getDynamicQueryComponents();
+		List<Expression> expressionsToEscape = new QueryComponentsAnalyzerForEscaping(queryComponents)
+			.createListOfExpressionsToEscape();
 		if (expressionsToEscape.isEmpty()) {
 			return true;
 		}
@@ -126,7 +129,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		onRewrite();
 		return true;
 	}
-	
+
 	@Override
 	public void endVisit(CompilationUnit compilationUnit) {
 		liveVariableScope.clearCompilationUnitScope(compilationUnit);
@@ -218,12 +221,5 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		oracleCODECDeclarationStatement.setType(codecParameterizedType);
 
 		return oracleCODECDeclarationStatement;
-	}
-
-	private List<Expression> analyzeQueryComponents(SqlVariableAnalyzerVisitor sqlVariableVisitor) {
-		List<Expression> queryComponents = sqlVariableVisitor.getDynamicQueryComponents();
-		QueryComponentsAnalyzerForEscaping componentsAnalyzer = new QueryComponentsAnalyzerForEscaping(queryComponents);
-		componentsAnalyzer.analyze();
-		return componentsAnalyzer.getExpressionsToEscape();
 	}
 }
