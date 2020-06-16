@@ -47,8 +47,9 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 		if (statementDeclaringNode.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
 			return null;
 		}
-		VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) statementDeclaringNode.getParent();
-		if(variableDeclarationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY ) {
+		VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) statementDeclaringNode
+			.getParent();
+		if (variableDeclarationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return null;
 		}
 		return (VariableDeclarationFragment) statementDeclaringNode;

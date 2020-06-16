@@ -111,7 +111,7 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 
 		} else if (methodInvocation.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) methodInvocation.getParent();
-			if(assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY ) {
+			if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 				return null;
 			}
 			Expression leftHandSide = assignment.getLeftHandSide();

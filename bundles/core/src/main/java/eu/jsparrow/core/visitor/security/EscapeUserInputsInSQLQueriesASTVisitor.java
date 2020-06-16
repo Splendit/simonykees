@@ -92,7 +92,8 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		}
 
 		List<Expression> queryComponents = sqlVariableVisitor.getDynamicQueryComponents();
-		List<Expression> expressionsToEscape = new QueryComponentsAnalyzerForEscaping(queryComponents).createListOfExpressionsToEscape();
+		List<Expression> expressionsToEscape = new QueryComponentsAnalyzerForEscaping(queryComponents)
+			.createListOfExpressionsToEscape();
 		if (expressionsToEscape.isEmpty()) {
 			return true;
 		}
