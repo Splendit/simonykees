@@ -361,4 +361,79 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 				"}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_VariableDeclarationsAfterCreateStatement_shouldTransform() throws Exception {
+		String original = "" +
+				"			Connection connection = null;\n" +
+				"			Statement statement;\n" +
+				"			try {\n" +
+				"				statement = connection.createStatement();\n" +
+				"				String departmentId1 = \"40\";\n" +
+				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n"
+				+
+				"				query += \" OR department_id = '\";\n" +
+				"				String departmentId2 = \"140\";\n" +
+				"				query += departmentId2;\n" +
+				"				query += \"'\";\n" +
+				"				ResultSet resultSet = statement.executeQuery(query);\n" +
+				"			} catch (Exception e) {\n" +
+				"			}";
+
+		String expected = "" +
+				"			Connection connection = null;\n" +
+				"			PreparedStatement statement;\n" +
+				"			try {\n" +
+				"				String departmentId1 = \"40\";\n" +
+				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id =  ?\" + \"\";\n"
+				+
+				"				query += \" OR department_id =  ?\";\n" +
+				"				String departmentId2 = \"140\";\n" +
+				"				query += \"\";\n" +
+				"				statement = connection.prepareStatement(query);\n" +
+				"				statement.setString(1, departmentId1);\n" +
+				"				statement.setString(2, departmentId2);\n" +
+				"				ResultSet resultSet = statement.executeQuery();\n" +
+				"			} catch (Exception e) {\n" +
+				"			}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_VariableDeclarationsAfterCreateStatement_Initializer_shouldTransform() throws Exception {
+		String original = "" +
+				"			Connection connection = null;			\n" +
+				"			try {\n" +
+				"				Statement statement  = connection.createStatement();\n" +
+				"				String departmentId1 = \"40\";\n" +
+				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n"
+				+
+				"				query += \" OR department_id = '\";\n" +
+				"				String departmentId2 = \"140\";\n" +
+				"				query += departmentId2;\n" +
+				"				query += \"'\";\n" +
+				"				ResultSet resultSet = statement.executeQuery(query);\n" +
+				"			} catch (Exception e) {\n" +
+				"			}";
+
+		String expected = "" +
+				"			Connection connection = null;			\n" +
+				"			try {\n" +
+				"				PreparedStatement statement;\n" +
+				"				String departmentId1 = \"40\";\n" +
+				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id =  ?\" + \"\";\n"
+				+
+				"				query += \" OR department_id =  ?\";\n" +
+				"				String departmentId2 = \"140\";\n" +
+				"				query += \"\";\n" +
+				"				statement = connection.prepareStatement(query);\n" +
+				"				statement.setString(1, departmentId1);\n" +
+				"				statement.setString(2, departmentId2);\n" +
+				"				ResultSet resultSet = statement.executeQuery();\n" +
+				"			} catch (Exception e) {\n" +
+				"			}";
+
+		assertChange(original, expected);
+	}	
 }

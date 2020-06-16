@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -59,8 +60,8 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		Expression queryMethodArgument = analyzeStatementExecuteQuery(methodInvocation);
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(queryMethodArgument);
+		Expression executeQueryArgument = analyzeStatementExecuteQuery(methodInvocation);
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(executeQueryArgument);
 		if (sqlVariableVisitor == null) {
 			return true;
 		}
@@ -88,14 +89,20 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 
 		MethodInvocation createStatementInvocation = (MethodInvocation) sqlStatementVisitor.getInitializer();
 		VariableDeclarationFragment fragment = sqlStatementVisitor.getDeclarationFragment();
-		SimpleName query = (SimpleName) methodInvocation.arguments()
-			.get(0);
-		replaceStatementDeclaration(fragment, createStatementInvocation, query);
-		addSetters(sqlStatementVisitor.getInitializer(), setParameterStatements);
+
+		Statement statementContainingExecuteQuery = ASTNodeUtil.getSpecificAncestor(methodInvocation, Statement.class);
+
+		transformCreateStatement(
+				createStatementInvocation, statementContainingExecuteQuery, executeQueryArgument);
+
+		insertStatementsBeforeExecuteQuery(statementContainingExecuteQuery, setParameterStatements);
+
+		replaceStatementDeclaration(fragment);
 
 		SimpleName methodName = methodInvocation.getName();
 		ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.forEach(node -> astRewrite.remove(node, null));
+
 		if (EXECUTE.equals(methodName.getIdentifier())) {
 			AST ast = methodInvocation.getAST();
 			SimpleName originalName = methodInvocation.getName();
@@ -110,6 +117,82 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		onRewrite();
 
 		return true;
+	}
+
+	private void transformCreateStatement(MethodInvocation createStatementInvocation,
+			Statement statementContainingExecuteQuery,
+			Expression executeQueryArgument) {
+
+		ExpressionStatement prepareStatementOnNewPosition = createPrepareStatementOnNewPosition(
+				createStatementInvocation, statementContainingExecuteQuery);
+
+		if (prepareStatementOnNewPosition != null) {
+			Block block = (Block) statementContainingExecuteQuery.getParent();
+			ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+			listRewrite.insertBefore(prepareStatementOnNewPosition, statementContainingExecuteQuery, null);
+		}
+
+		AST ast = createStatementInvocation.getAST();
+		SimpleName name = createStatementInvocation.getName();
+		astRewrite.replace(name, ast.newSimpleName("prepareStatement"), null); //$NON-NLS-1$
+		ListRewrite listRewrite = astRewrite.getListRewrite(createStatementInvocation,
+				MethodInvocation.ARGUMENTS_PROPERTY);
+		listRewrite.insertFirst(astRewrite.createMoveTarget(executeQueryArgument), null);
+	}
+
+	private boolean isBeforeStatementContainingExecuteQuery(Statement statement,
+			Statement statementContainingExecuteQuery) {
+		if(statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return false;
+		}
+		Block block = (Block)statement.getParent();
+		int indexOfStatementContainingExecuteQuery = block.statements().indexOf(statementContainingExecuteQuery);
+		if(indexOfStatementContainingExecuteQuery < 1) {
+			return false;
+		}
+		return block.statements().indexOf(statement) == indexOfStatementContainingExecuteQuery - 1;
+	}
+
+	private ExpressionStatement createPrepareStatementOnNewPosition(MethodInvocation createStatementInvocation,
+			Statement statementContainingExecuteQuery) {
+		AST ast = createStatementInvocation.getAST();
+		ExpressionStatement prepareStatementOnNewPosition = null;
+		StructuralPropertyDescriptor locationInParent = createStatementInvocation.getLocationInParent();
+		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			Assignment prepareStatementAssignment = (Assignment) createStatementInvocation.getParent();
+			if (prepareStatementAssignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+				ExpressionStatement expressionStatement = (ExpressionStatement) prepareStatementAssignment.getParent();
+				if (isBeforeStatementContainingExecuteQuery(expressionStatement, statementContainingExecuteQuery)) {
+					return null;
+				}
+				prepareStatementOnNewPosition = (ExpressionStatement) astRewrite
+					.createMoveTarget(expressionStatement);
+
+			}
+		} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment fragment = (VariableDeclarationFragment) createStatementInvocation.getParent();
+			if (fragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+				return null;
+			}
+			if (isBeforeStatementContainingExecuteQuery((VariableDeclarationStatement) fragment.getParent(),
+					statementContainingExecuteQuery)) {
+				return null;
+			}
+			Assignment assignment = ast.newAssignment();
+			assignment.setLeftHandSide(ast.newSimpleName(fragment.getName()
+				.getIdentifier()));
+			assignment.setRightHandSide((Expression) astRewrite.createMoveTarget(createStatementInvocation));
+			prepareStatementOnNewPosition = ast.newExpressionStatement(assignment);
+		}
+		return prepareStatementOnNewPosition;
+	}
+
+	protected void insertStatementsBeforeExecuteQuery(Statement executeQueryStatement,
+			List<ExpressionStatement> setParameterStatements) {
+		Block block = (Block) executeQueryStatement.getParent();
+		ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+		setParameterStatements
+			.forEach(setter -> listRewrite.insertBefore(setter, executeQueryStatement, null));
 	}
 
 	private void removeGetResultSetInvocation(MethodInvocation getResultSetInvocation,
@@ -216,8 +299,7 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		return componentsAnalyzer.createReplaceableParameterList();
 	}
 
-	private void replaceStatementDeclaration(VariableDeclarationFragment fragment, MethodInvocation createStatement,
-			SimpleName query) {
+	private void replaceStatementDeclaration(VariableDeclarationFragment fragment) {
 		VariableDeclarationStatement statement = (VariableDeclarationStatement) fragment.getParent();
 
 		int numFragments = statement.fragments()
@@ -226,7 +308,6 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		SimpleType preparedStatementType = ast
 			.newSimpleType(ast.newSimpleName(java.sql.PreparedStatement.class.getSimpleName()));
 		if (numFragments > 1) {
-
 			VariableDeclarationFragment newFragment = (VariableDeclarationFragment) astRewrite
 				.createMoveTarget(fragment);
 			VariableDeclarationStatement newDeclarationStatement = ast.newVariableDeclarationStatement(newFragment);
@@ -238,12 +319,7 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 			Type type = statement.getType();
 			astRewrite.replace(type, preparedStatementType, null);
 		}
-		SimpleName name = createStatement.getName();
-		astRewrite.replace(name, ast.newSimpleName("prepareStatement"), null); //$NON-NLS-1$
-		ListRewrite listRewrite = astRewrite.getListRewrite(createStatement, MethodInvocation.ARGUMENTS_PROPERTY);
-		listRewrite.insertFirst(astRewrite.createCopyTarget(query), null);
 		addImports.add(java.sql.PreparedStatement.class.getName());
-
 	}
 
 	private boolean analyzeSqlStatementInitializer(Expression sqlStatementInitializerExpression) {
