@@ -174,8 +174,10 @@ public class AvoidConcatenationInLoggingStatementsASTVisitor extends AbstractAST
 
 		Expression expression = methodInvocation.getExpression();
 		boolean isLoggerType = ClassRelationUtil.isContentOfTypes(expression.resolveTypeBinding(), LOGGER_TYPES);
+		boolean isInheritingLoggerType = ClassRelationUtil.isInheritingContentOfTypes(expression.resolveTypeBinding(),
+				LOGGER_TYPES);
 
-		if (!isLoggerType) {
+		if (!isLoggerType && !isInheritingLoggerType) {
 			return null;
 		}
 
