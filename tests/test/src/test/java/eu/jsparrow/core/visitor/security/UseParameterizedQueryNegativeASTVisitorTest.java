@@ -445,7 +445,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 				"		}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_TwoExecuteArguments_shouldNotTransform() throws Exception {
 
@@ -464,6 +464,54 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 				"		}";
 		assertNoChange(original);
 	}
-	
 
+	@Test
+	public void visit_AssignmentToStatementUsedByMethod_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	class TestVariablesBefore {\n" +
+				"		void useStatement(Statement statement) {\n" +
+				"		}\n" +
+				"		void test() {\n" +
+				"			String departmentId1 = \"40\";\n" +
+				"			String departmentId2 = \"140\";\n" +
+				"			Connection connection = null;\n" +
+				"			String query = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\" + departmentId1 + \"'\" + //\n"
+				+
+				"					\" OR department_id ='\" + departmentId2 + \"'\" + //\n" +
+				"					\" ORDER BY last_name\";\n" +
+				"			Statement statement;\n" +
+				"			try {\n" +
+				"				useStatement(statement = connection.createStatement());\n" +
+				"				ResultSet resultSet = statement.executeQuery(query);\n" +
+				"			} catch (Exception e) {\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_StatementContainingExecuteQueryNotInBlock_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	class TestStatementContainingExecuteQueryNotInBlock {\n" + 
+				"		void test() {\n" + 
+				"			Connection connection = null;\n" + 
+				"			Statement statement;\n" + 
+				"			ResultSet resultSet;\n" + 
+				"			try {\n" + 
+				"				statement = connection.createStatement();\n" + 
+				"				String departmentId1 = \"40\";\n" + 
+				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" + 
+				"				query += \" OR department_id = '\";\n" + 
+				"				String departmentId2 = \"140\";\n" + 
+				"				query += departmentId2;\n" + 
+				"				query += \"'\";\n" + 
+				"				if (true) resultSet = statement.executeQuery(query);\n" + 
+				"			} catch (Exception e) {\n" + 
+				"			}\n" + 
+				"		}\n" + 
+				"	}";
+		
+		assertNoChange(original);
+	}
 }
