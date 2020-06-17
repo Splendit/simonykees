@@ -238,6 +238,10 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 		if (returnStatement != null) {
 			Expression expression = returnStatement.getExpression();
 
+			if (expression.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
+				expression = ASTNodeUtil.unwrapParenthesizedExpression(expression);
+			}
+
 			if (expression == null) {
 				return null;
 			}

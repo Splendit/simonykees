@@ -50,6 +50,8 @@ public class Messages extends NLS {
 	public static String Activator_standalone_noRulesSelected;
 	public static String ArithmethicAssignmentRule_description;
 	public static String ArithmethicAssignmentRule_name;
+	public static String AvoidConcatenationInLoggingStatementsRule_description;
+	public static String AvoidConcatenationInLoggingStatementsRule_name;
 	public static String BracketsToControlRule_description;
 	public static String BracketsToControlRule_name;
 	public static String BufferedReaderLinesRule_description;
@@ -524,12 +526,16 @@ public class Messages extends NLS {
 	public static String UpdateLicenseDialog_error_couldNotSave;
 	public static String UpdateLicenseDialog_error_couldNotValidate;
 	public static String UpdateLicenseDialog_error_licenseInvalid;
+	public static String UseArraysStreamRule_description;
+	public static String UseArraysStreamRule_name;
 	public static String UseCollectionsSingletonListRule_description;
 	public static String UseCollectionsSingletonListRule_name;
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String UseListSortRule_description;
 	public static String UseListSortRule_name;
+	public static String UseParameterizedJPAQueryRule_description;
+	public static String UseParameterizedJPAQueryRule_name;
 	public static String UseStringBuilderAppendRule_description;
 	public static String UseStringBuilderAppendRule_name;
 	public static String UseStringJoinRule_description;

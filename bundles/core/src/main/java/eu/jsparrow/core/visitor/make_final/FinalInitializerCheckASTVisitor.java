@@ -5,16 +5,20 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -24,11 +28,11 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * This is a helper visitor for finding {@link FieldDeclaration}s that could be
  * made {@code final}. There are a few criteria which this visitor checks:
  * <ul>
- * <li><strong>{@code static final} fields</strong> must be initialised at the
- * declaration or in a static initialiser but not in both.</li>
- * <li><strong>non-static {@code final} fields</strong> must be initialised in
+ * <li><strong>{@code static final} fields</strong> must be initialized at the
+ * declaration or in a static initializer but not in both.</li>
+ * <li><strong>non-static {@code final} fields</strong> must be initialized in
  * only one of the following parts: at the declaration, in a non-static class
- * initialiser or at the end of ALL constructors.</li>
+ * initializer or at the end of ALL constructors.</li>
  * </ul>
  * 
  * <strong>How to use:</strong>
@@ -53,15 +57,18 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	private List<VariableDeclarationFragment> multiplyAssignedDeclarations = new ArrayList<>();
 
 	private List<VariableDeclarationFragment> tempAssignmentsInBlocks;
+	private List<VariableDeclarationFragment> nonRootAssignment = new ArrayList<>();
 
 	private int constructorCount = 0;
 	private boolean isInConstructor = false;
+	private ASTNode currentConstructor;
 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
-		boolean isAlreadyFinal = ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isFinal);
+		int modifiers = fieldDeclaration.getModifiers();
+		boolean isFinalOrVolatile = Modifier.isFinal(modifiers) || Modifier.isVolatile(modifiers);
 
-		if (isAlreadyFinal) {
+		if (isFinalOrVolatile) {
 			return true;
 		}
 
@@ -82,6 +89,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	@Override
 	public boolean visit(Initializer initializer) {
 		tempAssignmentsInBlocks = new LinkedList<>();
+		currentConstructor = initializer;
 		return true;
 	}
 
@@ -94,14 +102,15 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 		}
 
 		tempAssignmentsInBlocks = null;
+		currentConstructor = null;
 	}
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
 		if (!methodDeclaration.isConstructor()) {
-			return false;
+			return isInConstructor;
 		}
-
+		currentConstructor = methodDeclaration;
 		tempAssignmentsInBlocks = new LinkedList<>();
 		isInConstructor = true;
 
@@ -116,16 +125,44 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 
 		constructorInitializers.put(constructorCount, tempAssignmentsInBlocks);
 		tempAssignmentsInBlocks = null;
+		currentConstructor = null;
 		isInConstructor = false;
 		constructorCount++;
 	}
 
 	@Override
+	public boolean visit(PrefixExpression infixExpression) {
+		Expression expression = infixExpression.getOperand();
+		VariableDeclarationFragment variableDeclarationFragment = extractFieldDeclarationFragmentFromExpression(
+				expression);
+		multiplyAssignedDeclarations.add(variableDeclarationFragment);
+		return true;
+	}
+
+	@Override
+	public boolean visit(PostfixExpression postfixExpression) {
+		Expression expression = postfixExpression.getOperand();
+		VariableDeclarationFragment variableDeclarationFragment = extractFieldDeclarationFragmentFromExpression(
+				expression);
+		multiplyAssignedDeclarations.add(variableDeclarationFragment);
+
+		return true;
+	}
+
+	@Override
 	public boolean visit(Assignment assignment) {
 		Expression leftHandSide = assignment.getLeftHandSide();
-
 		VariableDeclarationFragment variableDeclarationFragment = extractFieldDeclarationFragmentFromExpression(
 				leftHandSide);
+
+		if (isInNestedBlock(leftHandSide.getParent())) {
+			/*
+			 * Otherwise, wee need control flow analysis to determine if the
+			 * field is assigned exactly once in each branch of the control
+			 * flow.
+			 */
+			nonRootAssignment.add(variableDeclarationFragment);
+		}
 
 		if (variableDeclarationFragment != null) {
 			if (!isInConstructor && isAlreadyAssigned(variableDeclarationFragment)) {
@@ -134,8 +171,16 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 				tempAssignmentsInBlocks.add(variableDeclarationFragment);
 			}
 		}
+		return true;
+	}
 
-		return false;
+	private boolean isInNestedBlock(ASTNode assignment) {
+		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return true;
+		}
+		ExpressionStatement statement = (ExpressionStatement) assignment.getParent();
+		return statement.getParent()
+			.getParent() != currentConstructor;
 	}
 
 	/**
@@ -170,7 +215,17 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
 				VariableDeclarationFragment.class);
 
-		return fragments.stream()
+		/*
+		 * This is the only visitor analyzing constructors
+		 */
+		boolean reassignedInConstructor = constructorInitializers.values()
+			.stream()
+			.filter(Objects::nonNull)
+			.flatMap(List::stream)
+			.filter(Objects::nonNull)
+			.anyMatch(fragments::contains);
+
+		return !reassignedInConstructor && fragments.stream()
 			.allMatch(fragment -> (fieldInitializers.contains(fragment)
 					^ staticInitializerInitializers.contains(fragment))
 					&& !multiplyAssignedDeclarations.contains(fragment));
@@ -187,12 +242,18 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 
 				boolean constructor = !constructorInitializers.isEmpty() && constructorInitializers.entrySet()
 					.stream()
-					.allMatch((Map.Entry<Integer, List<VariableDeclarationFragment>> entry) -> entry.getValue()
-						.contains(fragment));
+					.map(Map.Entry::getValue)
+					.allMatch((List<VariableDeclarationFragment> entry) -> entry.contains(fragment));
+				boolean atLeastOneConstructor = constructorInitializers.entrySet()
+					.stream()
+					.map(Map.Entry::getValue)
+					.anyMatch((List<VariableDeclarationFragment> entry) -> entry.contains(fragment));
+
 				boolean multiplyAssigned = multiplyAssignedDeclarations.contains(fragment);
+				boolean hasNonRootAssignment = nonRootAssignment.contains(fragment);
 
 				return ((declaration ^ initializer ^ constructor) ^ (declaration && initializer && constructor))
-						&& !multiplyAssigned;
+						&& !multiplyAssigned && !(!constructor && atLeastOneConstructor) && !hasNonRootAssignment;
 			});
 	}
 

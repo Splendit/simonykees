@@ -105,7 +105,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				ASTNode lambdaParameter;
 				List<IExtendedModifier> modifiers = ASTNodeUtil.returnTypedList(parameter.modifiers(),
 						IExtendedModifier.class);
-				if (modifiers.isEmpty()) {
+				if (modifiers.isEmpty() && isTypeSafe(expressionTypeBinding)) {
 					VariableDeclarationFragment temp = astRewrite.getAST()
 						.newVariableDeclarationFragment();
 					temp.setName(parameterNameCopy);

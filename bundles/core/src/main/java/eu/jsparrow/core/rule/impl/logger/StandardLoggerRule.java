@@ -46,7 +46,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private static final Logger logger = LoggerFactory.getLogger(StandardLoggerRule.class);
 
 	private static final String TRUE = Boolean.TRUE.toString();
-	
+
 	public static final String STANDARD_LOGGER_RULE_ID = "StandardLogger"; //$NON-NLS-1$
 
 	private Map<String, Integer> systemOutReplaceOptions = new LinkedHashMap<>();
@@ -77,7 +77,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		this.id = STANDARD_LOGGER_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.StandardLoggerRule_name,
 				Messages.StandardLoggerRule_description, Duration.ofMinutes(10),
-				Arrays.asList(Tag.JAVA_1_1, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS));
+				Arrays.asList(Tag.JAVA_1_1, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS, Tag.LOGGING));
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.loop;
+package eu.jsparrow.rules.common.visitor.helper;
 
 import java.util.ArrayList;
 import java.util.Arrays;

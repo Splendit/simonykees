@@ -39,7 +39,8 @@ public enum Tag {
 	OLD_LANGUAGE_CONSTRUCTS("old language constructs"),
 	LAMBDA("lambda"),
 	SECURITY("security"),
-	FREE("free");
+	FREE("free"),
+	LOGGING("logging");
 
 	private List<String> tagName;
 
