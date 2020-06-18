@@ -9,7 +9,6 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -22,7 +21,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Replaces a dynamic query with a prepared statement. For example, the
@@ -61,7 +59,7 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		Expression executeQueryArgument = analyzeStatementExecuteQuery(methodInvocation);
-		if(executeQueryArgument == null) {
+		if (executeQueryArgument == null) {
 			return true;
 		}
 		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(executeQueryArgument);
@@ -84,15 +82,11 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		if (sqlStatementVisitor == null) {
 			return true;
 		}
-		MethodInvocation createStatementInvocation = (MethodInvocation) sqlStatementVisitor.getInitializer();
-		
-		Statement statementInitializingSQLStatement = findStatementInitializingSQLStatement(sqlStatementVisitor);
-		if (statementInitializingSQLStatement == null) {
-			return true;
-		}
-		
+		MethodInvocation createStatementInvocation = sqlStatementVisitor.getCreateStatementInvocation();
+		Statement statementContainingCreateStatement = sqlStatementVisitor.getStatementContainingCreateStatement();
+
 		Statement statementContainingExecuteQuery = ASTNodeUtil.getSpecificAncestor(methodInvocation, Statement.class);
-		if(statementContainingExecuteQuery.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+		if (statementContainingExecuteQuery.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return true;
 		}
 
@@ -100,8 +94,8 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		replaceQuery(replaceableParameters);
 		List<ExpressionStatement> setParameterStatements = createSetParameterStatements(replaceableParameters,
 				sqlStatement);
-		
-		moveStatementContainingCreateStatement(statementInitializingSQLStatement, createStatementInvocation,
+
+		moveStatementContainingCreateStatement(statementContainingCreateStatement, createStatementInvocation,
 				statementContainingExecuteQuery);
 
 		transformCreateStatementInvocation(createStatementInvocation, executeQueryArgument);
@@ -128,22 +122,6 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		onRewrite();
 
 		return true;
-	}
-
-	private Statement findStatementInitializingSQLStatement(SqlStatementAnalyzerVisitor sqlStatementVisitor) {
-		Expression createStatementInvocation = sqlStatementVisitor.getInitializer();
-		if (createStatementInvocation.getParent() == sqlStatementVisitor.getDeclarationFragment()) {
-			return (Statement) sqlStatementVisitor.getDeclarationFragment()
-				.getParent();
-		}
-		if (createStatementInvocation.getLocationInParent() != Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			return null;
-		}
-		ASTNode assignment = createStatementInvocation.getParent();
-		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return null;
-		}
-		return (ExpressionStatement) assignment.getParent();
 	}
 
 	private void transformCreateStatementInvocation(
@@ -254,22 +232,9 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		if (surroundingBody == null) {
 			return null;
 		}
+
 		SqlStatementAnalyzerVisitor sqlStatementVisitor = new SqlStatementAnalyzerVisitor(sqlStatement);
-		surroundingBody.accept(sqlStatementVisitor);
-
-		if (sqlStatementVisitor.isUnsafe()) {
-			return null;
-		}
-		
-		Expression connectionCreateStatement = sqlStatementVisitor.getInitializer();
-		
-		Statement statement = ASTNodeUtil.getSpecificAncestor(connectionCreateStatement, Statement.class);
-		if (statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return null;
-		}
-
-		boolean isConnectionPrepareStatement = analyzeSqlStatementInitializer(connectionCreateStatement);
-		if (!isConnectionPrepareStatement) {
+		if (!sqlStatementVisitor.analyze(surroundingBody)) {
 			return null;
 		}
 
@@ -284,7 +249,6 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 				return null;
 			}
 		}
-
 		return sqlStatementVisitor;
 	}
 
@@ -315,27 +279,6 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 			astRewrite.replace(type, preparedStatementType, null);
 		}
 		addImports.add(java.sql.PreparedStatement.class.getName());
-	}
-
-	private boolean analyzeSqlStatementInitializer(Expression sqlStatementInitializerExpression) {
-		if (sqlStatementInitializerExpression.getNodeType() != ASTNode.METHOD_INVOCATION) {
-			return false;
-		}
-		MethodInvocation sqlStatementInitializer = (MethodInvocation) sqlStatementInitializerExpression;
-		Expression connection = sqlStatementInitializer.getExpression();
-		if(connection == null) {
-			return false;
-		}
-		ITypeBinding connectionTypeBinding = connection.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(connectionTypeBinding, java.sql.Connection.class.getName())) {
-			return false;
-		}
-		SimpleName createStatement = sqlStatementInitializer.getName();
-		if (!"createStatement".equals(createStatement.getIdentifier())) { //$NON-NLS-1$
-			return false;
-		}
-		return sqlStatementInitializer.arguments()
-			.isEmpty();
 	}
 
 	@Override
