@@ -493,25 +493,26 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	@Test
 	public void visit_StatementContainingExecuteQueryNotInBlock_shouldNotTransform() throws Exception {
 		String original = "" +
-				"	class TestStatementContainingExecuteQueryNotInBlock {\n" + 
-				"		void test() {\n" + 
-				"			Connection connection = null;\n" + 
-				"			Statement statement;\n" + 
-				"			ResultSet resultSet;\n" + 
-				"			try {\n" + 
-				"				statement = connection.createStatement();\n" + 
-				"				String departmentId1 = \"40\";\n" + 
-				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" + 
-				"				query += \" OR department_id = '\";\n" + 
-				"				String departmentId2 = \"140\";\n" + 
-				"				query += departmentId2;\n" + 
-				"				query += \"'\";\n" + 
-				"				if (true) resultSet = statement.executeQuery(query);\n" + 
-				"			} catch (Exception e) {\n" + 
-				"			}\n" + 
-				"		}\n" + 
+				"	class TestStatementContainingExecuteQueryNotInBlock {\n" +
+				"		void test() {\n" +
+				"			Connection connection = null;\n" +
+				"			Statement statement;\n" +
+				"			ResultSet resultSet;\n" +
+				"			try {\n" +
+				"				statement = connection.createStatement();\n" +
+				"				String departmentId1 = \"40\";\n" +
+				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n"
+				+
+				"				query += \" OR department_id = '\";\n" +
+				"				String departmentId2 = \"140\";\n" +
+				"				query += departmentId2;\n" +
+				"				query += \"'\";\n" +
+				"				if (true) resultSet = statement.executeQuery(query);\n" +
+				"			} catch (Exception e) {\n" +
+				"			}\n" +
+				"		}\n" +
 				"	}";
-		
+
 		assertNoChange(original);
 	}
 
@@ -540,5 +541,52 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 				"	}";
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_prepareCallInsteadOfCreateStatement_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	class Test_prepareCallInsteadCreateStatement {\n" + 
+				"		void test() {\n" + 
+				"			Connection connection = null;\n" + 
+				"			Statement statement;\n" + 
+				"			try {\n" + 
+				"				\n" + 
+				"				String departmentId1 = \"40\";\n" + 
+				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" + 
+				"				query += \" OR department_id = '\";\n" + 
+				"				String departmentId2 = \"140\";\n" + 
+				"				query += departmentId2;\n" + 
+				"				query += \"'\";\n" + 
+				"				statement = connection.prepareCall(\"\");\n" + 
+				"				ResultSet resultSet = statement.executeQuery(query);\n" + 
+				"			} catch (Exception e) {\n" + 
+				"			}\n" + 
+				"		}\n" + 
+				"	}";
+		assertNoChange(original);
+	}
 	
+	
+	@Test
+	public void visit_createStatementWithArguments_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	class Test_createStatementWithArguments {\n" + 
+				"		void test() {\n" + 
+				"			Connection connection = null;\n" + 
+				"			Statement statement;\n" + 
+				"			try {				\n" + 
+				"				String departmentId1 = \"40\";\n" + 
+				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" + 
+				"				query += \" OR department_id = '\";\n" + 
+				"				String departmentId2 = \"140\";\n" + 
+				"				query += departmentId2;\n" + 
+				"				query += \"'\";\n" + 
+				"				statement = connection.createStatement(0, 0);\n" + 
+				"				ResultSet resultSet = statement.executeQuery(query);\n" + 
+				"			} catch (Exception e) {\n" + 
+				"			}\n" + 
+				"		}\n" + 
+				"	}";
+		assertNoChange(original);
+	}
 }
