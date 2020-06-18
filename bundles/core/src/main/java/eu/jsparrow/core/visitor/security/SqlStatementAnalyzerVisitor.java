@@ -10,8 +10,13 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+
 import java.sql.Connection;
 
+import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
@@ -31,10 +36,13 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 
 	private MethodInvocation createStatementInvocation;
 
+	private MethodInvocation executeQueryInvocation;
+
 	private Statement statementContainingCreateStatement;
 
-	public SqlStatementAnalyzerVisitor(SimpleName sqlStatement) {
+	public SqlStatementAnalyzerVisitor(SimpleName sqlStatement, MethodInvocation executeQueryMethodInvocation) {
 		super(sqlStatement);
+		this.executeQueryInvocation = executeQueryMethodInvocation;
 	}
 
 	private MethodInvocation findGetResultSet(SimpleName simpleName) {
@@ -115,8 +123,48 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 		if (statement == null || statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return null;
 		}
-		
+
 		return statement;
+	}
+
+	public boolean analyzeGetResultSetInvocation() {
+		if (getResultSetInvocation != null) {
+			if ("executeQuery".equals(executeQueryInvocation.getName() //$NON-NLS-1$
+				.getIdentifier())) {
+				return false;
+			}
+			boolean isRemovableRs = isRemovableGetResultSet();
+			if (!isRemovableRs) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean isRemovableGetResultSet() {
+
+		StructuralPropertyDescriptor propertyDescriptor = getResultSetInvocation.getLocationInParent();
+		if (propertyDescriptor == ExpressionStatement.EXPRESSION_PROPERTY) {
+			return true;
+		} else if (propertyDescriptor == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment fragment = (VariableDeclarationFragment) getResultSetInvocation.getParent();
+			if (fragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+				return false;
+			}
+			SimpleName variableName = fragment.getName();
+			String resultSetIdentifier = variableName.getIdentifier();
+			Block newScope = ASTNodeUtil.getSpecificAncestor(executeQueryInvocation, Block.class);
+			VariableDeclarationsVisitor visitor = new VariableDeclarationsVisitor();
+			newScope.accept(visitor);
+			long numMatchingNames = visitor.getVariableDeclarationNames()
+				.stream()
+				.map(SimpleName::getIdentifier)
+				.filter(resultSetIdentifier::equals)
+				.count();
+			return numMatchingNames == 1;
+		}
+
+		return false;
 	}
 
 	/**
@@ -139,15 +187,19 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 			return false;
 		}
 		createStatementInvocation = analyzeSqlStatementInitializer(initializer);
-
 		if (createStatementInvocation != null) {
 			statementContainingCreateStatement = findStatementContainingCreateStatement(createStatementInvocation);
 		}
-		
+
 		if (createStatementInvocation == null || statementContainingCreateStatement == null) {
 			unsafe = true;
+			return false;
 		}
-		
+
+		if (!analyzeGetResultSetInvocation()) {
+			unsafe = true;
+		}
+
 		return !unsafe;
 	}
 

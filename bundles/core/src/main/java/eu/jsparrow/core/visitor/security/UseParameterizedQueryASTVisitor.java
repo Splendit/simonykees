@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -78,10 +77,17 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		}
 		SimpleName sqlStatement = (SimpleName) methodExpression;
 
-		SqlStatementAnalyzerVisitor sqlStatementVisitor = analyzeSqlStatementUsages(sqlStatement, methodInvocation);
-		if (sqlStatementVisitor == null) {
+		Block surroundingBody = this.findSurroundingBody(methodInvocation);
+		if (surroundingBody == null) {
 			return true;
 		}
+
+		SqlStatementAnalyzerVisitor sqlStatementVisitor = new SqlStatementAnalyzerVisitor(sqlStatement,
+				methodInvocation);
+		if (!sqlStatementVisitor.analyze(surroundingBody)) {
+			return true;
+		}
+
 		MethodInvocation createStatementInvocation = sqlStatementVisitor.getCreateStatementInvocation();
 		Statement statementContainingCreateStatement = sqlStatementVisitor.getStatementContainingCreateStatement();
 
@@ -196,60 +202,6 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		} else {
 			astRewrite.remove(getResultSetInvocation.getParent(), null);
 		}
-	}
-
-	private boolean isRemovableGetResultSet(MethodInvocation getResultSetInvocation,
-			MethodInvocation methodInvocation) {
-
-		StructuralPropertyDescriptor propertyDescriptor = getResultSetInvocation.getLocationInParent();
-		if (propertyDescriptor == ExpressionStatement.EXPRESSION_PROPERTY) {
-			return true;
-		} else if (propertyDescriptor == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			VariableDeclarationFragment fragment = (VariableDeclarationFragment) getResultSetInvocation.getParent();
-			if (fragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-				return false;
-			}
-			SimpleName variableName = fragment.getName();
-			String resultSetIdentifier = variableName.getIdentifier();
-			Block newScope = ASTNodeUtil.getSpecificAncestor(methodInvocation, Block.class);
-			VariableDeclarationsVisitor visitor = new VariableDeclarationsVisitor();
-			newScope.accept(visitor);
-			long numMatchingNames = visitor.getVariableDeclarationNames()
-				.stream()
-				.map(SimpleName::getIdentifier)
-				.filter(resultSetIdentifier::equals)
-				.count();
-			return numMatchingNames == 1;
-		}
-
-		return false;
-	}
-
-	private SqlStatementAnalyzerVisitor analyzeSqlStatementUsages(SimpleName sqlStatement,
-			MethodInvocation methodInvocation) {
-
-		Block surroundingBody = this.findSurroundingBody(methodInvocation);
-		if (surroundingBody == null) {
-			return null;
-		}
-
-		SqlStatementAnalyzerVisitor sqlStatementVisitor = new SqlStatementAnalyzerVisitor(sqlStatement);
-		if (!sqlStatementVisitor.analyze(surroundingBody)) {
-			return null;
-		}
-
-		MethodInvocation getResultSetInvocation = sqlStatementVisitor.getGetResultSetInvocation();
-		if (getResultSetInvocation != null) {
-			if (EXECUTE_QUERY.equals(methodInvocation.getName()
-				.getIdentifier())) {
-				return null;
-			}
-			boolean isRemovableRs = isRemovableGetResultSet(getResultSetInvocation, methodInvocation);
-			if (!isRemovableRs) {
-				return null;
-			}
-		}
-		return sqlStatementVisitor;
 	}
 
 	private List<ReplaceableParameter> analyzeQueryComponents(SqlVariableAnalyzerVisitor sqlVariableVisitor) {
