@@ -257,17 +257,12 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		SqlStatementAnalyzerVisitor sqlStatementVisitor = new SqlStatementAnalyzerVisitor(sqlStatement);
 		surroundingBody.accept(sqlStatementVisitor);
 
-		if (!sqlStatementVisitor.hasFoundDeclaration()) {
-			return null;
-		}
 		if (sqlStatementVisitor.isUnsafe()) {
 			return null;
 		}
+		
 		Expression connectionCreateStatement = sqlStatementVisitor.getInitializer();
-		if (connectionCreateStatement == null) {
-			return null;
-		}
-
+		
 		Statement statement = ASTNodeUtil.getSpecificAncestor(connectionCreateStatement, Statement.class);
 		if (statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return null;

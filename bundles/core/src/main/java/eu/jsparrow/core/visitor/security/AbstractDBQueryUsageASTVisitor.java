@@ -136,18 +136,26 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	}
 
 	/**
+	 * There are various reasons which make the further usage of a variable
+	 * analyzed by {@link AbstractDBQueryUsageASTVisitor} unsafe, for example:
+	 * <ul>
+	 * <li>The usage of the variable itself is unsafe.</li>
+	 * <li>The declaration of the analyzed variable could not be found.</li>
+	 * <li>No valid initialization of the analyzed variable could be found.</li>
+	 * </ul>
 	 * 
-	 * @return if it is not safe to replace the {@link java.sql.Statement} with
-	 *         a {@link java.sql.PreparedStatement}.
+	 * @return true if the analyzed variable declaration is unsafe and prohibits
+	 *         the transformation of code.
 	 */
 	public boolean isUnsafe() {
-		return unsafe;
+		return unsafe || beforeDeclaration || initializer == null;
 	}
 
 	/**
 	 * 
-	 * @return the expression used for initializing the original
-	 *         {@link java.sql.Statement}.
+	 * @return the expression used for initializing the analyzed variable. If
+	 *         {@link #isUnsafe()} returns false, it is guaranteed that the
+	 *         return value of this method will not be null.
 	 */
 	public Expression getInitializer() {
 		return initializer;
@@ -161,15 +169,6 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	 */
 	public VariableDeclarationFragment getDeclarationFragment() {
 		return localVariableDeclarationFragment;
-	}
-
-	/**
-	 * 
-	 * @return true if the visitor could find the local variable declaration
-	 *         fragment corresponding to {@link #variableName}, otherwise false.
-	 */
-	public boolean hasFoundDeclaration() {
-		return !beforeDeclaration;
 	}
 
 	protected abstract boolean isOtherUnsafeVariableReference(SimpleName simpleName);
