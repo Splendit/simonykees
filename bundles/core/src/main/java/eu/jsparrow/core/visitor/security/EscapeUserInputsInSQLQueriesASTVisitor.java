@@ -86,6 +86,9 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		Expression queryMethodArgument = analyzeStatementExecuteQuery(methodInvocation);
+		if(queryMethodArgument == null) {
+			return true;
+		}
 		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(queryMethodArgument);
 		if (sqlVariableVisitor == null) {
 			return true;

@@ -61,6 +61,9 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		Expression executeQueryArgument = analyzeStatementExecuteQuery(methodInvocation);
+		if(executeQueryArgument == null) {
+			return true;
+		}
 		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(executeQueryArgument);
 		if (sqlVariableVisitor == null) {
 			return true;
@@ -325,6 +328,9 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		}
 		MethodInvocation sqlStatementInitializer = (MethodInvocation) sqlStatementInitializerExpression;
 		Expression connection = sqlStatementInitializer.getExpression();
+		if(connection == null) {
+			return false;
+		}
 		ITypeBinding connectionTypeBinding = connection.resolveTypeBinding();
 		if (!ClassRelationUtil.isContentOfType(connectionTypeBinding, java.sql.Connection.class.getName())) {
 			return false;

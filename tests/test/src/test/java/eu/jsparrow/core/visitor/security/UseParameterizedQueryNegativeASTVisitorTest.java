@@ -514,4 +514,31 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 		
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_ConnectionCreateStatementUsedByMethod_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	class TestVariablesBefore {\n" +
+				"		Statement useStatement(Statement statement) {\n" +
+				"			return statement; \n" +
+				"		}\n" +
+				"		void test() {\n" +
+				"			String departmentId1 = \"40\";\n" +
+				"			String departmentId2 = \"140\";\n" +
+				"			Connection connection = null;\n" +
+				"			String query = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\" + departmentId1 + \"'\" + //\n"
+				+
+				"					\" OR department_id ='\" + departmentId2 + \"'\" + //\n" +
+				"					\" ORDER BY last_name\";\n" +
+				"			Statement statement;\n" +
+				"			try {\n" +
+				"				statement = useStatement(connection.createStatement());\n" +
+				"				ResultSet resultSet = statement.executeQuery(query);\n" +
+				"			} catch (Exception e) {\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}";
+		assertNoChange(original);
+	}
+	
 }
