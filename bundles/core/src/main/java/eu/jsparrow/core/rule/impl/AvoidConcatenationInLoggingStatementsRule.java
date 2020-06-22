@@ -23,7 +23,7 @@ public class AvoidConcatenationInLoggingStatementsRule
 		this.id = "AvoidConcatenationInLoggingStatements"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.AvoidConcatenationInLoggingStatementsRule_name,
 				Messages.AvoidConcatenationInLoggingStatementsRule_description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_1, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				Arrays.asList(Tag.JAVA_1_1, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS, Tag.READABILITY, Tag.LOGGING));
 
 	}
 
