@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 
-@SuppressWarnings("nls")
 public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
@@ -21,39 +20,37 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	public void visit_executeQuery_shouldTransform() throws Exception {
 
 		String original = "" +
-				"		String departmentId = \"40\";\n" +
-				"        Connection connection = null;\n" +
-				"        String query = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\" + departmentId + \"' ORDER BY last_name\";\n"
-				+
-				"        query += \"\";\n" +
-				"        Statement statement;\n" +
-				"		try {\n" +
-				"			statement = connection.createStatement();\n" +
-				"	        ResultSet resultSet = statement.executeQuery(query);\n" +
-				"	        while(resultSet.next()) {\n" +
-				"	        	String firstName = resultSet.getString(2);\n" +
-				"	        }\n" +
-				"		} catch (Exception e) {\n" +
-				"			return;\n" +
-				"		}";
+				"String departmentId = \"40\";\n" +
+				"  Connection connection = null;\n" +
+				"  String query = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\" + departmentId + \"' ORDER BY last_name\";\n" +
+				"  query += \"\";\n" +
+				"  Statement statement;\n" +
+				"try {\n" +
+				"	statement = connection.createStatement();\n" +
+				"     ResultSet resultSet = statement.executeQuery(query);\n" +
+				"     while(resultSet.next()) {\n" +
+				"     	String firstName = resultSet.getString(2);\n" +
+				"     }\n" +
+				"} catch (Exception e) {\n" +
+				"	return;\n" +
+				"}";
 
 		String expected = "" +
-				"		String departmentId = \"40\";\n" +
-				"        Connection connection = null;\n" +
-				"        String query = \"SELECT employee_id, first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n"
-				+
-				"        query += \"\";\n" +
-				"        PreparedStatement statement;\n" +
-				"		try {\n" +
-				"			statement = connection.prepareStatement(query);\n" +
-				"			statement.setString(1, departmentId);" +
-				"	        ResultSet resultSet = statement.executeQuery();\n" +
-				"	        while(resultSet.next()) {\n" +
-				"	        	String firstName = resultSet.getString(2);\n" +
-				"	        }\n" +
-				"		} catch (Exception e) {\n" +
-				"			return;\n" +
-				"		}";
+				"String departmentId = \"40\";\n" +
+				"  Connection connection = null;\n" +
+				"  String query = \"SELECT employee_id, first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n" +
+				"  query += \"\";\n" +
+				"  PreparedStatement statement;\n" +
+				"try {\n" +
+				"	statement = connection.prepareStatement(query);\n" +
+				"	statement.setString(1, departmentId);" +
+				"     ResultSet resultSet = statement.executeQuery();\n" +
+				"     while(resultSet.next()) {\n" +
+				"     	String firstName = resultSet.getString(2);\n" +
+				"     }\n" +
+				"} catch (Exception e) {\n" +
+				"	return;\n" +
+				"}";
 
 		assertChange(original, expected);
 	}
@@ -61,36 +58,35 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	@Test
 	public void visit_multipleConcatenationStatements_shouldTransform() throws Exception {
 		String original = "" +
-				"		try {\n" +
-				"			String departmentId = \"40\";\n" +
-				"	        Connection connection = null;\n" +
-				"	        String query = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\";\n" +
-				"	        query += departmentId;\n" +
-				"	        query += \"' ORDER BY last_name\";\n" +
-				"	        Statement statement = connection.createStatement();\n" +
-				"	        ResultSet resultSet = statement.executeQuery(query);\n" +
-				"	        while(resultSet.next()) {\n" +
-				"	        	String firstName = resultSet.getString(2);\n" +
-				"	        }\n" +
-				"		} catch (Exception e) {\n" +
-				"			\n" +
-				"		}";
+				"try {\n" +
+				"	String departmentId = \"40\";\n" +
+				"     Connection connection = null;\n" +
+				"     String query = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\";\n" +
+				"     query += departmentId;\n" +
+				"     query += \"' ORDER BY last_name\";\n" +
+				"     Statement statement = connection.createStatement();\n" +
+				"     ResultSet resultSet = statement.executeQuery(query);\n" +
+				"     while(resultSet.next()) {\n" +
+				"     	String firstName = resultSet.getString(2);\n" +
+				"     }\n" +
+				"} catch (Exception e) {\n" +
+				"	\n" +
+				"}";
 		String expected = "" +
-				"		try {\n" +
-				"			String departmentId = \"40\";\n" +
-				"	        Connection connection = null;\n" +
-				"	        String query = \"SELECT employee_id, first_name FROM employee WHERE department_id = ?\";\n"
-				+
-				"	        query += \" ORDER BY last_name\";\n" +
-				"	        PreparedStatement statement = connection.prepareStatement(query);\n" +
-				"			statement.setString(1, departmentId);" +
-				"	        ResultSet resultSet = statement.executeQuery();\n" +
-				"	        while(resultSet.next()) {\n" +
-				"	        	String firstName = resultSet.getString(2);\n" +
-				"	        }\n" +
-				"		} catch (Exception e) {\n" +
-				"			\n" +
-				"		}";
+				"try {\n" +
+				"	String departmentId = \"40\";\n" +
+				"     Connection connection = null;\n" +
+				"     String query = \"SELECT employee_id, first_name FROM employee WHERE department_id = ?\";\n" +
+				"     query += \" ORDER BY last_name\";\n" +
+				"     PreparedStatement statement = connection.prepareStatement(query);\n" +
+				"	statement.setString(1, departmentId);" +
+				"     ResultSet resultSet = statement.executeQuery();\n" +
+				"     while(resultSet.next()) {\n" +
+				"     	String firstName = resultSet.getString(2);\n" +
+				"     }\n" +
+				"} catch (Exception e) {\n" +
+				"	\n" +
+				"}";
 		assertChange(original, expected);
 
 	}
@@ -161,8 +157,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 				"String departmentId = \"40\";\n" +
 				"String id = \"1\";\n" +
 				"Connection connection = null;\n" +
-				"String query = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\" + departmentId + \"' AND employee_id = '\" + id +  \"' ORDER BY last_name\";\n"
-				+
+				"String query = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\" + departmentId + \"' AND employee_id = '\" + id +  \"' ORDER BY last_name\";\n" +
 				"try {\n" +
 				"	Statement statement = connection.createStatement();\n" +
 				"    ResultSet resultSet = statement.executeQuery(query);\n" +
@@ -171,8 +166,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 				"String departmentId = \"40\";\n" +
 				"String id = \"1\";\n" +
 				"Connection connection = null;\n" +
-				"String query = \"SELECT employee_id, first_name FROM employee WHERE department_id = ?\" + \"' AND employee_id =  ?\" + \" ORDER BY last_name\";\n"
-				+
+				"String query = \"SELECT employee_id, first_name FROM employee WHERE department_id = ?\" + \"' AND employee_id =  ?\" + \" ORDER BY last_name\";\n" +
 				"try {\n" +
 				"	PreparedStatement statement = connection.prepareStatement(query);\n" +
 				"	statement.setString(1, departmentId);\n" +
@@ -187,8 +181,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
-				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + departmentId + \"' ORDER BY last_name\";\n"
-				+
+				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + departmentId + \"' ORDER BY last_name\";\n" +
 				"try {\n" +
 				"    Statement statement = connection.createStatement();\n" +
 				"    statement.executeQuery(query);\n" +
@@ -196,8 +189,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 		String expected = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +
-				"String query=\"SELECT first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n"
-				+
+				"String query=\"SELECT first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n" +
 				"try {\n" +
 				"    PreparedStatement statement=connection.prepareStatement(query);\n" +
 				"    statement.setString(1, departmentId);" +
@@ -210,16 +202,14 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	public void visit_parenthesizedParameterExpression_shouldTransform() throws Exception {
 		String original = "" +
 				"Connection connection = null;\n" +
-				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + (2 + 38) + \"' ORDER BY last_name\";\n"
-				+
+				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + (2 + 38) + \"' ORDER BY last_name\";\n" +
 				"try {\n" +
 				"    Statement statement = connection.createStatement();\n" +
 				"    statement.executeQuery(query);\n" +
 				"} catch (Exception e) {}";
 		String expected = "" +
 				"Connection connection = null;\n" +
-				"String query = \"SELECT first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n"
-				+
+				"String query = \"SELECT first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n" +
 				"try {\n" +
 				"    PreparedStatement statement = connection.prepareStatement(query);\n" +
 				"    statement.setInt(1, (2 + 38));\n" +
@@ -233,8 +223,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 		String original = "" +
 				"Connection connection = null;\n" +
 				"long id = 40;\n" +
-				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + id + \"' ORDER BY last_name\";\n"
-				+
+				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + id + \"' ORDER BY last_name\";\n" +
 				"try {\n" +
 				"    Statement statement = connection.createStatement();\n" +
 				"    statement.execute(query);\n" +
@@ -243,8 +232,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 		String expected = "" +
 				"Connection connection = null;\n" +
 				"long id = 40;\n" +
-				"String query = \"SELECT first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n"
-				+
+				"String query = \"SELECT first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n" +
 				"try {\n" +
 				"    PreparedStatement statement = connection.prepareStatement(query);\n" +
 				"    statement.setLong(1, id);\n" +
@@ -259,8 +247,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 		String original = "" +
 				"Connection connection = null;\n" +
 				"long id = 40;\n" +
-				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + id + \"' ORDER BY last_name\";\n"
-				+
+				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + id + \"' ORDER BY last_name\";\n" +
 				"try {\n" +
 				"    Statement statement = connection.createStatement();\n" +
 				"    statement.executeQuery(query);\n" +
@@ -268,8 +255,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 		String expected = "" +
 				"Connection connection = null;\n" +
 				"long id = 40;\n" +
-				"String query = \"SELECT first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n"
-				+
+				"String query = \"SELECT first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n" +
 				"try {\n" +
 				"    PreparedStatement statement = connection.prepareStatement(query);\n" +
 				"    statement.setLong(1, id);\n" +
@@ -283,8 +269,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 		String original = "" +
 				"int id = 40;\n" +
 				"Connection connection = null;\n" +
-				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + id + \"' ORDER BY last_name\";\n"
-				+
+				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + id + \"' ORDER BY last_name\";\n" +
 				"try {\n" +
 				"    Statement statement = connection.createStatement();\n" +
 				"    statement.execute(query);\n" +
@@ -293,8 +278,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 		String expected = "" +
 				"int id = 40;\n" +
 				"Connection connection = null;\n" +
-				"String query = \"SELECT first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n"
-				+
+				"String query = \"SELECT first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n" +
 				"try {\n" +
 				"    PreparedStatement statement = connection.prepareStatement(query);\n" +
 				"    statement.setInt(1, id);\n" +
@@ -336,8 +320,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	public void visit_infixExpressions_shouldTransform() throws Exception {
 		String original = "" +
 				"class Foo {\n" +
-				"	public void sampleMethod(Connection connection, String departmentId1, String departmentId2) throws Exception {\n"
-				+
+				"	public void sampleMethod(Connection connection, String departmentId1, String departmentId2) throws Exception {\n" +
 				"	    String query = \"\" + \n" +
 				"	            \"SELECT\" +\n" +
 				"	            \"   employee_id\" +\n" +
@@ -355,8 +338,7 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 				"}";
 		String expected = "" +
 				"class Foo {\n" +
-				"	public void sampleMethod(Connection connection, String departmentId1, String departmentId2) throws Exception {\n"
-				+
+				"	public void sampleMethod(Connection connection, String departmentId1, String departmentId2) throws Exception {\n" +
 				"	    String query = \"\" + \n" +
 				"	            \"SELECT\" +\n" +
 				"	            \"   employee_id\" +\n" +
@@ -380,74 +362,66 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	@Test
 	public void visit_VariableDeclarationsAfterCreateStatement_shouldTransform() throws Exception {
 		String original = "" +
-				"			Connection connection = null;\n" +
-				"			Statement statement;\n" +
-				"			try {\n" +
-				"				statement = connection.createStatement();\n" +
-				"				String departmentId1 = \"40\";\n" +
-				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n"
-				+
-				"				query += \" OR department_id = '\";\n" +
-				"				String departmentId2 = \"140\";\n" +
-				"				query += departmentId2;\n" +
-				"				query += \"'\";\n" +
-				"				ResultSet resultSet = statement.executeQuery(query);\n" +
-				"			} catch (Exception e) {\n" +
-				"			}";
+				"Connection connection = null;\n" +
+				"Statement statement;\n" +
+				"try {\n" +
+				"	statement = connection.createStatement();\n" +
+				"	String departmentId1 = \"40\";\n" +
+				"	String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" +
+				"	query += \" OR department_id = '\";\n" +
+				"	String departmentId2 = \"140\";\n" +
+				"	query += departmentId2;\n" +
+				"	query += \"'\";\n" +
+				"	ResultSet resultSet = statement.executeQuery(query);\n" +
+				"} catch (Exception e) {}";
 
 		String expected = "" +
-				"			Connection connection = null;\n" +
-				"			PreparedStatement statement;\n" +
-				"			try {\n" +
-				"				String departmentId1 = \"40\";\n" +
-				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id =  ?\" + \"\";\n"
-				+
-				"				query += \" OR department_id =  ?\";\n" +
-				"				String departmentId2 = \"140\";\n" +
-				"				query += \"\";\n" +
-				"				statement = connection.prepareStatement(query);\n" +
-				"				statement.setString(1, departmentId1);\n" +
-				"				statement.setString(2, departmentId2);\n" +
-				"				ResultSet resultSet = statement.executeQuery();\n" +
-				"			} catch (Exception e) {\n" +
-				"			}";
+				"Connection connection = null;\n" +
+				"PreparedStatement statement;\n" +
+				"try {\n" +
+				"	String departmentId1 = \"40\";\n" +
+				"	String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id =  ?\" + \"\";\n" +
+				"	query += \" OR department_id =  ?\";\n" +
+				"	String departmentId2 = \"140\";\n" +
+				"	query += \"\";\n" +
+				"	statement = connection.prepareStatement(query);\n" +
+				"	statement.setString(1, departmentId1);\n" +
+				"	statement.setString(2, departmentId2);\n" +
+				"	ResultSet resultSet = statement.executeQuery();\n" +
+				"} catch (Exception e) {}";
 
 		assertChange(original, expected);
 	}
 
 	@Test
-	public void visit_VariableDeclarationsAfterCreateStatement_Initializer_shouldTransform() throws Exception {
+	public void visit_movingStatementDeclarationFragmentAfterParameterDeclarations_shouldTransform() throws Exception {
 		String original = "" +
-				"			Connection connection = null;			\n" +
-				"			try {\n" +
-				"				Statement statement  = connection.createStatement();\n" +
-				"				String departmentId1 = \"40\";\n" +
-				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n"
-				+
-				"				query += \" OR department_id = '\";\n" +
-				"				String departmentId2 = \"140\";\n" +
-				"				query += departmentId2;\n" +
-				"				query += \"'\";\n" +
-				"				ResultSet resultSet = statement.executeQuery(query);\n" +
-				"			} catch (Exception e) {\n" +
-				"			}";
+				"Connection connection = null;\n" +
+				"try {\n" +
+				"	Statement statement  = connection.createStatement();\n" +
+				"	String departmentId1 = \"40\";\n" +
+				"	String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" +
+				"	query += \" OR department_id = '\";\n" +
+				"	String departmentId2 = \"140\";\n" +
+				"	query += departmentId2;\n" +
+				"	query += \"'\";\n" +
+				"	ResultSet resultSet = statement.executeQuery(query);\n" +
+				"} catch (Exception e) {}";
 
 		String expected = "" +
-				"			Connection connection = null;			\n" +
-				"			try {\n" +
-				"				PreparedStatement statement;\n" +
-				"				String departmentId1 = \"40\";\n" +
-				"				String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id =  ?\" + \"\";\n"
-				+
-				"				query += \" OR department_id =  ?\";\n" +
-				"				String departmentId2 = \"140\";\n" +
-				"				query += \"\";\n" +
-				"				statement = connection.prepareStatement(query);\n" +
-				"				statement.setString(1, departmentId1);\n" +
-				"				statement.setString(2, departmentId2);\n" +
-				"				ResultSet resultSet = statement.executeQuery();\n" +
-				"			} catch (Exception e) {\n" +
-				"			}";
+				"Connection connection = null;\n" +
+				"try {\n" +
+				"	PreparedStatement statement;\n" +
+				"	String departmentId1 = \"40\";\n" +
+				"	String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id =  ?\" + \"\";\n" +
+				"	query += \" OR department_id =  ?\";\n" +
+				"	String departmentId2 = \"140\";\n" +
+				"	query += \"\";\n" +
+				"	statement = connection.prepareStatement(query);\n" +
+				"	statement.setString(1, departmentId1);\n" +
+				"	statement.setString(2, departmentId2);\n" +
+				"	ResultSet resultSet = statement.executeQuery();\n" +
+				"} catch (Exception e) {}";
 
 		assertChange(original, expected);
 	}
@@ -455,40 +429,37 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	@Test
 	public void visit_ExecuteQueryAsOnlyStatementInNestedBlock_shouldTransform() throws Exception {
 		String original = "" +
-				"	class TestExecuteQueryAsOnlyStatementInNestedBlock {\n" + 
-				"		void test() {\n" + 
-				"			Connection connection = null;\n" + 
-				"			String departmentId1 = \"40\";			\n" + 
-				"			String query = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\" + departmentId1 + \"'\";\n" + 
-				"			Statement statement;\n" + 
-				"			try {\n" + 
-				"				statement = connection.createStatement();\n" + 
-				"				{\n" + 
-				"					statement.executeQuery(query);\n" + 
-				"				}\n" + 
-				"			} catch (Exception e) {\n" + 
+				"class TestExecuteQueryAsOnlyStatementInNestedBlock {\n" + 
+				"	void test() {\n" + 
+				"		Connection connection = null;\n" + 
+				"		String departmentId1 = \"40\";			\n" + 
+				"		String query = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\" + departmentId1 + \"'\";\n" + 
+				"		Statement statement;\n" + 
+				"		try {\n" + 
+				"			statement = connection.createStatement();\n" + 
+				"			{\n" + 
+				"				statement.executeQuery(query);\n" + 
 				"			}\n" + 
-				"		}\n" + 
-				"	}";
+				"		} catch (Exception e) {}\n" + 
+				"	}\n" + 
+				"}";
 
 		String expected = "" +
-				"	class TestExecuteQueryAsOnlyStatementInNestedBlock {\n" + 
-				"		void test() {\n" + 
-				"			Connection connection = null;\n" + 
-				"			String departmentId1 = \"40\";			\n" + 
-				"			String query = \"SELECT employee_id, first_name FROM employee WHERE department_id = ?\" + \"\";\n" + 
-				"			PreparedStatement statement;\n" + 
-				"			try {\n" + 
-				"				{\n" + 
-				"					statement = connection.prepareStatement(query);\n" + 
-				"					statement.setString(1, departmentId1);\n" + 
-				"					statement.executeQuery();\n" + 
-				"				}\n" + 
-				"			} catch (Exception e) {\n" + 
+				"class TestExecuteQueryAsOnlyStatementInNestedBlock {\n" + 
+				"	void test() {\n" + 
+				"		Connection connection = null;\n" + 
+				"		String departmentId1 = \"40\";			\n" + 
+				"		String query = \"SELECT employee_id, first_name FROM employee WHERE department_id = ?\" + \"\";\n" + 
+				"		PreparedStatement statement;\n" + 
+				"		try {\n" + 
+				"			{\n" + 
+				"				statement = connection.prepareStatement(query);\n" + 
+				"				statement.setString(1, departmentId1);\n" + 
+				"				statement.executeQuery();\n" + 
 				"			}\n" + 
-				"		}\n" + 
+				"		} catch (Exception e) {}\n" + 
 				"	}\n" + 
-				"";
+				"}\n";
 		assertChange(original, expected);
 	}
 }
