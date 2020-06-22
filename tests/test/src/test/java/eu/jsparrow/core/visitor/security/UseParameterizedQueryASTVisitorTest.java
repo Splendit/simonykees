@@ -401,10 +401,6 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 				"	Statement statement  = connection.createStatement();\n" +
 				"	String departmentId1 = \"40\";\n" +
 				"	String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" +
-				"	query += \" OR department_id = '\";\n" +
-				"	String departmentId2 = \"140\";\n" +
-				"	query += departmentId2;\n" +
-				"	query += \"'\";\n" +
 				"	ResultSet resultSet = statement.executeQuery(query);\n" +
 				"} catch (Exception e) {}";
 
@@ -414,12 +410,8 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 				"	PreparedStatement statement;\n" +
 				"	String departmentId1 = \"40\";\n" +
 				"	String query = \"\" + \"SELECT employee_id FROM employee WHERE department_id =  ?\" + \"\";\n" +
-				"	query += \" OR department_id =  ?\";\n" +
-				"	String departmentId2 = \"140\";\n" +
-				"	query += \"\";\n" +
 				"	statement = connection.prepareStatement(query);\n" +
 				"	statement.setString(1, departmentId1);\n" +
-				"	statement.setString(2, departmentId2);\n" +
 				"	ResultSet resultSet = statement.executeQuery();\n" +
 				"} catch (Exception e) {}";
 
