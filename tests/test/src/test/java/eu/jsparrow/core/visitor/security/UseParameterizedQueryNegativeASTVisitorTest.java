@@ -560,4 +560,20 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 				"}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	public void visit_referencingStatementBeforeUsage_shouldNotTransform() throws Exception {
+		String original = "" +
+				"Connection connection = null;\n" + 
+				"try {\n" + 
+				"	Statement statement = connection.createStatement();\n" + 
+				"	String departmentId = \"40\";\n" + 
+				"	statement.equals(null);\n" + 
+				"    String query = \"SELECT employee_id, first_name FROM employee WHERE department_id = '\" + departmentId + \"'\";\n" + 
+				"    ResultSet resultSet = statement.executeQuery(query);\n" + 
+				"} catch (Exception e) {\n" + 
+				"	\n" + 
+				"}";
+		assertNoChange(original);
+	}
 }

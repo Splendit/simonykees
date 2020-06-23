@@ -33,11 +33,8 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor {
 
 	private MethodInvocation getResultSetInvocation;
-
 	private MethodInvocation createStatementInvocation;
-
 	private MethodInvocation executeQueryInvocation;
-
 	private Statement statementContainingCreateStatement;
 
 	public SqlStatementAnalyzerVisitor(SimpleName sqlStatement, MethodInvocation executeQueryMethodInvocation) {
@@ -60,14 +57,11 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 	@Override
 	protected boolean isOtherUnsafeVariableReference(SimpleName simpleName) {
 		MethodInvocation getResultSet = findGetResultSet(simpleName);
-		if (getResultSet != null) {
-			if (this.getResultSetInvocation == null) {
-				this.getResultSetInvocation = getResultSet;
-			} else {
-				return true;
-			}
+		if (getResultSet != null && this.getResultSetInvocation == null) {
+			this.getResultSetInvocation = getResultSet;
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 	/**
