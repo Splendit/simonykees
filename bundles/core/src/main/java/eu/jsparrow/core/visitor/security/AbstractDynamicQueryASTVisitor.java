@@ -120,10 +120,6 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	 */
 	protected SqlVariableAnalyzerVisitor createSqlVariableAnalyzerVisitor(Expression queryMethodArgument) {
 
-		if (queryMethodArgument == null) {
-			return null;
-		}
-
 		if (queryMethodArgument.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return null;
 		}
