@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -92,10 +93,15 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		return true;
 	}
+	
+	@Override
+	public void endVisit(CompilationUnit compilationUnit) {
+		this.scope.clearCompilationUnitScope(compilationUnit);
+		super.endVisit(compilationUnit);
+	}
 
 	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
-		this.scope.clearLocalVariablesScope(typeDeclaration);
 		this.scope.clearFieldScope(typeDeclaration);
 	}
 

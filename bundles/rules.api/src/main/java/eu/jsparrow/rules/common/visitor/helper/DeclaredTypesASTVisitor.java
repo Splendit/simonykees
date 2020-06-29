@@ -1,10 +1,11 @@
-package eu.jsparrow.core.visitor.loop;
+package eu.jsparrow.rules.common.visitor.helper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -24,11 +25,11 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 public class DeclaredTypesASTVisitor extends ASTVisitor {
 
 	private Map<String, List<ITypeBinding>> typesMap;
-	private List<ITypeBinding> topLevelTypes;
+	private List<ITypeBinding> allTypes;
 
 	public DeclaredTypesASTVisitor() {
 		typesMap = new HashMap<>();
-		topLevelTypes = new ArrayList<>();
+		allTypes = new ArrayList<>();
 	}
 
 	@Override
@@ -51,10 +52,8 @@ public class DeclaredTypesASTVisitor extends ASTVisitor {
 
 	private void storeDeclaredTypes(AbstractTypeDeclaration typeDeclaration) {
 		ITypeBinding binding = typeDeclaration.resolveBinding();
+		allTypes.add(binding);
 		List<ITypeBinding> innerTypes = Arrays.asList(binding.getDeclaredTypes());
-		if (binding.isTopLevel()) {
-			topLevelTypes.add(binding);
-		}
 		typesMap.put(binding.getQualifiedName(), innerTypes);
 	}
 
@@ -72,6 +71,18 @@ public class DeclaredTypesASTVisitor extends ASTVisitor {
 	 * @return the list of the type bindings top level types.
 	 */
 	public List<ITypeBinding> getTopLevelTypes() {
-		return topLevelTypes;
+		return allTypes.stream()
+			.filter(ITypeBinding::isTopLevel)
+			.collect(Collectors.toList());
 	}
+
+	/**
+	 * 
+	 * @return a list containing all type bindings, including inner types and
+	 *         also local types.
+	 */
+	public List<ITypeBinding> getAllTypes() {
+		return allTypes;
+	}
+
 }

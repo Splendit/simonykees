@@ -1,13 +1,10 @@
 package eu.jsparrow.core.visitor.security;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -20,10 +17,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
  * @since 3.16.0
  *
  */
-public class QueryComponentsAnalyzer {
-
-	private List<Expression> components;
-	private List<ReplaceableParameter> parameters = new ArrayList<>();
+public class QueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer {
 
 	@SuppressWarnings("nls")
 	private static final Map<String, String> SETTERS_MAP = Collections.unmodifiableMap(new HashMap<String, String>() {
@@ -60,36 +54,26 @@ public class QueryComponentsAnalyzer {
 		}
 	});
 
-	public QueryComponentsAnalyzer(List<Expression> components) {
-		this.components = components;
+	QueryComponentsAnalyzer(List<Expression> components) {
+		super(components);
 	}
 
-	/**
-	 * Constructs a list of {@link ReplaceableParameter}s out of the
-	 * {@link #components} of the query.
-	 * 
-	 * @return
-	 */
-	public void analyze() {
-		List<Expression> nonLiteralComponents = components.stream()
-			.filter(component -> component.getNodeType() != ASTNode.STRING_LITERAL)
-			.collect(Collectors.toList());
-
-		int position = 1;
-		for (Expression component : nonLiteralComponents) {
-			int index = components.indexOf(component);
-			StringLiteral previous = findPrevious(index);
-			if (previous != null) {
-				StringLiteral next = findNext(index);
-				if (next != null) {
-					String setterName = findSetterName(component);
-					if (setterName != null) {
-						this.parameters.add(new ReplaceableParameter(previous, next, component, setterName, position));
-						position++;
-					}
-				}
-			}
+	@Override
+	protected ReplaceableParameter createReplaceableParameter(int componentIndex, int parameterPosition) {
+		StringLiteral previous = findPrevious(componentIndex);
+		if (previous == null) {
+			return null;
 		}
+		StringLiteral next = findNext(componentIndex);
+		if (next == null) {
+			return null;
+		}
+		Expression nonLiteralComponent = components.get(componentIndex);
+		String setterName = findSetterName(nonLiteralComponent);
+		if (setterName == null) {
+			return null;
+		}
+		return new ReplaceableParameter(previous, next, nonLiteralComponent, setterName, parameterPosition);
 	}
 
 	private String findSetterName(Expression component) {
@@ -109,42 +93,6 @@ public class QueryComponentsAnalyzer {
 		}
 		return type.getErasure()
 			.getQualifiedName();
-	}
-
-	private StringLiteral findNext(int index) {
-		int nextIndex = index + 1;
-		if (components.size() <= nextIndex) {
-			return null;
-		}
-		Expression next = components.get(nextIndex);
-		if (next.getNodeType() != ASTNode.STRING_LITERAL) {
-			return null;
-		}
-		StringLiteral literal = (StringLiteral) next;
-		String value = literal.getLiteralValue();
-		return value.startsWith("'") ? literal : null; //$NON-NLS-1$
-	}
-
-	private StringLiteral findPrevious(int index) {
-		int previousIndex = index - 1;
-		if (previousIndex < 0) {
-			return null;
-		}
-		Expression previous = components.get(previousIndex);
-		if (previous.getNodeType() != ASTNode.STRING_LITERAL) {
-			return null;
-		}
-		StringLiteral stringLiteral = (StringLiteral) previous;
-		String value = stringLiteral.getLiteralValue();
-		return value.endsWith("'") ? stringLiteral : null; //$NON-NLS-1$
-	}
-
-	/**
-	 * @return the list of {@link ReplaceableParameter}s constructed by
-	 *         {@link #analyze()}.
-	 */
-	public List<ReplaceableParameter> getReplaceableParameters() {
-		return this.parameters;
 	}
 
 }

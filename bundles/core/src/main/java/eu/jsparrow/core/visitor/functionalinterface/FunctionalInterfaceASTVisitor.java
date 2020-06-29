@@ -169,6 +169,9 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						return true;
 					}
 					Block onlyFunctionalInterfaceMethodImplBody = onlyFunctionalInterfaceMethod.getBody();
+					if(hasOccurrencesOfThisKeyWord(onlyFunctionalInterfaceMethod)) {
+						return true;
+					}
 					// find parent scope and variable declarations in it
 					List<ASTNode> relevantBlocks = new ArrayList<>();
 					ASTNode scope = findScope(node, relevantBlocks);
@@ -321,6 +324,12 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 		return true;
 
+	}
+
+	private boolean hasOccurrencesOfThisKeyWord(MethodDeclaration methodDeclaration) {
+		ThisExpressionVisitor visitor = new ThisExpressionVisitor();
+		methodDeclaration.accept(visitor);
+		return visitor.hasThisExpression();
 	}
 
 	private boolean hasInvocationsOfInstanceMethods(AnonymousClassDeclaration node,

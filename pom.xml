@@ -5,7 +5,7 @@
 
 	<groupId>at.splendit</groupId>
 	<artifactId>eu.jsparrow</artifactId>
-	<version>3.17.0-SNAPSHOT</version>
+	<version>3.19.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
 	<description>jSparrow Parent</description>
@@ -204,6 +204,16 @@
 			<url>http://download.eclipse.org/releases/2018-12/</url>
 		</repository>
 		<repository>
+			<id>2019-12-updates</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/eclipse/updates/4.14</url>
+		</repository>
+		<repository>
+			<id>2019-12</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/releases/2019-12/</url>
+		</repository>
+		<repository>
 			<id>orbit</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/</url>
@@ -212,11 +222,6 @@
 			<id>netlicensing</id>
 			<layout>p2</layout>
 			<url>http://packagedrone-vm-01.splendit.loc:8080/p2/jsparrow-external-osgi-dependencies/</url>
-		</repository>
-		<repository>
-			<id>aeri</id>
-			<layout>p2</layout>
-			<url>http://download.eclipse.org/technology/epp/logging/stable/</url>
 		</repository>
 		<repository>
 			<id>mylyn</id>
@@ -260,7 +265,7 @@
 			<plugin>
 				<groupId>eu.jsparrow</groupId>
 				<artifactId>jsparrow-maven-plugin</artifactId>
-				<version>2.13.0</version>
+				<version>2.15.0</version>
 			</plugin>
 
 			<plugin>

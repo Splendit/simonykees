@@ -101,5 +101,39 @@ public class EnhancedForLoopToStreamForEachASTVisitorTest extends UsesSimpleJDTU
 		
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_iterableWithWildCard_shouldTransform() throws Exception {
+		String original = "" +
+				"		class R {\n" + 
+				"			final String matcher = \"matcher\";\n" + 
+				"			final String sampler = \"sampler\";\n" + 
+				"		}\n" + 
+				"		class Rule extends R {}\n" + 
+				"		\n" + 
+				"		List<? extends Rule> rules = new ArrayList<>();\n" + 
+				"		Map<String, String> map = new HashMap<>();\n" + 
+				"		for (Rule rule : rules) {\n" + 
+				"			map.put(rule.matcher, rule.sampler);\n" + 
+				"		}";
+		String expected = "" + 
+				"		class R {\n" + 
+				"			final String matcher = \"matcher\";\n" + 
+				"			final String sampler = \"sampler\";\n" + 
+				"		}\n" + 
+				"		class Rule extends R {}\n" + 
+				"		\n" + 
+				"		List<? extends Rule> rules = new ArrayList<>();\n" + 
+				"		Map<String, String> map = new HashMap<>();\n" + 
+				"		rules.forEach((Rule rule) -> {\n" + 
+				"			map.put(rule.matcher, rule.sampler);\n" + 
+				"		});";
+		fixture.addImport(java.util.List.class.getName());
+		fixture.addImport(java.util.ArrayList.class.getName());
+		fixture.addImport(java.util.Map.class.getName());
+		fixture.addImport(java.util.HashMap.class.getName());
+		
+		assertChange(original, expected);
+	}
 
 }

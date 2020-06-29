@@ -75,8 +75,6 @@ timestamps {
             switch (env.BRANCH_NAME.tokenize("/")[0]) {
                 case "develop":
 
-                    pushToGithub()
-
                     runStandardSteps()
 
                     runSonarQubeAnalysis()
@@ -94,8 +92,6 @@ timestamps {
                     tagCommit(env.BRANCH_NAME, "main")
                     break
                 case "master":
-
-                    pushToGithub()
 
                     runStandardSteps()
 
@@ -120,8 +116,6 @@ timestamps {
                     tagCommit(env.BRANCH_NAME, "main")
                     break
                 case "master-jmp":
-
-                    pushToGithub()
 
                     runStandardSteps()
 
@@ -189,7 +183,7 @@ void pushToGithub() {
             println "Pushing to GitHub..."
             sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
                 // pushing the repository to github
-                sh("git push $backupOrigin HEAD:$env.BRANCH_NAME")
+                sh("git push $backupOrigin HEAD:refs/heads/$env.BRANCH_NAME")
             }
         }
     } else {
@@ -198,6 +192,10 @@ void pushToGithub() {
 }
 
 void runStandardSteps() {
+
+    // this has been added to the standard steps, see SIM-1737
+    pushToGithub();
+
     compileEclipsePlugin()
     compileMavenPlugin()
     runIntegrationTests()
