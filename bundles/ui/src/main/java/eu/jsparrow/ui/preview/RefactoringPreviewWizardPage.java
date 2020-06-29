@@ -103,10 +103,10 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule, RefactoringRule rule,
-			RefactoringPreviewWizardModel wizardModel) {
+			RefactoringPreviewWizardModel wizardModel, boolean enabled) {
 		super(rule.getRuleDescription()
 			.getName());
-
+		CustomTextEditChangePreviewViewer.enabled = enabled;
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 
 		setTitle(rule.getRuleDescription()

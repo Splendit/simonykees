@@ -29,7 +29,6 @@ import org.eclipse.ltk.ui.refactoring.ChangePreviewViewerInput;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -37,11 +36,19 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.i18n.Messages;
 
+/**
+ * A modified version of
+ * {@link org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer}.
+ * Disables copying contents from preview wizard.
+ * 
+ * @version 3.19.0
+ */
 public class CustomTextEditChangePreviewViewer implements IChangePreviewViewer {
 
 	private static final Logger logger = LoggerFactory.getLogger(CustomTextEditChangePreviewViewer.class);
+	public static boolean enabled = true;
 
 	private ComparePreviewer fViewer;
 
@@ -69,14 +76,14 @@ public class CustomTextEditChangePreviewViewer implements IChangePreviewViewer {
 			super(parent, SWT.BORDER | SWT.FLAT, true);
 			fCompareConfiguration = new CompareConfiguration();
 			fCompareConfiguration.setLeftEditable(false);
-			fCompareConfiguration.setLeftLabel("Original code"); //$NON-NLS-1$
+			fCompareConfiguration.setLeftLabel(Messages.CustomTextEditChangePreviewViewer_originalCode);
 			fCompareConfiguration.setRightEditable(false);
-			fCompareConfiguration.setRightLabel("Refactored code"); //$NON-NLS-1$
+			fCompareConfiguration.setRightLabel(Messages.CustomTextEditChangePreviewViewer_refactoredCode);
 			addDisposeListener((DisposeEvent e) -> {
 				if (fImage != null && !fImage.isDisposed())
 					fImage.dispose();
 			});
-			
+
 			Dialog.applyDialogFont(this);
 		}
 
@@ -92,8 +99,7 @@ public class CustomTextEditChangePreviewViewer implements IChangePreviewViewer {
 		protected Viewer getViewer(Viewer oldViewer, Object input) {
 			Viewer viewer = CompareUI.findContentViewer(oldViewer, (ICompareInput) input, this, fCompareConfiguration);
 			Control viewerControl = viewer.getControl();
-			viewerControl.setEnabled(!LicenseUtil.get()
-				.isFreeLicense());
+			viewerControl.setEnabled(CustomTextEditChangePreviewViewer.enabled);
 			return viewer;
 		}
 
