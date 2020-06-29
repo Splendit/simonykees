@@ -408,6 +408,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			compareInputControl = compareInput.createContents(compareInputContainer);
 			compareInputControl.setSize(compareInputControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 			compareInputControl.setLayoutData(new GridData(GridData.FILL_BOTH));
+			compareInputControl.setEnabled(enabledFinishButton);
 			compareInputContainer.layout();
 		}
 	}
