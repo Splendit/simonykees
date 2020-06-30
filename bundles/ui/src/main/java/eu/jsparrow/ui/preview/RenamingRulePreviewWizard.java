@@ -105,21 +105,20 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		changesPerRule.keySet()
 			.stream()
 			.forEach(x -> model.addFileToRule(rule, x.getHandleIdentifier()));
-
 		if (!publicChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(publicChanges, originalDocuments, rule));
+			addPage(new RenamingRulePreviewWizardPage(publicChanges, originalDocuments, rule, canFinish()));
 		}
 
 		if (!protectedChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(protectedChanges, originalDocuments, rule));
+			addPage(new RenamingRulePreviewWizardPage(protectedChanges, originalDocuments, rule, canFinish()));
 		}
 
 		if (!packagePrivateChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(packagePrivateChanges, originalDocuments, rule));
+			addPage(new RenamingRulePreviewWizardPage(packagePrivateChanges, originalDocuments, rule, canFinish()));
 		}
 
 		if (!privateChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(privateChanges, originalDocuments, rule));
+			addPage(new RenamingRulePreviewWizardPage(privateChanges, originalDocuments, rule, canFinish()));
 		}
 		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model, canFinish());
 		addPage(summaryPage);

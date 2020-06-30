@@ -64,9 +64,10 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	private Map<IPath, Document> originalDocuments;
 
 	public RenamingRulePreviewWizardPage(Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes,
-			Map<IPath, Document> originalDocuments, FieldsRenamingRule rule1) {
+			Map<IPath, Document> originalDocuments, FieldsRenamingRule rule1, boolean enabledDiffView) {
 		super(rule1.getRuleDescription()
 			.getName());
+		CustomTextEditChangePreviewViewer.enabled = enabledDiffView;
 		this.changes = changes;
 
 		String title = NLS.bind(Messages.RenamingRulePreviewWizardPage_RenameFields, getModifierAsString());
@@ -277,7 +278,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		previewComposite.setLayout(new GridLayout());
 		previewComposite.setLayoutData(gridData);
 
-		currentPreviewViewer = new TextEditChangePreviewViewer();
+		currentPreviewViewer = new CustomTextEditChangePreviewViewer();
 		currentPreviewViewer.createControl(previewComposite);
 
 		currentPreviewViewer.getControl()
