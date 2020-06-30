@@ -41,7 +41,11 @@ import eu.jsparrow.i18n.Messages;
 /**
  * A modified version of
  * {@link org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer}.
- * Disables copying contents from preview wizard.
+ * 
+ * @implNote This is a hack to disable copying the contents of the preview
+ *           wizard.
+ * 
+ * @see SIM-1735
  * 
  * @version 3.19.0
  */
@@ -99,6 +103,9 @@ public class CustomTextEditChangePreviewViewer implements IChangePreviewViewer {
 		protected Viewer getViewer(Viewer oldViewer, Object input) {
 			Viewer viewer = CompareUI.findContentViewer(oldViewer, (ICompareInput) input, this, fCompareConfiguration);
 			Control viewerControl = viewer.getControl();
+			/*
+			 * Here the diff view gets disabled.
+			 */
 			viewerControl.setEnabled(CustomTextEditChangePreviewViewer.enabled);
 			return viewer;
 		}
