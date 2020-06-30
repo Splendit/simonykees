@@ -136,7 +136,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void test_multipleExecute_shouldNotTransform() throws Exception {
+	public void test_multipleExecutionOfSameQuery_shouldNotTransform() throws Exception {
 		String original = "" +
 				"String departmentId = \"40\";\n" +
 				"Connection connection = null;\n" +

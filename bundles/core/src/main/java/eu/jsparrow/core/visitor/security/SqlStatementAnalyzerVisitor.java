@@ -86,6 +86,7 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 		if (getResultSet != null) {
 			if (this.getResultSetInvocation == null) {
 				this.getResultSetInvocation = getResultSet;
+				return false;
 			} else {
 				return true;
 			}
