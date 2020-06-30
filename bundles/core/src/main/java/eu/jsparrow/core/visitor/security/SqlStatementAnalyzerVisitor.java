@@ -36,6 +36,7 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 	private MethodInvocation createStatementInvocation;
 	private MethodInvocation executeQueryInvocation;
 	private Statement statementContainingCreateStatement;
+	private boolean beforeExecuteQueryInvocation = true;
 
 	public SqlStatementAnalyzerVisitor(SimpleName sqlStatement, MethodInvocation executeQueryMethodInvocation) {
 		super(sqlStatement);
@@ -54,14 +55,42 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 		return null;
 	}
 
-	@Override
-	protected boolean isOtherUnsafeVariableReference(SimpleName simpleName) {
-		MethodInvocation getResultSet = findGetResultSet(simpleName);
-		if (getResultSet != null && this.getResultSetInvocation == null) {
-			this.getResultSetInvocation = getResultSet;
+	private boolean hasAdditionalExecutionMethodInvocation(SimpleName simpleName) {
+		StructuralPropertyDescriptor structuralDescriptor = simpleName.getLocationInParent();
+		if (structuralDescriptor != MethodInvocation.EXPRESSION_PROPERTY) {
 			return false;
 		}
+		MethodInvocation methodInvocation = (MethodInvocation) simpleName.getParent();
+		String methodIdentifier = methodInvocation.getName()
+			.getIdentifier();
+		
+		return "executeUpdate".equals(methodIdentifier) || //$NON-NLS-1$
+				"executeQuery".equals(methodIdentifier) || //$NON-NLS-1$
+				"execute".equals(methodIdentifier); //$NON-NLS-1$
+	}
+
+	@Override
+	public boolean visit(MethodInvocation methodInvocation) {
+		if (methodInvocation == executeQueryInvocation) {
+			beforeExecuteQueryInvocation = false;
+		}
 		return true;
+	}
+
+	@Override
+	protected boolean isOtherUnsafeVariableReference(SimpleName simpleName) {
+		if (beforeExecuteQueryInvocation) {
+			return true;
+		}
+		MethodInvocation getResultSet = findGetResultSet(simpleName);
+		if (getResultSet != null) {
+			if (this.getResultSetInvocation == null) {
+				this.getResultSetInvocation = getResultSet;
+			} else {
+				return true;
+			}
+		}
+		return hasAdditionalExecutionMethodInvocation(simpleName);
 	}
 
 	/**
