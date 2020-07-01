@@ -42,7 +42,7 @@ import eu.jsparrow.i18n.Messages;
  * {@link org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer}.
  * 
  * @implNote This is a hack to disable copying the contents of the preview
- *           wizard.
+ *           wizard. Other than that, this is an exact copy of TextEditChangePreviewViewer.
  * 
  * @see SIM-1735
  * 
