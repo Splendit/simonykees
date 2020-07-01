@@ -120,7 +120,6 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	/*
 	 * SQL Statement tests
 	 */
-
 	@Test
 	public void test_storingExecuteResult_shouldNotTransform() throws Exception {
 		String original = "" +
