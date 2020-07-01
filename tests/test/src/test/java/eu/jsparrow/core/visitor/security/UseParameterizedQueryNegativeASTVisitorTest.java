@@ -605,44 +605,6 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_executeUpdateAfterExecuteQuery_shouldNotTransform() throws Exception {
-		String original = "" +
-				"			Connection connection = null;\n" +
-				"			Statement statement;\n" +
-				"			String departmentId1 = \"40\";\n" +
-				"			String salary = \"1000000\";\n" +
-				"			String id = \"1000001\";\n" +
-				"			String query = \"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n"
-				+
-				"			String query2 = \"UPDATE employee SET salary  ='\" + salary + \"' WHERE id = '\" + id + \"'\";\n"
-				+
-				"			try {\n" +
-				"				statement = connection.createStatement();\n" +
-				"				statement.executeQuery(query);\n" +
-				"				statement.executeUpdate(query2);\n" +
-				"			} catch (Exception e) {\n" +
-				"			}\n";
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_executeQueryTwice_shouldNotTransform() throws Exception {
-		String original = "" +
-				"			Connection connection = null;\n" + 
-				"			Statement statement;\n" + 
-				"			String departmentId1 = \"40\";\n" + 
-				"			String query = \"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" + 
-				"			String query2 = \"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" + 
-				"			try {\n" + 
-				"				statement = connection.createStatement();				\n" + 
-				"				statement.executeQuery(query);\n" + 
-				"				statement.executeQuery(query2);\n" + 
-				"			} catch (Exception e) {\n" + 
-				"			}";
-		assertNoChange(original);
-	}
-	
-	@Test
 	public void visit_executeAfterExecuteQuery_shouldNotTransform() throws Exception {
 		String original = "" +
 				"			Connection connection = null;\n" + 
@@ -651,7 +613,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 				"			String query = \"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" + 
 				"			String query2 = \"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" + 
 				"			try {\n" + 
-				"				statement = connection.createStatement();				\n" + 
+				"				statement = connection.createStatement();\n" + 
 				"				statement.executeQuery(query);\n" + 
 				"				statement.execute(query2);\n" + 
 				"			} catch (Exception e) {\n" + 

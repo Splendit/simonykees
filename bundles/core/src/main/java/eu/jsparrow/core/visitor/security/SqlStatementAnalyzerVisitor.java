@@ -61,12 +61,8 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 			return false;
 		}
 		MethodInvocation methodInvocation = (MethodInvocation) simpleName.getParent();
-		String methodIdentifier = methodInvocation.getName()
-			.getIdentifier();
-		
-		return "executeUpdate".equals(methodIdentifier) || //$NON-NLS-1$
-				"executeQuery".equals(methodIdentifier) || //$NON-NLS-1$
-				"execute".equals(methodIdentifier); //$NON-NLS-1$
+		return methodInvocation.getName()
+			.getIdentifier().startsWith("execute"); //$NON-NLS-1$
 	}
 
 	@Override
