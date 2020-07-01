@@ -62,7 +62,8 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 		}
 		MethodInvocation methodInvocation = (MethodInvocation) simpleName.getParent();
 		return methodInvocation.getName()
-			.getIdentifier().startsWith("execute"); //$NON-NLS-1$
+			.getIdentifier()
+			.startsWith("execute"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -194,40 +195,33 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 	 * <p>
 	 * Afterwards, further analyzing is carried out, for example:
 	 * <ul>
-	 * <li>to make sure that {@link #initializer} is an invocation of
-	 * {@link Connection#createStatement()}</li>
+	 * <li>to make sure that a valid invocation of
+	 * {@link Connection#createStatement()} can be found</li>
 	 * </ul>
 	 * 
 	 * @return true if the {@link SqlStatementAnalyzerVisitor} is valid,
 	 *         otherwise false.
 	 */
+	@Override
 	public boolean analyze(Block block) {
-		block.accept(this);
-		if (unsafe) {
-			return false;
-		}
-		createStatementInvocation = analyzeSqlStatementInitializer(initializer);
-		if (createStatementInvocation != null) {
-			statementContainingCreateStatement = findStatementContainingCreateStatement(createStatementInvocation);
-		}
-
-		if (createStatementInvocation == null || statementContainingCreateStatement == null) {
-			unsafe = true;
+		if (!super.analyze(block)) {
 			return false;
 		}
 
-		if (!analyzeGetResultSetInvocation()) {
-			unsafe = true;
+		createStatementInvocation = analyzeSqlStatementInitializer(getInitializer());
+		if (createStatementInvocation == null) {
+			return false;
 		}
+		statementContainingCreateStatement = findStatementContainingCreateStatement(createStatementInvocation);
 
-		return !unsafe;
+		return statementContainingCreateStatement != null && analyzeGetResultSetInvocation();
 	}
 
 	/**
 	 * 
-	 * @return If the {@link SqlStatementAnalyzerVisitor} is valid, it is
-	 *         guaranteed that a non null value of {@link MethodInvocation} is
-	 *         returned.
+	 * @return If {@link SqlStatementAnalyzerVisitor#analyze(Block)} returns
+	 *         true, then it is guaranteed that a non null value of
+	 *         {@link MethodInvocation} is returned.
 	 */
 	public MethodInvocation getCreateStatementInvocation() {
 		return createStatementInvocation;
@@ -235,9 +229,9 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 
 	/**
 	 * 
-	 * @return If the {@link SqlStatementAnalyzerVisitor} is valid, it is
-	 *         guaranteed that a non null value of {@link Statement} is
-	 *         returned.
+	 * @return If {@link SqlStatementAnalyzerVisitor#analyze(Block)} returns
+	 *         true, then it is guaranteed that a non null value of
+	 *         {@link Statement} is returned.
 	 */
 	public Statement getStatementContainingCreateStatement() {
 		return statementContainingCreateStatement;

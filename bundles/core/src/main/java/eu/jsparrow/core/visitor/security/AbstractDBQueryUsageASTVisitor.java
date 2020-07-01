@@ -29,9 +29,9 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	protected final VariableDeclarationFragment localVariableDeclarationFragment;
 	protected final SimpleName variableName;
 	protected final CompilationUnit compilationUnit;
-	protected Expression initializer;
-	protected boolean unsafe = false;
-	protected boolean beforeDeclaration = true;
+	private Expression initializer;
+	private boolean unsafe = false;
+	private boolean beforeDeclaration = true;
 
 	protected AbstractDBQueryUsageASTVisitor(SimpleName databaseQuery) {
 		this.variableName = databaseQuery;
@@ -68,7 +68,7 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 
 	private boolean isUnsafeVariableReference(SimpleName simpleName) {
 		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
-		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {			
+		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			if (initializer != null) {
 				return true;
 			}
@@ -126,32 +126,6 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * There are various reasons which make the further usage of a variable
-	 * analyzed by {@link AbstractDBQueryUsageASTVisitor} unsafe, for example:
-	 * <ul>
-	 * <li>The usage of the variable itself is unsafe.</li>
-	 * <li>The declaration of the analyzed variable could not be found.</li>
-	 * <li>No valid initialization of the analyzed variable could be found.</li>
-	 * </ul>
-	 * 
-	 * @return true if the analyzed variable declaration is unsafe and prohibits
-	 *         the transformation of code.
-	 */
-	public boolean isUnsafe() {
-		return unsafe || beforeDeclaration || initializer == null;
-	}
-
-	/**
-	 * 
-	 * @return the expression used for initializing the analyzed variable. If
-	 *         {@link #isUnsafe()} returns false, it is guaranteed that the
-	 *         return value of this method will not be null.
-	 */
-	public Expression getInitializer() {
-		return initializer;
-	}
-
-	/**
 	 * 
 	 * @return the {@link VariableDeclarationFragment} of the
 	 *         {@link java.sql.Statement} to be replaced with
@@ -159,6 +133,35 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	 */
 	public VariableDeclarationFragment getDeclarationFragment() {
 		return localVariableDeclarationFragment;
+	}
+
+	/**
+	 * 
+	 * @return as soon as {@link #analyze(Block)} returns true, it is guaranteed
+	 *         that the return value of this method will not be null.
+	 */
+	public Expression getInitializer() {
+		return initializer;
+	}
+
+	/**
+	 * Invokes the method
+	 * {@link ASTNode#accept(org.eclipse.jdt.core.dom.ASTVisitor)} on the block
+	 * given by the parameter.
+	 * 
+	 * @return true if all the following conditions are fulfilled:
+	 *         <ul>
+	 *         <li>a declaration has been found</li>
+	 *         <li>an initialization has been found</li>
+	 *         <li>the variable is used in a safe way</li>
+	 *         </ul>
+	 *         and false as soon as one of the requirements from above is
+	 *         missing.
+	 *
+	 */
+	public boolean analyze(Block block) {
+		block.accept(this);
+		return !unsafe && !beforeDeclaration && initializer != null;
 	}
 
 	protected abstract boolean isOtherUnsafeVariableReference(SimpleName simpleName);
