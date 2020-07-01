@@ -22,7 +22,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
 import org.eclipse.ltk.ui.refactoring.ChangePreviewViewerInput;
@@ -63,8 +62,6 @@ public class CustomTextEditChangePreviewViewer implements IChangePreviewViewer {
 		TextEditBasedChangeGroup[] groups;
 		IRegion range;
 
-		GroupCategory groupCategory;
-
 		public TextEditBasedChangeInput(Change change) {
 			super(change);
 		}
@@ -76,7 +73,7 @@ public class CustomTextEditChangePreviewViewer implements IChangePreviewViewer {
 		private ImageDescriptor fDescriptor;
 		private Image fImage;
 
-		public ComparePreviewer(Composite parent, boolean enabled) {
+		public ComparePreviewer(Composite parent) {
 			super(parent, SWT.BORDER | SWT.FLAT, true);
 			fCompareConfiguration = new CompareConfiguration();
 			fCompareConfiguration.setLeftEditable(false);
@@ -206,7 +203,7 @@ public class CustomTextEditChangePreviewViewer implements IChangePreviewViewer {
 
 	@Override
 	public void createControl(Composite parent) {
-		fViewer = new ComparePreviewer(parent, false);
+		fViewer = new ComparePreviewer(parent);
 
 	}
 
@@ -233,9 +230,6 @@ public class CustomTextEditChangePreviewViewer implements IChangePreviewViewer {
 				} else if (extended.groups != null && extended.groups.length > 0 && extended.range != null) {
 					TextEditBasedChange editChange = extended.groups[0].getTextEditChange();
 					TextEditBasedChangeGroup[] groups = extended.groups;
-					if (extended.groupCategory != null) {
-
-					}
 					setInput(editChange,
 							editChange.getCurrentContent(extended.range, true, 0, new NullProgressMonitor()),
 							editChange.getPreviewContent(groups, extended.range, true, 0, new NullProgressMonitor()),
