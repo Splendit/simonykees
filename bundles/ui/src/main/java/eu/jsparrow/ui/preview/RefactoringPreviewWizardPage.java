@@ -106,7 +106,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			RefactoringPreviewWizardModel wizardModel, boolean enabled) {
 		super(rule.getRuleDescription()
 			.getName());
-		CustomTextEditChangePreviewViewer.enabled = enabled;
+		CustomTextEditChangePreviewViewer.setEnableDiffView(enabled);
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 
 		setTitle(rule.getRuleDescription()

@@ -52,7 +52,7 @@ import eu.jsparrow.i18n.Messages;
 public class CustomTextEditChangePreviewViewer implements IChangePreviewViewer {
 
 	private static final Logger logger = LoggerFactory.getLogger(CustomTextEditChangePreviewViewer.class);
-	public static boolean enabled = true;
+	private static boolean enabled = true;
 
 	private ComparePreviewer fViewer;
 
@@ -282,5 +282,9 @@ public class CustomTextEditChangePreviewViewer implements IChangePreviewViewer {
 
 		fViewer.setInput(
 				new DiffNode(new CompareElement(left, type, resource), new CompareElement(right, type, resource)));
+	}
+	
+	public static void setEnableDiffView(boolean enabledDiffView) {
+		enabled = enabledDiffView;
 	}
 }

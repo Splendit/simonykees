@@ -67,7 +67,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			Map<IPath, Document> originalDocuments, FieldsRenamingRule rule1, boolean enabledDiffView) {
 		super(rule1.getRuleDescription()
 			.getName());
-		CustomTextEditChangePreviewViewer.enabled = enabledDiffView;
+		CustomTextEditChangePreviewViewer.setEnableDiffView(enabledDiffView);
 		this.changes = changes;
 
 		String title = NLS.bind(Messages.RenamingRulePreviewWizardPage_RenameFields, getModifierAsString());
