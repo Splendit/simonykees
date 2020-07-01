@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -55,11 +56,7 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 		return (VariableDeclarationFragment) statementDeclaringNode;
 	}
 
-	protected boolean isVariableReference(Expression expression) {
-		if (expression.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return false;
-		}
-		SimpleName simpleName = (SimpleName) expression;
+	protected boolean isVariableReference(SimpleName simpleName) {
 		if (!simpleName.getIdentifier()
 			.equals(variableName.getIdentifier())) {
 			return false;
@@ -67,6 +64,37 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 		IBinding binding = simpleName.resolveBinding();
 		ASTNode declaringNode = compilationUnit.findDeclaringNode(binding);
 		return declaringNode == localVariableDeclarationFragment;
+	}
+
+	private boolean isUnsafeVariableReference(SimpleName simpleName) {
+		StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
+		if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY) {			
+			if (initializer != null) {
+				return true;
+			}
+			Assignment assignment = (Assignment) simpleName.getParent();
+			Expression right = assignment.getRightHandSide();
+			if (right.getNodeType() != ASTNode.NULL_LITERAL) {
+				this.initializer = right;
+			}
+			return false;
+		}
+		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			return true;
+		}
+		if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
+			return true;
+		}
+		if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			return true;
+		}
+		if (simpleName == variableName) {
+			return false;
+		}
+		if (simpleName == localVariableDeclarationFragment.getName()) {
+			return false;
+		}
+		return isOtherUnsafeVariableReference(simpleName);
 	}
 
 	@Override
@@ -82,33 +110,6 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 			if (statementInitializer != null && statementInitializer.getNodeType() != ASTNode.NULL_LITERAL) {
 				this.initializer = statementInitializer;
 			}
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public boolean visit(Assignment assignment) {
-		if (beforeDeclaration) {
-			return false;
-		}
-
-		Expression left = assignment.getLeftHandSide();
-		if (isVariableReference(left)) {
-			if (initializer == null) {
-				Expression right = assignment.getRightHandSide();
-				if (right.getNodeType() != ASTNode.NULL_LITERAL) {
-					this.initializer = right;
-					return false;
-				}
-			} else {
-				unsafe = true;
-			}
-		}
-
-		Expression right = assignment.getRightHandSide();
-		if (isVariableReference(right)) {
-			unsafe = true;
 		}
 		return true;
 	}
@@ -118,19 +119,8 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 		if (beforeDeclaration) {
 			return false;
 		}
-
-		if (simpleName == variableName) {
-			return false;
-		}
-
 		if (isVariableReference(simpleName)) {
-			if (simpleName.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-				unsafe = true;
-			} else if (simpleName.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
-				unsafe = true;
-			} else {
-				unsafe = isOtherUnsafeVariableReference(simpleName);
-			}
+			unsafe = isUnsafeVariableReference(simpleName);
 		}
 		return true;
 	}
