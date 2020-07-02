@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.security;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
@@ -50,7 +51,9 @@ public class JPAQueryVariableAnalyzerASTVisitor extends AbstractDBQueryUsageASTV
 		return false;
 	}
 
-	public MethodInvocation getExecutionInvocation() {
-		return executionInvocation;
+	@Override
+	public boolean analyze(Block block) {
+		return super.analyze(block) && executionInvocation != null;
 	}
+
 }
