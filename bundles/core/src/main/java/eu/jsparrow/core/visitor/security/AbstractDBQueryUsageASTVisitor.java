@@ -26,9 +26,9 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  *
  */
 public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
-	protected final VariableDeclarationFragment localVariableDeclarationFragment;
-	protected final SimpleName variableName;
-	protected final CompilationUnit compilationUnit;
+	private final VariableDeclarationFragment localVariableDeclarationFragment;
+	private final SimpleName variableName;
+	private final CompilationUnit compilationUnit;
 	private Expression initializer;
 	private boolean unsafe = false;
 	private boolean beforeDeclaration = true;
@@ -37,10 +37,7 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 		this.variableName = databaseQuery;
 		this.compilationUnit = ASTNodeUtil.getSpecificAncestor(databaseQuery, CompilationUnit.class);
 		ASTNode statementDeclaringNode = compilationUnit.findDeclaringNode(databaseQuery.resolveBinding());
-		localVariableDeclarationFragment = findLocalVariableDeclarationFragment(statementDeclaringNode);
-		if (this.localVariableDeclarationFragment == null) {
-			this.unsafe = true;
-		}
+		localVariableDeclarationFragment = findLocalVariableDeclarationFragment(statementDeclaringNode);	
 	}
 
 	private VariableDeclarationFragment findLocalVariableDeclarationFragment(ASTNode statementDeclaringNode) {
@@ -160,6 +157,9 @@ public abstract class AbstractDBQueryUsageASTVisitor extends ASTVisitor {
 	 *
 	 */
 	public boolean analyze(Block block) {
+		if (this.localVariableDeclarationFragment == null) {
+			return false;
+		}
 		block.accept(this);
 		return !unsafe && !beforeDeclaration && initializer != null;
 	}
