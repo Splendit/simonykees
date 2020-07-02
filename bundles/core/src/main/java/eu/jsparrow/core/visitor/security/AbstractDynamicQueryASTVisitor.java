@@ -44,6 +44,7 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 
 	protected static final String EXECUTE = "execute"; //$NON-NLS-1$
 	protected static final String EXECUTE_QUERY = "executeQuery"; //$NON-NLS-1$
+	protected static final String EXECUTE_UPDATE = "executeUpdate"; //$NON-NLS-1$
 
 	/**
 	 * 
@@ -75,7 +76,7 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	protected boolean hasRequiredName(MethodInvocation methodInvocation) {
 		String identifier = methodInvocation.getName()
 			.getIdentifier();
-		return EXECUTE.equals(identifier) || EXECUTE_QUERY.equals(identifier);
+		return EXECUTE.equals(identifier) || EXECUTE_QUERY.equals(identifier) || EXECUTE_UPDATE.equals(identifier);
 	}
 
 	protected boolean hasRequiredMethodExpressionType(ITypeBinding methodExpressionTypeBinding) {

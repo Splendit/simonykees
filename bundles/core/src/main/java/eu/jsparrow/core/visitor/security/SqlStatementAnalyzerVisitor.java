@@ -36,6 +36,7 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 	private MethodInvocation createStatementInvocation;
 	private MethodInvocation executeQueryInvocation;
 	private Statement statementContainingCreateStatement;
+	private boolean beforeExecuteQueryInvocation = true;
 
 	public SqlStatementAnalyzerVisitor(SimpleName sqlStatement, MethodInvocation executeQueryMethodInvocation) {
 		super(sqlStatement);
@@ -54,14 +55,40 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 		return null;
 	}
 
-	@Override
-	protected boolean isOtherUnsafeVariableReference(SimpleName simpleName) {
-		MethodInvocation getResultSet = findGetResultSet(simpleName);
-		if (getResultSet != null && this.getResultSetInvocation == null) {
-			this.getResultSetInvocation = getResultSet;
+	private boolean hasAdditionalExecutionMethodInvocation(SimpleName simpleName) {
+		StructuralPropertyDescriptor structuralDescriptor = simpleName.getLocationInParent();
+		if (structuralDescriptor != MethodInvocation.EXPRESSION_PROPERTY) {
 			return false;
 		}
+		MethodInvocation methodInvocation = (MethodInvocation) simpleName.getParent();
+		return methodInvocation.getName()
+			.getIdentifier()
+			.startsWith("execute"); //$NON-NLS-1$
+	}
+
+	@Override
+	public boolean visit(MethodInvocation methodInvocation) {
+		if (methodInvocation == executeQueryInvocation) {
+			beforeExecuteQueryInvocation = false;
+		}
 		return true;
+	}
+
+	@Override
+	protected boolean isOtherUnsafeVariableReference(SimpleName simpleName) {
+		if (beforeExecuteQueryInvocation) {
+			return true;
+		}
+		MethodInvocation getResultSet = findGetResultSet(simpleName);
+		if (getResultSet != null) {
+			if (this.getResultSetInvocation == null) {
+				this.getResultSetInvocation = getResultSet;
+				return false;
+			} else {
+				return true;
+			}
+		}
+		return hasAdditionalExecutionMethodInvocation(simpleName);
 	}
 
 	/**
@@ -168,40 +195,33 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 	 * <p>
 	 * Afterwards, further analyzing is carried out, for example:
 	 * <ul>
-	 * <li>to make sure that {@link #initializer} is an invocation of
-	 * {@link Connection#createStatement()}</li>
+	 * <li>to make sure that a valid invocation of
+	 * {@link Connection#createStatement()} can be found</li>
 	 * </ul>
 	 * 
 	 * @return true if the {@link SqlStatementAnalyzerVisitor} is valid,
 	 *         otherwise false.
 	 */
+	@Override
 	public boolean analyze(Block block) {
-		block.accept(this);
-		if (unsafe) {
-			return false;
-		}
-		createStatementInvocation = analyzeSqlStatementInitializer(initializer);
-		if (createStatementInvocation != null) {
-			statementContainingCreateStatement = findStatementContainingCreateStatement(createStatementInvocation);
-		}
-
-		if (createStatementInvocation == null || statementContainingCreateStatement == null) {
-			unsafe = true;
+		if (!super.analyze(block)) {
 			return false;
 		}
 
-		if (!analyzeGetResultSetInvocation()) {
-			unsafe = true;
+		createStatementInvocation = analyzeSqlStatementInitializer(getInitializer());
+		if (createStatementInvocation == null) {
+			return false;
 		}
+		statementContainingCreateStatement = findStatementContainingCreateStatement(createStatementInvocation);
 
-		return !unsafe;
+		return statementContainingCreateStatement != null && analyzeGetResultSetInvocation();
 	}
 
 	/**
 	 * 
-	 * @return If the {@link SqlStatementAnalyzerVisitor} is valid, it is
-	 *         guaranteed that a non null value of {@link MethodInvocation} is
-	 *         returned.
+	 * @return If {@link SqlStatementAnalyzerVisitor#analyze(Block)} returns
+	 *         true, then it is guaranteed that a non null value of
+	 *         {@link MethodInvocation} is returned.
 	 */
 	public MethodInvocation getCreateStatementInvocation() {
 		return createStatementInvocation;
@@ -209,9 +229,9 @@ public class SqlStatementAnalyzerVisitor extends AbstractDBQueryUsageASTVisitor 
 
 	/**
 	 * 
-	 * @return If the {@link SqlStatementAnalyzerVisitor} is valid, it is
-	 *         guaranteed that a non null value of {@link Statement} is
-	 *         returned.
+	 * @return If {@link SqlStatementAnalyzerVisitor#analyze(Block)} returns
+	 *         true, then it is guaranteed that a non null value of
+	 *         {@link Statement} is returned.
 	 */
 	public Statement getStatementContainingCreateStatement() {
 		return statementContainingCreateStatement;
