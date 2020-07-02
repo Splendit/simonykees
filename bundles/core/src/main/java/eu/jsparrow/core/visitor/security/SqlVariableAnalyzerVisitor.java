@@ -14,8 +14,15 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
- * A helper visitor for analyzing the declaration and references of the variable
- * representing a dynamic SQL query.
+ * This visitor is intended to be used by visitors which transform dynamic
+ * queries in order to prevent injections.
+ * <p>
+ * It analyzes the declaration and references on a variable which may represent
+ * for example:
+ * <ul>
+ * <li>a dynamic SQL query</li>
+ * <li>an LDAP filter expression</li>
+ * </ul>
  * 
  * @since 3.16.0
  *
