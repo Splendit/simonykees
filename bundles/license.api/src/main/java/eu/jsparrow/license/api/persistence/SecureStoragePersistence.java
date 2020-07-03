@@ -53,7 +53,7 @@ public abstract class SecureStoragePersistence<T> implements LicensePersistence<
 		} catch (StorageException e) {
 			throw new PersistenceException(Messages.Netlicensing_persistenceError_failedtoLoad,e);
 		} catch(IllegalArgumentException e) {
-			logger.error("Data from secure storate is corrupted.", e); //$NON-NLS-1$
+			logger.error("Data from secure storage is corrupted.", e); //$NON-NLS-1$
 			return null;
 		}
 	}
