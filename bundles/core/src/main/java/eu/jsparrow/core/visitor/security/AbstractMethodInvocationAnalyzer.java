@@ -30,7 +30,7 @@ public abstract class AbstractMethodInvocationAnalyzer {
 	}
 
 	public boolean analyze(String declaringTypeName, String methodName, List<String> parameterTypes) {
-
+		//TODO: as soon as we find an unsatisfied condition we can return
 		boolean valid = methodSimpleName.getIdentifier()
 			.equals(methodName);
 

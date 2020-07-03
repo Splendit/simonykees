@@ -34,6 +34,7 @@ public class UseParameterizedLDAPQueryRule extends RefactoringRuleImpl<UseParame
 				Arrays.asList(Tag.JAVA_1_1, Tag.SECURITY));
 	}
 
+	//TODO: we do not need this. DirContext is Java built-in type. It will always be there. 
 	@SuppressWarnings("nls")
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
@@ -51,7 +52,7 @@ public class UseParameterizedLDAPQueryRule extends RefactoringRuleImpl<UseParame
 
 	@Override
 	protected String provideRequiredJavaVersion() {
-		return JavaCore.VERSION_1_1;
+		return JavaCore.VERSION_1_1; //FIXME This is 1.3. javax.naming was introduced in 1.3
 	}
 
 	@Override
