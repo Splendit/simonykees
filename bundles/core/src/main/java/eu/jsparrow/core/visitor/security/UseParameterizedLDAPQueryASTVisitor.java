@@ -22,8 +22,11 @@ public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryAST
 
 		List<Expression> dynamicQueryComponents = findDynamicQueryComponents(filterExpression);
 
-		return true;
-	}
+		LDAPQueryComponentAnalyzer componentsAnalyzer = new LDAPQueryComponentAnalyzer(dynamicQueryComponents);
+		List<ReplaceableParameter> replaceableParameters = componentsAnalyzer.createReplaceableParameterList();
+		if (replaceableParameters.isEmpty()) {
+			return true;
+		}
 
 	public List<Expression> findDynamicQueryComponents(Expression filterExpression) {
 
