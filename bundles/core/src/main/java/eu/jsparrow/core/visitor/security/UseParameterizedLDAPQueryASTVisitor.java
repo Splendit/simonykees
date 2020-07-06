@@ -14,6 +14,27 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+/**
+ * Replaces String concatenation of LDAP statements with user defined input by
+ * parameterizing, for example:
+ * 
+ * <pre>
+ * String filter = "(&(uid=" + user + ")(userPassword=" + pass + "))";
+ * NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new SearchControls());
+ * return results.hasMore();
+ * </pre>
+ * 
+ * is transformed to:
+ * 
+ * <pre>
+ * String filter = "(&(uid={0})(userPassword={1}))";
+ * NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new String[] { user, pass },
+ * 		new SearchControls());
+ * </pre>
+ * 
+ * @since 3.19.0
+ *
+ */
 public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryASTVisitor {
 
 	@Override
@@ -39,7 +60,7 @@ public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryAST
 		ArrayCreation searchParameters = createSearchParameters(replaceableParameters);
 		ListRewrite listRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 		listRewrite.insertAfter(searchParameters, filterExpression, null);
-		
+
 		onRewrite();
 
 		return true;

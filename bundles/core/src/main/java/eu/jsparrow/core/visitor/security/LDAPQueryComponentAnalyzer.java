@@ -8,6 +8,13 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Finds the components of the concatenation of an LDAP statement that can be
+ * replaced by parameterizing the LDAP statement.
+ * 
+ * @since 3.19.0
+ *
+ */
 public class LDAPQueryComponentAnalyzer extends AbstractQueryComponentsAnalyzer {
 
 	LDAPQueryComponentAnalyzer(List<Expression> components) {
@@ -17,32 +24,32 @@ public class LDAPQueryComponentAnalyzer extends AbstractQueryComponentsAnalyzer 
 	@Override
 	protected ReplaceableParameter createReplaceableParameter(int componentIndex, int parameterPosition) {
 		StringLiteral previous = findPrevious(componentIndex);
-		if(previous == null) {
+		if (previous == null) {
 			return null;
 		}
 		StringLiteral next = findNext(componentIndex);
-		if(next == null) {
+		if (next == null) {
 			return null;
 		}
 		Expression nonLiteralComponent = components.get(componentIndex);
 		ITypeBinding nonLiteralTypeBinding = nonLiteralComponent.resolveTypeBinding();
 		boolean isString = ClassRelationUtil.isContentOfType(nonLiteralTypeBinding, java.lang.String.class.getName());
-		if(!isString) {
+		if (!isString) {
 			return null;
 		}
 		return new ReplaceableParameter(previous, next, nonLiteralComponent, parameterPosition);
 	}
-	
+
 	@Override
 	protected boolean isValidPrevious(StringLiteral literal) {
 		return literal.getLiteralValue()
 			.endsWith("="); //$NON-NLS-1$
 	}
-	
+
 	@Override
 	protected boolean isValidNext(StringLiteral literal) {
-		return literal.getLiteralValue().startsWith(")"); //$NON-NLS-1$
+		return literal.getLiteralValue()
+			.startsWith(")"); //$NON-NLS-1$
 	}
-	
 
 }

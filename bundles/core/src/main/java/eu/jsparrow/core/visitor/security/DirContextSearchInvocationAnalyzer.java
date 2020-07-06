@@ -10,6 +10,15 @@ import javax.naming.directory.SearchControls;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+/**
+ * Determines whether a method invocation references either
+ * {@link javax.naming.directory.DirContext#search(String, String, SearchControls)}
+ * or<br>
+ * {@link javax.naming.directory.DirContext#search(Name, String, SearchControls)}.
+ *
+ * @since 3.19.0
+ *
+ */
 @SuppressWarnings("nls")
 public class DirContextSearchInvocationAnalyzer extends AbstractMethodInvocationAnalyzer {
 

@@ -12,6 +12,16 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Used to determine whether the method which is called fulfills the following
+ * conditions:
+ * <ul>
+ * <li>The method must be declared by a specified class.</li>
+ * <li>The method must have a specified name and signature.</li>
+ * </ul>
+ * 
+ * @since 3.19.0
+ */
 public abstract class AbstractMethodInvocationAnalyzer {
 
 	private final MethodInvocation methodInvocation;
@@ -28,6 +38,18 @@ public abstract class AbstractMethodInvocationAnalyzer {
 		arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
 	}
 
+	/**
+	 * 
+	 * @param declaringTypeName
+	 *            the qualified name of the type by which the method is expected
+	 *            to be declared
+	 * @param methodName
+	 *            expected method name
+	 * @param parameterTypes
+	 *            list of the qualified names of the expected parameter types.
+	 * @return true if all conditions given by the parameters are fulfilled,
+	 *         otherwise false.
+	 */
 	public boolean analyze(String declaringTypeName, String methodName, List<String> parameterTypes) {
 		if (!methodSimpleName.getIdentifier()
 			.equals(methodName)) {
