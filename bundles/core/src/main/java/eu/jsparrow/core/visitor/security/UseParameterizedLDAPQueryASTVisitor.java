@@ -39,6 +39,8 @@ public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryAST
 		ArrayCreation searchParameters = createSearchParameters(replaceableParameters);
 		ListRewrite listRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 		listRewrite.insertAfter(searchParameters, filterExpression, null);
+		
+		onRewrite();
 
 		return true;
 	}

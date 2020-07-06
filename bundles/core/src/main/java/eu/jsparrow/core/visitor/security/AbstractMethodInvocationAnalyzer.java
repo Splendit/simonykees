@@ -26,18 +26,19 @@ public abstract class AbstractMethodInvocationAnalyzer {
 		methodBinding = methodInvocation.resolveMethodBinding();
 		declaringClass = methodBinding.getDeclaringClass();
 		arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-
 	}
 
 	public boolean analyze(String declaringTypeName, String methodName, List<String> parameterTypes) {
-		//TODO: as soon as we find an unsatisfied condition we can return
-		boolean valid = methodSimpleName.getIdentifier()
-			.equals(methodName);
+		if (!methodSimpleName.getIdentifier()
+			.equals(methodName)) {
+			return false;
+		}
 
-		valid &= ClassRelationUtil.isContentOfType(declaringClass, declaringTypeName);
-		valid &= arguments.size() == parameterTypes.size();
+		if (!ClassRelationUtil.isContentOfType(declaringClass, declaringTypeName)) {
+			return false;
+		}
 
-		if (!valid) {
+		if (arguments.size() != parameterTypes.size()) {
 			return false;
 		}
 
@@ -45,7 +46,6 @@ public abstract class AbstractMethodInvocationAnalyzer {
 		return arguments.stream()
 			.map(Expression::resolveTypeBinding)
 			.allMatch(t -> ClassRelationUtil.isContentOfType(t, parameterTypesIterator.next()));
-
 	}
 
 	public MethodInvocation getMethodInvocation() {
@@ -67,5 +67,4 @@ public abstract class AbstractMethodInvocationAnalyzer {
 	public List<Expression> getArguments() {
 		return arguments;
 	}
-
 }

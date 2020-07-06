@@ -4,13 +4,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.SimpleName;
-
 import javax.naming.Name;
 import javax.naming.directory.SearchControls;
+
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
 @SuppressWarnings("nls")
 public class DirContextSearchInvocationAnalyzer extends AbstractMethodInvocationAnalyzer {
@@ -34,7 +32,6 @@ public class DirContextSearchInvocationAnalyzer extends AbstractMethodInvocation
 			return true;
 		}
 		return analyze(javax.naming.directory.DirContext.class.getName(), SEARCH, OVERLOAD_USING_NAME_AS_STRING);
-
 	}
 
 	/**
