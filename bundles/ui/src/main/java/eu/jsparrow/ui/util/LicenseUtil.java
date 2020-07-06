@@ -137,6 +137,19 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			licenseModel = factoryService.createDemoLicenseModel();
 		}
 
+		// Verify the persisted license' secret matches the hardware ID
+		String secret = systemInfoWrapper.createUniqueHardwareId();
+		boolean validSecret = licenseService.verifySecretKey(licenseModel, secret);
+		if (!validSecret) {
+			handleStartUpValidationFailure(shell, new ValidationException("Invalid license data")); //$NON-NLS-1$
+			licenseModel = factoryService.createDemoLicenseModel();
+			try {
+				persistenceService.saveToPersistence(licenseModel);
+			} catch (PersistenceException e) {
+				logger.error("License could not be persisted", e); //$NON-NLS-1$
+			}
+		}
+
 		Optional<String> encryptedEndpointOpt = loadEncryptedEndpointFromPersistence();
 		try {
 			String endpoint = ""; //$NON-NLS-1$

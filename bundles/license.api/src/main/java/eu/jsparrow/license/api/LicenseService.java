@@ -32,4 +32,16 @@ public interface LicenseService {
 	 */
 	public void checkIn(LicenseModel model, String endpoint) throws ValidationException;
 
+	/**
+	 * Verifies if the given secret is valid for the license model.
+	 * 
+	 * @param model
+	 *            model to be verified
+	 * @param endpoint
+	 *            expected secret key.
+	 * @return if the license is node locked and the given secret key matches
+	 *         with the model's secret.
+	 */
+	public boolean verifySecretKey(LicenseModel model, String endpoint);
+
 }
