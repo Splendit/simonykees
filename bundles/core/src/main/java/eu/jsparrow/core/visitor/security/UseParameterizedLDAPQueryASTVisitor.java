@@ -67,7 +67,7 @@ public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryAST
 		AST ast = astRewrite.getAST();
 		ArrayCreation arrayCreation = ast.newArrayCreation();
 
-		SimpleType elementType = ast.newSimpleType(ast.newSimpleName(String.class.getSimpleName()));
+		SimpleType elementType = ast.newSimpleType(ast.newSimpleName(Object.class.getSimpleName()));
 		ArrayType stringArrayType = ast.newArrayType(elementType);
 		arrayCreation.setType(stringArrayType);
 		ArrayInitializer initializer = ast.newArrayInitializer();

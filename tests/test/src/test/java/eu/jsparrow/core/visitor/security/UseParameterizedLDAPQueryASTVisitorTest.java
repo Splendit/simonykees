@@ -38,7 +38,7 @@ public class UseParameterizedLDAPQueryASTVisitorTest extends UsesSimpleJDTUnitFi
 				"DirContext ctx = null;\n" +
 				"String filter = \"(&(uid={0}\" + \")(userPassword={1}\" + \"))\";\n" +
 				"try {\n" +
-				"	NamingEnumeration<SearchResult> results = ctx.search(\"ou=system\", filter, new String[] {user, pass}, new SearchControls());\n" +
+				"	NamingEnumeration<SearchResult> results = ctx.search(\"ou=system\", filter, new Object[] {user, pass}, new SearchControls());\n" +
 				"} catch (NamingException e) {}";
 
 		assertChange(original, expected);
