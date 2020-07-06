@@ -37,11 +37,11 @@ public interface LicenseService {
 	 * 
 	 * @param model
 	 *            model to be verified
-	 * @param endpoint
+	 * @param secret
 	 *            expected secret key.
 	 * @return if the license is node locked and the given secret key matches
 	 *         with the model's secret.
 	 */
-	public boolean verifySecretKey(LicenseModel model, String endpoint);
+	public boolean verifySecretKey(LicenseModel model, String secret);
 
 }
