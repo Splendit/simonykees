@@ -36,6 +36,7 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	private boolean beforeDeclaration = true;
 	private boolean beforeUsage = true;
 	private boolean unsafe = false;
+	private Expression initializer;
 
 	public SqlVariableAnalyzerVisitor(SimpleName variableName, ASTNode declaration, CompilationUnit compilationUnit) {
 		this.variableName = variableName;
@@ -47,9 +48,16 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	public boolean visit(VariableDeclarationFragment fragment) {
 		if (this.declarationFragment == fragment) {
 			beforeDeclaration = false;
-			Expression initializer = fragment.getInitializer();
-			componentStore.storeComponents(initializer);
+			initializer = fragment.getInitializer();
+			if (initializer != null) {
+				if (initializer.getNodeType() != ASTNode.NULL_LITERAL) {
+					componentStore.storeComponents(initializer);
+				} else {
+					initializer = null;
+				}
+			}
 			return false;
+
 		}
 		return true;
 	}
@@ -92,8 +100,14 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		StructuralPropertyDescriptor structuralDescriptor = simpleName.getLocationInParent();
 		if (structuralDescriptor == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) simpleName.getParent();
-			if (assignment.getOperator() == Assignment.Operator.PLUS_ASSIGN) {
+			if (assignment.getOperator() == Assignment.Operator.PLUS_ASSIGN && initializer != null) {
 				componentStore.storeComponents(assignment.getRightHandSide());
+			} else if (assignment.getOperator() == Assignment.Operator.ASSIGN && initializer == null) {
+				Expression rightHandSide = assignment.getRightHandSide();
+				if (rightHandSide.getNodeType() != ASTNode.NULL_LITERAL) {
+					initializer = rightHandSide;
+					componentStore.storeComponents(initializer);
+				}
 			} else {
 				unsafe = true;
 			}
