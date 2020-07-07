@@ -43,6 +43,11 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		this.declarationFragment = declaration;
 		this.compilationUnit = compilationUnit;
 	}
+	
+	@Override
+	public boolean preVisit2(ASTNode node) {
+		return !unsafe;
+	}
 
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
