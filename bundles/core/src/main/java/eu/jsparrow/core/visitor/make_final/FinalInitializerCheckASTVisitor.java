@@ -2,7 +2,6 @@ package eu.jsparrow.core.visitor.make_final;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -91,8 +90,8 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	public boolean visit(LambdaExpression lambda) {
 		
 		if(isFieldInitializer(lambda)) {
-			tempAssignmentsInBlocksMap.put(lambda.getBody(), new ArrayList<>());
-			currentConstructor = lambda.getBody();
+			tempAssignmentsInBlocksMap.put(lambda, new ArrayList<>());
+			currentConstructor = lambda;
 		}
 		
 		return true;
@@ -102,13 +101,13 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	public void endVisit(LambdaExpression lambda) {
 		if(isFieldInitializer(lambda)) {
 			FieldDeclaration field = ASTNodeUtil.getSpecificAncestor(lambda, FieldDeclaration.class);
-			List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap.getOrDefault(lambda.getBody(), new ArrayList<>());
+			List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap.getOrDefault(lambda, new ArrayList<>());
 			if(ASTNodeUtil.hasModifier(field.modifiers(), Modifier::isStatic)) {
 				staticInitializerInitializers.addAll(tempAssignmentsInBlocks);
 			} else {
 				nonStaticInitializerInitializers.addAll(tempAssignmentsInBlocks);
 			}
-			tempAssignmentsInBlocksMap.remove(lambda.getBody());
+			tempAssignmentsInBlocksMap.remove(lambda);
 			currentConstructor = null;
 		}
 	}

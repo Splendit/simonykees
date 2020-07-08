@@ -22,8 +22,6 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
-//		defaultFixture = fixtureProject.addCompilationUnit(DEFAULT_TYPE_NAME);
-
 		visitor = new FinalInitializerCheckASTVisitor();
 	}
 
@@ -34,8 +32,10 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 
 	@Test
 	public void staticField_initInDeclarationOnly_shouldBeCandidate() throws Exception {
-		String typeContent = "private static String a = \"asdf\";" + "static {" + "}" + "public " + DEFAULT_TYPE_DECLARATION_NAME
-				+ "() {" + "}";
+		String typeContent = 
+				"private static String a = \"asdf\";" +
+				"static {}" + 
+				"public " + DEFAULT_TYPE_DECLARATION_NAME+ "() {" + "}";
 
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
 
@@ -124,6 +124,18 @@ public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {
 		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
 
 		assertFalse(isValidCandidates(candidates));
+	}
+
+	@Test
+	public void nonStaticField_lambdaExpressionInitializer_shouldBeCandidate() throws Exception {
+		String typeContent = "private Runnable r = () -> {\n" + 
+				"	String value = \"\";\n" + 
+				"	value = \"123\";\n" + 
+				"};";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, typeContent);
+		defaultFixture.accept(visitor);
+		List<FieldDeclaration> candidates = visitor.getFinalCandidates();
+		assertTrue(isValidCandidates(candidates, "r"));
 	}
 
 	@Test
