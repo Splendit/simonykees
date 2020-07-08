@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -56,7 +57,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 	private final Map<Integer, List<VariableDeclarationFragment>> constructorInitializers = new HashMap<>();
 	private List<VariableDeclarationFragment> multiplyAssignedDeclarations = new ArrayList<>();
 
-	private List<VariableDeclarationFragment> tempAssignmentsInBlocks;
+	private Map<ASTNode, List<VariableDeclarationFragment>> tempAssignmentsInBlocksMap = new HashMap<>();
 	private List<VariableDeclarationFragment> nonRootAssignment = new ArrayList<>();
 
 	private int constructorCount = 0;
@@ -85,23 +86,58 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 
 		return true;
 	}
+	
+	@Override
+	public boolean visit(LambdaExpression lambda) {
+		
+		if(isFieldInitializer(lambda)) {
+			tempAssignmentsInBlocksMap.put(lambda.getBody(), new ArrayList<>());
+			currentConstructor = lambda.getBody();
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public void endVisit(LambdaExpression lambda) {
+		if(isFieldInitializer(lambda)) {
+			FieldDeclaration field = ASTNodeUtil.getSpecificAncestor(lambda, FieldDeclaration.class);
+			List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap.getOrDefault(lambda.getBody(), new ArrayList<>());
+			if(ASTNodeUtil.hasModifier(field.modifiers(), Modifier::isStatic)) {
+				staticInitializerInitializers.addAll(tempAssignmentsInBlocks);
+			} else {
+				nonStaticInitializerInitializers.addAll(tempAssignmentsInBlocks);
+			}
+			tempAssignmentsInBlocksMap.remove(lambda.getBody());
+			currentConstructor = null;
+		}
+	}
+	
+	private boolean isFieldInitializer(LambdaExpression lambda) {
+		if(lambda.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment fragment = (VariableDeclarationFragment)lambda.getParent();
+			return fragment.getLocationInParent() == FieldDeclaration.FRAGMENTS_PROPERTY;
+		}
+		return false;
+	}
 
 	@Override
 	public boolean visit(Initializer initializer) {
-		tempAssignmentsInBlocks = new LinkedList<>();
+		tempAssignmentsInBlocksMap.put(initializer, new ArrayList<>());
 		currentConstructor = initializer;
 		return true;
 	}
 
 	@Override
 	public void endVisit(Initializer initializer) {
+		List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap.getOrDefault(initializer, new ArrayList<>());
 		if (ASTNodeUtil.hasModifier(initializer.modifiers(), Modifier::isStatic)) {
 			staticInitializerInitializers.addAll(tempAssignmentsInBlocks);
 		} else {
 			nonStaticInitializerInitializers.addAll(tempAssignmentsInBlocks);
 		}
 
-		tempAssignmentsInBlocks = null;
+		tempAssignmentsInBlocksMap.remove(initializer);
 		currentConstructor = null;
 	}
 
@@ -111,7 +147,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 			return isInConstructor;
 		}
 		currentConstructor = methodDeclaration;
-		tempAssignmentsInBlocks = new LinkedList<>();
+		tempAssignmentsInBlocksMap.put(methodDeclaration, new ArrayList<>());
 		isInConstructor = true;
 
 		return true;
@@ -122,9 +158,10 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 		if (!methodDeclaration.isConstructor()) {
 			return;
 		}
-
+		
+		List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap.getOrDefault(methodDeclaration, new ArrayList<>());
 		constructorInitializers.put(constructorCount, tempAssignmentsInBlocks);
-		tempAssignmentsInBlocks = null;
+		tempAssignmentsInBlocksMap.remove(methodDeclaration);
 		currentConstructor = null;
 		isInConstructor = false;
 		constructorCount++;
@@ -168,6 +205,7 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 			if (!isInConstructor && isAlreadyAssigned(variableDeclarationFragment)) {
 				multiplyAssignedDeclarations.add(variableDeclarationFragment);
 			} else {
+				List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap.getOrDefault(currentConstructor, new ArrayList<>());
 				tempAssignmentsInBlocks.add(variableDeclarationFragment);
 			}
 		}
