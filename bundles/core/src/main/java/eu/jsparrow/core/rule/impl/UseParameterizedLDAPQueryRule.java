@@ -15,7 +15,7 @@ import eu.jsparrow.rules.common.Tag;
 /**
  * @see UseParameterizedJPAQueryASTVisitor
  * 
- * @since 3.18.0
+ * @since 3.19.0
  *
  */
 public class UseParameterizedLDAPQueryRule extends RefactoringRuleImpl<UseParameterizedLDAPQueryASTVisitor> {
