@@ -14,6 +14,8 @@ import org.eclipse.jdt.core.dom.StringLiteral;
  * <p>
  * Note that this class will take part of the work which had been as yet done by
  * {@link AbstractQueryComponentsAnalyzer}.
+ * 
+ * @since 3.19.0
  *
  */
 public class UserSuppliedInputCollector {
