@@ -61,7 +61,13 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		if (executeQueryArgument == null) {
 			return true;
 		}
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(executeQueryArgument);
+		
+		if (executeQueryArgument.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return true;
+		}
+		SimpleName querySimpleName = (SimpleName) executeQueryArgument;
+		
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(querySimpleName);
 		if (sqlVariableVisitor == null) {
 			return true;
 		}

@@ -89,7 +89,13 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		if(queryMethodArgument == null) {
 			return true;
 		}
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(queryMethodArgument);
+		
+		if (queryMethodArgument.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return true;
+		}
+		SimpleName querySimpleName = (SimpleName) queryMethodArgument;
+		
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(querySimpleName);
 		if (sqlVariableVisitor == null) {
 			return true;
 		}

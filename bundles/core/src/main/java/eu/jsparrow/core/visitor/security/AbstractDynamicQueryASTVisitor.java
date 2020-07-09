@@ -119,13 +119,7 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	 * @return a SqlVariableAnalyzerVisitor if a query is found which can be
 	 *         transformed, otherwise {@code null}.
 	 */
-	protected SqlVariableAnalyzerVisitor createSqlVariableAnalyzerVisitor(Expression queryMethodArgument) {
-
-		if (queryMethodArgument.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return null;
-		}
-
-		SimpleName query = (SimpleName) queryMethodArgument;
+	protected SqlVariableAnalyzerVisitor createSqlVariableAnalyzerVisitor(SimpleName query) {
 
 		IBinding queryVariableBinding = query.resolveBinding();
 		if (queryVariableBinding.getKind() != IBinding.VARIABLE) {

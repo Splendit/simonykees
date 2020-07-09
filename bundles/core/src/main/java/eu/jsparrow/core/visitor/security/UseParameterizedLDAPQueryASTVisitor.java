@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -73,8 +74,13 @@ public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryAST
 			componentStore.storeComponents(infixExpression);
 			return componentStore.getComponents();
 		}
+		
+		if (filterExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return Collections.emptyList();
+		}
+		SimpleName filterSimpleName = (SimpleName) filterExpression;
 
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(filterExpression);
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(filterSimpleName);
 		if (sqlVariableVisitor == null) {
 			return Collections.emptyList();
 		}
