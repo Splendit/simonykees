@@ -19,16 +19,16 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
  * filter by parameterizing, for example:
  * 
  * <pre>
- * String filter = "(&(uid=" + user + ")(userPassword=" + pass + "))";
- * NamingEnumeration&lt;SearchResult&gt; results = ctx.search("ou=system", filter, new SearchControls());
+ * 	String filter = "(&(uid=" + user + ")(userPassword=" + pass + "))";
+ * 	NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new SearchControls());
  * </pre>
  * 
  * is transformed to:
  * 
  * <pre>
- * String filter = "(&(uid={0})(userPassword={1}))";
- * NamingEnumeration&lt;SearchResult&gt; results = ctx.search("ou=system", filter, new String[] { user, pass },
- * 		new SearchControls());
+ * 	String filter = "(&(uid={0})(userPassword={1}))";
+ * 	NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new String[] { user, pass },
+ * 			new SearchControls());
  * </pre>
  * 
  * @since 3.19.0
@@ -65,7 +65,7 @@ public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryAST
 		return true;
 	}
 
-	public List<Expression> findDynamicQueryComponents(Expression filterExpression) {
+	private List<Expression> findDynamicQueryComponents(Expression filterExpression) {
 
 		if (filterExpression.getNodeType() == ASTNode.INFIX_EXPRESSION) {
 			InfixExpression infixExpression = (InfixExpression) filterExpression;
