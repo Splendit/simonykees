@@ -331,6 +331,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	public void updateValidationResult() {
 		LicenseModel model = tryLoadModelFromPersistence();
+		
 		Optional<String> encryptedEndpointOpt = loadEncryptedEndpointFromPersistence();
 
 		try {
@@ -367,6 +368,11 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			model = persistenceService.loadFromPersistence();
 		} catch (PersistenceException e) {
 			logger.warn("Error while loading stored license, using default demo license", e); //$NON-NLS-1$
+			model = factoryService.createDemoLicenseModel();
+		}
+		
+		String secret = systemInfoWrapper.createUniqueHardwareId();
+		if(!licenseService.verifySecretKey(model, secret)) {
 			model = factoryService.createDemoLicenseModel();
 		}
 		return model;
