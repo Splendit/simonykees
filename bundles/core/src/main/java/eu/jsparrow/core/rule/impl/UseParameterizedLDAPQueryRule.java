@@ -33,9 +33,4 @@ public class UseParameterizedLDAPQueryRule extends RefactoringRuleImpl<UseParame
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_3;
 	}
-
-	@Override
-	public String requiredLibraries() {
-		return "Java LDAP API"; //$NON-NLS-1$
-	}
 }

@@ -15,20 +15,19 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 /**
- * Replaces String concatenation of LDAP statements with user defined input by
- * parameterizing, for example:
+ * Replaces potential user supplied input concatenated into an LDAP search
+ * filter by parameterizing, for example:
  * 
  * <pre>
  * String filter = "(&(uid=" + user + ")(userPassword=" + pass + "))";
- * NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new SearchControls());
- * return results.hasMore();
+ * NamingEnumeration&lt;SearchResult&gt; results = ctx.search("ou=system", filter, new SearchControls());
  * </pre>
  * 
  * is transformed to:
  * 
  * <pre>
  * String filter = "(&(uid={0})(userPassword={1}))";
- * NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new String[] { user, pass },
+ * NamingEnumeration&lt;SearchResult&gt; results = ctx.search("ou=system", filter, new String[] { user, pass },
  * 		new SearchControls());
  * </pre>
  * 

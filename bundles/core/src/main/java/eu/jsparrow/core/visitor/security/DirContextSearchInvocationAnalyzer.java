@@ -4,17 +4,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.naming.Name;
-import javax.naming.directory.SearchControls;
-
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 /**
- * Determines whether a method invocation references either
- * {@link javax.naming.directory.DirContext#search(String, String, SearchControls)}
- * or<br>
- * {@link javax.naming.directory.DirContext#search(Name, String, SearchControls)}.
+ * Determines whether a method invocation references one of the following
+ * methods:
+ * <p>
+ * {@link javax.naming.directory.DirContext#search(java.lang.String, java.lang.String, javax.naming.directory.SearchControls)}
+ * <p>
+ * or
+ * <p>
+ * {@link javax.naming.directory.DirContext#search(javax.naming.Name, java.lang.String, javax.naming.directory.SearchControls)}
  *
  * @since 3.19.0
  *
@@ -23,11 +24,13 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 public class DirContextSearchInvocationAnalyzer extends AbstractMethodInvocationAnalyzer {
 
 	private static final List<String> OVERLOAD_USING_NAME_AS_NAME = Collections
-		.unmodifiableList(Arrays.asList(Name.class.getName(), String.class.getName(), SearchControls.class.getName()));
+		.unmodifiableList(Arrays.asList(javax.naming.Name.class.getName(), java.lang.String.class.getName(),
+				javax.naming.directory.SearchControls.class.getName()));
 
 	private static final List<String> OVERLOAD_USING_NAME_AS_STRING = Collections
 		.unmodifiableList(
-				Arrays.asList(String.class.getName(), String.class.getName(), SearchControls.class.getName()));
+				Arrays.asList(java.lang.String.class.getName(), java.lang.String.class.getName(),
+						javax.naming.directory.SearchControls.class.getName()));
 
 	private static final String SEARCH = "search";
 
