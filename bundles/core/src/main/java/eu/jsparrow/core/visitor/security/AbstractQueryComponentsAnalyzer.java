@@ -111,6 +111,10 @@ public abstract class AbstractQueryComponentsAnalyzer {
 		}
 		return parameters;
 	}
+		
+	public int getIndexOffset() {
+		return indexOffset;
+	}
 
 	protected abstract ReplaceableParameter createReplaceableParameter(int componentIndex, int parameterPosition);
 
