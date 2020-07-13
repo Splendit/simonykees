@@ -47,6 +47,7 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	private boolean beforeUsage = true;
 	private boolean unsafe = false;
 	private Expression initializer;
+	private List<Block> simpleNameAtUsageBlockAncestors;
 
 	public SqlVariableAnalyzerVisitor(SimpleName variableName) {
 		this.compilationUnit = ASTNodeUtil.getSpecificAncestor(variableName, CompilationUnit.class);
@@ -127,6 +128,21 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		StructuralPropertyDescriptor structuralDescriptor = simpleName.getLocationInParent();
 		if (structuralDescriptor == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) simpleName.getParent();
+			if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+				unsafe = true;
+				return false;
+			}
+			ExpressionStatement expressionStatement = (ExpressionStatement) assignment.getParent();
+			if (expressionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+				unsafe = true;
+				return false;
+			}
+			Block blockAroundAssignement = (Block) expressionStatement.getParent();
+			if (!simpleNameAtUsageBlockAncestors.contains(blockAroundAssignement)) {
+				unsafe = true;
+				return false;
+			}
+
 			if (assignment.getOperator() == Assignment.Operator.PLUS_ASSIGN && initializer != null) {
 				componentStore.storeComponents(assignment.getRightHandSide());
 			} else if (assignment.getOperator() == Assignment.Operator.ASSIGN && initializer == null) {
@@ -150,89 +166,16 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		return componentStore.getComponents();
 	}
 
-	Block getBlockSurroundingSimpleNameAtUsage(SimpleName simpleNameAtUsage) {
-
-		if (simpleNameAtUsage.getLocationInParent() != MethodInvocation.ARGUMENTS_PROPERTY) {
-			return null;
-		}
-		MethodInvocation invocation = (MethodInvocation) simpleNameAtUsage.getParent();
-
-		Statement statement = null;
-		if (invocation.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-			statement = (ExpressionStatement) invocation.getParent();
-		}
-
-		if (invocation.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) invocation.getParent();
-			if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-				statement = (ExpressionStatement) assignment.getParent();
-			}
-		}
-
-		if (invocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			VariableDeclarationFragment fragment = (VariableDeclarationFragment) invocation.getParent();
-			if (fragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-				statement = (VariableDeclarationStatement) fragment.getParent();
-			}
-		}
-		if (statement == null) {
-			return null;
-		}
-		if (statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return null;
-		}
-		return (Block) statement.getParent();
-
-	}
-
-	/**
-	 * 
-	 * @param variableDeclarationFragment
-	 * @return if the given {@link VariableDeclarationFragment} is a fragment of
-	 *         a {@link VariableDeclarationStatement} surrounded by a
-	 *         {@link Block}, then the {@link Block} surrounding the
-	 *         {@link VariableDeclarationFragment} is returned. Otherwise, null
-	 *         is returned.
-	 */
-	Block getBlockOfLocalVariableDeclaration(VariableDeclarationFragment variableDeclarationFragment) {
-		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-			return null;
-		}
-		VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) variableDeclarationFragment
-			.getParent();
-
-		if (variableDeclarationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return null;
-		}
-		return (Block) variableDeclarationStatement.getParent();
-	}
-
-	/**
-	 * 
-	 * @return a list containing at least one {@link Block} if a valid path of
-	 *         ancestor blocks can be found. Otherwise an empty list is
-	 *         returned.
-	 */
-	List<Block> createBlockAncestorList(SimpleName simpleNameAtUsage,
-			VariableDeclarationFragment variableDeclarationFragment) {
-
-		Block blockOfLocalVariableDeclaration = getBlockOfLocalVariableDeclaration(variableDeclarationFragment);
-		if (blockOfLocalVariableDeclaration == null) {
-			return Collections.emptyList();
-		}
-		Block blockSurroundingSimpleNameAtUsage = getBlockSurroundingSimpleNameAtUsage(simpleNameAtUsage);
-		if (blockSurroundingSimpleNameAtUsage == null) {
-			return Collections.emptyList();
-		}
+	List<Block> createBlockAncestorList(SimpleName simpleNameAtUsage, Block blockOfDeclarationFragment) {
 
 		List<Block> ancestorsList = new ArrayList<>();
-		ASTNode parentNode = blockSurroundingSimpleNameAtUsage;
+		ASTNode parentNode = simpleNameAtUsage.getParent();
 		while (parentNode != null) {
 			if (parentNode.getNodeType() == ASTNode.BLOCK) {
 				ancestorsList.add((Block) parentNode);
-			}
-			if (parentNode == blockOfLocalVariableDeclaration) {
-				break;
+				if (parentNode == blockOfDeclarationFragment) {
+					break;
+				}
 			}
 			parentNode = parentNode.getParent();
 		}
@@ -243,16 +186,23 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		if (declarationNode == null || declarationNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			return false;
 		}
-		variableDeclarationFragment = (VariableDeclarationFragment)declarationNode;
-		if(variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+		variableDeclarationFragment = (VariableDeclarationFragment) declarationNode;
+		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
 			return false;
 		}
-		VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement)variableDeclarationFragment.getParent();
-		if(variableDeclarationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+		VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) variableDeclarationFragment
+			.getParent();
+		if (variableDeclarationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return false;
 		}
-		
-		Block blockOfDeclarationFragment = (Block)variableDeclarationStatement.getParent();
+
+		Block blockOfDeclarationFragment = (Block) variableDeclarationStatement.getParent();
+		simpleNameAtUsageBlockAncestors = createBlockAncestorList(simpleNameAtUsage, blockOfDeclarationFragment);
+
+		if (simpleNameAtUsageBlockAncestors.isEmpty()) {
+			return false;
+		}
+
 		blockOfDeclarationFragment.accept(this);
 		return !unsafe;
 	}
