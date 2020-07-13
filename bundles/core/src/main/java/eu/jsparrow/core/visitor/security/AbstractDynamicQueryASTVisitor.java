@@ -110,22 +110,6 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	}
 
 	/**
-	 * 
-	 * @param queryMethodArgument
-	 *            parameter which is examined whether or not it is a local
-	 *            variable storing an SQL query.
-	 * @return a SqlVariableAnalyzerVisitor if a query is found which can be
-	 *         transformed, otherwise {@code null}.
-	 */
-	protected SqlVariableAnalyzerVisitor createSqlVariableAnalyzerVisitor(SimpleName query) {
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = new SqlVariableAnalyzerVisitor(query);
-		if (sqlVariableVisitor.analyze()) {
-			return sqlVariableVisitor;
-		}
-		return null;
-	}
-
-	/**
 	 * @return by default the old literal value of the previous string literal
 	 *         unless this method is overridden in order to return a different
 	 *         value.
