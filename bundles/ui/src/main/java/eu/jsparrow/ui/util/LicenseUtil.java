@@ -393,14 +393,14 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	private void handleStartUpPersistenceFailure(Shell shell, PersistenceException e) {
 		logger.error("Failed to load stored license. Falling back to free license.", e); //$NON-NLS-1$
-		String message = String.format("%s\n%s", Messages.MessageDialog_licensingError_failedToLoad , e.getMessage()); //$NON-NLS-1$
+		String message = NLS.bind(Messages.MessageDialog_licensingError_failedToLoad, e.getMessage());
 		
 		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
 	}
 
 	private void handleStartUpValidationFailure(Shell shell, Exception e) {
 		logger.error("Failed to validate license. ", e); //$NON-NLS-1$
-		String message = String.format("%s\n%s", Messages.MessageDialog_licensingError_failedToValidate, e.getMessage()); //$NON-NLS-1$
+		String message = NLS.bind(Messages.MessageDialog_licensingError_failedToValidate, e.getMessage());
 		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
 	}
 
