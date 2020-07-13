@@ -85,24 +85,25 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(LambdaExpression lambda) {
-		
-		if(isFieldInitializer(lambda)) {
+
+		if (isFieldInitializer(lambda)) {
 			tempAssignmentsInBlocksMap.put(lambda, new ArrayList<>());
 			currentConstructor = lambda;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public void endVisit(LambdaExpression lambda) {
-		if(isFieldInitializer(lambda)) {
+		if (isFieldInitializer(lambda)) {
 			FieldDeclaration field = ASTNodeUtil.getSpecificAncestor(lambda, FieldDeclaration.class);
-			List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap.getOrDefault(lambda, new ArrayList<>());
-			if(ASTNodeUtil.hasModifier(field.modifiers(), Modifier::isStatic)) {
+			List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap.getOrDefault(lambda,
+					new ArrayList<>());
+			if (ASTNodeUtil.hasModifier(field.modifiers(), Modifier::isStatic)) {
 				staticInitializerInitializers.addAll(tempAssignmentsInBlocks);
 			} else {
 				nonStaticInitializerInitializers.addAll(tempAssignmentsInBlocks);
@@ -111,10 +112,10 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 			currentConstructor = null;
 		}
 	}
-	
+
 	private boolean isFieldInitializer(LambdaExpression lambda) {
-		if(lambda.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			VariableDeclarationFragment fragment = (VariableDeclarationFragment)lambda.getParent();
+		if (lambda.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment fragment = (VariableDeclarationFragment) lambda.getParent();
 			return fragment.getLocationInParent() == FieldDeclaration.FRAGMENTS_PROPERTY;
 		}
 		return false;
@@ -129,7 +130,8 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 
 	@Override
 	public void endVisit(Initializer initializer) {
-		List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap.getOrDefault(initializer, new ArrayList<>());
+		List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap.getOrDefault(initializer,
+				new ArrayList<>());
 		if (ASTNodeUtil.hasModifier(initializer.modifiers(), Modifier::isStatic)) {
 			staticInitializerInitializers.addAll(tempAssignmentsInBlocks);
 		} else {
@@ -157,8 +159,9 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 		if (!methodDeclaration.isConstructor()) {
 			return;
 		}
-		
-		List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap.getOrDefault(methodDeclaration, new ArrayList<>());
+
+		List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap
+			.getOrDefault(methodDeclaration, new ArrayList<>());
 		constructorInitializers.put(constructorCount, tempAssignmentsInBlocks);
 		tempAssignmentsInBlocksMap.remove(methodDeclaration);
 		currentConstructor = null;
@@ -204,7 +207,8 @@ public class FinalInitializerCheckASTVisitor extends AbstractMakeFinalHelperVisi
 			if (!isInConstructor && isAlreadyAssigned(variableDeclarationFragment)) {
 				multiplyAssignedDeclarations.add(variableDeclarationFragment);
 			} else {
-				List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap.getOrDefault(currentConstructor, new ArrayList<>());
+				List<VariableDeclarationFragment> tempAssignmentsInBlocks = tempAssignmentsInBlocksMap
+					.getOrDefault(currentConstructor, new ArrayList<>());
 				tempAssignmentsInBlocks.add(variableDeclarationFragment);
 			}
 		}
