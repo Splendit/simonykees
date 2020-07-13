@@ -1,18 +1,18 @@
 package eu.jsparrow.license.netlicensing.validation.impl.response;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static java.util.AbstractMap.SimpleEntry;
-import static java.util.Map.Entry;
-import static java.util.Arrays.asList;
 
 import java.time.ZonedDateTime;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,10 +21,10 @@ import com.labs64.netlicensing.domain.vo.Composition;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 import eu.jsparrow.license.netlicensing.testhelper.DummyResponseGenerator;
-import eu.jsparrow.license.netlicensing.validation.impl.response.Parser;
-import eu.jsparrow.license.netlicensing.validation.impl.response.model.*;
+import eu.jsparrow.license.netlicensing.validation.impl.response.model.FloatingResponse;
+import eu.jsparrow.license.netlicensing.validation.impl.response.model.MultiFeatureResponse;
+import eu.jsparrow.license.netlicensing.validation.impl.response.model.SubscriptionResponse;
 
-@SuppressWarnings("nls")
 public class ParserTest {
 
 	private Parser parser;

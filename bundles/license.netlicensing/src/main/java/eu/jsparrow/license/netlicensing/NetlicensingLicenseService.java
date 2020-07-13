@@ -10,11 +10,13 @@ import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.LicenseService;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
+import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidation;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidationFactory;
 
 /**
- * Implementor of {@link LicenseService} using <a href="http://www.netlicensing.io">NetLicensing</a>
+ * Implementor of {@link LicenseService} using
+ * <a href="http://www.netlicensing.io">NetLicensing</a>
  */
 @Component
 @SuppressWarnings("nls")
@@ -42,6 +44,15 @@ public class NetlicensingLicenseService implements LicenseService {
 		LicenseValidation validation = validationFactory.create(licenseModel, endpoint);
 
 		validation.checkIn();
+	}
+
+	@Override
+	public boolean verifySecretKey(LicenseModel model, String secret) {
+		if (model instanceof NetlicensingLicenseModel) {
+			NetlicensingLicenseModel nodeLocked = (NetlicensingLicenseModel) model;
+			return secret.equals(nodeLocked.getSecret());
+		}
+		return true;
 	}
 
 }

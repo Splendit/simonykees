@@ -79,6 +79,15 @@ public class RegistrationSecureStoragePersistenceTest {
 
 		assertTrue(result.isEmpty());
 	}
+	
+	@Test
+	public void load_withCorruptedSecureStorage_returnsEmptyRegistrationSecret() throws Exception {
+		when(simonykeesRegistrationNode.getByteArray(any(), any())).thenThrow(IllegalArgumentException.class);
+
+		String result = persistence.load();
+
+		assertTrue(result.isEmpty());
+	}
 
 	@Test(expected = PersistenceException.class)
 	public void save_withCorruptedSecureStorage_throwsPersistenceException() throws Exception {
