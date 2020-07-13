@@ -61,20 +61,18 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		if (executeQueryArgument == null) {
 			return true;
 		}
-
+		
 		if (executeQueryArgument.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return true;
 		}
 		SimpleName querySimpleName = (SimpleName) executeQueryArgument;
-
+		
 		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(querySimpleName);
 		if (sqlVariableVisitor == null) {
 			return true;
 		}
 
-		SQLQueryReplaceableParameterCollector replaceableParameterCollector = new SQLQueryReplaceableParameterCollector();
-		List<ReplaceableParameter> replaceableParameters = replaceableParameterCollector
-			.createReplaceableParameterList(sqlVariableVisitor);
+		List<ReplaceableParameter> replaceableParameters = analyzeQueryComponents(sqlVariableVisitor);
 		if (replaceableParameters.isEmpty()) {
 			return true;
 		}
@@ -210,6 +208,12 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		} else {
 			astRewrite.remove(getResultSetInvocation.getParent(), null);
 		}
+	}
+
+	private List<ReplaceableParameter> analyzeQueryComponents(SqlVariableAnalyzerVisitor sqlVariableVisitor) {
+		List<Expression> queryComponents = sqlVariableVisitor.getDynamicQueryComponents();
+		QueryComponentsAnalyzer componentsAnalyzer = new QueryComponentsAnalyzer(queryComponents);
+		return componentsAnalyzer.createReplaceableParameterList();
 	}
 
 	private void replaceStatementDeclaration(VariableDeclarationFragment fragment) {
