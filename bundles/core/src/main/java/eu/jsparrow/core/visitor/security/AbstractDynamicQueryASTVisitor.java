@@ -11,10 +11,8 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -120,31 +118,11 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	 *         transformed, otherwise {@code null}.
 	 */
 	protected SqlVariableAnalyzerVisitor createSqlVariableAnalyzerVisitor(SimpleName query) {
-
-		IBinding queryVariableBinding = query.resolveBinding();
-		if (queryVariableBinding.getKind() != IBinding.VARIABLE) {
-			return null;
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = new SqlVariableAnalyzerVisitor(query);
+		if (sqlVariableVisitor.analyze()) {
+			return sqlVariableVisitor;
 		}
-
-		IVariableBinding variableBinding = (IVariableBinding) queryVariableBinding;
-		if (variableBinding.isField()) {
-			return null;
-		}
-
-		ASTNode declaringNode = this.getCompilationUnit()
-			.findDeclaringNode(queryVariableBinding);
-		if (declaringNode == null || declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return null;
-		}
-
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = new SqlVariableAnalyzerVisitor(query, declaringNode,
-				getCompilationUnit());
-		Block enclosingBlock = ASTNodeUtil.getSpecificAncestor(declaringNode, Block.class);
-		enclosingBlock.accept(sqlVariableVisitor);
-		if (sqlVariableVisitor.isUnsafe()) {
-			return null;
-		}
-		return sqlVariableVisitor;
+		return null;
 	}
 
 	/**
