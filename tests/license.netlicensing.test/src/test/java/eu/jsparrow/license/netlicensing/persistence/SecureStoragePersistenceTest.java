@@ -1,8 +1,8 @@
 package eu.jsparrow.license.netlicensing.persistence;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -100,4 +100,12 @@ public class SecureStoragePersistenceTest {
 		secureStoragePersistence.save(new DummyLicenseModel());
 	}
 
+	@Test
+	public void load_withCorruptedStorage_returnsDemoLicenseModel() throws Exception {
+		when(simonykeesLicenseNode.getByteArray(any(), any())).thenThrow(IllegalArgumentException.class);
+
+		LicenseModel result = secureStoragePersistence.load();
+
+		assertThat(result, instanceOf(DemoLicenseModel.class));
+	}
 }

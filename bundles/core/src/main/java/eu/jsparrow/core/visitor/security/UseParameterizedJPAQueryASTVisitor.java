@@ -82,14 +82,7 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 		JPAQueryVariableAnalyzerASTVisitor queryVariableAnalyzerVisitor = new JPAQueryVariableAnalyzerASTVisitor(
 				querySimpleName);
 
-		surroundingBody.accept(queryVariableAnalyzerVisitor);
-		if (!queryVariableAnalyzerVisitor.hasFoundDeclaration()) {
-			return true;
-		}
-		if (queryVariableAnalyzerVisitor.isUnsafe()) {
-			return true;
-		}
-		if (queryVariableAnalyzerVisitor.getExecutionInvocation() == null) {
+		if (!queryVariableAnalyzerVisitor.analyze(surroundingBody)) {
 			return true;
 		}
 

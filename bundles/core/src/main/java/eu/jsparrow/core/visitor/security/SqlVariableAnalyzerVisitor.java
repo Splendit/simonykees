@@ -14,8 +14,15 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
- * A helper visitor for analyzing the declaration and references of the variable
- * representing a dynamic SQL query.
+ * This visitor is intended to be used by visitors which transform dynamic
+ * queries in order to prevent injections.
+ * <p>
+ * It analyzes the declaration and references on a variable which may represent
+ * for example:
+ * <ul>
+ * <li>a dynamic SQL query</li>
+ * <li>an LDAP filter expression</li>
+ * </ul>
  * 
  * @since 3.16.0
  *
@@ -29,20 +36,33 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	private boolean beforeDeclaration = true;
 	private boolean beforeUsage = true;
 	private boolean unsafe = false;
+	private Expression initializer;
 
 	public SqlVariableAnalyzerVisitor(SimpleName variableName, ASTNode declaration, CompilationUnit compilationUnit) {
 		this.variableName = variableName;
 		this.declarationFragment = declaration;
 		this.compilationUnit = compilationUnit;
 	}
+	
+	@Override
+	public boolean preVisit2(ASTNode node) {
+		return !unsafe;
+	}
 
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
 		if (this.declarationFragment == fragment) {
 			beforeDeclaration = false;
-			Expression initializer = fragment.getInitializer();
-			componentStore.storeComponents(initializer);
+			initializer = fragment.getInitializer();
+			if (initializer != null) {
+				if (initializer.getNodeType() != ASTNode.NULL_LITERAL) {
+					componentStore.storeComponents(initializer);
+				} else {
+					initializer = null;
+				}
+			}
 			return false;
+
 		}
 		return true;
 	}
@@ -85,8 +105,14 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		StructuralPropertyDescriptor structuralDescriptor = simpleName.getLocationInParent();
 		if (structuralDescriptor == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) simpleName.getParent();
-			if (assignment.getOperator() == Assignment.Operator.PLUS_ASSIGN) {
+			if (assignment.getOperator() == Assignment.Operator.PLUS_ASSIGN && initializer != null) {
 				componentStore.storeComponents(assignment.getRightHandSide());
+			} else if (assignment.getOperator() == Assignment.Operator.ASSIGN && initializer == null) {
+				Expression rightHandSide = assignment.getRightHandSide();
+				if (rightHandSide.getNodeType() != ASTNode.NULL_LITERAL) {
+					initializer = rightHandSide;
+					componentStore.storeComponents(initializer);
+				}
 			} else {
 				unsafe = true;
 			}
