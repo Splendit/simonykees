@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.security;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -11,7 +12,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -35,34 +35,74 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 
-	private CompilationUnit compilationUnit;
-	private SimpleName simpleNameAtUsage;
-	private ASTNode declarationNode;
-	private VariableDeclarationFragment variableDeclarationFragment;
+	private final CompilationUnit compilationUnit;
+	private final SimpleName simpleNameAtUsage;
+	private final VariableDeclarationFragment variableDeclarationFragment;
+	private final Block blockAroundLocalDeclarationFragment;
+	private final List<Block> simpleNameAtUsageBlockAncestors;
 	private final DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
 	private boolean beforeDeclaration = true;
 	private boolean beforeUsage = true;
 	private boolean unsafe = false;
 	private Expression initializer;
-	private List<Block> simpleNameAtUsageBlockAncestors;
 
 	public SqlVariableAnalyzerVisitor(SimpleName variableName) {
 		this.compilationUnit = ASTNodeUtil.getSpecificAncestor(variableName, CompilationUnit.class);
 		this.simpleNameAtUsage = variableName;
-		this.declarationNode = findDeclarationNode(variableName);
+		this.variableDeclarationFragment = findVariableDeclarationFragment(variableName, compilationUnit);
+		this.blockAroundLocalDeclarationFragment = findBlockSurroundingDeclaration(variableDeclarationFragment);
+		if (blockAroundLocalDeclarationFragment != null) {
+			this.simpleNameAtUsageBlockAncestors = createBlockAncestorList(simpleNameAtUsage,
+					blockAroundLocalDeclarationFragment);
+		} else {
+			this.simpleNameAtUsageBlockAncestors = Collections.emptyList();
+		}
 	}
 
-	private ASTNode findDeclarationNode(SimpleName variableName) {
+	private VariableDeclarationFragment findVariableDeclarationFragment(SimpleName variableName,
+			CompilationUnit compilationUnit) {
 		IBinding queryVariableBinding = variableName.resolveBinding();
 		if (queryVariableBinding.getKind() != IBinding.VARIABLE) {
 			return null;
 		}
 
-		IVariableBinding variableBinding = (IVariableBinding) queryVariableBinding;
-		if (variableBinding.isField()) {
+		ASTNode declarationNode = compilationUnit.findDeclaringNode(queryVariableBinding);
+		if (declarationNode == null || declarationNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			return null;
 		}
-		return compilationUnit.findDeclaringNode(queryVariableBinding);
+		return (VariableDeclarationFragment) declarationNode;
+	}
+
+	private Block findBlockSurroundingDeclaration(VariableDeclarationFragment variableDeclarationFragment) {
+		if (variableDeclarationFragment == null) {
+			return null;
+		}
+		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+			return null;
+		}
+
+		VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) variableDeclarationFragment
+			.getParent();
+		if (variableDeclarationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return null;
+		}
+		return (Block) variableDeclarationStatement.getParent();
+	}
+
+	private List<Block> createBlockAncestorList(SimpleName simpleNameAtUsage, Block blockOfDeclarationFragment) {
+
+		List<Block> ancestorsList = new ArrayList<>();
+		ASTNode parentNode = simpleNameAtUsage.getParent();
+		while (parentNode != null) {
+			if (parentNode.getNodeType() == ASTNode.BLOCK) {
+				ancestorsList.add((Block) parentNode);
+				if (parentNode == blockOfDeclarationFragment) {
+					break;
+				}
+			}
+			parentNode = parentNode.getParent();
+		}
+		return ancestorsList;
 	}
 
 	@Override
@@ -72,7 +112,7 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
-		if (this.declarationNode == fragment) {
+		if (this.variableDeclarationFragment == fragment) {
 			beforeDeclaration = false;
 			initializer = fragment.getInitializer();
 			if (initializer != null) {
@@ -83,13 +123,37 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 				}
 			}
 			return false;
-
 		}
 		return true;
 	}
 
+	private Block findBlockSurroundingAssignement(Assignment assignment) {
+		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return null;
+		}
+		ExpressionStatement expressionStatement = (ExpressionStatement) assignment.getParent();
+		if (expressionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return null;
+		}
+		return (Block) expressionStatement.getParent();
+	}
+	
+	protected boolean isVariableReference(SimpleName simpleName) {		
+		if (!simpleName.getIdentifier()
+			.equals(simpleNameAtUsage.getIdentifier())) {
+			return false;
+		}
+		IBinding binding = simpleName.resolveBinding();
+		if (binding.getKind() != IBinding.VARIABLE) {
+			return false;
+		}
+		ASTNode declaringNode = compilationUnit.findDeclaringNode(binding);
+		return declaringNode == variableDeclarationFragment;
+	}
+
 	@Override
 	public boolean visit(SimpleName simpleName) {
+		
 		if (beforeDeclaration) {
 			return false;
 		}
@@ -98,22 +162,8 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 			beforeUsage = false;
 			return false;
 		}
-
-		if (!simpleNameAtUsage.getIdentifier()
-			.equals(simpleName.getIdentifier())) {
-			return false;
-		}
-
-		IBinding binding = simpleName.resolveBinding();
-		if (binding.getKind() != IBinding.VARIABLE) {
-			return false;
-		}
-
-		if (((IVariableBinding) binding).isField()) {
-			return false;
-		}
-
-		if (compilationUnit.findDeclaringNode(simpleName.resolveBinding()) != declarationNode) {
+		
+		if(!isVariableReference(simpleName)) {
 			return false;
 		}
 
@@ -125,16 +175,12 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		StructuralPropertyDescriptor structuralDescriptor = simpleName.getLocationInParent();
 		if (structuralDescriptor == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) simpleName.getParent();
-			if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			
+			Block blockAroundAssignement = findBlockSurroundingAssignement(assignment);
+			if(blockAroundAssignement == null) {
 				unsafe = true;
 				return false;
 			}
-			ExpressionStatement expressionStatement = (ExpressionStatement) assignment.getParent();
-			if (expressionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-				unsafe = true;
-				return false;
-			}
-			Block blockAroundAssignement = (Block) expressionStatement.getParent();
 			if (!simpleNameAtUsageBlockAncestors.contains(blockAroundAssignement)) {
 				unsafe = true;
 				return false;
@@ -151,11 +197,9 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 			} else {
 				unsafe = true;
 			}
-
 		} else {
 			unsafe = true;
 		}
-
 		return true;
 	}
 
@@ -163,44 +207,15 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		return componentStore.getComponents();
 	}
 
-	List<Block> createBlockAncestorList(SimpleName simpleNameAtUsage, Block blockOfDeclarationFragment) {
-
-		List<Block> ancestorsList = new ArrayList<>();
-		ASTNode parentNode = simpleNameAtUsage.getParent();
-		while (parentNode != null) {
-			if (parentNode.getNodeType() == ASTNode.BLOCK) {
-				ancestorsList.add((Block) parentNode);
-				if (parentNode == blockOfDeclarationFragment) {
-					break;
-				}
-			}
-			parentNode = parentNode.getParent();
-		}
-		return ancestorsList;
-	}
-
 	public boolean analyze() {
-		if (declarationNode == null || declarationNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return false;
-		}
-		variableDeclarationFragment = (VariableDeclarationFragment) declarationNode;
-		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-			return false;
-		}
-		VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) variableDeclarationFragment
-			.getParent();
-		if (variableDeclarationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return false;
-		}
 
-		Block blockOfDeclarationFragment = (Block) variableDeclarationStatement.getParent();
-		simpleNameAtUsageBlockAncestors = createBlockAncestorList(simpleNameAtUsage, blockOfDeclarationFragment);
-
+		if (blockAroundLocalDeclarationFragment == null) {
+			return false;
+		}
 		if (simpleNameAtUsageBlockAncestors.isEmpty()) {
 			return false;
 		}
-
-		blockOfDeclarationFragment.accept(this);
+		blockAroundLocalDeclarationFragment.accept(this);
 		return !unsafe;
 	}
 }
