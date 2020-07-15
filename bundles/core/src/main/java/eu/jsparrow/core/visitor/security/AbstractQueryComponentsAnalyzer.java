@@ -26,7 +26,7 @@ public abstract class AbstractQueryComponentsAnalyzer {
 		this.components = components;
 		this.indexOffset = indexOffset;
 	}
-	
+
 	AbstractQueryComponentsAnalyzer(List<Expression> components) {
 		this(components, 1);
 	}
@@ -111,7 +111,7 @@ public abstract class AbstractQueryComponentsAnalyzer {
 		}
 		return parameters;
 	}
-		
+
 	protected abstract ReplaceableParameter createReplaceableParameter(int componentIndex, int parameterPosition);
 
 }
