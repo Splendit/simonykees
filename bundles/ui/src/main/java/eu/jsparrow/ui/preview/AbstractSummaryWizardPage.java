@@ -313,7 +313,6 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		sashForm.setWeights(new int[] { 1, 3 });
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
 
@@ -321,7 +320,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(), BeanProperties.values("name")); //$NON-NLS-1$
 
-		IViewerObservableValue selectedFile = ViewerProperties.singleSelection()
+		IViewerObservableValue<Object> selectedFile = ViewerProperties.singleSelection()
 			.observe(fileTableViewer);
 
 		selectedFile.addValueChangeListener(e -> {
