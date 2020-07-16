@@ -84,6 +84,22 @@ public class EscapeUserInputsInSQLQueriesNegativeASTVisitorTest extends UsesJDTU
 		assertNoChange(original);
 	}
 
-
+	/**
+	 * This test is expected to fail as soon as Bugfix SIM-1775 is solved.
+	 */
+	@Test
+	public void visit_ConditionalUserSuppliedInput_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" + 
+				"			String userName = \"userName\";\n" + 
+				"			String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + userName + \"'\";\n" + 
+				"			if (true) {\n" + 
+				"				String userPassword = \"userPassword\";\n" + 
+				"				query += \" and user_password = '\" + userPassword + \"'\";\n" + 
+				"			}\n" + 
+				TRY_EXECUTE +
+				"		}";
+		assertNoChange(original);
+	}
 
 }
