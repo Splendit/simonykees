@@ -12,7 +12,7 @@ public class UseSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		setDefaultVisitor(new UseSecureRandomASTVisitor());
+		setDefaultVisitor(new UseClassSecureRandomASTVisitor());
 		defaultFixture.addImport(java.util.Random.class.getName());
 	}
 

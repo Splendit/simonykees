@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
-public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
+public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
