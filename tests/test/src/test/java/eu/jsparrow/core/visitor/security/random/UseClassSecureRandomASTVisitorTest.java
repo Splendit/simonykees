@@ -1,14 +1,12 @@
 package eu.jsparrow.core.visitor.security.random;
 
-import java.util.Random;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
-public class UseSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
+public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
