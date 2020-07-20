@@ -318,8 +318,6 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		for (IWizardPage page : pages) {
 			if (page instanceof RenamingRulePreviewWizardPage) {
 				((RenamingRulePreviewWizardPage) page).disposeControl();
-			} else if (page instanceof RenamingRuleSummaryWizardPage) {
-				((RenamingRuleSummaryWizardPage) page).disposeCompareInputControl();
 			}
 		}
 	}

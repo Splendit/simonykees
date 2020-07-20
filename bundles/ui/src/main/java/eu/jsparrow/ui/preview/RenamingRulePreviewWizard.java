@@ -288,10 +288,6 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		}
 
 		IWizardPage currentPage = container.getCurrentPage();
-		if (currentPage instanceof RefactoringSummaryWizardPage) {
-			((RefactoringSummaryWizardPage) currentPage).disposeCompareInputControl();
-		}
-
 		getPreviousPage(currentPage);
 	}
 

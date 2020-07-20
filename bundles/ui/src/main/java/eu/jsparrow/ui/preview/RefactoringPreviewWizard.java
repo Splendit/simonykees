@@ -328,8 +328,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		if (null != getContainer()) {
 			if (getContainer().getCurrentPage() instanceof RefactoringPreviewWizardPage) {
 				((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
-			} else {
-				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
 			}
 			getPreviousPage(getContainer().getCurrentPage());
 		}

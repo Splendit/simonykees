@@ -2,15 +2,12 @@ package eu.jsparrow.ui.preview;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
-import org.eclipse.compare.internal.ComparePreferencePage;
-import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
@@ -39,13 +36,11 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +53,6 @@ import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.preview.dialog.CompareInput;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
@@ -80,9 +74,6 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	private TableViewer fileTableViewer;
 	private TableViewer ruleTableViewer;
 	private TableViewer rulesPerFileTableViewer;
-
-	private Composite compareInputContainer;
-	private Control compareInputControl;
 
 	private RefactoringSummaryWizardPageModel summaryWizardPageModel;
 
@@ -126,12 +117,6 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		rootComposite.setLayout(new GridLayout(1, false));
 	}
 
-	public void disposeCompareInputControl() {
-		if (compareInputControl != null) {
-			compareInputControl.dispose();
-		}
-	}
-
 	@Override
 	public void performHelp() {
 		SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
@@ -142,10 +127,8 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		if (visible) {
 			setStatusInfo();
 			summaryWizardPageModel.updateData();
-
 			saveStatisticsData();
 
-			createCompareInputControl();
 			// We must wait to set selection until control is visible
 			setInitialFileSelection();
 
@@ -218,7 +201,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		tableComposite.setText(Messages.SummaryWizardPage_Rules);
 		tableComposite.setLayout(new GridLayout(1, false));
 		GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
-		layoutData.heightHint = displayHeight / 4;
+		layoutData.heightHint = displayHeight / 3;
 		tableComposite.setLayoutData(layoutData);
 		ruleTableViewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
 		Table table = ruleTableViewer.getTable();
@@ -274,7 +257,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 	protected void addFilesSection() {
 		Group filesGroup = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
-		filesGroup.setLayout(new GridLayout(2, true));
+		filesGroup.setLayout(new GridLayout(1, true));
 		filesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		filesGroup.setText(Messages.SummaryWizardPage_Files);
 		SashForm sashForm = new SashForm(filesGroup, SWT.HORIZONTAL);
@@ -305,21 +288,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 				return model1.getName()
 					.compareTo(model2.getName());
 			}
-		});
-
-		compareInputContainer = new Composite(filesGroup, SWT.FILL);
-		GridLayout layout = new GridLayout();
-		layout.marginHeight = 0;
-		layout.marginWidth = 0;
-		compareInputContainer.setLayout(layout);
-		compareInputContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		compareInputContainer.setSize(SWT.DEFAULT, 1000);
-
-		CompareUIPlugin.getDefault()
-			.getPreferenceStore()
-			.setValue(ComparePreferencePage.OPEN_STRUCTURE_COMPARE, Boolean.FALSE);
-
-		
+		});		
 	}
 
 	protected void initializeDataBindings() {
@@ -338,14 +307,10 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			ChangedFilesModel selectedItem = (ChangedFilesModel) e.getObservableValue()
 				.getValue();
 
-			summaryWizardPageModel.updateRulesPerFile(selectedItem.getRules());
 			if (selectedItem != null) {
-				updateCompareInputControl(selectedItem.getName(), selectedItem.getSourceLeft(),
-						selectedItem.getSourceRight());
-				
+				summaryWizardPageModel.updateRulesPerFile(selectedItem.getRules());
 			}
 		});
-
 	}
 
 	private void setStatusInfo() {
@@ -386,46 +351,6 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 				null, UpdateValueStrategy.create(convertTimeSaved));
 	}
 
-	private void createCompareInputControl() {
-		disposeCompareInputControl();
-		Display.getDefault()
-			.syncExec(() -> {
-				CompareInput compareInput = new CompareInput("", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				updateCompareInputControl(compareInput);
-			});
-	}
-
-	private void updateCompareInputControl(String name, String left, String right) {
-		disposeCompareInputControl();
-		Display.getDefault()
-			.syncExec(() -> {
-				CompareInput compareInput = new CompareInput(name, left, right);
-				updateCompareInputControl(compareInput);
-			});
-	}
-
-	private void updateCompareInputControl(CompareInput compareInput) {
-		try {
-			PlatformUI.getWorkbench()
-				.getProgressService()
-				.run(true, true, compareInput);
-		} catch (InvocationTargetException | InterruptedException e) {
-			logger.error(e.getMessage(), e);
-		}
-		createControlsIfNoneExist(compareInput);
-	}
-
-	private void createControlsIfNoneExist(CompareInput compareInput) {
-		// Condition fixes SIM-902
-		if (compareInputContainer.getChildren().length == 0) {
-			compareInputControl = compareInput.createContents(compareInputContainer);
-			compareInputControl.setSize(compareInputControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
-			compareInputControl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			compareInputControl.setEnabled(enabledFinishButton);
-			compareInputContainer.layout();
-		}
-	}
-
 	private void setInitialFileSelection() {
 		Object item = fileTableViewer.getElementAt(0);
 		if (item != null) {
@@ -438,5 +363,4 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
 				BeanProperties.values("name", "times", "timeSaved")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
-
 }

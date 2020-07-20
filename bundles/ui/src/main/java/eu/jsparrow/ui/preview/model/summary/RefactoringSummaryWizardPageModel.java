@@ -228,11 +228,11 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	}
 
 	public void updateRulesPerFile(List<String> rules) {
-		List<RulesPerFileModel> rulesPerFile = rules.stream()
+		List<RulesPerFileModel> newRules = rules.stream()
 				.map(RulesPerFileModel::new)
 				.collect(Collectors.toList());
-		rulesPerFile.clear();
-		rulesPerFile.addAll(rulesPerFile);
+		this.rulesPerFile.clear();
+		this.rulesPerFile.addAll(newRules);
 		
 	}
 }
