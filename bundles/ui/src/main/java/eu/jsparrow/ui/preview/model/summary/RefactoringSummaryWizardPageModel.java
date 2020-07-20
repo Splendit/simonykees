@@ -1,14 +1,18 @@
 package eu.jsparrow.ui.preview.model.summary;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
@@ -35,8 +39,8 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	private Map<RefactoringState, String> finalSource = new HashMap<>();
 
 	private IObservableList<RuleTimesModel> ruleTimes = new WritableList<>();
-
 	private IObservableList<ChangedFilesModel> changedFiles = new WritableList<>();
+	private IObservableList<RulesPerFileModel> rulesPerFile = new WritableList<>();
 
 	private RefactoringPreviewWizardModel wizardModel;
 
@@ -61,6 +65,10 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 
 	public IObservableList<RuleTimesModel> getRuleTimes() {
 		return ruleTimes;
+	}
+	
+	public IObservableList<RulesPerFileModel> getRulesPerFile() {
+		return rulesPerFile;
 	}
 
 	public Integer getIssuesFixed() {
@@ -94,6 +102,7 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		refactoringPipeline.putAllRefactoringStateSources(finalSource);
 		addModifiedFiles();
 		addRuleTimes();
+		addRulesPerFile();
 		/*
 		 * Set initial values to something big so labels have enough size This
 		 * is easiert hat resizing/layouting labels dynamically based on their
@@ -102,6 +111,14 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		setRunDuration(StopWatchUtil.getTime());
 		setIssuesFixed(99999);
 		setTimeSaved(Duration.ofSeconds(999999999));
+	}
+
+	private void addRulesPerFile() {
+		ChangedFilesModel firstFile = changedFiles.get(0);
+		firstFile.getRules().forEach(rule -> {
+			rulesPerFile.add(new RulesPerFileModel(rule));
+		});
+		
 	}
 
 	private void addModifiedFiles() {
@@ -166,7 +183,16 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		String fileName = String.format("%s - %s", compUnit.getElementName(), getPathString(compUnit)); //$NON-NLS-1$
 		String left = initialSource.get(state) == null ? "" : initialSource.get(state); //$NON-NLS-1$
 		String right = finalSource.get(state) == null ? "" : finalSource.get(state); //$NON-NLS-1$
-		return new ChangedFilesModel(fileName, left, right);
+		List<RefactoringRule> rules = refactoringPipeline.getRules();
+		List<String> rulesWithChanges = new ArrayList<>();
+		for(RefactoringRule rule : rules) {
+			DocumentChange change = state.getChangeIfPresent(rule);
+			if(change != null) {
+				rulesWithChanges.add(rule.getRuleDescription().getName());
+			}
+		}
+		
+		return new ChangedFilesModel(fileName, left, right, rulesWithChanges);
 	}
 
 	private void updateIssuesFixed() {
@@ -191,11 +217,22 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	private void updateChangedFiles() {
 		changedFiles.clear();
 		finalSource.clear();
+		rulesPerFile.clear();
 		refactoringPipeline.putAllRefactoringStateSources(finalSource);
 		addModifiedFiles();
+		addRulesPerFile();
 	}
 
 	public RefactoringPipeline getRefactoringPipeline() {
 		return refactoringPipeline;
+	}
+
+	public void updateRulesPerFile(List<String> rules) {
+		List<RulesPerFileModel> rulesPerFile = rules.stream()
+				.map(RulesPerFileModel::new)
+				.collect(Collectors.toList());
+		rulesPerFile.clear();
+		rulesPerFile.addAll(rulesPerFile);
+		
 	}
 }

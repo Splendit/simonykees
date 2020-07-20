@@ -63,6 +63,7 @@ import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
+import eu.jsparrow.ui.preview.model.summary.RulesPerFileModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 @SuppressWarnings({ "restriction" })
@@ -73,17 +74,14 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	private Composite rootComposite;
 
 	private CLabel labelExecutionTime;
-
 	private CLabel labelIssuesFixed;
-
 	private CLabel labelHoursSaved;
 
 	private TableViewer fileTableViewer;
-
 	private TableViewer ruleTableViewer;
+	private TableViewer rulesPerFileTableViewer;
 
 	private Composite compareInputContainer;
-
 	private Control compareInputControl;
 
 	private RefactoringSummaryWizardPageModel summaryWizardPageModel;
@@ -276,12 +274,12 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 	protected void addFilesSection() {
 		Group filesGroup = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
-		filesGroup.setLayout(new GridLayout(1, false));
-		filesGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
+		filesGroup.setLayout(new GridLayout(2, true));
+		filesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		filesGroup.setText(Messages.SummaryWizardPage_Files);
-		SashForm sashForm = new SashForm(filesGroup, SWT.VERTICAL);
+		SashForm sashForm = new SashForm(filesGroup, SWT.HORIZONTAL);
 		sashForm.setLayout(new GridLayout());
-		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
+		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		sashForm.setBackground(sashForm.getDisplay()
 			.getSystemColor(SWT.COLOR_GRAY));
 
@@ -298,19 +296,30 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			}
 		});
 
-		compareInputContainer = new Composite(sashForm, SWT.FILL);
+		rulesPerFileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
+		rulesPerFileTableViewer.setComparator(new ViewerComparator() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				RulesPerFileModel model1 = (RulesPerFileModel) e1;
+				RulesPerFileModel model2 = (RulesPerFileModel) e2;
+				return model1.getName()
+					.compareTo(model2.getName());
+			}
+		});
+
+		compareInputContainer = new Composite(filesGroup, SWT.FILL);
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
 		compareInputContainer.setLayout(layout);
-		compareInputContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
+		compareInputContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		compareInputContainer.setSize(SWT.DEFAULT, 1000);
 
 		CompareUIPlugin.getDefault()
 			.getPreferenceStore()
 			.setValue(ComparePreferencePage.OPEN_STRUCTURE_COMPARE, Boolean.FALSE);
 
-		sashForm.setWeights(new int[] { 1, 3 });
+		
 	}
 
 	protected void initializeDataBindings() {
@@ -322,13 +331,18 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 		IViewerObservableValue<Object> selectedFile = ViewerProperties.singleSelection()
 			.observe(fileTableViewer);
+		ViewerSupport.bind(rulesPerFileTableViewer, summaryWizardPageModel.getRulesPerFile(), BeanProperties.values("name")); //$NON-NLS-1$
+		
 
 		selectedFile.addValueChangeListener(e -> {
 			ChangedFilesModel selectedItem = (ChangedFilesModel) e.getObservableValue()
 				.getValue();
+
+			summaryWizardPageModel.updateRulesPerFile(selectedItem.getRules());
 			if (selectedItem != null) {
 				updateCompareInputControl(selectedItem.getName(), selectedItem.getSourceLeft(),
 						selectedItem.getSourceRight());
+				
 			}
 		});
 
@@ -406,7 +420,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		if (compareInputContainer.getChildren().length == 0) {
 			compareInputControl = compareInput.createContents(compareInputContainer);
 			compareInputControl.setSize(compareInputControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
-			compareInputControl.setLayoutData(new GridData(GridData.FILL_BOTH));
+			compareInputControl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			compareInputControl.setEnabled(enabledFinishButton);
 			compareInputContainer.layout();
 		}
@@ -420,6 +434,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	}
 
 	protected void initializeRuleTableDataBindings() {
+		
 		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
 				BeanProperties.values("name", "times", "timeSaved")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
