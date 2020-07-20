@@ -211,11 +211,17 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		SummaryPageRuleTableViewerComparator comparator = new SummaryPageRuleTableViewerComparator();
 		ruleTableViewer.setComparator(comparator);
 
-		TableViewerColumn colRuleName = createTableViewerColumn(Messages.SummaryWizardPage_Rule, 0,
+		TableViewerColumn colRuleName = createTableViewerColumn(Messages.SummaryWizardPage_Rule,
+				Messages.AbstractSummaryWizardPage_ruleTableViewerRuleToolTipText,
+				0,
 				comparator);
-		TableViewerColumn colTimes = createTableViewerColumn(Messages.SummaryWizardPage_TimesApplied, 1,
+		TableViewerColumn colTimes = createTableViewerColumn(Messages.SummaryWizardPage_TimesApplied,
+				Messages.AbstractSummaryWizardPage_ruleTableViewerTimesAppliedToolTipText,
+				1,
 				comparator);
-		TableViewerColumn colTimeSaved = createTableViewerColumn(Messages.SummaryWizardPage_TimeSaved, 2,
+		TableViewerColumn colTimeSaved = createTableViewerColumn(Messages.SummaryWizardPage_TimeSaved,
+				Messages.AbstractSummaryWizardPage_ruleTableViewerTimeSavedToolTipText,
+				2,
 				comparator);
 
 		TableColumnLayout tableLayout = new TableColumnLayout();
@@ -226,13 +232,14 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 	}
 
-	private TableViewerColumn createTableViewerColumn(String title, int colNumber,
+	private TableViewerColumn createTableViewerColumn(String title, String toolTipText, int colNumber,
 			SummaryPageRuleTableViewerComparator comparator) {
 		TableViewerColumn tableViewerColumn = new TableViewerColumn(ruleTableViewer, SWT.NONE);
 		TableColumn column = tableViewerColumn.getColumn();
 
 		column.setResizable(false);
 		column.setText(title);
+		column.setToolTipText(toolTipText);
 		column.addSelectionListener(
 				getSelectionAdapterForRulesTableViewer(column, colNumber, comparator));
 
@@ -267,6 +274,9 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			.getSystemColor(SWT.COLOR_GRAY));
 
 		fileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
+		Table fileTable = fileTableViewer.getTable();
+		fileTable.setHeaderVisible(true);
+		fileTable.setLinesVisible(true);
 
 		// sort files alphabetically (SIM-922)
 		fileTableViewer.setComparator(new ViewerComparator() {
@@ -278,8 +288,16 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 					.compareTo(model2.getName());
 			}
 		});
+		TableViewerColumn filePathCol = new TableViewerColumn(fileTableViewer, SWT.NONE);
+		TableColumn pathColumn = filePathCol.getColumn();
+		pathColumn.setWidth(200);
+		pathColumn.setText(Messages.AbstractSummaryWizardPage_fileTableViewerTitle);
+		pathColumn.setToolTipText(Messages.AbstractSummaryWizardPage_fileTableViewerToolTipText);
 
 		rulesPerFileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
+		Table table = rulesPerFileTableViewer.getTable();
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
 		rulesPerFileTableViewer.setComparator(new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
@@ -288,7 +306,12 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 				return model1.getName()
 					.compareTo(model2.getName());
 			}
-		});		
+		});
+		TableViewerColumn ruleNameCol = new TableViewerColumn(rulesPerFileTableViewer, SWT.NONE);
+		TableColumn column = ruleNameCol.getColumn();
+		column.setWidth(200);
+		column.setText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerTitle);
+		column.setToolTipText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText);
 	}
 
 	protected void initializeDataBindings() {
@@ -300,8 +323,8 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 		IViewerObservableValue<Object> selectedFile = ViewerProperties.singleSelection()
 			.observe(fileTableViewer);
-		ViewerSupport.bind(rulesPerFileTableViewer, summaryWizardPageModel.getRulesPerFile(), BeanProperties.values("name")); //$NON-NLS-1$
-		
+		ViewerSupport.bind(rulesPerFileTableViewer, summaryWizardPageModel.getRulesPerFile(),
+				BeanProperties.values("name")); //$NON-NLS-1$
 
 		selectedFile.addValueChangeListener(e -> {
 			ChangedFilesModel selectedItem = (ChangedFilesModel) e.getObservableValue()
@@ -359,7 +382,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	}
 
 	protected void initializeRuleTableDataBindings() {
-		
+
 		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
 				BeanProperties.values("name", "times", "timeSaved")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

@@ -23,6 +23,16 @@ public class Messages extends NLS {
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
+	public static String AbstractSummaryWizardPage_fileTableViewerTitle;
+	public static String AbstractSummaryWizardPage_fileTableViewerToolTipText;
+	public static String AbstractSummaryWizardPage_rulesPerFileTableViewerTitle;
+	public static String AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText;
+
+	public static String AbstractSummaryWizardPage_ruleTableViewerRuleToolTipText;
+
+	public static String AbstractSummaryWizardPage_ruleTableViewerTimesAppliedToolTipText;
+
+	public static String AbstractSummaryWizardPage_ruleTableViewerTimeSavedToolTipText;
 	public static String ActivationControl_acitvationSuccessfulTitle;
 	public static String ActivationControl_activateButton;
 	public static String ActivationControl_activationFailedText;
