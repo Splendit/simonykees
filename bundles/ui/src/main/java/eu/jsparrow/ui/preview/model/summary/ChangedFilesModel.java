@@ -1,6 +1,5 @@
 package eu.jsparrow.ui.preview.model.summary;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import eu.jsparrow.ui.preview.model.BaseModel;
@@ -8,19 +7,16 @@ import eu.jsparrow.ui.preview.model.BaseModel;
 public class ChangedFilesModel extends BaseModel {
 
 	private String name;
+	/*
+	 * FIXME We do not need sourceLeft and sourceRight unless we show a summary diff
+	 * view in the summary page. The summary diff view was removed in SIM-1735.
+	 */
 	private String sourceLeft;
 	private String sourceRight;
 	private List<String> rules;
 
 	public ChangedFilesModel(String name) {
 		this.name = name;
-	}
-
-	public ChangedFilesModel(String name, String sourceLeft, String sourceRight) {
-		this(name);
-		this.sourceLeft = sourceLeft;
-		this.sourceRight = sourceRight;
-		this.rules = new ArrayList<>();
 	}
 	
 	public ChangedFilesModel(String name, String sourceLeft, String sourceRight, List<String> rules) {

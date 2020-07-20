@@ -16,6 +16,7 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
@@ -31,6 +32,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -41,6 +44,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +60,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
+import eu.jsparrow.ui.preview.model.summary.FileViewerFilter;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
 import eu.jsparrow.ui.preview.model.summary.RulesPerFileModel;
 import eu.jsparrow.ui.util.ResourceHelper;
@@ -201,7 +206,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		tableComposite.setText(Messages.SummaryWizardPage_Rules);
 		tableComposite.setLayout(new GridLayout(1, false));
 		GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
-		layoutData.heightHint = displayHeight / 3;
+		layoutData.heightHint = displayHeight * 2 / 7;
 		tableComposite.setLayoutData(layoutData);
 		ruleTableViewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
 		Table table = ruleTableViewer.getTable();
@@ -267,6 +272,19 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		filesGroup.setLayout(new GridLayout(1, true));
 		filesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		filesGroup.setText(Messages.SummaryWizardPage_Files);
+		
+		Composite searchGroup = new Composite(filesGroup, SWT.NONE);
+		searchGroup.setLayout(new GridLayout(2, false));
+		GridData searchGroupGridData = new GridData(SWT.LEFT, SWT.FILL, false, false);
+		searchGroupGridData.widthHint = 600;
+		searchGroup.setLayoutData(searchGroupGridData);
+		
+		Label searchLabel = new Label(searchGroup, SWT.NONE);
+		searchLabel.setText(Messages.AbstractSummaryWizardPage_searchLabel);
+		final Text searchText = new Text(searchGroup, SWT.BORDER | SWT.SEARCH);
+		searchText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		searchText.setToolTipText(Messages.AbstractSummaryWizardPage_searchBoxToolTipText);
+		
 		SashForm sashForm = new SashForm(filesGroup, SWT.HORIZONTAL);
 		sashForm.setLayout(new GridLayout());
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -277,6 +295,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		Table fileTable = fileTableViewer.getTable();
 		fileTable.setHeaderVisible(true);
 		fileTable.setLinesVisible(true);
+		fileTable.setToolTipText(Messages.AbstractSummaryWizardPage_fileTableViewerToolTipText);
 
 		// sort files alphabetically (SIM-922)
 		fileTableViewer.setComparator(new ViewerComparator() {
@@ -293,11 +312,23 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		pathColumn.setWidth(200);
 		pathColumn.setText(Messages.AbstractSummaryWizardPage_fileTableViewerTitle);
 		pathColumn.setToolTipText(Messages.AbstractSummaryWizardPage_fileTableViewerToolTipText);
+		
+		FileViewerFilter filter = new FileViewerFilter();
+		searchText.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				filter.setSearchString(searchText.getText());
+				fileTableViewer.refresh();
+				setInitialFileSelection();
+			}
+		});
+		fileTableViewer.addFilter(filter);
 
 		rulesPerFileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
 		Table table = rulesPerFileTableViewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
+		table.setToolTipText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText);
 		rulesPerFileTableViewer.setComparator(new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
@@ -344,31 +375,30 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		StatusUtil.applyToStatusLine(this, statusInfo);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initializeHeaderDataBindings(DataBindingContext bindingContext) {
-		IConverter convertRunDuration = IConverter.create(Long.class, String.class,
+		IConverter<Object, String> convertRunDuration = IConverter.create(Long.class, String.class,
 				x -> DurationFormatUtil.formatRunDuration((Long) x));
-		IObservableValue observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
+		IObservableValue<String> observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
 			.observe(labelExecutionTime);
-		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
+		IObservableValue<Object> executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
 				executionTimeSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertRunDuration));
 
-		IConverter convertIssuesFixed = IConverter.create(Integer.class, String.class,
+		IConverter<Object, String> convertIssuesFixed = IConverter.create(Integer.class, String.class,
 				x -> (String.format(Messages.SummaryWizardPageModel_IssuesFixed, (Integer) x)));
-		IObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
+		ISWTObservableValue<String> observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
 			.observe(labelIssuesFixed);
-		IObservableValue issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed") //$NON-NLS-1$
+		IObservableValue<Object> issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelIssuesFixedObserveWidget,
 				issuesFixedSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertIssuesFixed));
 
-		IConverter convertTimeSaved = IConverter.create(Duration.class, String.class, x -> String
+		IConverter<Object, String> convertTimeSaved = IConverter.create(Duration.class, String.class, x -> String
 			.format(Messages.DurationFormatUtil_TimeSaved, DurationFormatUtil.formatTimeSaved((Duration) x)));
-		IObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
+		ISWTObservableValue<String> observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
 			.observe(labelHoursSaved);
-		IObservableValue hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("timeSaved") //$NON-NLS-1$
+		IObservableValue<Object> hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("timeSaved") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue,
 				null, UpdateValueStrategy.create(convertTimeSaved));
