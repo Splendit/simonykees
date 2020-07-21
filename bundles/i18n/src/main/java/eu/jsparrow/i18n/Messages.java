@@ -19,6 +19,7 @@ public class Messages extends NLS {
 	public static String AbstractSelectRulesWizardPage_freemiumRegirementsMessage;
 	public static String AbstractSelectRulesWizardPage_neitherRegisteredNorLicensed_statusInfoMessage;
 	public static String AbstractSelectRulesWizardPage_notOnlyFreemiumSelected_statusInfoMessage;
+	public static String AbstractSelectRulesWizardPage_seeDocumentation;
 	public static String AbstractSelectRulesWizardPage_warning_RulesInProfileNotApplicable;
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
