@@ -105,6 +105,7 @@ public class Messages extends NLS {
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputLabel;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputText;
 	public static String ConfigureProfileSelectRulesWizardPageModel_error_NameExists;
+	public static String ConfigureProfileSelectRulesWIzardPageModel_error_nameReserved;
 	public static String ConfigureRenameFieldsRuleWizard_WizardTitle_RenameFields;
 	public static String DateDeprecatedRule_description;
 	public static String DateDeprecatedRule_name;

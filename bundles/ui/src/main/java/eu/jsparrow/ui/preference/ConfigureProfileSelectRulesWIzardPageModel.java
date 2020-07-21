@@ -50,14 +50,17 @@ public class ConfigureProfileSelectRulesWIzardPageModel extends AbstractSelectRu
 		StatusInfo status = new StatusInfo();
 		// if name is changed and already exists in profiles list it can not be
 		// used, name has to be unique
-		if (SimonykeesPreferenceManager.getAllProfileIds()
-			.contains(StringUtils.trim(name))
-				&& !StringUtils.trim(name)
-					.equals(this.name)) {
+		String value = StringUtils.trim(name);
+		List<String> existingProfiles = SimonykeesPreferenceManager.getAllProfileIds();
+		String customProfileLabel = Messages.SelectRulesWizardPage_CustomProfileLabel;
+		if (existingProfiles.contains(value) && !value.equals(this.name)) {
 			status.setError(Messages.ConfigureProfileSelectRulesWizardPageModel_error_NameExists);
 			this.newName = null;
+		} else if(StringUtils.equals(value, customProfileLabel)) {
+			status.setError(Messages.ConfigureProfileSelectRulesWIzardPageModel_error_nameReserved);
+			this.newName = null;
 		} else {
-			this.newName = StringUtils.trim(name);
+			this.newName = value;
 		}
 		return status;
 	}
