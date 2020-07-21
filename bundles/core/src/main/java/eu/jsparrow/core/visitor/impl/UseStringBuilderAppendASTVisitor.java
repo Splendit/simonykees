@@ -38,6 +38,7 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 	private static final String APPEND = "append"; //$NON-NLS-1$
 
 	private static final int MIN_OPERANDS = 3;
+	private static final int MAX_OPERANDS = 200;
 
 	@Override
 	public boolean visit(NormalAnnotation annotation) {
@@ -64,7 +65,7 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 		}
 
 		List<Expression> operands = findOperands(infixExpression);
-		if (operands.size() < MIN_OPERANDS) {
+		if (operands.size() < MIN_OPERANDS || operands.size() > MAX_OPERANDS) {
 			/*
 			 * If there are less than three operands, it does not make much
 			 * sense to introduce an instance of a StringBuilder.
