@@ -607,17 +607,81 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	@Test
 	public void visit_executeAfterExecuteQuery_shouldNotTransform() throws Exception {
 		String original = "" +
-				"			Connection connection = null;\n" + 
-				"			Statement statement;\n" + 
-				"			String departmentId1 = \"40\";\n" + 
-				"			String query = \"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" + 
-				"			String query2 = \"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n" + 
-				"			try {\n" + 
-				"				statement = connection.createStatement();\n" + 
-				"				statement.executeQuery(query);\n" + 
-				"				statement.execute(query2);\n" + 
-				"			} catch (Exception e) {\n" + 
+				"			Connection connection = null;\n" +
+				"			Statement statement;\n" +
+				"			String departmentId1 = \"40\";\n" +
+				"			String query = \"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n"
+				+
+				"			String query2 = \"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\";\n"
+				+
+				"			try {\n" +
+				"				statement = connection.createStatement();\n" +
+				"				statement.executeQuery(query);\n" +
+				"				statement.execute(query2);\n" +
+				"			} catch (Exception e) {\n" +
 				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ConditionalPlusAssign_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		Connection connection = null;\n" +
+				"		String query = \"SELECT employee_id, first_name FROM employee WHERE\";\n" +
+				"		if(true){\n" +
+				"			String departmentId1 = \"40\";\n" +
+				"			query += \" department_id ='\" + departmentId1 + \"'\";\n" +
+				"		}			\n" +
+				"		try {\n" +
+				"			Statement statement = connection.createStatement();\n" +
+				"			ResultSet resultSet = statement.executeQuery(query);\n" +
+				"			while (resultSet.next()) {\n" +
+				"				String firstName = resultSet.getString(2);\n" +
+				"			}\n" +
+				"		} catch (Exception e) {\n" +
+				"\n" +
+				"		}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ConditionalPlusAssignNotWithinBlock_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		Connection connection = null;\n" +
+				"		String query = \"SELECT employee_id, first_name FROM employee WHERE\";\n" +
+				"		String departmentId1 = \"40\";\n" +
+				"		if (true)\n" +
+				"			query += \" department_id ='\" + departmentId1 + \"'\";\n" +
+				"		try {\n" +
+				"			Statement statement = connection.createStatement();\n" +
+				"			ResultSet resultSet = statement.executeQuery(query);\n" +
+				"			while (resultSet.next()) {\n" +
+				"				String firstName = resultSet.getString(2);\n" +
+				"			}\n" +
+				"		} catch (Exception e) {\n" +
+				"\n" +
+				"		}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_AssignmentAsOtherAssignmentLeftHandSide_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		Connection connection = null;\n" +
+				"		String departmentId1 = \"40\";\n" +
+				"		String query0; \n" +
+				"		String query1; \n" +
+				"		query0 = query1 = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\" + departmentId1 + \"'\";\n"
+				+
+				"		try {\n" +
+				"			Statement statement = connection.createStatement();\n" +
+				"			ResultSet resultSet = statement.executeQuery(query1);\n" +
+				"			while (resultSet.next()) {\n" +
+				"				String firstName = resultSet.getString(2);\n" +
+				"			}\n" +
+				"		} catch (Exception e) {\n" +
+				"\n" +
+				"		}";
 		assertNoChange(original);
 	}
 }

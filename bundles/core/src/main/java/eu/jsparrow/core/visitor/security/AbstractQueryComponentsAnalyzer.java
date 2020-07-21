@@ -26,7 +26,7 @@ public abstract class AbstractQueryComponentsAnalyzer {
 		this.components = components;
 		this.indexOffset = indexOffset;
 	}
-	
+
 	AbstractQueryComponentsAnalyzer(List<Expression> components) {
 		this(components, 1);
 	}

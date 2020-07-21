@@ -178,4 +178,66 @@ public class UseParameterizedLDAPQueryASTVisitorTest extends UsesSimpleJDTUnitFi
 		assertChange(original, expected);
 	}
 
+	@Test
+	public void visit_FilterSameNameAsLocalClass_shouldTransform() throws Exception {
+		String original = "" +
+				"			String user = null;\n" + 
+				"			String pass = null;\n" + 
+				"			DirContext ctx = null;			\n" + 
+				"			String filter;\n" + 
+				"			class filter {}\n" + 
+				"			filter  = \"(&(uid=\" + user + \")(userPassword=\" + pass + \"))\";\n" + 
+				"			try {\n" + 
+				"				NamingEnumeration<SearchResult> results = ctx.search(\"ou=system\", filter, new SearchControls());\n" + 
+				"			} catch (NamingException e) {\n" + 
+				"				e.printStackTrace();\n" + 
+				"			}";
+		String expected = "" +
+				"			String user = null;\n" + 
+				"			String pass = null;\n" + 
+				"			DirContext ctx = null;			\n" + 
+				"			String filter;\n" + 
+				"			class filter {}\n" + 
+				"			filter  = \"(&(uid={0}\" + \")(userPassword={1}\" + \"))\";\n" + 
+				"			try {\n" + 
+				"				NamingEnumeration<SearchResult> results = ctx.search(\"ou=system\", filter, new Object[] { user, pass }, new SearchControls());\n" + 
+				"			} catch (NamingException e) {\n" + 
+				"				e.printStackTrace();\n" + 
+				"			}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_FilterSameNameAsLocalClassField_shouldTransform() throws Exception {
+		String original = "" +
+				"			String user = null;\n" + 
+				"			String pass = null;\n" + 
+				"			DirContext ctx = null;			\n" + 
+				"			String filter;\n" + 
+				"			class LocalClass {\n" + 
+				"				String filter;\n" + 
+				"			}			\n" + 
+				"			filter  = \"(&(uid=\" + user + \")(userPassword=\" + pass + \"))\";\n" + 
+				"			try {\n" + 
+				"				NamingEnumeration<SearchResult> results = ctx.search(\"ou=system\", filter, new SearchControls());\n" + 
+				"			} catch (NamingException e) {\n" + 
+				"				e.printStackTrace();\n" + 
+				"			}";
+		String expected = "" +
+				"			String user = null;\n" + 
+				"			String pass = null;\n" + 
+				"			DirContext ctx = null;			\n" + 
+				"			String filter;\n" + 
+				"			class LocalClass {\n" + 
+				"				String filter;\n" + 
+				"			}			\n" + 
+				"			filter  = \"(&(uid={0}\" + \")(userPassword={1}\" + \"))\";\n" + 
+				"			try {\n" + 
+				"				NamingEnumeration<SearchResult> results = ctx.search(\"ou=system\", filter, new Object[] { user, pass }, new SearchControls());\n" + 
+				"			} catch (NamingException e) {\n" + 
+				"				e.printStackTrace();\n" + 
+				"			}";
+		assertChange(original, expected);
+	}
+
 }

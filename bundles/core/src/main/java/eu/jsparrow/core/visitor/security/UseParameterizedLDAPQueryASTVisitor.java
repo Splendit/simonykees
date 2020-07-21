@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -19,16 +20,16 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
  * filter by parameterizing, for example:
  * 
  * <pre>
- * 	String filter = "(&(uid=" + user + ")(userPassword=" + pass + "))";
- * 	NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new SearchControls());
+ * String filter = "(&(uid=" + user + ")(userPassword=" + pass + "))";
+ * NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new SearchControls());
  * </pre>
  * 
  * is transformed to:
  * 
  * <pre>
- * 	String filter = "(&(uid={0})(userPassword={1}))";
- * 	NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new String[] { user, pass },
- * 			new SearchControls());
+ * String filter = "(&(uid={0})(userPassword={1}))";
+ * NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new String[] { user, pass },
+ * 		new SearchControls());
  * </pre>
  * 
  * @since 3.19.0
@@ -74,8 +75,13 @@ public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryAST
 			return componentStore.getComponents();
 		}
 
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(filterExpression);
-		if (sqlVariableVisitor == null) {
+		if (filterExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return Collections.emptyList();
+		}
+		SimpleName filterSimpleName = (SimpleName) filterExpression;
+
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = new SqlVariableAnalyzerVisitor(filterSimpleName);
+		if (!sqlVariableVisitor.analyze()) {
 			return Collections.emptyList();
 		}
 

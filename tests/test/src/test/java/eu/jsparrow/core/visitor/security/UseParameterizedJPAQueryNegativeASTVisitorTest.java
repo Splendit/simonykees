@@ -160,6 +160,9 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 		assertNoChange(original);
 	}
 
+	/**
+	 * This test is expected to fail as soon as Bugfix SIM-1782 has been solved.
+	 */
 	@Test
 	public void visit_CreateQueryWithJPQLVariable_shouldNotTransform() throws Exception {
 		String original = "" +
