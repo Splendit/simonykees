@@ -274,14 +274,13 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		filesGroup.setText(Messages.SummaryWizardPage_Files);
 		
 		Composite searchGroup = new Composite(filesGroup, SWT.NONE);
-		searchGroup.setLayout(new GridLayout(2, false));
+		searchGroup.setLayout(new GridLayout(1, false));
 		GridData searchGroupGridData = new GridData(SWT.LEFT, SWT.FILL, false, false);
 		searchGroupGridData.widthHint = 600;
 		searchGroup.setLayoutData(searchGroupGridData);
 		
-		Label searchLabel = new Label(searchGroup, SWT.NONE);
-		searchLabel.setText(Messages.AbstractSummaryWizardPage_searchLabel);
-		final Text searchText = new Text(searchGroup, SWT.BORDER | SWT.SEARCH);
+		final Text searchText = new Text(searchGroup, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		searchText.setMessage(Messages.AbstractSummaryWizardPage_searchLabel);
 		searchText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		searchText.setToolTipText(Messages.AbstractSummaryWizardPage_searchBoxToolTipText);
 		
