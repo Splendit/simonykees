@@ -268,9 +268,9 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 								 */
 								boolean unsafe = unnassignedReferences.stream()
 									.map(SimpleName::getIdentifier)
-									.anyMatch(name -> !assignedVariables.stream()
+									.anyMatch(name -> assignedVariables.stream()
 										.map(SimpleName::getIdentifier)
-										.anyMatch(name::equals));
+										.noneMatch(name::equals));
 								if (unsafe) {
 									return true;
 								}
