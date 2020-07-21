@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.rule.impl.FunctionalInterfaceRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-@SuppressWarnings("nls")
 public class FunctionalInterfaceRuleTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE1 = "TestFunctionalInterfaceRule.java";
