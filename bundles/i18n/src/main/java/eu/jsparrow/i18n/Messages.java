@@ -455,6 +455,8 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_profileSettingsGroupTitle;
 	public static String SimonykeesPreferencePage_removeProfileButtonLabel;
 	public static String SimonykeesPreferencePage_Replace;
+	public static String SimonykeesPreferencePage_reservedProfileNameError;
+
 	public static String SimonykeesPreferencePage_resolvePackagesRecursivelyLabel;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_SelectedFileDoesNotExist;

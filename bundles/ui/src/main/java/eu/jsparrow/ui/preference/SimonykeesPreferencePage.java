@@ -467,11 +467,18 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		try {
 			YAMLConfig config = YAMLConfigUtil.loadConfiguration(file);
 			int importedProfileCount = 0;
+			String customProfileLabel = Messages.SelectRulesWizardPage_CustomProfileLabel;
 
 			for (YAMLProfile profile : config.getProfiles()) {
 				List<String> currentProfileNames = SimonykeesPreferenceManager.getAllProfileIds();
 				ProfileImportMode mode = ProfileImportMode.IMPORT;
 
+				if(customProfileLabel.equals(profile.getName())) {
+					String message = NLS.bind(Messages.SimonykeesPreferencePage_reservedProfileNameError, customProfileLabel);
+					logger.error(message);
+					SimonykeesMessageDialog.openMessageDialog(getShell(), message,  MessageDialog.ERROR);
+					return;
+				}
 				Optional<SimonykeesProfile> optCurrentProfile = SimonykeesPreferenceManager
 					.getProfileFromName(profile.getName());
 				// prevent the default profile from being replaced
@@ -538,7 +545,6 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		} catch (YAMLConfigException e) {
 			logger.error(e.getMessage(), e);
 			SimonykeesMessageDialog.openMessageDialog(getShell(), e.getMessage(), MessageDialog.ERROR);
-			return;
 		}
 	}
 
