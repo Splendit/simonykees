@@ -32,6 +32,14 @@ public class RemoveToStringOnStringASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		String expected = "Consumer<String> consumer = (String value) -> this.getClass().getName();";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_toStringAsConsumerBodyWithNewInstanceExpression_shouldTransform() throws Exception {
+		fixture.addImport(java.util.function.Consumer.class.getName());
+		String original = "Consumer<String> consumer = (String value) -> new String(value).toString();";
+		String expected = "Consumer<String> consumer = (String value) -> new String(value);";
+		assertChange(original, expected);
+	}
 
 	@Test
 	public void visit_toStringAsSupplierBody_shouldTransform() throws Exception {
