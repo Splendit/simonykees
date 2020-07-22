@@ -437,6 +437,23 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		return fileDialog.open();
 	}
 
+	private boolean isValidFile(File file) {
+		if (!file.exists()) {
+			logger.error(Messages.SimonykeesPreferencePage_SelectedFileDoesNotExist);
+			SimonykeesMessageDialog.openMessageDialog(getShell(),
+					Messages.SimonykeesPreferencePage_SelectedFileDoesNotExist, MessageDialog.ERROR); // $NON-NLS-1$
+			return false;
+		}
+
+		if (file.isDirectory()) {
+			logger.error(Messages.SimonykeesPreferencePage_SelectedPathIsDirectory);
+			SimonykeesMessageDialog.openMessageDialog(getShell(),
+					Messages.SimonykeesPreferencePage_SelectedPathIsDirectory, MessageDialog.ERROR); // $NON-NLS-1$
+			return false;
+		}
+		return true;
+	}
+
 	/**
 	 * imports profiles from a config file
 	 */
@@ -449,18 +466,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		}
 
 		File file = new File(path);
-
-		if (!file.exists()) {
-			logger.error(Messages.SimonykeesPreferencePage_SelectedFileDoesNotExist);
-			SimonykeesMessageDialog.openMessageDialog(getShell(),
-					Messages.SimonykeesPreferencePage_SelectedFileDoesNotExist, MessageDialog.ERROR); // $NON-NLS-1$
-			return;
-		}
-
-		if (file.isDirectory()) {
-			logger.error(Messages.SimonykeesPreferencePage_SelectedPathIsDirectory);
-			SimonykeesMessageDialog.openMessageDialog(getShell(),
-					Messages.SimonykeesPreferencePage_SelectedPathIsDirectory, MessageDialog.ERROR); // $NON-NLS-1$
+		if (!isValidFile(file)) {
 			return;
 		}
 
