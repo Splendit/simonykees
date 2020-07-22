@@ -454,6 +454,30 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		return true;
 	}
 
+	private boolean isValidProfileName(String profileName) {
+		String customProfileLabel = Messages.SelectRulesWizardPage_CustomProfileLabel;
+		if (customProfileLabel.equals(profileName)) {
+			String message = NLS.bind(Messages.SimonykeesPreferencePage_reservedProfileNameError, customProfileLabel);
+			logger.error(message);
+			SimonykeesMessageDialog.openMessageDialog(getShell(), message, MessageDialog.ERROR);
+			return false;
+		}
+
+		// prevent the default profile from being replaced
+		boolean isBuiltIn = SimonykeesPreferenceManager.getProfileFromName(profileName)
+			.filter(SimonykeesProfile::isBuiltInProfile)
+			.map(builtIn -> true)
+			.orElse(false);
+		if (isBuiltIn) {
+			String message = NLS.bind(Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable, profileName);
+			logger.error(message);
+			SimonykeesMessageDialog.openMessageDialog(getShell(), message, MessageDialog.ERROR);
+			return false;
+		}
+
+		return true;
+	}
+
 	/**
 	 * imports profiles from a config file
 	 */
@@ -473,28 +497,14 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		try {
 			YAMLConfig config = YAMLConfigUtil.loadConfiguration(file);
 			int importedProfileCount = 0;
-			String customProfileLabel = Messages.SelectRulesWizardPage_CustomProfileLabel;
 
 			for (YAMLProfile profile : config.getProfiles()) {
 				List<String> currentProfileNames = SimonykeesPreferenceManager.getAllProfileIds();
 				ProfileImportMode mode = ProfileImportMode.IMPORT;
 
-				if(customProfileLabel.equals(profile.getName())) {
-					String message = NLS.bind(Messages.SimonykeesPreferencePage_reservedProfileNameError, customProfileLabel);
-					logger.error(message);
-					SimonykeesMessageDialog.openMessageDialog(getShell(), message,  MessageDialog.ERROR);
+				if (!isValidProfileName(profile.getName())) {
 					return;
 				}
-				Optional<SimonykeesProfile> optCurrentProfile = SimonykeesPreferenceManager
-					.getProfileFromName(profile.getName());
-				// prevent the default profile from being replaced
-				optCurrentProfile.filter(SimonykeesProfile::isBuiltInProfile)
-					.ifPresent(currentProfile -> {
-						logger.error(Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable);
-						SimonykeesMessageDialog.openMessageDialog(getShell(),
-								Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable, MessageDialog.ERROR);
-						return;
-					});
 
 				// check if the profile already exists
 				if (currentProfileNames.contains(profile.getName())) {
