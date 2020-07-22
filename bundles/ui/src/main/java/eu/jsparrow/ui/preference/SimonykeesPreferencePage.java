@@ -542,16 +542,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 						String newProfileName = addSuffixToProfileName(profile.getName());
 						profile.setName(newProfileName);
 					}
-					List<String> nonExistentRules = YAMLConfigUtil.getNonExistentRules(profile.getRules(), false);
-					if (!nonExistentRules.isEmpty()) {
-						String nonExistentRulesMessage = NLS.bind(Messages.SimonykeesPreferencePage_profileAndName,
-								profile.getName()) + "\n" //$NON-NLS-1$
-								+ NLS.bind(Messages.Activator_standalone_RulesDoNotExist, nonExistentRules.toString());
-						SimonykeesMessageDialog.openMessageDialog(getShell(), nonExistentRulesMessage,
-								MessageDialog.INFORMATION);
-						profile.getRules()
-							.removeAll(nonExistentRules);
-					}
+					validateExistingRules(profile);
 					SimonykeesPreferenceManager.addProfile(profile.getName(), profile.getRules());
 					importedProfileCount++;
 					logger.info("profile added: {}", profile); //$NON-NLS-1$
@@ -567,6 +558,19 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		} catch (YAMLConfigException e) {
 			logger.error(e.getMessage(), e);
 			SimonykeesMessageDialog.openMessageDialog(getShell(), e.getMessage(), MessageDialog.ERROR);
+		}
+	}
+
+	private void validateExistingRules(YAMLProfile profile) {
+		List<String> nonExistentRules = YAMLConfigUtil.getNonExistentRules(profile.getRules(), false);
+		if (!nonExistentRules.isEmpty()) {
+			String nonExistentRulesMessage = NLS.bind(Messages.SimonykeesPreferencePage_profileAndName,
+					profile.getName()) + "\n" //$NON-NLS-1$
+					+ NLS.bind(Messages.Activator_standalone_RulesDoNotExist, nonExistentRules.toString());
+			SimonykeesMessageDialog.openMessageDialog(getShell(), nonExistentRulesMessage,
+					MessageDialog.INFORMATION);
+			profile.getRules()
+				.removeAll(nonExistentRules);
 		}
 	}
 
