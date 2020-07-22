@@ -477,6 +477,30 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 		return true;
 	}
+	
+	private ProfileImportMode requestImportModeUpdate(String profileName) {
+		String message = NLS.bind(Messages.SimonykeesPreferencePage_ProfileExistsReplace,
+				profileName);
+		String[] buttonLabels = new String[] { Messages.SimonykeesPreferencePage_Skip,
+				Messages.SimonykeesPreferencePage_Replace, Messages.SimonykeesPreferencePage_KeepBoth };
+		int doImport = SimonykeesMessageDialog.openQuestionWithCancelDialog(getShell(), message,
+				buttonLabels);
+		ProfileImportMode mode;
+		switch (doImport) {
+		case 0:
+			mode = ProfileImportMode.SKIP;
+			break;
+		case 1:
+			mode = ProfileImportMode.REPLACE;
+			break;
+		case 2:
+			mode = ProfileImportMode.RENAME;
+			break;
+		default:
+			mode = ProfileImportMode.SKIP;
+		}
+		return mode;
+	}
 
 	/**
 	 * imports profiles from a config file
@@ -508,25 +532,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 				// check if the profile already exists
 				if (currentProfileNames.contains(profile.getName())) {
-					String message = NLS.bind(Messages.SimonykeesPreferencePage_ProfileExistsReplace,
-							profile.getName());
-					String[] buttonLabels = new String[] { Messages.SimonykeesPreferencePage_Skip,
-							Messages.SimonykeesPreferencePage_Replace, Messages.SimonykeesPreferencePage_KeepBoth };
-					int doImport = SimonykeesMessageDialog.openQuestionWithCancelDialog(getShell(), message,
-							buttonLabels);
-					switch (doImport) {
-					case 0:
-						mode = ProfileImportMode.SKIP;
-						break;
-					case 1:
-						mode = ProfileImportMode.REPLACE;
-						break;
-					case 2:
-						mode = ProfileImportMode.RENAME;
-						break;
-					default:
-						mode = ProfileImportMode.SKIP;
-					}
+					mode = requestImportModeUpdate(profile.getName());
 				}
 
 				if (mode != ProfileImportMode.SKIP) {
