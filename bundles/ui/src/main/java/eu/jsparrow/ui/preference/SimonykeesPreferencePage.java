@@ -172,22 +172,15 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			String currentProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
 
 			optionalProfile.ifPresent(profile -> {
-				if (currentProfileId.equals(profile.getProfileName())) {
-					setDefaultProfileButton.setEnabled(false);
-				} else {
-					setDefaultProfileButton.setEnabled(true);
-				}
+				boolean defaultSelected = currentProfileId.equals(profile.getProfileName());
+				setDefaultProfileButton.setEnabled(!defaultSelected);
 
 				editProfileButton.setEnabled(true);
 				exportProfileButton.setEnabled(true);
-
-				if (profile.isBuiltInProfile()) {
-					editProfileButton.setEnabled(false);
-					removeProfileButton.setEnabled(false);
-				} else {
-					editProfileButton.setEnabled(true);
-					removeProfileButton.setEnabled(true);
-				}
+				
+				boolean builtInSelected = profile.isBuiltInProfile();
+				editProfileButton.setEnabled(!builtInSelected);
+				removeProfileButton.setEnabled(!builtInSelected);
 			});
 		} else if (selectionCount > 1) {
 			setDefaultProfileButton.setEnabled(false);
@@ -477,7 +470,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 		return true;
 	}
-	
+
 	private ProfileImportMode requestImportModeUpdate(String profileName) {
 		String message = NLS.bind(Messages.SimonykeesPreferencePage_ProfileExistsReplace,
 				profileName);
@@ -518,47 +511,49 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			return;
 		}
 
+		YAMLConfig config;
 		try {
-			YAMLConfig config = YAMLConfigUtil.loadConfiguration(file);
-			int importedProfileCount = 0;
-
-			for (YAMLProfile profile : config.getProfiles()) {
-				List<String> currentProfileNames = SimonykeesPreferenceManager.getAllProfileIds();
-				ProfileImportMode mode = ProfileImportMode.IMPORT;
-
-				if (!isValidProfileName(profile.getName())) {
-					return;
-				}
-
-				// check if the profile already exists
-				if (currentProfileNames.contains(profile.getName())) {
-					mode = requestImportModeUpdate(profile.getName());
-				}
-
-				if (mode != ProfileImportMode.SKIP) {
-					if (mode == ProfileImportMode.REPLACE) {
-						SimonykeesPreferenceManager.removeProfile(profile.getName());
-					} else if (mode == ProfileImportMode.RENAME) {
-						String newProfileName = addSuffixToProfileName(profile.getName());
-						profile.setName(newProfileName);
-					}
-					validateExistingRules(profile);
-					SimonykeesPreferenceManager.addProfile(profile.getName(), profile.getRules());
-					importedProfileCount++;
-					logger.info("profile added: {}", profile); //$NON-NLS-1$
-
-				}
-			}
-
-			String finishMessage = (importedProfileCount == 0) ? Messages.SimonykeesPreferencePage_NoProfilesImported
-					: NLS.bind(Messages.SimonykeesPreferencePage_ProfileImportSuccessful, importedProfileCount);
-
-			SimonykeesMessageDialog.openMessageDialog(getShell(), finishMessage, MessageDialog.INFORMATION);
-
+			config = YAMLConfigUtil.loadConfiguration(file);
 		} catch (YAMLConfigException e) {
 			logger.error(e.getMessage(), e);
 			SimonykeesMessageDialog.openMessageDialog(getShell(), e.getMessage(), MessageDialog.ERROR);
+			return;
 		}
+		int importedProfileCount = 0;
+
+		for (YAMLProfile profile : config.getProfiles()) {
+			List<String> currentProfileNames = SimonykeesPreferenceManager.getAllProfileIds();
+			ProfileImportMode mode = ProfileImportMode.IMPORT;
+
+			if (!isValidProfileName(profile.getName())) {
+				return;
+			}
+
+			// check if the profile already exists
+			if (currentProfileNames.contains(profile.getName())) {
+				mode = requestImportModeUpdate(profile.getName());
+			}
+
+			if (mode == ProfileImportMode.SKIP) {
+				return;
+			}
+
+			if (mode == ProfileImportMode.REPLACE) {
+				SimonykeesPreferenceManager.removeProfile(profile.getName());
+			} else if (mode == ProfileImportMode.RENAME) {
+				String newProfileName = addSuffixToProfileName(profile.getName());
+				profile.setName(newProfileName);
+			}
+			validateExistingRules(profile);
+			SimonykeesPreferenceManager.addProfile(profile.getName(), profile.getRules());
+			importedProfileCount++;
+			logger.info("profile added: {}", profile); //$NON-NLS-1$
+		}
+
+		String finishMessage = (importedProfileCount == 0) ? Messages.SimonykeesPreferencePage_NoProfilesImported
+				: NLS.bind(Messages.SimonykeesPreferencePage_ProfileImportSuccessful, importedProfileCount);
+		SimonykeesMessageDialog.openMessageDialog(getShell(), finishMessage, MessageDialog.INFORMATION);
+
 	}
 
 	private void validateExistingRules(YAMLProfile profile) {
