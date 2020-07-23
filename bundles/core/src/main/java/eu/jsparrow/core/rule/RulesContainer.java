@@ -73,6 +73,7 @@ import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
+import eu.jsparrow.core.rule.impl.ReuseRandomObjectsRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
@@ -169,6 +170,8 @@ public class RulesContainer {
 				new UseParameterizedJPAQueryRule(),
 				new UseParameterizedLDAPQueryRule(),
 				new EscapeUserInputsInSQLQueriesRule(),
+
+				new ReuseRandomObjectsRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

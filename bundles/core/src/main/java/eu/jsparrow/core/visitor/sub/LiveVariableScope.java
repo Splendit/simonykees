@@ -1,12 +1,14 @@
 package eu.jsparrow.core.visitor.sub;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -231,5 +233,17 @@ public class LiveVariableScope {
 		importedStaticFieldNames.remove(node);
 		fieldNames.clear();
 		localVariableNames.clear();
+	}
+
+	public List<String> getLocalVariableNames(ASTNode scope) {
+		return this.localVariableNames.get(scope);
+	}
+
+	public List<String> getFieldNames() {
+		List<String> names = this.fieldNames.values()
+			.stream()
+			.flatMap(Collection::stream)
+			.collect(Collectors.toList());
+		return Collections.unmodifiableList(names);
 	}
 }
