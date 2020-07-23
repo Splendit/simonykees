@@ -30,6 +30,12 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private final LiveVariableScope liveVariableScope = new LiveVariableScope();
+	private List<String> introducedFields = new ArrayList<>();
+	
+	@Override
+	public boolean visit(TypeDeclaration typeDeclaration) {
+		return !typeDeclaration.isMemberTypeDeclaration() && !typeDeclaration.isLocalTypeDeclaration(); 
+	}
 
 	@Override
 	public boolean visit(VariableDeclarationStatement statement) {
@@ -49,20 +55,16 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 		liveVariableScope.lazyLoadScopeNames(scope);
 
 		List<String> currentFieldNames = liveVariableScope.getFieldNames();
-		List<String> localVariables = liveVariableScope.getLocalVariableNames(scope);
-		/*
-		 * For Each fragment: Check for name shadowing
-		 * 
-		 */
 
 		List<VariableDeclarationFragment> reusableRandomDeclaration = new ArrayList<>();
+		List<VariableDeclarationFragment> alreadyExtracted = new ArrayList<>();
 		for (VariableDeclarationFragment fragment : fragments) {
 			SimpleName fragmentName = fragment.getName();
 			if (!currentFieldNames.contains(fragmentName.getIdentifier())) {
-				long matchingVariableNamesCounter = localVariables.stream()
-					.filter(name -> name.equals(fragmentName.getIdentifier()))
-					.count();
-				if (matchingVariableNamesCounter == 1) {
+				
+				if(introducedFields.contains(fragmentName.getIdentifier())) {
+					alreadyExtracted.add(fragment);
+				} else {
 					// move fragment to a field
 					reusableRandomDeclaration.add(fragment);
 				}
@@ -75,11 +77,16 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 		for (VariableDeclarationFragment fragment : reusableRandomDeclaration) {
 			List<ModifierKeyword> requiredModifiers = findRequiredModifiers(statement);
 			moveToFields(fragment, typeDeclaration, requiredModifiers);
+			introducedFields.add(fragment.getName().getIdentifier());
+		}
+		
+		for(VariableDeclarationFragment fragment : alreadyExtracted) {
+			astRewrite.remove(fragment, null);
 		}
 
 		int originalNumFragments = statement.fragments()
 			.size();
-		if (originalNumFragments == reusableRandomDeclaration.size()) {
+		if (originalNumFragments == reusableRandomDeclaration.size() + alreadyExtracted.size()) {
 			astRewrite.remove(statement, null);
 		}
 
@@ -153,6 +160,7 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
 		liveVariableScope.clearFieldScope(typeDeclaration);
+		introducedFields.clear();
 	}
 
 	@Override
