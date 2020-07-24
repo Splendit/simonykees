@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,11 +9,8 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -31,17 +29,47 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private final LiveVariableScope liveVariableScope = new LiveVariableScope();
 	private List<String> introducedFields = new ArrayList<>();
-	
+	private List<String> existingRandomFields = new ArrayList<>();
+	private List<String> remainingFieldNames = new ArrayList<>();
+
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
-		return !typeDeclaration.isMemberTypeDeclaration() && !typeDeclaration.isLocalTypeDeclaration(); 
+		if (typeDeclaration.isMemberTypeDeclaration() || typeDeclaration.isLocalTypeDeclaration()) {
+			return false;
+		}
+
+		existingRandomFields = Arrays.stream(typeDeclaration.getFields())
+			.filter(field -> isJavaUtilRandomType(field.getType()))
+			.flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
+				.stream())
+			// otherwise we don't know if the field is ever initialized
+			.filter(fragment -> fragment.getInitializer() != null)
+			.map(VariableDeclarationFragment::getName)
+			.map(SimpleName::getIdentifier)
+			.collect(Collectors.toList());
+
+		remainingFieldNames = Arrays.stream(typeDeclaration.getFields())
+			.flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
+				.stream())
+			.map(VariableDeclarationFragment::getName)
+			.map(SimpleName::getIdentifier)
+			.filter(name -> !existingRandomFields.contains(name))
+			.collect(Collectors.toList());
+
+		return true;
+	}
+
+	@Override
+	public void endVisit(TypeDeclaration typeDeclaration) {
+		existingRandomFields.clear();
+		remainingFieldNames.clear();
+		super.endVisit(typeDeclaration);
 	}
 
 	@Override
 	public boolean visit(VariableDeclarationStatement statement) {
-		Type type = statement.getType();
-		ITypeBinding variableTypeBinding = type.resolveBinding();
-		if (!ClassRelationUtil.isContentOfType(variableTypeBinding, java.util.Random.class.getName())) {
+
+		if (!isJavaUtilRandomType(statement.getType())) {
 			return false;
 		}
 
@@ -52,17 +80,13 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 			return false;
 		}
 
-		liveVariableScope.lazyLoadScopeNames(scope);
-
-		List<String> currentFieldNames = liveVariableScope.getFieldNames();
-
 		List<VariableDeclarationFragment> reusableRandomDeclaration = new ArrayList<>();
 		List<VariableDeclarationFragment> alreadyExtracted = new ArrayList<>();
 		for (VariableDeclarationFragment fragment : fragments) {
 			SimpleName fragmentName = fragment.getName();
-			if (!currentFieldNames.contains(fragmentName.getIdentifier())) {
-				
-				if(introducedFields.contains(fragmentName.getIdentifier())) {
+			if (!remainingFieldNames.contains(fragmentName.getIdentifier())) {
+				if (introducedFields.contains(fragmentName.getIdentifier())
+						|| existingRandomFields.contains(fragmentName.getIdentifier())) {
 					alreadyExtracted.add(fragment);
 				} else {
 					// move fragment to a field
@@ -77,10 +101,11 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 		for (VariableDeclarationFragment fragment : reusableRandomDeclaration) {
 			List<ModifierKeyword> requiredModifiers = findRequiredModifiers(statement);
 			moveToFields(fragment, typeDeclaration, requiredModifiers);
-			introducedFields.add(fragment.getName().getIdentifier());
+			introducedFields.add(fragment.getName()
+				.getIdentifier());
 		}
-		
-		for(VariableDeclarationFragment fragment : alreadyExtracted) {
+
+		for (VariableDeclarationFragment fragment : alreadyExtracted) {
 			astRewrite.remove(fragment, null);
 		}
 
@@ -93,12 +118,20 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 		return true;
 	}
 
+	private boolean isJavaUtilRandomType(Type type) {
+		ITypeBinding typeBinding = type.resolveBinding();
+		if (typeBinding == null) {
+			return false;
+		}
+		return ClassRelationUtil.isContentOfType(typeBinding, java.util.Random.class.getName());
+	}
+
 	private List<ModifierKeyword> findRequiredModifiers(VariableDeclarationStatement statement) {
 		List<ModifierKeyword> modifiers = new ArrayList<>();
 		modifiers.add(ModifierKeyword.PRIVATE_KEYWORD);
 		ASTNodeUtil.convertToTypedList(statement.modifiers(), Modifier.class)
 			.stream()
-			.map(modifier -> modifier.getKeyword())
+			.map(Modifier::getKeyword)
 			.forEach(modifiers::add);
 		BodyDeclaration enclosingBodyDeclaration = ASTNodeUtil.getSpecificAncestor(statement, BodyDeclaration.class);
 		if (Modifier.isStatic(enclosingBodyDeclaration.getModifiers())) {
@@ -150,32 +183,4 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 			.filter(fragment -> fragment.getInitializer() != null)
 			.collect(Collectors.toList());
 	}
-
-	@Override
-	public void endVisit(CompilationUnit compilationUnit) {
-		liveVariableScope.clearCompilationUnitScope(compilationUnit);
-		super.endVisit(compilationUnit);
-	}
-
-	@Override
-	public void endVisit(TypeDeclaration typeDeclaration) {
-		liveVariableScope.clearFieldScope(typeDeclaration);
-		introducedFields.clear();
-	}
-
-	@Override
-	public void endVisit(MethodDeclaration methodDeclaration) {
-		liveVariableScope.clearLocalVariablesScope(methodDeclaration);
-	}
-
-	@Override
-	public void endVisit(FieldDeclaration fieldDeclaration) {
-		liveVariableScope.clearLocalVariablesScope(fieldDeclaration);
-	}
-
-	@Override
-	public void endVisit(Initializer initializer) {
-		liveVariableScope.clearLocalVariablesScope(initializer);
-	}
-
 }
