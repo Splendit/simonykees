@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
@@ -289,12 +290,18 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		searchText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		searchText.setToolTipText(Messages.AbstractSummaryWizardPage_searchBoxToolTipText);
 
-		// content for autocomplete proposal window with specified size
-		SimpleContentProposalProvider proposalProvider = new SimpleContentProposalProvider(
+		// array of names of all rules applied and all files affected
+		String[] filesAndRules = Stream.concat(
 				summaryWizardPageModel.getRuleTimes()
 					.stream()
-					.map(RuleTimesModel::getName)
-					.toArray(String[]::new));
+					.map(RuleTimesModel::getName),
+				summaryWizardPageModel.getChangedFiles()
+					.stream()
+					.map(ChangedFilesModel::getName))
+			.toArray(String[]::new);
+
+		// content for autocomplete proposal window with specified size
+		SimpleContentProposalProvider proposalProvider = new SimpleContentProposalProvider(filesAndRules);
 		ContentProposalAdapter proposalAdapter = new ContentProposalAdapter(searchText, new TextContentAdapter(),
 				proposalProvider, null, null);
 		proposalProvider.setFiltering(true);
