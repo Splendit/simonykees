@@ -25,7 +25,30 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
+ * Creating a new Random object each time a random value is needed is
+ * inefficient and may produce numbers which are not random. This visitor
+ * extracts reusable {@link java.util.Random} objects, from local variables to
+ * class or instance fields. For example, the following code:
  * 
+ * <pre>
+ * <code>
+ * 	private void sampleMethod(String value) {
+ *		Random r = new Random();
+ *		int i = r.nextInt();
+ *	}
+ * </code>
+ * </pre>
+ * 
+ * will be transformed into
+ * 
+ * <pre>
+ * <code> 
+ * 	Random r = new Random();
+ * 	private void sampleMethod(String value) {
+ *		int i = r.nextInt();
+ *	}
+ * </code>
+ * </pre>
  * 
  * @since 3.20.0
  *
