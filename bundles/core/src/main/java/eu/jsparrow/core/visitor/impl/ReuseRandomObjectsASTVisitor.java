@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -23,6 +24,12 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * 
+ * 
+ * @since 3.20.0
+ *
+ */
 public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private List<FieldProperties> introducedFields = new ArrayList<>();
@@ -38,30 +45,35 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 		for (FieldDeclaration fieldDeclaration : typeDeclaration.getFields()) {
 			List<VariableDeclarationFragment> fragments = ASTNodeUtil
 				.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class);
-			if (isJavaUtilRandomType(fieldDeclaration.getType()) 
+			if (isJavaUtilRandomType(fieldDeclaration.getType())
 					&& Modifier.isPrivate(fieldDeclaration.getModifiers())) {
-				List<ModifierKeyword> modifiers = ASTNodeUtil
-					.convertToTypedList(fieldDeclaration.modifiers(), Modifier.class)
-					.stream()
-					.map(Modifier::getKeyword)
-					.collect(Collectors.toList());
-
-				for (VariableDeclarationFragment fragment : fragments) {
-					if (fragment.getInitializer() != null) {
-						SimpleName name = fragment.getName();
-						existingRandomFields.add(new FieldProperties(name.getIdentifier(), modifiers));
-					} else {
-						remainingFieldNames.add(fragment.getName()
-							.getIdentifier());
-					}
-				}
+				collectReusableRandomObjects(fieldDeclaration, fragments);
 			} else {
 				fragments.forEach(fragment -> remainingFieldNames.add(fragment.getName()
 					.getIdentifier()));
 			}
 		}
-
 		return true;
+	}
+
+	private void collectReusableRandomObjects(FieldDeclaration fieldDeclaration,
+			List<VariableDeclarationFragment> fragments) {
+		List<ModifierKeyword> modifiers = ASTNodeUtil
+			.convertToTypedList(fieldDeclaration.modifiers(), Modifier.class)
+			.stream()
+			.map(Modifier::getKeyword)
+			.collect(Collectors.toList());
+
+		for (VariableDeclarationFragment fragment : fragments) {
+			Expression initializer = fragment.getInitializer();
+			if (initializer != null && initializer.getNodeType() != ASTNode.NULL_LITERAL) {
+				SimpleName name = fragment.getName();
+				existingRandomFields.add(new FieldProperties(name.getIdentifier(), modifiers));
+			} else {
+				remainingFieldNames.add(fragment.getName()
+					.getIdentifier());
+			}
+		}
 	}
 
 	@Override
@@ -79,22 +91,22 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 			return false;
 		}
 
-		List<VariableDeclarationFragment> fragments = extractFragmentsWithInitializer(statement);
+		List<VariableDeclarationFragment> fragments = ASTNodeUtil
+			.convertToTypedList(statement.fragments(), VariableDeclarationFragment.class)
+			.stream()
+			.filter(fragment -> fragment.getInitializer() != null && fragment.getInitializer()
+				.getNodeType() != ASTNode.NULL_LITERAL)
+			.collect(Collectors.toList());
 		List<VariableDeclarationFragment> reusableRandomDeclaration = new ArrayList<>();
 		List<VariableDeclarationFragment> alreadyExtracted = new ArrayList<>();
 		List<ModifierKeyword> requiredModifiers = findRequiredModifiers(statement);
 		for (VariableDeclarationFragment fragment : fragments) {
 			SimpleName fragmentName = fragment.getName();
 			String identifier = fragmentName.getIdentifier();
-			if (!remainingFieldNames.contains(identifier)) {
-				if (hasReusableField(introducedFields, identifier, requiredModifiers) ||
-						hasReusableField(existingRandomFields, identifier, requiredModifiers)) {
-					alreadyExtracted.add(fragment);
-				} else if (!FieldProperties.contains(introducedFields, identifier)
-						&& !FieldProperties.contains(existingRandomFields, identifier)) {
-					// move fragment to a field
-					reusableRandomDeclaration.add(fragment);
-				}
+			if (hasReusableField(identifier, requiredModifiers)) {
+				alreadyExtracted.add(fragment);
+			} else if (isExtractableLocalVariable(identifier)) {
+				reusableRandomDeclaration.add(fragment);
 			}
 		}
 
@@ -135,6 +147,26 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 			.map(FieldProperties::getModifiers)
 			.filter(modifiers -> modifiers.contains(ModifierKeyword.STATIC_KEYWORD))
 			.isPresent();
+	}
+
+	private boolean hasReusableField(String identifier,
+			List<ModifierKeyword> requiredModifiers) {
+
+		if (remainingFieldNames.contains(identifier)) {
+			return false;
+		}
+
+		return hasReusableField(introducedFields, identifier, requiredModifiers)
+				|| hasReusableField(existingRandomFields, identifier, requiredModifiers);
+	}
+
+	private boolean isExtractableLocalVariable(String identifier) {
+		if (remainingFieldNames.contains(identifier)) {
+			return false;
+		}
+
+		return !FieldProperties.contains(introducedFields, identifier)
+				&& !FieldProperties.contains(existingRandomFields, identifier);
 	}
 
 	private boolean isJavaUtilRandomType(Type type) {
@@ -194,13 +226,6 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 		return firstMethodDeclaration;
 
-	}
-
-	private List<VariableDeclarationFragment> extractFragmentsWithInitializer(VariableDeclarationStatement statement) {
-		return ASTNodeUtil.convertToTypedList(statement.fragments(), VariableDeclarationFragment.class)
-			.stream()
-			.filter(fragment -> fragment.getInitializer() != null)
-			.collect(Collectors.toList());
 	}
 
 	static class FieldProperties {

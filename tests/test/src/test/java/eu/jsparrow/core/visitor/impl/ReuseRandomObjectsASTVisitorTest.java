@@ -37,7 +37,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void test_multipleLocalVariales_shouldTransform() throws Exception {
+	public void test_multipleLocalVariables_shouldTransform() throws Exception {
 		String actual = "" +
 				"private void sampleMethod(String value) {\n" +
 				"	if(value.isEmpty()) {\n" +
@@ -91,7 +91,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
-	public void test_finalVariable_shouldTrasform() throws Exception {
+	public void test_finalVariable_shouldTransform() throws Exception {
 		String actual = "" + 
 				"private void sampleMethod(String value) {\n" + 
 				"	final Random random = new Random();\n" + 
@@ -185,6 +185,28 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 				"}";
 		assertNoChange(actual);
 	}
+
+	@Test
+	public void test_shadowingNullInitializedField_shouldNotTransform() throws Exception {
+		String actual = "" + 
+				"private Random random = null;\n" + 
+				"private void sampleMethod(String value) {\n" + 
+				"	Random random = new Random();\n" + 
+				"	System.out.println(value + random.nextInt());\n" + 
+				"}";
+		assertNoChange(actual);
+	}
+	
+	@Test
+	public void test_shadowingNullInitializedLocalVariable_shouldNotTransform() throws Exception {
+		String actual = "" +
+				"private void sampleMethod(String value) {\n" + 
+				"	Random random = null;\n" + 
+				"	System.out.println(value + random.nextInt());\n" + 
+				"}";
+		assertNoChange(actual);
+	}
+
 	
 	
 	@Disabled("only as a framework")
