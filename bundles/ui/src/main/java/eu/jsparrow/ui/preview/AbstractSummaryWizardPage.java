@@ -21,6 +21,9 @@ import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
+import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -36,6 +39,7 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -62,6 +66,7 @@ import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.FileViewerFilter;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
+import eu.jsparrow.ui.preview.model.summary.RuleTimesModel;
 import eu.jsparrow.ui.preview.model.summary.RulesPerFileModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
@@ -272,18 +277,31 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		filesGroup.setLayout(new GridLayout(1, true));
 		filesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		filesGroup.setText(Messages.SummaryWizardPage_Files);
-		
+
 		Composite searchGroup = new Composite(filesGroup, SWT.NONE);
 		searchGroup.setLayout(new GridLayout(1, false));
 		GridData searchGroupGridData = new GridData(SWT.LEFT, SWT.FILL, false, false);
 		searchGroupGridData.widthHint = 600;
 		searchGroup.setLayoutData(searchGroupGridData);
-		
+
 		final Text searchText = new Text(searchGroup, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
 		searchText.setMessage(Messages.AbstractSummaryWizardPage_searchLabel);
 		searchText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		searchText.setToolTipText(Messages.AbstractSummaryWizardPage_searchBoxToolTipText);
-		
+
+		// content for autocomplete proposal window with specified size
+		SimpleContentProposalProvider proposalProvider = new SimpleContentProposalProvider(
+				summaryWizardPageModel.getRuleTimes()
+					.stream()
+					.map(RuleTimesModel::getName)
+					.toArray(String[]::new));
+		ContentProposalAdapter proposalAdapter = new ContentProposalAdapter(searchText, new TextContentAdapter(),
+				proposalProvider, null, null);
+		proposalProvider.setFiltering(true);
+		proposalAdapter.setPropagateKeys(true);
+		proposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
+		proposalAdapter.setPopupSize(new Point(450, 80));
+
 		SashForm sashForm = new SashForm(filesGroup, SWT.HORIZONTAL);
 		sashForm.setLayout(new GridLayout());
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -311,7 +329,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		pathColumn.setWidth(200);
 		pathColumn.setText(Messages.AbstractSummaryWizardPage_fileTableViewerTitle);
 		pathColumn.setToolTipText(Messages.AbstractSummaryWizardPage_fileTableViewerToolTipText);
-		
+
 		FileViewerFilter filter = new FileViewerFilter();
 		searchText.addKeyListener(new KeyAdapter() {
 			@Override
