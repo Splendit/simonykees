@@ -38,6 +38,8 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -338,12 +340,40 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		pathColumn.setToolTipText(Messages.AbstractSummaryWizardPage_fileTableViewerToolTipText);
 
 		FileViewerFilter filter = new FileViewerFilter();
+
+		/*
+		 * Used to handle the case when a suggestion is double clicked (and
+		 * therefore inserted as text into the searchText). Without this, the
+		 * selection will not change.
+		 */
+		searchText.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				updateSearch(searchText, filter);
+			}
+		});
+
+		/*
+		 * Handles hitting the delete search text button and clicking on the
+		 * search icon
+		 */
+		searchText.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				if (e.detail == SWT.CANCEL) {
+					searchText.setText(Messages.SelectRulesWizardPage_emptyString);
+					updateSearch(searchText, filter);
+				} else if (e.detail == SWT.ICON_SEARCH) {
+					updateSearch(searchText, filter);
+				}
+			}
+		});
+
 		searchText.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				filter.setSearchString(searchText.getText());
-				fileTableViewer.refresh();
-				setInitialFileSelection();
+				updateSearch(searchText, filter);
 			}
 		});
 		fileTableViewer.addFilter(filter);
@@ -367,6 +397,12 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		column.setWidth(200);
 		column.setText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerTitle);
 		column.setToolTipText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText);
+	}
+	
+	private void updateSearch(Text searchText, FileViewerFilter filter) {
+		filter.setSearchString(searchText.getText());
+		fileTableViewer.refresh();
+		setInitialFileSelection();
 	}
 
 	protected void initializeDataBindings() {
