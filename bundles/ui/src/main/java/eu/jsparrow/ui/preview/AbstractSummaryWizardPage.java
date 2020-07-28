@@ -23,7 +23,7 @@ import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
-import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -63,6 +63,7 @@ import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.PartialMatchContentProposalProvider;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
@@ -303,10 +304,9 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			.toArray(String[]::new);
 
 		// content for autocomplete proposal window with specified size
-		SimpleContentProposalProvider proposalProvider = new SimpleContentProposalProvider(filesAndRules);
+		IContentProposalProvider proposalProvider = new PartialMatchContentProposalProvider(filesAndRules);
 		ContentProposalAdapter proposalAdapter = new ContentProposalAdapter(searchText, new TextContentAdapter(),
 				proposalProvider, null, null);
-		proposalProvider.setFiltering(true);
 		proposalAdapter.setPropagateKeys(true);
 		proposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
 		proposalAdapter.setPopupSize(new Point(450, 80));
