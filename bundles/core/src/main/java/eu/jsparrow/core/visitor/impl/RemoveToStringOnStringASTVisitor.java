@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -62,7 +64,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 			return true;
 		}
 
-		boolean unwrapped = false;
+		boolean unwrapped;
 		do {
 			unwrapped = false;
 
@@ -72,7 +74,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 				unwrapped = true;
 			}
 
-			if (variableExpression instanceof MethodInvocation) {
+			if (variableExpression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 				MethodInvocation mI = (MethodInvocation) variableExpression;
 				if (StringUtils.equals(ReservedNames.MI_TO_STRING, mI.getName()
 					.getFullyQualifiedName()) && mI.typeArguments()
@@ -86,11 +88,28 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 			}
 		} while (unwrapped);
 
-		astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(variableExpression), null);
+		if (isDirectConsumerBody(node, variableExpression)) {
+			return true;
+		}
+
+		astRewrite.replace(node, astRewrite.createMoveTarget(variableExpression), null);
 		saveComments(node, variableExpression);
 		onRewrite();
 
 		return true;
+	}
+
+	private boolean isDirectConsumerBody(MethodInvocation node, Expression unwrappedExpression) {
+		if (node.getLocationInParent() != LambdaExpression.BODY_PROPERTY) {
+			return false;
+		}
+
+		LambdaExpression lambda = (LambdaExpression) node.getParent();
+		ITypeBinding binding = lambda.resolveTypeBinding();
+		return ClassRelationUtil.isContentOfType(binding, java.util.function.Consumer.class.getName())
+				&& unwrappedExpression.getNodeType() != ASTNode.METHOD_INVOCATION
+				&& unwrappedExpression.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION;
+
 	}
 
 	/**
