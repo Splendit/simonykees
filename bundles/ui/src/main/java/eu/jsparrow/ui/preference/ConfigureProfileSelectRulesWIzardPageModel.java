@@ -6,6 +6,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.osgi.util.NLS;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -56,8 +57,8 @@ public class ConfigureProfileSelectRulesWIzardPageModel extends AbstractSelectRu
 		if (existingProfiles.contains(value) && !value.equals(this.name)) {
 			status.setError(Messages.ConfigureProfileSelectRulesWizardPageModel_error_NameExists);
 			this.newName = null;
-		} else if(StringUtils.equals(value, customProfileLabel)) {
-			status.setError(Messages.ConfigureProfileSelectRulesWIzardPageModel_error_nameReserved);
+		} else if (StringUtils.equals(value, customProfileLabel)) {
+			status.setError(NLS.bind(Messages.ConfigureProfileSelectRulesWIzardPageModel_error_nameReserved, value));
 			this.newName = null;
 		} else {
 			this.newName = value;
