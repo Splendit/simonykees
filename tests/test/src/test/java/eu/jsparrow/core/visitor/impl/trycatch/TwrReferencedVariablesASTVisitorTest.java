@@ -10,11 +10,11 @@ import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 
 public class TwrReferencedVariablesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
-	private TwrReferencedVariablesASTVisitor visitor;
+	private ReferencedVariablesASTVisitor visitor;
 	
 	@BeforeEach
 	public void setUp() {
-		visitor = new TwrReferencedVariablesASTVisitor();
+		visitor = new ReferencedVariablesASTVisitor();
 	}
 
 	@Test

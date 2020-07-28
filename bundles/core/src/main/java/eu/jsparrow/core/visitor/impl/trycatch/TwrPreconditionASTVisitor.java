@@ -158,7 +158,7 @@ class TwrPreconditionASTVisitor extends ASTVisitor {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) parent;
 			Expression initExpression = fragment.getInitializer();
 			if (initExpression != null) {
-				TwrReferencedVariablesASTVisitor visitor = new TwrReferencedVariablesASTVisitor();
+				ReferencedVariablesASTVisitor visitor = new ReferencedVariablesASTVisitor();
 				initExpression.accept(visitor);
 				result.addAll(visitor.getReferencedVariables());
 			}

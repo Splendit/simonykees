@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.visitor.impl.trycatch.TwrReferencedVariablesASTVisitor;
+import eu.jsparrow.core.visitor.impl.trycatch.ReferencedVariablesASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -219,7 +219,7 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		Expression initializer = fragment.getInitializer();
 
-		TwrReferencedVariablesASTVisitor variableReferencesVisitor = new TwrReferencedVariablesASTVisitor();
+		ReferencedVariablesASTVisitor variableReferencesVisitor = new ReferencedVariablesASTVisitor();
 		initializer.accept(variableReferencesVisitor);
 		List<SimpleName> referencedVariables = variableReferencesVisitor.getReferencedVariables();
 		if (!referencedVariables.isEmpty()) {
