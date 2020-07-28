@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * @since 1.0
  *
  */
-class TwrReferencedVariablesASTVisitor extends ASTVisitor {
+public class TwrReferencedVariablesASTVisitor extends ASTVisitor {
 	private List<SimpleName> referencedVariables;
 
 	public TwrReferencedVariablesASTVisitor() {
