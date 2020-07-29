@@ -138,9 +138,11 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 
 	void replaceUnsafeRandomInstanceCreation(ClassInstanceCreation instanceCreation) {
 		astRewrite.replace(instanceCreation.getType(), getSecureRandomType(), null);
+		onRewrite();
 	}
 
 	void replaceUnsafeRandomVariableType(VariableDeclarationStatement variableDeclarationStatement) {
 		astRewrite.replace(variableDeclarationStatement.getType(), getSecureRandomType(), null);
+		onRewrite();
 	}
 }
