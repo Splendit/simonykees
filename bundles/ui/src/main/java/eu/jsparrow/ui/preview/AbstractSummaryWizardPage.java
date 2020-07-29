@@ -26,6 +26,7 @@ import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -68,6 +69,7 @@ import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.FileViewerFilter;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
+import eu.jsparrow.ui.preview.model.summary.RuleTimesModel;
 import eu.jsparrow.ui.preview.model.summary.RulesPerFileModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
@@ -85,6 +87,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	private TableViewer fileTableViewer;
 	private TableViewer ruleTableViewer;
 	private TableViewer rulesPerFileTableViewer;
+	private Text searchText;
 
 	private RefactoringSummaryWizardPageModel summaryWizardPageModel;
 
@@ -221,6 +224,12 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 		SummaryPageRuleTableViewerComparator comparator = new SummaryPageRuleTableViewerComparator();
 		ruleTableViewer.setComparator(comparator);
+		ruleTableViewer.addDoubleClickListener((DoubleClickEvent event) -> {
+			StructuredSelection selection = (StructuredSelection) event.getSelection();
+			RuleTimesModel selectedModel = (RuleTimesModel) selection.getFirstElement();
+			String ruleName = selectedModel.getName();
+			searchText.setText(ruleName);
+		});
 
 		TableViewerColumn colRuleName = createTableViewerColumn(Messages.SummaryWizardPage_Rule,
 				Messages.AbstractSummaryWizardPage_ruleTableViewerRuleToolTipText,
@@ -285,7 +294,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		searchGroupGridData.widthHint = 600;
 		searchComposite.setLayoutData(searchGroupGridData);
 
-		final Text searchText = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		searchText = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
 		searchText.setMessage(Messages.AbstractSummaryWizardPage_searchLabel);
 		searchText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		searchText.setToolTipText(Messages.AbstractSummaryWizardPage_searchBoxToolTipText);
