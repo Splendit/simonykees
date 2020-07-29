@@ -31,7 +31,7 @@ public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 
 		String expected = "" +
 				"	void test() {\n" +
-				"		SecureRandom random = new SecureRandom();\n" +
+				"		Random random = new SecureRandom();\n" +
 				"		byte bytes[] = new byte[20];\n" +
 				"		random.nextBytes(bytes);" +
 				"	}";
@@ -53,7 +53,7 @@ public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 		String expected = "" +
 				"	class SecureRandom {}\n" +
 				"	void test() {\n" +
-				"		java.security.SecureRandom random = new java.security.SecureRandom();\n" +
+				"		Random random = new java.security.SecureRandom();\n" +
 				"		byte bytes[] = new byte[20];\n" +
 				"		random.nextBytes(bytes);\n" +
 				"	}";

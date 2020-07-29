@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -35,20 +34,6 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 			return true;
 		}
 		replaceUnsafeRandomInstanceCreation(node);
-		return true;
-	}
-
-	@Override
-	public boolean visit(VariableDeclarationStatement node) {
-
-		ITypeBinding typeBinding = node.getType()
-			.resolveBinding();
-		if (!typeBinding.getQualifiedName()
-			.equals(java.util.Random.class.getName())) {
-			return true;
-		}
-
-		replaceUnsafeRandomVariableType(node);
 		return true;
 	}
 
@@ -99,11 +84,6 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 
 	void replaceUnsafeRandomInstanceCreation(ClassInstanceCreation instanceCreation) {
 		astRewrite.replace(instanceCreation.getType(), getSecureRandomType(), null);
-		onRewrite();
-	}
-
-	void replaceUnsafeRandomVariableType(VariableDeclarationStatement variableDeclarationStatement) {
-		astRewrite.replace(variableDeclarationStatement.getType(), getSecureRandomType(), null);
 		onRewrite();
 	}
 }
