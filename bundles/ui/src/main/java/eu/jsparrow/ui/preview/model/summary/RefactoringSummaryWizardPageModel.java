@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -66,7 +67,7 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	public IObservableList<RuleTimesModel> getRuleTimes() {
 		return ruleTimes;
 	}
-	
+
 	public IObservableList<RulesPerFileModel> getRulesPerFile() {
 		return rulesPerFile;
 	}
@@ -115,17 +116,19 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 
 	private void addRulesPerFile() {
 		ChangedFilesModel firstFile = changedFiles.get(0);
-		firstFile.getRules().forEach(rule -> {
-			rulesPerFile.add(new RulesPerFileModel(rule));
-		});
-		
+		firstFile.getRules()
+			.forEach(rule -> {
+				rulesPerFile.add(new RulesPerFileModel(rule));
+			});
+
 	}
 
 	private void addModifiedFiles() {
 		refactoringPipeline.getInitialSourceMap()
 			.entrySet()
 			.stream()
-			.filter(this::hasChanges).map(Map.Entry::getKey)
+			.filter(this::hasChanges)
+			.map(Map.Entry::getKey)
 			.forEach(state -> changedFiles.add(createModelFromRefactoringState(state)));
 	}
 
@@ -185,13 +188,14 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		String right = finalSource.get(state) == null ? "" : finalSource.get(state); //$NON-NLS-1$
 		List<RefactoringRule> rules = refactoringPipeline.getRules();
 		List<String> rulesWithChanges = new ArrayList<>();
-		for(RefactoringRule rule : rules) {
+		for (RefactoringRule rule : rules) {
 			DocumentChange change = state.getChangeIfPresent(rule);
-			if(change != null) {
-				rulesWithChanges.add(rule.getRuleDescription().getName());
+			if (change != null) {
+				rulesWithChanges.add(rule.getRuleDescription()
+					.getName());
 			}
 		}
-		
+
 		return new ChangedFilesModel(fileName, left, right, rulesWithChanges);
 	}
 
@@ -229,10 +233,25 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 
 	public void updateRulesPerFile(List<String> rules) {
 		List<RulesPerFileModel> newRules = rules.stream()
-				.map(RulesPerFileModel::new)
-				.collect(Collectors.toList());
+			.map(RulesPerFileModel::new)
+			.collect(Collectors.toList());
 		this.rulesPerFile.clear();
 		this.rulesPerFile.addAll(newRules);
-		
+
+	}
+
+	/**
+	 * 
+	 * @return an array of all the rules and the file names in the summary page.
+	 */
+	public String[] getProposalProviderContents() {
+		return Stream.concat(
+				getRuleTimes()
+					.stream()
+					.map(RuleTimesModel::getName),
+				getChangedFiles()
+					.stream()
+					.map(ChangedFilesModel::getName))
+			.toArray(String[]::new);
 	}
 }

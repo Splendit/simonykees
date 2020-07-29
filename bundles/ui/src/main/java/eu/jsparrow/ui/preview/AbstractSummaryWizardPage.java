@@ -293,18 +293,8 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		searchText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		searchText.setToolTipText(Messages.AbstractSummaryWizardPage_searchBoxToolTipText);
 
-		// array of names of all rules applied and all files affected
-		String[] filesAndRules = Stream.concat(
-				summaryWizardPageModel.getRuleTimes()
-					.stream()
-					.map(RuleTimesModel::getName),
-				summaryWizardPageModel.getChangedFiles()
-					.stream()
-					.map(ChangedFilesModel::getName))
-			.toArray(String[]::new);
-
 		// content for autocomplete proposal window with specified size
-		IContentProposalProvider proposalProvider = new PartialMatchContentProposalProvider(filesAndRules);
+		IContentProposalProvider proposalProvider = new PartialMatchContentProposalProvider(summaryWizardPageModel.getProposalProviderContents());
 		ContentProposalAdapter proposalAdapter = new ContentProposalAdapter(searchText, new TextContentAdapter(),
 				proposalProvider, null, null);
 		proposalAdapter.setPropagateKeys(true);
