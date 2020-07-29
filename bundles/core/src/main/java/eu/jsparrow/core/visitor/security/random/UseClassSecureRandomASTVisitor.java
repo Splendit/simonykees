@@ -30,10 +30,29 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
-		if (!analyzeInstanceCreation(node)) {
+
+		ITypeBinding typeBinding = node.getType()
+			.resolveBinding();
+		if (!typeBinding.getQualifiedName()
+			.equals(java.util.Random.class.getName())) {
 			return true;
 		}
-		replaceUnsafeRandomInstanceCreation(node);
+
+		Expression expression = node;
+		while (expression.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
+			expression = (Expression) expression.getParent();
+		}
+		if (expression.getLocationInParent() == ClassInstanceCreation.ARGUMENTS_PROPERTY
+				|| expression.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+			return true;
+		}
+
+		if (node.arguments()
+			.isEmpty()) {
+			astRewrite.replace(node.getType(), getSecureRandomType(), null);
+			onRewrite();
+			return true;
+		}
 		return true;
 	}
 
@@ -41,29 +60,6 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 	public void endVisit(CompilationUnit node) {
 		super.endVisit(node);
 		isSafeToAddImportMap.clear();
-	}
-
-	private boolean analyzeInstanceCreation(ClassInstanceCreation classInstanceCreation) {
-
-		ITypeBinding typeBinding = classInstanceCreation.getType()
-			.resolveBinding();
-		if (!typeBinding.getQualifiedName()
-			.equals(java.util.Random.class.getName())) {
-			return false;
-		}
-
-		if (!classInstanceCreation.arguments()
-			.isEmpty()) {
-			return false;
-		}
-
-		Expression expression = classInstanceCreation;
-		while (expression.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
-			expression = (Expression) expression.getParent();
-		}
-
-		return expression.getLocationInParent() != ClassInstanceCreation.ARGUMENTS_PROPERTY
-				&& expression.getLocationInParent() != MethodInvocation.ARGUMENTS_PROPERTY;
 	}
 
 	private Type getSecureRandomType() {
@@ -82,8 +78,4 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 		return ast.newSimpleType(secureRandomName);
 	}
 
-	void replaceUnsafeRandomInstanceCreation(ClassInstanceCreation instanceCreation) {
-		astRewrite.replace(instanceCreation.getType(), getSecureRandomType(), null);
-		onRewrite();
-	}
 }
