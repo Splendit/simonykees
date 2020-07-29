@@ -38,6 +38,16 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 	private static final String APPEND = "append"; //$NON-NLS-1$
 
 	private static final int MIN_OPERANDS = 3;
+
+	/**
+	 * If the number of concatenations is too big, the JDT will throw a
+	 * StackOverflwoException while creating the chain of append invocations.
+	 * For this reason, we limit the number of concatenations to a reasonably
+	 * big upper-bound of concatenations. See SIM-1783.Note that 200 is not 
+	 * the biggest number of invocations that JDT allows, but this number was 
+	 * chosen after experimenting with different values. Whether this value 
+	 * is still too high, is an open discussion. 
+	 */
 	private static final int MAX_OPERANDS = 200;
 
 	@Override
