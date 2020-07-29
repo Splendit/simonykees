@@ -2,7 +2,6 @@ package eu.jsparrow.core.visitor.impl;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
@@ -196,7 +195,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 				"}";
 		assertNoChange(actual);
 	}
-	
+
 	@Test
 	public void test_shadowingNullInitializedLocalVariable_shouldNotTransform() throws Exception {
 		String actual = "" +
@@ -207,15 +206,85 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 		assertNoChange(actual);
 	}
 
-	
-	
-	@Disabled("only as a framework")
 	@Test
-	public void test_() throws Exception {
+	public void test_randomVariableInAnonymousClass_shouldNotTransform() throws Exception {
 		String actual = "" + 
-				"";
+				"private void sampleMethod() {\n" + 
+				"	Runnable r = new Runnable() {\n" + 
+				"		@Override\n" + 
+				"		public void run() {\n" + 
+				"			Random random = new Random();\n" + 
+				"			int i = random.nextInt();\n" + 
+				"		}\n" + 
+				"	};\n" + 
+				"}"; 
+		assertNoChange(actual);
+	}
+	
+	@Test
+	public void test_innerClass_shouldNotTransform() throws Exception {
+		String actual = "" + 
+				"private void sampleMethod() {\n" + 
+				"	class LocalClass {\n" + 
+				"		private void innerMethod() {\n" + 
+				"			Random random = new Random();\n" + 
+				"			int i = random.nextInt();\n" + 
+				"		}\n" + 
+				"	}\n" + 
+				"}"; 
+		assertNoChange(actual);
+	}
+
+	@Test
+	public void test_usingLocalVariableAsSeed_shouldNotTransform() throws Exception {
+		String actual = "" + 
+				"private void sampleMethod() {\n" + 
+				"	int seed = 10;\n" + 
+				"	Random random = new Random(seed);\n" + 
+				"	int i = random.nextInt();\n" + 
+				"}"; 
+		assertNoChange(actual);
+	}
+
+	@Test
+	public void test_matchingFieldWithDifferentInitializer_shouldNotTransform() throws Exception {
+		String actual = "" + 
+				"private Random random = new Random();\n" + 
+				"private void sampleMethod() {\n" + 
+				"	Random random = new Random(10);\n" + 
+				"	int i = random.nextInt();\n" + 
+				"}"; 
+		assertNoChange(actual);
+	}
+
+	@Test
+	public void test_reuseObjectWithIntLiteralAsSeed_shouldTransform() throws Exception {
+		String actual = "" + 
+				"private Random random = new Random(10);\n" + 
+				"private void sampleMethod() {\n" + 
+				"	Random random = new Random(10);\n" + 
+				"	int i = random.nextInt();\n" + 
+				"}";
 		String expected = "" + 
-				"";
+				"private Random random = new Random(10);\n" + 
+				"private void sampleMethod() {\n" + 
+				"	int i = random.nextInt();\n" + 
+				"}";
+		assertChange(actual, expected);
+	}
+
+	@Test
+	public void test_extractObjectWithIntLiteralAsSeed_shouldTransform() throws Exception {
+		String actual = "" + 
+				"private void sampleMethod() {\n" + 
+				"	Random random = new Random(10);\n" + 
+				"	int i = random.nextInt();\n" + 
+				"}";
+		String expected = "" + 
+				"private Random random = new Random(10);\n" + 
+				"private void sampleMethod() {\n" + 
+				"	int i = random.nextInt();\n" + 
+				"}";
 		assertChange(actual, expected);
 	}
 
