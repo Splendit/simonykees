@@ -4,15 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
@@ -27,6 +37,7 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 		isSafeToAddImportMap.put(node, Boolean.valueOf(flagSafeImport));
 		return true;
 	}
+
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
@@ -53,6 +64,53 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 			onRewrite();
 			return true;
 		}
+		
+		Statement statementBeforeSetSeed = null;
+		String variableIdentifier = null;
+		
+		
+		if(expression.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment)expression.getParent();
+			if(variableDeclarationFragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+				statementBeforeSetSeed = (VariableDeclarationStatement)variableDeclarationFragment.getParent();
+				variableIdentifier = variableDeclarationFragment.getName().getIdentifier();
+			}
+			
+		} else if(expression.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			Assignment assignment = (Assignment)expression.getParent();
+			if(assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+				statementBeforeSetSeed = (ExpressionStatement)assignment.getParent();
+				if(assignment.getLeftHandSide().getNodeType() == ASTNode.SIMPLE_NAME) {
+					SimpleName simpleName = (SimpleName)assignment.getLeftHandSide();
+					variableIdentifier = simpleName.getIdentifier();
+				}
+			}			
+		}
+		if(statementBeforeSetSeed == null || variableIdentifier == null) {
+			return true;
+		}
+		
+		if(statementBeforeSetSeed.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return true;
+		}
+		Block block  = (Block)statementBeforeSetSeed.getParent();
+		
+		Expression seedArgument = ASTNodeUtil.convertToTypedList(node.arguments(), Expression.class).get(0);
+		ASTNode removedSetSeed = astRewrite.createMoveTarget(seedArgument);
+		astRewrite.remove(seedArgument, null);
+		
+		AST ast = block.getAST();
+		MethodInvocation setSeedInvocation = ast.newMethodInvocation();
+		setSeedInvocation.setExpression(ast.newSimpleName(variableIdentifier));
+		setSeedInvocation.setName(ast.newSimpleName("setSeed")); //$NON-NLS-1$
+		ListRewrite argumentListRewrite = astRewrite.getListRewrite(setSeedInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
+		argumentListRewrite.insertFirst(removedSetSeed, null);
+		ExpressionStatement setSeedInvocationStatement = ast.newExpressionStatement(setSeedInvocation);
+		
+		ListRewrite statementListRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+		statementListRewrite.insertAfter(setSeedInvocationStatement, statementBeforeSetSeed, null);
+		astRewrite.replace(node.getType(), getSecureRandomType(), null);
+		onRewrite();
 		return true;
 	}
 

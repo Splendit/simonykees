@@ -61,4 +61,18 @@ public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
+	@Test
+	public void visit_NewRandomWithSeed_shouldTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"		Random random = new Random(0L);\n" +
+				"	}";
+		String expected = "" +
+				"	void test() {\n" +
+				"		Random random = new SecureRandom();\n" +
+				"		random.setSeed(0L);\n" +
+				"	}";
+		assertChange(original, expected);
+	}
+
 }
