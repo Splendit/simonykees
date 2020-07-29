@@ -38,31 +38,27 @@ public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-	
-	
+
 	@Test
 	public void visit_ImportNotPossible_shouldTransform() throws Exception {
 
 		String original = "" +
-				"	class SecureRandom {}\n" + 
-				"	void test() {\n" + 
-				"		Random random = new Random();\n" + 
-				"		byte bytes[] = new byte[20];\n" + 
-				"		random.nextBytes(bytes);\n" + 
+				"	class SecureRandom {}\n" +
+				"	void test() {\n" +
+				"		Random random = new Random();\n" +
+				"		byte bytes[] = new byte[20];\n" +
+				"		random.nextBytes(bytes);\n" +
 				"	}";
 
 		String expected = "" +
-				"	class SecureRandom {}\n" + 
-				"	void test() {\n" + 
-				"		java.security.SecureRandom random = new java.security.SecureRandom();\n" + 
-				"		byte bytes[] = new byte[20];\n" + 
-				"		random.nextBytes(bytes);\n" + 
+				"	class SecureRandom {}\n" +
+				"	void test() {\n" +
+				"		java.security.SecureRandom random = new java.security.SecureRandom();\n" +
+				"		byte bytes[] = new byte[20];\n" +
+				"		random.nextBytes(bytes);\n" +
 				"	}";
 
 		assertChange(original, expected);
 	}
-	
-	
-
 
 }

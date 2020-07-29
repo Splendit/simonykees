@@ -4,21 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
@@ -37,7 +32,7 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		if (!analyzeInstanceCreation(node)) {
-			return false;
+			return true;
 		}
 		replaceUnsafeRandomInstanceCreation(node);
 		return true;
@@ -50,7 +45,7 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 			.resolveBinding();
 		if (!typeBinding.getQualifiedName()
 			.equals(java.util.Random.class.getName())) {
-			return false;
+			return true;
 		}
 
 		replaceUnsafeRandomVariableType(node);
@@ -77,47 +72,13 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 			return false;
 		}
 
-		ASTNode astNode = classInstanceCreation;
-		while (astNode != null) {
-			StructuralPropertyDescriptor locationInParent = astNode.getLocationInParent();
-			if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
-				return false;
-			}
-
-			if (locationInParent == MethodInvocation.EXPRESSION_PROPERTY) {
-				MethodInvocation methodInvocation = (MethodInvocation) astNode.getParent();
-				ITypeBinding declaringClass = methodInvocation.resolveMethodBinding()
-					.getDeclaringClass();
-				if (!ClassRelationUtil.isContentOfType(declaringClass, java.util.Random.class.getName())) {
-					return false;
-				}
-				String methodName = methodInvocation.getName()
-					.getIdentifier();
-				return methodName.startsWith("next") //$NON-NLS-1$
-						|| methodName.equals("doubles") //$NON-NLS-1$
-						|| methodName.equals("ints") //$NON-NLS-1$
-						|| methodName.equals("longs"); //$NON-NLS-1$
-			}
-
-			if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-				return true;
-			}
-
-			if (locationInParent == ExpressionStatement.EXPRESSION_PROPERTY) {
-				return true;
-			}
-
-			boolean continueLoop = locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY
-					|| locationInParent == ParenthesizedExpression.EXPRESSION_PROPERTY;
-
-			if (!continueLoop) {
-				break;
-			}
-
-			astNode = astNode.getParent();
-
+		Expression expression = classInstanceCreation;
+		while (expression.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
+			expression = (Expression) expression.getParent();
 		}
-		return false;
+
+		return expression.getLocationInParent() != ClassInstanceCreation.ARGUMENTS_PROPERTY
+				&& expression.getLocationInParent() != MethodInvocation.ARGUMENTS_PROPERTY;
 	}
 
 	private Type getSecureRandomType() {
