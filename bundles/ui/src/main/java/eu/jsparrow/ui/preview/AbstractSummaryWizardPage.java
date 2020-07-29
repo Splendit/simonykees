@@ -38,7 +38,6 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -351,13 +350,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		 * therefore inserted as text into the searchText). Without this, the
 		 * selection will not change.
 		 */
-		searchText.addModifyListener(new ModifyListener() {
-
-			@Override
-			public void modifyText(ModifyEvent e) {
-				updateSearch(searchText, filter);
-			}
-		});
+		searchText.addModifyListener((ModifyEvent e) -> updateSearch(searchText, filter));
 
 		/*
 		 * Handles hitting the delete search text button and clicking on the
