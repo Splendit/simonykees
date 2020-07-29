@@ -34,10 +34,25 @@ public class ReplaceableParameter {
 	 */
 	public ReplaceableParameter(StringLiteral previous, StringLiteral next, Expression parameter, String setterName,
 			int position) {
+		this(previous, next, parameter, position);
+		this.setterName = setterName;
+	}
+
+	/**
+	 * 
+	 * @param previous
+	 *            string literal preceding the component to be replaced
+	 * @param next
+	 *            string literal succeeding the component to be replaced
+	 * @param parameter
+	 *            the component to be replaced with a parameter
+	 * @param position
+	 *            the parameter's index
+	 */
+	public ReplaceableParameter(StringLiteral previous, StringLiteral next, Expression parameter, int position) {
 		this.previous = previous;
 		this.next = next;
 		this.parameter = parameter;
-		this.setterName = setterName;
 		this.position = position;
 	}
 

@@ -20,9 +20,15 @@ public abstract class AbstractQueryComponentsAnalyzer {
 	protected static final String SIMPLE_QUOTATION_MARK = "'"; //$NON-NLS-1$
 
 	protected List<Expression> components;
+	private int indexOffset;
+
+	AbstractQueryComponentsAnalyzer(List<Expression> components, int indexOffset) {
+		this.components = components;
+		this.indexOffset = indexOffset;
+	}
 
 	AbstractQueryComponentsAnalyzer(List<Expression> components) {
-		this.components = components;
+		this(components, 1);
 	}
 
 	/**
@@ -94,7 +100,7 @@ public abstract class AbstractQueryComponentsAnalyzer {
 
 		List<ReplaceableParameter> parameters = new ArrayList<>();
 
-		int parameterPosition = 1;
+		int parameterPosition = indexOffset;
 		for (Expression component : nonLiteralComponents) {
 			int componentIndex = components.indexOf(component);
 			ReplaceableParameter parameter = createReplaceableParameter(componentIndex, parameterPosition);

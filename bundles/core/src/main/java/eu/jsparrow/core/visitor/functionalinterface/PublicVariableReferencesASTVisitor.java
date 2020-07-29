@@ -105,8 +105,8 @@ public class PublicVariableReferencesASTVisitor extends ASTVisitor {
 	 */
 	public List<SimpleName> getUnassignedVariableReferences() {
 		return publicVariableReferences.stream()
-			.filter(ref -> !assignedPublicVariables.stream()
-				.anyMatch(assigned -> assigned.getIdentifier()
+			.filter(ref -> assignedPublicVariables.stream()
+				.noneMatch(assigned -> assigned.getIdentifier()
 					.equals(ref.getIdentifier())))
 			.collect(Collectors.toList());
 	}

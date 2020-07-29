@@ -19,6 +19,7 @@ public class Messages extends NLS {
 	public static String AbstractSelectRulesWizardPage_freemiumRegirementsMessage;
 	public static String AbstractSelectRulesWizardPage_neitherRegisteredNorLicensed_statusInfoMessage;
 	public static String AbstractSelectRulesWizardPage_notOnlyFreemiumSelected_statusInfoMessage;
+	public static String AbstractSelectRulesWizardPage_seeDocumentation;
 	public static String AbstractSelectRulesWizardPage_warning_RulesInProfileNotApplicable;
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
@@ -114,6 +115,7 @@ public class Messages extends NLS {
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputLabel;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputText;
 	public static String ConfigureProfileSelectRulesWizardPageModel_error_NameExists;
+	public static String ConfigureProfileSelectRulesWIzardPageModel_error_nameReserved;
 	public static String ConfigureRenameFieldsRuleWizard_WizardTitle_RenameFields;
 	public static String CustomTextEditChangePreviewViewer_originalCode;
 	public static String CustomTextEditChangePreviewViewer_refactoredCode;
@@ -464,6 +466,8 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_profileSettingsGroupTitle;
 	public static String SimonykeesPreferencePage_removeProfileButtonLabel;
 	public static String SimonykeesPreferencePage_Replace;
+	public static String SimonykeesPreferencePage_reservedProfileNameError;
+
 	public static String SimonykeesPreferencePage_resolvePackagesRecursivelyLabel;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_SelectedFileDoesNotExist;
@@ -547,6 +551,8 @@ public class Messages extends NLS {
 	public static String UseListSortRule_name;
 	public static String UseParameterizedJPAQueryRule_description;
 	public static String UseParameterizedJPAQueryRule_name;
+	public static String UseParameterizedLDAPQueryRule_description;
+	public static String UseParameterizedLDAPQueryRule_name;
 	public static String UseStringBuilderAppendRule_description;
 	public static String UseStringBuilderAppendRule_name;
 	public static String UseStringJoinRule_description;

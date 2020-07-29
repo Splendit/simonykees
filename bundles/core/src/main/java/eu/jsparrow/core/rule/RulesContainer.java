@@ -88,6 +88,7 @@ import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedQueryRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedJPAQueryRule;
+import eu.jsparrow.core.rule.impl.UseParameterizedLDAPQueryRule;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.UseStringJoinRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
@@ -166,6 +167,7 @@ public class RulesContainer {
 				 */
 				new UseParameterizedQueryRule(),
 				new UseParameterizedJPAQueryRule(),
+				new UseParameterizedLDAPQueryRule(),
 				new EscapeUserInputsInSQLQueriesRule(),
 
 				/*

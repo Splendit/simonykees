@@ -137,6 +137,19 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			licenseModel = factoryService.createDemoLicenseModel();
 		}
 
+		// Verify the persisted license' secret matches the hardware ID
+		String secret = systemInfoWrapper.createUniqueHardwareId();
+		boolean validSecret = licenseService.verifySecretKey(licenseModel, secret);
+		if (!validSecret) {
+			handleStartUpPersistenceFailure(shell, new PersistenceException("Invalid license data.")); //$NON-NLS-1$
+			licenseModel = factoryService.createDemoLicenseModel();
+			try {
+				persistenceService.saveToPersistence(licenseModel);
+			} catch (PersistenceException e) {
+				logger.error("License could not be persisted", e); //$NON-NLS-1$
+			}
+		}
+
 		Optional<String> encryptedEndpointOpt = loadEncryptedEndpointFromPersistence();
 		try {
 			String endpoint = ""; //$NON-NLS-1$
@@ -318,6 +331,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	public void updateValidationResult() {
 		LicenseModel model = tryLoadModelFromPersistence();
+		
 		Optional<String> encryptedEndpointOpt = loadEncryptedEndpointFromPersistence();
 
 		try {
@@ -356,6 +370,11 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			logger.warn("Error while loading stored license, using default demo license", e); //$NON-NLS-1$
 			model = factoryService.createDemoLicenseModel();
 		}
+		
+		String secret = systemInfoWrapper.createUniqueHardwareId();
+		if(!licenseService.verifySecretKey(model, secret)) {
+			model = factoryService.createDemoLicenseModel();
+		}
 		return model;
 	}
 
@@ -374,13 +393,14 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	private void handleStartUpPersistenceFailure(Shell shell, PersistenceException e) {
 		logger.error("Failed to load stored license. Falling back to free license.", e); //$NON-NLS-1$
-		String message = Messages.MessageDialog_licensingError_failedToLoad;
+		String message = NLS.bind(Messages.MessageDialog_licensingError_failedToLoad, e.getMessage());
+		
 		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
 	}
 
 	private void handleStartUpValidationFailure(Shell shell, Exception e) {
 		logger.error("Failed to validate license. ", e); //$NON-NLS-1$
-		String message = Messages.MessageDialog_licensingError_failedToValidate;
+		String message = NLS.bind(Messages.MessageDialog_licensingError_failedToValidate, e.getMessage());
 		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
 	}
 

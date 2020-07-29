@@ -21,7 +21,14 @@ public class TestFunctionalInterfaceRule {
 			String s = FINAL_INITIALIZED_STRING_FIELD;
 		}
 	};
-	
+
+	private AFunctionalInterface reusingFieldDuringInitialization = new AFunctionalInterface() {
+		@Override
+		public void method(int a) {
+			reusingFieldDuringInitialization.toString();
+		}
+	};
+
 	private final String FINAL_INITIALIZED_STRING_FIELD = "initialized";
 	
 	private AFunctionalInterface usingUnInitializedField = new AFunctionalInterface() {

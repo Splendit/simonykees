@@ -86,11 +86,17 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		Expression queryMethodArgument = analyzeStatementExecuteQuery(methodInvocation);
-		if(queryMethodArgument == null) {
+		if (queryMethodArgument == null) {
 			return true;
 		}
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(queryMethodArgument);
-		if (sqlVariableVisitor == null) {
+
+		if (queryMethodArgument.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return true;
+		}
+		SimpleName querySimpleName = (SimpleName) queryMethodArgument;
+
+		SqlVariableAnalyzerVisitor sqlVariableVisitor = new SqlVariableAnalyzerVisitor(querySimpleName);
+		if (!sqlVariableVisitor.analyze()) {
 			return true;
 		}
 
