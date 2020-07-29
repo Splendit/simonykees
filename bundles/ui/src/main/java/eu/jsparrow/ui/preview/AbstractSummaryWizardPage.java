@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
@@ -35,7 +34,6 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
@@ -70,7 +68,6 @@ import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.FileViewerFilter;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
-import eu.jsparrow.ui.preview.model.summary.RuleTimesModel;
 import eu.jsparrow.ui.preview.model.summary.RulesPerFileModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
@@ -282,32 +279,35 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		filesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		filesGroup.setText(Messages.SummaryWizardPage_Files);
 
-		Composite searchGroup = new Composite(filesGroup, SWT.NONE);
-		searchGroup.setLayout(new GridLayout(1, false));
+		Composite searchComposite = new Composite(filesGroup, SWT.NONE);
+		searchComposite.setLayout(new GridLayout(1, false));
 		GridData searchGroupGridData = new GridData(SWT.LEFT, SWT.FILL, false, false);
 		searchGroupGridData.widthHint = 600;
-		searchGroup.setLayoutData(searchGroupGridData);
+		searchComposite.setLayoutData(searchGroupGridData);
 
-		final Text searchText = new Text(searchGroup, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		final Text searchText = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
 		searchText.setMessage(Messages.AbstractSummaryWizardPage_searchLabel);
 		searchText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		searchText.setToolTipText(Messages.AbstractSummaryWizardPage_searchBoxToolTipText);
 
 		// content for autocomplete proposal window with specified size
-		IContentProposalProvider proposalProvider = new PartialMatchContentProposalProvider(summaryWizardPageModel.getProposalProviderContents());
+		IContentProposalProvider proposalProvider = new PartialMatchContentProposalProvider(
+				summaryWizardPageModel.getProposalProviderContents());
 		ContentProposalAdapter proposalAdapter = new ContentProposalAdapter(searchText, new TextContentAdapter(),
 				proposalProvider, null, null);
 		proposalAdapter.setPropagateKeys(true);
 		proposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
-		proposalAdapter.setPopupSize(new Point(450, 80));
+		proposalAdapter.setPopupSize(new Point(580, 80));
 
-		SashForm sashForm = new SashForm(filesGroup, SWT.HORIZONTAL);
-		sashForm.setLayout(new GridLayout());
-		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		sashForm.setBackground(sashForm.getDisplay()
-			.getSystemColor(SWT.COLOR_GRAY));
+		Composite filesSectionComposite = new Composite(filesGroup, SWT.NONE);
+		filesSectionComposite.setLayout(new GridLayout(2, true));
+		filesSectionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		fileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
+		Composite filesComposite = new Composite(filesSectionComposite, SWT.NONE);
+		filesComposite.setLayout(new GridLayout(1, true));
+		filesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		fileTableViewer = new TableViewer(filesComposite, SWT.SINGLE);
 		Table fileTable = fileTableViewer.getTable();
 		fileTable.setHeaderVisible(true);
 		fileTable.setLinesVisible(true);
@@ -325,9 +325,15 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		});
 		TableViewerColumn filePathCol = new TableViewerColumn(fileTableViewer, SWT.NONE);
 		TableColumn pathColumn = filePathCol.getColumn();
-		pathColumn.setWidth(200);
 		pathColumn.setText(Messages.AbstractSummaryWizardPage_fileTableViewerTitle);
 		pathColumn.setToolTipText(Messages.AbstractSummaryWizardPage_fileTableViewerToolTipText);
+
+		TableColumnLayout filesTableLayout = new TableColumnLayout();
+		filesComposite.setLayout(filesTableLayout);
+		filesTableLayout.setColumnData(pathColumn, new ColumnWeightData(100));
+
+		TableColumnLayout tableLayout1 = new TableColumnLayout();
+		tableLayout1.setColumnData(pathColumn, new ColumnWeightData(100));
 
 		FileViewerFilter filter = new FileViewerFilter();
 
@@ -368,7 +374,11 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		});
 		fileTableViewer.addFilter(filter);
 
-		rulesPerFileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
+		Composite rulesInFileComposite = new Composite(filesSectionComposite, SWT.NONE);
+		rulesInFileComposite.setLayout(new GridLayout(1, true));
+		rulesInFileComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		rulesPerFileTableViewer = new TableViewer(rulesInFileComposite, SWT.SINGLE);
 		Table table = rulesPerFileTableViewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
@@ -384,11 +394,15 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		});
 		TableViewerColumn ruleNameCol = new TableViewerColumn(rulesPerFileTableViewer, SWT.NONE);
 		TableColumn column = ruleNameCol.getColumn();
-		column.setWidth(200);
+		column.setWidth(650);
 		column.setText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerTitle);
 		column.setToolTipText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText);
+
+		TableColumnLayout rulesInFileTableLayout = new TableColumnLayout();
+		rulesInFileComposite.setLayout(rulesInFileTableLayout);
+		rulesInFileTableLayout.setColumnData(column, new ColumnWeightData(100));
 	}
-	
+
 	private void updateSearch(Text searchText, FileViewerFilter filter) {
 		filter.setSearchString(searchText.getText());
 		fileTableViewer.refresh();
