@@ -24,7 +24,59 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
+/**
+ * Used to replace invocations of constructors of {@link java.util.Random}.
+ * <p>
+ * Invocations of {@link java.util.Random#Random() } are simply replaced by
+ * invocations of {@link java.security.SecureRandom#SecureRandom() }, and when
+ * replacing {@link java.util.Random#Random(long)}, additionally a subsequent
+ * invocation of {@link java.util.Random#setSeed(long)} is inserted.
+ * <p>
+ * Example:
+ * 
+ * <pre>
+ * Random random = new Random(0L);
+ * </pre>
+ * 
+ * is transformed to:
+ * 
+ * <pre>
+ * Random random = new SecureRandom();
+ * random.setSeed(0L);
+ * </pre>
+ * 
+ * @since 3.20.0
+ */
 public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
+
+	/**
+	 * This class is intended to be used exclusively inside
+	 * {@link UseClassSecureRandomASTVisitor} for storing information needed for
+	 * transformation, without any logics.
+	 *
+	 */
+	private static class TransformationData {
+		private final ClassInstanceCreation randomConstruction;
+		private final Expression nonParenthesized;
+		private final Expression seedArgument;
+		private final Expression assignmentTarget;
+		private final Statement randomConstructionStatement;
+		private final Block blockOfConstructionStatement;
+
+		public TransformationData(ClassInstanceCreation classInstanceCreation, Expression nonParenthesized,
+				Expression seedArgument,
+				Expression assignmentTarget, Statement randomConstructionStatement,
+				Block blockOfConstructionStatement) {
+			super();
+			this.randomConstruction = classInstanceCreation;
+			this.nonParenthesized = nonParenthesized;
+			this.seedArgument = seedArgument;
+
+			this.assignmentTarget = assignmentTarget;
+			this.randomConstructionStatement = randomConstructionStatement;
+			this.blockOfConstructionStatement = blockOfConstructionStatement;
+		}
+	}
 
 	private static final String SECURE_RANDOM_QUALIFIED_NAME = java.security.SecureRandom.class.getName();
 	private final Map<CompilationUnit, Boolean> isSafeToAddImportMap = new HashMap<>();
@@ -37,14 +89,13 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 		return true;
 	}
 
-	@Override
-	public boolean visit(ClassInstanceCreation node) {
+	private TransformationData createTransformationData(ClassInstanceCreation node) {
 
 		ITypeBinding typeBinding = node.getType()
 			.resolveBinding();
 		if (!typeBinding.getQualifiedName()
 			.equals(java.util.Random.class.getName())) {
-			return true;
+			return null;
 		}
 
 		Expression nonParenthesized = node;
@@ -53,71 +104,89 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 		}
 		if (nonParenthesized.getLocationInParent() == ClassInstanceCreation.ARGUMENTS_PROPERTY
 				|| nonParenthesized.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
-			return true;
+			return null;
 		}
 
 		if (node.arguments()
 			.isEmpty()) {
-			if (nonParenthesized != node) {
-				astRewrite.replace(nonParenthesized, node, null);
-			}
-			astRewrite.replace(node.getType(), getSecureRandomType(), null);
-			onRewrite();
-			return true;
+			return new TransformationData(node, nonParenthesized, null, null, null, null);
 		}
-
-		Statement statementBeforeSetSeed = null;
+		
+		Statement randomConstructionStatement = null;
 		Expression assignmentTarget = null;
 
 		if (nonParenthesized.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
 			VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) nonParenthesized
 				.getParent();
 			if (variableDeclarationFragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-				statementBeforeSetSeed = (VariableDeclarationStatement) variableDeclarationFragment.getParent();
+				randomConstructionStatement = (VariableDeclarationStatement) variableDeclarationFragment.getParent();
 				assignmentTarget = variableDeclarationFragment.getName();
 			}
 
 		} else if (nonParenthesized.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment) nonParenthesized.getParent();
 			if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-				statementBeforeSetSeed = (ExpressionStatement) assignment.getParent();
+				randomConstructionStatement = (ExpressionStatement) assignment.getParent();
 				assignmentTarget = assignment.getLeftHandSide();
 			}
 		}
-		if (statementBeforeSetSeed == null || assignmentTarget == null) {
-			return true;
+
+		if (randomConstructionStatement == null || assignmentTarget == null) {
+			return null;
 		}
 
-		if (statementBeforeSetSeed.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return true;
+		if (randomConstructionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return null;
 		}
 
-		Expression setSeedExpression = (Expression) astRewrite.createCopyTarget(assignmentTarget);
-
-		Block block = (Block) statementBeforeSetSeed.getParent();
-
+		Block blockOfConstructionStatement = (Block) randomConstructionStatement.getParent();
 		Expression seedArgument = ASTNodeUtil.convertToTypedList(node.arguments(), Expression.class)
 			.get(0);
-		ASTNode removedSetSeed = astRewrite.createMoveTarget(seedArgument);
-		astRewrite.remove(seedArgument, null);
 
-		AST ast = block.getAST();
+		return new TransformationData(node, nonParenthesized, seedArgument, assignmentTarget,
+				randomConstructionStatement, blockOfConstructionStatement);
+	}
+
+	@Override
+	public boolean visit(ClassInstanceCreation node) {
+		TransformationData transformationData = createTransformationData(node);
+		if (transformationData != null) {
+			transform(transformationData);
+		}
+		return true;
+	}
+
+	void transform(TransformationData data) {
+		if (data.seedArgument == null) {
+			if (data.nonParenthesized != data.randomConstruction) {
+				astRewrite.replace(data.nonParenthesized, data.randomConstruction, null);
+			}
+			astRewrite.replace(data.randomConstruction.getType(), getSecureRandomType(), null);
+			onRewrite();
+			return;
+		}
+
+		Expression insertedSetSeedExpression = (Expression) astRewrite.createCopyTarget(data.assignmentTarget);
+		ASTNode insertedSetSeedArgument = astRewrite.createMoveTarget(data.seedArgument);
+		astRewrite.remove(data.seedArgument, null);
+
+		AST ast = data.blockOfConstructionStatement.getAST();
 		MethodInvocation setSeedInvocation = ast.newMethodInvocation();
-		setSeedInvocation.setExpression(setSeedExpression);
+		setSeedInvocation.setExpression(insertedSetSeedExpression);
 		setSeedInvocation.setName(ast.newSimpleName("setSeed")); //$NON-NLS-1$
 		ListRewrite argumentListRewrite = astRewrite.getListRewrite(setSeedInvocation,
 				MethodInvocation.ARGUMENTS_PROPERTY);
-		argumentListRewrite.insertFirst(removedSetSeed, null);
+		argumentListRewrite.insertFirst(insertedSetSeedArgument, null);
 		ExpressionStatement setSeedInvocationStatement = ast.newExpressionStatement(setSeedInvocation);
 
-		ListRewrite statementListRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-		statementListRewrite.insertAfter(setSeedInvocationStatement, statementBeforeSetSeed, null);
-		if (nonParenthesized != node) {
-			astRewrite.replace(nonParenthesized, node, null);
+		ListRewrite statementListRewrite = astRewrite.getListRewrite(data.blockOfConstructionStatement,
+				Block.STATEMENTS_PROPERTY);
+		statementListRewrite.insertAfter(setSeedInvocationStatement, data.randomConstructionStatement, null);
+		if (data.nonParenthesized != data.randomConstruction) {
+			astRewrite.replace(data.nonParenthesized, data.randomConstruction, null);
 		}
-		astRewrite.replace(node.getType(), getSecureRandomType(), null);
+		astRewrite.replace(data.randomConstruction.getType(), getSecureRandomType(), null);
 		onRewrite();
-		return true;
 	}
 
 	@Override
