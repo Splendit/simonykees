@@ -17,7 +17,10 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.statistic.StopWatchUtil;
+import eu.jsparrow.core.visitor.renaming.FieldMetaData;
+import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
@@ -191,12 +194,97 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		for (RefactoringRule rule : rules) {
 			DocumentChange change = state.getChangeIfPresent(rule);
 			if (change != null) {
-				rulesWithChanges.add(rule.getRuleDescription()
-					.getName());
+				List<String> ruleNamesToDisplay = computeRuleNames(rule, compUnit);
+				rulesWithChanges.addAll(ruleNamesToDisplay);
 			}
 		}
 
 		return new ChangedFilesModel(fileName, left, right, rulesWithChanges);
+	}
+
+	private List<String> computeRuleNames(RefactoringRule rule, ICompilationUnit compUnit) {
+		List<String> rulesWithChanges = new ArrayList<>();
+		String compUnitName = compUnit.getElementName();
+		if(rule instanceof FieldsRenamingRule) {
+			FieldsRenamingRule fieldsRenaming = (FieldsRenamingRule)rule;
+			List<FieldMetaData> metaDataList = fieldsRenaming.getMetaData();
+			
+			List<JavaAccessModifier> compUnitAccessModifiers = metaDataList.stream()
+				.filter(md -> compUnitName.equals(md.getClassDeclarationName()))
+				.map(FieldMetaData::getFieldModifier)
+				.collect(Collectors.toList());
+			
+			long numPrivate = compUnitAccessModifiers.stream()
+					.filter(JavaAccessModifier.PRIVATE::equals)
+					.count();
+			if(numPrivate > 0) {
+				rulesWithChanges.add(numPrivate + " Private Fields");
+			}
+			
+			long numPackagePrivate = compUnitAccessModifiers.stream()
+					.filter(JavaAccessModifier.PACKAGE_PRIVATE::equals)
+					.count();
+			if(numPackagePrivate > 0) {
+				rulesWithChanges.add(numPackagePrivate + " Package Private Fields");
+			}
+			
+			long numProtected = compUnitAccessModifiers.stream()
+					.filter(JavaAccessModifier.PROTECTED::equals)
+					.count();
+			if(numProtected > 0) {
+				rulesWithChanges.add(numProtected + " Protected Fields");
+			}
+			
+			long numPublic = compUnitAccessModifiers.stream()
+					.filter(JavaAccessModifier.PUBLIC::equals)
+					.count();
+			if(numPublic > 0) {
+				rulesWithChanges.add(numPublic + " Public Fields");
+			}
+			
+			long publicFieldReferencesFromOtherClasses = metaDataList.stream()
+					.filter(md -> md.getFieldModifier().equals(JavaAccessModifier.PUBLIC))
+					.flatMap(metaData -> {
+						return metaData.getTargetICompilationUnits()
+								.stream()
+								.filter(icu -> !icu.getElementName().equals(metaData.getClassDeclarationName()));
+					})
+					.filter(md -> compUnitName.equals(md.getElementName()))
+					.count();
+			if(publicFieldReferencesFromOtherClasses > 0) {
+				rulesWithChanges.add(publicFieldReferencesFromOtherClasses + " References of renamed public fields declared in other classes");
+			}
+			
+			long protectedFieldReferencesFromOtherClasses = metaDataList.stream()
+					.filter(md -> md.getFieldModifier().equals(JavaAccessModifier.PROTECTED))
+					.flatMap(metaData -> {
+						return metaData.getTargetICompilationUnits()
+								.stream()
+								.filter(icu -> !icu.getElementName().equals(metaData.getClassDeclarationName()));
+					})
+					.filter(md -> compUnitName.equals(md.getElementName()))
+					.count();
+			if(protectedFieldReferencesFromOtherClasses > 0) {
+				rulesWithChanges.add(protectedFieldReferencesFromOtherClasses + " References of renamed protected fields declared in other classes");
+			}
+			
+			long packageProtectedFieldReferencesFromOtherClasses = metaDataList.stream()
+					.filter(md -> md.getFieldModifier().equals(JavaAccessModifier.PACKAGE_PRIVATE))
+					.flatMap(metaData -> {
+						return metaData.getTargetICompilationUnits()
+								.stream()
+								.filter(icu -> !icu.getElementName().equals(metaData.getClassDeclarationName()));
+					})
+					.filter(md -> compUnitName.equals(md.getElementName()))
+					.count();
+			if(packageProtectedFieldReferencesFromOtherClasses > 0) {
+				rulesWithChanges.add(packageProtectedFieldReferencesFromOtherClasses + " References of renamed package private fields declared in other classes");
+			}
+		} else {
+			rulesWithChanges.add(rule.getRuleDescription()
+					.getName());
+		}
+		return rulesWithChanges;
 	}
 
 	private void updateIssuesFixed() {
