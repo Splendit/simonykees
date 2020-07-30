@@ -66,33 +66,32 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 		}
 		
 		Statement statementBeforeSetSeed = null;
-		String variableIdentifier = null;
-		
+		Expression assignmentTarget = null;
 		
 		if(expression.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
 			VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment)expression.getParent();
 			if(variableDeclarationFragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
 				statementBeforeSetSeed = (VariableDeclarationStatement)variableDeclarationFragment.getParent();
-				variableIdentifier = variableDeclarationFragment.getName().getIdentifier();
+				assignmentTarget = variableDeclarationFragment.getName();
 			}
 			
 		} else if(expression.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
 			Assignment assignment = (Assignment)expression.getParent();
 			if(assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
 				statementBeforeSetSeed = (ExpressionStatement)assignment.getParent();
-				if(assignment.getLeftHandSide().getNodeType() == ASTNode.SIMPLE_NAME) {
-					SimpleName simpleName = (SimpleName)assignment.getLeftHandSide();
-					variableIdentifier = simpleName.getIdentifier();
-				}
+				assignmentTarget = assignment.getLeftHandSide();
 			}			
 		}
-		if(statementBeforeSetSeed == null || variableIdentifier == null) {
+		if(statementBeforeSetSeed == null || assignmentTarget == null) {
 			return true;
 		}
 		
 		if(statementBeforeSetSeed.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return true;
 		}
+		
+		Expression setSeedExpression = (Expression)astRewrite.createCopyTarget(assignmentTarget);
+		
 		Block block  = (Block)statementBeforeSetSeed.getParent();
 		
 		Expression seedArgument = ASTNodeUtil.convertToTypedList(node.arguments(), Expression.class).get(0);
@@ -101,7 +100,7 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 		
 		AST ast = block.getAST();
 		MethodInvocation setSeedInvocation = ast.newMethodInvocation();
-		setSeedInvocation.setExpression(ast.newSimpleName(variableIdentifier));
+		setSeedInvocation.setExpression(setSeedExpression);
 		setSeedInvocation.setName(ast.newSimpleName("setSeed")); //$NON-NLS-1$
 		ListRewrite argumentListRewrite = astRewrite.getListRewrite(setSeedInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 		argumentListRewrite.insertFirst(removedSetSeed, null);

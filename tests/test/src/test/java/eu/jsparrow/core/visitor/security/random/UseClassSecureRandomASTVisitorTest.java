@@ -74,5 +74,26 @@ public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 				"	}";
 		assertChange(original, expected);
 	}
-
+	
+	@Test
+	public void visit_NewRandomWithSeedAssignedToField_shouldTransform() throws Exception {
+		String original = "" +
+				"		class RandomWrapper {\n" + 
+				"			Random random;\n" + 
+				"		}\n" + 
+				"		RandomWrapper wrapper = new RandomWrapper();\n" + 
+				"		void test() {\n" + 
+				"			this.wrapper.random = new Random(0L);\n" + 
+				"		}";
+		String expected = "" +
+				"		class RandomWrapper {\n" + 
+				"			Random random;\n" + 
+				"		}\n" + 
+				"		RandomWrapper wrapper = new RandomWrapper();\n" + 
+				"		void test() {\n" + 
+				"			this.wrapper.random = new SecureRandom();\n" + 
+				"			this.wrapper.random.setSeed(0L);\n" + 
+				"		}";
+		assertChange(original, expected);
+	}
 }
