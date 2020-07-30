@@ -1,20 +1,17 @@
 package eu.jsparrow.core.visitor.security;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.SimpleName;
 
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- * Used to determine whether the method which is called fulfills the following
- * conditions:
+ * Used to determine whether a given {@link IMethodBinding} fulfills the
+ * following conditions:
  * <ul>
  * <li>The method must be declared by a specified class.</li>
  * <li>The method must have a specified name and signature.</li>
@@ -22,20 +19,12 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * 
  * @since 3.19.0
  */
-public abstract class AbstractMethodInvocationAnalyzer {
+public class AbstractMethodInvocationAnalyzer {
 
-	private final MethodInvocation methodInvocation;
-	private final SimpleName methodSimpleName;
 	private final IMethodBinding methodBinding;
-	private final ITypeBinding declaringClass;
-	private final List<Expression> arguments;
 
-	public AbstractMethodInvocationAnalyzer(MethodInvocation methodInvocation) {
-		this.methodInvocation = methodInvocation;
-		methodSimpleName = methodInvocation.getName();
-		methodBinding = methodInvocation.resolveMethodBinding();
-		declaringClass = methodBinding.getDeclaringClass();
-		arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+	public AbstractMethodInvocationAnalyzer(IMethodBinding methodBinding) {
+		this.methodBinding = methodBinding;
 	}
 
 	/**
@@ -45,48 +34,29 @@ public abstract class AbstractMethodInvocationAnalyzer {
 	 *            to be declared
 	 * @param methodName
 	 *            expected method name
-	 * @param parameterTypes
+	 * @param parameterTypeNames
 	 *            list of the qualified names of the expected parameter types.
 	 * @return true if all conditions given by the parameters are fulfilled,
 	 *         otherwise false.
 	 */
-	public boolean analyze(String declaringTypeName, String methodName, List<String> parameterTypes) {
-		if (!methodSimpleName.getIdentifier()
+	public boolean analyze(String declaringTypeName, String methodName, List<String> parameterTypeNames) {
+		if (!methodBinding.getName()
 			.equals(methodName)) {
 			return false;
 		}
 
-		if (!ClassRelationUtil.isContentOfType(declaringClass, declaringTypeName)) {
+		if (!ClassRelationUtil.isContentOfType(methodBinding.getDeclaringClass(), declaringTypeName)) {
 			return false;
 		}
 
-		if (arguments.size() != parameterTypes.size()) {
+		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
+
+		if (parameterTypes.length != parameterTypeNames.size()) {
 			return false;
 		}
 
-		Iterator<String> parameterTypesIterator = parameterTypes.iterator();
-		return arguments.stream()
-			.map(Expression::resolveTypeBinding)
+		Iterator<String> parameterTypesIterator = parameterTypeNames.iterator();
+		return Arrays.stream(parameterTypes)
 			.allMatch(t -> ClassRelationUtil.isContentOfType(t, parameterTypesIterator.next()));
-	}
-
-	public MethodInvocation getMethodInvocation() {
-		return methodInvocation;
-	}
-
-	public SimpleName getMethodSimpleName() {
-		return methodSimpleName;
-	}
-
-	public IMethodBinding getMethodBinding() {
-		return methodBinding;
-	}
-
-	public ITypeBinding getDeclaringClass() {
-		return declaringClass;
-	}
-
-	public List<Expression> getArguments() {
-		return arguments;
 	}
 }

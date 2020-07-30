@@ -7,6 +7,8 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+
 /**
  * Determines whether a method invocation references one of the following
  * methods:
@@ -33,9 +35,12 @@ public class DirContextSearchInvocationAnalyzer extends AbstractMethodInvocation
 						javax.naming.directory.SearchControls.class.getName()));
 
 	private static final String SEARCH = "search";
+	
+	private final List<Expression> arguments;
 
 	public DirContextSearchInvocationAnalyzer(MethodInvocation methodInvocation) {
-		super(methodInvocation);
+		super(methodInvocation.resolveMethodBinding());
+		arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
 	}
 
 	public boolean analyze() {
@@ -54,7 +59,7 @@ public class DirContextSearchInvocationAnalyzer extends AbstractMethodInvocation
 	 * 
 	 */
 	public Expression getFilterExpression() {
-		return getArguments().get(1);
+		return arguments.get(1);
 	}
 
 }
