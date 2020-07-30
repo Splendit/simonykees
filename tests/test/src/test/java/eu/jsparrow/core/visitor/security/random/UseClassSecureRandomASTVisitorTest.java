@@ -38,6 +38,26 @@ public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_ParenthesizedNewRandomInvocation_shouldTransform() throws Exception {
+
+		String original = "" +
+				"	void test() {\n" +
+				"		Random random = ((new Random()));\n" +
+				"		byte bytes[] = new byte[20];\n" +
+				"		random.nextBytes(bytes);\n" +
+				"	}";
+
+		String expected = "" +
+				"	void test() {\n" +
+				"		Random random = new SecureRandom();\n" +
+				"		byte bytes[] = new byte[20];\n" +
+				"		random.nextBytes(bytes);" +
+				"	}";
+
+		assertChange(original, expected);
+	}
 
 	@Test
 	public void visit_ImportNotPossible_shouldTransform() throws Exception {
@@ -66,6 +86,20 @@ public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 		String original = "" +
 				"	void test() {\n" +
 				"		Random random = new Random(0L);\n" +
+				"	}";
+		String expected = "" +
+				"	void test() {\n" +
+				"		Random random = new SecureRandom();\n" +
+				"		random.setSeed(0L);\n" +
+				"	}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_ParenthesizedNewRandomWithSeed_shouldTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"		Random random = ((new Random(0L)));\n" +
 				"	}";
 		String expected = "" +
 				"	void test() {\n" +

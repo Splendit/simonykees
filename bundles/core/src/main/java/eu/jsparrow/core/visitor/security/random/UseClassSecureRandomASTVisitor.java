@@ -15,7 +15,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -38,7 +37,6 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 		return true;
 	}
 
-
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
 
@@ -49,65 +47,74 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 			return true;
 		}
 
-		Expression expression = node;
-		while (expression.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
-			expression = (Expression) expression.getParent();
+		Expression nonParenthesized = node;
+		while (nonParenthesized.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
+			nonParenthesized = (Expression) nonParenthesized.getParent();
 		}
-		if (expression.getLocationInParent() == ClassInstanceCreation.ARGUMENTS_PROPERTY
-				|| expression.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+		if (nonParenthesized.getLocationInParent() == ClassInstanceCreation.ARGUMENTS_PROPERTY
+				|| nonParenthesized.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
 			return true;
 		}
 
 		if (node.arguments()
 			.isEmpty()) {
+			if (nonParenthesized != node) {
+				astRewrite.replace(nonParenthesized, node, null);
+			}
 			astRewrite.replace(node.getType(), getSecureRandomType(), null);
 			onRewrite();
 			return true;
 		}
-		
+
 		Statement statementBeforeSetSeed = null;
 		Expression assignmentTarget = null;
-		
-		if(expression.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment)expression.getParent();
-			if(variableDeclarationFragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-				statementBeforeSetSeed = (VariableDeclarationStatement)variableDeclarationFragment.getParent();
+
+		if (nonParenthesized.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) nonParenthesized
+				.getParent();
+			if (variableDeclarationFragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+				statementBeforeSetSeed = (VariableDeclarationStatement) variableDeclarationFragment.getParent();
 				assignmentTarget = variableDeclarationFragment.getName();
 			}
-			
-		} else if(expression.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment)expression.getParent();
-			if(assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-				statementBeforeSetSeed = (ExpressionStatement)assignment.getParent();
+
+		} else if (nonParenthesized.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			Assignment assignment = (Assignment) nonParenthesized.getParent();
+			if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+				statementBeforeSetSeed = (ExpressionStatement) assignment.getParent();
 				assignmentTarget = assignment.getLeftHandSide();
-			}			
+			}
 		}
-		if(statementBeforeSetSeed == null || assignmentTarget == null) {
+		if (statementBeforeSetSeed == null || assignmentTarget == null) {
 			return true;
 		}
-		
-		if(statementBeforeSetSeed.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+
+		if (statementBeforeSetSeed.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return true;
 		}
-		
-		Expression setSeedExpression = (Expression)astRewrite.createCopyTarget(assignmentTarget);
-		
-		Block block  = (Block)statementBeforeSetSeed.getParent();
-		
-		Expression seedArgument = ASTNodeUtil.convertToTypedList(node.arguments(), Expression.class).get(0);
+
+		Expression setSeedExpression = (Expression) astRewrite.createCopyTarget(assignmentTarget);
+
+		Block block = (Block) statementBeforeSetSeed.getParent();
+
+		Expression seedArgument = ASTNodeUtil.convertToTypedList(node.arguments(), Expression.class)
+			.get(0);
 		ASTNode removedSetSeed = astRewrite.createMoveTarget(seedArgument);
 		astRewrite.remove(seedArgument, null);
-		
+
 		AST ast = block.getAST();
 		MethodInvocation setSeedInvocation = ast.newMethodInvocation();
 		setSeedInvocation.setExpression(setSeedExpression);
 		setSeedInvocation.setName(ast.newSimpleName("setSeed")); //$NON-NLS-1$
-		ListRewrite argumentListRewrite = astRewrite.getListRewrite(setSeedInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
+		ListRewrite argumentListRewrite = astRewrite.getListRewrite(setSeedInvocation,
+				MethodInvocation.ARGUMENTS_PROPERTY);
 		argumentListRewrite.insertFirst(removedSetSeed, null);
 		ExpressionStatement setSeedInvocationStatement = ast.newExpressionStatement(setSeedInvocation);
-		
+
 		ListRewrite statementListRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 		statementListRewrite.insertAfter(setSeedInvocationStatement, statementBeforeSetSeed, null);
+		if (nonParenthesized != node) {
+			astRewrite.replace(nonParenthesized, node, null);
+		}
 		astRewrite.replace(node.getType(), getSecureRandomType(), null);
 		onRewrite();
 		return true;
