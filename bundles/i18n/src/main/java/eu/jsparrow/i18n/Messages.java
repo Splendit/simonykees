@@ -405,6 +405,10 @@ public class Messages extends NLS {
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_leaveAsIs;
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase;
 	public static String RenamingRulePreviewWizardPage_RenameFields;
+
+	public static String RenamingRuleSummaryWizardPage_times;
+
+	public static String RenamingSummaryWizardPageModel_externalReferencesDescription;
 	public static String ReorderModifiersRule_description;
 	public static String ReorderModifiersRule_name;
 	public static String ReplaceDynamicQueryByPreparedStatementRule_description;

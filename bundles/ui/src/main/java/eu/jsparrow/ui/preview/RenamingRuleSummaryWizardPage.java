@@ -58,7 +58,7 @@ public class RenamingRuleSummaryWizardPage extends AbstractSummaryWizardPage<Ren
 		IViewerObservableValue<Object> selectedFile = ViewerProperties.singleSelection()
 			.observe(fileTableViewer);
 		ViewerSupport.bind(rulesPerFileTableViewer, summaryWizardPageModel.getRulesPerFile(),
-				BeanProperties.values("times", "name")); //$NON-NLS-1$  //$NON-NLS-2$
+				BeanProperties.values("name", "times")); //$NON-NLS-1$  //$NON-NLS-2$
 
 		selectedFile.addValueChangeListener(e -> {
 			ChangedNamesInFileModel selectedItem = (ChangedNamesInFileModel) e.getObservableValue()
@@ -91,22 +91,20 @@ public class RenamingRuleSummaryWizardPage extends AbstractSummaryWizardPage<Ren
 			}
 		});
 		
-		TableViewerColumn ruleTimesCol = new TableViewerColumn(rulesPerFileTableViewer, SWT.NONE);
-		TableColumn timesCol = ruleTimesCol.getColumn();
-		timesCol.setText("Times");
-		timesCol.setToolTipText("Times");
-		
 		TableViewerColumn ruleNameCol = new TableViewerColumn(rulesPerFileTableViewer, SWT.NONE);
 		TableColumn column = ruleNameCol.getColumn();
 		column.setText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerTitle);
 		column.setToolTipText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText);
 		
-		
+		TableViewerColumn ruleTimesCol = new TableViewerColumn(rulesPerFileTableViewer, SWT.NONE);
+		TableColumn timesCol = ruleTimesCol.getColumn();
+		timesCol.setText(Messages.RenamingRuleSummaryWizardPage_times);
 
 		TableColumnLayout rulesInFileTableLayout = new TableColumnLayout();
 		rulesInFileComposite.setLayout(rulesInFileTableLayout);
-		rulesInFileTableLayout.setColumnData(timesCol, new ColumnWeightData(30));
 		rulesInFileTableLayout.setColumnData(column, new ColumnWeightData(70));
+		rulesInFileTableLayout.setColumnData(timesCol, new ColumnWeightData(30));
+
 		
 	}
 

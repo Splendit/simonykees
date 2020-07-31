@@ -10,12 +10,14 @@ import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.osgi.util.NLS;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 
@@ -104,9 +106,8 @@ public class RenamingSummaryWizardPageModel extends AbstractSummaryWizardPageMod
 			.forEach(modifier -> {
 				long count = countReferencesOfExternalFields(metaDataList, compilationUnitName, modifier);
 				if (count > 0) {
-					String value = "References of external " + modifier.toString()
-							+ " fields";
-					entries.add(new RenamingPerFileModel(value, count));
+					String description = NLS.bind(Messages.RenamingSummaryWizardPageModel_externalReferencesDescription, modifier.toString());
+					entries.add(new RenamingPerFileModel(description, count));
 				}
 
 			});
@@ -128,7 +129,7 @@ public class RenamingSummaryWizardPageModel extends AbstractSummaryWizardPageMod
 					.filter(modifier::equals)
 					.count();
 				if (count > 0) {
-					String name = modifier.toString() + " fields";
+					String name = NLS.bind(Messages.RenamingRulePreviewWizardPage_RenameFields, modifier.toString());
 					entries.add(new RenamingPerFileModel(name, count));
 				}
 			});
