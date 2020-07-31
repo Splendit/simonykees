@@ -65,9 +65,9 @@ import eu.jsparrow.ui.PartialMatchContentProposalProvider;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
+import eu.jsparrow.ui.preview.model.summary.AbstractSummaryWizardPageModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.FileViewerFilter;
-import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
 import eu.jsparrow.ui.preview.model.summary.RuleTimesModel;
 import eu.jsparrow.ui.preview.model.summary.RulesPerFileModel;
 import eu.jsparrow.ui.util.ResourceHelper;
@@ -88,7 +88,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	private TableViewer rulesPerFileTableViewer;
 	private Text searchText;
 
-	private RefactoringSummaryWizardPageModel summaryWizardPageModel;
+	private AbstractSummaryWizardPageModel summaryWizardPageModel;
 
 	private int displayHeight;
 
@@ -111,12 +111,15 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 
 		setTitle(Messages.SummaryWizardPage_RunSummary);
-		this.summaryWizardPageModel = new RefactoringSummaryWizardPageModel(refactoringPipeline, wizardModel);
+		this.summaryWizardPageModel = summaryPageModelFactory(refactoringPipeline, wizardModel);
 		this.enabledFinishButton = enabledFinishButton;
 		displayHeight = Display.getCurrent()
 			.getPrimaryMonitor()
 			.getBounds().height;
 	}
+
+	protected abstract AbstractSummaryWizardPageModel summaryPageModelFactory(RefactoringPipeline pipeline,
+			RefactoringPreviewWizardModel wizardModel);
 
 	/**
 	 * Create contents of the wizard.
@@ -340,9 +343,6 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		filesComposite.setLayout(filesTableLayout);
 		filesTableLayout.setColumnData(pathColumn, new ColumnWeightData(100));
 
-		TableColumnLayout tableLayout1 = new TableColumnLayout();
-		tableLayout1.setColumnData(pathColumn, new ColumnWeightData(100));
-
 		FileViewerFilter filter = new FileViewerFilter();
 
 		/*
@@ -396,7 +396,6 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		});
 		TableViewerColumn ruleNameCol = new TableViewerColumn(rulesPerFileTableViewer, SWT.NONE);
 		TableColumn column = ruleNameCol.getColumn();
-		column.setWidth(650);
 		column.setText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerTitle);
 		column.setToolTipText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText);
 

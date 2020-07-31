@@ -25,6 +25,11 @@ public class ChangedFilesModel extends BaseModel {
 		this.sourceRight = sourceRight;
 		this.rules = rules;
 	}
+	
+	public ChangedFilesModel(String name, List<String> rules) {
+		this(name);
+		this.rules = rules;
+	}
 
 
 	public String getName() {
