@@ -1,5 +1,9 @@
 package eu.jsparrow.ui.preview.model.summary;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.ArrayList;
+
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -24,16 +28,33 @@ public class FileViewerFilter extends ViewerFilter {
 			return true;
 		}
 
-		ChangedFilesModel changedFilesModel = (ChangedFilesModel) element;
-		String fileName = changedFilesModel.getName()
-			.toLowerCase();
+		String fileName = ""; //$NON-NLS-1$
+		List<String> rules = new ArrayList<>();
+		if (element instanceof ChangedFilesModel) {
+			ChangedFilesModel changedFilesModel = (ChangedFilesModel) element;
+			fileName = changedFilesModel.getName()
+				.toLowerCase();
+			rules = changedFilesModel.getRules()
+				.stream()
+				.map(RulesPerFileModel::getName)
+				.map(String::toLowerCase)
+				.collect(Collectors.toList());
+		} else if (element instanceof ChangedNamesInFileModel) {
+			ChangedNamesInFileModel changedFilesModel = (ChangedNamesInFileModel) element;
+			fileName = changedFilesModel.getFileName()
+				.toLowerCase();
+			rules = changedFilesModel.getRenamings()
+				.stream()
+				.map(RenamingPerFileModel::getName)
+				.map(String::toLowerCase)
+				.collect(Collectors.toList());
+		}
+
 		if (fileName.matches(searchString)) {
 			return true;
 		}
 
-		return changedFilesModel.getRules()
-			.stream()
-			.map(String::toLowerCase)
+		return rules.stream()
 			.anyMatch(rule -> rule.matches(searchString));
 	}
 

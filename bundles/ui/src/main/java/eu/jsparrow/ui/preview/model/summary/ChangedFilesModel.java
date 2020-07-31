@@ -13,20 +13,20 @@ public class ChangedFilesModel extends BaseModel {
 	 */
 	private String sourceLeft;
 	private String sourceRight;
-	private List<String> rules;
+	private List<RulesPerFileModel> rules;
 
 	public ChangedFilesModel(String name) {
 		this.name = name;
 	}
 	
-	public ChangedFilesModel(String name, String sourceLeft, String sourceRight, List<String> rules) {
+	public ChangedFilesModel(String name, String sourceLeft, String sourceRight, List<RulesPerFileModel> rules) {
 		this(name);
 		this.sourceLeft = sourceLeft;
 		this.sourceRight = sourceRight;
 		this.rules = rules;
 	}
 	
-	public ChangedFilesModel(String name, List<String> rules) {
+	public ChangedFilesModel(String name, List<RulesPerFileModel> rules) {
 		this(name);
 		this.rules = rules;
 	}
@@ -53,7 +53,7 @@ public class ChangedFilesModel extends BaseModel {
 		this.sourceRight = sourceRight;
 	}
 	
-	public List<String> getRules() {
+	public List<RulesPerFileModel> getRules() {
 		return rules;
 	}
 

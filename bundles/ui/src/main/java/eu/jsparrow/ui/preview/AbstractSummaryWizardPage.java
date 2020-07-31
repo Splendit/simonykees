@@ -18,9 +18,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
-import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
-import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
@@ -30,8 +28,6 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -66,14 +62,12 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.AbstractSummaryWizardPageModel;
-import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.FileViewerFilter;
 import eu.jsparrow.ui.preview.model.summary.RuleTimesModel;
-import eu.jsparrow.ui.preview.model.summary.RulesPerFileModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 @SuppressWarnings({ "restriction" })
-public abstract class AbstractSummaryWizardPage extends WizardPage {
+public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardPageModel> extends WizardPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractSummaryWizardPage.class);
 
@@ -83,12 +77,12 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	private CLabel labelIssuesFixed;
 	private CLabel labelHoursSaved;
 
-	private TableViewer fileTableViewer;
+	protected TableViewer fileTableViewer;
 	private TableViewer ruleTableViewer;
-	private TableViewer rulesPerFileTableViewer;
+	protected TableViewer rulesPerFileTableViewer;
 	private Text searchText;
 
-	private AbstractSummaryWizardPageModel summaryWizardPageModel;
+	private T summaryWizardPageModel;
 
 	private int displayHeight;
 
@@ -118,8 +112,12 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			.getBounds().height;
 	}
 
-	protected abstract AbstractSummaryWizardPageModel summaryPageModelFactory(RefactoringPipeline pipeline,
+	protected abstract T summaryPageModelFactory(RefactoringPipeline pipeline,
 			RefactoringPreviewWizardModel wizardModel);
+
+	protected T getSummaryPageModel() {
+		return summaryWizardPageModel;
+	}
 
 	/**
 	 * Create contents of the wizard.
@@ -313,35 +311,9 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		Composite filesSectionComposite = new Composite(filesGroup, SWT.NONE);
 		filesSectionComposite.setLayout(new GridLayout(2, true));
 		filesSectionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		Composite filesComposite = new Composite(filesSectionComposite, SWT.NONE);
-		filesComposite.setLayout(new GridLayout(1, true));
-		filesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		fileTableViewer = new TableViewer(filesComposite, SWT.SINGLE);
-		Table fileTable = fileTableViewer.getTable();
-		fileTable.setHeaderVisible(true);
-		fileTable.setLinesVisible(true);
-		fileTable.setToolTipText(Messages.AbstractSummaryWizardPage_fileTableViewerToolTipText);
-
-		// sort files alphabetically (SIM-922)
-		fileTableViewer.setComparator(new ViewerComparator() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				ChangedFilesModel model1 = (ChangedFilesModel) e1;
-				ChangedFilesModel model2 = (ChangedFilesModel) e2;
-				return model1.getName()
-					.compareTo(model2.getName());
-			}
-		});
-		TableViewerColumn filePathCol = new TableViewerColumn(fileTableViewer, SWT.NONE);
-		TableColumn pathColumn = filePathCol.getColumn();
-		pathColumn.setText(Messages.AbstractSummaryWizardPage_fileTableViewerTitle);
-		pathColumn.setToolTipText(Messages.AbstractSummaryWizardPage_fileTableViewerToolTipText);
-
-		TableColumnLayout filesTableLayout = new TableColumnLayout();
-		filesComposite.setLayout(filesTableLayout);
-		filesTableLayout.setColumnData(pathColumn, new ColumnWeightData(100));
+		
+		addFileTableViewerSection(filesSectionComposite);
+		addRulePerFileSection(filesSectionComposite);
 
 		FileViewerFilter filter = new FileViewerFilter();
 
@@ -375,34 +347,11 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			}
 		});
 		fileTableViewer.addFilter(filter);
-
-		Composite rulesInFileComposite = new Composite(filesSectionComposite, SWT.NONE);
-		rulesInFileComposite.setLayout(new GridLayout(1, true));
-		rulesInFileComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		rulesPerFileTableViewer = new TableViewer(rulesInFileComposite, SWT.SINGLE);
-		Table table = rulesPerFileTableViewer.getTable();
-		table.setHeaderVisible(true);
-		table.setLinesVisible(true);
-		table.setToolTipText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText);
-		rulesPerFileTableViewer.setComparator(new ViewerComparator() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				RulesPerFileModel model1 = (RulesPerFileModel) e1;
-				RulesPerFileModel model2 = (RulesPerFileModel) e2;
-				return model1.getName()
-					.compareTo(model2.getName());
-			}
-		});
-		TableViewerColumn ruleNameCol = new TableViewerColumn(rulesPerFileTableViewer, SWT.NONE);
-		TableColumn column = ruleNameCol.getColumn();
-		column.setText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerTitle);
-		column.setToolTipText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText);
-
-		TableColumnLayout rulesInFileTableLayout = new TableColumnLayout();
-		rulesInFileComposite.setLayout(rulesInFileTableLayout);
-		rulesInFileTableLayout.setColumnData(column, new ColumnWeightData(100));
 	}
+
+	protected abstract void addRulePerFileSection(Composite filesSectionComposite);
+
+	protected abstract void addFileTableViewerSection(Composite filesSectionComposite);
 
 	private void updateSearch(Text searchText, FileViewerFilter filter) {
 		filter.setSearchString(searchText.getText());
@@ -415,22 +364,10 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 		initializeHeaderDataBindings(bindingContext);
 
-		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(), BeanProperties.values("name")); //$NON-NLS-1$
-
-		IViewerObservableValue<Object> selectedFile = ViewerProperties.singleSelection()
-			.observe(fileTableViewer);
-		ViewerSupport.bind(rulesPerFileTableViewer, summaryWizardPageModel.getRulesPerFile(),
-				BeanProperties.values("name")); //$NON-NLS-1$
-
-		selectedFile.addValueChangeListener(e -> {
-			ChangedFilesModel selectedItem = (ChangedFilesModel) e.getObservableValue()
-				.getValue();
-
-			if (selectedItem != null) {
-				summaryWizardPageModel.updateRulesPerFile(selectedItem.getRules());
-			}
-		});
+		initializeFileTableViewer();
 	}
+
+	protected abstract void initializeFileTableViewer();
 
 	private void setStatusInfo() {
 		StatusInfo statusInfo = new StatusInfo();
@@ -477,7 +414,6 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	}
 
 	protected void initializeRuleTableDataBindings() {
-
 		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
 				BeanProperties.values("name", "times", "timeSaved")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

@@ -2,19 +2,23 @@ package eu.jsparrow.ui.preview.model.summary;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 
 public class RefactoringSummaryWizardPageModel extends AbstractSummaryWizardPageModel {
 
+	protected IObservableList<ChangedFilesModel> changedFiles = new WritableList<>();
 	private IObservableList<RulesPerFileModel> rulesPerFile = new WritableList<>();
 
 	public RefactoringSummaryWizardPageModel(RefactoringPipeline refactoringPipeline,
@@ -25,8 +29,11 @@ public class RefactoringSummaryWizardPageModel extends AbstractSummaryWizardPage
 	public IObservableList<RulesPerFileModel> getRulesPerFile() {
 		return rulesPerFile;
 	}
+	
+	public IObservableList<ChangedFilesModel> getChangedFiles() {
+		return changedFiles;
+	}
 
-	@Override
 	public void updateData() {
 		updateChangedFiles();
 		super.updateData();
@@ -34,6 +41,8 @@ public class RefactoringSummaryWizardPageModel extends AbstractSummaryWizardPage
 
 	@Override
 	protected void initialize() {
+		changedFiles = new WritableList<>();
+		addModifiedFiles();
 		super.initialize();
 		rulesPerFile = new WritableList<>();
 		addRulesPerFile();
@@ -43,32 +52,58 @@ public class RefactoringSummaryWizardPageModel extends AbstractSummaryWizardPage
 		ChangedFilesModel firstFile = changedFiles.get(0);
 		firstFile.getRules()
 			.forEach(rule -> {
-				rulesPerFile.add(new RulesPerFileModel(rule));
+				rulesPerFile.add(rule);
 			});
 
 	}
 
-	@Override
 	protected void updateChangedFiles() {
-		super.updateChangedFiles();
+		changedFiles.clear();
+		addModifiedFiles();
 		rulesPerFile.clear();
 		addRulesPerFile();
 	}
 
-	@Override
-	public void updateRulesPerFile(List<String> rules) {
-		List<RulesPerFileModel> newRules = rules.stream()
-			.map(RulesPerFileModel::new)
-			.collect(Collectors.toList());
+	public void updateRulesPerFile(List<RulesPerFileModel> rules) {
 		this.rulesPerFile.clear();
-		this.rulesPerFile.addAll(newRules);
-
+		this.rulesPerFile.addAll(rules);
 	}
 
-	protected List<String> computeRuleNames(RefactoringRule rule, ICompilationUnit compUnit) {
-		List<String> rulesWithChanges = new ArrayList<>();
-		RuleDescription ruleDescription = rule.getRuleDescription();
-		rulesWithChanges.add(ruleDescription.getName());
-		return rulesWithChanges;
+	private void addModifiedFiles() {
+		refactoringPipeline.getInitialSourceMap()
+			.entrySet()
+			.stream()
+			.filter(this::hasChanges)
+			.map(Map.Entry::getKey)
+			.forEach(state -> changedFiles.add(createModelFromRefactoringState(state)));
+	}
+
+	private ChangedFilesModel createModelFromRefactoringState(RefactoringState state) {
+		ICompilationUnit compUnit = state.getWorkingCopy();
+		String fileName = String.format("%s - %s", compUnit.getElementName(), getPathString(compUnit)); //$NON-NLS-1$
+		List<RefactoringRule> rules = refactoringPipeline.getRules();
+		List<RulesPerFileModel> rulesWithChanges = new ArrayList<>();
+		for (RefactoringRule rule : rules) {
+			DocumentChange change = state.getChangeIfPresent(rule);
+			if (change != null) {
+				RuleDescription ruleDescription = rule.getRuleDescription();
+				RulesPerFileModel model = new RulesPerFileModel(ruleDescription.getName());
+				rulesWithChanges.add(model);
+			}
+		}
+
+		return new ChangedFilesModel(fileName, rulesWithChanges);
+	}
+	
+	@Override
+	public String[] getProposalProviderContents() {
+		return Stream.concat(
+				getRuleTimes()
+					.stream()
+					.map(RuleTimesModel::getName),
+				getChangedFiles()
+					.stream()
+					.map(ChangedFilesModel::getName))
+			.toArray(String[]::new);
 	}
 }
