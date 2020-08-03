@@ -1,12 +1,10 @@
 package eu.jsparrow.core.visitor.security.random;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -14,15 +12,10 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.visitor.security.AbstractMethodInvocationAnalyzer;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
@@ -50,35 +43,6 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 
-	/**
-	 * This class is intended to be used exclusively inside
-	 * {@link UseClassSecureRandomASTVisitor} for storing information needed for
-	 * transformation, without any logics.
-	 *
-	 */
-	private static class TransformationData {
-		private final ClassInstanceCreation randomConstruction;
-		private final Expression nonParenthesized;
-		private final Expression seedArgument;
-		private final Expression assignmentTarget;
-		private final Statement randomConstructionStatement;
-		private final Block blockOfConstructionStatement;
-
-		public TransformationData(ClassInstanceCreation classInstanceCreation, Expression nonParenthesized,
-				Expression seedArgument,
-				Expression assignmentTarget, Statement randomConstructionStatement,
-				Block blockOfConstructionStatement) {
-			super();
-			this.randomConstruction = classInstanceCreation;
-			this.nonParenthesized = nonParenthesized;
-			this.seedArgument = seedArgument;
-
-			this.assignmentTarget = assignmentTarget;
-			this.randomConstructionStatement = randomConstructionStatement;
-			this.blockOfConstructionStatement = blockOfConstructionStatement;
-		}
-	}
-
 	private static final String SECURE_RANDOM_QUALIFIED_NAME = java.security.SecureRandom.class.getName();
 	private final Map<CompilationUnit, Boolean> isSafeToAddImportMap = new HashMap<>();
 
@@ -90,87 +54,36 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 		return true;
 	}
 
-	private TransformationData createTransformationData(ClassInstanceCreation node) {
-
-		Expression nonParenthesized = node;
-		while (nonParenthesized.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
-			nonParenthesized = (Expression) nonParenthesized.getParent();
-		}
-		if (nonParenthesized.getLocationInParent() == ClassInstanceCreation.ARGUMENTS_PROPERTY
-				|| nonParenthesized.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
-			return null;
-		}
-
-		if (node.arguments()
-			.isEmpty()) {
-			return new TransformationData(node, nonParenthesized, null, null, null, null);
-		}
-		
-		Statement randomConstructionStatement = null;
-		Expression assignmentTarget = null;
-
-		if (nonParenthesized.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) nonParenthesized
-				.getParent();
-			if (variableDeclarationFragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-				randomConstructionStatement = (VariableDeclarationStatement) variableDeclarationFragment.getParent();
-				assignmentTarget = variableDeclarationFragment.getName();
-			}
-
-		} else if (nonParenthesized.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) nonParenthesized.getParent();
-			if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-				randomConstructionStatement = (ExpressionStatement) assignment.getParent();
-				assignmentTarget = assignment.getLeftHandSide();
-			}
-		}
-
-		if (randomConstructionStatement == null || assignmentTarget == null) {
-			return null;
-		}
-
-		if (randomConstructionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return null;
-		}
-
-		Block blockOfConstructionStatement = (Block) randomConstructionStatement.getParent();
-		Expression seedArgument = ASTNodeUtil.convertToTypedList(node.arguments(), Expression.class)
-			.get(0);
-
-		return new TransformationData(node, nonParenthesized, seedArgument, assignmentTarget,
-				randomConstructionStatement, blockOfConstructionStatement);
-	}
-
-	@SuppressWarnings("nls")
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
-		AbstractMethodInvocationAnalyzer invocationAnalyzer = new AbstractMethodInvocationAnalyzer(node.resolveConstructorBinding());
-		if(!invocationAnalyzer.analyze(java.util.Random.class.getName(), "Random", Collections.emptyList()) &&
-				!invocationAnalyzer.analyze(java.util.Random.class.getName(),  "Random", Collections.singletonList("long"))) {
-			return true;
-		}
-		TransformationData transformationData = createTransformationData(node);
-		if (transformationData != null) {
-			transform(transformationData);
+		NewRandomAnalyzer analyzer = new NewRandomAnalyzer(node);
+		if (analyzer.analyze()) {
+			transform(analyzer);
 		}
 		return true;
 	}
 
-	void transform(TransformationData data) {
-		if (data.seedArgument == null) {
-			if (data.nonParenthesized != data.randomConstruction) {
-				astRewrite.replace(data.nonParenthesized, data.randomConstruction, null);
+	void transform(NewRandomAnalyzer analyzer) {
+		ClassInstanceCreation newRandom = analyzer.getClassInstanceCreation();
+		Expression seedArgument = analyzer.getSeedArgument();
+		Expression nonParenthesizedRandomExpression = analyzer.getNonParenthesizedRandomExpression();
+		if (seedArgument == null) {
+			if (nonParenthesizedRandomExpression != newRandom) {
+				astRewrite.replace(nonParenthesizedRandomExpression, newRandom, null);
 			}
-			astRewrite.replace(data.randomConstruction.getType(), getSecureRandomType(), null);
+			astRewrite.replace(newRandom.getType(), getSecureRandomType(), null);
 			onRewrite();
 			return;
 		}
 
-		Expression insertedSetSeedExpression = (Expression) astRewrite.createCopyTarget(data.assignmentTarget);
-		ASTNode insertedSetSeedArgument = astRewrite.createMoveTarget(data.seedArgument);
-		astRewrite.remove(data.seedArgument, null);
+		Expression insertedSetSeedExpression = (Expression) astRewrite.createCopyTarget(analyzer.getAssignmentTarget());
+		ASTNode insertedSetSeedArgument = astRewrite.createMoveTarget(seedArgument);
+		astRewrite.remove(seedArgument, null);
 
-		AST ast = data.blockOfConstructionStatement.getAST();
+		Block blockOfConstructionStatement = analyzer.getBlockOfConstructionStatement();
+		Statement randomConstructionStatement = analyzer.getRandomConstructionStatement();
+
+		AST ast = blockOfConstructionStatement.getAST();
 		MethodInvocation setSeedInvocation = ast.newMethodInvocation();
 		setSeedInvocation.setExpression(insertedSetSeedExpression);
 		setSeedInvocation.setName(ast.newSimpleName("setSeed")); //$NON-NLS-1$
@@ -179,13 +92,13 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 		argumentListRewrite.insertFirst(insertedSetSeedArgument, null);
 		ExpressionStatement setSeedInvocationStatement = ast.newExpressionStatement(setSeedInvocation);
 
-		ListRewrite statementListRewrite = astRewrite.getListRewrite(data.blockOfConstructionStatement,
+		ListRewrite statementListRewrite = astRewrite.getListRewrite(blockOfConstructionStatement,
 				Block.STATEMENTS_PROPERTY);
-		statementListRewrite.insertAfter(setSeedInvocationStatement, data.randomConstructionStatement, null);
-		if (data.nonParenthesized != data.randomConstruction) {
-			astRewrite.replace(data.nonParenthesized, data.randomConstruction, null);
+		statementListRewrite.insertAfter(setSeedInvocationStatement, randomConstructionStatement, null);
+		if (nonParenthesizedRandomExpression != newRandom) {
+			astRewrite.replace(nonParenthesizedRandomExpression, newRandom, null);
 		}
-		astRewrite.replace(data.randomConstruction.getType(), getSecureRandomType(), null);
+		astRewrite.replace(newRandom.getType(), getSecureRandomType(), null);
 		onRewrite();
 	}
 
