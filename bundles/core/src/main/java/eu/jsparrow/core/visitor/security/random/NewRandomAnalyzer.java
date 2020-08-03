@@ -1,20 +1,20 @@
 package eu.jsparrow.core.visitor.security.random;
 
 import java.util.Collections;
-import java.util.List;
 
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import eu.jsparrow.core.visitor.security.AbstractMethodInvocationAnalyzer;
+import eu.jsparrow.core.visitor.security.common.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -29,10 +29,11 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class NewRandomAnalyzer {
 
-	private static final List<String> PARAMETER_LIST_WITH_SEED = Collections.singletonList(long.class.getSimpleName());
-	private static final String RANDOM_QUALIFIED_NAME = java.util.Random.class.getName();
-	private static final String RANDOM_SIMPLE_NAME = java.util.Random.class.getSimpleName();
-
+	private static final SignatureData SIGNATURE_WITHOUT_PARAMETER = new SignatureData(
+			java.util.Random.class.getName(), java.util.Random.class.getSimpleName(), Collections.emptyList());
+	private static final SignatureData SIGNATURE_WITH_SEED_PARAMETER = new SignatureData(
+			java.util.Random.class.getName(), java.util.Random.class.getSimpleName(),
+			Collections.singletonList(long.class.getSimpleName()));
 	private final ClassInstanceCreation classInstanceCreation;
 	private Expression seedArgument;
 	private Expression nonParenthesizedRandomExpression;
@@ -84,13 +85,11 @@ public class NewRandomAnalyzer {
 	 *         transformed, otherwise false.
 	 */
 	public boolean analyze() {
-		AbstractMethodInvocationAnalyzer invocationAnalyzer = new AbstractMethodInvocationAnalyzer(
-				classInstanceCreation.resolveConstructorBinding());
-
+		IMethodBinding constructorBinding = classInstanceCreation.resolveConstructorBinding();
 		boolean isNewRandom = false;
-		if (invocationAnalyzer.analyze(RANDOM_QUALIFIED_NAME, RANDOM_SIMPLE_NAME, Collections.emptyList())) {
+		if (SIGNATURE_WITHOUT_PARAMETER.isEquivalentTo(constructorBinding)) {
 			isNewRandom = true;
-		} else if (invocationAnalyzer.analyze(RANDOM_QUALIFIED_NAME, RANDOM_SIMPLE_NAME, PARAMETER_LIST_WITH_SEED)) {
+		} else if (SIGNATURE_WITH_SEED_PARAMETER.isEquivalentTo(constructorBinding)) {
 			isNewRandom = true;
 			seedArgument = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(), Expression.class)
 				.get(0);
