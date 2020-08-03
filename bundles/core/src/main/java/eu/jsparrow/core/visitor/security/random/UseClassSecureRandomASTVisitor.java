@@ -55,6 +55,12 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 	}
 
 	@Override
+	public void endVisit(CompilationUnit node) {
+		super.endVisit(node);
+		isSafeToAddImportMap.clear();
+	}
+
+	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		NewRandomAnalyzer analyzer = new NewRandomAnalyzer(node);
 		if (analyzer.analyze()) {
@@ -63,49 +69,39 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 		return true;
 	}
 
-	void transform(NewRandomAnalyzer analyzer) {
-		ClassInstanceCreation newRandom = analyzer.getClassInstanceCreation();
+	private void transform(NewRandomAnalyzer analyzer) {
+
 		Expression seedArgument = analyzer.getSeedArgument();
-		Expression nonParenthesizedRandomExpression = analyzer.getNonParenthesizedRandomExpression();
-		if (seedArgument == null) {
-			if (nonParenthesizedRandomExpression != newRandom) {
-				astRewrite.replace(nonParenthesizedRandomExpression, newRandom, null);
-			}
-			astRewrite.replace(newRandom.getType(), getSecureRandomType(), null);
-			onRewrite();
-			return;
+		if (seedArgument != null) {
+			Expression insertedSetSeedExpression = (Expression) astRewrite
+				.createCopyTarget(analyzer.getAssignmentTarget());
+			ASTNode insertedSetSeedArgument = astRewrite.createMoveTarget(seedArgument);
+			astRewrite.remove(seedArgument, null);
+
+			Block blockOfConstructionStatement = analyzer.getBlockOfConstructionStatement();
+			Statement randomConstructionStatement = analyzer.getRandomConstructionStatement();
+
+			AST ast = blockOfConstructionStatement.getAST();
+			MethodInvocation setSeedInvocation = ast.newMethodInvocation();
+			setSeedInvocation.setExpression(insertedSetSeedExpression);
+			setSeedInvocation.setName(ast.newSimpleName("setSeed")); //$NON-NLS-1$
+			ListRewrite argumentListRewrite = astRewrite.getListRewrite(setSeedInvocation,
+					MethodInvocation.ARGUMENTS_PROPERTY);
+			argumentListRewrite.insertFirst(insertedSetSeedArgument, null);
+			ExpressionStatement setSeedInvocationStatement = ast.newExpressionStatement(setSeedInvocation);
+
+			ListRewrite statementListRewrite = astRewrite.getListRewrite(blockOfConstructionStatement,
+					Block.STATEMENTS_PROPERTY);
+			statementListRewrite.insertAfter(setSeedInvocationStatement, randomConstructionStatement, null);
 		}
 
-		Expression insertedSetSeedExpression = (Expression) astRewrite.createCopyTarget(analyzer.getAssignmentTarget());
-		ASTNode insertedSetSeedArgument = astRewrite.createMoveTarget(seedArgument);
-		astRewrite.remove(seedArgument, null);
-
-		Block blockOfConstructionStatement = analyzer.getBlockOfConstructionStatement();
-		Statement randomConstructionStatement = analyzer.getRandomConstructionStatement();
-
-		AST ast = blockOfConstructionStatement.getAST();
-		MethodInvocation setSeedInvocation = ast.newMethodInvocation();
-		setSeedInvocation.setExpression(insertedSetSeedExpression);
-		setSeedInvocation.setName(ast.newSimpleName("setSeed")); //$NON-NLS-1$
-		ListRewrite argumentListRewrite = astRewrite.getListRewrite(setSeedInvocation,
-				MethodInvocation.ARGUMENTS_PROPERTY);
-		argumentListRewrite.insertFirst(insertedSetSeedArgument, null);
-		ExpressionStatement setSeedInvocationStatement = ast.newExpressionStatement(setSeedInvocation);
-
-		ListRewrite statementListRewrite = astRewrite.getListRewrite(blockOfConstructionStatement,
-				Block.STATEMENTS_PROPERTY);
-		statementListRewrite.insertAfter(setSeedInvocationStatement, randomConstructionStatement, null);
+		ClassInstanceCreation newRandom = analyzer.getClassInstanceCreation();
+		Expression nonParenthesizedRandomExpression = analyzer.getNonParenthesizedRandomExpression();
 		if (nonParenthesizedRandomExpression != newRandom) {
 			astRewrite.replace(nonParenthesizedRandomExpression, newRandom, null);
 		}
 		astRewrite.replace(newRandom.getType(), getSecureRandomType(), null);
 		onRewrite();
-	}
-
-	@Override
-	public void endVisit(CompilationUnit node) {
-		super.endVisit(node);
-		isSafeToAddImportMap.clear();
 	}
 
 	private Type getSecureRandomType() {
@@ -123,5 +119,4 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 		}
 		return ast.newSimpleType(secureRandomName);
 	}
-
 }
