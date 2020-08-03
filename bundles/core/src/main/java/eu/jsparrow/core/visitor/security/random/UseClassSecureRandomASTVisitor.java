@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.security.random;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +12,6 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.security.AbstractMethodInvocationAnalyzer;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -91,13 +92,6 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 
 	private TransformationData createTransformationData(ClassInstanceCreation node) {
 
-		ITypeBinding typeBinding = node.getType()
-			.resolveBinding();
-		if (!typeBinding.getQualifiedName()
-			.equals(java.util.Random.class.getName())) {
-			return null;
-		}
-
 		Expression nonParenthesized = node;
 		while (nonParenthesized.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
 			nonParenthesized = (Expression) nonParenthesized.getParent();
@@ -147,8 +141,14 @@ public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor 
 				randomConstructionStatement, blockOfConstructionStatement);
 	}
 
+	@SuppressWarnings("nls")
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
+		AbstractMethodInvocationAnalyzer invocationAnalyzer = new AbstractMethodInvocationAnalyzer(node.resolveConstructorBinding());
+		if(!invocationAnalyzer.analyze(java.util.Random.class.getName(), "Random", Collections.emptyList()) &&
+				!invocationAnalyzer.analyze(java.util.Random.class.getName(),  "Random", Collections.singletonList("long"))) {
+			return true;
+		}
 		TransformationData transformationData = createTransformationData(node);
 		if (transformationData != null) {
 			transform(transformationData);

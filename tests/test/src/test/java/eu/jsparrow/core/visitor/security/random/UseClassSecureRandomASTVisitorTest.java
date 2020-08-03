@@ -40,6 +40,22 @@ public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 	}
 	
 	@Test
+	public void visit_NewRandomInvocationWithQualifiedName_shouldTransform() throws Exception {
+
+		String original = "" +
+				"		void test() {\n" + 
+				"			java.util.Random random = new java.util.Random();\n" + 
+				"		}";
+
+		String expected = "" +
+				"		void test() {\n" + 
+				"			java.util.Random random = new SecureRandom();\n" + 
+				"		}";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
 	public void visit_ParenthesizedNewRandomInvocation_shouldTransform() throws Exception {
 
 		String original = "" +
