@@ -21,7 +21,6 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedNamesInFileModel;
-import eu.jsparrow.ui.preview.model.summary.RenamingPerFileModel;
 import eu.jsparrow.ui.preview.model.summary.RenamingSummaryWizardPageModel;
 
 public class RenamingRuleSummaryWizardPage extends AbstractSummaryWizardPage<RenamingSummaryWizardPageModel> {
@@ -53,12 +52,13 @@ public class RenamingRuleSummaryWizardPage extends AbstractSummaryWizardPage<Ren
 	@Override
 	protected void initializeFileTableViewer() {
 		RenamingSummaryWizardPageModel summaryWizardPageModel = getSummaryPageModel();
-		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(), BeanProperties.values("fileName")); //$NON-NLS-1$
+		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(),
+				BeanProperties.values("fileName")); //$NON-NLS-1$
 
 		IViewerObservableValue<Object> selectedFile = ViewerProperties.singleSelection()
 			.observe(fileTableViewer);
 		ViewerSupport.bind(rulesPerFileTableViewer, summaryWizardPageModel.getRulesPerFile(),
-				BeanProperties.values("name", "times")); //$NON-NLS-1$  //$NON-NLS-2$
+				BeanProperties.values("name", "times")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		selectedFile.addValueChangeListener(e -> {
 			ChangedNamesInFileModel selectedItem = (ChangedNamesInFileModel) e.getObservableValue()
@@ -81,31 +81,27 @@ public class RenamingRuleSummaryWizardPage extends AbstractSummaryWizardPage<Ren
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		table.setToolTipText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText);
-		rulesPerFileTableViewer.setComparator(new ViewerComparator() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				RenamingPerFileModel model1 = (RenamingPerFileModel) e1;
-				RenamingPerFileModel model2 = (RenamingPerFileModel) e2;
-				return model1.getName()
-					.compareTo(model2.getName());
-			}
-		});
-		
-		TableViewerColumn ruleNameCol = new TableViewerColumn(rulesPerFileTableViewer, SWT.NONE);
-		TableColumn column = ruleNameCol.getColumn();
-		column.setText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerTitle);
-		column.setToolTipText(Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText);
-		
-		TableViewerColumn ruleTimesCol = new TableViewerColumn(rulesPerFileTableViewer, SWT.NONE);
+
+		SortableViewerComparator comparator = new RenamingRuleSummaryTableViewerComparator();
+		rulesPerFileTableViewer.setComparator(comparator);
+
+		TableViewerColumn ruleNameCol = createSortableTableViewerColumn(rulesPerFileTableViewer,
+				Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerTitle,
+				Messages.AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText, 0, comparator);
+
+		TableColumn namesCol = ruleNameCol.getColumn();
+
+		TableViewerColumn ruleTimesCol = createSortableTableViewerColumn(rulesPerFileTableViewer,
+				Messages.RenamingRuleSummaryWizardPage_times, Messages.RenamingRuleSummaryWizardPage_timesToolTipText,
+				1, comparator);
+
 		TableColumn timesCol = ruleTimesCol.getColumn();
-		timesCol.setText(Messages.RenamingRuleSummaryWizardPage_times);
 
 		TableColumnLayout rulesInFileTableLayout = new TableColumnLayout();
 		rulesInFileComposite.setLayout(rulesInFileTableLayout);
-		rulesInFileTableLayout.setColumnData(column, new ColumnWeightData(70));
+		rulesInFileTableLayout.setColumnData(namesCol, new ColumnWeightData(70));
 		rulesInFileTableLayout.setColumnData(timesCol, new ColumnWeightData(30));
 
-		
 	}
 
 	@Override
@@ -138,6 +134,6 @@ public class RenamingRuleSummaryWizardPage extends AbstractSummaryWizardPage<Ren
 		TableColumnLayout filesTableLayout = new TableColumnLayout();
 		filesComposite.setLayout(filesTableLayout);
 		filesTableLayout.setColumnData(pathColumn, new ColumnWeightData(100));
-		
+
 	}
 }

@@ -222,7 +222,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
-		SummaryPageRuleTableViewerComparator comparator = new SummaryPageRuleTableViewerComparator();
+		SortableViewerComparator comparator = new SummaryPageRuleTableViewerComparator();
 		ruleTableViewer.setComparator(comparator);
 		ruleTableViewer.addDoubleClickListener((DoubleClickEvent event) -> {
 			StructuredSelection selection = (StructuredSelection) event.getSelection();
@@ -231,18 +231,18 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 			searchText.setText(ruleName);
 		});
 
-		TableViewerColumn colRuleName = createTableViewerColumn(Messages.SummaryWizardPage_Rule,
+		TableViewerColumn colRuleName = createSortableTableViewerColumn(ruleTableViewer,
+				Messages.SummaryWizardPage_Rule,
 				Messages.AbstractSummaryWizardPage_ruleTableViewerRuleToolTipText,
-				0,
-				comparator);
-		TableViewerColumn colTimes = createTableViewerColumn(Messages.SummaryWizardPage_TimesApplied,
+				0, comparator);
+		TableViewerColumn colTimes = createSortableTableViewerColumn(ruleTableViewer,
+				Messages.SummaryWizardPage_TimesApplied,
 				Messages.AbstractSummaryWizardPage_ruleTableViewerTimesAppliedToolTipText,
-				1,
-				comparator);
-		TableViewerColumn colTimeSaved = createTableViewerColumn(Messages.SummaryWizardPage_TimeSaved,
+				1, comparator);
+		TableViewerColumn colTimeSaved = createSortableTableViewerColumn(ruleTableViewer,
+				Messages.SummaryWizardPage_TimeSaved,
 				Messages.AbstractSummaryWizardPage_ruleTableViewerTimeSavedToolTipText,
-				2,
-				comparator);
+				2, comparator);
 
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableComposite.setLayout(tableLayout);
@@ -252,32 +252,33 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 
 	}
 
-	private TableViewerColumn createTableViewerColumn(String title, String toolTipText, int colNumber,
-			SummaryPageRuleTableViewerComparator comparator) {
-		TableViewerColumn tableViewerColumn = new TableViewerColumn(ruleTableViewer, SWT.NONE);
+	protected TableViewerColumn createSortableTableViewerColumn(TableViewer tableViewer, String title,
+			String toolTipText,
+			int colNumber, SortableViewerComparator comparator) {
+		TableViewerColumn tableViewerColumn = new TableViewerColumn(tableViewer, SWT.NONE);
 		TableColumn column = tableViewerColumn.getColumn();
 
 		column.setResizable(false);
 		column.setText(title);
 		column.setToolTipText(toolTipText);
 		column.addSelectionListener(
-				getSelectionAdapterForRulesTableViewer(column, colNumber, comparator));
+				getSelectionAdapterForRulesTableViewer(tableViewer, column, colNumber, comparator));
 
 		return tableViewerColumn;
 	}
 
-	private SelectionAdapter getSelectionAdapterForRulesTableViewer(final TableColumn column,
-			final int index, SummaryPageRuleTableViewerComparator comparator) {
+	private SelectionAdapter getSelectionAdapterForRulesTableViewer(final TableViewer tableViewer,
+			final TableColumn column, final int index, SortableViewerComparator comparator) {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				comparator.setColumn(index);
 				int dir = comparator.getDirection();
-				ruleTableViewer.getTable()
+				tableViewer.getTable()
 					.setSortDirection(dir);
-				ruleTableViewer.getTable()
+				tableViewer.getTable()
 					.setSortColumn(column);
-				ruleTableViewer.refresh();
+				tableViewer.refresh();
 			}
 		};
 	}
@@ -311,7 +312,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 		Composite filesSectionComposite = new Composite(filesGroup, SWT.NONE);
 		filesSectionComposite.setLayout(new GridLayout(2, true));
 		filesSectionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		addFileTableViewerSection(filesSectionComposite);
 		addRulePerFileSection(filesSectionComposite);
 
