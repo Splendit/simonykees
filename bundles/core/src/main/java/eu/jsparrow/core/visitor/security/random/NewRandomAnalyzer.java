@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -37,27 +38,20 @@ public class NewRandomAnalyzer {
 	private final ClassInstanceCreation classInstanceCreation;
 	private Expression seedArgument;
 	private Expression nonParenthesizedRandomExpression;
-	Statement randomConstructionStatement;
-	Expression assignmentTarget;
-	Block blockOfConstructionStatement;
+	private Statement randomConstructionStatement;
+	private Expression assignmentTarget;
+	private Block blockOfConstructionStatement;
 
 	public NewRandomAnalyzer(ClassInstanceCreation classInstanceCreation) {
 		this.classInstanceCreation = classInstanceCreation;
 	}
 
 	private Expression findAssignmentTarget(Expression randomExpression) {
-		if (randomExpression
-			.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) randomExpression
-				.getParent();
-			if (variableDeclarationFragment.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-				return variableDeclarationFragment.getName();
-			}
-		} else if (randomExpression.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) randomExpression.getParent();
-			if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-				return assignment.getLeftHandSide();
-			}
+		StructuralPropertyDescriptor locationInParent = randomExpression.getLocationInParent();
+		if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			return ((VariableDeclarationFragment) randomExpression.getParent()).getName();
+		} else if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			return ((Assignment) randomExpression.getParent()).getLeftHandSide();
 		}
 		return null;
 	}
@@ -79,22 +73,25 @@ public class NewRandomAnalyzer {
 		return null;
 	}
 
+	private SignatureData findRandomConstructorSignature(ClassInstanceCreation classInstanceCreation) {
+		IMethodBinding constructorBinding = classInstanceCreation.resolveConstructorBinding();
+		if (SIGNATURE_WITHOUT_PARAMETER.isEquivalentTo(constructorBinding)) {
+			return SIGNATURE_WITHOUT_PARAMETER;
+		}
+		if (SIGNATURE_WITH_SEED_PARAMETER.isEquivalentTo(constructorBinding)) {
+			return SIGNATURE_WITH_SEED_PARAMETER;
+		}
+		return null;
+	}
+
 	/**
 	 * 
 	 * @return true if the given {@link ClassInstanceCreation} can be
 	 *         transformed, otherwise false.
 	 */
 	public boolean analyze() {
-		IMethodBinding constructorBinding = classInstanceCreation.resolveConstructorBinding();
-		boolean isNewRandom = false;
-		if (SIGNATURE_WITHOUT_PARAMETER.isEquivalentTo(constructorBinding)) {
-			isNewRandom = true;
-		} else if (SIGNATURE_WITH_SEED_PARAMETER.isEquivalentTo(constructorBinding)) {
-			isNewRandom = true;
-			seedArgument = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(), Expression.class)
-				.get(0);
-		}
-		if (!isNewRandom) {
+		SignatureData randomConstructorSignature = findRandomConstructorSignature(classInstanceCreation);
+		if (randomConstructorSignature == null) {
 			return false;
 		}
 
@@ -108,25 +105,25 @@ public class NewRandomAnalyzer {
 			return false;
 		}
 
-		if (seedArgument == null) {
-			return true;
-		}
+		if (randomConstructorSignature == SIGNATURE_WITH_SEED_PARAMETER) {
+			seedArgument = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(), Expression.class)
+				.get(0);
 
-		assignmentTarget = findAssignmentTarget(nonParenthesizedRandomExpression);
-		if (assignmentTarget == null) {
-			return false;
-		}
+			assignmentTarget = findAssignmentTarget(nonParenthesizedRandomExpression);
+			if (assignmentTarget == null) {
+				return false;
+			}
 
-		randomConstructionStatement = findConstructionStatement(nonParenthesizedRandomExpression);
-		if (randomConstructionStatement == null) {
-			return false;
-		}
+			randomConstructionStatement = findConstructionStatement(nonParenthesizedRandomExpression);
+			if (randomConstructionStatement == null) {
+				return false;
+			}
 
-		if (randomConstructionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return false;
+			if (randomConstructionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+				return false;
+			}
+			blockOfConstructionStatement = (Block) randomConstructionStatement.getParent();
 		}
-		blockOfConstructionStatement = (Block) randomConstructionStatement.getParent();
-
 		return true;
 	}
 

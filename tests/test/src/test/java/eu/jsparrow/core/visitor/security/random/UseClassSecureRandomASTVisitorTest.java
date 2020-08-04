@@ -25,15 +25,11 @@ public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 		String original = "" +
 				"	void test() {\n" +
 				"		Random random = new Random();\n" +
-				"		byte bytes[] = new byte[20];\n" +
-				"		random.nextBytes(bytes);\n" +
 				"	}";
 
 		String expected = "" +
 				"	void test() {\n" +
 				"		Random random = new SecureRandom();\n" +
-				"		byte bytes[] = new byte[20];\n" +
-				"		random.nextBytes(bytes);" +
 				"	}";
 
 		assertChange(original, expected);
@@ -61,15 +57,11 @@ public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 		String original = "" +
 				"	void test() {\n" +
 				"		Random random = ((new Random()));\n" +
-				"		byte bytes[] = new byte[20];\n" +
-				"		random.nextBytes(bytes);\n" +
 				"	}";
 
 		String expected = "" +
 				"	void test() {\n" +
 				"		Random random = new SecureRandom();\n" +
-				"		byte bytes[] = new byte[20];\n" +
-				"		random.nextBytes(bytes);" +
 				"	}";
 
 		assertChange(original, expected);
@@ -82,16 +74,12 @@ public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 				"	class SecureRandom {}\n" +
 				"	void test() {\n" +
 				"		Random random = new Random();\n" +
-				"		byte bytes[] = new byte[20];\n" +
-				"		random.nextBytes(bytes);\n" +
 				"	}";
 
 		String expected = "" +
 				"	class SecureRandom {}\n" +
 				"	void test() {\n" +
 				"		Random random = new java.security.SecureRandom();\n" +
-				"		byte bytes[] = new byte[20];\n" +
-				"		random.nextBytes(bytes);\n" +
 				"	}";
 
 		assertChange(original, expected);

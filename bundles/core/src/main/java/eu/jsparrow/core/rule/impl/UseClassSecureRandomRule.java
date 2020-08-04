@@ -21,7 +21,7 @@ public class UseClassSecureRandomRule extends RefactoringRuleImpl<UseClassSecure
 
 	public UseClassSecureRandomRule() {
 		this.visitorClass = UseClassSecureRandomASTVisitor.class;
-		this.id = "UseClassSecureRandomRule"; //$NON-NLS-1$
+		this.id = "UseClassSecureRandom"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.UseClassSecureRandomRule_name,
 				Messages.UseClassSecureRandomRule_description,
 				Duration.ofMinutes(5),
