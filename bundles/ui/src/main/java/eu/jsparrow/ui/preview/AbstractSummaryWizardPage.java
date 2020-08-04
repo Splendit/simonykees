@@ -18,13 +18,9 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
-import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
-import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -43,7 +39,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
@@ -60,12 +55,10 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.PartialMatchContentProposalProvider;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.comparator.SortableViewerComparator;
-import eu.jsparrow.ui.preview.comparator.SummaryPageRuleTableViewerComparator;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.AbstractSummaryWizardPageModel;
 import eu.jsparrow.ui.preview.model.summary.FileViewerFilter;
-import eu.jsparrow.ui.preview.model.summary.RuleTimesModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 @SuppressWarnings({ "restriction" })
@@ -73,20 +66,19 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractSummaryWizardPage.class);
 
-	private Composite rootComposite;
+	protected Composite rootComposite;
 
 	private CLabel labelExecutionTime;
 	private CLabel labelIssuesFixed;
 	private CLabel labelHoursSaved;
 
 	protected TableViewer fileTableViewer;
-	private TableViewer ruleTableViewer;
 	protected TableViewer rulesPerFileTableViewer;
-	private Text searchText;
+	protected Text searchText;
 
-	private T summaryWizardPageModel;
+	protected T summaryWizardPageModel;
 
-	private int displayHeight;
+	protected int displayHeight;
 
 	private boolean enabledFinishButton;
 	private StandaloneStatisticsMetadata statisticsMetadata;
@@ -210,48 +202,6 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	}
-
-	protected void addRulesSection() {
-		Group tableComposite = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
-		tableComposite.setText(Messages.SummaryWizardPage_Rules);
-		tableComposite.setLayout(new GridLayout(1, false));
-		GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
-		layoutData.heightHint = displayHeight * 2 / 7;
-		tableComposite.setLayoutData(layoutData);
-		ruleTableViewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
-		Table table = ruleTableViewer.getTable();
-		table.setHeaderVisible(true);
-		table.setLinesVisible(true);
-
-		SortableViewerComparator comparator = new SummaryPageRuleTableViewerComparator();
-		ruleTableViewer.setComparator(comparator);
-		ruleTableViewer.addDoubleClickListener((DoubleClickEvent event) -> {
-			StructuredSelection selection = (StructuredSelection) event.getSelection();
-			RuleTimesModel selectedModel = (RuleTimesModel) selection.getFirstElement();
-			String ruleName = selectedModel.getName();
-			searchText.setText(ruleName);
-		});
-
-		TableViewerColumn colRuleName = createSortableTableViewerColumn(ruleTableViewer,
-				Messages.SummaryWizardPage_Rule,
-				Messages.AbstractSummaryWizardPage_ruleTableViewerRuleToolTipText,
-				0, comparator);
-		TableViewerColumn colTimes = createSortableTableViewerColumn(ruleTableViewer,
-				Messages.SummaryWizardPage_TimesApplied,
-				Messages.AbstractSummaryWizardPage_ruleTableViewerTimesAppliedToolTipText,
-				1, comparator);
-		TableViewerColumn colTimeSaved = createSortableTableViewerColumn(ruleTableViewer,
-				Messages.SummaryWizardPage_TimeSaved,
-				Messages.AbstractSummaryWizardPage_ruleTableViewerTimeSavedToolTipText,
-				2, comparator);
-
-		TableColumnLayout tableLayout = new TableColumnLayout();
-		tableComposite.setLayout(tableLayout);
-		tableLayout.setColumnData(colRuleName.getColumn(), new ColumnWeightData(60));
-		tableLayout.setColumnData(colTimes.getColumn(), new ColumnWeightData(20));
-		tableLayout.setColumnData(colTimeSaved.getColumn(), new ColumnWeightData(20));
-
 	}
 
 	protected TableViewerColumn createSortableTableViewerColumn(TableViewer tableViewer, String title,
@@ -416,8 +366,4 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 		}
 	}
 
-	protected void initializeRuleTableDataBindings() {
-		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
-				BeanProperties.values("name", "times", "timeSaved")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	}
 }

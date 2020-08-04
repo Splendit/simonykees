@@ -6,6 +6,8 @@ import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -14,18 +16,24 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.preview.comparator.SortableViewerComparator;
+import eu.jsparrow.ui.preview.comparator.SummaryPageRuleTableViewerComparator;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
+import eu.jsparrow.ui.preview.model.summary.RuleTimesModel;
 import eu.jsparrow.ui.preview.model.summary.RulesPerFileModel;
 
 public class RefactoringSummaryWizardPage extends AbstractSummaryWizardPage<RefactoringSummaryWizardPageModel> {
+
+	private TableViewer ruleTableViewer;
 
 	protected RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton,
@@ -50,7 +58,7 @@ public class RefactoringSummaryWizardPage extends AbstractSummaryWizardPage<Refa
 	@Override
 	protected void initializeDataBindings() {
 		super.initializeDataBindings();
-		super.initializeRuleTableDataBindings();
+		initializeRuleTableDataBindings();
 	}
 
 	@Override
@@ -108,7 +116,7 @@ public class RefactoringSummaryWizardPage extends AbstractSummaryWizardPage<Refa
 		TableColumnLayout rulesInFileTableLayout = new TableColumnLayout();
 		rulesInFileComposite.setLayout(rulesInFileTableLayout);
 		rulesInFileTableLayout.setColumnData(column, new ColumnWeightData(100));
-		
+
 	}
 
 	@Override
@@ -141,6 +149,54 @@ public class RefactoringSummaryWizardPage extends AbstractSummaryWizardPage<Refa
 		TableColumnLayout filesTableLayout = new TableColumnLayout();
 		filesComposite.setLayout(filesTableLayout);
 		filesTableLayout.setColumnData(pathColumn, new ColumnWeightData(100));
-		
+
 	}
+
+	protected void addRulesSection() {
+		Group tableComposite = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
+		tableComposite.setText(Messages.SummaryWizardPage_Rules);
+		tableComposite.setLayout(new GridLayout(1, false));
+		GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+		layoutData.heightHint = displayHeight * 2 / 7;
+		tableComposite.setLayoutData(layoutData);
+		ruleTableViewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
+		Table table = ruleTableViewer.getTable();
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+
+		SortableViewerComparator comparator = new SummaryPageRuleTableViewerComparator();
+		ruleTableViewer.setComparator(comparator);
+		ruleTableViewer.addDoubleClickListener((DoubleClickEvent event) -> {
+			StructuredSelection selection = (StructuredSelection) event.getSelection();
+			RuleTimesModel selectedModel = (RuleTimesModel) selection.getFirstElement();
+			String ruleName = selectedModel.getName();
+			searchText.setText(ruleName);
+		});
+
+		TableViewerColumn colRuleName = createSortableTableViewerColumn(ruleTableViewer,
+				Messages.SummaryWizardPage_Rule,
+				Messages.AbstractSummaryWizardPage_ruleTableViewerRuleToolTipText,
+				0, comparator);
+		TableViewerColumn colTimes = createSortableTableViewerColumn(ruleTableViewer,
+				Messages.SummaryWizardPage_TimesApplied,
+				Messages.AbstractSummaryWizardPage_ruleTableViewerTimesAppliedToolTipText,
+				1, comparator);
+		TableViewerColumn colTimeSaved = createSortableTableViewerColumn(ruleTableViewer,
+				Messages.SummaryWizardPage_TimeSaved,
+				Messages.AbstractSummaryWizardPage_ruleTableViewerTimeSavedToolTipText,
+				2, comparator);
+
+		TableColumnLayout tableLayout = new TableColumnLayout();
+		tableComposite.setLayout(tableLayout);
+		tableLayout.setColumnData(colRuleName.getColumn(), new ColumnWeightData(60));
+		tableLayout.setColumnData(colTimes.getColumn(), new ColumnWeightData(20));
+		tableLayout.setColumnData(colTimeSaved.getColumn(), new ColumnWeightData(20));
+
+	}
+
+	protected void initializeRuleTableDataBindings() {
+		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
+				BeanProperties.values("name", "times", "timeSaved")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
 }
