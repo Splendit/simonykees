@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.preview;
+package eu.jsparrow.ui.preview.comparator;
 
 import org.eclipse.jface.viewers.Viewer;
 

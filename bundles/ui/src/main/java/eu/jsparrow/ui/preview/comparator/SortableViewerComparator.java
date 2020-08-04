@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.preview;
+package eu.jsparrow.ui.preview.comparator;
 
 import java.util.Comparator;
 

@@ -19,6 +19,8 @@ import org.eclipse.swt.widgets.TableColumn;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.preview.comparator.RenamingRuleSummaryTableViewerComparator;
+import eu.jsparrow.ui.preview.comparator.SortableViewerComparator;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedNamesInFileModel;
 import eu.jsparrow.ui.preview.model.summary.RenamingSummaryWizardPageModel;
