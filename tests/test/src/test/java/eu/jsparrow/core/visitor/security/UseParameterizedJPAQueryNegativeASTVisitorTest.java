@@ -160,23 +160,6 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 		assertNoChange(original);
 	}
 
-	/**
-	 * This test is expected to fail as soon as Bugfix SIM-1782 has been solved.
-	 */
-	@Test
-	public void visit_CreateQueryWithJPQLVariable_shouldNotTransform() throws Exception {
-		String original = "" +
-				"	void test() {\n" +
-				"		String orderId = \"100000000\";\n" +
-				"		EntityManager entityManager = null;\n" +
-				"		String jpqlString = \"Select order from Orders order where order.id = \" + orderId;\n" +
-				"		Query jpqlQuery = entityManager.createQuery(jpqlString);\n" +
-				"		jpqlQuery.getResultList();\n" +
-				"	}";
-
-		assertNoChange(original);
-	}
-
 	@Test
 	public void visit_QueryDeclaredAsField_shouldNotTransform() throws Exception {
 		String original = "" +

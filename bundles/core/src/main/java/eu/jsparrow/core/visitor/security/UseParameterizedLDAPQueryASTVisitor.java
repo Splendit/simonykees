@@ -1,17 +1,13 @@
 package eu.jsparrow.core.visitor.security;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -64,28 +60,6 @@ public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryAST
 		onRewrite();
 
 		return true;
-	}
-
-	private List<Expression> findDynamicQueryComponents(Expression filterExpression) {
-
-		if (filterExpression.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-			InfixExpression infixExpression = (InfixExpression) filterExpression;
-			DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
-			componentStore.storeComponents(infixExpression);
-			return componentStore.getComponents();
-		}
-
-		if (filterExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return Collections.emptyList();
-		}
-		SimpleName filterSimpleName = (SimpleName) filterExpression;
-
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = new SqlVariableAnalyzerVisitor(filterSimpleName);
-		if (!sqlVariableVisitor.analyze()) {
-			return Collections.emptyList();
-		}
-
-		return sqlVariableVisitor.getDynamicQueryComponents();
 	}
 
 	@SuppressWarnings("unchecked")
