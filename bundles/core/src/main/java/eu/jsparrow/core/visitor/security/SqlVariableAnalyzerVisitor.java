@@ -36,7 +36,8 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	private final CompilationUnit compilationUnit;
 	private final SimpleName simpleNameAtUsage;
 	private final VariableDeclarationFragment variableDeclarationFragment;
-	private final DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
+	private final Block blockAroundLocalDeclarationFragment;
+	private final List<Block> scopeOfVariableUsage;
 	private final List<SimpleName> variableReferences = new ArrayList<>();
 	private boolean beforeDeclaration = true;
 
@@ -44,6 +45,12 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		this.compilationUnit = ASTNodeUtil.getSpecificAncestor(variableName, CompilationUnit.class);
 		this.simpleNameAtUsage = variableName;
 		this.variableDeclarationFragment = findVariableDeclarationFragment(variableName, compilationUnit);
+		if (this.variableDeclarationFragment != null) {
+			this.blockAroundLocalDeclarationFragment = findBlockSurroundingDeclaration(variableDeclarationFragment);
+		} else {
+			this.blockAroundLocalDeclarationFragment = null;
+		}
+		this.scopeOfVariableUsage = findScopeOfVariableUsage(simpleNameAtUsage, blockAroundLocalDeclarationFragment);
 	}
 
 	private VariableDeclarationFragment findVariableDeclarationFragment(SimpleName variableName,
@@ -57,6 +64,33 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 			return null;
 		}
 		return (VariableDeclarationFragment) declarationNode;
+	}
+
+	private Block findBlockSurroundingDeclaration(VariableDeclarationFragment variableDeclarationFragment) {
+		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+			return null;
+		}
+		VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) variableDeclarationFragment
+			.getParent();
+		if (variableDeclarationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return null;
+		}
+		return (Block) variableDeclarationStatement.getParent();
+	}
+
+	private List<Block> findScopeOfVariableUsage(SimpleName simpleNameAtUsage, Block blockOfDeclarationFragment) {
+		List<Block> ancestorsList = new ArrayList<>();
+		ASTNode parentNode = simpleNameAtUsage.getParent();
+		while (parentNode != null) {
+			if (parentNode.getNodeType() == ASTNode.BLOCK) {
+				ancestorsList.add((Block) parentNode);
+				if (parentNode == blockOfDeclarationFragment) {
+					break;
+				}
+			}
+			parentNode = parentNode.getParent();
+		}
+		return ancestorsList;
 	}
 
 	@Override
@@ -82,78 +116,42 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 		return true;
 	}
 
-	private List<Block> findScopeOfVariableUsage(SimpleName simpleNameAtUsage, Block blockOfDeclarationFragment) {
-		List<Block> ancestorsList = new ArrayList<>();
-		ASTNode parentNode = simpleNameAtUsage.getParent();
-		while (parentNode != null) {
-			if (parentNode.getNodeType() == ASTNode.BLOCK) {
-				ancestorsList.add((Block) parentNode);
-				if (parentNode == blockOfDeclarationFragment) {
-					break;
-				}
-			}
-			parentNode = parentNode.getParent();
-		}
-		return ancestorsList;
-	}
-
-	private Block findBlockSurroundingDeclaration(VariableDeclarationFragment variableDeclarationFragment) {
-		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-			return null;
-		}
-		VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) variableDeclarationFragment
-			.getParent();
-		if (variableDeclarationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return null;
-		}
-		return (Block) variableDeclarationStatement.getParent();
-	}
-
-	private boolean collectAssignmentsToVariable(ArrayList<Assignment> assignementsOnVariable,
-			List<Block> scopeOfVariableUsage) {
-		for (SimpleName simpleName : variableReferences) {
-			if (simpleName.getLocationInParent() != Assignment.LEFT_HAND_SIDE_PROPERTY) {
-				return false;
-			}
-			Assignment assignment = (Assignment) simpleName.getParent();
-			if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-				return false;
-			}
-			ExpressionStatement expressionStatement = (ExpressionStatement) assignment.getParent();
-			if (expressionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-				return false;
-			}
-			if (!scopeOfVariableUsage.contains(expressionStatement.getParent())) {
-				return false;
-			}
-			assignementsOnVariable.add(assignment);
-		}
-		return true;
-	}
-
-	private boolean storeComponents(ArrayList<Assignment> assignementsOnVariable) {
+	private Expression findInitializationAtDeclaration(VariableDeclarationFragment variableDeclarationFragment) {
 		Expression initializer = variableDeclarationFragment.getInitializer();
-		if (initializer != null) {
-			if (initializer.getNodeType() != ASTNode.NULL_LITERAL) {
-				componentStore.storeComponents(initializer);
-			} else {
-				initializer = null;
-			}
+		if (initializer == null) {
+			return null;
 		}
-		for (Assignment assignment : assignementsOnVariable) {
-			if (assignment.getOperator() == Assignment.Operator.PLUS_ASSIGN && initializer != null) {
-				componentStore.storeComponents(assignment.getRightHandSide());
-			} else if (assignment.getOperator() == Assignment.Operator.ASSIGN && initializer == null) {
-				Expression rightHandSide = assignment.getRightHandSide();
-				if (rightHandSide.getNodeType() != ASTNode.NULL_LITERAL) {
-					initializer = rightHandSide;
-					componentStore.storeComponents(initializer);
-				}
-			} else {
-				return false;
-			}
+		if (initializer.getNodeType() == ASTNode.NULL_LITERAL) {
+			return null;
 		}
-		return true;
+		return initializer;
+	}
+
+	private boolean isReferencedAfterUsage(List<SimpleName> variableReferences) {
+		int lastIndex = variableReferences.size() - 1;
+		return lastIndex > variableReferences.indexOf(this.simpleNameAtUsage);
+	}
+
+	private boolean analyzeAssignment(Assignment assignment, Expression initializer) {
+		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return false;
+		}
+		ExpressionStatement expressionStatement = (ExpressionStatement) assignment.getParent();
+		if (expressionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return false;
+		}
+		if (!scopeOfVariableUsage.contains(expressionStatement.getParent())) {
+			return false;
+		}
+
+		if (assignment.getOperator() == Assignment.Operator.PLUS_ASSIGN) {
+			return initializer != null;
+		}
+
+		if (assignment.getOperator() == Assignment.Operator.ASSIGN) {
+			return initializer == null;
+		}
+		return false;
 	}
 
 	/**
@@ -171,37 +169,49 @@ public class SqlVariableAnalyzerVisitor extends ASTVisitor {
 	 * besides the one invocation which executes the query.</li>
 	 * </ul>
 	 * 
-	 * @return true if the given variable is a local variable and usage is safe, otherwise
-	 *         false.
+	 * @return a {@link DynamicQueryComponentsStore} containing the components
+	 *         of the query concatenation if the given variable is a local
+	 *         variable which is used in a safe way. Otherwise null is returned;
 	 */
-	public boolean analyze() {
+	public DynamicQueryComponentsStore analyze() {
 		variableReferences.clear();
 		if (variableDeclarationFragment == null) {
-			return false;
+			return null;
 		}
-		Block blockAroundLocalDeclarationFragment = findBlockSurroundingDeclaration(variableDeclarationFragment);
 		if (blockAroundLocalDeclarationFragment == null) {
-			return false;
+			return null;
 		}
 		blockAroundLocalDeclarationFragment.accept(this);
 
-		int referencesMaxIndex = variableReferences.size() - 1;
-		int referenceAtUsageIndex = variableReferences.indexOf(this.simpleNameAtUsage);
-		if (referencesMaxIndex > referenceAtUsageIndex) {
-			return false;
+		if (isReferencedAfterUsage(variableReferences)) {
+			return null;
 		}
 		variableReferences.remove(simpleNameAtUsage);
 
-		List<Block> scopeOfVariableUsage = findScopeOfVariableUsage(simpleNameAtUsage,
-				blockAroundLocalDeclarationFragment);
-		ArrayList<Assignment> assignementsOnVariable = new ArrayList<>();
-		if (!collectAssignmentsToVariable(assignementsOnVariable, scopeOfVariableUsage)) {
-			return false;
+		DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
+		Expression initializer = findInitializationAtDeclaration(variableDeclarationFragment);
+		if (initializer != null) {
+			componentStore.storeComponents(initializer);
 		}
-		return storeComponents(assignementsOnVariable);
-	}
 
-	public List<Expression> getDynamicQueryComponents() {
-		return componentStore.getComponents();
+		for (SimpleName simpleName : variableReferences) {
+			if (simpleName.getLocationInParent() != Assignment.LEFT_HAND_SIDE_PROPERTY) {
+				return null;
+			}
+			Assignment assignment = (Assignment) simpleName.getParent();
+			if (!analyzeAssignment(assignment, initializer)) {
+				return null;
+			}
+			if (assignment.getOperator() == Assignment.Operator.PLUS_ASSIGN && initializer != null) {
+				componentStore.storeComponents(assignment.getRightHandSide());
+			} else if (assignment.getOperator() == Assignment.Operator.ASSIGN && initializer == null) {
+				Expression rightHandSide = assignment.getRightHandSide();
+				if (rightHandSide.getNodeType() != ASTNode.NULL_LITERAL) {
+					initializer = rightHandSide;
+					componentStore.storeComponents(initializer);
+				}
+			}
+		}
+		return componentStore;
 	}
 }

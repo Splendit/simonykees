@@ -250,10 +250,10 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 		SimpleName filterSimpleName = (SimpleName) filterExpression;
 
 		SqlVariableAnalyzerVisitor sqlVariableVisitor = new SqlVariableAnalyzerVisitor(filterSimpleName);
-		if (!sqlVariableVisitor.analyze()) {
+		DynamicQueryComponentsStore componentStore = sqlVariableVisitor.analyze();
+		if (componentStore == null) {
 			return Collections.emptyList();
 		}
-
-		return sqlVariableVisitor.getDynamicQueryComponents();
+		return componentStore.getComponents();
 	}
 }
