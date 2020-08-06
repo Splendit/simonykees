@@ -106,7 +106,8 @@ public class RenamingSummaryWizardPageModel extends AbstractSummaryWizardPageMod
 			.forEach(modifier -> {
 				long count = countReferencesOfExternalFields(metaDataList, compilationUnitName, modifier);
 				if (count > 0) {
-					String description = NLS.bind(Messages.RenamingSummaryWizardPageModel_externalReferencesDescription, modifier.toString());
+					String description = NLS.bind(Messages.RenamingSummaryWizardPageModel_externalReferencesDescription,
+							modifier.toString());
 					entries.add(new RenamingPerFileModel(description, count));
 				}
 
@@ -162,9 +163,15 @@ public class RenamingSummaryWizardPageModel extends AbstractSummaryWizardPageMod
 	}
 
 	public String[] getProposalProviderContents() {
-		return getChangedFiles()
-			.stream()
-			.map(ChangedNamesInFileModel::getFileName)
+		return Stream.concat(
+				getChangedFiles().stream()
+					.flatMap(list -> list.getRenamings()
+						.stream())
+					.map(RenamingPerFileModel::getName)
+					.distinct(),
+				getChangedFiles()
+					.stream()
+					.map(ChangedNamesInFileModel::getFileName))
 			.toArray(String[]::new);
 	}
 }
