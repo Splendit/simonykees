@@ -235,25 +235,21 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 
 	}
 
-	protected List<Expression> findDynamicQueryComponents(Expression filterExpression) {
-
-		if (filterExpression.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-			InfixExpression infixExpression = (InfixExpression) filterExpression;
+	protected List<Expression> findDynamicQueryComponents(Expression queryExpression) {
+		if (queryExpression.getNodeType() == ASTNode.INFIX_EXPRESSION) {
+			InfixExpression infixExpression = (InfixExpression) queryExpression;
 			DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
 			componentStore.storeComponents(infixExpression);
 			return componentStore.getComponents();
 		}
-
-		if (filterExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return Collections.emptyList();
+		if (queryExpression.getNodeType() == ASTNode.SIMPLE_NAME) {
+			ParameterizedQueryAnalyzer parameterizedQueryAnalyzer = new ParameterizedQueryAnalyzer(
+					(SimpleName) queryExpression);
+			DynamicQueryComponentsStore componentStore = parameterizedQueryAnalyzer.analyze();
+			if (componentStore != null) {
+				return componentStore.getComponents();
+			}
 		}
-		SimpleName filterSimpleName = (SimpleName) filterExpression;
-
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = new SqlVariableAnalyzerVisitor(filterSimpleName);
-		DynamicQueryComponentsStore componentStore = sqlVariableVisitor.analyze();
-		if (componentStore == null) {
-			return Collections.emptyList();
-		}
-		return componentStore.getComponents();
+		return Collections.emptyList();
 	}
 }
