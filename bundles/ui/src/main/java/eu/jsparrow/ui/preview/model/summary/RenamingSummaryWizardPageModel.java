@@ -23,8 +23,8 @@ import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 
 public class RenamingSummaryWizardPageModel extends AbstractSummaryWizardPageModel {
 
-	private IObservableList<RenamingPerFileModel> rulesPerFile = new WritableList<>();
-	protected IObservableList<ChangedNamesInFileModel> changedFiles = new WritableList<>();
+	private IObservableList<RenamingPerFileModel> rulesPerFile;
+	protected IObservableList<ChangedNamesInFileModel> changedFiles;
 
 	public RenamingSummaryWizardPageModel(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel) {

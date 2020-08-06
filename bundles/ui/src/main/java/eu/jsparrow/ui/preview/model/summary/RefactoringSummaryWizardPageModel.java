@@ -18,8 +18,8 @@ import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 
 public class RefactoringSummaryWizardPageModel extends AbstractSummaryWizardPageModel {
 
-	protected IObservableList<ChangedFilesModel> changedFiles = new WritableList<>();
-	private IObservableList<RulesPerFileModel> rulesPerFile = new WritableList<>();
+	protected IObservableList<ChangedFilesModel> changedFiles;
+	private IObservableList<RulesPerFileModel> rulesPerFile;
 
 	public RefactoringSummaryWizardPageModel(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel) {
