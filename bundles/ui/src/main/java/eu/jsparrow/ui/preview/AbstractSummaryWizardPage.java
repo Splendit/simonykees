@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
@@ -309,6 +310,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 	private void updateSearch(Text searchText, FileViewerFilter filter) {
 		filter.setSearchString(searchText.getText());
 		fileTableViewer.refresh();
+		rulesPerFileTableViewer.refresh();
 		setInitialFileSelection();
 	}
 
@@ -363,6 +365,9 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 		Object item = fileTableViewer.getElementAt(0);
 		if (item != null) {
 			fileTableViewer.setSelection(new StructuredSelection(item));
+		} else {
+			Table table = rulesPerFileTableViewer.getTable();
+			table.clearAll();
 		}
 	}
 
