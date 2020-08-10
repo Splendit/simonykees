@@ -147,7 +147,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 				"Random random = new Random();\n" + 
 				"private void sampleMethod(String value) {\n" + 
 				"	Random random = new Random();\n" + 
-				"	System.out.println(value + random7.nextInt());\n" + 
+				"	System.out.println(value + random.nextInt());\n" + 
 				"}";
 		assertNoChange(actual);
 	}
@@ -158,7 +158,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 				"Random random = new Random();\n" + 
 				"private void sampleMethod(String value) {\n" + 
 				"	Random random = new Random();\n" + 
-				"	System.out.println(value + random7.nextInt());\n" + 
+				"	System.out.println(value + random.nextInt());\n" + 
 				"}";
 		assertNoChange(actual);
 	}
