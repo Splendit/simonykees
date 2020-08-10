@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.preview.model.summary;
 
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 
@@ -19,7 +20,7 @@ public class FileViewerFilter extends ViewerFilter {
 	private String searchString;
 
 	public void setSearchString(String searchString) {
-		this.searchString = ".*" + searchString.toLowerCase() + ".*"; //$NON-NLS-1$//$NON-NLS-2$
+		this.searchString = ".*" + Pattern.quote(searchString.toLowerCase()) + ".*"; //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	@Override
