@@ -1,8 +1,5 @@
 package eu.jsparrow.core.visitor.security.random;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
