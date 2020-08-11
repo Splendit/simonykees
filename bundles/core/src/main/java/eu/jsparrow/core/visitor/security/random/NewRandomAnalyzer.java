@@ -19,32 +19,33 @@ import eu.jsparrow.core.visitor.security.common.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * Carries out all operations which are necessary to determine whether a given
- * {@link ClassInstanceCreation} is an invocation of
- * {@link java.util.Random#Random()} or {@link java.util.Random#Random(long)}
+ * Intended to be used exclusively by
+ * {@link UseSecureRandomASTVisitor#visit(ClassInstanceCreation)}.
+ * <p>
+ * This visitor will find out whether a given {@link ClassInstanceCreation} is
+ * an invocation of
+ * <ul>
+ * <li>{@link java.util.Random#Random()} or</li>
+ * <li>{@link java.util.Random#Random(long)}</li>
+ * </ul>
  * which can be replaced by an invocation of
  * {@link java.security.SecureRandom#SecureRandom()}.
  * 
  * @since 3.20.0
  *
  */
-public class NewRandomAnalyzer {
+class NewRandomAnalyzer {
 
 	private static final SignatureData SIGNATURE_WITHOUT_PARAMETER = new SignatureData(
 			java.util.Random.class.getName(), java.util.Random.class.getSimpleName(), Collections.emptyList());
 	private static final SignatureData SIGNATURE_WITH_SEED_PARAMETER = new SignatureData(
 			java.util.Random.class.getName(), java.util.Random.class.getSimpleName(),
 			Collections.singletonList(long.class.getSimpleName()));
-	private final ClassInstanceCreation classInstanceCreation;
 	private Expression seedArgument;
-	private Expression nonParenthesizedRandomExpression;
+	private Expression randomExpressionToReplace;
 	private Statement randomConstructionStatement;
 	private Expression assignmentTarget;
 	private Block blockOfConstructionStatement;
-
-	public NewRandomAnalyzer(ClassInstanceCreation classInstanceCreation) {
-		this.classInstanceCreation = classInstanceCreation;
-	}
 
 	private Expression findAssignmentTarget(Expression randomExpression) {
 		StructuralPropertyDescriptor locationInParent = randomExpression.getLocationInParent();
@@ -87,21 +88,21 @@ public class NewRandomAnalyzer {
 	/**
 	 * 
 	 * @return true if the given {@link ClassInstanceCreation} can be
-	 *         transformed, otherwise false.
+	 *         transformed, otherwise {@code false}.
 	 */
-	public boolean analyze() {
+	public boolean analyze(ClassInstanceCreation classInstanceCreation) {
 		SignatureData randomConstructorSignature = findRandomConstructorSignature(classInstanceCreation);
 		if (randomConstructorSignature == null) {
 			return false;
 		}
 
-		nonParenthesizedRandomExpression = classInstanceCreation;
-		while (nonParenthesizedRandomExpression.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
-			nonParenthesizedRandomExpression = (Expression) nonParenthesizedRandomExpression.getParent();
+		randomExpressionToReplace = classInstanceCreation;
+		while (randomExpressionToReplace.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
+			randomExpressionToReplace = (Expression) randomExpressionToReplace.getParent();
 		}
 
-		if (nonParenthesizedRandomExpression.getLocationInParent() == ClassInstanceCreation.ARGUMENTS_PROPERTY
-				|| nonParenthesizedRandomExpression.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+		if (randomExpressionToReplace.getLocationInParent() == ClassInstanceCreation.ARGUMENTS_PROPERTY
+				|| randomExpressionToReplace.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
 			return false;
 		}
 
@@ -109,12 +110,12 @@ public class NewRandomAnalyzer {
 			seedArgument = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(), Expression.class)
 				.get(0);
 
-			assignmentTarget = findAssignmentTarget(nonParenthesizedRandomExpression);
+			assignmentTarget = findAssignmentTarget(randomExpressionToReplace);
 			if (assignmentTarget == null) {
 				return false;
 			}
 
-			randomConstructionStatement = findConstructionStatement(nonParenthesizedRandomExpression);
+			randomConstructionStatement = findConstructionStatement(randomExpressionToReplace);
 			if (randomConstructionStatement == null) {
 				return false;
 			}
@@ -129,40 +130,31 @@ public class NewRandomAnalyzer {
 
 	/**
 	 * 
-	 * @return the {@link ClassInstanceCreation} which can be transformed,
-	 *         provided that {@link #analyze() has returned true.
-	 */
-	public ClassInstanceCreation getClassInstanceCreation() {
-		return classInstanceCreation;
-	}
-
-	/**
-	 * 
 	 * @return an {@link Expression} representing the seed in the case of the
 	 *         invocation of {@link java.util.Random#Random(long)}, otherwise
-	 *         null.
+	 *         {@code null}.
 	 */
 	public Expression getSeedArgument() {
 		return seedArgument;
 	}
 
 	/**
-	 * This method will return a non-null value only if a previous invocation of
-	 * {@link #analyze()} has returned true before.
+	 * Getter for the expression to be replaced by an invocation of
+	 * {@link java.security.SecureRandom#SecureRandom()}.
 	 * 
-	 * @return the outermost {@link ParenthesizedExpression} if the
-	 *         {@link ClassInstanceCreation} is parenthesized, otherwise the
-	 *         {@link ClassInstanceCreation} itself.
+	 * @return an instance of {@link Expression} if the invocation of
+	 *         {@link #analyze()} has returned {@code true} before, otherwise
+	 *         {@code null}.
 	 */
-	public Expression getNonParenthesizedRandomExpression() {
-		return nonParenthesizedRandomExpression;
+	public Expression getRandomExpressionToReplace() {
+		return randomExpressionToReplace;
 	}
 
 	/**
 	 * 
 	 * @return an instance of {@link Statement} if both a previous invocation of
 	 *         {@link #analyze()} has returned true and a seed argument has been
-	 *         found, otherwise null.
+	 *         found, otherwise {@code null}.
 	 */
 	public Statement getRandomConstructionStatement() {
 		return randomConstructionStatement;
@@ -171,8 +163,8 @@ public class NewRandomAnalyzer {
 	/**
 	 * 
 	 * @return an instance of {@link Expression} if both a previous invocation
-	 *         of {@link #analyze()} has returned true and a seed argument has
-	 *         been found, otherwise null.
+	 *         of {@link #analyze()} has returned {@code true} and a seed
+	 *         argument has been found, otherwise {@code null}.
 	 */
 	public Expression getAssignmentTarget() {
 		return assignmentTarget;
@@ -181,8 +173,8 @@ public class NewRandomAnalyzer {
 	/**
 	 * 
 	 * @return an instance of {@link Block} if both a previous invocation of
-	 *         {@link #analyze()} has returned true and a seed argument has been
-	 *         found, otherwise null.
+	 *         {@link #analyze()} has returned {@code true} and a seed argument
+	 *         has been found, otherwise {@code null}.
 	 */
 	public Block getBlockOfConstructionStatement() {
 		return blockOfConstructionStatement;

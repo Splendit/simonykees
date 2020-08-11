@@ -12,8 +12,8 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -62,8 +62,8 @@ public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
-		NewRandomAnalyzer analyzer = new NewRandomAnalyzer(node);
-		if (analyzer.analyze()) {
+		NewRandomAnalyzer analyzer = new NewRandomAnalyzer();
+		if (analyzer.analyze(node)) {
 			transform(analyzer);
 		}
 		return true;
@@ -94,17 +94,12 @@ public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 					Block.STATEMENTS_PROPERTY);
 			statementListRewrite.insertAfter(setSeedInvocationStatement, randomConstructionStatement, null);
 		}
-
-		ClassInstanceCreation newRandom = analyzer.getClassInstanceCreation();
-		Expression nonParenthesizedRandomExpression = analyzer.getNonParenthesizedRandomExpression();
-		if (nonParenthesizedRandomExpression != newRandom) {
-			astRewrite.replace(nonParenthesizedRandomExpression, newRandom, null);
-		}
-		astRewrite.replace(newRandom.getType(), getSecureRandomType(), null);
+		astRewrite.replace(analyzer.getRandomExpressionToReplace(), getSecureRandomInstanceCreation(), null);
 		onRewrite();
 	}
 
-	private Type getSecureRandomType() {
+	private ClassInstanceCreation getSecureRandomInstanceCreation() {		
+		
 		CompilationUnit compilationUnit = getCompilationUnit();
 		AST ast = compilationUnit.getAST();
 		Name secureRandomName;
@@ -117,6 +112,9 @@ public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 		} else {
 			secureRandomName = ast.newName(SECURE_RANDOM_QUALIFIED_NAME);
 		}
-		return ast.newSimpleType(secureRandomName);
+		SimpleType secureRandomType = ast.newSimpleType(secureRandomName);
+		ClassInstanceCreation secureRandomInstanceCreation = ast.newClassInstanceCreation();
+		secureRandomInstanceCreation.setType(secureRandomType);
+		return secureRandomInstanceCreation;
 	}
 }
