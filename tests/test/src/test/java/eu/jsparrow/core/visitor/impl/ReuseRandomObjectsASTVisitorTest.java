@@ -170,7 +170,7 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 	@Test
 	public void test_shadowingNonRandomField_shouldNotTransform() throws Exception {
 		String actual = "" + 
-				"Random random = new Random();\n" + 
+				"int random = 123;\n" + 
 				"private void sampleMethod(String value) {\n" + 
 				"	Random random = new Random();\n" + 
 				"	System.out.println(value + random.nextInt());\n" + 
