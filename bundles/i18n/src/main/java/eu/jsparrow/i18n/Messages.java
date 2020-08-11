@@ -528,8 +528,8 @@ public class Messages extends NLS {
 	public static String UpdateLicenseDialog_error_licenseInvalid;
 	public static String UseArraysStreamRule_description;
 	public static String UseArraysStreamRule_name;
-	public static String UseClassSecureRandomRule_description;
-	public static String UseClassSecureRandomRule_name;
+	public static String UseSecureRandomRule_description;
+	public static String UseSecureRandomRule_name;
 	public static String UseCollectionsSingletonListRule_description;
 	public static String UseCollectionsSingletonListRule_name;
 	public static String UseIsEmptyOnCollectionsRule_description;

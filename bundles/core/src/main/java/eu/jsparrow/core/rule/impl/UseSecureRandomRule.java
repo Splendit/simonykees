@@ -5,25 +5,25 @@ import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import eu.jsparrow.core.visitor.security.random.UseClassSecureRandomASTVisitor;
+import eu.jsparrow.core.visitor.security.random.UseSecureRandomASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
- * @see UseClassSecureRandomASTVisitor
+ * @see UseSecureRandomASTVisitor
  * 
  * @since 3.20.0
  *
  */
-public class UseClassSecureRandomRule extends RefactoringRuleImpl<UseClassSecureRandomASTVisitor> {
+public class UseSecureRandomRule extends RefactoringRuleImpl<UseSecureRandomASTVisitor> {
 
-	public UseClassSecureRandomRule() {
-		this.visitorClass = UseClassSecureRandomASTVisitor.class;
-		this.id = "UseClassSecureRandom"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.UseClassSecureRandomRule_name,
-				Messages.UseClassSecureRandomRule_description,
+	public UseSecureRandomRule() {
+		this.visitorClass = UseSecureRandomASTVisitor.class;
+		this.id = "UseSecureRandomRule"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.UseSecureRandomRule_name,
+				Messages.UseSecureRandomRule_description,
 				Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_2, Tag.SECURITY));
 	}

@@ -83,7 +83,7 @@ import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseArraysStreamRule;
-import eu.jsparrow.core.rule.impl.UseClassSecureRandomRule;
+import eu.jsparrow.core.rule.impl.UseSecureRandomRule;
 import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
@@ -170,7 +170,7 @@ public class RulesContainer {
 				new UseParameterizedJPAQueryRule(),
 				new UseParameterizedLDAPQueryRule(),
 				new EscapeUserInputsInSQLQueriesRule(),
-				new UseClassSecureRandomRule(),
+				new UseSecureRandomRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

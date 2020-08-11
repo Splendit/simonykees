@@ -41,7 +41,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * 
  * @since 3.20.0
  */
-public class UseClassSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
+public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String SECURE_RANDOM_QUALIFIED_NAME = java.security.SecureRandom.class.getName();
 	private final Map<CompilationUnit, Boolean> isSafeToAddImportMap = new HashMap<>();

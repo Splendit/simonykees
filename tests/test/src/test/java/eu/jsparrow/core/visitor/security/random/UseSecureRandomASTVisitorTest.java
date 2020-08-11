@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
-public class UseClassSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
+public class UseSecureRandomASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		setDefaultVisitor(new UseClassSecureRandomASTVisitor());
+		setDefaultVisitor(new UseSecureRandomASTVisitor());
 		defaultFixture.addImport(java.util.Random.class.getName());
 	}
 
