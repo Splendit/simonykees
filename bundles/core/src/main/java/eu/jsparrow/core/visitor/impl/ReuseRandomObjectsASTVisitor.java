@@ -28,6 +28,7 @@ import eu.jsparrow.core.visitor.sub.ReferencedVariablesASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * Creating a new Random object each time a random value is needed is
@@ -140,6 +141,8 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 			.size();
 		if (originalNumFragments == reusableRandomDeclaration.size() + alreadyExtracted.size()) {
 			astRewrite.remove(statement, null);
+			CommentRewriter commentRewriter = getCommentRewriter();
+			commentRewriter.saveLeadingComment(statement);
 		}
 
 		return true;
