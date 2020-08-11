@@ -56,6 +56,21 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 				"}";
 		assertChange(actual, expected);
 	}
+	
+	@Test
+	public void test_usingStaticFinalSeed_shouldTransform() throws Exception {
+		String actual = "" +
+				"private static final int seed = 10;\n" + 
+				"public void sampleMethod() {\n" + 
+				"	Random withStaticFinalSeed = new Random(seed);\n" + 
+				"}";
+		String expected = "" +
+				"private static final int seed = 10;\n" + 
+				"private Random withStaticFinalSeed = new Random(seed);" +
+				"public void sampleMethod() {\n" + 
+				"}\n";
+		assertChange(actual, expected);
+	}
 
 	@Test
 	public void test_localRandomObjectShadowingAField_shouldTransform() throws Exception {

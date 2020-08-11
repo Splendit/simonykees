@@ -12,7 +12,9 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -223,11 +225,27 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 		initializer.accept(variableReferencesVisitor);
 		List<SimpleName> referencedVariables = variableReferencesVisitor.getReferencedVariables();
 		if (!referencedVariables.isEmpty()) {
-			return false;
+			boolean allStaticFinal = referencedVariables.stream().allMatch(this::isReferenceToStaticFinalField);
+			if(!allStaticFinal) {
+				return false;
+			}
 		}
 
 		return !FieldProperties.contains(introducedFields, identifier)
 				&& !FieldProperties.contains(existingRandomFields, identifier);
+	}
+
+	private boolean isReferenceToStaticFinalField(SimpleName reference) {
+		IBinding binding = reference.resolveBinding();
+		if (binding.getKind() == IBinding.VARIABLE) {
+			IVariableBinding variableBinding = (IVariableBinding) binding;
+			if (variableBinding.isField()) {
+				return Modifier.isFinal(variableBinding.getModifiers())
+						&& Modifier.isStatic(variableBinding.getModifiers());
+			}
+		}
+		return false;
+
 	}
 
 	private boolean isJavaUtilRandomType(Type type) {
