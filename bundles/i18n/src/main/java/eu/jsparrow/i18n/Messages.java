@@ -24,6 +24,15 @@ public class Messages extends NLS {
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
+	public static String AbstractSummaryWizardPage_fileTableViewerTitle;
+	public static String AbstractSummaryWizardPage_fileTableViewerToolTipText;
+	public static String AbstractSummaryWizardPage_rulesPerFileTableViewerTitle;
+	public static String AbstractSummaryWizardPage_rulesPerFileTableViewerToolTipText;
+	public static String AbstractSummaryWizardPage_ruleTableViewerRuleToolTipText;
+	public static String AbstractSummaryWizardPage_ruleTableViewerTimesAppliedToolTipText;
+	public static String AbstractSummaryWizardPage_ruleTableViewerTimeSavedToolTipText;
+	public static String AbstractSummaryWizardPage_searchBoxToolTipText;
+	public static String AbstractSummaryWizardPage_searchLabel;
 	public static String ActivationControl_acitvationSuccessfulTitle;
 	public static String ActivationControl_activateButton;
 	public static String ActivationControl_activationFailedText;
@@ -108,6 +117,8 @@ public class Messages extends NLS {
 	public static String ConfigureProfileSelectRulesWizardPageModel_error_NameExists;
 	public static String ConfigureProfileSelectRulesWIzardPageModel_error_nameReserved;
 	public static String ConfigureRenameFieldsRuleWizard_WizardTitle_RenameFields;
+	public static String CustomTextEditChangePreviewViewer_originalCode;
+	public static String CustomTextEditChangePreviewViewer_refactoredCode;
 	public static String DateDeprecatedRule_description;
 	public static String DateDeprecatedRule_name;
 	public static String DiamondOperatorASTVisitor_using_diamond_operator;
@@ -394,6 +405,9 @@ public class Messages extends NLS {
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_leaveAsIs;
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase;
 	public static String RenamingRulePreviewWizardPage_RenameFields;
+	public static String RenamingRuleSummaryWizardPage_times;
+	public static String RenamingRuleSummaryWizardPage_timesToolTipText;
+	public static String RenamingSummaryWizardPageModel_externalReferencesDescription;
 	public static String ReorderModifiersRule_description;
 	public static String ReorderModifiersRule_name;
 	public static String ReplaceDynamicQueryByPreparedStatementRule_description;
@@ -456,7 +470,6 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_removeProfileButtonLabel;
 	public static String SimonykeesPreferencePage_Replace;
 	public static String SimonykeesPreferencePage_reservedProfileNameError;
-
 	public static String SimonykeesPreferencePage_resolvePackagesRecursivelyLabel;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_SelectedFileDoesNotExist;

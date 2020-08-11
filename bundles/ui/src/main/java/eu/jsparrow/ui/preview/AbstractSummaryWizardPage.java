@@ -2,50 +2,46 @@ package eu.jsparrow.ui.preview;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
-import org.eclipse.compare.internal.ComparePreferencePage;
-import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
-import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
-import org.eclipse.jface.databinding.viewers.ViewerSupport;
-import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
+import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,38 +53,33 @@ import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.PartialMatchContentProposalProvider;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.preview.dialog.CompareInput;
+import eu.jsparrow.ui.preview.comparator.SortableViewerComparator;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
-import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
-import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
+import eu.jsparrow.ui.preview.model.summary.AbstractSummaryWizardPageModel;
+import eu.jsparrow.ui.preview.model.summary.FileViewerFilter;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 @SuppressWarnings({ "restriction" })
-public abstract class AbstractSummaryWizardPage extends WizardPage {
+public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardPageModel> extends WizardPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractSummaryWizardPage.class);
 
-	private Composite rootComposite;
+	protected Composite rootComposite;
 
 	private CLabel labelExecutionTime;
-
 	private CLabel labelIssuesFixed;
-
 	private CLabel labelHoursSaved;
 
-	private TableViewer fileTableViewer;
+	protected TableViewer fileTableViewer;
+	protected TableViewer rulesPerFileTableViewer;
+	protected Text searchText;
 
-	private TableViewer ruleTableViewer;
+	protected T summaryWizardPageModel;
 
-	private Composite compareInputContainer;
-
-	private Control compareInputControl;
-
-	private RefactoringSummaryWizardPageModel summaryWizardPageModel;
-
-	private int displayHeight;
+	protected int displayHeight;
 
 	private boolean enabledFinishButton;
 	private StandaloneStatisticsMetadata statisticsMetadata;
@@ -109,11 +100,18 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 
 		setTitle(Messages.SummaryWizardPage_RunSummary);
-		this.summaryWizardPageModel = new RefactoringSummaryWizardPageModel(refactoringPipeline, wizardModel);
+		this.summaryWizardPageModel = summaryPageModelFactory(refactoringPipeline, wizardModel);
 		this.enabledFinishButton = enabledFinishButton;
 		displayHeight = Display.getCurrent()
 			.getPrimaryMonitor()
 			.getBounds().height;
+	}
+
+	protected abstract T summaryPageModelFactory(RefactoringPipeline pipeline,
+			RefactoringPreviewWizardModel wizardModel);
+
+	protected T getSummaryPageModel() {
+		return summaryWizardPageModel;
 	}
 
 	/**
@@ -128,12 +126,6 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		rootComposite.setLayout(new GridLayout(1, false));
 	}
 
-	public void disposeCompareInputControl() {
-		if (compareInputControl != null) {
-			compareInputControl.dispose();
-		}
-	}
-
 	@Override
 	public void performHelp() {
 		SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
@@ -144,10 +136,8 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		if (visible) {
 			setStatusInfo();
 			summaryWizardPageModel.updateData();
-
 			saveStatisticsData();
 
-			createCompareInputControl();
 			// We must wait to set selection until control is visible
 			setInitialFileSelection();
 
@@ -215,125 +205,124 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
-	protected void addRulesSection() {
-		Group tableComposite = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
-		tableComposite.setText(Messages.SummaryWizardPage_Rules);
-		tableComposite.setLayout(new GridLayout(1, false));
-		GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
-		layoutData.heightHint = displayHeight / 4;
-		tableComposite.setLayoutData(layoutData);
-		ruleTableViewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
-		Table table = ruleTableViewer.getTable();
-		table.setHeaderVisible(true);
-		table.setLinesVisible(true);
-
-		SummaryPageRuleTableViewerComparator comparator = new SummaryPageRuleTableViewerComparator();
-		ruleTableViewer.setComparator(comparator);
-
-		TableViewerColumn colRuleName = createTableViewerColumn(Messages.SummaryWizardPage_Rule, 0,
-				comparator);
-		TableViewerColumn colTimes = createTableViewerColumn(Messages.SummaryWizardPage_TimesApplied, 1,
-				comparator);
-		TableViewerColumn colTimeSaved = createTableViewerColumn(Messages.SummaryWizardPage_TimeSaved, 2,
-				comparator);
-
-		TableColumnLayout tableLayout = new TableColumnLayout();
-		tableComposite.setLayout(tableLayout);
-		tableLayout.setColumnData(colRuleName.getColumn(), new ColumnWeightData(60));
-		tableLayout.setColumnData(colTimes.getColumn(), new ColumnWeightData(20));
-		tableLayout.setColumnData(colTimeSaved.getColumn(), new ColumnWeightData(20));
-
-	}
-
-	private TableViewerColumn createTableViewerColumn(String title, int colNumber,
-			SummaryPageRuleTableViewerComparator comparator) {
-		TableViewerColumn tableViewerColumn = new TableViewerColumn(ruleTableViewer, SWT.NONE);
+	protected TableViewerColumn createSortableTableViewerColumn(TableViewer tableViewer, String title,
+			String toolTipText,
+			int colNumber, SortableViewerComparator comparator) {
+		TableViewerColumn tableViewerColumn = new TableViewerColumn(tableViewer, SWT.NONE);
 		TableColumn column = tableViewerColumn.getColumn();
 
 		column.setResizable(false);
 		column.setText(title);
+		column.setToolTipText(toolTipText);
 		column.addSelectionListener(
-				getSelectionAdapterForRulesTableViewer(column, colNumber, comparator));
+				getSelectionAdapterForRulesTableViewer(tableViewer, column, colNumber, comparator));
 
 		return tableViewerColumn;
 	}
 
-	private SelectionAdapter getSelectionAdapterForRulesTableViewer(final TableColumn column,
-			final int index, SummaryPageRuleTableViewerComparator comparator) {
+	private SelectionAdapter getSelectionAdapterForRulesTableViewer(final TableViewer tableViewer,
+			final TableColumn column, final int index, SortableViewerComparator comparator) {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				comparator.setColumn(index);
 				int dir = comparator.getDirection();
-				ruleTableViewer.getTable()
+				tableViewer.getTable()
 					.setSortDirection(dir);
-				ruleTableViewer.getTable()
+				tableViewer.getTable()
 					.setSortColumn(column);
-				ruleTableViewer.refresh();
+				tableViewer.refresh();
 			}
 		};
 	}
 
 	protected void addFilesSection() {
 		Group filesGroup = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
-		filesGroup.setLayout(new GridLayout(1, false));
-		filesGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
+		filesGroup.setLayout(new GridLayout(1, true));
+		filesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		filesGroup.setText(Messages.SummaryWizardPage_Files);
-		SashForm sashForm = new SashForm(filesGroup, SWT.VERTICAL);
-		sashForm.setLayout(new GridLayout());
-		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
-		sashForm.setBackground(sashForm.getDisplay()
-			.getSystemColor(SWT.COLOR_GRAY));
 
-		fileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
+		Composite searchComposite = new Composite(filesGroup, SWT.NONE);
+		searchComposite.setLayout(new GridLayout(1, false));
+		GridData searchGroupGridData = new GridData(SWT.LEFT, SWT.FILL, false, false);
+		searchGroupGridData.widthHint = 600;
+		searchComposite.setLayoutData(searchGroupGridData);
 
-		// sort files alphabetically (SIM-922)
-		fileTableViewer.setComparator(new ViewerComparator() {
+		searchText = new Text(searchComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		searchText.setMessage(Messages.AbstractSummaryWizardPage_searchLabel);
+		searchText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		searchText.setToolTipText(Messages.AbstractSummaryWizardPage_searchBoxToolTipText);
+
+		// content for autocomplete proposal window with specified size
+		IContentProposalProvider proposalProvider = new PartialMatchContentProposalProvider(
+				summaryWizardPageModel.getProposalProviderContents());
+		ContentProposalAdapter proposalAdapter = new ContentProposalAdapter(searchText, new TextContentAdapter(),
+				proposalProvider, null, null);
+		proposalAdapter.setPropagateKeys(true);
+		proposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
+		proposalAdapter.setPopupSize(new Point(580, 80));
+
+		Composite filesSectionComposite = new Composite(filesGroup, SWT.NONE);
+		filesSectionComposite.setLayout(new GridLayout(2, true));
+		filesSectionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		addFileTableViewerSection(filesSectionComposite);
+		addRulePerFileSection(filesSectionComposite);
+
+		FileViewerFilter filter = new FileViewerFilter();
+
+		/*
+		 * Used to handle the case when a suggestion is double clicked (and
+		 * therefore inserted as text into the searchText). Without this, the
+		 * selection will not change.
+		 */
+		searchText.addModifyListener((ModifyEvent e) -> updateSearch(searchText, filter));
+
+		/*
+		 * Handles hitting the delete search text button and clicking on the
+		 * search icon
+		 */
+		searchText.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				ChangedFilesModel model1 = (ChangedFilesModel) e1;
-				ChangedFilesModel model2 = (ChangedFilesModel) e2;
-				return model1.getName()
-					.compareTo(model2.getName());
+			public void widgetDefaultSelected(SelectionEvent e) {
+				if (e.detail == SWT.CANCEL) {
+					searchText.setText(Messages.SelectRulesWizardPage_emptyString);
+					updateSearch(searchText, filter);
+				} else if (e.detail == SWT.ICON_SEARCH) {
+					updateSearch(searchText, filter);
+				}
 			}
 		});
 
-		compareInputContainer = new Composite(sashForm, SWT.FILL);
-		GridLayout layout = new GridLayout();
-		layout.marginHeight = 0;
-		layout.marginWidth = 0;
-		compareInputContainer.setLayout(layout);
-		compareInputContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
-		compareInputContainer.setSize(SWT.DEFAULT, 1000);
-
-		CompareUIPlugin.getDefault()
-			.getPreferenceStore()
-			.setValue(ComparePreferencePage.OPEN_STRUCTURE_COMPARE, Boolean.FALSE);
-
-		sashForm.setWeights(new int[] { 1, 3 });
+		searchText.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				updateSearch(searchText, filter);
+			}
+		});
+		fileTableViewer.addFilter(filter);
 	}
 
-	@SuppressWarnings("unchecked")
+	protected abstract void addRulePerFileSection(Composite filesSectionComposite);
+
+	protected abstract void addFileTableViewerSection(Composite filesSectionComposite);
+
+	private void updateSearch(Text searchText, FileViewerFilter filter) {
+		filter.setSearchString(searchText.getText());
+		fileTableViewer.refresh();
+		rulesPerFileTableViewer.refresh();
+		setInitialFileSelection();
+	}
+
 	protected void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
 
 		initializeHeaderDataBindings(bindingContext);
 
-		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(), BeanProperties.values("name")); //$NON-NLS-1$
-
-		IViewerObservableValue selectedFile = ViewerProperties.singleSelection()
-			.observe(fileTableViewer);
-
-		selectedFile.addValueChangeListener(e -> {
-			ChangedFilesModel selectedItem = (ChangedFilesModel) e.getObservableValue()
-				.getValue();
-			if (selectedItem != null) {
-				updateCompareInputControl(selectedItem.getName(), selectedItem.getSourceLeft(),
-						selectedItem.getSourceRight());
-			}
-		});
-
+		initializeFileTableViewer();
 	}
+
+	protected abstract void initializeFileTableViewer();
 
 	private void setStatusInfo() {
 		StatusInfo statusInfo = new StatusInfo();
@@ -343,85 +332,43 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		StatusUtil.applyToStatusLine(this, statusInfo);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initializeHeaderDataBindings(DataBindingContext bindingContext) {
-		IConverter convertRunDuration = IConverter.create(Long.class, String.class,
+		IConverter<Object, String> convertRunDuration = IConverter.create(Long.class, String.class,
 				x -> DurationFormatUtil.formatRunDuration((Long) x));
-		IObservableValue observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
+		IObservableValue<String> observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
 			.observe(labelExecutionTime);
-		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
+		IObservableValue<Object> executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
 				executionTimeSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertRunDuration));
 
-		IConverter convertIssuesFixed = IConverter.create(Integer.class, String.class,
+		IConverter<Object, String> convertIssuesFixed = IConverter.create(Integer.class, String.class,
 				x -> (String.format(Messages.SummaryWizardPageModel_IssuesFixed, (Integer) x)));
-		IObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
+		ISWTObservableValue<String> observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
 			.observe(labelIssuesFixed);
-		IObservableValue issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed") //$NON-NLS-1$
+		IObservableValue<Object> issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelIssuesFixedObserveWidget,
 				issuesFixedSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertIssuesFixed));
 
-		IConverter convertTimeSaved = IConverter.create(Duration.class, String.class, x -> String
+		IConverter<Object, String> convertTimeSaved = IConverter.create(Duration.class, String.class, x -> String
 			.format(Messages.DurationFormatUtil_TimeSaved, DurationFormatUtil.formatTimeSaved((Duration) x)));
-		IObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
+		ISWTObservableValue<String> observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
 			.observe(labelHoursSaved);
-		IObservableValue hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("timeSaved") //$NON-NLS-1$
+		IObservableValue<Object> hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("timeSaved") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue,
 				null, UpdateValueStrategy.create(convertTimeSaved));
-	}
-
-	private void createCompareInputControl() {
-		disposeCompareInputControl();
-		Display.getDefault()
-			.syncExec(() -> {
-				CompareInput compareInput = new CompareInput("", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				updateCompareInputControl(compareInput);
-			});
-	}
-
-	private void updateCompareInputControl(String name, String left, String right) {
-		disposeCompareInputControl();
-		Display.getDefault()
-			.syncExec(() -> {
-				CompareInput compareInput = new CompareInput(name, left, right);
-				updateCompareInputControl(compareInput);
-			});
-	}
-
-	private void updateCompareInputControl(CompareInput compareInput) {
-		try {
-			PlatformUI.getWorkbench()
-				.getProgressService()
-				.run(true, true, compareInput);
-		} catch (InvocationTargetException | InterruptedException e) {
-			logger.error(e.getMessage(), e);
-		}
-		createControlsIfNoneExist(compareInput);
-	}
-
-	private void createControlsIfNoneExist(CompareInput compareInput) {
-		// Condition fixes SIM-902
-		if (compareInputContainer.getChildren().length == 0) {
-			compareInputControl = compareInput.createContents(compareInputContainer);
-			compareInputControl.setSize(compareInputControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
-			compareInputControl.setLayoutData(new GridData(GridData.FILL_BOTH));
-			compareInputContainer.layout();
-		}
 	}
 
 	private void setInitialFileSelection() {
 		Object item = fileTableViewer.getElementAt(0);
 		if (item != null) {
 			fileTableViewer.setSelection(new StructuredSelection(item));
+		} else {
+			Table table = rulesPerFileTableViewer.getTable();
+			table.clearAll();
 		}
-	}
-
-	protected void initializeRuleTableDataBindings() {
-		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
-				BeanProperties.values("name", "times", "timeSaved")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 }
