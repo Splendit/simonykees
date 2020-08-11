@@ -172,6 +172,7 @@ public class RenamingSummaryWizardPageModel extends AbstractSummaryWizardPageMod
 				getChangedFiles()
 					.stream()
 					.map(ChangedNamesInFileModel::getFileName))
+			.sorted()
 			.toArray(String[]::new);
 	}
 }

@@ -29,7 +29,7 @@ public class RefactoringSummaryWizardPageModel extends AbstractSummaryWizardPage
 	public IObservableList<RulesPerFileModel> getRulesPerFile() {
 		return rulesPerFile;
 	}
-	
+
 	public IObservableList<ChangedFilesModel> getChangedFiles() {
 		return changedFiles;
 	}
@@ -94,7 +94,7 @@ public class RefactoringSummaryWizardPageModel extends AbstractSummaryWizardPage
 
 		return new ChangedFilesModel(fileName, rulesWithChanges);
 	}
-	
+
 	@Override
 	public String[] getProposalProviderContents() {
 		return Stream.concat(
@@ -104,6 +104,7 @@ public class RefactoringSummaryWizardPageModel extends AbstractSummaryWizardPage
 				getChangedFiles()
 					.stream()
 					.map(ChangedFilesModel::getName))
+			.sorted()
 			.toArray(String[]::new);
 	}
 }
