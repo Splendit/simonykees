@@ -44,20 +44,19 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String SECURE_RANDOM_QUALIFIED_NAME = java.security.SecureRandom.class.getName();
-	private final Map<CompilationUnit, Boolean> isSafeToAddImportMap = new HashMap<>();
+	private boolean flagSafeImport;
 
 	@Override
 	public boolean visit(CompilationUnit node) {
 		super.visit(node);
-		boolean flagSafeImport = isSafeToAddImport(node, SECURE_RANDOM_QUALIFIED_NAME);
-		isSafeToAddImportMap.put(node, Boolean.valueOf(flagSafeImport));
+		flagSafeImport = isSafeToAddImport(node, SECURE_RANDOM_QUALIFIED_NAME);
 		return true;
 	}
 
 	@Override
 	public void endVisit(CompilationUnit node) {
 		super.endVisit(node);
-		isSafeToAddImportMap.clear();
+		flagSafeImport = false;
 	}
 
 	@Override
@@ -103,8 +102,6 @@ public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 		CompilationUnit compilationUnit = getCompilationUnit();
 		AST ast = compilationUnit.getAST();
 		Name secureRandomName;
-		boolean flagSafeImport = isSafeToAddImportMap.get(compilationUnit)
-			.booleanValue();
 		if (flagSafeImport) {
 			this.addImports.add(SECURE_RANDOM_QUALIFIED_NAME);
 			secureRandomName = ast
