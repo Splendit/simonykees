@@ -1,0 +1,58 @@
+package eu.jsparrow.core.visitor.security.common;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
+
+/**
+ * Used to determine whether a given {@link IMethodBinding} fulfills the
+ * following conditions:
+ * <ul>
+ * <li>The method must be declared by a specified class.</li>
+ * <li>The method must have a specified name and signature.</li>
+ * </ul>
+ * 
+ * @since 3.20.0
+ */
+public class SignatureData {
+
+	private final String declaringTypeName;
+	private final String methodName;
+	private final List<String> parameterTypeNames;
+
+	public SignatureData(String declaringTypeName, String methodName, List<String> parameterTypeNames) {
+		this.declaringTypeName = declaringTypeName;
+		this.methodName = methodName;
+		this.parameterTypeNames = parameterTypeNames;
+	}
+
+	/**
+	 * @return true if the given {@link IMethodBinding} fulfills all conditions
+	 *         regarding the declaring type, name and the parameter types.
+	 */
+	public boolean isEquivalentTo(IMethodBinding methodBinding) {
+		if (!methodBinding.getName()
+			.equals(methodName)) {
+			return false;
+		}
+
+		if (!ClassRelationUtil.isContentOfType(methodBinding.getDeclaringClass(), declaringTypeName)) {
+			return false;
+		}
+
+		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
+
+		if (parameterTypes.length != parameterTypeNames.size()) {
+			return false;
+		}
+
+		Iterator<String> parameterTypesIterator = parameterTypeNames.iterator();
+		return Arrays.stream(parameterTypes)
+			.allMatch(t -> ClassRelationUtil.isContentOfType(t, parameterTypesIterator.next()));
+	}
+}
