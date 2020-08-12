@@ -171,9 +171,8 @@ public class RulesContainer {
 				new UseParameterizedJPAQueryRule(),
 				new UseParameterizedLDAPQueryRule(),
 				new EscapeUserInputsInSQLQueriesRule(),
-				new UseSecureRandomRule(),
-
 				new ReuseRandomObjectsRule(),
+				new UseSecureRandomRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
