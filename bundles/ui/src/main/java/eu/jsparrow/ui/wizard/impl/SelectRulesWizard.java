@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
@@ -76,7 +77,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		this.refactoringPipeline = refactoringPipeline;
 		this.rules = rules;
 		setNeedsProgressMonitor(true);
-		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
+		Window.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
 	}
 
 	@Override

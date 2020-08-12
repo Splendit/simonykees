@@ -103,10 +103,10 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule, RefactoringRule rule,
-			RefactoringPreviewWizardModel wizardModel) {
+			RefactoringPreviewWizardModel wizardModel, boolean enabled) {
 		super(rule.getRuleDescription()
 			.getName());
-
+		CustomTextEditChangePreviewViewer.setEnableDiffView(enabled);
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 
 		setTitle(rule.getRuleDescription()
@@ -305,7 +305,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		previewContainer.setLayout(new GridLayout());
 		previewContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		currentPreviewViewer = new TextEditChangePreviewViewer();
+		currentPreviewViewer = new CustomTextEditChangePreviewViewer();
 	}
 
 	private ISelectionChangedListener createSelectionChangedListener() {
@@ -393,7 +393,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		currentPreviewViewer.getControl()
 			.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		currentPreviewViewer.setInput(TextEditChangePreviewViewer.createInput(getCurrentDocumentChange()));
+		currentPreviewViewer.setInput(CustomTextEditChangePreviewViewer.createInput(getCurrentDocumentChange()));
 		((CompareViewerSwitchingPane) currentPreviewViewer.getControl())
 			.setTitleArgument(currentCompilationUnit.getElementName());
 
@@ -525,9 +525,13 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 	private void clearCounterForChangedFile(ICompilationUnit newSelection) {
 		wizardModel.getChangedFilesPerRule()
-			.keySet().stream().filter(changedFileRule -> wizardModel.getFilesForRule(changedFileRule)
-			.contains(newSelection.getHandleIdentifier())).map(changedFileRule -> RuleApplicationCount.getFor(changedFileRule)
-			.getApplicationsForFile(newSelection.getHandleIdentifier())).forEach(FileChangeCount::clear);
+			.keySet()
+			.stream()
+			.filter(changedFileRule -> wizardModel.getFilesForRule(changedFileRule)
+				.contains(newSelection.getHandleIdentifier()))
+			.map(changedFileRule -> RuleApplicationCount.getFor(changedFileRule)
+				.getApplicationsForFile(newSelection.getHandleIdentifier()))
+			.forEach(FileChangeCount::clear);
 	}
 
 }

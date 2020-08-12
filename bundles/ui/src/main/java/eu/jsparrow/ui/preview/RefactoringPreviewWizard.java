@@ -90,7 +90,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
 				if (!changes.isEmpty()) {
-					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model);
+					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish());
 					addPage(previewPage);
 				}
 			});
@@ -328,8 +328,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		if (null != getContainer()) {
 			if (getContainer().getCurrentPage() instanceof RefactoringPreviewWizardPage) {
 				((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
-			} else {
-				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
 			}
 			getPreviousPage(getContainer().getCurrentPage());
 		}
