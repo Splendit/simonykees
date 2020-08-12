@@ -364,4 +364,53 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 		assertNoChange(original);
 	}
 
+	@Test
+	public void visit_HiddenInitialization_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" + 
+				"		EntityManager entityManager = null;\n" + 
+				"		String query;\n" + 
+				"		{\n" + 
+				"			String orderId = \"100000000\";\n" + 
+				"			query = \"Select order from Orders order where order.id = \" + orderId;\n" + 
+				"		}\n" + 
+				"		Query jpqlQuery = entityManager.createQuery(query);\n" + 
+				"		jpqlQuery.getResultList();\n" + 
+				"	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_HiddenPlusAssign_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" + 
+				"		EntityManager entityManager = null;\n" + 
+				"		String query;\n" + 
+				"		String orderId = \"100000000\";\n" + 
+				"		query = \"Select order from Orders order where order.id = \" + orderId;\n" + 
+				"		{\n" + 
+				"			String orderId2 = \"200000000\";\n" + 
+				"			query += \" or order.id = \" + orderId2;\n" + 
+				"		}\n" + 
+				"		Query jpqlQuery = entityManager.createQuery(query);\n" + 
+				"		jpqlQuery.getResultList();\n" + 
+				"	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_PlusAssignToNullValue_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" + 
+				"		EntityManager entityManager = null;\n" + 
+				"		String query = null;\n" + 
+				"		String orderId = \"100000000\";\n" + 
+				"		query += \"Select order from Orders order where order.id = \" + orderId;\n" + 
+				"		\n" + 
+				"		Query jpqlQuery = entityManager.createQuery(query);\n" + 
+				"		jpqlQuery.getResultList();\n" + 
+				"	}";
+		assertNoChange(original);
+	}
+
 }
