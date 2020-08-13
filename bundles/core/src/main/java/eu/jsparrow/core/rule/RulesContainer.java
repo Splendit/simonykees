@@ -87,6 +87,7 @@ import eu.jsparrow.core.rule.impl.UseSecureRandomRule;
 import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
+import eu.jsparrow.core.rule.impl.UseOffsetBasedStringMethodsRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedJPAQueryRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedLDAPQueryRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedQueryRule;
@@ -197,6 +198,7 @@ public class RulesContainer {
 				 * StringBuildingLoopRule.
 				 */
 				new UseStringBuilderAppendRule(), new UseStringJoinRule(),
+				new UseOffsetBasedStringMethodsRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen
