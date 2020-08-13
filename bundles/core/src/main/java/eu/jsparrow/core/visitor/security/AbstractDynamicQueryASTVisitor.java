@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -234,4 +235,21 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 
 	}
 
+	protected List<Expression> findDynamicQueryComponents(Expression queryExpression) {
+		if (queryExpression.getNodeType() == ASTNode.INFIX_EXPRESSION) {
+			InfixExpression infixExpression = (InfixExpression) queryExpression;
+			DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
+			componentStore.storeComponents(infixExpression);
+			return componentStore.getComponents();
+		}
+		if (queryExpression.getNodeType() == ASTNode.SIMPLE_NAME) {
+			ParameterizedQueryAnalyzer parameterizedQueryAnalyzer = new ParameterizedQueryAnalyzer(
+					(SimpleName) queryExpression);
+			DynamicQueryComponentsStore componentStore = parameterizedQueryAnalyzer.analyze();
+			if (componentStore != null) {
+				return componentStore.getComponents();
+			}
+		}
+		return Collections.emptyList();
+	}
 }
