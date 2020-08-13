@@ -160,23 +160,6 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 		assertNoChange(original);
 	}
 
-	/**
-	 * This test is expected to fail as soon as Bugfix SIM-1782 has been solved.
-	 */
-	@Test
-	public void visit_CreateQueryWithJPQLVariable_shouldNotTransform() throws Exception {
-		String original = "" +
-				"	void test() {\n" +
-				"		String orderId = \"100000000\";\n" +
-				"		EntityManager entityManager = null;\n" +
-				"		String jpqlString = \"Select order from Orders order where order.id = \" + orderId;\n" +
-				"		Query jpqlQuery = entityManager.createQuery(jpqlString);\n" +
-				"		jpqlQuery.getResultList();\n" +
-				"	}";
-
-		assertNoChange(original);
-	}
-
 	@Test
 	public void visit_QueryDeclaredAsField_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -378,6 +361,55 @@ public class UseParameterizedJPAQueryNegativeASTVisitorTest extends UsesJDTUnitF
 				"					.createQuery(\"Select order from Orders order where order.id = \" + orderId);\n" +
 				"			jpqlQuery2.getResultList();\n" +
 				"		}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_HiddenInitialization_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" + 
+				"		EntityManager entityManager = null;\n" + 
+				"		String query;\n" + 
+				"		{\n" + 
+				"			String orderId = \"100000000\";\n" + 
+				"			query = \"Select order from Orders order where order.id = \" + orderId;\n" + 
+				"		}\n" + 
+				"		Query jpqlQuery = entityManager.createQuery(query);\n" + 
+				"		jpqlQuery.getResultList();\n" + 
+				"	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_HiddenPlusAssign_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" + 
+				"		EntityManager entityManager = null;\n" + 
+				"		String query;\n" + 
+				"		String orderId = \"100000000\";\n" + 
+				"		query = \"Select order from Orders order where order.id = \" + orderId;\n" + 
+				"		{\n" + 
+				"			String orderId2 = \"200000000\";\n" + 
+				"			query += \" or order.id = \" + orderId2;\n" + 
+				"		}\n" + 
+				"		Query jpqlQuery = entityManager.createQuery(query);\n" + 
+				"		jpqlQuery.getResultList();\n" + 
+				"	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_PlusAssignToNullValue_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" + 
+				"		EntityManager entityManager = null;\n" + 
+				"		String query = null;\n" + 
+				"		String orderId = \"100000000\";\n" + 
+				"		query += \"Select order from Orders order where order.id = \" + orderId;\n" + 
+				"		\n" + 
+				"		Query jpqlQuery = entityManager.createQuery(query);\n" + 
+				"		jpqlQuery.getResultList();\n" + 
+				"	}";
 		assertNoChange(original);
 	}
 

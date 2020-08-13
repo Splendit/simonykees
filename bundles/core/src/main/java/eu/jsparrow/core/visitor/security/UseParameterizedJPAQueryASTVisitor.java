@@ -10,7 +10,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -53,16 +52,10 @@ public class UseParameterizedJPAQueryASTVisitor extends AbstractDynamicQueryASTV
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		Expression queryMethodArgument = analyzeStatementExecuteQuery(methodInvocation);
-		if (queryMethodArgument == null || queryMethodArgument.getNodeType() != ASTNode.INFIX_EXPRESSION) {
+		if (queryMethodArgument == null) {
 			return true;
 		}
-
-		InfixExpression infixExpression = (InfixExpression) queryMethodArgument;
-
-		DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
-
-		componentStore.storeComponents(infixExpression);
-		List<Expression> queryComponents = componentStore.getComponents();
+		List<Expression> queryComponents = findDynamicQueryComponents(queryMethodArgument);
 		JPAQueryComponentsAnalyzer componentsAnalyzer = new JPAQueryComponentsAnalyzer(queryComponents);
 
 		List<ReplaceableParameter> replaceableParameters = componentsAnalyzer.createReplaceableParameterList();

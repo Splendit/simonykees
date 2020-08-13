@@ -579,4 +579,30 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 				"			}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_ExecuteQueryArgumentInfixExpression_shouldTransform() throws Exception {
+
+		String original = "" +
+				"		String departmentId1 = \"40\";\n" + 
+				"		try {\n" + 
+				"			Connection connection = null;\n" + 
+				"			Statement statement = connection.createStatement();\n" + 
+				"			ResultSet resultSet = statement\n" + 
+				"					.executeQuery(\"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\");\n" + 
+				"		} catch (Exception e) {\n" + 
+				"		}";
+		
+		String expected = "" +
+				"		String departmentId1=\"40\";\n" + 
+				"		try {\n" + 
+				"			Connection connection=null;\n" + 
+				"			PreparedStatement statement=connection.prepareStatement(\"SELECT id FROM employee WHERE department_id =  ?\" + \"\");\n" + 
+				"			statement.setString(1,departmentId1);\n" + 
+				"			ResultSet resultSet=statement.executeQuery();\n" + 
+				"		} catch (  Exception e) {\n" + 
+				"		}";
+
+		assertChange(original, expected);
+	}
 }

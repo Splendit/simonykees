@@ -36,6 +36,26 @@ public class UseParameterizedJPAQueryASTVisitorTest extends UsesSimpleJDTUnitFix
 		assertChange(original, expected);
 
 	}
+	
+	@Test
+	public void visit_CreateQueryWithJPQLVariable_shouldTransform() throws Exception {
+		String original = "" +
+				"		String orderId = \"100000000\";\n" +
+				"		EntityManager entityManager = null;\n" +
+				"		String jpqlString = \"Select order from Orders order where order.id = \" + orderId;\n" +
+				"		Query jpqlQuery = entityManager.createQuery(jpqlString);\n" +
+				"		jpqlQuery.getResultList();\n";
+		
+		String expected = "" +
+				"		String orderId=\"100000000\";\n" + 
+				"		EntityManager entityManager=null;\n" + 
+				"		String jpqlString=\"Select order from Orders order where order.id =  ?1\";\n" + 
+				"		Query jpqlQuery=entityManager.createQuery(jpqlString);\n" + 
+				"		jpqlQuery.setParameter(1,orderId);\n" + 
+				"		jpqlQuery.getResultList();\n";
+
+		assertChange(original, expected);
+	}
 
 	@Test
 	public void visit_useRelationalGT_shouldTransform() throws Exception {

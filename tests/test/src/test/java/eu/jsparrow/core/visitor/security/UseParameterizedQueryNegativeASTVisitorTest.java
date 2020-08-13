@@ -401,7 +401,7 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 	}
 
 	@Test
-	public void visit_ExecuteQueryArgumentConcatenated_shouldNotTransform() throws Exception {
+	public void visit_ExecuteQueryArgumentAsInfixExpression_shouldNotTransform() throws Exception {
 
 		String original = "" +
 				"String userID = \"100000\";\n" +
