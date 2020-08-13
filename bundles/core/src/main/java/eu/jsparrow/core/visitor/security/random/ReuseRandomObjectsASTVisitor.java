@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl;
+package eu.jsparrow.core.visitor.security.random;
 
 import java.util.ArrayList;
 import java.util.List;

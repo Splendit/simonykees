@@ -4,6 +4,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.core.visitor.security.random.ReuseRandomObjectsASTVisitor;
+
 public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach

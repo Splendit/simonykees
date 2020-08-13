@@ -4,7 +4,7 @@ import java.time.Duration;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import eu.jsparrow.core.visitor.impl.ReuseRandomObjectsASTVisitor;
+import eu.jsparrow.core.visitor.security.random.ReuseRandomObjectsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
