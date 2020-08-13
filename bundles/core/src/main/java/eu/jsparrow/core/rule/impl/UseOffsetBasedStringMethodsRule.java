@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import eu.jsparrow.core.visitor.impl.indexof.UseOffsetBasedStringMethodsASTVisitor;
+import eu.jsparrow.core.visitor.impl.UseOffsetBasedStringMethodsASTVisitor;
 import eu.jsparrow.core.visitor.security.UseParameterizedQueryASTVisitor;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;

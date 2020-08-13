@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl.indexof;
+package eu.jsparrow.core.visitor.impl;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -7,8 +7,9 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
-class SubstringIndexOfInvocationChainAnalyzer {
+public class UseOffsetBasedStringMethodsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String SUBSTRING = "substring"; //$NON-NLS-1$
 	private static final String STARTS_WITH = "startsWith"; //$NON-NLS-1$
@@ -26,11 +27,6 @@ class SubstringIndexOfInvocationChainAnalyzer {
 	private static final SignatureData SUBSTRING_AT_BEGIN_INDEX = new SignatureData(java.lang.String.class, SUBSTRING,
 			int.class);
 
-	private Expression stringExpression;
-	private MethodInvocation substringInvocation;
-	private String offsetBasedMethodName;
-	private Expression offsetArgument;
-
 	private boolean checkSignature(IMethodBinding methodBinding) {
 		return INDEX_OF_INT.isEquivalentTo(methodBinding) ||
 				INDEX_OF_STRING.isEquivalentTo(methodBinding) ||
@@ -39,41 +35,33 @@ class SubstringIndexOfInvocationChainAnalyzer {
 				STARTS_WITH_STRING.isEquivalentTo(methodBinding);
 	}
 
-	boolean analyze(MethodInvocation methodInvocation) {
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		if (!checkSignature(methodBinding)) {
-			return false;
+	@Override
+	public boolean visit(MethodInvocation node) {
+		if (!checkSignature(node.resolveMethodBinding())) {
+			return true;
 		}
-		offsetBasedMethodName = methodBinding.getName();
 
-		Expression expression = methodInvocation.getExpression();
+		Expression expression = node.getExpression();
 		if (expression.getNodeType() != ASTNode.METHOD_INVOCATION) {
-			return false;
+			return true;
 		}
-		substringInvocation = (MethodInvocation) expression;
+		MethodInvocation substringInvocation = (MethodInvocation) expression;
 		if (!SUBSTRING_AT_BEGIN_INDEX.isEquivalentTo(substringInvocation.resolveMethodBinding())) {
-			return false;
+			return true;
 		}
-		stringExpression = substringInvocation.getExpression();
-		offsetArgument = ASTNodeUtil.convertToTypedList(substringInvocation.arguments(), Expression.class)
+
+		Expression stringExpression = substringInvocation.getExpression();
+		Expression offsetArgument = ASTNodeUtil.convertToTypedList(substringInvocation.arguments(), Expression.class)
 			.get(0);
+
+		// begin transforming...
+		ASTNode offsetArgumentCopy = astRewrite.createCopyTarget(offsetArgument);
+		astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
+			.insertLast(offsetArgumentCopy, null);
+
+		ASTNode stringExpressionCopy = astRewrite.createCopyTarget(stringExpression);
+		astRewrite.replace(node.getExpression(), stringExpressionCopy, null);
+		onRewrite();
 		return true;
 	}
-
-	public Expression getStringExpression() {
-		return stringExpression;
-	}
-
-	public MethodInvocation getSubstringInvocation() {
-		return substringInvocation;
-	}
-
-	public String getOffsetBasedMethodName() {
-		return offsetBasedMethodName;
-	}
-
-	public Expression getOffsetArgument() {
-		return offsetArgument;
-	}
-
 }
