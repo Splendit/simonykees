@@ -36,11 +36,12 @@ class SubstringIndexOfInvocationChainAnalyzer {
 			int.class);
 
 	private Expression stringExpression;
+	private MethodInvocation substringInvocation;
 	private String offsetBasedMethodName;
 	private Expression offsetArgument;
 
 	private boolean checkSignature(IMethodBinding methodBinding) {
-		return INDEX_OF_INT.isEquivalentTo(methodBinding) ||
+		return INDEX_OF_INT.isEquivalentTo(methodBinding)||
 				INDEX_OF_STRING.isEquivalentTo(methodBinding) ||
 				LAST_INDEX_OF_INT.isEquivalentTo(methodBinding) ||
 				LAST_INDEX_OF_STRING.isEquivalentTo(methodBinding) ||
@@ -58,8 +59,8 @@ class SubstringIndexOfInvocationChainAnalyzer {
 		if (expression.getNodeType() != ASTNode.METHOD_INVOCATION) {
 			return false;
 		}
-		MethodInvocation substringInvocation = (MethodInvocation) expression;
-		if (SUBSTRING_AT_BEGIN_INDEX.isEquivalentTo(substringInvocation.resolveMethodBinding())) {
+		substringInvocation = (MethodInvocation) expression;
+		if (!SUBSTRING_AT_BEGIN_INDEX.isEquivalentTo(substringInvocation.resolveMethodBinding())) {
 			return false;
 		}
 		stringExpression = substringInvocation.getExpression();
@@ -71,6 +72,10 @@ class SubstringIndexOfInvocationChainAnalyzer {
 
 	public Expression getStringExpression() {
 		return stringExpression;
+	}
+
+	public MethodInvocation getSubstringInvocation() {
+		return substringInvocation;
 	}
 
 	public String getOffsetBasedMethodName() {
