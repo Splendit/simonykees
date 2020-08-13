@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.impl;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -24,7 +26,7 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractASTRewriteAST
 			java.lang.String.class);
 	private static final SignatureData STARTS_WITH_STRING = new SignatureData(java.lang.String.class, STARTS_WITH,
 			java.lang.String.class);
-	private static final SignatureData SUBSTRING_AT_BEGIN_INDEX = new SignatureData(java.lang.String.class, SUBSTRING,
+	private static final SignatureData SUBSTRING_WITH_BEGIN_INDEX = new SignatureData(java.lang.String.class, SUBSTRING,
 			int.class);
 
 	private boolean checkSignature(IMethodBinding methodBinding) {
@@ -46,21 +48,20 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractASTRewriteAST
 			return true;
 		}
 		MethodInvocation substringInvocation = (MethodInvocation) expression;
-		if (!SUBSTRING_AT_BEGIN_INDEX.isEquivalentTo(substringInvocation.resolveMethodBinding())) {
+		if (!SUBSTRING_WITH_BEGIN_INDEX.isEquivalentTo(substringInvocation.resolveMethodBinding())) {
 			return true;
 		}
 
-		Expression stringExpression = substringInvocation.getExpression();
-		Expression offsetArgument = ASTNodeUtil.convertToTypedList(substringInvocation.arguments(), Expression.class)
-			.get(0);
-
+		List<Expression> substringArgumentList = ASTNodeUtil.convertToTypedList(substringInvocation.arguments(),
+				Expression.class);
+		
 		// begin transforming...
-		ASTNode offsetArgumentCopy = astRewrite.createCopyTarget(offsetArgument);
+		ASTNode offsetArgument = astRewrite.createCopyTarget(substringArgumentList.get(0));
 		astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
-			.insertLast(offsetArgumentCopy, null);
-
-		ASTNode stringExpressionCopy = astRewrite.createCopyTarget(stringExpression);
-		astRewrite.replace(node.getExpression(), stringExpressionCopy, null);
+			.insertLast(offsetArgument, null);
+		
+		ASTNode stringExpression = astRewrite.createCopyTarget(substringInvocation.getExpression());
+		astRewrite.replace(node.getExpression(), stringExpression, null);
 		onRewrite();
 		return true;
 	}
