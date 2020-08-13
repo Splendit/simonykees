@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.security;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,7 +16,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.visitor.security.common.SignatureData;
+import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -44,17 +43,13 @@ public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryAST
 
 	private static final String SEARCH = "search"; //$NON-NLS-1$
 	private static final SignatureData OVERLOAD_WITH_NAME_OF_TYPE_NAME = new SignatureData(
-			javax.naming.directory.DirContext.class.getName(), SEARCH,
-			Collections.unmodifiableList(Arrays.asList(
-					javax.naming.Name.class.getName(),
-					java.lang.String.class.getName(),
-					javax.naming.directory.SearchControls.class.getName())));
+			javax.naming.directory.DirContext.class,
+			SEARCH,
+			javax.naming.Name.class, java.lang.String.class, javax.naming.directory.SearchControls.class);
 	private static final SignatureData OVERLOAD_WITH_NAME_OF_TYPE_STRING = new SignatureData(
-			javax.naming.directory.DirContext.class.getName(), SEARCH,
-			Collections.unmodifiableList(Arrays.asList(
-					java.lang.String.class.getName(),
-					java.lang.String.class.getName(),
-					javax.naming.directory.SearchControls.class.getName())));
+			javax.naming.directory.DirContext.class,
+			SEARCH,
+			java.lang.String.class, java.lang.String.class, javax.naming.directory.SearchControls.class);
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {

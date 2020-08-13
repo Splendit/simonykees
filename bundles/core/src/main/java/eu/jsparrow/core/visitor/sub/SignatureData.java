@@ -1,8 +1,10 @@
-package eu.jsparrow.core.visitor.security.common;
+package eu.jsparrow.core.visitor.sub;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -28,7 +30,13 @@ public class SignatureData {
 	public SignatureData(String declaringTypeName, String methodName, List<String> parameterTypeNames) {
 		this.declaringTypeName = declaringTypeName;
 		this.methodName = methodName;
-		this.parameterTypeNames = parameterTypeNames;
+		this.parameterTypeNames = Collections.unmodifiableList(parameterTypeNames);
+	}
+
+	public SignatureData(Class<?> declaringClass, String methodName, Class<?>... parameterTypes) {
+		this(declaringClass.getName(), methodName, Arrays.stream(parameterTypes)
+			.map(Class::getName)
+			.collect(Collectors.toList()));
 	}
 
 	/**

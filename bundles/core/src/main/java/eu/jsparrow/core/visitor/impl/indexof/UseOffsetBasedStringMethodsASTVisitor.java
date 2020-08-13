@@ -25,5 +25,4 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractASTRewriteAST
 		astRewrite.replace(methodInvocation.getExpression(), stringExpression, null);
 		onRewrite();
 	}
-
 }
