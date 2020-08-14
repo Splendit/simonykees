@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.sub;
 
+import static eu.jsparrow.rules.common.util.ASTNodeUtil.getSpecificAncestor;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,8 +23,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-
-import static eu.jsparrow.rules.common.util.ASTNodeUtil.getSpecificAncestor;
 
 /**
  * Stores the names of local variables and fields declared in a scope and,

@@ -412,6 +412,8 @@ public class Messages extends NLS {
 	public static String ReorderModifiersRule_name;
 	public static String ReplaceDynamicQueryByPreparedStatementRule_description;
 	public static String ReplaceDynamicQueryByPreparedStatementRule_name;
+	public static String ReuseRandomObjectsRule_description;
+	public static String ReuseRandomObjectsRule_name;
 	public static String SelectRulesWizardHandler_allready_running;
 	public static String SelectRulesWizardHandler_finishButtonText;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
