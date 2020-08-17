@@ -1,9 +1,9 @@
 package eu.jsparrow.ui.preview;
 
-import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
-import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
+import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableViewer;
@@ -57,7 +57,7 @@ public class RenamingRuleSummaryWizardPage extends AbstractSummaryWizardPage<Ren
 		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(),
 				BeanProperties.values("fileName")); //$NON-NLS-1$
 
-		IViewerObservableValue<Object> selectedFile = ViewerProperties.singleSelection()
+		IViewerObservableValue selectedFile = ViewerProperties.singleSelection()
 			.observe(fileTableViewer);
 		ViewerSupport.bind(rulesPerFileTableViewer, summaryWizardPageModel.getRulesPerFile(),
 				BeanProperties.values("name", "times")); //$NON-NLS-1$ //$NON-NLS-2$
