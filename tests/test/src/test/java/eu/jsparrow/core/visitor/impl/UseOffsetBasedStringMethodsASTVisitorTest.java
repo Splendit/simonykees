@@ -16,7 +16,7 @@ public class UseOffsetBasedStringMethodsASTVisitorTest extends UsesSimpleJDTUnit
 				"		int index = str.substring(6).indexOf('d');\n";
 		String expected = "" +
 				"		String str = \"Hello World!\";\n" +
-				"		int index = str.indexOf('d', 6);\n";
+				"		int index=max(str.indexOf('d',6) - 6,-1);\n";
 
 		assertChange(original, expected);
 	}
@@ -28,7 +28,7 @@ public class UseOffsetBasedStringMethodsASTVisitorTest extends UsesSimpleJDTUnit
 				"		int index = str.substring(6).indexOf(\"d\");";
 		String expected = "" +
 				"		String str = \"Hello World!\";\n" +
-				"		int index = str.indexOf(\"d\", 6);";
+				"		int index=max(str.indexOf(\"d\",6) - 6,-1);";
 
 		assertChange(original, expected);
 	}
@@ -40,7 +40,7 @@ public class UseOffsetBasedStringMethodsASTVisitorTest extends UsesSimpleJDTUnit
 				"		int index = str.substring(6).lastIndexOf('d');";
 		String expected = "" +
 				"		String str = \"Hello World!\";\n" +
-				"		int index = str.lastIndexOf('d', 6);";
+				"		int index=max(str.lastIndexOf('d',6) - 6,-1);";
 
 		assertChange(original, expected);
 	}
@@ -52,7 +52,7 @@ public class UseOffsetBasedStringMethodsASTVisitorTest extends UsesSimpleJDTUnit
 				"		int index = str.substring(6).lastIndexOf(\"d\");";
 		String expected = "" +
 				"		String str = \"Hello World!\";\n" +
-				"		int index = str.lastIndexOf(\"d\", 6);";
+				"		int index=max(str.lastIndexOf(\"d\",6) - 6,-1);";
 
 		assertChange(original, expected);
 	}

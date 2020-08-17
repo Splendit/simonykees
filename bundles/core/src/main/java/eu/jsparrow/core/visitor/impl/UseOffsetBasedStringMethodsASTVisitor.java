@@ -2,21 +2,27 @@ package eu.jsparrow.core.visitor.impl;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
-public class UseOffsetBasedStringMethodsASTVisitor extends AbstractASTRewriteASTVisitor {
-
+public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String SUBSTRING = "substring"; //$NON-NLS-1$
 	private static final String STARTS_WITH = "startsWith"; //$NON-NLS-1$
 	private static final String LAST_INDEX_OF = "lastIndexOf"; //$NON-NLS-1$
 	private static final String INDEX_OF = "indexOf"; //$NON-NLS-1$
+	private static final String MAX = "max"; //$NON-NLS-1$
+	private static final String MATH_MAX_FULLY_QUALIFIED_NAME = java.lang.Math.class.getName() + "." + MAX; //$NON-NLS-1$
+	private static final String MINUS_ONE_LITERAL = "-1"; //$NON-NLS-1$
+
 	private static final SignatureData INDEX_OF_INT = new SignatureData(java.lang.String.class, INDEX_OF, int.class);
 	private static final SignatureData INDEX_OF_STRING = new SignatureData(java.lang.String.class, INDEX_OF,
 			java.lang.String.class);
@@ -39,7 +45,8 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractASTRewriteAST
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-		if (!checkSignature(node.resolveMethodBinding())) {
+		IMethodBinding methodBinding = node.resolveMethodBinding();
+		if (!checkSignature(methodBinding)) {
 			return true;
 		}
 
@@ -54,15 +61,40 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractASTRewriteAST
 
 		List<Expression> substringArgumentList = ASTNodeUtil.convertToTypedList(substringInvocation.arguments(),
 				Expression.class);
-		
+
 		// begin transforming...
-		ASTNode offsetArgument = astRewrite.createCopyTarget(substringArgumentList.get(0));
+		Expression substringArgument = substringArgumentList.get(0);
+		ASTNode copyForOffsetArgument = astRewrite.createCopyTarget(substringArgument);
 		astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
-			.insertLast(offsetArgument, null);
-		
-		ASTNode stringExpression = astRewrite.createCopyTarget(substringInvocation.getExpression());
-		astRewrite.replace(node.getExpression(), stringExpression, null);
+			.insertLast(copyForOffsetArgument, null);
+
+		ASTNode copyForStringExpression = astRewrite.createCopyTarget(substringInvocation.getExpression());
+		astRewrite.replace(node.getExpression(), copyForStringExpression, null);
+
+		if (!methodBinding.getName()
+			.equals(STARTS_WITH)) {
+			MethodInvocation maxInvocation = createMathMaxExpression(node, substringArgument);
+			astRewrite.replace(node, maxInvocation, null);
+		}
+
 		onRewrite();
 		return true;
 	}
+
+	private MethodInvocation createMathMaxExpression(MethodInvocation methodInvocation, Expression substringArgument) {
+		addStaticImport(MATH_MAX_FULLY_QUALIFIED_NAME);
+		AST ast = methodInvocation.getAST();
+		InfixExpression offsetSubtraction = ast.newInfixExpression();
+		offsetSubtraction.setOperator(InfixExpression.Operator.MINUS);
+		offsetSubtraction.setLeftOperand((MethodInvocation) astRewrite.createCopyTarget(methodInvocation));
+		offsetSubtraction.setRightOperand((Expression) astRewrite.createCopyTarget(substringArgument));
+		MethodInvocation maxInvocation = ast.newMethodInvocation();
+		maxInvocation.setName(ast.newSimpleName(MAX));
+		ListRewrite maxArgumentsListRewrite = astRewrite.getListRewrite(maxInvocation,
+				MethodInvocation.ARGUMENTS_PROPERTY);
+		maxArgumentsListRewrite.insertFirst(offsetSubtraction, null);
+		maxArgumentsListRewrite.insertLast(ast.newNumberLiteral(MINUS_ONE_LITERAL), null);
+		return maxInvocation;
+	}
+
 }
