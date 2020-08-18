@@ -16,6 +16,39 @@ import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
+/**
+ * This visitor looks for constructs where an invocations of
+ * <ul>
+ * <li>{@link String#indexOf(int)} or</li>
+ * <li>{@link String#indexOf(String)} or</li>
+ * <li>{@link String#lastIndexOf(int)} or</li>
+ * <li>{@link String#lastIndexOf(String)} or</li>
+ * <li>{@link String#startsWith(String)}</li>
+ * </ul>
+ * is immediately carried out upon the return value of a preceding invocation of
+ * {@link String#substring(int)}. The invocation of the substring method is
+ * eliminated and the subsequent indexOf-, lastIndexOf- or startsWith-
+ * invocation is replaced by an invocation of the corresponding offset based
+ * method.
+ * <p>
+ * Example using {@link String#indexOf(String)}
+ * <p>
+ * {@code str.substring(6).indexOf("d")} is transformed to <br>
+ * {@code Math.max(str.indexOf("d", 6) - 6, -1)}
+ * <p>
+ * Example using {@link String#lastIndexOf(String)}
+ * <p>
+ * {@code str.substring(6).lastIndexOf("d")} is transformed to <br>
+ * {@code Math.max(str.lastIndexOf("d", 6) - 6, -1)}
+ * <p>
+ * Example using {@link String#startsWith(String)}
+ * <p>
+ * {@code str.substring(6).startsWith("World")} is transformed to <br>
+ * {@code str.startsWith("World", 6)}
+ * 
+ * @since 3.20.0
+ *
+ */
 public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String SUBSTRING = "substring"; //$NON-NLS-1$
 	private static final String STARTS_WITH = "startsWith"; //$NON-NLS-1$
@@ -25,7 +58,6 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 	private static final String MATH_FULLY_QUALIFIED_NAME = java.lang.Math.class.getName(); // $NON-NLS-1$
 	private static final String MATH_MAX_FULLY_QUALIFIED_NAME = MATH_FULLY_QUALIFIED_NAME + "." + MAX; //$NON-NLS-1$
 	private static final String MINUS_ONE_LITERAL = "-1"; //$NON-NLS-1$
-
 	private static final SignatureData INDEX_OF_INT = new SignatureData(java.lang.String.class, INDEX_OF, int.class);
 	private static final SignatureData INDEX_OF_STRING = new SignatureData(java.lang.String.class, INDEX_OF,
 			java.lang.String.class);
@@ -37,7 +69,6 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 			java.lang.String.class);
 	private static final SignatureData SUBSTRING_WITH_BEGIN_INDEX = new SignatureData(java.lang.String.class, SUBSTRING,
 			int.class);
-
 	private boolean flagSafeImportStaticMathMax;
 	private boolean flagSafeImportMath;
 

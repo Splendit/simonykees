@@ -553,6 +553,8 @@ public class Messages extends NLS {
 	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String UseListSortRule_description;
 	public static String UseListSortRule_name;
+	public static String UseOffsetBasedStringMethodsRule_description;
+	public static String UseOffsetBasedStringMethodsRule_name;
 	public static String UseParameterizedJPAQueryRule_description;
 	public static String UseParameterizedJPAQueryRule_name;
 	public static String UseParameterizedLDAPQueryRule_description;
