@@ -14,7 +14,7 @@ import eu.jsparrow.rules.common.Tag;
 /**
  * @see UseOffsetBasedStringMethodsASTVisitor
  * 
- * @since 3.20.0
+ * @since 3.21.0
  *
  */
 public class UseOffsetBasedStringMethodsRule
@@ -25,7 +25,7 @@ public class UseOffsetBasedStringMethodsRule
 		this.id = "UseOffsetBasedStringMethods"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.UseOffsetBasedStringMethodsRule_name,
 				Messages.UseOffsetBasedStringMethodsRule_description,
-				Duration.ofMinutes(10),
+				Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_1, Tag.PERFORMANCE));
 	}
 

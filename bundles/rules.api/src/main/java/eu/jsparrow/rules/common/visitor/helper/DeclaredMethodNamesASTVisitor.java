@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 /**
  * A visitor for collecting the names of methods declared in a compilation unit.
  *
- * @since 3.20.0
+ * @since 3.21.0
  */
 public class DeclaredMethodNamesASTVisitor extends ASTVisitor {
 
