@@ -70,6 +70,61 @@ public class UseOffsetBasedStringMethodsASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
+	public void visit_MaxMethodAlreadyDeclared_shouldTransform() throws Exception {
+		String original = "" +
+				"		class LocalClass {\n" +
+				"			void max() {\n" +
+				"			}\n" +
+				"		}\n" +
+				"		String str = \"Hello World!\";\n" +
+				"		int index = str.substring(6).indexOf('d');";
+		String expected = "" +
+				"		class LocalClass {\n" + 
+				"			void max(){\n" + 
+				"			}\n" + 
+				"		}\n" + 
+				"		String str=\"Hello World!\";\n" + 
+				"		int index=Math.max(str.indexOf('d',6) - 6,-1);";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_MathClassAndMaxMethodAlreadyDeclared_shouldTransform() throws Exception {
+		String original = "" +
+				"		class Math {\n" +
+				"			void max() {\n" +
+				"			}\n" +
+				"		}\n" +
+				"		String str = \"Hello World!\";\n" +
+				"		int index = str.substring(6).indexOf('d');\n";
+		String expected = "" +
+				"		class Math {\n" + 
+				"			void max(){\n" + 
+				"			}\n" + 
+				"		}\n" + 
+				"		String str=\"Hello World!\";\n" + 
+				"		int index=java.lang.Math.max(str.indexOf('d',6) - 6,-1);\n";
+
+		assertChange(original, expected);
+
+	}
+	
+	@Test
+	public void visit_ImportClashForMax_shouldTransform() throws Exception {
+		boolean isStatic = true;
+		boolean isOnDemand = false;		
+		fixture.addImport("samples.sim1746.staticmembers.StaticMembers.max", isStatic, isOnDemand);
+		String original = "" +
+				"		String str = \"Hello World!\";\n" +
+				"		int index = str.substring(6).indexOf('d');\n";
+		String expected = "" +
+				"		String str = \"Hello World!\";\n" +
+				"		int index=Math.max(str.indexOf('d',6) - 6,-1);\n";
+
+		assertChange(original, expected);
+	}
+	@Test
 	public void visit_SubstringWithTwoArguments_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		String str = \"Hello World!\";\n" +
