@@ -605,18 +605,19 @@ public class ClassRelationUtil {
 
 	/**
 	 * Checks if the given {@link ImportDeclaration} is
-	 * {@link ImportDeclaration#isOnDemand} and implicitly imports the given
+	 * {@link ImportDeclaration#isOnDemand} which implicitly imports the given
 	 * type.
 	 * 
 	 * @param importDeclaration
 	 *            import declaration to be checked.
-	 * @param typeName
-	 *            type to be checked
+	 * @param javaFileName
+	 *            expected is a file name which is combined from the simple name of the type
+	 *            to be checked and a ".java" - suffix.
 	 * @return {@code true} if a type with the given name exists in the package
 	 *         imported with the on-demand {@link ImportDeclaration} or
 	 *         {@code false} otherwise.
 	 */
-	public static boolean importsTypeOnDemand(ImportDeclaration importDeclaration, String typeName) {
+	public static boolean importsTypeOnDemand(ImportDeclaration importDeclaration, String javaFileName) {
 		if (!importDeclaration.isOnDemand()) {
 			return false;
 		}
@@ -636,7 +637,7 @@ public class ClassRelationUtil {
 		try {
 			IJavaElement[] children = iPackageFragment.getChildren();
 			for (IJavaElement child : children) {
-				if (typeName.equals(child.getElementName())) {
+				if (javaFileName.equals(child.getElementName())) {
 					return true;
 				}
 			}
@@ -650,14 +651,15 @@ public class ClassRelationUtil {
 
 	/**
 	 * Checks if the given {@link ImportDeclaration} is
-	 * {@link ImportDeclaration#isOnDemand} and implicitly imports the given
-	 * type.
+	 * {@link ImportDeclaration#isStatic} and
+	 * {@link ImportDeclaration#isOnDemand} which implicitly imports the given
+	 * static method.
 	 * 
 	 * @param importDeclaration
 	 *            import declaration to be checked.
 	 * @param methodName
 	 *            name of the static method
-	 * @return {@code true} if a method with the given name exists in the type
+	 * @return {@code true} if a static method with the given name exists in the type
 	 *         imported with the on-demand {@link ImportDeclaration} or
 	 *         {@code false} otherwise.
 	 */
