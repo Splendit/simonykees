@@ -649,6 +649,46 @@ public class ClassRelationUtil {
 	}
 
 	/**
+	 * Checks if the given {@link ImportDeclaration} is
+	 * {@link ImportDeclaration#isOnDemand} and implicitly imports the given
+	 * type.
+	 * 
+	 * @param importDeclaration
+	 *            import declaration to be checked.
+	 * @param methodName
+	 *            name of the static method
+	 * @return {@code true} if a method with the given name exists in the type
+	 *         imported with the on-demand {@link ImportDeclaration} or
+	 *         {@code false} otherwise.
+	 */
+	public static boolean importsStaticMethodOnDemand(ImportDeclaration importDeclaration, String methodName) {
+		if (!importDeclaration.isOnDemand()) {
+			return false;
+		}
+
+		if (!importDeclaration.isStatic()) {
+			return false;
+		}
+
+		IBinding iBinding = importDeclaration.resolveBinding();
+		if (iBinding.getKind() != IBinding.TYPE) {
+			return false;
+		}
+
+		ITypeBinding typeBinding = (ITypeBinding) iBinding;
+
+		IMethodBinding[] declaredMethods = typeBinding.getDeclaredMethods();
+		for (IMethodBinding declaredMethodBinding : declaredMethods) {
+			if (Modifier.isStatic(declaredMethodBinding.getModifiers()) &&
+					declaredMethodBinding.getName()
+						.equals(methodName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * 
 	 * @param methodInvocation
 	 *            method to be checked.
