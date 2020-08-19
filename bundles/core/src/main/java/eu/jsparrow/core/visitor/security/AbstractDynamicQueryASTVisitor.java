@@ -11,10 +11,9 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -109,48 +108,6 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 		}
 
 		return getStringExpressionAsTheOnlyArgument(methodInvocation);
-	}
-
-	/**
-	 * 
-	 * @param queryMethodArgument
-	 *            parameter which is examined whether or not it is a local
-	 *            variable storing an SQL query.
-	 * @return a SqlVariableAnalyzerVisitor if a query is found which can be
-	 *         transformed, otherwise {@code null}.
-	 */
-	protected SqlVariableAnalyzerVisitor createSqlVariableAnalyzerVisitor(Expression queryMethodArgument) {
-
-		if (queryMethodArgument.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return null;
-		}
-
-		SimpleName query = (SimpleName) queryMethodArgument;
-
-		IBinding queryVariableBinding = query.resolveBinding();
-		if (queryVariableBinding.getKind() != IBinding.VARIABLE) {
-			return null;
-		}
-
-		IVariableBinding variableBinding = (IVariableBinding) queryVariableBinding;
-		if (variableBinding.isField()) {
-			return null;
-		}
-
-		ASTNode declaringNode = this.getCompilationUnit()
-			.findDeclaringNode(queryVariableBinding);
-		if (declaringNode == null || declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return null;
-		}
-
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = new SqlVariableAnalyzerVisitor(query, declaringNode,
-				getCompilationUnit());
-		Block enclosingBlock = ASTNodeUtil.getSpecificAncestor(declaringNode, Block.class);
-		enclosingBlock.accept(sqlVariableVisitor);
-		if (sqlVariableVisitor.isUnsafe()) {
-			return null;
-		}
-		return sqlVariableVisitor;
 	}
 
 	/**
@@ -278,4 +235,21 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 
 	}
 
+	protected List<Expression> findDynamicQueryComponents(Expression queryExpression) {
+		if (queryExpression.getNodeType() == ASTNode.INFIX_EXPRESSION) {
+			InfixExpression infixExpression = (InfixExpression) queryExpression;
+			DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
+			componentStore.storeComponents(infixExpression);
+			return componentStore.getComponents();
+		}
+		if (queryExpression.getNodeType() == ASTNode.SIMPLE_NAME) {
+			ParameterizedQueryAnalyzer parameterizedQueryAnalyzer = new ParameterizedQueryAnalyzer(
+					(SimpleName) queryExpression);
+			DynamicQueryComponentsStore componentStore = parameterizedQueryAnalyzer.analyze();
+			if (componentStore != null) {
+				return componentStore.getComponents();
+			}
+		}
+		return Collections.emptyList();
+	}
 }

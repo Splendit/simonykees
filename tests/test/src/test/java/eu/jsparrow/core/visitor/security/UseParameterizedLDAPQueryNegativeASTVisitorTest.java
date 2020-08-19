@@ -104,4 +104,100 @@ public class UseParameterizedLDAPQueryNegativeASTVisitorTest extends UsesSimpleJ
 		assertNoChange(original);
 	}
 
+	@Test
+	public void visit_ConcatenationInAnonymousBlock_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		DirContext ctx = null;\n" +
+				"		String filter = \"(&(uid=\";\n" +
+				"		{\n" +
+				"			String user = null;\n" +
+				"			String pass = null;\n" +
+				"			filter += user;\n" +
+				"			filter += \")(userPassword=\";\n" +
+				"			filter += pass;\n" +
+				"			filter += \"))\";\n" +
+				"		}\n" +
+				"		try {\n" +
+				"			NamingEnumeration<SearchResult> results = ctx.search(\"ou=system\", filter, new SearchControls());\n"
+				+
+				"		} catch (NamingException e) {\n" +
+				"			e.printStackTrace();\n" +
+				"		}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_FilterInitializationAsMethodArgument_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	class FilterInitializationAsMethodArgument {\n" +
+				"\n" +
+				"		String useFilter(String filter) {\n" +
+				"			return filter;\n" +
+				"		}\n" +
+				"		public void test() {\n" +
+				"			String user = null;\n" +
+				"			String pass = null;\n" +
+				"			DirContext ctx = null;\n" +
+				"\n" +
+				"			String filter;\n" +
+				"			useFilter(filter = \"(&(uid=\" + user + \")(userPassword=\" + pass + \"))\");\n" +
+				"			try {\n" +
+				"				NamingEnumeration<SearchResult> results = ctx.search(\"ou=system\", filter, new SearchControls());\n"
+				+
+				"			} catch (NamingException e) {\n" +
+				"				e.printStackTrace();\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ConditionalFilterInitialization_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	class ConditionalFilterInitialization {\n" +
+				"	\n" +
+				"		public void test() {\n" +
+				"			String user = null;\n" +
+				"			String pass = null;\n" +
+				"			DirContext ctx = null;\n" +
+				"\n" +
+				"			String filter;\n" +
+				"			if (true)\n" +
+				"				filter = \"(&(uid=\" + user + \")(userPassword=\" + pass + \"))\";\n" +
+				"\n" +
+				"			try {\n" +
+				"				NamingEnumeration<SearchResult> results = ctx.search(\"ou=system\", filter, new SearchControls());\n"
+				+
+				"			} catch (NamingException e) {\n" +
+				"				e.printStackTrace();\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_InvocationAsFilterArgument_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	class InvocationAsFilterArgument {\n" + 
+				"\n" + 
+				"		String useFilter(String filter) {\n" + 
+				"			return filter;\n" + 
+				"		}\n" + 
+				"		public void test() {\n" + 
+				"			String user = null;\n" + 
+				"			String pass = null;\n" + 
+				"			DirContext ctx = null;\n" + 
+				"			try {\n" + 
+				"				NamingEnumeration<SearchResult> results = ctx.search(\"ou=system\",\n" + 
+				"						useFilter(\"(&(uid=\" + user + \")(userPassword=\" + pass + \"))\"), new SearchControls());\n" + 
+				"			} catch (NamingException e) {\n" + 
+				"				e.printStackTrace();\n" + 
+				"			}\n" + 
+				"		}\n" + 
+				"	}";
+		assertNoChange(original);
+	}
+
 }

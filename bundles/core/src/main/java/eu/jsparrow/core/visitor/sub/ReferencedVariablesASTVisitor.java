@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl.trycatch;
+package eu.jsparrow.core.visitor.sub;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +14,10 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * @since 1.0
  *
  */
-class TwrReferencedVariablesASTVisitor extends ASTVisitor {
+public class ReferencedVariablesASTVisitor extends ASTVisitor {
 	private List<SimpleName> referencedVariables;
 
-	public TwrReferencedVariablesASTVisitor() {
+	public ReferencedVariablesASTVisitor() {
 		referencedVariables = new ArrayList<>();
 	}
 

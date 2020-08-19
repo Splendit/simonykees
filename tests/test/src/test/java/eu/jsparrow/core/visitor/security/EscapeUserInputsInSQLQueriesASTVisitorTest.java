@@ -458,7 +458,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_StaticFinalFieldESAPI_shouldNotTransform() throws Exception {
+	public void visit_StaticFinalFieldESAPI_shouldTransform() throws Exception {
 
 		String original = "" +
 				"	static final int ESAPI = 0;" +
@@ -487,6 +487,44 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 		assertNotContainsImport("org.owasp.esapi.ESAPI");
 		assertContainsImport("org.owasp.esapi.codecs.Codec");
 		assertContainsImport("org.owasp.esapi.codecs.OracleCodec");
+	}
+
+	@Test
+	public void visit_QueryAsInfixExpression_shouldTransform() throws Exception {
+		String original = "" + 
+				"	public void test() {\n" +
+				"		try {\n" + 
+				"			Connection connection = null;\n" + 
+				"			Statement statement = connection.createStatement();\n" + 
+				"			String userID =\"1111111\";\n" + 
+				"			String pwd = \"pwd\";\n" + 
+				"			ResultSet resultset = statement.executeQuery(\n" + 
+				"					\"SELECT user_id FROM user_data WHERE\" +\n" + 
+				"					\" user_id = '\" + userID + \n" + 
+				"					\"' and user_password = '\" + pwd + \n" + 
+				"					\"'\");\n" + 
+				"		} catch (SQLException e) {\n" + 
+				"			e.printStackTrace();\n" + 
+				"		}" +				
+				"	}";
+		String expected = "" + 
+				"	public void test() {\n" +
+				"		try {\n" + 
+				"			Connection connection = null;\n" + 
+				"			Statement statement = connection.createStatement();\n" + 
+				"			String userID =\"1111111\";\n" + 
+				"			String pwd = \"pwd\";\n" + 
+				"			Codec<Character> oracleCodec = new OracleCodec();\n" + 
+				"			ResultSet resultset = statement.executeQuery(\n" + 
+				"					\"SELECT user_id FROM user_data WHERE\" +\n" + 
+				"					\" user_id = '\" + ESAPI.encoder().encodeForSQL(oracleCodec, userID) + \n" + 
+				"					\"' and user_password = '\" + ESAPI.encoder().encodeForSQL(oracleCodec, pwd) + \n" + 
+				"					\"'\");\n" + 
+				"		} catch (SQLException e) {\n" + 
+				"			e.printStackTrace();\n" + 
+				"		}" +
+				"	}";
+		assertChange(original, expected);
 	}
 
 }

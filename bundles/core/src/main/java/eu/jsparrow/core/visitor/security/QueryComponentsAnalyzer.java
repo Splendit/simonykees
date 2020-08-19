@@ -94,5 +94,4 @@ public class QueryComponentsAnalyzer extends AbstractQueryComponentsAnalyzer {
 		return type.getErasure()
 			.getQualifiedName();
 	}
-
 }

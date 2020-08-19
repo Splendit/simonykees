@@ -39,6 +39,17 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 
 	private static final int MIN_OPERANDS = 3;
 
+	/**
+	 * If the number of concatenations is too big, the JDT will throw a
+	 * StackOverflwoException while creating the chain of append invocations.
+	 * For this reason, we limit the number of concatenations to a reasonably
+	 * big upper-bound of concatenations. See SIM-1783. Note that 200 is not 
+	 * the biggest number of invocations that JDT allows, but this number was 
+	 * chosen after experimenting with different values. Whether this value 
+	 * is still too high, is an open discussion. 
+	 */
+	private static final int MAX_OPERANDS = 200;
+
 	@Override
 	public boolean visit(NormalAnnotation annotation) {
 		return false;
@@ -64,7 +75,7 @@ public class UseStringBuilderAppendASTVisitor extends AbstractASTRewriteASTVisit
 		}
 
 		List<Expression> operands = findOperands(infixExpression);
-		if (operands.size() < MIN_OPERANDS) {
+		if (operands.size() < MIN_OPERANDS || operands.size() > MAX_OPERANDS) {
 			/*
 			 * If there are less than three operands, it does not make much
 			 * sense to introduce an instance of a StringBuilder.

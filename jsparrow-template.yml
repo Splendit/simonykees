@@ -212,6 +212,8 @@ rules:
   - UseParameterizedJPAQuery
   - UseArraysStream
   - UseParameterizedLDAPQuery
+  - UseSecureRandomRule
+  - ReuseRandomObjects
 
 excludes:
   excludeClasses: []

@@ -73,7 +73,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	@Override
-	public boolean visit(FieldDeclaration fieldDeclaration) {
+	public void endVisit(FieldDeclaration fieldDeclaration) {
 		boolean isFinal = ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isFinal);
 		safeToUseFields
 			.addAll(ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class)
@@ -81,7 +81,6 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 				.filter(fragment -> !isFinal || fragment.getInitializer() != null)
 				.map(VariableDeclarationFragment::getName)
 				.collect(Collectors.toList()));
-		return true;
 	}
 
 	@Override
@@ -269,9 +268,9 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 								 */
 								boolean unsafe = unnassignedReferences.stream()
 									.map(SimpleName::getIdentifier)
-									.anyMatch(name -> !assignedVariables.stream()
+									.anyMatch(name -> assignedVariables.stream()
 										.map(SimpleName::getIdentifier)
-										.anyMatch(name::equals));
+										.noneMatch(name::equals));
 								if (unsafe) {
 									return true;
 								}

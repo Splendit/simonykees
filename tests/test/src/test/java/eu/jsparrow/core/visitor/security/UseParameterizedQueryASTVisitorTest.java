@@ -58,6 +58,49 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	}
 
 	@Test
+	public void visit_executeQuery_assignedToResultSet_shouldTransform() throws Exception {
+
+		String original = "" +
+				"String departmentId = \"40\";\n" +
+				"  Connection connection = null;\n" +
+				"  String query = \"SELECT employee_id, first_name FROM employee WHERE department_id ='\" + departmentId + \"' ORDER BY last_name\";\n"
+				+
+				"  query += \"\";\n" +
+				"  Statement statement;\n" +
+				"try {\n" +
+				"	statement = connection.createStatement();\n" +
+				"     ResultSet resultSet;\n" +
+				"     resultSet = statement.executeQuery(query);\n" +
+				"     while(resultSet.next()) {\n" +
+				"     	String firstName = resultSet.getString(2);\n" +
+				"     }\n" +
+				"} catch (Exception e) {\n" +
+				"	return;\n" +
+				"}";
+
+		String expected = "" +
+				"String departmentId = \"40\";\n" +
+				"  Connection connection = null;\n" +
+				"  String query = \"SELECT employee_id, first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n"
+				+
+				"  query += \"\";\n" +
+				"  PreparedStatement statement;\n" +
+				"try {\n" +
+				"	ResultSet resultSet;\n" +
+				"	statement = connection.prepareStatement(query);\n" +
+				"	statement.setString(1, departmentId);" +
+				"	resultSet = statement.executeQuery();\n" +
+				"	while(resultSet.next()) {\n" +
+				"		String firstName = resultSet.getString(2);\n" +
+				"	}\n" +
+				"} catch (Exception e) {\n" +
+				"	return;\n" +
+				"}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_multipleConcatenationStatements_shouldTransform() throws Exception {
 		String original = "" +
 				"try {\n" +
@@ -509,30 +552,57 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 	@Test
 	public void visit_executeUpdate_shouldTransform() throws Exception {
 		String original = "" +
-				"			Connection connection = null;\n" + 
-				"			Statement statement;\n" + 
-				"			String salary = \"1000000\";\n" + 
-				"			String id = \"1000001\";\n" + 
-				"			String query = \"UPDATE employee SET salary  ='\" + salary + \"' WHERE id = '\" + id + \"'\";\n" + 
-				"			try {\n" + 
-				"				statement = connection.createStatement();\n" + 
-				"				statement.executeUpdate(query);\n" + 
-				"			} catch (Exception e) {\n" + 
+				"			Connection connection = null;\n" +
+				"			Statement statement;\n" +
+				"			String salary = \"1000000\";\n" +
+				"			String id = \"1000001\";\n" +
+				"			String query = \"UPDATE employee SET salary  ='\" + salary + \"' WHERE id = '\" + id + \"'\";\n"
+				+
+				"			try {\n" +
+				"				statement = connection.createStatement();\n" +
+				"				statement.executeUpdate(query);\n" +
+				"			} catch (Exception e) {\n" +
 				"			}";
+
+		String expected = "" +
+				"			Connection connection = null;\n" +
+				"			PreparedStatement statement;\n" +
+				"			String salary = \"1000000\";\n" +
+				"			String id = \"1000001\";\n" +
+				"			String query = \"UPDATE employee SET salary  = ?\" + \"' WHERE id =  ?\" + \"\";\n" +
+				"			try {\n" +
+				"				statement = connection.prepareStatement(query);\n" +
+				"				statement.setString(1, salary);\n" +
+				"				statement.setString(2, id);\n" +
+				"				statement.executeUpdate();\n" +
+				"			} catch (Exception e) {\n" +
+				"			}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_ExecuteQueryArgumentInfixExpression_shouldTransform() throws Exception {
+
+		String original = "" +
+				"		String departmentId1 = \"40\";\n" + 
+				"		try {\n" + 
+				"			Connection connection = null;\n" + 
+				"			Statement statement = connection.createStatement();\n" + 
+				"			ResultSet resultSet = statement\n" + 
+				"					.executeQuery(\"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\");\n" + 
+				"		} catch (Exception e) {\n" + 
+				"		}";
 		
 		String expected = "" +
-				"			Connection connection = null;\n" + 
-				"			PreparedStatement statement;\n" + 
-				"			String salary = \"1000000\";\n" + 
-				"			String id = \"1000001\";\n" + 
-				"			String query = \"UPDATE employee SET salary  = ?\" + \"' WHERE id =  ?\" + \"\";\n" + 
-				"			try {\n" + 
-				"				statement = connection.prepareStatement(query);\n" + 
-				"				statement.setString(1, salary);\n" + 
-				"				statement.setString(2, id);\n" + 
-				"				statement.executeUpdate();\n" + 
-				"			} catch (Exception e) {\n" + 
-				"			}";		
+				"		String departmentId1=\"40\";\n" + 
+				"		try {\n" + 
+				"			Connection connection=null;\n" + 
+				"			PreparedStatement statement=connection.prepareStatement(\"SELECT id FROM employee WHERE department_id =  ?\" + \"\");\n" + 
+				"			statement.setString(1,departmentId1);\n" + 
+				"			ResultSet resultSet=statement.executeQuery();\n" + 
+				"		} catch (  Exception e) {\n" + 
+				"		}";
+
 		assertChange(original, expected);
 	}
 }

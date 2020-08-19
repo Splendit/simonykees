@@ -86,23 +86,17 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		Expression queryMethodArgument = analyzeStatementExecuteQuery(methodInvocation);
-		if(queryMethodArgument == null) {
+		if (queryMethodArgument == null) {
 			return true;
 		}
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(queryMethodArgument);
-		if (sqlVariableVisitor == null) {
-			return true;
-		}
-
-		List<Expression> queryComponents = sqlVariableVisitor.getDynamicQueryComponents();
-		List<Expression> expressionsToEscape = new QueryComponentsAnalyzerForEscaping(queryComponents)
+		List<Expression> dynamicQueryComponents = findDynamicQueryComponents(queryMethodArgument);
+		List<Expression> expressionsToEscape = new QueryComponentsAnalyzerForEscaping(dynamicQueryComponents)
 			.createListOfExpressionsToEscape();
 		if (expressionsToEscape.isEmpty()) {
 			return true;
 		}
-		Expression expression = sqlVariableVisitor.getDynamicQueryComponents()
-			.get(0);
-		Statement statement = ASTNodeUtil.getSpecificAncestor(expression, Statement.class);
+		Expression firstComponent = dynamicQueryComponents.get(0);
+		Statement statement = ASTNodeUtil.getSpecificAncestor(firstComponent, Statement.class);
 		if (statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return true;
 		}

@@ -7,14 +7,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
+import eu.jsparrow.core.visitor.sub.ReferencedVariablesASTVisitor;
 
 public class TwrReferencedVariablesASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
-	private TwrReferencedVariablesASTVisitor visitor;
+	private ReferencedVariablesASTVisitor visitor;
 	
 	@BeforeEach
 	public void setUp() {
-		visitor = new TwrReferencedVariablesASTVisitor();
+		visitor = new ReferencedVariablesASTVisitor();
 	}
 
 	@Test

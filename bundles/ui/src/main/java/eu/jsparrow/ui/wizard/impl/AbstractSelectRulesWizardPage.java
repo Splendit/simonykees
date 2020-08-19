@@ -65,12 +65,12 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		}
 
-		public static int start = 0;
-		public static int end = 0;
-		public static String link = "";
+		static int start = 0;
+		static int end = 0;
+		static String link = ""; //$NON-NLS-1$
 	}
 
-	private static final String documentationSpace = "https://jsparrow.github.io/rules/";
+	private static final String DOCUMENTATION_SPACE_BASE_URL = "https://jsparrow.github.io/rules/"; //$NON-NLS-1$
 
 	protected AbstractSelectRulesWizardModel model;
 	protected AbstractSelectRulesWizardControler controler;
@@ -378,7 +378,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		descriptionStyledText.addListener(SWT.MouseDown, event -> {
 			int offset;
 			try {
-				offset = descriptionStyledText.getOffsetAtLocation(new Point(event.x, event.y));
+				offset = descriptionStyledText.getOffsetAtPoint(new Point(event.x, event.y));
 			} catch (SWTException | IllegalArgumentException e) {
 				offset = -1;
 			}
@@ -479,7 +479,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		final String minJavaVersionLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
 		final String requiredLibrariesLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
 		final String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
-		final String documentationLabel = "See Documentation";
+		final String documentationLabel = Messages.AbstractSelectRulesWizardPage_seeDocumentation;
 
 		String name = rule.getRuleDescription()
 			.getName();
@@ -513,7 +513,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		Consumer<StyleRange> green = style -> style.foreground = getShell().getDisplay()
 			.getSystemColor(SWT.COLOR_GREEN);
 
-		SelectedRule.link = ResourceHelper.generateLinkToDocumentation(documentationSpace, rule.getId());
+		SelectedRule.link = ResourceHelper.generateLinkToDocumentation(DOCUMENTATION_SPACE_BASE_URL, rule.getId());
 		Consumer<StyleRange> documentationConfig = style -> {
 			style.underline = true;
 			style.underlineStyle = SWT.UNDERLINE_LINK;
@@ -545,7 +545,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		descriptionList.add(new StyleContainer(tagsValue));
 
 		String descriptionText = descriptionList.stream()
-			.map(container -> container.getValue())
+			.map(StyleContainer::getValue)
 			.collect(Collectors.joining());
 
 		descriptionStyledText.setText(descriptionText);

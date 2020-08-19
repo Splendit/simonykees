@@ -1,34 +1,37 @@
 package eu.jsparrow.core.visitor.security;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
+import eu.jsparrow.core.visitor.security.common.SignatureData;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * Replaces potential user supplied input concatenated into an LDAP search
  * filter by parameterizing, for example:
  * 
  * <pre>
- * 	String filter = "(&(uid=" + user + ")(userPassword=" + pass + "))";
- * 	NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new SearchControls());
+ * String filter = "(&(uid=" + user + ")(userPassword=" + pass + "))";
+ * NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new SearchControls());
  * </pre>
  * 
  * is transformed to:
  * 
  * <pre>
- * 	String filter = "(&(uid={0})(userPassword={1}))";
- * 	NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new String[] { user, pass },
- * 			new SearchControls());
+ * String filter = "(&(uid={0})(userPassword={1}))";
+ * NamingEnumeration<SearchResult> results = ctx.search("ou=system", filter, new String[] { user, pass },
+ * 		new SearchControls());
  * </pre>
  * 
  * @since 3.19.0
@@ -36,18 +39,31 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
  */
 public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryASTVisitor {
 
+	private static final String SEARCH = "search"; //$NON-NLS-1$
+	private static final SignatureData OVERLOAD_WITH_NAME_OF_TYPE_NAME = new SignatureData(
+			javax.naming.directory.DirContext.class.getName(), SEARCH,
+			Collections.unmodifiableList(Arrays.asList(
+					javax.naming.Name.class.getName(),
+					java.lang.String.class.getName(),
+					javax.naming.directory.SearchControls.class.getName())));
+	private static final SignatureData OVERLOAD_WITH_NAME_OF_TYPE_STRING = new SignatureData(
+			javax.naming.directory.DirContext.class.getName(), SEARCH,
+			Collections.unmodifiableList(Arrays.asList(
+					java.lang.String.class.getName(),
+					java.lang.String.class.getName(),
+					javax.naming.directory.SearchControls.class.getName())));
+
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		DirContextSearchInvocationAnalyzer invocationAnalyzer = new DirContextSearchInvocationAnalyzer(
-				methodInvocation);
-		if (!invocationAnalyzer.analyze()) {
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (!OVERLOAD_WITH_NAME_OF_TYPE_NAME.isEquivalentTo(methodBinding) &&
+				!OVERLOAD_WITH_NAME_OF_TYPE_STRING.isEquivalentTo(methodBinding)) {
 			return true;
 		}
-
-		Expression filterExpression = invocationAnalyzer.getFilterExpression();
+		Expression filterExpression = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
+			.get(1);
 
 		List<Expression> dynamicQueryComponents = findDynamicQueryComponents(filterExpression);
-
 		LDAPQueryComponentAnalyzer componentsAnalyzer = new LDAPQueryComponentAnalyzer(dynamicQueryComponents);
 		List<ReplaceableParameter> replaceableParameters = componentsAnalyzer.createReplaceableParameterList();
 		if (replaceableParameters.isEmpty()) {
@@ -63,23 +79,6 @@ public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryAST
 		onRewrite();
 
 		return true;
-	}
-
-	private List<Expression> findDynamicQueryComponents(Expression filterExpression) {
-
-		if (filterExpression.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-			InfixExpression infixExpression = (InfixExpression) filterExpression;
-			DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
-			componentStore.storeComponents(infixExpression);
-			return componentStore.getComponents();
-		}
-
-		SqlVariableAnalyzerVisitor sqlVariableVisitor = createSqlVariableAnalyzerVisitor(filterExpression);
-		if (sqlVariableVisitor == null) {
-			return Collections.emptyList();
-		}
-
-		return sqlVariableVisitor.getDynamicQueryComponents();
 	}
 
 	@SuppressWarnings("unchecked")
