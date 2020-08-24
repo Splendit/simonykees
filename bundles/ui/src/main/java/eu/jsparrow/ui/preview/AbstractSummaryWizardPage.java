@@ -10,14 +10,14 @@ import java.util.Optional;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
-import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
@@ -333,7 +333,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 	}
 
 	private void initializeHeaderDataBindings(DataBindingContext bindingContext) {
-		IConverter<Object, String> convertRunDuration = IConverter.create(Long.class, String.class,
+		IConverter convertRunDuration = IConverter.create(Long.class, String.class,
 				x -> DurationFormatUtil.formatRunDuration((Long) x));
 		IObservableValue<String> observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
 			.observe(labelExecutionTime);
@@ -342,18 +342,18 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
 				executionTimeSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertRunDuration));
 
-		IConverter<Object, String> convertIssuesFixed = IConverter.create(Integer.class, String.class,
+		IConverter convertIssuesFixed = IConverter.create(Integer.class, String.class,
 				x -> (String.format(Messages.SummaryWizardPageModel_IssuesFixed, (Integer) x)));
-		ISWTObservableValue<String> observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
+		ISWTObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
 			.observe(labelIssuesFixed);
 		IObservableValue<Object> issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelIssuesFixedObserveWidget,
 				issuesFixedSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertIssuesFixed));
 
-		IConverter<Object, String> convertTimeSaved = IConverter.create(Duration.class, String.class, x -> String
+		IConverter convertTimeSaved = IConverter.create(Duration.class, String.class, x -> String
 			.format(Messages.DurationFormatUtil_TimeSaved, DurationFormatUtil.formatTimeSaved((Duration) x)));
-		ISWTObservableValue<String> observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
+		ISWTObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
 			.observe(labelHoursSaved);
 		IObservableValue<Object> hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("timeSaved") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
