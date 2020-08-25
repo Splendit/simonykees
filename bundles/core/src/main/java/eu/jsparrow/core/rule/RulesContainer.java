@@ -178,7 +178,8 @@ public class RulesContainer {
 				 */
 				new RemoveNewStringConstructorRule(), new InefficientConstructorRule(),
 				new PrimitiveBoxedForStringRule(), new StringFormatLineSeparatorRule(), new IndexOfToContainsRule(),
-				new RemoveToStringOnStringRule(), new StringUtilsRule(), new StringLiteralEqualityCheckRule(),
+				new RemoveToStringOnStringRule(), new UseOffsetBasedStringMethodsRule(), new StringUtilsRule(),
+				new StringLiteralEqualityCheckRule(),
 				new StringConcatToPlusRule(), new UseIsEmptyOnCollectionsRule(), new ArithmethicAssignmentRule(),
 				new StringBufferToBuilderRule(), new PrimitiveObjectUseEqualsRule(),
 				new AvoidConcatenationInLoggingStatementsRule(),
@@ -198,7 +199,6 @@ public class RulesContainer {
 				 * StringBuildingLoopRule.
 				 */
 				new UseStringBuilderAppendRule(), new UseStringJoinRule(),
-				new UseOffsetBasedStringMethodsRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen
