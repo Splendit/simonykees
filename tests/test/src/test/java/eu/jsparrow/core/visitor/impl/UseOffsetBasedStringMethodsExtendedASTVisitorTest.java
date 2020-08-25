@@ -3,9 +3,11 @@ package eu.jsparrow.core.visitor.impl;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
+
 
 public class UseOffsetBasedStringMethodsExtendedASTVisitorTest extends UsesJDTUnitFixture {
 
@@ -41,6 +43,7 @@ public class UseOffsetBasedStringMethodsExtendedASTVisitorTest extends UsesJDTUn
 		fixtureProject.clear();
 	}
 
+	@Disabled
 	@Test
 	public void visit_StaticImportOnDemandClashing_shouldTransform() throws Exception {
 
