@@ -111,16 +111,16 @@ public class UseOffsetBasedStringMethodsASTVisitorTest extends UsesSimpleJDTUnit
 	}
 	
 	@Test
-	public void visit_ImportClashForMax_shouldTransform() throws Exception {
+	public void visit_StaticImportOfMaxAlreadyExists_shouldTransform() throws Exception {
 		boolean isStatic = true;
 		boolean isOnDemand = false;		
-		fixture.addImport("samples.sim1746.staticmembers.StaticMembers.max", isStatic, isOnDemand);
+		fixture.addImport(java.lang.Math.class.getName() + ".max", isStatic, isOnDemand);
 		String original = "" +
 				"		String str = \"Hello World!\";\n" +
 				"		int index = str.substring(6).indexOf('d');\n";
 		String expected = "" +
 				"		String str = \"Hello World!\";\n" +
-				"		int index=Math.max(str.indexOf('d',6) - 6,-1);\n";
+				"		int index=max(str.indexOf('d',6) - 6,-1);\n";
 
 		assertChange(original, expected);
 	}
