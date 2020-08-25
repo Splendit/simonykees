@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import eu.jsparrow.sample.utilities.Math;
 
 public class UseOffsetBasedStringMethodsAllImportsClashRule {
+
 	Math math;
 
 	public int testIndexOfCharacterD(String str) {
