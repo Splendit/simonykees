@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
@@ -261,6 +262,28 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			.anyMatch(name -> name.equals(simpleMethod));
 	}
 
+	private boolean containsUnambiguousStaticMethodImportOnDemand(List<ImportDeclaration> importDeclarations,
+			String qualifiedStaticMethodName) {
+		String simpleMethodName = getSimpleName(qualifiedStaticMethodName);
+		List<ImportDeclaration> importsOnDemand = importDeclarations.stream()
+			.filter(importDeclaration -> ClassRelationUtil.importsStaticMethodOnDemand(importDeclaration,
+					simpleMethodName))
+			.collect(Collectors.toList());
+		if (importsOnDemand.size() != 1) {
+			return false;
+		}
+		ImportDeclaration importOnDemand = importsOnDemand.get(0);
+		IBinding iBinding = importOnDemand.resolveBinding();
+		if (iBinding.getKind() == IBinding.TYPE) {
+			ITypeBinding typeBinding = (ITypeBinding) iBinding;
+			String implicitStaticImport = typeBinding.getQualifiedName() + "." + simpleMethodName; //$NON-NLS-1$
+			if (qualifiedStaticMethodName.equals(implicitStaticImport)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * 
 	 * @param compilationUnit
@@ -282,6 +305,11 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		if (containsImport(importDeclarations, qualifiedStaticMethodName)) {
 			return true;
 		}
+
+		if (containsUnambiguousStaticMethodImportOnDemand(importDeclarations, qualifiedStaticMethodName)) {
+			return true;
+		}
+
 		if (isImportClashing(importDeclarations, simpleMethodName)) {
 			return false;
 		}
