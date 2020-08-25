@@ -17,6 +17,7 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE_IMPORT_MAX_CLASHING = "UseOffsetBasedStringMethodsImportMaxClashRule.java";
 	private static final String SAMPLE_FILE_ALL_IMPORTS_CLASHING = "UseOffsetBasedStringMethodsAllImportsClashRule.java";
+	private static final String SAMPLE_FILE_ALL_IMPORTS_ON_DEMAND_CLASHING = "UseOffsetBasedStringMethodsAllImportsOnDemandClashRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "useOffsetBasedStringMethods";
 
 	private UseOffsetBasedStringMethodsRule rule;
@@ -48,6 +49,20 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 
 		Path preRule = getPreRuleFile(SAMPLE_FILE_ALL_IMPORTS_CLASHING);
 		Path postRule = getPostRuleFile(SAMPLE_FILE_ALL_IMPORTS_CLASHING, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testAllImportsOnDemandClashing() throws Exception {
+		// Test file references classes from utilities package
+		loadUtilities();
+
+		Path preRule = getPreRuleFile(SAMPLE_FILE_ALL_IMPORTS_ON_DEMAND_CLASHING);
+		Path postRule = getPostRuleFile(SAMPLE_FILE_ALL_IMPORTS_ON_DEMAND_CLASHING, POSTRULE_SUBDIRECTORY);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
