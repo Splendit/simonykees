@@ -262,7 +262,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			.anyMatch(name -> name.equals(simpleMethod));
 	}
 
-	private boolean containsUnambiguousStaticMethodImportOnDemand(List<ImportDeclaration> importDeclarations,
+	protected boolean containsUnambiguousStaticMethodImportOnDemand(List<ImportDeclaration> importDeclarations,
 			String qualifiedStaticMethodName) {
 		String simpleMethodName = getSimpleName(qualifiedStaticMethodName);
 		List<ImportDeclaration> importsOnDemand = importDeclarations.stream()

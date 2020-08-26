@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -70,6 +71,7 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 	private static final SignatureData SUBSTRING_WITH_BEGIN_INDEX = new SignatureData(java.lang.String.class, SUBSTRING,
 			int.class);
 	private boolean flagSafeImportStaticMathMax;
+	private boolean flagSafeImportStaticMathMaxExistsOnDemand;
 	private boolean flagSafeImportMath;
 
 	private boolean checkSignature(IMethodBinding methodBinding) {
@@ -84,6 +86,12 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 	public boolean visit(CompilationUnit node) {
 		super.visit(node);
 		flagSafeImportStaticMathMax = isSafeToAddStaticMethodImport(node, MATH_MAX_FULLY_QUALIFIED_NAME);
+		if (flagSafeImportStaticMathMax) {
+			List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(node.imports(),
+					ImportDeclaration.class);
+			flagSafeImportStaticMathMaxExistsOnDemand = containsUnambiguousStaticMethodImportOnDemand(
+					importDeclarations, MATH_MAX_FULLY_QUALIFIED_NAME);
+		}
 		flagSafeImportMath = isSafeToAddImport(node, MATH_FULLY_QUALIFIED_NAME);
 		return true;
 	}
@@ -93,6 +101,7 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 		super.endVisit(node);
 		flagSafeImportStaticMathMax = false;
 		flagSafeImportMath = false;
+		flagSafeImportStaticMathMaxExistsOnDemand = false;
 	}
 
 	@Override
@@ -155,7 +164,9 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 
 	private Name findMaxInvocationQualifier(AST ast) {
 		if (flagSafeImportStaticMathMax) {
-			addStaticImport(MATH_MAX_FULLY_QUALIFIED_NAME);
+			if (!flagSafeImportStaticMathMaxExistsOnDemand) {
+				addStaticImport(MATH_MAX_FULLY_QUALIFIED_NAME);
+			}
 			return null;
 		}
 		if (flagSafeImportMath) {
