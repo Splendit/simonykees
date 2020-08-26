@@ -47,7 +47,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * {@code str.substring(6).startsWith("World")} is transformed to <br>
  * {@code str.startsWith("World", 6)}
  * 
- * @since 3.20.0
+ * @since 3.21.0
  *
  */
 public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTVisitor {
