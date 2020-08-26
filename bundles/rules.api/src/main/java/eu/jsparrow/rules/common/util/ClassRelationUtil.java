@@ -648,6 +648,40 @@ public class ClassRelationUtil {
 
 		return false;
 	}
+	
+	/**
+	 * Checks if the given {@link ImportDeclaration} is  {@link ImportDeclaration#isOnDemand} and
+	 * implicitly imports the given inner type.
+	 * 
+	 * @param importDeclaration
+	 *            import declaration to be checked.
+	 * @param simpleTypeName
+	 *            expected is a simple type name.
+	 * @return {@code true} if a type with the given name exists in the type
+	 *         imported with the on-demand {@link ImportDeclaration} or
+	 *         {@code false} otherwise.
+	 */
+	public static boolean importsInnerTypeOnDemand(ImportDeclaration importDeclaration, String simpleTypeName) {
+		if (!importDeclaration.isOnDemand()) {
+			return false;
+		}
+
+		IBinding iBinding = importDeclaration.resolveBinding();
+		if (iBinding.getKind() != IBinding.TYPE) {
+			return false;
+		}
+
+		ITypeBinding iTypeBinding = (ITypeBinding) iBinding;
+		ITypeBinding[] declaredTypes = iTypeBinding.getDeclaredTypes();
+		
+		for(ITypeBinding declaredType : declaredTypes) {
+			if(declaredType.getName().equals(simpleTypeName)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 
 	/**
 	 * Checks if the given {@link ImportDeclaration} is

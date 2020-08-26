@@ -246,7 +246,8 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		String javaFileName = simpleTypeName + ".java"; //$NON-NLS-1$
 		return importDeclarations.stream()
 			.noneMatch(
-					importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration, javaFileName));
+					importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration, javaFileName) ||
+							ClassRelationUtil.importsInnerTypeOnDemand(importDeclaration, simpleTypeName));
 	}
 
 	/**
