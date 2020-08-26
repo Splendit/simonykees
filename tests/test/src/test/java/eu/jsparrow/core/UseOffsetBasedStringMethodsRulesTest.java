@@ -18,6 +18,8 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 	private static final String SAMPLE_FILE_IMPORT_MAX_CLASHING = "UseOffsetBasedStringMethodsImportMaxClashRule.java";
 	private static final String SAMPLE_FILE_ALL_IMPORTS_CLASHING = "UseOffsetBasedStringMethodsAllImportsClashRule.java";
 	private static final String SAMPLE_FILE_ALL_IMPORTS_ON_DEMAND_CLASHING = "UseOffsetBasedStringMethodsAllImportsOnDemandClashRule.java";
+	private static final String SAMPLE_FILE_AMBIGUOUS_IMPORTS_ON_DEMAND = "UseOffsetBasedStringMethodsAmbiguousImportsOnDemandRule.java";
+	
 	private static final String POSTRULE_SUBDIRECTORY = "useOffsetBasedStringMethods";
 
 	private UseOffsetBasedStringMethodsRule rule;
@@ -69,4 +71,19 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testAmbiguousImportsOnDemandClashing() throws Exception {
+		// Test file references classes from utilities package
+		loadUtilities();
+
+		Path preRule = getPreRuleFile(SAMPLE_FILE_AMBIGUOUS_IMPORTS_ON_DEMAND);
+		Path postRule = getPostRuleFile(SAMPLE_FILE_AMBIGUOUS_IMPORTS_ON_DEMAND, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+	
 }

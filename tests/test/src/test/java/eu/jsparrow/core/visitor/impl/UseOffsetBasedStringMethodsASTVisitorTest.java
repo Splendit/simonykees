@@ -1,5 +1,13 @@
 package eu.jsparrow.core.visitor.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -8,7 +16,7 @@ public class UseOffsetBasedStringMethodsASTVisitorTest extends UsesSimpleJDTUnit
 	public void setUp() throws Exception {
 		setVisitor(new UseOffsetBasedStringMethodsASTVisitor());
 	}
-
+	
 	@Test
 	public void visit_SubstringIndexOfCharacter_shouldTransform() throws Exception {
 		String original = "" +
@@ -17,8 +25,14 @@ public class UseOffsetBasedStringMethodsASTVisitorTest extends UsesSimpleJDTUnit
 		String expected = "" +
 				"		String str = \"Hello World!\";\n" +
 				"		int index=max(str.indexOf('d',6) - 6,-1);\n";
-
+		
 		assertChange(original, expected);
+		
+		List<ImportDeclaration> imports = fixture.getImports();
+		assertEquals(1, imports.size());
+		assertTrue(imports.get(0).isStatic());
+		assertFalse(imports.get(0).isOnDemand());
+		assertEquals("java.lang.Math.max", ((QualifiedName)imports.get(0).getName()).getFullyQualifiedName());
 	}
 
 	@Test
@@ -85,8 +99,10 @@ public class UseOffsetBasedStringMethodsASTVisitorTest extends UsesSimpleJDTUnit
 				"		}\n" + 
 				"		String str=\"Hello World!\";\n" + 
 				"		int index=Math.max(str.indexOf('d',6) - 6,-1);";
-
+		
 		assertChange(original, expected);
+		
+		assertTrue(fixture.getImports().isEmpty());
 	}
 
 	@Test
@@ -107,7 +123,8 @@ public class UseOffsetBasedStringMethodsASTVisitorTest extends UsesSimpleJDTUnit
 				"		int index=java.lang.Math.max(str.indexOf('d',6) - 6,-1);\n";
 
 		assertChange(original, expected);
-
+		
+		assertTrue(fixture.getImports().isEmpty());
 	}
 	
 	@Test
@@ -135,9 +152,14 @@ public class UseOffsetBasedStringMethodsASTVisitorTest extends UsesSimpleJDTUnit
 				"		int index = str.substring(6).indexOf('d');\n";
 		String expected = "" +
 				"		String str = \"Hello World!\";\n" +
-				"		int index=max(str.indexOf('d',6) - 6,-1);\n";
-
+				"		int index=max(str.indexOf('d',6) - 6,-1);\n";		
 		assertChange(original, expected);
+		
+		List<ImportDeclaration> imports = fixture.getImports();
+		assertEquals(1, imports.size());
+		assertTrue(imports.get(0).isStatic());
+		assertTrue(imports.get(0).isOnDemand());
+		assertEquals("java.lang.Math", ((QualifiedName)imports.get(0).getName()).getFullyQualifiedName());
 	}
 	
 	@Test
