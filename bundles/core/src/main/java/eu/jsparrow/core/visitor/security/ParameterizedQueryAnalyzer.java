@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.security;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,15 +7,12 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Assignment.Operator;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.core.visitor.sub.VariableDeclarationsUtil;
 
 /**
  * This visitor is intended to be used by visitors which transform dynamic
@@ -39,57 +35,6 @@ public class ParameterizedQueryAnalyzer {
 
 	public ParameterizedQueryAnalyzer(SimpleName simpleNameAtUsage) {
 		this.simpleNameAtUsage = simpleNameAtUsage;
-	}
-
-	private VariableDeclarationFragment findVariableDeclarationFragment() {
-		CompilationUnit compilationUnit = ASTNodeUtil.getSpecificAncestor(simpleNameAtUsage, CompilationUnit.class);
-		IBinding queryVariableBinding = simpleNameAtUsage.resolveBinding();
-		if (queryVariableBinding.getKind() != IBinding.VARIABLE) {
-			return null;
-		}
-		ASTNode declarationNode = compilationUnit.findDeclaringNode(queryVariableBinding);
-		if (declarationNode == null || declarationNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return null;
-		}
-		return (VariableDeclarationFragment) declarationNode;
-	}
-
-	private Block findBlockSurroundingDeclaration(VariableDeclarationFragment variableDeclarationFragment) {
-		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-			return null;
-		}
-		VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) variableDeclarationFragment
-			.getParent();
-		if (variableDeclarationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return null;
-		}
-		return (Block) variableDeclarationStatement.getParent();
-	}
-
-	private List<Block> findScopeOfVariableUsage(Block blockOfDeclarationFragment) {
-		List<Block> ancestorsList = new ArrayList<>();
-		ASTNode parentNode = simpleNameAtUsage.getParent();
-		while (parentNode != null) {
-			if (parentNode.getNodeType() == ASTNode.BLOCK) {
-				ancestorsList.add((Block) parentNode);
-				if (parentNode == blockOfDeclarationFragment) {
-					break;
-				}
-			}
-			parentNode = parentNode.getParent();
-		}
-		return ancestorsList;
-	}
-
-	private Expression findInitializationAtDeclaration(VariableDeclarationFragment variableDeclarationFragment) {
-		Expression initializer = variableDeclarationFragment.getInitializer();
-		if (initializer == null) {
-			return null;
-		}
-		if (initializer.getNodeType() == ASTNode.NULL_LITERAL) {
-			return null;
-		}
-		return initializer;
 	}
 
 	private boolean analyzeVariableReferences(List<SimpleName> variableReferences) {
@@ -124,7 +69,7 @@ public class ParameterizedQueryAnalyzer {
 			List<Block> scopeOfVariableUsage) {
 
 		DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
-		Expression initializer = findInitializationAtDeclaration(variableDeclarationFragment);
+		Expression initializer = VariableDeclarationsUtil.findInitializationAtDeclaration(variableDeclarationFragment);
 		if (initializer != null) {
 			componentStore.storeComponents(initializer);
 		}
@@ -182,15 +127,15 @@ public class ParameterizedQueryAnalyzer {
 	 */
 	public DynamicQueryComponentsStore analyze() {
 
-		VariableDeclarationFragment variableDeclarationFragment = findVariableDeclarationFragment();
+		VariableDeclarationFragment variableDeclarationFragment = VariableDeclarationsUtil.findVariableDeclarationFragment(simpleNameAtUsage);
 		if (variableDeclarationFragment == null) {
 			return null;
 		}
-		Block blockAroundLocalDeclarationFragment = findBlockSurroundingDeclaration(variableDeclarationFragment);
+		Block blockAroundLocalDeclarationFragment = VariableDeclarationsUtil.findBlockSurroundingDeclaration(variableDeclarationFragment);
 		if (blockAroundLocalDeclarationFragment == null) {
 			return null;
 		}
-		List<Block> scopeOfVariableUsage = findScopeOfVariableUsage(blockAroundLocalDeclarationFragment);
+		List<Block> scopeOfVariableUsage = VariableDeclarationsUtil.findScopeOfVariableUsage(blockAroundLocalDeclarationFragment, simpleNameAtUsage);
 		if (scopeOfVariableUsage.isEmpty()) {
 			return null;
 		}
