@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -31,6 +32,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.sub.LiveVariableScope;
+import eu.jsparrow.core.visitor.sub.VariableDeclarationsUtil;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -156,6 +158,55 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	public void endVisit(Initializer initializer) {
 		liveVariableScope.clearLocalVariablesScope(initializer);
 		mapBlockToOracleCodecVariable.clear();
+	}
+
+	private DynamicQueryComponentsStore collectQueryComponents(SimpleName queryVariableName) {
+		VariableDeclarationFragment variableDeclarationFragment = VariableDeclarationsUtil
+			.findVariableDeclarationFragment(queryVariableName);
+		if (variableDeclarationFragment == null) {
+			return null;
+		}
+		Block blockAroundLocalDeclarationFragment = VariableDeclarationsUtil
+			.findBlockSurroundingDeclaration(variableDeclarationFragment);
+		if (blockAroundLocalDeclarationFragment == null) {
+			return null;
+		}
+
+		SqlVariableAnalyzerVisitor visitor = new SqlVariableAnalyzerVisitor(variableDeclarationFragment);
+		blockAroundLocalDeclarationFragment.accept(visitor);
+		List<SimpleName> variableReferences = visitor.getVariableReferences();
+		int lastIndex = variableReferences.size() - 1;
+		if (variableReferences.get(lastIndex) != queryVariableName) {
+			return null;
+		}
+
+		DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
+		Expression initializer = VariableDeclarationsUtil.findInitializationAtDeclaration(variableDeclarationFragment);
+		if (initializer != null) {
+			componentStore.storeComponents(initializer);
+		}
+
+		for (SimpleName simpleName : variableReferences) {
+			if (simpleName.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+				Assignment assignment = (Assignment) simpleName.getParent();
+				componentStore.storeComponents(assignment.getRightHandSide());
+			} else if (simpleName != queryVariableName) {
+				return null;
+			}
+		}
+		return componentStore;
+	}
+
+	@Override
+	protected List<Expression> findDynamicQueryComponents(Expression queryExpression) {
+		if (queryExpression.getNodeType() == ASTNode.SIMPLE_NAME) {
+			DynamicQueryComponentsStore componentStore = collectQueryComponents((SimpleName) queryExpression);
+			if (componentStore != null) {
+				return componentStore.getComponents();
+			}
+			return Collections.emptyList();
+		}
+		return super.findDynamicQueryComponents(queryExpression);
 	}
 
 	private Name createTypeName(String qualifiedName) {
