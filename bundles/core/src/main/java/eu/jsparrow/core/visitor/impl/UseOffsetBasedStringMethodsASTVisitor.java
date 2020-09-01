@@ -49,6 +49,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  *
  */
 public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTVisitor {
+
 	private static final String SUBSTRING = "substring"; //$NON-NLS-1$
 	private static final String STARTS_WITH = "startsWith"; //$NON-NLS-1$
 	private static final String LAST_INDEX_OF = "lastIndexOf"; //$NON-NLS-1$
@@ -56,18 +57,14 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 	private static final String MAX = "max"; //$NON-NLS-1$
 	private static final String MATH_FULLY_QUALIFIED_NAME = java.lang.Math.class.getName(); // $NON-NLS-1$
 	private static final String MATH_MAX_FULLY_QUALIFIED_NAME = MATH_FULLY_QUALIFIED_NAME + "." + MAX; //$NON-NLS-1$
-	private static final String MINUS_ONE_LITERAL = "-1"; //$NON-NLS-1$
-	private final SignatureData indexOfInt = new SignatureData(java.lang.String.class, INDEX_OF, int.class);
-	private final SignatureData indexOfString = new SignatureData(java.lang.String.class, INDEX_OF,
-			java.lang.String.class);
-	private final SignatureData lastIndexOfInt = new SignatureData(java.lang.String.class, LAST_INDEX_OF,
-			int.class);
-	private final SignatureData lastIndexOfString = new SignatureData(java.lang.String.class, LAST_INDEX_OF,
-			java.lang.String.class);
-	private final SignatureData startsWithString = new SignatureData(java.lang.String.class, STARTS_WITH,
-			java.lang.String.class);
-	private final SignatureData substringWithBeginIndex = new SignatureData(java.lang.String.class, SUBSTRING,
-			int.class);
+	private static final Class<?> STRING = java.lang.String.class;
+
+	private final SignatureData indexOfInt = new SignatureData(STRING, INDEX_OF, int.class);
+	private final SignatureData indexOfString = new SignatureData(STRING, INDEX_OF, STRING);
+	private final SignatureData lastIndexOfInt = new SignatureData(STRING, LAST_INDEX_OF, int.class);
+	private final SignatureData lastIndexOfString = new SignatureData(STRING, LAST_INDEX_OF, STRING);
+	private final SignatureData startsWithString = new SignatureData(STRING, STARTS_WITH, STRING);
+	private final SignatureData substringWithOffset = new SignatureData(STRING, SUBSTRING, int.class);
 	private boolean safeImportStaticMathMax;
 	private boolean safeImportStaticMathMaxExistsOnDemand;
 	private boolean safeImportMath;
@@ -106,7 +103,7 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 			return true;
 		}
 		MethodInvocation substringInvocation = (MethodInvocation) expression;
-		if (!substringWithBeginIndex.isEquivalentTo(substringInvocation.resolveMethodBinding())) {
+		if (!substringWithOffset.isEquivalentTo(substringInvocation.resolveMethodBinding())) {
 			return true;
 		}
 
@@ -153,7 +150,7 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 		@SuppressWarnings("unchecked")
 		List<Expression> maxArguments = maxInvocation.arguments();
 		maxArguments.add(offsetSubtraction);
-		maxArguments.add(ast.newNumberLiteral(MINUS_ONE_LITERAL));
+		maxArguments.add(ast.newNumberLiteral("-1")); //$NON-NLS-1$
 
 		String maxInvocationQualifier = findMaxInvocationQualifier();
 		if (maxInvocationQualifier != null) {
