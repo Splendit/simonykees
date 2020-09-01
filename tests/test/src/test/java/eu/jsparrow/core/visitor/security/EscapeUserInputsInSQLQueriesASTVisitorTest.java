@@ -125,7 +125,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_QueryInitializedWithNull_shouldTransform() throws Exception {
 
@@ -146,8 +146,8 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 				"	void test() {			\n" +
 				"		String userName = \"userName\";\n" +
 				"		String userPWD = \"userPWD\";\n" +
-				"		String query = null;\n" +				
-				"		Codec<Character> oracleCodec = new OracleCodec();\n" +
+				"		Codec<Character> oracleCodec = new OracleCodec();\n" +				
+				"		String query = null;\n" +
 				"		query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
 				"				ESAPI.encoder().encodeForSQL(oracleCodec, userName) + \n" +
 				"				\"' and user_password = '\" + \n" +
@@ -581,22 +581,24 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 				"		}";
 
 		String expected = "" +
-				"	void test(){\n" + 
-				"		String userName=\"userName\";\n" + 
-				"		Codec<Character> oracleCodec=new OracleCodec();\n" + 
-				"		String query=\"SELECT user_id FROM user_data WHERE user_name = '\" + ESAPI.encoder().encodeForSQL(oracleCodec,userName) + \"'\";\n" + 
-				"		if (true) {\n" + 
-				"			String userPassword=\"userPassword\";\n" + 
-				"			query+=\" and user_password = '\" + ESAPI.encoder().encodeForSQL(oracleCodec,userPassword) + \"'\";\n" + 
-				"		}\n" + 
-				"		try {\n" + 
-				"			Connection connection=null;\n" + 
-				"			Statement statement=connection.createStatement();\n" + 
-				"			ResultSet results=statement.executeQuery(query);\n" + 
-				"		}\n" + 
-				"		catch (SQLException e) {\n" + 
-				"			e.printStackTrace();\n" + 
-				"		}\n" + 
+				"	void test(){\n" +
+				"		String userName=\"userName\";\n" +
+				"		Codec<Character> oracleCodec=new OracleCodec();\n" +
+				"		String query=\"SELECT user_id FROM user_data WHERE user_name = '\" + ESAPI.encoder().encodeForSQL(oracleCodec,userName) + \"'\";\n"
+				+
+				"		if (true) {\n" +
+				"			String userPassword=\"userPassword\";\n" +
+				"			query+=\" and user_password = '\" + ESAPI.encoder().encodeForSQL(oracleCodec,userPassword) + \"'\";\n"
+				+
+				"		}\n" +
+				"		try {\n" +
+				"			Connection connection=null;\n" +
+				"			Statement statement=connection.createStatement();\n" +
+				"			ResultSet results=statement.executeQuery(query);\n" +
+				"		}\n" +
+				"		catch (SQLException e) {\n" +
+				"			e.printStackTrace();\n" +
+				"		}\n" +
 				"	}";
 
 		assertChange(original, expected);

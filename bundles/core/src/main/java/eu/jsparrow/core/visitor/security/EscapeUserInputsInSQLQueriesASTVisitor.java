@@ -85,6 +85,19 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		return super.visit(compilationUnit);
 	}
 
+	private Statement findStatementAfterOracleCodec(Expression queryMethodArgument) {
+		if (queryMethodArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
+			SimpleName variableName = (SimpleName) queryMethodArgument;
+			// In this case it is already known that queryMethodArgument
+			// references a local variable
+			ASTNode declarationNode = getCompilationUnit().findDeclaringNode(variableName.resolveBinding());
+			// and it is clear that the specific ancestor will be the
+			// corresponding variable declaration statement
+			return ASTNodeUtil.getSpecificAncestor(declarationNode, Statement.class);
+		}
+		return ASTNodeUtil.getSpecificAncestor(queryMethodArgument, Statement.class);
+	}
+
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		Expression queryMethodArgument = analyzeStatementExecuteQuery(methodInvocation);
@@ -97,14 +110,13 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		if (expressionsToEscape.isEmpty()) {
 			return true;
 		}
-		Expression firstComponent = dynamicQueryComponents.get(0);
-		Statement statement = ASTNodeUtil.getSpecificAncestor(firstComponent, Statement.class);
-		if (statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+		Statement statementAfterOracleCodec = findStatementAfterOracleCodec(queryMethodArgument);
+		if (statementAfterOracleCodec.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return true;
 		}
-		Block enclosingBlock = (Block) statement.getParent();
+		Block enclosingBlock = (Block) statementAfterOracleCodec.getParent();
 
-		ASTNode enclosingScope = this.liveVariableScope.findEnclosingScope(statement)
+		ASTNode enclosingScope = this.liveVariableScope.findEnclosingScope(statementAfterOracleCodec)
 			.orElse(null);
 		if (enclosingScope == null) {
 			return true;
@@ -118,7 +130,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 			VariableDeclarationStatement oracleCodecDeclarationStatement = createOracleCODECDeclarationStatement(
 					newName);
 			ListRewrite listRewrite = astRewrite.getListRewrite(enclosingBlock, Block.STATEMENTS_PROPERTY);
-			listRewrite.insertBefore(oracleCodecDeclarationStatement, statement, null);
+			listRewrite.insertBefore(oracleCodecDeclarationStatement, statementAfterOracleCodec, null);
 			return newName;
 		});
 
