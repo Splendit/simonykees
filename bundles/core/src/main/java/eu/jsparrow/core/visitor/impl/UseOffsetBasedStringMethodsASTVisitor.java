@@ -10,8 +10,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -59,49 +57,41 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 	private static final String MATH_FULLY_QUALIFIED_NAME = java.lang.Math.class.getName(); // $NON-NLS-1$
 	private static final String MATH_MAX_FULLY_QUALIFIED_NAME = MATH_FULLY_QUALIFIED_NAME + "." + MAX; //$NON-NLS-1$
 	private static final String MINUS_ONE_LITERAL = "-1"; //$NON-NLS-1$
-	private static final SignatureData INDEX_OF_INT = new SignatureData(java.lang.String.class, INDEX_OF, int.class);
-	private static final SignatureData INDEX_OF_STRING = new SignatureData(java.lang.String.class, INDEX_OF,
+	private final SignatureData indexOfInt = new SignatureData(java.lang.String.class, INDEX_OF, int.class);
+	private final SignatureData indexOfString = new SignatureData(java.lang.String.class, INDEX_OF,
 			java.lang.String.class);
-	private static final SignatureData LAST_INDEX_OF_INT = new SignatureData(java.lang.String.class, LAST_INDEX_OF,
+	private final SignatureData lastIndexOfInt = new SignatureData(java.lang.String.class, LAST_INDEX_OF,
 			int.class);
-	private static final SignatureData LAST_INDEX_OF_STRING = new SignatureData(java.lang.String.class, LAST_INDEX_OF,
+	private final SignatureData lastIndexOfString = new SignatureData(java.lang.String.class, LAST_INDEX_OF,
 			java.lang.String.class);
-	private static final SignatureData STARTS_WITH_STRING = new SignatureData(java.lang.String.class, STARTS_WITH,
+	private final SignatureData startsWithString = new SignatureData(java.lang.String.class, STARTS_WITH,
 			java.lang.String.class);
-	private static final SignatureData SUBSTRING_WITH_BEGIN_INDEX = new SignatureData(java.lang.String.class, SUBSTRING,
+	private final SignatureData substringWithBeginIndex = new SignatureData(java.lang.String.class, SUBSTRING,
 			int.class);
-	private boolean flagSafeImportStaticMathMax;
-	private boolean flagSafeImportStaticMathMaxExistsOnDemand;
-	private boolean flagSafeImportMath;
-
-	private boolean checkSignature(IMethodBinding methodBinding) {
-		return INDEX_OF_INT.isEquivalentTo(methodBinding) ||
-				INDEX_OF_STRING.isEquivalentTo(methodBinding) ||
-				LAST_INDEX_OF_INT.isEquivalentTo(methodBinding) ||
-				LAST_INDEX_OF_STRING.isEquivalentTo(methodBinding) ||
-				STARTS_WITH_STRING.isEquivalentTo(methodBinding);
-	}
+	private boolean safeImportStaticMathMax;
+	private boolean safeImportStaticMathMaxExistsOnDemand;
+	private boolean safeImportMath;
 
 	@Override
 	public boolean visit(CompilationUnit node) {
 		super.visit(node);
-		flagSafeImportStaticMathMax = isSafeToAddStaticMethodImport(node, MATH_MAX_FULLY_QUALIFIED_NAME);
-		if (flagSafeImportStaticMathMax) {
+		safeImportStaticMathMax = isSafeToAddStaticMethodImport(node, MATH_MAX_FULLY_QUALIFIED_NAME);
+		if (safeImportStaticMathMax) {
 			List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(node.imports(),
 					ImportDeclaration.class);
-			flagSafeImportStaticMathMaxExistsOnDemand = containsUnambiguousStaticMethodImportOnDemand(
+			safeImportStaticMathMaxExistsOnDemand = containsUnambiguousStaticMethodImportOnDemand(
 					importDeclarations, MATH_MAX_FULLY_QUALIFIED_NAME);
 		}
-		flagSafeImportMath = isSafeToAddImport(node, MATH_FULLY_QUALIFIED_NAME);
+		safeImportMath = isSafeToAddImport(node, MATH_FULLY_QUALIFIED_NAME);
 		return true;
 	}
 
 	@Override
 	public void endVisit(CompilationUnit node) {
 		super.endVisit(node);
-		flagSafeImportStaticMathMax = false;
-		flagSafeImportMath = false;
-		flagSafeImportStaticMathMaxExistsOnDemand = false;
+		safeImportStaticMathMax = false;
+		safeImportMath = false;
+		safeImportStaticMathMaxExistsOnDemand = false;
 	}
 
 	@Override
@@ -116,7 +106,7 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 			return true;
 		}
 		MethodInvocation substringInvocation = (MethodInvocation) expression;
-		if (!SUBSTRING_WITH_BEGIN_INDEX.isEquivalentTo(substringInvocation.resolveMethodBinding())) {
+		if (!substringWithBeginIndex.isEquivalentTo(substringInvocation.resolveMethodBinding())) {
 			return true;
 		}
 
@@ -142,6 +132,14 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 		return true;
 	}
 
+	private boolean checkSignature(IMethodBinding methodBinding) {
+		return indexOfInt.isEquivalentTo(methodBinding) ||
+				indexOfString.isEquivalentTo(methodBinding) ||
+				lastIndexOfInt.isEquivalentTo(methodBinding) ||
+				lastIndexOfString.isEquivalentTo(methodBinding) ||
+				startsWithString.isEquivalentTo(methodBinding);
+	}
+
 	private MethodInvocation createMathMaxExpression(MethodInvocation methodInvocation, Expression substringArgument) {
 
 		AST ast = methodInvocation.getAST();
@@ -151,28 +149,29 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 		offsetSubtraction.setRightOperand((Expression) astRewrite.createCopyTarget(substringArgument));
 		MethodInvocation maxInvocation = ast.newMethodInvocation();
 		maxInvocation.setName(ast.newSimpleName(MAX));
-		ListRewrite maxArgumentsListRewrite = astRewrite.getListRewrite(maxInvocation,
-				MethodInvocation.ARGUMENTS_PROPERTY);
-		maxArgumentsListRewrite.insertFirst(offsetSubtraction, null);
-		maxArgumentsListRewrite.insertLast(ast.newNumberLiteral(MINUS_ONE_LITERAL), null);
-		Name maxInvocationQualifier = findMaxInvocationQualifier(ast);
+
+		@SuppressWarnings("unchecked")
+		List<Expression> maxArguments = maxInvocation.arguments();
+		maxArguments.add(offsetSubtraction);
+		maxArguments.add(ast.newNumberLiteral(MINUS_ONE_LITERAL));
+
+		String maxInvocationQualifier = findMaxInvocationQualifier();
 		if (maxInvocationQualifier != null) {
-			maxInvocation.setExpression(maxInvocationQualifier);
+			maxInvocation.setExpression(ast.newName(maxInvocationQualifier));
 		}
 		return maxInvocation;
 	}
 
-	private Name findMaxInvocationQualifier(AST ast) {
-		if (flagSafeImportStaticMathMax) {
-			if (!flagSafeImportStaticMathMaxExistsOnDemand) {
+	private String findMaxInvocationQualifier() {
+		if (safeImportStaticMathMax) {
+			if (!safeImportStaticMathMaxExistsOnDemand) {
 				addStaticImport(MATH_MAX_FULLY_QUALIFIED_NAME);
 			}
 			return null;
 		}
-		if (flagSafeImportMath) {
-			return ast.newSimpleName(java.lang.Math.class.getSimpleName());
+		if (safeImportMath) {
+			return java.lang.Math.class.getSimpleName();
 		}
-
-		return ast.newName(MATH_FULLY_QUALIFIED_NAME);
+		return MATH_FULLY_QUALIFIED_NAME;
 	}
 }
