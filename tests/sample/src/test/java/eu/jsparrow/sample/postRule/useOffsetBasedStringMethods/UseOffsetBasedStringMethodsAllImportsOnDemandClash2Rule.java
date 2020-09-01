@@ -1,7 +1,7 @@
 package eu.jsparrow.sample.postRule.useOffsetBasedStringMethods;
 
 import static eu.jsparrow.sample.utilities.ClassWithMaxMethod.*;
-import static eu.jsparrow.sample.utilities.InnerClasses.*;
+import static eu.jsparrow.sample.utilities.ClassWithStaticInnerClasses.*;
 
 public class UseOffsetBasedStringMethodsAllImportsOnDemandClash2Rule {
 

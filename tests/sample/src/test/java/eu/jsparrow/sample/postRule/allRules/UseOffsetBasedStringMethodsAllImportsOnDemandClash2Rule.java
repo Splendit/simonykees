@@ -4,7 +4,7 @@ import static eu.jsparrow.sample.utilities.ClassWithMaxMethod.max;
 
 import org.apache.commons.lang3.StringUtils;
 
-import eu.jsparrow.sample.utilities.InnerClasses.OtherInnerClass;
+import eu.jsparrow.sample.utilities.ClassWithStaticInnerClasses.OtherInnerClass;
 
 public class UseOffsetBasedStringMethodsAllImportsOnDemandClash2Rule {
 

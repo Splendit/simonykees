@@ -1,11 +1,13 @@
 package eu.jsparrow.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +35,6 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 
 	@Test
 	public void testImportMaxClashing() throws Exception {
-		// Test file references classes from utilities package
 		loadUtilities();
 
 		Path preRule = getPreRuleFile(SAMPLE_FILE_IMPORT_MAX_CLASHING);
@@ -47,7 +48,6 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 
 	@Test
 	public void testAllImportsClashing() throws Exception {
-		// Test file references classes from utilities package
 		loadUtilities();
 
 		Path preRule = getPreRuleFile(SAMPLE_FILE_ALL_IMPORTS_CLASHING);
@@ -61,7 +61,6 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 	
 	@Test
 	public void testAllImportsOnDemandClashing() throws Exception {
-		// Test file references classes from utilities package
 		loadUtilities();
 
 		Path preRule = getPreRuleFile(SAMPLE_FILE_ALL_IMPORTS_ON_DEMAND_CLASHING);
@@ -75,7 +74,6 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 	
 	@Test
 	public void testAllImportsOnDemandClashing2() throws Exception {
-		// Test file references classes from utilities package
 		loadUtilities();
 
 		Path preRule = getPreRuleFile(SAMPLE_FILE_ALL_IMPORTS_ON_DEMAND_CLASHING2);
@@ -89,7 +87,6 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 	
 	@Test
 	public void testAmbiguousImportsOnDemandClashing() throws Exception {
-		// Test file references classes from utilities package
 		loadUtilities();
 
 		Path preRule = getPreRuleFile(SAMPLE_FILE_AMBIGUOUS_IMPORTS_ON_DEMAND);
@@ -99,6 +96,15 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void calculateEnabledForProjectShouldBeEnabled() {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_1);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertTrue(rule.isEnabled());
 	}
 	
 }
