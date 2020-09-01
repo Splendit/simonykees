@@ -79,7 +79,7 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 		if (safeImportStaticMathMax) {
 			List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(node.imports(),
 					ImportDeclaration.class);
-			safeImportStaticMathMaxExistsOnDemand = containsUnambiguousStaticMethodImportOnDemand(
+			safeImportStaticMathMaxExistsOnDemand = matchesStaticMethodImportOnDemand(
 					importDeclarations, MATH_MAX_FULLY_QUALIFIED_NAME);
 		}
 		safeImportMath = isSafeToAddImport(node, MATH_FULLY_QUALIFIED_NAME);

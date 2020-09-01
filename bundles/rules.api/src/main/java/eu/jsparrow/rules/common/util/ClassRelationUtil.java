@@ -611,8 +611,8 @@ public class ClassRelationUtil {
 	 * @param importDeclaration
 	 *            import declaration to be checked.
 	 * @param javaFileName
-	 *            expected is a file name which is combined from the simple name of the type
-	 *            to be checked and a ".java" - suffix.
+	 *            expected is a file name which is combined from the simple name
+	 *            of the type to be checked and a ".java" - suffix.
 	 * @return {@code true} if a type with the given name exists in the package
 	 *         imported with the on-demand {@link ImportDeclaration} or
 	 *         {@code false} otherwise.
@@ -648,10 +648,11 @@ public class ClassRelationUtil {
 
 		return false;
 	}
-	
+
 	/**
-	 * Checks if the given {@link ImportDeclaration} is  {@link ImportDeclaration#isOnDemand} and
-	 * implicitly imports the given inner type.
+	 * Checks if the given {@link ImportDeclaration} is
+	 * {@link ImportDeclaration#isOnDemand} and implicitly imports the given
+	 * inner type.
 	 * 
 	 * @param importDeclaration
 	 *            import declaration to be checked.
@@ -672,29 +673,22 @@ public class ClassRelationUtil {
 		}
 
 		ITypeBinding iTypeBinding = (ITypeBinding) iBinding;
-		ITypeBinding[] declaredTypes = iTypeBinding.getDeclaredTypes();
-		
-		for(ITypeBinding declaredType : declaredTypes) {
-			if(declaredType.getName().equals(simpleTypeName)) {
-				return true;
-			}
-		}
-		
-		return false;
+		return Arrays.stream(iTypeBinding.getDeclaredTypes())
+			.map(ITypeBinding::getName)
+			.anyMatch(simpleTypeName::equals);
 	}
 
 	/**
-	 * Checks if the given {@link ImportDeclaration} is
-	 * {@link ImportDeclaration#isStatic} and
-	 * {@link ImportDeclaration#isOnDemand} which implicitly imports the given
-	 * static method.
+	 * 
+	 * Checks if the given {@link ImportDeclaration} is a
+	 * Static-Import-on-Demand which implicitly imports the given static method.
 	 * 
 	 * @param importDeclaration
 	 *            import declaration to be checked.
 	 * @param methodName
 	 *            name of the static method
-	 * @return {@code true} if a static method with the given name exists in the type
-	 *         imported with the on-demand {@link ImportDeclaration} or
+	 * @return {@code true} if a static method with the given name exists in the
+	 *         type imported with the on-demand {@link ImportDeclaration} or
 	 *         {@code false} otherwise.
 	 */
 	public static boolean importsStaticMethodOnDemand(ImportDeclaration importDeclaration, String methodName) {
@@ -714,14 +708,10 @@ public class ClassRelationUtil {
 		ITypeBinding typeBinding = (ITypeBinding) iBinding;
 
 		IMethodBinding[] declaredMethods = typeBinding.getDeclaredMethods();
-		for (IMethodBinding declaredMethodBinding : declaredMethods) {
-			if (Modifier.isStatic(declaredMethodBinding.getModifiers()) &&
-					declaredMethodBinding.getName()
-						.equals(methodName)) {
-				return true;
-			}
-		}
-		return false;
+		return Arrays.stream(declaredMethods)
+			.filter(m -> Modifier.isStatic(m.getModifiers()))
+			.map(IMethodBinding::getName)
+			.anyMatch(methodName::equals);
 	}
 
 	/**

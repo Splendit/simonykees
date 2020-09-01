@@ -263,26 +263,31 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			.anyMatch(name -> name.equals(simpleMethod));
 	}
 
-	protected boolean containsUnambiguousStaticMethodImportOnDemand(List<ImportDeclaration> importDeclarations,
+	protected boolean matchesStaticMethodImportOnDemand(List<ImportDeclaration> importDeclarations,
 			String qualifiedStaticMethodName) {
 		String simpleMethodName = getSimpleName(qualifiedStaticMethodName);
 		List<ImportDeclaration> importsOnDemand = importDeclarations.stream()
 			.filter(importDeclaration -> ClassRelationUtil.importsStaticMethodOnDemand(importDeclaration,
 					simpleMethodName))
 			.collect(Collectors.toList());
-		if (importsOnDemand.size() != 1) {
+
+		if (importsOnDemand.isEmpty()) {
 			return false;
 		}
-		ImportDeclaration importOnDemand = importsOnDemand.get(0);
-		IBinding iBinding = importOnDemand.resolveBinding();
-		if (iBinding.getKind() == IBinding.TYPE) {
+
+		for (ImportDeclaration importOnDemand : importsOnDemand) {
+			IBinding iBinding = importOnDemand.resolveBinding();
+			if (iBinding.getKind() != IBinding.TYPE) {
+				return false;
+			}
 			ITypeBinding typeBinding = (ITypeBinding) iBinding;
 			String implicitStaticImport = typeBinding.getQualifiedName() + "." + simpleMethodName; //$NON-NLS-1$
-			if (qualifiedStaticMethodName.equals(implicitStaticImport)) {
-				return true;
+			if (!qualifiedStaticMethodName.equals(implicitStaticImport)) {
+				return false;
 			}
 		}
-		return false;
+
+		return true;
 	}
 
 	/**
@@ -307,7 +312,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			return true;
 		}
 
-		if (containsUnambiguousStaticMethodImportOnDemand(importDeclarations, qualifiedStaticMethodName)) {
+		if (matchesStaticMethodImportOnDemand(importDeclarations, qualifiedStaticMethodName)) {
 			return true;
 		}
 
