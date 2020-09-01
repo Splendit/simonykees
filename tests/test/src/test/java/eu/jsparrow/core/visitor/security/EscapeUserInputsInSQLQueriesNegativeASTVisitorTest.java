@@ -86,19 +86,50 @@ public class EscapeUserInputsInSQLQueriesNegativeASTVisitorTest extends UsesJDTU
 
 	@Test
 	public void visit_UseQueryAsArgument_shouldNotTransform() throws Exception {
-		
+
 		String original = "" +
-				"	void useQuery(String query) {}\n" + 
-				"	void test() {\n" + 
-				"		String userName = \"userName\";\n" + 
-				"		String userPassword = \"userPassword\";\n" + 
-				"		String query;\n" + 
-				"		query = \"SELECT user_id FROM user_data WHERE user_name = '\" + userName + \"'\";\n" + 
-				"		query += \" and user_password = '\" + userPassword + \"'\";\n" + 
-				"		useQuery(query);\n" + 
+				"	void useQuery(String query) {}\n" +
+				"	void test() {\n" +
+				"		String userName = \"userName\";\n" +
+				"		String userPassword = \"userPassword\";\n" +
+				"		String query;\n" +
+				"		query = \"SELECT user_id FROM user_data WHERE user_name = '\" + userName + \"'\";\n" +
+				"		query += \" and user_password = '\" + userPassword + \"'\";\n" +
+				"		useQuery(query);\n" +
 				TRY_EXECUTE +
 				"	}";
-		
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_QueryAsField_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	String query;\n" +
+				"	void test() {\n" +
+				"		String userName = \"userName\";\n" +
+				"		String userPassword = \"userPassword\";\n" +
+				"		query = \"SELECT user_id FROM user_data WHERE user_name = '\" + userName + \"'\";\n" +
+				"		query += \" and user_password = '\" + userPassword + \"'\";\n" +
+				TRY_EXECUTE +
+				"	}";
+
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_ReAssignAfterUse_shouldNotTransform() throws Exception {
+		String original = "" +				
+				"	void test() {\n" +
+				"		String query;\n" +
+				"		String userName = \"userName\";\n" +
+				"		String userPassword = \"userPassword\";\n" +
+				"		query = \"SELECT user_id FROM user_data WHERE user_name = '\" + userName + \"'\";\n" +
+				"		query += \" and user_password = '\" + userPassword + \"'\";\n" +
+				TRY_EXECUTE +
+				"		query = null;\n" +
+				"	}";
+
 		assertNoChange(original);
 	}
 

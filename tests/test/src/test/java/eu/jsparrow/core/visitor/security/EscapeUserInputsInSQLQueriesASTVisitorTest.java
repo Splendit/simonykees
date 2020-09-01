@@ -125,6 +125,39 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_QueryInitializedWithNull_shouldTransform() throws Exception {
+
+		String original = "" +
+				"	void test() {			\n" +
+				"		String userName = \"userName\";\n" +
+				"		String userPWD = \"userPWD\";\n" +
+				"		String query = null;\n" +
+				"		query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"				userName + \n" +
+				"				\"' and user_password = '\" + \n" +
+				"				userPWD + \n" +
+				"				\"'\";\n" +
+				tryExecute("query") +
+				"	}";
+
+		String expected = "" +
+				"	void test() {			\n" +
+				"		String userName = \"userName\";\n" +
+				"		String userPWD = \"userPWD\";\n" +
+				"		String query = null;\n" +				
+				"		Codec<Character> oracleCodec = new OracleCodec();\n" +
+				"		query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec, userName) + \n" +
+				"				\"' and user_password = '\" + \n" +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec, userPWD) + \n" +
+				"				\"'\";\n" +
+				tryExecute("query") +
+				"	}";
+
+		assertChange(original, expected);
+	}
 
 	@Test
 	public void visit_StringFields_shouldTransform() throws Exception {
