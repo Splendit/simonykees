@@ -1,7 +1,5 @@
 package eu.jsparrow.core.visitor.security.random;
 
-import java.util.Collections;
-
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -15,7 +13,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import eu.jsparrow.core.visitor.security.common.SignatureData;
+import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -37,10 +35,9 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 class NewRandomAnalyzer {
 
 	private static final SignatureData SIGNATURE_WITHOUT_PARAMETER = new SignatureData(
-			java.util.Random.class.getName(), java.util.Random.class.getSimpleName(), Collections.emptyList());
+			java.util.Random.class, java.util.Random.class.getSimpleName());
 	private static final SignatureData SIGNATURE_WITH_SEED_PARAMETER = new SignatureData(
-			java.util.Random.class.getName(), java.util.Random.class.getSimpleName(),
-			Collections.singletonList(long.class.getSimpleName()));
+			java.util.Random.class, java.util.Random.class.getSimpleName(), long.class);
 	private Expression seedArgument;
 	private Expression randomExpressionToReplace;
 	private Statement randomConstructionStatement;
