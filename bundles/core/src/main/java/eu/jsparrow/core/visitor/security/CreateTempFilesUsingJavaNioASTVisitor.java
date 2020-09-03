@@ -61,18 +61,18 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 		super.visit(node);
 		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(node.imports(),
 				ImportDeclaration.class);
-		
-		if(matchesTypeImportOnDemand(importDeclarations, PATHS_QUALIFIED_NAME)) {
-			typesImportedOnDemand.add(PATHS_QUALIFIED_NAME);
-		}
-		if(matchesTypeImportOnDemand(importDeclarations, FILES_QUALIFIED_NAME)) {
-			typesImportedOnDemand.add(FILES_QUALIFIED_NAME);
-		}		
+
 		if (isSafeToAddImport(node, PATHS_QUALIFIED_NAME)) {
 			safeTypeImports.add(PATHS_QUALIFIED_NAME);
+			if (matchesTypeImportOnDemand(importDeclarations, PATHS_QUALIFIED_NAME)) {
+				typesImportedOnDemand.add(PATHS_QUALIFIED_NAME);
+			}
 		}
 		if (isSafeToAddImport(node, FILES_QUALIFIED_NAME)) {
 			safeTypeImports.add(FILES_QUALIFIED_NAME);
+			if (matchesTypeImportOnDemand(importDeclarations, FILES_QUALIFIED_NAME)) {
+				typesImportedOnDemand.add(FILES_QUALIFIED_NAME);
+			}
 		}
 		return true;
 	}
@@ -81,6 +81,7 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 	public void endVisit(CompilationUnit node) {
 		super.endVisit(node);
 		safeTypeImports.clear();
+		typesImportedOnDemand.clear();
 	}
 
 	@Override
@@ -167,13 +168,12 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 	}
 
 	private String findTypeNameForStaticMethodInvocation(String qualifiedName) {
-		if(typesImportedOnDemand.contains(qualifiedName)) {
-			return getSimpleName(qualifiedName);
-		}
 		if (!safeTypeImports.contains(qualifiedName)) {
 			return qualifiedName;
 		}
-		addImports.add(qualifiedName);
+		if (!typesImportedOnDemand.contains(qualifiedName)) {
+			addImports.add(qualifiedName);
+		}
 		return getSimpleName(qualifiedName);
 	}
 
