@@ -87,6 +87,25 @@ public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnit
 				"		}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_FilesAndPathsImportedOnDemand_shouldTransform() throws Exception {
+		fixture.addImport(java.nio.file.Files.class.getPackage().getName(), false, true);		
+		String original = "" +
+				"		try {\n" +
+				"			File file = File.createTempFile(\"prefix\", \"suffix\", new File(\"/tmp/test/\"));\n" +
+				"		} catch (Exception e) {\n" +
+				"			e.printStackTrace();\n" +
+				"		}";
+		String expected = "" +
+				"		try {\n" +
+				"			File file = Files.createTempFile(Paths.get(\"/tmp/test/\"), \"prefix\", \"suffix\").toFile();\n"
+				+
+				"		} catch (Exception e) {\n" +
+				"			e.printStackTrace();\n" +
+				"		}";
+		assertChange(original, expected);
+	}
 
 	@Test
 	public void visit_CreateTempFileWithNewFileAsDirectory_shouldTransform() throws Exception {
