@@ -241,6 +241,11 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		if (containsImport(importDeclarations, qualifiedTypeName)) {
 			return true;
 		}
+		
+		if(matchesTypeImportOnDemand(importDeclarations, qualifiedTypeName)) {
+			return true;
+		}
+		
 		if (isImportClashing(importDeclarations, simpleTypeName)) {
 			return false;
 		}
