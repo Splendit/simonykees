@@ -68,6 +68,25 @@ public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnit
 				"		}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_FilesCannotBeImported_shouldTransform() throws Exception {
+		String original = "" +
+				"		class Files {}\n" + 
+				"		try {\n" + 
+				"			File file = File.createTempFile(\"prefix\", \"suffix\");\n" + 
+				"		} catch (Exception e) {\n" + 
+				"			e.printStackTrace();\n" + 
+				"		}";
+		String expected = "" +
+				"		class Files {}\n" + 
+				"		try {\n" + 
+				"			File file = java.nio.file.Files.createTempFile(\"prefix\", \"suffix\").toFile();\n" + 
+				"		} catch (Exception e) {\n" + 
+				"			e.printStackTrace();\n" + 
+				"		}";
+		assertChange(original, expected);
+	}
 
 	@Test
 	public void visit_CreateTempFileWithNewFileAsDirectory_shouldTransform() throws Exception {

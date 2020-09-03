@@ -1,7 +1,9 @@
 package eu.jsparrow.core.visitor.security;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -9,7 +11,6 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.visitor.sub.SignatureData;
@@ -30,6 +31,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String PATHS_QUALIFIED_NAME = java.nio.file.Paths.class.getName();
+	private static final String FILES_QUALIFIED_NAME = java.nio.file.Files.class.getName();
 	private static final Class<File> FILE = java.io.File.class;
 	private static final Class<?> STRING = java.lang.String.class;
 	private static final String CREATE_TEMP_FILE = "createTempFile"; //$NON-NLS-1$
@@ -37,7 +39,7 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 	private final SignatureData createTempFileWithDirectory = new SignatureData(FILE, CREATE_TEMP_FILE, STRING, STRING,
 			FILE);
 	private final SignatureData newFileFromPath = new SignatureData(FILE, FILE.getSimpleName(), STRING);
-	private boolean safeToImportPaths;
+	private final Set<String> safeTypeImports = new HashSet<>();
 
 	private class TransformationData {
 		private final Expression filePrefix;
@@ -51,20 +53,24 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 			this.directoryPath = directoryPath;
 		}
 	}
-	
+
 	@Override
 	public boolean visit(CompilationUnit node) {
 		super.visit(node);
-		safeToImportPaths = isSafeToAddImport(node, PATHS_QUALIFIED_NAME);
+		if (isSafeToAddImport(node, PATHS_QUALIFIED_NAME)) {
+			safeTypeImports.add(PATHS_QUALIFIED_NAME);
+		}
+		if (isSafeToAddImport(node, FILES_QUALIFIED_NAME)) {
+			safeTypeImports.add(FILES_QUALIFIED_NAME);
+		}
 		return true;
 	}
 
 	@Override
 	public void endVisit(CompilationUnit node) {
 		super.endVisit(node);
-		safeToImportPaths = false;
+		safeTypeImports.clear();
 	}
-
 
 	@Override
 	public boolean visit(MethodInvocation node) {
@@ -119,11 +125,11 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 
 	private void transform(MethodInvocation replacedCreateTempFileInvocation, TransformationData data) {
 
-		addImports.add(java.nio.file.Files.class.getName());
 		AST ast = replacedCreateTempFileInvocation.getAST();
 		MethodInvocation createTempFileInvocation = ast.newMethodInvocation();
 		createTempFileInvocation.setName(ast.newSimpleName(CREATE_TEMP_FILE));
-		createTempFileInvocation.setExpression(ast.newSimpleName(java.nio.file.Files.class.getSimpleName()));
+		String typeNameFiles = findTypeNameForStaticMethodInvocation(FILES_QUALIFIED_NAME);
+		createTempFileInvocation.setExpression(ast.newName(typeNameFiles));
 
 		@SuppressWarnings("unchecked")
 		List<Expression> createTempFileArguments = createTempFileInvocation.arguments();
@@ -131,7 +137,8 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 
 			MethodInvocation pathsGetterInvocation = ast.newMethodInvocation();
 			pathsGetterInvocation.setName(ast.newSimpleName("get")); //$NON-NLS-1$
-			pathsGetterInvocation.setExpression(ast.newName(findPathsGetterInvocationExpression()));
+			String typeNamePaths = findTypeNameForStaticMethodInvocation(PATHS_QUALIFIED_NAME);
+			pathsGetterInvocation.setExpression(ast.newName(typeNamePaths));
 			@SuppressWarnings("unchecked")
 			List<Expression> pathsGetterInvocationArguments = pathsGetterInvocation.arguments();
 			pathsGetterInvocationArguments.add((Expression) astRewrite.createCopyTarget(data.directoryPath));
@@ -147,13 +154,13 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 		astRewrite.replace(replacedCreateTempFileInvocation, toFileInvocation, null);
 		onRewrite();
 	}
-	
-	private String findPathsGetterInvocationExpression() {
-		if(!safeToImportPaths) {
-			return PATHS_QUALIFIED_NAME;
+
+	private String findTypeNameForStaticMethodInvocation(String qualifiedName) {
+		if (!safeTypeImports.contains(qualifiedName)) {
+			return qualifiedName;
 		}
-		addImports.add(PATHS_QUALIFIED_NAME);
-		return java.nio.file.Paths.class.getSimpleName();
+		addImports.add(qualifiedName);
+		return getSimpleName(qualifiedName);
 	}
 
 }
