@@ -6,8 +6,10 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.visitor.sub.SignatureData;
@@ -27,6 +29,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  *
  */
 public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTVisitor {
+	private static final String PATHS_QUALIFIED_NAME = java.nio.file.Paths.class.getName();
 	private static final Class<File> FILE = java.io.File.class;
 	private static final Class<?> STRING = java.lang.String.class;
 	private static final String CREATE_TEMP_FILE = "createTempFile"; //$NON-NLS-1$
@@ -34,6 +37,7 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 	private final SignatureData createTempFileWithDirectory = new SignatureData(FILE, CREATE_TEMP_FILE, STRING, STRING,
 			FILE);
 	private final SignatureData newFileFromPath = new SignatureData(FILE, FILE.getSimpleName(), STRING);
+	private boolean safeToImportPaths;
 
 	private class TransformationData {
 		private final Expression filePrefix;
@@ -47,6 +51,20 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 			this.directoryPath = directoryPath;
 		}
 	}
+	
+	@Override
+	public boolean visit(CompilationUnit node) {
+		super.visit(node);
+		safeToImportPaths = isSafeToAddImport(node, PATHS_QUALIFIED_NAME);
+		return true;
+	}
+
+	@Override
+	public void endVisit(CompilationUnit node) {
+		super.endVisit(node);
+		safeToImportPaths = false;
+	}
+
 
 	@Override
 	public boolean visit(MethodInvocation node) {
@@ -110,10 +128,10 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 		@SuppressWarnings("unchecked")
 		List<Expression> createTempFileArguments = createTempFileInvocation.arguments();
 		if (data.directoryPath != null) {
-			addImports.add(java.nio.file.Paths.class.getName());
+
 			MethodInvocation pathsGetterInvocation = ast.newMethodInvocation();
 			pathsGetterInvocation.setName(ast.newSimpleName("get")); //$NON-NLS-1$
-			pathsGetterInvocation.setExpression(ast.newSimpleName(java.nio.file.Paths.class.getSimpleName()));
+			pathsGetterInvocation.setExpression(ast.newName(findPathsGetterInvocationExpression()));
 			@SuppressWarnings("unchecked")
 			List<Expression> pathsGetterInvocationArguments = pathsGetterInvocation.arguments();
 			pathsGetterInvocationArguments.add((Expression) astRewrite.createCopyTarget(data.directoryPath));
@@ -128,6 +146,14 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 
 		astRewrite.replace(replacedCreateTempFileInvocation, toFileInvocation, null);
 		onRewrite();
+	}
+	
+	private String findPathsGetterInvocationExpression() {
+		if(!safeToImportPaths) {
+			return PATHS_QUALIFIED_NAME;
+		}
+		addImports.add(PATHS_QUALIFIED_NAME);
+		return java.nio.file.Paths.class.getSimpleName();
 	}
 
 }
