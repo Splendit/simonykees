@@ -21,6 +21,7 @@ public class FileReaderAnalyzer {
 	private SimpleName fileReaderName;
 	private Expression charset;
 	private Expression file;
+	private Expression filePath;
 	
 	public FileReaderAnalyzer(VariableDeclarationExpression variableDeclaration) {
 		this.variableDeclaration = variableDeclaration;
@@ -64,16 +65,30 @@ public class FileReaderAnalyzer {
 			} else {
 				return false;
 			}
-			
-			
 		}
 		
 		return true;
 	}
 	
-	private boolean isFileInstanceCreation(Expression file) {
-		//TODO: implement this method. 
-		return false;
+	private boolean isFileInstanceCreation(Expression expression) {
+		ITypeBinding typeBinding = expression.resolveTypeBinding();
+		if(ClassRelationUtil.isContentOfType(typeBinding, java.io.FileReader.class.getName())) {
+			return false;
+		}
+		if(expression.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
+			return false;
+		}
+		
+		ClassInstanceCreation fileInstanceCreation = (ClassInstanceCreation)expression;
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(fileInstanceCreation.arguments(), Expression.class);
+		if(arguments.size() != 1) {
+			return false;
+		}
+		Expression argument = arguments.get(0);
+		ITypeBinding argumentTypeBinding = argument.resolveTypeBinding();
+		boolean isStringArgument = ClassRelationUtil.isContentOfType(argumentTypeBinding, java.lang.String.class.getName());
+		this.filePath = argument;
+		return isStringArgument;
 	}
 
 	public Optional<Expression> getCharset() {
@@ -88,14 +103,8 @@ public class FileReaderAnalyzer {
 		return this.fileReaderName;
 	}
 
-	public Expression computePathExpression() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public Optional<Expression> computeCharsetExpression() {
-		// TODO Auto-generated method stub
-		return null;
+	public Expression getPathExpression() {
+		return filePath;
 	}
 
 }
