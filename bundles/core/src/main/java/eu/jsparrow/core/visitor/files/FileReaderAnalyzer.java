@@ -20,7 +20,6 @@ public class FileReaderAnalyzer {
 	private VariableDeclarationExpression variableDeclaration;
 	private SimpleName fileReaderName;
 	private Expression charset;
-	private Expression file;
 	private Expression filePath;
 	
 	public FileReaderAnalyzer(VariableDeclarationExpression variableDeclaration) {
@@ -55,7 +54,7 @@ public class FileReaderAnalyzer {
 		if(!isFileInstanceCreation(file)) {
 			return false;
 		}
-		this.file = file;
+		
 		//TODO: get the path of the file.
 		if(argumentSize == 2) {
 			Expression charset = arguments.get(1);
@@ -93,10 +92,6 @@ public class FileReaderAnalyzer {
 
 	public Optional<Expression> getCharset() {
 		return Optional.ofNullable(charset);
-	}
-	
-	public Expression getFileInstanceCreation() {
-		return this.file;
 	}
 	
 	public SimpleName getFileReaderName() {

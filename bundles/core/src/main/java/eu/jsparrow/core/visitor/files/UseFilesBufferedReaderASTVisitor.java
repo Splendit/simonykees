@@ -49,6 +49,13 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 				typesImportedOnDemand.add(FILES_QUALIFIED_NAME);
 			}
 		}
+		
+		if(isSafeToAddImport(compilationUnit, CHARSET_QUALIFIED_NAME)) {
+			safeImports.add(CHARSET_QUALIFIED_NAME);
+			if(matchesTypeImportOnDemand(importDeclarations, CHARSET_QUALIFIED_NAME)) {
+				typesImportedOnDemand.add(CHARSET_QUALIFIED_NAME);
+			}
+		}
 
 		return continueVisiting;
 	}
@@ -99,7 +106,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 				.map(exp -> (Expression)astRewrite.createCopyTarget(exp))
 				.orElse(createDefaultCharsetExpression(ast));
 		List<Expression> arguments = new ArrayList<>();
-		arguments.add(pathArgument);
+		arguments.add(pathsGet);
 		arguments.add(charset);
 		Expression filesExpression = ast.newName(findTypeNameForStaticMethodInvocation(FILES_QUALIFIED_NAME));
 		MethodInvocation filesNewBufferedReader = NodeBuilder.newMethodInvocation(ast, filesExpression,
@@ -121,7 +128,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fileReaderName);
 		body.accept(visitor);
 		List<SimpleName> usages = visitor.getUsages();
-		return usages.isEmpty();
+		return !usages.isEmpty();
 	}
 	
 	private String findTypeNameForStaticMethodInvocation(String qualifiedName) {
