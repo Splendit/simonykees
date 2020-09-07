@@ -7,16 +7,24 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
 /**
  * This visitor looks for invocations of
@@ -119,20 +127,64 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 			return new TransformationData(null, filePrefix, fileSuffix);
 		}
 
-		if (directory.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
+		if (directory.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+			ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) directory;
+			IMethodBinding constructorBinding = classInstanceCreation.resolveConstructorBinding();
+			if (!newFileFromPath.isEquivalentTo(constructorBinding)) {
+				return null;
+			}
+			Expression directoryPath = ASTNodeUtil
+				.convertToTypedList(classInstanceCreation.arguments(), Expression.class)
+				.get(0);
+			return new TransformationData(directoryPath, filePrefix, fileSuffix);
+		}
+
+		if (directory.getNodeType() == ASTNode.SIMPLE_NAME) {
+			return createTransformationData((SimpleName) directory, filePrefix, fileSuffix);
+		}
+
+		return null;
+	}
+
+	private TransformationData createTransformationData(SimpleName directoryName, Expression filePrefix,
+			Expression fileSuffix) {
+		CompilationUnit compilationUnit = ASTNodeUtil.getSpecificAncestor(directoryName, CompilationUnit.class);
+		IBinding fileVariableBinding = directoryName.resolveBinding();
+		if (fileVariableBinding.getKind() != IBinding.VARIABLE) {
 			return null;
 		}
-		ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) directory;
-		IMethodBinding constructorBinding = classInstanceCreation.resolveConstructorBinding();
-		if (!newFileFromPath.isEquivalentTo(constructorBinding)) {
+		ASTNode declarationNode = compilationUnit.findDeclaringNode(fileVariableBinding);
+		if (declarationNode == null) {
 			return null;
 		}
-		Expression directoryPath = ASTNodeUtil
-			.convertToTypedList(classInstanceCreation.arguments(), Expression.class)
-			.get(0);
+		if (declarationNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			return null;
+		}
+		if (declarationNode.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+			return null;
+		}
+		VariableDeclarationFragment localVariableDeclarationFragment = (VariableDeclarationFragment) declarationNode;
+		Expression initializer = localVariableDeclarationFragment.getInitializer();
+		if (initializer == null) {
+			return null;
+		}
+		if (initializer.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
+			return null;
+		}
+		LocalVariableUsagesASTVisitor usagesVisitor = new LocalVariableUsagesASTVisitor(directoryName);
+		Block block = ASTNodeUtil.getSpecificAncestor(localVariableDeclarationFragment, Block.class);
+		block.accept(usagesVisitor);
 
-		return new TransformationData(directoryPath, filePrefix, fileSuffix);
-
+		List<SimpleName> usages = usagesVisitor.getUsages();
+		for (SimpleName usage : usages) {
+			if (usage == directoryName) {
+				break;
+			}
+			if (usage.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+				return null;
+			}
+		}
+		return new TransformationData(directoryName, filePrefix, fileSuffix);
 	}
 
 	private void transform(MethodInvocation replacedCreateTempFileInvocation, TransformationData data) {
@@ -146,15 +198,24 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 		@SuppressWarnings("unchecked")
 		List<Expression> createTempFileArguments = createTempFileInvocation.arguments();
 		if (data.directoryPath != null) {
-
-			MethodInvocation pathsGetterInvocation = ast.newMethodInvocation();
-			pathsGetterInvocation.setName(ast.newSimpleName("get")); //$NON-NLS-1$
-			String typeNamePaths = findTypeNameForStaticMethodInvocation(PATHS_QUALIFIED_NAME);
-			pathsGetterInvocation.setExpression(ast.newName(typeNamePaths));
-			@SuppressWarnings("unchecked")
-			List<Expression> pathsGetterInvocationArguments = pathsGetterInvocation.arguments();
-			pathsGetterInvocationArguments.add((Expression) astRewrite.createCopyTarget(data.directoryPath));
-			createTempFileArguments.add((Expression) pathsGetterInvocation);
+			ITypeBinding directoryType = data.directoryPath.resolveTypeBinding();
+			if (directoryType.getQualifiedName()
+				.equals(STRING.getName())) {
+				MethodInvocation pathsGetterInvocation = ast.newMethodInvocation();
+				pathsGetterInvocation.setName(ast.newSimpleName("get")); //$NON-NLS-1$
+				String typeNamePaths = findTypeNameForStaticMethodInvocation(PATHS_QUALIFIED_NAME);
+				pathsGetterInvocation.setExpression(ast.newName(typeNamePaths));
+				@SuppressWarnings("unchecked")
+				List<Expression> pathsGetterInvocationArguments = pathsGetterInvocation.arguments();
+				pathsGetterInvocationArguments.add((Expression) astRewrite.createCopyTarget(data.directoryPath));
+				createTempFileArguments.add((Expression) pathsGetterInvocation);
+			} else {
+				// assumed that directoryPath is an instance of java.io.File
+				MethodInvocation toPathInvocation = ast.newMethodInvocation();
+				toPathInvocation.setName(ast.newSimpleName("toPath")); //$NON-NLS-1$
+				toPathInvocation.setExpression((Expression) astRewrite.createCopyTarget(data.directoryPath));
+				createTempFileArguments.add(toPathInvocation);
+			}
 		}
 		createTempFileArguments.add((Expression) astRewrite.createCopyTarget(data.filePrefix));
 		createTempFileArguments.add((Expression) astRewrite.createCopyTarget(data.fileSuffix));
