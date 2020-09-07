@@ -20,14 +20,12 @@ public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnit
 				"		try {\n" +
 				"			File file = File.createTempFile(\"prefix\", \"suffix\");\n" +
 				"		} catch (Exception e) {\n" +
-				"			e.printStackTrace();\n" +
 				"		}";
 
 		String expected = "" +
 				"		try {\n" +
 				"			File file = Files.createTempFile(\"prefix\", \"suffix\").toFile();\n" +
 				"		} catch (Exception e) {\n" +
-				"			e.printStackTrace();\n" +
 				"		}";
 		assertChange(original, expected);
 	}
@@ -39,13 +37,11 @@ public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnit
 				"		try {\n" +
 				"			File file = File.createTempFile(\"prefix\", \"suffix\", null);\n" +
 				"		} catch (Exception e) {\n" +
-				"			e.printStackTrace();\n" +
 				"		}";
 		String expected = "" +
 				"		try {\n" +
 				"			File file = Files.createTempFile(\"prefix\", \"suffix\").toFile();\n" +
 				"		} catch (Exception e) {\n" +
-				"			e.printStackTrace();\n" +
 				"		}";
 		assertChange(original, expected);
 	}
@@ -57,14 +53,12 @@ public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnit
 				"		try {\n" + 
 				"			File file = File.createTempFile(\"prefix\", \"suffix\", new File(\"/tmp/test/\"));\n" + 
 				"		} catch (Exception e) {\n" + 
-				"			e.printStackTrace();\n" + 
 				"		}";
 		String expected = "" +
 				"		class Paths {}\n" + 
 				"		try {\n" + 
 				"			File file = Files.createTempFile(java.nio.file.Paths.get(\"/tmp/test/\"), \"prefix\", \"suffix\").toFile();\n" + 
 				"		} catch (Exception e) {\n" + 
-				"			e.printStackTrace();\n" + 
 				"		}";
 		assertChange(original, expected);
 	}
@@ -76,14 +70,12 @@ public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnit
 				"		try {\n" + 
 				"			File file = File.createTempFile(\"prefix\", \"suffix\");\n" + 
 				"		} catch (Exception e) {\n" + 
-				"			e.printStackTrace();\n" + 
 				"		}";
 		String expected = "" +
 				"		class Files {}\n" + 
 				"		try {\n" + 
 				"			File file = java.nio.file.Files.createTempFile(\"prefix\", \"suffix\").toFile();\n" + 
 				"		} catch (Exception e) {\n" + 
-				"			e.printStackTrace();\n" + 
 				"		}";
 		assertChange(original, expected);
 	}
@@ -95,14 +87,12 @@ public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnit
 				"		try {\n" +
 				"			File file = File.createTempFile(\"prefix\", \"suffix\", new File(\"/tmp/test/\"));\n" +
 				"		} catch (Exception e) {\n" +
-				"			e.printStackTrace();\n" +
 				"		}";
 		String expected = "" +
 				"		try {\n" +
 				"			File file = Files.createTempFile(Paths.get(\"/tmp/test/\"), \"prefix\", \"suffix\").toFile();\n"
 				+
 				"		} catch (Exception e) {\n" +
-				"			e.printStackTrace();\n" +
 				"		}";
 		assertChange(original, expected);
 	}
@@ -114,29 +104,14 @@ public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnit
 				"		try {\n" +
 				"			File file = File.createTempFile(\"prefix\", \"suffix\", new File(\"/tmp/test/\"));\n" +
 				"		} catch (Exception e) {\n" +
-				"			e.printStackTrace();\n" +
 				"		}";
 		String expected = "" +
 				"		try {\n" +
 				"			File file = Files.createTempFile(Paths.get(\"/tmp/test/\"), \"prefix\", \"suffix\").toFile();\n"
 				+
 				"		} catch (Exception e) {\n" +
-				"			e.printStackTrace();\n" +
 				"		}";
 		assertChange(original, expected);
-	}
-
-	@Test
-	public void visit_CreateTempFileWithNewFileAsDirectory_shouldNotTransform() throws Exception {
-
-		String original = "" +
-				"		try {\n" +
-				"			File file = File.createTempFile(\"prefix\", \"suffix\", new File(new File(\"test/\"), \"/tmp/\"));\n"
-				+
-				"		} catch (Exception e) {\n" +
-				"			e.printStackTrace();\n" +
-				"		}";
-		assertNoChange(original);
 	}
 
 	@Test
@@ -147,7 +122,6 @@ public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnit
 				"			File directory = new File(\"/tmp/test/\");\n" +
 				"			File file = File.createTempFile(\"prefix\", \"suffix\", directory);\n" +
 				"		} catch (Exception e) {\n" +
-				"			e.printStackTrace();\n" +
 				"		}";
 
 		String expected = "" +
@@ -155,25 +129,8 @@ public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnit
 				"			File directory = new File(\"/tmp/test/\");\n" +
 				"			File file=Files.createTempFile(directory.toPath(),\"prefix\",\"suffix\").toFile();\n" +
 				"		} catch (Exception e) {\n" +
-				"			e.printStackTrace();\n" +
 				"		}";
 		
 		assertChange(original, expected);
 	}
-	
-	@Test
-	public void visit_CreateTempFileWithNotInitializedVariableAsDirectory_shouldNotTransform() throws Exception {
-
-		String original = "" +
-				"		try {\n" +
-				"			File directory;\n" +				
-				"			directory = new File(\"/tmp/test/\");\n" +
-				"			File file = File.createTempFile(\"prefix\", \"suffix\", directory);\n" +
-				"		} catch (Exception e) {\n" +
-				"			e.printStackTrace();\n" +
-				"		}";
-	
-		assertNoChange(original);
-	}
-
 }
