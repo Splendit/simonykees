@@ -16,51 +16,43 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class NewBufferedReaderAnalyzer {
-	
-	private VariableDeclarationExpression newBufferedReader;
+
 	private Expression initializer;
-	
-	public NewBufferedReaderAnalyzer(VariableDeclarationExpression newBufferedReader) {
-		this.newBufferedReader = newBufferedReader;
-	}
-	
-	private boolean isBufferedReaderInstanceCreation() {
-		Type type = this.newBufferedReader.getType();
+
+	public boolean isInitializedWith(VariableDeclarationExpression newBufferedReader, SimpleName fileReaderName) {
+		Type type = newBufferedReader.getType();
 		ITypeBinding typeBinding = type.resolveBinding();
-		return ClassRelationUtil.isContentOfType(typeBinding, java.io.BufferedReader.class.getName());
-	}
-	
-	public boolean isInitializedWith(SimpleName fileReaderName) {
-		if(!isBufferedReaderInstanceCreation()) {
+		if (!ClassRelationUtil.isContentOfType(typeBinding, java.io.BufferedReader.class.getName())) {
 			return false;
 		}
-		
-		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(newBufferedReader.fragments(), VariableDeclarationFragment.class);
-		if(fragments.size() != 1) {
+
+		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(newBufferedReader.fragments(),
+				VariableDeclarationFragment.class);
+		if (fragments.size() != 1) {
 			return false;
 		}
 		VariableDeclarationFragment fragment = fragments.get(0);
-		Expression initializer = fragment.getInitializer();
-		if(initializer == null)  {
+		Expression bufferedReaderInitializer = fragment.getInitializer();
+		if (bufferedReaderInitializer == null) {
 			return false;
 		}
-		this.initializer = initializer;
-		
-		if(initializer.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
+		this.initializer = bufferedReaderInitializer;
+
+		if (bufferedReaderInitializer.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
 			return false;
 		}
-		ClassInstanceCreation instanceCreation = (ClassInstanceCreation)initializer;
+		ClassInstanceCreation instanceCreation = (ClassInstanceCreation) bufferedReaderInitializer;
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(instanceCreation.arguments(), Expression.class);
-		if(arguments.size() != 1) {
+		if (arguments.size() != 1) {
 			return false;
 		}
-		
+
 		Expression argument = arguments.get(0);
-		if(argument.getNodeType() != ASTNode.SIMPLE_NAME) {
+		if (argument.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return false;
 		}
-		
-		SimpleName argumentName = (SimpleName)argument;
+
+		SimpleName argumentName = (SimpleName) argument;
 		ASTMatcher matcher = new ASTMatcher();
 		return matcher.match(fileReaderName, argumentName);
 	}

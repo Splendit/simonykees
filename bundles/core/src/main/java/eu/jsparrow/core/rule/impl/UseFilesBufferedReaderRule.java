@@ -15,7 +15,7 @@ public class UseFilesBufferedReaderRule extends RefactoringRuleImpl<UseFilesBuff
 	public UseFilesBufferedReaderRule() {
 		this.id = "UseFilesBufferedReader"; //$NON-NLS-1$
 		this.visitorClass = UseFilesBufferedReaderASTVisitor.class;
-		this.ruleDescription = new RuleDescription("Use Files Buffered Reader",
+		this.ruleDescription = new RuleDescription("Use Files.newBufferedReader",
 				"", Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_8, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
 	}

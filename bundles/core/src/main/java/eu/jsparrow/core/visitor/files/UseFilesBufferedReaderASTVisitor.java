@@ -81,8 +81,8 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 		}
 		SimpleName fileReaderName = fileReaderAnalyzer.getFileReaderName();
 
-		NewBufferedReaderAnalyzer bufferedReaderAnalyzer = new NewBufferedReaderAnalyzer(resources.get(1));
-		boolean validBufferedReader = bufferedReaderAnalyzer.isInitializedWith(fileReaderName);
+		NewBufferedReaderAnalyzer bufferedReaderAnalyzer = new NewBufferedReaderAnalyzer();
+		boolean validBufferedReader = bufferedReaderAnalyzer.isInitializedWith(resources.get(1), fileReaderName);
 		if (!validBufferedReader) {
 			return false;
 		}
