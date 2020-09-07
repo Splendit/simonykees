@@ -9,14 +9,17 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
@@ -114,6 +117,48 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 		astRewrite.remove(resources.get(0), null);
 		Expression initializer = bufferedReaderAnalyzer.getInitializer();
 		astRewrite.replace(initializer, filesNewBufferedReader, null);
+		return true;
+	}
+	
+	@Override
+	public boolean  visit(VariableDeclarationFragment fragment) {
+		if(fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
+			return true;
+		}
+		SimpleName name = fragment.getName();
+		ITypeBinding typeBinding = name.resolveTypeBinding();
+		if(!ClassRelationUtil.isContentOfType(typeBinding, java.io.BufferedReader.class.getName())) {
+			return true;
+		}
+		
+		NewBufferedReaderAnalyzer analyzer = new NewBufferedReaderAnalyzer();
+		if(!analyzer.isInitializedWithNewReader(fragment)) {
+			return true;
+		}
+		
+		
+		AST ast = fragment.getAST();
+		MethodInvocation pathsGet = ast.newMethodInvocation();
+		String pathsIdentifier = findTypeNameForStaticMethodInvocation(PATHS_QUALIFIED_NAME);
+		pathsGet.setExpression(ast.newName(pathsIdentifier));
+		pathsGet.setName(ast.newSimpleName("get")); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Expression> pathsGetParameters = pathsGet.arguments();
+		List<Expression> pathExpressions = analyzer.getPathExpressions();
+		pathExpressions.forEach(pathArgument -> pathsGetParameters.add((Expression)astRewrite.createCopyTarget(pathArgument)));
+
+		Expression charset = analyzer.getCharset()
+				.map(exp -> (Expression)astRewrite.createCopyTarget(exp))
+				.orElse(createDefaultCharsetExpression(ast));
+		List<Expression> arguments = new ArrayList<>();
+		arguments.add(pathsGet);
+		arguments.add(charset);
+		Expression filesExpression = ast.newName(findTypeNameForStaticMethodInvocation(FILES_QUALIFIED_NAME));
+		MethodInvocation filesNewBufferedReader = NodeBuilder.newMethodInvocation(ast, filesExpression,
+				ast.newSimpleName("newBufferedReader"), arguments); //$NON-NLS-1$
+		
+		astRewrite.replace(fragment.getInitializer(), filesNewBufferedReader, null);
+		
 		return true;
 	}
 

@@ -34,6 +34,37 @@ public class UseFilesBufferedReaderASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		assertChange(original, expected);
 	}
 	
+	@Test 
+	public void visit_initializingWithNewFileReaderNewFile_shouldTransform() throws Exception {
+		String original = "" +
+				"try (BufferedReader br = new BufferedReader(new FileReader(new File(\"path/to/file\")))) {\n" + 
+				"} catch (IOException e) {}";
+		String expected = "" +
+				"try (BufferedReader br = Files.newBufferedReader(Paths.get(\"path/to/file\"), Charset.defaultCharset())) {\n" + 
+				"} catch (IOException e) {}";
+		assertChange(original, expected);
+	}
 	
+	@Test 
+	public void visit_initializingWithNewFileReaderNewFileMultipleArgs_shouldTransform() throws Exception {
+		String original = "" +
+				"try (BufferedReader br = new BufferedReader(new FileReader(new File(\"path/to/parent\", \"path/to/child\")))) {\n" + 
+				"} catch (IOException e) {}";
+		String expected = "" +
+				"try (BufferedReader br = Files.newBufferedReader(Paths.get(\"path/to/file\", \"path/to/child\"), Charset.defaultCharset())) {\n" + 
+				"} catch (IOException e) {}";
+		assertChange(original, expected);
+	}
+
+	@Test 
+	public void visit_initializingWithNewFileReaderString_shouldTransform() throws Exception {
+		String original = "" +
+				"try (BufferedReader br = new BufferedReader(new FileReader(\"path/to/file\"))) {\n" + 
+				"} catch (IOException e) {}";
+		String expected = "" +
+				"try (BufferedReader br = Files.newBufferedReader(Paths.get(\"path/to/file\"), Charset.defaultCharset())) {\n" + 
+				"} catch (IOException e) {}";
+		assertChange(original, expected);
+	}
 
 }
