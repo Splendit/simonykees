@@ -1,5 +1,8 @@
 package eu.jsparrow.core.visitor.files;
 
+import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,20 +12,15 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
-import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
-import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
-
 public class FileReaderAnalyzer {
 
 	private VariableDeclarationExpression variableDeclaration;
-	private SimpleName fileReaderName;
 	private Expression charsetExpression;
 	private List<Expression> pathExpressions = new ArrayList<>();
 
@@ -44,7 +42,6 @@ public class FileReaderAnalyzer {
 			return false;
 		}
 		VariableDeclarationFragment fragment = fragments.get(0);
-		this.fileReaderName = fragment.getName();
 
 		Expression initialzier = fragment.getInitializer();
 		if (initialzier == null || initialzier.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
@@ -95,10 +92,6 @@ public class FileReaderAnalyzer {
 
 	public Optional<Expression> getCharset() {
 		return Optional.ofNullable(charsetExpression);
-	}
-
-	public SimpleName getFileReaderName() {
-		return this.fileReaderName;
 	}
 
 	public List<Expression> getPathExpressions() {

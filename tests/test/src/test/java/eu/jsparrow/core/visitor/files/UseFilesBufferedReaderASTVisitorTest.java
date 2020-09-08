@@ -68,5 +68,68 @@ public class UseFilesBufferedReaderASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"} catch (IOException e) {}";
 		assertChange(original, expected);
 	}
-
+	
+	@Test 
+	public void visit_missingInitializer_shouldNotTransform() throws Exception {
+		String original = "BufferedReader br;";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_methodInvocationInitializer_shouldNotTransform() throws Exception {
+		fixture.addImport(java.nio.file.Files.class.getName());
+		fixture.addImport(java.nio.file.Paths.class.getName());
+		String original = "" + 
+			"try {\n" + 
+			"	BufferedReader br = Files.newBufferedReader(Paths.get(\"path/to/file\"));\n" + 
+			"} catch (IOException e) {}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_multipleArguments_shouldNotTransform() throws Exception {
+		String original = "" + 
+			"try {\n" + 
+			"	BufferedReader br = new BufferedReader(new FileReader(\"path/to/file\"), 100);\n" + 
+			"} catch (IOException e) {}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_missingFileReader_shouldNotTransform() throws Exception {
+		fixture.addImport(java.io.InputStreamReader.class.getName());
+		String original = "" + 
+			"BufferedReader br = new BufferedReader(new InputStreamReader(null));";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_fileReaderDeclaredBeforeTWR_shouldNotTransform() throws Exception {
+		String original = "" + 
+			"try {\n" + 
+			"	FileReader fileReader = new FileReader(\"path/to/file\");\n" + 
+			"	try(BufferedReader br = new BufferedReader(fileReader)) {\n" + 
+			"	} catch (IOException e) {}\n" + 
+			"} catch (FileNotFoundException e1) {}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_missingFileReaderInitializer_shouldNotTransform() throws Exception {
+		String original = "" + 
+			"try(FileReader fileReader = null;\n" + 
+			"	BufferedReader br = new BufferedReader(fileReader)) {\n" + 
+			"} catch (IOException e) {}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_reuseFileReaderInTryBlock_shouldNotTransform() throws Exception {
+		String original = "" + 
+			"try(FileReader fileReader = new FileReader(new File(\"path/to/file\"));\n" + 
+			"		BufferedReader br = new BufferedReader(fileReader)) {\n" + 
+			"	System.out.println(fileReader.getEncoding());\n" + 
+			"} catch (IOException e) {}";
+		assertNoChange(original);
+	}
 }
