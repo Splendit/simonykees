@@ -35,6 +35,24 @@ public class UseFilesBufferedReaderASTVisitorTest extends UsesSimpleJDTUnitFixtu
 	}
 	
 	@Test 
+	public void visit_fileReaderInitializedWithString_shouldTransform() throws Exception {
+		String original = "" +
+				"try (FileReader reader = new FileReader(\"path/to/file\");\n" + 
+				"        BufferedReader br = new BufferedReader(reader)) {\n" + 
+				"\n" + 
+				"} catch (IOException e) {\n" + 
+				"   e.printStackTrace();\n" + 
+				"}";
+		String expected = "" +
+				"try (BufferedReader br = Files.newBufferedReader(Paths.get(\"path/to/file\"), Charset.defaultCharset())) {\n" + 
+				"\n" + 
+				"} catch (IOException e) {\n" + 
+				"   e.printStackTrace();\n" + 
+				"}";
+		assertChange(original, expected);
+	}
+	
+	@Test 
 	public void visit_initializingWithNewFileReaderNewFile_shouldTransform() throws Exception {
 		String original = "" +
 				"try {\n" +

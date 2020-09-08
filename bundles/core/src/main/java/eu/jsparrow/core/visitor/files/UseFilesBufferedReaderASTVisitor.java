@@ -119,6 +119,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 					charset);
 
 			astRewrite.replace(initializer, filesNewBufferedReader, null);
+			onRewrite();
 		} else if (isDeclarationInTWRHeader(fragment, bufferedReaderArg)) {
 				VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment
 					.getParent();
@@ -151,9 +152,8 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 						pathArguments, charset);
 				astRewrite.remove(fileReaderResource.getParent(), null);
 				astRewrite.replace(initializer, filesNewBufferedReader, null);
-
+				onRewrite();
 		}
-
 		return true;
 	}
 

@@ -55,7 +55,7 @@ public class FileReaderAnalyzer {
 			return false;
 		}
 		Expression file = arguments.get(0);
-		if (!isFileInstanceCreation(file)) {
+		if (!isFileInstanceCreation(file) && !isStringExpression(file)) {
 			return false;
 		}
 
@@ -72,6 +72,16 @@ public class FileReaderAnalyzer {
 		return true;
 	}
 
+	private boolean isStringExpression(Expression expression) {
+		ITypeBinding typeBinding = expression.resolveTypeBinding();
+		boolean isString = ClassRelationUtil.isContentOfType(typeBinding, java.lang.String.class.getName());
+		if(isString) {
+			this.pathExpressions = new ArrayList<>();
+			this.pathExpressions.add(expression);
+		}
+		return isString;
+	}
+
 	private boolean isFileInstanceCreation(Expression expression) {
 		ITypeBinding typeBinding = expression.resolveTypeBinding();
 		if (isContentOfType(typeBinding, java.io.FileReader.class.getName())) {
@@ -82,12 +92,15 @@ public class FileReaderAnalyzer {
 		}
 
 		ClassInstanceCreation fileInstanceCreation = (ClassInstanceCreation) expression;
-		this.pathExpressions = new ArrayList<>();
 		List<Expression> arguments = convertToTypedList(fileInstanceCreation.arguments(), Expression.class);
-		this.pathExpressions.addAll(arguments);
-		return arguments
-				.stream()
-				.allMatch(argument -> isContentOfType(argument.resolveTypeBinding(), java.lang.String.class.getName()));
+		boolean allStrings =  arguments
+			.stream()
+			.allMatch(argument -> isContentOfType(argument.resolveTypeBinding(), java.lang.String.class.getName()));
+		if(allStrings) {
+			this.pathExpressions = new ArrayList<>();
+			this.pathExpressions.addAll(arguments);
+		}
+		return allStrings;
 	}
 
 	public Optional<Expression> getCharset() {
