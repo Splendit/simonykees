@@ -34,7 +34,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  * and replaces them by invocations of the corresponding methods of the class
  * {@link java.nio.file.Files}.
  * 
- * @since 3.22.0
+ * @since 3.21.0
  *
  */
 public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTVisitor {

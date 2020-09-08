@@ -14,7 +14,7 @@ import eu.jsparrow.rules.common.Tag;
 /**
  * @see CreateTempFilesUsingJavaNioASTVisitor
  * 
- * @since 3.22.0
+ * @since 3.21.0
  *
  */
 public class CreateTempFilesUsingJavaNioRule
