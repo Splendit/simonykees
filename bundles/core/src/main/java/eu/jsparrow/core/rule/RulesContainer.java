@@ -92,6 +92,7 @@ import eu.jsparrow.core.rule.impl.UseOffsetBasedStringMethodsRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedJPAQueryRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedLDAPQueryRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedQueryRule;
+import eu.jsparrow.core.rule.impl.UsePredefinedStandardCharsetRule;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.UseStringJoinRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
@@ -201,6 +202,11 @@ public class RulesContainer {
 				 * StringBuildingLoopRule.
 				 */
 				new UseStringBuilderAppendRule(), new UseStringJoinRule(),
+
+				/*
+				 * Performance
+				 */
+				new UsePredefinedStandardCharsetRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen
