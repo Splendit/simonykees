@@ -49,40 +49,42 @@ public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnit
 	@Test
 	public void visit_PathsCannotBeImported_shouldTransform() throws Exception {
 		String original = "" +
-				"		class Paths {}\n" + 
-				"		try {\n" + 
-				"			File file = File.createTempFile(\"prefix\", \"suffix\", new File(\"/tmp/test/\"));\n" + 
-				"		} catch (Exception e) {\n" + 
+				"		class Paths {}\n" +
+				"		try {\n" +
+				"			File file = File.createTempFile(\"prefix\", \"suffix\", new File(\"/tmp/test/\"));\n" +
+				"		} catch (Exception e) {\n" +
 				"		}";
 		String expected = "" +
-				"		class Paths {}\n" + 
-				"		try {\n" + 
-				"			File file = Files.createTempFile(java.nio.file.Paths.get(\"/tmp/test/\"), \"prefix\", \"suffix\").toFile();\n" + 
-				"		} catch (Exception e) {\n" + 
+				"		class Paths {}\n" +
+				"		try {\n" +
+				"			File file = Files.createTempFile(java.nio.file.Paths.get(\"/tmp/test/\"), \"prefix\", \"suffix\").toFile();\n"
+				+
+				"		} catch (Exception e) {\n" +
 				"		}";
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_FilesCannotBeImported_shouldTransform() throws Exception {
 		String original = "" +
-				"		class Files {}\n" + 
-				"		try {\n" + 
-				"			File file = File.createTempFile(\"prefix\", \"suffix\");\n" + 
-				"		} catch (Exception e) {\n" + 
+				"		class Files {}\n" +
+				"		try {\n" +
+				"			File file = File.createTempFile(\"prefix\", \"suffix\");\n" +
+				"		} catch (Exception e) {\n" +
 				"		}";
 		String expected = "" +
-				"		class Files {}\n" + 
-				"		try {\n" + 
-				"			File file = java.nio.file.Files.createTempFile(\"prefix\", \"suffix\").toFile();\n" + 
-				"		} catch (Exception e) {\n" + 
+				"		class Files {}\n" +
+				"		try {\n" +
+				"			File file = java.nio.file.Files.createTempFile(\"prefix\", \"suffix\").toFile();\n" +
+				"		} catch (Exception e) {\n" +
 				"		}";
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_FilesAndPathsImportedOnDemand_shouldTransform() throws Exception {
-		fixture.addImport(java.nio.file.Files.class.getPackage().getName(), false, true);		
+		fixture.addImport(java.nio.file.Files.class.getPackage()
+			.getName(), false, true);
 		String original = "" +
 				"		try {\n" +
 				"			File file = File.createTempFile(\"prefix\", \"suffix\", new File(\"/tmp/test/\"));\n" +
@@ -130,7 +132,28 @@ public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnit
 				"			File file=Files.createTempFile(directory.toPath(),\"prefix\",\"suffix\").toFile();\n" +
 				"		} catch (Exception e) {\n" +
 				"		}";
-		
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_DirectoryAssignedToNullAfterUsage_shouldTransform() throws Exception {
+		String original = "" +
+				"		try {\n" +
+				"			File directory = new File(\"/tmp/test/\");\n" +
+				"			File file = File.createTempFile(\"prefix\", \"suffix\", directory);\n" +
+				"			directory = null;\n" +
+				"		} catch (Exception e) {\n" +
+				"		}";
+
+		String expected = "" +
+				"		try {\n" +
+				"			File directory = new File(\"/tmp/test/\");\n" +
+				"			File file=Files.createTempFile(directory.toPath(),\"prefix\",\"suffix\").toFile();\n" +
+				"			directory = null;\n" +
+				"		} catch (Exception e) {\n" +
+				"		}";
+
 		assertChange(original, expected);
 	}
 }
