@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -41,151 +42,159 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 
 		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
 				ImportDeclaration.class);
-		//TODO: push this functionality up.
+		// TODO: push this functionality up.
 		if (isSafeToAddImport(compilationUnit, PATHS_QUALIFIED_NAME)) {
 			safeImports.add(PATHS_QUALIFIED_NAME);
 			if (matchesTypeImportOnDemand(importDeclarations, PATHS_QUALIFIED_NAME)) {
 				typesImportedOnDemand.add(PATHS_QUALIFIED_NAME);
 			}
 		}
-		
-		if(isSafeToAddImport(compilationUnit, FILES_QUALIFIED_NAME)) {
+
+		if (isSafeToAddImport(compilationUnit, FILES_QUALIFIED_NAME)) {
 			safeImports.add(FILES_QUALIFIED_NAME);
-			if(matchesTypeImportOnDemand(importDeclarations, FILES_QUALIFIED_NAME)) {
+			if (matchesTypeImportOnDemand(importDeclarations, FILES_QUALIFIED_NAME)) {
 				typesImportedOnDemand.add(FILES_QUALIFIED_NAME);
 			}
 		}
-		
-		if(isSafeToAddImport(compilationUnit, CHARSET_QUALIFIED_NAME)) {
+
+		if (isSafeToAddImport(compilationUnit, CHARSET_QUALIFIED_NAME)) {
 			safeImports.add(CHARSET_QUALIFIED_NAME);
-			if(matchesTypeImportOnDemand(importDeclarations, CHARSET_QUALIFIED_NAME)) {
+			if (matchesTypeImportOnDemand(importDeclarations, CHARSET_QUALIFIED_NAME)) {
 				typesImportedOnDemand.add(CHARSET_QUALIFIED_NAME);
 			}
 		}
 
 		return continueVisiting;
 	}
-	
+
 	@Override
 	public void endVisit(CompilationUnit compilationUnit) {
 		super.endVisit(compilationUnit);
 		safeImports.clear();
 		typesImportedOnDemand.clear();
 	}
-	
+
 	@Override
-	public boolean  visit(VariableDeclarationFragment fragment) {
-		
+	public boolean visit(VariableDeclarationFragment fragment) {
+
 		SimpleName name = fragment.getName();
 		ITypeBinding typeBinding = name.resolveTypeBinding();
-		if(!ClassRelationUtil.isContentOfType(typeBinding, BUFFERED_READER_QUALIFIED_NAME)) {
+		if (!ClassRelationUtil.isContentOfType(typeBinding, BUFFERED_READER_QUALIFIED_NAME)) {
 			return true;
 		}
-		
+
 		Expression initializer = fragment.getInitializer();
-		if(initializer == null || initializer.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
+		if (initializer == null || initializer.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
 			return true;
 		}
 		ITypeBinding initializerType = initializer.resolveTypeBinding();
-		if(!ClassRelationUtil.isContentOfType(initializerType, BUFFERED_READER_QUALIFIED_NAME)) {
+		if (!ClassRelationUtil.isContentOfType(initializerType, BUFFERED_READER_QUALIFIED_NAME)) {
 			return true;
 		}
-		ClassInstanceCreation newBufferedReader = (ClassInstanceCreation)initializer;
-		List<Expression> newBufferedReaderArgs = ASTNodeUtil.convertToTypedList(newBufferedReader.arguments(), Expression.class);
-		if(newBufferedReaderArgs.size() != 1) {
+		ClassInstanceCreation newBufferedReader = (ClassInstanceCreation) initializer;
+		List<Expression> newBufferedReaderArgs = ASTNodeUtil.convertToTypedList(newBufferedReader.arguments(),
+				Expression.class);
+		if (newBufferedReaderArgs.size() != 1) {
 			return true;
 		}
-		
+
 		Expression bufferedReaderArg = newBufferedReaderArgs.get(0);
 		ITypeBinding firstArgType = bufferedReaderArg.resolveTypeBinding();
-		if(!ClassRelationUtil.isContentOfType(firstArgType, java.io.FileReader.class.getName())) {
+		if (!ClassRelationUtil.isContentOfType(firstArgType, java.io.FileReader.class.getName())) {
 			return true;
 		}
-		
+
 		NewBufferedReaderAnalyzer analyzer = new NewBufferedReaderAnalyzer();
-		if(bufferedReaderArg.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-			boolean feasible = analyzer.isInitializedWithNewReader((ClassInstanceCreation)bufferedReaderArg);
-			if(!feasible) {
-				return true;
-			}
+		if (bufferedReaderArg.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION 
+				&& analyzer.isInitializedWithNewReader((ClassInstanceCreation) bufferedReaderArg)) {
+
+
 			AST ast = fragment.getAST();
-			MethodInvocation pathsGet = ast.newMethodInvocation();
-			String pathsIdentifier = findTypeNameForStaticMethodInvocation(PATHS_QUALIFIED_NAME);
-			pathsGet.setExpression(ast.newName(pathsIdentifier));
-			pathsGet.setName(ast.newSimpleName("get")); //$NON-NLS-1$
-			@SuppressWarnings("unchecked")
-			List<Expression> pathsGetParameters = pathsGet.arguments();
 			List<Expression> pathExpressions = analyzer.getPathExpressions();
-			pathExpressions.forEach(pathArgument -> pathsGetParameters.add((Expression)astRewrite.createCopyTarget(pathArgument)));
-
 			Expression charset = analyzer.getCharset()
-					.map(exp -> (Expression)astRewrite.createCopyTarget(exp))
-					.orElse(createDefaultCharsetExpression(ast));
-			List<Expression> arguments = new ArrayList<>();
-			arguments.add(pathsGet);
-			arguments.add(charset);
-			Expression filesExpression = ast.newName(findTypeNameForStaticMethodInvocation(FILES_QUALIFIED_NAME));
-			MethodInvocation filesNewBufferedReader = NodeBuilder.newMethodInvocation(ast, filesExpression,
-					ast.newSimpleName("newBufferedReader"), arguments); //$NON-NLS-1$
-			
-			astRewrite.replace(fragment.getInitializer(), filesNewBufferedReader, null);
-		} else if(bufferedReaderArg.getNodeType() == ASTNode.SIMPLE_NAME) {
-			if(fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
-				VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment.getParent();
-				if(declarationExpression.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
-					TryStatement tryStatement = (TryStatement)declarationExpression.getParent();
-					List<VariableDeclarationExpression> resources = ASTNodeUtil.convertToTypedList(tryStatement.resources(), VariableDeclarationExpression.class);
-					VariableDeclarationFragment fileReaderResource = resources.stream()
-						.flatMap(resource -> 
-							ASTNodeUtil
-								.convertToTypedList(resource.fragments(), VariableDeclarationFragment.class)
-								.stream())
-						.filter(resource -> resource.getName().getIdentifier().equals(((SimpleName)bufferedReaderArg).getIdentifier()))
-						.findFirst()
-						.orElse(null);
-					if(fileReaderResource != null) {
-						FileReaderAnalyzer fileReaderAnalyzer = new FileReaderAnalyzer((VariableDeclarationExpression)fileReaderResource.getParent());
-						if (!fileReaderAnalyzer.isFileReaderDeclaration()) {
-							return false;
-						}
-						
-						boolean isUsedInTryBody = hasUsagesOn(tryStatement.getBody(), fileReaderResource.getName());
-						if (isUsedInTryBody) {
-							return false;
-						}
+				.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
+				.orElse(createDefaultCharsetExpression(ast));
 
-						// Now the transformation happens
-						AST ast = tryStatement.getAST();
-						Expression pathArgument = fileReaderAnalyzer.getPathExpression();
-						MethodInvocation pathsGet = ast.newMethodInvocation();
-						String pathsIdentifier = findTypeNameForStaticMethodInvocation(PATHS_QUALIFIED_NAME);
-						pathsGet.setExpression(ast.newName(pathsIdentifier));
-						pathsGet.setName(ast.newSimpleName("get")); //$NON-NLS-1$
-						@SuppressWarnings("unchecked")
-						List<Expression> pathsGetParameters = pathsGet.arguments();
-						pathsGetParameters.add((Expression)astRewrite.createCopyTarget(pathArgument));
-						Expression charset = fileReaderAnalyzer.getCharset()
-								.map(exp -> (Expression)astRewrite.createCopyTarget(exp))
-								.orElse(createDefaultCharsetExpression(ast));
-						List<Expression> arguments = new ArrayList<>();
-						arguments.add(pathsGet);
-						arguments.add(charset);
-						Expression filesExpression = ast.newName(findTypeNameForStaticMethodInvocation(FILES_QUALIFIED_NAME));
-						MethodInvocation filesNewBufferedReader = NodeBuilder.newMethodInvocation(ast, filesExpression,
-								ast.newSimpleName("newBufferedReader"), arguments); //$NON-NLS-1$
-						astRewrite.remove(resources.get(0), null);
+			MethodInvocation filesNewBufferedReader = createFilesNewBufferedReaderExpression(ast, pathExpressions,
+					charset);
 
-						astRewrite.replace(initializer, filesNewBufferedReader, null);
-						
-						
-					}
-						
-					
+			astRewrite.replace(initializer, filesNewBufferedReader, null);
+		} else if (isDeclarationInTWRHeader(fragment, bufferedReaderArg)) {
+				VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment
+					.getParent();
+				TryStatement tryStatement = (TryStatement) declarationExpression.getParent();
+				VariableDeclarationFragment fileReaderResource = findFileReaderResource(bufferedReaderArg,
+						tryStatement).orElse(null);
+				if(fileReaderResource == null) {
+					return true;
 				}
-			}
+				
+				FileReaderAnalyzer fileReaderAnalyzer = new FileReaderAnalyzer(
+						(VariableDeclarationExpression) fileReaderResource.getParent());
+				if (!fileReaderAnalyzer.isFileReaderDeclaration()) {
+					return true;
+				}
+
+				boolean isUsedInTryBody = hasUsagesOn(tryStatement.getBody(), fileReaderResource.getName());
+				if (isUsedInTryBody) {
+					return true;
+				}
+
+				// Now the transformation happens
+				AST ast = tryStatement.getAST();
+				Expression charset = fileReaderAnalyzer.getCharset()
+					.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
+					.orElse(createDefaultCharsetExpression(ast));
+				List<Expression> pathArguments = fileReaderAnalyzer.getPathExpressions();
+
+				MethodInvocation filesNewBufferedReader = createFilesNewBufferedReaderExpression(ast,
+						pathArguments, charset);
+				astRewrite.remove(fileReaderResource.getParent(), null);
+				astRewrite.replace(initializer, filesNewBufferedReader, null);
+
 		}
-		
+
 		return true;
+	}
+
+	private boolean isDeclarationInTWRHeader(VariableDeclarationFragment fragment, Expression bufferedReaderArg) {
+		ASTNode fragmentParent = fragment.getParent();
+		return bufferedReaderArg.getNodeType() == ASTNode.SIMPLE_NAME 
+				&& fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
+				&& fragmentParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY;
+	}
+
+	private Optional<VariableDeclarationFragment> findFileReaderResource(Expression bufferedReaderArg,
+			TryStatement tryStatement) {
+		List<VariableDeclarationExpression> resources = ASTNodeUtil
+			.convertToTypedList(tryStatement.resources(), VariableDeclarationExpression.class);
+		return resources.stream()
+			.flatMap(resource -> ASTNodeUtil
+				.convertToTypedList(resource.fragments(), VariableDeclarationFragment.class)
+				.stream())
+			.filter(resource -> resource.getName()
+				.getIdentifier()
+				.equals(((SimpleName) bufferedReaderArg).getIdentifier()))
+			.findFirst();
+	}
+
+	private MethodInvocation createFilesNewBufferedReaderExpression(AST ast, List<Expression> pathExpressions,
+			Expression charset) {
+		MethodInvocation pathsGet = ast.newMethodInvocation();
+		String pathsIdentifier = findTypeNameForStaticMethodInvocation(PATHS_QUALIFIED_NAME);
+		pathsGet.setExpression(ast.newName(pathsIdentifier));
+		pathsGet.setName(ast.newSimpleName("get")); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Expression> pathsGetParameters = pathsGet.arguments();
+		pathExpressions
+			.forEach(pathArgument -> pathsGetParameters.add((Expression) astRewrite.createCopyTarget(pathArgument)));
+
+		List<Expression> arguments = new ArrayList<>();
+		arguments.add(pathsGet);
+		arguments.add(charset);
+		Expression filesExpression = ast.newName(findTypeNameForStaticMethodInvocation(FILES_QUALIFIED_NAME));
+		return NodeBuilder.newMethodInvocation(ast, filesExpression,
+				ast.newSimpleName("newBufferedReader"), arguments); //$NON-NLS-1$
 	}
 
 	private Expression createDefaultCharsetExpression(AST ast) {
@@ -201,7 +210,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 		List<SimpleName> usages = visitor.getUsages();
 		return !usages.isEmpty();
 	}
-	
+
 	private String findTypeNameForStaticMethodInvocation(String qualifiedName) {
 		if (!safeImports.contains(qualifiedName)) {
 			return qualifiedName;

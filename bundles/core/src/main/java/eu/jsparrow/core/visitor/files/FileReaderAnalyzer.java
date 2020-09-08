@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.files;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +23,8 @@ public class FileReaderAnalyzer {
 
 	private VariableDeclarationExpression variableDeclaration;
 	private SimpleName fileReaderName;
-	private Expression charset;
-	private Expression filePath;
+	private Expression charsetExpression;
+	private List<Expression> pathExpressions = new ArrayList<>();
 
 	public FileReaderAnalyzer(VariableDeclarationExpression variableDeclaration) {
 		this.variableDeclaration = variableDeclaration;
@@ -61,12 +62,11 @@ public class FileReaderAnalyzer {
 			return false;
 		}
 
-		// TODO: get the path of the file.
 		if (argumentSize == 2) {
 			Expression charset = arguments.get(1);
 			ITypeBinding charsetBinding = charset.resolveTypeBinding();
 			if (isContentOfType(charsetBinding, java.nio.charset.Charset.class.getName())) {
-				this.charset = charset;
+				this.charsetExpression = charset;
 			} else {
 				return false;
 			}
@@ -85,28 +85,24 @@ public class FileReaderAnalyzer {
 		}
 
 		ClassInstanceCreation fileInstanceCreation = (ClassInstanceCreation) expression;
+		this.pathExpressions = new ArrayList<>();
 		List<Expression> arguments = convertToTypedList(fileInstanceCreation.arguments(), Expression.class);
-		if (arguments.size() != 1) {
-			return false;
-		}
-		Expression argument = arguments.get(0);
-		ITypeBinding argumentTypeBinding = argument.resolveTypeBinding();
-		boolean isStringArgument = isContentOfType(argumentTypeBinding,
-				java.lang.String.class.getName());
-		this.filePath = argument;
-		return isStringArgument;
+		this.pathExpressions.addAll(arguments);
+		return arguments
+				.stream()
+				.allMatch(argument -> isContentOfType(argument.resolveTypeBinding(), java.lang.String.class.getName()));
 	}
 
 	public Optional<Expression> getCharset() {
-		return Optional.ofNullable(charset);
+		return Optional.ofNullable(charsetExpression);
 	}
 
 	public SimpleName getFileReaderName() {
 		return this.fileReaderName;
 	}
 
-	public Expression getPathExpression() {
-		return filePath;
+	public List<Expression> getPathExpressions() {
+		return pathExpressions;
 	}
 
 }
