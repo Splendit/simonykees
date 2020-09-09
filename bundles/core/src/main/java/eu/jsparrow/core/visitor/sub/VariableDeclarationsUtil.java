@@ -49,6 +49,27 @@ public class VariableDeclarationsUtil {
 		}
 		return (VariableDeclarationFragment) declarationNode;
 	}
+	
+	/**
+	 * 
+	 * @param variableName
+	 *            a variable name
+	 * @return If the specified {@link SimpleName} references a local variable
+	 *         declaration, then this method returns the corresponding
+	 *         {@link VariableDeclarationStatement}. Otherwise, null is returned.
+	 */
+	public static VariableDeclarationStatement findLocalVariableDeclarationStatement(SimpleName variableName) {
+		VariableDeclarationFragment variableDeclarationFragment = VariableDeclarationsUtil
+			.findVariableDeclarationFragment(variableName);
+		if (variableDeclarationFragment == null) {
+			return null;
+		}
+		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+			return null;
+		}
+		return (VariableDeclarationStatement) variableDeclarationFragment.getParent();
+	}
+
 
 	/**
 	 * @return If the given {@link VariableDeclarationFragment} declares a local
