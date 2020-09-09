@@ -180,7 +180,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		}
 
 		DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
-		Expression initializer = VariableDeclarationsUtil.findInitializationAtDeclaration(variableDeclarationFragment);
+		Expression initializer = VariableDeclarationsUtil.findInitializer(variableDeclarationFragment);
 		if (initializer != null) {
 			componentStore.storeComponents(initializer);
 		}

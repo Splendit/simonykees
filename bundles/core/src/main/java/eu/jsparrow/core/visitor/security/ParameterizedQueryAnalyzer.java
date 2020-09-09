@@ -69,7 +69,7 @@ public class ParameterizedQueryAnalyzer {
 			List<Block> scopeOfVariableUsage) {
 
 		DynamicQueryComponentsStore componentStore = new DynamicQueryComponentsStore();
-		Expression initializer = VariableDeclarationsUtil.findInitializationAtDeclaration(variableDeclarationFragment);
+		Expression initializer = VariableDeclarationsUtil.findInitializer(variableDeclarationFragment);
 		if (initializer != null) {
 			componentStore.storeComponents(initializer);
 		}
@@ -77,7 +77,7 @@ public class ParameterizedQueryAnalyzer {
 			if (!checkAssignmentAncestors(assignment, scopeOfVariableUsage)) {
 				return null;
 			}
-			
+
 			Operator assignmentOperator = assignment.getOperator();
 			if (assignmentOperator == Assignment.Operator.PLUS_ASSIGN && initializer != null) {
 				componentStore.storeComponents(assignment.getRightHandSide());
@@ -127,15 +127,18 @@ public class ParameterizedQueryAnalyzer {
 	 */
 	public DynamicQueryComponentsStore analyze() {
 
-		VariableDeclarationFragment variableDeclarationFragment = VariableDeclarationsUtil.findVariableDeclarationFragment(simpleNameAtUsage);
+		VariableDeclarationFragment variableDeclarationFragment = VariableDeclarationsUtil
+			.findVariableDeclarationFragment(simpleNameAtUsage);
 		if (variableDeclarationFragment == null) {
 			return null;
 		}
-		Block blockAroundLocalDeclarationFragment = VariableDeclarationsUtil.findBlockSurroundingDeclaration(variableDeclarationFragment);
+		Block blockAroundLocalDeclarationFragment = VariableDeclarationsUtil
+			.findBlockSurroundingDeclaration(variableDeclarationFragment);
 		if (blockAroundLocalDeclarationFragment == null) {
 			return null;
 		}
-		List<Block> scopeOfVariableUsage = VariableDeclarationsUtil.findScopeOfVariableUsage(blockAroundLocalDeclarationFragment, simpleNameAtUsage);
+		List<Block> scopeOfVariableUsage = VariableDeclarationsUtil
+			.findScopeOfVariableUsage(blockAroundLocalDeclarationFragment, simpleNameAtUsage);
 		if (scopeOfVariableUsage.isEmpty()) {
 			return null;
 		}

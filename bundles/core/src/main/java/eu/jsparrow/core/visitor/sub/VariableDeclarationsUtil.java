@@ -32,6 +32,7 @@ public class VariableDeclarationsUtil {
 	/**
 	 * 
 	 * @param variableName
+	 *            a variable name
 	 * @return If the specified {@link SimpleName} references a variable
 	 *         declaration, then this method returns the corresponding
 	 *         {@link VariableDeclarationFragment}. Otherwise, null is returned.
@@ -67,8 +68,8 @@ public class VariableDeclarationsUtil {
 	}
 
 	/**
-	 * Collects all blocks which belong to the scope of a given variable
-	 * referencing a local variable.
+	 * Collects all the parent blocks until the declaration of the specified
+	 * variable is reached.
 	 * 
 	 * 
 	 * @param blockOfDeclarationFragment
@@ -76,6 +77,7 @@ public class VariableDeclarationsUtil {
 	 *            referenced by the {@link SimpleName} specified by the second
 	 *            parameter.
 	 * @param variableName
+	 *            the variable name to find the scope for.
 	 * @return A list of {@link Block} instances belonging to the scope of the
 	 *         specified variable name, with the {@link Block} surrounding the
 	 *         variable name as first element and the {@link Block} where the
@@ -104,7 +106,7 @@ public class VariableDeclarationsUtil {
 	 *         found which is not the {@link ASTNode#NULL_LITERAL}. Otherwise,
 	 *         null is returned.
 	 */
-	public static Expression findInitializationAtDeclaration(VariableDeclarationFragment variableDeclarationFragment) {
+	public static Expression findInitializer(VariableDeclarationFragment variableDeclarationFragment) {
 		Expression initializer = variableDeclarationFragment.getInitializer();
 		if (initializer == null) {
 			return null;
