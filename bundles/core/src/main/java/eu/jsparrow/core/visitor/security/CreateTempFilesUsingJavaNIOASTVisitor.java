@@ -38,7 +38,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  * @since 3.21.0
  *
  */
-public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTVisitor {
+public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String PATHS_QUALIFIED_NAME = java.nio.file.Paths.class.getName();
 	private static final String FILES_QUALIFIED_NAME = java.nio.file.Files.class.getName();
 	private static final Class<File> FILE = java.io.File.class;

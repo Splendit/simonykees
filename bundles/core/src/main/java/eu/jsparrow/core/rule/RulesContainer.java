@@ -24,7 +24,7 @@ import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.core.rule.impl.CollapseIfStatementsRule;
 import eu.jsparrow.core.rule.impl.CollectionRemoveAllRule;
 import eu.jsparrow.core.rule.impl.CollectionsFactoryMethodsRule;
-import eu.jsparrow.core.rule.impl.CreateTempFilesUsingJavaNioRule;
+import eu.jsparrow.core.rule.impl.CreateTempFilesUsingJavaNIORule;
 import eu.jsparrow.core.rule.impl.DateDeprecatedRule;
 import eu.jsparrow.core.rule.impl.DiamondOperatorRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamAnyMatchRule;
@@ -175,7 +175,7 @@ public class RulesContainer {
 				new EscapeUserInputsInSQLQueriesRule(),
 				new ReuseRandomObjectsRule(),
 				new UseSecureRandomRule(),
-				new CreateTempFilesUsingJavaNioRule(),
+				new CreateTempFilesUsingJavaNIORule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

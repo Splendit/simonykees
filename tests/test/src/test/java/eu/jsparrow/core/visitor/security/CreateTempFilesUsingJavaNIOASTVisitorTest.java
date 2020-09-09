@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 
-public class CreateTempFilesUsingJavaNioASTVisitorTest extends UsesSimpleJDTUnitFixture {
+public class CreateTempFilesUsingJavaNIOASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
-		setVisitor(new CreateTempFilesUsingJavaNioASTVisitor());
+		setVisitor(new CreateTempFilesUsingJavaNIOASTVisitor());
 		fixture.addImport(java.io.File.class.getName());
 	}
 

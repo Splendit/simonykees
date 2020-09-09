@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
-public class CreateTempFilesUsingJavaNioNegativeASTVisitorTest extends UsesJDTUnitFixture {
+public class CreateTempFilesUsingJavaNIONegativeASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		setDefaultVisitor(new CreateTempFilesUsingJavaNioASTVisitor());
+		setDefaultVisitor(new CreateTempFilesUsingJavaNIOASTVisitor());
 		defaultFixture.addImport(java.io.File.class.getName());
 	}
 
