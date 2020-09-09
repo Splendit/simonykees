@@ -130,9 +130,8 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 					return true;
 				}
 				
-				FileReaderAnalyzer fileReaderAnalyzer = new FileReaderAnalyzer(
-						(VariableDeclarationExpression) fileReaderResource.getParent());
-				if (!fileReaderAnalyzer.isFileReaderDeclaration()) {
+				FileReaderAnalyzer fileReaderAnalyzer = new FileReaderAnalyzer();
+				if (!fileReaderAnalyzer.analyzeFileReader((VariableDeclarationExpression) fileReaderResource.getParent())) {
 					return true;
 				}
 

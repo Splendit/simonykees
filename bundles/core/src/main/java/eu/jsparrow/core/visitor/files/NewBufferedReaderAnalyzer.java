@@ -28,9 +28,10 @@ public class NewBufferedReaderAnalyzer {
 		if(arguments.size() == 2) {
 			Expression ndArgument = arguments.get(1);
 			ITypeBinding ndArgType = ndArgument.resolveTypeBinding();
-			if(ClassRelationUtil.isContentOfType(ndArgType, java.nio.charset.Charset.class.getName())) {
-				this.charsetExpression = ndArgument;
+			if(!ClassRelationUtil.isContentOfType(ndArgType, java.nio.charset.Charset.class.getName())) {
+				return false;
 			}
+			this.charsetExpression = ndArgument;
 		}
 
 		Expression readerArgument = arguments.get(0);
