@@ -97,10 +97,22 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		if (expressionsToEscape.isEmpty()) {
 			return true;
 		}
-		Statement statementAfterOracleCodec = findStatementAfterOracleCodec(queryMethodArgument);
+
+		Statement statementAfterOracleCodec;
+		if (queryMethodArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
+			statementAfterOracleCodec = VariableDeclarationsUtil.findLocalVariableDeclarationStatement((SimpleName) queryMethodArgument);
+		} else {
+			statementAfterOracleCodec = ASTNodeUtil.getSpecificAncestor(queryMethodArgument, Statement.class);
+		}
+
+		if (statementAfterOracleCodec == null) {
+			return true;
+		}
+
 		if (statementAfterOracleCodec.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return true;
 		}
+
 		Block enclosingBlock = (Block) statementAfterOracleCodec.getParent();
 
 		ASTNode enclosingScope = this.liveVariableScope.findEnclosingScope(statementAfterOracleCodec)
@@ -206,19 +218,6 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 			return Collections.emptyList();
 		}
 		return super.findDynamicQueryComponents(queryExpression);
-	}
-
-	private Statement findStatementAfterOracleCodec(Expression queryMethodArgument) {
-		if (queryMethodArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-			SimpleName variableName = (SimpleName) queryMethodArgument;
-			// In this case it is already known that queryMethodArgument
-			// references a local variable
-			ASTNode declarationNode = getCompilationUnit().findDeclaringNode(variableName.resolveBinding());
-			// and it is clear that the specific ancestor will be the
-			// corresponding variable declaration statement
-			return ASTNodeUtil.getSpecificAncestor(declarationNode, Statement.class);
-		}
-		return ASTNodeUtil.getSpecificAncestor(queryMethodArgument, Statement.class);
 	}
 
 	private Name createTypeName(String qualifiedName) {
