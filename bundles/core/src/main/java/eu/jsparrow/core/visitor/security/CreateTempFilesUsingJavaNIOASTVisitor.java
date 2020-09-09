@@ -80,34 +80,31 @@ public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTV
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-		TransformationData data = createTransformationData(node);
+
+		IMethodBinding methodBinding = node.resolveMethodBinding();
+		List<Expression> createTempFileArguments = ASTNodeUtil.convertToTypedList(node.arguments(), Expression.class);
+		TransformationData data = null;
+
+		if (createTempFile.isEquivalentTo(methodBinding)) {
+			Expression filePrefix = createTempFileArguments.get(0);
+			Expression fileSuffix = createTempFileArguments.get(1);
+			data = new TransformationData(filePrefix, fileSuffix);
+
+		} else if (createTempFileWithDirectory.isEquivalentTo(methodBinding)) {
+			data = createTransformationDataUsingDirectory(createTempFileArguments);
+		}
+
 		if (data != null) {
 			transform(node, data);
 		}
 		return true;
 	}
 
-	private TransformationData createTransformationData(MethodInvocation node) {
-		SignatureData signature;
-		IMethodBinding methodBinding = node.resolveMethodBinding();
+	private TransformationData createTransformationDataUsingDirectory(List<Expression> createTempFileArguments) {
 
-		if (createTempFile.isEquivalentTo(methodBinding)) {
-			signature = createTempFile;
-		} else if (createTempFileWithDirectory.isEquivalentTo(methodBinding)) {
-			signature = createTempFileWithDirectory;
-		} else {
-			return null;
-		}
-
-		List<Expression> createTempFileArguments = ASTNodeUtil.convertToTypedList(node.arguments(), Expression.class);
 		Expression filePrefix = createTempFileArguments.get(0);
 		Expression fileSuffix = createTempFileArguments.get(1);
-		if (signature == createTempFile) {
-			return new TransformationData(filePrefix, fileSuffix);
-		}
-
-		Expression directory = createTempFileArguments
-			.get(2);
+		Expression directory = createTempFileArguments.get(2);
 
 		if (directory.getNodeType() == ASTNode.NULL_LITERAL) {
 			return new TransformationData(filePrefix, fileSuffix);
@@ -116,13 +113,13 @@ public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTV
 		if (directory.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
 			ClassInstanceCreation directoryFileInstanceCreation = (ClassInstanceCreation) directory;
 			IMethodBinding constructorBinding = directoryFileInstanceCreation.resolveConstructorBinding();
-			if (!newFileFromPath.isEquivalentTo(constructorBinding)) {
-				return null;
+
+			if (newFileFromPath.isEquivalentTo(constructorBinding)) {
+				Expression directoryPath = ASTNodeUtil
+					.convertToTypedList(directoryFileInstanceCreation.arguments(), Expression.class)
+					.get(0);
+				return new TransformationData(directoryPath, filePrefix, fileSuffix);
 			}
-			Expression directoryPath = ASTNodeUtil
-				.convertToTypedList(directoryFileInstanceCreation.arguments(), Expression.class)
-				.get(0);
-			return new TransformationData(directoryPath, filePrefix, fileSuffix);
 		}
 
 		if (directory.getNodeType() == ASTNode.SIMPLE_NAME && checkDirectoryVariableUsage((SimpleName) directory)) {
