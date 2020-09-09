@@ -26,6 +26,24 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
+/**
+ * Replaces the initializations of {@link java.io.BufferedReader} objects with
+ * the non-blocking alternative
+ * {@link java.nio.file.Files#newBufferedReader(java.nio.file.Path, java.nio.charset.Charset)}. 
+ * 
+ * For example, the following code: 
+ * 
+ * <pre>
+ * {@code BufferedReader bufferedReader = new BufferedReader(new FileReader(new File("path/to/file")));}
+ * </pre>
+ * is transformed to:
+ * <pre>
+ * {@code BufferedReader bufferedReader = Files.newBufferedReader(Paths.get("path/to/file"), Charset.defaultCharset());}
+ * </pre>
+ * 
+ * @since 3.21.0
+ *
+ */
 public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String FILES_QUALIFIED_NAME = java.nio.file.Files.class.getName();
@@ -105,9 +123,8 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 		}
 
 		NewBufferedReaderAnalyzer analyzer = new NewBufferedReaderAnalyzer();
-		if (bufferedReaderArg.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION 
+		if (bufferedReaderArg.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION
 				&& analyzer.isInitializedWithNewReader((ClassInstanceCreation) bufferedReaderArg)) {
-
 
 			AST ast = fragment.getAST();
 			List<Expression> pathExpressions = analyzer.getPathExpressions();
@@ -121,44 +138,44 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 			astRewrite.replace(initializer, filesNewBufferedReader, null);
 			onRewrite();
 		} else if (isDeclarationInTWRHeader(fragment, bufferedReaderArg)) {
-				VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment
-					.getParent();
-				TryStatement tryStatement = (TryStatement) declarationExpression.getParent();
-				VariableDeclarationFragment fileReaderResource = findFileReaderResource(bufferedReaderArg,
-						tryStatement).orElse(null);
-				if(fileReaderResource == null) {
-					return true;
-				}
-				
-				FileReaderAnalyzer fileReaderAnalyzer = new FileReaderAnalyzer();
-				if (!fileReaderAnalyzer.analyzeFileReader((VariableDeclarationExpression) fileReaderResource.getParent())) {
-					return true;
-				}
+			VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment
+				.getParent();
+			TryStatement tryStatement = (TryStatement) declarationExpression.getParent();
+			VariableDeclarationFragment fileReaderResource = findFileReaderResource(bufferedReaderArg,
+					tryStatement).orElse(null);
+			if (fileReaderResource == null) {
+				return true;
+			}
 
-				boolean isUsedInTryBody = hasUsagesOn(tryStatement.getBody(), fileReaderResource.getName());
-				if (isUsedInTryBody) {
-					return true;
-				}
+			FileReaderAnalyzer fileReaderAnalyzer = new FileReaderAnalyzer();
+			if (!fileReaderAnalyzer.analyzeFileReader((VariableDeclarationExpression) fileReaderResource.getParent())) {
+				return true;
+			}
 
-				// Now the transformation happens
-				AST ast = tryStatement.getAST();
-				Expression charset = fileReaderAnalyzer.getCharset()
-					.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
-					.orElse(createDefaultCharsetExpression(ast));
-				List<Expression> pathArguments = fileReaderAnalyzer.getPathExpressions();
+			boolean isUsedInTryBody = hasUsagesOn(tryStatement.getBody(), fileReaderResource.getName());
+			if (isUsedInTryBody) {
+				return true;
+			}
 
-				MethodInvocation filesNewBufferedReader = createFilesNewBufferedReaderExpression(ast,
-						pathArguments, charset);
-				astRewrite.remove(fileReaderResource.getParent(), null);
-				astRewrite.replace(initializer, filesNewBufferedReader, null);
-				onRewrite();
+			// Now the transformation happens
+			AST ast = tryStatement.getAST();
+			Expression charset = fileReaderAnalyzer.getCharset()
+				.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
+				.orElse(createDefaultCharsetExpression(ast));
+			List<Expression> pathArguments = fileReaderAnalyzer.getPathExpressions();
+
+			MethodInvocation filesNewBufferedReader = createFilesNewBufferedReaderExpression(ast,
+					pathArguments, charset);
+			astRewrite.remove(fileReaderResource.getParent(), null);
+			astRewrite.replace(initializer, filesNewBufferedReader, null);
+			onRewrite();
 		}
 		return true;
 	}
 
 	private boolean isDeclarationInTWRHeader(VariableDeclarationFragment fragment, Expression bufferedReaderArg) {
 		ASTNode fragmentParent = fragment.getParent();
-		return bufferedReaderArg.getNodeType() == ASTNode.SIMPLE_NAME 
+		return bufferedReaderArg.getNodeType() == ASTNode.SIMPLE_NAME
 				&& fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
 				&& fragmentParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY;
 	}

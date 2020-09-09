@@ -16,7 +16,27 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
-public class FileReaderAnalyzer {
+/**
+ * Analyzes whether the declaration of a {@link java.io.FileReader} satisfies the preconditions
+ * for replacing the following: 
+ * 
+ * <pre>
+ * try(FileReader fileReader = new FileReader(new File("path/to/file"));
+ * 		BufferedReader buffer = new BufferedReader(fileReader)) {}
+ * </pre>
+ * 
+ * by:
+ * 
+ * <pre>
+ *  try(BufferedReader buffer = Files.newBufferedReader(Paths.get("pat/to/file"), Charset.defaultCharset()) {}
+ * </pre>
+ * 
+ * @see UseFilesBufferedReaderASTVisitor
+ * 
+ * @since 3.21.0
+ *
+ */
+class FileReaderAnalyzer {
 
 	private Expression charsetExpression;
 	private List<Expression> pathExpressions = new ArrayList<>();

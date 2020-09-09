@@ -13,7 +13,24 @@ import org.eclipse.jdt.core.dom.Type;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
-public class NewBufferedReaderAnalyzer {
+/**
+ * Analyzes whether the declaration of a {@link java.io.BufferedReader}
+ * satisfies the preconditions for replacing the following:
+ * 
+ * <pre>
+ * {@code BufferedReader buffer = new BufferedReader(new FileReader(new File("path/to/file"))));}
+ * </pre>
+ * by:
+ * 
+ * <pre>
+ * {@code BufferedReader buffer = Files.newBufferedReader(Paths.get("pat/to/file"), Charset.defaultCharset());}
+ * </pre>
+ * @see UseFilesBufferedReaderASTVisitor
+ * 
+ * @since 3.21.0
+ *
+ */
+class NewBufferedReaderAnalyzer {
 
 	private List<Expression> pathExpressions = new ArrayList<>();
 	private Expression charsetExpression;
@@ -24,11 +41,11 @@ public class NewBufferedReaderAnalyzer {
 		if (arguments.isEmpty()) {
 			return false;
 		}
-		
-		if(arguments.size() == 2) {
+
+		if (arguments.size() == 2) {
 			Expression ndArgument = arguments.get(1);
 			ITypeBinding ndArgType = ndArgument.resolveTypeBinding();
-			if(!ClassRelationUtil.isContentOfType(ndArgType, java.nio.charset.Charset.class.getName())) {
+			if (!ClassRelationUtil.isContentOfType(ndArgType, java.nio.charset.Charset.class.getName())) {
 				return false;
 			}
 			this.charsetExpression = ndArgument;
