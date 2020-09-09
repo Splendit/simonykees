@@ -27,12 +27,14 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * <p>
  * Example:
  * <p>
+ * 
  * <pre>
  * Charset c = Charset.forName("UTF-8");
  * </pre>
  * <p>
  * is replaced by
  * <p>
+ * 
  * <pre>
  * Charset c = StandardCharsets.UTF_8;
  * </pre>
@@ -106,5 +108,4 @@ public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportAST
 		this.astRewrite.replace(forNameInvocation, charsetConstantQualifiedName, null);
 		onRewrite();
 	}
-
 }
