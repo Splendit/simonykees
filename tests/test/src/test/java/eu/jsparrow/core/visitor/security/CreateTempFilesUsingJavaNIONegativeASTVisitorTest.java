@@ -78,6 +78,22 @@ public class CreateTempFilesUsingJavaNIONegativeASTVisitorTest extends UsesJDTUn
 	}
 
 	@Test
+	public void visit_DirectoryIsLambdaParameter_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.function.Consumer.class.getName());
+		String original = "" +
+				"	void test() {\n" +
+				"		Consumer<File> consumer = directory -> {\n" +
+				"			try {\n" +
+				"				File file = File.createTempFile(\"prefix\", \"suffix\", directory);\n" +
+				"			} catch (IOException e) {\n" +
+				"			}\n" +
+				"		};" +
+				"	};";
+
+		assertNoChange(original);
+	}
+
+	@Test
 	public void visit_DirectoryVariableDeclaredWithoutInitializer_shouldNotTransform() throws Exception {
 
 		String original = "" +
@@ -126,6 +142,7 @@ public class CreateTempFilesUsingJavaNIONegativeASTVisitorTest extends UsesJDTUn
 
 	@Test
 	public void visit_TempFileAlreadyCreatedWithFiles_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.nio.file.Files.class.getName());
 		String original = "" +
 				"	void test() {\n" +
 				"		try {\n" +
@@ -133,8 +150,6 @@ public class CreateTempFilesUsingJavaNIONegativeASTVisitorTest extends UsesJDTUn
 				"		} catch (Exception e) {\n" +
 				"		}\n" +
 				"	}";
-		
-		defaultFixture.addImport(java.nio.file.Files.class.getName());
 		assertNoChange(original);
 	}
 

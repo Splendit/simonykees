@@ -83,8 +83,7 @@ public class CreateTempFilesUsingJavaNIOASTVisitorTest extends UsesSimpleJDTUnit
 
 	@Test
 	public void visit_FilesAndPathsImportedOnDemand_shouldTransform() throws Exception {
-		fixture.addImport(java.nio.file.Files.class.getPackage()
-			.getName(), false, true);
+		fixture.addImport("java.nio.file", false, true);
 		String original = "" +
 				"		try {\n" +
 				"			File file = File.createTempFile(\"prefix\", \"suffix\", new File(\"/tmp/test/\"));\n" +
