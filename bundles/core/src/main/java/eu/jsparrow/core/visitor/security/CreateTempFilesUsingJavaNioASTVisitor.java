@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.security;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -50,22 +51,8 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 	private final Set<String> safeTypeImports = new HashSet<>();
 	private final Set<String> typesImportedOnDemand = new HashSet<>();
 
-	private class TransformationData {
-		private final Expression filePrefix;
-		private final Expression fileSuffix;
-		private final Expression directory;
-
-		private TransformationData(Expression directoryPath, Expression filePrefix, Expression fileSuffix) {
-			super();
-			this.filePrefix = filePrefix;
-			this.fileSuffix = fileSuffix;
-			this.directory = directoryPath;
-		}
-	}
-
 	@Override
 	public boolean visit(CompilationUnit node) {
-		super.visit(node);
 		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(node.imports(),
 				ImportDeclaration.class);
 
@@ -81,7 +68,7 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 				typesImportedOnDemand.add(FILES_QUALIFIED_NAME);
 			}
 		}
-		return true;
+		return super.visit(node);
 	}
 
 	@Override
@@ -116,14 +103,14 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 		Expression filePrefix = createTempFileArguments.get(0);
 		Expression fileSuffix = createTempFileArguments.get(1);
 		if (signature == createTempFile) {
-			return new TransformationData(null, filePrefix, fileSuffix);
+			return new TransformationData(filePrefix, fileSuffix);
 		}
 
 		Expression directory = createTempFileArguments
 			.get(2);
 
 		if (directory.getNodeType() == ASTNode.NULL_LITERAL) {
-			return new TransformationData(null, filePrefix, fileSuffix);
+			return new TransformationData(filePrefix, fileSuffix);
 		}
 
 		if (directory.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
@@ -204,10 +191,12 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 
 		@SuppressWarnings("unchecked")
 		List<Expression> createTempFileArguments = createTempFileInvocation.arguments();
-		if (data.directory != null) {
-			Expression directoryCopyTarget = (Expression) astRewrite.createCopyTarget(data.directory);
+		Optional<Expression> optionalDirectory = data.getDirectory();
+		if (optionalDirectory.isPresent()) {
+			Expression directory = optionalDirectory.get();
+			Expression directoryCopyTarget = (Expression) astRewrite.createCopyTarget(directory);
 			MethodInvocation pathExpression = ast.newMethodInvocation();
-			boolean isStringPath = data.directory.resolveTypeBinding()
+			boolean isStringPath = directory.resolveTypeBinding()
 				.getQualifiedName()
 				.equals(STRING.getName());
 			if (isStringPath) {
@@ -224,8 +213,8 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 			}
 			createTempFileArguments.add(pathExpression);
 		}
-		createTempFileArguments.add((Expression) astRewrite.createCopyTarget(data.filePrefix));
-		createTempFileArguments.add((Expression) astRewrite.createCopyTarget(data.fileSuffix));
+		createTempFileArguments.add((Expression) astRewrite.createCopyTarget(data.getFilePrefix()));
+		createTempFileArguments.add((Expression) astRewrite.createCopyTarget(data.getFileSuffix()));
 
 		MethodInvocation toFileInvocation = ast.newMethodInvocation();
 		toFileInvocation.setName(ast.newSimpleName("toFile")); //$NON-NLS-1$
@@ -244,4 +233,35 @@ public class CreateTempFilesUsingJavaNioASTVisitor extends AbstractAddImportASTV
 		}
 		return getSimpleName(qualifiedName);
 	}
+
+	private class TransformationData {
+		private final Expression filePrefix;
+		private final Expression fileSuffix;
+		private final Optional<Expression> directory;
+
+		private TransformationData(Expression directoryPath, Expression filePrefix, Expression fileSuffix) {
+			this.filePrefix = filePrefix;
+			this.fileSuffix = fileSuffix;
+			this.directory = Optional.of(directoryPath);
+		}
+
+		private TransformationData(Expression filePrefix, Expression fileSuffix) {
+			this.filePrefix = filePrefix;
+			this.fileSuffix = fileSuffix;
+			this.directory = Optional.empty();
+		}
+
+		public Optional<Expression> getDirectory() {
+			return directory;
+		}
+
+		public Expression getFilePrefix() {
+			return filePrefix;
+		}
+
+		public Expression getFileSuffix() {
+			return fileSuffix;
+		}
+	}
+
 }
