@@ -617,7 +617,7 @@ public class ClassRelationUtil {
 	 *         imported with the on-demand {@link ImportDeclaration} or
 	 *         {@code false} otherwise.
 	 */
-	public static boolean importsTypeOnDemand(ImportDeclaration importDeclaration, String javaFileName) {
+	public static boolean importsTypeOnDemand(ImportDeclaration importDeclaration, String expectedTypeName) {
 		if (!importDeclaration.isOnDemand()) {
 			return false;
 		}
@@ -637,7 +637,9 @@ public class ClassRelationUtil {
 		try {
 			IJavaElement[] children = iPackageFragment.getChildren();
 			for (IJavaElement child : children) {
-				if (javaFileName.equals(child.getElementName())) {
+				String elementName = child.getElementName();
+				String typeName = elementName.replaceAll("\\.(class|java)$", "");  //$NON-NLS-1$//$NON-NLS-2$
+				if (expectedTypeName.equals(typeName)) {
 					return true;
 				}
 			}
