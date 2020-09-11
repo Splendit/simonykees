@@ -24,7 +24,7 @@ public class UseFilesBufferedReaderRule extends RefactoringRuleImpl<UseFilesBuff
 		this.visitorClass = UseFilesBufferedReaderASTVisitor.class;
 		this.ruleDescription = new RuleDescription(Messages.UseFilesBufferedReaderRule_name,
 				Messages.UseFilesBufferedReaderRule_description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_8, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.PERFORMANCE));
+				Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.PERFORMANCE));
 	}
 
 	@Override
