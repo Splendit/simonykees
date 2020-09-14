@@ -85,14 +85,15 @@ import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseArraysStreamRule;
-import eu.jsparrow.core.rule.impl.UseSecureRandomRule;
 import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
+import eu.jsparrow.core.rule.impl.UseFilesBufferedReaderRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
 import eu.jsparrow.core.rule.impl.UseOffsetBasedStringMethodsRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedJPAQueryRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedLDAPQueryRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedQueryRule;
+import eu.jsparrow.core.rule.impl.UseSecureRandomRule;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.UseStringJoinRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
@@ -165,6 +166,7 @@ public class RulesContainer {
 				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
 				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
 				new RemoveCollectionAddAllRule(), new RemoveRedundantTypeCastRule(),
+				new UseFilesBufferedReaderRule(),
 
 				/*
 				 * Security
