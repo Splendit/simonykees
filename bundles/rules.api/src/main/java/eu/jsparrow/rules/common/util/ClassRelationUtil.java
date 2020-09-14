@@ -759,8 +759,8 @@ public class ClassRelationUtil {
 			return false;
 		}
 
-		ClassInstanceCreation fileInstanceCreation = (ClassInstanceCreation) expression;
-		return fileInstanceCreation.getAnonymousClassDeclaration() == null;
+		ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) expression;
+		return classInstanceCreation.getAnonymousClassDeclaration() == null;
 	}
 
 }
