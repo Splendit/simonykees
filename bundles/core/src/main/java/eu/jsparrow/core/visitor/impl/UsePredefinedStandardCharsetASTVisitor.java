@@ -65,7 +65,7 @@ public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportAST
 
 	@Override
 	public boolean visit(CompilationUnit node) {
-		super.visit(node);
+		boolean superReturnValue = super.visit(node);
 		safeImportStandardCharsets = isSafeToAddImport(node, STANDARD_CHARSETS_QUALIFIED_NAME);
 		if (safeImportStandardCharsets) {
 			List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(node.imports(),
@@ -73,7 +73,7 @@ public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportAST
 			importedStandardCharsetsOnDemand = matchesTypeImportOnDemand(importDeclarations,
 					STANDARD_CHARSETS_QUALIFIED_NAME);
 		}
-		return true;
+		return superReturnValue;
 	}
 
 	@Override
