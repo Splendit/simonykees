@@ -154,7 +154,7 @@ public class UseFilesBufferedReaderASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"} catch (IOException e) {}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_nullFileReaderArgument_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -165,7 +165,7 @@ public class UseFilesBufferedReaderASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_nullFileReaderArgumentInTWR_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -177,43 +177,72 @@ public class UseFilesBufferedReaderASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_usingInputStreamReader_shouldNotTransform() throws Exception {
 		String original = "" +
-				"try (InputStreamReader reader = new InputStreamReader(new FileInputStream(new File(\"file\")));\n" + 
-				"	BufferedReader br = new BufferedReader(reader)) {\n" + 
-				"\n" + 
-				"} catch (IOException e) {}";
-		assertNoChange(original);
-	}
-	
-	@Test
-	public void visit_subTypeInitializer_shouldNotTransform() throws Exception {
-		String original = "" +
-				"try (BufferedReader br = new LineNumberReader(null)) {\n" + 
-				"\n" + 
-				"} catch (IOException e) {}";
-		assertNoChange(original);
-	}
-	
-	@Test
-	public void visit_tempFileInFileReader_shouldNotTransform() throws Exception {
-		String original = "" +
-				"try (FileReader reader = new FileReader(File.createTempFile(\"prefix\", \"suffix\"));\n" + 
-				"		BufferedReader br = new BufferedReader(reader)) {\n" + 
-				"\n" + 
+				"try (InputStreamReader reader = new InputStreamReader(new FileInputStream(new File(\"file\")));\n" +
+				"	BufferedReader br = new BufferedReader(reader)) {\n" +
+				"\n" +
 				"} catch (IOException e) {}";
 		assertNoChange(original);
 	}
 
 	@Test
-	public void visit_anonymousClass_shouldNotTransform() throws Exception {
+	public void visit_subTypeInitializer_shouldNotTransform() throws Exception {
 		String original = "" +
-				"try {\n" + 
-				"	BufferedReader br = new BufferedReader(new FileReader(\"path\")) {};\n" + 
+				"try (BufferedReader br = new LineNumberReader(null)) {\n" +
+				"\n" +
+				"} catch (IOException e) {}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_tempFileInFileReader_shouldNotTransform() throws Exception {
+		String original = "" +
+				"try (FileReader reader = new FileReader(File.createTempFile(\"prefix\", \"suffix\"));\n" +
+				"		BufferedReader br = new BufferedReader(reader)) {\n" +
+				"\n" +
+				"} catch (IOException e) {}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_anonymousSubClassOfBufferedReader_shouldNotTransform() throws Exception {
+		String newAnonymousSubclassOfBufferedReader = "new BufferedReader(new FileReader(\"path\")) {}";
+		String original = "" +
+				"try {\n" +
+				"	BufferedReader br = " + newAnonymousSubclassOfBufferedReader + ";\n" +
 				"	System.out.println(br.readLine());\n" +
 				"} catch (IOException e) {}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_anonymousSubclassOfFileReader_shouldNotTransform() throws Exception {
+		String newAnonymousSubclassOfFileReader = "new FileReader(new File(\"path\")){}";
+		String original = "" +
+				"		try {\n" +
+				"			BufferedReader br = new BufferedReader(" +
+				newAnonymousSubclassOfFileReader +
+				");\n" +
+				"			System.out.println(br.readLine());\n" +
+				"		} catch (Exception e) {\n" +
+				"		}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_anonymousSubclassOfFile_shouldNotTransform() throws Exception {
+		String newAnonymousSubclassOfFile = "new File(\"path\") {}";
+		String original = "" +
+				"		try {\n" +
+				"			BufferedReader br = new BufferedReader(new FileReader(" +
+				newAnonymousSubclassOfFile +
+				"));\n" +
+				"			System.out.println(br.readLine());\n" +
+				"		} catch (Exception e) {\n" +
+				"		}";
 		assertNoChange(original);
 	}
 }
