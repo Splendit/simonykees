@@ -753,14 +753,12 @@ public class ClassRelationUtil {
 		if (expression == null || expression.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
 			return false;
 		}
-
-		ITypeBinding typeBinding = expression.resolveTypeBinding();
-		if (!isContentOfType(typeBinding, fullyQualifiedTypeName)) {
+		ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) expression;
+		if (classInstanceCreation.getAnonymousClassDeclaration() != null) {
 			return false;
 		}
-
-		ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) expression;
-		return classInstanceCreation.getAnonymousClassDeclaration() == null;
+		ITypeBinding typeBinding = expression.resolveTypeBinding();
+		return isContentOfType(typeBinding, fullyQualifiedTypeName);
 	}
 
 }
