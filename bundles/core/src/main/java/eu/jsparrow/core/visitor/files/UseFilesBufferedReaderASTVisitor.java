@@ -29,14 +29,16 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 /**
  * Replaces the initializations of {@link java.io.BufferedReader} objects with
  * the non-blocking alternative
- * {@link java.nio.file.Files#newBufferedReader(java.nio.file.Path, java.nio.charset.Charset)}. 
+ * {@link java.nio.file.Files#newBufferedReader(java.nio.file.Path, java.nio.charset.Charset)}.
  * 
- * For example, the following code: 
+ * For example, the following code:
  * 
  * <pre>
  * {@code BufferedReader bufferedReader = new BufferedReader(new FileReader(new File("path/to/file")));}
  * </pre>
+ * 
  * is transformed to:
+ * 
  * <pre>
  * {@code BufferedReader bufferedReader = Files.newBufferedReader(Paths.get("path/to/file"), Charset.defaultCharset());}
  * </pre>
@@ -102,14 +104,11 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 		}
 
 		Expression initializer = fragment.getInitializer();
-		if (initializer == null || initializer.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
-			return true;
-		}
-		ITypeBinding initializerType = initializer.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(initializerType, BUFFERED_READER_QUALIFIED_NAME)) {
+		if(!ClassRelationUtil.isNewInstanceCreationOf(initializer, BUFFERED_READER_QUALIFIED_NAME)) {
 			return true;
 		}
 		ClassInstanceCreation newBufferedReader = (ClassInstanceCreation) initializer;
+
 		List<Expression> newBufferedReaderArgs = ASTNodeUtil.convertToTypedList(newBufferedReader.arguments(),
 				Expression.class);
 		if (newBufferedReaderArgs.size() != 1) {

@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Type;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -55,19 +53,16 @@ class NewBufferedReaderAnalyzer {
 		if (ClassRelationUtil.isContentOfType(readerArgument.resolveTypeBinding(), java.lang.String.class.getName())) {
 			pathExpressions.add(readerArgument);
 			return true;
-		} else if (readerArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+		} else if (ClassRelationUtil.isNewInstanceCreationOf(readerArgument, java.io.File.class.getName())) {
 			ClassInstanceCreation fileInstanceCreation = (ClassInstanceCreation) readerArgument;
-			Type argType = fileInstanceCreation.getType();
-			boolean isFile = ClassRelationUtil.isContentOfType(argType.resolveBinding(), java.io.File.class.getName());
-			if (isFile) {
-				List<Expression> fileArgs = ASTNodeUtil.convertToTypedList(fileInstanceCreation.arguments(),
-						Expression.class);
-				pathExpressions.addAll(fileArgs);
-				return fileArgs
-					.stream()
-					.map(Expression::resolveTypeBinding)
-					.allMatch(t -> ClassRelationUtil.isContentOfType(t, java.lang.String.class.getName()));
-			}
+			List<Expression> fileArgs = ASTNodeUtil.convertToTypedList(fileInstanceCreation.arguments(),
+					Expression.class);
+			pathExpressions.addAll(fileArgs);
+			return fileArgs
+				.stream()
+				.map(Expression::resolveTypeBinding)
+				.allMatch(t -> ClassRelationUtil.isContentOfType(t, java.lang.String.class.getName()));
+			
 		}
 
 		return false;

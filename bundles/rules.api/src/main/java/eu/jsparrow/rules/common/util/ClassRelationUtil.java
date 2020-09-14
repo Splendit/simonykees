@@ -10,7 +10,10 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -638,7 +641,7 @@ public class ClassRelationUtil {
 			IJavaElement[] children = iPackageFragment.getChildren();
 			for (IJavaElement child : children) {
 				String elementName = child.getElementName();
-				String typeName = elementName.replaceAll("\\.(class|java)$", "");  //$NON-NLS-1$//$NON-NLS-2$
+				String typeName = elementName.replaceAll("\\.(class|java)$", ""); //$NON-NLS-1$//$NON-NLS-2$
 				if (expectedTypeName.equals(typeName)) {
 					return true;
 				}
@@ -732,6 +735,32 @@ public class ClassRelationUtil {
 		}
 		String packageName = declaringClassPackage.getName();
 		return packageName.startsWith("java.util"); //$NON-NLS-1$
+	}
+
+	/**
+	 * Checks if the given expression represents a new instance creation of the
+	 * given qualified type name.
+	 * 
+	 * 
+	 * @param expression
+	 *            expression to be checked
+	 * @param fullyQualifiedTypeName
+	 *            expected fully qualified type name.
+	 * @return if the condition is met and the {@link ClassInstanceCreation} has
+	 *         no {@link AnonymousClassDeclaration}.
+	 */
+	public static boolean isNewInstanceCreationOf(Expression expression, String fullyQualifiedTypeName) {
+		if (expression == null || expression.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
+			return false;
+		}
+
+		ITypeBinding typeBinding = expression.resolveTypeBinding();
+		if (!isContentOfType(typeBinding, fullyQualifiedTypeName)) {
+			return false;
+		}
+
+		ClassInstanceCreation fileInstanceCreation = (ClassInstanceCreation) expression;
+		return fileInstanceCreation.getAnonymousClassDeclaration() == null;
 	}
 
 }

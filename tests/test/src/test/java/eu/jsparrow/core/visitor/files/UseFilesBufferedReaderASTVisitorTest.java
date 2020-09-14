@@ -206,4 +206,14 @@ public class UseFilesBufferedReaderASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"} catch (IOException e) {}";
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_anonymousClass_shouldNotTransform() throws Exception {
+		String original = "" +
+				"try {\n" + 
+				"	BufferedReader br = new BufferedReader(new FileReader(\"path\")) {};\n" + 
+				"	System.out.println(br.readLine());\n" +
+				"} catch (IOException e) {}";
+		assertNoChange(original);
+	}
 }

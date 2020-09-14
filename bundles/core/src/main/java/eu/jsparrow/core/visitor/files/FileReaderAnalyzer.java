@@ -2,27 +2,26 @@ package eu.jsparrow.core.visitor.files;
 
 import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isNewInstanceCreationOf;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
-
 /**
- * Analyzes whether the declaration of a {@link java.io.FileReader} satisfies the preconditions
- * for replacing the following: 
+ * Analyzes whether the declaration of a {@link java.io.FileReader} satisfies
+ * the preconditions for replacing the following:
  * 
  * <pre>
- * try(FileReader fileReader = new FileReader(new File("path/to/file"));
- * 		BufferedReader buffer = new BufferedReader(fileReader)) {}
+ * try (FileReader fileReader = new FileReader(new File("path/to/file"));
+ * 		BufferedReader buffer = new BufferedReader(fileReader)) {
+ * }
  * </pre>
  * 
  * by:
@@ -50,7 +49,12 @@ class FileReaderAnalyzer {
 		VariableDeclarationFragment fragment = fragments.get(0);
 
 		Expression initialzier = fragment.getInitializer();
-		if (initialzier == null || initialzier.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
+		if (initialzier == null) {
+			return false;
+		}
+
+		boolean isFileReaderCreation = isNewInstanceCreationOf(initialzier, java.io.FileReader.class.getName());
+		if (!isFileReaderCreation) {
 			return false;
 		}
 
@@ -79,8 +83,8 @@ class FileReaderAnalyzer {
 
 	private boolean isStringExpression(Expression expression) {
 		ITypeBinding typeBinding = expression.resolveTypeBinding();
-		boolean isString = ClassRelationUtil.isContentOfType(typeBinding, java.lang.String.class.getName());
-		if(isString) {
+		boolean isString = isContentOfType(typeBinding, java.lang.String.class.getName());
+		if (isString) {
 			this.pathExpressions = new ArrayList<>();
 			this.pathExpressions.add(expression);
 		}
@@ -88,20 +92,16 @@ class FileReaderAnalyzer {
 	}
 
 	private boolean isFileInstanceCreation(Expression expression) {
-		ITypeBinding typeBinding = expression.resolveTypeBinding();
-		if (!isContentOfType(typeBinding, java.io.File.class.getName())) {
+		boolean isNewInstanceCreation = isNewInstanceCreationOf(expression, java.io.File.class.getName());
+		if (!isNewInstanceCreation) {
 			return false;
 		}
-		if (expression.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
-			return false;
-		}
-
 		ClassInstanceCreation fileInstanceCreation = (ClassInstanceCreation) expression;
 		List<Expression> arguments = convertToTypedList(fileInstanceCreation.arguments(), Expression.class);
-		boolean allStrings =  arguments
+		boolean allStrings = arguments
 			.stream()
 			.allMatch(argument -> isContentOfType(argument.resolveTypeBinding(), java.lang.String.class.getName()));
-		if(allStrings) {
+		if (allStrings) {
 			this.pathExpressions = new ArrayList<>();
 			this.pathExpressions.addAll(arguments);
 		}
