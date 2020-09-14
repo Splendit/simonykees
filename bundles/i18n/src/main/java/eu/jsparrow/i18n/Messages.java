@@ -117,6 +117,8 @@ public class Messages extends NLS {
 	public static String ConfigureProfileSelectRulesWizardPageModel_error_NameExists;
 	public static String ConfigureProfileSelectRulesWIzardPageModel_error_nameReserved;
 	public static String ConfigureRenameFieldsRuleWizard_WizardTitle_RenameFields;
+	public static String CreateTempFilesUsingJavaNioRule_description;
+	public static String CreateTempFilesUsingJavaNioRule_name;
 	public static String CustomTextEditChangePreviewViewer_originalCode;
 	public static String CustomTextEditChangePreviewViewer_refactoredCode;
 	public static String DateDeprecatedRule_description;
