@@ -1,10 +1,8 @@
 package eu.jsparrow.core.visitor.files;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -13,7 +11,6 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -53,45 +50,16 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 	private static final String CHARSET_QUALIFIED_NAME = java.nio.charset.Charset.class.getName();
 	private static final String BUFFERED_READER_QUALIFIED_NAME = java.io.BufferedReader.class.getName();
 
-	private Set<String> safeImports = new HashSet<>();
-	private Set<String> typesImportedOnDemand = new HashSet<>();
-
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		boolean continueVisiting = super.visit(compilationUnit);
-
-		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
-				ImportDeclaration.class);
-		// TODO: push this functionality up.
-		if (isSafeToAddImport(compilationUnit, PATHS_QUALIFIED_NAME)) {
-			safeImports.add(PATHS_QUALIFIED_NAME);
-			if (matchesTypeImportOnDemand(importDeclarations, PATHS_QUALIFIED_NAME)) {
-				typesImportedOnDemand.add(PATHS_QUALIFIED_NAME);
-			}
+		if(!continueVisiting) {
+			return false;
 		}
-
-		if (isSafeToAddImport(compilationUnit, FILES_QUALIFIED_NAME)) {
-			safeImports.add(FILES_QUALIFIED_NAME);
-			if (matchesTypeImportOnDemand(importDeclarations, FILES_QUALIFIED_NAME)) {
-				typesImportedOnDemand.add(FILES_QUALIFIED_NAME);
-			}
-		}
-
-		if (isSafeToAddImport(compilationUnit, CHARSET_QUALIFIED_NAME)) {
-			safeImports.add(CHARSET_QUALIFIED_NAME);
-			if (matchesTypeImportOnDemand(importDeclarations, CHARSET_QUALIFIED_NAME)) {
-				typesImportedOnDemand.add(CHARSET_QUALIFIED_NAME);
-			}
-		}
-
+		verifyImport(compilationUnit, PATHS_QUALIFIED_NAME);
+		verifyImport(compilationUnit, FILES_QUALIFIED_NAME);
+		verifyImport(compilationUnit, CHARSET_QUALIFIED_NAME);
 		return continueVisiting;
-	}
-
-	@Override
-	public void endVisit(CompilationUnit compilationUnit) {
-		super.endVisit(compilationUnit);
-		safeImports.clear();
-		typesImportedOnDemand.clear();
 	}
 
 	@Override
@@ -224,16 +192,6 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 		body.accept(visitor);
 		List<SimpleName> usages = visitor.getUsages();
 		return !usages.isEmpty();
-	}
-
-	private String findTypeNameForStaticMethodInvocation(String qualifiedName) {
-		if (!safeImports.contains(qualifiedName)) {
-			return qualifiedName;
-		}
-		if (!typesImportedOnDemand.contains(qualifiedName)) {
-			addImports.add(qualifiedName);
-		}
-		return getSimpleName(qualifiedName);
 	}
 
 }

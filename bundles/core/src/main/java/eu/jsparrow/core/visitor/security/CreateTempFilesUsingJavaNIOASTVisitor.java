@@ -1,10 +1,8 @@
 package eu.jsparrow.core.visitor.security;
 
 import java.io.File;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -15,7 +13,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -39,6 +36,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  *
  */
 public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTVisitor {
+
 	private static final String PATHS_QUALIFIED_NAME = java.nio.file.Paths.class.getName();
 	private static final String FILES_QUALIFIED_NAME = java.nio.file.Files.class.getName();
 	private static final Class<File> FILE = java.io.File.class;
@@ -48,34 +46,16 @@ public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTV
 	private final SignatureData createTempFileWithDirectory = new SignatureData(FILE, CREATE_TEMP_FILE, STRING, STRING,
 			FILE);
 	private final SignatureData newFileFromPath = new SignatureData(FILE, FILE.getSimpleName(), STRING);
-	private final Set<String> safeTypeImports = new HashSet<>();
-	private final Set<String> typesImportedOnDemand = new HashSet<>();
 
 	@Override
 	public boolean visit(CompilationUnit node) {
-		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(node.imports(),
-				ImportDeclaration.class);
-
-		if (isSafeToAddImport(node, PATHS_QUALIFIED_NAME)) {
-			safeTypeImports.add(PATHS_QUALIFIED_NAME);
-			if (matchesTypeImportOnDemand(importDeclarations, PATHS_QUALIFIED_NAME)) {
-				typesImportedOnDemand.add(PATHS_QUALIFIED_NAME);
-			}
+		boolean continueVisit = super.visit(node);
+		if (!continueVisit) {
+			return false;
 		}
-		if (isSafeToAddImport(node, FILES_QUALIFIED_NAME)) {
-			safeTypeImports.add(FILES_QUALIFIED_NAME);
-			if (matchesTypeImportOnDemand(importDeclarations, FILES_QUALIFIED_NAME)) {
-				typesImportedOnDemand.add(FILES_QUALIFIED_NAME);
-			}
-		}
-		return super.visit(node);
-	}
-
-	@Override
-	public void endVisit(CompilationUnit node) {
-		super.endVisit(node);
-		safeTypeImports.clear();
-		typesImportedOnDemand.clear();
+		verifyImport(node, PATHS_QUALIFIED_NAME);
+		verifyImport(node, FILES_QUALIFIED_NAME);
+		return continueVisit;
 	}
 
 	@Override
@@ -219,16 +199,6 @@ public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTV
 
 		astRewrite.replace(replacedCreateTempFileInvocation, toFileInvocation, null);
 		onRewrite();
-	}
-
-	private String findTypeNameForStaticMethodInvocation(String qualifiedName) {
-		if (!safeTypeImports.contains(qualifiedName)) {
-			return qualifiedName;
-		}
-		if (!typesImportedOnDemand.contains(qualifiedName)) {
-			addImports.add(qualifiedName);
-		}
-		return getSimpleName(qualifiedName);
 	}
 
 	private class TransformationData {
