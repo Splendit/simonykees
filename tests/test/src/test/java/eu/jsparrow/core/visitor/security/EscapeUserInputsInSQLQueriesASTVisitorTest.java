@@ -127,6 +127,39 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
+	public void visit_QueryInitializedWithNull_shouldTransform() throws Exception {
+
+		String original = "" +
+				"	void test() {			\n" +
+				"		String userName = \"userName\";\n" +
+				"		String userPWD = \"userPWD\";\n" +
+				"		String query = null;\n" +
+				"		query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"				userName + \n" +
+				"				\"' and user_password = '\" + \n" +
+				"				userPWD + \n" +
+				"				\"'\";\n" +
+				tryExecute("query") +
+				"	}";
+
+		String expected = "" +
+				"	void test() {			\n" +
+				"		String userName = \"userName\";\n" +
+				"		String userPWD = \"userPWD\";\n" +
+				"		Codec<Character> oracleCodec = new OracleCodec();\n" +				
+				"		String query = null;\n" +
+				"		query = \"SELECT user_id FROM user_data WHERE user_name = '\" + \n" +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec, userName) + \n" +
+				"				\"' and user_password = '\" + \n" +
+				"				ESAPI.encoder().encodeForSQL(oracleCodec, userPWD) + \n" +
+				"				\"'\";\n" +
+				tryExecute("query") +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_StringFields_shouldTransform() throws Exception {
 
 		String original = "" +
@@ -491,39 +524,83 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 
 	@Test
 	public void visit_QueryAsInfixExpression_shouldTransform() throws Exception {
-		String original = "" + 
+		String original = "" +
 				"	public void test() {\n" +
-				"		try {\n" + 
-				"			Connection connection = null;\n" + 
-				"			Statement statement = connection.createStatement();\n" + 
-				"			String userID =\"1111111\";\n" + 
-				"			String pwd = \"pwd\";\n" + 
-				"			ResultSet resultset = statement.executeQuery(\n" + 
-				"					\"SELECT user_id FROM user_data WHERE\" +\n" + 
-				"					\" user_id = '\" + userID + \n" + 
-				"					\"' and user_password = '\" + pwd + \n" + 
-				"					\"'\");\n" + 
-				"		} catch (SQLException e) {\n" + 
-				"			e.printStackTrace();\n" + 
-				"		}" +				
-				"	}";
-		String expected = "" + 
-				"	public void test() {\n" +
-				"		try {\n" + 
-				"			Connection connection = null;\n" + 
-				"			Statement statement = connection.createStatement();\n" + 
-				"			String userID =\"1111111\";\n" + 
-				"			String pwd = \"pwd\";\n" + 
-				"			Codec<Character> oracleCodec = new OracleCodec();\n" + 
-				"			ResultSet resultset = statement.executeQuery(\n" + 
-				"					\"SELECT user_id FROM user_data WHERE\" +\n" + 
-				"					\" user_id = '\" + ESAPI.encoder().encodeForSQL(oracleCodec, userID) + \n" + 
-				"					\"' and user_password = '\" + ESAPI.encoder().encodeForSQL(oracleCodec, pwd) + \n" + 
-				"					\"'\");\n" + 
-				"		} catch (SQLException e) {\n" + 
-				"			e.printStackTrace();\n" + 
+				"		try {\n" +
+				"			Connection connection = null;\n" +
+				"			Statement statement = connection.createStatement();\n" +
+				"			String userID =\"1111111\";\n" +
+				"			String pwd = \"pwd\";\n" +
+				"			ResultSet resultset = statement.executeQuery(\n" +
+				"					\"SELECT user_id FROM user_data WHERE\" +\n" +
+				"					\" user_id = '\" + userID + \n" +
+				"					\"' and user_password = '\" + pwd + \n" +
+				"					\"'\");\n" +
+				"		} catch (SQLException e) {\n" +
+				"			e.printStackTrace();\n" +
 				"		}" +
 				"	}";
+		String expected = "" +
+				"	public void test() {\n" +
+				"		try {\n" +
+				"			Connection connection = null;\n" +
+				"			Statement statement = connection.createStatement();\n" +
+				"			String userID =\"1111111\";\n" +
+				"			String pwd = \"pwd\";\n" +
+				"			Codec<Character> oracleCodec = new OracleCodec();\n" +
+				"			ResultSet resultset = statement.executeQuery(\n" +
+				"					\"SELECT user_id FROM user_data WHERE\" +\n" +
+				"					\" user_id = '\" + ESAPI.encoder().encodeForSQL(oracleCodec, userID) + \n" +
+				"					\"' and user_password = '\" + ESAPI.encoder().encodeForSQL(oracleCodec, pwd) + \n" +
+				"					\"'\");\n" +
+				"		} catch (SQLException e) {\n" +
+				"			e.printStackTrace();\n" +
+				"		}" +
+				"	}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ConditionalUserSuppliedInput_shouldTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"			String userName = \"userName\";\n" +
+				"			String query = \"SELECT user_id FROM user_data WHERE user_name = '\" + userName + \"'\";\n"
+				+
+				"			if (true) {\n" +
+				"				String userPassword = \"userPassword\";\n" +
+				"				query += \" and user_password = '\" + userPassword + \"'\";\n" +
+				"			}\n" +
+				"			try {\n" +
+				"				Connection connection = null;\n" +
+				"				Statement statement = connection.createStatement();\n" +
+				"				ResultSet results = statement.executeQuery(query);\n" +
+				"			} catch (SQLException e) {\n" +
+				"				e.printStackTrace();\n" +
+				"			}\n" +
+				"		}";
+
+		String expected = "" +
+				"	void test(){\n" +
+				"		String userName=\"userName\";\n" +
+				"		Codec<Character> oracleCodec=new OracleCodec();\n" +
+				"		String query=\"SELECT user_id FROM user_data WHERE user_name = '\" + ESAPI.encoder().encodeForSQL(oracleCodec,userName) + \"'\";\n"
+				+
+				"		if (true) {\n" +
+				"			String userPassword=\"userPassword\";\n" +
+				"			query+=\" and user_password = '\" + ESAPI.encoder().encodeForSQL(oracleCodec,userPassword) + \"'\";\n"
+				+
+				"		}\n" +
+				"		try {\n" +
+				"			Connection connection=null;\n" +
+				"			Statement statement=connection.createStatement();\n" +
+				"			ResultSet results=statement.executeQuery(query);\n" +
+				"		}\n" +
+				"		catch (SQLException e) {\n" +
+				"			e.printStackTrace();\n" +
+				"		}\n" +
+				"	}";
+
 		assertChange(original, expected);
 	}
 
