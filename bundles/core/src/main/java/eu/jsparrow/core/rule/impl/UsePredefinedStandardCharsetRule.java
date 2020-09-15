@@ -25,7 +25,7 @@ public class UsePredefinedStandardCharsetRule
 		this.id = "UsePredefinedStandardCharset"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.UsePredefinedStandardCharsetRule_name,
 				Messages.UsePredefinedStandardCharsetRule_description,
-				Duration.ofMinutes(5),
+				Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_7, Tag.PERFORMANCE));
 	}
 
