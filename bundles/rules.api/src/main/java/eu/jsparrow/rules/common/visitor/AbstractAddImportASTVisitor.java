@@ -42,6 +42,8 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	private Set<String> staticImports;
 	private Set<String> safeImports;
 	private Set<String> typesImportedOnDemand;
+	private Set<String> safeStaticMethodImports;
+	private Set<String> staticMethodsImportedOnDemand;
 
 	protected AbstractAddImportASTVisitor() {
 		super();
@@ -49,6 +51,8 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		this.staticImports = new HashSet<>();
 		this.safeImports = new HashSet<>();
 		this.typesImportedOnDemand = new HashSet<>();
+		this.safeStaticMethodImports = new HashSet<>();
+		this.staticMethodsImportedOnDemand = new HashSet<>();
 	}
 
 	@Override
@@ -84,6 +88,17 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			safeImports.add(qualifiedTypeName);
 			if (matchesTypeImportOnDemand(importDeclarations, qualifiedTypeName)) {
 				typesImportedOnDemand.add(qualifiedTypeName);
+			}
+		}
+	}
+
+	protected void verifyStaticMethodImport(CompilationUnit compilationUnit, String fullyQualifiedStaticMethodName) {
+		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
+				ImportDeclaration.class);
+		if (isSafeToAddStaticMethodImport(compilationUnit, fullyQualifiedStaticMethodName)) {
+			safeStaticMethodImports.add(fullyQualifiedStaticMethodName);
+			if (matchesStaticMethodImportOnDemand(importDeclarations, fullyQualifiedStaticMethodName)) {
+				staticMethodsImportedOnDemand.add(fullyQualifiedStaticMethodName);
 			}
 		}
 	}
@@ -384,5 +399,23 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			addImports.add(qualifiedName);
 		}
 		return getSimpleName(qualifiedName);
+	}
+
+	/**
+	 * @param qualifiedName
+	 *            the fully qualified name of a type.
+	 * @return the simple name of the type in case the corresponding import can
+	 *         be safely added, or the fully qualified name otherwise.
+	 */
+	protected String findQualifierForStaticMethodInvocation(String fullyQualifiedStaticMethodName) {
+		if (safeStaticMethodImports.contains(fullyQualifiedStaticMethodName)) {
+			if (!staticMethodsImportedOnDemand.contains(fullyQualifiedStaticMethodName)) {
+				addStaticImport(fullyQualifiedStaticMethodName);
+			}
+			return null;
+		}
+		int lastIndexOfDot = fullyQualifiedStaticMethodName.lastIndexOf('.');
+		String qualifiedTypeName = fullyQualifiedStaticMethodName.substring(0, lastIndexOfDot);
+		return findTypeNameForStaticMethodInvocation(qualifiedTypeName);
 	}
 }
