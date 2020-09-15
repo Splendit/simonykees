@@ -45,6 +45,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  *
  */
 public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportASTVisitor {
+
 	private static final String STANDARD_CHARSETS_QUALIFIED_NAME = java.nio.charset.StandardCharsets.class.getName();
 	private static final Class<String> STRING = java.lang.String.class;
 	private static final Class<Charset> CHARSET = java.nio.charset.Charset.class;

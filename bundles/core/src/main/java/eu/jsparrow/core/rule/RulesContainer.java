@@ -167,7 +167,7 @@ public class RulesContainer {
 				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
 				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
 				new RemoveCollectionAddAllRule(), new RemoveRedundantTypeCastRule(),
-				new UseFilesBufferedReaderRule(),
+				new UseFilesBufferedReaderRule(), new UsePredefinedStandardCharsetRule(),
 
 				/*
 				 * Security
@@ -206,11 +206,6 @@ public class RulesContainer {
 				 * StringBuildingLoopRule.
 				 */
 				new UseStringBuilderAppendRule(), new UseStringJoinRule(),
-
-				/*
-				 * Performance
-				 */
-				new UsePredefinedStandardCharsetRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen
