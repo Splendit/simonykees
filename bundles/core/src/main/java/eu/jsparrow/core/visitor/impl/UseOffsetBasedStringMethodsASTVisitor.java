@@ -7,7 +7,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
@@ -65,30 +64,15 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 	private final SignatureData lastIndexOfString = new SignatureData(STRING, LAST_INDEX_OF, STRING);
 	private final SignatureData startsWithString = new SignatureData(STRING, STARTS_WITH, STRING);
 	private final SignatureData substringWithOffset = new SignatureData(STRING, SUBSTRING, int.class);
-	private boolean safeImportStaticMathMax;
-	private boolean safeImportStaticMathMaxExistsOnDemand;
-	private boolean safeImportMath;
 
 	@Override
-	public boolean visit(CompilationUnit node) {
-		super.visit(node);
-		safeImportStaticMathMax = isSafeToAddStaticMethodImport(node, MATH_MAX_FULLY_QUALIFIED_NAME);
-		if (safeImportStaticMathMax) {
-			List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(node.imports(),
-					ImportDeclaration.class);
-			safeImportStaticMathMaxExistsOnDemand = matchesStaticMethodImportOnDemand(
-					importDeclarations, MATH_MAX_FULLY_QUALIFIED_NAME);
+	public boolean visit(CompilationUnit compilationUnit) {
+		boolean continueVisiting = super.visit(compilationUnit);
+		if (continueVisiting) {
+			verifyStaticMethodImport(compilationUnit, MATH_MAX_FULLY_QUALIFIED_NAME);
+			verifyImport(compilationUnit, MATH_FULLY_QUALIFIED_NAME);
 		}
-		safeImportMath = isSafeToAddImport(node, MATH_FULLY_QUALIFIED_NAME);
-		return true;
-	}
-
-	@Override
-	public void endVisit(CompilationUnit node) {
-		super.endVisit(node);
-		safeImportStaticMathMax = false;
-		safeImportMath = false;
-		safeImportStaticMathMaxExistsOnDemand = false;
+		return continueVisiting;
 	}
 
 	@Override
@@ -152,23 +136,10 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 		maxArguments.add(offsetSubtraction);
 		maxArguments.add(ast.newNumberLiteral("-1")); //$NON-NLS-1$
 
-		String maxInvocationQualifier = findMaxInvocationQualifier();
+		String maxInvocationQualifier = findQualifierForStaticMethodInvocation(MATH_MAX_FULLY_QUALIFIED_NAME);
 		if (maxInvocationQualifier != null) {
 			maxInvocation.setExpression(ast.newName(maxInvocationQualifier));
 		}
 		return maxInvocation;
-	}
-
-	private String findMaxInvocationQualifier() {
-		if (safeImportStaticMathMax) {
-			if (!safeImportStaticMathMaxExistsOnDemand) {
-				addStaticImport(MATH_MAX_FULLY_QUALIFIED_NAME);
-			}
-			return null;
-		}
-		if (safeImportMath) {
-			return java.lang.Math.class.getSimpleName();
-		}
-		return MATH_FULLY_QUALIFIED_NAME;
 	}
 }
