@@ -40,11 +40,15 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 
 	protected Set<String> addImports;
 	private Set<String> staticImports;
+	private Set<String> safeImports;
+	private Set<String> typesImportedOnDemand;
 
 	protected AbstractAddImportASTVisitor() {
 		super();
 		this.addImports = new HashSet<>();
 		this.staticImports = new HashSet<>();
+		this.safeImports = new HashSet<>();
+		this.typesImportedOnDemand = new HashSet<>();
 	}
 
 	@Override
@@ -61,6 +65,8 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			.filter(newImport -> isNotExistingImport(node, newImport))
 			.forEach(newImport -> astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY)
 				.insertLast(newImport, null));
+		safeImports.clear();
+		typesImportedOnDemand.clear();
 		super.endVisit(node);
 	}
 
@@ -69,6 +75,17 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		return node.imports()
 			.stream()
 			.noneMatch(importDeclaration -> (new ASTMatcher()).match((ImportDeclaration) importDeclaration, newImport));
+	}
+
+	protected void verifyImport(CompilationUnit compilationUnit, String qualifiedTypeName) {
+		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
+				ImportDeclaration.class);
+		if (isSafeToAddImport(compilationUnit, qualifiedTypeName)) {
+			safeImports.add(qualifiedTypeName);
+			if (matchesTypeImportOnDemand(importDeclarations, qualifiedTypeName)) {
+				typesImportedOnDemand.add(qualifiedTypeName);
+			}
+		}
 	}
 
 	/**
@@ -241,11 +258,11 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		if (containsImport(importDeclarations, qualifiedTypeName)) {
 			return true;
 		}
-		
-		if(matchesTypeImportOnDemand(importDeclarations, qualifiedTypeName)) {
+
+		if (matchesTypeImportOnDemand(importDeclarations, qualifiedTypeName)) {
 			return true;
 		}
-		
+
 		if (isImportClashing(importDeclarations, simpleTypeName)) {
 			return false;
 		}
@@ -283,7 +300,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		for (ImportDeclaration importOnDemand : importsOnDemand) {
 			IBinding iBinding = importOnDemand.resolveBinding();
 			IPackageBinding iPackageBinding = (IPackageBinding) iBinding;
-			String implicitTypeImport = iPackageBinding.getName() + "." + simpleTypeName;
+			String implicitTypeImport = iPackageBinding.getName() + "." + simpleTypeName; //$NON-NLS-1$
 			if (!qualifiedTypeName.equals(implicitTypeImport)) {
 				return false;
 			}
@@ -351,5 +368,21 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			.noneMatch(
 					importDeclaration -> ClassRelationUtil.importsStaticMethodOnDemand(importDeclaration,
 							simpleMethodName));
+	}
+
+	/**
+	 * @param qualifiedName
+	 *            the fully qualified name of a type.
+	 * @return the simple name of the type in case the corresponding import can
+	 *         be safely added, or the fully qualified name otherwise.
+	 */
+	protected String findTypeNameForStaticMethodInvocation(String qualifiedName) {
+		if (!safeImports.contains(qualifiedName)) {
+			return qualifiedName;
+		}
+		if (!typesImportedOnDemand.contains(qualifiedName)) {
+			addImports.add(qualifiedName);
+		}
+		return getSimpleName(qualifiedName);
 	}
 }
