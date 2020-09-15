@@ -565,6 +565,8 @@ public class Messages extends NLS {
 	public static String UseParameterizedJPAQueryRule_name;
 	public static String UseParameterizedLDAPQueryRule_description;
 	public static String UseParameterizedLDAPQueryRule_name;
+	public static String UsePredefinedStandardCharsetRule_description;
+	public static String UsePredefinedStandardCharsetRule_name;
 	public static String UseStringBuilderAppendRule_description;
 	public static String UseStringBuilderAppendRule_name;
 	public static String UseStringJoinRule_description;

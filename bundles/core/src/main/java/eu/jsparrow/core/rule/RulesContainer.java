@@ -93,6 +93,7 @@ import eu.jsparrow.core.rule.impl.UseOffsetBasedStringMethodsRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedJPAQueryRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedLDAPQueryRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedQueryRule;
+import eu.jsparrow.core.rule.impl.UsePredefinedStandardCharsetRule;
 import eu.jsparrow.core.rule.impl.UseSecureRandomRule;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.UseStringJoinRule;
@@ -166,7 +167,7 @@ public class RulesContainer {
 				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
 				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
 				new RemoveCollectionAddAllRule(), new RemoveRedundantTypeCastRule(),
-				new UseFilesBufferedReaderRule(),
+				new UseFilesBufferedReaderRule(), new UsePredefinedStandardCharsetRule(),
 
 				/*
 				 * Security
