@@ -2,7 +2,6 @@ package eu.jsparrow.core.visitor.impl;
 
 import java.nio.charset.Charset;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -11,7 +10,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -61,26 +59,13 @@ public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportAST
 					"UTF-16LE")
 				.collect(Collectors.toMap(s -> s, s -> s.replace('-', '_'))));
 
-	private boolean safeImportStandardCharsets;
-	private boolean importedStandardCharsetsOnDemand;
-
 	@Override
-	public boolean visit(CompilationUnit node) {
-		boolean superReturnValue = super.visit(node);
-		safeImportStandardCharsets = isSafeToAddImport(node, STANDARD_CHARSETS_QUALIFIED_NAME);
-		if (safeImportStandardCharsets) {
-			List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(node.imports(),
-					ImportDeclaration.class);
-			importedStandardCharsetsOnDemand = matchesTypeImportOnDemand(importDeclarations,
-					STANDARD_CHARSETS_QUALIFIED_NAME);
+	public boolean visit(CompilationUnit compilationUnit) {
+		boolean continueVisiting = super.visit(compilationUnit);
+		if (continueVisiting) {
+			verifyImport(compilationUnit, STANDARD_CHARSETS_QUALIFIED_NAME);
 		}
-		return superReturnValue;
-	}
-
-	@Override
-	public void endVisit(CompilationUnit node) {
-		super.endVisit(node);
-		safeImportStandardCharsets = false;
+		return continueVisiting;
 	}
 
 	@Override
@@ -103,16 +88,8 @@ public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportAST
 
 	private void transform(MethodInvocation forNameInvocation, String charsetConstantIdentifier) {
 		AST ast = forNameInvocation.getAST();
-
-		String typeNameStandardCharsets;
-		if (safeImportStandardCharsets) {
-			typeNameStandardCharsets = java.nio.charset.StandardCharsets.class.getSimpleName();
-			if (!importedStandardCharsetsOnDemand) {
-				addImports.add(STANDARD_CHARSETS_QUALIFIED_NAME);
-			}
-		} else {
-			typeNameStandardCharsets = STANDARD_CHARSETS_QUALIFIED_NAME;
-		}
+		
+		String typeNameStandardCharsets = findTypeNameForStaticMethodInvocation(STANDARD_CHARSETS_QUALIFIED_NAME);
 		SimpleName charsetConstantSimpleName = ast.newSimpleName(charsetConstantIdentifier);
 		QualifiedName charsetConstantQualifiedName = ast.newQualifiedName(ast.newName(typeNameStandardCharsets),
 				charsetConstantSimpleName);

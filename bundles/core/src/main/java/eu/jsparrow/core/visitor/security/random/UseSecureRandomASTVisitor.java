@@ -41,19 +41,14 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String SECURE_RANDOM_QUALIFIED_NAME = java.security.SecureRandom.class.getName();
-	private boolean flagSafeImport;
 
 	@Override
-	public boolean visit(CompilationUnit node) {
-		super.visit(node);
-		flagSafeImport = isSafeToAddImport(node, SECURE_RANDOM_QUALIFIED_NAME);
-		return true;
-	}
-
-	@Override
-	public void endVisit(CompilationUnit node) {
-		super.endVisit(node);
-		flagSafeImport = false;
+	public boolean visit(CompilationUnit compilationUnit) {
+		boolean continueVisiting = super.visit(compilationUnit);
+		if (continueVisiting) {
+			verifyImport(compilationUnit, SECURE_RANDOM_QUALIFIED_NAME);
+		}
+		return continueVisiting;
 	}
 
 	@Override
@@ -94,21 +89,16 @@ public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 		onRewrite();
 	}
 
-	private ClassInstanceCreation getSecureRandomInstanceCreation() {		
-		
+	private ClassInstanceCreation getSecureRandomInstanceCreation() {
+
 		CompilationUnit compilationUnit = getCompilationUnit();
 		AST ast = compilationUnit.getAST();
-		Name secureRandomName;
-		if (flagSafeImport) {
-			this.addImports.add(SECURE_RANDOM_QUALIFIED_NAME);
-			secureRandomName = ast
-				.newSimpleName(java.security.SecureRandom.class.getSimpleName());
-		} else {
-			secureRandomName = ast.newName(SECURE_RANDOM_QUALIFIED_NAME);
-		}
+		
+		Name secureRandomName = ast.newName(findTypeNameForStaticMethodInvocation(SECURE_RANDOM_QUALIFIED_NAME));
 		SimpleType secureRandomType = ast.newSimpleType(secureRandomName);
 		ClassInstanceCreation secureRandomInstanceCreation = ast.newClassInstanceCreation();
 		secureRandomInstanceCreation.setType(secureRandomType);
+		
 		return secureRandomInstanceCreation;
 	}
 }
