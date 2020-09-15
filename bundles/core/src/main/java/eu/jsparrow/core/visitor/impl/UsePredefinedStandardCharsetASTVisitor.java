@@ -89,7 +89,7 @@ public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportAST
 	private void transform(MethodInvocation forNameInvocation, String charsetConstantIdentifier) {
 		AST ast = forNameInvocation.getAST();
 		
-		String typeNameStandardCharsets = findTypeNameForStaticMethodInvocation(STANDARD_CHARSETS_QUALIFIED_NAME);
+		String typeNameStandardCharsets = findTypeName(STANDARD_CHARSETS_QUALIFIED_NAME);
 		SimpleName charsetConstantSimpleName = ast.newSimpleName(charsetConstantIdentifier);
 		QualifiedName charsetConstantQualifiedName = ast.newQualifiedName(ast.newName(typeNameStandardCharsets),
 				charsetConstantSimpleName);

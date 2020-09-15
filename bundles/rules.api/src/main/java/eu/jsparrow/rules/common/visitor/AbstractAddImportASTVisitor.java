@@ -391,7 +391,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * @return the simple name of the type in case the corresponding import can
 	 *         be safely added, or the fully qualified name otherwise.
 	 */
-	protected String findTypeNameForStaticMethodInvocation(String qualifiedName) {
+	protected String findTypeName(String qualifiedName) {
 		if (!safeImports.contains(qualifiedName)) {
 			return qualifiedName;
 		}
@@ -402,12 +402,17 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	}
 
 	/**
-	 * @param qualifiedName
-	 *            the fully qualified name of a type.
-	 * @return the simple name of the type in case the corresponding import can
-	 *         be safely added, or the fully qualified name otherwise.
+	 * @param fullyQualifiedStaticMethodName
+	 *            the fully qualified name of a static method.
+	 * @return If the static method can be imported, no qualifier is needed and
+	 *         therefore null is returned. <br>
+	 *         If the simple name of the type declaring the static method can be
+	 *         imported, then the corresponding simple type name is returned.
+	 *         <br>
+	 *         If no legal import can be carried out, then the fully qualified
+	 *         name of the type declaring the static method is returned.
 	 */
-	protected String findQualifierForStaticMethodInvocation(String fullyQualifiedStaticMethodName) {
+	protected String findQualifierNeededForStaticMethodInvocation(String fullyQualifiedStaticMethodName) {
 		if (safeStaticMethodImports.contains(fullyQualifiedStaticMethodName)) {
 			if (!staticMethodsImportedOnDemand.contains(fullyQualifiedStaticMethodName)) {
 				addStaticImport(fullyQualifiedStaticMethodName);
@@ -416,6 +421,6 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		}
 		int lastIndexOfDot = fullyQualifiedStaticMethodName.lastIndexOf('.');
 		String qualifiedTypeName = fullyQualifiedStaticMethodName.substring(0, lastIndexOfDot);
-		return findTypeNameForStaticMethodInvocation(qualifiedTypeName);
+		return findTypeName(qualifiedTypeName);
 	}
 }

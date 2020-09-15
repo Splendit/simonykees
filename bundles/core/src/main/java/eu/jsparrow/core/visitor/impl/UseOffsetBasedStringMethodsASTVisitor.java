@@ -136,7 +136,7 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 		maxArguments.add(offsetSubtraction);
 		maxArguments.add(ast.newNumberLiteral("-1")); //$NON-NLS-1$
 
-		String maxInvocationQualifier = findQualifierForStaticMethodInvocation(MATH_MAX_FULLY_QUALIFIED_NAME);
+		String maxInvocationQualifier = findQualifierNeededForStaticMethodInvocation(MATH_MAX_FULLY_QUALIFIED_NAME);
 		if (maxInvocationQualifier != null) {
 			maxInvocation.setExpression(ast.newName(maxInvocationQualifier));
 		}
