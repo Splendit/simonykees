@@ -15,12 +15,14 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -75,6 +77,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 
+	private static final String STREAM_QUALIFIED_NAME = java.util.stream.Stream.class.getName();
+	private static final String ARRAYS_QUALIFIED_NAME = java.util.Arrays.class.getName();
 	@SuppressWarnings("nls")
 	private static final List<String> BLOCKED_LIST = Collections.unmodifiableList(Arrays.asList(
 			"mapToInt",
@@ -96,8 +100,18 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 			"concat"));
 
 	@Override
+	public boolean visit(CompilationUnit compilationUnit) {
+		boolean continueVisiting = super.visit(compilationUnit);
+		if (continueVisiting) {
+			verifyImport(compilationUnit, ARRAYS_QUALIFIED_NAME);
+			verifyImport(compilationUnit, STREAM_QUALIFIED_NAME);
+		}
+		return continueVisiting;
+	}
+
+	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		boolean hasRightType = isMethodDeclaredOnType(methodInvocation, "asList", java.util.Arrays.class.getName()); //$NON-NLS-1$
+		boolean hasRightType = isMethodDeclaredOnType(methodInvocation, "asList", ARRAYS_QUALIFIED_NAME); //$NON-NLS-1$
 		if (!hasRightType) {
 			return true;
 		}
@@ -122,16 +136,10 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 				return true;
 			}
 			Expression experssion = methodInvocation.getExpression();
-			if (experssion == null && !isSafeToAddImport(getCompilationUnit(), java.util.Arrays.class.getName())) {
-				return true;
-			}
 			replaceWithArraysStream(parent, arguments, argumentTypeBinding, experssion);
 			onRewrite();
 			return true;
 		} else {
-			if (!isSafeToAddImport(getCompilationUnit(), java.util.stream.Stream.class.getName())) {
-				return true;
-			}
 			replaceWithStreamOf(parent, arguments);
 			onRewrite();
 			return true;
@@ -140,17 +148,16 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 
 	private void replaceWithStreamOf(MethodInvocation parent, List<Expression> arguments) {
 		AST ast = parent.getAST();
-		Expression expression = ast.newSimpleName(java.util.stream.Stream.class.getSimpleName());
+		Expression expression = ast.newName(findTypeName(STREAM_QUALIFIED_NAME));
 		ListRewrite listRewrite = astRewrite.getListRewrite(parent, MethodInvocation.ARGUMENTS_PROPERTY);
 		arguments.forEach(arg -> listRewrite.insertLast(astRewrite.createMoveTarget(arg), null));
 
-		addImports.add(java.util.stream.Stream.class.getName());
 		astRewrite.replace(parent.getExpression(), expression, null);
 		astRewrite.replace(parent.getName(), ast.newSimpleName("of"), null); //$NON-NLS-1$
 	}
 
 	private void replaceWithArraysStream(MethodInvocation stream, List<Expression> arguments,
-			ITypeBinding argumentTypeBinding, Expression experssion) {
+			ITypeBinding argumentTypeBinding, Expression experession) {
 		AST ast = stream.getAST();
 		ArrayCreation arrayCreation = ast.newArrayCreation();
 		Code primitiveType = PrimitiveType.toCode(argumentTypeBinding.getName());
@@ -167,12 +174,11 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 		ListRewrite listRewrite = astRewrite.getListRewrite(stream, MethodInvocation.ARGUMENTS_PROPERTY);
 		listRewrite.insertFirst(arrayCreation, null);
 
-		if (experssion != null) {
-			astRewrite.replace(stream.getExpression(), astRewrite.createCopyTarget(experssion), null);
+		if (experession != null) {
+			astRewrite.replace(stream.getExpression(), astRewrite.createCopyTarget(experession), null);
 		} else {
-			addImports.add(java.util.Arrays.class.getName());
-			SimpleName newExpression = ast.newSimpleName(Arrays.class.getSimpleName());
-			astRewrite.replace(stream.getExpression(), newExpression, null);
+			Name arraysTypeName = ast.newName(findTypeName(ARRAYS_QUALIFIED_NAME));
+			astRewrite.replace(stream.getExpression(), arraysTypeName, null);
 		}
 	}
 
@@ -233,8 +239,7 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 			MethodInvocation parent = (MethodInvocation) methodInvocation.getParent();
 			IMethodBinding parentMethodBinding = parent.resolveMethodBinding();
 			ITypeBinding declaringClass = parentMethodBinding.getDeclaringClass();
-			boolean isStreamMethod = ClassRelationUtil.isContentOfType(declaringClass,
-					java.util.stream.Stream.class.getName());
+			boolean isStreamMethod = ClassRelationUtil.isContentOfType(declaringClass, STREAM_QUALIFIED_NAME);
 			if (isStreamMethod) {
 				chain.add(parent);
 				chain.addAll(extractStreamChain(parent));
