@@ -26,7 +26,7 @@ public class UseOffsetBasedStringMethodsRule
 		this.ruleDescription = new RuleDescription(Messages.UseOffsetBasedStringMethodsRule_name,
 				Messages.UseOffsetBasedStringMethodsRule_description,
 				Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_1, Tag.PERFORMANCE));
+				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE));
 	}
 
 	@Override
