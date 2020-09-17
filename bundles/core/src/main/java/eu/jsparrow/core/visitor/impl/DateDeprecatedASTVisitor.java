@@ -52,11 +52,18 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String DATE_QUALIFIED_NAME = java.util.Date.class.getName();
 	private static final String CALENDAR_QUALIFIED_NAME = java.util.Calendar.class.getName();
-	private static final String CALENDAR_NAME = java.util.Calendar.class.getSimpleName();
-
 	private static final String CALENDAR = "calendar"; //$NON-NLS-1$
-	
+
 	private LiveVariableScope scope = new LiveVariableScope();
+
+	@Override
+	public boolean visit(CompilationUnit compilationUnit) {
+		boolean continueVisiting = super.visit(compilationUnit);
+		if (continueVisiting) {
+			verifyImport(compilationUnit, CALENDAR_QUALIFIED_NAME);
+		}
+		return continueVisiting;
+	}
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
@@ -71,7 +78,8 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 			case 3:
 			case 5:
 			case 6:
-				ASTNode enclosingScope = this.scope.findEnclosingScope(node).orElse(null);
+				ASTNode enclosingScope = this.scope.findEnclosingScope(node)
+					.orElse(null);
 				if (enclosingScope == null) {
 					logger.warn("The scope of the Date declaration cannot be found!"); //$NON-NLS-1$
 					break;
@@ -84,8 +92,6 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 				} else {
 					replaceConstructorInStatement(node, calendarName, expressionList, enclosingScope);
 				}
-
-				addImports.add(CALENDAR_QUALIFIED_NAME);
 				break;
 			default:
 				break;
@@ -93,7 +99,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void endVisit(CompilationUnit compilationUnit) {
 		this.scope.clearCompilationUnitScope(compilationUnit);
@@ -282,10 +288,11 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		// Calendar cal = Calendar.getInstance(); done
 		VariableDeclarationFragment variableDeclFragment = ast.newVariableDeclarationFragment();
 		variableDeclFragment.setName(NodeBuilder.newSimpleName(ast, nameOfCalendar));
+		String calendarNameAsString = findTypeName(CALENDAR_QUALIFIED_NAME);
 		variableDeclFragment.setInitializer(NodeBuilder.newMethodInvocation(ast,
-				NodeBuilder.newSimpleName(ast, CALENDAR_NAME), NodeBuilder.newSimpleName(ast, "getInstance"))); //$NON-NLS-1$
+				ast.newName(calendarNameAsString), NodeBuilder.newSimpleName(ast, "getInstance"))); //$NON-NLS-1$
 		VariableDeclarationStatement variableDeclStatement = ast.newVariableDeclarationStatement(variableDeclFragment);
-		Type calendarType = ast.newSimpleType(NodeBuilder.newSimpleName(ast, CALENDAR_NAME));
+		Type calendarType = ast.newSimpleType(ast.newName(calendarNameAsString));
 		variableDeclStatement.setType(calendarType);
 		statementList.add(variableDeclStatement);
 		// cal.set(1900 + 99, 1, 1); set arguments need to be added
