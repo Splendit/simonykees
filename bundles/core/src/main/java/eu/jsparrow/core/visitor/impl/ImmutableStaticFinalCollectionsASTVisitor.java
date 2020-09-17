@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -71,7 +72,6 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	private static final String JAVA_UTIL_SORTED_MAP = java.util.SortedMap.class.getName();
 	private static final String JAVA_UTIL_SORTED_SET = java.util.SortedSet.class.getName();
 
-	private static final String JAVA_UTIL_COLLECTIONS_SIMPLENAME = java.util.Collections.class.getSimpleName();
 	private static final String JAVA_UTIL_COLLECTIONS = java.util.Collections.class.getName();
 
 	/*** TYPE LISTS ***/
@@ -131,6 +131,15 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	}
 
 	/*** VISITORS ***/
+
+	@Override
+	public boolean visit(CompilationUnit compilationUnit) {
+		boolean continueVisiting = super.visit(compilationUnit);
+		if (continueVisiting) {
+			verifyImport(compilationUnit, JAVA_UTIL_COLLECTIONS);
+		}
+		return continueVisiting;
+	}
 
 	@Override
 	public boolean visit(VariableDeclarationFragment fragmentNode) {
@@ -293,7 +302,6 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 			.filter(key -> initializersToReplace.keySet()
 				.contains(key) && !excludedNames.contains(key))
 			.forEach(key -> {
-				this.addImports.add(JAVA_UTIL_COLLECTIONS);
 				MethodInvocation newMI = createNewMethodInvocation(initializersToReplace.get(key),
 						methodNames.get(key));
 				astRewrite.replace(initializersToReplace.get(key), newMI, null);
@@ -312,8 +320,8 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	 * @return new {@link MethodInvocation}
 	 */
 	private MethodInvocation createNewMethodInvocation(Expression initializer, String methodNameString) {
-		SimpleName collectionsClassName = astRewrite.getAST()
-			.newSimpleName(JAVA_UTIL_COLLECTIONS_SIMPLENAME);
+		Name collectionsClassName = astRewrite.getAST()
+			.newName(findTypeName(JAVA_UTIL_COLLECTIONS));
 		SimpleName methodName = astRewrite.getAST()
 			.newSimpleName(methodNameString);
 
