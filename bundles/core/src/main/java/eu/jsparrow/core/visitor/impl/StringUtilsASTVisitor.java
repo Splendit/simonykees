@@ -36,7 +36,6 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String STRING_UTILS_FULLY_QUALIFIED_NAME = org.apache.commons.lang3.StringUtils.class
 		.getName();
 
-	private static final String STRING_UTILS = "StringUtils"; //$NON-NLS-1$
 	private static final String IS_EMPTY = "isEmpty"; //$NON-NLS-1$
 	private static final String TRIM = "trim"; //$NON-NLS-1$
 
@@ -65,54 +64,11 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
-		boolean clashingImports = false;
-
-		/*
-		 * Check if there is any type inside the compilation unit with the same
-		 * name as StringUtils
-		 */
-		ConflictingTypeDeclarationAstVisitor visitor = new ConflictingTypeDeclarationAstVisitor();
-		compilationUnit.accept(visitor);
-		boolean isConflictingTypeName = visitor.isSafe();
-		if (!isConflictingTypeName) {
-			clashingImports = true;
+		boolean continueVisiting = super.visit(compilationUnit);
+		if (continueVisiting) {
+			verifyImport(compilationUnit, STRING_UTILS_FULLY_QUALIFIED_NAME);
 		}
-
-		/*
-		 * Check if there is another import declaration conflicting with
-		 * org.apache.commons.lang3.StringUtils
-		 */
-
-		List<ImportDeclaration> imports = ASTNodeUtil.returnTypedList(compilationUnit.imports(),
-				ImportDeclaration.class);
-
-		if (!clashingImports) {
-			clashingImports = imports.stream()
-				.anyMatch(importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration,
-						STRING_UTILS));
-		}
-
-		if (!clashingImports) {
-			for (ImportDeclaration importDeclaration : imports) {
-				Name qualifiedName = importDeclaration.getName();
-				String fullyQualifiedName = qualifiedName.getFullyQualifiedName();
-				if (ASTNode.QUALIFIED_NAME == qualifiedName.getNodeType()) {
-					SimpleName name = ((QualifiedName) qualifiedName).getName();
-					if (StringUtils.equals(name.getIdentifier(), STRING_UTILS)
-							&& !StringUtils.equals(fullyQualifiedName, STRING_UTILS_FULLY_QUALIFIED_NAME)) {
-						clashingImports = true;
-						break;
-					}
-				}
-			}
-		}
-
-		boolean safeToGo = false;
-		if (!clashingImports) {
-			safeToGo = super.visit(compilationUnit);
-		}
-
-		return safeToGo;
+		return continueVisiting;
 	}
 
 	@Override
@@ -158,13 +114,13 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 				break;
 			}
 			if (replacementOperation != null) {
-				addImports.add(STRING_UTILS_FULLY_QUALIFIED_NAME);
-				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, currentAST.newSimpleName(STRING_UTILS),
+				Name stringUtilsName = findTypeName(STRING_UTILS_FULLY_QUALIFIED_NAME);
+				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, stringUtilsName,
 						null);
 				astRewrite.set(node, MethodInvocation.NAME_PROPERTY, node.getAST()
 					.newSimpleName(replacementOperation), null);
 				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
-					.insertFirst((Expression) ASTNode.copySubtree(currentAST, node.getExpression()), null);
+					.insertFirst(ASTNode.copySubtree(currentAST, node.getExpression()), null);
 				saveComments(node);
 				onRewrite();
 			}
@@ -177,34 +133,5 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 		Statement parent = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
 		List<Comment> internalComments = commRewrite.findInternalComments(node);
 		commRewrite.saveBeforeStatement(parent, internalComments);
-	}
-
-	/**
-	 * Checks for a type declaration with name
-	 * {@value StringUtilsASTVisitor#STRING_UTILS}.
-	 * 
-	 * @author Ardit Ymeri
-	 *
-	 */
-	private class ConflictingTypeDeclarationAstVisitor extends ASTVisitor {
-		private boolean safe = true;
-
-		@Override
-		public boolean visit(TypeDeclaration node) {
-			if (STRING_UTILS.equals(node.getName()
-				.getIdentifier())) {
-				safe = false;
-			}
-			return safe;
-		}
-
-		public boolean isSafe() {
-			return safe;
-		}
-
-		@Override
-		public boolean preVisit2(ASTNode node) {
-			return safe;
-		}
 	}
 }

@@ -23,6 +23,6 @@ public class StringUtilsClashingImportCornerCaseRule {
 		final NumberUtils numUtil;
 		NumberUtils.explode();
 		final List<String> list;
-		return testString.indexOf("e");
+		return org.apache.commons.lang3.StringUtils.indexOf(testString, "e");
 	}
 }

@@ -10,6 +10,6 @@ public class UseOffsetBasedStringMethodsAllImportsOnDemandClashRule {
 
 	public int testIndexOfCharacterD(String str) {
 		max();
-		return java.lang.Math.max(str.indexOf('D', 6) - 6, -1);
+		return java.lang.Math.max(org.apache.commons.lang3.StringUtils.indexOf(str, 'D', 6) - 6, -1);
 	}
 }
