@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -288,11 +289,10 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		// Calendar cal = Calendar.getInstance(); done
 		VariableDeclarationFragment variableDeclFragment = ast.newVariableDeclarationFragment();
 		variableDeclFragment.setName(NodeBuilder.newSimpleName(ast, nameOfCalendar));
-		String calendarNameAsString = findTypeName(CALENDAR_QUALIFIED_NAME);
 		variableDeclFragment.setInitializer(NodeBuilder.newMethodInvocation(ast,
-				ast.newName(calendarNameAsString), NodeBuilder.newSimpleName(ast, "getInstance"))); //$NON-NLS-1$
+				findTypeName(CALENDAR_QUALIFIED_NAME), NodeBuilder.newSimpleName(ast, "getInstance"))); //$NON-NLS-1$
 		VariableDeclarationStatement variableDeclStatement = ast.newVariableDeclarationStatement(variableDeclFragment);
-		Type calendarType = ast.newSimpleType(ast.newName(calendarNameAsString));
+		Type calendarType = ast.newSimpleType(findTypeName(CALENDAR_QUALIFIED_NAME));
 		variableDeclStatement.setType(calendarType);
 		statementList.add(variableDeclStatement);
 		// cal.set(1900 + 99, 1, 1); set arguments need to be added

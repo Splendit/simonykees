@@ -217,13 +217,13 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	private Expression createEscapeExpression(String oracleCodecName, Expression expressionToEscape) {
 		AST ast = astRewrite.getAST();
 
-		String nameEsapiAsString;
+		Name nameESAPI;
 		if (liveVariableScope.isInScope("ESAPI")) {
-			nameEsapiAsString = QUALIFIED_NAME_ESAPI;
+			nameESAPI = ast.newName(QUALIFIED_NAME_ESAPI);
 		} else {
-			nameEsapiAsString = findTypeName(QUALIFIED_NAME_ESAPI);
+			nameESAPI = findTypeName(QUALIFIED_NAME_ESAPI);
 		}
-		Name nameESAPI = ast.newName(nameEsapiAsString);
+		
 		MethodInvocation encoderInvocationOfESAPI = NodeBuilder.newMethodInvocation(ast, nameESAPI, "encoder");
 		SimpleName encodeForSQLName = ast.newSimpleName("encodeForSQL");
 		List<Expression> arguments = new ArrayList<>();
@@ -249,12 +249,12 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		fragment.setName(ast.newSimpleName(oracleCodecName));
 		ClassInstanceCreation oracleCODECinitializer = ast.newClassInstanceCreation();
 
-		SimpleType oracleCodecType = ast.newSimpleType(ast.newName(findTypeName(QUALIFIED_NAME_ORACLE_CODEC)));
+		SimpleType oracleCodecType = ast.newSimpleType(findTypeName(QUALIFIED_NAME_ORACLE_CODEC));
 		oracleCODECinitializer.setType(oracleCodecType);
 		fragment.setInitializer(oracleCODECinitializer);
 		VariableDeclarationStatement oracleCODECDeclarationStatement = ast.newVariableDeclarationStatement(fragment);
 
-		SimpleType codecSimpleType = ast.newSimpleType(ast.newName(findTypeName(QUALIFIED_NAME_CODEC)));
+		SimpleType codecSimpleType = ast.newSimpleType(findTypeName(QUALIFIED_NAME_CODEC));
 		ParameterizedType codecParameterizedType = ast.newParameterizedType(codecSimpleType);
 		Type characterTypeArg = ast.newSimpleType(ast.newSimpleName(Character.class.getSimpleName()));
 		@SuppressWarnings("unchecked")

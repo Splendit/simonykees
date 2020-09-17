@@ -164,8 +164,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 	private MethodInvocation createFilesNewBufferedReaderExpression(AST ast, List<Expression> pathExpressions,
 			Expression charset) {
 		MethodInvocation pathsGet = ast.newMethodInvocation();
-		String pathsIdentifier = findTypeName(PATHS_QUALIFIED_NAME);
-		pathsGet.setExpression(ast.newName(pathsIdentifier));
+		pathsGet.setExpression(findTypeName(PATHS_QUALIFIED_NAME));
 		pathsGet.setName(ast.newSimpleName("get")); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Expression> pathsGetParameters = pathsGet.arguments();
@@ -175,14 +174,14 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 		List<Expression> arguments = new ArrayList<>();
 		arguments.add(pathsGet);
 		arguments.add(charset);
-		Expression filesExpression = ast.newName(findTypeName(FILES_QUALIFIED_NAME));
+		Expression filesExpression = findTypeName(FILES_QUALIFIED_NAME);
 		return NodeBuilder.newMethodInvocation(ast, filesExpression,
 				ast.newSimpleName("newBufferedReader"), arguments); //$NON-NLS-1$
 	}
 
 	private Expression createDefaultCharsetExpression(AST ast) {
 		MethodInvocation defaultCharset = ast.newMethodInvocation();
-		defaultCharset.setExpression(ast.newName(findTypeName(CHARSET_QUALIFIED_NAME)));
+		defaultCharset.setExpression(findTypeName(CHARSET_QUALIFIED_NAME));
 		defaultCharset.setName(ast.newSimpleName("defaultCharset")); //$NON-NLS-1$
 		return defaultCharset;
 	}

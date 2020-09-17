@@ -480,7 +480,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		AST ast = astRewrite.getAST();
 		MethodInvocation stream = ast.newMethodInvocation();
 		stream.setName(ast.newSimpleName(STREAM));
-		stream.setExpression(ast.newName(findTypeName(ARRAYS_QUALIFIED_NAME)));
+		stream.setExpression(findTypeName(ARRAYS_QUALIFIED_NAME));
 		ListRewrite argRewriter = astRewrite.getListRewrite(stream, MethodInvocation.ARGUMENTS_PROPERTY);
 		argRewriter.insertFirst(loopExpression, null);
 		return stream;
@@ -534,7 +534,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		MethodInvocation collectorsJoining = ast.newMethodInvocation();
 		collectorsJoining.setName(ast.newSimpleName(JOINING));
-		collectorsJoining.setExpression(ast.newName(findTypeName(COLLECTORS_QUALIFIED_NAME)));
+		collectorsJoining.setExpression(findTypeName(COLLECTORS_QUALIFIED_NAME));
 
 		ListRewrite argRewriter = astRewrite.getListRewrite(collect, MethodInvocation.ARGUMENTS_PROPERTY);
 		argRewriter.insertFirst(collectorsJoining, null);

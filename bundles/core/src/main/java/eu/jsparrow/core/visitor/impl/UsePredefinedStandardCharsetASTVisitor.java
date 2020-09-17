@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -89,9 +90,9 @@ public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportAST
 	private void transform(MethodInvocation forNameInvocation, String charsetConstantIdentifier) {
 		AST ast = forNameInvocation.getAST();
 		
-		String typeNameStandardCharsets = findTypeName(STANDARD_CHARSETS_QUALIFIED_NAME);
 		SimpleName charsetConstantSimpleName = ast.newSimpleName(charsetConstantIdentifier);
-		QualifiedName charsetConstantQualifiedName = ast.newQualifiedName(ast.newName(typeNameStandardCharsets),
+		Name typeNameStandardCharsets = findTypeName(STANDARD_CHARSETS_QUALIFIED_NAME);
+		QualifiedName charsetConstantQualifiedName = ast.newQualifiedName(typeNameStandardCharsets,
 				charsetConstantSimpleName);
 		this.astRewrite.replace(forNameInvocation, charsetConstantQualifiedName, null);
 		onRewrite();

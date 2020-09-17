@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -260,14 +261,15 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 *            class to be imported
 	 * @return true if the import can be carried out, otherwise false.
 	 */
-	private boolean isSafeToAddImport(CompilationUnit compilationUnit, List<ImportDeclaration> importDeclarations, String qualifiedTypeName) {
+	private boolean isSafeToAddImport(CompilationUnit compilationUnit, List<ImportDeclaration> importDeclarations,
+			String qualifiedTypeName) {
 
 		String simpleTypeName = getSimpleName(qualifiedTypeName);
 
 		if (containsTypeDeclarationWithName(compilationUnit, simpleTypeName)) {
 			return false;
 		}
-		
+
 		if (containsImport(importDeclarations, qualifiedTypeName)) {
 			return true;
 		}
@@ -356,7 +358,8 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 *            static method to be imported
 	 * @return true if the import can be carried out, otherwise false.
 	 */
-	private boolean isSafeToAddStaticMethodImport(CompilationUnit compilationUnit, List<ImportDeclaration> importDeclarations, String qualifiedStaticMethodName) {
+	private boolean isSafeToAddStaticMethodImport(CompilationUnit compilationUnit,
+			List<ImportDeclaration> importDeclarations, String qualifiedStaticMethodName) {
 
 		String simpleMethodName = getSimpleName(qualifiedStaticMethodName);
 
@@ -384,31 +387,37 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	/**
 	 * @param qualifiedName
 	 *            the fully qualified name of a type.
-	 * @return the simple name of the type in case the corresponding import can
-	 *         be safely added, or the fully qualified name otherwise.
+	 * @return a {@link SimpleName} representing the simple type name if
+	 *         corresponding import can be added safely added, otherwise a
+	 *         {@link Name} representing the fully qualified type name.
 	 */
-	protected String findTypeName(String qualifiedName) {
+	protected Name findTypeName(String qualifiedName) {
+		AST ast = astRewrite.getAST();
 		if (!safeImports.contains(qualifiedName)) {
-			return qualifiedName;
+			return ast.newName(qualifiedName);
 		}
 		if (!typesImportedOnDemand.contains(qualifiedName)) {
 			addImports.add(qualifiedName);
 		}
-		return getSimpleName(qualifiedName);
+		return ast.newSimpleName(getSimpleName(qualifiedName));
 	}
 
 	/**
 	 * @param fullyQualifiedStaticMethodName
-	 *            the fully qualified name of a static method.
-	 * @return If the static method can be imported, no qualifier is needed and
-	 *         therefore null is returned. <br>
-	 *         If the simple name of the type declaring the static method can be
-	 *         imported, then the corresponding simple type name is returned.
-	 *         <br>
-	 *         If no legal import can be carried out, then the fully qualified
-	 *         name of the type declaring the static method is returned.
+	 *            the fully qualified name of a static method, for example
+	 *            {@code java.lang.Math.max} if the qualified type name is
+	 *            {@code java.lang.Math} and the simple name of the method is
+	 *            {@code max}
+	 * @return If a static import is possible for the static method, no
+	 *         qualifier is needed and therefore null is returned. <br>
+	 *         If a static import is not possible and the simple name of the
+	 *         type declaring the static method can be used as qualifier, an
+	 *         instance of {@link SimpleName} representing the simple type name
+	 *         is returned. <br>
+	 *         In all other cases, an instance of {@link Name} is returned which
+	 *         represents the qualified type name.
 	 */
-	protected String findQualifierNeededForStaticMethodInvocation(String fullyQualifiedStaticMethodName) {
+	protected Name findQualifierForStaticMethodInvocation(String fullyQualifiedStaticMethodName) {
 		if (safeStaticMethodImports.contains(fullyQualifiedStaticMethodName)) {
 			if (!staticMethodsImportedOnDemand.contains(fullyQualifiedStaticMethodName)) {
 				addStaticImport(fullyQualifiedStaticMethodName);

@@ -210,8 +210,7 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		int numFragments = statement.fragments()
 			.size();
 		AST ast = astRewrite.getAST();
-		String typeNameFound = findTypeName(PREPARED_STATEMENT_QUALIFIED_NAME);
-		Name preparedStatementTypeName = ast.newName(typeNameFound);
+		Name preparedStatementTypeName = findTypeName(PREPARED_STATEMENT_QUALIFIED_NAME);
 		SimpleType preparedStatementType = ast.newSimpleType(preparedStatementTypeName);
 		if (numFragments > 1) {
 			VariableDeclarationFragment newFragment = (VariableDeclarationFragment) astRewrite
