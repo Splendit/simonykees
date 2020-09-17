@@ -84,7 +84,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	protected void verifyImport(CompilationUnit compilationUnit, String qualifiedTypeName) {
 		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
 				ImportDeclaration.class);
-		if (isSafeToAddImport(compilationUnit, qualifiedTypeName)) {
+		if (isSafeToAddImport(compilationUnit, importDeclarations, qualifiedTypeName)) {
 			safeImports.add(qualifiedTypeName);
 			if (matchesTypeImportOnDemand(importDeclarations, qualifiedTypeName)) {
 				typesImportedOnDemand.add(qualifiedTypeName);
@@ -95,7 +95,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	protected void verifyStaticMethodImport(CompilationUnit compilationUnit, String fullyQualifiedStaticMethodName) {
 		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
 				ImportDeclaration.class);
-		if (isSafeToAddStaticMethodImport(compilationUnit, fullyQualifiedStaticMethodName)) {
+		if (isSafeToAddStaticMethodImport(compilationUnit, importDeclarations, fullyQualifiedStaticMethodName)) {
 			safeStaticMethodImports.add(fullyQualifiedStaticMethodName);
 			if (matchesStaticMethodImportOnDemand(importDeclarations, fullyQualifiedStaticMethodName)) {
 				staticMethodsImportedOnDemand.add(fullyQualifiedStaticMethodName);
@@ -146,7 +146,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 *         the compilation unit or to a type declared inside the compilation
 	 *         unit.
 	 */
-	protected boolean isInSamePackage(String newImport, String cuPackageQualifiedName,
+	private boolean isInSamePackage(String newImport, String cuPackageQualifiedName,
 			List<AbstractTypeDeclaration> cuDeclaredTypes) {
 		boolean isInSamePackage = false;
 
@@ -190,7 +190,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * @return true if a type with the given simple name is declared in the
 	 *         given {@link CompilationUnit}.
 	 */
-	protected boolean containsTypeDeclarationWithName(CompilationUnit compilationUnit, String simpleTypeName) {
+	private boolean containsTypeDeclarationWithName(CompilationUnit compilationUnit, String simpleTypeName) {
 		DeclaredTypesASTVisitor visitor = new DeclaredTypesASTVisitor();
 		compilationUnit.accept(visitor);
 		return visitor.getAllTypes()
@@ -204,7 +204,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * @return true if a given type is already imported into the given
 	 *         {@link CompilationUnit}.
 	 */
-	protected boolean containsImport(List<ImportDeclaration> importDeclarations, String qualifiedTypeName) {
+	private boolean containsImport(List<ImportDeclaration> importDeclarations, String qualifiedTypeName) {
 		return importDeclarations
 			.stream()
 			.map(ImportDeclaration::getName)
@@ -217,7 +217,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * @return true if the simple name of a given type will cause conflicts when
 	 *         imported into the given {@link CompilationUnit}.
 	 */
-	protected boolean isImportClashing(List<ImportDeclaration> importDeclarations, String simpleTypeName) {
+	private boolean isImportClashing(List<ImportDeclaration> importDeclarations, String simpleTypeName) {
 		boolean clashing = importDeclarations.stream()
 			.map(ImportDeclaration::getName)
 			.filter(Name::isQualifiedName)
@@ -244,7 +244,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * @return the simple name of the class corresponding the name given by the
 	 *         parameter.
 	 */
-	protected String getSimpleName(String name) {
+	private String getSimpleName(String name) {
 		int lastIndexOfDot = name.lastIndexOf('.');
 		if (lastIndexOfDot == -1) {
 			return name;
@@ -260,16 +260,14 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 *            class to be imported
 	 * @return true if the import can be carried out, otherwise false.
 	 */
-	protected boolean isSafeToAddImport(CompilationUnit compilationUnit, String qualifiedTypeName) {
+	private boolean isSafeToAddImport(CompilationUnit compilationUnit, List<ImportDeclaration> importDeclarations, String qualifiedTypeName) {
 
 		String simpleTypeName = getSimpleName(qualifiedTypeName);
 
 		if (containsTypeDeclarationWithName(compilationUnit, simpleTypeName)) {
 			return false;
 		}
-		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
-				ImportDeclaration.class);
-
+		
 		if (containsImport(importDeclarations, qualifiedTypeName)) {
 			return true;
 		}
@@ -292,7 +290,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * @return true if a method with the given simple name is declared in the
 	 *         given {@link CompilationUnit}.
 	 */
-	protected boolean containsMethodDeclarationWithName(CompilationUnit compilationUnit, String simpleMethod) {
+	private boolean containsMethodDeclarationWithName(CompilationUnit compilationUnit, String simpleMethod) {
 		DeclaredMethodNamesASTVisitor visitor = new DeclaredMethodNamesASTVisitor();
 		compilationUnit.accept(visitor);
 		return visitor.getDeclaredMethodNames()
@@ -300,7 +298,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			.anyMatch(name -> name.equals(simpleMethod));
 	}
 
-	protected boolean matchesTypeImportOnDemand(List<ImportDeclaration> importDeclarations,
+	private boolean matchesTypeImportOnDemand(List<ImportDeclaration> importDeclarations,
 			String qualifiedTypeName) {
 		String simpleTypeName = getSimpleName(qualifiedTypeName);
 		List<ImportDeclaration> importsOnDemand = importDeclarations.stream()
@@ -323,7 +321,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		return true;
 	}
 
-	protected boolean matchesStaticMethodImportOnDemand(List<ImportDeclaration> importDeclarations,
+	private boolean matchesStaticMethodImportOnDemand(List<ImportDeclaration> importDeclarations,
 			String qualifiedStaticMethodName) {
 		String simpleMethodName = getSimpleName(qualifiedStaticMethodName);
 		List<ImportDeclaration> importsOnDemand = importDeclarations.stream()
@@ -358,15 +356,13 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 *            static method to be imported
 	 * @return true if the import can be carried out, otherwise false.
 	 */
-	protected boolean isSafeToAddStaticMethodImport(CompilationUnit compilationUnit, String qualifiedStaticMethodName) {
+	private boolean isSafeToAddStaticMethodImport(CompilationUnit compilationUnit, List<ImportDeclaration> importDeclarations, String qualifiedStaticMethodName) {
 
 		String simpleMethodName = getSimpleName(qualifiedStaticMethodName);
 
 		if (containsMethodDeclarationWithName(compilationUnit, simpleMethodName)) {
 			return false;
 		}
-		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
-				ImportDeclaration.class);
 
 		if (containsImport(importDeclarations, qualifiedStaticMethodName)) {
 			return true;
