@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
@@ -118,6 +119,8 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStreamASTVisitor {
 
+	private static final String COLLECTORS_QUALIFIED_NAME = java.util.stream.Collectors.class.getName();
+	private static final String ARRAYS_QUALIFIED_NAME = java.util.Arrays.class.getName();
 	private static final String COLLECT = "collect"; //$NON-NLS-1$
 	private static final String JOINING = "joining"; //$NON-NLS-1$
 	private static final String TO_STRING = "toString"; //$NON-NLS-1$
@@ -145,6 +148,17 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	public void endVisit(Initializer initializer) {
 		generatedIdsPerMethod.clear();
 	}
+	
+	@Override
+	public boolean visit(CompilationUnit compilationUnit) {
+		boolean continueVisiting = super.visit(compilationUnit);
+		if (continueVisiting) {
+			verifyImport(compilationUnit, ARRAYS_QUALIFIED_NAME);
+			verifyImport(compilationUnit, COLLECTORS_QUALIFIED_NAME);
+		}
+		return continueVisiting;
+	}
+
 
 	@Override
 	public boolean visit(EnhancedForStatement loopNode) {
@@ -466,8 +480,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		AST ast = astRewrite.getAST();
 		MethodInvocation stream = ast.newMethodInvocation();
 		stream.setName(ast.newSimpleName(STREAM));
-		stream.setExpression(ast.newSimpleName(java.util.Arrays.class.getSimpleName()));
-		addImports.add(java.util.Arrays.class.getName());
+		stream.setExpression(ast.newName(findTypeName(ARRAYS_QUALIFIED_NAME)));
 		ListRewrite argRewriter = astRewrite.getListRewrite(stream, MethodInvocation.ARGUMENTS_PROPERTY);
 		argRewriter.insertFirst(loopExpression, null);
 		return stream;
@@ -521,8 +534,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		MethodInvocation collectorsJoining = ast.newMethodInvocation();
 		collectorsJoining.setName(ast.newSimpleName(JOINING));
-		collectorsJoining.setExpression(ast.newSimpleName(java.util.stream.Collectors.class.getSimpleName()));
-		this.addImports.add(java.util.stream.Collectors.class.getName());
+		collectorsJoining.setExpression(ast.newName(findTypeName(COLLECTORS_QUALIFIED_NAME)));
 
 		ListRewrite argRewriter = astRewrite.getListRewrite(collect, MethodInvocation.ARGUMENTS_PROPERTY);
 		argRewriter.insertFirst(collectorsJoining, null);
