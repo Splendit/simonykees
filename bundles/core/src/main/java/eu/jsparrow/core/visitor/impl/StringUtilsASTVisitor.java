@@ -87,10 +87,9 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 				ImportDeclaration.class);
 
 		if (!clashingImports) {
-			String stringUtilsTypeName = STRING_UTILS + ".java"; //$NON-NLS-1$
 			clashingImports = imports.stream()
 				.anyMatch(importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration,
-						stringUtilsTypeName));
+						STRING_UTILS));
 		}
 
 		if (!clashingImports) {

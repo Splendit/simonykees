@@ -15,6 +15,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.logging.LogRecord;
 
 import org.slf4j.Logger;
@@ -48,8 +51,8 @@ public class TestCornerCasesTryWithResourceRule {
 
 	static void readFirstLineFromFile(String path) {
 
-		try (BufferedReader br = new BufferedReader(new FileReader(path));
-				BufferedReader br2 = new BufferedReader(new FileReader(path));
+		try (BufferedReader br = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br2 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
 				Closeable cl = new BufferedReader(new FileReader(path))) {
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
@@ -58,8 +61,8 @@ public class TestCornerCasesTryWithResourceRule {
 
 	static void readFirstLineFromFile_withFinalBlock(String path) {
 
-		try (BufferedReader br = new BufferedReader(new FileReader(path));
-				BufferedReader br2 = new BufferedReader(new FileReader(path));
+		try (BufferedReader br = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br2 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
 				Closeable cl = new BufferedReader(new FileReader(path))) {
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);

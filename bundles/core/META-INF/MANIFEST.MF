@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.core
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Core
 Bundle-SymbolicName: eu.jsparrow.core;singleton:=true
-Bundle-Version: 3.20.0.qualifier
+Bundle-Version: 3.21.0.qualifier
 Bundle-Activator: eu.jsparrow.core.Activator
 Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.i18n,

@@ -24,6 +24,7 @@ import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.core.rule.impl.CollapseIfStatementsRule;
 import eu.jsparrow.core.rule.impl.CollectionRemoveAllRule;
 import eu.jsparrow.core.rule.impl.CollectionsFactoryMethodsRule;
+import eu.jsparrow.core.rule.impl.CreateTempFilesUsingJavaNIORule;
 import eu.jsparrow.core.rule.impl.DateDeprecatedRule;
 import eu.jsparrow.core.rule.impl.DiamondOperatorRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamAnyMatchRule;
@@ -84,13 +85,16 @@ import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseArraysStreamRule;
-import eu.jsparrow.core.rule.impl.UseSecureRandomRule;
 import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
+import eu.jsparrow.core.rule.impl.UseFilesBufferedReaderRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
+import eu.jsparrow.core.rule.impl.UseOffsetBasedStringMethodsRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedJPAQueryRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedLDAPQueryRule;
 import eu.jsparrow.core.rule.impl.UseParameterizedQueryRule;
+import eu.jsparrow.core.rule.impl.UsePredefinedStandardCharsetRule;
+import eu.jsparrow.core.rule.impl.UseSecureRandomRule;
 import eu.jsparrow.core.rule.impl.UseStringBuilderAppendRule;
 import eu.jsparrow.core.rule.impl.UseStringJoinRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
@@ -163,6 +167,7 @@ public class RulesContainer {
 				new CollectionsFactoryMethodsRule(), new UseCollectionsSingletonListRule(),
 				new HideDefaultConstructorInUtilityClassesRule(), new MakeFieldsAndVariablesFinalRule(),
 				new RemoveCollectionAddAllRule(), new RemoveRedundantTypeCastRule(),
+				new UseFilesBufferedReaderRule(), new UsePredefinedStandardCharsetRule(),
 
 				/*
 				 * Security
@@ -173,13 +178,15 @@ public class RulesContainer {
 				new EscapeUserInputsInSQLQueriesRule(),
 				new ReuseRandomObjectsRule(),
 				new UseSecureRandomRule(),
+				new CreateTempFilesUsingJavaNIORule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
 				 */
 				new RemoveNewStringConstructorRule(), new InefficientConstructorRule(),
 				new PrimitiveBoxedForStringRule(), new StringFormatLineSeparatorRule(), new IndexOfToContainsRule(),
-				new RemoveToStringOnStringRule(), new StringUtilsRule(), new StringLiteralEqualityCheckRule(),
+				new RemoveToStringOnStringRule(), new UseOffsetBasedStringMethodsRule(), new StringUtilsRule(),
+				new StringLiteralEqualityCheckRule(),
 				new StringConcatToPlusRule(), new UseIsEmptyOnCollectionsRule(), new ArithmethicAssignmentRule(),
 				new StringBufferToBuilderRule(), new PrimitiveObjectUseEqualsRule(),
 				new AvoidConcatenationInLoggingStatementsRule(),

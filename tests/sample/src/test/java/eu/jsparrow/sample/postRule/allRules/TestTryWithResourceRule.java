@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +18,8 @@ public class TestTryWithResourceRule {
 
 	static void readFirstLineFromFile(String path) {
 
-		try (BufferedReader br = new BufferedReader(new FileReader(path));
-				BufferedReader br2 = new BufferedReader(new FileReader(path));
+		try (BufferedReader br = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br2 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
 				Closeable cl = new BufferedReader(new FileReader(path))) {
 			br.close();
 		} catch (IOException e) {
@@ -25,8 +28,8 @@ public class TestTryWithResourceRule {
 	}
 
 	public void assignedResource(String path) {
-		try (BufferedReader br2 = new BufferedReader(new FileReader(path))) {
-			BufferedReader br = new BufferedReader(new FileReader(path));
+		try (BufferedReader br2 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset())) {
+			BufferedReader br = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
 			br.readLine();
 			br = new BufferedReader(new FileReader(path));
 			br2.readLine();
@@ -38,11 +41,11 @@ public class TestTryWithResourceRule {
 	}
 
 	public void assignedMultipleResources(String path) {
-		try (BufferedReader br4 = new BufferedReader(new FileReader(path));
-				BufferedReader br = new BufferedReader(new FileReader(path));
-				BufferedReader br2 = new BufferedReader(new FileReader(path));
-				BufferedReader br003 = new BufferedReader(new FileReader(path));
-				BufferedReader br004 = new BufferedReader(new FileReader(path))) {
+		try (BufferedReader br4 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br2 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br003 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br004 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset())) {
 			br.readLine();
 			br2.readLine();
 			br003.readLine();
@@ -55,11 +58,11 @@ public class TestTryWithResourceRule {
 	}
 
 	public void assignedMultipleResources1(String path) {
-		try (BufferedReader br = new BufferedReader(new FileReader(path));
-				BufferedReader br2 = new BufferedReader(new FileReader(path));
-				BufferedReader br003 = new BufferedReader(new FileReader(path));
-				BufferedReader br004 = new BufferedReader(new FileReader(path));
-				BufferedReader br4 = new BufferedReader(new FileReader(path))) {
+		try (BufferedReader br = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br2 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br003 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br004 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br4 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset())) {
 			br.readLine();
 			br2.readLine();
 			br003.readLine();
@@ -71,10 +74,10 @@ public class TestTryWithResourceRule {
 	}
 
 	public void assignedMultipleResources2(String path) {
-		try (BufferedReader br = new BufferedReader(new FileReader(path));
-				BufferedReader br4 = new BufferedReader(new FileReader(path));
-				BufferedReader br2 = new BufferedReader(new FileReader(path));
-				BufferedReader br3 = new BufferedReader(new FileReader(path))) {
+		try (BufferedReader br = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br4 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br2 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br3 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset())) {
 			br.readLine();
 			br2.readLine();
 			br3.readLine();
@@ -85,9 +88,9 @@ public class TestTryWithResourceRule {
 	}
 
 	public void assignedMultipleResources3(String path) {
-		try (BufferedReader br = new BufferedReader(new FileReader(path));
-				BufferedReader br4 = new BufferedReader(new FileReader(path));
-				BufferedReader br2 = new BufferedReader(new FileReader(path))) {
+		try (BufferedReader br = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br4 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br2 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset())) {
 			br.readLine();
 			br2.readLine();
 			br4.read();
@@ -97,8 +100,8 @@ public class TestTryWithResourceRule {
 	}
 
 	public void assignedResource4(String path) {
-		try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-			BufferedReader br2 = new BufferedReader(new FileReader(path));
+		try (BufferedReader br = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset())) {
+			BufferedReader br2 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
 			br.readLine();
 			br2 = new BufferedReader(new FileReader(path));
 			br.readLine();
@@ -112,7 +115,7 @@ public class TestTryWithResourceRule {
 		final BufferedReader br;
 		try {
 			br = new BufferedReader(new FileReader(path));
-			BufferedReader br2 = new BufferedReader(new FileReader(path));
+			BufferedReader br2 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
 			br.readLine();
 			br2 = new BufferedReader(new FileReader(path));
 			br.readLine();
@@ -142,7 +145,7 @@ public class TestTryWithResourceRule {
 
 	public void assignedResource7(String path) {
 
-		try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+		try (BufferedReader br = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset())) {
 			final BufferedReader br2;
 			br2 = new BufferedReader(new FileReader(path));
 			br2.readLine();
@@ -156,10 +159,10 @@ public class TestTryWithResourceRule {
 
 	public void nestedTryWithResource(String path) {
 
-		try (BufferedReader br = new BufferedReader(new FileReader(path));
-				BufferedReader br2 = new BufferedReader(new FileReader(path))) {
+		try (BufferedReader br = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
+				BufferedReader br2 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset())) {
 			try {
-				final BufferedReader br3 = new BufferedReader(new FileReader(path));
+				final BufferedReader br3 = Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
 				br3.read();
 				br3.close();
 			} catch (IOException e) {

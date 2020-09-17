@@ -10,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
@@ -20,6 +22,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.visitor.helper.DeclaredMethodNamesASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.DeclaredTypesASTVisitor;
 
 /**
@@ -37,11 +40,15 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 
 	protected Set<String> addImports;
 	private Set<String> staticImports;
+	private Set<String> safeImports;
+	private Set<String> typesImportedOnDemand;
 
 	protected AbstractAddImportASTVisitor() {
 		super();
 		this.addImports = new HashSet<>();
 		this.staticImports = new HashSet<>();
+		this.safeImports = new HashSet<>();
+		this.typesImportedOnDemand = new HashSet<>();
 	}
 
 	@Override
@@ -58,6 +65,8 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			.filter(newImport -> isNotExistingImport(node, newImport))
 			.forEach(newImport -> astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY)
 				.insertLast(newImport, null));
+		safeImports.clear();
+		typesImportedOnDemand.clear();
 		super.endVisit(node);
 	}
 
@@ -66,6 +75,17 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		return node.imports()
 			.stream()
 			.noneMatch(importDeclaration -> (new ASTMatcher()).match((ImportDeclaration) importDeclaration, newImport));
+	}
+
+	protected void verifyImport(CompilationUnit compilationUnit, String qualifiedTypeName) {
+		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
+				ImportDeclaration.class);
+		if (isSafeToAddImport(compilationUnit, qualifiedTypeName)) {
+			safeImports.add(qualifiedTypeName);
+			if (matchesTypeImportOnDemand(importDeclarations, qualifiedTypeName)) {
+				typesImportedOnDemand.add(qualifiedTypeName);
+			}
+		}
 	}
 
 	/**
@@ -238,11 +258,131 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		if (containsImport(importDeclarations, qualifiedTypeName)) {
 			return true;
 		}
+
+		if (matchesTypeImportOnDemand(importDeclarations, qualifiedTypeName)) {
+			return true;
+		}
+
 		if (isImportClashing(importDeclarations, simpleTypeName)) {
 			return false;
 		}
 		return importDeclarations.stream()
 			.noneMatch(
-					importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration, qualifiedTypeName));
+					importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration, simpleTypeName) ||
+							ClassRelationUtil.importsInnerTypeOnDemand(importDeclaration, simpleTypeName));
+	}
+
+	/**
+	 * 
+	 * @return true if a method with the given simple name is declared in the
+	 *         given {@link CompilationUnit}.
+	 */
+	protected boolean containsMethodDeclarationWithName(CompilationUnit compilationUnit, String simpleMethod) {
+		DeclaredMethodNamesASTVisitor visitor = new DeclaredMethodNamesASTVisitor();
+		compilationUnit.accept(visitor);
+		return visitor.getDeclaredMethodNames()
+			.stream()
+			.anyMatch(name -> name.equals(simpleMethod));
+	}
+
+	protected boolean matchesTypeImportOnDemand(List<ImportDeclaration> importDeclarations,
+			String qualifiedTypeName) {
+		String simpleTypeName = getSimpleName(qualifiedTypeName);
+		List<ImportDeclaration> importsOnDemand = importDeclarations.stream()
+			.filter(importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration,
+					simpleTypeName))
+			.collect(Collectors.toList());
+
+		if (importsOnDemand.isEmpty()) {
+			return false;
+		}
+
+		for (ImportDeclaration importOnDemand : importsOnDemand) {
+			IBinding iBinding = importOnDemand.resolveBinding();
+			IPackageBinding iPackageBinding = (IPackageBinding) iBinding;
+			String implicitTypeImport = iPackageBinding.getName() + "." + simpleTypeName; //$NON-NLS-1$
+			if (!qualifiedTypeName.equals(implicitTypeImport)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	protected boolean matchesStaticMethodImportOnDemand(List<ImportDeclaration> importDeclarations,
+			String qualifiedStaticMethodName) {
+		String simpleMethodName = getSimpleName(qualifiedStaticMethodName);
+		List<ImportDeclaration> importsOnDemand = importDeclarations.stream()
+			.filter(importDeclaration -> ClassRelationUtil.importsStaticMethodOnDemand(importDeclaration,
+					simpleMethodName))
+			.collect(Collectors.toList());
+
+		if (importsOnDemand.isEmpty()) {
+			return false;
+		}
+
+		for (ImportDeclaration importOnDemand : importsOnDemand) {
+			IBinding iBinding = importOnDemand.resolveBinding();
+			if (iBinding.getKind() != IBinding.TYPE) {
+				return false;
+			}
+			ITypeBinding typeBinding = (ITypeBinding) iBinding;
+			String implicitStaticImport = typeBinding.getQualifiedName() + "." + simpleMethodName; //$NON-NLS-1$
+			if (!qualifiedStaticMethodName.equals(implicitStaticImport)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * 
+	 * @param compilationUnit
+	 *            where the import is intended to be carried out
+	 * @param qualifiedStaticMethodName
+	 *            static method to be imported
+	 * @return true if the import can be carried out, otherwise false.
+	 */
+	protected boolean isSafeToAddStaticMethodImport(CompilationUnit compilationUnit, String qualifiedStaticMethodName) {
+
+		String simpleMethodName = getSimpleName(qualifiedStaticMethodName);
+
+		if (containsMethodDeclarationWithName(compilationUnit, simpleMethodName)) {
+			return false;
+		}
+		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
+				ImportDeclaration.class);
+
+		if (containsImport(importDeclarations, qualifiedStaticMethodName)) {
+			return true;
+		}
+
+		if (matchesStaticMethodImportOnDemand(importDeclarations, qualifiedStaticMethodName)) {
+			return true;
+		}
+
+		if (isImportClashing(importDeclarations, simpleMethodName)) {
+			return false;
+		}
+		return importDeclarations.stream()
+			.noneMatch(
+					importDeclaration -> ClassRelationUtil.importsStaticMethodOnDemand(importDeclaration,
+							simpleMethodName));
+	}
+
+	/**
+	 * @param qualifiedName
+	 *            the fully qualified name of a type.
+	 * @return the simple name of the type in case the corresponding import can
+	 *         be safely added, or the fully qualified name otherwise.
+	 */
+	protected String findTypeNameForStaticMethodInvocation(String qualifiedName) {
+		if (!safeImports.contains(qualifiedName)) {
+			return qualifiedName;
+		}
+		if (!typesImportedOnDemand.contains(qualifiedName)) {
+			addImports.add(qualifiedName);
+		}
+		return getSimpleName(qualifiedName);
 	}
 }
