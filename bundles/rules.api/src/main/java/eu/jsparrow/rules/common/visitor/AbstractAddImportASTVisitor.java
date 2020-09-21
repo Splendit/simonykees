@@ -60,7 +60,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	public void endVisit(CompilationUnit node) {
 
 		addImports.stream()
-			.filter(qualifiedName -> !StringUtils.startsWith(qualifiedName, JAVA_LANG_PACKAGE))
+			.filter(qualifiedName -> !JAVA_LANG_PACKAGE.equals(findQualifyingPrefix(qualifiedName)))
 			.map(qualifiedName -> NodeBuilder.newImportDeclaration(node.getAST(), qualifiedName, false))
 			.filter(newImport -> isNotExistingImport(node, newImport))
 			.forEach(newImport -> astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY)
@@ -72,6 +72,8 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 				.insertLast(newImport, null));
 		safeImports.clear();
 		typesImportedOnDemand.clear();
+		safeStaticMethodImports.clear();
+		staticMethodsImportedOnDemand.clear();
 		super.endVisit(node);
 	}
 
