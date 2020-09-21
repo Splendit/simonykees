@@ -236,7 +236,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 *            class to be imported
 	 * @return true if the import can be carried out, otherwise false.
 	 */
-	private boolean isSafeToAddImport(CompilationUnit compilationUnit, List<ImportDeclaration> importDeclarations,
+	protected boolean isSafeToAddImport(CompilationUnit compilationUnit, List<ImportDeclaration> importDeclarations,
 			String qualifiedTypeName) {
 
 		String simpleTypeName = getSimpleName(qualifiedTypeName);
