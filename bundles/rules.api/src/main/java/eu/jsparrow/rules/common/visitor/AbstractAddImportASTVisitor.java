@@ -407,8 +407,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		if (safeStaticMethodImports.contains(fullyQualifiedStaticMethodName)) {
 			return null;
 		}
-		int lastIndexOfDot = fullyQualifiedStaticMethodName.lastIndexOf('.');
-		String qualifiedTypeName = fullyQualifiedStaticMethodName.substring(0, lastIndexOfDot);
+		String qualifiedTypeName = findQualifyingPrefix(fullyQualifiedStaticMethodName);
 		return findTypeName(qualifiedTypeName);
 	}
 
@@ -435,9 +434,13 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 				&& !staticMethodsImportedOnDemand.contains(fullyQualifiedMethodName)) {
 			this.staticImports.add(fullyQualifiedMethodName);
 		} else {
-			int lastIndexOfDot = fullyQualifiedMethodName.lastIndexOf('.');
-			String qualifiedTypeName = fullyQualifiedMethodName.substring(0, lastIndexOfDot);
+			String qualifiedTypeName = findQualifyingPrefix(fullyQualifiedMethodName);
 			addImport(qualifiedTypeName);
 		}
+	}
+
+	private String findQualifyingPrefix(String qualifiedName) {
+		int lastIndexOfDot = qualifiedName.lastIndexOf('.');
+		return qualifiedName.substring(0, lastIndexOfDot);
 	}
 }
