@@ -221,6 +221,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		if (liveVariableScope.isInScope("ESAPI")) {
 			nameESAPI = ast.newName(QUALIFIED_NAME_ESAPI);
 		} else {
+			addImport(QUALIFIED_NAME_ESAPI);
 			nameESAPI = findTypeName(QUALIFIED_NAME_ESAPI);
 		}
 		
@@ -249,11 +250,13 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		fragment.setName(ast.newSimpleName(oracleCodecName));
 		ClassInstanceCreation oracleCODECinitializer = ast.newClassInstanceCreation();
 
+		addImport(QUALIFIED_NAME_ORACLE_CODEC);
 		SimpleType oracleCodecType = ast.newSimpleType(findTypeName(QUALIFIED_NAME_ORACLE_CODEC));
 		oracleCODECinitializer.setType(oracleCodecType);
 		fragment.setInitializer(oracleCODECinitializer);
 		VariableDeclarationStatement oracleCODECDeclarationStatement = ast.newVariableDeclarationStatement(fragment);
 
+		addImport(QUALIFIED_NAME_CODEC);
 		SimpleType codecSimpleType = ast.newSimpleType(findTypeName(QUALIFIED_NAME_CODEC));
 		ParameterizedType codecParameterizedType = ast.newParameterizedType(codecSimpleType);
 		Type characterTypeArg = ast.newSimpleType(ast.newSimpleName(Character.class.getSimpleName()));

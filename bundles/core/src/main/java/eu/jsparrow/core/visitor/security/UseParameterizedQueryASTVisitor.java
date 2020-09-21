@@ -210,6 +210,7 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		int numFragments = statement.fragments()
 			.size();
 		AST ast = astRewrite.getAST();
+		addImport(PREPARED_STATEMENT_QUALIFIED_NAME);
 		Name preparedStatementTypeName = findTypeName(PREPARED_STATEMENT_QUALIFIED_NAME);
 		SimpleType preparedStatementType = ast.newSimpleType(preparedStatementTypeName);
 		if (numFragments > 1) {

@@ -263,7 +263,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 		expMethodReference.setName(ast.newSimpleName(expMethRefName));
 		expMethodReference.setExpression(ast.newSimpleName(boxedClass.getSimpleName()));
 
-		addImport(boxedClass.getName());
+		addImport(boxedClass);
 
 		ListRewrite miRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 		miRewrite.insertFirst(expMethodReference, null);
@@ -279,7 +279,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 	 * @param qualifiedName
 	 *            a string representing a qualified name.
 	 */
-	private void addImport(String qualifiedName) {
+	private void addImport(Class<? extends Number> boxedClass) {
+		String qualifiedName = boxedClass.getName();
 		ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
 		importRewrite.addImport(qualifiedName);
 		String[] addedImpots = importRewrite.getAddedImports();

@@ -93,7 +93,7 @@ public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 
 		CompilationUnit compilationUnit = getCompilationUnit();
 		AST ast = compilationUnit.getAST();
-		
+		addImport(SECURE_RANDOM_QUALIFIED_NAME);
 		Name secureRandomName = findTypeName(SECURE_RANDOM_QUALIFIED_NAME);
 		SimpleType secureRandomType = ast.newSimpleType(secureRandomName);
 		ClassInstanceCreation secureRandomInstanceCreation = ast.newClassInstanceCreation();

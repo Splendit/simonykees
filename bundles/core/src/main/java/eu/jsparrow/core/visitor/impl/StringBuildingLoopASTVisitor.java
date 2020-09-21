@@ -148,7 +148,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	public void endVisit(Initializer initializer) {
 		generatedIdsPerMethod.clear();
 	}
-	
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		boolean continueVisiting = super.visit(compilationUnit);
@@ -159,14 +159,13 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		return continueVisiting;
 	}
 
-
 	@Override
 	public boolean visit(EnhancedForStatement loopNode) {
 
 		Expression loopExpression = loopNode.getExpression();
 		SingleVariableDeclaration loopParameter = loopNode.getParameter();
-		
-		if(isGeneratedNode(loopParameter.getType())) {
+
+		if (isGeneratedNode(loopParameter.getType())) {
 			return true;
 		}
 
@@ -480,6 +479,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		AST ast = astRewrite.getAST();
 		MethodInvocation stream = ast.newMethodInvocation();
 		stream.setName(ast.newSimpleName(STREAM));
+		addImport(ARRAYS_QUALIFIED_NAME);
 		stream.setExpression(findTypeName(ARRAYS_QUALIFIED_NAME));
 		ListRewrite argRewriter = astRewrite.getListRewrite(stream, MethodInvocation.ARGUMENTS_PROPERTY);
 		argRewriter.insertFirst(loopExpression, null);
@@ -534,6 +534,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		MethodInvocation collectorsJoining = ast.newMethodInvocation();
 		collectorsJoining.setName(ast.newSimpleName(JOINING));
+		addImport(COLLECTORS_QUALIFIED_NAME);
 		collectorsJoining.setExpression(findTypeName(COLLECTORS_QUALIFIED_NAME));
 
 		ListRewrite argRewriter = astRewrite.getListRewrite(collect, MethodInvocation.ARGUMENTS_PROPERTY);

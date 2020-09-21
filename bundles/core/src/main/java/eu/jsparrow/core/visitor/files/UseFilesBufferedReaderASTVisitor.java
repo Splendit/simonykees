@@ -31,13 +31,19 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  * For example, the following code:
  * 
  * <pre>
- * {@code BufferedReader bufferedReader = new BufferedReader(new FileReader(new File("path/to/file")));}
+ * {
+ * 	&#64;code
+ * 	BufferedReader bufferedReader = new BufferedReader(new FileReader(new File("path/to/file")));
+ * }
  * </pre>
  * 
  * is transformed to:
  * 
  * <pre>
- * {@code BufferedReader bufferedReader = Files.newBufferedReader(Paths.get("path/to/file"), Charset.defaultCharset());}
+ * {
+ * 	&#64;code
+ * 	BufferedReader bufferedReader = Files.newBufferedReader(Paths.get("path/to/file"), Charset.defaultCharset());
+ * }
  * </pre>
  * 
  * @since 3.21.0
@@ -53,7 +59,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		boolean continueVisiting = super.visit(compilationUnit);
-		if(!continueVisiting) {
+		if (!continueVisiting) {
 			return false;
 		}
 		verifyImport(compilationUnit, PATHS_QUALIFIED_NAME);
@@ -72,7 +78,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 		}
 
 		Expression initializer = fragment.getInitializer();
-		if(!ClassRelationUtil.isNewInstanceCreationOf(initializer, BUFFERED_READER_QUALIFIED_NAME)) {
+		if (!ClassRelationUtil.isNewInstanceCreationOf(initializer, BUFFERED_READER_QUALIFIED_NAME)) {
 			return true;
 		}
 		ClassInstanceCreation newBufferedReader = (ClassInstanceCreation) initializer;
@@ -164,6 +170,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 	private MethodInvocation createFilesNewBufferedReaderExpression(AST ast, List<Expression> pathExpressions,
 			Expression charset) {
 		MethodInvocation pathsGet = ast.newMethodInvocation();
+		addImport(PATHS_QUALIFIED_NAME);
 		pathsGet.setExpression(findTypeName(PATHS_QUALIFIED_NAME));
 		pathsGet.setName(ast.newSimpleName("get")); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
@@ -174,6 +181,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 		List<Expression> arguments = new ArrayList<>();
 		arguments.add(pathsGet);
 		arguments.add(charset);
+		addImport(FILES_QUALIFIED_NAME);
 		Expression filesExpression = findTypeName(FILES_QUALIFIED_NAME);
 		return NodeBuilder.newMethodInvocation(ast, filesExpression,
 				ast.newSimpleName("newBufferedReader"), arguments); //$NON-NLS-1$
@@ -181,6 +189,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 
 	private Expression createDefaultCharsetExpression(AST ast) {
 		MethodInvocation defaultCharset = ast.newMethodInvocation();
+		addImport(CHARSET_QUALIFIED_NAME);
 		defaultCharset.setExpression(findTypeName(CHARSET_QUALIFIED_NAME));
 		defaultCharset.setName(ast.newSimpleName("defaultCharset")); //$NON-NLS-1$
 		return defaultCharset;

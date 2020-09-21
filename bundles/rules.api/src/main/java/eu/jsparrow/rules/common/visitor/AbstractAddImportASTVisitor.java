@@ -176,17 +176,6 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	}
 
 	/**
-	 * Records a static import to be inserted if it does not exist. Does not
-	 * support on demand imports.
-	 * 
-	 * @param qualifiedName
-	 *            the qualified name of the static import.
-	 */
-	protected void addStaticImport(String qualifiedName) {
-		this.staticImports.add(qualifiedName);
-	}
-
-	/**
 	 * 
 	 * @return true if a type with the given simple name is declared in the
 	 *         given {@link CompilationUnit}.
@@ -393,13 +382,10 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 */
 	protected Name findTypeName(String qualifiedName) {
 		AST ast = astRewrite.getAST();
-		if (!safeImports.contains(qualifiedName)) {
-			return ast.newName(qualifiedName);
+		if (safeImports.contains(qualifiedName)) {
+			return ast.newSimpleName(getSimpleName(qualifiedName));
 		}
-		if (!typesImportedOnDemand.contains(qualifiedName)) {
-			addImports.add(qualifiedName);
-		}
-		return ast.newSimpleName(getSimpleName(qualifiedName));
+		return ast.newName(qualifiedName);
 	}
 
 	/**
@@ -419,13 +405,39 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 */
 	protected Name findQualifierForStaticMethodInvocation(String fullyQualifiedStaticMethodName) {
 		if (safeStaticMethodImports.contains(fullyQualifiedStaticMethodName)) {
-			if (!staticMethodsImportedOnDemand.contains(fullyQualifiedStaticMethodName)) {
-				addStaticImport(fullyQualifiedStaticMethodName);
-			}
 			return null;
 		}
 		int lastIndexOfDot = fullyQualifiedStaticMethodName.lastIndexOf('.');
 		String qualifiedTypeName = fullyQualifiedStaticMethodName.substring(0, lastIndexOfDot);
 		return findTypeName(qualifiedTypeName);
+	}
+
+	/**
+	 * Adds the qualified type name specified by the parameter to the type names
+	 * which will be imported.
+	 * 
+	 * @param qualifiedName
+	 */
+	protected void addImport(String qualifiedName) {
+		if (safeImports.contains(qualifiedName) && !typesImportedOnDemand.contains(qualifiedName)) {
+			addImports.add(qualifiedName);
+		}
+	}
+
+	/**
+	 * Adds the fully qualified static method name to the static method names
+	 * which will be imported.
+	 * 
+	 * @param fullyQualifiedMethodName
+	 */
+	protected void addImportForStaticMethod(String fullyQualifiedMethodName) {
+		if (safeStaticMethodImports.contains(fullyQualifiedMethodName)
+				&& !staticMethodsImportedOnDemand.contains(fullyQualifiedMethodName)) {
+			this.staticImports.add(fullyQualifiedMethodName);
+		} else {
+			int lastIndexOfDot = fullyQualifiedMethodName.lastIndexOf('.');
+			String qualifiedTypeName = fullyQualifiedMethodName.substring(0, lastIndexOfDot);
+			addImport(qualifiedTypeName);
+		}
 	}
 }

@@ -163,6 +163,7 @@ public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTV
 		AST ast = replacedCreateTempFileInvocation.getAST();
 		MethodInvocation createTempFileInvocation = ast.newMethodInvocation();
 		createTempFileInvocation.setName(ast.newSimpleName(CREATE_TEMP_FILE));
+		addImport(FILES_QUALIFIED_NAME);
 		createTempFileInvocation.setExpression(findTypeName(FILES_QUALIFIED_NAME));
 
 		@SuppressWarnings("unchecked")
@@ -177,6 +178,7 @@ public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTV
 				.equals(STRING.getName());
 			if (isStringPath) {
 				pathExpression.setName(ast.newSimpleName("get")); //$NON-NLS-1$
+				addImport(PATHS_QUALIFIED_NAME);
 				pathExpression.setExpression(findTypeName(PATHS_QUALIFIED_NAME));
 				@SuppressWarnings("unchecked")
 				List<Expression> pathsGetterInvocationArguments = pathExpression.arguments();

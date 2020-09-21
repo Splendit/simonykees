@@ -289,8 +289,11 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		// Calendar cal = Calendar.getInstance(); done
 		VariableDeclarationFragment variableDeclFragment = ast.newVariableDeclarationFragment();
 		variableDeclFragment.setName(NodeBuilder.newSimpleName(ast, nameOfCalendar));
+
+		addImport(CALENDAR_QUALIFIED_NAME);
 		variableDeclFragment.setInitializer(NodeBuilder.newMethodInvocation(ast,
 				findTypeName(CALENDAR_QUALIFIED_NAME), NodeBuilder.newSimpleName(ast, "getInstance"))); //$NON-NLS-1$
+
 		VariableDeclarationStatement variableDeclStatement = ast.newVariableDeclarationStatement(variableDeclFragment);
 		Type calendarType = ast.newSimpleType(findTypeName(CALENDAR_QUALIFIED_NAME));
 		variableDeclStatement.setType(calendarType);

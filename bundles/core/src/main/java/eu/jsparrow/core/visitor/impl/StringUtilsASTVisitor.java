@@ -114,6 +114,7 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 				break;
 			}
 			if (replacementOperation != null) {
+				addImport(STRING_UTILS_FULLY_QUALIFIED_NAME);
 				Name stringUtilsName = findTypeName(STRING_UTILS_FULLY_QUALIFIED_NAME);
 				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, stringUtilsName,
 						null);
