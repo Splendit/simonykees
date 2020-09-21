@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -138,9 +139,9 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 		maxArguments.add(ast.newNumberLiteral("-1")); //$NON-NLS-1$
 
 		addImportForStaticMethod(MATH_MAX_FULLY_QUALIFIED_NAME);
-		Name maxInvocationQualifier = findQualifierForStaticMethodInvocation(MATH_MAX_FULLY_QUALIFIED_NAME);
-		if (maxInvocationQualifier != null) {
-			maxInvocation.setExpression(maxInvocationQualifier);
+		Optional<Name> maxInvocationQualifier = findQualifierForStaticMethodInvocation(MATH_MAX_FULLY_QUALIFIED_NAME);
+		if (maxInvocationQualifier.isPresent()) {
+			maxInvocation.setExpression(maxInvocationQualifier.get());
 		}
 		return maxInvocation;
 	}

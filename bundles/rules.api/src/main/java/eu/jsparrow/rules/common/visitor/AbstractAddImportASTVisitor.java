@@ -3,6 +3,7 @@ package eu.jsparrow.rules.common.visitor;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -388,12 +389,12 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 *         In all other cases, an instance of {@link Name} is returned which
 	 *         represents the qualified type name.
 	 */
-	protected Name findQualifierForStaticMethodInvocation(String fullyQualifiedStaticMethodName) {
+	protected Optional<Name> findQualifierForStaticMethodInvocation(String fullyQualifiedStaticMethodName) {
 		if (safeStaticMethodImports.contains(fullyQualifiedStaticMethodName)) {
-			return null;
+			return Optional.empty();
 		}
 		String qualifiedTypeName = findQualifyingPrefix(fullyQualifiedStaticMethodName);
-		return findTypeName(qualifiedTypeName);
+		return Optional.of(findTypeName(qualifiedTypeName));
 	}
 
 	/**
