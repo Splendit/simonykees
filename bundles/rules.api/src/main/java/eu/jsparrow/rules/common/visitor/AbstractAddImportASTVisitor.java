@@ -59,8 +59,20 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	@Override
 	public void endVisit(CompilationUnit node) {
 
+		PackageDeclaration cuPackage = node.getPackage();
+		String packageQualifiedName;
+		if (cuPackage != null) {
+			Name packageName = cuPackage.getName();
+			packageQualifiedName = packageName.getFullyQualifiedName();
+		} else {
+			packageQualifiedName = ""; //$NON-NLS-1$
+		}
+		List<AbstractTypeDeclaration> cuDeclaredTypes = ASTNodeUtil.convertToTypedList(node.types(),
+				AbstractTypeDeclaration.class);
+
 		addImports.stream()
 			.filter(qualifiedName -> !JAVA_LANG_PACKAGE.equals(findQualifyingPrefix(qualifiedName)))
+			.filter(newImport -> !isInSamePackage(newImport, packageQualifiedName, cuDeclaredTypes))
 			.map(qualifiedName -> NodeBuilder.newImportDeclaration(node.getAST(), qualifiedName, false))
 			.filter(newImport -> isNotExistingImport(node, newImport))
 			.forEach(newImport -> astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY)
@@ -104,35 +116,6 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 				staticMethodsImportedOnDemand.add(fullyQualifiedStaticMethodName);
 			}
 		}
-	}
-
-	/**
-	 * from a given list of fully qualified class names, this method filters out
-	 * all imports, which are in the same package or file as the given
-	 * {@link CompilationUnit}.
-	 * 
-	 * @param cu
-	 *            current compilation unit
-	 * @param newImports
-	 *            list of fully qualified names, which are about to be imported
-	 * @return list of fully qualified names, where the names contained in the
-	 *         current package are filtered out
-	 */
-	protected List<String> filterNewImportsByExcludingCurrentPackage(CompilationUnit cu, Set<String> newImports) {
-		PackageDeclaration cuPackage = cu.getPackage();
-		String packageQualifiedName;
-		if (cuPackage != null) {
-			Name packageName = cuPackage.getName();
-			packageQualifiedName = packageName.getFullyQualifiedName();
-		} else {
-			packageQualifiedName = ""; //$NON-NLS-1$
-		}
-		List<AbstractTypeDeclaration> cuDeclaredTypes = ASTNodeUtil.convertToTypedList(cu.types(),
-				AbstractTypeDeclaration.class);
-
-		return newImports.stream()
-			.filter(newImport -> !isInSamePackage(newImport, packageQualifiedName, cuDeclaredTypes))
-			.collect(Collectors.toList());
 	}
 
 	/**

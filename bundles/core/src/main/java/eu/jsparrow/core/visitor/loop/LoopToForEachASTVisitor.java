@@ -88,7 +88,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 	@Override
 	public void endVisit(CompilationUnit cu) {
-		super.addImports.addAll(filterNewImportsByExcludingCurrentPackage(this.compilationUnit, newImports));
+		super.addImports.addAll(newImports);
 		super.endVisit(cu);
 	}
 

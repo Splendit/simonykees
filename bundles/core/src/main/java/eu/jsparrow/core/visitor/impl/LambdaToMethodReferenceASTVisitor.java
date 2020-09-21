@@ -69,7 +69,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 	@Override
 	public void endVisit(CompilationUnit cu) {
-		this.addImports.addAll(filterNewImportsByExcludingCurrentPackage(cu, newImports));
+		this.addImports.addAll(newImports);
 		super.endVisit(cu);
 	}
 
