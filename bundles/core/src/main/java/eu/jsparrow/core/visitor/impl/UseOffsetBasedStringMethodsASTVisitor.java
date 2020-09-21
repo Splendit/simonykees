@@ -139,7 +139,7 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 
 		addImportForStaticMethod(MATH_MAX_FULLY_QUALIFIED_NAME);
 		Name maxInvocationQualifier = findQualifierForStaticMethodInvocation(MATH_MAX_FULLY_QUALIFIED_NAME);
-		if (findQualifierForStaticMethodInvocation(MATH_MAX_FULLY_QUALIFIED_NAME) != null) {
+		if (maxInvocationQualifier != null) {
 			maxInvocation.setExpression(maxInvocationQualifier);
 		}
 		return maxInvocation;
