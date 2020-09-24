@@ -87,16 +87,16 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		}
 		return bufferedReaderArg;
 	}
-	
+
 	protected boolean isDeclarationInTWRHeader(VariableDeclarationFragment fragment, Expression bufferedReaderArg) {
 		ASTNode fragmentParent = fragment.getParent();
 		return bufferedReaderArg.getNodeType() == ASTNode.SIMPLE_NAME
 				&& fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
 				&& fragmentParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY;
 	}
-	
+
 	protected TransformationData createAnalysisDataUsingFileIOResource(VariableDeclarationFragment fragment,
-			ClassInstanceCreation newBufferedIO, Expression bufferedIOArg) {
+			ClassInstanceCreation newBufferedIO, Expression bufferedIOArg, FileIOAnalyzer fileIOAnalyzer) {
 		TryStatement tryStatement = findTryStatement(fragment);
 
 		VariableDeclarationFragment fileIOResource = findFileIOResource(bufferedIOArg,
@@ -105,8 +105,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 			return null;
 		}
 
-		FileReaderAnalyzer fileIOAnalyzer = new FileReaderAnalyzer();
-		if (!fileIOAnalyzer.analyzeFileReader((VariableDeclarationExpression) fileIOResource.getParent())) {
+		if (!fileIOAnalyzer.analyzeFileIO((VariableDeclarationExpression) fileIOResource.getParent())) {
 			return null;
 		}
 
@@ -141,7 +140,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 				.equals(((SimpleName) bufferedIOArg).getIdentifier()))
 			.findFirst();
 	}
-	
+
 	protected boolean hasUsagesOn(Block body, SimpleName fileReaderName) {
 		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fileReaderName);
 		body.accept(visitor);

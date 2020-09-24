@@ -35,12 +35,17 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * @since 3.21.0
  *
  */
-class FileReaderAnalyzer {
+class FileIOAnalyzer {
 
 	private Expression charsetExpression;
 	private List<Expression> pathExpressions = new ArrayList<>();
+	private final Class<?> fileIOClass;
 
-	public boolean analyzeFileReader(VariableDeclarationExpression variableDeclaration) {
+	public FileIOAnalyzer(Class<?> fileIOClass) {
+		this.fileIOClass = fileIOClass;
+	}
+
+	public boolean analyzeFileIO(VariableDeclarationExpression variableDeclaration) {
 		List<VariableDeclarationFragment> fragments = convertToTypedList(variableDeclaration.fragments(),
 				VariableDeclarationFragment.class);
 		if (fragments.size() != 1) {
@@ -53,7 +58,7 @@ class FileReaderAnalyzer {
 			return false;
 		}
 
-		boolean isFileReaderCreation = isNewInstanceCreationOf(initialzier, java.io.FileReader.class.getName());
+		boolean isFileReaderCreation = isNewInstanceCreationOf(initialzier, fileIOClass.getName());
 		if (!isFileReaderCreation) {
 			return false;
 		}
