@@ -29,16 +29,13 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  * {@link java.nio.file.Files#newBufferedReader(java.nio.file.Path, java.nio.charset.Charset)}.
  * 
  * For example, the following code:
- * 
- * <pre>
+ * <p>
  * {@code BufferedReader bufferedReader = new BufferedReader(new FileReader(new File("path/to/file")));}
- * </pre>
- * 
+ * <p>
  * is transformed to:
- * 
- * <pre>
+ * <p>
  * {@code BufferedReader bufferedReader = Files.newBufferedReader(Paths.get("path/to/file"), Charset.defaultCharset());}
- * </pre>
+ * <p>
  * 
  * @since 3.21.0
  *
