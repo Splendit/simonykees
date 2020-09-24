@@ -1,6 +1,7 @@
 package eu.jsparrow.rules.common.visitor;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +41,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	protected static final String DOT = "."; //$NON-NLS-1$
 	protected static final String DOT_REGEX = "\\" + DOT; //$NON-NLS-1$
 
-	protected Set<String> addImports;
+	private Set<String> addImports;
 	private Set<String> staticImports;
 	private Set<String> safeImports;
 	private Set<String> typesImportedOnDemand;
@@ -428,5 +429,9 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	private String findQualifyingPrefix(String qualifiedName) {
 		int lastIndexOfDot = qualifiedName.lastIndexOf('.');
 		return qualifiedName.substring(0, lastIndexOfDot);
+	}
+	
+	protected void addAlreadyVerifiedImports(Collection<String>newImports) {
+		addImports.addAll(newImports);
 	}
 }

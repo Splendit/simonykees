@@ -32,40 +32,21 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTVisitor {
 
-	private static final String JAVA_UTIL = "java.util"; //$NON-NLS-1$
-	private static final String COLLECTIONS = "Collections"; //$NON-NLS-1$
+	private static final String JAVA_UTIL_COLLECTIONS = java.util.Collections.class.getName();
 	private static final String AS_LIST = "asList"; //$NON-NLS-1$
 	private static final String SINGLETON_LIST = "singletonList"; //$NON-NLS-1$
 	private static final String EMPTY_LIST = "emptyList"; //$NON-NLS-1$
 	private static final String ARRAYS_FULLY_QUALIFIED_NAME = java.util.Arrays.class.getName();
 
 	private List<ASTNode> replacedNames = new ArrayList<>();
-	private boolean isCollectionsImportedOnDemand = false;
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
-		super.visit(compilationUnit);
-		List<ImportDeclaration> imports = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
-				ImportDeclaration.class);
-
-		isCollectionsImportedOnDemand = imports.stream()
-			.filter(importDeclaration -> !importDeclaration.isStatic())
-			.filter(ImportDeclaration::isOnDemand)
-			.anyMatch(importDeclaration -> JAVA_UTIL.equals(importDeclaration.getName()
-				.getFullyQualifiedName()));
-
-		return imports.stream()
-			.filter(importDeclaration -> !importDeclaration.isOnDemand())
-			.filter(importDeclaration -> !importDeclaration.isStatic())
-			.noneMatch(importDeclaration -> {
-				QualifiedName qualifiedName = (QualifiedName) importDeclaration.getName();
-				SimpleName name = qualifiedName.getName();
-				Name qualifier = qualifiedName.getQualifier();
-				/*
-				 * Another Collections type, not in java.util, is imported.
-				 */
-				return COLLECTIONS.equals(name.getIdentifier()) && !JAVA_UTIL.equals(qualifier.getFullyQualifiedName()); // $NON-NLS-1$
-			});
+		boolean continueVisiting = super.visit(compilationUnit);
+		if(continueVisiting) {
+			verifyImport(compilationUnit, JAVA_UTIL_COLLECTIONS);
+		}
+		return continueVisiting;
 	}
 
 	@Override
@@ -129,12 +110,10 @@ public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTV
 		AST ast = astRewrite.getAST();
 		String newMethodIdentifier = arguments.isEmpty() ? EMPTY_LIST : SINGLETON_LIST;
 		SimpleName newMethodName = ast.newSimpleName(newMethodIdentifier);
-		SimpleName newExpressionName = ast.newSimpleName(COLLECTIONS);
+		Name newExpressionName = findTypeName(JAVA_UTIL_COLLECTIONS);
 
 		Expression originalExpression = methodInvocation.getExpression();
-		if (!isCollectionsImportedOnDemand) {
-			addImports.add(java.util.Collections.class.getName());
-		}
+		addImport(JAVA_UTIL_COLLECTIONS);
 		if (originalExpression != null) {
 			astRewrite.replace(originalExpression, newExpressionName, null);
 			Expression simpleName = originalExpression.getNodeType() == ASTNode.QUALIFIED_NAME

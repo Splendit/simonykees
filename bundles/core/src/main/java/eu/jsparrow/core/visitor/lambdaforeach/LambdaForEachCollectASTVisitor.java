@@ -13,11 +13,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -62,8 +59,6 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 
 	private static final String ADD_METHOD_NAME = "add"; //$NON-NLS-1$
 	private static final String JAVA_UTIL_STREAM_COLLECTORS = java.util.stream.Collectors.class.getName();
-	private static final String JAVA_UTIL_STREAM_COLLECTORS_SIMPLE_NAME = java.util.stream.Collectors.class
-		.getSimpleName();
 	private static final String JAVA_UTIL_LIST = java.util.List.class.getName();
 	private static final String TO_LIST = "toList"; //$NON-NLS-1$
 	private static final String COLLECT = "collect"; //$NON-NLS-1$
@@ -71,14 +66,12 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
-		boolean safeToAddImport = ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
-			.stream()
-			.map(ImportDeclaration::getName)
-			.filter(Name::isQualifiedName)
-			.map(name -> ((QualifiedName) name).getName())
-			.noneMatch(JAVA_UTIL_STREAM_COLLECTORS_SIMPLE_NAME::equals);
+		boolean continueVisiting = super.visit(compilationUnit);
+		if(continueVisiting) {
+			verifyImport(compilationUnit, JAVA_UTIL_STREAM_COLLECTORS);
+		}
 
-		return safeToAddImport && super.visit(compilationUnit);
+		return continueVisiting;
 	}
 
 	@Override
@@ -170,10 +163,10 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 			.newMethodInvocation();
 		collectorsToList.setName(collect.getAST()
 			.newSimpleName(TO_LIST));
-		collectorsToList.setExpression(collect.getAST()
-			.newSimpleName(JAVA_UTIL_STREAM_COLLECTORS_SIMPLE_NAME));
+		addImport(JAVA_UTIL_STREAM_COLLECTORS);
+		collectorsToList.setExpression(findTypeName(JAVA_UTIL_STREAM_COLLECTORS));
 		listRewirte.insertFirst(collectorsToList, null);
-		this.addImports.add(JAVA_UTIL_STREAM_COLLECTORS);
+		
 
 		collect.setExpression((Expression) astRewrite.createCopyTarget(methodInvocation.getExpression()));
 
