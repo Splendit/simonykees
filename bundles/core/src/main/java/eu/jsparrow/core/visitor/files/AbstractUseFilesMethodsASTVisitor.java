@@ -1,14 +1,18 @@
 package eu.jsparrow.core.visitor.files;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -78,5 +82,31 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 			return null;
 		}
 		return bufferedReaderArg;
+	}
+	
+	protected Expression createDefaultCharsetExpression(AST ast) {
+		MethodInvocation defaultCharset = ast.newMethodInvocation();
+		defaultCharset.setExpression(ast.newName(findTypeNameForStaticMethodInvocation(CHARSET_QUALIFIED_NAME)));
+		defaultCharset.setName(ast.newSimpleName("defaultCharset")); //$NON-NLS-1$
+		return defaultCharset;
+	}
+
+	protected MethodInvocation createFilesNewBufferedIOMethodInvocation(AST ast, List<Expression> pathExpressions,
+			Expression charset, String newBufferdIOMethodName) {
+		MethodInvocation pathsGet = ast.newMethodInvocation();
+		String pathsIdentifier = findTypeNameForStaticMethodInvocation(PATHS_QUALIFIED_NAME);
+		pathsGet.setExpression(ast.newName(pathsIdentifier));
+		pathsGet.setName(ast.newSimpleName("get")); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Expression> pathsGetParameters = pathsGet.arguments();
+		pathExpressions
+			.forEach(pathArgument -> pathsGetParameters.add((Expression) astRewrite.createCopyTarget(pathArgument)));
+
+		List<Expression> arguments = new ArrayList<>();
+		arguments.add(pathsGet);
+		arguments.add(charset);
+		Expression filesExpression = ast.newName(findTypeNameForStaticMethodInvocation(FILES_QUALIFIED_NAME));
+		return NodeBuilder.newMethodInvocation(ast, filesExpression,
+				ast.newSimpleName(newBufferdIOMethodName), arguments);
 	}
 }

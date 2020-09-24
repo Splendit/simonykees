@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.files;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,7 +14,6 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
@@ -39,6 +37,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsASTVisitor {
 
 	private static final String BUFFERED_READER_QUALIFIED_NAME = java.io.BufferedReader.class.getName();
+	private static final String NEW_BUFFERED_READER = "newBufferedReader"; //$NON-NLS-1$
 
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
@@ -53,9 +52,9 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsAST
 			return true;
 		}
 
-		NewBufferedReaderAnalyzer analyzer = new NewBufferedReaderAnalyzer();
+		NewBufferedIOArgumentsAnalyzer analyzer = new NewBufferedIOArgumentsAnalyzer();
 		if (bufferedReaderArg.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION
-				&& analyzer.isInitializedWithNewReader((ClassInstanceCreation) bufferedReaderArg)) {
+				&& analyzer.analyzeInitializer((ClassInstanceCreation) bufferedReaderArg)) {
 
 			AST ast = fragment.getAST();
 			List<Expression> pathExpressions = analyzer.getPathExpressions();
@@ -63,8 +62,8 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsAST
 				.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
 				.orElse(createDefaultCharsetExpression(ast));
 
-			MethodInvocation filesNewBufferedReader = createFilesNewBufferedReaderExpression(ast, pathExpressions,
-					charset);
+			MethodInvocation filesNewBufferedReader = createFilesNewBufferedIOMethodInvocation(ast, pathExpressions,
+					charset, NEW_BUFFERED_READER);
 
 			astRewrite.replace(newBufferedReader, filesNewBufferedReader, null);
 			onRewrite();
@@ -95,8 +94,8 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsAST
 				.orElse(createDefaultCharsetExpression(ast));
 			List<Expression> pathArguments = fileReaderAnalyzer.getPathExpressions();
 
-			MethodInvocation filesNewBufferedReader = createFilesNewBufferedReaderExpression(ast,
-					pathArguments, charset);
+			MethodInvocation filesNewBufferedReader = createFilesNewBufferedIOMethodInvocation(ast,
+					pathArguments, charset, NEW_BUFFERED_READER);
 			astRewrite.remove(fileReaderResource.getParent(), null);
 			astRewrite.replace(newBufferedReader, filesNewBufferedReader, null);
 			onRewrite();
@@ -104,7 +103,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsAST
 		return true;
 	}
 
-	private boolean isDeclarationInTWRHeader(VariableDeclarationFragment fragment, Expression bufferedReaderArg) {
+	protected boolean isDeclarationInTWRHeader(VariableDeclarationFragment fragment, Expression bufferedReaderArg) {
 		ASTNode fragmentParent = fragment.getParent();
 		return bufferedReaderArg.getNodeType() == ASTNode.SIMPLE_NAME
 				&& fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
@@ -125,31 +124,8 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsAST
 			.findFirst();
 	}
 
-	private MethodInvocation createFilesNewBufferedReaderExpression(AST ast, List<Expression> pathExpressions,
-			Expression charset) {
-		MethodInvocation pathsGet = ast.newMethodInvocation();
-		String pathsIdentifier = findTypeNameForStaticMethodInvocation(PATHS_QUALIFIED_NAME);
-		pathsGet.setExpression(ast.newName(pathsIdentifier));
-		pathsGet.setName(ast.newSimpleName("get")); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Expression> pathsGetParameters = pathsGet.arguments();
-		pathExpressions
-			.forEach(pathArgument -> pathsGetParameters.add((Expression) astRewrite.createCopyTarget(pathArgument)));
 
-		List<Expression> arguments = new ArrayList<>();
-		arguments.add(pathsGet);
-		arguments.add(charset);
-		Expression filesExpression = ast.newName(findTypeNameForStaticMethodInvocation(FILES_QUALIFIED_NAME));
-		return NodeBuilder.newMethodInvocation(ast, filesExpression,
-				ast.newSimpleName("newBufferedReader"), arguments); //$NON-NLS-1$
-	}
 
-	private Expression createDefaultCharsetExpression(AST ast) {
-		MethodInvocation defaultCharset = ast.newMethodInvocation();
-		defaultCharset.setExpression(ast.newName(findTypeNameForStaticMethodInvocation(CHARSET_QUALIFIED_NAME)));
-		defaultCharset.setName(ast.newSimpleName("defaultCharset")); //$NON-NLS-1$
-		return defaultCharset;
-	}
 
 	private boolean hasUsagesOn(Block body, SimpleName fileReaderName) {
 		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fileReaderName);
