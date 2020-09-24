@@ -2,28 +2,32 @@ package eu.jsparrow.core.visitor.files;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
 /**
- * Parent class for visitors which transform code in order to use methods of the
- * class {@link java.nio.file.Files} for the creation of objects like for
- * example instances of <br>
- * {@link java.io.BufferedReader}<br>
- * or <br>
- * {@link java.io.BufferedWriter}
+ * Parent class for visitors which replace the initializations of
+ * {@link java.io.BufferedReader}-objects or
+ * {@link java.io.BufferedWriter}-objects by the corresponding methods of
+ * {@link java.nio.file.Files}.
  * 
  * @since 3.22.0
  *
@@ -84,15 +88,95 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		return bufferedReaderArg;
 	}
 	
-	protected Expression createDefaultCharsetExpression(AST ast) {
+	protected boolean isDeclarationInTWRHeader(VariableDeclarationFragment fragment, Expression bufferedReaderArg) {
+		ASTNode fragmentParent = fragment.getParent();
+		return bufferedReaderArg.getNodeType() == ASTNode.SIMPLE_NAME
+				&& fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
+				&& fragmentParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY;
+	}
+	
+	protected TransformationData createAnalysisDataUsingFileIOResource(VariableDeclarationFragment fragment,
+			ClassInstanceCreation newBufferedIO, Expression bufferedIOArg) {
+		TryStatement tryStatement = findTryStatement(fragment);
+
+		VariableDeclarationFragment fileIOResource = findFileIOResource(bufferedIOArg,
+				tryStatement).orElse(null);
+		if (fileIOResource == null) {
+			return null;
+		}
+
+		FileReaderAnalyzer fileIOAnalyzer = new FileReaderAnalyzer();
+		if (!fileIOAnalyzer.analyzeFileReader((VariableDeclarationExpression) fileIOResource.getParent())) {
+			return null;
+		}
+
+		boolean isUsedInTryBody = hasUsagesOn(tryStatement.getBody(), fileIOResource.getName());
+		if (isUsedInTryBody) {
+			return null;
+		}
+
+		// Now the transformation happens
+		List<Expression> pathExpressions = fileIOAnalyzer.getPathExpressions();
+		Optional<Expression> optionalCharSet = fileIOAnalyzer.getCharset();
+		return new TransformationData(newBufferedIO, pathExpressions, optionalCharSet,
+				fileIOResource);
+	}
+
+	protected TryStatement findTryStatement(VariableDeclarationFragment fragment) {
+		VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment
+			.getParent();
+		return (TryStatement) declarationExpression.getParent();
+	}
+
+	protected Optional<VariableDeclarationFragment> findFileIOResource(Expression bufferedIOArg,
+			TryStatement tryStatement) {
+		List<VariableDeclarationExpression> resources = ASTNodeUtil
+			.convertToTypedList(tryStatement.resources(), VariableDeclarationExpression.class);
+		return resources.stream()
+			.flatMap(resource -> ASTNodeUtil
+				.convertToTypedList(resource.fragments(), VariableDeclarationFragment.class)
+				.stream())
+			.filter(resource -> resource.getName()
+				.getIdentifier()
+				.equals(((SimpleName) bufferedIOArg).getIdentifier()))
+			.findFirst();
+	}
+	
+	protected boolean hasUsagesOn(Block body, SimpleName fileReaderName) {
+		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fileReaderName);
+		body.accept(visitor);
+		List<SimpleName> usages = visitor.getUsages();
+		return !usages.isEmpty();
+	}
+
+	protected void transform(TransformationData analysisData, String newBufferedIOMethodName) {
+		Optional<VariableDeclarationFragment> optionalFileReaderResource = analysisData.getFileIOResource();
+		List<Expression> pathExpressions = analysisData.getPathExpressions();
+		Optional<Expression> optionalCharSet = analysisData.getCharset();
+		ClassInstanceCreation bufferedIOInstanceCreation = analysisData.getBufferedIOInstanceCreation();
+		if (optionalFileReaderResource.isPresent()) {
+			VariableDeclarationFragment fileReaderResource = optionalFileReaderResource.get();
+			astRewrite.remove(fileReaderResource.getParent(), null);
+		}
+		MethodInvocation filesNewBufferedReader = createFilesNewBufferedIOMethodInvocation(pathExpressions,
+				optionalCharSet, newBufferedIOMethodName);
+		astRewrite.replace(bufferedIOInstanceCreation, filesNewBufferedReader, null);
+		onRewrite();
+	}
+
+	private Expression createDefaultCharSetExpression(AST ast) {
 		MethodInvocation defaultCharset = ast.newMethodInvocation();
 		defaultCharset.setExpression(ast.newName(findTypeNameForStaticMethodInvocation(CHARSET_QUALIFIED_NAME)));
 		defaultCharset.setName(ast.newSimpleName("defaultCharset")); //$NON-NLS-1$
 		return defaultCharset;
 	}
 
-	protected MethodInvocation createFilesNewBufferedIOMethodInvocation(AST ast, List<Expression> pathExpressions,
-			Expression charset, String newBufferdIOMethodName) {
+	protected MethodInvocation createFilesNewBufferedIOMethodInvocation(List<Expression> pathExpressions,
+			Optional<Expression> optionalCharSet, String newBufferdIOMethodName) {
+		AST ast = astRewrite.getAST();
+		Expression charset = optionalCharSet
+			.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
+			.orElse(createDefaultCharSetExpression(ast));
 		MethodInvocation pathsGet = ast.newMethodInvocation();
 		String pathsIdentifier = findTypeNameForStaticMethodInvocation(PATHS_QUALIFIED_NAME);
 		pathsGet.setExpression(ast.newName(pathsIdentifier));

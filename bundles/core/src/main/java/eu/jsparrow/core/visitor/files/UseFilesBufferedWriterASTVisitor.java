@@ -1,8 +1,8 @@
 package eu.jsparrow.core.visitor.files;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
@@ -48,19 +48,15 @@ public class UseFilesBufferedWriterASTVisitor extends AbstractUseFilesMethodsAST
 		if (bufferedWriterArg.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION
 				&& analyzer.analyzeInitializer((ClassInstanceCreation) bufferedWriterArg)) {
 
-			AST ast = fragment.getAST();
 			List<Expression> pathExpressions = analyzer.getPathExpressions();
-			Expression charset = analyzer.getCharset()
-				.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
-				.orElse(createDefaultCharsetExpression(ast));
+			Optional<Expression> optionalCharSet = analyzer.getCharset();
 
-			MethodInvocation filesNewBufferedReader = createFilesNewBufferedIOMethodInvocation(ast, pathExpressions,
-					charset, NEW_BUFFERED_WRITER);
+			MethodInvocation filesNewBufferedReader = createFilesNewBufferedIOMethodInvocation(pathExpressions,
+					optionalCharSet, NEW_BUFFERED_WRITER);
 
 			astRewrite.replace(newBufferedWriter, filesNewBufferedReader, null);
 			onRewrite();
 		}
 		return super.visit(fragment);
 	}
-
 }

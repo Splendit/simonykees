@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 class TransformationData {
 
 	private final ClassInstanceCreation bufferedIOInstanceCreation;
-	private final Optional<VariableDeclarationFragment> fileReaderResource;
+	private final Optional<VariableDeclarationFragment> fileIOResource;
 	private final List<Expression> pathExpressions;
 	private final Optional<Expression> charset;
 
@@ -29,7 +29,7 @@ class TransformationData {
 			List<Expression> pathExpressions, Optional<Expression> optionalCharset,
 			VariableDeclarationFragment fileReaderResource) {
 		this.bufferedIOInstanceCreation = newBufferedReader;
-		this.fileReaderResource = Optional.of(fileReaderResource);
+		this.fileIOResource = Optional.of(fileReaderResource);
 		this.pathExpressions = pathExpressions;
 		this.charset = optionalCharset;
 	}
@@ -37,13 +37,13 @@ class TransformationData {
 	public TransformationData(ClassInstanceCreation newBufferedReader, List<Expression> pathExpressions,
 			Optional<Expression> optionalCharset) {
 		this.bufferedIOInstanceCreation = newBufferedReader;
-		this.fileReaderResource = Optional.empty();
+		this.fileIOResource = Optional.empty();
 		this.pathExpressions = pathExpressions;
 		this.charset = optionalCharset;
 	}
 
-	public Optional<VariableDeclarationFragment> getFileReaderResource() {
-		return fileReaderResource;
+	public Optional<VariableDeclarationFragment> getFileIOResource() {
+		return fileIOResource;
 	}
 
 	public List<Expression> getPathExpressions() {
