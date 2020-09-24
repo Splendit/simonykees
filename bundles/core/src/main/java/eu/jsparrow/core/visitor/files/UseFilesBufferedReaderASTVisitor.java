@@ -40,24 +40,9 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  * @since 3.21.0
  *
  */
-public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisitor {
+public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsASTVisitor {
 
-	private static final String FILES_QUALIFIED_NAME = java.nio.file.Files.class.getName();
-	private static final String PATHS_QUALIFIED_NAME = java.nio.file.Paths.class.getName();
-	private static final String CHARSET_QUALIFIED_NAME = java.nio.charset.Charset.class.getName();
 	private static final String BUFFERED_READER_QUALIFIED_NAME = java.io.BufferedReader.class.getName();
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		boolean continueVisiting = super.visit(compilationUnit);
-		if(!continueVisiting) {
-			return false;
-		}
-		verifyImport(compilationUnit, PATHS_QUALIFIED_NAME);
-		verifyImport(compilationUnit, FILES_QUALIFIED_NAME);
-		verifyImport(compilationUnit, CHARSET_QUALIFIED_NAME);
-		return continueVisiting;
-	}
 
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {

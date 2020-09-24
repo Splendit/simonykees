@@ -21,7 +21,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.22.0
  *
  */
-public class UseFilesBufferedWriterASTVisitor extends AbstractAddImportASTVisitor {
+public class UseFilesBufferedWriterASTVisitor extends AbstractUseFilesMethodsASTVisitor {
 
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
