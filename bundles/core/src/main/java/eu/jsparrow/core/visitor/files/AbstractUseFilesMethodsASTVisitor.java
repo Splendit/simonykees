@@ -1,7 +1,13 @@
 package eu.jsparrow.core.visitor.files;
 
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
@@ -30,5 +36,28 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		verifyImport(compilationUnit, FILES_QUALIFIED_NAME);
 		verifyImport(compilationUnit, CHARSET_QUALIFIED_NAME);
 		return continueVisiting;
+	}
+
+	/**
+	 * 
+	 * @return If the variable declared by the given
+	 *         {@link VariableDeclarationFragment} has the specified type and is
+	 *         also initialized with a constructor of the specified type, then
+	 *         the corresponding {@link ClassInstanceCreation} is returned.
+	 *         Otherwise, null is returned.
+	 */
+	protected ClassInstanceCreation findClassInstanceCreationAsInitializer(VariableDeclarationFragment fragment,
+			String qualifiedClassName) {
+		SimpleName name = fragment.getName();
+		ITypeBinding typeBinding = name.resolveTypeBinding();
+		if (!ClassRelationUtil.isContentOfType(typeBinding, qualifiedClassName)) {
+			return null;
+		}
+
+		Expression initializer = fragment.getInitializer();
+		if (!ClassRelationUtil.isNewInstanceCreationOf(initializer, qualifiedClassName)) {
+			return null;
+		}
+		return (ClassInstanceCreation) initializer;
 	}
 }

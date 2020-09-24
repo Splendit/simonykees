@@ -47,17 +47,11 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsAST
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
 
-		SimpleName name = fragment.getName();
-		ITypeBinding typeBinding = name.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(typeBinding, BUFFERED_READER_QUALIFIED_NAME)) {
+		ClassInstanceCreation newBufferedReader = findClassInstanceCreationAsInitializer(fragment,
+				BUFFERED_READER_QUALIFIED_NAME);
+		if (newBufferedReader == null) {
 			return true;
 		}
-
-		Expression initializer = fragment.getInitializer();
-		if(!ClassRelationUtil.isNewInstanceCreationOf(initializer, BUFFERED_READER_QUALIFIED_NAME)) {
-			return true;
-		}
-		ClassInstanceCreation newBufferedReader = (ClassInstanceCreation) initializer;
 
 		List<Expression> newBufferedReaderArgs = ASTNodeUtil.convertToTypedList(newBufferedReader.arguments(),
 				Expression.class);
@@ -84,7 +78,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsAST
 			MethodInvocation filesNewBufferedReader = createFilesNewBufferedReaderExpression(ast, pathExpressions,
 					charset);
 
-			astRewrite.replace(initializer, filesNewBufferedReader, null);
+			astRewrite.replace(newBufferedReader, filesNewBufferedReader, null);
 			onRewrite();
 		} else if (isDeclarationInTWRHeader(fragment, bufferedReaderArg)) {
 			VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment
@@ -116,7 +110,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsAST
 			MethodInvocation filesNewBufferedReader = createFilesNewBufferedReaderExpression(ast,
 					pathArguments, charset);
 			astRewrite.remove(fileReaderResource.getParent(), null);
-			astRewrite.replace(initializer, filesNewBufferedReader, null);
+			astRewrite.replace(newBufferedReader, filesNewBufferedReader, null);
 			onRewrite();
 		}
 		return true;

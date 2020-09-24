@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.files;
 
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -22,9 +23,18 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  *
  */
 public class UseFilesBufferedWriterASTVisitor extends AbstractUseFilesMethodsASTVisitor {
+	
+	private static final String BUFFERED_WRITER_QUALIFIED_NAME = java.io.BufferedWriter.class.getName();
 
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
+		
+		ClassInstanceCreation newBufferedReader = findClassInstanceCreationAsInitializer(fragment,
+				BUFFERED_WRITER_QUALIFIED_NAME);
+		if (newBufferedReader == null) {
+			return true;
+		}
+		
 		return super.visit(fragment);
 	}
 
