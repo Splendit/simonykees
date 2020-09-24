@@ -8,9 +8,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -19,8 +17,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
-import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
 /**
@@ -52,16 +48,8 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsAST
 		if (newBufferedReader == null) {
 			return true;
 		}
-
-		List<Expression> newBufferedReaderArgs = ASTNodeUtil.convertToTypedList(newBufferedReader.arguments(),
-				Expression.class);
-		if (newBufferedReaderArgs.size() != 1) {
-			return true;
-		}
-
-		Expression bufferedReaderArg = newBufferedReaderArgs.get(0);
-		ITypeBinding firstArgType = bufferedReaderArg.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(firstArgType, java.io.FileReader.class.getName())) {
+		Expression bufferedReaderArg = findFirstArgumentOfType(newBufferedReader, java.io.FileReader.class.getName());
+		if (bufferedReaderArg == null) {
 			return true;
 		}
 

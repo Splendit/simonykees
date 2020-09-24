@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.files;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -7,6 +9,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -59,5 +62,21 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 			return null;
 		}
 		return (ClassInstanceCreation) initializer;
+	}
+
+	protected Expression findFirstArgumentOfType(ClassInstanceCreation classInstanceCreation,
+			String qualifiedTypeName) {
+
+		List<Expression> newBufferedReaderArgs = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(),
+				Expression.class);
+		if (newBufferedReaderArgs.size() != 1) {
+			return null;
+		}
+		Expression bufferedReaderArg = newBufferedReaderArgs.get(0);
+		ITypeBinding firstArgType = bufferedReaderArg.resolveTypeBinding();
+		if (!ClassRelationUtil.isContentOfType(firstArgType, qualifiedTypeName)) {
+			return null;
+		}
+		return bufferedReaderArg;
 	}
 }
