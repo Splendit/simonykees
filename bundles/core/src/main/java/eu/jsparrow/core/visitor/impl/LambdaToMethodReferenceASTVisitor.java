@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -41,7 +40,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -441,8 +439,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		if (binding == null) {
 			return ""; //$NON-NLS-1$
 		}
-
-		if (binding.isArray()) {
+		
+		if(binding.isArray()) {
 			// see SIM-1453
 			return ""; //$NON-NLS-1$
 		}
@@ -458,58 +456,27 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			binding = optBinding.get();
 		}
 
-		String bindingQualifiedName = binding.getErasure()
-			.getQualifiedName();
 		if (binding.isMember() && !ASTNodeUtil.enclosedInSameType(expression, binding)) {
 
 			ITypeBinding declaringClass = binding.getDeclaringClass();
 			ITypeBinding declaringClassErasure = declaringClass.getErasure();
 			String outerTypeName = declaringClassErasure.getName();
-			String outerTypeQualifiedName = declaringClassErasure.getQualifiedName();
-
-			List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
-					ImportDeclaration.class);
-			if (isSafeToAddImport(compilationUnit, importDeclarations, outerTypeQualifiedName)) {
-				int outerTypeStartingIndex = bindingQualifiedName.lastIndexOf(outerTypeName);
-				typeNameStr = StringUtils.substring(bindingQualifiedName, outerTypeStartingIndex);
-				addImport(outerTypeQualifiedName);
-			} else {
-				typeNameStr = bindingQualifiedName;
-			}
+			String qualifiedName = binding.getErasure()
+				.getQualifiedName();
+			int outerTypeStartingIndex = qualifiedName.lastIndexOf(outerTypeName);
+			typeNameStr = StringUtils.substring(qualifiedName, outerTypeStartingIndex);
+			newImports.add(declaringClassErasure.getQualifiedName());
 		} else if (qualifiedNameNeeded(binding)) {
-			typeNameStr = bindingQualifiedName;
+			typeNameStr = binding.getErasure()
+				.getQualifiedName();
 		} else {
-			List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(compilationUnit.imports(),
-					ImportDeclaration.class);
-			boolean safeToAddImport = isSafeToAddImport(compilationUnit, importDeclarations, bindingQualifiedName);
-			if (safeToAddImport) {
-				typeNameStr = binding.getErasure()
-					.getName();
-				addImport(bindingQualifiedName);
-
-			} else if (isDeclaredInSameCompilationUnit(bindingQualifiedName)) {
-				typeNameStr = binding.getErasure()
-					.getName();
-			} else {
-				typeNameStr = bindingQualifiedName;
-			}
+			typeNameStr = binding.getErasure()
+				.getName();
+			newImports.add(binding.getErasure()
+				.getQualifiedName());
 		}
 
 		return typeNameStr;
-	}
-
-	private boolean isDeclaredInSameCompilationUnit(String qualifiedName) {
-		List<TypeDeclaration> nestedTypes = ASTNodeUtil.convertToTypedList(compilationUnit.types(),
-				TypeDeclaration.class);
-
-		for (TypeDeclaration t : nestedTypes) {
-			String nestedTypeQualifiedName = t.resolveBinding()
-				.getQualifiedName();
-			if (nestedTypeQualifiedName.equals(qualifiedName)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private boolean qualifiedNameNeeded(ITypeBinding binding) {
