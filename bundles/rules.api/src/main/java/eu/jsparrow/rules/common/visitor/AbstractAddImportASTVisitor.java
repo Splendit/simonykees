@@ -367,7 +367,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 *         corresponding import can be added safely added, otherwise a
 	 *         {@link Name} representing the fully qualified type name.
 	 */
-	protected Name findTypeName(String qualifiedName) {
+	private Name findTypeName(String qualifiedName) {
 		AST ast = astRewrite.getAST();
 		if (safeImports.contains(qualifiedName)) {
 			return ast.newSimpleName(getSimpleName(qualifiedName));
@@ -404,10 +404,11 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * 
 	 * @param qualifiedName
 	 */
-	protected void addImport(String qualifiedName) {
+	protected Name addImport(String qualifiedName) {
 		if (safeImports.contains(qualifiedName) && !typesImportedOnDemand.contains(qualifiedName)) {
 			addImports.add(qualifiedName);
 		}
+		return findTypeName(qualifiedName);
 	}
 
 	/**

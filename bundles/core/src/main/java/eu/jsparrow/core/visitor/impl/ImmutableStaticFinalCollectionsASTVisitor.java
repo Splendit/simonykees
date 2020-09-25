@@ -320,8 +320,7 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	 * @return new {@link MethodInvocation}
 	 */
 	private MethodInvocation createNewMethodInvocation(Expression initializer, String methodNameString) {
-		addImport(JAVA_UTIL_COLLECTIONS);
-		Name collectionsClassName = findTypeName(JAVA_UTIL_COLLECTIONS);
+		Name collectionsClassName = addImport(JAVA_UTIL_COLLECTIONS);
 		SimpleName methodName = astRewrite.getAST()
 			.newSimpleName(methodNameString);
 

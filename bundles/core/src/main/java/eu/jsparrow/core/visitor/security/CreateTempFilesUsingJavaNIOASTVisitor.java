@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -163,8 +164,8 @@ public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTV
 		AST ast = replacedCreateTempFileInvocation.getAST();
 		MethodInvocation createTempFileInvocation = ast.newMethodInvocation();
 		createTempFileInvocation.setName(ast.newSimpleName(CREATE_TEMP_FILE));
-		addImport(FILES_QUALIFIED_NAME);
-		createTempFileInvocation.setExpression(findTypeName(FILES_QUALIFIED_NAME));
+		Name filesTypeName = addImport(FILES_QUALIFIED_NAME);
+		createTempFileInvocation.setExpression(filesTypeName);
 
 		@SuppressWarnings("unchecked")
 		List<Expression> createTempFileArguments = createTempFileInvocation.arguments();
@@ -178,8 +179,8 @@ public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTV
 				.equals(STRING.getName());
 			if (isStringPath) {
 				pathExpression.setName(ast.newSimpleName("get")); //$NON-NLS-1$
-				addImport(PATHS_QUALIFIED_NAME);
-				pathExpression.setExpression(findTypeName(PATHS_QUALIFIED_NAME));
+				Name pathsTypeName = addImport(PATHS_QUALIFIED_NAME);
+				pathExpression.setExpression(pathsTypeName);
 				@SuppressWarnings("unchecked")
 				List<Expression> pathsGetterInvocationArguments = pathExpression.arguments();
 				pathsGetterInvocationArguments.add(directoryCopyTarget);

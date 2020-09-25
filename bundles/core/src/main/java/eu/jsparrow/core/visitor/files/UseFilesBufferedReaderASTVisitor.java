@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -170,8 +171,8 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 	private MethodInvocation createFilesNewBufferedReaderExpression(AST ast, List<Expression> pathExpressions,
 			Expression charset) {
 		MethodInvocation pathsGet = ast.newMethodInvocation();
-		addImport(PATHS_QUALIFIED_NAME);
-		pathsGet.setExpression(findTypeName(PATHS_QUALIFIED_NAME));
+		Name pathsTypeName = addImport(PATHS_QUALIFIED_NAME);
+		pathsGet.setExpression(pathsTypeName);
 		pathsGet.setName(ast.newSimpleName("get")); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Expression> pathsGetParameters = pathsGet.arguments();
@@ -181,16 +182,15 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractAddImportASTVisito
 		List<Expression> arguments = new ArrayList<>();
 		arguments.add(pathsGet);
 		arguments.add(charset);
-		addImport(FILES_QUALIFIED_NAME);
-		Expression filesExpression = findTypeName(FILES_QUALIFIED_NAME);
+		Name filesExpression = addImport(FILES_QUALIFIED_NAME);
 		return NodeBuilder.newMethodInvocation(ast, filesExpression,
 				ast.newSimpleName("newBufferedReader"), arguments); //$NON-NLS-1$
 	}
 
 	private Expression createDefaultCharsetExpression(AST ast) {
 		MethodInvocation defaultCharset = ast.newMethodInvocation();
-		addImport(CHARSET_QUALIFIED_NAME);
-		defaultCharset.setExpression(findTypeName(CHARSET_QUALIFIED_NAME));
+		Name typeName = addImport(CHARSET_QUALIFIED_NAME);
+		defaultCharset.setExpression(typeName);
 		defaultCharset.setName(ast.newSimpleName("defaultCharset")); //$NON-NLS-1$
 		return defaultCharset;
 	}

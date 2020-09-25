@@ -110,10 +110,9 @@ public class UseCollectionsSingletonListASTVisitor extends AbstractAddImportASTV
 		AST ast = astRewrite.getAST();
 		String newMethodIdentifier = arguments.isEmpty() ? EMPTY_LIST : SINGLETON_LIST;
 		SimpleName newMethodName = ast.newSimpleName(newMethodIdentifier);
-		Name newExpressionName = findTypeName(JAVA_UTIL_COLLECTIONS);
 
 		Expression originalExpression = methodInvocation.getExpression();
-		addImport(JAVA_UTIL_COLLECTIONS);
+		Name newExpressionName = addImport(JAVA_UTIL_COLLECTIONS);
 		if (originalExpression != null) {
 			astRewrite.replace(originalExpression, newExpressionName, null);
 			Expression simpleName = originalExpression.getNodeType() == ASTNode.QUALIFIED_NAME

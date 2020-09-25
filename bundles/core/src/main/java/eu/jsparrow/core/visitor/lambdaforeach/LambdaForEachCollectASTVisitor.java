@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -163,8 +164,8 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 			.newMethodInvocation();
 		collectorsToList.setName(collect.getAST()
 			.newSimpleName(TO_LIST));
-		addImport(JAVA_UTIL_STREAM_COLLECTORS);
-		collectorsToList.setExpression(findTypeName(JAVA_UTIL_STREAM_COLLECTORS));
+		Name streamCollectorsTypeName = addImport(JAVA_UTIL_STREAM_COLLECTORS);
+		collectorsToList.setExpression(streamCollectorsTypeName);
 		listRewirte.insertFirst(collectorsToList, null);
 		
 
