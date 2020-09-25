@@ -71,6 +71,7 @@ public class OrganizeImportsRule extends OrganiseImportsRuleBase {
 	 * 
 	 * TODO: find a better solution when adding the rule to the JMP
 	 */
+	@SuppressWarnings("nls")
 	protected void setUpOrganizeImportsConstants() {
 		if (JavaManipulation.getPreferenceNodeId() == null) {
 			Preferences preferences = InstanceScope.INSTANCE.getNode("eu.jsparrow.manipulation");
