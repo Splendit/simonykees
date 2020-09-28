@@ -43,22 +43,12 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	protected static final String DOT = "."; //$NON-NLS-1$
 	protected static final String DOT_REGEX = "\\" + DOT; //$NON-NLS-1$
 
-	private Set<String> addImports;
-	private Set<String> staticImports;
-	private Set<String> safeImports;
-	private Set<String> typesImportedOnDemand;
-	private Set<String> safeStaticMethodImports;
-	private Set<String> staticMethodsImportedOnDemand;
-
-	protected AbstractAddImportASTVisitor() {
-		super();
-		this.addImports = new HashSet<>();
-		this.staticImports = new HashSet<>();
-		this.safeImports = new HashSet<>();
-		this.typesImportedOnDemand = new HashSet<>();
-		this.safeStaticMethodImports = new HashSet<>();
-		this.staticMethodsImportedOnDemand = new HashSet<>();
-	}
+	private Set<String> addImports = new HashSet<>();
+	private Set<String> staticImports = new HashSet<>();
+	private Set<String> safeImports = new HashSet<>();
+	private Set<String> typesImportedOnDemand = new HashSet<>();
+	private Set<String> safeStaticMethodImports = new HashSet<>();
+	private Set<String> staticMethodsImportedOnDemand = new HashSet<>();
 
 	@Override
 	public void endVisit(CompilationUnit node) {
@@ -73,16 +63,18 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		}
 		List<AbstractTypeDeclaration> cuDeclaredTypes = ASTNodeUtil.convertToTypedList(node.types(),
 				AbstractTypeDeclaration.class);
+		List<ImportDeclaration> existingImports = ASTNodeUtil.convertToTypedList(node.imports(),
+				ImportDeclaration.class);
 
 		addImports.stream()
 			.filter(qualifiedName -> !JAVA_LANG_PACKAGE.equals(findQualifyingPrefix(qualifiedName)))
 			.filter(qualifiedName -> !isInSamePackage(qualifiedName, packageQualifiedName, cuDeclaredTypes))
-			.filter(qualifiedName -> isNotExistingImport(node, qualifiedName))
+			.filter(qualifiedName -> !containsImport(existingImports, qualifiedName))
 			.map(qualifiedName -> NodeBuilder.newImportDeclaration(node.getAST(), qualifiedName, false))
 			.forEach(newImport -> astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY)
 				.insertLast(newImport, null));
 		staticImports.stream()
-			.filter(qualifiedName -> isNotExistingImport(node, qualifiedName))
+			.filter(qualifiedName -> !containsImport(existingImports, qualifiedName))
 			.map(qualifiedName -> NodeBuilder.newImportDeclaration(node.getAST(), qualifiedName, true))
 			.forEach(newImport -> astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY)
 				.insertLast(newImport, null));
@@ -91,14 +83,6 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		safeStaticMethodImports.clear();
 		staticMethodsImportedOnDemand.clear();
 		super.endVisit(node);
-	}
-
-	private boolean isNotExistingImport(CompilationUnit node, String qualifiedName) {
-		return ASTNodeUtil.convertToTypedList(node.imports(), ImportDeclaration.class)
-			.stream()
-			.map(ImportDeclaration::getName)
-			.map(Name::getFullyQualifiedName)
-			.noneMatch(qualifiedName::equals);
 	}
 
 	protected void verifyImport(CompilationUnit compilationUnit, String qualifiedTypeName) {
