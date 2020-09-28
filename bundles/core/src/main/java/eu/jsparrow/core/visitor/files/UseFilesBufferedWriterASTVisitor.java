@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
@@ -44,19 +43,23 @@ public class UseFilesBufferedWriterASTVisitor extends AbstractUseFilesMethodsAST
 			return true;
 		}
 
-		NewBufferedIOArgumentsAnalyzer analyzer = new NewBufferedIOArgumentsAnalyzer();
+		NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
+		TransformationData transformationData = null;
 		if (bufferedWriterArg.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION
-				&& analyzer.analyzeInitializer((ClassInstanceCreation) bufferedWriterArg)) {
+				&& newBufferedIOArgumentsAnalyzer.analyzeInitializer((ClassInstanceCreation) bufferedWriterArg)) {
 
-			List<Expression> pathExpressions = analyzer.getPathExpressions();
-			Optional<Expression> optionalCharSet = analyzer.getCharset();
-
-			MethodInvocation filesNewBufferedReader = createFilesNewBufferedIOMethodInvocation(pathExpressions,
-					optionalCharSet, NEW_BUFFERED_WRITER);
-
-			astRewrite.replace(newBufferedWriter, filesNewBufferedReader, null);
-			onRewrite();
+			List<Expression> pathExpressions = newBufferedIOArgumentsAnalyzer.getPathExpressions();
+			Optional<Expression> optionalCharset = newBufferedIOArgumentsAnalyzer.getCharset();
+			transformationData = new TransformationData(newBufferedWriter, pathExpressions, optionalCharset);
+		} else if (isDeclarationInTWRHeader(fragment, bufferedWriterArg)) {
+			FileIOAnalyzer fileWriterAnalyzer = new FileIOAnalyzer(java.io.FileWriter.class);
+			transformationData = createAnalysisDataUsingFileIOResource(fragment, newBufferedWriter, bufferedWriterArg,
+					fileWriterAnalyzer);
 		}
-		return super.visit(fragment);
+
+		if (transformationData != null) {
+			transform(transformationData, NEW_BUFFERED_WRITER);
+		}
+		return true;
 	}
 }
