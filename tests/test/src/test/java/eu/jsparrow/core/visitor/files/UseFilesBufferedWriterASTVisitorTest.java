@@ -91,4 +91,166 @@ public class UseFilesBufferedWriterASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"			}";
 		assertChange(original, expected);
 	}
+
+	@Test
+	public void visit_MissingInitializer_shouldNotTransform() throws Exception {
+		String original = "BufferedWriter bw;";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_MethodInvocationAsInitializer_shouldNotTransform() throws Exception {
+		fixture.addImport(java.nio.file.Files.class.getName());
+		fixture.addImport(java.nio.file.Paths.class.getName());
+		String original = "" +
+				"			try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(\"path/to/file\"));) {\n" +
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_BufferedWriterWithIntAs2ndArgument_shouldNotTransform() throws Exception {
+		String original = "" +
+				"			try (BufferedWriter bw = new BufferedWriter(new FileWriter(\"path/to/file\"), 100);) {\n" +
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_BufferedWriterWithOutputStreamWriterAsArgument_shouldNotTransform() throws Exception {
+		fixture.addImport(java.io.OutputStreamWriter.class.getName());
+		String original = "" +
+				"			try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(null));) {\n" +
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_FileWriterDeclaredBeforeTWR_shouldNotTransform() throws Exception {
+		String original = "" +
+				"			try {\n" +
+				"				FileWriter fileWriter = new FileWriter(\"path/to/file\");\n" +
+				"				try (BufferedWriter bw = new BufferedWriter(fileWriter)) {\n" +
+				"				} catch (IOException e) {\n" +
+				"				}\n" +
+				"			} catch (IOException e1) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_FileWriterInitializedWithNull_shouldNotTransform() throws Exception {
+		String original = "" +
+				"			try (FileWriter fileWriter = null; BufferedWriter bw = new BufferedWriter(fileWriter)) {\n"
+				+
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ReuseFileWriterInTryBlock_shouldNotTransform() throws Exception {
+		String original = "" +
+				"			try (FileWriter fileWriter = new FileWriter(new File(\"path/to/file\"));\n" +
+				"					BufferedWriter bw = new BufferedWriter(fileWriter)) {\n" +
+				"				System.out.println(fileWriter.getEncoding());\n" +
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_NullAsFileWriterArgument_shouldNotTransform() throws Exception {
+		String original = "" +
+				"			try (BufferedWriter bw = new BufferedWriter(new FileWriter((File) null))) {\n" +
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_NullAsFileWriterArgumentInTWR_shouldNotTransform() throws Exception {
+		String original = "" +
+				"			try (FileWriter writer = new FileWriter((File) null); BufferedWriter bw = new BufferedWriter(writer)) {\n"
+				+
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_UsingOutputStreamWriter_shouldNotTransform() throws Exception {
+		fixture.addImport(java.io.OutputStreamWriter.class.getName());
+		fixture.addImport(java.io.FileOutputStream.class.getName());
+		String original = "" +
+				"			try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(\"file\")));\n"
+				+
+				"					BufferedWriter bw = new BufferedWriter(writer)) {\n" +
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_InitializingBufferedWriterWithSubclass_shouldNotTransform() throws Exception {
+		String original = "" +
+				"			class BufferedWriterSubclass extends BufferedWriter {\n" +
+				"				public BufferedWriterSubclass(Writer out) {\n" +
+				"					super(out);\n" +
+				"				}\n" +
+				"			}\n" +
+				"			try (BufferedWriter bw = new BufferedWriterSubclass(new FileWriter(\"path/to/file\"))) {\n"
+				+
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_FileWriterWithTempFileAsArgument_shouldNotTransform() throws Exception {
+		String original = "" +
+				"			try (FileWriter writer = new FileWriter(File.createTempFile(\"prefix\", \"suffix\"));\n" +
+				"					BufferedWriter bw = new BufferedWriter(writer)) {\n" +
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_AnonymousSubclassOfBufferedWriter_shouldNotTransform() throws Exception {
+		String newAnonymousSubclassOfBufferedWriter = "new BufferedWriter(new FileWriter(\"path\")) {}";
+		String original = "" +
+				"			try {\n" +
+				"				BufferedWriter bw = " + newAnonymousSubclassOfBufferedWriter + ";\n" +
+				"			} catch (IOException e) {\n" +
+				"			}\n" +
+				"";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_AnonymousSubclassOfFileWriter_shouldNotTransform() throws Exception {
+		String newAnonymousSubclassOfFileWriter = "new FileWriter(new File(\"path\")) {}";
+		String original = "" +
+				"			try {\n" +
+				"				BufferedWriter bw = new BufferedWriter(" + newAnonymousSubclassOfFileWriter + ");\n" +
+				"			} catch (Exception e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_AnonymousSubclassOfFile_shouldNotTransform() throws Exception {
+		String newAnonymousSubclassOfFile = "new File(\"path\") {}";
+		String original = "" +
+				"			try {\n" +
+				"				BufferedWriter br = new BufferedWriter(new FileWriter(" + newAnonymousSubclassOfFile
+				+ "));\n" +
+				"			} catch (Exception e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
 }
