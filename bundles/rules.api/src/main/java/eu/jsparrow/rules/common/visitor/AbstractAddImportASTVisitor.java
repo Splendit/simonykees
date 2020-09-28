@@ -1,5 +1,9 @@
 package eu.jsparrow.rules.common.visitor;
 
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.importsInnerTypeOnDemand;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.importsStaticMethodOnDemand;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.importsTypeOnDemand;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,7 +14,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -24,7 +27,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.helper.DeclaredMethodNamesASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.DeclaredTypesASTVisitor;
 
@@ -74,14 +76,14 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 
 		addImports.stream()
 			.filter(qualifiedName -> !JAVA_LANG_PACKAGE.equals(findQualifyingPrefix(qualifiedName)))
-			.filter(newImport -> !isInSamePackage(newImport, packageQualifiedName, cuDeclaredTypes))
+			.filter(qualifiedName -> !isInSamePackage(qualifiedName, packageQualifiedName, cuDeclaredTypes))
+			.filter(qualifiedName -> isNotExistingImport(node, qualifiedName))
 			.map(qualifiedName -> NodeBuilder.newImportDeclaration(node.getAST(), qualifiedName, false))
-			.filter(newImport -> isNotExistingImport(node, newImport))
 			.forEach(newImport -> astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY)
 				.insertLast(newImport, null));
 		staticImports.stream()
+			.filter(qualifiedName -> isNotExistingImport(node, qualifiedName))
 			.map(qualifiedName -> NodeBuilder.newImportDeclaration(node.getAST(), qualifiedName, true))
-			.filter(newImport -> isNotExistingImport(node, newImport))
 			.forEach(newImport -> astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY)
 				.insertLast(newImport, null));
 		safeImports.clear();
@@ -91,11 +93,12 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		super.endVisit(node);
 	}
 
-	@SuppressWarnings("unchecked")
-	private boolean isNotExistingImport(CompilationUnit node, ImportDeclaration newImport) {
-		return node.imports()
+	private boolean isNotExistingImport(CompilationUnit node, String qualifiedName) {
+		return ASTNodeUtil.convertToTypedList(node.imports(), ImportDeclaration.class)
 			.stream()
-			.noneMatch(importDeclaration -> (new ASTMatcher()).match((ImportDeclaration) importDeclaration, newImport));
+			.map(ImportDeclaration::getName)
+			.map(Name::getFullyQualifiedName)
+			.noneMatch(qualifiedName::equals);
 	}
 
 	protected void verifyImport(CompilationUnit compilationUnit, String qualifiedTypeName) {
@@ -195,8 +198,11 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 *         imported into the given {@link CompilationUnit}.
 	 */
 	private boolean isImportClashing(List<ImportDeclaration> importDeclarations, String simpleTypeName) {
-		boolean clashing = importDeclarations.stream()
+		List<Name> importedNames = importDeclarations.stream()
 			.map(ImportDeclaration::getName)
+			.collect(Collectors.toList());
+		boolean clashing = importedNames
+			.stream()
 			.filter(Name::isQualifiedName)
 			.map(name -> (QualifiedName) name)
 			.map(QualifiedName::getName)
@@ -204,8 +210,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			.anyMatch(simpleTypeName::equals);
 
 		if (!clashing) {
-			clashing = importDeclarations.stream()
-				.map(ImportDeclaration::getName)
+			clashing = importedNames.stream()
 				.filter(Name::isSimpleName)
 				.map(name -> (SimpleName) name)
 				.map(SimpleName::getIdentifier)
@@ -258,9 +263,8 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			return false;
 		}
 		return importDeclarations.stream()
-			.noneMatch(
-					importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration, simpleTypeName) ||
-							ClassRelationUtil.importsInnerTypeOnDemand(importDeclaration, simpleTypeName));
+			.noneMatch(importDeclaration -> importsTypeOnDemand(importDeclaration, simpleTypeName) ||
+					importsInnerTypeOnDemand(importDeclaration, simpleTypeName));
 	}
 
 	/**
@@ -280,8 +284,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			String qualifiedTypeName) {
 		String simpleTypeName = getSimpleName(qualifiedTypeName);
 		List<ImportDeclaration> importsOnDemand = importDeclarations.stream()
-			.filter(importDeclaration -> ClassRelationUtil.importsTypeOnDemand(importDeclaration,
-					simpleTypeName))
+			.filter(importDeclaration -> importsTypeOnDemand(importDeclaration, simpleTypeName))
 			.collect(Collectors.toList());
 
 		if (importsOnDemand.isEmpty()) {
@@ -303,8 +306,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			String qualifiedStaticMethodName) {
 		String simpleMethodName = getSimpleName(qualifiedStaticMethodName);
 		List<ImportDeclaration> importsOnDemand = importDeclarations.stream()
-			.filter(importDeclaration -> ClassRelationUtil.importsStaticMethodOnDemand(importDeclaration,
-					simpleMethodName))
+			.filter(importDeclaration -> importsStaticMethodOnDemand(importDeclaration, simpleMethodName))
 			.collect(Collectors.toList());
 
 		if (importsOnDemand.isEmpty()) {
@@ -355,9 +357,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			return false;
 		}
 		return importDeclarations.stream()
-			.noneMatch(
-					importDeclaration -> ClassRelationUtil.importsStaticMethodOnDemand(importDeclaration,
-							simpleMethodName));
+			.noneMatch(importDeclaration -> importsStaticMethodOnDemand(importDeclaration, simpleMethodName));
 	}
 
 	/**
@@ -373,29 +373,6 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			return ast.newSimpleName(getSimpleName(qualifiedName));
 		}
 		return ast.newName(qualifiedName);
-	}
-
-	/**
-	 * @param fullyQualifiedStaticMethodName
-	 *            the fully qualified name of a static method, for example
-	 *            {@code java.lang.Math.max} if the qualified type name is
-	 *            {@code java.lang.Math} and the simple name of the method is
-	 *            {@code max}
-	 * @return If a static import is possible for the static method, no
-	 *         qualifier is needed and therefore null is returned. <br>
-	 *         If a static import is not possible and the simple name of the
-	 *         type declaring the static method can be used as qualifier, an
-	 *         instance of {@link SimpleName} representing the simple type name
-	 *         is returned. <br>
-	 *         In all other cases, an instance of {@link Name} is returned which
-	 *         represents the qualified type name.
-	 */
-	protected Optional<Name> findQualifierForStaticMethodInvocation(String fullyQualifiedStaticMethodName) {
-		if (safeStaticMethodImports.contains(fullyQualifiedStaticMethodName)) {
-			return Optional.empty();
-		}
-		String qualifiedTypeName = findQualifyingPrefix(fullyQualifiedStaticMethodName);
-		return Optional.of(findTypeName(qualifiedTypeName));
 	}
 
 	/**
@@ -416,14 +393,18 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * which will be imported.
 	 * 
 	 * @param fullyQualifiedMethodName
+	 * @return The qualifier to be used for the static method or an empty
+	 *         {@link Optional} if no qualifier is needed.
 	 */
-	protected void addImportForStaticMethod(String fullyQualifiedMethodName) {
+	protected Optional<Name> addImportForStaticMethod(String fullyQualifiedMethodName) {
 		if (safeStaticMethodImports.contains(fullyQualifiedMethodName)
 				&& !staticMethodsImportedOnDemand.contains(fullyQualifiedMethodName)) {
 			this.staticImports.add(fullyQualifiedMethodName);
+			return Optional.empty();
 		} else {
 			String qualifiedTypeName = findQualifyingPrefix(fullyQualifiedMethodName);
 			addImport(qualifiedTypeName);
+			return Optional.of(findTypeName(qualifiedTypeName));
 		}
 	}
 
@@ -431,8 +412,8 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		int lastIndexOfDot = qualifiedName.lastIndexOf('.');
 		return qualifiedName.substring(0, lastIndexOfDot);
 	}
-	
-	protected void addAlreadyVerifiedImports(Collection<String>newImports) {
+
+	protected void addAlreadyVerifiedImports(Collection<String> newImports) {
 		addImports.addAll(newImports);
 	}
 }
