@@ -138,8 +138,8 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 				 * same compilation unit.
 				 */
 				isInSamePackage = cuDeclaredTypes.stream()
-					.map(type -> type.getName()
-						.getIdentifier())
+					.map(AbstractTypeDeclaration::getName)
+					.map(SimpleName::getIdentifier)
 					.anyMatch(name -> name.equals(suffixComponents.get(0)));
 			} else {
 				isInSamePackage = true;
@@ -160,7 +160,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		return visitor.getAllTypes()
 			.stream()
 			.map(ITypeBinding::getName)
-			.anyMatch(name -> name.equals(simpleTypeName));
+			.anyMatch(simpleTypeName::equals);
 	}
 
 	/**
@@ -173,7 +173,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			.stream()
 			.map(ImportDeclaration::getName)
 			.map(Name::getFullyQualifiedName)
-			.anyMatch(qualifiedName -> qualifiedName.equals(qualifiedTypeName));
+			.anyMatch(qualifiedTypeName::equals);
 	}
 
 	/**
@@ -261,7 +261,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		compilationUnit.accept(visitor);
 		return visitor.getDeclaredMethodNames()
 			.stream()
-			.anyMatch(name -> name.equals(simpleMethod));
+			.anyMatch(simpleMethod::equals);
 	}
 
 	private boolean matchesTypeImportOnDemand(List<ImportDeclaration> importDeclarations,
