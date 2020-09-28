@@ -75,29 +75,31 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 	protected Expression findFirstArgumentOfType(ClassInstanceCreation classInstanceCreation,
 			String qualifiedTypeName) {
 
-		List<Expression> newBufferedReaderArgs = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(),
+		List<Expression> newBufferedIOArgs = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(),
 				Expression.class);
-		if (newBufferedReaderArgs.size() != 1) {
+		if (newBufferedIOArgs.size() != 1) {
 			return null;
 		}
-		Expression bufferedReaderArg = newBufferedReaderArgs.get(0);
-		ITypeBinding firstArgType = bufferedReaderArg.resolveTypeBinding();
+		Expression bufferedIOArg = newBufferedIOArgs.get(0);
+		ITypeBinding firstArgType = bufferedIOArg.resolveTypeBinding();
 		if (!ClassRelationUtil.isContentOfType(firstArgType, qualifiedTypeName)) {
 			return null;
 		}
-		return bufferedReaderArg;
+		return bufferedIOArg;
 	}
 
-	protected boolean isDeclarationInTWRHeader(VariableDeclarationFragment fragment, Expression bufferedReaderArg) {
+	protected boolean isDeclarationInTWRHeader(VariableDeclarationFragment fragment, Expression bufferedIOArg) {
 		ASTNode fragmentParent = fragment.getParent();
-		return bufferedReaderArg.getNodeType() == ASTNode.SIMPLE_NAME
+		return bufferedIOArg.getNodeType() == ASTNode.SIMPLE_NAME
 				&& fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
 				&& fragmentParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY;
 	}
 
 	protected TransformationData createAnalysisDataUsingFileIOResource(VariableDeclarationFragment fragment,
 			ClassInstanceCreation newBufferedIO, Expression bufferedIOArg, FileIOAnalyzer fileIOAnalyzer) {
-		TryStatement tryStatement = findTryStatement(fragment);
+		VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment
+				.getParent();
+		TryStatement tryStatement = (TryStatement) declarationExpression.getParent();
 
 		VariableDeclarationFragment fileIOResource = findFileIOResource(bufferedIOArg,
 				tryStatement).orElse(null);
@@ -121,12 +123,6 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 				fileIOResource);
 	}
 
-	protected TryStatement findTryStatement(VariableDeclarationFragment fragment) {
-		VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment
-			.getParent();
-		return (TryStatement) declarationExpression.getParent();
-	}
-
 	protected Optional<VariableDeclarationFragment> findFileIOResource(Expression bufferedIOArg,
 			TryStatement tryStatement) {
 		List<VariableDeclarationExpression> resources = ASTNodeUtil
@@ -141,25 +137,25 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 			.findFirst();
 	}
 
-	protected boolean hasUsagesOn(Block body, SimpleName fileReaderName) {
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fileReaderName);
+	protected boolean hasUsagesOn(Block body, SimpleName fileIOName) {
+		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fileIOName);
 		body.accept(visitor);
 		List<SimpleName> usages = visitor.getUsages();
 		return !usages.isEmpty();
 	}
 
-	protected void transform(TransformationData analysisData, String newBufferedIOMethodName) {
-		Optional<VariableDeclarationFragment> optionalFileReaderResource = analysisData.getFileIOResource();
-		List<Expression> pathExpressions = analysisData.getPathExpressions();
-		Optional<Expression> optionalCharSet = analysisData.getCharset();
-		ClassInstanceCreation bufferedIOInstanceCreation = analysisData.getBufferedIOInstanceCreation();
-		if (optionalFileReaderResource.isPresent()) {
-			VariableDeclarationFragment fileReaderResource = optionalFileReaderResource.get();
-			astRewrite.remove(fileReaderResource.getParent(), null);
+	protected void transform(TransformationData transformationData, String newBufferedIOMethodName) {
+		Optional<VariableDeclarationFragment> optionalFileIOResource = transformationData.getFileIOResource();
+		List<Expression> pathExpressions = transformationData.getPathExpressions();
+		Optional<Expression> optionalCharSet = transformationData.getCharSet();
+		ClassInstanceCreation bufferedIOInstanceCreation = transformationData.getBufferedIOInstanceCreation();
+		if (optionalFileIOResource.isPresent()) {
+			VariableDeclarationFragment fileIOResource = optionalFileIOResource.get();
+			astRewrite.remove(fileIOResource.getParent(), null);
 		}
-		MethodInvocation filesNewBufferedReader = createFilesNewBufferedIOMethodInvocation(pathExpressions,
+		MethodInvocation filesNewBufferedIO = createFilesNewBufferedIOMethodInvocation(pathExpressions,
 				optionalCharSet, newBufferedIOMethodName);
-		astRewrite.replace(bufferedIOInstanceCreation, filesNewBufferedReader, null);
+		astRewrite.replace(bufferedIOInstanceCreation, filesNewBufferedIO, null);
 		onRewrite();
 	}
 

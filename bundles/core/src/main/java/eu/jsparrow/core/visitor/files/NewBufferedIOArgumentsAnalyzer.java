@@ -16,7 +16,8 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- * An analyzer for the arguments of new {@link BufferedReader}s and {@link BufferedWriter}s initializers. 
+ * An analyzer for the arguments of new {@link BufferedReader}s and
+ * {@link BufferedWriter}s initializers.
  * 
  * 
  * 
@@ -30,12 +31,11 @@ class NewBufferedIOArgumentsAnalyzer {
 
 	private List<Expression> pathExpressions = new ArrayList<>();
 	private Expression charsetExpression;
-	
-	
 
 	/**
-	 * Checks if the arguments of the {@link ClassInstanceCreation} represent the 
-	 * expected parameters for constructors of {@link FileReader} or {@link FileWriter}. 
+	 * Checks if the arguments of the {@link ClassInstanceCreation} represent
+	 * the expected parameters for constructors of {@link FileReader} or
+	 * {@link FileWriter}.
 	 * 
 	 * @param newInstanceCreation
 	 * @return
@@ -86,5 +86,4 @@ class NewBufferedIOArgumentsAnalyzer {
 	public Optional<Expression> getCharset() {
 		return Optional.ofNullable(charsetExpression);
 	}
-
 }

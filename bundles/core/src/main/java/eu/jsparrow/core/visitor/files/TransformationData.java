@@ -23,23 +23,23 @@ class TransformationData {
 	private final ClassInstanceCreation bufferedIOInstanceCreation;
 	private final Optional<VariableDeclarationFragment> fileIOResource;
 	private final List<Expression> pathExpressions;
-	private final Optional<Expression> charset;
+	private final Optional<Expression> charSet;
 
-	public TransformationData(ClassInstanceCreation newBufferedReader,
-			List<Expression> pathExpressions, Optional<Expression> optionalCharset,
-			VariableDeclarationFragment fileReaderResource) {
-		this.bufferedIOInstanceCreation = newBufferedReader;
-		this.fileIOResource = Optional.of(fileReaderResource);
+	public TransformationData(ClassInstanceCreation newBufferedIO,
+			List<Expression> pathExpressions, Optional<Expression> optionalCharSet,
+			VariableDeclarationFragment fileIOResource) {
+		this.bufferedIOInstanceCreation = newBufferedIO;
+		this.fileIOResource = Optional.of(fileIOResource);
 		this.pathExpressions = pathExpressions;
-		this.charset = optionalCharset;
+		this.charSet = optionalCharSet;
 	}
 
-	public TransformationData(ClassInstanceCreation newBufferedReader, List<Expression> pathExpressions,
-			Optional<Expression> optionalCharset) {
-		this.bufferedIOInstanceCreation = newBufferedReader;
+	public TransformationData(ClassInstanceCreation newBufferedIO, List<Expression> pathExpressions,
+			Optional<Expression> optionalCharSet) {
+		this.bufferedIOInstanceCreation = newBufferedIO;
 		this.fileIOResource = Optional.empty();
 		this.pathExpressions = pathExpressions;
-		this.charset = optionalCharset;
+		this.charSet = optionalCharSet;
 	}
 
 	public Optional<VariableDeclarationFragment> getFileIOResource() {
@@ -50,8 +50,8 @@ class TransformationData {
 		return pathExpressions;
 	}
 
-	public Optional<Expression> getCharset() {
-		return charset;
+	public Optional<Expression> getCharSet() {
+		return charSet;
 	}
 
 	public ClassInstanceCreation getBufferedIOInstanceCreation() {

@@ -6,8 +6,6 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
@@ -46,23 +44,23 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsAST
 		}
 
 		NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
-		TransformationData analysisData = null;
+		TransformationData transformationData = null;
 		if (bufferedReaderArg.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION
 				&& newBufferedIOArgumentsAnalyzer.analyzeInitializer((ClassInstanceCreation) bufferedReaderArg)) {
 
 			List<Expression> pathExpressions = newBufferedIOArgumentsAnalyzer.getPathExpressions();
 			Optional<Expression> optionalCharset = newBufferedIOArgumentsAnalyzer.getCharset();
-			analysisData = new TransformationData(newBufferedReader, pathExpressions, optionalCharset);
+			transformationData = new TransformationData(newBufferedReader, pathExpressions, optionalCharset);
 
 		} else if (isDeclarationInTWRHeader(fragment, bufferedReaderArg)) {
 			FileIOAnalyzer fileReaderAnalyzer = new FileIOAnalyzer(java.io.FileReader.class);
-			analysisData = createAnalysisDataUsingFileIOResource(fragment, newBufferedReader, bufferedReaderArg, fileReaderAnalyzer);
+			transformationData = createAnalysisDataUsingFileIOResource(fragment, newBufferedReader, bufferedReaderArg,
+					fileReaderAnalyzer);
 		}
 
-		if (analysisData != null) {
-			transform(analysisData, NEW_BUFFERED_READER);
+		if (transformationData != null) {
+			transform(transformationData, NEW_BUFFERED_READER);
 		}
 		return true;
 	}
-
 }

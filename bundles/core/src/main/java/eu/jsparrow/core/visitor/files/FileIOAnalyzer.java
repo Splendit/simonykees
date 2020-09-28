@@ -15,8 +15,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
- * Analyzes whether the declaration of a {@link java.io.FileReader} satisfies
- * the preconditions for replacing the following:
+ * Analyzes whether the declaration of a {@link java.io.FileReader} or a
+ * {@link java.io.FileWriter} satisfies the preconditions for replacing, as
+ * shown in the following example with a {@link java.io.FileReader}:
  * 
  * <pre>
  * try (FileReader fileReader = new FileReader(new File("path/to/file"));
@@ -31,6 +32,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * </pre>
  * 
  * @see UseFilesBufferedReaderASTVisitor
+ * @see UseFilesBufferedWriterASTVisitor
  * 
  * @since 3.21.0
  *
@@ -58,13 +60,13 @@ class FileIOAnalyzer {
 			return false;
 		}
 
-		boolean isFileReaderCreation = isNewInstanceCreationOf(initialzier, fileIOClass.getName());
-		if (!isFileReaderCreation) {
+		boolean isFileIOCreation = isNewInstanceCreationOf(initialzier, fileIOClass.getName());
+		if (!isFileIOCreation) {
 			return false;
 		}
 
-		ClassInstanceCreation fileReaderCreation = (ClassInstanceCreation) initialzier;
-		List<Expression> arguments = convertToTypedList(fileReaderCreation.arguments(), Expression.class);
+		ClassInstanceCreation fileIOCreation = (ClassInstanceCreation) initialzier;
+		List<Expression> arguments = convertToTypedList(fileIOCreation.arguments(), Expression.class);
 		int argumentSize = arguments.size();
 		if (argumentSize == 0 || argumentSize > 2) {
 			return false;
@@ -120,5 +122,4 @@ class FileIOAnalyzer {
 	public List<Expression> getPathExpressions() {
 		return pathExpressions;
 	}
-
 }
