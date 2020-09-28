@@ -49,6 +49,11 @@ public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> 
 	private static final String VERSION_3_5 = "3.5"; //$NON-NLS-1$
 	private static final String VERSION_3_6 = "3.6"; //$NON-NLS-1$
 	private static final String VERSION_3_7 = "3.7"; //$NON-NLS-1$
+	private static final String VERSION_3_8 = "3.8"; //$NON-NLS-1$
+	private static final String VERSION_3_8_1 = "3.8.1"; //$NON-NLS-1$
+	private static final String VERSION_3_9 = "3.9"; //$NON-NLS-1$
+	private static final String VERSION_3_10 = "3.10"; //$NON-NLS-1$
+	private static final String VERSION_3_11 = "3.11"; //$NON-NLS-1$
 
 	Logger logger = LoggerFactory.getLogger(StringUtilsRule.class);
 
@@ -57,7 +62,8 @@ public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> 
 	public StringUtilsRule() {
 		this.visitorClass = StringUtilsASTVisitor.class;
 		this.supportedVersion = Arrays.asList(VERSION_3_0, VERSION_3_0_1, VERSION_3_1, VERSION_3_2, VERSION_3_2_1,
-				VERSION_3_3, VERSION_3_3_1, VERSION_3_3_2, VERSION_3_4, VERSION_3_5, VERSION_3_6, VERSION_3_7);
+				VERSION_3_3, VERSION_3_3_1, VERSION_3_3_2, VERSION_3_4, VERSION_3_5, VERSION_3_6, VERSION_3_7, VERSION_3_8, 
+				VERSION_3_8_1, VERSION_3_9, VERSION_3_10, VERSION_3_11);
 		this.id = "StringUtils"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.StringUtilsRule_name, Messages.StringUtilsRule_description,
 				Duration.ofMinutes(10), Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION));
