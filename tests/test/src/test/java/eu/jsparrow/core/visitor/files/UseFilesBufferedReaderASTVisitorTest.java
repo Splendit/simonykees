@@ -247,20 +247,39 @@ public class UseFilesBufferedReaderASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"		}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
-	public void visit_fileReaderWithCharset_shouldTransform() throws Exception {
+	public void visit_NewFileReaderWithCharSet_shouldTransform() throws Exception {
 		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
-		String original = "" + 
+		String original = "" +
 				"var path = \"pathToFile\";" +
-				"try {\n" + 
-				"	BufferedReader bufferedReader = new BufferedReader(new FileReader(path, StandardCharsets.UTF_8));\n" + 
+				"try {\n" +
+				"	BufferedReader bufferedReader = new BufferedReader(new FileReader(path, StandardCharsets.UTF_8));\n"
+				+
 				"} catch (IOException e) {}";
 		String expected = "" +
 				"var path = \"pathToFile\";" +
-				"try {\n" + 
-				"	BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(path), StandardCharsets.UTF_8);\n" + 
+				"try {\n" +
+				"	BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(path), StandardCharsets.UTF_8);\n"
+				+
 				"} catch (IOException e) {}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_FileReaderVariableWithCharSet_shouldTransform() throws Exception {
+		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
+		String original = "" +
+				"			var path = \"pathToFile\";\n"
+				+ "			try (FileReader FileReader = new FileReader(path, StandardCharsets.UTF_8);\n"
+				+ "					BufferedReader bw = new BufferedReader(FileReader);) {\n"
+				+ "			} catch (IOException e) {\n"
+				+ "			}";
+		String expected = "" +
+				"			var path = \"pathToFile\";\n"
+				+ "			try (BufferedReader bw = Files.newBufferedReader(Paths.get(path), StandardCharsets.UTF_8);) {\n"
+				+ "			} catch (IOException e) {\n"
+				+ "			}";
 		assertChange(original, expected);
 	}
 }

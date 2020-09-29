@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.files;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +11,7 @@ public class UseFilesBufferedWriterASTVisitorTest extends UsesSimpleJDTUnitFixtu
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
 		setVisitor(new UseFilesBufferedWriterASTVisitor());
+		setJavaVersion(JavaCore.VERSION_11);
 		fixture.addImport(java.io.File.class.getName());
 		fixture.addImport(java.io.FileWriter.class.getName());
 		fixture.addImport(java.io.BufferedWriter.class.getName());
@@ -251,6 +253,68 @@ public class UseFilesBufferedWriterASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				+ "));\n" +
 				"			} catch (Exception e) {\n" +
 				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_NewFileWriterWithCharSet_shouldTransform() throws Exception {
+		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
+		String original = "" +
+				"			var path = \"pathToFile\";\n" +
+				"			try {\n" +
+				"				BufferedWriter bw = new BufferedWriter(new FileWriter(path, StandardCharsets.UTF_8));\n"
+				+
+				"			} catch (IOException e) {\n" +
+				"			}";
+		String expected = "" +
+				"			var path = \"pathToFile\";\n" +
+				"			try {\n" +
+				"				BufferedWriter bw = Files.newBufferedWriter(Paths.get(path), StandardCharsets.UTF_8);\n"
+				+
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_FileWriterVariableWithCharSet_shouldTransform() throws Exception {
+		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
+		String original = "" +
+				"			var path = \"pathToFile\";\n" +
+				"			try (FileWriter fileWriter = new FileWriter(path, StandardCharsets.UTF_8);\n" +
+				"					BufferedWriter bw = new BufferedWriter(fileWriter);) {\n" +
+				"			} catch (IOException e) {\n" +
+				"			}";
+		String expected = "" +
+				"			var path = \"pathToFile\";\n" +
+				"			try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(path), StandardCharsets.UTF_8);) {\n"
+				+
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_NewFileWriterWithCharSetAndBoolean_shouldNotTransform() throws Exception {
+		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
+		String original = "" +
+				"			var path = \"pathToFile\";\n" +
+				"			try {\n" +
+				"				BufferedWriter bw = new BufferedWriter(new FileWriter(path, StandardCharsets.UTF_8, true));\n"
+				+
+				"			} catch (IOException e) {\n" +
+				"			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_NewFileWriterWithBoolean_shouldNotTransform() throws Exception {
+		String original = "" +
+				"			var path = \"pathToFile\";\n"
+				+ "			try {\n"
+				+ "				BufferedWriter bw = new BufferedWriter(new FileWriter(path, true));\n"
+				+ "			} catch (IOException e) {\n"
+				+ "			}";
 		assertNoChange(original);
 	}
 }
