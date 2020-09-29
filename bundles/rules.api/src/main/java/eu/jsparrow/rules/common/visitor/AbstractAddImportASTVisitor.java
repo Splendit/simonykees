@@ -381,9 +381,10 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 *         {@link Optional} if no qualifier is needed.
 	 */
 	protected Optional<Name> addImportForStaticMethod(String fullyQualifiedMethodName) {
-		if (safeStaticMethodImports.contains(fullyQualifiedMethodName)
-				&& !staticMethodsImportedOnDemand.contains(fullyQualifiedMethodName)) {
-			this.staticImports.add(fullyQualifiedMethodName);
+		if (safeStaticMethodImports.contains(fullyQualifiedMethodName)) {
+			if(!staticMethodsImportedOnDemand.contains(fullyQualifiedMethodName)) {
+				this.staticImports.add(fullyQualifiedMethodName);
+			}
 			return Optional.empty();
 		} else {
 			String qualifiedTypeName = findQualifyingPrefix(fullyQualifiedMethodName);
