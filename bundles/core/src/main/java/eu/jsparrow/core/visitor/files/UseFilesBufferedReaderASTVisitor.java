@@ -53,7 +53,7 @@ public class UseFilesBufferedReaderASTVisitor extends AbstractUseFilesMethodsAST
 			transformationData = new TransformationData(newBufferedReader, pathExpressions, optionalCharset);
 
 		} else if (isDeclarationInTWRHeader(fragment, bufferedReaderArg)) {
-			FileIOAnalyzer fileReaderAnalyzer = new FileIOAnalyzer(java.io.FileReader.class);
+			FileIOAnalyzer fileReaderAnalyzer = new FileIOAnalyzer(java.io.FileReader.class.getName());
 			transformationData = createAnalysisDataUsingFileIOResource(fragment, newBufferedReader, bufferedReaderArg,
 					fileReaderAnalyzer);
 		}

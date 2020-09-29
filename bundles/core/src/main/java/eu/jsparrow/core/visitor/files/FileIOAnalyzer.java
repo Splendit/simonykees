@@ -41,10 +41,10 @@ class FileIOAnalyzer {
 
 	private Expression charsetExpression;
 	private List<Expression> pathExpressions = new ArrayList<>();
-	private final Class<?> fileIOClass;
+	private final String fileIOClassQualifiedName;
 
-	public FileIOAnalyzer(Class<?> fileIOClass) {
-		this.fileIOClass = fileIOClass;
+	public FileIOAnalyzer(String fileIOClassQualifiedName) {
+		this.fileIOClassQualifiedName = fileIOClassQualifiedName;
 	}
 
 	public boolean analyzeFileIO(VariableDeclarationExpression variableDeclaration) {
@@ -60,7 +60,7 @@ class FileIOAnalyzer {
 			return false;
 		}
 
-		boolean isFileIOCreation = isNewInstanceCreationOf(initialzier, fileIOClass.getName());
+		boolean isFileIOCreation = isNewInstanceCreationOf(initialzier, fileIOClassQualifiedName);
 		if (!isFileIOCreation) {
 			return false;
 		}

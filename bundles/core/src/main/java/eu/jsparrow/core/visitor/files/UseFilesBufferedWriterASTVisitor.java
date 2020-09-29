@@ -52,7 +52,7 @@ public class UseFilesBufferedWriterASTVisitor extends AbstractUseFilesMethodsAST
 			Optional<Expression> optionalCharset = newBufferedIOArgumentsAnalyzer.getCharset();
 			transformationData = new TransformationData(newBufferedWriter, pathExpressions, optionalCharset);
 		} else if (isDeclarationInTWRHeader(fragment, bufferedWriterArg)) {
-			FileIOAnalyzer fileWriterAnalyzer = new FileIOAnalyzer(java.io.FileWriter.class);
+			FileIOAnalyzer fileWriterAnalyzer = new FileIOAnalyzer(java.io.FileWriter.class.getName());
 			transformationData = createAnalysisDataUsingFileIOResource(fragment, newBufferedWriter, bufferedWriterArg,
 					fileWriterAnalyzer);
 		}
