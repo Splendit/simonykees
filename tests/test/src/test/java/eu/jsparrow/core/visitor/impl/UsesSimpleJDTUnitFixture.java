@@ -56,6 +56,10 @@ public abstract class UsesSimpleJDTUnitFixture {
 		fixture.clear(true);
 	}
 
+	protected void setJavaVersion(String javaVersion) {
+		fixtureProject.setJavaVersion(javaVersion);
+	}
+
 	protected void addDependency(String groupId, String artifactId, String version) throws Exception {
 		IClasspathEntry classPathEntry = RulesTestUtil.generateMavenEntryFromDepedencyString(groupId, artifactId,
 				version);

@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.files;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +11,7 @@ public class UseFilesBufferedReaderASTVisitorTest extends UsesSimpleJDTUnitFixtu
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
 		setVisitor(new UseFilesBufferedReaderASTVisitor());
+		setJavaVersion(JavaCore.VERSION_11);
 		fixture.addImport(java.io.File.class.getName());
 		fixture.addImport(java.io.FileReader.class.getName());
 		fixture.addImport(java.io.BufferedReader.class.getName());
@@ -244,5 +246,21 @@ public class UseFilesBufferedReaderASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"		} catch (Exception e) {\n" +
 				"		}";
 		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_fileReaderWithCharset_shouldTransform() throws Exception {
+		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
+		String original = "" + 
+				"var path = \"pathToFile\";" +
+				"try {\n" + 
+				"	BufferedReader bufferedReader = new BufferedReader(new FileReader(path, StandardCharsets.UTF_8));\n" + 
+				"} catch (IOException e) {}";
+		String expected = "" +
+				"try {\n" + 
+				"var path = \"pathToFile\";" +
+				"	BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(path), StandardCharsets.UTF_8);\n" + 
+				"} catch (IOException e) {}";
+		assertChange(original, expected);
 	}
 }

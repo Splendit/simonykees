@@ -48,6 +48,10 @@ public abstract class UsesJDTUnitFixture {
 		defaultFixture = fixtureProject.addCompilationUnit(DEFAULT_TYPE_DECLARATION_NAME);
 	}
 	
+	protected void setJavaVersion(String version) {
+		fixtureProject.setJavaVersion(version);
+	}
+	
 	protected void  addDependency(String groupId, String artifactId, String version) throws Exception {
 		IClasspathEntry classPathEntry = RulesTestUtil.generateMavenEntryFromDepedencyString(groupId, artifactId, version);
 		fixtureProject.addClasspathEntry(classPathEntry);

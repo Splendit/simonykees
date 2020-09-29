@@ -173,4 +173,20 @@ public class JdtUnitFixtureProject {
 	public IJavaProject getJavaProject() {
 		return javaProject;
 	}
+
+	/**
+	 * Sets the {@link JavaCore#COMPILER_COMPLIANCE},
+	 * {@link JavaCore#COMPILER_CODEGEN_TARGET_PLATFORM} and
+	 * {@link JavaCore#COMPILER_SOURCE} in the current Java project.
+	 * 
+	 * @param javaVersion
+	 *            the Java version to be set.
+	 */
+	public void setJavaVersion(String javaVersion) {
+		if (javaProject != null) {
+			javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, javaVersion);
+			javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, javaVersion);
+			javaProject.setOption(JavaCore.COMPILER_SOURCE, javaVersion);
+		}
+	}
 }
