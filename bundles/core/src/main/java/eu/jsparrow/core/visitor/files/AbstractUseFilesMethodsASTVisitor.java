@@ -33,9 +33,20 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  *
  */
 abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVisitor {
-	protected static final String FILES_QUALIFIED_NAME = java.nio.file.Files.class.getName();
-	protected static final String PATHS_QUALIFIED_NAME = java.nio.file.Paths.class.getName();
-	protected static final String CHARSET_QUALIFIED_NAME = java.nio.charset.Charset.class.getName();
+	private static final String FILES_QUALIFIED_NAME = java.nio.file.Files.class.getName();
+	private static final String PATHS_QUALIFIED_NAME = java.nio.file.Paths.class.getName();
+	private static final String CHARSET_QUALIFIED_NAME = java.nio.charset.Charset.class.getName();
+	
+	private final String bufferedIOQualifiedTypeName;
+	private final String fileIOQualifiedTypeName;
+	private final String newBufferedIOMethodName;
+	
+	public AbstractUseFilesMethodsASTVisitor(String bufferedIOQualifiedTypeName, String fileIOQualifiedTypeName, String newBufferedIOMethodName) {
+		super();
+		this.bufferedIOQualifiedTypeName = bufferedIOQualifiedTypeName;
+		this.fileIOQualifiedTypeName = fileIOQualifiedTypeName;
+		this.newBufferedIOMethodName = newBufferedIOMethodName;
+	}
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
@@ -49,6 +60,38 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		return continueVisiting;
 	}
 
+	@Override
+	public boolean visit(VariableDeclarationFragment fragment) {
+
+		ClassInstanceCreation newBufferedIO = findClassInstanceCreationAsInitializer(fragment,
+				bufferedIOQualifiedTypeName);
+		if (newBufferedIO == null) {
+			return true;
+		}
+		Expression bufferedIOArgument = findFirstArgumentOfType(newBufferedIO, fileIOQualifiedTypeName);
+		if (bufferedIOArgument == null) {
+			return true;
+		}
+
+		NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
+		TransformationData transformationData = null;
+		if (bufferedIOArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION
+				&& newBufferedIOArgumentsAnalyzer.analyzeInitializer((ClassInstanceCreation) bufferedIOArgument)) {
+
+			List<Expression> pathExpressions = newBufferedIOArgumentsAnalyzer.getPathExpressions();
+			Optional<Expression> optionalCharset = newBufferedIOArgumentsAnalyzer.getCharset();
+			transformationData = new TransformationData(newBufferedIO, pathExpressions, optionalCharset);
+		} else if (isDeclarationInTWRHeader(fragment, bufferedIOArgument)) {
+			FileIOAnalyzer fileWriterAnalyzer = new FileIOAnalyzer(fileIOQualifiedTypeName);
+			transformationData = createAnalysisDataUsingFileIOResource(fragment, newBufferedIO, bufferedIOArgument,
+					fileWriterAnalyzer);
+		}
+
+		if (transformationData != null) {
+			transform(transformationData);
+		}
+		return true;
+	}
 	/**
 	 * 
 	 * @return If the variable declared by the given
@@ -144,7 +187,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		return !usages.isEmpty();
 	}
 
-	protected void transform(TransformationData transformationData, String newBufferedIOMethodName) {
+	protected void transform(TransformationData transformationData) {
 		Optional<VariableDeclarationFragment> optionalFileIOResource = transformationData.getFileIOResource();
 		List<Expression> pathExpressions = transformationData.getPathExpressions();
 		Optional<Expression> optionalCharSet = transformationData.getCharSet();
@@ -154,7 +197,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 			astRewrite.remove(fileIOResource.getParent(), null);
 		}
 		MethodInvocation filesNewBufferedIO = createFilesNewBufferedIOMethodInvocation(pathExpressions,
-				optionalCharSet, newBufferedIOMethodName);
+				optionalCharSet);
 		astRewrite.replace(bufferedIOInstanceCreation, filesNewBufferedIO, null);
 		onRewrite();
 	}
@@ -167,7 +210,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 	}
 
 	protected MethodInvocation createFilesNewBufferedIOMethodInvocation(List<Expression> pathExpressions,
-			Optional<Expression> optionalCharSet, String newBufferdIOMethodName) {
+			Optional<Expression> optionalCharSet) {
 		AST ast = astRewrite.getAST();
 		Expression charset = optionalCharSet
 			.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
@@ -186,6 +229,6 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		arguments.add(charset);
 		Expression filesExpression = ast.newName(findTypeNameForStaticMethodInvocation(FILES_QUALIFIED_NAME));
 		return NodeBuilder.newMethodInvocation(ast, filesExpression,
-				ast.newSimpleName(newBufferdIOMethodName), arguments);
+				ast.newSimpleName(newBufferedIOMethodName), arguments);
 	}
 }
