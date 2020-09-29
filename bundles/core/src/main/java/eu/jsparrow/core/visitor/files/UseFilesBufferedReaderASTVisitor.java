@@ -32,19 +32,16 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  * For example, the following code:
  * 
  * <pre>
- * {
- * 	&#64;code
- * 	BufferedReader bufferedReader = new BufferedReader(new FileReader(new File("path/to/file")));
- * }
+ * {@code BufferedReader bufferedReader 
+ * 		= new BufferedReader(new FileReader(new File("path/to/file")));}
  * </pre>
  * 
  * is transformed to:
  * 
  * <pre>
- * {
- * 	&#64;code
- * 	BufferedReader bufferedReader = Files.newBufferedReader(Paths.get("path/to/file"), Charset.defaultCharset());
- * }
+ * {@code
+ * 	BufferedReader bufferedReader 
+ * 		= Files.newBufferedReader(Paths.get("path/to/file"), Charset.defaultCharset());}
  * </pre>
  * 
  * @since 3.21.0
