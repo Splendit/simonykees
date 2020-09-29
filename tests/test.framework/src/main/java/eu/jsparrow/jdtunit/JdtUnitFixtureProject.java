@@ -3,6 +3,7 @@ package eu.jsparrow.jdtunit;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -103,11 +104,9 @@ public class JdtUnitFixtureProject {
 	 *            name of the new compilation unit
 	 * @return
 	 * @throws JdtUnitException
-	 * @throws BadLocationException
-	 * @throws JavaModelException
 	 */
 	public JdtUnitFixtureClass addCompilationUnit(String className)
-			throws JdtUnitException, JavaModelException, BadLocationException {
+			throws JdtUnitException {
 		return addCompilationUnit(packageFragment, className);
 	}
 
@@ -125,7 +124,7 @@ public class JdtUnitFixtureProject {
 	 * @throws JavaModelException
 	 */
 	public JdtUnitFixtureClass addCompilationUnit(IPackageFragment packageFragment, String className)
-			throws JdtUnitException, JavaModelException, BadLocationException {
+			throws JdtUnitException {
 		JdtUnitFixtureClass clazz = new JdtUnitFixtureClass(this, packageFragment, className);
 		classes.put(className, clazz);
 		return clazz;
@@ -166,7 +165,7 @@ public class JdtUnitFixtureProject {
 		return Optional.ofNullable(classes.get(className));
 	}
 
-	public HashMap<String, String> getOptions() {
+	public Map<String, String> getOptions() {
 		return options;
 	}
 
