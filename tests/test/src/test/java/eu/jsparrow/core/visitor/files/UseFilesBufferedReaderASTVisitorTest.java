@@ -257,8 +257,8 @@ public class UseFilesBufferedReaderASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"	BufferedReader bufferedReader = new BufferedReader(new FileReader(path, StandardCharsets.UTF_8));\n" + 
 				"} catch (IOException e) {}";
 		String expected = "" +
-				"try {\n" + 
 				"var path = \"pathToFile\";" +
+				"try {\n" + 
 				"	BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(path), StandardCharsets.UTF_8);\n" + 
 				"} catch (IOException e) {}";
 		assertChange(original, expected);
