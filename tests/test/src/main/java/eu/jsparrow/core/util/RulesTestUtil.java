@@ -3,6 +3,7 @@ package eu.jsparrow.core.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -180,12 +181,9 @@ public class RulesTestUtil {
 		IProject project = javaProject.getProject();
 		IFolder folder = project.getFolder(containerName);
 		createFolder(folder);
-
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(folder);
-		IClasspathEntry[] cpentry = new IClasspathEntry[] {
-				JavaCore.newSourceEntry(root.getPath(), EMPTY_PATHS, EMPTY_PATHS, null),
-				JavaRuntime.getDefaultJREContainerEntry() };
-		addToClasspath(javaProject, Arrays.asList(cpentry));
+		IClasspathEntry classpathEntry = JavaCore.newSourceEntry(root.getPath(), EMPTY_PATHS, EMPTY_PATHS, null);
+		addToClasspath(javaProject, Collections.singletonList(classpathEntry));
 		return root;
 	}
 
@@ -201,33 +199,33 @@ public class RulesTestUtil {
 			} else {
 				newEntries = classpathEntries.toArray(new IClasspathEntry[classpathEntries.size()]);
 			}
-			javaProject.setRawClasspath(newEntries, null);
+			javaProject.setRawClasspath(newEntries, new NullProgressMonitor());
 		}
 	}
 
 	public static IJavaProject createJavaProject(String projectName, String binFolderName) throws Exception {
-		IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace()
-			.getRoot();
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IWorkspaceRoot workspaceRoot = workspace.getRoot();
 		IProject project = workspaceRoot.getProject(projectName);
 
 		if (!project.exists()) {
-			project.create(null);
+			project.create(new NullProgressMonitor());
 		} else {
-			project.refreshLocal(IResource.DEPTH_INFINITE, null);
+			project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		}
 
 		if (!project.isOpen()) {
-			project.open(null);
+			project.open(new NullProgressMonitor());
 		}
 
 		IFolder binFolder = project.getFolder(binFolderName);
 
 		createFolder(binFolder);
 		addNature(project, JavaCore.NATURE_ID);
-
+		IClasspathEntry jreEntry = JavaRuntime.getDefaultJREContainerEntry();
 		IJavaProject javaProject = JavaCore.create(project);
-		javaProject.setOutputLocation(binFolder.getFullPath(), null);
-		javaProject.setRawClasspath(new IClasspathEntry[0], null);
+		javaProject.setOutputLocation(binFolder.getFullPath(), new NullProgressMonitor());
+		javaProject.setRawClasspath(new IClasspathEntry[] { jreEntry }, new NullProgressMonitor());
 
 		/*
 		 * The following options are extracted from our internal eclipse code
