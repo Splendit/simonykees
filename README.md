@@ -16,8 +16,6 @@ Read instructions at: [Eclipse](https://confluence.splendit.loc/display/Tutorial
 
 ## build ##
 
-JDK 9 and above: set the Environment Variable ``JSPARROW_RT_JAR_PATH`` to a path to a JDK 8 rt.jar in your ``~/.profile`` (see SIM-1415)
-
     mvn clean verify -fae
 
 ## version update ##
