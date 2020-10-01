@@ -18,9 +18,11 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -251,16 +253,12 @@ public class RulesTestUtil {
 		if (project.hasNature(natureId)) {
 			return;
 		}
-
 		IProjectDescription projectDescription = project.getDescription();
-
 		String[] oldNatures = (projectDescription.getNatureIds());
 		String[] newNatures = Arrays.copyOf(oldNatures, oldNatures.length + 1);
 		newNatures[oldNatures.length] = natureId;
-
 		projectDescription.setNatureIds(newNatures);
-		project.setDescription(projectDescription, null);
-
+		project.setDescription(projectDescription, new NullProgressMonitor());
 	}
 
 	private static void createFolder(IFolder folder) throws CoreException {
@@ -269,7 +267,7 @@ public class RulesTestUtil {
 			if (parent instanceof IFolder) {
 				createFolder((IFolder) parent);
 			}
-			folder.create(false, true, null);
+			folder.create(false, true, new NullProgressMonitor());
 		}
 	}
 
