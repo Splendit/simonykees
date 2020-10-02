@@ -8,7 +8,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
 /**
- * Contains functionality for finding the current JDT version.
+ * Contains functionality for finding the current JDT Core version.
  * 
  * @since 2.6.0
  *
@@ -52,21 +52,21 @@ public class JdtCoreVersionBindingUtil {
 	}
 
 	/**
-	 * Finds the appropriate JLS level for the given JDT version.
+	 * Finds the appropriate JLS level for the given JDT Core version.
 	 * 
 	 * @param jdtVersion
-	 *            the JDT version on the current platform
+	 *            the JDT Core version on the current platform
 	 * @return
 	 *         <ul>
-	 *         <li>{@link AST#JLS14} if the JDT version corresponds to 3.22.0
+	 *         <li>{@code 14} if the JDT Core version corresponds to 3.22.0
 	 *         (2020-06);</li>
-	 *         <li>{@link AST#JLS13} if the JDT version corresponds to 3.20.0
+	 *         <li>{@link AST#JLS13} if the JDT Core version corresponds to 3.20.0
 	 *         (2019-12);</li>
-	 *         <li>{@link AST#JLS12} if the JDT version corresponds to 3.18.0
+	 *         <li>{@link AST#JLS12} if the JDT Core version corresponds to 3.18.0
 	 *         (2019-06);</li>
-	 *         <li>{@link AST#JLS11} if the JDT version corresponds to 3.16.0
+	 *         <li>{@link AST#JLS11} if the JDT Core version corresponds to 3.16.0
 	 *         (2018-12);</li>
-	 *         <li>{@link AST#JLS10} if the JDT version corresponds to
+	 *         <li>{@link AST#JLS10} if the JDT Core version corresponds to
 	 *         Photon;</li>
 	 *         <li>{@link AST#JLS9} if the version corresponds to Oxygen;
 	 *         or</li>
