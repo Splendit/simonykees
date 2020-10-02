@@ -13,9 +13,9 @@ import org.osgi.framework.Version;
  * @since 2.6.0
  *
  */
-public class JdtVersionBindingUtil {
+public class JdtCoreVersionBindingUtil {
 
-	private static final String ORG_ECLIPSE_JDT = "org.eclipse.jdt"; //$NON-NLS-1$
+	private static final String ORG_ECLIPSE_JDT_CORE = "org.eclipse.jdt"; //$NON-NLS-1$
 	private static final String JDT_JAVA_14_SUPPORT = "3.21.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_13_SUPPORT = "3.20.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_12_SUPPORT = "3.18.0"; //$NON-NLS-1$
@@ -25,24 +25,24 @@ public class JdtVersionBindingUtil {
 	private static final String JDT_LEAST_SUPPORTED = "3.12.0"; //$NON-NLS-1$
 	private static Bundle jdtBundle;
 
-	private JdtVersionBindingUtil() {
+	private JdtCoreVersionBindingUtil() {
 		/*
 		 * Hiding default constructor
 		 */
 	}
 
 	/**
-	 * Finds the version of the {@value #ORG_ECLIPSE_JDT} bundle on the current
+	 * Finds the version of the {@value #ORG_ECLIPSE_JDT_CORE} bundle on the current
 	 * {@link Platform}.
 	 * 
-	 * @return the {@link Version} of {@value #ORG_ECLIPSE_JDT} bundle on the
+	 * @return the {@link Version} of {@value #ORG_ECLIPSE_JDT_CORE} bundle on the
 	 *         current platform or {@value #JDT_LEAST_SUPPORTED} if none is
 	 *         found since it corresponds to the least eclipse version that we
 	 *         support.
 	 */
 	public static Version findCurrentJDTVersion() {
 		if (jdtBundle == null) {
-			Bundle bundle = Platform.getBundle(ORG_ECLIPSE_JDT);
+			Bundle bundle = Platform.getBundle(ORG_ECLIPSE_JDT_CORE);
 			if (bundle == null) {
 				return Version.parseVersion(JDT_LEAST_SUPPORTED);
 			}
@@ -106,7 +106,7 @@ public class JdtVersionBindingUtil {
 	}
 
 	/**
-	 * Finds the resources property descriptior for the {@link TryStatement}
+	 * Finds the resources property descriptor for the {@link TryStatement}
 	 * statement.
 	 * 
 	 * @param jdtVersion

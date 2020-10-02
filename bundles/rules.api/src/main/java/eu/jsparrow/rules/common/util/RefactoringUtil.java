@@ -92,7 +92,7 @@ public final class RefactoringUtil {
 	 * @since 0.9
 	 */
 	public static CompilationUnit parse(ICompilationUnit compilationUnit) {
-		int astLevel = JdtVersionBindingUtil.findJLSLevel(JdtVersionBindingUtil.findCurrentJDTVersion());
+		int astLevel = JdtCoreVersionBindingUtil.findJLSLevel(JdtCoreVersionBindingUtil.findCurrentJDTVersion());
 		ASTParser astParser = ASTParser.newParser(astLevel);
 		astParser.setKind(ASTParser.K_COMPILATION_UNIT);
 		astParser.setSource(compilationUnit);

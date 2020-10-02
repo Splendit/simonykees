@@ -31,7 +31,7 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
-import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
+import eu.jsparrow.rules.common.util.JdtCoreVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
@@ -583,9 +583,9 @@ public class RefactoringPipeline {
 		try {
 			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, newAstRoot, initialApply);
 			if (hasChanges) {
-				Version jdtVersion = JdtVersionBindingUtil.findCurrentJDTVersion();
+				Version jdtVersion = JdtCoreVersionBindingUtil.findCurrentJDTVersion();
 				ICompilationUnit workingCopy = refactoringState.getWorkingCopy();
-				newAstRoot = workingCopy.reconcile(JdtVersionBindingUtil.findJLSLevel(jdtVersion), true, null, null);
+				newAstRoot = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null, null);
 			}
 		} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 			logger.error(e.getMessage(), e);

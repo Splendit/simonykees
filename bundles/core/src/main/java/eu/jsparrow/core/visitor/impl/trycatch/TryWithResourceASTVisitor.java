@@ -34,7 +34,7 @@ import org.osgi.framework.Version;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
-import eu.jsparrow.rules.common.util.JdtVersionBindingUtil;
+import eu.jsparrow.rules.common.util.JdtCoreVersionBindingUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -154,8 +154,8 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			astRewrite.replace(node, tryStatement, null);
 
 		} else {
-			Version version = JdtVersionBindingUtil.findCurrentJDTVersion();
-			ChildListPropertyDescriptor resourcesProperty = JdtVersionBindingUtil.findTryWithResourcesProperty(version);
+			Version version = JdtCoreVersionBindingUtil.findCurrentJDTVersion();
+			ChildListPropertyDescriptor resourcesProperty = JdtCoreVersionBindingUtil.findTryWithResourcesProperty(version);
 			ListRewrite listRewrite = astRewrite.getListRewrite(node, resourcesProperty);
 			resourceList.forEach(iteratorNode -> listRewrite.insertLast(iteratorNode, null));
 			TwrCloseStatementsASTVisitor visitor = new TwrCloseStatementsASTVisitor(closeInvocations);
