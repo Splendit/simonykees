@@ -154,7 +154,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			astRewrite.replace(node, tryStatement, null);
 
 		} else {
-			Version version = JdtCoreVersionBindingUtil.findCurrentJDTVersion();
+			Version version = JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion();
 			ChildListPropertyDescriptor resourcesProperty = JdtCoreVersionBindingUtil.findTryWithResourcesProperty(version);
 			ListRewrite listRewrite = astRewrite.getListRewrite(node, resourcesProperty);
 			resourceList.forEach(iteratorNode -> listRewrite.insertLast(iteratorNode, null));

@@ -583,7 +583,7 @@ public class RefactoringPipeline {
 		try {
 			boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, newAstRoot, initialApply);
 			if (hasChanges) {
-				Version jdtVersion = JdtCoreVersionBindingUtil.findCurrentJDTVersion();
+				Version jdtVersion = JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion();
 				ICompilationUnit workingCopy = refactoringState.getWorkingCopy();
 				newAstRoot = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null, null);
 			}

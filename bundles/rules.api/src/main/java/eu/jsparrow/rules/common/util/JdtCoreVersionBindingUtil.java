@@ -40,7 +40,7 @@ public class JdtCoreVersionBindingUtil {
 	 *         found since it corresponds to the least eclipse version that we
 	 *         support.
 	 */
-	public static Version findCurrentJDTVersion() {
+	public static Version findCurrentJDTCoreVersion() {
 		if (jdtBundle == null) {
 			Bundle bundle = Platform.getBundle(ORG_ECLIPSE_JDT_CORE);
 			if (bundle == null) {
@@ -79,7 +79,7 @@ public class JdtCoreVersionBindingUtil {
 			/*
 			 * @since 3.22.0 -> 20-06
 			 */
-			return 14;
+			return AST.JLS14;
 		} else if (isJava13Supported(jdtVersion)) {
 			/*
 			 * @since 3.20.0 -> 19-12
