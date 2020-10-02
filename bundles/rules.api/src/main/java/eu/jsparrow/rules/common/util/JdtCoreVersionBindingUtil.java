@@ -16,7 +16,7 @@ import org.osgi.framework.Version;
 public class JdtCoreVersionBindingUtil {
 
 	private static final String ORG_ECLIPSE_JDT_CORE = "org.eclipse.jdt.core"; //$NON-NLS-1$
-	private static final String JDT_JAVA_14_SUPPORT = "3.21.0"; //$NON-NLS-1$
+	private static final String JDT_JAVA_14_SUPPORT = "3.22.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_13_SUPPORT = "3.20.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_12_SUPPORT = "3.18.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_11_SUPPORT = "3.16.0"; //$NON-NLS-1$
@@ -58,6 +58,8 @@ public class JdtCoreVersionBindingUtil {
 	 *            the JDT version on the current platform
 	 * @return
 	 *         <ul>
+	 *         <li>{@link AST#JLS14} if the JDT version corresponds to 3.22.0
+	 *         (2020-06);</li>
 	 *         <li>{@link AST#JLS13} if the JDT version corresponds to 3.20.0
 	 *         (2019-12);</li>
 	 *         <li>{@link AST#JLS12} if the JDT version corresponds to 3.18.0
@@ -75,9 +77,9 @@ public class JdtCoreVersionBindingUtil {
 	public static int findJLSLevel(Version jdtVersion) {
 		if (isJava14Supported(jdtVersion)) {
 			/*
-			 * @since 3.21.0 -> 20-03
+			 * @since 3.22.0 -> 20-06
 			 */
-			return 14;//FIXME replace with AST.JLS14 when switching to eclipse 20-03
+			return 14;
 		} else if (isJava13Supported(jdtVersion)) {
 			/*
 			 * @since 3.20.0 -> 19-12
