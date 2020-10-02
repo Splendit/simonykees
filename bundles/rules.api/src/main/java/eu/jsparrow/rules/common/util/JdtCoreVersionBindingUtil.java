@@ -15,7 +15,7 @@ import org.osgi.framework.Version;
  */
 public class JdtCoreVersionBindingUtil {
 
-	private static final String ORG_ECLIPSE_JDT_CORE = "org.eclipse.jdt"; //$NON-NLS-1$
+	private static final String ORG_ECLIPSE_JDT_CORE = "org.eclipse.jdt.core"; //$NON-NLS-1$
 	private static final String JDT_JAVA_14_SUPPORT = "3.21.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_13_SUPPORT = "3.20.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_12_SUPPORT = "3.18.0"; //$NON-NLS-1$
