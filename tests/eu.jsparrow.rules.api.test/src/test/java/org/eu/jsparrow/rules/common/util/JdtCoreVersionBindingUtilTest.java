@@ -31,8 +31,8 @@ public class JdtCoreVersionBindingUtilTest {
 	public void test_findCurrentJdtCore_shouldReturn14() {
 		/*
 		 * This test fails as soon as the target platform is different form
-		 * 2020-06 and 2020-09. THis is also relevant for the Eclipse Version 
-		 * that Tycho uses for the maven build. 
+		 * 2020-06 and 2020-09. This is also relevant for the Eclipse Version
+		 * that Tycho uses for the maven build.
 		 */
 		Version jdtVersion = JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion();
 		int jlsLevel = JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion);

@@ -32,11 +32,11 @@ public class JdtCoreVersionBindingUtil {
 	}
 
 	/**
-	 * Finds the version of the {@value #ORG_ECLIPSE_JDT_CORE} bundle on the current
-	 * {@link Platform}.
+	 * Finds the version of the {@value #ORG_ECLIPSE_JDT_CORE} bundle on the
+	 * current {@link Platform}.
 	 * 
-	 * @return the {@link Version} of {@value #ORG_ECLIPSE_JDT_CORE} bundle on the
-	 *         current platform or {@value #JDT_LEAST_SUPPORTED} if none is
+	 * @return the {@link Version} of {@value #ORG_ECLIPSE_JDT_CORE} bundle on
+	 *         the current platform or {@value #JDT_LEAST_SUPPORTED} if none is
 	 *         found since it corresponds to the least eclipse version that we
 	 *         support.
 	 */
@@ -58,14 +58,14 @@ public class JdtCoreVersionBindingUtil {
 	 *            the JDT Core version on the current platform
 	 * @return
 	 *         <ul>
-	 *         <li>{@code 14} if the JDT Core version corresponds to 3.22.0
-	 *         (2020-06);</li>
-	 *         <li>{@link AST#JLS13} if the JDT Core version corresponds to 3.20.0
-	 *         (2019-12);</li>
-	 *         <li>{@link AST#JLS12} if the JDT Core version corresponds to 3.18.0
-	 *         (2019-06);</li>
-	 *         <li>{@link AST#JLS11} if the JDT Core version corresponds to 3.16.0
-	 *         (2018-12);</li>
+	 *         <li>{@link AST#JLS14} if the JDT Core version corresponds to
+	 *         3.22.0 (2020-06);</li>
+	 *         <li>{@link AST#JLS13} if the JDT Core version corresponds to
+	 *         3.20.0 (2019-12);</li>
+	 *         <li>{@link AST#JLS12} if the JDT Core version corresponds to
+	 *         3.18.0 (2019-06);</li>
+	 *         <li>{@link AST#JLS11} if the JDT Core version corresponds to
+	 *         3.16.0 (2018-12);</li>
 	 *         <li>{@link AST#JLS10} if the JDT Core version corresponds to
 	 *         Photon;</li>
 	 *         <li>{@link AST#JLS9} if the version corresponds to Oxygen;
@@ -77,11 +77,15 @@ public class JdtCoreVersionBindingUtil {
 	public static int findJLSLevel(Version jdtVersion) {
 		if (isJava14Supported(jdtVersion)) {
 			/*
+			 * @since 3.23.0 -> 20-09
+			 * 
 			 * @since 3.22.0 -> 20-06
 			 */
 			return AST.JLS14;
 		} else if (isJava13Supported(jdtVersion)) {
 			/*
+			 * @since 3.21.0 -> 20-03
+			 * 
 			 * @since 3.20.0 -> 19-12
 			 */
 			return AST.JLS13;
