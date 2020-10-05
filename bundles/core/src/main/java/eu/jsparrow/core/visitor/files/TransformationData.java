@@ -21,29 +21,45 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 class TransformationData {
 
 	private final ClassInstanceCreation bufferedIOInstanceCreation;
-	private final Optional<VariableDeclarationFragment> fileIOResource;
+	private final VariableDeclarationFragment fileIOResource;
 	private final List<Expression> pathExpressions;
-	private final Optional<Expression> charSet;
+	private final Expression charSet;
 
 	public TransformationData(ClassInstanceCreation newBufferedIO,
-			List<Expression> pathExpressions, Optional<Expression> optionalCharSet,
+			List<Expression> pathExpressions, Expression charSet,
 			VariableDeclarationFragment fileIOResource) {
 		this.bufferedIOInstanceCreation = newBufferedIO;
-		this.fileIOResource = Optional.of(fileIOResource);
+		this.fileIOResource = fileIOResource;
 		this.pathExpressions = pathExpressions;
-		this.charSet = optionalCharSet;
+		this.charSet = charSet;
 	}
 
-	public TransformationData(ClassInstanceCreation newBufferedIO, List<Expression> pathExpressions,
-			Optional<Expression> optionalCharSet) {
+	public TransformationData(ClassInstanceCreation newBufferedIO,
+			List<Expression> pathExpressions, VariableDeclarationFragment fileIOResource) {
 		this.bufferedIOInstanceCreation = newBufferedIO;
-		this.fileIOResource = Optional.empty();
+		this.fileIOResource = fileIOResource;
 		this.pathExpressions = pathExpressions;
-		this.charSet = optionalCharSet;
+		this.charSet = null;
+	}
+
+	public TransformationData(ClassInstanceCreation newBufferedIO,
+			List<Expression> pathExpressions, Expression charSet) {
+		this.bufferedIOInstanceCreation = newBufferedIO;
+		this.fileIOResource = null;
+		this.pathExpressions = pathExpressions;
+		this.charSet = charSet;
+	}
+
+	public TransformationData(ClassInstanceCreation newBufferedIO,
+			List<Expression> pathExpressions) {
+		this.bufferedIOInstanceCreation = newBufferedIO;
+		this.fileIOResource = null;
+		this.pathExpressions = pathExpressions;
+		this.charSet = null;
 	}
 
 	public Optional<VariableDeclarationFragment> getFileIOResource() {
-		return fileIOResource;
+		return Optional.ofNullable(fileIOResource);
 	}
 
 	public List<Expression> getPathExpressions() {
@@ -51,7 +67,7 @@ class TransformationData {
 	}
 
 	public Optional<Expression> getCharSet() {
-		return charSet;
+		return Optional.ofNullable(charSet);
 	}
 
 	public ClassInstanceCreation getBufferedIOInstanceCreation() {
