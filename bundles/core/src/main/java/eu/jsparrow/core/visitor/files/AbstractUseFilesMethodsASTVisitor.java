@@ -74,25 +74,20 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		}
 
 		NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
-		TransformationData transformationData = null;
 		if (bufferedIOArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION
 				&& newBufferedIOArgumentsAnalyzer.analyzeInitializer((ClassInstanceCreation) bufferedIOArgument)) {
-
+			
 			List<Expression> pathExpressions = newBufferedIOArgumentsAnalyzer.getPathExpressions();
-			transformationData = newBufferedIOArgumentsAnalyzer.getCharset()
+			TransformationData transformationData = newBufferedIOArgumentsAnalyzer.getCharset()
 				.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet))
 				.orElse(new TransformationData(newBufferedIO, pathExpressions));
+			transform(transformationData);
 
 		} else if (isDeclarationInTWRHeader(fragment, bufferedIOArgument)) {
-			FileIOAnalyzer fileWriterAnalyzer = new FileIOAnalyzer(fileIOQualifiedTypeName);
-			transformationData = createTransformationDataUsingFileIOResource(fragment, newBufferedIO,
-					bufferedIOArgument,
-					fileWriterAnalyzer);
+			createTransformationDataUsingFileIOResource(fragment, newBufferedIO,
+					bufferedIOArgument).ifPresent(this::transform);
 		}
 
-		if (transformationData != null) {
-			transform(transformationData);
-		}
 		return true;
 	}
 
@@ -140,8 +135,9 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 				&& fragmentParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY;
 	}
 
-	private TransformationData createTransformationDataUsingFileIOResource(VariableDeclarationFragment fragment,
-			ClassInstanceCreation newBufferedIO, Expression bufferedIOArg, FileIOAnalyzer fileIOAnalyzer) {
+	private Optional<TransformationData> createTransformationDataUsingFileIOResource(
+			VariableDeclarationFragment fragment,
+			ClassInstanceCreation newBufferedIO, Expression bufferedIOArg) {
 		VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment
 			.getParent();
 		TryStatement tryStatement = (TryStatement) declarationExpression.getParent();
@@ -149,23 +145,25 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		VariableDeclarationFragment fileIOResource = findFileIOResource(bufferedIOArg,
 				tryStatement).orElse(null);
 		if (fileIOResource == null) {
-			return null;
+			return Optional.empty();
 		}
 
+		FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(fileIOQualifiedTypeName);
 		if (!fileIOAnalyzer.analyzeFileIO((VariableDeclarationExpression) fileIOResource.getParent())) {
-			return null;
+			return Optional.empty();
 		}
 
 		boolean isUsedInTryBody = hasUsagesOn(tryStatement.getBody(), fileIOResource.getName());
 		if (isUsedInTryBody) {
-			return null;
+			return Optional.empty();
 		}
 
 		// Now the transformation happens
 		List<Expression> pathExpressions = fileIOAnalyzer.getPathExpressions();
-		return fileIOAnalyzer.getCharset()
+		TransformationData transformationData = fileIOAnalyzer.getCharset()
 			.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet, fileIOResource))
 			.orElse(new TransformationData(newBufferedIO, pathExpressions, fileIOResource));
+		return Optional.of(transformationData);
 	}
 
 	private Optional<VariableDeclarationFragment> findFileIOResource(Expression bufferedIOArg,
