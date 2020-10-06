@@ -21,41 +21,34 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 class TransformationData {
 
 	private final ClassInstanceCreation bufferedIOInstanceCreation;
-	private final VariableDeclarationFragment fileIOResource;
 	private final List<Expression> pathExpressions;
-	private final Expression charSet;
+	private VariableDeclarationFragment fileIOResource;
+	private Expression charSet;
 
 	public TransformationData(ClassInstanceCreation newBufferedIO,
 			List<Expression> pathExpressions, Expression charSet,
 			VariableDeclarationFragment fileIOResource) {
-		this.bufferedIOInstanceCreation = newBufferedIO;
-		this.fileIOResource = fileIOResource;
-		this.pathExpressions = pathExpressions;
+		this(newBufferedIO, pathExpressions, fileIOResource);
 		this.charSet = charSet;
 	}
 
 	public TransformationData(ClassInstanceCreation newBufferedIO,
 			List<Expression> pathExpressions, VariableDeclarationFragment fileIOResource) {
-		this.bufferedIOInstanceCreation = newBufferedIO;
+		this(newBufferedIO, pathExpressions);
 		this.fileIOResource = fileIOResource;
-		this.pathExpressions = pathExpressions;
-		this.charSet = null;
+
 	}
 
 	public TransformationData(ClassInstanceCreation newBufferedIO,
 			List<Expression> pathExpressions, Expression charSet) {
-		this.bufferedIOInstanceCreation = newBufferedIO;
-		this.fileIOResource = null;
-		this.pathExpressions = pathExpressions;
+		this(newBufferedIO, pathExpressions);
 		this.charSet = charSet;
 	}
 
 	public TransformationData(ClassInstanceCreation newBufferedIO,
 			List<Expression> pathExpressions) {
 		this.bufferedIOInstanceCreation = newBufferedIO;
-		this.fileIOResource = null;
 		this.pathExpressions = pathExpressions;
-		this.charSet = null;
 	}
 
 	public Optional<VariableDeclarationFragment> getFileIOResource() {
