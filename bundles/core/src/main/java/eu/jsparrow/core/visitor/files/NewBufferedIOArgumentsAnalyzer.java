@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.files;
 
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -55,14 +57,14 @@ class NewBufferedIOArgumentsAnalyzer {
 		if (argumentsSize == 2) {
 			Expression secondArgument = arguments.get(1);
 			ITypeBinding secondArgType = secondArgument.resolveTypeBinding();
-			if (!ClassRelationUtil.isContentOfType(secondArgType, java.nio.charset.Charset.class.getName())) {
+			if (!isContentOfType(secondArgType, java.nio.charset.Charset.class.getName())) {
 				return false;
 			}
 			this.charsetExpression = secondArgument;
 		}
 
 		Expression firstArgument = arguments.get(0);
-		if (ClassRelationUtil.isContentOfType(firstArgument.resolveTypeBinding(), java.lang.String.class.getName())) {
+		if (isContentOfType(firstArgument.resolveTypeBinding(), java.lang.String.class.getName())) {
 			pathExpressions.add(firstArgument);
 			return true;
 		} else if (ClassRelationUtil.isNewInstanceCreationOf(firstArgument, java.io.File.class.getName())) {
@@ -73,7 +75,7 @@ class NewBufferedIOArgumentsAnalyzer {
 			return fileArgs
 				.stream()
 				.map(Expression::resolveTypeBinding)
-				.allMatch(t -> ClassRelationUtil.isContentOfType(t, java.lang.String.class.getName()));
+				.allMatch(fileArgType -> isContentOfType(fileArgType, java.lang.String.class.getName()));
 
 		}
 		return false;
