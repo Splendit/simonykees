@@ -129,7 +129,7 @@ public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> 
 					String keyword = key.toString();
 					if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
 						return supportedVersion.stream()
-							.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s));
+							.anyMatch(s -> StringUtils.equals(attributes.getValue(key), s));
 					}
 				}
 			}
