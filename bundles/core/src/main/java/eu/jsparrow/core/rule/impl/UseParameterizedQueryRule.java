@@ -24,7 +24,7 @@ public class UseParameterizedQueryRule
 		this.visitorClass = UseParameterizedQueryASTVisitor.class;
 		this.id = "UseParameterizedQuery"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.ReplaceDynamicQueryByPreparedStatementRule_name,
-				Messages.ReplaceDynamicQueryByPreparedStatementRule_description, Duration.ofMinutes(10),
+				Messages.ReplaceDynamicQueryByPreparedStatementRule_description, Duration.ofMinutes(20),
 				Arrays.asList(Tag.JAVA_1_1, Tag.SECURITY));
 	}
 
