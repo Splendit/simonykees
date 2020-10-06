@@ -214,6 +214,10 @@ rules:
   - UseParameterizedLDAPQuery
   - UseSecureRandomRule
   - ReuseRandomObjects
+  - CreateTempFilesUsingJavaNIO
+  - UseFilesBufferedReader
+  - UsePredefinedStandardCharset
+  - UseOffsetBasedStringMethods
 
 excludes:
   excludeClasses: []

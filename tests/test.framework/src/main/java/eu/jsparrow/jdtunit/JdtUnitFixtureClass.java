@@ -50,7 +50,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @author Hans-Jörg Schrödl
  *
  */
-@SuppressWarnings({ "unchecked", "nls" })
+@SuppressWarnings({ "unchecked"})
 public class JdtUnitFixtureClass {
 
 	private static final String DEFAULT_METHOD_FIXTURE_NAME = "FixtureMethod";
@@ -71,7 +71,7 @@ public class JdtUnitFixtureClass {
 	private boolean hasChanged = false;
 
 	JdtUnitFixtureClass(JdtUnitFixtureProject fixtureProject, IPackageFragment packageFragment, String className)
-			throws JdtUnitException, JavaModelException, BadLocationException {
+			throws JdtUnitException {
 		this.packageFragment = packageFragment;
 		this.className = className;
 		this.fixtureProject = fixtureProject;
@@ -343,10 +343,9 @@ public class JdtUnitFixtureClass {
 	 *            method is removed.
 	 * @throws BadLocationException
 	 * @throws JavaModelException
-	 * @throws JdtUnitException
 	 * 
 	 */
-	public void clear(boolean keepDefaultMethod) throws JavaModelException, BadLocationException, JdtUnitException {
+	public void clear(boolean keepDefaultMethod) throws JavaModelException, BadLocationException {
 		astRoot.imports()
 			.clear();
 		methods.values()
@@ -387,7 +386,7 @@ public class JdtUnitFixtureClass {
 		compilationUnit.delete(true, new NullProgressMonitor());
 	}
 
-	private void createCompilationUnit() throws JdtUnitException, JavaModelException, BadLocationException {
+	private void createCompilationUnit() throws JdtUnitException {
 		compilationUnit = new CompilationUnitBuilder(packageFragment).setName(className + ".java")
 			.build();
 

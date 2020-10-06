@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-@SuppressWarnings("nls")
 public class StandardLoggerRuleSlf4jTest extends SingleRuleTest {
 
 	private static final String STANDARD_FILE = "TestStandardLoggerRule.java";
@@ -89,9 +88,9 @@ public class StandardLoggerRuleSlf4jTest extends SingleRuleTest {
 		Path preRule = getPreRuleFile(file);
 		Path postRule = getPostRuleFile(file, POSTRULE_SUBDIRECTORY);
 
+		RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
 		RulesTestUtil.addToClasspath(testProject,
 				Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25")));
-		RulesTestUtil.addToClasspath(testProject, RulesTestUtil.getClassPathEntries(root));
 		rule.calculateEnabledForProject(testProject);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));

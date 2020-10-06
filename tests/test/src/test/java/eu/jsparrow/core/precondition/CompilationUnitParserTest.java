@@ -21,7 +21,6 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
  * @since 3.3.0
  *
  */
-@SuppressWarnings("nls")
 public class CompilationUnitParserTest {
 	IJavaProject testproject = null;
 	IPackageFragment packageFragment = null;
@@ -30,9 +29,6 @@ public class CompilationUnitParserTest {
 	public void setUp() throws Exception {
 		testproject = RulesTestUtil.createJavaProject("compilationUnitParserProject", "bin");
 		IPackageFragmentRoot root = RulesTestUtil.addSourceContainer(testproject, "/allRulesTestRoot");
-
-		RulesTestUtil.addToClasspath(testproject, RulesTestUtil.getClassPathEntries(root));
-
 		packageFragment = root.createPackageFragment("eu.jsparrow", true, null);
 	}
 
