@@ -38,17 +38,20 @@ public class EscapeUserInputsInSQLQueriesRule extends RefactoringRuleImpl<Escape
 
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
-
-		for (String fullyQuallifiedClassName : EscapeUserInputsInSQLQueriesASTVisitor.CODEC_TYPES_QUALIFIED_NAMES) {
 			try {
-				if (project.findType(fullyQuallifiedClassName) == null) {
+				if (project.findType(EscapeUserInputsInSQLQueriesASTVisitor.QUALIFIED_NAME_CODEC) == null) {
+					return false;
+				}
+				if (project.findType(EscapeUserInputsInSQLQueriesASTVisitor.QUALIFIED_NAME_ORACLE_CODEC) == null) {
+					return false;
+				}
+				if (project.findType(EscapeUserInputsInSQLQueriesASTVisitor.QUALIFIED_NAME_ESAPI) == null) {
 					return false;
 				}
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
 				return false;
 			}
-		}
 		return true;
 	}
 

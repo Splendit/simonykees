@@ -198,7 +198,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 
 	private Expression createDefaultCharSetExpression(AST ast) {
 		MethodInvocation defaultCharset = ast.newMethodInvocation();
-		defaultCharset.setExpression(ast.newName(findTypeNameForStaticMethodInvocation(CHARSET_QUALIFIED_NAME)));
+		defaultCharset.setExpression(addImport(CHARSET_QUALIFIED_NAME));
 		defaultCharset.setName(ast.newSimpleName("defaultCharset")); //$NON-NLS-1$
 		return defaultCharset;
 	}
@@ -209,8 +209,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 			.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
 			.orElse(createDefaultCharSetExpression(ast));
 		MethodInvocation pathsGet = ast.newMethodInvocation();
-		String pathsIdentifier = findTypeNameForStaticMethodInvocation(PATHS_QUALIFIED_NAME);
-		pathsGet.setExpression(ast.newName(pathsIdentifier));
+		pathsGet.setExpression(addImport(PATHS_QUALIFIED_NAME));
 		pathsGet.setName(ast.newSimpleName("get")); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Expression> pathsGetParameters = pathsGet.arguments();
@@ -221,7 +220,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		List<Expression> arguments = new ArrayList<>();
 		arguments.add(pathsGet);
 		arguments.add(charset);
-		Expression filesExpression = ast.newName(findTypeNameForStaticMethodInvocation(FILES_QUALIFIED_NAME));
+		Expression filesExpression = addImport(FILES_QUALIFIED_NAME);
 		return NodeBuilder.newMethodInvocation(ast, filesExpression,
 				ast.newSimpleName(newBufferedIOMethodName), arguments);
 	}

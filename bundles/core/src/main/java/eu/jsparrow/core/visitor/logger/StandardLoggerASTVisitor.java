@@ -170,7 +170,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	@Override
 	public void endVisit(CompilationUnit compilationUnit) {
 		if (importsNeeded) {
-			super.addImports.addAll(newImports.get(loggerQualifiedName));
+			super.addAlreadyVerifiedImports(newImports.get(loggerQualifiedName));
 		}
 		super.endVisit(compilationUnit);
 	}

@@ -12,7 +12,6 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 		setVisitor(new UseParameterizedQueryASTVisitor());
 		fixture.addImport(java.sql.Connection.class.getName());
 		fixture.addImport(java.sql.Statement.class.getName());
-		fixture.addImport(java.sql.PreparedStatement.class.getName());
 		fixture.addImport(java.sql.ResultSet.class.getName());
 	}
 
@@ -579,30 +578,60 @@ public class UseParameterizedQueryASTVisitorTest extends UsesSimpleJDTUnitFixtur
 				"			}";
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_ExecuteQueryArgumentInfixExpression_shouldTransform() throws Exception {
 
 		String original = "" +
-				"		String departmentId1 = \"40\";\n" + 
-				"		try {\n" + 
-				"			Connection connection = null;\n" + 
-				"			Statement statement = connection.createStatement();\n" + 
-				"			ResultSet resultSet = statement\n" + 
-				"					.executeQuery(\"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\");\n" + 
-				"		} catch (Exception e) {\n" + 
-				"		}";
-		
-		String expected = "" +
-				"		String departmentId1=\"40\";\n" + 
-				"		try {\n" + 
-				"			Connection connection=null;\n" + 
-				"			PreparedStatement statement=connection.prepareStatement(\"SELECT id FROM employee WHERE department_id =  ?\" + \"\");\n" + 
-				"			statement.setString(1,departmentId1);\n" + 
-				"			ResultSet resultSet=statement.executeQuery();\n" + 
-				"		} catch (  Exception e) {\n" + 
+				"		String departmentId1 = \"40\";\n" +
+				"		try {\n" +
+				"			Connection connection = null;\n" +
+				"			Statement statement = connection.createStatement();\n" +
+				"			ResultSet resultSet = statement\n" +
+				"					.executeQuery(\"SELECT id FROM employee WHERE department_id = '\" + departmentId1 + \"'\");\n"
+				+
+				"		} catch (Exception e) {\n" +
 				"		}";
 
+		String expected = "" +
+				"		String departmentId1=\"40\";\n" +
+				"		try {\n" +
+				"			Connection connection=null;\n" +
+				"			PreparedStatement statement=connection.prepareStatement(\"SELECT id FROM employee WHERE department_id =  ?\" + \"\");\n"
+				+
+				"			statement.setString(1,departmentId1);\n" +
+				"			ResultSet resultSet=statement.executeQuery();\n" +
+				"		} catch (  Exception e) {\n" +
+				"		}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void test_conflictingImport_shouldTransform() throws Exception {
+		fixture.addImport("test.net.sql.PreparedStatement");
+		String original = "" +
+				"String departmentId = \"40\";\n" +
+				"Connection connection = null;\n" +
+				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + departmentId + \"' ORDER BY last_name\";\n"
+				+
+				"try {\n" +
+				"    Statement statement = connection.createStatement();\n" +
+				"    statement.executeQuery(query);\n" +
+				"} catch (Exception e) {}";
+		
+		String expected = "" +
+				"  String departmentId=\"40\";\n" + 
+				"  Connection connection=null;\n" + 
+				"  String query=\"SELECT first_name FROM employee WHERE department_id = ?\" + \" ORDER BY last_name\";\n" + 
+				"  try {\n" + 
+				"    java.sql.PreparedStatement statement=connection.prepareStatement(query);\n" + 
+				"    statement.setString(1,departmentId);\n" + 
+				"    statement.executeQuery();\n" + 
+				"  }\n" + 
+				" catch (  Exception e) {\n" + 
+				"  }";
+		
 		assertChange(original, expected);
 	}
 }
