@@ -22,7 +22,8 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 	private static final String SAMPLE_FILE_ALL_IMPORTS_ON_DEMAND_CLASHING = "UseOffsetBasedStringMethodsAllImportsOnDemandClashRule.java";
 	private static final String SAMPLE_FILE_ALL_IMPORTS_ON_DEMAND_CLASHING2 = "UseOffsetBasedStringMethodsAllImportsOnDemandClash2Rule.java";
 	private static final String SAMPLE_FILE_AMBIGUOUS_IMPORTS_ON_DEMAND = "UseOffsetBasedStringMethodsAmbiguousImportsOnDemandRule.java";
-	
+	private static final String SAMPLE_FILE_MATH_AS_VARIABLE = "UseOffsetBasedStringMethodsMathAsVariableRule.java";
+
 	private static final String POSTRULE_SUBDIRECTORY = "useOffsetBasedStringMethods";
 
 	private UseOffsetBasedStringMethodsRule rule;
@@ -58,7 +59,7 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	public void testAllImportsOnDemandClashing() throws Exception {
 		loadUtilities();
@@ -71,7 +72,7 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	public void testAllImportsOnDemandClashing2() throws Exception {
 		loadUtilities();
@@ -84,7 +85,7 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	public void testAmbiguousImportsOnDemandClashing() throws Exception {
 		loadUtilities();
@@ -97,7 +98,20 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
+
+	@Test
+	public void testMathAsVariable() throws Exception {
+		loadUtilities();
+
+		Path preRule = getPreRuleFile(SAMPLE_FILE_MATH_AS_VARIABLE);
+		Path postRule = getPostRuleFile(SAMPLE_FILE_MATH_AS_VARIABLE, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+
 	@Test
 	public void calculateEnabledForProjectShouldBeEnabled() {
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_1);
@@ -106,5 +120,5 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
+
 }
