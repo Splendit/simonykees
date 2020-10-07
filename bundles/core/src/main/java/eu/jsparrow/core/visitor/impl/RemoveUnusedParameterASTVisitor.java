@@ -4,6 +4,7 @@ import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -74,6 +75,12 @@ public class RemoveUnusedParameterASTVisitor extends AbstractASTRewriteASTVisito
 	}
 
 	private void analyzeParameter(SingleVariableDeclaration parameter, MethodDeclaration methodDeclaration) {
+		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(parameter.modifiers(),
+				Annotation.class);
+		if (!annotations.isEmpty()) {
+			return;
+		}
+
 		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(parameter.getName());
 		Block methodBody = methodDeclaration.getBody();
 		if (methodBody == null) {

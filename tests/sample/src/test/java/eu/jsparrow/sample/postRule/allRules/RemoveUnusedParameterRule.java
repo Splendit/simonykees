@@ -62,6 +62,12 @@ public class RemoveUnusedParameterRule {
 		consume(value);
 	}
 
+	private void unusedFinalParameter_shouldTransform() {
+	}
+
+	private void unusedAnnotatedParameter_shouldNotTransform(@SuppressWarnings("unused") String unusedParameter) {
+	}
+
 	private void invokeTransformedMethods() {
 		final String first = "first";
 		visit_multipleUnusedParameters_shouldTransform("second");

@@ -70,6 +70,10 @@ public class RemoveUnusedParameterRule {
 	private void visit_sameSignatureWithInnerClassMethod_shouldTransformInInnerClass(String value) {
 		consume(value);
 	}
+
+	private void unusedFinalParameter_shouldTransform(final String unusedParameter) {}
+
+	private void unusedAnnotatedParameter_shouldNotTransform(@SuppressWarnings("unused") String unusedParameter) {}
 	
 	private void invokeTransformedMethods() {
 		String first = "first";
