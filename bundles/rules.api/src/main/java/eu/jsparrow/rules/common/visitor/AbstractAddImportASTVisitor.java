@@ -14,21 +14,27 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.DeclaredMethodNamesASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.DeclaredTypesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
 
 /**
  * Extended {@link AbstractASTRewriteASTVisitor} where a list of java classes
@@ -49,9 +55,12 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	private Set<String> typesImportedOnDemand = new HashSet<>();
 	private Set<String> safeStaticMethodImports = new HashSet<>();
 	private Set<String> staticMethodsImportedOnDemand = new HashSet<>();
+	private final LiveVariableScope liveVariableScope = new LiveVariableScope();
+	private ASTNode enclosingScope;
 
 	@Override
 	public void endVisit(CompilationUnit node) {
+		liveVariableScope.clearCompilationUnitScope(node);
 
 		PackageDeclaration cuPackage = node.getPackage();
 		String packageQualifiedName;
@@ -83,6 +92,52 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		safeStaticMethodImports.clear();
 		staticMethodsImportedOnDemand.clear();
 		super.endVisit(node);
+	}
+
+	@Override
+	public void endVisit(TypeDeclaration typeDeclaration) {
+		enclosingScope = liveVariableScope.findEnclosingScope(typeDeclaration)
+			.orElse(null);
+		liveVariableScope.clearFieldScope(typeDeclaration);
+	}
+
+	@Override
+	public boolean visit(MethodDeclaration methodDeclaration) {
+		enclosingScope = methodDeclaration;
+		return super.visit(methodDeclaration);
+	}
+
+	@Override
+	public void endVisit(MethodDeclaration methodDeclaration) {
+		enclosingScope = liveVariableScope.findEnclosingScope(methodDeclaration)
+			.orElse(null);
+		liveVariableScope.clearLocalVariablesScope(methodDeclaration);
+	}
+
+	@Override
+	public boolean visit(FieldDeclaration fieldDeclaration) {
+		enclosingScope = fieldDeclaration;
+		return super.visit(fieldDeclaration);
+	}
+
+	@Override
+	public void endVisit(FieldDeclaration fieldDeclaration) {
+		enclosingScope = liveVariableScope.findEnclosingScope(fieldDeclaration)
+			.orElse(null);
+		liveVariableScope.clearLocalVariablesScope(fieldDeclaration);
+	}
+
+	@Override
+	public boolean visit(Initializer initializer) {
+		enclosingScope = initializer;
+		return super.visit(initializer);
+	}
+
+	@Override
+	public void endVisit(Initializer initializer) {
+		enclosingScope = liveVariableScope.findEnclosingScope(initializer)
+			.orElse(null);
+		liveVariableScope.clearLocalVariablesScope(initializer);
 	}
 
 	protected void verifyImport(CompilationUnit compilationUnit, String qualifiedTypeName) {
@@ -382,7 +437,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 */
 	protected Optional<Name> addImportForStaticMethod(String fullyQualifiedMethodName) {
 		if (safeStaticMethodImports.contains(fullyQualifiedMethodName)) {
-			if(!staticMethodsImportedOnDemand.contains(fullyQualifiedMethodName)) {
+			if (!staticMethodsImportedOnDemand.contains(fullyQualifiedMethodName)) {
 				this.staticImports.add(fullyQualifiedMethodName);
 			}
 			return Optional.empty();
@@ -401,4 +456,13 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	protected void addAlreadyVerifiedImports(Collection<String> newImports) {
 		addImports.addAll(newImports);
 	}
+
+	public ASTNode getEnclosingScope() {
+		return enclosingScope;
+	}
+
+	public LiveVariableScope getLiveVariableScope() {
+		return liveVariableScope;
+	}
+	
 }

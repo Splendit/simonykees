@@ -31,7 +31,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsUtil;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
 
 /**
  * Used for preventing injection of SQL code by escaping of the user input that
@@ -64,8 +63,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	public static final String QUALIFIED_NAME_ESAPI = "org.owasp.esapi.ESAPI"; //$NON-NLS-1$
 	private static final String VAR_NAME_ORACLE_CODEC = "oracleCodec"; //$NON-NLS-1$
 
-	private final Map<Block, String> mapBlockToOracleCodecVariable = new HashMap<>();
-	private final LiveVariableScope liveVariableScope = new LiveVariableScope();
+	private final Map<Block, String> mapBlockToOracleCodecVariable = new HashMap<>();	
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
@@ -109,17 +107,16 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 
 		Block enclosingBlock = (Block) statementAfterOracleCodec.getParent();
 
-		ASTNode enclosingScope = this.liveVariableScope.findEnclosingScope(statementAfterOracleCodec)
-			.orElse(null);
+		ASTNode enclosingScope = getEnclosingScope();
 		if (enclosingScope == null) {
 			return true;
 		}
 
-		liveVariableScope.lazyLoadScopeNames(enclosingScope);
+		getLiveVariableScope().lazyLoadScopeNames(enclosingScope);
 
 		String oracleCodecName = mapBlockToOracleCodecVariable.computeIfAbsent(enclosingBlock, block -> {
 			String newName = createOracleCodecName();
-			liveVariableScope.addName(enclosingScope, newName);
+			getLiveVariableScope().addName(enclosingScope, newName);
 			VariableDeclarationStatement oracleCodecDeclarationStatement = createOracleCODECDeclarationStatement(
 					newName);
 			ListRewrite listRewrite = astRewrite.getListRewrite(enclosingBlock, Block.STATEMENTS_PROPERTY);
@@ -135,33 +132,27 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	}
 
 	@Override
-	public void endVisit(CompilationUnit compilationUnit) {
-		liveVariableScope.clearCompilationUnitScope(compilationUnit);
-		super.endVisit(compilationUnit);
-	}
-
-	@Override
-	public void endVisit(TypeDeclaration typeDeclaration) {
-		liveVariableScope.clearFieldScope(typeDeclaration);
+	public void endVisit(TypeDeclaration typeDeclaration) {		
 		mapBlockToOracleCodecVariable.clear();
+		super.endVisit(typeDeclaration);
 	}
 
 	@Override
 	public void endVisit(MethodDeclaration methodDeclaration) {
-		liveVariableScope.clearLocalVariablesScope(methodDeclaration);
 		mapBlockToOracleCodecVariable.clear();
+		super.endVisit(methodDeclaration);
 	}
 
 	@Override
 	public void endVisit(FieldDeclaration fieldDeclaration) {
-		liveVariableScope.clearLocalVariablesScope(fieldDeclaration);
 		mapBlockToOracleCodecVariable.clear();
+		super.endVisit(fieldDeclaration);
 	}
 
 	@Override
 	public void endVisit(Initializer initializer) {
-		liveVariableScope.clearLocalVariablesScope(initializer);
 		mapBlockToOracleCodecVariable.clear();
+		super.endVisit(initializer);
 	}
 
 	private DynamicQueryComponentsStore collectQueryComponents(SimpleName queryVariableName) {
@@ -218,7 +209,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		AST ast = astRewrite.getAST();
 
 		Name nameESAPI;
-		if (liveVariableScope.isInScope("ESAPI")) {
+		if (getLiveVariableScope().isInScope("ESAPI")) {
 			nameESAPI = ast.newName(QUALIFIED_NAME_ESAPI);
 		} else {
 			nameESAPI = addImport(QUALIFIED_NAME_ESAPI);
@@ -235,7 +226,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	private String createOracleCodecName() {
 		String name = VAR_NAME_ORACLE_CODEC;
 		int suffix = 1;
-		while (liveVariableScope.isInScope(name)) {
+		while (getLiveVariableScope().isInScope(name)) {
 			name = VAR_NAME_ORACLE_CODEC + suffix;
 			suffix++;
 		}

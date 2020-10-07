@@ -143,11 +143,13 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	@Override
 	public void endVisit(MethodDeclaration methodDeclaration) {
 		generatedIdsPerMethod.clear();
+		super.endVisit(methodDeclaration);
 	}
 
 	@Override
 	public void endVisit(Initializer initializer) {
 		generatedIdsPerMethod.clear();
+		super.endVisit(initializer);
 	}
 
 	@Override

@@ -110,16 +110,19 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
 		this.scope.clearFieldScope(typeDeclaration);
+		super.endVisit(typeDeclaration);
 	}
 
 	@Override
 	public void endVisit(MethodDeclaration methodDeclaration) {
 		this.scope.clearLocalVariablesScope(methodDeclaration);
+		super.endVisit(methodDeclaration);
 	}
 
 	@Override
 	public void endVisit(FieldDeclaration fieldDeclaration) {
 		this.scope.clearLocalVariablesScope(fieldDeclaration);
+		super.endVisit(fieldDeclaration);
 	}
 
 	@Override
