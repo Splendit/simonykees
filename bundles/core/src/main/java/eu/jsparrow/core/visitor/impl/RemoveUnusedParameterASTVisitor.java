@@ -67,13 +67,13 @@ public class RemoveUnusedParameterASTVisitor extends AbstractASTRewriteASTVisito
 		}
 
 		for (SingleVariableDeclaration parameter : parameters) {
-			analyzeParamter(parameter, methodDeclaration);
+			analyzeParameter(parameter, methodDeclaration);
 		}
 
 		return true;
 	}
 
-	private void analyzeParamter(SingleVariableDeclaration parameter, MethodDeclaration methodDeclaration) {
+	private void analyzeParameter(SingleVariableDeclaration parameter, MethodDeclaration methodDeclaration) {
 		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(parameter.getName());
 		Block methodBody = methodDeclaration.getBody();
 		if (methodBody == null) {
