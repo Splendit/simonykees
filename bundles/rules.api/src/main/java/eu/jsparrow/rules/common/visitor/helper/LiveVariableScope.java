@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.sub;
+package eu.jsparrow.rules.common.visitor.helper;
 
 import static eu.jsparrow.rules.common.util.ASTNodeUtil.getSpecificAncestor;
 
