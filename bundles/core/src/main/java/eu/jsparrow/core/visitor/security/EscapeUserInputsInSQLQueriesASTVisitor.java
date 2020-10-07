@@ -63,7 +63,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	public static final String QUALIFIED_NAME_ESAPI = "org.owasp.esapi.ESAPI"; //$NON-NLS-1$
 	private static final String VAR_NAME_ORACLE_CODEC = "oracleCodec"; //$NON-NLS-1$
 
-	private final Map<Block, String> mapBlockToOracleCodecVariable = new HashMap<>();	
+	private final Map<Block, String> mapBlockToOracleCodecVariable = new HashMap<>();
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
@@ -132,7 +132,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	}
 
 	@Override
-	public void endVisit(TypeDeclaration typeDeclaration) {		
+	public void endVisit(TypeDeclaration typeDeclaration) {
 		mapBlockToOracleCodecVariable.clear();
 		super.endVisit(typeDeclaration);
 	}
@@ -208,13 +208,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	private Expression createEscapeExpression(String oracleCodecName, Expression expressionToEscape) {
 		AST ast = astRewrite.getAST();
 
-		Name nameESAPI;
-		if (getLiveVariableScope().isInScope("ESAPI")) {
-			nameESAPI = ast.newName(QUALIFIED_NAME_ESAPI);
-		} else {
-			nameESAPI = addImport(QUALIFIED_NAME_ESAPI);
-		}
-		
+		Name nameESAPI = addImport(QUALIFIED_NAME_ESAPI);
 		MethodInvocation encoderInvocationOfESAPI = NodeBuilder.newMethodInvocation(ast, nameESAPI, "encoder");
 		SimpleName encodeForSQLName = ast.newSimpleName("encodeForSQL");
 		List<Expression> arguments = new ArrayList<>();

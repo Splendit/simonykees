@@ -421,6 +421,13 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * @param qualifiedName
 	 */
 	protected Name addImport(String qualifiedName) {
+		if(enclosingScope != null) {
+			String simpleTypeName = getSimpleName(qualifiedName);
+			this.liveVariableScope.lazyLoadScopeNames(enclosingScope);
+			if(liveVariableScope.isInScope(simpleTypeName)) {
+				return astRewrite.getAST().newName(qualifiedName);
+			}
+		}
 		if (safeImports.contains(qualifiedName) && !typesImportedOnDemand.contains(qualifiedName)) {
 			addImports.add(qualifiedName);
 		}
@@ -443,8 +450,8 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			return Optional.empty();
 		} else {
 			String qualifiedTypeName = findQualifyingPrefix(fullyQualifiedMethodName);
-			addImport(qualifiedTypeName);
-			return Optional.of(findTypeName(qualifiedTypeName));
+			Name typeName = addImport(qualifiedTypeName);
+			return Optional.of(typeName);
 		}
 	}
 
