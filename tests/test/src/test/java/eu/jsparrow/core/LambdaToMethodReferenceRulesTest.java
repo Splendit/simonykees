@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-@SuppressWarnings("nls")
 public class LambdaToMethodReferenceRulesTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE = "LambdaToMethodReferenceRule.java";
@@ -53,7 +52,7 @@ public class LambdaToMethodReferenceRulesTest extends SingleRuleTest {
 	}
 
 	@Test
-	public void calculateEnabledforProjectShouldBeDisabled() {
+	public void calculateEnabledForProjectShouldBeDisabled() {
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
 
 		rule.calculateEnabledForProject(testProject);

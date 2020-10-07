@@ -144,6 +144,7 @@ public class StandaloneStatisticsData {
 		numberOfTotalIssuesFixed += issuesFixed;
 	}
 
+	@SuppressWarnings("nls")
 	public void logMetricData() {
 		StringBuilder logString = new StringBuilder();
 		if (null != metricData) {
@@ -192,6 +193,7 @@ public class StandaloneStatisticsData {
 		}
 	}
 
+	@SuppressWarnings("nls")
 	private void appendLogForRule(JsparrowRuleData ruleData, StringBuilder logString) {
 		logString.append("Metric for rule with id ")
 			.append(ruleData.getRuleId())

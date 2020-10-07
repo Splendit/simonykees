@@ -8,12 +8,12 @@ package eu.jsparrow.core.rule.impl.logger;
  */
 public enum LogLevelEnum {
 
-	TRACE("trace"),
-	DEBUG("debug"),
-	INFO("info"),
-	WARN("warn"),
-	ERROR("error"),
-	LEAVE("");
+	TRACE("trace"), //$NON-NLS-1$
+	DEBUG("debug"), //$NON-NLS-1$
+	INFO("info"), //$NON-NLS-1$
+	WARN("warn"), //$NON-NLS-1$
+	ERROR("error"), //$NON-NLS-1$
+	LEAVE(""); //$NON-NLS-1$
 
 	private String logLevel;
 

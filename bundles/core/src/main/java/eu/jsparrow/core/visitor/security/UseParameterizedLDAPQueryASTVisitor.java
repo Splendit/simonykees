@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.security;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
