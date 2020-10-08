@@ -1,23 +1,22 @@
 package eu.jsparrow.sample.preRule;
 
+import static eu.jsparrow.sample.utilities.HelloWorld.HELLO_WORLD;
+
 public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 
 	void testWithVariableMath() {
 		String Math = "";
-		String str = "Hello World!";
-		int index = str.substring(6)
+		int index = HELLO_WORLD.substring(6)
 			.indexOf('d');
 	}
 
 	void testWithoutVariableMath() {
-		String str = "Hello World!";
-		int index = str.substring(6)
+		int index = HELLO_WORLD.substring(6)
 			.indexOf('d');
 	}
 
 	void testWitMathAsFieldInLocalClass() {
-		String str = "Hello World!";
-		int index = str.substring(6)
+		int index = HELLO_WORLD.substring(6)
 			.indexOf('d');
 
 		class LocalClassWithMathAsField {
@@ -26,13 +25,12 @@ public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 	}
 
 	void testWitMathAsVariableInAnonymousClassMethod() {
-		String str = "Hello World!";
-		int index = str.substring(6)
+		int index = HELLO_WORLD.substring(6)
 			.indexOf('d');
 
 		class LocalClassWithoutMathAsField {
 			void test() {
-				int index = str.substring(6)
+				int index = HELLO_WORLD.substring(6)
 					.indexOf('d');
 			}
 		}
@@ -46,13 +44,12 @@ public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 	}
 
 	void testWitMathAsVariableInLambda() {
-		String str = "Hello World!";
-		int index = str.substring(6)
+		int index = HELLO_WORLD.substring(6)
 			.indexOf('d');
 
 		class LocalClassWithoutMathAsField {
 			void test() {
-				int index = str.substring(6)
+				int index = HELLO_WORLD.substring(6)
 					.indexOf('d');
 			}
 		}
@@ -62,15 +59,16 @@ public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 		};
 	}
 
-	void max() {
+	class ClassWithMaxMethod {
+		void max() {
+		}
 	}
 
 	class InnerClassWithMathAsField {
 		String Math = "";
 
 		void test() {
-			String str = "Hello World!";
-			int index = str.substring(6)
+			int index = HELLO_WORLD.substring(6)
 				.indexOf('d');
 		}
 	}
@@ -78,8 +76,7 @@ public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 	class InnerClassWithoutMathAsField {
 
 		void test() {
-			String str = "Hello World!";
-			int index = str.substring(6)
+			int index = HELLO_WORLD.substring(6)
 				.indexOf('d');
 		}
 	}
@@ -91,8 +88,7 @@ class ClassWithMathAsField {
 	class InnerClassWithoutMathAsField {
 
 		void test() {
-			String str = "Hello World!";
-			int index = str.substring(6)
+			int index = HELLO_WORLD.substring(6)
 				.indexOf('d');
 		}
 	}
@@ -105,8 +101,7 @@ class ClassWithLambdaAssignedToField {
 	};
 
 	void testWithoutVariableMath() {
-		String str = "Hello World!";
-		int index = str.substring(6)
+		int index = HELLO_WORLD.substring(6)
 			.indexOf('d');
 	}
 }
@@ -122,8 +117,7 @@ class ClassWithAnonymousClassAssignedToField {
 	};
 
 	void testWithoutVariableMath() {
-		String str = "Hello World!";
-		int index = str.substring(6)
+		int index = HELLO_WORLD.substring(6)
 			.indexOf('d');
 	}
 }

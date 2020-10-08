@@ -1,23 +1,22 @@
 package eu.jsparrow.sample.postRule.useOffsetBasedStringMethods;
 
+import static eu.jsparrow.sample.utilities.HelloWorld.HELLO_WORLD;
+
 public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 
 	void testWithVariableMath() {
 		String Math = "";
-		String str = "Hello World!";
-		int index = java.lang.Math.max(str
+		int index = java.lang.Math.max(HELLO_WORLD
 			.indexOf('d', 6) - 6, -1);
 	}
 
 	void testWithoutVariableMath() {
-		String str = "Hello World!";
-		int index = Math.max(str
+		int index = Math.max(HELLO_WORLD
 			.indexOf('d', 6) - 6, -1);
 	}
 
 	void testWitMathAsFieldInLocalClass() {
-		String str = "Hello World!";
-		int index = java.lang.Math.max(str
+		int index = java.lang.Math.max(HELLO_WORLD
 			.indexOf('d', 6) - 6, -1);
 
 		class LocalClassWithMathAsField {
@@ -26,13 +25,12 @@ public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 	}
 
 	void testWitMathAsVariableInAnonymousClassMethod() {
-		String str = "Hello World!";
-		int index = java.lang.Math.max(str
+		int index = java.lang.Math.max(HELLO_WORLD
 			.indexOf('d', 6) - 6, -1);
 
 		class LocalClassWithoutMathAsField {
 			void test() {
-				int index = java.lang.Math.max(str
+				int index = java.lang.Math.max(HELLO_WORLD
 					.indexOf('d', 6) - 6, -1);
 			}
 		}
@@ -46,13 +44,12 @@ public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 	}
 
 	void testWitMathAsVariableInLambda() {
-		String str = "Hello World!";
-		int index = java.lang.Math.max(str
+		int index = java.lang.Math.max(HELLO_WORLD
 			.indexOf('d', 6) - 6, -1);
 
 		class LocalClassWithoutMathAsField {
 			void test() {
-				int index = java.lang.Math.max(str
+				int index = java.lang.Math.max(HELLO_WORLD
 					.indexOf('d', 6) - 6, -1);
 			}
 		}
@@ -62,15 +59,16 @@ public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 		};
 	}
 
-	void max() {
+	class ClassWithMaxMethod {
+		void max() {
+		}
 	}
 
 	class InnerClassWithMathAsField {
 		String Math = "";
 
 		void test() {
-			String str = "Hello World!";
-			int index = java.lang.Math.max(str
+			int index = java.lang.Math.max(HELLO_WORLD
 				.indexOf('d', 6) - 6, -1);
 		}
 	}
@@ -78,8 +76,7 @@ public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 	class InnerClassWithoutMathAsField {
 
 		void test() {
-			String str = "Hello World!";
-			int index = Math.max(str
+			int index = Math.max(HELLO_WORLD
 				.indexOf('d', 6) - 6, -1);
 		}
 	}
@@ -91,8 +88,7 @@ class ClassWithMathAsField {
 	class InnerClassWithoutMathAsField {
 
 		void test() {
-			String str = "Hello World!";
-			int index = java.lang.Math.max(str
+			int index = java.lang.Math.max(HELLO_WORLD
 				.indexOf('d', 6) - 6, -1);
 		}
 	}
@@ -105,8 +101,7 @@ class ClassWithLambdaAssignedToField {
 	};
 
 	void testWithoutVariableMath() {
-		String str = "Hello World!";
-		int index = Math.max(str
+		int index = Math.max(HELLO_WORLD
 			.indexOf('d', 6) - 6, -1);
 	}
 }
@@ -122,8 +117,7 @@ class ClassWithAnonymousClassAssignedToField {
 	};
 
 	void testWithoutVariableMath() {
-		String str = "Hello World!";
-		int index = Math.max(str
+		int index = Math.max(HELLO_WORLD
 			.indexOf('d', 6) - 6, -1);
 	}
 }
