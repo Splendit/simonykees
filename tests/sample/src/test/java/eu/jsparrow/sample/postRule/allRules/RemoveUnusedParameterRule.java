@@ -36,7 +36,7 @@ public class RemoveUnusedParameterRule {
 
 	private native void visit_nativeOverloadedMethod_shouldNotTransform(String unusedParameter);
 
-	private void visit_methodWithoutParameters_shouldNotTranform() {
+	private void visit_methodWithoutParameters_shouldNotTransform() {
 
 	}
 
@@ -46,7 +46,7 @@ public class RemoveUnusedParameterRule {
 	 * @param second should remain
 	 * @return empty string
 	 */
-	private String visit_multipleUnusedParameters_shouldTranform(String second) {
+	private String visit_multipleUnusedParameters_shouldTransform(String second) {
 		/*
 		 * Should remove first and second
 		 */
@@ -58,15 +58,21 @@ public class RemoveUnusedParameterRule {
 		value.chars();
 	}
 
-	private void visit_sameSignatureWithInnerclassMethod_shouldTransformInInnerClass(String value) {
+	private void visit_sameSignatureWithInnerClassMethod_shouldTransformInInnerClass(String value) {
 		consume(value);
+	}
+
+	private void unusedFinalParameter_shouldTransform() {
+	}
+
+	private void unusedAnnotatedParameter_shouldNotTransform(@SuppressWarnings("unused") String unusedParameter) {
 	}
 
 	private void invokeTransformedMethods() {
 		final String first = "first";
-		visit_multipleUnusedParameters_shouldTranform("second");
+		visit_multipleUnusedParameters_shouldTransform("second");
 		visit_privateMethod_shouldTransform();
-		visit_sameSignatureWithInnerclassMethod_shouldTransformInInnerClass(first);
+		visit_sameSignatureWithInnerClassMethod_shouldTransformInInnerClass(first);
 
 		/* 1 */
 		/* 2 */
@@ -75,25 +81,25 @@ public class RemoveUnusedParameterRule {
 		/*
 		 * Save comments
 		 */
-		visit_multipleUnusedParameters_shouldTranform(/* 3 */"second"/* 4 */);
+		visit_multipleUnusedParameters_shouldTransform(/* 3 */"second"/* 4 */);
 	}
 
 	private void secondaryInvocations() {
 		final String first = "first";
-		visit_multipleUnusedParameters_shouldTranform("second");
+		visit_multipleUnusedParameters_shouldTransform("second");
 		visit_privateMethod_shouldTransform();
-		visit_sameSignatureWithInnerclassMethod_shouldTransformInInnerClass(first);
+		visit_sameSignatureWithInnerClassMethod_shouldTransformInInnerClass(first);
 	}
 
 	class InnerClass {
 
-		private void visit_sameSignatureWithInnerclassMethod_shouldTransformInInnerClass() {
+		private void visit_sameSignatureWithInnerClassMethod_shouldTransformInInnerClass() {
 
 		}
 
 		public void invokeInInnerClass() {
 			final String first = "first";
-			visit_sameSignatureWithInnerclassMethod_shouldTransformInInnerClass();
+			visit_sameSignatureWithInnerClassMethod_shouldTransformInInnerClass();
 			visit_overloadedInInnerClass_shouldNotTransform(first);
 			visit_overloadedInInnerClass_shouldNotTransform(1);
 		}
