@@ -1,0 +1,129 @@
+package eu.jsparrow.sample.preRule;
+
+public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
+
+	void testWithVariableMath() {
+		String Math = "";
+		String str = "Hello World!";
+		int index = str.substring(6)
+			.indexOf('d');
+	}
+
+	void testWithoutVariableMath() {
+		String str = "Hello World!";
+		int index = str.substring(6)
+			.indexOf('d');
+	}
+
+	void testWitMathAsFieldInLocalClass() {
+		String str = "Hello World!";
+		int index = str.substring(6)
+			.indexOf('d');
+
+		class LocalClassWithMathAsField {
+			String Math = "";
+		}
+	}
+
+	void testWitMathAsVariableInAnonymousClassMethod() {
+		String str = "Hello World!";
+		int index = str.substring(6)
+			.indexOf('d');
+
+		class LocalClassWithoutMathAsField {
+			void test() {
+				int index = str.substring(6)
+					.indexOf('d');
+			}
+		}
+
+		Runnable r = new Runnable() {
+
+			public void run() {
+				String Math = "";
+			}
+		};
+	}
+
+	void testWitMathAsVariableInLambda() {
+		String str = "Hello World!";
+		int index = str.substring(6)
+			.indexOf('d');
+
+		class LocalClassWithoutMathAsField {
+			void test() {
+				int index = str.substring(6)
+					.indexOf('d');
+			}
+		}
+
+		Runnable r = () -> {
+			String Math = "";
+		};
+	}
+
+	void max() {
+	}
+
+	class InnerClassWithMathAsField {
+		String Math = "";
+
+		void test() {
+			String str = "Hello World!";
+			int index = str.substring(6)
+				.indexOf('d');
+		}
+	}
+
+	class InnerClassWithoutMathAsField {
+
+		void test() {
+			String str = "Hello World!";
+			int index = str.substring(6)
+				.indexOf('d');
+		}
+	}
+}
+
+class ClassWithMathAsField {
+	String Math = "";
+
+	class InnerClassWithoutMathAsField {
+
+		void test() {
+			String str = "Hello World!";
+			int index = str.substring(6)
+				.indexOf('d');
+		}
+	}
+}
+
+class ClassWithLambdaAssignedToField {
+
+	Runnable r = () -> {
+		String Math = "";
+	};
+
+	void testWithoutVariableMath() {
+		String str = "Hello World!";
+		int index = str.substring(6)
+			.indexOf('d');
+	}
+}
+
+class ClassWithAnonymousClassAssignedToField {
+
+	Runnable r = new Runnable() {
+		String Math = "";
+
+		public void run() {
+			String Math = "";
+		}
+	};
+
+	void testWithoutVariableMath() {
+		String str = "Hello World!";
+		int index = str.substring(6)
+			.indexOf('d');
+	}
+}

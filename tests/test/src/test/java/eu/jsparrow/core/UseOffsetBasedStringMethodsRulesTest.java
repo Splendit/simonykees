@@ -22,7 +22,7 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 	private static final String SAMPLE_FILE_ALL_IMPORTS_ON_DEMAND_CLASHING = "UseOffsetBasedStringMethodsAllImportsOnDemandClashRule.java";
 	private static final String SAMPLE_FILE_ALL_IMPORTS_ON_DEMAND_CLASHING2 = "UseOffsetBasedStringMethodsAllImportsOnDemandClash2Rule.java";
 	private static final String SAMPLE_FILE_AMBIGUOUS_IMPORTS_ON_DEMAND = "UseOffsetBasedStringMethodsAmbiguousImportsOnDemandRule.java";
-	private static final String SAMPLE_FILE_MATH_AS_VARIABLE = "UseOffsetBasedStringMethodsMathAsVariableRule.java";
+	private static final String SAMPLE_FILE_MATH_AS_VARIABLE_OR_FIELD = "UseOffsetBasedStringMethodsMathAsVariableOrFieldRule.java";
 
 	private static final String POSTRULE_SUBDIRECTORY = "useOffsetBasedStringMethods";
 
@@ -100,11 +100,11 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 	}
 
 	@Test
-	public void testMathAsVariable() throws Exception {
+	public void testWithMathAsVariableOrField() throws Exception {
 		loadUtilities();
 
-		Path preRule = getPreRuleFile(SAMPLE_FILE_MATH_AS_VARIABLE);
-		Path postRule = getPostRuleFile(SAMPLE_FILE_MATH_AS_VARIABLE, POSTRULE_SUBDIRECTORY);
+		Path preRule = getPreRuleFile(SAMPLE_FILE_MATH_AS_VARIABLE_OR_FIELD);
+		Path postRule = getPostRuleFile(SAMPLE_FILE_MATH_AS_VARIABLE_OR_FIELD, POSTRULE_SUBDIRECTORY);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
