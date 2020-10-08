@@ -422,6 +422,33 @@ public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixtu
 		assertContainsImport("org.owasp.esapi.codecs.Codec");
 		assertNotContainsImport("org.owasp.esapi.codecs.OracleCodec");
 	}
+	
+	@Test
+	public void visit_CodecAsLocalVariable_shouldTransform() throws Exception {
+		String original = "" +
+				"	public void test() {\n" +
+				"		int Codec = 0;\n" +
+				"		String userName = \"userName\";\n" +
+				"		String query = " +
+				"			\"SELECT user_id FROM user_data WHERE user_name = '\" + userName + \"'\";\n" +
+				tryExecute("query") +
+				"		}";
+		String expected = "" +
+				"	public void test() {\n" +
+				"		int Codec = 0;\n" +
+				"		String userName = \"userName\";\n" +
+				"		org.owasp.esapi.codecs.Codec<Character> oracleCodec = new OracleCodec();\n" +
+				"		String query = " +
+				"			\"SELECT user_id FROM user_data WHERE user_name = '\" + " +
+				"			ESAPI.encoder().encodeForSQL(oracleCodec, userName) + " +
+				"			\"'\";\n" +
+				tryExecute("query") +
+				"		}";
+		assertChange(original, expected);
+		assertContainsImport("org.owasp.esapi.ESAPI");
+		assertNotContainsImport("org.owasp.esapi.codecs.Codec");
+		assertContainsImport("org.owasp.esapi.codecs.OracleCodec");
+	}
 
 	@Test
 	public void visit_ImportStaticESAPI_shouldTransform() throws Exception {
