@@ -120,5 +120,4 @@ public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-
 }

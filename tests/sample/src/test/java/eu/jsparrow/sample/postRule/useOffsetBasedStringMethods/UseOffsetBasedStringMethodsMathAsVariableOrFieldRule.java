@@ -15,7 +15,7 @@ public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 			.indexOf('d', 6) - 6, -1);
 	}
 
-	void testWitMathAsFieldInLocalClass() {
+	void testWithMathAsFieldInLocalClass() {
 		int index = java.lang.Math.max(HELLO_WORLD
 			.indexOf('d', 6) - 6, -1);
 
@@ -24,7 +24,7 @@ public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 		}
 	}
 
-	void testWitMathAsVariableInAnonymousClassMethod() {
+	void testWithMathAsVariableInAnonymousClassMethod() {
 		int index = java.lang.Math.max(HELLO_WORLD
 			.indexOf('d', 6) - 6, -1);
 
@@ -43,7 +43,7 @@ public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 		};
 	}
 
-	void testWitMathAsVariableInLambda() {
+	void testWithMathAsVariableInLambda() {
 		int index = java.lang.Math.max(HELLO_WORLD
 			.indexOf('d', 6) - 6, -1);
 
@@ -57,6 +57,17 @@ public class UseOffsetBasedStringMethodsMathAsVariableOrFieldRule {
 		Runnable r = () -> {
 			String Math = "";
 		};
+	}
+
+	void testWithMathInLambdaAssignedToLocalClassField() {
+		int index = java.lang.Math.max(HELLO_WORLD
+			.indexOf('d', 6) - 6, -1);
+
+		class LocalClassWithLambda {
+			Runnable r = () -> {
+				String Math = "";
+			};
+		}
 	}
 
 	class ClassWithMaxMethod {
