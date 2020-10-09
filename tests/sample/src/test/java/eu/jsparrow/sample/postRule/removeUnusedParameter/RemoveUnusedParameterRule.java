@@ -1,5 +1,7 @@
 package eu.jsparrow.sample.postRule.removeUnusedParameter;
 
+import java.util.List;
+
 @SuppressWarnings("nls")
 public class RemoveUnusedParameterRule {
 	
@@ -38,6 +40,12 @@ public class RemoveUnusedParameterRule {
 	
 	private void visit_methodWithoutParameters_shouldNotTransform() {
 		
+	}
+	
+	private void visit_usedInExpressionMethodReference_shouldNotTransform(String value) {}
+	
+	public void useWithMethodReference(List<String>values) {
+		values.forEach(this::visit_usedInExpressionMethodReference_shouldNotTransform);
 	}
 	
 	/**

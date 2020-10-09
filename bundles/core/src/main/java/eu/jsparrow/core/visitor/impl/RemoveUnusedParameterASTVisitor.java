@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.IDocElement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -97,6 +98,11 @@ public class RemoveUnusedParameterASTVisitor extends AbstractASTRewriteASTVisito
 				methodDeclaration.resolveBinding());
 		compilationUnit.accept(methodInvocationsVisitor);
 		if (methodInvocationsVisitor.hasUnresolvedBindings()) {
+			return;
+		}
+
+		List<ExpressionMethodReference> methodReferences = methodInvocationsVisitor.getExpressionMethodReferences();
+		if (!methodReferences.isEmpty()) {
 			return;
 		}
 
