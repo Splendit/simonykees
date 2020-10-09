@@ -8,15 +8,15 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
 /**
- * Contains functionality for finding the current JDT version.
+ * Contains functionality for finding the current JDT Core version.
  * 
  * @since 2.6.0
  *
  */
-public class JdtVersionBindingUtil {
+public class JdtCoreVersionBindingUtil {
 
-	private static final String ORG_ECLIPSE_JDT = "org.eclipse.jdt"; //$NON-NLS-1$
-	private static final String JDT_JAVA_14_SUPPORT = "3.21.0"; //$NON-NLS-1$
+	private static final String ORG_ECLIPSE_JDT_CORE = "org.eclipse.jdt.core"; //$NON-NLS-1$
+	private static final String JDT_JAVA_14_SUPPORT = "3.22.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_13_SUPPORT = "3.20.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_12_SUPPORT = "3.18.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_11_SUPPORT = "3.16.0"; //$NON-NLS-1$
@@ -25,24 +25,24 @@ public class JdtVersionBindingUtil {
 	private static final String JDT_LEAST_SUPPORTED = "3.12.0"; //$NON-NLS-1$
 	private static Bundle jdtBundle;
 
-	private JdtVersionBindingUtil() {
+	private JdtCoreVersionBindingUtil() {
 		/*
 		 * Hiding default constructor
 		 */
 	}
 
 	/**
-	 * Finds the version of the {@value #ORG_ECLIPSE_JDT} bundle on the current
-	 * {@link Platform}.
+	 * Finds the version of the {@value #ORG_ECLIPSE_JDT_CORE} bundle on the
+	 * current {@link Platform}.
 	 * 
-	 * @return the {@link Version} of {@value #ORG_ECLIPSE_JDT} bundle on the
-	 *         current platform or {@value #JDT_LEAST_SUPPORTED} if none is
+	 * @return the {@link Version} of {@value #ORG_ECLIPSE_JDT_CORE} bundle on
+	 *         the current platform or {@value #JDT_LEAST_SUPPORTED} if none is
 	 *         found since it corresponds to the least eclipse version that we
 	 *         support.
 	 */
-	public static Version findCurrentJDTVersion() {
+	public static Version findCurrentJDTCoreVersion() {
 		if (jdtBundle == null) {
-			Bundle bundle = Platform.getBundle(ORG_ECLIPSE_JDT);
+			Bundle bundle = Platform.getBundle(ORG_ECLIPSE_JDT_CORE);
 			if (bundle == null) {
 				return Version.parseVersion(JDT_LEAST_SUPPORTED);
 			}
@@ -52,19 +52,21 @@ public class JdtVersionBindingUtil {
 	}
 
 	/**
-	 * Finds the appropriate JLS level for the given JDT version.
+	 * Finds the appropriate JLS level for the given JDT Core version.
 	 * 
 	 * @param jdtVersion
-	 *            the JDT version on the current platform
+	 *            the JDT Core version on the current platform
 	 * @return
 	 *         <ul>
-	 *         <li>{@link AST#JLS13} if the JDT version corresponds to 3.20.0
-	 *         (2019-12);</li>
-	 *         <li>{@link AST#JLS12} if the JDT version corresponds to 3.18.0
-	 *         (2019-06);</li>
-	 *         <li>{@link AST#JLS11} if the JDT version corresponds to 3.16.0
-	 *         (2018-12);</li>
-	 *         <li>{@link AST#JLS10} if the JDT version corresponds to
+	 *         <li>{@link AST#JLS14} if the JDT Core version corresponds to
+	 *         3.22.0 (2020-06);</li>
+	 *         <li>{@link AST#JLS13} if the JDT Core version corresponds to
+	 *         3.20.0 (2019-12);</li>
+	 *         <li>{@link AST#JLS12} if the JDT Core version corresponds to
+	 *         3.18.0 (2019-06);</li>
+	 *         <li>{@link AST#JLS11} if the JDT Core version corresponds to
+	 *         3.16.0 (2018-12);</li>
+	 *         <li>{@link AST#JLS10} if the JDT Core version corresponds to
 	 *         Photon;</li>
 	 *         <li>{@link AST#JLS9} if the version corresponds to Oxygen;
 	 *         or</li>
@@ -75,11 +77,15 @@ public class JdtVersionBindingUtil {
 	public static int findJLSLevel(Version jdtVersion) {
 		if (isJava14Supported(jdtVersion)) {
 			/*
-			 * @since 3.21.0 -> 20-03
+			 * @since 3.23.0 -> 20-09
+			 * 
+			 * @since 3.22.0 -> 20-06
 			 */
-			return 14;//FIXME replace with AST.JLS14 when switching to eclipse 20-03
+			return AST.JLS14;
 		} else if (isJava13Supported(jdtVersion)) {
 			/*
+			 * @since 3.21.0 -> 20-03
+			 * 
 			 * @since 3.20.0 -> 19-12
 			 */
 			return AST.JLS13;
@@ -106,7 +112,7 @@ public class JdtVersionBindingUtil {
 	}
 
 	/**
-	 * Finds the resources property descriptior for the {@link TryStatement}
+	 * Finds the resources property descriptor for the {@link TryStatement}
 	 * statement.
 	 * 
 	 * @param jdtVersion
