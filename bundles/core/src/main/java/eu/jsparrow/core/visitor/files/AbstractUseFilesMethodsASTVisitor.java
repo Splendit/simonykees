@@ -199,7 +199,8 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 
 	private Expression createDefaultCharSetExpression(AST ast) {
 		MethodInvocation defaultCharset = ast.newMethodInvocation();
-		defaultCharset.setExpression(ast.newName(findTypeNameForStaticMethodInvocation(CHARSET_QUALIFIED_NAME)));
+		Name charsetTypeName = addImport(CHARSET_QUALIFIED_NAME);
+		defaultCharset.setExpression(charsetTypeName);
 		defaultCharset.setName(ast.newSimpleName("defaultCharset")); //$NON-NLS-1$
 		return defaultCharset;
 	}
