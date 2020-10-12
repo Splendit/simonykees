@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
@@ -323,7 +322,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			String qualifiedTypeName) {
 		String simpleTypeName = getSimpleName(qualifiedTypeName);
 		List<ImportDeclaration> importsOnDemand = importDeclarations.stream()
-			.filter(importDeclaration -> importsTypeOnDemand(importDeclaration, simpleTypeName))
+			.filter(ImportDeclaration::isOnDemand)
 			.collect(Collectors.toList());
 
 		if (importsOnDemand.isEmpty()) {
@@ -332,13 +331,12 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 
 		for (ImportDeclaration importOnDemand : importsOnDemand) {
 			IBinding iBinding = importOnDemand.resolveBinding();
-			IPackageBinding iPackageBinding = (IPackageBinding) iBinding;
-			String implicitTypeImport = iPackageBinding.getName() + "." + simpleTypeName; //$NON-NLS-1$
-			if (!qualifiedTypeName.equals(implicitTypeImport)) {
-				return false;
+			String implicitTypeImport = iBinding.getName() + "." + simpleTypeName; //$NON-NLS-1$
+			if (qualifiedTypeName.equals(implicitTypeImport)) {
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	private boolean matchesStaticMethodImportOnDemand(List<ImportDeclaration> importDeclarations,

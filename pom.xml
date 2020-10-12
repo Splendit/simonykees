@@ -204,14 +204,14 @@
 			<url>http://download.eclipse.org/releases/2018-12/</url>
 		</repository>
 		<repository>
-			<id>2019-12-updates</id>
+			<id>2020-06-updates</id>
 			<layout>p2</layout>
-			<url>http://download.eclipse.org/eclipse/updates/4.14</url>
+			<url>http://download.eclipse.org/eclipse/updates/4.16</url>
 		</repository>
 		<repository>
-			<id>2019-12</id>
+			<id>2020-06</id>
 			<layout>p2</layout>
-			<url>http://download.eclipse.org/releases/2019-12/</url>
+			<url>http://download.eclipse.org/releases/2020-06/</url>
 		</repository>
 		<repository>
 			<id>orbit</id>

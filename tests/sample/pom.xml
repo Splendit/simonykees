@@ -55,7 +55,7 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>0</id>
+						<id>commons-lang3-3-0</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -65,7 +65,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>0-1</id>
+						<id>commons-lang3-3-0-1</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -75,7 +75,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>1</id>
+						<id>commons-lang3-3-1</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -85,7 +85,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>2</id>
+						<id>commons-lang3-3-2</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -95,7 +95,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>2-1</id>
+						<id>commons-lang3-3-2-1</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -105,7 +105,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>3</id>
+						<id>commons-lang3-3-3</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -115,7 +115,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>3-1</id>
+						<id>commons-lang3-3-3-1</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -125,7 +125,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>3-2</id>
+						<id>commons-lang3-3-3-2</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -135,7 +135,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>4</id>
+						<id>commons-lang3-3-4</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -145,7 +145,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>5</id>
+						<id>commons-lang3-3-5</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -155,7 +155,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>6</id>
+						<id>commons-lang3-3-6</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -165,7 +165,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>7</id>
+						<id>commons-lang3-3-7</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -175,7 +175,57 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>8</id>
+						<id>commons-lang3-3-8</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.commons:commons-lang3:3.8</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>commons-lang3-3-8-1</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.commons:commons-lang3:3.8.1</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>commons-lang3-3-9</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.commons:commons-lang3:3.9</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>commons-lang3-3-10</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.commons:commons-lang3:3.10</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>commons-lang3-3-11</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.commons:commons-lang3:3.11</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>log4j-core-2-7</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -185,7 +235,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>9</id>
+						<id>log-4j-api-2-7</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -195,7 +245,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>10</id>
+						<id>slf4j-api-1-7-25</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -205,7 +255,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>11</id>
+						<id>logback-classic-1-2-3</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>
@@ -215,7 +265,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>12</id>
+						<id>logback-core-1-2-3</id>
 						<phase>package</phase>
 						<goals>
 							<goal>get</goal>

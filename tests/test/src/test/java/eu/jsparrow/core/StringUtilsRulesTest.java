@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-@SuppressWarnings("nls")
 public class StringUtilsRulesTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE = "StringUtilsRefactorRule.java";
@@ -65,7 +64,7 @@ public class StringUtilsRulesTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
+
 	@Test
 	public void calculateEnabledForProject_initialSupportedLibraryVersion_shouldReturnTrue() throws Exception {
 		RulesTestUtil.addToClasspath(testProject, Arrays
@@ -76,9 +75,9 @@ public class StringUtilsRulesTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
+
 	@Test
-	public void calculateEnabledForProject_requestedSupportLibraryVersion_shouldReturnTrue() throws Exception {
+	public void calculateEnabledForProject_supportLibraryVersion_3_4_shouldReturnTrue() throws Exception {
 		RulesTestUtil.addToClasspath(testProject, Arrays
 			.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons", "commons-lang3", "3.4")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_1);
@@ -89,9 +88,67 @@ public class StringUtilsRulesTest extends SingleRuleTest {
 	}
 
 	@Test
-	public void calculateEnabledForProject_maximumSupportedLibraryVersion_shouldReturnTrue() throws Exception {
+	public void calculateEnabledForProject_supportLibraryVersion_3_7_shouldReturnTrue() throws Exception {
 		RulesTestUtil.addToClasspath(testProject, Arrays
 			.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons", "commons-lang3", "3.7")));
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_1);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertTrue(rule.isEnabled());
+	}
+
+	@Test
+	public void calculateEnabledForProject_supportLibraryVersion_3_8_shouldReturnTrue() throws Exception {
+		RulesTestUtil.addToClasspath(testProject, Arrays
+			.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons", "commons-lang3", "3.8")));
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_1);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertTrue(rule.isEnabled());
+	}
+
+	@Test
+	public void calculateEnabledForProject_supportLibraryVersion_3_8_1_shouldReturnTrue() throws Exception {
+		RulesTestUtil.addToClasspath(testProject, Arrays
+			.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons", "commons-lang3",
+					"3.8.1")));
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_1);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertTrue(rule.isEnabled());
+	}
+
+	@Test
+	public void calculateEnabledForProject_supportLibraryVersion_3_9_shouldReturnTrue() throws Exception {
+		RulesTestUtil.addToClasspath(testProject, Arrays
+			.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons", "commons-lang3", "3.9")));
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_1);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertTrue(rule.isEnabled());
+	}
+
+	@Test
+	public void calculateEnabledForProject_supportLibraryVersion_3_10_shouldReturnTrue() throws Exception {
+		RulesTestUtil.addToClasspath(testProject, Arrays
+			.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons", "commons-lang3",
+					"3.10")));
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_1);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertTrue(rule.isEnabled());
+	}
+
+	@Test
+	public void calculateEnabledForProject_maximumSupportedLibraryVersion_shouldReturnTrue() throws Exception {
+		RulesTestUtil.addToClasspath(testProject, Arrays
+			.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons", "commons-lang3",
+					"3.11")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_1);
 
 		rule.calculateEnabledForProject(testProject);
