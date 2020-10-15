@@ -91,6 +91,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 
 			MethodInvocation invocationLeftHS = (MethodInvocation) compareToMethodExpression;
 			MethodInvocation invocationRightHS = (MethodInvocation) compareToMethodArgument;
+
 			if (invocationLeftHS.getExpression() == null || invocationLeftHS.getExpression()
 				.getNodeType() != ASTNode.SIMPLE_NAME) {
 				return null;
@@ -105,6 +106,11 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			}
 			IMethodBinding comparisonKeyMethod = invocationLeftHS
 				.resolveMethodBinding();
+
+			if (comparisonKeyMethod.getParameterTypes().length != 0) {
+				return null;
+			}
+			
 			ITypeBinding lambdaParameterType = lambdaParameters.get(0)
 				.resolveBinding()
 				.getType();
@@ -142,10 +148,11 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		methodReference.setName(ast.newSimpleName(comparisonKeyMethod.getName()));
 
 		Name lambdaParameterTypeName;
+		ITypeBinding lambdaParameterTypeErasure = lambdaParameterType.getErasure();
 		if (lambdaParameterType.isLocal()) {
-			lambdaParameterTypeName = ast.newSimpleName(lambdaParameterType.getName());
+			lambdaParameterTypeName = ast.newSimpleName(lambdaParameterTypeErasure.getName());
 		} else {
-			String qualifiedName = lambdaParameterType.getQualifiedName();
+			String qualifiedName = lambdaParameterTypeErasure.getQualifiedName();
 			verifyImport(getCompilationUnit(), qualifiedName);
 			lambdaParameterTypeName = addImport(qualifiedName);
 		}
