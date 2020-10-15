@@ -43,6 +43,11 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 	@Override
 	public boolean visit(LambdaExpression lambda) {
 
+		ITypeBinding lambdaTypeBinding = lambda.resolveTypeBinding();
+		if (!ClassRelationUtil.isContentOfType(lambdaTypeBinding, JAVA_UTIL_COMPARATOR)) {
+			return true;
+		}
+
 		MethodInvocation lambdaReplacement = createComparatorMethodInvocation(lambda);
 		if (lambdaReplacement != null) {
 			astRewrite.replace(lambda, lambdaReplacement, null);
@@ -110,7 +115,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			if (comparisonKeyMethod.getParameterTypes().length != 0) {
 				return null;
 			}
-			
+
 			ITypeBinding lambdaParameterType = lambdaParameters.get(0)
 				.resolveBinding()
 				.getType();

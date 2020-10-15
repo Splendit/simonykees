@@ -195,6 +195,18 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
+	
+	@Test
+	public void visit_LambdaTypeBindingNotComparator_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.function.BiFunction.class.getName());
+		String original = "" +
+				"void test() {\n" +
+				"	BiFunction<Integer, Integer, Integer> bifunction = (lhs, rhs) -> lhs.compareTo(rhs);\n"
+				+
+				"}";
+
+		assertNoChange(original);
+	}
 
 	/**
 	 * This test will fail as soon as the transformation with jokers is
