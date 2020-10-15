@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.loop.stream;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -263,7 +264,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 		expMethodReference.setName(ast.newSimpleName(expMethRefName));
 		expMethodReference.setExpression(ast.newSimpleName(boxedClass.getSimpleName()));
 
-		addImport(boxedClass.getName());
+		addRequiredImport(boxedClass.getName());
 
 		ListRewrite miRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 		miRewrite.insertFirst(expMethodReference, null);
@@ -273,19 +274,16 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 
 	/**
 	 * Makes use of {@link ImportRewrite} to check whether an import statement
-	 * is needed for the given qualified name, and if yes, stores it to the
-	 * {@link #addImports}.
+	 * is needed for the given qualified name.
 	 * 
 	 * @param qualifiedName
 	 *            a string representing a qualified name.
 	 */
-	private void addImport(String qualifiedName) {
+	private void addRequiredImport(String qualifiedName) {
 		ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
 		importRewrite.addImport(qualifiedName);
 		String[] addedImpots = importRewrite.getAddedImports();
-		for (String addedImport : addedImpots) {
-			this.addImports.add(addedImport);
-		}
+		super.addAlreadyVerifiedImports(Arrays.asList(addedImpots));
 	}
 
 	/**

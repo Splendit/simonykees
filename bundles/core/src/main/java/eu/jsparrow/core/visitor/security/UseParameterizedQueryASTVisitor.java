@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
@@ -46,13 +47,15 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisitor {
 
+	private static final String PREPARED_STATEMENT_QUALIFIED_NAME = java.sql.PreparedStatement.class.getName();
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
-		boolean safeToAddImport = isSafeToAddImport(compilationUnit, java.sql.PreparedStatement.class.getName());
-		if (!safeToAddImport) {
-			return false;
+		boolean continueVisiting = super.visit(compilationUnit);
+		if (continueVisiting) {
+			verifyImport(compilationUnit, PREPARED_STATEMENT_QUALIFIED_NAME);
 		}
-		return super.visit(compilationUnit);
+		return continueVisiting;
 	}
 
 	@Override
@@ -207,8 +210,8 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		int numFragments = statement.fragments()
 			.size();
 		AST ast = astRewrite.getAST();
-		SimpleType preparedStatementType = ast
-			.newSimpleType(ast.newSimpleName(java.sql.PreparedStatement.class.getSimpleName()));
+		Name preparedStatementTypeName = addImport(PREPARED_STATEMENT_QUALIFIED_NAME);
+		SimpleType preparedStatementType = ast.newSimpleType(preparedStatementTypeName);
 		if (numFragments > 1) {
 			VariableDeclarationFragment newFragment = (VariableDeclarationFragment) astRewrite
 				.createMoveTarget(fragment);
@@ -221,7 +224,6 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 			Type type = statement.getType();
 			astRewrite.replace(type, preparedStatementType, null);
 		}
-		addImports.add(java.sql.PreparedStatement.class.getName());
 	}
 
 	@Override

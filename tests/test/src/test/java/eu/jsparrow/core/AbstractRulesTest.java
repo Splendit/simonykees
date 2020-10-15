@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -53,8 +52,6 @@ public abstract class AbstractRulesTest {
 	protected static String javaVersion = JavaCore.VERSION_1_8;
 
 	protected static List<RefactoringRule> rulesList = new ArrayList<>();
-
-	protected IJavaProject testproject;
 
 	public AbstractRulesTest() {
 		super();

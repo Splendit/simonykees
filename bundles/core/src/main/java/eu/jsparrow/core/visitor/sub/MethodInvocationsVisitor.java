@@ -2,9 +2,11 @@ package eu.jsparrow.core.visitor.sub;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -23,6 +25,7 @@ public class MethodInvocationsVisitor extends ASTVisitor {
 	private IMethodBinding declaration;
 	private String methodName;
 	private List<MethodInvocation> invocations = new ArrayList<>();
+	private List<ExpressionMethodReference> methodReferences = new ArrayList<>();
 	private boolean unresolvedBindingsFlag = false;
 
 	public MethodInvocationsVisitor(IMethodBinding declaration) {
@@ -36,24 +39,38 @@ public class MethodInvocationsVisitor extends ASTVisitor {
 	}
 
 	@Override
-	public boolean visit(MethodInvocation methodInvocation) {
-		SimpleName invocationName = methodInvocation.getName();
-		String invocationIdentifier = invocationName.getIdentifier();
-		if (!invocationIdentifier.equals(methodName)) {
-			return true;
-		}
-		IMethodBinding invocationBinding = methodInvocation.resolveMethodBinding();
-		if (invocationBinding == null) {
-			unresolvedBindingsFlag = true;
-			return false;
-		}
-
-		IMethodBinding invocationDeclaration = invocationBinding.getMethodDeclaration();
-		if (declaration.isEqualTo(invocationDeclaration)) {
-			invocations.add(methodInvocation);
-		}
+	public boolean visit(ExpressionMethodReference methodReference) {
+		SimpleName invocationName = methodReference.getName();
+		IMethodBinding binding = methodReference.resolveMethodBinding();
+		analyzeInvocation(invocationName, binding, methodReference, methodReferences::add);
 
 		return true;
+	}
+
+	@Override
+	public boolean visit(MethodInvocation methodInvocation) {
+		SimpleName invocationName = methodInvocation.getName();
+		IMethodBinding invocationBinding = methodInvocation.resolveMethodBinding();
+		analyzeInvocation(invocationName, invocationBinding, methodInvocation, invocations::add);
+		return true;
+	}
+
+	private <T> void analyzeInvocation(SimpleName invocationName, IMethodBinding binding, T reference,
+			Consumer<T> stateUpdater) {
+		String invocationIdentifier = invocationName.getIdentifier();
+		if (!invocationIdentifier.equals(methodName)) {
+			return;
+		}
+
+		if (binding == null) {
+			unresolvedBindingsFlag = true;
+			return;
+		}
+
+		IMethodBinding invocationDeclaration = binding.getMethodDeclaration();
+		if (declaration.isEqualTo(invocationDeclaration)) {
+			stateUpdater.accept(reference);
+		}
 	}
 
 	/**
@@ -72,5 +89,14 @@ public class MethodInvocationsVisitor extends ASTVisitor {
 	 */
 	public boolean hasUnresolvedBindings() {
 		return unresolvedBindingsFlag;
+	}
+
+	/**
+	 * 
+	 * @return the list of method references ({@link ExpressionMethodReference})
+	 *         found in the visited node.
+	 */
+	public List<ExpressionMethodReference> getExpressionMethodReferences() {
+		return this.methodReferences;
 	}
 }

@@ -18,7 +18,6 @@ import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-@SuppressWarnings("nls")
 public class StandardLoggerCustomOptionsRuleTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE = "TestStandardLoggerCustomOptionsRule.java";
@@ -41,12 +40,11 @@ public class StandardLoggerCustomOptionsRuleTest extends SingleRuleTest {
 
 		RulesTestUtil.addToClasspath(testProject,
 				Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25")));
-		RulesTestUtil.addToClasspath(testProject, RulesTestUtil.getClassPathEntries(root));
 		Map<String, String> selectedOptions = new HashMap<>();
-		selectedOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, ""); // -->>
-																				// Leave
-																				// as
-																				// is
+		/*
+		 * Leave as is
+		 */
+		selectedOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, "");
 		selectedOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, "debug");
 		selectedOptions.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY, "warn");
 		rule.activateOptions(selectedOptions);

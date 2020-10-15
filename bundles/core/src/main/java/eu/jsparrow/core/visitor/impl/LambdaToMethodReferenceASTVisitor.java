@@ -58,18 +58,10 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisitor {
 
 	private Set<String> newImports = new HashSet<>();
-	private CompilationUnit compilationUnit;
-
-	@Override
-	public boolean visit(CompilationUnit cu) {
-		this.compilationUnit = cu;
-		super.visit(cu);
-		return true;
-	}
 
 	@Override
 	public void endVisit(CompilationUnit cu) {
-		this.addImports.addAll(filterNewImportsByExcludingCurrentPackage(cu, newImports));
+		super.addAlreadyVerifiedImports(newImports);
 		super.endVisit(cu);
 	}
 
@@ -483,6 +475,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		ITypeBinding typeBidning = binding.getErasure() != null ? binding.getErasure() : binding;
 		String bindingName = typeBidning.getName();
 		String bindingQualifiedName = typeBidning.getQualifiedName();
+		CompilationUnit compilationUnit = super.getCompilationUnit();
 		return ASTNodeUtil.returnTypedList(compilationUnit.imports(), ImportDeclaration.class)
 			.stream()
 			.map(ImportDeclaration::getName)

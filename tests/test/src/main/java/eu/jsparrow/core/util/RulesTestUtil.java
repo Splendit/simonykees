@@ -1,10 +1,9 @@
 package eu.jsparrow.core.util;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,15 +18,17 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -38,7 +39,6 @@ import org.w3c.dom.NodeList;
  * @author Martin Huter, Hannes Schweighofer
  * @since 0.9
  */
-@SuppressWarnings("nls")
 public class RulesTestUtil {
 
 	/**
@@ -54,8 +54,6 @@ public class RulesTestUtil {
 	public static final String BASE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/eu/jsparrow/sample";
 	public static final String PRERULE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/eu/jsparrow/sample/preRule";
 
-	private static final String JSPARROW_RT_JAR_PATH_KEY = "JSPARROW_RT_JAR_PATH";
-
 	private RulesTestUtil() {
 		// hiding
 	}
@@ -70,37 +68,9 @@ public class RulesTestUtil {
 		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, javaVersion);
 		javaProject.setOption(JavaCore.COMPILER_SOURCE, javaVersion);
 		IPackageFragmentRoot root = addSourceContainer(javaProject, "/allRulesTestRoot");
-		addToClasspath(javaProject, getClassPathEntries(root));
 		addToClasspath(javaProject, extractMavenDependenciesFromPom(SAMPLE_MODULE_PATH + "pom.xml"));
 
 		return root;
-	}
-
-	public static List<IClasspathEntry> getClassPathEntries(IPackageFragmentRoot root) throws Exception {
-		final List<IClasspathEntry> entries = new ArrayList<>();
-
-		IPath path = getPathToRtJar();
-		if (path != null) {
-			final IClasspathEntry rtJarEntry = JavaCore.newLibraryEntry(path, null, null);
-			entries.add(rtJarEntry);
-		} else {
-			String rtJarPathString = System.getenv(JSPARROW_RT_JAR_PATH_KEY);
-			if (rtJarPathString == null || !Files.exists(Paths.get(rtJarPathString))) {
-				throw new RuntimeException(
-						"Could not find java runtime library rt.jar. Is the JSPARROW_RT_JAR_PATH environment variable set?");
-			}
-
-			IPath rtJarPath = new Path(rtJarPathString);
-
-			final IClasspathEntry rtJarEntry = JavaCore.newLibraryEntry(rtJarPath, null, null);
-			entries.add(rtJarEntry);
-		}
-
-		final IClasspathEntry srcEntry = JavaCore.newSourceEntry(root.getPath(), EMPTY_PATHS, EMPTY_PATHS, null);
-
-		entries.add(srcEntry);
-
-		return entries;
 	}
 
 	public static List<IClasspathEntry> extractMavenDependenciesFromPom(String classpathFile) throws Exception {
@@ -208,27 +178,14 @@ public class RulesTestUtil {
 		return results;
 	}
 
-	private static IPath getPathToRtJar() {
-		final String classPath = System.getProperty("sun.boot.class.path");
-		final int idx = StringUtils.indexOf(classPath, "rt.jar");
-		if (idx == -1) {
-			return null;
-		}
-		final int end = idx + "rt.jar".length();
-		final int lastIdx = classPath.lastIndexOf(":", idx);
-		final int start = lastIdx != -1 ? lastIdx + 1 : 0;
-		return new Path(StringUtils.substring(classPath, start, end));
-	}
-
 	public static IPackageFragmentRoot addSourceContainer(IJavaProject javaProject, String containerName)
 			throws Exception {
 		IProject project = javaProject.getProject();
 		IFolder folder = project.getFolder(containerName);
 		createFolder(folder);
-
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(folder);
 		IClasspathEntry classpathEntry = JavaCore.newSourceEntry(root.getPath(), EMPTY_PATHS, EMPTY_PATHS, null);
-		addToClasspath(javaProject, Arrays.asList(classpathEntry));
+		addToClasspath(javaProject, Collections.singletonList(classpathEntry));
 		return root;
 	}
 
@@ -244,33 +201,33 @@ public class RulesTestUtil {
 			} else {
 				newEntries = classpathEntries.toArray(new IClasspathEntry[classpathEntries.size()]);
 			}
-			javaProject.setRawClasspath(newEntries, null);
+			javaProject.setRawClasspath(newEntries, new NullProgressMonitor());
 		}
 	}
 
 	public static IJavaProject createJavaProject(String projectName, String binFolderName) throws Exception {
-		IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace()
-			.getRoot();
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IWorkspaceRoot workspaceRoot = workspace.getRoot();
 		IProject project = workspaceRoot.getProject(projectName);
 
 		if (!project.exists()) {
-			project.create(null);
+			project.create(new NullProgressMonitor());
 		} else {
-			project.refreshLocal(IResource.DEPTH_INFINITE, null);
+			project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		}
 
 		if (!project.isOpen()) {
-			project.open(null);
+			project.open(new NullProgressMonitor());
 		}
 
 		IFolder binFolder = project.getFolder(binFolderName);
 
 		createFolder(binFolder);
 		addNature(project, JavaCore.NATURE_ID);
-
+		IClasspathEntry jreEntry = JavaRuntime.getDefaultJREContainerEntry();
 		IJavaProject javaProject = JavaCore.create(project);
-		javaProject.setOutputLocation(binFolder.getFullPath(), null);
-		javaProject.setRawClasspath(new IClasspathEntry[0], null);
+		javaProject.setOutputLocation(binFolder.getFullPath(), new NullProgressMonitor());
+		javaProject.setRawClasspath(new IClasspathEntry[] { jreEntry }, new NullProgressMonitor());
 
 		/*
 		 * The following options are extracted from our internal eclipse code
@@ -296,16 +253,12 @@ public class RulesTestUtil {
 		if (project.hasNature(natureId)) {
 			return;
 		}
-
 		IProjectDescription projectDescription = project.getDescription();
-
 		String[] oldNatures = (projectDescription.getNatureIds());
 		String[] newNatures = Arrays.copyOf(oldNatures, oldNatures.length + 1);
 		newNatures[oldNatures.length] = natureId;
-
 		projectDescription.setNatureIds(newNatures);
-		project.setDescription(projectDescription, null);
-
+		project.setDescription(projectDescription, new NullProgressMonitor());
 	}
 
 	private static void createFolder(IFolder folder) throws CoreException {
@@ -314,7 +267,7 @@ public class RulesTestUtil {
 			if (parent instanceof IFolder) {
 				createFolder((IFolder) parent);
 			}
-			folder.create(false, true, null);
+			folder.create(false, true, new NullProgressMonitor());
 		}
 	}
 

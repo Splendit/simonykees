@@ -25,11 +25,12 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * look at {@link UsesSimpleJDTUnitFixture}.
  */
 public abstract class UsesJDTUnitFixture {
-	
+
 	public static final String DEFAULT_TYPE_DECLARATION_NAME = "TestCU"; //$NON-NLS-1$
 
 	protected static JdtUnitFixtureProject fixtureProject;
-	private AbstractASTRewriteASTVisitor defaultVisitor = new AbstractASTRewriteASTVisitor () {};
+	private AbstractASTRewriteASTVisitor defaultVisitor = new AbstractASTRewriteASTVisitor() {
+	};
 	protected JdtUnitFixtureClass defaultFixture;
 
 	@BeforeAll
@@ -42,21 +43,26 @@ public abstract class UsesJDTUnitFixture {
 	public static void tearDownClass() throws CoreException {
 		fixtureProject.tearDown();
 	}
-	
+
 	@BeforeEach
 	public void setUpDefaultFixture() throws Exception {
 		defaultFixture = fixtureProject.addCompilationUnit(DEFAULT_TYPE_DECLARATION_NAME);
 	}
-	
-	protected void  addDependency(String groupId, String artifactId, String version) throws Exception {
-		IClasspathEntry classPathEntry = RulesTestUtil.generateMavenEntryFromDepedencyString(groupId, artifactId, version);
+
+	protected void setJavaVersion(String version) {
+		fixtureProject.setJavaVersion(version);
+	}
+
+	protected void addDependency(String groupId, String artifactId, String version) throws Exception {
+		IClasspathEntry classPathEntry = RulesTestUtil.generateMavenEntryFromDepedencyString(groupId, artifactId,
+				version);
 		fixtureProject.addClasspathEntry(classPathEntry);
 	}
-	
+
 	protected void setDefaultVisitor(AbstractASTRewriteASTVisitor visitor) {
 		this.defaultVisitor = visitor;
 	}
-	
+
 	protected void assertChange(String actual, String expected)
 			throws JdtUnitException, JavaModelException, BadLocationException {
 		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actual);
@@ -67,12 +73,12 @@ public abstract class UsesJDTUnitFixture {
 		assertMatch(ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, expected),
 				defaultFixture.getTypeDeclaration());
 	}
-	
+
 	protected void assertNoChange(String actualAndExpected)
 			throws JdtUnitException, JavaModelException, BadLocationException {
 		assertChange(actualAndExpected, actualAndExpected);
 	}
-	
+
 	protected AbstractASTRewriteASTVisitor getDefaultVisitor() {
 		return defaultVisitor;
 	}

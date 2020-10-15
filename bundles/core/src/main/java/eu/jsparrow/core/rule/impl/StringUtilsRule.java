@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
@@ -11,6 +12,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -37,27 +39,33 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> {
 
-	private static final String VERSION_3_0 = "3.0"; //$NON-NLS-1$
-	private static final String VERSION_3_0_1 = "3.0.1"; //$NON-NLS-1$
-	private static final String VERSION_3_1 = "3.1"; //$NON-NLS-1$
-	private static final String VERSION_3_2 = "3.2"; //$NON-NLS-1$
-	private static final String VERSION_3_2_1 = "3.2.1"; //$NON-NLS-1$
-	private static final String VERSION_3_3 = "3.3"; //$NON-NLS-1$
-	private static final String VERSION_3_3_1 = "3.3.1"; //$NON-NLS-1$
-	private static final String VERSION_3_3_2 = "3.3.2"; //$NON-NLS-1$
-	private static final String VERSION_3_4 = "3.4"; //$NON-NLS-1$
-	private static final String VERSION_3_5 = "3.5"; //$NON-NLS-1$
-	private static final String VERSION_3_6 = "3.6"; //$NON-NLS-1$
-	private static final String VERSION_3_7 = "3.7"; //$NON-NLS-1$
+	private static final Logger logger = LoggerFactory.getLogger(StringUtilsRule.class);
 
-	Logger logger = LoggerFactory.getLogger(StringUtilsRule.class);
+	private static final String STRING_UTILS_QUALIFIED_NAME = org.apache.commons.lang3.StringUtils.class.getName();
 
-	private List<String> supportedVersion;
+	@SuppressWarnings("nls")
+	private static final List<String> supportedVersion = Collections
+		.unmodifiableList(Arrays.asList(
+				"3.0",
+				"3.0.1",
+				"3.1",
+				"3.2",
+				"3.2.1",
+				"3.3",
+				"3.3.1",
+				"3.3.2",
+				"3.4",
+				"3.5",
+				"3.6",
+				"3.7",
+				"3.8",
+				"3.8.1",
+				"3.9",
+				"3.10",
+				"3.11"));
 
 	public StringUtilsRule() {
 		this.visitorClass = StringUtilsASTVisitor.class;
-		this.supportedVersion = Arrays.asList(VERSION_3_0, VERSION_3_0_1, VERSION_3_1, VERSION_3_2, VERSION_3_2_1,
-				VERSION_3_3, VERSION_3_3_1, VERSION_3_3_2, VERSION_3_4, VERSION_3_5, VERSION_3_6, VERSION_3_7);
 		this.id = "StringUtils"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.StringUtilsRule_name, Messages.StringUtilsRule_description,
 				Duration.ofMinutes(10), Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION));
@@ -71,15 +79,15 @@ public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> 
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 		try {
-			String fullyQuallifiedClassName = "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
+			String fullyQuallifiedClassName = STRING_UTILS_QUALIFIED_NAME;
 			IType classtype = project.findType(fullyQuallifiedClassName);
 			if (classtype != null) {
 
 				IPackageFragmentRoot commonsLangLib = getProject(classtype.getParent());
 				if (commonsLangLib != null) {
 					// file with path to library jar
-					File file = new File(commonsLangLib.getPath()
-						.toString());
+					IPath resourcePath = commonsLangLib.getPath();
+					File file = new File(resourcePath.toString());
 
 					return isImplementationVersionValid(file);
 				}
@@ -95,7 +103,7 @@ public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> 
 
 	@Override
 	public String requiredLibraries() {
-		return "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
+		return STRING_UTILS_QUALIFIED_NAME;
 	}
 
 	private IPackageFragmentRoot getProject(IJavaElement iJavaElement) {
@@ -110,7 +118,7 @@ public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> 
 	}
 
 	private boolean isImplementationVersionValid(File file) {
-		try (JarFile jar = new java.util.jar.JarFile(file)) {
+		try (JarFile jar = new JarFile(file)) {
 
 			Manifest manifest = jar.getManifest();
 			Attributes attributes = manifest.getMainAttributes();
@@ -121,7 +129,7 @@ public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> 
 					String keyword = key.toString();
 					if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
 						return supportedVersion.stream()
-							.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s));
+							.anyMatch(s -> StringUtils.equals(attributes.getValue(key), s));
 					}
 				}
 			}

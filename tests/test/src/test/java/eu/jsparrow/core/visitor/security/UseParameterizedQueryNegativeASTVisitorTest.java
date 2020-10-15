@@ -381,25 +381,6 @@ public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUn
 		assertNoChange(original);
 	}
 
-	/*
-	 * Conflicting imports
-	 */
-
-	@Test
-	public void test_conflictingImport_shouldNotTransform() throws Exception {
-		String original = "" +
-				"String departmentId = \"40\";\n" +
-				"Connection connection = null;\n" +
-				"String query = \"SELECT first_name FROM employee WHERE department_id ='\" + departmentId + \"' ORDER BY last_name\";\n"
-				+
-				"try {\n" +
-				"    Statement statement = connection.createStatement();\n" +
-				"    statement.executeQuery(query);\n" +
-				"} catch (Exception e) {}";
-		fixture.addImport("test.net.sql.PreparedStatement");
-		assertNoChange(original);
-	}
-
 	@Test
 	public void visit_ExecuteQueryArgumentAsInfixExpression_shouldNotTransform() throws Exception {
 

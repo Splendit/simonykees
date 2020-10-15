@@ -20,7 +20,6 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
  * @author Martin Huter
  * @since 1.2
  */
-@SuppressWarnings("nls")
 public class SyntaxErrorCheckTest {
 
 	IJavaProject testproject = null;
@@ -30,9 +29,6 @@ public class SyntaxErrorCheckTest {
 	public void setUp() throws Exception {
 		testproject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 		IPackageFragmentRoot root = RulesTestUtil.addSourceContainer(testproject, "/allRulesTestRoot");
-
-		RulesTestUtil.addToClasspath(testproject, RulesTestUtil.getClassPathEntries(root));
-
 		packageFragment = root.createPackageFragment("eu.jsparrow", true, null);
 	}
 

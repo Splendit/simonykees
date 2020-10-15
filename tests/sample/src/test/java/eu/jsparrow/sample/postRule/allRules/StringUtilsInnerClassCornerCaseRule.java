@@ -11,7 +11,7 @@ package eu.jsparrow.sample.postRule.allRules;
 public class StringUtilsInnerClassCornerCaseRule {
 
 	public int testIndexOf(String testString) {
-		return testString.indexOf("e");
+		return org.apache.commons.lang3.StringUtils.indexOf(testString, "e");
 	}
 
 	class StringUtils {

@@ -4,10 +4,12 @@ import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.IDocElement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -67,13 +69,19 @@ public class RemoveUnusedParameterASTVisitor extends AbstractASTRewriteASTVisito
 		}
 
 		for (SingleVariableDeclaration parameter : parameters) {
-			analyzeParamter(parameter, methodDeclaration);
+			analyzeParameter(parameter, methodDeclaration);
 		}
 
 		return true;
 	}
 
-	private void analyzeParamter(SingleVariableDeclaration parameter, MethodDeclaration methodDeclaration) {
+	private void analyzeParameter(SingleVariableDeclaration parameter, MethodDeclaration methodDeclaration) {
+		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(parameter.modifiers(),
+				Annotation.class);
+		if (!annotations.isEmpty()) {
+			return;
+		}
+
 		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(parameter.getName());
 		Block methodBody = methodDeclaration.getBody();
 		if (methodBody == null) {
@@ -90,6 +98,11 @@ public class RemoveUnusedParameterASTVisitor extends AbstractASTRewriteASTVisito
 				methodDeclaration.resolveBinding());
 		compilationUnit.accept(methodInvocationsVisitor);
 		if (methodInvocationsVisitor.hasUnresolvedBindings()) {
+			return;
+		}
+
+		List<ExpressionMethodReference> methodReferences = methodInvocationsVisitor.getExpressionMethodReferences();
+		if (!methodReferences.isEmpty()) {
 			return;
 		}
 

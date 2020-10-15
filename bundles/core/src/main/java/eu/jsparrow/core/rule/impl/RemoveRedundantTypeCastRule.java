@@ -24,7 +24,7 @@ public class RemoveRedundantTypeCastRule extends RefactoringRuleImpl<RemoveRedun
 		this.id = "RemoveRedundantTypeCast"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.RemoveRedundantTypeCastRule_name,
 				Messages.RemoveRedundantTypeCastRule_description,
-				Duration.ofMinutes(1),
+				Duration.ofMinutes(5),
 				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY));
 	}
 

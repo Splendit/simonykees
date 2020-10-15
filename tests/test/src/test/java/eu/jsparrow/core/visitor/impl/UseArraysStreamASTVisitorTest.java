@@ -7,7 +7,6 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		fixture.addImport("java.util.Arrays");
 		setVisitor(new UseArraysStreamASTVisitor());
 	}
 
@@ -25,6 +24,7 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@Test
 	public void visit_varArgsAsParameter_shouldTransform() throws Exception {
+		fixture.addImport("java.util.Arrays");
 		String original = "" +
 				"Arrays.asList(\"1\", \"2\", \"3\").stream();";
 		String expected = "" +
@@ -34,6 +34,7 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@Test
 	public void visit_intVarArgs_shouldTransform() throws Exception {
+		fixture.addImport("java.util.Arrays");
 		String original = "" +
 				"Arrays.asList(1, 2, 3).stream();";
 		String expected = "" +
@@ -43,6 +44,7 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@Test
 	public void visit_incompatibleStreamChain_shouldNotTransform() throws Exception {
+		fixture.addImport("java.util.Arrays");
 		String original = "" +
 				"Arrays.asList(1, 2, 3).stream()\n" +
 				".filter(value -> value > 0)\n" +
@@ -56,6 +58,7 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@Test
 	public void visit_invokeMethodsInBoxedType_shouldNotTransform() throws Exception {
+		fixture.addImport("java.util.Arrays");
 		String original = "" +
 				"		Arrays.asList(1, 2, 3).stream()\n" +
 				"			.map(value -> value.toString())\n" +
@@ -65,6 +68,7 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@Test
 	public void visit_usingCollect_shouldNotTransform() throws Exception {
+		fixture.addImport("java.util.Arrays");
 		fixture.addImport("java.util.stream.Collectors");
 		String original = "" +
 				"Arrays.asList(1, 2, 3).stream()\n" +
@@ -74,6 +78,7 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@Test
 	public void visit_usingExplicitParameterType_shouldNotTransform() throws Exception {
+		fixture.addImport("java.util.Arrays");
 		String original = "" +
 				"Arrays.asList(1, 2, 3).stream()\n" +
 				"	.filter((Integer value) -> value > 0)\n" +
@@ -83,6 +88,7 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@Test
 	public void visit_usingMethodReferences_shouldNotTransform() throws Exception {
+		fixture.addImport("java.util.Arrays");
 		String original = "" +
 				"Integer expected = 3;\n" +
 				"Arrays.asList(1, 2, 3).stream()\n" +
@@ -93,6 +99,7 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@Test
 	public void visit_missingStream_shouldNotTransform() throws Exception {
+		fixture.addImport("java.util.Arrays");
 		String original = "" +
 				"Arrays.asList(1, 2, 3);";
 		assertNoChange(original);
@@ -100,6 +107,7 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@Test
 	public void visit_missingArgumentsInAsList_shouldNotTransform() throws Exception {
+		fixture.addImport("java.util.Arrays");
 		String original = "" +
 				"Arrays.asList().stream().forEach(val -> {});";
 		assertNoChange(original);
@@ -116,7 +124,32 @@ public class UseArraysStreamASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_ArraysCannotBeImported_shouldTransform() throws Exception {
+		fixture.addImport("java.util.Arrays", true, true);
+		String original = "" +
+				"class Arrays {}\n" +
+				"asList(1, 2, 3).stream().forEach(val -> {});";
+		String expected = "" +
+				"class Arrays {}\n" +
+				"java.util.Arrays.stream(new int[] {1, 2, 3}).forEach(val -> {});";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_StreamCannotBeImported_shouldTransform() throws Exception {
+		fixture.addImport("java.util.Arrays");
+		String original = "" +
+				"		class Stream {}\n" + 
+				"		Arrays.asList(\"1\", \"2\", \"3\").stream();";
+		String expected = "" +
+				"		class Stream {}\n" + 
+				"		java.util.stream.Stream.of(\"1\", \"2\", \"3\");";
+		assertChange(original, expected);	
+	}
+
+	@Test
 	public void visit_compatibleStreamChain_shouldTransform() throws Exception {
+		fixture.addImport("java.util.Arrays");
 		String original = "" +
 				"Arrays.asList(1, 2, 3).stream()\n" +
 				"	.filter(value -> value > 0)\n" +

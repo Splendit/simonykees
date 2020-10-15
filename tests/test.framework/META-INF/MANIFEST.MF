@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.test.framework
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Test Framework
 Bundle-SymbolicName: eu.jsparrow.test.framework
-Bundle-Version: 3.21.0.qualifier
+Bundle-Version: 3.22.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Splendit IT-Consulting GmbH
@@ -18,7 +18,6 @@ Require-Bundle: org.eclipse.jdt.core;bundle-version="[3.11.0,4.0.0)",
  org.opentest4j
 Export-Package: eu.jsparrow.jdtunit,
  eu.jsparrow.jdtunit.util
-Bundle-Vendor: Splendit IT-Consulting GmbH
 Import-Package: org.eclipse.jdt.core,
  org.junit.jupiter.api,
  org.junit.jupiter.api.function,

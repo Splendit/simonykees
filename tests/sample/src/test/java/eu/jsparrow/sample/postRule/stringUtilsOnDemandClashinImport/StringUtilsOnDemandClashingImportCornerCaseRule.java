@@ -17,11 +17,11 @@ public class StringUtilsOnDemandClashingImportCornerCaseRule {
 		NumberUtils numUtil;
 		NumberUtils.explode();
 		List<String> list;
-		return testString.indexOf("e");
+		return org.apache.commons.lang3.StringUtils.indexOf(testString, "e");
 	}
 
 	public boolean testEmpty(String testString) {
-		return testString.isEmpty();
+		return org.apache.commons.lang3.StringUtils.isEmpty(testString);
 	}
 
 }
