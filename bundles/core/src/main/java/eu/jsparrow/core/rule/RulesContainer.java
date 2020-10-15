@@ -171,7 +171,6 @@ public class RulesContainer {
 				new RemoveCollectionAddAllRule(), new RemoveRedundantTypeCastRule(),
 				new UseFilesBufferedReaderRule(), new UseFilesBufferedWriterRule(),
 				new UsePredefinedStandardCharsetRule(),
-				new UseComparatorMethodsRule(),
 
 				/*
 				 * Security
@@ -203,7 +202,8 @@ public class RulesContainer {
 				new StatementLambdaToExpressionRule(), new LambdaForEachCollectRule(), new LambdaForEachMapRule(),
 				new FlatMapInsteadOfNestedLoopsRule(), new EnhancedForLoopToStreamAnyMatchRule(),
 				new EnhancedForLoopToStreamFindFirstRule(), new EnhancedForLoopToStreamSumRule(),
-				new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(), new UseArraysStreamRule(),
+				new StringBuildingLoopRule(), new UseComparatorMethodsRule(), new LambdaToMethodReferenceRule(),
+				new UseArraysStreamRule(),
 
 				/*
 				 * String manipulations. These rules must be applied after
