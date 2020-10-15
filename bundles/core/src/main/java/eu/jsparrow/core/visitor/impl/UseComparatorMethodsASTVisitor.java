@@ -1,9 +1,7 @@
 package eu.jsparrow.core.visitor.impl;
 
-import java.awt.dnd.DropTargetListener;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -34,68 +32,15 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 	@Override
 	public boolean visit(LambdaExpression lambda) {
 
-		ComparatorTransformationData transformationData = analyzeLambda(lambda);
-		MethodInvocation lambdaReplacement;
-		if (transformationData != null) {
-			lambdaReplacement = createInvocationCreatingComparator(transformationData);
+		MethodInvocation lambdaReplacement = createComparatorMethodInvocation(lambda);
+		if (lambdaReplacement != null) {
 			astRewrite.replace(lambda, lambdaReplacement, null);
 			onRewrite();
 		}
 		return true;
 	}
 
-	private MethodInvocation createInvocationCreatingComparator(ComparatorTransformationData transformationData) {
-		boolean isReverse = transformationData.isReverseOrder();
-		Optional<IMethodBinding> optionalComparisonKeyMethod = transformationData.getComparisonKeyMethod();
-		AST ast = astRewrite.getAST();
-
-		MethodInvocation methodInvocation = ast.newMethodInvocation();
-		String methodName;
-		if (!optionalComparisonKeyMethod.isPresent()) {
-
-			if (isReverse) {
-				methodName = "reverseOrder"; //$NON-NLS-1$
-			} else {
-				methodName = "naturalOrder"; //$NON-NLS-1$
-			}
-			methodInvocation.setName(ast.newSimpleName(methodName));
-			methodInvocation.setExpression(ast.newSimpleName("Comparator")); //$NON-NLS-1$
-			return methodInvocation;
-		}
-
-		IMethodBinding iMethodBinding = optionalComparisonKeyMethod.get();
-		ITypeBinding returnType = iMethodBinding.getReturnType();
-		if (ClassRelationUtil.isContentOfType(returnType, java.lang.Integer.class.getName())) {
-			methodName = "comparingInt"; //$NON-NLS-1$
-		} else if (ClassRelationUtil.isContentOfType(returnType, java.lang.Long.class.getName())) {
-			methodName = "comparingLong"; //$NON-NLS-1$
-		} else if (ClassRelationUtil.isContentOfType(returnType, java.lang.Double.class.getName())) {
-			methodName = "comparingDouble"; //$NON-NLS-1$
-		} else {
-			methodName = "comparing"; //$NON-NLS-1$
-		}
-		methodInvocation.setName(ast.newSimpleName(methodName));
-		methodInvocation.setExpression(ast.newSimpleName("Comparator")); //$NON-NLS-1$
-		ExpressionMethodReference methodReference = ast.newExpressionMethodReference();
-		methodReference.setName(ast.newSimpleName(iMethodBinding.getName()));
-		methodReference.setExpression(ast.newName(iMethodBinding.getDeclaringClass()
-			.getErasure()
-			.getQualifiedName()));
-
-		@SuppressWarnings("unchecked")
-		List<Expression> arguments = methodInvocation.arguments();
-		arguments.add(methodReference);
-		if (!isReverse) {
-			return methodInvocation;
-		}
-		MethodInvocation reverseMethodInvocation = ast.newMethodInvocation();
-		// reversed
-		reverseMethodInvocation.setName(ast.newSimpleName("reversed")); //$NON-NLS-1$
-		reverseMethodInvocation.setExpression(methodInvocation);
-		return reverseMethodInvocation;
-	}
-
-	private ComparatorTransformationData analyzeLambda(LambdaExpression lambda) {
+	private MethodInvocation createComparatorMethodInvocation(LambdaExpression lambda) {
 
 		List<VariableDeclaration> lambdaParameters = ASTNodeUtil.convertToTypedList(lambda.parameters(),
 				VariableDeclaration.class);
@@ -124,8 +69,11 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			SimpleName simpleNameRightHS = (SimpleName) compareToMethodArgument;
 			Order lambdaParameterUsageOrder = findLambdaParameterUsageOrder(lambdaParameters, simpleNameLeftHS,
 					simpleNameRightHS);
-			if (lambdaParameterUsageOrder != null) {
-				return new ComparatorTransformationData(lambdaParameterUsageOrder);
+			if (lambdaParameterUsageOrder == Order.NATURAL_ORDER) {
+				return createComparatorMethodInvocation("naturalOrder"); //$NON-NLS-1$
+			}
+			if (lambdaParameterUsageOrder == Order.REVERSE_ORDER) {
+				return createComparatorMethodInvocation("reverseOrder");//$NON-NLS-1$
 			}
 		}
 
@@ -152,16 +100,62 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 
 			Order lambdaParameterUsageOrder = findLambdaParameterUsageOrder(lambdaParameters, simpleNameLeftHS,
 					simpleNameRightHS);
-			if (lambdaParameterUsageOrder == null) {
-				return null;
-			}
-
 			IMethodBinding comparisonKeyMethod = invocationLeftHS
 				.resolveMethodBinding();
-			return new ComparatorTransformationData(comparisonKeyMethod, lambdaParameterUsageOrder);
+			if (lambdaParameterUsageOrder == Order.NATURAL_ORDER) {
+				return createComparatorMethodInvocation(comparisonKeyMethod, false);
+			}
+			if (lambdaParameterUsageOrder == Order.REVERSE_ORDER) {
+				return createComparatorMethodInvocation(comparisonKeyMethod, true);
+			}
 		}
 		return null;
+	}
 
+	private MethodInvocation createComparatorMethodInvocation(String methodName) {
+		AST ast = astRewrite.getAST();
+		MethodInvocation methodInvocation = ast.newMethodInvocation();
+		methodInvocation.setName(ast.newSimpleName(methodName));
+		methodInvocation.setExpression(ast.newSimpleName("Comparator")); //$NON-NLS-1$
+		return methodInvocation;
+	}
+
+	private MethodInvocation createComparatorMethodInvocation(IMethodBinding comparisonKeyMethod,
+			boolean reverseOrder) {
+		AST ast = astRewrite.getAST();
+		String methodName = getComparisonKeyMethodName(comparisonKeyMethod);
+		MethodInvocation methodInvocation = createComparatorMethodInvocation(methodName);
+		ExpressionMethodReference methodReference = ast.newExpressionMethodReference();
+		methodReference.setName(ast.newSimpleName(comparisonKeyMethod.getName()));
+		methodReference.setExpression(ast.newName(comparisonKeyMethod.getDeclaringClass()
+			.getErasure()
+			.getQualifiedName()));
+
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments = methodInvocation.arguments();
+		arguments.add(methodReference);
+		if (!reverseOrder) {
+			return methodInvocation;
+		}
+		MethodInvocation reverseMethodInvocation = ast.newMethodInvocation();
+		// reversed
+		reverseMethodInvocation.setName(ast.newSimpleName("reversed")); //$NON-NLS-1$
+		reverseMethodInvocation.setExpression(methodInvocation);
+		return reverseMethodInvocation;
+	}
+
+	private String getComparisonKeyMethodName(IMethodBinding comparisonKeyMethod) {
+		ITypeBinding returnType = comparisonKeyMethod.getReturnType();
+		if (ClassRelationUtil.isContentOfType(returnType, java.lang.Integer.class.getName())) {
+			return "comparingInt"; //$NON-NLS-1$
+		}
+		if (ClassRelationUtil.isContentOfType(returnType, java.lang.Long.class.getName())) {
+			return "comparingLong"; //$NON-NLS-1$
+		}
+		if (ClassRelationUtil.isContentOfType(returnType, java.lang.Double.class.getName())) {
+			return "comparingDouble"; //$NON-NLS-1$
+		}
+		return "comparing"; //$NON-NLS-1$
 	}
 
 	private Order findLambdaParameterUsageOrder(List<VariableDeclaration> lambdaParameters,
@@ -252,30 +246,6 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 	private enum Order {
 		NATURAL_ORDER,
 		REVERSE_ORDER
-	}
-
-	private class ComparatorTransformationData {
-		private final IMethodBinding comparisonKeyMethod;
-		private final Order order;
-
-		public ComparatorTransformationData(Order order) {
-			this.comparisonKeyMethod = null;
-			this.order = order;
-
-		}
-
-		public ComparatorTransformationData(IMethodBinding comparisonKeyMethod, Order order) {
-			this.comparisonKeyMethod = comparisonKeyMethod;
-			this.order = order;
-		}
-
-		public boolean isReverseOrder() {
-			return order == Order.REVERSE_ORDER;
-		}
-
-		public Optional<IMethodBinding> getComparisonKeyMethod() {
-			return Optional.ofNullable(comparisonKeyMethod);
-		}
 	}
 
 }
