@@ -2,7 +2,6 @@ package eu.jsparrow.core.visitor.impl;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -66,14 +65,12 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 
 		if (compareToMethodExpression.getNodeType() == ASTNode.SIMPLE_NAME
 				&& compareToMethodArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-			SimpleName simpleNameLeftHS = (SimpleName) compareToMethodExpression;
-			SimpleName simpleNameRightHS = (SimpleName) compareToMethodArgument;
-			Order lambdaParameterUsageOrder = findLambdaParameterUsageOrder(lambdaParameters, simpleNameLeftHS,
-					simpleNameRightHS);
-			if (lambdaParameterUsageOrder == Order.NATURAL_ORDER) {
+			int indexOfLeftHS = indexOfSimpleParameterName(lambdaParameters, (SimpleName) compareToMethodExpression);
+			int indexOfRightHS = indexOfSimpleParameterName(lambdaParameters, (SimpleName) compareToMethodArgument);
+			if (indexOfLeftHS == 0 && indexOfRightHS == 1) {
 				return createComparatorMethodInvocation("naturalOrder"); //$NON-NLS-1$
 			}
-			if (lambdaParameterUsageOrder == Order.REVERSE_ORDER) {
+			if (indexOfLeftHS == 1 && indexOfRightHS == 0) {
 				return createComparatorMethodInvocation("reverseOrder");//$NON-NLS-1$
 			}
 		}
@@ -95,21 +92,20 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			if (!isEqivalentComparisonKeyMethod(invocationLeftHS, invocationRightHS)) {
 				return null;
 			}
-
-			SimpleName simpleNameLeftHS = (SimpleName) invocationLeftHS.getExpression();
-			SimpleName simpleNameRightHS = (SimpleName) invocationRightHS.getExpression();
-
-			Order lambdaParameterUsageOrder = findLambdaParameterUsageOrder(lambdaParameters, simpleNameLeftHS,
-					simpleNameRightHS);
 			IMethodBinding comparisonKeyMethod = invocationLeftHS
 				.resolveMethodBinding();
 			ITypeBinding lambdaParameterType = lambdaParameters.get(0)
 				.resolveBinding()
 				.getType();
-			if (lambdaParameterUsageOrder == Order.NATURAL_ORDER) {
+			SimpleName simpleNameLeftHS = (SimpleName) invocationLeftHS.getExpression();
+			SimpleName simpleNameRightHS = (SimpleName) invocationRightHS.getExpression();
+			int indexOfLeftHS = indexOfSimpleParameterName(lambdaParameters, simpleNameLeftHS);
+			int indexOfRightHS = indexOfSimpleParameterName(lambdaParameters, simpleNameRightHS);
+
+			if (indexOfLeftHS == 0 && indexOfRightHS == 1) {
 				return createComparatorMethodInvocation(lambdaParameterType, comparisonKeyMethod, false);
 			}
-			if (lambdaParameterUsageOrder == Order.REVERSE_ORDER) {
+			if (indexOfLeftHS == 1 && indexOfRightHS == 0) {
 				return createComparatorMethodInvocation(lambdaParameterType, comparisonKeyMethod, true);
 			}
 		}
@@ -170,24 +166,18 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		return "comparing"; //$NON-NLS-1$
 	}
 
-	private Order findLambdaParameterUsageOrder(List<VariableDeclaration> lambdaParameters,
-			SimpleName simpleNameLeftHS,
-			SimpleName simpleNameRightHS) {
+	private int indexOfSimpleParameterName(List<VariableDeclaration> lambdaParameters, SimpleName simpleName) {
 
-		List<String> lambdaParameterIdentidiers = lambdaParameters.stream()
-			.map(VariableDeclaration::getName)
-			.map(SimpleName::getIdentifier)
-			.collect(Collectors.toList());
-
-		int indexOfLHS = lambdaParameterIdentidiers.indexOf(simpleNameLeftHS.getIdentifier());
-		int indexOfRHS = lambdaParameterIdentidiers.indexOf(simpleNameRightHS.getIdentifier());
-		if (indexOfLHS == 0 && indexOfRHS == 1) {
-			return Order.NATURAL_ORDER;
+		for (int i = 0; i < lambdaParameters.size(); i++) {
+			String parameterIdentifier = lambdaParameters.get(i)
+				.getName()
+				.getIdentifier();
+			if (simpleName.getIdentifier()
+				.equals(parameterIdentifier)) {
+				return i;
+			}
 		}
-		if (indexOfLHS == 1 && indexOfRHS == 0) {
-			return Order.REVERSE_ORDER;
-		}
-		return null;
+		return -1;
 	}
 
 	private boolean isEqivalentComparisonKeyMethod(MethodInvocation lhs, MethodInvocation rhs) {
@@ -254,10 +244,4 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 
 		return methodInvocation;
 	}
-
-	private enum Order {
-		NATURAL_ORDER,
-		REVERSE_ORDER
-	}
-
 }
