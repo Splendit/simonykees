@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
@@ -102,11 +103,14 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 					simpleNameRightHS);
 			IMethodBinding comparisonKeyMethod = invocationLeftHS
 				.resolveMethodBinding();
+			ITypeBinding lambdaParameterType = lambdaParameters.get(0)
+				.resolveBinding()
+				.getType();
 			if (lambdaParameterUsageOrder == Order.NATURAL_ORDER) {
-				return createComparatorMethodInvocation(comparisonKeyMethod, false);
+				return createComparatorMethodInvocation(lambdaParameterType, comparisonKeyMethod, false);
 			}
 			if (lambdaParameterUsageOrder == Order.REVERSE_ORDER) {
-				return createComparatorMethodInvocation(comparisonKeyMethod, true);
+				return createComparatorMethodInvocation(lambdaParameterType, comparisonKeyMethod, true);
 			}
 		}
 		return null;
@@ -120,16 +124,24 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		return methodInvocation;
 	}
 
-	private MethodInvocation createComparatorMethodInvocation(IMethodBinding comparisonKeyMethod,
+	private MethodInvocation createComparatorMethodInvocation(ITypeBinding lambdaParameterType,
+			IMethodBinding comparisonKeyMethod,
 			boolean reverseOrder) {
 		AST ast = astRewrite.getAST();
 		String methodName = getComparisonKeyMethodName(comparisonKeyMethod);
 		MethodInvocation methodInvocation = createComparatorMethodInvocation(methodName);
 		ExpressionMethodReference methodReference = ast.newExpressionMethodReference();
 		methodReference.setName(ast.newSimpleName(comparisonKeyMethod.getName()));
-		methodReference.setExpression(ast.newName(comparisonKeyMethod.getDeclaringClass()
-			.getErasure()
-			.getQualifiedName()));
+
+		Name lambdaParameterTypeName;
+		if (lambdaParameterType.isLocal()) {
+			lambdaParameterTypeName = ast.newSimpleName(lambdaParameterType.getName());
+		} else {
+			String qualifiedName = lambdaParameterType.getQualifiedName();
+			verifyImport(getCompilationUnit(), qualifiedName);
+			lambdaParameterTypeName = addImport(qualifiedName);
+		}
+		methodReference.setExpression(lambdaParameterTypeName);
 
 		@SuppressWarnings("unchecked")
 		List<Expression> arguments = methodInvocation.arguments();
