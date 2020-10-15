@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -28,6 +29,16 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String JAVA_LANG_COMPARABLE = java.lang.Comparable.class.getName();
+	private static final String JAVA_UTIL_COMPARATOR = java.util.Comparator.class.getName();
+
+	@Override
+	public boolean visit(CompilationUnit compilationUnit) {
+		boolean continueVisiting = super.visit(compilationUnit);
+		if (continueVisiting) {
+			verifyImport(compilationUnit, JAVA_UTIL_COMPARATOR);
+		}
+		return continueVisiting;
+	}
 
 	@Override
 	public boolean visit(LambdaExpression lambda) {
@@ -116,7 +127,8 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		AST ast = astRewrite.getAST();
 		MethodInvocation methodInvocation = ast.newMethodInvocation();
 		methodInvocation.setName(ast.newSimpleName(methodName));
-		methodInvocation.setExpression(ast.newSimpleName("Comparator")); //$NON-NLS-1$
+		Name comparatorTypeName = addImport(JAVA_UTIL_COMPARATOR);
+		methodInvocation.setExpression(comparatorTypeName);
 		return methodInvocation;
 	}
 
