@@ -134,6 +134,58 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_Comparator4LocalClass_shouldTransform() throws Exception {
+		String original = "" +
+				"void test() {\n" +
+				"	class LocalClass {\n" +
+				"		String getString(){\n" +
+				"			return \"\";\n" +
+				"		}\n" +
+				"	}\n" +
+				"	Comparator<LocalClass> comparator = (lhs, rhs) -> lhs.getString().compareTo(rhs.getString());\n" +
+				"}";
+
+		String expected = "" +
+				"void test() {\n" +
+				"	class LocalClass {\n" +
+				"		String getString(){\n" +
+				"			return \"\";\n" +
+				"		}\n" +
+				"	}\n" +
+				"	Comparator<LocalClass> comparator=Comparator.comparing(LocalClass::getString);\n" +
+				"}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_Comparator4InnerClass_shouldTransform() throws Exception {
+		String original = "" +
+				"class InnerClass {\n" +
+				"	String getString(){\n" +
+				"		return \"\";\n" +
+				"	}\n" +
+				"}\n" +
+				"void test() {\n" +
+				"	Comparator<InnerClass> comparator = (lhs, rhs) -> lhs.getString().compareTo(rhs.getString());\n"
+				+
+				"}";
+
+		String expected = "" +
+				"class InnerClass {\n" +
+				"	String getString(){\n" +
+				"		return \"\";\n" +
+				"	}\n" +
+				"}\n" +
+				"void test() {\n" +
+				"	Comparator<InnerClass> comparator=Comparator.comparing(fixturepackage.TestCU.InnerClass::getString);\n"
+				+
+				"}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_Comparator4IntegerUsingOnlyLHSLambdaParameter_shouldNotTransform() throws Exception {
 		String original = "" +
 				"void test() {\n" +
@@ -148,6 +200,45 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 				"void test() {\n" +
 				"	Comparator<Integer> comparator = (lhs, rhs) -> rhs.compareTo(rhs);\n" +
 				"}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ComparatorForIntegerNotUsingLambdaParameters_shouldNotTransform() throws Exception {
+		String original = "" +
+				"void test(Integer x1, Integer x2) {\n" +
+				"	Comparator<Integer> comparator = (lhs, rhs) -> x1.compareTo(x2);\n" +
+				"}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_Comparator4LocalClassWithoutCompareTo_shouldNotTransform() throws Exception {
+		String original = "" +
+				"void test() {\n" +
+				"	class LocalClass {\n" +
+				"		int extractInt(LocalClass other) {\n" +
+				"			return 0;\n" +
+				"		}\n" +
+				"	}\n" +
+				"	Comparator<LocalClass> comparator = (lhs, rhs) -> lhs.extractInt(rhs);\n" +
+				"}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_Comparator4LocalClassUsingCompareTo_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	class Comparator4LocalClassUsingCompareTo {\n" +
+				"		void test() {\n" +
+				"			class LocalClass {\n" +
+				"				int compareTo(LocalClass other) {\n" +
+				"					return 0;\n" +
+				"				}\n" +
+				"			}\n" +
+				"			Comparator<LocalClass> comparator = (lhs, rhs) -> lhs.compareTo(rhs);\n" +
+				"		}\n" +
+				"	}";
 		assertNoChange(original);
 	}
 
@@ -195,7 +286,7 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_LambdaTypeBindingNotComparator_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.function.BiFunction.class.getName());
