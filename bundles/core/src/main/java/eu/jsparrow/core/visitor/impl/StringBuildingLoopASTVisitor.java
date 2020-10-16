@@ -203,11 +203,11 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 				concatUsingCollectorsJoining(loopNode, resultVariable, streamExpression);
 			} else if (isArrayOfStrings(loopExpressionTypeBinding)) {
 				// Arrays.stream(expression)
-				streamExpression = createStreamFromArray(loopExpression);
+				streamExpression = createStreamFromArray(loopExpression, loopNode);
 				concatUsingCollectorsJoining(loopNode, resultVariable, streamExpression);
 			} else if (isArrayOfNumbers(loopExpressionTypeBinding)) {
 				// Arrays.stream(expression)).map(Object::toString)
-				streamExpression = createStreamFromNumnbersArray(loopExpression);
+				streamExpression = createStreamFromNumbersArray(loopExpression, loopNode);
 				concatUsingCollectorsJoining(loopNode, resultVariable, streamExpression);
 			} else if (isCollectionOfNumbers(loopExpressionTypeBinding)) {
 				// expression.stream().map(Object::toString)
@@ -242,7 +242,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	 */
 	private void concatUsingCollectorsJoining(EnhancedForStatement loopNode, SimpleName resultVariable,
 			MethodInvocation streamExpression) {
-		MethodInvocation collect = createCollectInvocation();
+		MethodInvocation collect = createCollectInvocation(loopNode);
 		collect.setExpression(streamExpression);
 		ASTNode newStatement;
 		Optional<VariableDeclarationFragment> optFragment = isReassignable(resultVariable, loopNode);
@@ -478,21 +478,21 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	 *            a node representing an array
 	 * @return an expression of the form {@code Arrays.stream(loopExpression)}.
 	 */
-	private MethodInvocation createStreamFromArray(Expression loopExpression) {
+	private MethodInvocation createStreamFromArray(Expression loopExpression, ASTNode context) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation stream = ast.newMethodInvocation();
 		stream.setName(ast.newSimpleName(STREAM));
-		Name arraysTypeName = addImport(ARRAYS_QUALIFIED_NAME);
+		Name arraysTypeName = addImport(ARRAYS_QUALIFIED_NAME, context);
 		stream.setExpression(arraysTypeName);
 		ListRewrite argRewriter = astRewrite.getListRewrite(stream, MethodInvocation.ARGUMENTS_PROPERTY);
 		argRewriter.insertFirst(loopExpression, null);
 		return stream;
 	}
 
-	private MethodInvocation createStreamFromNumnbersArray(Expression loopExpression) {
+	private MethodInvocation createStreamFromNumbersArray(Expression loopExpression, ASTNode context) {
 		AST ast = astRewrite.getAST();
 
-		MethodInvocation stream = createStreamFromArray(loopExpression);
+		MethodInvocation stream = createStreamFromArray(loopExpression, context);
 		MethodInvocation mapToString = ast.newMethodInvocation();
 		mapToString.setName(ast.newSimpleName(MAP));
 		mapToString.setExpression(stream);
@@ -530,14 +530,14 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	 * @return a node representing the invocation of
 	 *         {@link Collectors#joining()}.
 	 */
-	private MethodInvocation createCollectInvocation() {
+	private MethodInvocation createCollectInvocation(ASTNode context) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation collect = ast.newMethodInvocation();
 		collect.setName(ast.newSimpleName(COLLECT));
 
 		MethodInvocation collectorsJoining = ast.newMethodInvocation();
 		collectorsJoining.setName(ast.newSimpleName(JOINING));
-		Name colllectorsTypeName = addImport(COLLECTORS_QUALIFIED_NAME);
+		Name colllectorsTypeName = addImport(COLLECTORS_QUALIFIED_NAME, context);
 		collectorsJoining.setExpression(colllectorsTypeName);
 
 		ListRewrite argRewriter = astRewrite.getListRewrite(collect, MethodInvocation.ARGUMENTS_PROPERTY);

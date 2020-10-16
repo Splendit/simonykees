@@ -193,6 +193,49 @@ public class LiveVariableScope {
 	}
 
 	/**
+	 * Checks whether the given identifier matches any of the values stored for
+	 * the given scope {@link #fieldNames}, {@link #localVariableNames}, or
+	 * {@link #importedStaticFieldNames}.
+	 * 
+	 * @param name
+	 *            name to search for
+	 * @param scope
+	 *            the scope to search in
+	 * @return if a value is found
+	 */
+	public boolean isInScope(String name, ASTNode scope) {
+		List<String> values = importedStaticFieldNames.getOrDefault(scope, Collections.emptyList());
+		boolean matchesStaticImport = values.contains(name);
+		if (matchesStaticImport) {
+			return true;
+		}
+
+		boolean matchesField = fieldNames.getOrDefault(scope, Collections.emptyList())
+			.stream()
+			.anyMatch(name::equals);
+		if (matchesField) {
+			return true;
+		}
+
+		boolean matchesLocalVariable = localVariableNames.getOrDefault(scope, Collections.emptyList())
+			.stream()
+			.anyMatch(name::equals);
+		if (matchesLocalVariable) {
+			return true;
+		}
+
+		ASTNode parent = scope.getParent();
+		if (parent != null) {
+			/*
+			 * Field names and outer class fields are stored in parent enclosing
+			 * scopes.
+			 */
+			return isInScope(name, parent);
+		}
+		return false;
+	}
+
+	/**
 	 * Adds the given variable name in the {@link #localVariableNames}
 	 * 
 	 * @param scope

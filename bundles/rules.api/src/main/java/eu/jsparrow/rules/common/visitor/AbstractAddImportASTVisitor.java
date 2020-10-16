@@ -17,17 +17,13 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -55,12 +51,11 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	private Set<String> safeStaticMethodImports = new HashSet<>();
 	private Set<String> staticMethodsImportedOnDemand = new HashSet<>();
 	private final LiveVariableScope liveVariableScope = new LiveVariableScope();
-	private ASTNode enclosingScope;
 
 	@Override
 	public void endVisit(CompilationUnit node) {
-		liveVariableScope.clearCompilationUnitScope(node);
 
+		liveVariableScope.clearCompilationUnitScope(node);
 		PackageDeclaration cuPackage = node.getPackage();
 		String packageQualifiedName;
 		if (cuPackage != null) {
@@ -91,52 +86,6 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		safeStaticMethodImports.clear();
 		staticMethodsImportedOnDemand.clear();
 		super.endVisit(node);
-	}
-
-	@Override
-	public void endVisit(TypeDeclaration typeDeclaration) {
-		enclosingScope = liveVariableScope.findEnclosingScope(typeDeclaration)
-			.orElse(null);
-		liveVariableScope.clearFieldScope(typeDeclaration);
-	}
-
-	@Override
-	public boolean visit(MethodDeclaration methodDeclaration) {
-		enclosingScope = methodDeclaration;
-		return super.visit(methodDeclaration);
-	}
-
-	@Override
-	public void endVisit(MethodDeclaration methodDeclaration) {
-		enclosingScope = liveVariableScope.findEnclosingScope(methodDeclaration)
-			.orElse(null);
-		liveVariableScope.clearLocalVariablesScope(methodDeclaration);
-	}
-
-	@Override
-	public boolean visit(FieldDeclaration fieldDeclaration) {
-		enclosingScope = fieldDeclaration;
-		return super.visit(fieldDeclaration);
-	}
-
-	@Override
-	public void endVisit(FieldDeclaration fieldDeclaration) {
-		enclosingScope = liveVariableScope.findEnclosingScope(fieldDeclaration)
-			.orElse(null);
-		liveVariableScope.clearLocalVariablesScope(fieldDeclaration);
-	}
-
-	@Override
-	public boolean visit(Initializer initializer) {
-		enclosingScope = initializer;
-		return super.visit(initializer);
-	}
-
-	@Override
-	public void endVisit(Initializer initializer) {
-		enclosingScope = liveVariableScope.findEnclosingScope(initializer)
-			.orElse(null);
-		liveVariableScope.clearLocalVariablesScope(initializer);
 	}
 
 	protected void verifyImport(CompilationUnit compilationUnit, String qualifiedTypeName) {
@@ -417,12 +366,15 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * which will be imported.
 	 * 
 	 * @param qualifiedName
+	 * @param contex
+	 * @return
 	 */
-	protected Name addImport(String qualifiedName) {
+	protected Name addImport(String qualifiedName, ASTNode context) {
+		ASTNode enclosingScope = liveVariableScope.findEnclosingScope(context).orElse(null);
 		if(enclosingScope != null) {
 			String simpleTypeName = getSimpleName(qualifiedName);
 			this.liveVariableScope.lazyLoadScopeNames(enclosingScope);
-			if(liveVariableScope.isInScope(simpleTypeName)) {
+			if(liveVariableScope.isInScope(simpleTypeName, enclosingScope)) {
 				return astRewrite.getAST().newName(qualifiedName);
 			}
 		}
@@ -440,7 +392,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * @return The qualifier to be used for the static method or an empty
 	 *         {@link Optional} if no qualifier is needed.
 	 */
-	protected Optional<Name> addImportForStaticMethod(String fullyQualifiedMethodName) {
+	protected Optional<Name> addImportForStaticMethod(String fullyQualifiedMethodName, ASTNode context) {
 		if (safeStaticMethodImports.contains(fullyQualifiedMethodName)) {
 			if (!staticMethodsImportedOnDemand.contains(fullyQualifiedMethodName)) {
 				this.staticImports.add(fullyQualifiedMethodName);
@@ -448,7 +400,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			return Optional.empty();
 		} else {
 			String qualifiedTypeName = findQualifyingPrefix(fullyQualifiedMethodName);
-			Name typeName = addImport(qualifiedTypeName);
+			Name typeName = addImport(qualifiedTypeName, context);
 			return Optional.of(typeName);
 		}
 	}
@@ -460,14 +412,6 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 
 	protected void addAlreadyVerifiedImports(Collection<String> newImports) {
 		addImports.addAll(newImports);
-	}
-
-	public ASTNode getEnclosingScope() {
-		return enclosingScope;
-	}
-
-	public LiveVariableScope getLiveVariableScope() {
-		return liveVariableScope;
 	}
 	
 }

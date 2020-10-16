@@ -108,7 +108,7 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 
 		insertSetParameterStatementsBeforeExecuteQuery(statementContainingExecuteQuery, setParameterStatements);
 
-		replaceStatementDeclaration(sqlStatementVisitor.getDeclarationFragment());
+		replaceStatementDeclaration(sqlStatementVisitor.getDeclarationFragment(), methodInvocation);
 
 		SimpleName methodName = methodInvocation.getName();
 		ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
@@ -204,13 +204,13 @@ public class UseParameterizedQueryASTVisitor extends AbstractDynamicQueryASTVisi
 		}
 	}
 
-	private void replaceStatementDeclaration(VariableDeclarationFragment fragment) {
+	private void replaceStatementDeclaration(VariableDeclarationFragment fragment, ASTNode context) {
 		VariableDeclarationStatement statement = (VariableDeclarationStatement) fragment.getParent();
 
 		int numFragments = statement.fragments()
 			.size();
 		AST ast = astRewrite.getAST();
-		Name preparedStatementTypeName = addImport(PREPARED_STATEMENT_QUALIFIED_NAME);
+		Name preparedStatementTypeName = addImport(PREPARED_STATEMENT_QUALIFIED_NAME, context);
 		SimpleType preparedStatementType = ast.newSimpleType(preparedStatementTypeName);
 		if (numFragments > 1) {
 			VariableDeclarationFragment newFragment = (VariableDeclarationFragment) astRewrite

@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.rule.impl.UseOffsetBasedStringMethodsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-@SuppressWarnings("nls")
 public class UseOffsetBasedStringMethodsRulesTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE_IMPORT_MAX_CLASHING = "UseOffsetBasedStringMethodsImportMaxClashRule.java";

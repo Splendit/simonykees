@@ -172,7 +172,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		Block body = ast.newBlock();
 		@SuppressWarnings("unchecked")
 		List<Statement> bodyStatements = (List<Statement>) body.statements();
-		List<Statement> calendarStatemetns = generateCalendar(ast, calendarName, expressionList);
+		List<Statement> calendarStatemetns = generateCalendar(calendarName, expressionList, node);
 		bodyStatements.addAll(calendarStatemetns);
 
 		SimpleName dateName = fragment.getName();
@@ -234,13 +234,13 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		if (ancestorStatment.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
 			Block surroundingBlock = (Block) ancestorStatment.getParent();
 			ListRewrite lrw = astRewrite.getListRewrite(surroundingBlock, Block.STATEMENTS_PROPERTY);
-			generateCalendar(ast, calendarName, arguments).forEach(s -> lrw.insertBefore(s, ancestorStatment, null));
+			generateCalendar(calendarName, arguments, node).forEach(s -> lrw.insertBefore(s, ancestorStatment, null));
 			commentRewriter.saveCommentsInParentStatement(node);
 		} else {
 			Block injectionBlock = ast.newBlock();
 			@SuppressWarnings("unchecked")
 			List<Statement> blockStatements = (List<Statement>) injectionBlock.statements();
-			blockStatements.addAll(generateCalendar(ast, calendarName, arguments));
+			blockStatements.addAll(generateCalendar(calendarName, arguments, node));
 			blockStatements.add((Statement) astRewrite.createMoveTarget(ancestorStatment));
 			astRewrite.replace(ancestorStatment, injectionBlock, null);
 			List<Comment> relatedComments = commentRewriter.findRelatedComments(node);
@@ -287,13 +287,15 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 	 * @return the list of generated statements as described above
 	 */
 	@SuppressWarnings("unchecked")
-	private List<Statement> generateCalendar(AST ast, String nameOfCalendar, List<Expression> arguments) {
+	private List<Statement> generateCalendar(String nameOfCalendar, List<Expression> arguments, ASTNode context) {
+
 		List<Statement> statementList = new ArrayList<>();
 		// Calendar cal = Calendar.getInstance(); done
+		AST ast = context.getAST();
 		VariableDeclarationFragment variableDeclFragment = ast.newVariableDeclarationFragment();
 		variableDeclFragment.setName(NodeBuilder.newSimpleName(ast, nameOfCalendar));
 
-		Name typeName = addImport(CALENDAR_QUALIFIED_NAME);
+		Name typeName = addImport(CALENDAR_QUALIFIED_NAME, context);
 		variableDeclFragment.setInitializer(NodeBuilder.newMethodInvocation(ast,
 				typeName, NodeBuilder.newSimpleName(ast, "getInstance"))); //$NON-NLS-1$
 

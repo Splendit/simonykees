@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
-@SuppressWarnings("nls")
 public class EscapeUserInputsInSQLQueriesASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach

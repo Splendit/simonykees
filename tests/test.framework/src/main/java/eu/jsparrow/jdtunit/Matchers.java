@@ -1,5 +1,6 @@
 package eu.jsparrow.jdtunit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -45,6 +46,7 @@ public final class Matchers {
 	public static void assertMatch(TypeDeclaration expected, ASTNode actual) {
 		ASTMatcher astMatcher = new ASTMatcher();
 		if (!astMatcher.match(expected, actual)) {
+			assertEquals(expected.toString(), actual.toString());
 			fail("ASTNodes do not match. expected:\n" + expected.toString() + "\n, actual:\n" + actual.toString());
 		}
 	}

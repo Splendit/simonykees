@@ -25,7 +25,6 @@ import eu.jsparrow.rules.java10.LocalVariableTypeInferenceRule;
  * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Ardit Ymeri
  * @since 0.9
  */
-@SuppressWarnings("nls")
 public class AllRulesTest extends AbstractRulesTest {
 
 	public static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.allRules";
