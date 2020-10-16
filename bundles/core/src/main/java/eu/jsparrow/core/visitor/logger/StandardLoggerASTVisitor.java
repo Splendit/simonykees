@@ -230,9 +230,9 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		 * SIM-1337
 		 */
 
-		AbstractTypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(methodDeclaration,
+		AbstractTypeDeclaration declaration = ASTNodeUtil.getSpecificAncestor(methodDeclaration,
 				AbstractTypeDeclaration.class);
-		Optional<VariableDeclarationFragment> fragment = findDeclaredLogger(typeDeclaration);
+		Optional<VariableDeclarationFragment> fragment = findDeclaredLogger(declaration);
 		if (!fragment.isPresent()) {
 			return true;
 		}
@@ -503,7 +503,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				stringValueOf.setName(ast.newSimpleName(VALUE_OF));
 				stringValueOf.setExpression(ast.newSimpleName(String.class.getSimpleName()));
 				ListRewrite argRewrite = astRewrite.getListRewrite(stringValueOf, MethodInvocation.ARGUMENTS_PROPERTY);
-				argRewrite.insertFirst((Expression) astRewrite.createCopyTarget(firstArgument), null);
+				argRewrite.insertFirst(astRewrite.createCopyTarget(firstArgument), null);
 				logArguments.add(stringValueOf);
 			}
 

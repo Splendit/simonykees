@@ -99,7 +99,7 @@ public class CollapseIfStatementsASTVisitor extends AbstractASTRewriteASTVisitor
 			astRewrite.replace(ifStatement.getExpression(), conditionConjunction, null);
 		}
 
-		astRewrite.replace(ifStatement.getThenStatement(), (Statement) astRewrite.createCopyTarget(newBodyStatement),
+		astRewrite.replace(ifStatement.getThenStatement(), astRewrite.createCopyTarget(newBodyStatement),
 				null);
 		saveComments(ifStatement, innerifStatementStatements, newBodyStatement);
 		onRewrite();

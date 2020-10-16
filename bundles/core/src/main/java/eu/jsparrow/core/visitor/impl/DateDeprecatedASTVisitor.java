@@ -171,7 +171,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		 */
 		Block body = ast.newBlock();
 		@SuppressWarnings("unchecked")
-		List<Statement> bodyStatements = (List<Statement>) body.statements();
+		List<Statement> bodyStatements = body.statements();
 		List<Statement> calendarStatemetns = generateCalendar(calendarName, expressionList, node);
 		bodyStatements.addAll(calendarStatemetns);
 
@@ -239,7 +239,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		} else {
 			Block injectionBlock = ast.newBlock();
 			@SuppressWarnings("unchecked")
-			List<Statement> blockStatements = (List<Statement>) injectionBlock.statements();
+			List<Statement> blockStatements = injectionBlock.statements();
 			blockStatements.addAll(generateCalendar(calendarName, arguments, node));
 			blockStatements.add((Statement) astRewrite.createMoveTarget(ancestorStatment));
 			astRewrite.replace(ancestorStatment, injectionBlock, null);

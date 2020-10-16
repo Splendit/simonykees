@@ -359,10 +359,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 				VariableDeclarationStatement.MODIFIERS2_PROPERTY);
 		List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(oldDeclaration.modifiers(), Modifier.class);
 		modifiers
-			.forEach(modifier -> modifiersRewriter.insertLast((Modifier) astRewrite.createCopyTarget(modifier), null));
+			.forEach(modifier -> modifiersRewriter.insertLast(astRewrite.createCopyTarget(modifier), null));
 		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(oldDeclaration.modifiers(), Annotation.class);
 		annotations.forEach(
-				annotation -> modifiersRewriter.insertLast((Annotation) astRewrite.createCopyTarget(annotation), null));
+				annotation -> modifiersRewriter.insertLast(astRewrite.createCopyTarget(annotation), null));
 	}
 
 	/**
@@ -594,7 +594,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		append.setExpression(ast.newSimpleName(sbName));
 
 		ListRewrite argRewriter = astRewrite.getListRewrite(append, MethodInvocation.ARGUMENTS_PROPERTY);
-		argRewriter.insertFirst((SimpleName) astRewrite.createCopyTarget(loopParameter), null);
+		argRewriter.insertFirst(astRewrite.createCopyTarget(loopParameter), null);
 
 		ExpressionStatement expressionStatement = ast.newExpressionStatement(append);
 		astRewrite.replace(singleBodyStatement, expressionStatement, null);
