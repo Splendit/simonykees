@@ -65,8 +65,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	private static final String VAR_NAME_ORACLE_CODEC = "oracleCodec"; //$NON-NLS-1$
 
 	private final Map<Block, String> mapBlockToOracleCodecVariable = new HashMap<>();
-	
-	private LiveVariableScope liveVariableScope = new LiveVariableScope();
+	private final LiveVariableScope liveVariableScope = new LiveVariableScope();
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {

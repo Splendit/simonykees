@@ -205,7 +205,6 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
-		super.visit(methodDeclaration);
 
 		if (!checkLoggerValidityForMethod(methodDeclaration)) {
 			return false;
