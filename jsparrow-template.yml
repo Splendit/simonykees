@@ -218,6 +218,7 @@ rules:
   - UseFilesBufferedReader
   - UsePredefinedStandardCharset
   - UseOffsetBasedStringMethods
+  - UseFilesBufferedWriter
 
 excludes:
   excludeClasses: []
