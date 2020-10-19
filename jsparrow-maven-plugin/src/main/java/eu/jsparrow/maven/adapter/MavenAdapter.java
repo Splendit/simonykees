@@ -14,13 +14,12 @@ import static eu.jsparrow.maven.adapter.ConfigurationKeys.ROOT_CONFIG_PATH;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.ROOT_PROJECT_BASE_PATH;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.SELECTED_PROFILE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.STANDALONE_MODE_KEY;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.USER_DIR;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.USE_DEFAULT_CONFIGURATION;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_SEND;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_START_TIME;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_REPO_NAME;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_REPO_OWNER;
-
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_SEND;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_START_TIME;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.USER_DIR;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.USE_DEFAULT_CONFIGURATION;
 
 import java.io.File;
 import java.util.HashMap;
@@ -53,7 +52,7 @@ import eu.jsparrow.maven.util.ProxyUtil;
 public class MavenAdapter {
 
 	public static final String DOT = "."; //$NON-NLS-1$
-	
+
 	private Log log;
 	private Map<String, String> configuration = new HashMap<>();
 	private MavenProject rootProject;
@@ -97,7 +96,7 @@ public class MavenAdapter {
 
 		setProjectIds(projects);
 		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
-		
+
 		WorkingDirectory workingDirectory = setUpConfiguration(parameters);
 		String rootProjectIdentifier = MavenProjectUtil.findProjectIdentifier(rootProject);
 
@@ -136,13 +135,12 @@ public class MavenAdapter {
 		addInitialConfiguration(parameters);
 		return prepareWorkingDirectory();
 	}
-	
-	
-	public WorkingDirectory setUpConfiguration(MavenParameters parameters, Stream<Proxy> proxies) throws InterruptedException {
+
+	public WorkingDirectory setUpConfiguration(MavenParameters parameters, Stream<Proxy> proxies)
+			throws InterruptedException {
 		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
 		return setUpConfiguration(parameters);
 	}
-	
 
 	void addInitialConfiguration(MavenParameters config) {
 		boolean useDefaultConfig = config.getUseDefaultConfig();
@@ -165,7 +163,8 @@ public class MavenAdapter {
 
 		StatisticsMetadata statisticsMetadata = config.getStatisticsMetadata();
 		if (statisticsMetadata != null && statisticsMetadata.isValid()) {
-			configuration.put(STATISTICS_START_TIME, statisticsMetadata.getStartTime().toString());
+			configuration.put(STATISTICS_START_TIME, statisticsMetadata.getStartTime()
+				.toString());
 			configuration.put(STATISTICS_REPO_OWNER, statisticsMetadata.getRepoOwner());
 			configuration.put(STATISTICS_REPO_NAME, statisticsMetadata.getRepoName());
 		}
