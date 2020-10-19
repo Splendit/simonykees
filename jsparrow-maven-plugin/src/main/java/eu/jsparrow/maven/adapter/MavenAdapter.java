@@ -3,6 +3,7 @@ package eu.jsparrow.maven.adapter;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.AGENT_URL;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.CONFIG_FILE_OVERRIDE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.DEBUG_ENABLED;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.DEMO_MODE_KEY;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.FRAMEWORK_STORAGE_VALUE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.LICENSE_KEY;
@@ -13,13 +14,12 @@ import static eu.jsparrow.maven.adapter.ConfigurationKeys.ROOT_CONFIG_PATH;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.ROOT_PROJECT_BASE_PATH;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.SELECTED_PROFILE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.STANDALONE_MODE_KEY;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.USER_DIR;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.USE_DEFAULT_CONFIGURATION;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_SEND;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_START_TIME;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_REPO_NAME;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_REPO_OWNER;
-
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_SEND;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_START_TIME;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.USER_DIR;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.USE_DEFAULT_CONFIGURATION;
 
 import java.io.File;
 import java.util.HashMap;
@@ -159,6 +159,7 @@ public class MavenAdapter {
 		configuration.put(SELECTED_PROFILE, config.getProfile());
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 		configuration.put(LICENSE_KEY, config.getLicense());
+		configuration.put(DEMO_MODE_KEY, Boolean.toString(config.isDemoMode()));
 		configuration.put(AGENT_URL, config.getUrl());
 
 		StatisticsMetadata statisticsMetadata = config.getStatisticsMetadata();

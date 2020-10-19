@@ -77,6 +77,7 @@ public class MavenAdapterTest {
 		when(config.getUseDefaultConfig()).thenReturn(false);
 		when(config.getMode()).thenReturn(""); //$NON-NLS-1$
 		when(config.getLicense()).thenReturn(""); //$NON-NLS-1$
+		when(config.isDemoMode()).thenReturn(false); // $NON-NLS-1$
 		when(config.getUrl()).thenReturn(""); //$NON-NLS-1$
 		when(config.getProfile()).thenReturn(""); //$NON-NLS-1$
 		when(config.getRuleId()).thenReturn(Optional.empty());
@@ -87,6 +88,7 @@ public class MavenAdapterTest {
 		verify(config).getUseDefaultConfig();
 		verify(config).getMode();
 		verify(config).getLicense();
+		verify(config).isDemoMode();
 		verify(config).getUrl();
 		verify(config).getProfile();
 	}

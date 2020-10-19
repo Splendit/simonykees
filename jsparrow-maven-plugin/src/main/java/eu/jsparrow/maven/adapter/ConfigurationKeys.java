@@ -19,6 +19,7 @@ public class ConfigurationKeys {
 	public static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
 	public static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	public static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
+	public static final String DEMO_MODE_KEY = "DEMO.MODE"; //$NON-NLS-1$
 	public static final String AGENT_URL = "URL"; //$NON-NLS-1$
 	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	public static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$

@@ -76,6 +76,14 @@ public class RefactorMojo extends AbstractMojo {
 	private String license;
 
 	/**
+	 * Use this parameter to run in demo mode, which means, analyze the project
+	 * with jSparrow and print the results. No refactoring is committed in this
+	 * mode.
+	 */
+	@Parameter(property = "demoMode")
+	private boolean demoMode;
+
+	/**
 	 * Specify the license server to use.
 	 */
 	@Parameter(property = "url")
@@ -103,8 +111,8 @@ public class RefactorMojo extends AbstractMojo {
 
 		String mode = StandaloneMode.REFACTOR.name();
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
-		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration,
-				statisticsMetadata, sendStatistics);
+		MavenParameters parameters = new MavenParameters(mode, license, demoMode, url, profile,
+				defaultConfiguration, statisticsMetadata, sendStatistics);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);
