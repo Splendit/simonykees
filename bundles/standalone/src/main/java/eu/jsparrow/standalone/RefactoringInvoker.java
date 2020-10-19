@@ -96,6 +96,13 @@ public class RefactoringInvoker {
 		collectAndSendStatisticData(context);
 	}
 
+	public void runInDemoMode(BundleContext context) throws StandaloneException {
+		List<IJavaProject> importedProjects = importAllProjects(context);
+		loadStandaloneConfig(importedProjects, context);
+		prepareRefactoring();
+		computeRefactoring();
+	}
+
 	/**
 	 * Prepares the refactoring states for each {@link StandaloneConfig} on the
 	 * {@link #standaloneConfigs}.
@@ -158,10 +165,10 @@ public class RefactoringInvoker {
 
 	private void collectAndSendStatisticData(BundleContext context) {
 		boolean sendStatistics = Boolean.parseBoolean(context.getProperty(STATISTICS_SEND));
-		if(!sendStatistics) {
+		if (!sendStatistics) {
 			return;
 		}
-		
+
 		boolean computedStatistics = standaloneConfigs.stream()
 			.map(StandaloneConfig::getStatisticsData)
 			.filter(Objects::nonNull)

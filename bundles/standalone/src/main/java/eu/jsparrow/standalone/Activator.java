@@ -37,6 +37,7 @@ public class Activator implements BundleActivator {
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
+	private static final String DEMO_MODE = "DEMO.MODE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
 	// SIM-1406 org.eclipse.equinox.ds has been replaced with
@@ -93,8 +94,6 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	
-
 	@Override
 	public void stop(BundleContext context) {
 		try {
@@ -141,9 +140,14 @@ public class Activator implements BundleActivator {
 
 			String key = getLicenseKey(context);
 			String agentUrl = getAgentUrl(context);
+			boolean demoMode = isRunningInDemoMode(context);
 
 			licenseService = getStandaloneLicenseUtilService();
-			if (licenseService.validate(key, agentUrl)) {
+			boolean validLicense = licenseService.validate(key, agentUrl);
+
+			if (demoMode) {
+				refactoringInvoker.runInDemoMode(context);
+			} else if (validLicense) {
 				refactoringInvoker.startRefactoring(context);
 			} else {
 				String message = Messages.StandaloneActivator_noValidLicenseFound;
@@ -232,6 +236,12 @@ public class Activator implements BundleActivator {
 			licenseKey = cmdlineLicenseKey;
 		}
 		return licenseKey;
+	}
+
+	private Boolean isRunningInDemoMode(BundleContext context) {
+		return Optional.ofNullable(context.getProperty(DEMO_MODE))
+			.map(Boolean::valueOf)
+			.orElse(false);
 	}
 
 	private String getAgentUrl(BundleContext context) {
