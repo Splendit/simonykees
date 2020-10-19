@@ -230,7 +230,7 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_Comparator4LocalClassWithoutCompareTo_shouldNotTransform() throws Exception {
+	public void visit_ComparatorNotUsingCompareToMethod_shouldNotTransform() throws Exception {
 		String original = "" +
 				"void test() {\n" +
 				"	class LocalClass {\n" +
@@ -244,18 +244,16 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_Comparator4LocalClassUsingCompareTo_shouldNotTransform() throws Exception {
+	public void visit_CompareToNotMethodOfComparable_shouldNotTransform() throws Exception {
 		String original = "" +
-				"	class Comparator4LocalClassUsingCompareTo {\n" +
-				"		void test() {\n" +
-				"			class LocalClass {\n" +
-				"				int compareTo(LocalClass other) {\n" +
-				"					return 0;\n" +
-				"				}\n" +
-				"			}\n" +
-				"			Comparator<LocalClass> comparator = (lhs, rhs) -> lhs.compareTo(rhs);\n" +
+				"void test() {\n" +
+				"	class LocalClass {\n" +
+				"		int compareTo(LocalClass other) {\n" +
+				"			return 0;\n" +
 				"		}\n" +
-				"	}";
+				"	}\n" +
+				"	Comparator<LocalClass> comparator = (lhs, rhs) -> lhs.compareTo(rhs);\n" +
+				"}";
 		assertNoChange(original);
 	}
 
@@ -323,6 +321,120 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 				"void testComparatorOfJokerWithDequeOfInteger() {\n" +
 				"	Comparator<?> comparator = (ArrayDeque<Integer> x1, ArrayDeque<Integer> x2) -> x1.getFirst().compareTo(x2.getFirst());\n"
 				+
+				"}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_SimpleNameCompareToMethodInvocation_shouldNotTransform() throws Exception {
+		String original = "" +
+				"Integer useInteger(Integer integer) {\n" +
+				"	return integer;\n" +
+				"}\n" +
+				"void test() {\n" +
+				"	Comparator<Integer> comparator = (lhs, rhs) -> lhs.compareTo(useInteger(rhs));\n" +
+				"}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_MethodInvocationCompareToVariable_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
+		String original = "" +
+				"void test() {\n" +
+				"	Integer integerVariable = 1;\n" +
+				"	Comparator<ArrayDeque<Integer>> comparator = (lhs, rhs) -> lhs.getFirst().compareTo(integerVariable);\n"
+				+
+				"}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_LHSMethodInvocationOnMethodInvocation_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
+		String original = "" +
+				"<T> T useObject(T object) {\n" +
+				"	return object;\n" +
+				"}\n" +
+				"void test() {\n" +
+				"	Comparator<ArrayDeque<Integer>> comparator = (lhs, rhs) -> useObject(lhs).getFirst().compareTo(rhs.getFirst());\n"
+				+
+				"}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_RHSMethodInvocationOnMethodInvocation_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
+		String original = "" +
+				"<T> T useObject(T object) {\n" +
+				"	return object;\n" +
+				"}\n" +
+				"void test() {\n" +
+				"	Comparator<ArrayDeque<Integer>> comparator = (lhs, rhs) -> lhs.getFirst().compareTo(useObject(rhs).getFirst());\n"
+				+
+				"}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_LHSMethodInvocationWithoutExpression_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
+		String original = "" +
+				"Integer getFirst(ArrayDeque<Integer> deque) {\n" +
+				"	return deque.getFirst();\n" +
+				"}\n" +
+				"void test() {\n" +
+				"	Comparator<ArrayDeque<Integer>> comparator = (lhs, rhs) -> getFirst(lhs).compareTo(rhs.getFirst());\n"
+				+
+				"}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_RHSMethodInvocationWithoutExpression_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
+		String original = "" +
+				"Integer getFirst(ArrayDeque<Integer> deque) {\n" +
+				"	return deque.getFirst();\n" +
+				"}\n" +
+				"void test() {\n" +
+				"	Comparator<ArrayDeque<Integer>> comparator = (lhs, rhs) -> lhs.getFirst().compareTo(getFirst(rhs));\n"
+				+
+				"}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_LambdaBodyNotMethodInvocation_shouldNotTransform() throws Exception {
+		String original = "" +
+				"void test() {\n" +
+				"	Comparator<Integer> comparator = (lhs, rhs) -> {\n" +
+				"		return lhs.compareTo(rhs);\n" +
+				"	};\n" +
+				"}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_CompareToMethodWithoutExpression_shouldNotTransform() throws Exception {
+		String original = "" +
+				"void test() {\n" +
+				"	class LocalComparable implements Comparable<LocalComparable> {\n" +
+				"		Comparator<LocalComparable> comparator = (lhs, rhs) -> compareTo(rhs);\n" +
+				"		@Override\n" +
+				"		public int compareTo(LocalComparable o) {\n" +
+				"			return 0;\n" +
+				"		}\n" +
+				"	}\n" +
 				"}";
 
 		assertNoChange(original);
