@@ -3,6 +3,7 @@ package eu.jsparrow.maven.adapter;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.AGENT_URL;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.CONFIG_FILE_OVERRIDE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.DEBUG_ENABLED;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.FORMATTING_FILE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.FRAMEWORK_STORAGE_VALUE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.LICENSE_KEY;
@@ -89,7 +90,7 @@ public class MavenAdapter {
 	 *             current session.
 	 */
 	public WorkingDirectory setUpConfiguration(MavenParameters parameters, List<MavenProject> projects,
-			File configFileOverride, File fallbackConfigFile, Stream<Proxy> proxies)
+			File configFileOverride, File fallbackConfigFile, File formatterFile, Stream<Proxy> proxies)
 			throws InterruptedException, MojoExecutionException {
 
 		log.info(Messages.MavenAdapter_setUpConfiguration);
@@ -109,6 +110,7 @@ public class MavenAdapter {
 		configuration.put(ROOT_CONFIG_PATH, fallbackConfigFile.getAbsolutePath());
 		configuration.put(CONFIG_FILE_OVERRIDE,
 				(configFileOverride == null) ? null : configFileOverride.getAbsolutePath());
+		configuration.put(FORMATTING_FILE, formatterFile == null ? null : formatterFile.getAbsolutePath());
 		configuration.put(ROOT_PROJECT_BASE_PATH, rootProject.getBasedir()
 			.getAbsolutePath());
 		configuration.put(STATISTICS_SEND, Boolean.toString(parameters.isSendStatistics()));
