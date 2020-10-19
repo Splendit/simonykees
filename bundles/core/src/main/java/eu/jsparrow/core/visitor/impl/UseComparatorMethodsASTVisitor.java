@@ -258,11 +258,21 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			return null;
 		}
 
-		if (!isComparable(parameterTypes[0])) {
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		if (!isComparable(declaringClass)) {
 			return null;
 		}
 
-		if (!isComparable(methodBinding.getDeclaringClass())) {
+		ITypeBinding parameterType = parameterTypes[0];
+		if (parameterType.isCapture()) {
+			ITypeBinding wildcard = parameterType.getWildcard();
+			ITypeBinding bound = wildcard.getBound();
+			if (isComparable(bound)) {
+				return methodInvocation;
+			}
+		}
+
+		if (!isComparable(parameterType)) {
 			return null;
 		}
 

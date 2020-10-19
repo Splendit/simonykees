@@ -186,6 +186,23 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_ComparatorForComparableOfJoker_shouldTransform() throws Exception {
+		String original = "" +
+				"void test() {\n" +
+				"	Comparator<Comparable<? super Comparable<?>>> comparable = (u1, u2) -> u1.compareTo(u2);\n"
+				+
+				"}";
+
+		String expected = "" +
+				"void test() {\n" +
+				"	Comparator<Comparable<? super Comparable<?>>> comparable=Comparator.naturalOrder();\n"
+				+
+				"}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_Comparator4IntegerUsingOnlyLHSLambdaParameter_shouldNotTransform() throws Exception {
 		String original = "" +
 				"void test() {\n" +
@@ -298,25 +315,4 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
-
-	/**
-	 * This test will fail as soon as the transformation with jokers is
-	 * supported. TODO for Implementation of isComparable: find out whether
-	 * typeBinding.isCapture() is true, and if this is the case, then get the
-	 * bounds and determine whether comparable is within the bounds.
-	 * 
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public void visit_ComparatorForComparableOfJoker_shouldButDoesNotTransform() throws Exception {
-		String original = "" +
-				"void test() {\n" +
-				"	Comparator<Comparable<? super Comparable<?>>> comparableComparatorReversed = (u1, u2) -> u2.compareTo(u1);\n"
-				+
-				"}";
-
-		assertNoChange(original);
-	}
-
 }
