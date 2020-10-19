@@ -315,4 +315,16 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_LambdaParameterExpilcitDequeOfInteger_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
+		String original = "" +
+				"void testComparatorOfJokerWithDequeOfInteger() {\n" +
+				"	Comparator<?> comparator = (ArrayDeque<Integer> x1, ArrayDeque<Integer> x2) -> x1.getFirst().compareTo(x2.getFirst());\n"
+				+
+				"}";
+
+		assertNoChange(original);
+	}
 }
