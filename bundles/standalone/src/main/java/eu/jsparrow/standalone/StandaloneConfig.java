@@ -256,6 +256,8 @@ public class StandaloneConfig {
 				loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, projectName,
 						refactoringPipeline.getRulesWithChangesAsString());
 				logger.info(loggerInfo);
+				Instant now = Instant.now();
+				statisticsData.setEndTime(now.getEpochSecond());
 			} catch (RuleException e) {
 				logger.debug(e.getMessage(), e);
 				logger.error(e.getMessage());

@@ -11,7 +11,6 @@ import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -29,15 +28,8 @@ import eu.jsparrow.maven.i18n.Messages;
 import eu.jsparrow.maven.util.JavaVersion;
 import eu.jsparrow.maven.util.ProxyUtil;
 
-/**
- * Runs jSparrow on the Maven project.
- * 
- * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
- * @since 2.2.1
- *
- */
-@Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
-public class RefactorMojo extends AbstractMojo {
+@Mojo(name = "demo", requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
+public class DemoMojo  extends AbstractMojo  {
 
 	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession mavenSession;
@@ -101,7 +93,7 @@ public class RefactorMojo extends AbstractMojo {
 			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8and11);
 		}
 
-		String mode = StandaloneMode.REFACTOR.name();
+		String mode = StandaloneMode.DEMO.name();
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
 				defaultConfiguration, statisticsMetadata, sendStatistics);
@@ -153,5 +145,4 @@ public class RefactorMojo extends AbstractMojo {
 				}
 			}));
 	}
-
 }

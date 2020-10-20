@@ -37,7 +37,6 @@ public class Activator implements BundleActivator {
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
-	private static final String DEMO_MODE = "DEMO.MODE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
 	// SIM-1406 org.eclipse.equinox.ds has been replaced with
@@ -75,6 +74,9 @@ public class Activator implements BundleActivator {
 		switch (mode) {
 		case REFACTOR:
 			refactor(context);
+			break;
+		case DEMO:
+			runInDemoMode(context);
 			break;
 		case LIST_RULES:
 			listRules(listRulesId);
@@ -136,24 +138,42 @@ public class Activator implements BundleActivator {
 	}
 
 	private void refactor(BundleContext context) {
+		String key = getLicenseKey(context);
+		String agentUrl = getAgentUrl(context);
+		licenseService = getStandaloneLicenseUtilService();
+
 		try {
-
-			String key = getLicenseKey(context);
-			String agentUrl = getAgentUrl(context);
-			boolean demoMode = isRunningInDemoMode(context);
-
-			licenseService = getStandaloneLicenseUtilService();
 			boolean validLicense = licenseService.validate(key, agentUrl);
-
-			if (demoMode) {
-				refactoringInvoker.runInDemoMode(context);
-			} else if (validLicense) {
+			if (validLicense) {
 				refactoringInvoker.startRefactoring(context);
 			} else {
 				String message = Messages.StandaloneActivator_noValidLicenseFound;
 				logger.error(message);
 				setExitErrorMessageAndCleanUp(context, message);
 			}
+		} catch (StandaloneException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+			setExitErrorMessageAndCleanUp(context, e.getMessage());
+		}
+	}
+
+	private void runInDemoMode(BundleContext context) {
+		String key = getLicenseKey(context);
+		String agentUrl = getAgentUrl(context);
+		licenseService = getStandaloneLicenseUtilService();
+		try {
+			boolean validLicense = licenseService.validate(key, agentUrl);
+			if (!validLicense) {
+				String message = Messages.StandaloneActivator_noValidLicenseFound;
+				logger.error(message);
+			}
+		} catch (StandaloneException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+		}
+		try {
+			refactoringInvoker.runInDemoMode(context);
 		} catch (StandaloneException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
@@ -236,12 +256,6 @@ public class Activator implements BundleActivator {
 			licenseKey = cmdlineLicenseKey;
 		}
 		return licenseKey;
-	}
-
-	private Boolean isRunningInDemoMode(BundleContext context) {
-		return Optional.ofNullable(context.getProperty(DEMO_MODE))
-			.map(Boolean::valueOf)
-			.orElse(false);
 	}
 
 	private String getAgentUrl(BundleContext context) {

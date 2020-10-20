@@ -3,7 +3,6 @@ package eu.jsparrow.maven.adapter;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.AGENT_URL;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.CONFIG_FILE_OVERRIDE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.DEBUG_ENABLED;
-import static eu.jsparrow.maven.adapter.ConfigurationKeys.DEMO_MODE_KEY;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.FRAMEWORK_STORAGE_VALUE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.LICENSE_KEY;
@@ -159,7 +158,6 @@ public class MavenAdapter {
 		configuration.put(SELECTED_PROFILE, config.getProfile());
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 		configuration.put(LICENSE_KEY, config.getLicense());
-		configuration.put(DEMO_MODE_KEY, Boolean.toString(config.isDemoMode()));
 		configuration.put(AGENT_URL, config.getUrl());
 
 		StatisticsMetadata statisticsMetadata = config.getStatisticsMetadata();

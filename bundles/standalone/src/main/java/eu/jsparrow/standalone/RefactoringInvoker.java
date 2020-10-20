@@ -101,6 +101,7 @@ public class RefactoringInvoker {
 		loadStandaloneConfig(importedProjects, context);
 		prepareRefactoring();
 		computeRefactoring();
+		collectAndSendStatisticData(context);
 	}
 
 	/**
