@@ -61,10 +61,6 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		List<VariableDeclaration> lambdaParameters = ASTNodeUtil.convertToTypedList(lambda.parameters(),
 				VariableDeclaration.class);
 
-		if (!checkLambdaParameterList(lambdaParameters)) {
-			return null;
-		}
-
 		MethodInvocation compareToMethodInvocation = extractCompareToInvocation(lambda);
 		if (compareToMethodInvocation == null) {
 			return null;
@@ -106,7 +102,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 				.getNodeType() != ASTNode.SIMPLE_NAME) {
 				return null;
 			}
-			if (!isEqivalentComparisonKeyMethod(invocationLeftHS, invocationRightHS)) {
+			if (!isEquivalentComparisonKeyMethod(invocationLeftHS, invocationRightHS)) {
 				return null;
 			}
 			IMethodBinding comparisonKeyMethod = invocationLeftHS
@@ -204,7 +200,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		return -1;
 	}
 
-	private boolean isEqivalentComparisonKeyMethod(MethodInvocation lhs, MethodInvocation rhs) {
+	private boolean isEquivalentComparisonKeyMethod(MethodInvocation lhs, MethodInvocation rhs) {
 		IMethodBinding lhsMethodBinding = lhs.resolveMethodBinding();
 		IMethodBinding rhsMethodBinding = rhs.resolveMethodBinding();
 
@@ -212,25 +208,6 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			.equals(rhsMethodBinding.getName())
 				&& ClassRelationUtil.compareITypeBinding(lhsMethodBinding.getDeclaringClass(),
 						rhsMethodBinding.getDeclaringClass());
-	}
-
-	private boolean checkLambdaParameterList(List<VariableDeclaration> lambdaParameters) {
-		if (lambdaParameters.size() != 2) {
-			return false;
-		}
-
-		VariableDeclaration lambdaParameterLHS = lambdaParameters.get(0);
-		VariableDeclaration lambdaParameterRHS = lambdaParameters.get(1);
-
-		ITypeBinding lhsType = lambdaParameterLHS
-			.resolveBinding()
-			.getType();
-
-		ITypeBinding rhsType = lambdaParameterRHS
-			.resolveBinding()
-			.getType();
-
-		return ClassRelationUtil.compareITypeBinding(lhsType, rhsType);
 	}
 
 	private boolean isComparable(ITypeBinding typeBinding) {
@@ -258,11 +235,14 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			return null;
 		}
 
+		// This is obsolete because it is enough to make sure that
+		// declaringClass is isComparable
 		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
 		if (parameterTypes.length != 1) {
 			return null;
 		}
 
+		// This is needed
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		if (!isComparable(declaringClass)) {
 			return null;
