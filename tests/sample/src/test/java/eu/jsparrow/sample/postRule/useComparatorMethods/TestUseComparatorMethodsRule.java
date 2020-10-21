@@ -1,10 +1,15 @@
 package eu.jsparrow.sample.postRule.useComparatorMethods;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Comparator;
 
 @SuppressWarnings({ "unused" })
 public class TestUseComparatorMethodsRule {
+
+	<T> ArrayList<T> getCollectionForComparator(Comparator<T> comparator) {
+		return new ArrayList<>();
+	}
 
 	void testComparatorsForInteger() {
 		Comparator<Integer> comparator = Comparator.naturalOrder();
@@ -53,5 +58,12 @@ public class TestUseComparatorMethodsRule {
 	void testWithLossOfInformationAfterTransformation() {
 		Comparator<?> comparator1 = Comparator.naturalOrder();
 		Comparator<? extends Comparable<?>> comparator2 = Comparator.naturalOrder();
+	}
+
+	class TransformationCausingCompilationError {
+		void testGetCollectionForIntegerComparator() {
+			ArrayList<?> arrayList = getCollectionForComparator(Comparator.naturalOrder());
+			ArrayList<? extends Comparable<?>> arrayList5 = getCollectionForComparator(Comparator.naturalOrder());
+		}
 	}
 }

@@ -1,10 +1,15 @@
 package eu.jsparrow.sample.preRule;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Comparator;
 
 @SuppressWarnings({ "unused" })
 public class TestUseComparatorMethodsRule {
+
+	<T> ArrayList<T> getCollectionForComparator(Comparator<T> comparator) {
+		return new ArrayList<>();
+	}
 
 	void testComparatorsForInteger() {
 		Comparator<Integer> comparator = (lhs, rhs) -> lhs.compareTo(rhs);
@@ -54,5 +59,12 @@ public class TestUseComparatorMethodsRule {
 	void testWithLossOfInformationAfterTransformation() {
 		Comparator<?> comparator1 = (Integer u1, Integer u2) -> u1.compareTo(u2);
 		Comparator<? extends Comparable<?>> comparator2 = (Integer u1, Integer u2) -> u1.compareTo(u2);
+	}
+
+	class TransformationCausingCompilationError {
+		void testGetCollectionForIntegerComparator() {
+			ArrayList<?> arrayList = getCollectionForComparator((Integer u1, Integer u2) -> u1.compareTo(u2));
+			ArrayList<? extends Comparable<?>> arrayList5 = getCollectionForComparator((Integer u1, Integer u2) -> u1.compareTo(u2));
+		}
 	}
 }
