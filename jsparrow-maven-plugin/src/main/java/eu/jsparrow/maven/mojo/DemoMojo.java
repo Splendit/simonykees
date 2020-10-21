@@ -2,6 +2,7 @@ package eu.jsparrow.maven.mojo;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -11,6 +12,7 @@ import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -28,7 +30,7 @@ import eu.jsparrow.maven.i18n.Messages;
 import eu.jsparrow.maven.util.JavaVersion;
 import eu.jsparrow.maven.util.ProxyUtil;
 
-@Mojo(name = "demo", requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
+@Mojo(name = "demo", requiresDependencyResolution = ResolutionScope.COMPILE, defaultPhase = LifecyclePhase.INITIALIZE, aggregator = true)
 public class DemoMojo  extends AbstractMojo  {
 
 	@Parameter(defaultValue = "${session}", readonly = true)
@@ -73,13 +75,13 @@ public class DemoMojo  extends AbstractMojo  {
 	@Parameter(property = "url")
 	private String url;
 
-	@Parameter(property = "startTime")
+	@Parameter(defaultValue = "0", property = "startTime")
 	private String startTime;
 
-	@Parameter(property = "repoOwner")
+	@Parameter(defaultValue = "default", property = "repoOwner")
 	private String repoOwner;
 
-	@Parameter(property = "repoName")
+	@Parameter(defaultValue = "default", property = "repoName")
 	private String repoName;
 
 	@Parameter(property = "sendStatistics")
@@ -94,7 +96,8 @@ public class DemoMojo  extends AbstractMojo  {
 		}
 
 		String mode = StandaloneMode.DEMO.name();
-		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
+		String start = "0".equals(startTime) ? Instant.now().toString() : startTime;
+		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
 				defaultConfiguration, statisticsMetadata, sendStatistics);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);

@@ -101,7 +101,7 @@ public class RefactoringInvoker {
 		loadStandaloneConfig(importedProjects, context);
 		prepareRefactoring();
 		computeRefactoring();
-		collectAndSendStatisticData(context);
+		collectAndPrintStatistics(context);
 	}
 
 	/**
@@ -180,6 +180,29 @@ public class RefactoringInvoker {
 			return;
 		}
 
+		JsparrowMetric metricData = collectStatistics();
+
+		String json = JsonUtil.generateJSON(metricData);
+		JsonUtil.sendJsonToAwsStatisticsService(json);
+	}
+	
+	private void collectAndPrintStatistics(BundleContext context) {
+		boolean computedStatistics = standaloneConfigs.stream()
+			.map(StandaloneConfig::getStatisticsData)
+			.filter(Objects::nonNull)
+			.map(StandaloneStatisticsData::getMetricData)
+			.anyMatch(Optional::isPresent);
+
+		if (!computedStatistics) {
+			return;
+		}
+
+		JsparrowMetric metricData = collectStatistics();
+		String path = context.getProperty(ROOT_PROJECT_BASE_PATH) + File.separator + "results.json"; //$NON-NLS-1$
+		JsonUtil.writeJSON(metricData, path);
+	}
+
+	private JsparrowMetric collectStatistics() {
 		JsparrowMetric metricData = new JsparrowMetric();
 		JsparrowData projectData = new JsparrowData();
 		Map<String, JsparrowRuleData> rulesData = new HashMap<>();
@@ -231,9 +254,7 @@ public class RefactoringInvoker {
 				projectData.getProjectName(), projectData.getTotalIssuesFixed(), projectData.getTotalTimeSaved(),
 				projectData.getTotalFilesChanged());
 		logger.debug(logInfo);
-
-		String json = JsonUtil.generateJSON(metricData);
-		JsonUtil.sendJsonToAwsStatisticsService(json);
+		return metricData;
 	}
 
 	/**
