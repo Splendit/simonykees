@@ -203,6 +203,24 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_LambdaParameterExpilcitDequeOfInteger_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
+		String original = "" +
+				"void test() {\n" +
+				"	Comparator<ArrayDeque<Integer>> comparator = (ArrayDeque<Integer> x1, ArrayDeque<Integer> x2) -> x1\n"
+				+
+				"			.getFirst().compareTo(x2.getFirst());\n" +
+				"}";
+
+		String expected = "" +
+				"void test() {\n" +
+				"	Comparator<ArrayDeque<Integer>> comparator = Comparator.comparingInt(ArrayDeque::getFirst);\n" +
+				"}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_Comparator4IntegerUsingOnlyLHSLambdaParameter_shouldNotTransform() throws Exception {
 		String original = "" +
 				"void test() {\n" +
@@ -308,18 +326,6 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 		String original = "" +
 				"void test() {\n" +
 				"	BiFunction<Integer, Integer, Integer> bifunction = (lhs, rhs) -> lhs.compareTo(rhs);\n"
-				+
-				"}";
-
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_LambdaParameterExpilcitDequeOfInteger_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
-		String original = "" +
-				"void testComparatorOfJokerWithDequeOfInteger() {\n" +
-				"	Comparator<?> comparator = (ArrayDeque<Integer> x1, ArrayDeque<Integer> x2) -> x1.getFirst().compareTo(x2.getFirst());\n"
 				+
 				"}";
 

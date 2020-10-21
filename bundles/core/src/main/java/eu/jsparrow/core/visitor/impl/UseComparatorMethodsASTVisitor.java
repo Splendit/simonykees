@@ -218,15 +218,9 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		if (lambdaParameters.size() != 2) {
 			return false;
 		}
-		VariableDeclaration lambdaParameterLHS = lambdaParameters.get(0);
-		if (lambdaParameterLHS.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return false;
-		}
 
+		VariableDeclaration lambdaParameterLHS = lambdaParameters.get(0);
 		VariableDeclaration lambdaParameterRHS = lambdaParameters.get(1);
-		if (lambdaParameterRHS.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return false;
-		}
 
 		ITypeBinding lhsType = lambdaParameterLHS
 			.resolveBinding()
