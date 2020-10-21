@@ -23,4 +23,9 @@ public class TestUseComparatorMethodsRule {
 		comparator = Comparator.comparingInt(ArrayDeque::getFirst);
 		comparator = Comparator.comparingInt(ArrayDeque::getFirst);
 	}
+
+	void testWithLossOfInformationAfterTransformation() {
+		final Comparator<?> comparator1 = Comparator.naturalOrder();
+		final Comparator<? extends Comparable<?>> comparator2 = Comparator.naturalOrder();
+	}
 }

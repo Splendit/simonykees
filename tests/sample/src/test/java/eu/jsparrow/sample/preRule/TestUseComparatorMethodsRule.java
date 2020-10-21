@@ -50,4 +50,9 @@ public class TestUseComparatorMethodsRule {
 			}
 		};
 	}
+
+	void testWithLossOfInformationAfterTransformation() {
+		Comparator<?> comparator1 = (Integer u1, Integer u2) -> u1.compareTo(u2);
+		Comparator<? extends Comparable<?>> comparator2 = (Integer u1, Integer u2) -> u1.compareTo(u2);
+	}
 }

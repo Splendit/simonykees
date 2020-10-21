@@ -49,4 +49,9 @@ public class TestUseComparatorMethodsRule {
 			}
 		};
 	}
+
+	void testWithLossOfInformationAfterTransformation() {
+		Comparator<?> comparator1 = Comparator.naturalOrder();
+		Comparator<? extends Comparable<?>> comparator2 = Comparator.naturalOrder();
+	}
 }
