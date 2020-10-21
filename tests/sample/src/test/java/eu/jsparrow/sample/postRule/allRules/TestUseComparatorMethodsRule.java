@@ -14,13 +14,13 @@ public class TestUseComparatorMethodsRule {
 	void testComparatorsForInteger() {
 		Comparator<Integer> comparator = Comparator.naturalOrder();
 		comparator = Comparator.naturalOrder();
-		comparator = Comparator.<java.lang.Integer>naturalOrder();
+		comparator = Comparator.<Integer>naturalOrder();
 	}
 
 	void testComparatorsForIntegerReversed() {
 		Comparator<Integer> comparator = Comparator.reverseOrder();
 		comparator = Comparator.reverseOrder();
-		comparator = Comparator.<java.lang.Integer>reverseOrder();
+		comparator = Comparator.<Integer>reverseOrder();
 	}
 
 	void testComparatorsForArrayDeque() {
@@ -30,13 +30,13 @@ public class TestUseComparatorMethodsRule {
 	}
 
 	void testTransformationWithoutLossOfInformation() {
-		final Comparator<?> comparator1 = Comparator.<java.lang.Integer>naturalOrder();
-		final Comparator<? extends Comparable<?>> comparator2 = Comparator.<java.lang.Integer>naturalOrder();
+		final Comparator<?> comparator1 = Comparator.<Integer>naturalOrder();
+		final Comparator<? extends Comparable<?>> comparator2 = Comparator.<Integer>naturalOrder();
 	}
 
 	void testGetCollectionForIntegerComparator() {
-		final ArrayList<?> arrayList = getCollectionForComparator(Comparator.<java.lang.Integer>naturalOrder());
+		final ArrayList<?> arrayList = getCollectionForComparator(Comparator.<Integer>naturalOrder());
 		final ArrayList<? extends Comparable<?>> arrayList5 = getCollectionForComparator(
-				Comparator.<java.lang.Integer>naturalOrder());
+				Comparator.<Integer>naturalOrder());
 	}
 }

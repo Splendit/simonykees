@@ -56,13 +56,13 @@ public class TestUseComparatorMethodsRule {
 	}
 
 	void testTransformationWithoutLossOfInformation() {
-		Comparator<?> comparator1 = Comparator.<java.lang.Integer>naturalOrder();
-		Comparator<? extends Comparable<?>> comparator2 = Comparator.<java.lang.Integer>naturalOrder();
+		Comparator<?> comparator1 = Comparator.<Integer>naturalOrder();
+		Comparator<? extends Comparable<?>> comparator2 = Comparator.<Integer>naturalOrder();
 	}
 
 	void testGetCollectionForIntegerComparator() {
-		ArrayList<?> arrayList = getCollectionForComparator(Comparator.<java.lang.Integer>naturalOrder());
+		ArrayList<?> arrayList = getCollectionForComparator(Comparator.<Integer>naturalOrder());
 		ArrayList<? extends Comparable<?>> arrayList5 = getCollectionForComparator(
-				Comparator.<java.lang.Integer>naturalOrder());
+				Comparator.<Integer>naturalOrder());
 	}
 }

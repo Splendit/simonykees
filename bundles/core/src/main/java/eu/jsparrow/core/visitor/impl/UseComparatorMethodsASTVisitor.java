@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
@@ -76,33 +77,12 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		List<VariableDeclaration> lambdaParameters = ASTNodeUtil.convertToTypedList(lambda.parameters(),
 				VariableDeclaration.class);
 
-		boolean explicitLambdaParameterType = lambdaParameters.get(0)
-			.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION;
-
 		if (compareToMethodExpression.getNodeType() == ASTNode.SIMPLE_NAME
 				&& compareToMethodArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-			int indexOfLeftHS = indexOfSimpleParameterName(lambdaParameters, (SimpleName) compareToMethodExpression);
-			int indexOfRightHS = indexOfSimpleParameterName(lambdaParameters, (SimpleName) compareToMethodArgument);
-			MethodInvocation methodInvocation;
-			if (indexOfLeftHS == 0 && indexOfRightHS == 1) {
-				methodInvocation = createComparatorMethodInvocation("naturalOrder");//$NON-NLS-1$
-			} else if (indexOfLeftHS == 1 && indexOfRightHS == 0) {
-				methodInvocation = createComparatorMethodInvocation("reverseOrder");//$NON-NLS-1$
-			}
-			else {
-				return null;
-			}
-
-			if(explicitLambdaParameterType) {
-				@SuppressWarnings("unchecked")
-				List<Type> typeArguments = methodInvocation.typeArguments();
-				AST ast = astRewrite.getAST();
-				String qualifiedName = lambdaParameters.get(0).resolveBinding().getType().getQualifiedName();
-				Name typeName = ast.newName(qualifiedName);
-				Type typeArgument = ast.newSimpleType(typeName);
-				typeArguments.add(typeArgument);
-			}
-			return methodInvocation;
+			return createComparatorMethodInvocation(
+					lambdaParameters,
+					(SimpleName) compareToMethodExpression,
+					(SimpleName) compareToMethodArgument);
 		}
 
 		if (compareToMethodExpression.getNodeType() == ASTNode.METHOD_INVOCATION
@@ -146,6 +126,33 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			}
 		}
 		return null;
+	}
+
+	private MethodInvocation createComparatorMethodInvocation(List<VariableDeclaration> lambdaParameters,
+			SimpleName compareToMethodExpression, SimpleName compareToMethodArgument) {
+
+		int indexOfLeftHS = indexOfSimpleParameterName(lambdaParameters, compareToMethodExpression);
+		int indexOfRightHS = indexOfSimpleParameterName(lambdaParameters, compareToMethodArgument);
+
+		String comparatorMethodName;
+		if (indexOfLeftHS == 0 && indexOfRightHS == 1) {
+			comparatorMethodName = "naturalOrder"; //$NON-NLS-1$
+
+		} else if (indexOfLeftHS == 1 && indexOfRightHS == 0) {
+			comparatorMethodName = "reverseOrder"; //$NON-NLS-1$
+		} else {
+			return null;
+		}
+		MethodInvocation methodInvocation = createComparatorMethodInvocation(comparatorMethodName);
+		if (lambdaParameters.get(0)
+			.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
+			SingleVariableDeclaration singleVariableDeclaration = (SingleVariableDeclaration) lambdaParameters.get(0);
+			Type typeCopyTarget = (Type) astRewrite.createCopyTarget(singleVariableDeclaration.getType());
+			@SuppressWarnings("unchecked")
+			List<Type> typeArguments = methodInvocation.typeArguments();
+			typeArguments.add(typeCopyTarget);
+		}
+		return methodInvocation;
 	}
 
 	private MethodInvocation createComparatorMethodInvocation(String methodName) {
