@@ -167,8 +167,7 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 				"	}\n" +
 				"}\n" +
 				"void test() {\n" +
-				"	Comparator<InnerClass> comparator = (lhs, rhs) -> lhs.getString().compareTo(rhs.getString());\n"
-				+
+				"	Comparator<InnerClass> comparator = (lhs, rhs) -> lhs.getString().compareTo(rhs.getString());\n" +
 				"}";
 
 		String expected = "" +
@@ -218,6 +217,41 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 				"}";
 
 		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_OverloadedCompareToReceivingNotComparable_shouldNotTransform() throws Exception {
+		String original = "" +
+				"void test() {\n" +
+				"	class LocalClass {}\n" +
+				"	class LocalComparableSubclass implements Comparable<LocalComparableSubclass> {\n" +
+				"		int compareTo(LocalClass o) {\n" +
+				"			return 0;\n" +
+				"		}\n" +
+				"		public int compareTo(LocalComparableSubclass o) {\n" +
+				"			return 0;\n" +
+				"		}\n" +
+				"	}\n" +
+				"	Comparator<LocalComparableSubclass> comparator = (lhs, rhs) -> lhs.compareTo(new LocalClass());\n" +
+				"	}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_OverloadedCompareToReceivingTwoParameters_shouldNotTransform() throws Exception {
+		String original = "" +
+				"void test2() {\n" +
+				"	class LocalComparableSubclass implements Comparable<LocalComparableSubclass> {\n" +
+				"		int compareTo(LocalComparableSubclass o1, LocalComparableSubclass o2) {\n" +
+				"			return 0;\n" +
+				"		}\n" +
+				"		public int compareTo(LocalComparableSubclass o) {\n" +
+				"			return 0;\n" +
+				"		}\n" +
+				"	}\n" +
+				"	Comparator<LocalComparableSubclass> comparator = (lhs, rhs) -> lhs.compareTo(lhs, rhs);\n" +
+				"}";
+		assertNoChange(original);
 	}
 
 	@Test
