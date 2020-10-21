@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -58,9 +59,6 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 
 	private MethodInvocation createComparatorMethodInvocation(LambdaExpression lambda) {
 
-		List<VariableDeclaration> lambdaParameters = ASTNodeUtil.convertToTypedList(lambda.parameters(),
-				VariableDeclaration.class);
-
 		MethodInvocation compareToMethodInvocation = extractCompareToInvocation(lambda);
 		if (compareToMethodInvocation == null) {
 			return null;
@@ -75,16 +73,36 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			.convertToTypedList(compareToMethodInvocation.arguments(), Expression.class)
 			.get(0);
 
+		List<VariableDeclaration> lambdaParameters = ASTNodeUtil.convertToTypedList(lambda.parameters(),
+				VariableDeclaration.class);
+
+		boolean explicitLambdaParameterType = lambdaParameters.get(0)
+			.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION;
+
 		if (compareToMethodExpression.getNodeType() == ASTNode.SIMPLE_NAME
 				&& compareToMethodArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
 			int indexOfLeftHS = indexOfSimpleParameterName(lambdaParameters, (SimpleName) compareToMethodExpression);
 			int indexOfRightHS = indexOfSimpleParameterName(lambdaParameters, (SimpleName) compareToMethodArgument);
+			MethodInvocation methodInvocation;
 			if (indexOfLeftHS == 0 && indexOfRightHS == 1) {
-				return createComparatorMethodInvocation("naturalOrder"); //$NON-NLS-1$
+				methodInvocation = createComparatorMethodInvocation("naturalOrder");//$NON-NLS-1$
+			} else if (indexOfLeftHS == 1 && indexOfRightHS == 0) {
+				methodInvocation = createComparatorMethodInvocation("reverseOrder");//$NON-NLS-1$
 			}
-			if (indexOfLeftHS == 1 && indexOfRightHS == 0) {
-				return createComparatorMethodInvocation("reverseOrder");//$NON-NLS-1$
+			else {
+				return null;
 			}
+
+			if(explicitLambdaParameterType) {
+				@SuppressWarnings("unchecked")
+				List<Type> typeArguments = methodInvocation.typeArguments();
+				AST ast = astRewrite.getAST();
+				String qualifiedName = lambdaParameters.get(0).resolveBinding().getType().getQualifiedName();
+				Name typeName = ast.newName(qualifiedName);
+				Type typeArgument = ast.newSimpleType(typeName);
+				typeArguments.add(typeArgument);
+			}
+			return methodInvocation;
 		}
 
 		if (compareToMethodExpression.getNodeType() == ASTNode.METHOD_INVOCATION
@@ -235,8 +253,6 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			return null;
 		}
 
-		// This is obsolete because it is enough to make sure that
-		// declaringClass is isComparable
 		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
 		if (parameterTypes.length != 1) {
 			return null;

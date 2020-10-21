@@ -14,13 +14,13 @@ public class TestUseComparatorMethodsRule {
 	void testComparatorsForInteger() {
 		Comparator<Integer> comparator = Comparator.naturalOrder();
 		comparator = Comparator.naturalOrder();
-		comparator = Comparator.naturalOrder();
+		comparator = Comparator.<java.lang.Integer>naturalOrder();
 	}
 
 	void testComparatorsForIntegerReversed() {
 		Comparator<Integer> comparator = Comparator.reverseOrder();
 		comparator = Comparator.reverseOrder();
-		comparator = Comparator.reverseOrder();
+		comparator = Comparator.<java.lang.Integer>reverseOrder();
 	}
 
 	void testComparatorsForArrayDeque() {
@@ -29,15 +29,14 @@ public class TestUseComparatorMethodsRule {
 		comparator = Comparator.comparingInt(ArrayDeque::getFirst);
 	}
 
-	void testWithLossOfInformationAfterTransformation() {
-		final Comparator<?> comparator1 = Comparator.naturalOrder();
-		final Comparator<? extends Comparable<?>> comparator2 = Comparator.naturalOrder();
+	void testTransformationWithoutLossOfInformation() {
+		final Comparator<?> comparator1 = Comparator.<java.lang.Integer>naturalOrder();
+		final Comparator<? extends Comparable<?>> comparator2 = Comparator.<java.lang.Integer>naturalOrder();
 	}
 
-	class TransformationCausingCompilationError {
-		void testGetCollectionForIntegerComparator() {
-			final ArrayList<?> arrayList = getCollectionForComparator(Comparator.naturalOrder());
-			final ArrayList<? extends Comparable<?>> arrayList5 = getCollectionForComparator(Comparator.naturalOrder());
-		}
+	void testGetCollectionForIntegerComparator() {
+		final ArrayList<?> arrayList = getCollectionForComparator(Comparator.<java.lang.Integer>naturalOrder());
+		final ArrayList<? extends Comparable<?>> arrayList5 = getCollectionForComparator(
+				Comparator.<java.lang.Integer>naturalOrder());
 	}
 }

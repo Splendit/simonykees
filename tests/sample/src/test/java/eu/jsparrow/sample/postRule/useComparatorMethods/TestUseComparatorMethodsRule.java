@@ -55,15 +55,14 @@ public class TestUseComparatorMethodsRule {
 		};
 	}
 
-	void testWithLossOfInformationAfterTransformation() {
-		Comparator<?> comparator1 = Comparator.naturalOrder();
-		Comparator<? extends Comparable<?>> comparator2 = Comparator.naturalOrder();
+	void testTransformationWithoutLossOfInformation() {
+		Comparator<?> comparator1 = Comparator.<java.lang.Integer>naturalOrder();
+		Comparator<? extends Comparable<?>> comparator2 = Comparator.<java.lang.Integer>naturalOrder();
 	}
 
-	class TransformationCausingCompilationError {
-		void testGetCollectionForIntegerComparator() {
-			ArrayList<?> arrayList = getCollectionForComparator(Comparator.naturalOrder());
-			ArrayList<? extends Comparable<?>> arrayList5 = getCollectionForComparator(Comparator.naturalOrder());
-		}
+	void testGetCollectionForIntegerComparator() {
+		ArrayList<?> arrayList = getCollectionForComparator(Comparator.<java.lang.Integer>naturalOrder());
+		ArrayList<? extends Comparable<?>> arrayList5 = getCollectionForComparator(
+				Comparator.<java.lang.Integer>naturalOrder());
 	}
 }
