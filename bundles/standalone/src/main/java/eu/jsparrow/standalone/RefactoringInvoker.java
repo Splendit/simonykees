@@ -1,6 +1,8 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
@@ -32,6 +34,7 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.MavenImportException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
+import eu.jsparrow.standalone.report.ReportGenerator;
 
 /**
  * 
@@ -198,8 +201,16 @@ public class RefactoringInvoker {
 		}
 
 		JsparrowMetric metricData = collectStatistics();
-		String path = context.getProperty(ROOT_PROJECT_BASE_PATH) + File.separator + "results.json"; //$NON-NLS-1$
-		JsonUtil.writeJSON(metricData, path);
+		String htmlPath = context.getProperty(ROOT_PROJECT_BASE_PATH) + File.separator + "index.html"; //$NON-NLS-1$
+		ReportGenerator reportGenerator = new ReportGenerator(metricData.getData());
+		try {
+			reportGenerator.writeReport(htmlPath);
+		} catch (IOException | URISyntaxException e) {
+			logger.error("Cannot generate the html report", e);
+		}
+		
+		String jsonPath = context.getProperty(ROOT_PROJECT_BASE_PATH) + File.separator + "results.json"; //$NON-NLS-1$
+		JsonUtil.writeJSON(metricData, jsonPath);
 	}
 
 	private JsparrowMetric collectStatistics() {

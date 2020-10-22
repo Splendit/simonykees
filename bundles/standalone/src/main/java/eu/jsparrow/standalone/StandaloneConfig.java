@@ -214,6 +214,8 @@ public class StandaloneConfig {
 
 		applyRules(rules);
 		statisticsData.setMetricData();
+		Instant now = Instant.now();
+		statisticsData.setEndTime(now.getEpochSecond());
 	}
 
 	private Optional<StandardLoggerRule> setUpLoggerRule(Map<String, String> options) {
