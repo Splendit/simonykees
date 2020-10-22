@@ -75,13 +75,13 @@ public class DemoMojo  extends AbstractMojo  {
 	@Parameter(property = "url")
 	private String url;
 
-	@Parameter(defaultValue = "0", property = "startTime")
+	@Parameter(property = "startTime")
 	private String startTime;
 
-	@Parameter(defaultValue = "default", property = "repoOwner")
+	@Parameter(defaultValue = "${project.groupId}", property = "repoOwner")
 	private String repoOwner;
 
-	@Parameter(defaultValue = "default", property = "repoName")
+	@Parameter(defaultValue = "${project.name}", property = "repoName")
 	private String repoName;
 
 	@Parameter(property = "sendStatistics")
@@ -96,7 +96,7 @@ public class DemoMojo  extends AbstractMojo  {
 		}
 
 		String mode = StandaloneMode.DEMO.name();
-		String start = "0".equals(startTime) ? Instant.now().toString() : startTime;
+		String start = startTime == null ? Instant.now().toString() : startTime;
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
 				defaultConfiguration, statisticsMetadata, sendStatistics);
