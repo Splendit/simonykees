@@ -202,7 +202,7 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_LambdaParameterExpilcitDequeOfInteger_shouldTransform() throws Exception {
+	public	void visit_LambdaParameterExplicitlyDequeOfInteger_shouldTransform() throws Exception {
 		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
 		String original = "" +
 				"void test() {\n" +
@@ -213,8 +213,23 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 
 		String expected = "" +
 				"void test() {\n" +
-				"	Comparator<ArrayDeque<Integer>> comparator = Comparator.comparingInt(ArrayDeque::getFirst);\n" +
+				"	Comparator<ArrayDeque<Integer>> comparator=Comparator.comparingInt((ArrayDeque<Integer> x1) -> x1.getFirst());\n"
+				+
 				"}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_LambdaParameterExplicitlyInteger_shouldTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n"
+				+ "		Comparator<?> comparator1 = (Integer u1, Integer u2) -> u1.compareTo(u2);\n"
+				+ "	}";
+		String expected = "" +
+				"	void test() {\n"
+				+ "		Comparator<?> comparator1=Comparator.<Integer>naturalOrder();\n"
+				+ "	}";
 
 		assertChange(original, expected);
 	}

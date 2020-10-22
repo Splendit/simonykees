@@ -67,19 +67,4 @@ public class TestUseComparatorMethodsRule {
 		ArrayList<? extends Comparable<?>> arrayList5 = getCollectionForComparator(
 				(Integer u1, Integer u2) -> u1.compareTo(u2));
 	}
-
-	class NotCompilerCleanAfterTransformation {
-
-		void testMethodReferencesNotPossible() {
-			Comparator<?> comparatorDequeOfInt = (Deque<Integer> x1, Deque<Integer> x2) -> x1.getFirst()
-				.compareTo(x2.getFirst());
-
-			Comparator<?> comparatorDequeOfString = (Deque<String> x1, Deque<String> x2) -> x1.getFirst()
-				.compareTo(x2.getFirst());
-
-			ArrayList<?> arrayList = getCollectionForComparator(
-					(Deque<Integer> x1, Deque<Integer> x2) -> x1.getFirst()
-						.compareTo(x2.getFirst()));
-		}
-	}
 }

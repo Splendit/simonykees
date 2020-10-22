@@ -66,16 +66,4 @@ public class TestUseComparatorMethodsRule {
 		ArrayList<? extends Comparable<?>> arrayList5 = getCollectionForComparator(
 				Comparator.<Integer>naturalOrder());
 	}
-
-	class NotCompilerCleanAfterTransformation {
-
-		void testMethodReferencesNotPossible() {
-			Comparator<?> comparatorDequeOfInt = Comparator.comparingInt(Deque::getFirst);
-
-			Comparator<?> comparatorDequeOfString = Comparator.comparing(Deque::getFirst);
-
-			ArrayList<?> arrayList = getCollectionForComparator(
-					Comparator.comparingInt(Deque::getFirst));
-		}
-	}
 }

@@ -60,5 +60,4 @@ public class UseComparatorMethodsRulesTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-
 }

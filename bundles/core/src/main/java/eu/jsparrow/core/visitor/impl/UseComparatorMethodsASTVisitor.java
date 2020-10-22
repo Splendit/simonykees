@@ -112,7 +112,8 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 
 			MethodInvocation invocationLeftHS = (MethodInvocation) compareToMethodExpression;
 			MethodInvocation invocationRightHS = (MethodInvocation) compareToMethodArgument;
-			int lambdaParameterUsage = findUsageOfBothLambdaParameters(lambdaParameters, invocationLeftHS, invocationRightHS);
+			int lambdaParameterUsage = findUsageOfBothLambdaParameters(lambdaParameters, invocationLeftHS,
+					invocationRightHS);
 			if (lambdaParameterUsage == PARAM_USAGE_INVALID) {
 				return null;
 			}
@@ -131,12 +132,18 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 				.resolveBinding()
 				.getType();
 
-			ExpressionMethodReference methodReference = createExpressionMethodReference(lambdaParameterType,
-					comparisonKeyMethod);
+			Expression comparatorMethodArgument;
+			if (explicitLambdaParameterType != null) {
+				String lambdaParameterIdentifier =  lambdaParameters.get(0).getName().getIdentifier();
+				comparatorMethodArgument = createLambdaExpression(explicitLambdaParameterType, comparisonKeyMethod, lambdaParameterIdentifier);
+			} else {
+				comparatorMethodArgument = createExpressionMethodReference(lambdaParameterType,
+						comparisonKeyMethod);
+			}
 			String comparatorMethodName = getComparatorMethodName(comparisonKeyMethod);
 
 			MethodInvocation comparatorMethodInvocation = createComparatorMethodInvocation(comparatorMethodName,
-					methodReference);
+					comparatorMethodArgument);
 
 			if (lambdaParameterUsage == PARAM_USAGE_REVERSE_ORDER) {
 				return reverseComparatorMethodInvocation(comparatorMethodInvocation);
@@ -271,6 +278,22 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		return methodReference;
 	}
 
+	private Expression createLambdaExpression(Type explicitLambdaParameterType, IMethodBinding comparisonKeyMethod, String lambdaParameterIdentifier) {
+		AST ast = astRewrite.getAST();
+		LambdaExpression lambdaExpression = ast.newLambdaExpression();
+		@SuppressWarnings("unchecked")
+		List<VariableDeclaration> parameters = lambdaExpression.parameters();
+		SingleVariableDeclaration lambdaParam = ast.newSingleVariableDeclaration();
+		lambdaParam.setType((Type) astRewrite.createCopyTarget(explicitLambdaParameterType));
+		lambdaParam.setName(ast.newSimpleName(lambdaParameterIdentifier));
+		parameters.add(lambdaParam);
+		MethodInvocation lambdaBodyAsMethodInvocation = ast.newMethodInvocation();
+		lambdaBodyAsMethodInvocation.setName(ast.newSimpleName(comparisonKeyMethod.getName()));
+		lambdaBodyAsMethodInvocation.setExpression(ast.newSimpleName(lambdaParameterIdentifier));
+		lambdaExpression.setBody(lambdaBodyAsMethodInvocation);
+		return lambdaExpression;
+	}
+
 	private String getComparatorMethodName(IMethodBinding comparisonKeyMethod) {
 		ITypeBinding returnType = comparisonKeyMethod.getReturnType();
 		if (ClassRelationUtil.isContentOfType(returnType, java.lang.Integer.class.getName())) {
@@ -303,11 +326,11 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 	}
 
 	private MethodInvocation createComparatorMethodInvocation(String comparatorMethodName,
-			ExpressionMethodReference methodReference) {
+			Expression methodArgument) {
 		MethodInvocation comparatorMethodInvocation = createComparatorMethodInvocation(comparatorMethodName);
 		@SuppressWarnings("unchecked")
 		List<Expression> arguments = comparatorMethodInvocation.arguments();
-		arguments.add(methodReference);
+		arguments.add(methodArgument);
 		return comparatorMethodInvocation;
 	}
 
