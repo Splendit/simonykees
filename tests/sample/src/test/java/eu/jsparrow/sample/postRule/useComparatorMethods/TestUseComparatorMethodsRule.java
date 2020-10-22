@@ -3,6 +3,7 @@ package eu.jsparrow.sample.postRule.useComparatorMethods;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Deque;
 
 @SuppressWarnings({ "unused" })
 public class TestUseComparatorMethodsRule {
@@ -64,5 +65,17 @@ public class TestUseComparatorMethodsRule {
 		ArrayList<?> arrayList = getCollectionForComparator(Comparator.<Integer>naturalOrder());
 		ArrayList<? extends Comparable<?>> arrayList5 = getCollectionForComparator(
 				Comparator.<Integer>naturalOrder());
+	}
+
+	class NotCompilerCleanAfterTransformation {
+
+		void testMethodReferencesNotPossible() {
+			Comparator<?> comparatorDequeOfInt = Comparator.comparingInt(Deque::getFirst);
+
+			Comparator<?> comparatorDequeOfString = Comparator.comparing(Deque::getFirst);
+
+			ArrayList<?> arrayList = getCollectionForComparator(
+					Comparator.comparingInt(Deque::getFirst));
+		}
 	}
 }
