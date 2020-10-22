@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
@@ -15,8 +16,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -100,7 +103,8 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			} else {
 				comparatorMethodName = "naturalOrder"; //$NON-NLS-1$
 			}
-			if (explicitLambdaParameterType != null) {
+			if (explicitLambdaParameterType != null
+					&& isLambdaParameterTypeRequired(explicitLambdaParameterType, lambda)) {
 				return createComparatorMethodInvocation(comparatorMethodName, explicitLambdaParameterType);
 			} else {
 				return createComparatorMethodInvocation(comparatorMethodName);
@@ -133,9 +137,13 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 				.getType();
 
 			Expression comparatorMethodArgument;
-			if (explicitLambdaParameterType != null) {
-				String lambdaParameterIdentifier =  lambdaParameters.get(0).getName().getIdentifier();
-				comparatorMethodArgument = createLambdaExpression(explicitLambdaParameterType, comparisonKeyMethod, lambdaParameterIdentifier);
+			if (explicitLambdaParameterType != null
+					&& isLambdaParameterTypeRequired(explicitLambdaParameterType, lambda)) {
+				String lambdaParameterIdentifier = lambdaParameters.get(0)
+					.getName()
+					.getIdentifier();
+				comparatorMethodArgument = createLambdaExpression(explicitLambdaParameterType, comparisonKeyMethod,
+						lambdaParameterIdentifier);
 			} else {
 				comparatorMethodArgument = createExpressionMethodReference(lambdaParameterType,
 						comparisonKeyMethod);
@@ -259,6 +267,31 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		return methodInvocation;
 	}
 
+	private boolean isLambdaParameterTypeRequired(Type explicitLambdaParameterType, LambdaExpression lambda) {
+		ITypeBinding explicitLambdaParameterTypeBinding = explicitLambdaParameterType.resolveBinding();
+		ITypeBinding comparatorTypeBinding = null;
+		ITypeBinding comparatorTypeArgumentBinding = null;
+		StructuralPropertyDescriptor locationInParent = lambda.getLocationInParent();
+		ASTNode parent = lambda.getParent();
+		if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			comparatorTypeBinding = ((VariableDeclarationFragment) parent).resolveBinding()
+				.getType();
+
+		} else if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			Assignment assignment = ((Assignment) parent);
+			comparatorTypeBinding = assignment.getLeftHandSide()
+				.resolveTypeBinding();
+		}
+		if (comparatorTypeBinding != null) {
+			comparatorTypeArgumentBinding = comparatorTypeBinding.getTypeArguments()[0];
+			if (ClassRelationUtil.compareITypeBinding(comparatorTypeArgumentBinding,
+					explicitLambdaParameterTypeBinding)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private ExpressionMethodReference createExpressionMethodReference(ITypeBinding lambdaParameterType,
 			IMethodBinding comparisonKeyMethod) {
 		AST ast = astRewrite.getAST();
@@ -278,7 +311,8 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		return methodReference;
 	}
 
-	private Expression createLambdaExpression(Type explicitLambdaParameterType, IMethodBinding comparisonKeyMethod, String lambdaParameterIdentifier) {
+	private Expression createLambdaExpression(Type explicitLambdaParameterType, IMethodBinding comparisonKeyMethod,
+			String lambdaParameterIdentifier) {
 		AST ast = astRewrite.getAST();
 		LambdaExpression lambdaExpression = ast.newLambdaExpression();
 		@SuppressWarnings("unchecked")

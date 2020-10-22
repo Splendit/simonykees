@@ -14,13 +14,13 @@ public class TestUseComparatorMethodsRule {
 	void testComparatorsForInteger() {
 		Comparator<Integer> comparator = Comparator.naturalOrder();
 		comparator = Comparator.naturalOrder();
-		comparator = Comparator.<Integer>naturalOrder();
+		comparator = Comparator.naturalOrder();
 	}
 
 	void testComparatorsForIntegerReversed() {
 		Comparator<Integer> comparator = Comparator.reverseOrder();
 		comparator = Comparator.reverseOrder();
-		comparator = Comparator.<Integer>reverseOrder();
+		comparator = Comparator.reverseOrder();
 	}
 
 	void testComparatorsForArrayDeque() {

@@ -202,7 +202,26 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public	void visit_LambdaParameterExplicitlyDequeOfInteger_shouldTransform() throws Exception {
+	public	void visit_InitializingComparatorOfJoker_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
+		String original = "" +
+				"void test() {\n" +
+				"	Comparator<?> comparator = (ArrayDeque<Integer> x1, ArrayDeque<Integer> x2) -> x1\n"
+				+
+				"			.getFirst().compareTo(x2.getFirst());\n" +
+				"}";
+
+		String expected = "" +
+				"void test() {\n" +
+				"	Comparator<?> comparator=Comparator.comparingInt((ArrayDeque<Integer> x1) -> x1.getFirst());\n"
+				+
+				"}";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public	void visit_InitializingComparatorOfDequeOfInteger_shouldTransform() throws Exception {
 		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
 		String original = "" +
 				"void test() {\n" +
@@ -213,10 +232,10 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 
 		String expected = "" +
 				"void test() {\n" +
-				"	Comparator<ArrayDeque<Integer>> comparator=Comparator.comparingInt((ArrayDeque<Integer> x1) -> x1.getFirst());\n"
+				"	Comparator<ArrayDeque<Integer>> comparator=Comparator.comparingInt(ArrayDeque::getFirst);\n"
 				+
 				"}";
-
+		
 		assertChange(original, expected);
 	}
 
@@ -229,6 +248,36 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 		String expected = "" +
 				"	void test() {\n"
 				+ "		Comparator<?> comparator1=Comparator.<Integer>naturalOrder();\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_IntegerLambdaParameterInInitializer_shouldTransform() throws Exception {
+		String original = "" +
+				"	void test () {\n"
+				+ "		Comparator<Integer> integerComparator = (Integer u1, Integer u2) -> u1.compareTo(u2);\n"
+				+ "	}";
+		String expected = "" +
+				"	void test () {\n"
+				+ "		Comparator<Integer> integerComparator = Comparator.naturalOrder();\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_IntegerLambdaParameterInAssignmentRHS_shouldTransform() throws Exception {
+		String original = "" +
+				"	void test () {\n"
+				+ "		Comparator<Integer> integerComparator;\n"
+				+ "		integerComparator = (Integer u1, Integer u2) -> u1.compareTo(u2);\n"
+				+ "	}";
+		String expected = "" +
+				"	void test () {\n"
+				+ "		Comparator<Integer> integerComparator;\n"				
+				+ "		integerComparator = Comparator.naturalOrder();\n"
 				+ "	}";
 
 		assertChange(original, expected);
