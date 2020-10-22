@@ -19,7 +19,7 @@ public class FormatterXmlParser {
 	private static final Logger logger = LoggerFactory.getLogger(FormatterXmlParser.class);
 
 	private static final String CODE_FORMATTER_PROFILE_KEY = "CodeFormatterProfile"; //$NON-NLS-1$
-
+	
 	private FormatterXmlParser() {
 	}
 
@@ -57,10 +57,23 @@ public class FormatterXmlParser {
 	 *             when parsing of the provided file is impossible (e.g.,
 	 *             invalid XML)
 	 */
-	public static Map<String, String> getFormatterSettings(File file) throws Exception {
-		JAXBContext context = JAXBContext.newInstance(Profiles.class);
-		Unmarshaller unmarshaller = context.createUnmarshaller();
-		Profiles profiles = (Profiles) unmarshaller.unmarshal(file);
+	public static Map<String, String> getFormatterSettings(File file) throws FormatterXmlParserException {
+		Profiles profiles;
+		try {
+			JAXBContext context = JAXBContext.newInstance(Profiles.class);
+			Unmarshaller unmarshaller = context.createUnmarshaller();
+			profiles = (Profiles) unmarshaller.unmarshal(file);
+		} catch (JAXBException e) {
+			throw new FormatterXmlParserException(
+					String.format("Unable to parse the given formatting file: %s", file.getAbsolutePath()), e); //$NON-NLS-1$
+		} catch (IllegalArgumentException e) {
+			// when the unmarshal gets an illegal file path
+			throw new FormatterXmlParserException(String.format("Path unavailable: %s", file.getAbsolutePath()), e); //$NON-NLS-1$
+		} catch (ClassCastException e) {
+			// when the root element cannot be cast to Profiles
+			throw new FormatterXmlParserException(
+					String.format("Unexpected XML structure: %s", file.getAbsolutePath()), e); //$NON-NLS-1$
+		}
 
 		Profile relevantProfile = profiles.getProfiles()
 			.stream()
@@ -68,12 +81,20 @@ public class FormatterXmlParser {
 			.findFirst()
 			.orElse(null);
 
+		if (relevantProfile == null) {
+			throw new FormatterXmlParserException(
+					String.format("No CodeFormatterProfile found in: %s", file.getAbsolutePath())); //$NON-NLS-1$
+		}
+
 		Map<String, String> settings = new HashMap<String, String>();
 
 		// add settings to the map
-		if (relevantProfile != null) {
-			relevantProfile.getSettings()
-				.forEach(s -> settings.put(s.getId(), s.getValue()));
+		relevantProfile.getSettings()
+			.forEach(s -> settings.put(s.getId(), s.getValue()));
+
+		if (settings.isEmpty()) {
+			throw new FormatterXmlParserException(
+					String.format("No formatter settings found in: %s", file.getAbsolutePath())); //$NON-NLS-1$
 		}
 
 		logger.debug("'{}' settings loaded for formatting profile '{}' in '{}'", settings.size(), //$NON-NLS-1$
