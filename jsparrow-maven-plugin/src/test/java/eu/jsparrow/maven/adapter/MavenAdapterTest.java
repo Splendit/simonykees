@@ -57,7 +57,7 @@ public class MavenAdapterTest {
 		projectBaseDir = directory.newFolder("project_base_dir");
 		jsparrowYml = new File(projectBaseDir.getPath() + File.separator + "jsparrow.yml");
 		jsparrowYml.createNewFile();
-		
+
 		statisticsMetadata = mock(StatisticsMetadata.class);
 
 		proxy = mock(Proxy.class);
@@ -127,6 +127,7 @@ public class MavenAdapterTest {
 		when(path.toFile()).thenReturn(jsparrowYml);
 
 		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml,
+				null,
 				Stream.of(proxy));
 
 		Map<String, String> configurations = mavenAdapter.getConfiguration();
@@ -145,6 +146,7 @@ public class MavenAdapterTest {
 		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(true);
 
 		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml,
+				null,
 				Stream.of(proxy));
 
 		assertTrue(false);
