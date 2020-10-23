@@ -8482,6 +8482,19 @@
         }
       }
     }
+
+    function secondsToHms(d) {
+      d = Number(d);
+      var h = Math.floor(d / 3600);
+      var m = Math.floor(d % 3600 / 60);
+      var s = Math.floor(d % 3600 % 60);
+
+      // always show minutes, add comma and seconds if they are not 0
+      var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
+      var mDisplay = m + (m == 1 ? " minute" : " minutes");
+      var sDisplay = s > 0 ? ", " + s + (s == 1 ? " second" : " seconds") : "";
+      return hDisplay + mDisplay + sDisplay;
+    }
   </script>
 </head>
 
@@ -8506,7 +8519,7 @@
         </tr>
         <tr>
           <td>Total time saved</td>
-          <td>${totalTimeSaved}</td>
+          <td> <script>document.write(secondsToHms(${totalTimeSaved}))</script> </td>
         </tr>
       </tbody>
     </table>
@@ -8540,12 +8553,13 @@
             <tr class="v-datatable__progress">
               <th colspan="4" class="column"></th>
             </tr>
+
             <#list rules as rule> 
               <tr>
                 <td class="text-xs-right"><a href=${rule.ruleLink} target="_blank"> ${rule.ruleName} </a></td>
                 <td class="text-xs-right">${rule.issuesFixed}</td>
                 <td class="text-xs-right">${rule.filesChanged}</td>
-                <td class="text-xs-right">${rule.remediationCost}</td>
+                <td class="text-xs-right"><script>document.write(secondsToHms(${rule.issuesFixed} * ${rule.remediationCost}))</script></td>
               </tr>
             </#list>
           </tbody>
