@@ -79,7 +79,6 @@
       /* yes, I'm that particular about formatting */
     }
   </style>
-
  <style type="text/css">
     .sc-emoji-picker[data-v-a26ce8c8] {
       position: absolute;
@@ -144,7 +143,6 @@
       transform: scale(1.4);
     }
   </style>
-  
   <style type="text/css">
     .resize-observer[data-v-b329ee4c] {
       position: absolute;
@@ -1117,10 +1115,7 @@
 
     /*# sourceURL=/home/arditymeri/eclipse-workspace/jsparrow-doc/node_modules/@vuepress/core/lib/client/components/node_modules/@vuepress/core/lib/client/components/OutboundLink.vue */
   </style>
-  <script charset="utf-8" src="./132.js"></script>
   <script charset="utf-8" src="./0.js"></script>
-  <script charset="utf-8" src="./1.js"></script>
-  <script charset="utf-8" src="./2.js"></script>
   <meta name="description" content="">
   <style type="text/css">
     .home {
@@ -1258,7 +1253,6 @@
 
     /*# sourceURL=/home/arditymeri/eclipse-workspace/jsparrow-doc/node_modules/@vuepress/theme-default/components/node_modules/@vuepress/theme-default/components/Home.vue */
   </style>
- 
   <style type="text/css">
     .dropdown-enter,
     .dropdown-leave-to {
@@ -1728,7 +1722,6 @@
       overflow: hidden;
     }
   </style>
-
   <style type="text/css">
     .sidebar .sidebar-sub-headers {
       padding-left: 1rem;
@@ -7455,8 +7448,6 @@
 
     /*# sourceURL=/home/arditymeri/eclipse-workspace/jsparrow-doc/docs/.vuepress/theme/components/node_modules/vuetify/src/stylus/components/_ripples.styl */
   </style>
-
-  <script charset="utf-8" src="./14.js"></script>
   <style type="text/css" id="vuetify-theme-stylesheet">
     a {
       color: #1976d2;
@@ -8162,8 +8153,6 @@
       caret-color: #802700 !important;
     }
   </style>
-  <script charset="utf-8" src="./6.js"></script>
-  <script charset="utf-8" src="./5.js"></script>
   <style type="text/css">
     .theme--light.v-datatable thead th.column.sortable .v-icon {
       color: rgba(0, 0, 0, 0.38);
@@ -8383,119 +8372,117 @@
       border-top: none;
     }
   </style>
-
-<script>
-  function sortTextColumn(n) {
-    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    table = document.getElementById("rules-table");
-    switching = true;
-    // Set the sorting direction to ascending:
-    dir = "asc";
-    /* Make a loop that will continue until
-    no switching has been done: */
-    while (switching) {
-      // Start by saying: no switching is done:
-      switching = false;
-      rows = table.rows;
-      /* Loop through all table rows (except the
-      first, which contains table headers): */
-      for (i = 2; i < (rows.length - 1); i++) {
-        // Start by saying there should be no switching:
-        shouldSwitch = false;
-        /* Get the two elements you want to compare,
-        one from current row and one from the next: */
-        x = rows[i].getElementsByTagName("TD")[n];
-        y = rows[i + 1].getElementsByTagName("TD")[n];
-        /* Check if the two rows should switch place,
-        based on the direction, asc or desc: */
-        if (dir == "asc") {
-          if (x.innerText.toLowerCase() > y.innerText.toLowerCase()) {
-            // If so, mark as a switch and break the loop:
-            shouldSwitch = true;
-            break;
-          }
-        } else if (dir == "desc") {
-          if (x.innerText.toLowerCase() < y.innerText.toLowerCase()) {
-            // If so, mark as a switch and break the loop:
-            shouldSwitch = true;
-            break;
+  <script>
+    function sortTextColumn(n) {
+      var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+      table = document.getElementById("rules-table");
+      switching = true;
+      // Set the sorting direction to ascending:
+      dir = "asc";
+      /* Make a loop that will continue until
+      no switching has been done: */
+      while (switching) {
+        // Start by saying: no switching is done:
+        switching = false;
+        rows = table.rows;
+        /* Loop through all table rows (except the
+        first, which contains table headers): */
+        for (i = 2; i < (rows.length - 1); i++) {
+          // Start by saying there should be no switching:
+          shouldSwitch = false;
+          /* Get the two elements you want to compare,
+          one from current row and one from the next: */
+          x = rows[i].getElementsByTagName("TD")[n];
+          y = rows[i + 1].getElementsByTagName("TD")[n];
+          /* Check if the two rows should switch place,
+          based on the direction, asc or desc: */
+          if (dir == "asc") {
+            if (x.innerText.toLowerCase() > y.innerText.toLowerCase()) {
+              // If so, mark as a switch and break the loop:
+              shouldSwitch = true;
+              break;
+            }
+          } else if (dir == "desc") {
+            if (x.innerText.toLowerCase() < y.innerText.toLowerCase()) {
+              // If so, mark as a switch and break the loop:
+              shouldSwitch = true;
+              break;
+            }
           }
         }
-      }
-      if (shouldSwitch) {
-        /* If a switch has been marked, make the switch
-        and mark that a switch has been done: */
-        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-        switching = true;
-        // Each time a switch is done, increase this count by 1:
-        switchcount ++;
-      } else {
-        /* If no switching has been done AND the direction is "asc",
-        set the direction to "desc" and run the while loop again. */
-        if (switchcount == 0 && dir == "asc") {
-          dir = "desc";
+        if (shouldSwitch) {
+          /* If a switch has been marked, make the switch
+          and mark that a switch has been done: */
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
           switching = true;
+          // Each time a switch is done, increase this count by 1:
+          switchcount ++;
+        } else {
+          /* If no switching has been done AND the direction is "asc",
+          set the direction to "desc" and run the while loop again. */
+          if (switchcount == 0 && dir == "asc") {
+            dir = "desc";
+            switching = true;
+          }
         }
       }
     }
-  }
 
-  function sortNumberColumn(n) {
-    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    table = document.getElementById("rules-table");
-    switching = true;
-    // Set the sorting direction to ascending:
-    dir = "asc";
-    /* Make a loop that will continue until
-    no switching has been done: */
-    while (switching) {
-      // Start by saying: no switching is done:
-      switching = false;
-      rows = table.rows;
-      /* Loop through all table rows (except the
-      first, which contains table headers): */
-      for (i = 2; i < (rows.length - 1); i++) {
-        // Start by saying there should be no switching:
-        shouldSwitch = false;
-        /* Get the two elements you want to compare,
-        one from current row and one from the next: */
-        x = rows[i].getElementsByTagName("TD")[n];
-        y = rows[i + 1].getElementsByTagName("TD")[n];
-        /* Check if the two rows should switch place,
-        based on the direction, asc or desc: */
-        if (dir == "asc") {
-          if (Number(x.innerText) > Number(y.innerText)) {
-            // If so, mark as a switch and break the loop:
-            shouldSwitch = true;
-            break;
-          }
-        } else if (dir == "desc") {
-          if (Number(x.innerText) < Number(y.innerText)) {
-            // If so, mark as a switch and break the loop:
-            shouldSwitch = true;
-            break;
+    function sortNumberColumn(n) {
+      var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+      table = document.getElementById("rules-table");
+      switching = true;
+      // Set the sorting direction to ascending:
+      dir = "asc";
+      /* Make a loop that will continue until
+      no switching has been done: */
+      while (switching) {
+        // Start by saying: no switching is done:
+        switching = false;
+        rows = table.rows;
+        /* Loop through all table rows (except the
+        first, which contains table headers): */
+        for (i = 2; i < (rows.length - 1); i++) {
+          // Start by saying there should be no switching:
+          shouldSwitch = false;
+          /* Get the two elements you want to compare,
+          one from current row and one from the next: */
+          x = rows[i].getElementsByTagName("TD")[n];
+          y = rows[i + 1].getElementsByTagName("TD")[n];
+          /* Check if the two rows should switch place,
+          based on the direction, asc or desc: */
+          if (dir == "asc") {
+            if (Number(x.innerText) > Number(y.innerText)) {
+              // If so, mark as a switch and break the loop:
+              shouldSwitch = true;
+              break;
+            }
+          } else if (dir == "desc") {
+            if (Number(x.innerText) < Number(y.innerText)) {
+              // If so, mark as a switch and break the loop:
+              shouldSwitch = true;
+              break;
+            }
           }
         }
-      }
-      if (shouldSwitch) {
-        /* If a switch has been marked, make the switch
-        and mark that a switch has been done: */
-        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-        switching = true;
-        // Each time a switch is done, increase this count by 1:
-        switchcount ++;
-      } else {
-        /* If no switching has been done AND the direction is "asc",
-        set the direction to "desc" and run the while loop again. */
-        if (switchcount == 0 && dir == "asc") {
-          dir = "desc";
+        if (shouldSwitch) {
+          /* If a switch has been marked, make the switch
+          and mark that a switch has been done: */
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
           switching = true;
+          // Each time a switch is done, increase this count by 1:
+          switchcount ++;
+        } else {
+          /* If no switching has been done AND the direction is "asc",
+          set the direction to "desc" and run the while loop again. */
+          if (switchcount == 0 && dir == "asc") {
+            dir = "desc";
+            switching = true;
+          }
         }
       }
     }
-  }
   </script>
-
 </head>
 
 <body>

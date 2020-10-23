@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -30,6 +32,7 @@ import eu.jsparrow.core.statistic.entity.JsparrowData;
 import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.core.statistic.entity.JsparrowRuleData;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.MavenImportException;
@@ -188,7 +191,7 @@ public class RefactoringInvoker {
 		String json = JsonUtil.generateJSON(metricData);
 		JsonUtil.sendJsonToAwsStatisticsService(json);
 	}
-	
+
 	private void collectAndPrintStatistics(BundleContext context) {
 		boolean computedStatistics = standaloneConfigs.stream()
 			.map(StandaloneConfig::getStatisticsData)
@@ -201,15 +204,22 @@ public class RefactoringInvoker {
 		}
 
 		JsparrowMetric metricData = collectStatistics();
-		String htmlPath = context.getProperty(ROOT_PROJECT_BASE_PATH) + File.separator + "index.html"; //$NON-NLS-1$
-		ReportGenerator reportGenerator = new ReportGenerator(metricData.getData());
+		Map<String, RefactoringRule> ruleIdsMap = standaloneConfigs.stream()
+			.map(StandaloneConfig::getProjectRules)
+			.flatMap(List::stream)
+			.collect(Collectors.toMap(RefactoringRule::getId,
+					Function.identity(),
+					(r1, r2) -> r1 /* simply drop the duplicates */));
+
+		String htmlPath = context.getProperty(ROOT_PROJECT_BASE_PATH) + File.separator + "jSparrowFindingsReport.html"; //$NON-NLS-1$
+		ReportGenerator reportGenerator = new ReportGenerator(metricData.getData(), ruleIdsMap);
 		try {
 			reportGenerator.writeReport(htmlPath);
 		} catch (IOException | URISyntaxException e) {
-			logger.error("Cannot generate the html report", e);
+			logger.error("Cannot generate the html report", e); //$NON-NLS-1$
 		}
-		
-		String jsonPath = context.getProperty(ROOT_PROJECT_BASE_PATH) + File.separator + "results.json"; //$NON-NLS-1$
+
+		String jsonPath = context.getProperty(ROOT_PROJECT_BASE_PATH) + File.separator + "jSparrowFindings.json"; //$NON-NLS-1$
 		JsonUtil.writeJSON(metricData, jsonPath);
 	}
 
