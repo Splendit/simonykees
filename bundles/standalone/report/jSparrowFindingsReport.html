@@ -8544,9 +8544,10 @@
               <th onclick="sortNumberColumn(2)" role="columnheader" scope="col" aria-label="Files Changed: Not sorted. Activate to sort ascending."
                 aria-sort="none" class="column sortable text-xs-center"><i aria-hidden="true"
                   class="v-icon material-icons theme--light" style="font-size: 16px;">arrow_upward</i>Files Changed</th>
-              <th role="columnheader" scope="col" aria-label="Time saved: Not sorted. Activate to sort ascending."
+              <th onclick="sortNumberColumn(4)" role="columnheader" scope="col" aria-label="Time saved: Not sorted. Activate to sort ascending."
                 aria-sort="none" class="column sortable text-xs-center"><i aria-hidden="true"
                   class="v-icon material-icons theme--light" style="font-size: 16px;">arrow_upward</i>Time saved</th>
+              <th role="columnheader" style="display: none;">Time saved</th>
             </tr>
           </thead>
           <tbody>
@@ -8560,6 +8561,7 @@
                 <td class="text-xs-right">${rule.issuesFixed}</td>
                 <td class="text-xs-right">${rule.filesChanged}</td>
                 <td class="text-xs-right"><script>document.write(secondsToHms(${rule.issuesFixed} * ${rule.remediationCost}))</script></td>
+                <td style="display: none;">${rule.issuesFixed * rule.remediationCost}</td>
               </tr>
             </#list>
           </tbody>
