@@ -202,7 +202,7 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public	void visit_InitializingComparatorOfJoker_shouldTransform() throws Exception {
+	public void visit_InitializingComparatorOfJoker_shouldTransform() throws Exception {
 		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
 		String original = "" +
 				"void test() {\n" +
@@ -219,9 +219,9 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
-	public	void visit_InitializingComparatorOfDequeOfInteger_shouldTransform() throws Exception {
+	public void visit_InitializingComparatorOfDequeOfInteger_shouldTransform() throws Exception {
 		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
 		String original = "" +
 				"void test() {\n" +
@@ -235,7 +235,7 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 				"	Comparator<ArrayDeque<Integer>> comparator=Comparator.comparingInt(ArrayDeque::getFirst);\n"
 				+
 				"}";
-		
+
 		assertChange(original, expected);
 	}
 
@@ -252,7 +252,7 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_IntegerLambdaParameterInInitializer_shouldTransform() throws Exception {
 		String original = "" +
@@ -266,7 +266,7 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_IntegerLambdaParameterInAssignmentRHS_shouldTransform() throws Exception {
 		String original = "" +
@@ -276,9 +276,54 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	}";
 		String expected = "" +
 				"	void test () {\n"
-				+ "		Comparator<Integer> integerComparator;\n"				
+				+ "		Comparator<Integer> integerComparator;\n"
 				+ "		integerComparator = Comparator.naturalOrder();\n"
 				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_UseComparatorWithDequeOfIntegerAsArgument_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
+		String original = "" +
+				"void useComparator(Comparator<ArrayDeque<Integer>> comparator) {\n" +
+				"}\n" +
+				"void test() {\n" +
+				"	useComparator(\n" +
+				"			(ArrayDeque<Integer> lhs, ArrayDeque<Integer> rhs) -> lhs.getFirst().compareTo(rhs.getFirst()));\n"
+				+
+				"}";
+		String expected = "" +
+				"void useComparator(Comparator<ArrayDeque<Integer>> comparator) {\n" +
+				"}\n" +
+				"void test() {\n" +
+				"	useComparator(\n" +
+				"			Comparator.comparingInt(ArrayDeque::getFirst));\n" +
+				"}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_UseComparatorOfJokerWithDequeOfIntegerAsArgument_shouldTransform() throws Exception {
+
+		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
+		String original = "" +
+				"		void useComparator(Comparator<?> comparator) {\n" +
+				"		}\n" +
+				"		void test() {\n" +
+				"			useComparator(					\n" +
+				"					(ArrayDeque<Integer> lhs, ArrayDeque<Integer> rhs) -> lhs.getFirst().compareTo(rhs.getFirst()));\n"
+				+
+				"		}";
+		String expected = "" +
+				"		void useComparator(Comparator<?> comparator) {\n" +
+				"		}\n" +
+				"		void test() {\n" +
+				"			useComparator(					\n" +
+				"					Comparator.comparingInt((ArrayDeque<Integer> lhs) -> lhs.getFirst()));\n"
+				+
+				"		}";
 
 		assertChange(original, expected);
 	}
