@@ -8426,6 +8426,32 @@
           }
         }
       }
+
+      var thead = table.tHead;
+      var head_rows = thead.rows;
+      var th_elements = head_rows[0].getElementsByTagName("TH");
+      var thead = table.tHead;
+      var head_rows = thead.rows;
+      var th_elements = head_rows[0].getElementsByTagName("TH");
+      for (i = 0; i < th_elements.length; i++) {
+        if(i == n ) {
+          var index = i;
+          if(i == th_elements.length - 1) {
+            index = i -1;
+          }
+          var th = th_elements[index];
+          var span = th.getElementsByTagName("SPAN")[0];
+          if (dir == "asc") {
+            span.innerText = "\u25B2";
+          } else {
+            span.innerText = "\u25BC";
+          }
+        } else {
+          var th = th_elements[i];
+          var span = th.getElementsByTagName("SPAN")[0];
+          span.innerText = "";
+        }
+      }
     }
 
     function sortNumberColumn(n) {
@@ -8481,6 +8507,29 @@
           }
         }
       }
+
+      var thead = table.tHead;
+      var head_rows = thead.rows;
+      var th_elements = head_rows[0].getElementsByTagName("TH");
+      for (i = 0; i < th_elements.length; i++) {
+        if(i == n ) {
+          var index = i;
+          if(i == th_elements.length - 1) {
+            index = i -1;
+          } 
+          var th = th_elements[index];
+          var span = th.getElementsByTagName("SPAN")[0];
+          if (dir == "asc") {
+            span.innerText = "\u25B2";
+          } else {
+            span.innerText = "\u25BC";
+          }
+        } else {
+          var th = th_elements[i];
+          var span = th.getElementsByTagName("SPAN")[0];
+          span.innerText = "";
+        }
+      }
     }
 
     function secondsToHms(d) {
@@ -8528,26 +8577,21 @@
 
     <h3 id="per-rule">Per Rule Statistics</h3>
 
-    This table contains the list of rules that were applied on cucumber-jvm.
+    This table contains the list of rules that were applied on ${projectName}.
     <div>
       <div class="v-table__overflow">
         <table id="rules-table" class="v-datatable v-table theme--light">
           <thead>
             <tr>
               <th onclick="sortTextColumn(0)" role="columnheader" scope="col" aria-label="Rule Name: Sorted ascending. Activate to sort descending."
-                aria-sort="ascending" class="column sortable active asc text-xs-center"><i
-                  aria-hidden="true" class="v-icon material-icons theme--light"
-                  style="font-size: 16px;">arrow_upward</i>Rule Name</th>
+                aria-sort="ascending" class="column sortable active asc text-xs-center"><span></span>Rule Name</th>
               <th onclick="sortNumberColumn(1)" role="columnheader" scope="col" aria-label="Issues Fixed: Not sorted. Activate to sort ascending."
-                aria-sort="none" class="column sortable text-xs-center"><i aria-hidden="true"
-                  class="v-icon material-icons theme--light" style="font-size: 16px;">arrow_upward</i>Issues Fixed</th>
+                aria-sort="none" class="column sortable text-xs-center"><span></span>Issues Fixed</th>
               <th onclick="sortNumberColumn(2)" role="columnheader" scope="col" aria-label="Files Changed: Not sorted. Activate to sort ascending."
-                aria-sort="none" class="column sortable text-xs-center"><i aria-hidden="true"
-                  class="v-icon material-icons theme--light" style="font-size: 16px;">arrow_upward</i>Files Changed</th>
+                aria-sort="none" class="column sortable text-xs-center"><span></span>Files Changed</th>
               <th onclick="sortNumberColumn(4)" role="columnheader" scope="col" aria-label="Time saved: Not sorted. Activate to sort ascending."
-                aria-sort="none" class="column sortable text-xs-center"><i aria-hidden="true"
-                  class="v-icon material-icons theme--light" style="font-size: 16px;">arrow_upward</i>Time saved</th>
-              <th role="columnheader" style="display: none;">Time saved</th>
+                aria-sort="none" class="column sortable text-xs-center"><span></span>Time saved</th>
+              <th role="columnheader" style="display: none;"><span></span>Time saved</th>
             </tr>
           </thead>
           <tbody>
