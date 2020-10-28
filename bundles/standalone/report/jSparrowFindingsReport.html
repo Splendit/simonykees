@@ -3346,6 +3346,8 @@
       return hDisplay + mDisplay + sDisplay;
     }
   </script>
+
+  <link rel="icon" href="https://jsparrow.github.io/logo.png">
 </head>
 
 <body>
@@ -3358,7 +3360,7 @@
   <div class="theme-default-content content__default"></div>
 
   <div id="51" class="tabcontent" style="display: block;">
-    <h1>jSparrow results for ${projectName}</h1>
+    <h1>jSparrow report for ${projectName}</h1>
     <p>Metrics for ${projectName} (created on ${date}):</p>
     <table class="table-hover">
       <tbody>
@@ -3367,11 +3369,11 @@
           <td>${totalFilesCount}</td>
         </tr>
         <tr>
-          <td>Number of files changed</td>
+          <td>Number of files with findings</td>
           <td>${totalFilesChanged}</td>
         </tr>
         <tr>
-          <td>Total number of issues fixed</td>
+          <td>Total number of issues found</td>
           <td>${totalIssuesFixed}</td>
         </tr>
         <tr>
@@ -3394,11 +3396,11 @@
               <th onclick="sortAsText(0)" role="columnheader" scope="col" aria-label="Rule Name: Sorted ascending. Activate to sort descending."
                 aria-sort="ascending" class="column sortable active asc text-xs-center"><span></span>Rule Name</th>
               <th onclick="sortAsNumbers(1)" role="columnheader" scope="col" aria-label="Issues Fixed: Not sorted. Activate to sort ascending."
-                aria-sort="none" class="column sortable text-xs-center"><span></span>Issues Fixed</th>
+                aria-sort="none" class="column sortable text-xs-center"><span></span>Issues Found</th>
               <th onclick="sortAsNumbers(2)" role="columnheader" scope="col" aria-label="Files Changed: Not sorted. Activate to sort ascending."
-                aria-sort="none" class="column sortable text-xs-center"><span></span>Files Changed</th>
+                aria-sort="none" class="column sortable text-xs-center"><span></span>Files with Findings</th>
               <th onclick="sortAsNumbers(4)" role="columnheader" scope="col" aria-label="Time saved: Not sorted. Activate to sort ascending."
-                aria-sort="none" class="column sortable text-xs-center"><span></span>Time saved</th>
+                aria-sort="none" class="column sortable text-xs-center"><span></span>Time Saved</th>
               <th role="columnheader" style="display: none;"><span></span>Time saved</th>
             </tr>
           </thead>
