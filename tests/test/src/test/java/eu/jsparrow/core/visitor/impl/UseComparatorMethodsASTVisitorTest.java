@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.impl;
 
+import java.util.Comparator;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -343,6 +345,34 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 				"	void test() {\n" +
 				"		this.<Comparator<?>>useT(Comparator.<Integer>naturalOrder());\n" +
 				"	}";
+
+		assertChange(original, expected);
+	}
+	
+	void testUseComparatorOfJokerWithInteger() {
+		useComparatorOfJoker((Comparator<Integer>) (t1, t2) -> t1.compareTo(t2));
+	}
+	void useComparatorOfJoker(Comparator<?> comparator) {
+	}	
+	void testUseComparatorOfJokerWithIntegerTransformed() {
+		useComparatorOfJoker((Comparator<Integer>) Comparator.<Integer>naturalOrder());
+	}
+
+	@Test
+	public void visit_TypeCastToComparatorOfIntegerUsedAsComparatorOfJoker_shouldTransform() throws Exception {
+		String original = "" +
+				"	void useComparatorOfJoker(Comparator<?> comparator) {\n"
+				+ "	}	\n"
+				+ "	void test() {\n"
+				+ "		useComparatorOfJoker((Comparator<Integer>) (t1, t2) -> t1.compareTo(t2));\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void useComparatorOfJoker(Comparator<?> comparator) {\n"
+				+ "	}	\n"
+				+ "	void test() {\n"
+				+ "		useComparatorOfJoker((Comparator<Integer>) Comparator.<Integer>naturalOrder());\n"
+				+ "	}";
 
 		assertChange(original, expected);
 	}

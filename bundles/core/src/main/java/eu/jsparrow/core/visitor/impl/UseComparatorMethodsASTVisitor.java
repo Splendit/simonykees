@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
@@ -15,6 +16,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -90,6 +92,8 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			explicitLambdaParameterType = ((SingleVariableDeclaration) lambdaParameters.get(0)).getType();
 		}
 
+		boolean isTypeCastExpression = lambda.getLocationInParent() == CastExpression.EXPRESSION_PROPERTY;
+
 		if (compareToMethodExpression.getNodeType() == ASTNode.SIMPLE_NAME
 				&& compareToMethodArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
 
@@ -107,6 +111,20 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			if (explicitLambdaParameterType != null
 					&& isLambdaParameterTypeRequired(explicitLambdaParameterType, lambda)) {
 				return createComparatorMethodInvocation(comparatorMethodName, explicitLambdaParameterType);
+			} else if (isTypeCastExpression) {
+				CastExpression castExpression = (CastExpression) lambda.getParent();
+				Type castExpressionType = castExpression.getType();
+				if (castExpressionType.isParameterizedType()) {
+					ParameterizedType parametrizedType = (ParameterizedType) castExpressionType;
+					List<Type> castExpressionTypeArguments = ASTNodeUtil
+						.convertToTypedList(parametrizedType.typeArguments(), Type.class);
+					if (castExpressionTypeArguments.size() == 1) {
+						Type castExpressionTypeArgument = castExpressionTypeArguments.get(0);
+						return createComparatorMethodInvocation(comparatorMethodName, castExpressionTypeArgument);
+					} else {
+						return null;
+					}
+				}
 			} else {
 				return createComparatorMethodInvocation(comparatorMethodName);
 			}
