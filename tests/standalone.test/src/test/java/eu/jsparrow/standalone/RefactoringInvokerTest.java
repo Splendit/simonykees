@@ -71,6 +71,22 @@ public class RefactoringInvokerTest {
 	}
 
 	@Test
+	public void runInDemoMode() throws Exception {
+		BundleContext context = mock(BundleContext.class);
+		RefactoringPipeline refactoringPipeline = mock(RefactoringPipeline.class);
+
+		IJavaProject javaProject = mock(IJavaProject.class);
+		when(javaProject.getElementName()).thenReturn(""); //$NON-NLS-1$
+		when(refactoringPipeline.getRulesWithChangesAsString()).thenReturn(""); //$NON-NLS-1$
+
+		refactoringInvoker.runInDemoMode(context);
+
+		verify(standaloneConfig).createRefactoringStates();
+		verify(standaloneConfig).computeRefactoring();
+		verify(standaloneConfig, never()).commitRefactoring();
+	}
+
+	@Test
 	public void startRefactoring_exceptionsInCreateRefactoringState_shouldNotCommit() throws Exception {
 		BundleContext context = mock(BundleContext.class);
 
