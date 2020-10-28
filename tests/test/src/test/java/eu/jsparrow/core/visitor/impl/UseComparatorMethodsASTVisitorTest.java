@@ -1,7 +1,5 @@
 package eu.jsparrow.core.visitor.impl;
 
-import java.util.Comparator;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -348,15 +346,6 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-	
-	void testUseComparatorOfJokerWithInteger() {
-		useComparatorOfJoker((Comparator<Integer>) (t1, t2) -> t1.compareTo(t2));
-	}
-	void useComparatorOfJoker(Comparator<?> comparator) {
-	}	
-	void testUseComparatorOfJokerWithIntegerTransformed() {
-		useComparatorOfJoker((Comparator<Integer>) Comparator.<Integer>naturalOrder());
-	}
 
 	@Test
 	public void visit_TypeCastToComparatorOfIntegerUsedAsComparatorOfJoker_shouldTransform() throws Exception {
@@ -375,6 +364,29 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	}";
 
 		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_TypeCastToComparatorOfDequeUsedAsComparatorOfJoker_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
+		String original = "" +
+				"	void useComparatorOfJoker(Comparator<?> comparator) {\n"
+				+ "	}\n"
+				+ "	void test() {\n"
+				+ "		useComparatorOfJoker((Comparator<ArrayDeque<Integer>>) (x1, x2) -> x1.getFirst()\n"
+				+ "			.compareTo(x2.getFirst()));\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void useComparatorOfJoker(Comparator<?> comparator) {\n"
+				+ "	}\n"
+				+ "	void test() {\n"
+				+ "		useComparatorOfJoker(//\n"
+				+ "				(Comparator<ArrayDeque<Integer>>) Comparator.comparingInt((ArrayDeque<Integer> x1) -> x1.getFirst()));\n"
+				+ "	}";
+
+		assertChange(original, expected);
+
 	}
 
 	@Test

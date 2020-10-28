@@ -93,6 +93,10 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		}
 
 		boolean isTypeCastExpression = lambda.getLocationInParent() == CastExpression.EXPRESSION_PROPERTY;
+		Type castExpressionTypeArgument = null;
+		if (isTypeCastExpression) {
+			castExpressionTypeArgument = extractCastExpressionTypeArgument((CastExpression) lambda.getParent());
+		}
 
 		if (compareToMethodExpression.getNodeType() == ASTNode.SIMPLE_NAME
 				&& compareToMethodArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
@@ -112,19 +116,12 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 					&& isLambdaParameterTypeRequired(explicitLambdaParameterType, lambda)) {
 				return createComparatorMethodInvocation(comparatorMethodName, explicitLambdaParameterType);
 			} else if (isTypeCastExpression) {
-				CastExpression castExpression = (CastExpression) lambda.getParent();
-				Type castExpressionType = castExpression.getType();
-				if (castExpressionType.isParameterizedType()) {
-					ParameterizedType parametrizedType = (ParameterizedType) castExpressionType;
-					List<Type> castExpressionTypeArguments = ASTNodeUtil
-						.convertToTypedList(parametrizedType.typeArguments(), Type.class);
-					if (castExpressionTypeArguments.size() == 1) {
-						Type castExpressionTypeArgument = castExpressionTypeArguments.get(0);
-						return createComparatorMethodInvocation(comparatorMethodName, castExpressionTypeArgument);
-					} else {
-						return null;
-					}
+				if (castExpressionTypeArgument != null) {
+					return createComparatorMethodInvocation(comparatorMethodName, castExpressionTypeArgument);
 				}
+				else {
+					return null;
+				}				
 			} else {
 				return createComparatorMethodInvocation(comparatorMethodName);
 			}
@@ -156,13 +153,20 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 				.getType();
 
 			Expression comparatorMethodArgument;
+			String lambdaParameterIdentifier = lambdaParameters.get(0)
+				.getName()
+				.getIdentifier();
 			if (explicitLambdaParameterType != null
 					&& isLambdaParameterTypeRequired(explicitLambdaParameterType, lambda)) {
-				String lambdaParameterIdentifier = lambdaParameters.get(0)
-					.getName()
-					.getIdentifier();
 				comparatorMethodArgument = createLambdaExpression(explicitLambdaParameterType, comparisonKeyMethod,
 						lambdaParameterIdentifier);
+			} else if (isTypeCastExpression) {
+				if (castExpressionTypeArgument != null) {
+					comparatorMethodArgument = createLambdaExpression(castExpressionTypeArgument, comparisonKeyMethod,
+							lambdaParameterIdentifier);
+				} else {
+					return null;
+				}
 			} else {
 				comparatorMethodArgument = createExpressionMethodReference(lambdaParameterType,
 						comparisonKeyMethod);
@@ -177,6 +181,19 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			}
 			return comparatorMethodInvocation;
 
+		}
+		return null;
+	}
+
+	private Type extractCastExpressionTypeArgument(CastExpression castExpression) {
+		Type castExpressionType = castExpression.getType();
+		if (castExpressionType.isParameterizedType()) {
+			ParameterizedType parametrizedType = (ParameterizedType) castExpressionType;
+			List<Type> castExpressionTypeArguments = ASTNodeUtil
+				.convertToTypedList(parametrizedType.typeArguments(), Type.class);
+			if (castExpressionTypeArguments.size() == 1) {
+				return castExpressionTypeArguments.get(0);
+			}
 		}
 		return null;
 	}
