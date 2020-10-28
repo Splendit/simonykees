@@ -329,6 +329,25 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_ComparatorOfJokerAsTypeArgument_shouldTransform() throws Exception {
+		String original = "" +
+				"	<T> void useT(T t) {\n" +
+				"	}\n" +
+				"	void test() {\n" +
+				"		this.<Comparator<?>>useT((Integer t1, Integer t2) -> t1.compareTo(t2));\n" +
+				"	}";
+
+		String expected = "" +
+				"	<T> void useT(T t) {\n" +
+				"	}\n" +
+				"	void test() {\n" +
+				"		this.<Comparator<?>>useT(Comparator.<Integer>naturalOrder());\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_OverloadedCompareToReceivingNotComparable_shouldNotTransform() throws Exception {
 		String original = "" +
 				"void test() {\n" +
@@ -588,4 +607,5 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
+
 }

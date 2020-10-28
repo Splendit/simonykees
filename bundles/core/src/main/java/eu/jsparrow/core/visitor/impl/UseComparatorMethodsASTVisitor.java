@@ -297,10 +297,13 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		}
 
 		if (comparatorTypeBinding != null) {
-			comparatorTypeArgumentBinding = comparatorTypeBinding.getTypeArguments()[0];
-			if (ClassRelationUtil.compareITypeBinding(comparatorTypeArgumentBinding,
-					explicitLambdaParameterTypeBinding)) {
-				return false;
+			ITypeBinding[] typeArguments = comparatorTypeBinding.getTypeArguments();
+			if (typeArguments.length == 1) {
+				comparatorTypeArgumentBinding = typeArguments[0];
+				if (ClassRelationUtil.compareITypeBinding(comparatorTypeArgumentBinding,
+						explicitLambdaParameterTypeBinding)) {
+					return false;
+				}
 			}
 		}
 		return true;
