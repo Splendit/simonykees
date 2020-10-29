@@ -44,7 +44,7 @@ public class ReportGenerator {
 	private static final String TOTAL_FILES_CHANGED = "totalFilesChanged";  //$NON-NLS-1$
 	private static final String TOTAL_FILES_COUNT = "totalFilesCount";  //$NON-NLS-1$
 	private static final String PROJECT_NAME = "projectName";  //$NON-NLS-1$
-	
+	private static final String REPORT_FILE_NAME = "jSparrowReport.html"; //$NON-NLS-1$
 	private JsparrowData jSparrowData;
 	private Map<String, RefactoringRule> refactoringRules;
 	
