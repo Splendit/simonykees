@@ -174,23 +174,6 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_ComparatorForComparableOfJoker_shouldTransform() throws Exception {
-		String original = "" +
-				"void test() {\n" +
-				"	Comparator<Comparable<? super Comparable<?>>> comparable = (u1, u2) -> u1.compareTo(u2);\n"
-				+
-				"}";
-
-		String expected = "" +
-				"void test() {\n" +
-				"	Comparator<Comparable<? super Comparable<?>>> comparable=Comparator.naturalOrder();\n"
-				+
-				"}";
-
-		assertChange(original, expected);
-	}
-
-	@Test
 	public void visit_InitializingComparatorOfJoker_shouldTransform() throws Exception {
 		defaultFixture.addImport(java.util.ArrayDeque.class.getName());
 		String original = "" +
@@ -379,41 +362,6 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_OverloadedCompareToReceivingNotComparable_shouldNotTransform() throws Exception {
-		String original = "" +
-				"void test() {\n" +
-				"	class LocalClass {}\n" +
-				"	class LocalComparableSubclass implements Comparable<LocalComparableSubclass> {\n" +
-				"		int compareTo(LocalClass o) {\n" +
-				"			return 0;\n" +
-				"		}\n" +
-				"		public int compareTo(LocalComparableSubclass o) {\n" +
-				"			return 0;\n" +
-				"		}\n" +
-				"	}\n" +
-				"	Comparator<LocalComparableSubclass> comparator = (lhs, rhs) -> lhs.compareTo(new LocalClass());\n" +
-				"	}";
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_OverloadedCompareToReceivingTwoParameters_shouldNotTransform() throws Exception {
-		String original = "" +
-				"void test2() {\n" +
-				"	class LocalComparableSubclass implements Comparable<LocalComparableSubclass> {\n" +
-				"		int compareTo(LocalComparableSubclass o1, LocalComparableSubclass o2) {\n" +
-				"			return 0;\n" +
-				"		}\n" +
-				"		public int compareTo(LocalComparableSubclass o) {\n" +
-				"			return 0;\n" +
-				"		}\n" +
-				"	}\n" +
-				"	Comparator<LocalComparableSubclass> comparator = (lhs, rhs) -> lhs.compareTo(lhs, rhs);\n" +
-				"}";
-		assertNoChange(original);
-	}
-
-	@Test
 	public void visit_Comparator4IntegerUsingOnlyLHSLambdaParameter_shouldNotTransform() throws Exception {
 		String original = "" +
 				"void test() {\n" +
@@ -436,34 +384,6 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 		String original = "" +
 				"void test(Integer x1, Integer x2) {\n" +
 				"	Comparator<Integer> comparator = (lhs, rhs) -> x1.compareTo(x2);\n" +
-				"}";
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_ComparatorNotUsingCompareToMethod_shouldNotTransform() throws Exception {
-		String original = "" +
-				"void test() {\n" +
-				"	class LocalClass {\n" +
-				"		int extractInt(LocalClass other) {\n" +
-				"			return 0;\n" +
-				"		}\n" +
-				"	}\n" +
-				"	Comparator<LocalClass> comparator = (lhs, rhs) -> lhs.extractInt(rhs);\n" +
-				"}";
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_CompareToNotMethodOfComparable_shouldNotTransform() throws Exception {
-		String original = "" +
-				"void test() {\n" +
-				"	class LocalClass {\n" +
-				"		int compareTo(LocalClass other) {\n" +
-				"			return 0;\n" +
-				"		}\n" +
-				"	}\n" +
-				"	Comparator<LocalClass> comparator = (lhs, rhs) -> lhs.compareTo(rhs);\n" +
 				"}";
 		assertNoChange(original);
 	}
@@ -598,33 +518,4 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 
 		assertNoChange(original);
 	}
-
-	@Test
-	public void visit_LambdaBodyNotMethodInvocation_shouldNotTransform() throws Exception {
-		String original = "" +
-				"void test() {\n" +
-				"	Comparator<Integer> comparator = (lhs, rhs) -> {\n" +
-				"		return lhs.compareTo(rhs);\n" +
-				"	};\n" +
-				"}";
-
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_CompareToMethodWithoutExpression_shouldNotTransform() throws Exception {
-		String original = "" +
-				"void test() {\n" +
-				"	class LocalComparable implements Comparable<LocalComparable> {\n" +
-				"		Comparator<LocalComparable> comparator = (lhs, rhs) -> compareTo(rhs);\n" +
-				"		@Override\n" +
-				"		public int compareTo(LocalComparable o) {\n" +
-				"			return 0;\n" +
-				"		}\n" +
-				"	}\n" +
-				"}";
-
-		assertNoChange(original);
-	}
-
 }

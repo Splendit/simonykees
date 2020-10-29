@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.impl.comparatormethods;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -40,7 +39,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 	private static final int PARAM_USAGE_REVERSE_ORDER = 1;
 	private static final int PARAM_USAGE_INVALID = -1;
 
-	private static final String JAVA_LANG_COMPARABLE = java.lang.Comparable.class.getName();
+	static final String JAVA_LANG_COMPARABLE = java.lang.Comparable.class.getName();
 	static final String JAVA_UTIL_COMPARATOR = java.util.Comparator.class.getName();
 
 	@Override
@@ -70,20 +69,8 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 
 	private MethodInvocation createComparatorMethodInvocation(LambdaExpression lambda,
 			ComparatorLambdaAnalyzer lambdaAnalyzer) {
-
-		MethodInvocation compareToMethodInvocation = extractCompareToInvocation(lambda);
-		if (compareToMethodInvocation == null) {
-			return null;
-		}
-
-		Expression compareToMethodExpression = compareToMethodInvocation.getExpression();
-		if (compareToMethodExpression == null) {
-			return null;
-		}
-
-		Expression compareToMethodArgument = ASTNodeUtil
-			.convertToTypedList(compareToMethodInvocation.arguments(), Expression.class)
-			.get(0);
+		Expression compareToMethodExpression = lambdaAnalyzer.getCompareToMethodExpression();
+		Expression compareToMethodArgument = lambdaAnalyzer.getCompareToMethodArgument();
 
 		List<VariableDeclaration> lambdaParameters = ASTNodeUtil.convertToTypedList(lambda.parameters(),
 				VariableDeclaration.class);
@@ -249,58 +236,6 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			.equals(rhsMethodBinding.getName())
 				&& ClassRelationUtil.compareITypeBinding(lhsMethodBinding.getDeclaringClass(),
 						rhsMethodBinding.getDeclaringClass());
-	}
-
-	private boolean isComparable(ITypeBinding typeBinding) {
-		boolean isComparable = ClassRelationUtil.isContentOfType(typeBinding, JAVA_LANG_COMPARABLE);
-		boolean isInheritingComparable = ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
-				Collections.singletonList(JAVA_LANG_COMPARABLE));
-
-		return isComparable || isInheritingComparable;
-	}
-
-	private MethodInvocation extractCompareToInvocation(LambdaExpression lambda) {
-		ASTNode lambdaBody = lambda.getBody();
-		MethodInvocation methodInvocation = null;
-		if (lambdaBody.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			methodInvocation = (MethodInvocation) lambdaBody;
-		}
-		if (methodInvocation == null) {
-			return null;
-		}
-
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-
-		if (!methodBinding.getName()
-			.equals("compareTo")) { //$NON-NLS-1$
-			return null;
-		}
-
-		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
-		if (parameterTypes.length != 1) {
-			return null;
-		}
-
-		// This is needed
-		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-		if (!isComparable(declaringClass)) {
-			return null;
-		}
-
-		ITypeBinding parameterType = parameterTypes[0];
-		if (parameterType.isCapture()) {
-			ITypeBinding wildcard = parameterType.getWildcard();
-			ITypeBinding bound = wildcard.getBound();
-			if (isComparable(bound)) {
-				return methodInvocation;
-			}
-		}
-
-		if (!isComparable(parameterType)) {
-			return null;
-		}
-
-		return methodInvocation;
 	}
 
 	private boolean isLambdaParameterTypeRequired(Type explicitLambdaParameterType, LambdaExpression lambda) {
