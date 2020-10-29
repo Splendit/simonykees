@@ -2,17 +2,15 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -32,12 +30,14 @@ import eu.jsparrow.core.statistic.entity.JsparrowData;
 import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.core.statistic.entity.JsparrowRuleData;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.MavenImportException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
+import eu.jsparrow.standalone.report.ReportDataUtil;
 import eu.jsparrow.standalone.report.ReportGenerator;
+import eu.jsparrow.standalone.report.model.ReportData;
+import eu.jsparrow.standalone.util.ResourceLocator;
 
 /**
  * 
@@ -204,23 +204,25 @@ public class RefactoringInvoker {
 		}
 
 		JsparrowMetric metricData = collectStatistics();
-		Map<String, RefactoringRule> ruleIdsMap = standaloneConfigs.stream()
-			.map(StandaloneConfig::getProjectRules)
-			.flatMap(List::stream)
-			.collect(Collectors.toMap(RefactoringRule::getId,
-					Function.identity(),
-					(r1, r2) -> r1 /* simply drop the duplicates */));
+		String reportOutputPath = context.getProperty(ROOT_PROJECT_BASE_PATH);
+		String jsonPath = String.join(File.separator, reportOutputPath, "jSparrowReport.json"); //$NON-NLS-1$
+		JsonUtil.writeJSON(metricData, jsonPath);
 
-		String htmlPath = context.getProperty(ROOT_PROJECT_BASE_PATH) + File.separator + "jSparrowFindingsReport.html"; //$NON-NLS-1$
-		ReportGenerator reportGenerator = new ReportGenerator(metricData.getData(), ruleIdsMap);
-		try {
-			reportGenerator.writeReport(htmlPath);
-		} catch (IOException | URISyntaxException e) {
-			logger.error("Cannot generate the html report", e); //$NON-NLS-1$
+		File templateFolder = ResourceLocator.findFile("report") //$NON-NLS-1$
+			.orElse(null);
+		if (templateFolder == null) {
+			logger.warn("The jSparrow Report cannot be generated. The report template cannot be located."); //$NON-NLS-1$
+			return;
 		}
 
-		String jsonPath = context.getProperty(ROOT_PROJECT_BASE_PATH) + File.separator + "jSparrowFindings.json"; //$NON-NLS-1$
-		JsonUtil.writeJSON(metricData, jsonPath);
+		JsparrowData jSparrowData = metricData.getData();
+		ReportData report = ReportDataUtil.createReportData(standaloneConfigs, jSparrowData, new Date());
+		ReportGenerator reportGenerator = new ReportGenerator();
+		try {
+			reportGenerator.writeReport(report, reportOutputPath, templateFolder);
+		} catch (IOException e) {
+			logger.error("Cannot generate the html report", e); //$NON-NLS-1$
+		}
 	}
 
 	private JsparrowMetric collectStatistics() {

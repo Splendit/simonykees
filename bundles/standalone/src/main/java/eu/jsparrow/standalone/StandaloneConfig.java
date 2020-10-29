@@ -270,7 +270,7 @@ public class StandaloneConfig {
 		}
 	}
 
-	protected List<RefactoringRule> getProjectRules() {
+	public List<RefactoringRule> getProjectRules() {
 		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
 		return RulesContainer.getRulesForProject(getJavaProject(), true);
 	}

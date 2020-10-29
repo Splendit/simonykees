@@ -1,6 +1,7 @@
 package eu.jsparrow.standalone.report.model;
 
 /**
+ * A model for representing the findings of a rule in a project. 
  * 
  * @since 3.23.0
  *

@@ -219,7 +219,7 @@ public class StandaloneConfigTest {
 		}
 
 		@Override
-		protected List<RefactoringRule> getProjectRules() {
+		public List<RefactoringRule> getProjectRules() {
 			return Collections.singletonList(new CodeFormatterRule());
 		}
 
