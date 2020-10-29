@@ -73,7 +73,7 @@ class ReportDataUtilTest {
 	void test_create_shouldReturnSampleRule() throws Exception {
 		List<StandaloneConfig> standaloneConfigs = Collections.singletonList(standaloneConfig);
 
-		List<RuleDataModel> ruleDataModels = ReportDataUtil.mapToReportDataModel(standaloneConfigs,
+		List<RuleDataModel> ruleDataModels = ReportDataUtil.mapToReportRuleDataModel(standaloneConfigs,
 				jSparrowData.getRules());
 
 		assertThat(ruleDataModels, hasSize(1));

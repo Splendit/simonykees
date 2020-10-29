@@ -30,8 +30,16 @@ import eu.jsparrow.maven.i18n.Messages;
 import eu.jsparrow.maven.util.JavaVersion;
 import eu.jsparrow.maven.util.ProxyUtil;
 
+/**
+ * Runs the jSparrow in the demo mode, i.e. computes the refactorings and
+ * generates a report with the findings. Does not change anything in the source
+ * files.
+ * 
+ * @since 2.20.0
+ *
+ */
 @Mojo(name = "demo", requiresDependencyResolution = ResolutionScope.COMPILE, defaultPhase = LifecyclePhase.INITIALIZE, aggregator = true)
-public class DemoMojo  extends AbstractMojo  {
+public class DemoMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession mavenSession;
@@ -96,7 +104,8 @@ public class DemoMojo  extends AbstractMojo  {
 		}
 
 		String mode = StandaloneMode.DEMO.name();
-		String start = startTime == null ? Instant.now().toString() : startTime;
+		String start = startTime == null ? Instant.now()
+			.toString() : startTime;
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
 				defaultConfiguration, statisticsMetadata, sendStatistics);

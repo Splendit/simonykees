@@ -102,6 +102,16 @@ public class RefactoringInvoker {
 		collectAndSendStatisticData(context);
 	}
 
+	/**
+	 * Computes the refactorings and generates a report with the findings. Does
+	 * not commit the changes in the original sources.
+	 * 
+	 * @param context
+	 *            the bundle context configuration
+	 * @throws StandaloneException
+	 *             if the {@link StandaoneConfig} cannot be loaded or the
+	 *             refactoring cannot be computed or the
+	 */
 	public void runInDemoMode(BundleContext context) throws StandaloneException {
 		List<IJavaProject> importedProjects = importAllProjects(context);
 		loadStandaloneConfig(importedProjects, context);

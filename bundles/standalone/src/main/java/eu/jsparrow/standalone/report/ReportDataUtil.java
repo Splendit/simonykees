@@ -16,7 +16,7 @@ import eu.jsparrow.standalone.report.model.ReportData;
 import eu.jsparrow.standalone.report.model.RuleDataModel;
 
 /**
- * A utility class for
+ * A utility class for generating the data for the HTML report.
  * 
  * @since 3.23.0
  *
@@ -29,9 +29,21 @@ public class ReportDataUtil {
 		 */
 	}
 
+	/**
+	 * Extracts the necessary data for the jSparrow report.
+	 * 
+	 * @param standaloneConfigs
+	 *            the configurations for each project after the refactoring has
+	 *            been computed.
+	 * @param jSparrowData
+	 *            the summary of the jSparrow data for all projects.
+	 * @param date
+	 *            the current date for the report.
+	 * @return the extracted data.
+	 */
 	public static ReportData createReportData(List<StandaloneConfig> standaloneConfigs, JsparrowData jSparrowData,
 			Date date) {
-		List<RuleDataModel> ruleDataModels = mapToReportDataModel(standaloneConfigs,
+		List<RuleDataModel> ruleDataModels = mapToReportRuleDataModel(standaloneConfigs,
 				jSparrowData.getRules());
 		String projectName = jSparrowData.getProjectName();
 		int totalIssuesFixed = jSparrowData.getTotalIssuesFixed();
@@ -48,7 +60,7 @@ public class ReportDataUtil {
 				ruleDataModels);
 	}
 
-	public static List<RuleDataModel> mapToReportDataModel(List<StandaloneConfig> standaloneConfigs,
+	public static List<RuleDataModel> mapToReportRuleDataModel(List<StandaloneConfig> standaloneConfigs,
 			List<JsparrowRuleData> ruleData) {
 
 		Map<String, RefactoringRule> ruleIdsMap = standaloneConfigs.stream()

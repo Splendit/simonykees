@@ -16,7 +16,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
 /**
- * 
+ * Uses Apache FreeMarker to create a HTML report.
  * 
  * @since 3.23.0
  *
