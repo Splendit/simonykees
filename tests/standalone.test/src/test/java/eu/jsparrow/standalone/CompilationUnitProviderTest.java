@@ -14,9 +14,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaModelException;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import eu.jsparrow.core.config.YAMLExcludes;
 
@@ -25,9 +23,6 @@ public class CompilationUnitProviderTest {
 
 	private static final String EU_JSPARROW_PACKAGE = "eu.jsparrow.package";
 	private static final String EU_JSPARROW = "eu.jsparrow";
-
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
 
 	private CompilationUnitProvider compilationUnitProvider;
 

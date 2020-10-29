@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -19,9 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLLoggerRule;
@@ -43,9 +42,6 @@ public class RuleConfigurationWrapperTest {
 
 	private String selectedProfileName = "selectedProfileName";
 	private RefactoringRule refactoringRule = new CodeFormatterRule();
-
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
 
 	@Before
 	public void setUp() {
@@ -86,8 +82,7 @@ public class RuleConfigurationWrapperTest {
 		when(config.getSelectedProfile()).thenReturn(invalidSelectedProfileName);
 		when(config.getProfiles()).thenReturn(Collections.emptyList());
 
-		expectedException.expect(StandaloneException.class);
-		new RuleConfigurationWrapper(config, refactoringRules);
+		assertThrows(StandaloneException.class, () -> new RuleConfigurationWrapper(config, refactoringRules));
 
 		verify(config, never()).getLoggerRule();
 		verify(config, never()).getRenamingRule();
@@ -193,7 +188,8 @@ public class RuleConfigurationWrapperTest {
 	}
 
 	@Test
-	public void getFieldRenamingOptions_emptyConfiguration_shouldReturnDefaultOptionsMapWithJMPlimitations() throws Exception {
+	public void getFieldRenamingOptions_emptyConfiguration_shouldReturnDefaultOptionsMapWithJMPlimitations()
+			throws Exception {
 		/*
 		 * For limitations see SIM-1250 and SIM-1340
 		 */

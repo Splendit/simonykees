@@ -1,19 +1,17 @@
 package eu.jsparrow.standalone;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Collections;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.core.config.YAMLLoggerRule;
@@ -28,34 +26,29 @@ public class YAMLConfigurationWrapperTest {
 
 	private YAMLConfigurationWrapper yamlConfigurationWrapper;
 
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
-
 	@Before
 	public void setUp() {
 		yamlConfigurationWrapper = new YAMLConfigurationWrapper();
 	}
 
 	@Test
-	public void readConfiguration_invalidPath_shouldThrowException() throws StandaloneException {
-		expectedException.expect(StandaloneException.class);
-		expectedException.expectMessage("configuration file has not been found");
-		
-		yamlConfigurationWrapper.readConfiguration("i/dont/exist", "profile");
+	public void readConfiguration_invalidPath_shouldThrowException() {
+		StandaloneException exception = assertThrows(StandaloneException.class,
+				() -> yamlConfigurationWrapper.readConfiguration("i/dont/exist", "profile"));
+		assertEquals("A configuration file has not been found at the given path [i/dont/exist]", exception.getMessage());
 	}
 
 	@Test
-	public void readConfiguration_invalidExistingYamlFile_shouldReturnDefaultConfiguration()
-			throws StandaloneException {
-		expectedException.expect(StandaloneException.class);
-		yamlConfigurationWrapper.readConfiguration(loadResource("invalid.yaml").getPath(), "profile");
+	public void readConfiguration_invalidExistingYamlFile_shouldReturnDefaultConfiguration() {
+		assertThrows(StandaloneException.class,
+				() -> yamlConfigurationWrapper.readConfiguration(loadResource("invalid.yaml").getPath(), "profile"));
 	}
 
 	@Test
-	public void readConfiguration_validYamlFileInvalidProfile_shouldReturnDefaultConfiguration()
-			throws StandaloneException {
-		expectedException.expect(StandaloneException.class);
-		yamlConfigurationWrapper.readConfiguration(loadResource("valid.yaml").getPath(), "invalid-profile");
+	public void readConfiguration_validYamlFileInvalidProfile_shouldReturnDefaultConfiguration() {
+		assertThrows(StandaloneException.class,
+				() -> yamlConfigurationWrapper.readConfiguration(loadResource("valid.yaml").getPath(),
+						"invalid-profile"));
 	}
 
 	@Test
@@ -78,17 +71,15 @@ public class YAMLConfigurationWrapperTest {
 	}
 
 	@Test
-	public void updateProfile_NonExistingProflie_shouldThrowException() throws StandaloneException {
+	public void updateProfile_NonExistingProfile_shouldThrowException() throws StandaloneException {
 		String profileName = "profile-name"; //$NON-NLS-1$
 		YAMLConfig yamlConfig = new YAMLConfig();
 		yamlConfig.setProfiles(Collections.singletonList(
 				new YAMLProfile(profileName, Collections.emptyList(), new YAMLRenamingRule(), new YAMLLoggerRule())));
 
-		expectedException.expect(StandaloneException.class);
-		expectedException.expectMessage("Profile [INVALID] does not exist");
-		yamlConfigurationWrapper.updateSelectedProfile(yamlConfig, "INVALID");
-
-		assertTrue(false);
+		StandaloneException exception = assertThrows(StandaloneException.class,
+				() -> yamlConfigurationWrapper.updateSelectedProfile(yamlConfig, "INVALID"));
+		assertEquals("Profile [INVALID] does not exist", exception.getMessage());
 	}
 
 	private File loadResource(String resource) {

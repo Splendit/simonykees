@@ -5,6 +5,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -19,9 +20,7 @@ import java.util.Map;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorWrapper;
@@ -34,9 +33,6 @@ public class FieldsRenamingInstantiatorTest {
 	private FieldsRenamingInstantiator fieldsRenamingWrapper;
 	private IJavaProject javaProject;
 	private FieldDeclarationVisitorWrapper fieldDeclarationVisitorWrapper;
-
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
 
 	@Before
 	public void setUp() {
@@ -52,8 +48,9 @@ public class FieldsRenamingInstantiatorTest {
 		when(metadata.getReferences()).thenReturn(emptyList());
 		when(compilationUnitProvider.containsExcludedFiles(any())).thenThrow(new StandaloneException("")); //$NON-NLS-1$
 
-		expectedException.expect(StandaloneException.class);
-		fieldsRenamingWrapper.createRule(singletonList(metadata), compilationUnitProvider);
+		assertThrows(StandaloneException.class,
+				() -> fieldsRenamingWrapper.createRule(singletonList(metadata), compilationUnitProvider));
+
 	}
 
 	@Test
@@ -81,14 +78,14 @@ public class FieldsRenamingInstantiatorTest {
 	}
 
 	@Test
-	public void findFields() throws Exception {
+	public void findFields() {
 		List<ICompilationUnit> selectedElements = new ArrayList<>();
 		Map<String, Boolean> options = new HashMap<>();
 
 		when(fieldDeclarationVisitorWrapper.prepareRenaming(selectedElements, options)).thenReturn(1);
 
-		expectedException.expect(StandaloneException.class);
-		fieldsRenamingWrapper.findFields(selectedElements, options);
+		assertThrows(StandaloneException.class, 
+				() -> fieldsRenamingWrapper.findFields(selectedElements, options));
 	}
 
 	@Test

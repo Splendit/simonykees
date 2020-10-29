@@ -1,5 +1,6 @@
 package eu.jsparrow.standalone;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -14,9 +15,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.osgi.framework.BundleContext;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
@@ -34,9 +33,6 @@ public class RefactoringInvokerTest {
 	private StandaloneConfig standaloneConfig;
 
 	private MavenProjectImporter mavenImporter;
-
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
 
 	@Before
 	public void setUp() throws Exception {
@@ -93,8 +89,7 @@ public class RefactoringInvokerTest {
 		doThrow(StandaloneException.class).when(standaloneConfig)
 			.createRefactoringStates();
 
-		expectedException.expect(StandaloneException.class);
-		refactoringInvoker.startRefactoring(context);
+		assertThrows(StandaloneException.class, () -> refactoringInvoker.startRefactoring(context));
 
 		verify(standaloneConfig, never()).computeRefactoring();
 		verify(standaloneConfig, never()).commitRefactoring();
@@ -106,8 +101,7 @@ public class RefactoringInvokerTest {
 		doThrow(StandaloneException.class).when(standaloneConfig)
 			.computeRefactoring();
 
-		expectedException.expect(StandaloneException.class);
-		refactoringInvoker.startRefactoring(context);
+		assertThrows(StandaloneException.class, () -> refactoringInvoker.startRefactoring(context));
 
 		verify(standaloneConfig, never()).commitRefactoring();
 	}
@@ -118,6 +112,6 @@ public class RefactoringInvokerTest {
 		protected void loadStandaloneConfig(List<IJavaProject> importedProjects, BundleContext context) {
 			super.standaloneConfigs = Arrays.asList(standaloneConfig);
 		}
-		
+
 	}
 }
