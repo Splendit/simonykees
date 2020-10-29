@@ -41,7 +41,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 	private static final int PARAM_USAGE_INVALID = -1;
 
 	private static final String JAVA_LANG_COMPARABLE = java.lang.Comparable.class.getName();
-	private static final String JAVA_UTIL_COMPARATOR = java.util.Comparator.class.getName();
+	static final String JAVA_UTIL_COMPARATOR = java.util.Comparator.class.getName();
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
@@ -57,11 +57,6 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 
 		ComparatorLambdaAnalyzer lambdaAnalyzer = new ComparatorLambdaAnalyzer();
 		if (!lambdaAnalyzer.analyze(lambda)) {
-			return true;
-		}
-
-		ITypeBinding lambdaTypeBinding = lambda.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(lambdaTypeBinding, JAVA_UTIL_COMPARATOR)) {
 			return true;
 		}
 

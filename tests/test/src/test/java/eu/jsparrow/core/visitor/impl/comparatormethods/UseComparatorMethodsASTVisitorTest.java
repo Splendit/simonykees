@@ -20,19 +20,6 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
-	public void visit_Comparator4Integer_shouldTransform() throws Exception {
-		String original = "" +
-				"void test() {\n" +
-				"	Comparator<Integer> comparator = (lhs, rhs) -> lhs.compareTo(rhs);\n" +
-				"}";
-		String expected = "" +
-				"void test() {\n" +
-				"	Comparator<Integer> comparator=Comparator.naturalOrder();\n" +
-				"}";
-		assertChange(original, expected);
-	}
-
-	@Test
 	public void visit_Comparator4IntegerReversed_shouldTransform() throws Exception {
 		String original = "" +
 				"void test() {\n" +
@@ -520,18 +507,6 @@ public class UseComparatorMethodsASTVisitorTest extends UsesJDTUnitFixture {
 		String original = "" +
 				"void test() {\n" +
 				"	Comparator<ArrayList<Integer>> comparator = (lhs, rhs) -> lhs.get(0).compareTo(rhs.get(0));\n"
-				+
-				"}";
-
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_LambdaTypeBindingNotComparator_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(java.util.function.BiFunction.class.getName());
-		String original = "" +
-				"void test() {\n" +
-				"	BiFunction<Integer, Integer, Integer> bifunction = (lhs, rhs) -> lhs.compareTo(rhs);\n"
 				+
 				"}";
 
