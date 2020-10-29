@@ -1,7 +1,5 @@
 package eu.jsparrow.core.visitor.impl.comparatormethods;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,14 +17,11 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 public class LambdaStructureAnalyzer {
 	private final List<String> lambdaParameterIdentifiers;
-	private final Type explicitLambdaParameterType;
 
-	private MethodInvocation lambdaBodyMethodInvocation;
-	private Expression bodyMethodInvocationExpression;
-	private Expression bodyMethodInvocationArgument;
-	private MethodInvocation invocationLeftHS;
-	private MethodInvocation invocationRightHS;
-	private List<String> lambdaParameterIdentifiersInBody;
+	private String comparisonKeyMethodName;
+	private boolean isReversed;
+	private Type explicitLeftLambdaParameterType;
+	String leftParameterIdentifier;
 
 	LambdaStructureAnalyzer(LambdaExpression lambda) {
 		List<VariableDeclaration> lambdaParameters = ASTNodeUtil.convertToTypedList(lambda.parameters(),
@@ -39,24 +34,21 @@ public class LambdaStructureAnalyzer {
 
 		if (lambdaParameters.get(0)
 			.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
-			explicitLambdaParameterType = ((SingleVariableDeclaration) lambdaParameters.get(0)).getType();
+			explicitLeftLambdaParameterType = ((SingleVariableDeclaration) lambdaParameters.get(0)).getType();
 		} else {
-			explicitLambdaParameterType = null;
+			explicitLeftLambdaParameterType = null;
 		}
 
 	}
 
 	boolean analyze(LambdaExpression lambda) {
-		if (lambdaParameterIdentifiers.size() != 2) {
-			return false;
-		}
+
 		ASTNode lambdaBody = lambda.getBody();
 		if (lambdaBody.getNodeType() != ASTNode.METHOD_INVOCATION) {
 			return false;
 		}
-		lambdaBodyMethodInvocation = (MethodInvocation) lambdaBody;
-
-		bodyMethodInvocationExpression = lambdaBodyMethodInvocation.getExpression();
+		MethodInvocation lambdaBodyMethodInvocation = (MethodInvocation) lambdaBody;
+		Expression bodyMethodInvocationExpression = lambdaBodyMethodInvocation.getExpression();
 		if (bodyMethodInvocationExpression == null) {
 			return false;
 		}
@@ -66,66 +58,76 @@ public class LambdaStructureAnalyzer {
 		if (bodyMethodInvocationArguments.size() != 1) {
 			return false;
 		}
-		bodyMethodInvocationArgument = bodyMethodInvocationArguments.get(0);
-
-		lambdaParameterIdentifiersInBody = extractParameterIdentifiersUsedInLambdaBody(bodyMethodInvocationExpression,
+		Expression bodyMethodInvocationArgument = bodyMethodInvocationArguments.get(0);
+		Pair<String> pairOfIdentifiers = findPairOfIdentifiers(bodyMethodInvocationExpression,
 				bodyMethodInvocationArgument);
-		if (lambdaParameterIdentifiersInBody.isEmpty()) {
+		Pair<MethodInvocation> pairOfMethodInvocations;
+		if (pairOfIdentifiers.isEmpty()) {
+			pairOfMethodInvocations = findPairOfMethodInvocations(bodyMethodInvocationExpression,
+					bodyMethodInvocationArgument);
+			pairOfIdentifiers = findPairOfIdentifiersAsInvocationExpressions(pairOfMethodInvocations.getLeftHS(),
+					pairOfMethodInvocations.getRightHS());
+		} else {
+			pairOfMethodInvocations = Pair.empty();
+		}
+		if (pairOfIdentifiers.isEmpty()) {
 			return false;
 		}
 
-		if (bodyMethodInvocationExpression.getNodeType() == ASTNode.METHOD_INVOCATION
-				&& bodyMethodInvocationArgument.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			invocationLeftHS = (MethodInvocation) bodyMethodInvocationExpression;
-			invocationRightHS = (MethodInvocation) bodyMethodInvocationArgument;
+		if (lambdaParameterIdentifiers.size() != 2) {
+			return false;
 		}
-
+		if (pairOfIdentifiers.getLeftHS()
+			.equals(lambdaParameterIdentifiers.get(0))) {
+			if (!pairOfIdentifiers.getRightHS()
+				.equals(lambdaParameterIdentifiers.get(1))) {
+				return false;
+			}
+		} else if (pairOfIdentifiers.getLeftHS()
+			.equals(lambdaParameterIdentifiers.get(1))) {
+			if (!pairOfIdentifiers.getRightHS()
+				.equals(lambdaParameterIdentifiers.get(0))) {
+				return false;
+			}
+			isReversed = true;
+		} else {
+			return false;
+		}
 		return true;
+
 	}
 
-	private List<String> extractParameterIdentifiersUsedInLambdaBody(Expression bodyMethodInvocationExpression,
-			Expression bodyMethodInvocationArgument) {
-
-		String identidierLHS;
-		String identidierRHS;
-		if (bodyMethodInvocationExpression.getNodeType() == ASTNode.SIMPLE_NAME
-				&& bodyMethodInvocationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-			identidierLHS = ((SimpleName) bodyMethodInvocationExpression).getIdentifier();
-			identidierRHS = ((SimpleName) bodyMethodInvocationArgument).getIdentifier();
-
-		} else if (bodyMethodInvocationExpression.getNodeType() == ASTNode.METHOD_INVOCATION
-				&& bodyMethodInvocationArgument.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			invocationLeftHS = (MethodInvocation) bodyMethodInvocationExpression;
-			invocationRightHS = (MethodInvocation) bodyMethodInvocationArgument;
-			if (invocationLeftHS.getExpression() == null || invocationLeftHS.getExpression()
-				.getNodeType() != ASTNode.SIMPLE_NAME) {
-
-			}
-			identidierLHS = ((SimpleName) invocationLeftHS.getExpression()).getIdentifier();
-			if (invocationRightHS.getExpression() == null || invocationRightHS.getExpression()
-				.getNodeType() != ASTNode.SIMPLE_NAME) {
-
-			}
-			identidierRHS = ((SimpleName) invocationRightHS.getExpression()).getIdentifier();
-		} else {
-			return Collections.emptyList();
+	private Pair<MethodInvocation> findPairOfMethodInvocations(Expression left, Expression right) {
+		if (left.getNodeType() == ASTNode.METHOD_INVOCATION && right.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			return Pair.of((MethodInvocation) left, (MethodInvocation) right);
 		}
-		int indexOfLHS = lambdaParameterIdentifiers.indexOf(identidierLHS);
-		int indexOfRHS = lambdaParameterIdentifiers.indexOf(identidierRHS);
-		if (!(indexOfLHS == 0 && indexOfRHS == 1 || indexOfLHS == 1 && indexOfRHS == 0)) {
-			return Arrays.asList(identidierLHS, identidierRHS);
-		}
-		return Collections.emptyList();
+		return Pair.empty();
+	}
 
+	private Pair<String> findPairOfIdentifiers(Expression left, Expression right) {
+		if (left.getNodeType() == ASTNode.SIMPLE_NAME && right.getNodeType() == ASTNode.SIMPLE_NAME) {
+			return Pair.of(((SimpleName) left).getIdentifier(), ((SimpleName) right).getIdentifier());
+		}
+		return Pair.empty();
+	}
+
+	private Pair<String> findPairOfIdentifiersAsInvocationExpressions(MethodInvocation left, MethodInvocation right) {
+		if (left.getExpression() == null || right.getExpression() == null) {
+			return Pair.empty();
+		}
+		return findPairOfIdentifiers(left.getExpression(), right.getExpression());
 	}
 
 	Optional<Type> getExplicitLambdaParameterType() {
-		return Optional.ofNullable(explicitLambdaParameterType);
+		return Optional.ofNullable(explicitLeftLambdaParameterType);
 	}
 
 	boolean isReversedOrder() {
-		return lambdaParameterIdentifiersInBody.get(0)
-			.equals(lambdaParameterIdentifiers.get(1));
+		return isReversed;
+	}
+
+	Optional<String> getComparisonKeyMethodName() {
+		return Optional.ofNullable(comparisonKeyMethodName);
 	}
 
 }
