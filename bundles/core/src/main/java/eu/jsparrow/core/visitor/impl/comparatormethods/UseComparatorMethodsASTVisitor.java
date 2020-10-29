@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl;
+package eu.jsparrow.core.visitor.impl.comparatormethods;
 
 import java.util.Collections;
 import java.util.List;
@@ -55,12 +55,17 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 	@Override
 	public boolean visit(LambdaExpression lambda) {
 
+		ComparatorLambdaAnalyzer lambdaAnalyzer = new ComparatorLambdaAnalyzer();
+		if (!lambdaAnalyzer.analyze(lambda)) {
+			return true;
+		}
+
 		ITypeBinding lambdaTypeBinding = lambda.resolveTypeBinding();
 		if (!ClassRelationUtil.isContentOfType(lambdaTypeBinding, JAVA_UTIL_COMPARATOR)) {
 			return true;
 		}
 
-		MethodInvocation lambdaReplacement = createComparatorMethodInvocation(lambda);
+		MethodInvocation lambdaReplacement = createComparatorMethodInvocation(lambda, lambdaAnalyzer);
 		if (lambdaReplacement != null) {
 			astRewrite.replace(lambda, lambdaReplacement, null);
 			onRewrite();
@@ -68,7 +73,8 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		return true;
 	}
 
-	private MethodInvocation createComparatorMethodInvocation(LambdaExpression lambda) {
+	private MethodInvocation createComparatorMethodInvocation(LambdaExpression lambda,
+			ComparatorLambdaAnalyzer lambdaAnalyzer) {
 
 		MethodInvocation compareToMethodInvocation = extractCompareToInvocation(lambda);
 		if (compareToMethodInvocation == null) {
@@ -118,10 +124,9 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			} else if (isTypeCastExpression) {
 				if (castExpressionTypeArgument != null) {
 					return createComparatorMethodInvocation(comparatorMethodName, castExpressionTypeArgument);
-				}
-				else {
+				} else {
 					return null;
-				}				
+				}
 			} else {
 				return createComparatorMethodInvocation(comparatorMethodName);
 			}
