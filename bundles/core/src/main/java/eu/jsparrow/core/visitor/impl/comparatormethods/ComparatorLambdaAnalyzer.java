@@ -26,8 +26,14 @@ class ComparatorLambdaAnalyzer {
 				JAVA_UTIL_COMPARATOR)) {
 			return false;
 		}
-		MethodInvocation compareToMethodInvocation = extractCompareToInvocation(lambda);
-		if (compareToMethodInvocation == null) {
+
+		ASTNode lambdaBody = lambda.getBody();
+		if (lambdaBody.getNodeType() != ASTNode.METHOD_INVOCATION) {
+			return false;
+		}
+
+		MethodInvocation compareToMethodInvocation = (MethodInvocation) lambdaBody;
+		if (!isCompareToMethodOfComparator(compareToMethodInvocation)) {
 			return false;
 		}
 
@@ -43,48 +49,30 @@ class ComparatorLambdaAnalyzer {
 		return true;
 	}
 
-	private MethodInvocation extractCompareToInvocation(LambdaExpression lambda) {
-		ASTNode lambdaBody = lambda.getBody();
-		MethodInvocation methodInvocation = null;
-		if (lambdaBody.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			methodInvocation = (MethodInvocation) lambdaBody;
-		}
-		if (methodInvocation == null) {
-			return null;
-		}
-
+	private boolean isCompareToMethodOfComparator(MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 
 		if (!methodBinding.getName()
 			.equals("compareTo")) { //$NON-NLS-1$
-			return null;
+			return false;
 		}
 
 		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
 		if (parameterTypes.length != 1) {
-			return null;
+			return false;
 		}
 
-		// This is needed
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		if (!isComparable(declaringClass)) {
-			return null;
+			return false;
 		}
 
 		ITypeBinding parameterType = parameterTypes[0];
 		if (parameterType.isCapture()) {
 			ITypeBinding wildcard = parameterType.getWildcard();
-			ITypeBinding bound = wildcard.getBound();
-			if (isComparable(bound)) {
-				return methodInvocation;
-			}
+			parameterType = wildcard.getBound();
 		}
-
-		if (!isComparable(parameterType)) {
-			return null;
-		}
-
-		return methodInvocation;
+		return isComparable(parameterType);
 	}
 
 	private boolean isComparable(ITypeBinding typeBinding) {
