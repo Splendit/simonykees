@@ -32,8 +32,8 @@ import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
  * Runs the jSparrow in the demo mode, i.e. computes the refactorings and
- * generates a report with the findings. Does not change anything in the source
- * files.
+ * generates a report with the findings. Does not change the source files.
+ * Expects the same parameters as the {@code refactor} goal.
  * 
  * @since 2.20.0
  *
