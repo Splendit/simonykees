@@ -3378,7 +3378,7 @@
         </tr>
         <tr>
           <td>Total time saved</td>
-          <td> <script>document.write(secondsToHms(${totalTimeSaved}))</script> </td>
+          <td> <script>document.write(secondsToHms(${totalTimeSaved?long?c} * 60))</script> </td>
         </tr>
       </tbody>
     </table>
@@ -3414,8 +3414,8 @@
                 <td class="text-xs-right"><a href=${rule.ruleLink} target="_blank"> ${rule.ruleName} </a></td>
                 <td class="text-xs-right">${rule.issuesFixed}</td>
                 <td class="text-xs-right">${rule.filesChanged}</td>
-                <td class="text-xs-right"><script>document.write(secondsToHms(${rule.issuesFixed} * ${rule.remediationCost}))</script></td>
-                <td style="display: none;">${rule.issuesFixed * rule.remediationCost}</td>
+                <td class="text-xs-right"><script>document.write(secondsToHms(${rule.issuesFixed?c} * ${rule.remediationCost?c} * 60))</script></td>
+                <td style="display: none;">${(rule.issuesFixed * rule.remediationCost)?c}</td>
               </tr>
             </#list>
           </tbody>
