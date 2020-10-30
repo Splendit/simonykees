@@ -18,7 +18,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.config.YAMLExcludes;
 
-@SuppressWarnings("nls")
 public class CompilationUnitProviderTest {
 
 	private static final String EU_JSPARROW_PACKAGE = "eu.jsparrow.package";
@@ -88,7 +87,7 @@ public class CompilationUnitProviderTest {
 	}
 
 	@Test
-	public void getFilteredCompilationUnits_nothingEcluded_returnAll() throws JavaModelException {
+	public void getFilteredCompilationUnits_nothingExcluded_returnAll() throws JavaModelException {
 		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
 		when(packageDeclarationMock.getElementName()).thenReturn("eu.jsparrow.test");
 		when(compUnitMock.getElementName()).thenReturn("NotExcludedChass.java");

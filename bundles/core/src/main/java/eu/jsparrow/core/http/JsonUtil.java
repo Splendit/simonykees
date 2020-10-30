@@ -46,7 +46,15 @@ public class JsonUtil {
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Write the Json object to a new file.
+	 * 
+	 * @param value
+	 *            the Json object.
+	 * @param path
+	 *            the file path.
+	 */
 	public static void writeJSON(Object value, String path) {
 		try {
 			File resultFile = new File(path);

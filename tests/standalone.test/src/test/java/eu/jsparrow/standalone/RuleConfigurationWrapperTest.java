@@ -31,7 +31,6 @@ import eu.jsparrow.core.rule.impl.logger.LogLevelEnum;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
-@SuppressWarnings("nls")
 public class RuleConfigurationWrapperTest {
 
 	private static final String INFO = "info";

@@ -18,6 +18,12 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.standalone.Activator;
 
+/**
+ * A utility for finding the resource paths in this bundle.
+ * 
+ * @since 3.23.0
+ *
+ */
 public class ResourceLocator {
 
 	private static final Logger logger = LoggerFactory.getLogger(ResourceLocator.class);
@@ -28,6 +34,14 @@ public class ResourceLocator {
 		 */
 	}
 
+	/**
+	 * Finds the resource file in this bundle.
+	 * 
+	 * @param path
+	 *            the path of the resource to search for.
+	 * @return a {@link File} representing the found resource or an empty
+	 *         {@link Optional} if the resource cannot be found.
+	 */
 	public static Optional<File> findFile(String path) {
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
 		IPath iPathReport = new Path(path);

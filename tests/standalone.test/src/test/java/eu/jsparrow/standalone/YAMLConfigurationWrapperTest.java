@@ -19,7 +19,6 @@ import eu.jsparrow.core.config.YAMLProfile;
 import eu.jsparrow.core.config.YAMLRenamingRule;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
-@SuppressWarnings("nls")
 public class YAMLConfigurationWrapperTest {
 
 	private static final String RESOURCE_DIRECTORY = "src/test/resources";
@@ -35,7 +34,8 @@ public class YAMLConfigurationWrapperTest {
 	public void readConfiguration_invalidPath_shouldThrowException() {
 		StandaloneException exception = assertThrows(StandaloneException.class,
 				() -> yamlConfigurationWrapper.readConfiguration("i/dont/exist", "profile"));
-		assertEquals("A configuration file has not been found at the given path [i/dont/exist]", exception.getMessage());
+		assertEquals("A configuration file has not been found at the given path [i/dont/exist]",
+				exception.getMessage());
 	}
 
 	@Test

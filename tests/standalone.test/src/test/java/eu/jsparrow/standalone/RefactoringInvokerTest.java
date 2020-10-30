@@ -67,7 +67,7 @@ public class RefactoringInvokerTest {
 	}
 
 	@Test
-	public void runInDemoMode() throws Exception {
+	public void runInDemoMode_shouldNotCommit() throws Exception {
 		BundleContext context = mock(BundleContext.class);
 		RefactoringPipeline refactoringPipeline = mock(RefactoringPipeline.class);
 

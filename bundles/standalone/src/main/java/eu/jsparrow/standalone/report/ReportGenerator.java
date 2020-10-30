@@ -32,7 +32,21 @@ public class ReportGenerator {
 	private static final String PROJECT_NAME = "projectName"; //$NON-NLS-1$
 	private static final String REPORT_FILE_NAME = "jSparrowReport.html"; //$NON-NLS-1$
 
-	public void writeReport(ReportData reportData, String reportOutputFolder, File templateFolder) throws IOException {
+	/**
+	 * Generates a HTML report document with the given data.
+	 * 
+	 * @param reportData
+	 *            data to be written in the generated report.
+	 * @param outputFolder
+	 *            the parent directory to write the report to.
+	 * @param templateFolder
+	 *            the path to the directory containing the report template.
+	 * @throws IOException
+	 *             reasons include: the template file cannot be found, the
+	 *             template directory cannot be found, or the report file cannot
+	 *             be created.
+	 */
+	public void writeReport(ReportData reportData, String outputFolder, File templateFolder) throws IOException {
 		Map<String, Object> root = new HashMap<>();
 		root.put(PROJECT_NAME, reportData.getProjectName());
 		root.put(TOTAL_FILES_COUNT, reportData.getTotalFilesCount());
@@ -49,7 +63,7 @@ public class ReportGenerator {
 		configuration.setLogTemplateExceptions(false);
 
 		Template template = configuration.getTemplate(REPORT_FILE_NAME);
-		String oututPath = String.join(File.separator, reportOutputFolder, REPORT_FILE_NAME);
+		String oututPath = String.join(File.separator, outputFolder, REPORT_FILE_NAME);
 		Writer out = new OutputStreamWriter(new FileOutputStream(oututPath));
 		try {
 			template.process(root, out);
