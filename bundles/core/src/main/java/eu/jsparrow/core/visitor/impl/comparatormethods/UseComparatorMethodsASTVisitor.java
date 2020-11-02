@@ -56,13 +56,9 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			return true;
 		}
 
-		// MethodInvocation lambdaReplacement = findLambdaReplacement(lambda,
-		// lambdaAnalysisResult);
 		findLambdaReplacement(lambda, lambdaAnalysisResult).ifPresent(lambdaReplacement -> {
-			if (lambdaReplacement != null) {
-				astRewrite.replace(lambda, lambdaReplacement, null);
-				onRewrite();
-			}
+			astRewrite.replace(lambda, lambdaReplacement, null);
+			onRewrite();
 		});
 		return true;
 	}
