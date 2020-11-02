@@ -6,32 +6,33 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * @author Ludwig Werzowa
+ * XML model class used to parse Eclipse formatter files.
+ * 
+ * @since 3.23.0
  */
 @XmlRootElement(name = "setting")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Setting {
 
-    @XmlAttribute
-    private String id;
-    @XmlAttribute
-    private String value;
+	@XmlAttribute
+	private String id;
+	@XmlAttribute
+	private String value;
 
-    public String getId() {
-        return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public String getValue() {
-        return value;
-    }
+	public String getValue() {
+		return value;
+	}
 
-    @SuppressWarnings("nls")
+	@SuppressWarnings("nls")
 	@Override
-    public String toString() {
-        return "Setting{" +
-                "id='" + id + '\'' +
-                ", value='" + value + '\'' +
-                '}';
-    }
+	public String toString() {
+		return "Setting{" +
+				"id='" + id + '\'' +
+				", value='" + value + '\'' +
+				'}';
+	}
 }
-

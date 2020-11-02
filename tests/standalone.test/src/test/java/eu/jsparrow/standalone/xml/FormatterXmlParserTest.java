@@ -35,7 +35,7 @@ public class FormatterXmlParserTest {
 
 	@Test
 	public void readSettings_validPath_shouldReturnValidSettings() throws Exception {
-		Map<String, String> expected = new HashMap<String, String>();
+		Map<String, String> expected = new HashMap<>();
 		expected.put("org.eclipse.jdt.core.formatter.insert_space_after_ellipsis", "insert");
 		expected.put("org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations", "insert");
 
@@ -45,7 +45,7 @@ public class FormatterXmlParserTest {
 
 	@Test
 	public void readSettings_twoProfiles_shouldReturnFirstProfile() throws Exception {
-		Map<String, String> expected = new HashMap<String, String>();
+		Map<String, String> expected = new HashMap<>();
 		expected.put("1_org.eclipse.jdt.core.formatter.insert_space_after_ellipsis", "1_insert");
 		expected.put("1_org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations", "1_insert");
 
@@ -55,7 +55,7 @@ public class FormatterXmlParserTest {
 
 	@Test
 	public void readSettings_secondProfileIsFormatter_shouldReturnSecondProfile() throws Exception {
-		Map<String, String> expected = new HashMap<String, String>();
+		Map<String, String> expected = new HashMap<>();
 		expected.put("2_org.eclipse.jdt.core.formatter.insert_space_after_ellipsis", "2_insert");
 		expected.put("2_org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations", "2_insert");
 

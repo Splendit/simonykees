@@ -35,7 +35,6 @@ import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.MavenImportException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 import eu.jsparrow.standalone.xml.FormatterXmlParser;
-import eu.jsparrow.standalone.xml.FormatterXmlParserException;
 
 /**
  * 
@@ -360,13 +359,9 @@ public class RefactoringInvoker {
 				excludedModulesFilePath).get();
 
 		String formattingFilePath = context.getProperty(FORMATTING_FILE);
-		Map<String, String> formattingSettings = Collections.<String, String>emptyMap();
+		Map<String, String> formattingSettings = Collections.emptyMap();
 		if (formattingFilePath != null) {
-			try {
-				formattingSettings = FormatterXmlParser.getFormatterSettings(new File(formattingFilePath));
-			} catch (FormatterXmlParserException e) {
-				throw new StandaloneException(e.getMessage(), e);
-			}
+			formattingSettings = FormatterXmlParser.getFormatterSettings(new File(formattingFilePath));
 		}
 
 		StandaloneStatisticsMetadata metadata = extractStatisticsMetadata(context);

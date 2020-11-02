@@ -8,24 +8,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Ludwig Werzowa
+ * XML model class used to parse Eclipse formatter files.
+ * 
+ * @since 3.23.0
  */
 @XmlRootElement(name = "profiles")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Profiles {
 
-    @XmlElement(name = "profile")
-    private List<Profile> profiles = new ArrayList<>();
+	@XmlElement(name = "profile")
+	private List<Profile> profileList = new ArrayList<>();
 
-    public List<Profile> getProfiles() {
-        return profiles;
-    }
+	public List<Profile> getProfileList() {
+		return profileList;
+	}
 
-    @SuppressWarnings("nls")
+	@SuppressWarnings("nls")
 	@Override
-    public String toString() {
-        return "Profiles{" +
-                "profiles=" + profiles +
-                '}';
-    }
+	public String toString() {
+		return "Profiles{" +
+				"profileList=" + profileList +
+				'}';
+	}
 }
