@@ -85,10 +85,10 @@ public class UseComparatorMethodsAnalyzer {
 			.getIdentifier();
 
 		if (parameterNameFirst.equals(nameFirst) && parameterNameSecond.equals(nameSecond)) {
-			return Optional.of(new LambdaAnalysisResult(parameterFirst, parameterSecond));
+			return Optional.of(new LambdaAnalysisResult(parameterFirst, false));
 		}
 		if (parameterNameFirst.equals(nameSecond) && parameterNameSecond.equals(nameFirst)) {
-			return Optional.of(new LambdaAnalysisResult(parameterFirst, parameterSecond, true));
+			return Optional.of(new LambdaAnalysisResult(parameterFirst, true));
 		}
 		return Optional.empty();
 	}
@@ -138,11 +138,11 @@ public class UseComparatorMethodsAnalyzer {
 		IMethodBinding methodBinding = invocationFirst.resolveMethodBinding();
 		if (parameterNameFirst.equals(invocationExpressionNameFirst)
 				&& parameterNameSecond.equals(invocationExpressionNameSecond)) {
-			return Optional.of(new LambdaAnalysisResult(parameterFirst, parameterSecond, methodBinding));
+			return Optional.of(new LambdaAnalysisResult(parameterFirst, methodBinding, false));
 		}
 		if (parameterNameFirst.equals(invocationExpressionNameSecond)
 				&& parameterNameSecond.equals(invocationExpressionNameFirst)) {
-			return Optional.of(new LambdaAnalysisResult(parameterFirst, parameterSecond, methodBinding, true));
+			return Optional.of(new LambdaAnalysisResult(parameterFirst, methodBinding, true));
 		}
 		return Optional.empty();
 	}
@@ -183,32 +183,19 @@ public class UseComparatorMethodsAnalyzer {
 
 	static class LambdaAnalysisResult {
 		private final VariableDeclaration lambdaParameterLeftHS;
-		private final VariableDeclaration lambdaParameterRightHS;
 		private final boolean reversed;
 		private final IMethodBinding comparisonKeyMethodName;
 
 		public LambdaAnalysisResult(VariableDeclaration lambdaParameterLeftHS,
-				VariableDeclaration lambdaParameterRightHS) {
-			this(lambdaParameterLeftHS, lambdaParameterRightHS, false);
-		}
-
-		public LambdaAnalysisResult(VariableDeclaration lambdaParameterLeftHS,
-				VariableDeclaration lambdaParameterRightHS, boolean reversed) {
+				boolean reversed) {
 			this.lambdaParameterLeftHS = lambdaParameterLeftHS;
-			this.lambdaParameterRightHS = lambdaParameterRightHS;
 			this.comparisonKeyMethodName = null;
 			this.reversed = reversed;
 		}
 
 		public LambdaAnalysisResult(VariableDeclaration lambdaParameterLeftHS,
-				VariableDeclaration lambdaParameterRightHS, IMethodBinding comparisonKeyMethodName) {
-			this(lambdaParameterLeftHS, lambdaParameterRightHS, comparisonKeyMethodName, false);
-		}
-
-		public LambdaAnalysisResult(VariableDeclaration lambdaParameterLeftHS,
-				VariableDeclaration lambdaParameterRightHS, IMethodBinding comparisonKeyMethodName, boolean reversed) {
+				IMethodBinding comparisonKeyMethodName, boolean reversed) {
 			this.lambdaParameterLeftHS = lambdaParameterLeftHS;
-			this.lambdaParameterRightHS = lambdaParameterRightHS;
 			this.comparisonKeyMethodName = comparisonKeyMethodName;
 			this.reversed = reversed;
 		}
@@ -228,10 +215,6 @@ public class UseComparatorMethodsAnalyzer {
 
 		VariableDeclaration getLambdaParameterLeftHS() {
 			return lambdaParameterLeftHS;
-		}
-
-		VariableDeclaration getLambdaParameterRightHS() {
-			return lambdaParameterRightHS;
 		}
 
 		String getFirstLambdaParameterIdentifier() {

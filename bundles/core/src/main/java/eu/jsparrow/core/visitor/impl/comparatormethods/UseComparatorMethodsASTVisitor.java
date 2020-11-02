@@ -84,25 +84,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			.orElse(null);
 
 		if (comparisonKeyMethod == null) {
-			String comparatorMethodName;
-			if (analysisResult.isReversed()) {
-				comparatorMethodName = "reverseOrder"; //$NON-NLS-1$
-			} else {
-				comparatorMethodName = "naturalOrder"; //$NON-NLS-1$
-			}
-
-			if (explicitLambdaParameterType != null
-					&& isLambdaParameterTypeRequired(explicitLambdaParameterType, lambda)) {
-				return createComparatorMethodInvocation(comparatorMethodName, explicitLambdaParameterType);
-			} else if (isTypeCastExpression) {
-				if (castExpressionTypeArgument != null) {
-					return createComparatorMethodInvocation(comparatorMethodName, castExpressionTypeArgument);
-				} else {
-					return null;
-				}
-			} else {
-				return createComparatorMethodInvocation(comparatorMethodName);
-			}
+			return findSimpleLambdaReplacement(lambda, analysisResult);
 		}
 
 		ITypeBinding lambdaParameterType = lambdaParameters.get(0)
@@ -138,6 +120,38 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			return reverseComparatorMethodInvocation(comparatorMethodInvocation);
 		}
 		return comparatorMethodInvocation;
+	}
+
+	private MethodInvocation findSimpleLambdaReplacement(LambdaExpression lambda, LambdaAnalysisResult analysisResult) {
+		String comparatorMethodName;
+		if (analysisResult.isReversed()) {
+			comparatorMethodName = "reverseOrder"; //$NON-NLS-1$
+		} else {
+			comparatorMethodName = "naturalOrder"; //$NON-NLS-1$
+		}
+		Type explicitLambdaParameterType = analysisResult.getExplicitLambdaParameterType()
+			.orElse(null);
+
+		if (explicitLambdaParameterType != null
+				&& isLambdaParameterTypeRequired(explicitLambdaParameterType, lambda)) {
+			return createComparatorMethodInvocation(comparatorMethodName, explicitLambdaParameterType);
+		}
+
+		boolean isTypeCastExpression = lambda.getLocationInParent() == CastExpression.EXPRESSION_PROPERTY;
+		Type castExpressionTypeArgument = null;
+		if (isTypeCastExpression) {
+			castExpressionTypeArgument = extractCastExpressionTypeArgument((CastExpression) lambda.getParent());
+		}
+		
+		if (isTypeCastExpression) {
+			if (castExpressionTypeArgument != null) {
+				return createComparatorMethodInvocation(comparatorMethodName, castExpressionTypeArgument);
+			} else {
+				return null;
+			}
+		}
+		return createComparatorMethodInvocation(comparatorMethodName);
+
 	}
 
 	private Type extractCastExpressionTypeArgument(CastExpression castExpression) {
