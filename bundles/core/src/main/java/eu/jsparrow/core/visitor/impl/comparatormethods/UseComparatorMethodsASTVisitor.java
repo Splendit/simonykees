@@ -142,7 +142,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		if (isTypeCastExpression) {
 			castExpressionTypeArgument = extractCastExpressionTypeArgument((CastExpression) lambda.getParent());
 		}
-		
+
 		if (isTypeCastExpression) {
 			if (castExpressionTypeArgument != null) {
 				return createComparatorMethodInvocation(comparatorMethodName, castExpressionTypeArgument);

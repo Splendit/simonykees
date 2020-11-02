@@ -33,6 +33,14 @@ public class UseComparatorMethodsAnalyzer {
 		List<VariableDeclaration> lambdaParameters = ASTNodeUtil.convertToTypedList(lambda.parameters(),
 				VariableDeclaration.class);
 
+		ITypeBinding lambdaParameterType = lambdaParameters.get(0)
+			.resolveBinding()
+			.getType();
+
+		if (lambdaParameterType.isWildcardType()) {
+			return Optional.empty();
+		}
+
 		VariableDeclaration lambdaParameterLeftHS = lambdaParameters.get(0);
 		VariableDeclaration lambdaParameterRightHS = lambdaParameters.get(1);
 

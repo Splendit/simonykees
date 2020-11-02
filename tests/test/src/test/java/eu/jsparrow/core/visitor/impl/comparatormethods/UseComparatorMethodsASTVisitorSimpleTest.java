@@ -118,4 +118,16 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 
 		assertChange(original, expected);
 	}
+
+	@Test
+	public void visit_LambdaParameterHasWildCardType_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		class LocalClass {\n"
+				+ "			<T extends Comparable<T>> void useComparatorOfTExtendingComparable(Comparator<T> comparator) {\n"
+				+ "				// intended (java:S1186)\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "		new LocalClass().useComparatorOfTExtendingComparable((t1, t2) -> t1.compareTo(t2));";
+		assertNoChange(original);
+	}
 }
