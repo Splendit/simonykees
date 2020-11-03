@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<profiles version="17">
+    <profile kind="CodeFormatterProfile" name="Eclipse Splendit default" version="17">
+        <setting id="1_org.eclipse.jdt.core.formatter.insert_space_after_ellipsis" value="1_insert"/>
+        <setting id="1_org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations" value="1_insert"/>
+    </profile>
+        <profile kind="CodeFormatterProfile" name="Eclipse Splendit default" version="17">
+        <setting id="2_org.eclipse.jdt.core.formatter.insert_space_after_ellipsis" value="2_insert"/>
+        <setting id="2_org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations" value="2_insert"/>
+    </profile>
+</profiles>

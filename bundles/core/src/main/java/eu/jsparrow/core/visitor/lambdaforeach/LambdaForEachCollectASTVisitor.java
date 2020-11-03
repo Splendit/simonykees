@@ -164,7 +164,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 			.newMethodInvocation();
 		collectorsToList.setName(collect.getAST()
 			.newSimpleName(TO_LIST));
-		Name streamCollectorsTypeName = addImport(JAVA_UTIL_STREAM_COLLECTORS);
+		Name streamCollectorsTypeName = addImport(JAVA_UTIL_STREAM_COLLECTORS, methodInvocation);
 		collectorsToList.setExpression(streamCollectorsTypeName);
 		listRewirte.insertFirst(collectorsToList, null);
 		

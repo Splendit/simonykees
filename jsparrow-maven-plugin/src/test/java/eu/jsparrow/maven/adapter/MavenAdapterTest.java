@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
@@ -39,6 +40,7 @@ public class MavenAdapterTest {
 	Properties properties;
 	private File jsparrowTempDirectory;
 	private File jsparrowYml;
+	private File formatterFile;
 	private File projectBaseDir;
 	private Proxy proxy;
 	private StatisticsMetadata statisticsMetadata;
@@ -58,6 +60,9 @@ public class MavenAdapterTest {
 		projectBaseDir = directory.newFolder("project_base_dir");
 		jsparrowYml = new File(projectBaseDir.getPath() + File.separator + "jsparrow.yml");
 		jsparrowYml.createNewFile();
+
+		formatterFile = Files.createTempFile("formatting", ".xml")
+			.toFile();
 
 		statisticsMetadata = mock(StatisticsMetadata.class);
 
@@ -125,13 +130,18 @@ public class MavenAdapterTest {
 		when(path.toFile()).thenReturn(jsparrowYml);
 
 		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml,
-				Stream.of(proxy));
+				formatterFile, Stream.of(proxy));
 
 		Map<String, String> configurations = mavenAdapter.getConfiguration();
+
 		assertTrue(configurations.containsKey(ConfigurationKeys.ROOT_CONFIG_PATH));
 		assertEquals(jsparrowYml.getAbsolutePath(), configurations.get(ConfigurationKeys.ROOT_CONFIG_PATH));
+
 		assertTrue(configurations.containsKey(ConfigurationKeys.ROOT_PROJECT_BASE_PATH));
 		assertEquals(projectBaseDir.getAbsolutePath(), configurations.get(ConfigurationKeys.ROOT_PROJECT_BASE_PATH));
+
+		assertTrue(configurations.containsKey(ConfigurationKeys.FORMATTING_FILE));
+		assertEquals(formatterFile.getAbsolutePath(), configurations.get(ConfigurationKeys.FORMATTING_FILE));
 	}
 
 	@Test
@@ -140,8 +150,10 @@ public class MavenAdapterTest {
 
 		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(true);
 
-		assertThrows(MojoExecutionException.class, () -> mavenAdapter.setUpConfiguration(mavenParameters,
-				Collections.singletonList(project), jsparrowYml, jsparrowYml, Stream.of(proxy)));
+		assertThrows(MojoExecutionException.class,
+				() -> mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml,
+						jsparrowYml,
+						formatterFile, Stream.of(proxy)));
 	}
 
 	@Test

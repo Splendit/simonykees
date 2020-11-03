@@ -91,7 +91,7 @@ public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportAST
 		AST ast = forNameInvocation.getAST();
 
 		SimpleName charsetConstantSimpleName = ast.newSimpleName(charsetConstantIdentifier);
-		Name typeNameStandardCharsets = addImport(STANDARD_CHARSETS_QUALIFIED_NAME);
+		Name typeNameStandardCharsets = addImport(STANDARD_CHARSETS_QUALIFIED_NAME, forNameInvocation);
 		QualifiedName charsetConstantQualifiedName = ast.newQualifiedName(typeNameStandardCharsets,
 				charsetConstantSimpleName);
 		this.astRewrite.replace(forNameInvocation, charsetConstantQualifiedName, null);

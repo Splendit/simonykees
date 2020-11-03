@@ -3,6 +3,7 @@ package eu.jsparrow.maven.adapter;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.AGENT_URL;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.CONFIG_FILE_OVERRIDE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.DEBUG_ENABLED;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.FORMATTING_FILE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.FRAMEWORK_STORAGE_VALUE;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.INSTANCE_DATA_LOCATION_CONSTANT;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.LICENSE_KEY;
@@ -51,7 +52,7 @@ import eu.jsparrow.maven.util.ProxyUtil;
 public class MavenAdapter {
 
 	public static final String DOT = "."; //$NON-NLS-1$
-	
+
 	private Log log;
 	private Map<String, String> configuration = new HashMap<>();
 	private MavenProject rootProject;
@@ -88,14 +89,14 @@ public class MavenAdapter {
 	 *             current session.
 	 */
 	public WorkingDirectory setUpConfiguration(MavenParameters parameters, List<MavenProject> projects,
-			File configFileOverride, File fallbackConfigFile, Stream<Proxy> proxies)
+			File configFileOverride, File fallbackConfigFile, File formatterFile, Stream<Proxy> proxies)
 			throws InterruptedException, MojoExecutionException {
 
 		log.info(Messages.MavenAdapter_setUpConfiguration);
 
 		setProjectIds(projects);
 		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
-		
+
 		WorkingDirectory workingDirectory = setUpConfiguration(parameters);
 		String rootProjectIdentifier = MavenProjectUtil.findProjectIdentifier(rootProject);
 
@@ -108,6 +109,7 @@ public class MavenAdapter {
 		configuration.put(ROOT_CONFIG_PATH, fallbackConfigFile.getAbsolutePath());
 		configuration.put(CONFIG_FILE_OVERRIDE,
 				(configFileOverride == null) ? null : configFileOverride.getAbsolutePath());
+		configuration.put(FORMATTING_FILE, formatterFile == null ? null : formatterFile.getAbsolutePath());
 		configuration.put(ROOT_PROJECT_BASE_PATH, rootProject.getBasedir()
 			.getAbsolutePath());
 		configuration.put(STATISTICS_SEND, Boolean.toString(parameters.isSendStatistics()));
@@ -133,13 +135,12 @@ public class MavenAdapter {
 		addInitialConfiguration(parameters);
 		return prepareWorkingDirectory();
 	}
-	
-	
-	public WorkingDirectory setUpConfiguration(MavenParameters parameters, Stream<Proxy> proxies) throws InterruptedException {
+
+	public WorkingDirectory setUpConfiguration(MavenParameters parameters, Stream<Proxy> proxies)
+			throws InterruptedException {
 		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
 		return setUpConfiguration(parameters);
 	}
-	
 
 	void addInitialConfiguration(MavenParameters config) {
 		boolean useDefaultConfig = config.getUseDefaultConfig();
@@ -162,7 +163,8 @@ public class MavenAdapter {
 
 		StatisticsMetadata statisticsMetadata = config.getStatisticsMetadata();
 		if (statisticsMetadata != null && statisticsMetadata.isValid()) {
-			configuration.put(STATISTICS_START_TIME, statisticsMetadata.getStartTime().toString());
+			configuration.put(STATISTICS_START_TIME, statisticsMetadata.getStartTime()
+				.toString());
 			configuration.put(STATISTICS_REPO_OWNER, statisticsMetadata.getRepoOwner());
 			configuration.put(STATISTICS_REPO_NAME, statisticsMetadata.getRepoName());
 		}

@@ -1,31 +1,32 @@
-package eu.jsparrow.core.visitor.sub;
+package eu.jsparrow.rules.common.visitor.helper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 /**
- * Gathers the names of the declared variables and simple names used as
- * Qualifiers
+ * Gathers the names of the declared variables.
  * 
- * 
- * @since 3.17.0
+ * @author Ardit Ymeri
+ * @since 1.2
+ *
  */
-public class SimpleNamesAsQualifierVisitor extends ASTVisitor {
+public class VariableDeclarationsVisitor extends ASTVisitor {
 	private List<SimpleName> variableDeclarations;
 
-	public SimpleNamesAsQualifierVisitor() {
+	public VariableDeclarationsVisitor() {
 		variableDeclarations = new ArrayList<>();
 	}
 
 	@Override
 	public boolean visit(SimpleName simpleName) {
-		if (simpleName.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY) {
+		IBinding resolvedBinding = simpleName.resolveBinding();
+		if (resolvedBinding != null && resolvedBinding.getKind() == IBinding.VARIABLE && simpleName.isDeclaration()) {
 			variableDeclarations.add(simpleName);
-		} 
+		}
 		return true;
 	}
 
