@@ -28,10 +28,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsUtil;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
 
 /**
  * Used for preventing injection of SQL code by escaping of the user input that
@@ -108,8 +108,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		}
 
 		Block enclosingBlock = (Block) statementAfterOracleCodec.getParent();
-
-		ASTNode enclosingScope = this.liveVariableScope.findEnclosingScope(statementAfterOracleCodec)
+		ASTNode enclosingScope = liveVariableScope.findEnclosingScope(statementAfterOracleCodec)
 			.orElse(null);
 		if (enclosingScope == null) {
 			return true;
@@ -121,7 +120,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 			String newName = createOracleCodecName();
 			liveVariableScope.addName(enclosingScope, newName);
 			VariableDeclarationStatement oracleCodecDeclarationStatement = createOracleCODECDeclarationStatement(
-					newName);
+					newName, methodInvocation);
 			ListRewrite listRewrite = astRewrite.getListRewrite(enclosingBlock, Block.STATEMENTS_PROPERTY);
 			listRewrite.insertBefore(oracleCodecDeclarationStatement, statementAfterOracleCodec, null);
 			return newName;
@@ -133,7 +132,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 		onRewrite();
 		return true;
 	}
-
+	
 	@Override
 	public void endVisit(CompilationUnit compilationUnit) {
 		liveVariableScope.clearCompilationUnitScope(compilationUnit);
@@ -144,24 +143,27 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	public void endVisit(TypeDeclaration typeDeclaration) {
 		liveVariableScope.clearFieldScope(typeDeclaration);
 		mapBlockToOracleCodecVariable.clear();
+		super.endVisit(typeDeclaration);
 	}
 
 	@Override
 	public void endVisit(MethodDeclaration methodDeclaration) {
 		liveVariableScope.clearLocalVariablesScope(methodDeclaration);
 		mapBlockToOracleCodecVariable.clear();
+		super.endVisit(methodDeclaration);
 	}
 
 	@Override
 	public void endVisit(FieldDeclaration fieldDeclaration) {
 		liveVariableScope.clearLocalVariablesScope(fieldDeclaration);
 		mapBlockToOracleCodecVariable.clear();
+		super.endVisit(fieldDeclaration);
 	}
 
 	@Override
 	public void endVisit(Initializer initializer) {
-		liveVariableScope.clearLocalVariablesScope(initializer);
 		mapBlockToOracleCodecVariable.clear();
+		super.endVisit(initializer);
 	}
 
 	private DynamicQueryComponentsStore collectQueryComponents(SimpleName queryVariableName) {
@@ -217,13 +219,7 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	private Expression createEscapeExpression(String oracleCodecName, Expression expressionToEscape) {
 		AST ast = astRewrite.getAST();
 
-		Name nameESAPI;
-		if (liveVariableScope.isInScope("ESAPI")) {
-			nameESAPI = ast.newName(QUALIFIED_NAME_ESAPI);
-		} else {
-			nameESAPI = addImport(QUALIFIED_NAME_ESAPI);
-		}
-		
+		Name nameESAPI = addImport(QUALIFIED_NAME_ESAPI, expressionToEscape);
 		MethodInvocation encoderInvocationOfESAPI = NodeBuilder.newMethodInvocation(ast, nameESAPI, "encoder");
 		SimpleName encodeForSQLName = ast.newSimpleName("encodeForSQL");
 		List<Expression> arguments = new ArrayList<>();
@@ -235,27 +231,28 @@ public class EscapeUserInputsInSQLQueriesASTVisitor extends AbstractDynamicQuery
 	private String createOracleCodecName() {
 		String name = VAR_NAME_ORACLE_CODEC;
 		int suffix = 1;
-		while (liveVariableScope.isInScope(name)) {
+		while (this.liveVariableScope.isInScope(name)) {
 			name = VAR_NAME_ORACLE_CODEC + suffix;
 			suffix++;
 		}
 		return name;
 	}
 
-	private VariableDeclarationStatement createOracleCODECDeclarationStatement(String oracleCodecName) {
+	private VariableDeclarationStatement createOracleCODECDeclarationStatement(String oracleCodecName,
+			ASTNode context) {
 		AST ast = astRewrite.getAST();
 
 		VariableDeclarationFragment fragment = ast.newVariableDeclarationFragment();
 		fragment.setName(ast.newSimpleName(oracleCodecName));
 		ClassInstanceCreation oracleCODECinitializer = ast.newClassInstanceCreation();
 
-		Name oracleCodecTypeName = addImport(QUALIFIED_NAME_ORACLE_CODEC);
+		Name oracleCodecTypeName = addImport(QUALIFIED_NAME_ORACLE_CODEC, context);
 		SimpleType oracleCodecType = ast.newSimpleType(oracleCodecTypeName);
 		oracleCODECinitializer.setType(oracleCodecType);
 		fragment.setInitializer(oracleCODECinitializer);
 		VariableDeclarationStatement oracleCODECDeclarationStatement = ast.newVariableDeclarationStatement(fragment);
 
-		Name codecTypeName = addImport(QUALIFIED_NAME_CODEC);
+		Name codecTypeName = addImport(QUALIFIED_NAME_CODEC, context);
 		SimpleType codecSimpleType = ast.newSimpleType(codecTypeName);
 		ParameterizedType codecParameterizedType = ast.newParameterizedType(codecSimpleType);
 		Type characterTypeArg = ast.newSimpleType(ast.newSimpleName(Character.class.getSimpleName()));

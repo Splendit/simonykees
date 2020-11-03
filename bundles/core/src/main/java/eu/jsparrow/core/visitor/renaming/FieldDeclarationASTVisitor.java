@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,11 +35,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
-import org.apache.commons.lang3.StringUtils;
-
+import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
 /**
  * A visitor that searches for fields that do not comply with the naming
  * conventions. Makes use of {@link SearchEngine} for finding references of a

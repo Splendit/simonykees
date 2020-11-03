@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -28,6 +29,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.DeclaredMethodNamesASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.DeclaredTypesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
 
 /**
  * Extended {@link AbstractASTRewriteASTVisitor} where a list of java classes
@@ -48,10 +50,12 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	private Set<String> typesImportedOnDemand = new HashSet<>();
 	private Set<String> safeStaticMethodImports = new HashSet<>();
 	private Set<String> staticMethodsImportedOnDemand = new HashSet<>();
+	private final LiveVariableScope liveVariableScope = new LiveVariableScope();
 
 	@Override
 	public void endVisit(CompilationUnit node) {
 
+		liveVariableScope.clearCompilationUnitScope(node);
 		PackageDeclaration cuPackage = node.getPackage();
 		String packageQualifiedName;
 		if (cuPackage != null) {
@@ -362,8 +366,18 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * which will be imported.
 	 * 
 	 * @param qualifiedName
+	 * @param contex
+	 * @return
 	 */
-	protected Name addImport(String qualifiedName) {
+	protected Name addImport(String qualifiedName, ASTNode context) {
+		ASTNode enclosingScope = liveVariableScope.findEnclosingScope(context).orElse(null);
+		if(enclosingScope != null) {
+			String simpleTypeName = getSimpleName(qualifiedName);
+			this.liveVariableScope.lazyLoadScopeNames(enclosingScope);
+			if(liveVariableScope.isInScope(simpleTypeName, enclosingScope)) {
+				return astRewrite.getAST().newName(qualifiedName);
+			}
+		}
 		if (safeImports.contains(qualifiedName) && !typesImportedOnDemand.contains(qualifiedName)) {
 			addImports.add(qualifiedName);
 		}
@@ -378,16 +392,16 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 * @return The qualifier to be used for the static method or an empty
 	 *         {@link Optional} if no qualifier is needed.
 	 */
-	protected Optional<Name> addImportForStaticMethod(String fullyQualifiedMethodName) {
+	protected Optional<Name> addImportForStaticMethod(String fullyQualifiedMethodName, ASTNode context) {
 		if (safeStaticMethodImports.contains(fullyQualifiedMethodName)) {
-			if(!staticMethodsImportedOnDemand.contains(fullyQualifiedMethodName)) {
+			if (!staticMethodsImportedOnDemand.contains(fullyQualifiedMethodName)) {
 				this.staticImports.add(fullyQualifiedMethodName);
 			}
 			return Optional.empty();
 		} else {
 			String qualifiedTypeName = findQualifyingPrefix(fullyQualifiedMethodName);
-			addImport(qualifiedTypeName);
-			return Optional.of(findTypeName(qualifiedTypeName));
+			Name typeName = addImport(qualifiedTypeName, context);
+			return Optional.of(typeName);
 		}
 	}
 
@@ -399,4 +413,5 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	protected void addAlreadyVerifiedImports(Collection<String> newImports) {
 		addImports.addAll(newImports);
 	}
+	
 }

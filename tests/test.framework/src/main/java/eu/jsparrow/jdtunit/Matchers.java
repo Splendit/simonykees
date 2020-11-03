@@ -1,5 +1,7 @@
 package eu.jsparrow.jdtunit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -29,23 +31,32 @@ public final class Matchers {
 	 *            the actual block
 	 */
 	public static void assertMatch(Block expected, ASTNode actual) {
+		assertNotNull(expected);
+		assertNotNull(actual);
 		ASTMatcher astMatcher = new ASTMatcher();
 		if (!astMatcher.match(expected, actual)) {
-			fail("ASTNodes do not match. expected:\n" + expected.toString() + "\n, actual:\n" + actual.toString());
+			assertEquals("ASTNodes do not match. expected:", expected.toString(), actual.toString());
+			fail();
 		}
 	}
 
 	public static void assertMatch(CompilationUnit expected, ASTNode actual) {
+		assertNotNull(expected);
+		assertNotNull(actual);
 		ASTMatcher astMatcher = new ASTMatcher();
 		if (!astMatcher.match(expected, actual)) {
-			fail("ASTNodes do not match. expected:\n" + expected.toString() + "\n, actual:\n" + actual.toString());
+			assertEquals("ASTNodes do not match. expected:", expected.toString(), actual.toString());
+			fail();
 		}
 	}
 
 	public static void assertMatch(TypeDeclaration expected, ASTNode actual) {
+		assertNotNull(expected);
+		assertNotNull(actual);
 		ASTMatcher astMatcher = new ASTMatcher();
 		if (!astMatcher.match(expected, actual)) {
-			fail("ASTNodes do not match. expected:\n" + expected.toString() + "\n, actual:\n" + actual.toString());
+			assertEquals("ASTNodes do not match:", expected.toString(), actual.toString());
+			fail();
 		}
 	}
 }

@@ -39,11 +39,11 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
-import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
 
 /**
  * Replaces the occurrences of {@code System.out/err.print/ln} and
@@ -230,9 +230,9 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		 * SIM-1337
 		 */
 
-		AbstractTypeDeclaration typeDeclaration = ASTNodeUtil.getSpecificAncestor(methodDeclaration,
+		AbstractTypeDeclaration declaration = ASTNodeUtil.getSpecificAncestor(methodDeclaration,
 				AbstractTypeDeclaration.class);
-		Optional<VariableDeclarationFragment> fragment = findDeclaredLogger(typeDeclaration);
+		Optional<VariableDeclarationFragment> fragment = findDeclaredLogger(declaration);
 		if (!fragment.isPresent()) {
 			return true;
 		}
@@ -503,7 +503,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				stringValueOf.setName(ast.newSimpleName(VALUE_OF));
 				stringValueOf.setExpression(ast.newSimpleName(String.class.getSimpleName()));
 				ListRewrite argRewrite = astRewrite.getListRewrite(stringValueOf, MethodInvocation.ARGUMENTS_PROPERTY);
-				argRewrite.insertFirst((Expression) astRewrite.createCopyTarget(firstArgument), null);
+				argRewrite.insertFirst(astRewrite.createCopyTarget(firstArgument), null);
 				logArguments.add(stringValueOf);
 			}
 
