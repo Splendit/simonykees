@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -23,11 +25,21 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class UseComparatorMethodsAnalyzer {
 
+	private Type typeArgumentFromParentCastExpression;
+
 	Optional<LambdaAnalysisResult> analyze(LambdaExpression lambda) {
 		ITypeBinding lambdaTypeBinding = lambda.resolveTypeBinding();
 		if (!ClassRelationUtil.isContentOfType(lambdaTypeBinding,
 				JAVA_UTIL_COMPARATOR)) {
 			return Optional.empty();
+		}
+
+		if (lambda.getLocationInParent() == CastExpression.EXPRESSION_PROPERTY) {
+			CastExpression parentCastExpression = (CastExpression) lambda.getParent();
+			typeArgumentFromParentCastExpression = extractCastExpressionTypeArgument(parentCastExpression);
+			if (typeArgumentFromParentCastExpression == null || typeArgumentFromParentCastExpression.isWildcardType()) {
+				return Optional.empty();
+			}
 		}
 
 		List<VariableDeclaration> lambdaParameters = ASTNodeUtil.convertToTypedList(lambda.parameters(),
@@ -189,16 +201,32 @@ public class UseComparatorMethodsAnalyzer {
 		return isComparable || isInheritingComparable;
 	}
 
-	static class LambdaAnalysisResult {
+	private Type extractCastExpressionTypeArgument(CastExpression castExpression) {
+		Type castExpressionType = castExpression.getType();
+		if (castExpressionType.isParameterizedType()) {
+			ParameterizedType parametrizedType = (ParameterizedType) castExpressionType;
+			List<Type> castExpressionTypeArguments = ASTNodeUtil
+				.convertToTypedList(parametrizedType.typeArguments(), Type.class);
+			if (castExpressionTypeArguments.size() == 1) {
+				return castExpressionTypeArguments.get(0);
+			}
+		}
+		return null;
+	}
+
+	class LambdaAnalysisResult {
 		private final VariableDeclaration lambdaParameterLeftHS;
 		private final boolean reversed;
 		private final IMethodBinding comparisonKeyMethodName;
+		private final Type typeArgumentFromParentCastExpression;
 
 		public LambdaAnalysisResult(VariableDeclaration lambdaParameterLeftHS,
 				boolean reversed) {
 			this.lambdaParameterLeftHS = lambdaParameterLeftHS;
 			this.comparisonKeyMethodName = null;
 			this.reversed = reversed;
+			this.typeArgumentFromParentCastExpression = UseComparatorMethodsAnalyzer.this.typeArgumentFromParentCastExpression;
+
 		}
 
 		public LambdaAnalysisResult(VariableDeclaration lambdaParameterLeftHS,
@@ -206,6 +234,7 @@ public class UseComparatorMethodsAnalyzer {
 			this.lambdaParameterLeftHS = lambdaParameterLeftHS;
 			this.comparisonKeyMethodName = comparisonKeyMethodName;
 			this.reversed = reversed;
+			this.typeArgumentFromParentCastExpression = UseComparatorMethodsAnalyzer.this.typeArgumentFromParentCastExpression;
 		}
 
 		boolean isReversed() {
@@ -242,5 +271,10 @@ public class UseComparatorMethodsAnalyzer {
 			return lambdaParameterLeftHS.resolveBinding()
 				.getType();
 		}
+
+		Optional<Type> getTypeArgumentFromParentCastExpression() {
+			return Optional.ofNullable(typeArgumentFromParentCastExpression);
+		}
+
 	}
 }
