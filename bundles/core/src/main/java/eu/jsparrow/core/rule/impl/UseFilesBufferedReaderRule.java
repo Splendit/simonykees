@@ -18,7 +18,7 @@ import eu.jsparrow.rules.common.Tag;
  *
  */
 public class UseFilesBufferedReaderRule extends RefactoringRuleImpl<UseFilesBufferedReaderASTVisitor> {
-	
+
 	public UseFilesBufferedReaderRule() {
 		this.id = "UseFilesBufferedReader"; //$NON-NLS-1$
 		this.visitorClass = UseFilesBufferedReaderASTVisitor.class;

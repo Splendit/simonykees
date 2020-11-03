@@ -40,7 +40,7 @@ public enum Tag {
 	LAMBDA("lambda"),
 	SECURITY("security"),
 	FREE("free"),
-	LOGGING("logging"), 
+	LOGGING("logging"),
 	IO_OPERATIONS("io operations");
 
 	private List<String> tagName;
