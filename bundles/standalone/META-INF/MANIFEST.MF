@@ -30,5 +30,8 @@ Bundle-Vendor: Splendit IT-Consulting GmbH
 Bundle-ClassPath: lib/plexus-utils.jar,
  lib/maven-invoker.jar,
  lib/snakeyaml.jar,
+ lib/javax.activation.jar,
+ lib/jaxb-api.jar,
+ lib/jaxb-osgi.jar,
  .
 Import-Package: org.eclipse.jdt.launching

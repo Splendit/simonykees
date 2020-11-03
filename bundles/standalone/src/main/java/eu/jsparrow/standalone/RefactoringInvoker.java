@@ -3,10 +3,12 @@ package eu.jsparrow.standalone;
 import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -32,6 +34,7 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.MavenImportException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
+import eu.jsparrow.standalone.xml.FormatterXmlParser;
 
 /**
  * 
@@ -53,6 +56,7 @@ public class RefactoringInvoker {
 	private static final String ROOT_CONFIG_PATH = "ROOT.CONFIG.PATH"; //$NON-NLS-1$
 	private static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_OVERRIDE = "CONFIG.FILE.OVERRIDE"; //$NON-NLS-1$
+	private static final String FORMATTING_FILE = "formatting.file.path"; //$NON-NLS-1$
 	public static final String STATISTICS_START_TIME = "STATISTICS_START_TIME"; //$NON-NLS-1$
 	public static final String STATISTICS_REPO_OWNER = "STATISTICS_REPO_OWNER"; //$NON-NLS-1$
 	public static final String STATISTICS_REPO_NAME = "STATISTICS_REPO_NAME"; //$NON-NLS-1$
@@ -158,10 +162,10 @@ public class RefactoringInvoker {
 
 	private void collectAndSendStatisticData(BundleContext context) {
 		boolean sendStatistics = Boolean.parseBoolean(context.getProperty(STATISTICS_SEND));
-		if(!sendStatistics) {
+		if (!sendStatistics) {
 			return;
 		}
-		
+
 		boolean computedStatistics = standaloneConfigs.stream()
 			.map(StandaloneConfig::getStatisticsData)
 			.filter(Objects::nonNull)
@@ -354,11 +358,22 @@ public class RefactoringInvoker {
 		List<String> excludedModules = new ExcludedModules(parseUseDefaultConfiguration(context),
 				excludedModulesFilePath).get();
 
+		String formattingFilePath = context.getProperty(FORMATTING_FILE);
+		Map<String, String> formattingSettings = Collections.emptyMap();
+		if (formattingFilePath != null) {
+			formattingSettings = FormatterXmlParser.getFormatterSettings(new File(formattingFilePath));
+		}
+
 		StandaloneStatisticsMetadata metadata = extractStatisticsMetadata(context);
 
 		for (IJavaProject javaProject : importedProjects) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
 			verifyAbortFlag(abortMessage);
+
+			// add formatter settings
+			for (Entry<String, String> entry : formattingSettings.entrySet()) {
+				javaProject.setOption(entry.getKey(), entry.getValue());
+			}
 
 			String path = javaProject.getProject()
 				.getLocation()

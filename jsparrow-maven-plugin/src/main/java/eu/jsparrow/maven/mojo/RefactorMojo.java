@@ -58,6 +58,12 @@ public class RefactorMojo extends AbstractMojo {
 	private File configFileOverride;
 
 	/**
+	 * Specify an Eclipse XML formatter file to be used by the CodeFormatterRule
+	 */
+	@Parameter(property = "formatter")
+	private File formatterFile;
+
+	/**
 	 * Selected profile. Overrides the settings in the configuration file.
 	 */
 	@Parameter(defaultValue = "", property = "profile")
@@ -115,7 +121,7 @@ public class RefactorMojo extends AbstractMojo {
 
 		try {
 			WorkingDirectory workingDirectory = mavenAdapter.setUpConfiguration(parameters, projects,
-					configFileOverride, fallbackConfigFile, proxies);
+					configFileOverride, fallbackConfigFile, formatterFile, proxies);
 			addShutdownHook(bundleStarter, workingDirectory, mavenAdapter.isJsparrowRunningFlag());
 			bundleStarter.runStandalone(mavenAdapter.getConfiguration());
 		} catch (BundleException | InterruptedException e1) {
