@@ -25,7 +25,7 @@ public class UseFilesBufferedWriterRule extends RefactoringRuleImpl<UseFilesBuff
 		this.ruleDescription = new RuleDescription(Messages.UseFilesBufferedWriterRule_name,
 				Messages.UseFilesBufferedWriterRule_description,
 				Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.PERFORMANCE));
+				Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.PERFORMANCE, Tag.IO_OPERATIONS));
 	}
 
 	@Override

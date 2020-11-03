@@ -26,7 +26,7 @@ public class CreateTempFilesUsingJavaNIORule
 		this.ruleDescription = new RuleDescription(Messages.CreateTempFilesUsingJavaNioRule_name,
 				Messages.CreateTempFilesUsingJavaNioRule_description,
 				Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_7, Tag.SECURITY));
+				Arrays.asList(Tag.JAVA_1_7, Tag.SECURITY, Tag.IO_OPERATIONS));
 	}
 
 	@Override
