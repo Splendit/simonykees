@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -34,8 +35,12 @@ public class UseComparatorMethodsAnalyzer {
 			return Optional.empty();
 		}
 
-		if (lambda.getLocationInParent() == CastExpression.EXPRESSION_PROPERTY) {
-			CastExpression parentCastExpression = (CastExpression) lambda.getParent();
+		ASTNode childOfParent = lambda;
+		while (childOfParent.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
+			childOfParent = childOfParent.getParent();
+		}
+		if (childOfParent.getLocationInParent() == CastExpression.EXPRESSION_PROPERTY) {
+			CastExpression parentCastExpression = (CastExpression) childOfParent.getParent();
 			typeArgumentFromParentCastExpression = extractCastExpressionTypeArgument(parentCastExpression);
 			if (typeArgumentFromParentCastExpression == null || typeArgumentFromParentCastExpression.isWildcardType()) {
 				return Optional.empty();

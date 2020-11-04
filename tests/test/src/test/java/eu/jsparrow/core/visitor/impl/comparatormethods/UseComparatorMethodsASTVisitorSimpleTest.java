@@ -103,6 +103,13 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 	}
 
 	@Test
+	public void visit_TypeCastOfParenthesizedLambda_shouldTransform() throws Exception {
+		String original = "Comparator<Integer> comparator = (Comparator<Integer>)((((lhs, rhs) -> lhs.compareTo(rhs))));";
+		String expected = "Comparator<Integer> comparator=(Comparator<Integer>)(((Comparator.<Integer>naturalOrder())));";
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_LambdaExpressionNotComparator_shouldNotTransform() throws Exception {
 		fixture.addImport(java.util.function.BiFunction.class.getName());
 		assertNoChange("BiFunction<Integer, Integer, Integer> bifunction = (lhs, rhs) -> lhs.compareTo(rhs);");
@@ -211,4 +218,5 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 				+ "		new LocalClass().useComparatorOfTExtendingComparable((t1, t2) -> t1.compareTo(t2));";
 		assertNoChange(original);
 	}
+
 }
