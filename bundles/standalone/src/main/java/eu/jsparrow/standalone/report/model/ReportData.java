@@ -1,26 +1,27 @@
 package eu.jsparrow.standalone.report.model;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * A model representing the data printed into a jSparrow report. 
+ * A model representing the data printed into a jSparrow report.
  * 
  * @since 3.23.0
  *
  */
 public class ReportData {
-	
+
 	private String projectName;
-	private Date date;
+	private LocalDate date;
 	private int totalIssuesFixed;
 	private int totalFilesCount;
 	private int totalFilesChanged;
-	private long totalTimeSaved; 
+	private long totalTimeSaved;
 	private List<RuleDataModel> ruleDataModels;
 
-	public ReportData(String projectName, Date date, int totalIssuesFixed, int totalFilesCount, int totalFilesChanged,
+	public ReportData(String projectName, LocalDate date, int totalIssuesFixed, int totalFilesCount,
+			int totalFilesChanged,
 			long totalTimeSaved, List<RuleDataModel> ruleDataModels) {
 		this.projectName = projectName;
 		this.date = date;
@@ -36,8 +37,8 @@ public class ReportData {
 	}
 
 	public String getDate() {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy"); //$NON-NLS-1$
-		return dateFormat.format(date);
+		DateTimeFormatter datePattern = DateTimeFormatter.ofPattern("dd.MM.yyyy"); //$NON-NLS-1$
+		return date.format(datePattern);
 	}
 
 	public int getTotalIssuesFixed() {
@@ -59,5 +60,5 @@ public class ReportData {
 	public List<RuleDataModel> getRuleDataModels() {
 		return ruleDataModels;
 	}
-	
+
 }

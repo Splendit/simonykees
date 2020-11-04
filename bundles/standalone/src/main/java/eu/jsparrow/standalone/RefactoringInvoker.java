@@ -3,6 +3,7 @@ package eu.jsparrow.standalone;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -230,7 +231,7 @@ public class RefactoringInvoker {
 		}
 
 		JsparrowData jSparrowData = metricData.getData();
-		ReportData report = ReportDataUtil.createReportData(standaloneConfigs, jSparrowData, new Date());
+		ReportData report = ReportDataUtil.createReportData(standaloneConfigs, jSparrowData, LocalDate.now());
 		ReportGenerator reportGenerator = new ReportGenerator();
 		try {
 			reportGenerator.writeReport(report, reportOutputPath, templateFolder);

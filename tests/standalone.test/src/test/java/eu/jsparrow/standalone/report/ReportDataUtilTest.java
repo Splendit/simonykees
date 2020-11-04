@@ -6,10 +6,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -53,8 +52,7 @@ class ReportDataUtilTest {
 	@Test
 	void test_createReportData_shouldReturnSampleData() throws Exception {
 
-		SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
-		Date date = format.parse("29.10.2020");
+		LocalDate date = LocalDate.of(2020, 10, 29);
 		List<StandaloneConfig> standaloneConfigs = Collections.singletonList(standaloneConfig);
 
 		ReportData report = ReportDataUtil.createReportData(standaloneConfigs, jSparrowData, date);

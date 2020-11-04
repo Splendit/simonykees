@@ -1,6 +1,6 @@
 package eu.jsparrow.standalone.report;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -42,7 +42,7 @@ public class ReportDataUtil {
 	 * @return the extracted data.
 	 */
 	public static ReportData createReportData(List<StandaloneConfig> standaloneConfigs, JsparrowData jSparrowData,
-			Date date) {
+			LocalDate date) {
 		List<RuleDataModel> ruleDataModels = mapToReportRuleDataModel(standaloneConfigs,
 				jSparrowData.getRules());
 		String projectName = jSparrowData.getProjectName();
