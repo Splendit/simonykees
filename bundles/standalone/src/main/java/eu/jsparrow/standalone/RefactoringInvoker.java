@@ -365,6 +365,7 @@ public class RefactoringInvoker {
 		}
 
 		StandaloneStatisticsMetadata metadata = extractStatisticsMetadata(context);
+		String selectedSources = context.getProperty("SELECTED-SOURCES");
 
 		for (IJavaProject javaProject : importedProjects) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$
@@ -405,7 +406,7 @@ public class RefactoringInvoker {
 				YAMLConfig config = getConfiguration(context, javaProject.getProject()
 					.getLocation()
 					.toFile());
-				StandaloneConfig standaloneConfig = new StandaloneConfig(javaProject, path, config, metadata);
+				StandaloneConfig standaloneConfig = new StandaloneConfig(javaProject, path, config, metadata, selectedSources);
 
 				standaloneConfigs.add(standaloneConfig);
 

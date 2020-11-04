@@ -42,7 +42,7 @@ public class CompilationUnitProviderTest {
 		excludes.setExcludeClasses(Collections.singletonList("eu.jsparrow.test.ExcludedClass.java"));
 
 		compUnitMock = mock(ICompilationUnit.class);
-		compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes);
+		compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes, "*");
 
 		packageDeclarationMock = mock(IPackageDeclaration.class);
 
@@ -54,7 +54,7 @@ public class CompilationUnitProviderTest {
 
 		compUnitMock = mock(ICompilationUnit.class);
 		compilationUnitProvider = new CompilationUnitProvider(
-				Collections.singletonList(compUnitMock), excludes);
+				Collections.singletonList(compUnitMock), excludes, "*");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 

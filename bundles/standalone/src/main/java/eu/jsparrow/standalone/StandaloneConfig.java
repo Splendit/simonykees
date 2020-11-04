@@ -88,7 +88,7 @@ public class StandaloneConfig {
 	 *             if the project cannot be created
 	 */
 	public StandaloneConfig(IJavaProject javaProject, String path, YAMLConfig yamlConfig,
-			StandaloneStatisticsMetadata statisticsMetadata) throws CoreException, StandaloneException {
+			StandaloneStatisticsMetadata statisticsMetadata, String selectedSouces) throws CoreException, StandaloneException {
 
 		this.javaProject = javaProject;
 		this.projectName = javaProject.getProject()
@@ -96,7 +96,8 @@ public class StandaloneConfig {
 		this.path = path;
 		this.yamlConfig = yamlConfig;
 		this.statisticsMetadata = statisticsMetadata;
-		setUp();
+		
+		setUp(selectedSouces);
 	}
 
 	/**
@@ -105,9 +106,9 @@ public class StandaloneConfig {
 	 * @throws CoreException
 	 *             the source files cannot be parsed
 	 */
-	protected void setUp() throws CoreException {
+	protected void setUp(String selectedSources) throws CoreException {
 		List<ICompilationUnit> compilationUnits = findProjectCompilationUnits();
-		compilationUnitsProvider = new CompilationUnitProvider(compilationUnits, yamlConfig.getExcludes());
+		compilationUnitsProvider = new CompilationUnitProvider(compilationUnits, yamlConfig.getExcludes(), selectedSources);
 
 		statisticsData = new StandaloneStatisticsData(compilationUnits.size(), projectName, statisticsMetadata,
 				refactoringPipeline);

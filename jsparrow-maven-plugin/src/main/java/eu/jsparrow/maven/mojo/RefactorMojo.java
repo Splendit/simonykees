@@ -80,6 +80,9 @@ public class RefactorMojo extends AbstractMojo {
 	 */
 	@Parameter(property = "license")
 	private String license;
+	
+	@Parameter(defaultValue = "*", property="sources")
+	private String sources;
 
 	/**
 	 * Specify the license server to use.
@@ -110,7 +113,7 @@ public class RefactorMojo extends AbstractMojo {
 		String mode = StandaloneMode.REFACTOR.name();
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration,
-				statisticsMetadata, sendStatistics);
+				statisticsMetadata, sendStatistics, sources);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);
