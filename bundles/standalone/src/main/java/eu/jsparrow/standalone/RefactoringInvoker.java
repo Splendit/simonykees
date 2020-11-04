@@ -57,6 +57,7 @@ public class RefactoringInvoker {
 	private static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_OVERRIDE = "CONFIG.FILE.OVERRIDE"; //$NON-NLS-1$
 	private static final String FORMATTING_FILE = "formatting.file.path"; //$NON-NLS-1$
+	public static final String SELECTED_SOURCES = "SELECTED.SOURCES"; //$NON-NLS-1$
 	public static final String STATISTICS_START_TIME = "STATISTICS_START_TIME"; //$NON-NLS-1$
 	public static final String STATISTICS_REPO_OWNER = "STATISTICS_REPO_OWNER"; //$NON-NLS-1$
 	public static final String STATISTICS_REPO_NAME = "STATISTICS_REPO_NAME"; //$NON-NLS-1$
@@ -365,7 +366,7 @@ public class RefactoringInvoker {
 		}
 
 		StandaloneStatisticsMetadata metadata = extractStatisticsMetadata(context);
-		String selectedSources = context.getProperty("SELECTED-SOURCES");
+		String selectedSources = context.getProperty(SELECTED_SOURCES);
 
 		for (IJavaProject javaProject : importedProjects) {
 			String abortMessage = "Abort detected while loading standalone configuration "; //$NON-NLS-1$

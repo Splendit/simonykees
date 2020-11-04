@@ -39,7 +39,7 @@ public class CompilationUnitProvider {
 
 	private Set<String> usedExcludedPackages = new HashSet<>();
 	private Set<String> usedExcludedClasses = new HashSet<>();
-	private String selectedSources;
+	private List<PathMatcher> selectedSourceMatchers;
 
 	private static final Logger logger = LoggerFactory.getLogger(CompilationUnitProvider.class);
 
@@ -58,7 +58,16 @@ public class CompilationUnitProvider {
 	public CompilationUnitProvider(List<ICompilationUnit> compilationUnits, YAMLExcludes excludes, String selectedSources) {
 		this.compilationUnits = compilationUnits;
 		this.excludes = excludes;
-		this.selectedSources = selectedSources;
+		
+		
+		String[] sources = selectedSources.split(System.lineSeparator());
+
+		this.selectedSourceMatchers = Arrays.asList(sources)
+			.stream()
+			.map(source -> String.join("", "glob:**", source))  //$NON-NLS-1$//$NON-NLS-2$
+			.map(pattern -> FileSystems.getDefault()
+				.getPathMatcher(pattern))
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -69,19 +78,11 @@ public class CompilationUnitProvider {
 	 */
 	public List<ICompilationUnit> getFilteredCompilationUnits() {
 
-		String[] sources = selectedSources.split(System.lineSeparator());
-
-		List<PathMatcher> matchers = Arrays.asList(sources)
-			.stream()
-			.map(source -> String.join(File.separator, "glob:**", source))
-			.map(pattern -> FileSystems.getDefault()
-				.getPathMatcher(pattern))
-			.collect(Collectors.toList());
-
-		logger.info("Selected sources: {}.", selectedSources); //$NON-NLS-1$
-
 		Collector<CharSequence, ?, String> collector = Collectors.joining(","); //$NON-NLS-1$
-
+		String selectedSources = this.selectedSourceMatchers.stream()
+				.map(PathMatcher::toString)
+				.collect(collector);
+		logger.info("Selected sources: {}.", selectedSources); //$NON-NLS-1$
 		List<String> excludedPackages = Optional.ofNullable(excludes)
 				.map(YAMLExcludes::getExcludePackages)
 				.orElse(Collections.emptyList());
@@ -97,13 +98,13 @@ public class CompilationUnitProvider {
 		logger.debug("Excluded classes: {} ", logInfo); //$NON-NLS-1$
 
 		return compilationUnits.stream()
-			.filter(compilationUnit -> isSelected(compilationUnit, matchers))
+			.filter(compilationUnit -> isSelected(compilationUnit, selectedSourceMatchers))
 			.filter(compilationUnit -> isIncludedForRefactoring(compilationUnit, excludedPackages, exludedClasses))
 			.collect(Collectors.toList());
 	}
 
 	private boolean isSelected(ICompilationUnit compilationUnit, List<PathMatcher> matchers) {
-		IPath iPath = compilationUnit.getPath();
+		IPath iPath = compilationUnit.getPath().makeRelative();
 		File file = iPath.toFile();
 		Path path = file.toPath();
 		return matchers.stream()

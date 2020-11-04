@@ -103,7 +103,7 @@ public class CompilationUnitProviderTest {
 		assertEquals(1, compilationUnits.size());
 		assertTrue(compilationUnits.contains(compUnitMock));
 	}
-	
+
 	/*
 	 * Bugfix SIM-1338
 	 */
@@ -112,12 +112,12 @@ public class CompilationUnitProviderTest {
 		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
 		when(packageDeclarationMock.getElementName()).thenReturn("test.infofiles");
 		when(compUnitMock.getElementName()).thenReturn("package-info.java");
-		
+
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
-		
+
 		assertTrue(compilationUnits.isEmpty());
 	}
-	
+
 	/*
 	 * Bugfix SIM-1338
 	 */
@@ -126,9 +126,9 @@ public class CompilationUnitProviderTest {
 		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
 		when(packageDeclarationMock.getElementName()).thenReturn("test.infofiles");
 		when(compUnitMock.getElementName()).thenReturn("module-info.java");
-		
+
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
-		
+
 		assertTrue(compilationUnits.isEmpty());
 	}
 
@@ -164,7 +164,7 @@ public class CompilationUnitProviderTest {
 
 		assertTrue(expected);
 	}
-	
+
 	@Test
 	public void containsExcludedClasses_notExcludedClass_shouldReturnFalse() throws Exception {
 		ICompilationUnit compilationUnitInExcludedFiles = mock(ICompilationUnit.class);

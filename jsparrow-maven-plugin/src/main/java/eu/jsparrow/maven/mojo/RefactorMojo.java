@@ -81,7 +81,7 @@ public class RefactorMojo extends AbstractMojo {
 	@Parameter(property = "license")
 	private String license;
 	
-	@Parameter(defaultValue = "*", property="sources")
+	@Parameter(defaultValue = "*", property="selectedSources")
 	private String sources;
 
 	/**
