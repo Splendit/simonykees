@@ -14,10 +14,91 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 	}
 
 	@Test
-	public void visit_LambdaExpressionComparatorOfInteger_shouldTransform() throws Exception {
+	public void visit_ComparatorOfInteger_shouldTransform() throws Exception {
 		String original = "Comparator<Integer> comparator = (lhs, rhs) -> lhs.compareTo(rhs);";
 		String expected = "Comparator<Integer> comparator = Comparator.naturalOrder();";
 
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ComparatorOfIntegerReversed_shouldTransform() throws Exception {
+		String original = "Comparator<Integer> comparator = (lhs, rhs) -> rhs.compareTo(lhs);";
+		String expected = "Comparator<Integer> comparator=Comparator.reverseOrder();";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ComparatorOfDequeOfInteger_shouldTransform() throws Exception {
+		fixture.addImport(java.util.Deque.class.getName());
+		String original = "Comparator<Deque<Integer>> comparator = (lhs, rhs) -> lhs.getFirst().compareTo(rhs.getFirst());";
+		String expected = "Comparator<Deque<Integer>> comparator=Comparator.comparingInt(Deque::getFirst);";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ComparatorOfDequeOfLong_shouldTransform() throws Exception {
+		fixture.addImport(java.util.Deque.class.getName());
+		String original = "Comparator<Deque<Long>> comparator = (lhs, rhs) -> lhs.getFirst().compareTo(rhs.getFirst());";
+		String expected = "Comparator<Deque<Long>> comparator=Comparator.comparingLong(Deque::getFirst);";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ComparatorOfDequeOfDouble_shouldTransform() throws Exception {
+		fixture.addImport(java.util.Deque.class.getName());
+		String original = "Comparator<Deque<Double>> comparator = (lhs, rhs) -> lhs.getFirst().compareTo(rhs.getFirst());";
+		String expected = "Comparator<Deque<Double>> comparator=Comparator.comparingDouble(Deque::getFirst);";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ComparatorOfDequeOfString_shouldTransform() throws Exception {
+		fixture.addImport(java.util.Deque.class.getName());
+		String original = "Comparator<Deque<String>> comparator = (lhs, rhs) -> lhs.getFirst().compareTo(rhs.getFirst());";
+		String expected = "Comparator<Deque<String>> comparator=Comparator.comparing(Deque::getFirst);";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ComparatorOfDequeOfStringReversed_shouldTransform() throws Exception {
+		fixture.addImport(java.util.Deque.class.getName());
+		String original = "Comparator<Deque<String>> comparator = (lhs, rhs) -> rhs.getFirst().compareTo(lhs.getFirst());";
+		String expected = "Comparator<Deque<String>> comparator=Comparator.comparing(Deque::getFirst).reversed();";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ComparatorForLocalClass_shouldTransform() throws Exception {
+		String original = "" +
+				"class LocalClass {\n" +
+				"	String getString(){\n" +
+				"		return \"\";\n" +
+				"	}\n" +
+				"}\n" +
+				"Comparator<LocalClass> comparator = (lhs, rhs) -> lhs.getString().compareTo(rhs.getString());";
+		String expected = "" +
+				"class LocalClass {\n" +
+				"	String getString(){\n" +
+				"		return \"\";\n" +
+				"	}\n" +
+				"}\n" +
+				"Comparator<LocalClass> comparator=Comparator.comparing(LocalClass::getString);\n";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ComparatorOfJokerInitializedWithComparatorOfInteger_shouldTransform() throws Exception {
+		String original = "Comparator<?> comparator1 = (Integer u1, Integer u2) -> u1.compareTo(u2);";
+		String expected = "Comparator<?> comparator1 = Comparator.<Integer>naturalOrder();";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ComparatorOfJokerInitializedWithDequeOfInteger_shouldTransform() throws Exception {
+		fixture.addImport(java.util.Deque.class.getName());
+		String original = "Comparator<?> comparator = (Deque<Integer> x1, Deque<Integer> x2) -> x1.getFirst().compareTo(x2.getFirst());";
+		String expected = "Comparator<?> comparator = Comparator.comparingInt((Deque<Integer> x1) -> x1.getFirst());";
 		assertChange(original, expected);
 	}
 
