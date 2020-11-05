@@ -1,7 +1,6 @@
 package eu.jsparrow.core.visitor.impl.comparatormethods;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -72,88 +71,94 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 	private MethodInvocation findLambdaReplacementWithComparisonKey(LambdaExpression lambda,
 			LambdaAnalysisResult analysisResult, IMethodBinding comparisonKeyMethod) {
 
-		Type explicitLambdaParameterType = analysisResult.getExplicitLambdaParameterType()
-			.orElse(null);
-
-		CastExpression parentCastExpression = analysisResult.getParentCastExpression()
-			.orElse(null);
-
-		ITypeBinding lambdaParameterType = analysisResult.getImplicitLambdaParameterType();
-
-		Expression comparatorMethodArgument;
-		String lambdaParameterIdentifier = analysisResult.getFirstLambdaParameterIdentifier();
-
-		if (explicitLambdaParameterType != null
-				&& isLambdaParameterTypeRequired(explicitLambdaParameterType, lambda)) {
-			comparatorMethodArgument = createLambdaExpression(
-					(Type) astRewrite.createCopyTarget(explicitLambdaParameterType), lambdaParameterIdentifier,
-					comparisonKeyMethod.getName());
-		} else if (parentCastExpression != null) {
-			Type typeArgumentFromParentCastExpression = findParentCastExpressionTypeArgument(analysisResult).orElse(null);
-			if(typeArgumentFromParentCastExpression != null) {
-				typeArgumentFromParentCastExpression = (Type) astRewrite.createCopyTarget(typeArgumentFromParentCastExpression);
-			}
-			else {
-				Name objectTypeName = addImport(java.lang.Object.class.getName());
-				typeArgumentFromParentCastExpression = astRewrite.getAST().newSimpleType(objectTypeName);
-			}
-			comparatorMethodArgument = createLambdaExpression(typeArgumentFromParentCastExpression,
-					lambdaParameterIdentifier, comparisonKeyMethod.getName());
-		} else {
-			comparatorMethodArgument = createExpressionMethodReference(lambdaParameterType,
-					comparisonKeyMethod.getName());
-		}
 		String comparatorMethodName = getComparatorMethodName(comparisonKeyMethod);
-
-		MethodInvocation comparatorMethodInvocation = createComparatorMethodInvocation(comparatorMethodName,
-				comparatorMethodArgument);
-
+		MethodInvocation comparatorMethodInvocation = createComparatorMethodInvocation(comparatorMethodName);
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments = comparatorMethodInvocation.arguments();
+		Expression comparatorMethodArgument = createComparatorMethodArgument(lambda, analysisResult,
+				comparisonKeyMethod);
+		arguments.add(comparatorMethodArgument);
 		if (analysisResult.isReversed()) {
 			return reverseComparatorMethodInvocation(comparatorMethodInvocation);
 		}
 		return comparatorMethodInvocation;
 	}
 
+	private Expression createComparatorMethodArgument(LambdaExpression lambda, LambdaAnalysisResult analysisResult,
+			IMethodBinding comparisonKeyMethod) {
+
+		Type explicitLambdaParameterType = analysisResult.getExplicitLambdaParameterType()
+			.orElse(null);
+		String lambdaParameterIdentifier = analysisResult.getFirstLambdaParameterIdentifier();
+		if (explicitLambdaParameterType != null
+				&& isLambdaParameterTypeRequired(explicitLambdaParameterType, lambda)) {
+			return createLambdaExpression(
+					(Type) astRewrite.createCopyTarget(explicitLambdaParameterType), lambdaParameterIdentifier,
+					comparisonKeyMethod.getName());
+		}
+		CastExpression parentCastExpression = analysisResult.getParentCastExpression()
+			.orElse(null);
+		if (parentCastExpression != null) {
+			Type typeArgumentFromParentCastExpression = newTypeFromParentCastExpressionTypeArgument(
+					parentCastExpression);
+			return createLambdaExpression(typeArgumentFromParentCastExpression,
+					lambdaParameterIdentifier, comparisonKeyMethod.getName());
+		}
+		ITypeBinding lambdaParameterType = analysisResult.getImplicitLambdaParameterType();
+		return createExpressionMethodReference(lambdaParameterType,
+				comparisonKeyMethod.getName());
+	}
+
 	private MethodInvocation findSimpleLambdaReplacement(LambdaExpression lambda,
 			LambdaAnalysisResult analysisResult) {
-		String comparatorMethodName;
+
+		MethodInvocation comparatorMethodInvocation;
 		if (analysisResult.isReversed()) {
-			comparatorMethodName = "reverseOrder"; //$NON-NLS-1$
+			comparatorMethodInvocation = createComparatorMethodInvocation("reverseOrder"); //$NON-NLS-1$
 		} else {
-			comparatorMethodName = "naturalOrder"; //$NON-NLS-1$
+			comparatorMethodInvocation = createComparatorMethodInvocation("naturalOrder"); //$NON-NLS-1$
 		}
 		Type explicitLambdaParameterType = analysisResult.getExplicitLambdaParameterType()
 			.orElse(null);
 
 		if (explicitLambdaParameterType != null
 				&& isLambdaParameterTypeRequired(explicitLambdaParameterType, lambda)) {
-			return createComparatorMethodInvocation(comparatorMethodName, explicitLambdaParameterType);
+			@SuppressWarnings("unchecked")
+			List<Type> typeArguments = comparatorMethodInvocation.typeArguments();
+			explicitLambdaParameterType = (Type) astRewrite.createCopyTarget(explicitLambdaParameterType);
+			typeArguments.add(explicitLambdaParameterType);
+			return comparatorMethodInvocation;
 		}
 
-		Type parentCastExpressionTypeArgument = findParentCastExpressionTypeArgument(analysisResult).orElse(null);
-		if (parentCastExpressionTypeArgument != null) {
-			return createComparatorMethodInvocation(comparatorMethodName, parentCastExpressionTypeArgument);
-		}
-		return createComparatorMethodInvocation(comparatorMethodName);
-	}
-
-	private Optional<Type> findParentCastExpressionTypeArgument(LambdaAnalysisResult analysisResult) {
 		CastExpression parentCastExpression = analysisResult.getParentCastExpression()
 			.orElse(null);
-		if (parentCastExpression == null) {
-			return Optional.empty();
+		if (parentCastExpression != null) {
+			@SuppressWarnings("unchecked")
+			List<Type> typeArguments = comparatorMethodInvocation.typeArguments();
+			Type typeArgumentFromParentCastExpression = newTypeFromParentCastExpressionTypeArgument(
+					parentCastExpression);
+			typeArguments.add(typeArgumentFromParentCastExpression);
+			return comparatorMethodInvocation;
 		}
+		return comparatorMethodInvocation;
+	}
+
+	private Type newTypeFromParentCastExpressionTypeArgument(CastExpression parentCastExpression) {
 		Type castExpressionType = parentCastExpression.getType();
 		if (castExpressionType.isParameterizedType()) {
 			ParameterizedType parametrizedType = (ParameterizedType) castExpressionType;
 			List<Type> castExpressionTypeArguments = ASTNodeUtil
 				.convertToTypedList(parametrizedType.typeArguments(), Type.class);
 			if (castExpressionTypeArguments.size() == 1) {
-				return Optional.of(castExpressionTypeArguments.get(0));
+				Type typeToCopy = castExpressionTypeArguments.get(0);
+				return (Type) astRewrite
+					.createCopyTarget(typeToCopy);
 			}
 		}
-		return Optional.empty();
-		
+		Name objectTypeName = addImport(java.lang.Object.class.getName());
+		return astRewrite.getAST()
+			.newSimpleType(objectTypeName);
+
 	}
 
 	private boolean isLambdaParameterTypeRequired(Type explicitLambdaParameterType, LambdaExpression lambda) {
@@ -256,27 +261,9 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		return methodInvocation;
 	}
 
-	private MethodInvocation createComparatorMethodInvocation(String methodName, Type typeArgument) {
-		MethodInvocation methodInvocation = createComparatorMethodInvocation(methodName);
-		@SuppressWarnings("unchecked")
-		List<Type> typeArguments = methodInvocation.typeArguments();
-		typeArguments.add((Type) astRewrite.createCopyTarget(typeArgument));
-		return methodInvocation;
-	}
-
-	private MethodInvocation createComparatorMethodInvocation(String comparatorMethodName,
-			Expression methodArgument) {
-		MethodInvocation comparatorMethodInvocation = createComparatorMethodInvocation(comparatorMethodName);
-		@SuppressWarnings("unchecked")
-		List<Expression> arguments = comparatorMethodInvocation.arguments();
-		arguments.add(methodArgument);
-		return comparatorMethodInvocation;
-	}
-
 	private MethodInvocation reverseComparatorMethodInvocation(MethodInvocation comparatorMethodInvocation) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation reverseMethodInvocation = ast.newMethodInvocation();
-		// reversed
 		reverseMethodInvocation.setName(ast.newSimpleName("reversed")); //$NON-NLS-1$
 		reverseMethodInvocation.setExpression(comparatorMethodInvocation);
 		return reverseMethodInvocation;
