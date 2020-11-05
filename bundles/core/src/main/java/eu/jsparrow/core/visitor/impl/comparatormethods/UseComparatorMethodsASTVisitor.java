@@ -1,10 +1,12 @@
 package eu.jsparrow.core.visitor.impl.comparatormethods;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
@@ -14,6 +16,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
@@ -40,6 +43,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		boolean continueVisiting = super.visit(compilationUnit);
 		if (continueVisiting) {
 			verifyImport(compilationUnit, JAVA_UTIL_COMPARATOR);
+			verifyImport(compilationUnit, java.lang.Object.class.getName());
 		}
 		return continueVisiting;
 	}
@@ -71,7 +75,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		Type explicitLambdaParameterType = analysisResult.getExplicitLambdaParameterType()
 			.orElse(null);
 
-		Type typeArgumentFromParentCastExpression = analysisResult.getTypeArgumentFromParentCastExpression()
+		CastExpression parentCastExpression = analysisResult.getParentCastExpression()
 			.orElse(null);
 
 		ITypeBinding lambdaParameterType = analysisResult.getImplicitLambdaParameterType();
@@ -81,9 +85,18 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 
 		if (explicitLambdaParameterType != null
 				&& isLambdaParameterTypeRequired(explicitLambdaParameterType, lambda)) {
-			comparatorMethodArgument = createLambdaExpression(explicitLambdaParameterType,
-					lambdaParameterIdentifier, comparisonKeyMethod.getName());
-		} else if (typeArgumentFromParentCastExpression != null) {
+			comparatorMethodArgument = createLambdaExpression(
+					(Type) astRewrite.createCopyTarget(explicitLambdaParameterType), lambdaParameterIdentifier,
+					comparisonKeyMethod.getName());
+		} else if (parentCastExpression != null) {
+			Type typeArgumentFromParentCastExpression = findParentCastExpressionTypeArgument(analysisResult).orElse(null);
+			if(typeArgumentFromParentCastExpression != null) {
+				typeArgumentFromParentCastExpression = (Type) astRewrite.createCopyTarget(typeArgumentFromParentCastExpression);
+			}
+			else {
+				Name objectTypeName = addImport(java.lang.Object.class.getName());
+				typeArgumentFromParentCastExpression = astRewrite.getAST().newSimpleType(objectTypeName);
+			}
 			comparatorMethodArgument = createLambdaExpression(typeArgumentFromParentCastExpression,
 					lambdaParameterIdentifier, comparisonKeyMethod.getName());
 		} else {
@@ -117,12 +130,30 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			return createComparatorMethodInvocation(comparatorMethodName, explicitLambdaParameterType);
 		}
 
-		Type castExpressionTypeArgument = analysisResult.getTypeArgumentFromParentCastExpression()
-			.orElse(null);
-		if (castExpressionTypeArgument != null) {
-			return createComparatorMethodInvocation(comparatorMethodName, castExpressionTypeArgument);
+		Type parentCastExpressionTypeArgument = findParentCastExpressionTypeArgument(analysisResult).orElse(null);
+		if (parentCastExpressionTypeArgument != null) {
+			return createComparatorMethodInvocation(comparatorMethodName, parentCastExpressionTypeArgument);
 		}
 		return createComparatorMethodInvocation(comparatorMethodName);
+	}
+
+	private Optional<Type> findParentCastExpressionTypeArgument(LambdaAnalysisResult analysisResult) {
+		CastExpression parentCastExpression = analysisResult.getParentCastExpression()
+			.orElse(null);
+		if (parentCastExpression == null) {
+			return Optional.empty();
+		}
+		Type castExpressionType = parentCastExpression.getType();
+		if (castExpressionType.isParameterizedType()) {
+			ParameterizedType parametrizedType = (ParameterizedType) castExpressionType;
+			List<Type> castExpressionTypeArguments = ASTNodeUtil
+				.convertToTypedList(parametrizedType.typeArguments(), Type.class);
+			if (castExpressionTypeArguments.size() == 1) {
+				return Optional.of(castExpressionTypeArguments.get(0));
+			}
+		}
+		return Optional.empty();
+		
 	}
 
 	private boolean isLambdaParameterTypeRequired(Type explicitLambdaParameterType, LambdaExpression lambda) {
@@ -192,7 +223,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		@SuppressWarnings("unchecked")
 		List<VariableDeclaration> parameters = lambdaExpression.parameters();
 		SingleVariableDeclaration lambdaParam = ast.newSingleVariableDeclaration();
-		lambdaParam.setType((Type) astRewrite.createCopyTarget(explicitLambdaParameterType));
+		lambdaParam.setType(explicitLambdaParameterType);
 		lambdaParam.setName(ast.newSimpleName(lambdaParameterIdentifier));
 		parameters.add(lambdaParam);
 		MethodInvocation lambdaBodyAsMethodInvocation = ast.newMethodInvocation();

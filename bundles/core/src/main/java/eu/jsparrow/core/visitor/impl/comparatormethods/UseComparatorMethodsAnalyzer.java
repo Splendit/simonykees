@@ -26,7 +26,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class UseComparatorMethodsAnalyzer {
 
-	private Type typeArgumentFromParentCastExpression;
+	private CastExpression parentCastExpression;
 
 	Optional<LambdaAnalysisResult> analyze(LambdaExpression lambda) {
 		ITypeBinding lambdaTypeBinding = lambda.resolveTypeBinding();
@@ -40,9 +40,8 @@ public class UseComparatorMethodsAnalyzer {
 			childOfParent = childOfParent.getParent();
 		}
 		if (childOfParent.getLocationInParent() == CastExpression.EXPRESSION_PROPERTY) {
-			CastExpression parentCastExpression = (CastExpression) childOfParent.getParent();
-			typeArgumentFromParentCastExpression = extractCastExpressionTypeArgument(parentCastExpression);
-			if (typeArgumentFromParentCastExpression == null || typeArgumentFromParentCastExpression.isWildcardType()) {
+			parentCastExpression = (CastExpression) childOfParent.getParent();
+			if(isCastExpressionWithJokerTypeArgument(parentCastExpression)) {
 				return Optional.empty();
 			}
 		}
@@ -206,31 +205,31 @@ public class UseComparatorMethodsAnalyzer {
 		return isComparable || isInheritingComparable;
 	}
 
-	private Type extractCastExpressionTypeArgument(CastExpression castExpression) {
+	private boolean isCastExpressionWithJokerTypeArgument(CastExpression castExpression) {
 		Type castExpressionType = castExpression.getType();
 		if (castExpressionType.isParameterizedType()) {
 			ParameterizedType parametrizedType = (ParameterizedType) castExpressionType;
 			List<Type> castExpressionTypeArguments = ASTNodeUtil
 				.convertToTypedList(parametrizedType.typeArguments(), Type.class);
 			if (castExpressionTypeArguments.size() == 1) {
-				return castExpressionTypeArguments.get(0);
+				return castExpressionTypeArguments.get(0).isWildcardType();
 			}
 		}
-		return null;
+		return false;
 	}
 
 	class LambdaAnalysisResult {
 		private final VariableDeclaration lambdaParameterLeftHS;
 		private final boolean reversed;
 		private final IMethodBinding comparisonKeyMethodName;
-		private final Type typeArgumentFromParentCastExpression;
+		private final CastExpression parentCastExpression;
 
 		public LambdaAnalysisResult(VariableDeclaration lambdaParameterLeftHS,
 				boolean reversed) {
 			this.lambdaParameterLeftHS = lambdaParameterLeftHS;
 			this.comparisonKeyMethodName = null;
 			this.reversed = reversed;
-			this.typeArgumentFromParentCastExpression = UseComparatorMethodsAnalyzer.this.typeArgumentFromParentCastExpression;
+			this.parentCastExpression = UseComparatorMethodsAnalyzer.this.parentCastExpression;
 
 		}
 
@@ -239,7 +238,7 @@ public class UseComparatorMethodsAnalyzer {
 			this.lambdaParameterLeftHS = lambdaParameterLeftHS;
 			this.comparisonKeyMethodName = comparisonKeyMethodName;
 			this.reversed = reversed;
-			this.typeArgumentFromParentCastExpression = UseComparatorMethodsAnalyzer.this.typeArgumentFromParentCastExpression;
+			this.parentCastExpression = UseComparatorMethodsAnalyzer.this.parentCastExpression;
 		}
 
 		boolean isReversed() {
@@ -277,9 +276,8 @@ public class UseComparatorMethodsAnalyzer {
 				.getType();
 		}
 
-		Optional<Type> getTypeArgumentFromParentCastExpression() {
-			return Optional.ofNullable(typeArgumentFromParentCastExpression);
+		Optional<CastExpression> getParentCastExpression() {
+			return Optional.ofNullable(parentCastExpression);
 		}
-
 	}
 }

@@ -61,6 +61,22 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 	}
 
 	@Test
+	public void visit_InitializeComparatorRawType_shouldTransform() throws Exception {
+		fixture.addImport(java.lang.Comparable.class.getName());
+		String original = "Comparator comparator = (lhs, rhs) -> lhs.toString().compareTo(rhs.toString());";
+		String expected = "Comparator comparator = Comparator.comparing(Object::toString);";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_TypeCastToComparatorRawType_shouldNotTransform() throws Exception {
+		fixture.addImport(java.lang.Comparable.class.getName());
+		String original = "Comparator comparator =  (Comparator) (lhs, rhs) -> lhs.toString().compareTo(rhs.toString());";
+		String expected = "Comparator comparator=(Comparator)Comparator.comparing((  Object lhs) -> lhs.toString());";
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_ComparatorOfDequeOfStringReversed_shouldTransform() throws Exception {
 		fixture.addImport(java.util.Deque.class.getName());
 		String original = "Comparator<Deque<String>> comparator = (lhs, rhs) -> rhs.getFirst().compareTo(lhs.getFirst());";
@@ -123,6 +139,17 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 				"};";
 
 		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_CompareToParameterIsCapture_shouldTransform() throws Exception {
+		String original = "" +
+				"Comparator<Comparable<? super Comparable<?>>> comparator = (u1, u2) -> u1.compareTo(u2);";
+
+		String expected = "" +
+				"Comparator<Comparable<? super Comparable<?>>> comparator = Comparator.naturalOrder();";
+
+		assertChange(original, expected);
 	}
 
 	@Test
@@ -197,14 +224,9 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 	}
 
 	@Test
-	public void visit_CompareToParameterIsCapture_shouldTransform() throws Exception {
-		String original = "" +
-				"Comparator<Comparable<? super Comparable<?>>> comparator = (u1, u2) -> u1.compareTo(u2);";
-
-		String expected = "" +
-				"Comparator<Comparable<? super Comparable<?>>> comparator = Comparator.naturalOrder();";
-
-		assertChange(original, expected);
+	public void visit_InitializeComparatorOfJokerSuperComparable_shouldNotTransform() throws Exception {
+		String original = "Comparator<? super Comparable> comparator = (Comparable lhs, Comparable rhs) -> lhs.compareTo(rhs);";
+		assertNoChange(original);
 	}
 
 	@Test
