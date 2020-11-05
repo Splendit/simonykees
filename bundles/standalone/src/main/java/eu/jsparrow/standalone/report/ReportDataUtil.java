@@ -78,8 +78,8 @@ public class ReportDataUtil {
 	private static RuleDataModel createRuleDataModel(RefactoringRule rule,
 			JsparrowRuleData jsparrowRuleData) {
 		String ruleId = jsparrowRuleData.getRuleId();
-		RuleDescription descirption = rule.getRuleDescription();
-		String ruleName = descirption.getName();
+		RuleDescription description = rule.getRuleDescription();
+		String ruleName = description.getName();
 		String link = RuleDocumentationURLGeneratorUtil.generateLinkToDocumentation(ruleId);
 
 		return new RuleDataModel(ruleId,
