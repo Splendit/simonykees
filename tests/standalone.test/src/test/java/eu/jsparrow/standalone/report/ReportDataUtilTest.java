@@ -9,7 +9,9 @@ import static org.mockito.Mockito.when;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,7 @@ class ReportDataUtilTest {
 	private JsparrowData jSparrowData;
 	private JsparrowRuleData jSparrowRuleData;
 	private RefactoringRule refactoringRule;
+	private Map<StandaloneConfig, List<RefactoringRule>> rulesMap;
 
 	@BeforeEach
 	public void setUp() {
@@ -38,7 +41,9 @@ class ReportDataUtilTest {
 		RuleDescription description = new RuleDescription("Some Rule", "Some description", Duration.ofMinutes(5),
 				Tag.LAMBDA);
 		when(refactoringRule.getRuleDescription()).thenReturn(description);
-		when(standaloneConfig.getProjectRules()).thenReturn(Collections.singletonList(refactoringRule));
+		rulesMap = new HashMap<>();
+		rulesMap.put(standaloneConfig, Collections.singletonList(refactoringRule));
+
 		jSparrowRuleData = new JsparrowRuleData("SomeRuleId", 5, 6L, 7);
 		jSparrowData = new JsparrowData();
 		jSparrowData.setProjectName("project-name");
@@ -53,9 +58,7 @@ class ReportDataUtilTest {
 	void test_createReportData_shouldReturnSampleData() throws Exception {
 
 		LocalDate date = LocalDate.of(2020, 10, 29);
-		List<StandaloneConfig> standaloneConfigs = Collections.singletonList(standaloneConfig);
-
-		ReportData report = ReportDataUtil.createReportData(standaloneConfigs, jSparrowData, date);
+		ReportData report = ReportDataUtil.createReportData(jSparrowData, date, rulesMap);
 
 		assertThat(report.getDate(), equalTo("29.10.2020"));
 		assertThat(report.getProjectName(), equalTo("project-name"));
@@ -69,10 +72,7 @@ class ReportDataUtilTest {
 
 	@Test
 	void test_create_shouldReturnSampleRule() throws Exception {
-		List<StandaloneConfig> standaloneConfigs = Collections.singletonList(standaloneConfig);
-
-		List<RuleDataModel> ruleDataModels = ReportDataUtil.mapToReportRuleDataModel(standaloneConfigs,
-				jSparrowData.getRules());
+		List<RuleDataModel> ruleDataModels = ReportDataUtil.mapToReportRuleDataModel(jSparrowData.getRules(), rulesMap);
 
 		assertThat(ruleDataModels, hasSize(1));
 		RuleDataModel ruleDataModel = ruleDataModels.get(0);

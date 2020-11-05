@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,7 @@ import eu.jsparrow.core.statistic.entity.JsparrowData;
 import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.core.statistic.entity.JsparrowRuleData;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.MavenImportException;
@@ -121,8 +121,8 @@ public class RefactoringInvoker {
 		List<IJavaProject> importedProjects = importAllProjects(context);
 		loadStandaloneConfig(importedProjects, context);
 		prepareRefactoring();
-		computeRefactoring();
-		collectAndPrintStatistics(context);
+		Map<StandaloneConfig, List<RefactoringRule>> rules = computeRefactoring();
+		collectAndPrintStatistics(context, rules);
 	}
 
 	/**
@@ -153,20 +153,22 @@ public class RefactoringInvoker {
 		}
 	}
 
-	private void computeRefactoring() throws StandaloneException {
-
+	private Map<StandaloneConfig, List<RefactoringRule>> computeRefactoring() throws StandaloneException {
+		Map<StandaloneConfig, List<RefactoringRule>> rulesMap = new HashMap<>();
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
 			String abortMessage = String.format("abort detected while computing refactoring on %s ", //$NON-NLS-1$
 					standaloneConfig.getProjectName());
 			verifyAbortFlag(abortMessage);
 			try {
-				standaloneConfig.computeRefactoring();
+				List<RefactoringRule> rules = standaloneConfig.computeRefactoring();
+				rulesMap.put(standaloneConfig, rules);
 			} catch (ConcurrentModificationException e) {
 				String message = abort ? abortMessage : e.getMessage();
 				throw new StandaloneException(message);
 			}
 
 		}
+		return rulesMap;
 	}
 
 	private void commitRefactoring() throws StandaloneException {
@@ -207,7 +209,7 @@ public class RefactoringInvoker {
 		JsonUtil.sendJsonToAwsStatisticsService(json);
 	}
 
-	private void collectAndPrintStatistics(BundleContext context) {
+	private void collectAndPrintStatistics(BundleContext context, Map<StandaloneConfig, List<RefactoringRule>> rules) {
 		boolean computedStatistics = standaloneConfigs.stream()
 			.map(StandaloneConfig::getStatisticsData)
 			.filter(Objects::nonNull)
@@ -231,7 +233,7 @@ public class RefactoringInvoker {
 		}
 
 		JsparrowData jSparrowData = metricData.getData();
-		ReportData report = ReportDataUtil.createReportData(standaloneConfigs, jSparrowData, LocalDate.now());
+		ReportData report = ReportDataUtil.createReportData(jSparrowData, LocalDate.now(), rules);
 		ReportGenerator reportGenerator = new ReportGenerator();
 		try {
 			reportGenerator.writeReport(report, reportOutputPath, templateFolder);

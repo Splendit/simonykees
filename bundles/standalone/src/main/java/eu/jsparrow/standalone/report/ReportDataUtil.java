@@ -1,11 +1,14 @@
 package eu.jsparrow.standalone.report;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.statistic.RuleDocumentationURLGeneratorUtil;
 import eu.jsparrow.core.statistic.entity.JsparrowData;
 import eu.jsparrow.core.statistic.entity.JsparrowRuleData;
@@ -41,10 +44,8 @@ public class ReportDataUtil {
 	 *            the current date for the report.
 	 * @return the extracted data.
 	 */
-	public static ReportData createReportData(List<StandaloneConfig> standaloneConfigs, JsparrowData jSparrowData,
-			LocalDate date) {
-		List<RuleDataModel> ruleDataModels = mapToReportRuleDataModel(standaloneConfigs,
-				jSparrowData.getRules());
+	public static ReportData createReportData(JsparrowData jSparrowData, LocalDate date, Map<StandaloneConfig, List<RefactoringRule>>rulesMap) {
+		List<RuleDataModel> ruleDataModels = mapToReportRuleDataModel(jSparrowData.getRules(), rulesMap);
 		String projectName = jSparrowData.getProjectName();
 		int totalIssuesFixed = jSparrowData.getTotalIssuesFixed();
 		int totalFilesCount = jSparrowData.getTotalFilesCount();
@@ -60,16 +61,18 @@ public class ReportDataUtil {
 				ruleDataModels);
 	}
 
-	public static List<RuleDataModel> mapToReportRuleDataModel(List<StandaloneConfig> standaloneConfigs,
-			List<JsparrowRuleData> ruleData) {
+	public static List<RuleDataModel> mapToReportRuleDataModel(List<JsparrowRuleData> ruleData, Map<StandaloneConfig, List<RefactoringRule>>rulesMap) {
 
-		Map<String, RefactoringRule> ruleIdsMap = standaloneConfigs.stream()
-			.map(StandaloneConfig::getProjectRules)
+		Map<String, RefactoringRule> ruleIdsMap = rulesMap.values()
+			.stream()
 			.flatMap(List::stream)
 			.collect(Collectors.toMap(RefactoringRule::getId,
 					Function.identity(),
 					(r1, r2) -> r1 /* simply drop the duplicates */));
-
+		StandardLoggerRule loggerRule = new StandardLoggerRule();
+		FieldsRenamingRule renamingRule = new FieldsRenamingRule(Collections.emptyList(), Collections.emptyList());
+		ruleIdsMap.put(loggerRule.getId(), loggerRule);
+		ruleIdsMap.put(renamingRule.getId(), renamingRule);
 		return ruleData.stream()
 			.map(jrd -> createRuleDataModel(ruleIdsMap.get(jrd.getRuleId()), jrd))
 			.collect(Collectors.toList());
