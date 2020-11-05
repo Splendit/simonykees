@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaModelException;
@@ -35,26 +36,71 @@ public class CompilationUnitProviderTest {
 	private IPackageDeclaration packageDeclarationMock;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 		YAMLExcludes excludes = new YAMLExcludes();
 		excludes.setExcludePackages(Arrays.asList(EU_JSPARROW, EU_JSPARROW_PACKAGE));
 
 		excludes.setExcludeClasses(Collections.singletonList("eu.jsparrow.test.ExcludedClass.java"));
 
 		compUnitMock = mock(ICompilationUnit.class);
-		compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes, "*");
+		compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes, "");
 
 		packageDeclarationMock = mock(IPackageDeclaration.class);
+		IPath path = new org.eclipse.core.runtime.Path("/some/path/CompUnit.java");
+		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] {packageDeclarationMock});
+		when(compUnitMock.getElementName()).thenReturn("CompUnit.java");
+		when(compUnitMock.getPath()).thenReturn(path);
+		when(packageDeclarationMock.getElementName()).thenReturn("some.path");
+		
 
+	}
+	
+	@Test
+	public void getFilteredCompilationUnits_selectAllSources_shouldReturnAllCompilationUnits() throws Exception {
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
+				Collections.singletonList(compUnitMock), null, "");
+
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+
+		assertEquals(1, compilationUnits.size());
+	}
+	
+	@Test
+	public void getFilteredCompilationUnits_matchingSelection_shouldReturnOneCompilationUnits() throws Exception {
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
+				Collections.singletonList(compUnitMock), null, "path/CompUnit.java");
+
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+
+		assertEquals(1, compilationUnits.size());
+	}
+	
+	@Test
+	public void getFilteredCompilationUnits_globSelectionExpression_shouldReturnAllCompilationUnits() throws Exception {
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
+				Collections.singletonList(compUnitMock), null, "path/*");
+
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+
+		assertEquals(1, compilationUnits.size());
+	}
+	
+	@Test
+	public void getFilteredCompilationUnits_nonMatchingSelection_shouldReturnNoCompilationUnits() throws Exception {
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
+				Collections.singletonList(compUnitMock), null, "path/CompUnit2.java");
+
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+
+		assertTrue(compilationUnits.isEmpty());
 	}
 
 	@Test
 	public void getFilteredCompilationUnits_excludesIsNull_shouldReturnAllCompilationUnits() {
 		YAMLExcludes excludes = null;
 
-		compUnitMock = mock(ICompilationUnit.class);
 		compilationUnitProvider = new CompilationUnitProvider(
-				Collections.singletonList(compUnitMock), excludes, "*");
+				Collections.singletonList(compUnitMock), excludes, "");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
@@ -93,7 +139,7 @@ public class CompilationUnitProviderTest {
 	}
 
 	@Test
-	public void getFilteredCompilationUnits_nothingEcluded_returnAll() throws JavaModelException {
+	public void getFilteredCompilationUnits_nothingExcluded_returnAll() throws JavaModelException {
 		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
 		when(packageDeclarationMock.getElementName()).thenReturn("eu.jsparrow.test");
 		when(compUnitMock.getElementName()).thenReturn("NotExcludedChass.java");
