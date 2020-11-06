@@ -39,52 +39,63 @@ public class CompilationUnitProviderTest {
 	public void setUp() throws Exception {
 		YAMLExcludes excludes = new YAMLExcludes();
 		excludes.setExcludePackages(Arrays.asList(EU_JSPARROW, EU_JSPARROW_PACKAGE));
-
 		excludes.setExcludeClasses(Collections.singletonList("eu.jsparrow.test.ExcludedClass.java"));
-
-		compUnitMock = mock(ICompilationUnit.class);
-		compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes, "");
-
 		packageDeclarationMock = mock(IPackageDeclaration.class);
-		IPath path = new org.eclipse.core.runtime.Path("/some/path/CompUnit.java");
-		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] {packageDeclarationMock});
-		when(compUnitMock.getElementName()).thenReturn("CompUnit.java");
-		when(compUnitMock.getPath()).thenReturn(path);
 		when(packageDeclarationMock.getElementName()).thenReturn("some.path");
-		
-
+		compUnitMock = createICompilationUnitMock("CompUnit.java", "/some/path/CompUnit.java", packageDeclarationMock);
+		compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes, "");
 	}
-	
+
+	public static ICompilationUnit createICompilationUnitMock(String name, String path,
+			IPackageDeclaration packageDeclarationMock) throws Exception {
+		ICompilationUnit compUnit = mock(ICompilationUnit.class);
+		IPath path2 = new org.eclipse.core.runtime.Path(path);
+		when(compUnit.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
+		when(compUnit.getElementName()).thenReturn(name);
+		when(compUnit.getPath()).thenReturn(path2);
+		return compUnit;
+	}
+
 	@Test
 	public void getFilteredCompilationUnits_selectAllSources_shouldReturnAllCompilationUnits() throws Exception {
+		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "/some/CompUnit2.java",
+				packageDeclarationMock);
+		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "/CompUnit3.java",
+				packageDeclarationMock);
 		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
-				Collections.singletonList(compUnitMock), null, "");
+				Arrays.asList(compUnitMock, compUnit2, compUnit3), null, "");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
-		assertEquals(1, compilationUnits.size());
+		assertEquals(3, compilationUnits.size());
 	}
-	
+
 	@Test
 	public void getFilteredCompilationUnits_matchingSelection_shouldReturnOneCompilationUnits() throws Exception {
+
+		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java",
+				"/some/path/CompUnit2.java", packageDeclarationMock);
 		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
-				Collections.singletonList(compUnitMock), null, "path/CompUnit.java");
+				Arrays.asList(compUnitMock, compUnit2), null, "path/CompUnit.java");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
 		assertEquals(1, compilationUnits.size());
 	}
-	
+
 	@Test
-	public void getFilteredCompilationUnits_globSelectionExpression_shouldReturnAllCompilationUnits() throws Exception {
+	public void getFilteredCompilationUnits_globSelectionExpression_shouldReturnMatchingCompilationUnits()
+			throws Exception {
+		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "/some/path/CompUnit2.java",
+				packageDeclarationMock);
 		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
-				Collections.singletonList(compUnitMock), null, "path/*");
+				Arrays.asList(compUnitMock, compUnit2), null, "path/*");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
-		assertEquals(1, compilationUnits.size());
+		assertEquals(2, compilationUnits.size());
 	}
-	
+
 	@Test
 	public void getFilteredCompilationUnits_nonMatchingSelection_shouldReturnNoCompilationUnits() throws Exception {
 		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
