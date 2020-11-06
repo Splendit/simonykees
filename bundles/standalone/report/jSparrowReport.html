@@ -3414,8 +3414,8 @@
             <#list rules as rule> 
               <tr>
                 <td class="text-xs-right"><a href=${rule.ruleLink} target="_blank"> ${rule.ruleName} </a></td>
-                <td class="text-xs-right">${rule.issuesFixed}</td>
-                <td class="text-xs-right">${rule.filesChanged}</td>
+                <td class="text-xs-right">${rule.issuesFixed?c}</td>
+                <td class="text-xs-right">${rule.filesChanged?c}</td>
                 <td class="text-xs-right"><script>document.write(secondsToHms(${rule.issuesFixed?c} * ${rule.remediationCost?c} * 60))</script></td>
                 <td style="display: none;">${(rule.issuesFixed * rule.remediationCost)?c}</td>
               </tr>
