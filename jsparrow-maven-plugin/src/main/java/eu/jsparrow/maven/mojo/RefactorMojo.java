@@ -3,6 +3,7 @@ package eu.jsparrow.maven.mojo;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.maven.execution.MavenSession;
@@ -81,8 +82,12 @@ public class RefactorMojo extends AbstractMojo {
 	@Parameter(property = "license")
 	private String license;
 	
-	@Parameter(defaultValue = "*", property="selectedSources")
-	private String sources;
+	/**
+	 * Specify the glob patterns to match the sources for refactoring. Use line
+	 * breaks to specify multiple glob patterns.
+	 */
+	@Parameter(defaultValue = "", property="selectedSources")
+	private String selectedSources;
 
 	/**
 	 * Specify the license server to use.
@@ -110,6 +115,7 @@ public class RefactorMojo extends AbstractMojo {
 			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8and11);
 		}
 
+		String sources = Optional.ofNullable(selectedSources).orElse(""); //$NON-NLS-1$
 		String mode = StandaloneMode.REFACTOR.name();
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration,

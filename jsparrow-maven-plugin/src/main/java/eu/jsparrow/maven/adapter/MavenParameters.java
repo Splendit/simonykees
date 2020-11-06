@@ -1,6 +1,5 @@
 package eu.jsparrow.maven.adapter;
 
-import java.time.Instant;
 import java.util.Optional;
 
 /**
