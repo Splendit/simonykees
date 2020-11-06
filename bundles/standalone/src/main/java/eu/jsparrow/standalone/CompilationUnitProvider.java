@@ -59,11 +59,12 @@ public class CompilationUnitProvider {
 	public CompilationUnitProvider(List<ICompilationUnit> compilationUnits, YAMLExcludes excludes, String selectedSources) {
 		this.compilationUnits = compilationUnits;
 		this.excludes = excludes;
-		
-		
+
 		String[] sources = selectedSources.split(System.lineSeparator());
 		this.selectedSourceMatchers = Arrays.asList(sources)
 			.stream()
+			.map(String::trim)
+			.filter(pattern -> !pattern.isEmpty())
 			.map(source -> String.join("", GLOB_ALL, source))  //$NON-NLS-1$
 			.map(pattern -> FileSystems.getDefault()
 				.getPathMatcher(pattern))
@@ -98,16 +99,20 @@ public class CompilationUnitProvider {
 		logger.debug("Excluded classes: {} ", logInfo); //$NON-NLS-1$
 
 		return compilationUnits.stream()
-			.filter(compilationUnit -> isSelected(compilationUnit, selectedSourceMatchers))
+			.filter(this::isSelected)
 			.filter(compilationUnit -> isIncludedForRefactoring(compilationUnit, excludedPackages, exludedClasses))
 			.collect(Collectors.toList());
 	}
 
-	private boolean isSelected(ICompilationUnit compilationUnit, List<PathMatcher> matchers) {
-		IPath iPath = compilationUnit.getPath().makeRelative();
+	private boolean isSelected(ICompilationUnit compilationUnit) {
+		if(this.selectedSourceMatchers.isEmpty()) {
+			return true;
+		}
+		IPath compUnitPath = compilationUnit.getPath();
+		IPath iPath = compUnitPath.makeRelative();
 		File file = iPath.toFile();
 		Path path = file.toPath();
-		return matchers.stream()
+		return this.selectedSourceMatchers.stream()
 			.anyMatch(matcher -> matcher.matches(path));
 	}
 

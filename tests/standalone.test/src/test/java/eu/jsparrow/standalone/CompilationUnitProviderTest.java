@@ -57,7 +57,7 @@ public class CompilationUnitProviderTest {
 	}
 
 	@Test
-	public void getFilteredCompilationUnits_selectAllSources_shouldReturnAllCompilationUnits() throws Exception {
+	public void getFilteredCompilationUnits_noGlobPattern_shouldReturnAllCompilationUnits() throws Exception {
 		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "/some/CompUnit2.java",
 				packageDeclarationMock);
 		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "/CompUnit3.java",
@@ -68,6 +68,36 @@ public class CompilationUnitProviderTest {
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
 		assertEquals(3, compilationUnits.size());
+	}
+	
+	@Test
+	public void getFilteredCompilationUnits_multipleGlobPatters_shouldReturnAllCompilationUnits() throws Exception {
+		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "path/CompUnit2.java",
+				packageDeclarationMock);
+		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "path/CompUnit3.java",
+				packageDeclarationMock);
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
+				Arrays.asList(compUnitMock, compUnit2, compUnit3), null, "path/CompUnit2.java \n path/CompUnit3.java");
+
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+
+		assertEquals(2, compilationUnits.size());
+		
+	}
+	
+	@Test
+	public void getFilteredCompilationUnits_multipleGlobPattersWithEmptyLines_shouldReturnAllCompilationUnits() throws Exception {
+		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "path/CompUnit2.java",
+				packageDeclarationMock);
+		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "path/CompUnit3.java",
+				packageDeclarationMock);
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
+				Arrays.asList(compUnitMock, compUnit2, compUnit3), null, "path/CompUnit2.java \n\n path/CompUnit3.java");
+
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+
+		assertEquals(2, compilationUnits.size());
+		
 	}
 
 	@Test
