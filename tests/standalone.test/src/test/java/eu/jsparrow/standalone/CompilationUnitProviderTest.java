@@ -41,8 +41,8 @@ public class CompilationUnitProviderTest {
 		excludes.setExcludePackages(Arrays.asList(EU_JSPARROW, EU_JSPARROW_PACKAGE));
 		excludes.setExcludeClasses(Collections.singletonList("eu.jsparrow.test.ExcludedClass.java"));
 		packageDeclarationMock = mock(IPackageDeclaration.class);
-		when(packageDeclarationMock.getElementName()).thenReturn("some.path");
-		compUnitMock = createICompilationUnitMock("CompUnit.java", "/some/path/CompUnit.java", packageDeclarationMock);
+		when(packageDeclarationMock.getElementName()).thenReturn("eu.jsparrow.test");
+		compUnitMock = createICompilationUnitMock("CompUnit.java", "/eu/jsparrow/test/CompUnit.java", packageDeclarationMock);
 		compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes, "");
 	}
 
@@ -98,6 +98,22 @@ public class CompilationUnitProviderTest {
 
 		assertEquals(2, compilationUnits.size());
 		
+	}
+
+	@Test
+	public void getFilteredCompilationUnits_excludingSelectedSources_shouldReturnOneCompilationUnit() throws Exception {
+		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "eu/jsparrow/test/CompUnit2.java",
+				packageDeclarationMock);
+		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "eu/jsparrow/test/CompUnit3.java",
+				packageDeclarationMock);
+		YAMLExcludes excludes = new YAMLExcludes();
+		excludes.setExcludeClasses(Collections.singletonList("eu.jsparrow.test.CompUnit3.java"));
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
+				Arrays.asList(compUnitMock, compUnit2, compUnit3), excludes, "jsparrow/test/CompUnit2.java\njsparrow/test/CompUnit3.java");
+
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+
+		assertEquals(1, compilationUnits.size());
 	}
 
 	@Test
