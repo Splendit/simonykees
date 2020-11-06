@@ -1,7 +1,11 @@
 package eu.jsparrow.standalone;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -146,9 +150,12 @@ public class StandaloneConfigTest {
 		when(config.getLoggerRule()).thenReturn(new YAMLLoggerRule());
 		when(config.getRules()).thenReturn(Arrays.asList("CodeFormatter", "FieldRenaming", "StandardLogger"));//$NON-NLS-1$ , //$NON-NLS-2$ //$NON-NLS-3$
 
-		standaloneConfig.computeRefactoring();
+		List<RefactoringRule> rules = standaloneConfig.computeRefactoring();
 
 		verify(pipeline).doRefactoring(any(NullProgressMonitor.class));
+		assertEquals(2, rules.size());
+		assertThat(rules.get(0), hasProperty("id", equalTo("FieldRenaming")));
+		assertThat(rules.get(1), hasProperty("id", equalTo("CodeFormatter")));
 	}
 
 	@Test
