@@ -24,10 +24,27 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Helper class for {@link UseComparatorMethodsASTVisitor} which analyzes a
+ * lambda expression representing a comparator and provides an
+ * {@link java.util.Optional} storing an instance of
+ * {@link LambdaAnalysisResult}.<br>
+ * The transformation can only be carried out if the {@link java.util.Optional}
+ * is not empty.
+ * 
+ * @since 3.22.0
+ */
 public class UseComparatorMethodsAnalyzer {
 
 	private CastExpression parentCastExpression;
 
+	/**
+	 * 
+	 * @param lambda
+	 *            representing the {@link java.util.Comparator}.
+	 * @return an {@code Optional<LambdaAnalysisResult>} indicating whether or
+	 *         not the transformation can be carried out.
+	 */
 	Optional<LambdaAnalysisResult> analyze(LambdaExpression lambda) {
 		ITypeBinding lambdaTypeBinding = lambda.resolveTypeBinding();
 		if (!ClassRelationUtil.isContentOfType(lambdaTypeBinding,
@@ -41,7 +58,7 @@ public class UseComparatorMethodsAnalyzer {
 		}
 		if (childOfParent.getLocationInParent() == CastExpression.EXPRESSION_PROPERTY) {
 			parentCastExpression = (CastExpression) childOfParent.getParent();
-			if(isCastExpressionWithJokerTypeArgument(parentCastExpression)) {
+			if (isCastExpressionWithJokerTypeArgument(parentCastExpression)) {
 				return Optional.empty();
 			}
 		}
@@ -212,12 +229,17 @@ public class UseComparatorMethodsAnalyzer {
 			List<Type> castExpressionTypeArguments = ASTNodeUtil
 				.convertToTypedList(parametrizedType.typeArguments(), Type.class);
 			if (castExpressionTypeArguments.size() == 1) {
-				return castExpressionTypeArguments.get(0).isWildcardType();
+				return castExpressionTypeArguments.get(0)
+					.isWildcardType();
 			}
 		}
 		return false;
 	}
 
+	/**
+	 * Stores all informations which are necessary for the transformation of a
+	 * given lambda representing a {@link java.util.Comparator}.
+	 */
 	class LambdaAnalysisResult {
 		private final VariableDeclaration lambdaParameterLeftHS;
 		private final boolean reversed;

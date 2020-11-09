@@ -28,10 +28,40 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
+ * This visitor looks for lambda expressions which represent a *
+ * {@link java.util.Comparator} and have a certain structure, for example<br>
+ * {@code  (u1, u2) -> u1.compareTo(u2) }<br>
+ * or <br>
+ * {@code (u1, u2) -> u1.getSalary().compareTo(u2.getSalary())}.
+ * <p>
+ * These lambda expressions are transformed to static method invocations of
+ * {@link java.util.Comparator}.
+ * <p>
+ * Simple examples:
+ * <p>
+ * {@code Comparator<Integer> comparator = (lhs, rhs) -> lhs.compareTo(rhs); }
+ * <br>
+ * is transformed to<br>
+ * {@code Comparator<Integer> comparator = Comparator.naturalOrder();}
+ * <p>
  * 
+ * {@code Comparator<Integer> comparator = (lhs, rhs) -> rhs.compareTo(lhs); }
+ * <br>
+ * is transformed to<br>
+ * {@code Comparator<Integer> comparator = Comparator.reverseOrder(); }
+ * 
+ * <p>
+ * Example with transformations to method references:
+ * <p>
+ * 
+ * {@code Comparator<Deque<Integer>> comparator = (lhs, rhs) -> lhs.getFirst().compareTo(rhs.getFirst()); }
+ * <br>
+ * is transformed to<br>
+ * {@code Comparator<Deque<Integer>> comparator = Comparator.comparingInt(Deque::getFirst);}
+ * <p>
+ *
  * 
  * @since 3.22.0
- *
  */
 public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor {
 	static final String JAVA_LANG_COMPARABLE = java.lang.Comparable.class.getName();
