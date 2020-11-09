@@ -245,17 +245,8 @@ public class UseComparatorMethodsAnalyzer {
 			return reversed;
 		}
 
-		Optional<String> getComparisonKeyMethodName() {
-			return Optional.ofNullable(comparisonKeyMethodName)
-				.map(m -> m.getName());
-		}
-
 		Optional<IMethodBinding> getComparisonKeyMethod() {
 			return Optional.ofNullable(comparisonKeyMethodName);
-		}
-
-		VariableDeclaration getLambdaParameterLeftHS() {
-			return lambdaParameterLeftHS;
 		}
 
 		String getFirstLambdaParameterIdentifier() {
