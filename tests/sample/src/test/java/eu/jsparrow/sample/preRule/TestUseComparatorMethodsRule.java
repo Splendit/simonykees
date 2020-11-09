@@ -81,20 +81,21 @@ public class TestUseComparatorMethodsRule {
 
 	class TestUseComparatorOfJoker {
 
-		void useComparator(Comparator<?> comparator) {
+		Comparator<?> useComparator(Comparator<?> comparator) {
+			return comparator;
 		}
 
-		void test() {
-			useComparator(
+		void testWithComparatorOfInteger() {
+			Comparator<?> comparator0 = useComparator((Comparator<Integer>) (t1, t2) -> t1.compareTo(t2));
+			Comparator<?> comparator1 = useComparator((Integer t1, Integer t2) -> t1.compareTo(t2));
+		}
+
+		void testWithComparatorOfDeque() {
+			Comparator<?> comparator1 = useComparator((Comparator<Deque<Integer>>) (x1, x2) -> x1.getFirst()
+				.compareTo(x2.getFirst()));
+			Comparator<?> comparator0 = useComparator(
 					(Deque<Integer> lhs, Deque<Integer> rhs) -> lhs.getFirst()
 						.compareTo(rhs.getFirst()));
-
-			useComparator((Comparator<Deque<Integer>>) (x1, x2) -> x1.getFirst()
-				.compareTo(x2.getFirst()));
-
-			useComparator((Comparator<Integer>) (t1, t2) -> t1.compareTo(t2));
-
-			useComparator((Integer t1, Integer t2) -> t1.compareTo(t2));
 		}
 	}
 
@@ -103,11 +104,13 @@ public class TestUseComparatorMethodsRule {
 		}
 
 		void test() {
+			this.useObject((Comparator<Integer>)(t1, t2) -> t1.compareTo(t2));
 			this.<Comparator<?>>useObject((Integer t1, Integer t2) -> t1.compareTo(t2));
+			this.<Comparator<Integer>>useObject((t1, t2) -> t1.compareTo(t2));
 		}
 	}
 
-	class TestNotTransformedDueToambdsStructure {
+	class TestNotTransformedDueToLambdaStructure {
 		Integer useInteger(Integer integer) {
 			return integer;
 		}
@@ -127,13 +130,13 @@ public class TestUseComparatorMethodsRule {
 
 			Comparator<Integer> comparator3 = (lhs, rhs) -> lhs.compareTo(useInteger(rhs));
 			Comparator<Integer> comparator4 = (lhs, rhs) -> useInteger(lhs).compareTo(rhs);
-
 		}
 
 		void test(Deque<Integer> x1, Deque<Integer> x2) {
 
-			Comparator<Deque<Integer>> comparator = (lhs, rhs) -> lhs.getFirst()
-				.compareTo(rhs.getFirst());
+			Comparator<Deque<Integer>> comparator0 = (lhs, rhs) -> x1.getFirst().compareTo(rhs.getFirst());
+			Comparator<Deque<Integer>> comparator1 = (lhs, rhs) -> lhs.getFirst().compareTo(x2.getFirst());
+			Comparator<Deque<Integer>> comparator2 = (lhs, rhs) -> x1.getFirst().compareTo(x2.getFirst());
 
 			Comparator<Deque<Integer>> comparator3 = (lhs, rhs) -> useObject(lhs).getFirst()
 				.compareTo(rhs.getFirst());
