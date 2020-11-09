@@ -161,4 +161,18 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 				"integerComparator = Comparator.naturalOrder();\n";
 		assertChange(original, expected);
 	}
+
+	/**
+	 * Transformation of lambdas to method references in connection with the
+	 * invocation of {@link java.util.Comparator#reversed() } produces compiler
+	 * errors. This test will fail as soon as the bug of invalid transformation
+	 * for reversed comparator lambda expressions is fixed in SIM-1816.
+	 */
+	@Test
+	public void visit_ComparatorOfDequeOfIntegerReversed_shouldTransform() throws Exception {
+		fixture.addImport(java.util.Deque.class.getName());
+		String original = "Comparator<Deque<Integer>> comparator = (lhs, rhs) -> rhs.getFirst().compareTo(lhs.getFirst());";
+		String expected = "Comparator<Deque<Integer>> comparator = Comparator.comparingInt(Deque::getFirst).reversed();";
+		assertChange(original, expected);
+	}
 }
