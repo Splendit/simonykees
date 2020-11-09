@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
@@ -134,9 +135,35 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			return createLambdaExpression(typeArgumentFromParentCastExpression,
 					lambdaParameterIdentifier, comparisonKeyMethod.getName());
 		}
-		ITypeBinding lambdaParameterType = analysisResult.getImplicitLambdaParameterType();
-		return createExpressionMethodReference(lambdaParameterType,
+
+		ITypeBinding implicitLambdaParameterType = analysisResult.getImplicitLambdaParameterType();
+		if (analysisResult.isReversed()) {
+			Type newExplicitLambdaParameterType = createTypeWithOptionalArguments(implicitLambdaParameterType);
+			return createLambdaExpression(newExplicitLambdaParameterType,
+					lambdaParameterIdentifier, comparisonKeyMethod.getName());
+		}
+		return createExpressionMethodReference(implicitLambdaParameterType,
 				comparisonKeyMethod.getName());
+	}
+
+	@SuppressWarnings("unchecked")
+	private Type createTypeWithOptionalArguments(ITypeBinding typeBinding) {
+		AST ast = astRewrite.getAST();
+		ITypeBinding erasure = typeBinding.getErasure();
+		String erasureQualifiedName = erasure.getQualifiedName();
+		verifyImport(getCompilationUnit(), erasureQualifiedName);		
+		Name erasureTypeName = addImport(erasureQualifiedName);
+		SimpleType erasureSimpleType = ast.newSimpleType(erasureTypeName);
+		ITypeBinding[] typeBindingArguments = typeBinding.getTypeArguments();
+		if (typeBindingArguments.length == 0) {
+			return erasureSimpleType;
+		}
+		ParameterizedType parameterizedType = ast.newParameterizedType(erasureSimpleType);
+		List<Type> typeArguments = parameterizedType.typeArguments();
+		for (ITypeBinding typeBindingArgument : typeBindingArguments) {
+			typeArguments.add(createTypeWithOptionalArguments(typeBindingArgument));
+		}
+		return parameterizedType;
 	}
 
 	private MethodInvocation findSimpleLambdaReplacement(LambdaExpression lambda,
