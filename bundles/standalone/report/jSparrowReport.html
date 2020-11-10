@@ -3369,19 +3369,19 @@
     <table class="table-hover">
       <tbody>
         <tr>
-          <td>Total Java file* count</td>
-          <td>${totalFilesCount?c}</td>
-        </tr>
-        <tr>
-          <td>Number of files with findings</td>
-          <td>${totalFilesChanged?c}</td>
-        </tr>
-        <tr>
           <td>Total number of issues found</td>
           <td>${totalIssuesFixed?c}</td>
         </tr>
         <tr>
-          <td>Total time saved</td>
+          <td>Total number of files with findings</td>
+          <td>${totalFilesChanged?c}</td>
+        </tr>
+        <tr>
+          <td>Total Java file* count</td>
+          <td>${totalFilesCount?c}</td>
+        </tr>
+        <tr>
+          <td>Total time saving potential</td>
           <td> <script>document.write(secondsToHms(${totalTimeSaved?long?c} * 60))</script> </td>
         </tr>
       </tbody>

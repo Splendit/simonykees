@@ -2,6 +2,7 @@ package eu.jsparrow.maven.mojo;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -90,10 +91,10 @@ public class RefactorMojo extends AbstractMojo {
 	@Parameter(property = "startTime")
 	private String startTime;
 
-	@Parameter(property = "repoOwner")
+	@Parameter(defaultValue = "${project.groupId}", property = "repoOwner")
 	private String repoOwner;
 
-	@Parameter(property = "repoName")
+	@Parameter(defaultValue = "${project.name}", property = "repoName")
 	private String repoName;
 
 	@Parameter(property = "sendStatistics")
@@ -108,7 +109,9 @@ public class RefactorMojo extends AbstractMojo {
 		}
 
 		String mode = StandaloneMode.REFACTOR.name();
-		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
+		String start = startTime == null ? Instant.now()
+				.toString() : startTime;
+		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
 				defaultConfiguration, statisticsMetadata, sendStatistics);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);

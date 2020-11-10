@@ -137,6 +137,11 @@ public class Activator implements BundleActivator {
 		}
 	}
 
+	/**
+	 * @see Activator#runInDemoMode(BundleContext)
+	 * 
+	 * @param context
+	 */
 	private void refactor(BundleContext context) {
 		String key = getLicenseKey(context);
 		String agentUrl = getAgentUrl(context);
@@ -158,6 +163,12 @@ public class Activator implements BundleActivator {
 		}
 	}
 
+	/**
+	 * Contrary to {@link Activator#refactor(BundleContext)}, this method does
+	 * not stop JMP if the license is invalid.
+	 * 
+	 * @param context all the settings etc.
+	 */
 	private void runInDemoMode(BundleContext context) {
 		String key = getLicenseKey(context);
 		String agentUrl = getAgentUrl(context);

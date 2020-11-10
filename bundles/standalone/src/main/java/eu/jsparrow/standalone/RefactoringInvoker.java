@@ -2,6 +2,7 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import eu.jsparrow.core.http.JsonUtil;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
+import eu.jsparrow.core.statistic.DurationFormatUtil;
 import eu.jsparrow.core.statistic.entity.JsparrowData;
 import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.core.statistic.entity.JsparrowRuleData;
@@ -104,7 +106,23 @@ public class RefactoringInvoker {
 		prepareRefactoring();
 		computeRefactoring();
 		commitRefactoring();
-		collectAndSendStatisticData(context);
+		JsparrowMetric metricData = collectStatistics();
+		if (metricData != null) {
+			JsparrowData data = metricData.getData();
+			String message = String.format(
+					"Run statistics for project %s:%n" //$NON-NLS-1$
+							+ "Total number of issues fixed: %d%n" //$NON-NLS-1$
+							+ "Total number of files changed: %d%n" //$NON-NLS-1$
+							+ "Total Java file count: %d%n" //$NON-NLS-1$
+							+ "Total time saved: %s%n", //$NON-NLS-1$
+					data.getProjectName(),
+					data.getTotalIssuesFixed(),
+					data.getTotalFilesChanged(),
+					data.getTotalFilesCount(),
+					DurationFormatUtil.formatTimeSaved(Duration.ofMinutes(data.getTotalTimeSaved())));
+			logger.info(message);
+			sendStatisticData(context, metricData);
+		}
 	}
 
 	/**
@@ -122,7 +140,23 @@ public class RefactoringInvoker {
 		loadStandaloneConfig(importedProjects, context);
 		prepareRefactoring();
 		Map<StandaloneConfig, List<RefactoringRule>> rules = computeRefactoring();
-		collectAndPrintStatistics(context, rules);
+		JsparrowMetric metricData = collectStatistics();
+		if (metricData != null) {
+			JsparrowData data = metricData.getData();
+			String message = String.format(
+					"Run statistics for project %s:%n" //$NON-NLS-1$
+							+ "Total number of issues found: %d%n" //$NON-NLS-1$
+							+ "Total number of files with findings: %d%n" //$NON-NLS-1$
+							+ "Total Java file count: %d%n" //$NON-NLS-1$
+							+ "Total time saving potential: %s%n", //$NON-NLS-1$
+					data.getProjectName(),
+					data.getTotalIssuesFixed(),
+					data.getTotalFilesChanged(),
+					data.getTotalFilesCount(),
+					DurationFormatUtil.formatTimeSaved(Duration.ofMinutes(data.getTotalTimeSaved())));
+			logger.info(message);
+			printStatistics(context, rules, metricData);
+		}
 	}
 
 	/**
@@ -187,40 +221,18 @@ public class RefactoringInvoker {
 		}
 	}
 
-	private void collectAndSendStatisticData(BundleContext context) {
+	private void sendStatisticData(BundleContext context, JsparrowMetric metricData) {
 		boolean sendStatistics = Boolean.parseBoolean(context.getProperty(STATISTICS_SEND));
 		if (!sendStatistics) {
 			return;
 		}
 
-		boolean computedStatistics = standaloneConfigs.stream()
-			.map(StandaloneConfig::getStatisticsData)
-			.filter(Objects::nonNull)
-			.map(StandaloneStatisticsData::getMetricData)
-			.anyMatch(Optional::isPresent);
-
-		if (!computedStatistics) {
-			return;
-		}
-
-		JsparrowMetric metricData = collectStatistics();
-
 		String json = JsonUtil.generateJSON(metricData);
 		JsonUtil.sendJsonToAwsStatisticsService(json);
 	}
 
-	private void collectAndPrintStatistics(BundleContext context, Map<StandaloneConfig, List<RefactoringRule>> rules) {
-		boolean computedStatistics = standaloneConfigs.stream()
-			.map(StandaloneConfig::getStatisticsData)
-			.filter(Objects::nonNull)
-			.map(StandaloneStatisticsData::getMetricData)
-			.anyMatch(Optional::isPresent);
-
-		if (!computedStatistics) {
-			return;
-		}
-
-		JsparrowMetric metricData = collectStatistics();
+	private void printStatistics(BundleContext context, Map<StandaloneConfig, List<RefactoringRule>> rules,
+			JsparrowMetric metricData) {
 		String reportOutputPath = context.getProperty(ROOT_PROJECT_BASE_PATH);
 		String jsonPath = String.join(File.separator, reportOutputPath, "jSparrowReport.json"); //$NON-NLS-1$
 		JsonUtil.writeJSON(metricData, jsonPath);
@@ -243,6 +255,17 @@ public class RefactoringInvoker {
 	}
 
 	private JsparrowMetric collectStatistics() {
+
+		boolean computedStatistics = standaloneConfigs.stream()
+			.map(StandaloneConfig::getStatisticsData)
+			.filter(Objects::nonNull)
+			.map(StandaloneStatisticsData::getMetricData)
+			.anyMatch(Optional::isPresent);
+
+		if (!computedStatistics) {
+			return null;
+		}
+
 		JsparrowMetric metricData = new JsparrowMetric();
 		JsparrowData projectData = new JsparrowData();
 		Map<String, JsparrowRuleData> rulesData = new HashMap<>();
