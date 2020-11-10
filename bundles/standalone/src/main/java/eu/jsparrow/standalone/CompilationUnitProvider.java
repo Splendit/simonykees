@@ -56,6 +56,9 @@ public class CompilationUnitProvider {
 	 * @param excludes
 	 *            an instance of {@link YAMLExcludes} representing the modules,
 	 *            packages and classes that should be excluded from refactoring.
+	 * @param selectedSources
+	 *            glob pattern matchers for specifying the sources to be
+	 *            refactored. Use line breaks to separate multiple patterns.
 	 */
 	public CompilationUnitProvider(List<ICompilationUnit> compilationUnits, YAMLExcludes excludes,
 			String selectedSources) {
