@@ -147,7 +147,7 @@ public class TestUseComparatorMethodsRule {
 			comparator = this.useObject((Comparator<Deque<Integer>>) (lhs, rhs) -> lhs.getFirst()
 				.compareTo(rhs.getFirst()));
 			comparator = this.<Comparator<Deque<Integer>>>useObject(((lhs, rhs) -> lhs.getFirst()
-					.compareTo(rhs.getFirst())));
+				.compareTo(rhs.getFirst())));
 		}
 	}
 
@@ -190,6 +190,44 @@ public class TestUseComparatorMethodsRule {
 			Comparator<Deque<Integer>> comparator5 = (lhs, rhs) -> getFirst(lhs).compareTo(rhs.getFirst());
 			Comparator<Deque<Integer>> comparator6 = (lhs, rhs) -> lhs.getFirst()
 				.compareTo(getFirst(rhs));
+		}
+	}
+
+	class TestClassWithComparableTypeParameter<T extends Comparable<T>> {
+
+		Comparator<T> comparatorOfT;
+
+		@SuppressWarnings("unchecked")
+		void test() {
+			comparatorOfT = (x1, x2) -> x1.compareTo(x2);
+			comparatorOfT = (x1, x2) -> x2.compareTo(x1);
+
+			comparatorOfT = (T x1, T x2) -> x1.compareTo(x2);
+			comparatorOfT = (T x1, T x2) -> x2.compareTo(x1);
+
+			comparatorOfT = (Comparator<T>) (x1, x2) -> x1.compareTo(x2);
+			comparatorOfT = (Comparator<T>) (x1, x2) -> x2.compareTo(x1);
+
+			comparatorOfT = (Comparator<T>) (Comparator<Integer>) (Integer x1, Integer x2) -> x1.compareTo(x2);
+		}
+	}
+
+	class TestMethodWithComparableTypeParameter {
+
+		@SuppressWarnings("unchecked")
+		<T extends Comparable<T>> void test() {
+			Comparator<T> comparatorOfT;
+
+			comparatorOfT = (x1, x2) -> x1.compareTo(x2);
+			comparatorOfT = (x1, x2) -> x2.compareTo(x1);
+
+			comparatorOfT = (T x1, T x2) -> x1.compareTo(x2);
+			comparatorOfT = (T x1, T x2) -> x2.compareTo(x1);
+
+			comparatorOfT = (Comparator<T>) (x1, x2) -> x1.compareTo(x2);
+			comparatorOfT = (Comparator<T>) (x1, x2) -> x2.compareTo(x1);
+
+			comparatorOfT = (Comparator<T>) (Comparator<Integer>) (Integer x1, Integer x2) -> x1.compareTo(x2);
 		}
 	}
 }

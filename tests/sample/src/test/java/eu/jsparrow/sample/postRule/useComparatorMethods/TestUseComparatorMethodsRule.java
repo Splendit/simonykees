@@ -186,4 +186,42 @@ public class TestUseComparatorMethodsRule {
 				.compareTo(getFirst(rhs));
 		}
 	}
+
+	class TestClassWithComparableTypeParameter<T extends Comparable<T>> {
+
+		Comparator<T> comparatorOfT;
+
+		@SuppressWarnings("unchecked")
+		void test() {
+			comparatorOfT = Comparator.naturalOrder();
+			comparatorOfT = Comparator.reverseOrder();
+
+			comparatorOfT = Comparator.naturalOrder();
+			comparatorOfT = Comparator.reverseOrder();
+
+			comparatorOfT = (Comparator<T>) Comparator.<T>naturalOrder();
+			comparatorOfT = (Comparator<T>) Comparator.<T>reverseOrder();
+
+			comparatorOfT = (Comparator<T>) (Comparator<Integer>) Comparator.<Integer>naturalOrder();
+		}
+	}
+
+	class TestMethodWithComparableTypeParameter {
+
+		@SuppressWarnings("unchecked")
+		<T extends Comparable<T>> void test() {
+			Comparator<T> comparatorOfT;
+
+			comparatorOfT = Comparator.naturalOrder();
+			comparatorOfT = Comparator.reverseOrder();
+
+			comparatorOfT = Comparator.naturalOrder();
+			comparatorOfT = Comparator.reverseOrder();
+
+			comparatorOfT = (Comparator<T>) Comparator.<T>naturalOrder();
+			comparatorOfT = (Comparator<T>) Comparator.<T>reverseOrder();
+
+			comparatorOfT = (Comparator<T>) (Comparator<Integer>) Comparator.<Integer>naturalOrder();
+		}
+	}
 }
