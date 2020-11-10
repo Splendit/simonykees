@@ -121,10 +121,6 @@ public class UseComparatorMethodsASTVisitorComplexCasesTest extends UsesJDTUnitF
 		assertChange(original, expected);
 	}
 
-	/**
-	 * s * NullPointerException as long as bug in connection with sort method is
-	 * not fixed
-	 */
 	@Test
 	public void visit_SortArrayListOfTExtendsComparable_shouldTransform() throws Exception {
 		defaultFixture.addImport(java.util.ArrayList.class.getName());
@@ -136,15 +132,11 @@ public class UseComparatorMethodsASTVisitorComplexCasesTest extends UsesJDTUnitF
 		String expected = "" +
 				"	<T extends Comparable<T>> void testWithArrayListOfT() {\n"
 				+ "		ArrayList<T> arrayList = new ArrayList<>();\n"
-				+ "		arrayList.sort((T x1, T x2) -> x1.compareTo(x2));\n"
+				+ "		arrayList.sort(Comparator.<T>naturalOrder());\n"
 				+ "}";
 		assertChange(original, expected);
 	}
 
-	/**
-	 * NullPointerException as long as bug in connection with sort method is not
-	 * fixed
-	 */
 	@Test
 	public void visit_SortArrayListOfTExtendsSupplierOfInteger_shouldTransform() throws Exception {
 		defaultFixture.addImport(java.util.ArrayList.class.getName());
@@ -158,16 +150,12 @@ public class UseComparatorMethodsASTVisitorComplexCasesTest extends UsesJDTUnitF
 		String expected = "" +
 				"	<T extends Supplier<Integer>> void testWithArrayListOfTSupplyingInteger() {\n"
 				+ "		ArrayList<T> arrayList = new ArrayList<>();\n"
-				+ "		arrayList.sort((T x1, T x2) -> x1.get().compareTo(x2.get()));\n"
+				+ "		arrayList.sort(Comparator.comparingInt((T x1) -> x1.get()));\n"
 				+ "	}\n"
 				+ "";
 		assertChange(original, expected);
 	}
 
-	/**
-	 * NullPointerException as long as bug in connection with sort method is not
-	 * fixed
-	 */
 	@Test
 	public void visit_SortArrayListOfInteger_shouldTransform() throws Exception {
 		defaultFixture.addImport(java.util.ArrayList.class.getName());
@@ -179,9 +167,8 @@ public class UseComparatorMethodsASTVisitorComplexCasesTest extends UsesJDTUnitF
 		String expected = "" +
 				"void testWithArrayListOfInteger() {\n"
 				+ "		ArrayList<Integer> arrayList = new ArrayList<>();\n"
-				+ "		arrayList.sort((Integer x1, Integer x2) -> x1.compareTo(x2));\n"
+				+ "		arrayList.sort(Comparator.<Integer>naturalOrder());\n"
 				+ "}";
 		assertChange(original, expected);
 	}
-
 }

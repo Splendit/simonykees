@@ -231,12 +231,12 @@ public class TestUseComparatorMethodsRule {
 		Comparator<T> comparatorOfT;
 
 		void test() {
-			comparatorOfT = Comparator.comparingInt(T::get);
-			comparatorOfT = Comparator.comparingInt((T x1) -> x1.get())
+			comparatorOfT = Comparator.comparingInt(Supplier::get);
+			comparatorOfT = Comparator.comparingInt((Supplier x1) -> x1.get())
 				.reversed();
 
-			comparatorOfT = Comparator.comparingInt(T::get);
-			comparatorOfT = Comparator.comparingInt((T x1) -> x1.get())
+			comparatorOfT = Comparator.comparingInt(Supplier::get);
+			comparatorOfT = Comparator.comparingInt((Supplier x1) -> x1.get())
 				.reversed();
 
 			comparatorOfT = (Comparator<T>) Comparator.comparingInt((T x1) -> x1.get());
@@ -251,28 +251,21 @@ public class TestUseComparatorMethodsRule {
 			ArrayList<T> arrayList = new ArrayList<>();
 			arrayList.sort(Comparator.naturalOrder());
 			arrayList.sort((Comparator<T>) Comparator.<T>naturalOrder());
-
-			// causing RuleException
-			// arrayList.sort((T x1, T x2) -> x1.compareTo(x2));
+			arrayList.sort(Comparator.<T>naturalOrder());
 		}
 
 		<T extends Supplier<Integer>> void testWithArrayListOfTSupplyingInteger() {
 			ArrayList<T> arrayList = new ArrayList<>();
 			arrayList.sort(Comparator.comparingInt(Supplier::get));
 			arrayList.sort((Comparator<T>) Comparator.comparingInt((T x1) -> x1.get()));
-
-			// causing RuleException
-			// arrayList.sort((T x1, T x2) -> x1.get()
-			// .compareTo(x2.get()));
+			arrayList.sort(Comparator.comparingInt((T x1) -> x1.get()));
 		}
 
 		void testWithArrayListOfInteger() {
 			ArrayList<Integer> arrayList = new ArrayList<>();
 			arrayList.sort(Comparator.naturalOrder());
 			arrayList.sort((Comparator<Integer>) Comparator.<Integer>naturalOrder());
-
-			// causing RuleException:
-			// arrayList.sort((Integer x1, Integer x2) -> x1.compareTo(x2));
+			arrayList.sort(Comparator.<Integer>naturalOrder());
 		}
 	}
 

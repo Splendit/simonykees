@@ -260,9 +260,7 @@ public class TestUseComparatorMethodsRule {
 			ArrayList<T> arrayList = new ArrayList<>();
 			arrayList.sort((x1, x2) -> x1.compareTo(x2));
 			arrayList.sort((Comparator<T>) (x1, x2) -> x1.compareTo(x2));
-
-			// causing RuleException
-			// arrayList.sort((T x1, T x2) -> x1.compareTo(x2));
+			arrayList.sort((T x1, T x2) -> x1.compareTo(x2));
 		}
 
 		<T extends Supplier<Integer>> void testWithArrayListOfTSupplyingInteger() {
@@ -271,19 +269,15 @@ public class TestUseComparatorMethodsRule {
 				.compareTo(x2.get()));
 			arrayList.sort((Comparator<T>) (x1, x2) -> x1.get()
 				.compareTo(x2.get()));
-
-			// causing RuleException
-			// arrayList.sort((T x1, T x2) -> x1.get()
-			// .compareTo(x2.get()));
+			arrayList.sort((T x1, T x2) -> x1.get()
+				.compareTo(x2.get()));
 		}
 
 		void testWithArrayListOfInteger() {
 			ArrayList<Integer> arrayList = new ArrayList<>();
 			arrayList.sort((x1, x2) -> x1.compareTo(x2));
 			arrayList.sort((Comparator<Integer>) (x1, x2) -> x1.compareTo(x2));
-
-			// causing RuleException:
-			// arrayList.sort((Integer x1, Integer x2) -> x1.compareTo(x2));
+			arrayList.sort((Integer x1, Integer x2) -> x1.compareTo(x2));
 		}
 	}
 

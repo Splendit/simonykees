@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
@@ -236,14 +235,10 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			MethodInvocation methodInvocation = (MethodInvocation) parent;
 			int argumentIndex = methodInvocation.arguments()
 				.indexOf(lambda);
-			MethodDeclaration methodDeclaration = (MethodDeclaration) getCompilationUnit()
-				.findDeclaringNode(methodInvocation.resolveMethodBinding());
-			List<SingleVariableDeclaration> parameterDeclarations = ASTNodeUtil
-				.convertToTypedList(methodDeclaration.parameters(), SingleVariableDeclaration.class);
-			int parameterIndex = Math.min(argumentIndex, parameterDeclarations.size() - 1);
-			SingleVariableDeclaration parameterDeclaration = parameterDeclarations.get(parameterIndex);
-			comparatorTypeBinding = parameterDeclaration.getType()
-				.resolveBinding();
+			IMethodBinding parentInvocationMethodBinding = methodInvocation.resolveMethodBinding().getMethodDeclaration();
+			ITypeBinding[] parameterTypes = parentInvocationMethodBinding.getParameterTypes();
+			int parameterIndex = Math.min(argumentIndex, parameterTypes.length - 1);
+			comparatorTypeBinding = parameterTypes[parameterIndex];
 		}
 
 		if (comparatorTypeBinding != null) {
