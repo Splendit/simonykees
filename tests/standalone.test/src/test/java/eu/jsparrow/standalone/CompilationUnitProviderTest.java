@@ -71,13 +71,13 @@ public class CompilationUnitProviderTest {
 	}
 	
 	@Test
-	public void getFilteredCompilationUnits_multipleGlobPatters_shouldReturnAllCompilationUnits() throws Exception {
-		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "path/CompUnit2.java",
+	public void getFilteredCompilationUnits_multipleGlobPatterns_shouldReturnTwoCompilationUnits() throws Exception {
+		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "eu/jsparrow/test/CompUnit2.java",
 				packageDeclarationMock);
-		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "path/CompUnit3.java",
+		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "eu/jsparrow/test/CompUnit3.java",
 				packageDeclarationMock);
 		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
-				Arrays.asList(compUnitMock, compUnit2, compUnit3), null, "path/CompUnit2.java \n path/CompUnit3.java");
+				Arrays.asList(compUnitMock, compUnit2, compUnit3), null, "test/CompUnit2.java \n test/CompUnit3.java");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
@@ -86,13 +86,13 @@ public class CompilationUnitProviderTest {
 	}
 	
 	@Test
-	public void getFilteredCompilationUnits_multipleGlobPattersWithEmptyLines_shouldReturnAllCompilationUnits() throws Exception {
-		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "path/CompUnit2.java",
+	public void getFilteredCompilationUnits_multipleGlobPatternsWithEmptyLines_shouldReturnTwoCompilationUnits() throws Exception {
+		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "eu/jsparrow/test/CompUnit2.java",
 				packageDeclarationMock);
-		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "path/CompUnit3.java",
+		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "eu/jsparrow/test/CompUnit3.java",
 				packageDeclarationMock);
 		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
-				Arrays.asList(compUnitMock, compUnit2, compUnit3), null, "path/CompUnit2.java \n\n path/CompUnit3.java");
+				Arrays.asList(compUnitMock, compUnit2, compUnit3), null, "test/CompUnit2.java \n\n test/CompUnit3.java");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
@@ -117,12 +117,12 @@ public class CompilationUnitProviderTest {
 	}
 
 	@Test
-	public void getFilteredCompilationUnits_matchingSelection_shouldReturnOneCompilationUnits() throws Exception {
+	public void getFilteredCompilationUnits_selectSingleFile_shouldReturnOneCompilationUnits() throws Exception {
 
 		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java",
-				"/some/path/CompUnit2.java", packageDeclarationMock);
+				"/eu/jsparrow/test/CompUnit2.java", packageDeclarationMock);
 		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
-				Arrays.asList(compUnitMock, compUnit2), null, "path/CompUnit.java");
+				Arrays.asList(compUnitMock, compUnit2), null, "test/CompUnit.java");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
@@ -130,12 +130,12 @@ public class CompilationUnitProviderTest {
 	}
 
 	@Test
-	public void getFilteredCompilationUnits_globSelectionExpression_shouldReturnMatchingCompilationUnits()
+	public void getFilteredCompilationUnits_globSelectAllInFolder_shouldReturnMatchingCompilationUnits()
 			throws Exception {
-		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "/some/path/CompUnit2.java",
+		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "/eu/jsparrow/test/CompUnit2.java",
 				packageDeclarationMock);
 		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
-				Arrays.asList(compUnitMock, compUnit2), null, "path/*");
+				Arrays.asList(compUnitMock, compUnit2), null, "test/*");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
@@ -145,7 +145,7 @@ public class CompilationUnitProviderTest {
 	@Test
 	public void getFilteredCompilationUnits_nonMatchingSelection_shouldReturnNoCompilationUnits() throws Exception {
 		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
-				Collections.singletonList(compUnitMock), null, "path/CompUnit2.java");
+				Collections.singletonList(compUnitMock), null, "test/CompUnit2.java");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
