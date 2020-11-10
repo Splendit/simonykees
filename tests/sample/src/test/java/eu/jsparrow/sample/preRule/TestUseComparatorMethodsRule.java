@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.function.Supplier;
 
 @SuppressWarnings({ "unused" })
 public class TestUseComparatorMethodsRule {
@@ -228,6 +229,74 @@ public class TestUseComparatorMethodsRule {
 			comparatorOfT = (Comparator<T>) (x1, x2) -> x2.compareTo(x1);
 
 			comparatorOfT = (Comparator<T>) (Comparator<Integer>) (Integer x1, Integer x2) -> x1.compareTo(x2);
+		}
+	}
+
+	class TestClassWithTypeParameterSupplyingComparable<T extends Supplier<Integer>> {
+
+		Comparator<T> comparatorOfT;
+
+		void test() {
+			comparatorOfT = (x1, x2) -> x1.get()
+				.compareTo(x2.get());
+			comparatorOfT = (x1, x2) -> x2.get()
+				.compareTo(x1.get());
+
+			comparatorOfT = (T x1, T x2) -> x1.get()
+				.compareTo(x2.get());
+			comparatorOfT = (T x1, T x2) -> x2.get()
+				.compareTo(x1.get());
+
+			comparatorOfT = (Comparator<T>) (x1, x2) -> x1.get()
+				.compareTo(x2.get());
+			comparatorOfT = (Comparator<T>) (x1, x2) -> x2.get()
+				.compareTo(x1.get());
+		}
+	}
+
+	class TestSortingOfArrayList {
+
+		<T extends Comparable<T>> void testWithArrayListOfT() {
+			ArrayList<T> arrayList = new ArrayList<>();
+			arrayList.sort((x1, x2) -> x1.compareTo(x2));
+			arrayList.sort((Comparator<T>) (x1, x2) -> x1.compareTo(x2));
+
+			// causing RuleException
+			// arrayList.sort((T x1, T x2) -> x1.compareTo(x2));
+		}
+
+		<T extends Supplier<Integer>> void testWithArrayListOfTSupplyingInteger() {
+			ArrayList<T> arrayList = new ArrayList<>();
+			arrayList.sort((x1, x2) -> x1.get()
+				.compareTo(x2.get()));
+			arrayList.sort((Comparator<T>) (x1, x2) -> x1.get()
+				.compareTo(x2.get()));
+
+			// causing RuleException
+			// arrayList.sort((T x1, T x2) -> x1.get()
+			// .compareTo(x2.get()));
+		}
+
+		void testWithArrayListOfInteger() {
+			ArrayList<Integer> arrayList = new ArrayList<>();
+			arrayList.sort((x1, x2) -> x1.compareTo(x2));
+			arrayList.sort((Comparator<Integer>) (x1, x2) -> x1.compareTo(x2));
+
+			// causing RuleException:
+			// arrayList.sort((Integer x1, Integer x2) -> x1.compareTo(x2));
+		}
+	}
+
+	class TestComparatorForInnerClass {
+		class InnerClass {
+			String getString() {
+				return toString();
+			}
+		}
+
+		void test() {
+			Comparator<InnerClass> comparator = (lhs, rhs) -> lhs.getString()
+				.compareTo(rhs.getString());
 		}
 	}
 }

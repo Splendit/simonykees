@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.function.Supplier;
 
 @SuppressWarnings({ "unused" })
 public class TestUseComparatorMethodsRule {
@@ -222,6 +223,69 @@ public class TestUseComparatorMethodsRule {
 			comparatorOfT = (Comparator<T>) Comparator.<T>reverseOrder();
 
 			comparatorOfT = (Comparator<T>) (Comparator<Integer>) Comparator.<Integer>naturalOrder();
+		}
+	}
+
+	class TestClassWithTypeParameterSupplyingComparable<T extends Supplier<Integer>> {
+
+		Comparator<T> comparatorOfT;
+
+		void test() {
+			comparatorOfT = Comparator.comparingInt(Supplier::get);
+			comparatorOfT = Comparator.comparingInt((Supplier x1) -> x1.get())
+				.reversed();
+
+			comparatorOfT = Comparator.comparingInt(Supplier::get);
+			comparatorOfT = Comparator.comparingInt((Supplier x1) -> x1.get())
+				.reversed();
+
+			comparatorOfT = (Comparator<T>) Comparator.comparingInt((T x1) -> x1.get());
+			comparatorOfT = (Comparator<T>) Comparator.comparingInt((T x1) -> x1.get())
+				.reversed();
+		}
+	}
+
+	class TestSortingOfArrayList {
+
+		<T extends Comparable<T>> void testWithArrayListOfT() {
+			ArrayList<T> arrayList = new ArrayList<>();
+			arrayList.sort(Comparator.naturalOrder());
+			arrayList.sort((Comparator<T>) Comparator.<T>naturalOrder());
+
+			// causing RuleException
+			// arrayList.sort((T x1, T x2) -> x1.compareTo(x2));
+		}
+
+		<T extends Supplier<Integer>> void testWithArrayListOfTSupplyingInteger() {
+			ArrayList<T> arrayList = new ArrayList<>();
+			arrayList.sort(Comparator.comparingInt(Supplier::get));
+			arrayList.sort((Comparator<T>) Comparator.comparingInt((T x1) -> x1.get()));
+
+			// causing RuleException
+			// arrayList.sort((T x1, T x2) -> x1.get()
+			// .compareTo(x2.get()));
+		}
+
+		void testWithArrayListOfInteger() {
+			ArrayList<Integer> arrayList = new ArrayList<>();
+			arrayList.sort(Comparator.naturalOrder());
+			arrayList.sort((Comparator<Integer>) Comparator.<Integer>naturalOrder());
+
+			// causing RuleException:
+			// arrayList.sort((Integer x1, Integer x2) -> x1.compareTo(x2));
+		}
+	}
+
+	class TestComparatorForInnerClass {
+		class InnerClass {
+			String getString() {
+				return toString();
+			}
+		}
+
+		void test() {
+			Comparator<InnerClass> comparator = Comparator.comparing(
+					eu.jsparrow.sample.preRule.TestUseComparatorMethodsRule.TestComparatorForInnerClass.InnerClass::getString);
 		}
 	}
 }
