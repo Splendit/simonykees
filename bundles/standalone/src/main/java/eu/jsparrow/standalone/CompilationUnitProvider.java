@@ -66,7 +66,7 @@ public class CompilationUnitProvider {
 			.stream()
 			.map(String::trim)
 			.filter(pattern -> !pattern.isEmpty())
-			.map(source -> String.join("", GLOB_ALL, source)) //$NON-NLS-1$
+			.map(source -> String.join(File.separator, GLOB_ALL, source))
 			.map(pattern -> FileSystems.getDefault()
 				.getPathMatcher(pattern))
 			.collect(Collectors.toList());
@@ -106,8 +106,8 @@ public class CompilationUnitProvider {
 	}
 
 	private boolean isSelected(ICompilationUnit compilationUnit) {
-		if (this.selectedSourceMatchers.isEmpty()) {
-			return true;
+		if (selectedSourceMatchers.isEmpty()) {
+			return false;
 		}
 		IPath compUnitPath = compilationUnit.getPath();
 		IPath iPath = compUnitPath.makeRelative();

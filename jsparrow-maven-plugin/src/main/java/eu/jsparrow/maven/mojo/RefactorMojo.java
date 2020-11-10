@@ -95,7 +95,7 @@ public class RefactorMojo extends AbstractMojo {
 	 * <li><code>"$(git diff-tree --no-commit-id --name-only -r HEAD)"</code></li>
 	 * </ul>
 	 */
-	@Parameter(defaultValue = "", property = "selectedSources")
+	@Parameter(defaultValue = "**", property = "selectedSources")
 	private String selectedSources;
 
 	/**
@@ -124,12 +124,10 @@ public class RefactorMojo extends AbstractMojo {
 			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8and11);
 		}
 
-		String sources = Optional.ofNullable(selectedSources)
-			.orElse(""); //$NON-NLS-1$
 		String mode = StandaloneMode.REFACTOR.name();
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration,
-				statisticsMetadata, sendStatistics, sources);
+				statisticsMetadata, sendStatistics, selectedSources);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);

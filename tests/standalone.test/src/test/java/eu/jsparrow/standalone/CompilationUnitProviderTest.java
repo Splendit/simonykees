@@ -44,11 +44,11 @@ public class CompilationUnitProviderTest {
 		when(packageDeclarationMock.getElementName()).thenReturn("eu.jsparrow.test");
 		compUnitMock = createICompilationUnitMock("CompUnit.java", "/eu/jsparrow/test/CompUnit.java",
 				packageDeclarationMock);
-		compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes, "");
+		compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes, "**");
 	}
 
 	@Test
-	public void getFilteredCompilationUnits_noGlobPattern_shouldReturnAllCompilationUnits() throws Exception {
+	public void getFilteredCompilationUnits_noGlobPattern_shouldReturnNoCompilationUnits() throws Exception {
 		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "/some/CompUnit2.java",
 				packageDeclarationMock);
 		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "/CompUnit3.java",
@@ -58,7 +58,7 @@ public class CompilationUnitProviderTest {
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
-		assertEquals(3, compilationUnits.size());
+		assertTrue(compilationUnits.isEmpty());
 	}
 
 	@Test
@@ -73,7 +73,22 @@ public class CompilationUnitProviderTest {
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
 		assertEquals(2, compilationUnits.size());
+	}
+	
+	@Test
+	public void getFilteredCompilationUnits_selectAll_shouldReturnAllCompilationUnits()
+			throws Exception {
+		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "eu/jsparrow/test/CompUnit2.java",
+				packageDeclarationMock);
+		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "eu/jsparrow/test/CompUnit3.java",
+				packageDeclarationMock);
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
+				Arrays.asList(compUnitMock, compUnit2, compUnit3), null,
+				"**");
 
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+
+		assertEquals(3, compilationUnits.size());
 	}
 
 	@Test
@@ -90,7 +105,6 @@ public class CompilationUnitProviderTest {
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
 		assertEquals(2, compilationUnits.size());
-
 	}
 
 	@Test
@@ -165,7 +179,7 @@ public class CompilationUnitProviderTest {
 		YAMLExcludes excludes = null;
 
 		compilationUnitProvider = new CompilationUnitProvider(
-				Collections.singletonList(compUnitMock), excludes, "");
+				Collections.singletonList(compUnitMock), excludes, "**");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 

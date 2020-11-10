@@ -196,7 +196,7 @@ public class StandaloneConfigTest {
 	class TestableStandaloneConfig extends StandaloneConfig {
 
 		public TestableStandaloneConfig(String path, String compilerCompliance) throws Exception {
-			super(javaProject, path, config, new StandaloneStatisticsMetadata(), "*");
+			super(javaProject, path, config, new StandaloneStatisticsMetadata(), "**");
 			super.refactoringPipeline = pipeline;
 
 		}
