@@ -79,7 +79,7 @@ public class StandaloneConfig {
 	 *            path to the base directory of the project
 	 * @param yamlConfig
 	 *            the default yaml configuration file of the project
-	 * @param selectedSouces
+	 * @param selectedSources
 	 *            GLOB expressions matching the selected sources to be
 	 *            refactored. One expression per line.
 	 * @throws CoreException
@@ -89,7 +89,7 @@ public class StandaloneConfig {
 	 *             if the project cannot be created
 	 */
 	public StandaloneConfig(IJavaProject javaProject, String path, YAMLConfig yamlConfig,
-			StandaloneStatisticsMetadata statisticsMetadata, String selectedSouces)
+			StandaloneStatisticsMetadata statisticsMetadata, String selectedSources)
 			throws CoreException, StandaloneException {
 
 		this.javaProject = javaProject;
@@ -99,7 +99,7 @@ public class StandaloneConfig {
 		this.yamlConfig = yamlConfig;
 		this.statisticsMetadata = statisticsMetadata;
 
-		setUp(selectedSouces);
+		setUp(selectedSources);
 	}
 
 	/**

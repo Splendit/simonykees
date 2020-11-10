@@ -41,6 +41,7 @@ public class CompilationUnitProvider {
 	private Set<String> usedExcludedPackages = new HashSet<>();
 	private Set<String> usedExcludedClasses = new HashSet<>();
 	private List<PathMatcher> selectedSourceMatchers;
+	private String selectedSources;
 
 	private static final Logger logger = LoggerFactory.getLogger(CompilationUnitProvider.class);
 
@@ -60,7 +61,7 @@ public class CompilationUnitProvider {
 			String selectedSources) {
 		this.compilationUnits = compilationUnits;
 		this.excludes = excludes;
-
+		this.selectedSources = selectedSources;
 		String[] sources = selectedSources.split(System.lineSeparator());
 		this.selectedSourceMatchers = Arrays.asList(sources)
 			.stream()
@@ -81,9 +82,6 @@ public class CompilationUnitProvider {
 	public List<ICompilationUnit> getFilteredCompilationUnits() {
 
 		Collector<CharSequence, ?, String> collector = Collectors.joining(","); //$NON-NLS-1$
-		String selectedSources = this.selectedSourceMatchers.stream()
-			.map(PathMatcher::toString)
-			.collect(collector);
 		logger.info("Selected sources: {}.", selectedSources); //$NON-NLS-1$
 		List<String> excludedPackages = Optional.ofNullable(excludes)
 			.map(YAMLExcludes::getExcludePackages)
