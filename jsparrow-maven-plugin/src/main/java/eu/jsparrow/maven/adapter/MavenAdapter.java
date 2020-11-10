@@ -161,7 +161,7 @@ public class MavenAdapter {
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 		configuration.put(LICENSE_KEY, config.getLicense());
 		configuration.put(AGENT_URL, config.getUrl());
-		configuration.put(SELECTED_SOURCES, config.getSources());
+		configuration.put(SELECTED_SOURCES, config.getSelectedSources());
 
 		StatisticsMetadata statisticsMetadata = config.getStatisticsMetadata();
 		if (statisticsMetadata != null && statisticsMetadata.isValid()) {

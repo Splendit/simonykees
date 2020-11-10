@@ -19,16 +19,16 @@ public class MavenParameters {
 	private String url = ""; //$NON-NLS-1$
 	private StatisticsMetadata statisticsMetadata;
 	private boolean sendStatistics;
-	private String sources;
+	private String selectedSources;
 
 	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault,
-			StatisticsMetadata statisticsMetadata, boolean sendStatistics, String sources) {
+			StatisticsMetadata statisticsMetadata, boolean sendStatistics, String selectedSources) {
 		this(mode, license, url);
 		this.profile = profile;
 		this.useDefaultConfig = useDefault;
 		this.statisticsMetadata = statisticsMetadata;
 		this.sendStatistics = sendStatistics;
-		this.sources = sources;
+		this.selectedSources = selectedSources;
 	}
 
 	public MavenParameters(String mode, String license, String url) {
@@ -86,12 +86,8 @@ public class MavenParameters {
 		this.sendStatistics = sendStatistics;
 	}
 	
-	public String getSources() {
-		return this.sources;
-	}
-	
-	public void setSources(String sources) {
-		this.sources = sources;
+	public String getSelectedSources() {
+		return this.selectedSources;
 	}
 
 }
