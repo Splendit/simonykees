@@ -81,12 +81,21 @@ public class RefactorMojo extends AbstractMojo {
 	 */
 	@Parameter(property = "license")
 	private String license;
-	
+
 	/**
-	 * Specify the glob patterns to match the sources for refactoring. Use line
-	 * breaks to specify multiple glob patterns.
+	 * Specify the glob expression patterns relative to the project root
+	 * directory for selecting the sources to refactor. Use line breaks to
+	 * specify multiple glob patterns. If not specified, all Java sources in the
+	 * project will be considered for refactoring. Examples:
+	 * <ul>
+	 * <li><code>"core/*"</code></li>
+	 * <li><code>"core/**"</code></li>
+	 * <li><code>"core/Application.java"</code></li>
+	 * <li><code>"core/Application.java \n service/Order.java"</code></li>
+	 * <li><code>"$(git diff-tree --no-commit-id --name-only -r HEAD)"</code></li>
+	 * </ul>
 	 */
-	@Parameter(defaultValue = "", property="selectedSources")
+	@Parameter(defaultValue = "", property = "selectedSources")
 	private String selectedSources;
 
 	/**
