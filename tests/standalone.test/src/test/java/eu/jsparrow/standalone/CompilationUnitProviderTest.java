@@ -290,7 +290,7 @@ public class CompilationUnitProviderTest {
 		assertFalse(expected);
 	}
 
-	public static ICompilationUnit createICompilationUnitMock(String name, String path,
+	private static ICompilationUnit createICompilationUnitMock(String name, String path,
 			IPackageDeclaration packageDeclarationMock) throws Exception {
 		ICompilationUnit compUnit = mock(ICompilationUnit.class);
 		IPath path2 = new org.eclipse.core.runtime.Path(path);
