@@ -3335,17 +3335,19 @@
       }
     }
 
-    function secondsToHms(d) {
-      d = Number(d);
-      var h = Math.floor(d / 3600);
-      var m = Math.floor(d % 3600 / 60);
-      var s = Math.floor(d % 3600 % 60);
+    function secondsToHms(duration) {
+      duration = Number(duration);
+      var d = Math.floor(duration / (3600 * 8));
+      var h = Math.floor((duration / 3600) % 8);
+      var m = Math.floor(duration % 3600 / 60);
+      var s = Math.floor(duration % 3600 % 60);
 
       // always show minutes, add comma and seconds if they are not 0
+      var dDisplay = d > 0 ? d + (d == 1 ? " day, " : " days, ") : "";
       var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
       var mDisplay = m + (m == 1 ? " minute" : " minutes");
       var sDisplay = s > 0 ? ", " + s + (s == 1 ? " second" : " seconds") : "";
-      return hDisplay + mDisplay + sDisplay;
+      return dDisplay + hDisplay + mDisplay + sDisplay;
     }
   </script>
 
@@ -3368,15 +3370,15 @@
       <tbody>
         <tr>
           <td>Total Java file* count</td>
-          <td>${totalFilesCount}</td>
+          <td>${totalFilesCount?c}</td>
         </tr>
         <tr>
           <td>Number of files with findings</td>
-          <td>${totalFilesChanged}</td>
+          <td>${totalFilesChanged?c}</td>
         </tr>
         <tr>
           <td>Total number of issues found</td>
-          <td>${totalIssuesFixed}</td>
+          <td>${totalIssuesFixed?c}</td>
         </tr>
         <tr>
           <td>Total time saved</td>
