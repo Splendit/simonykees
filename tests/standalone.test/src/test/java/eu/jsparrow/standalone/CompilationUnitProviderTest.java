@@ -143,6 +143,20 @@ public class CompilationUnitProviderTest {
 	}
 
 	@Test
+	public void getFilteredCompilationUnits_selectOneInFolder_shouldReturnAllCompilationUnits() throws Exception {
+		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "/eu/jsparrow/CompUnit2.java",
+				packageDeclarationMock);
+		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "/eu/CompUnit3.java",
+				packageDeclarationMock);
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
+				Arrays.asList(compUnitMock, compUnit2, compUnit3), null, "jsparrow/CompUnit2.java");
+
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+
+		assertEquals(1, compilationUnits.size());
+	}
+
+	@Test
 	public void getFilteredCompilationUnits_nonMatchingSelection_shouldReturnNoCompilationUnits() throws Exception {
 		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
 				Collections.singletonList(compUnitMock), null, "test/CompUnit2.java");
