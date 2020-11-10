@@ -124,7 +124,8 @@ public class RefactorMojo extends AbstractMojo {
 			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8and11);
 		}
 
-		String sources = Optional.ofNullable(selectedSources).orElse(""); //$NON-NLS-1$
+		String sources = Optional.ofNullable(selectedSources)
+			.orElse(""); //$NON-NLS-1$
 		String mode = StandaloneMode.REFACTOR.name();
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration,

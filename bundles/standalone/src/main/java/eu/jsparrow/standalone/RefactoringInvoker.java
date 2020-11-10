@@ -407,7 +407,8 @@ public class RefactoringInvoker {
 				YAMLConfig config = getConfiguration(context, javaProject.getProject()
 					.getLocation()
 					.toFile());
-				StandaloneConfig standaloneConfig = new StandaloneConfig(javaProject, path, config, metadata, selectedSources);
+				StandaloneConfig standaloneConfig = new StandaloneConfig(javaProject, path, config, metadata,
+						selectedSources);
 
 				standaloneConfigs.add(standaloneConfig);
 

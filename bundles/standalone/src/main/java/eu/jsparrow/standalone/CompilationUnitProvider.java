@@ -56,7 +56,8 @@ public class CompilationUnitProvider {
 	 *            an instance of {@link YAMLExcludes} representing the modules,
 	 *            packages and classes that should be excluded from refactoring.
 	 */
-	public CompilationUnitProvider(List<ICompilationUnit> compilationUnits, YAMLExcludes excludes, String selectedSources) {
+	public CompilationUnitProvider(List<ICompilationUnit> compilationUnits, YAMLExcludes excludes,
+			String selectedSources) {
 		this.compilationUnits = compilationUnits;
 		this.excludes = excludes;
 
@@ -65,7 +66,7 @@ public class CompilationUnitProvider {
 			.stream()
 			.map(String::trim)
 			.filter(pattern -> !pattern.isEmpty())
-			.map(source -> String.join("", GLOB_ALL, source))  //$NON-NLS-1$
+			.map(source -> String.join("", GLOB_ALL, source)) //$NON-NLS-1$
 			.map(pattern -> FileSystems.getDefault()
 				.getPathMatcher(pattern))
 			.collect(Collectors.toList());
@@ -81,19 +82,19 @@ public class CompilationUnitProvider {
 
 		Collector<CharSequence, ?, String> collector = Collectors.joining(","); //$NON-NLS-1$
 		String selectedSources = this.selectedSourceMatchers.stream()
-				.map(PathMatcher::toString)
-				.collect(collector);
+			.map(PathMatcher::toString)
+			.collect(collector);
 		logger.info("Selected sources: {}.", selectedSources); //$NON-NLS-1$
 		List<String> excludedPackages = Optional.ofNullable(excludes)
-				.map(YAMLExcludes::getExcludePackages)
-				.orElse(Collections.emptyList());
+			.map(YAMLExcludes::getExcludePackages)
+			.orElse(Collections.emptyList());
 		String logInfo = excludedPackages.stream()
 			.collect(collector);
 		logger.debug("Excluded packages: {} ", logInfo); //$NON-NLS-1$
 
 		List<String> exludedClasses = Optional.ofNullable(excludes)
-				.map(YAMLExcludes::getExcludeClasses)
-				.orElse(Collections.emptyList());
+			.map(YAMLExcludes::getExcludeClasses)
+			.orElse(Collections.emptyList());
 		logInfo = exludedClasses.stream()
 			.collect(collector);
 		logger.debug("Excluded classes: {} ", logInfo); //$NON-NLS-1$
@@ -105,7 +106,7 @@ public class CompilationUnitProvider {
 	}
 
 	private boolean isSelected(ICompilationUnit compilationUnit) {
-		if(this.selectedSourceMatchers.isEmpty()) {
+		if (this.selectedSourceMatchers.isEmpty()) {
 			return true;
 		}
 		IPath compUnitPath = compilationUnit.getPath();
