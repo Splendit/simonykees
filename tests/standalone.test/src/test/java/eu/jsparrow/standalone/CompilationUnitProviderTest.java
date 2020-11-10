@@ -42,18 +42,9 @@ public class CompilationUnitProviderTest {
 		excludes.setExcludeClasses(Collections.singletonList("eu.jsparrow.test.ExcludedClass.java"));
 		packageDeclarationMock = mock(IPackageDeclaration.class);
 		when(packageDeclarationMock.getElementName()).thenReturn("eu.jsparrow.test");
-		compUnitMock = createICompilationUnitMock("CompUnit.java", "/eu/jsparrow/test/CompUnit.java", packageDeclarationMock);
+		compUnitMock = createICompilationUnitMock("CompUnit.java", "/eu/jsparrow/test/CompUnit.java",
+				packageDeclarationMock);
 		compilationUnitProvider = new CompilationUnitProvider(Collections.singletonList(compUnitMock), excludes, "");
-	}
-
-	public static ICompilationUnit createICompilationUnitMock(String name, String path,
-			IPackageDeclaration packageDeclarationMock) throws Exception {
-		ICompilationUnit compUnit = mock(ICompilationUnit.class);
-		IPath path2 = new org.eclipse.core.runtime.Path(path);
-		when(compUnit.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
-		when(compUnit.getElementName()).thenReturn(name);
-		when(compUnit.getPath()).thenReturn(path2);
-		return compUnit;
 	}
 
 	@Test
@@ -69,7 +60,7 @@ public class CompilationUnitProviderTest {
 
 		assertEquals(3, compilationUnits.size());
 	}
-	
+
 	@Test
 	public void getFilteredCompilationUnits_multipleGlobPatterns_shouldReturnTwoCompilationUnits() throws Exception {
 		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "eu/jsparrow/test/CompUnit2.java",
@@ -82,22 +73,24 @@ public class CompilationUnitProviderTest {
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
 		assertEquals(2, compilationUnits.size());
-		
+
 	}
-	
+
 	@Test
-	public void getFilteredCompilationUnits_multipleGlobPatternsWithEmptyLines_shouldReturnTwoCompilationUnits() throws Exception {
+	public void getFilteredCompilationUnits_multipleGlobPatternsWithEmptyLines_shouldReturnTwoCompilationUnits()
+			throws Exception {
 		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "eu/jsparrow/test/CompUnit2.java",
 				packageDeclarationMock);
 		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "eu/jsparrow/test/CompUnit3.java",
 				packageDeclarationMock);
 		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
-				Arrays.asList(compUnitMock, compUnit2, compUnit3), null, "test/CompUnit2.java \n\n test/CompUnit3.java");
+				Arrays.asList(compUnitMock, compUnit2, compUnit3), null,
+				"test/CompUnit2.java \n\n test/CompUnit3.java");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
 		assertEquals(2, compilationUnits.size());
-		
+
 	}
 
 	@Test
@@ -109,7 +102,8 @@ public class CompilationUnitProviderTest {
 		YAMLExcludes excludes = new YAMLExcludes();
 		excludes.setExcludeClasses(Collections.singletonList("eu.jsparrow.test.CompUnit3.java"));
 		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
-				Arrays.asList(compUnitMock, compUnit2, compUnit3), excludes, "jsparrow/test/CompUnit2.java\njsparrow/test/CompUnit3.java");
+				Arrays.asList(compUnitMock, compUnit2, compUnit3), excludes,
+				"jsparrow/test/CompUnit2.java\njsparrow/test/CompUnit3.java");
 
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
@@ -296,4 +290,13 @@ public class CompilationUnitProviderTest {
 		assertFalse(expected);
 	}
 
+	public static ICompilationUnit createICompilationUnitMock(String name, String path,
+			IPackageDeclaration packageDeclarationMock) throws Exception {
+		ICompilationUnit compUnit = mock(ICompilationUnit.class);
+		IPath path2 = new org.eclipse.core.runtime.Path(path);
+		when(compUnit.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
+		when(compUnit.getElementName()).thenReturn(name);
+		when(compUnit.getPath()).thenReturn(path2);
+		return compUnit;
+	}
 }
