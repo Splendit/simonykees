@@ -77,14 +77,6 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 	}
 
 	@Test
-	public void visit_ComparatorOfDequeOfStringReversed_shouldTransform() throws Exception {
-		fixture.addImport(java.util.Deque.class.getName());
-		String original = "Comparator<Deque<String>> comparator = (lhs, rhs) -> rhs.getFirst().compareTo(lhs.getFirst());";
-		String expected = "Comparator<Deque<String>> comparator=Comparator.comparing((Deque<String> lhs) -> lhs.getFirst()).reversed();";
-		assertChange(original, expected);
-	}
-
-	@Test
 	public void visit_ComparatorForLocalClass_shouldTransform() throws Exception {
 		String original = "" +
 				"class LocalClass {\n" +
@@ -162,17 +154,27 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 		assertChange(original, expected);
 	}
 
-	/**
-	 * Transformation of lambdas to method references in connection with the
-	 * invocation of {@link java.util.Comparator#reversed() } produces compiler
-	 * errors. This test will fail as soon as the bug of invalid transformation
-	 * for reversed comparator lambda expressions is fixed in SIM-1816.
-	 */
 	@Test
 	public void visit_ComparatorOfDequeOfIntegerReversed_shouldTransform() throws Exception {
 		fixture.addImport(java.util.Deque.class.getName());
 		String original = "Comparator<Deque<Integer>> comparator = (lhs, rhs) -> rhs.getFirst().compareTo(lhs.getFirst());";
 		String expected = "Comparator<Deque<Integer>> comparator = Comparator.comparingInt((Deque<Integer> lhs) -> lhs.getFirst()).reversed();";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ComparatorOfDequeOfStringReversed_shouldTransform() throws Exception {
+		fixture.addImport(java.util.Deque.class.getName());
+		String original = "Comparator<Deque<String>> comparator = (lhs, rhs) -> rhs.getFirst().compareTo(lhs.getFirst());";
+		String expected = "Comparator<Deque<String>> comparator=Comparator.comparing((Deque<String> lhs) -> lhs.getFirst()).reversed();";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ComparatorOfObjectReversed_shouldTransform() throws Exception {
+		fixture.addImport(java.util.Deque.class.getName());
+		String original = "Comparator<Object> comparator = (o1, o2) -> o2.toString().compareTo(o1.toString());";
+		String expected = "Comparator<Object> comparator = Comparator.comparing((Object o1) -> o1.toString()).reversed();";
 		assertChange(original, expected);
 	}
 }
