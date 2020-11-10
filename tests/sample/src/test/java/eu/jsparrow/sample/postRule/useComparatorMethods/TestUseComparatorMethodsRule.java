@@ -59,6 +59,19 @@ public class TestUseComparatorMethodsRule {
 	void testTransformationWithoutLossOfInformation() {
 		Comparator<?> comparator1 = Comparator.<Integer>naturalOrder();
 		Comparator<? extends Comparable<?>> comparator2 = Comparator.<Integer>naturalOrder();
+		comparator1 = Comparator.<Integer>reverseOrder();
+		comparator2 = Comparator.<Integer>reverseOrder();
+		class LocalClass<T> implements Comparable<LocalClass<T>> {
+
+			@Override
+			public int compareTo(LocalClass<T> o) {
+				return 0;
+			}
+		}
+		comparator1 = Comparator.<LocalClass<Object>>naturalOrder();
+		comparator2 = Comparator.<LocalClass<Object>>naturalOrder();
+		comparator1 = Comparator.<LocalClass<Object>>reverseOrder();
+		comparator2 = Comparator.<LocalClass<Object>>reverseOrder();
 	}
 
 	void testGetCollectionForIntegerComparator() {
@@ -88,6 +101,18 @@ public class TestUseComparatorMethodsRule {
 			Comparator<?> comparator1 = useComparator(Comparator.<Integer>naturalOrder());
 		}
 
+		void testWithComparatorOfJokerExtendingComparableRawtype() {
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			Comparator<?> comparator = useComparator((Comparator<? extends Comparable>) (t1, t2) -> t1.compareTo(t2));
+		}
+
+		void testWithComparatorOfComparableRawtype() {
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			Comparator<?> comparator0 = useComparator((Comparator<Comparable>) (t1, t2) -> t1.compareTo(t2));
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			Comparator<?> comparator1 = useComparator((Comparable t1, Comparable t2) -> t1.compareTo(t2));
+		}
+
 		void testWithComparatorOfDeque() {
 			Comparator<?> comparator1 = useComparator((Comparator<Deque<Integer>>) Comparator.comparingInt((Deque<Integer> x1) -> x1.getFirst()));
 			Comparator<?> comparator0 = useComparator(
@@ -96,13 +121,27 @@ public class TestUseComparatorMethodsRule {
 	}
 
 	class TestUseObjectWithTypeParameter {
-		<T> void useObject(T t) {
+		<T> T useObject(T t) {
+			return t;
 		}
 
-		void test() {
-			this.useObject((Comparator<Integer>)Comparator.<Integer>naturalOrder());
-			this.<Comparator<?>>useObject(Comparator.<Integer>naturalOrder());
-			this.<Comparator<Integer>>useObject(Comparator.naturalOrder());
+		void testWithComparatorOfInteger() {
+			Comparator<Integer> comparator;
+			comparator = this.useObject((Comparator<Integer>) Comparator.<Integer>naturalOrder());
+			comparator = this.<Comparator<Integer>>useObject(Comparator.naturalOrder());
+		}
+
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		void testWithComparatorOfJoker() {
+			Comparator<?> comparator;
+			comparator = this.<Comparator<?>>useObject(Comparator.<Integer>naturalOrder());
+			comparator = this.<Comparator<?>>useObject((Comparable t1, Comparable t2) -> t1.compareTo(t2));
+		}
+
+		void testWithComparatorOfDequeOfInteger() {
+			Comparator<Deque<Integer>> comparator;
+			comparator = this.useObject((Comparator<Deque<Integer>>) Comparator.comparingInt((Deque<Integer> lhs) -> lhs.getFirst()));
+			comparator = this.<Comparator<Deque<Integer>>>useObject((Comparator.comparingInt(Deque::getFirst)));
 		}
 	}
 
@@ -130,9 +169,12 @@ public class TestUseComparatorMethodsRule {
 
 		void test(Deque<Integer> x1, Deque<Integer> x2) {
 
-			Comparator<Deque<Integer>> comparator0 = (lhs, rhs) -> x1.getFirst().compareTo(rhs.getFirst());
-			Comparator<Deque<Integer>> comparator1 = (lhs, rhs) -> lhs.getFirst().compareTo(x2.getFirst());
-			Comparator<Deque<Integer>> comparator2 = (lhs, rhs) -> x1.getFirst().compareTo(x2.getFirst());
+			Comparator<Deque<Integer>> comparator0 = (lhs, rhs) -> x1.getFirst()
+				.compareTo(rhs.getFirst());
+			Comparator<Deque<Integer>> comparator1 = (lhs, rhs) -> lhs.getFirst()
+				.compareTo(x2.getFirst());
+			Comparator<Deque<Integer>> comparator2 = (lhs, rhs) -> x1.getFirst()
+				.compareTo(x2.getFirst());
 
 			Comparator<Deque<Integer>> comparator3 = (lhs, rhs) -> useObject(lhs).getFirst()
 				.compareTo(rhs.getFirst());

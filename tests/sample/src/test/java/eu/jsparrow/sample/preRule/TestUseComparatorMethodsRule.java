@@ -60,6 +60,19 @@ public class TestUseComparatorMethodsRule {
 	void testTransformationWithoutLossOfInformation() {
 		Comparator<?> comparator1 = (Integer u1, Integer u2) -> u1.compareTo(u2);
 		Comparator<? extends Comparable<?>> comparator2 = (Integer u1, Integer u2) -> u1.compareTo(u2);
+		comparator1 = (Integer u1, Integer u2) -> u2.compareTo(u1);
+		comparator2 = (Integer u1, Integer u2) -> u2.compareTo(u1);
+		class LocalClass<T> implements Comparable<LocalClass<T>> {
+
+			@Override
+			public int compareTo(LocalClass<T> o) {
+				return 0;
+			}
+		}
+		comparator1 = (LocalClass<Object> u1, LocalClass<Object> u2) -> u1.compareTo(u2);
+		comparator2 = (LocalClass<Object> u1, LocalClass<Object> u2) -> u1.compareTo(u2);
+		comparator1 = (LocalClass<Object> u1, LocalClass<Object> u2) -> u2.compareTo(u1);
+		comparator2 = (LocalClass<Object> u1, LocalClass<Object> u2) -> u2.compareTo(u1);
 	}
 
 	void testGetCollectionForIntegerComparator() {
@@ -90,6 +103,18 @@ public class TestUseComparatorMethodsRule {
 			Comparator<?> comparator1 = useComparator((Integer t1, Integer t2) -> t1.compareTo(t2));
 		}
 
+		void testWithComparatorOfJokerExtendingComparableRawtype() {
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			Comparator<?> comparator = useComparator((Comparator<? extends Comparable>) (t1, t2) -> t1.compareTo(t2));
+		}
+
+		void testWithComparatorOfComparableRawtype() {
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			Comparator<?> comparator0 = useComparator((Comparator<Comparable>) (t1, t2) -> t1.compareTo(t2));
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			Comparator<?> comparator1 = useComparator((Comparable t1, Comparable t2) -> t1.compareTo(t2));
+		}
+
 		void testWithComparatorOfDeque() {
 			Comparator<?> comparator1 = useComparator((Comparator<Deque<Integer>>) (x1, x2) -> x1.getFirst()
 				.compareTo(x2.getFirst()));
@@ -100,13 +125,29 @@ public class TestUseComparatorMethodsRule {
 	}
 
 	class TestUseObjectWithTypeParameter {
-		<T> void useObject(T t) {
+		<T> T useObject(T t) {
+			return t;
 		}
 
-		void test() {
-			this.useObject((Comparator<Integer>)(t1, t2) -> t1.compareTo(t2));
-			this.<Comparator<?>>useObject((Integer t1, Integer t2) -> t1.compareTo(t2));
-			this.<Comparator<Integer>>useObject((t1, t2) -> t1.compareTo(t2));
+		void testWithComparatorOfInteger() {
+			Comparator<Integer> comparator;
+			comparator = this.useObject((Comparator<Integer>) (t1, t2) -> t1.compareTo(t2));
+			comparator = this.<Comparator<Integer>>useObject((t1, t2) -> t1.compareTo(t2));
+		}
+
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		void testWithComparatorOfJoker() {
+			Comparator<?> comparator;
+			comparator = this.<Comparator<?>>useObject((Integer t1, Integer t2) -> t1.compareTo(t2));
+			comparator = this.<Comparator<?>>useObject((Comparable t1, Comparable t2) -> t1.compareTo(t2));
+		}
+
+		void testWithComparatorOfDequeOfInteger() {
+			Comparator<Deque<Integer>> comparator;
+			comparator = this.useObject((Comparator<Deque<Integer>>) (lhs, rhs) -> lhs.getFirst()
+				.compareTo(rhs.getFirst()));
+			comparator = this.<Comparator<Deque<Integer>>>useObject(((lhs, rhs) -> lhs.getFirst()
+					.compareTo(rhs.getFirst())));
 		}
 	}
 
@@ -134,9 +175,12 @@ public class TestUseComparatorMethodsRule {
 
 		void test(Deque<Integer> x1, Deque<Integer> x2) {
 
-			Comparator<Deque<Integer>> comparator0 = (lhs, rhs) -> x1.getFirst().compareTo(rhs.getFirst());
-			Comparator<Deque<Integer>> comparator1 = (lhs, rhs) -> lhs.getFirst().compareTo(x2.getFirst());
-			Comparator<Deque<Integer>> comparator2 = (lhs, rhs) -> x1.getFirst().compareTo(x2.getFirst());
+			Comparator<Deque<Integer>> comparator0 = (lhs, rhs) -> x1.getFirst()
+				.compareTo(rhs.getFirst());
+			Comparator<Deque<Integer>> comparator1 = (lhs, rhs) -> lhs.getFirst()
+				.compareTo(x2.getFirst());
+			Comparator<Deque<Integer>> comparator2 = (lhs, rhs) -> x1.getFirst()
+				.compareTo(x2.getFirst());
 
 			Comparator<Deque<Integer>> comparator3 = (lhs, rhs) -> useObject(lhs).getFirst()
 				.compareTo(rhs.getFirst());
