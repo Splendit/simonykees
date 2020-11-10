@@ -334,7 +334,8 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 
 	private void initializeHeaderDataBindings(DataBindingContext bindingContext) {
 		IConverter convertRunDuration = IConverter.create(Long.class, String.class,
-				x -> DurationFormatUtil.formatRunDuration((Long) x));
+				x -> String.format(Messages.DurationFormatUtil_RunDuration,
+						DurationFormatUtil.formatRunDuration((Long) x)));
 		IObservableValue<String> observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
 			.observe(labelExecutionTime);
 		IObservableValue<Object> executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
