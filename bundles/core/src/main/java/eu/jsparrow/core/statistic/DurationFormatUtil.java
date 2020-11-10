@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.preview.model;
+package eu.jsparrow.core.statistic;
 
 import java.time.Duration;
 

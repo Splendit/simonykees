@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.test;
+package eu.jsparrow.core.statistic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -6,8 +6,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.Test;
-
-import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 
 /**
  * 
