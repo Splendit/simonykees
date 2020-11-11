@@ -2,13 +2,13 @@ package eu.jsparrow.standalone;
 
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.File;
 
 import org.junit.Test;
 
-@SuppressWarnings("nls")
 public class YAMLStandaloneConfigTest {
 
 	private YAMLStandaloneConfig config;

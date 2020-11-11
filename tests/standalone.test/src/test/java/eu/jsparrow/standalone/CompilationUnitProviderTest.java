@@ -14,20 +14,14 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaModelException;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import eu.jsparrow.core.config.YAMLExcludes;
 
-@SuppressWarnings("nls")
 public class CompilationUnitProviderTest {
 
 	private static final String EU_JSPARROW_PACKAGE = "eu.jsparrow.package";
 	private static final String EU_JSPARROW = "eu.jsparrow";
-
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
 
 	private CompilationUnitProvider compilationUnitProvider;
 
@@ -93,7 +87,7 @@ public class CompilationUnitProviderTest {
 	}
 
 	@Test
-	public void getFilteredCompilationUnits_nothingEcluded_returnAll() throws JavaModelException {
+	public void getFilteredCompilationUnits_nothingExcluded_returnAll() throws JavaModelException {
 		when(compUnitMock.getPackageDeclarations()).thenReturn(new IPackageDeclaration[] { packageDeclarationMock });
 		when(packageDeclarationMock.getElementName()).thenReturn("eu.jsparrow.test");
 		when(compUnitMock.getElementName()).thenReturn("NotExcludedChass.java");

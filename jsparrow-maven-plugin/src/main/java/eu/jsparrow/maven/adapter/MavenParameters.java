@@ -1,6 +1,5 @@
 package eu.jsparrow.maven.adapter;
 
-import java.time.Instant;
 import java.util.Optional;
 
 /**
@@ -21,8 +20,8 @@ public class MavenParameters {
 	private StatisticsMetadata statisticsMetadata;
 	private boolean sendStatistics;
 
-	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault,
-			StatisticsMetadata statisticsMetadata, boolean sendStatistics) {
+	public MavenParameters(String mode, String license, String url, String profile,
+			boolean useDefault, StatisticsMetadata statisticsMetadata, boolean sendStatistics) {
 		this(mode, license, url);
 		this.profile = profile;
 		this.useDefaultConfig = useDefault;

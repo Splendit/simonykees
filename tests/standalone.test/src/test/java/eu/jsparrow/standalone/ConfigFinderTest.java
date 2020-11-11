@@ -37,7 +37,6 @@ import eu.jsparrow.standalone.ConfigFinder.ConfigType;
  * @since 2.6.0
  */
 @RunWith(Enclosed.class)
-@SuppressWarnings("nls")
 public class ConfigFinderTest {
 
 	/**

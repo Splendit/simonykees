@@ -3,6 +3,7 @@ package eu.jsparrow.standalone;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -144,14 +145,14 @@ public class ListRulesUtilTest {
 		Optional<Integer> maxWordLength = listRulesUtil.getMaxWordLength(rules);
 
 		assertTrue(maxWordLength.isPresent());
-		assertTrue(maxWordLength.get() == rule2id.length());
+		assertThat(maxWordLength.get(), equalTo(rule2id.length()));
 	}
 
 	@Test
 	public void calculateWhitespace() {
 		String whitespace = listRulesUtil.calculateWhitespace(5, 10);
 
-		assertTrue(whitespace.length() == 6);
+		assertThat(whitespace.length(), equalTo(6));
 		assertThat(whitespace, equalToIgnoringWhiteSpace("")); //$NON-NLS-1$
 	}
 

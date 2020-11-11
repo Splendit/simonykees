@@ -31,14 +31,15 @@ import eu.jsparrow.maven.util.JavaVersion;
 import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
- * Runs jSparrow on the Maven project.
+ * Runs the jSparrow in the demo mode, i.e. computes the refactorings and
+ * generates a report with the findings. Does not change the source files.
+ * Expects the same parameters as the {@code refactor} goal.
  * 
- * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
- * @since 2.2.1
+ * @since 2.20.0
  *
  */
-@Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
-public class RefactorMojo extends AbstractMojo {
+@Mojo(name = "demo", requiresDependencyResolution = ResolutionScope.COMPILE, defaultPhase = LifecyclePhase.INITIALIZE, aggregator = true)
+public class DemoMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession mavenSession;
@@ -108,9 +109,9 @@ public class RefactorMojo extends AbstractMojo {
 			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8and11);
 		}
 
-		String mode = StandaloneMode.REFACTOR.name();
+		String mode = StandaloneMode.DEMO.name();
 		String start = startTime == null ? Instant.now()
-				.toString() : startTime;
+			.toString() : startTime;
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
 				defaultConfiguration, statisticsMetadata, sendStatistics);
@@ -162,5 +163,4 @@ public class RefactorMojo extends AbstractMojo {
 				}
 			}));
 	}
-
 }

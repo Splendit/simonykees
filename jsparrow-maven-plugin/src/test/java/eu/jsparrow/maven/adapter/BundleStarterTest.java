@@ -1,6 +1,8 @@
 package eu.jsparrow.maven.adapter;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -83,16 +85,14 @@ public class BundleStarterTest {
 		assertTrue(captor.getValue()
 			.contains(line1));
 
-		assertTrue(bundles.size() == 1);
+		assertEquals(1, bundles.size());
 	}
 
-	@Test(expected = MojoExecutionException.class)
+	@Test
 	public void loadBundles_inputStreamIsNull_noInteractionWithReaderOrBundleContext() throws Exception {
 		isInputStreamNull = true;
 
-		bundleStarter.loadBundles();
-
-		assertTrue(false);
+		assertThrows(MojoExecutionException.class, () -> bundleStarter.loadBundles());
 	}
 
 	@Test
