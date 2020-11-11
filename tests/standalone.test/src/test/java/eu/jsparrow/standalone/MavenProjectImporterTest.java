@@ -28,7 +28,6 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-@SuppressWarnings("nls")
 @RunWith(MockitoJUnitRunner.class)
 public class MavenProjectImporterTest {
 

@@ -4,6 +4,7 @@ import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -191,11 +192,11 @@ public class StandaloneConfig {
 		}
 	}
 
-	public void computeRefactoring() throws StandaloneException {
+	public List<RefactoringRule> computeRefactoring() throws StandaloneException {
 		if (!hasRefactoringStates()) {
 			String loggerInfo = NLS.bind(Messages.StandaloneConfig_noRefactoringStates, projectName);
 			logger.info(loggerInfo);
-			return;
+			return Collections.emptyList();
 		}
 
 		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
@@ -218,6 +219,9 @@ public class StandaloneConfig {
 
 		applyRules(rules);
 		statisticsData.setMetricData();
+		Instant now = Instant.now();
+		statisticsData.setEndTime(now.getEpochSecond());
+		return rules;
 	}
 
 	private Optional<StandardLoggerRule> setUpLoggerRule(Map<String, String> options) {
@@ -272,7 +276,7 @@ public class StandaloneConfig {
 		}
 	}
 
-	protected List<RefactoringRule> getProjectRules() {
+	public List<RefactoringRule> getProjectRules() {
 		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
 		return RulesContainer.getRulesForProject(getJavaProject(), true);
 	}

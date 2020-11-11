@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.preview.model;
+package eu.jsparrow.core.statistic;
 
 import java.time.Duration;
 
@@ -47,7 +47,7 @@ public class DurationFormatUtil {
 		long workingHours = (millis / (1000 * 60 * 60)) % 8;
 		long workingDays = millis / (1000 * 60 * 60 * 8);
 
-		String formatted = String.format("%d %s %d %s %d %s", workingDays, DAYS, workingHours, HOURS, minutes, //$NON-NLS-1$
+		String formatted = String.format("%d %s, %d %s, %d %s", workingDays, DAYS, workingHours, HOURS, minutes, //$NON-NLS-1$
 				MINUTES);
 
 		formatted = removeZeroValueTimeUnit(DAYS, formatted);
@@ -56,13 +56,19 @@ public class DurationFormatUtil {
 		return formatted;
 	}
 
+	/**
+	 * Formats the run duration of jSparrow (seen in the left corner of the summary page)
+	 * 
+	 * @param milliseconds
+	 * @return Human-readable time String, containing hours, minutes, and seconds
+	 */
 	public static String formatRunDuration(long milliseconds) {
-		String dateFormat = String.format("HH '%s' mm '%s' ss '%s'", HOURS, MINUTES, SECONDS); //$NON-NLS-1$
+		String dateFormat = String.format("HH '%s', mm '%s', ss '%s'", HOURS, MINUTES, SECONDS); //$NON-NLS-1$
 		String formatted = DurationFormatUtils.formatDuration(milliseconds, dateFormat, false);
 		formatted = removeZeroValueTimeUnit(HOURS, formatted);
 		formatted = removeZeroValueTimeUnit(MINUTES, formatted);
 		formatted = removeZeroValueTimeUnit(SECONDS, formatted);
-		return String.format(Messages.DurationFormatUtil_RunDuration, formatted);
+		return formatted;
 	}
 
 	/**
@@ -75,6 +81,6 @@ public class DurationFormatUtil {
 	 * @return formated time unit where useless timeUnit was removed
 	 */
 	private static String removeZeroValueTimeUnit(String timeUnit, String input) {
-		return input.replaceAll("(^0 " + timeUnit + "\\s)", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return input.replaceAll("(^0 " + timeUnit + ",\\s)", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 }

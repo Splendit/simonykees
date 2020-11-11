@@ -16,7 +16,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import eu.jsparrow.core.config.YAMLConfig;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
 
-@SuppressWarnings("nls")
 @RunWith(MockitoJUnitRunner.class)
 public class ExcludedModulesTest {
 
@@ -46,7 +45,7 @@ public class ExcludedModulesTest {
 	}
 
 	@Test
-	public void get_withValidYmlConfig_shouldReturnExlusionsFromConfig() throws StandaloneException {
+	public void get_withValidYmlConfig_shouldReturnExclusionsFromConfig() throws StandaloneException {
 		excludedModules = new TestableExcludedModules(false, SOME_PROJECT);
 		List<String> exclusionsFromConfig = Collections.singletonList("exludedModule");
 		when(yamlConfigStub.getExcludes()
@@ -58,7 +57,7 @@ public class ExcludedModulesTest {
 	}
 
 	@Test
-	public void get_withValidYmlConfig_shouldReturnEmptyExlusionsList() throws StandaloneException {
+	public void get_withValidYmlConfig_shouldReturnEmptyExclusionsList() throws StandaloneException {
 		excludedModules = new TestableExcludedModules(false, SOME_PROJECT);
 		List<String> exclusionsFromConfig = Collections.emptyList();
 		when(yamlConfigStub.getExcludes()
@@ -70,7 +69,7 @@ public class ExcludedModulesTest {
 	}
 
 	@Test
-	public void get_WithEmptyExcludes_shouldReturnEmptyExlusionsList() {
+	public void get_WithEmptyExcludes_shouldReturnEmptyExclusionsList() {
 		excludedModules = new TestableExcludedModules(false, SOME_PROJECT);
 		when(yamlConfigStub.getExcludes()).thenReturn(null);
 

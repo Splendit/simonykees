@@ -1,7 +1,12 @@
 package eu.jsparrow.standalone;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -114,17 +119,16 @@ public class StandaloneConfigTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expected = StandaloneException.class)
+	@Test
 	public void createRefactoringStates_shouldThrowStandaloneException() throws Exception {
 		doThrow(JavaModelException.class).when(pipeline)
 			.createRefactoringState(any(ICompilationUnit.class), any(List.class));
 
-		standaloneConfig.createRefactoringStates();
+		assertThrows(StandaloneException.class, () -> standaloneConfig.createRefactoringStates());
 
-		assertTrue(false);
 	}
 
-	@Test(expected = StandaloneException.class)
+	@Test
 	public void createRefactoringStates_abortFlag_shouldThrowStandaloneException() throws Exception {
 		standaloneConfig.setAbortFlag();
 		YAMLExcludes excludes = mock(YAMLExcludes.class);
@@ -132,9 +136,8 @@ public class StandaloneConfigTest {
 		when(excludes.getExcludePackages()).thenReturn(Collections.emptyList());
 		when(config.getExcludes()).thenReturn(excludes);
 
-		standaloneConfig.createRefactoringStates();
-
-		assertTrue(false);
+		assertThrows(StandaloneException.class, 
+				() -> standaloneConfig.createRefactoringStates());
 	}
 
 	@Test
@@ -147,9 +150,12 @@ public class StandaloneConfigTest {
 		when(config.getLoggerRule()).thenReturn(new YAMLLoggerRule());
 		when(config.getRules()).thenReturn(Arrays.asList("CodeFormatter", "FieldRenaming", "StandardLogger"));//$NON-NLS-1$ , //$NON-NLS-2$ //$NON-NLS-3$
 
-		standaloneConfig.computeRefactoring();
+		List<RefactoringRule> rules = standaloneConfig.computeRefactoring();
 
 		verify(pipeline).doRefactoring(any(NullProgressMonitor.class));
+		assertEquals(2, rules.size());
+		assertThat(rules.get(0), hasProperty("id", equalTo("FieldRenaming")));
+		assertThat(rules.get(1), hasProperty("id", equalTo("CodeFormatter")));
 	}
 
 	@Test
@@ -161,20 +167,18 @@ public class StandaloneConfigTest {
 		verify(pipeline, never()).doRefactoring(any(IProgressMonitor.class));
 	}
 
-	@Test(expected = StandaloneException.class)
+	@Test
 	public void computeRefactoring_shouldThrowStandaloneException() throws Exception {
 		hasRefactoringStates = true;
 		doThrow(RefactoringException.class).when(pipeline)
 			.doRefactoring(any(IProgressMonitor.class));
 		when(config.getRules()).thenReturn(Collections.singletonList("CodeFormatter"));//$NON-NLS-1$
 
-		standaloneConfig.computeRefactoring();
-
-		assertTrue(false);
+		assertThrows(StandaloneException.class, () -> standaloneConfig.computeRefactoring());
 	}
 
 	@Test
-	public void commitrefactoring_emptyRefactoringStates() throws Exception {
+	public void commitRefactoring_emptyRefactoringStates() throws Exception {
 		hasRefactoringStates = false;
 
 		standaloneConfig.commitRefactoring();
@@ -182,15 +186,13 @@ public class StandaloneConfigTest {
 		verify(pipeline, never()).commitRefactoring();
 	}
 
-	@Test(expected = StandaloneException.class)
+	@Test
 	public void commitChanges_shouldThrowStandaloneException() throws Exception {
 		hasRefactoringStates = true;
 		doThrow(RefactoringException.class).when(pipeline)
 			.commitRefactoring();
 
-		standaloneConfig.commitRefactoring();
-
-		assertTrue(false);
+		assertThrows(StandaloneException.class, () -> standaloneConfig.commitRefactoring());
 	}
 
 	class TestableStandaloneConfig extends StandaloneConfig {
@@ -224,7 +226,7 @@ public class StandaloneConfigTest {
 		}
 
 		@Override
-		protected List<RefactoringRule> getProjectRules() {
+		public List<RefactoringRule> getProjectRules() {
 			return Collections.singletonList(new CodeFormatterRule());
 		}
 

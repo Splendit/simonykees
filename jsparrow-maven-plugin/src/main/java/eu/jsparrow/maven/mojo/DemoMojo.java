@@ -31,14 +31,15 @@ import eu.jsparrow.maven.util.JavaVersion;
 import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
- * Runs jSparrow on the Maven project.
+ * Runs the jSparrow in the demo mode, i.e. computes the refactorings and
+ * generates a report with the findings. Does not change the source files.
+ * Expects the same parameters as the {@code refactor} goal.
  * 
- * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
- * @since 2.2.1
+ * @since 2.20.0
  *
  */
-@Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, aggregator = true)
-public class RefactorMojo extends AbstractMojo {
+@Mojo(name = "demo", requiresDependencyResolution = ResolutionScope.COMPILE, defaultPhase = LifecyclePhase.INITIALIZE, aggregator = true)
+public class DemoMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession mavenSession;
@@ -83,22 +84,6 @@ public class RefactorMojo extends AbstractMojo {
 	private String license;
 
 	/**
-	 * Specify the glob expression patterns relative to the project root
-	 * directory for selecting the sources to refactor. Use line breaks to
-	 * specify multiple glob patterns. If not specified, all Java sources in the
-	 * project will be considered for refactoring. Examples:
-	 * <ul>
-	 * <li><code>"core/*"</code></li>
-	 * <li><code>"core/**"</code></li>
-	 * <li><code>"core/Application.java"</code></li>
-	 * <li><code>"core/Application.java \n service/Order.java"</code></li>
-	 * <li><code>"$(git diff-tree --no-commit-id --name-only -r HEAD)"</code></li>
-	 * </ul>
-	 */
-	@Parameter(defaultValue = "**", property = "selectedSources")
-	private String selectedSources;
-
-	/**
 	 * Specify the license server to use.
 	 */
 	@Parameter(property = "url")
@@ -124,12 +109,12 @@ public class RefactorMojo extends AbstractMojo {
 			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8and11);
 		}
 
-		String mode = StandaloneMode.REFACTOR.name();
+		String mode = StandaloneMode.DEMO.name();
 		String start = startTime == null ? Instant.now()
-				.toString() : startTime;
+			.toString() : startTime;
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
-				defaultConfiguration, statisticsMetadata, sendStatistics, selectedSources);
+				defaultConfiguration, statisticsMetadata, sendStatistics);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);
@@ -178,5 +163,4 @@ public class RefactorMojo extends AbstractMojo {
 				}
 			}));
 	}
-
 }

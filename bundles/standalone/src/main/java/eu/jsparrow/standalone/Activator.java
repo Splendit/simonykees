@@ -75,6 +75,9 @@ public class Activator implements BundleActivator {
 		case REFACTOR:
 			refactor(context);
 			break;
+		case DEMO:
+			runInDemoMode(context);
+			break;
 		case LIST_RULES:
 			listRules(listRulesId);
 			break;
@@ -92,8 +95,6 @@ public class Activator implements BundleActivator {
 			setExitErrorMessageAndCleanUp(context, errorMsg);
 		}
 	}
-
-	
 
 	@Override
 	public void stop(BundleContext context) {
@@ -136,20 +137,54 @@ public class Activator implements BundleActivator {
 		}
 	}
 
+	/**
+	 * @see Activator#runInDemoMode(BundleContext)
+	 * 
+	 * @param context
+	 */
 	private void refactor(BundleContext context) {
+		String key = getLicenseKey(context);
+		String agentUrl = getAgentUrl(context);
+		licenseService = getStandaloneLicenseUtilService();
+
 		try {
-
-			String key = getLicenseKey(context);
-			String agentUrl = getAgentUrl(context);
-
-			licenseService = getStandaloneLicenseUtilService();
-			if (licenseService.validate(key, agentUrl)) {
+			boolean validLicense = licenseService.validate(key, agentUrl);
+			if (validLicense) {
 				refactoringInvoker.startRefactoring(context);
 			} else {
 				String message = Messages.StandaloneActivator_noValidLicenseFound;
 				logger.error(message);
 				setExitErrorMessageAndCleanUp(context, message);
 			}
+		} catch (StandaloneException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+			setExitErrorMessageAndCleanUp(context, e.getMessage());
+		}
+	}
+
+	/**
+	 * Contrary to {@link Activator#refactor(BundleContext)}, this method does
+	 * not stop JMP if the license is invalid.
+	 * 
+	 * @param context all the settings etc.
+	 */
+	private void runInDemoMode(BundleContext context) {
+		String key = getLicenseKey(context);
+		String agentUrl = getAgentUrl(context);
+		licenseService = getStandaloneLicenseUtilService();
+		try {
+			boolean validLicense = licenseService.validate(key, agentUrl);
+			if (!validLicense) {
+				String message = Messages.StandaloneActivator_noValidLicenseFound;
+				logger.error(message);
+			}
+		} catch (StandaloneException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
+		}
+		try {
+			refactoringInvoker.runInDemoMode(context);
 		} catch (StandaloneException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());

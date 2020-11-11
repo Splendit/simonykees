@@ -24,17 +24,4 @@ public class ResourceHelper {
 		ImageDescriptor imageDescriptor = ImageDescriptor.createFromURL(url);
 		return imageDescriptor.createImage();
 	}
-	
-	/** 
-	 *  Generates URL for the {@link ruleId}. The camelcase word is split,
-	 *  transposed to lowercase and concatinated with a dash (-)
-	 * @param baseUrl base URL 
-	 * @param ruleId name of the rule in Id format.
-	 * @return
-	 */
-	public static String generateLinkToDocumentation(String baseUrl, String ruleId) {
-		return baseUrl + String.join("-", ruleId.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])")) //$NON-NLS-1$ //$NON-NLS-2$
-			.toLowerCase() + ".html"; //$NON-NLS-1$
-	}
-
 }

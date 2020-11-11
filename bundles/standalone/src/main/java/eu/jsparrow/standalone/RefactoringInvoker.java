@@ -1,7 +1,10 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
+import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -26,14 +29,20 @@ import eu.jsparrow.core.http.JsonUtil;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
+import eu.jsparrow.core.statistic.DurationFormatUtil;
 import eu.jsparrow.core.statistic.entity.JsparrowData;
 import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.core.statistic.entity.JsparrowRuleData;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.standalone.ConfigFinder.ConfigType;
 import eu.jsparrow.standalone.exceptions.MavenImportException;
 import eu.jsparrow.standalone.exceptions.StandaloneException;
+import eu.jsparrow.standalone.report.ReportDataUtil;
+import eu.jsparrow.standalone.report.ReportGenerator;
+import eu.jsparrow.standalone.report.model.ReportData;
+import eu.jsparrow.standalone.util.ResourceLocator;
 import eu.jsparrow.standalone.xml.FormatterXmlParser;
 
 /**
@@ -98,7 +107,57 @@ public class RefactoringInvoker {
 		prepareRefactoring();
 		computeRefactoring();
 		commitRefactoring();
-		collectAndSendStatisticData(context);
+		JsparrowMetric metricData = collectStatistics();
+		if (metricData != null) {
+			JsparrowData data = metricData.getData();
+			String message = String.format(
+					"Run statistics for project %s:%n" //$NON-NLS-1$
+							+ "Total number of issues fixed: %d%n" //$NON-NLS-1$
+							+ "Total number of files changed: %d%n" //$NON-NLS-1$
+							+ "Total Java file count: %d%n" //$NON-NLS-1$
+							+ "Total time saved: %s%n", //$NON-NLS-1$
+					data.getProjectName(),
+					data.getTotalIssuesFixed(),
+					data.getTotalFilesChanged(),
+					data.getTotalFilesCount(),
+					DurationFormatUtil.formatTimeSaved(Duration.ofMinutes(data.getTotalTimeSaved())));
+			logger.info(message);
+			sendStatisticData(context, metricData);
+		}
+	}
+
+	/**
+	 * Computes the refactorings and generates a report with the findings. Does
+	 * not commit the changes in the original sources.
+	 * 
+	 * @param context
+	 *            the bundle context configuration
+	 * @throws StandaloneException
+	 *             if the {@link StandaoneConfig} cannot be loaded or the
+	 *             refactoring cannot be computed or the
+	 */
+	public void runInDemoMode(BundleContext context) throws StandaloneException {
+		List<IJavaProject> importedProjects = importAllProjects(context);
+		loadStandaloneConfig(importedProjects, context);
+		prepareRefactoring();
+		Map<StandaloneConfig, List<RefactoringRule>> rules = computeRefactoring();
+		JsparrowMetric metricData = collectStatistics();
+		if (metricData != null) {
+			JsparrowData data = metricData.getData();
+			String message = String.format(
+					"Run statistics for project %s:%n" //$NON-NLS-1$
+							+ "Total number of issues found: %d%n" //$NON-NLS-1$
+							+ "Total number of files with findings: %d%n" //$NON-NLS-1$
+							+ "Total Java file count: %d%n" //$NON-NLS-1$
+							+ "Total time saving potential: %s%n", //$NON-NLS-1$
+					data.getProjectName(),
+					data.getTotalIssuesFixed(),
+					data.getTotalFilesChanged(),
+					data.getTotalFilesCount(),
+					DurationFormatUtil.formatTimeSaved(Duration.ofMinutes(data.getTotalTimeSaved())));
+			logger.info(message);
+			printStatistics(context, rules, metricData);
+		}
 	}
 
 	/**
@@ -129,20 +188,22 @@ public class RefactoringInvoker {
 		}
 	}
 
-	private void computeRefactoring() throws StandaloneException {
-
+	private Map<StandaloneConfig, List<RefactoringRule>> computeRefactoring() throws StandaloneException {
+		Map<StandaloneConfig, List<RefactoringRule>> rulesMap = new HashMap<>();
 		for (StandaloneConfig standaloneConfig : standaloneConfigs) {
 			String abortMessage = String.format("abort detected while computing refactoring on %s ", //$NON-NLS-1$
 					standaloneConfig.getProjectName());
 			verifyAbortFlag(abortMessage);
 			try {
-				standaloneConfig.computeRefactoring();
+				List<RefactoringRule> rules = standaloneConfig.computeRefactoring();
+				rulesMap.put(standaloneConfig, rules);
 			} catch (ConcurrentModificationException e) {
 				String message = abort ? abortMessage : e.getMessage();
 				throw new StandaloneException(message);
 			}
 
 		}
+		return rulesMap;
 	}
 
 	private void commitRefactoring() throws StandaloneException {
@@ -161,11 +222,40 @@ public class RefactoringInvoker {
 		}
 	}
 
-	private void collectAndSendStatisticData(BundleContext context) {
+	private void sendStatisticData(BundleContext context, JsparrowMetric metricData) {
 		boolean sendStatistics = Boolean.parseBoolean(context.getProperty(STATISTICS_SEND));
 		if (!sendStatistics) {
 			return;
 		}
+
+		String json = JsonUtil.generateJSON(metricData);
+		JsonUtil.sendJsonToAwsStatisticsService(json);
+	}
+
+	private void printStatistics(BundleContext context, Map<StandaloneConfig, List<RefactoringRule>> rules,
+			JsparrowMetric metricData) {
+		String reportOutputPath = context.getProperty(ROOT_PROJECT_BASE_PATH);
+		String jsonPath = String.join(File.separator, reportOutputPath, "jSparrowReport.json"); //$NON-NLS-1$
+		JsonUtil.writeJSON(metricData, jsonPath);
+
+		File templateFolder = ResourceLocator.findFile("report") //$NON-NLS-1$
+			.orElse(null);
+		if (templateFolder == null) {
+			logger.warn("The jSparrow Report cannot be generated. The report template cannot be located."); //$NON-NLS-1$
+			return;
+		}
+
+		JsparrowData jSparrowData = metricData.getData();
+		ReportData report = ReportDataUtil.createReportData(jSparrowData, LocalDate.now(), rules);
+		ReportGenerator reportGenerator = new ReportGenerator();
+		try {
+			reportGenerator.writeReport(report, reportOutputPath, templateFolder);
+		} catch (IOException e) {
+			logger.error("Cannot generate the html report", e); //$NON-NLS-1$
+		}
+	}
+
+	private JsparrowMetric collectStatistics() {
 
 		boolean computedStatistics = standaloneConfigs.stream()
 			.map(StandaloneConfig::getStatisticsData)
@@ -174,7 +264,7 @@ public class RefactoringInvoker {
 			.anyMatch(Optional::isPresent);
 
 		if (!computedStatistics) {
-			return;
+			return null;
 		}
 
 		JsparrowMetric metricData = new JsparrowMetric();
@@ -228,9 +318,7 @@ public class RefactoringInvoker {
 				projectData.getProjectName(), projectData.getTotalIssuesFixed(), projectData.getTotalTimeSaved(),
 				projectData.getTotalFilesChanged());
 		logger.debug(logInfo);
-
-		String json = JsonUtil.generateJSON(metricData);
-		JsonUtil.sendJsonToAwsStatisticsService(json);
+		return metricData;
 	}
 
 	/**

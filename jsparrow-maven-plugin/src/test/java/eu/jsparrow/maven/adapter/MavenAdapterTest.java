@@ -1,6 +1,7 @@
 package eu.jsparrow.maven.adapter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -37,7 +38,7 @@ public class MavenAdapterTest {
 	private String groupId = "group-id";
 	private String artifactId = "artifact-id";
 	Properties properties;
-	private File jsparrowTemDirectory;
+	private File jsparrowTempDirectory;
 	private File jsparrowYml;
 	private File formatterFile;
 	private File projectBaseDir;
@@ -55,7 +56,7 @@ public class MavenAdapterTest {
 		workingDirectory = mock(WorkingDirectory.class);
 		mavenAdapter = new TestableMavenAdapter(project, log);
 
-		jsparrowTemDirectory = directory.newFolder("temp_jSparrow");
+		jsparrowTempDirectory = directory.newFolder("temp_jSparrow");
 		projectBaseDir = directory.newFolder("project_base_dir");
 		jsparrowYml = new File(projectBaseDir.getPath() + File.separator + "jsparrow.yml");
 		jsparrowYml.createNewFile();
@@ -97,32 +98,29 @@ public class MavenAdapterTest {
 		verify(config).getSelectedSources();
 	}
 
-	@Test(expected = InterruptedException.class)
+	@Test
 	public void prepareWorkingDirectory_directoryDoesNotExistAndMkdirsNotWorking() throws Exception {
-		jsparrowTemDirectory = mock(File.class);
-		when(jsparrowTemDirectory.exists()).thenReturn(false);
-		when(jsparrowTemDirectory.mkdirs()).thenReturn(false);
+		jsparrowTempDirectory = mock(File.class);
+		when(jsparrowTempDirectory.exists()).thenReturn(false);
+		when(jsparrowTempDirectory.mkdirs()).thenReturn(false);
 
-		mavenAdapter.prepareWorkingDirectory();
-
-		assertTrue(false);
+		assertThrows(InterruptedException.class, () -> mavenAdapter.prepareWorkingDirectory());
 	}
 
 	@Test
 	public void prepareWorkingDirectory_directoryDoesNotExistAndMkdirsIsWorking() throws Exception {
 
 		String absolutePath = "somePath";
-		jsparrowTemDirectory = mock(File.class);
-		when(jsparrowTemDirectory.exists()).thenReturn(false);
-		when(jsparrowTemDirectory.mkdirs()).thenReturn(true);
-		when(jsparrowTemDirectory.getAbsolutePath()).thenReturn(absolutePath);
+		jsparrowTempDirectory = mock(File.class);
+		when(jsparrowTempDirectory.exists()).thenReturn(false);
+		when(jsparrowTempDirectory.mkdirs()).thenReturn(true);
+		when(jsparrowTempDirectory.getAbsolutePath()).thenReturn(absolutePath);
 
 		mavenAdapter.prepareWorkingDirectory();
 
-		verify(jsparrowTemDirectory).getAbsolutePath();
-		assertTrue(mavenAdapter.getConfiguration()
-			.getOrDefault("osgi.instance.area", "asdf") //$NON-NLS-1$ //$NON-NLS-2$
-			.equals(absolutePath));
+		verify(jsparrowTempDirectory).getAbsolutePath();
+		assertEquals(absolutePath, mavenAdapter.getConfiguration()
+			.getOrDefault("osgi.instance.area", "asdf")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Test
@@ -137,27 +135,27 @@ public class MavenAdapterTest {
 				formatterFile, Stream.of(proxy));
 
 		Map<String, String> configurations = mavenAdapter.getConfiguration();
-		
+
 		assertTrue(configurations.containsKey(ConfigurationKeys.ROOT_CONFIG_PATH));
 		assertEquals(jsparrowYml.getAbsolutePath(), configurations.get(ConfigurationKeys.ROOT_CONFIG_PATH));
-		
+
 		assertTrue(configurations.containsKey(ConfigurationKeys.ROOT_PROJECT_BASE_PATH));
 		assertEquals(projectBaseDir.getAbsolutePath(), configurations.get(ConfigurationKeys.ROOT_PROJECT_BASE_PATH));
-		
+
 		assertTrue(configurations.containsKey(ConfigurationKeys.FORMATTING_FILE));
 		assertEquals(formatterFile.getAbsolutePath(), configurations.get(ConfigurationKeys.FORMATTING_FILE));
 	}
 
-	@Test(expected = MojoExecutionException.class)
+	@Test
 	public void setUp_jsparrowAlreadyRunning() throws Exception {
 		MavenParameters mavenParameters = new MavenParameters("list-rules");
 
 		when(workingDirectory.isJsparrowStarted(any(String.class))).thenReturn(true);
 
-		mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml, jsparrowYml,
-				formatterFile, Stream.of(proxy));
-
-		assertTrue(false);
+		assertThrows(MojoExecutionException.class,
+				() -> mavenAdapter.setUpConfiguration(mavenParameters, Collections.singletonList(project), jsparrowYml,
+						jsparrowYml,
+						formatterFile, Stream.of(proxy)));
 	}
 
 	@Test
@@ -184,7 +182,7 @@ public class MavenAdapterTest {
 
 		@Override
 		protected File createJsparrowTempDirectory() {
-			return jsparrowTemDirectory;
+			return jsparrowTempDirectory;
 		}
 
 		@Override
