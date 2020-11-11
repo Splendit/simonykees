@@ -84,8 +84,12 @@ public class CompilationUnitProvider {
 	 */
 	public List<ICompilationUnit> getFilteredCompilationUnits() {
 
+		String humanReadableSelectedSources = this.selectedSources == null || this.selectedSourceMatchers.isEmpty()
+				? "none" //$NON-NLS-1$
+				: this.selectedSources.replaceAll(System.lineSeparator(), File.pathSeparator);
+		logger.info("Selected sources: {}.", humanReadableSelectedSources); //$NON-NLS-1$
+
 		Collector<CharSequence, ?, String> collector = Collectors.joining(","); //$NON-NLS-1$
-		logger.info("Selected sources: {}.", selectedSources); //$NON-NLS-1$
 		List<String> excludedPackages = Optional.ofNullable(excludes)
 			.map(YAMLExcludes::getExcludePackages)
 			.orElse(Collections.emptyList());

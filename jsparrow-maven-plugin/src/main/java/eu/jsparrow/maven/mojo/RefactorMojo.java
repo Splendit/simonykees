@@ -3,7 +3,6 @@ package eu.jsparrow.maven.mojo;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.maven.execution.MavenSession;
