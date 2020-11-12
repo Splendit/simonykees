@@ -256,7 +256,7 @@ public class TestUseComparatorMethodsRule {
 
 		<T extends Supplier<Integer>> void testWithArrayListOfTSupplyingInteger() {
 			ArrayList<T> arrayList = new ArrayList<>();
-			arrayList.sort(Comparator.comparingInt(Supplier::get));
+			arrayList.sort(Comparator.comparingInt(T::get));
 			arrayList.sort((Comparator<T>) Comparator.comparingInt((T x1) -> x1.get()));
 			arrayList.sort(Comparator.comparingInt((T x1) -> x1.get()));
 		}

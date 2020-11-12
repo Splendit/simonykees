@@ -148,11 +148,17 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 	@SuppressWarnings("unchecked")
 	private Type createTypeWithOptionalArguments(ITypeBinding typeBinding) {
 		AST ast = astRewrite.getAST();
-		ITypeBinding erasure = typeBinding.getErasure();
-		String erasureQualifiedName = erasure.getQualifiedName();
-		verifyImport(getCompilationUnit(), erasureQualifiedName);		
-		Name erasureTypeName = addImport(erasureQualifiedName);
-		SimpleType erasureSimpleType = ast.newSimpleType(erasureTypeName);
+		Name typeName;
+		if(typeBinding.isTypeVariable()) {
+			String name = typeBinding.getName();
+			typeName = ast.newName(name);
+		} else {
+			ITypeBinding erasure = typeBinding.getErasure();
+			String erasureQualifiedName = erasure.getQualifiedName();
+			verifyImport(getCompilationUnit(), erasureQualifiedName);		
+			typeName = addImport(erasureQualifiedName);
+		}
+		SimpleType erasureSimpleType = ast.newSimpleType(typeName);
 		ITypeBinding[] typeBindingArguments = typeBinding.getTypeArguments();
 		if (typeBindingArguments.length == 0) {
 			return erasureSimpleType;
@@ -261,11 +267,13 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		methodReference.setName(ast.newSimpleName(comparisonKeyMethodName));
 
 		Name lambdaParameterTypeName;
-		ITypeBinding lambdaParameterTypeErasure = lambdaParameterType.getErasure();
-		if (lambdaParameterType.isLocal()) {
-			lambdaParameterTypeName = ast.newSimpleName(lambdaParameterTypeErasure.getName());
+		ITypeBinding parameterType = lambdaParameterType.isParameterizedType() ? 
+				lambdaParameterType.getErasure() 
+				:lambdaParameterType;
+		if (lambdaParameterType.isLocal() || lambdaParameterType.isTypeVariable()) {
+			lambdaParameterTypeName = ast.newSimpleName(parameterType.getName());
 		} else {
-			String qualifiedName = lambdaParameterTypeErasure.getQualifiedName();
+			String qualifiedName = parameterType.getQualifiedName();
 			verifyImport(getCompilationUnit(), qualifiedName);
 			lambdaParameterTypeName = addImport(qualifiedName);
 		}

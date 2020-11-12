@@ -588,7 +588,7 @@ public class RefactoringPipeline {
 				newAstRoot = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null, null);
 			}
 		} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);e.printStackTrace();
 			returnListNotWorkingRules.add(new NotWorkingRuleModel(rule.getRuleDescription()
 				.getName(), refactoringState.getWorkingCopyName()));
 		}
