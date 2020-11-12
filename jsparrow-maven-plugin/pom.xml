@@ -17,7 +17,8 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<proguard.plugin.version>2.0.14</proguard.plugin.version>
+		<proguard.plugin.version>2.3.1</proguard.plugin.version>
+		<proguard.base.version>6.2.2</proguard.base.version>
 	</properties>
 
 	<dependencies>
@@ -159,7 +160,7 @@
 						<dependency>
 							<groupId>net.sf.proguard</groupId>
 							<artifactId>proguard-base</artifactId>
-							<version>6.0.1</version>
+							<version>${proguard.base.version}</version>
 							<scope>runtime</scope>
 						</dependency>
 					</dependencies>

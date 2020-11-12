@@ -64,7 +64,7 @@
 						<dependency>
 							<groupId>net.sf.proguard</groupId>
 							<artifactId>proguard-base</artifactId>
-							<version>6.0.3</version>
+							<version>${proguard.base.version}</version>
 							<scope>runtime</scope>
 						</dependency>
 					</dependencies>
