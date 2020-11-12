@@ -25,7 +25,7 @@ public class UseComparatorMethodsRule
 		this.id = "UseComparatorMethods"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.UseComparatorMethodsRule_name,
 				Messages.UseComparatorMethodsRule_description,
-				Duration.ofMinutes(5),
+				Duration.ofMinutes(15),
 				Arrays.asList(Tag.JAVA_1_8, Tag.CODING_CONVENTIONS));
 	}
 
