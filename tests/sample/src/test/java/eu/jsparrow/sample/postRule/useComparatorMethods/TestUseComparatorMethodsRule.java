@@ -231,12 +231,12 @@ public class TestUseComparatorMethodsRule {
 		Comparator<T> comparatorOfT;
 
 		void test() {
-			comparatorOfT = Comparator.comparingInt(Supplier::get);
-			comparatorOfT = Comparator.comparingInt((Supplier x1) -> x1.get())
+			comparatorOfT = Comparator.comparingInt(T::get);
+			comparatorOfT = Comparator.comparingInt((T x1) -> x1.get())
 				.reversed();
 
-			comparatorOfT = Comparator.comparingInt(Supplier::get);
-			comparatorOfT = Comparator.comparingInt((Supplier x1) -> x1.get())
+			comparatorOfT = Comparator.comparingInt(T::get);
+			comparatorOfT = Comparator.comparingInt((T x1) -> x1.get())
 				.reversed();
 
 			comparatorOfT = (Comparator<T>) Comparator.comparingInt((T x1) -> x1.get());
@@ -277,8 +277,7 @@ public class TestUseComparatorMethodsRule {
 		}
 
 		void test() {
-			Comparator<InnerClass> comparator = Comparator.comparing(
-					eu.jsparrow.sample.preRule.TestUseComparatorMethodsRule.TestComparatorForInnerClass.InnerClass::getString);
+			Comparator<InnerClass> comparator = Comparator.comparing(InnerClass::getString);
 		}
 	}
 }
