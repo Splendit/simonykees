@@ -35,8 +35,6 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 public class UseComparatorMethodsAnalyzer {
 
-	private CastExpression parentCastExpression;
-
 	/**
 	 * 
 	 * @param lambda
@@ -51,6 +49,7 @@ public class UseComparatorMethodsAnalyzer {
 			return Optional.empty();
 		}
 
+		CastExpression parentCastExpression = null;
 		ASTNode outermostExpression = ASTNodeUtil.getOutermostParenthesizedExpression(lambda);
 		if (outermostExpression.getLocationInParent() == CastExpression.EXPRESSION_PROPERTY) {
 			parentCastExpression = (CastExpression) outermostExpression.getParent();
@@ -82,7 +81,13 @@ public class UseComparatorMethodsAnalyzer {
 			return Optional.empty();
 		}
 
-		return analyzeLambdaBody(lambdaParameterLeftHS, lambdaParameterRightHS, lambdaBody);
+		Optional<LambdaAnalysisResult> lambdaAnalysisResult = analyzeLambdaBody(lambdaParameterLeftHS,
+				lambdaParameterRightHS, lambdaBody);
+		if(lambdaAnalysisResult.isPresent()) {
+			LambdaAnalysisResult result = lambdaAnalysisResult.get();
+			result.setParentCastExpression(parentCastExpression);
+		}
+		return lambdaAnalysisResult;
 	}
 
 	Optional<LambdaAnalysisResult> analyzeLambdaBody(VariableDeclaration lambdaParameterLeftHS,
@@ -237,20 +242,17 @@ public class UseComparatorMethodsAnalyzer {
 	 * given lambda representing a {@link java.util.Comparator}.
 	 */
 	class LambdaAnalysisResult {
-		// Why don't you externalize this class?
+
 		private final VariableDeclaration lambdaParameterLeftHS;
 		private final boolean reversed;
 		private final IMethodBinding comparisonKeyMethodName;
-		private final CastExpression parentCastExpression;
+		private CastExpression parentCastExpression;
 
 		public LambdaAnalysisResult(VariableDeclaration lambdaParameterLeftHS,
 				boolean reversed) {
 			this.lambdaParameterLeftHS = lambdaParameterLeftHS;
 			this.comparisonKeyMethodName = null;
 			this.reversed = reversed;
-			// This is very confusing. Usually we pass the values as parameters in the constructor. 
-			this.parentCastExpression = UseComparatorMethodsAnalyzer.this.parentCastExpression;
-
 		}
 
 		public LambdaAnalysisResult(VariableDeclaration lambdaParameterLeftHS,
@@ -258,8 +260,6 @@ public class UseComparatorMethodsAnalyzer {
 			this.lambdaParameterLeftHS = lambdaParameterLeftHS;
 			this.comparisonKeyMethodName = comparisonKeyMethodName;
 			this.reversed = reversed;
-			// This is very confusing. Usually we pass the values as parameters in the constructor. 
-			this.parentCastExpression = UseComparatorMethodsAnalyzer.this.parentCastExpression;
 		}
 
 		boolean isReversed() {
@@ -290,6 +290,10 @@ public class UseComparatorMethodsAnalyzer {
 
 		Optional<CastExpression> getParentCastExpression() {
 			return Optional.ofNullable(parentCastExpression);
+		}
+
+		public void setParentCastExpression(CastExpression parentCastExpression) {
+			this.parentCastExpression = parentCastExpression;
 		}
 	}
 }
