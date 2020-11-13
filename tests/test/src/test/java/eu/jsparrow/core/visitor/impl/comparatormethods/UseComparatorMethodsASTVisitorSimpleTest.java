@@ -158,7 +158,7 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 	public void visit_ComparatorOfDequeOfIntegerReversed_shouldTransform() throws Exception {
 		fixture.addImport(java.util.Deque.class.getName());
 		String original = "Comparator<Deque<Integer>> comparator = (lhs, rhs) -> rhs.getFirst().compareTo(lhs.getFirst());";
-		String expected = "Comparator<Deque<Integer>> comparator = Comparator.comparingInt((Deque<Integer> lhs) -> lhs.getFirst()).reversed();";
+		String expected = "Comparator<Deque<Integer>> comparator = Comparator.comparingInt(Deque<Integer>::getFirst).reversed();";
 		assertChange(original, expected);
 	}
 
@@ -166,7 +166,7 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 	public void visit_ComparatorOfDequeOfStringReversed_shouldTransform() throws Exception {
 		fixture.addImport(java.util.Deque.class.getName());
 		String original = "Comparator<Deque<String>> comparator = (lhs, rhs) -> rhs.getFirst().compareTo(lhs.getFirst());";
-		String expected = "Comparator<Deque<String>> comparator=Comparator.comparing((Deque<String> lhs) -> lhs.getFirst()).reversed();";
+		String expected = "Comparator<Deque<String>> comparator=Comparator.comparing(Deque<String>::getFirst).reversed();";
 		assertChange(original, expected);
 	}
 
@@ -174,7 +174,7 @@ public class UseComparatorMethodsASTVisitorSimpleTest extends UsesSimpleJDTUnitF
 	public void visit_ComparatorOfObjectReversed_shouldTransform() throws Exception {
 		fixture.addImport(java.util.Deque.class.getName());
 		String original = "Comparator<Object> comparator = (o1, o2) -> o2.toString().compareTo(o1.toString());";
-		String expected = "Comparator<Object> comparator = Comparator.comparing((Object o1) -> o1.toString()).reversed();";
+		String expected = "Comparator<Object> comparator = Comparator.comparing(Object::toString).reversed();";
 		assertChange(original, expected);
 	}
 }

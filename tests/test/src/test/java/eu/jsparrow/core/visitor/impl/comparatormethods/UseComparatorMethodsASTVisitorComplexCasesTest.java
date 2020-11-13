@@ -62,7 +62,7 @@ public class UseComparatorMethodsASTVisitorComplexCasesTest extends UsesJDTUnitF
 				"	class TestClassWithTypeParameterSupplyingComparable<T extends Supplier<Integer>> {\n"
 				+ "		Comparator<T> comparatorOfT;\n"
 				+ "		void test() {\n"
-				+ "			comparatorOfT = Comparator.comparingInt((T x1) -> x1.get())\n"
+				+ "			comparatorOfT = Comparator.comparingInt(T::get)\n"
 				+ "				.reversed();\n"
 				+ "		}\n"
 				+ "	}";
@@ -113,7 +113,7 @@ public class UseComparatorMethodsASTVisitorComplexCasesTest extends UsesJDTUnitF
 				"	class TestClassWithTypeParameterSupplyingComparable<T extends Supplier<Integer>> {\n"
 				+ "		Comparator<T> comparatorOfT;\n"
 				+ "		void test() {\n"
-				+ "			comparatorOfT = Comparator.comparingInt((T x1) -> x1.get())\n"
+				+ "			comparatorOfT = Comparator.comparingInt(T::get)\n"
 				+ "				.reversed();\n"
 				+ "		}\n"
 				+ "	}\n"

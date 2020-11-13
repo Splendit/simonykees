@@ -232,11 +232,11 @@ public class TestUseComparatorMethodsRule {
 
 		void test() {
 			comparatorOfT = Comparator.comparingInt(T::get);
-			comparatorOfT = Comparator.comparingInt((T x1) -> x1.get())
+			comparatorOfT = Comparator.comparingInt(T::get)
 				.reversed();
 
 			comparatorOfT = Comparator.comparingInt(T::get);
-			comparatorOfT = Comparator.comparingInt((T x1) -> x1.get())
+			comparatorOfT = Comparator.comparingInt(T::get)
 				.reversed();
 
 			comparatorOfT = (Comparator<T>) Comparator.comparingInt((T x1) -> x1.get());
