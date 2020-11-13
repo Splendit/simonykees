@@ -148,16 +148,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 	@SuppressWarnings("unchecked")
 	private Type createTypeWithOptionalArguments(ITypeBinding typeBinding) {
 		AST ast = astRewrite.getAST();
-		Name typeName;
-		if(typeBinding.isTypeVariable()) {
-			String name = typeBinding.getName();
-			typeName = ast.newName(name);
-		} else {
-			ITypeBinding erasure = typeBinding.getErasure();
-			String erasureQualifiedName = erasure.getQualifiedName();
-			verifyImport(getCompilationUnit(), erasureQualifiedName);		
-			typeName = addImport(erasureQualifiedName);
-		}
+		Name typeName = createLambdaParameterTypeName(typeBinding, ast);
 		SimpleType erasureSimpleType = ast.newSimpleType(typeName);
 		ITypeBinding[] typeBindingArguments = typeBinding.getTypeArguments();
 		if (typeBindingArguments.length == 0) {
@@ -241,7 +232,8 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			MethodInvocation methodInvocation = (MethodInvocation) parent;
 			int argumentIndex = methodInvocation.arguments()
 				.indexOf(lambda);
-			IMethodBinding parentInvocationMethodBinding = methodInvocation.resolveMethodBinding().getMethodDeclaration();
+			IMethodBinding parentInvocationMethodBinding = methodInvocation.resolveMethodBinding()
+				.getMethodDeclaration();
 			ITypeBinding[] parameterTypes = parentInvocationMethodBinding.getParameterTypes();
 			int parameterIndex = Math.min(argumentIndex, parameterTypes.length - 1);
 			comparatorTypeBinding = parameterTypes[parameterIndex];
@@ -265,20 +257,23 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		AST ast = astRewrite.getAST();
 		ExpressionMethodReference methodReference = ast.newExpressionMethodReference();
 		methodReference.setName(ast.newSimpleName(comparisonKeyMethodName));
-
-		Name lambdaParameterTypeName;
-		ITypeBinding parameterType = lambdaParameterType.isParameterizedType() ? 
-				lambdaParameterType.getErasure() 
-				:lambdaParameterType;
-		if (lambdaParameterType.isLocal() || lambdaParameterType.isTypeVariable()) {
-			lambdaParameterTypeName = ast.newSimpleName(parameterType.getName());
-		} else {
-			String qualifiedName = parameterType.getQualifiedName();
-			verifyImport(getCompilationUnit(), qualifiedName);
-			lambdaParameterTypeName = addImport(qualifiedName);
-		}
+		Name lambdaParameterTypeName = createLambdaParameterTypeName(lambdaParameterType, ast);
 		methodReference.setExpression(lambdaParameterTypeName);
 		return methodReference;
+	}
+
+	private Name createLambdaParameterTypeName(ITypeBinding typeBinding, AST ast) {
+		Name typeName;
+		if (typeBinding.isTypeVariable() || typeBinding.isLocal()) {
+			String name = typeBinding.getName();
+			typeName = ast.newName(name);
+		} else {
+			ITypeBinding erasure = typeBinding.getErasure();
+			String erasureQualifiedName = erasure.getQualifiedName();
+			verifyImport(getCompilationUnit(), erasureQualifiedName);
+			typeName = addImport(erasureQualifiedName);
+		}
+		return typeName;
 	}
 
 	private Expression createLambdaExpression(Type explicitLambdaParameterType, String lambdaParameterIdentifier,
