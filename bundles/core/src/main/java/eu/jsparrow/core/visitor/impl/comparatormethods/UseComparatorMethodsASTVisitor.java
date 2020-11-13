@@ -27,7 +27,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
- * This visitor looks for lambda expressions which represent a *
+ * This visitor looks for lambda expressions which represent a
  * {@link java.util.Comparator} and have a certain structure, for example<br>
  * {@code  (u1, u2) -> u1.compareTo(u2) }<br>
  * or <br>
