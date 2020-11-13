@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
@@ -83,7 +82,7 @@ public class UseComparatorMethodsAnalyzer {
 
 		Optional<LambdaAnalysisResult> lambdaAnalysisResult = analyzeLambdaBody(lambdaParameterLeftHS,
 				lambdaParameterRightHS, lambdaBody);
-		if(lambdaAnalysisResult.isPresent()) {
+		if (lambdaAnalysisResult.isPresent()) {
 			LambdaAnalysisResult result = lambdaAnalysisResult.get();
 			result.setParentCastExpression(parentCastExpression);
 		}
@@ -235,65 +234,5 @@ public class UseComparatorMethodsAnalyzer {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Stores all informations which are necessary for the transformation of a
-	 * given lambda representing a {@link java.util.Comparator}.
-	 */
-	class LambdaAnalysisResult {
-
-		private final VariableDeclaration lambdaParameterLeftHS;
-		private final boolean reversed;
-		private final IMethodBinding comparisonKeyMethodName;
-		private CastExpression parentCastExpression;
-
-		public LambdaAnalysisResult(VariableDeclaration lambdaParameterLeftHS,
-				boolean reversed) {
-			this.lambdaParameterLeftHS = lambdaParameterLeftHS;
-			this.comparisonKeyMethodName = null;
-			this.reversed = reversed;
-		}
-
-		public LambdaAnalysisResult(VariableDeclaration lambdaParameterLeftHS,
-				IMethodBinding comparisonKeyMethodName, boolean reversed) {
-			this.lambdaParameterLeftHS = lambdaParameterLeftHS;
-			this.comparisonKeyMethodName = comparisonKeyMethodName;
-			this.reversed = reversed;
-		}
-
-		boolean isReversed() {
-			return reversed;
-		}
-
-		Optional<IMethodBinding> getComparisonKeyMethod() {
-			return Optional.ofNullable(comparisonKeyMethodName);
-		}
-
-		String getFirstLambdaParameterIdentifier() {
-			return lambdaParameterLeftHS.getName()
-				.getIdentifier();
-		}
-
-		Optional<Type> getExplicitLambdaParameterType() {
-			if (lambdaParameterLeftHS
-				.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
-				return Optional.of(((SingleVariableDeclaration) lambdaParameterLeftHS).getType());
-			}
-			return Optional.empty();
-		}
-
-		ITypeBinding getImplicitLambdaParameterType() {
-			return lambdaParameterLeftHS.resolveBinding()
-				.getType();
-		}
-
-		Optional<CastExpression> getParentCastExpression() {
-			return Optional.ofNullable(parentCastExpression);
-		}
-
-		public void setParentCastExpression(CastExpression parentCastExpression) {
-			this.parentCastExpression = parentCastExpression;
-		}
 	}
 }
