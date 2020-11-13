@@ -280,17 +280,4 @@ public class TestUseComparatorMethodsRule {
 			arrayList.sort((Integer x1, Integer x2) -> x1.compareTo(x2));
 		}
 	}
-
-	class TestComparatorForInnerClass {
-		class InnerClass {
-			String getString() {
-				return toString();
-			}
-		}
-
-		void test() {
-			Comparator<InnerClass> comparator = (lhs, rhs) -> lhs.getString()
-				.compareTo(rhs.getString());
-		}
-	}
 }

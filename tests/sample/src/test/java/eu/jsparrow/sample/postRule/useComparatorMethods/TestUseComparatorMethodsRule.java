@@ -268,16 +268,4 @@ public class TestUseComparatorMethodsRule {
 			arrayList.sort(Comparator.<Integer>naturalOrder());
 		}
 	}
-
-	class TestComparatorForInnerClass {
-		class InnerClass {
-			String getString() {
-				return toString();
-			}
-		}
-
-		void test() {
-			Comparator<InnerClass> comparator = Comparator.comparing(InnerClass::getString);
-		}
-	}
 }
