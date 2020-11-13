@@ -14,7 +14,7 @@ import eu.jsparrow.rules.common.Tag;
 /**
  * @see UseComparatorMethodsASTVisitor
  * 
- * @since 3.22.0
+ * @since 3.23.0
  *
  */
 public class UseComparatorMethodsRule

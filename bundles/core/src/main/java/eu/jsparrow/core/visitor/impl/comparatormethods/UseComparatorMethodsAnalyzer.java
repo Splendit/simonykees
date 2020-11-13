@@ -31,7 +31,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * The transformation can only be carried out if the {@link java.util.Optional}
  * is not empty.
  * 
- * @since 3.22.0
+ * @since 3.23.0
  */
 public class UseComparatorMethodsAnalyzer {
 

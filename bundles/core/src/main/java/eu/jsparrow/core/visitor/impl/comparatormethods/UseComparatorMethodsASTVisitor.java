@@ -61,7 +61,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * <p>
  *
  * 
- * @since 3.22.0
+ * @since 3.23.0
  */
 public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor {
 	static final String JAVA_LANG_COMPARABLE = java.lang.Comparable.class.getName();
