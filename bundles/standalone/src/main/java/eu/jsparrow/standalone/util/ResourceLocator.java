@@ -43,12 +43,18 @@ public class ResourceLocator {
 	 *         {@link Optional} if the resource cannot be found.
 	 */
 	public static Optional<File> findFile(String path) {
+		logger.debug("Locating resource '{}'", path); //$NON-NLS-1$
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
 		IPath iPathReport = new Path(path);
 		URL url = FileLocator.find(bundle, iPathReport, new HashMap<>());
+		if (url == null) {
+			logger.error("Unable to locate resource '{}'", path); //$NON-NLS-1$
+			return Optional.empty();
+		}
 		URL templateDirecotryUrl;
 		try {
 			templateDirecotryUrl = FileLocator.toFileURL(url);
+			logger.debug("Successfuly located resource at '{}'", templateDirecotryUrl); //$NON-NLS-1$
 		} catch (IOException e1) {
 			logger.error("Cannot convert the bundle resource to File URL", e1); //$NON-NLS-1$
 			return Optional.empty();
