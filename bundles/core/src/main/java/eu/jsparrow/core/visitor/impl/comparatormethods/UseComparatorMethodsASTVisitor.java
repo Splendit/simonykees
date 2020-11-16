@@ -106,7 +106,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			LambdaAnalysisResult analysisResult, IMethodBinding comparisonKeyMethod) {
 
 		String comparatorMethodName = getComparatorMethodName(comparisonKeyMethod);
-		MethodInvocation comparatorMethodInvocation = createComparatorMethodInvocation(comparatorMethodName);
+		MethodInvocation comparatorMethodInvocation = createComparatorMethodInvocation(comparatorMethodName, lambda);
 		@SuppressWarnings("unchecked")
 		List<Expression> arguments = comparatorMethodInvocation.arguments();
 		Expression comparatorMethodArgument = createComparatorMethodArgument(lambda, analysisResult,
@@ -141,17 +141,17 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 
 		ITypeBinding implicitLambdaParameterType = analysisResult.getImplicitLambdaParameterType();
 		if (analysisResult.isReversed()) {
-			Type methodReferenceType = createTypeWithOptionalArguments(implicitLambdaParameterType);
+			Type methodReferenceType = createTypeWithOptionalArguments(implicitLambdaParameterType, lambda);
 			return createTypeMethodReference(methodReferenceType, comparisonKeyMethod.getName());
 		}
 		return createExpressionMethodReference(implicitLambdaParameterType,
-				comparisonKeyMethod.getName());
+				comparisonKeyMethod.getName(), lambda);
 	}
 
 	@SuppressWarnings("unchecked")
-	private Type createTypeWithOptionalArguments(ITypeBinding typeBinding) {
-		AST ast = astRewrite.getAST();
-		Name typeName = createLambdaParameterTypeName(typeBinding, ast);
+	private Type createTypeWithOptionalArguments(ITypeBinding typeBinding, ASTNode context) {
+		AST ast = context.getAST();
+		Name typeName = createLambdaParameterTypeName(typeBinding, context);
 		SimpleType erasureSimpleType = ast.newSimpleType(typeName);
 		ITypeBinding[] typeBindingArguments = typeBinding.getTypeArguments();
 		if (typeBindingArguments.length == 0) {
@@ -160,7 +160,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		ParameterizedType parameterizedType = ast.newParameterizedType(erasureSimpleType);
 		List<Type> typeArguments = parameterizedType.typeArguments();
 		for (ITypeBinding typeBindingArgument : typeBindingArguments) {
-			typeArguments.add(createTypeWithOptionalArguments(typeBindingArgument));
+			typeArguments.add(createTypeWithOptionalArguments(typeBindingArgument, context));
 		}
 		return parameterizedType;
 	}
@@ -170,9 +170,9 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 
 		MethodInvocation comparatorMethodInvocation;
 		if (analysisResult.isReversed()) {
-			comparatorMethodInvocation = createComparatorMethodInvocation("reverseOrder"); //$NON-NLS-1$
+			comparatorMethodInvocation = createComparatorMethodInvocation("reverseOrder", lambda); //$NON-NLS-1$
 		} else {
-			comparatorMethodInvocation = createComparatorMethodInvocation("naturalOrder"); //$NON-NLS-1$
+			comparatorMethodInvocation = createComparatorMethodInvocation("naturalOrder", lambda); //$NON-NLS-1$
 		}
 		Type explicitLambdaParameterType = analysisResult.getExplicitLambdaParameterType()
 			.orElse(null);
@@ -211,7 +211,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 					.createCopyTarget(typeToCopy);
 			}
 		}
-		Name objectTypeName = addImport(java.lang.Object.class.getName());
+		Name objectTypeName = addImport(java.lang.Object.class.getName(), parentCastExpression);
 		return astRewrite.getAST()
 			.newSimpleType(objectTypeName);
 
@@ -256,11 +256,11 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 	}
 
 	private ExpressionMethodReference createExpressionMethodReference(ITypeBinding lambdaParameterType,
-			String comparisonKeyMethodName) {
-		AST ast = astRewrite.getAST();
+			String comparisonKeyMethodName, ASTNode context) {
+		AST ast = context.getAST();
 		ExpressionMethodReference methodReference = ast.newExpressionMethodReference();
 		methodReference.setName(ast.newSimpleName(comparisonKeyMethodName));
-		Name lambdaParameterTypeName = createLambdaParameterTypeName(lambdaParameterType, ast);
+		Name lambdaParameterTypeName = createLambdaParameterTypeName(lambdaParameterType, context);
 		methodReference.setExpression(lambdaParameterTypeName);
 		return methodReference;
 	}
@@ -273,7 +273,8 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		return methodReference;
 	}
 
-	private Name createLambdaParameterTypeName(ITypeBinding typeBinding, AST ast) {
+	private Name createLambdaParameterTypeName(ITypeBinding typeBinding, ASTNode context) {
+		AST ast = context.getAST();
 		Name typeName;
 		if (typeBinding.isTypeVariable() || typeBinding.isLocal()) {
 			String name = typeBinding.getName();
@@ -282,7 +283,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			ITypeBinding erasure = typeBinding.getErasure();
 			String erasureQualifiedName = erasure.getQualifiedName();
 			verifyImport(getCompilationUnit(), erasureQualifiedName);
-			typeName = addImport(erasureQualifiedName);
+			typeName = addImport(erasureQualifiedName, context);
 		}
 		return typeName;
 	}
@@ -321,11 +322,11 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		return "comparing"; //$NON-NLS-1$
 	}
 
-	private MethodInvocation createComparatorMethodInvocation(String methodName) {
-		AST ast = astRewrite.getAST();
+	private MethodInvocation createComparatorMethodInvocation(String methodName, ASTNode context) {
+		AST ast = context.getAST();
 		MethodInvocation methodInvocation = ast.newMethodInvocation();
 		methodInvocation.setName(ast.newSimpleName(methodName));
-		Name comparatorTypeName = addImport(JAVA_UTIL_COMPARATOR);
+		Name comparatorTypeName = addImport(JAVA_UTIL_COMPARATOR, context);
 		methodInvocation.setExpression(comparatorTypeName);
 		return methodInvocation;
 	}
