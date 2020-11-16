@@ -80,8 +80,9 @@ public class StandaloneConfig {
 	 *            path to the base directory of the project
 	 * @param yamlConfig
 	 *            the default yaml configuration file of the project
-	 * @param projectName
-	 *            name of the eclipse project to be created
+	 * @param selectedSources
+	 *            GLOB expressions matching the selected sources to be
+	 *            refactored. One expression per line.
 	 * @throws CoreException
 	 *             if the classpath entries cannot be added or the source files
 	 *             cannot be parsed
@@ -89,7 +90,8 @@ public class StandaloneConfig {
 	 *             if the project cannot be created
 	 */
 	public StandaloneConfig(IJavaProject javaProject, String path, YAMLConfig yamlConfig,
-			StandaloneStatisticsMetadata statisticsMetadata) throws CoreException, StandaloneException {
+			StandaloneStatisticsMetadata statisticsMetadata, String selectedSources)
+			throws CoreException, StandaloneException {
 
 		this.javaProject = javaProject;
 		this.projectName = javaProject.getProject()
@@ -97,7 +99,8 @@ public class StandaloneConfig {
 		this.path = path;
 		this.yamlConfig = yamlConfig;
 		this.statisticsMetadata = statisticsMetadata;
-		setUp();
+
+		setUp(selectedSources);
 	}
 
 	/**
@@ -106,9 +109,10 @@ public class StandaloneConfig {
 	 * @throws CoreException
 	 *             the source files cannot be parsed
 	 */
-	protected void setUp() throws CoreException {
+	protected void setUp(String selectedSources) throws CoreException {
 		List<ICompilationUnit> compilationUnits = findProjectCompilationUnits();
-		compilationUnitsProvider = new CompilationUnitProvider(compilationUnits, yamlConfig.getExcludes());
+		compilationUnitsProvider = new CompilationUnitProvider(compilationUnits, yamlConfig.getExcludes(),
+				selectedSources);
 
 		statisticsData = new StandaloneStatisticsData(compilationUnits.size(), projectName, statisticsMetadata,
 				refactoringPipeline);

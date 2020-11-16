@@ -86,6 +86,7 @@ public class MavenAdapterTest {
 		when(config.getProfile()).thenReturn(""); //$NON-NLS-1$
 		when(config.getRuleId()).thenReturn(Optional.empty());
 		when(config.getStatisticsMetadata()).thenReturn(statisticsMetadata);
+		when(config.getSelectedSources()).thenReturn("");
 
 		mavenAdapter.addInitialConfiguration(config); // $NON-NLS-1$
 
@@ -94,6 +95,7 @@ public class MavenAdapterTest {
 		verify(config).getLicense();
 		verify(config).getUrl();
 		verify(config).getProfile();
+		verify(config).getSelectedSources();
 	}
 
 	@Test

@@ -84,6 +84,22 @@ public class DemoMojo extends AbstractMojo {
 	private String license;
 
 	/**
+	 * Specify the glob expression patterns relative to the project root
+	 * directory for selecting the sources to refactor. Use line breaks to
+	 * specify multiple glob patterns. If not specified, all Java sources in the
+	 * project will be considered for refactoring. Examples:
+	 * <ul>
+	 * <li><code>"core/*"</code></li>
+	 * <li><code>"core/**"</code></li>
+	 * <li><code>"core/Application.java"</code></li>
+	 * <li><code>"core/Application.java \n service/Order.java"</code></li>
+	 * <li><code>"$(git diff-tree --no-commit-id --name-only -r HEAD)"</code></li>
+	 * </ul>
+	 */
+	@Parameter(defaultValue = "**", property = "selectedSources")
+	private String selectedSources;
+
+	/**
 	 * Specify the license server to use.
 	 */
 	@Parameter(property = "url")
@@ -114,7 +130,7 @@ public class DemoMojo extends AbstractMojo {
 			.toString() : startTime;
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
-				defaultConfiguration, statisticsMetadata, sendStatistics);
+				defaultConfiguration, statisticsMetadata, sendStatistics, selectedSources);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);

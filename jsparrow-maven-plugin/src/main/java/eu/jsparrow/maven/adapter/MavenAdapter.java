@@ -20,6 +20,7 @@ import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_SEND;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_START_TIME;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.USER_DIR;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.USE_DEFAULT_CONFIGURATION;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.SELECTED_SOURCES;
 
 import java.io.File;
 import java.util.HashMap;
@@ -160,6 +161,7 @@ public class MavenAdapter {
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 		configuration.put(LICENSE_KEY, config.getLicense());
 		configuration.put(AGENT_URL, config.getUrl());
+		configuration.put(SELECTED_SOURCES, config.getSelectedSources());
 
 		StatisticsMetadata statisticsMetadata = config.getStatisticsMetadata();
 		if (statisticsMetadata != null && statisticsMetadata.isValid()) {
