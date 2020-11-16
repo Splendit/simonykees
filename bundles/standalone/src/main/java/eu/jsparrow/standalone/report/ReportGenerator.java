@@ -33,7 +33,7 @@ public class ReportGenerator {
 	/**
 	 * The template is taken from {@linkplain https://jsparrow.github.io/statistics/statistics.html}.
 	 */
-	private static final String REPORT_FILE_NAME = "jSparrowReport.html"; //$NON-NLS-1$
+	public static final String REPORT_FILE_NAME = "jSparrowReport.html"; //$NON-NLS-1$
 
 	/**
 	 * Generates a HTML report document with the given data.

@@ -2,6 +2,7 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -237,9 +238,11 @@ public class RefactoringInvoker {
 		String jsonPath = String.join(File.separator, reportOutputPath, "jSparrowReport.json"); //$NON-NLS-1$
 		JsonUtil.writeJSON(metricData, jsonPath);
 
-		File templateFolder = ResourceLocator.findFile("report") //$NON-NLS-1$
+		String reportFilePath = Paths.get("report", ReportGenerator.REPORT_FILE_NAME) //$NON-NLS-1$
+			.toString();
+		File templateFile = ResourceLocator.findFile(reportFilePath)
 			.orElse(null);
-		if (templateFolder == null) {
+		if (templateFile == null) {
 			logger.warn("The jSparrow Report cannot be generated. The report template cannot be located."); //$NON-NLS-1$
 			return;
 		}
@@ -248,7 +251,7 @@ public class RefactoringInvoker {
 		ReportData report = ReportDataUtil.createReportData(jSparrowData, LocalDate.now(), rules);
 		ReportGenerator reportGenerator = new ReportGenerator();
 		try {
-			reportGenerator.writeReport(report, reportOutputPath, templateFolder);
+			reportGenerator.writeReport(report, reportOutputPath, templateFile.getParentFile());
 		} catch (IOException e) {
 			logger.error("Cannot generate the html report", e); //$NON-NLS-1$
 		}
