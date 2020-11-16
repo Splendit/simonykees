@@ -29,17 +29,23 @@ public class AllRulesTest extends AbstractRulesTest {
 
 	public static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.allRules";
 	public static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/allRules";
-	
+
 	public static Stream<Arguments> data() throws Exception {
 		List<Arguments> data = new ArrayList<>();
 
 		try (DirectoryStream<Path> directoryStream = Files
 			.newDirectoryStream(Paths.get(RulesTestUtil.PRERULE_DIRECTORY), RulesTestUtil.RULE_SUFFIX)) {
 			for (Path preRulePath : directoryStream) {
-				Path postRulePath = Paths.get(POSTRULE_DIRECTORY, preRulePath.getFileName()
-					.toString());
-				data.add(Arguments.of(preRulePath.getFileName()
-					.toString(), preRulePath, postRulePath ));
+				/*
+				 * FIXME remove this filter as soon as SIM-1826 is solved.
+				 */
+				if (!"TestUseComparatorMethodsRule.java".equals(preRulePath.getFileName()
+					.toString())) {
+					Path postRulePath = Paths.get(POSTRULE_DIRECTORY, preRulePath.getFileName()
+						.toString());
+					data.add(Arguments.of(preRulePath.getFileName()
+						.toString(), preRulePath, postRulePath));
+				}
 			}
 		}
 		return data.stream();

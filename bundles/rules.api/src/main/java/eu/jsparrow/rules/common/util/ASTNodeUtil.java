@@ -602,5 +602,23 @@ public class ASTNodeUtil {
 		return methodDeclaration != null && methodDeclaration.isGenericMethod();
 	}
 
+	/**
+	 * Finds the outermost ancestor of type {@link ParenthesizedExpression}. If
+	 * the given expression is not a child of a {@link ParenthesizedExpression}
+	 * then it is returned immediately. Otherwise, the parents are traversed
+	 * bottom-up until the first first node which is not a child of a
+	 * {@link ParenthesizedExpression} is found.
+	 * 
+	 * @param expression
+	 *            current expression
+	 * @return the node computed as described above.
+	 */
+	public static ASTNode getOutermostParenthesizedExpression(Expression expression) {
+		ASTNode child = expression;
+		while (child.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
+			child = child.getParent();
+		}
+		return child;
+	}
 
 }
