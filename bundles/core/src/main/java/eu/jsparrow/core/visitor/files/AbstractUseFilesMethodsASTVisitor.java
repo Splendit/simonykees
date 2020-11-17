@@ -106,12 +106,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		if (!ClassRelationUtil.isContentOfType(typeBinding, bufferedIOQualifiedTypeName)) {
 			return null;
 		}
-
-		Expression initializer = fragment.getInitializer();
-		if (!ClassRelationUtil.isNewInstanceCreationOf(initializer, bufferedIOQualifiedTypeName)) {
-			return null;
-		}
-		return (ClassInstanceCreation) initializer;
+		return FilesUtils.findClassInstanceCreationAsInitializer(fragment, bufferedIOQualifiedTypeName).orElse(null);
 	}
 
 	private Expression findBufferedIOArgument(ClassInstanceCreation classInstanceCreation) {

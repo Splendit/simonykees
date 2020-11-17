@@ -3,12 +3,15 @@ package eu.jsparrow.core.visitor.files;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class FilesUtils {
 
@@ -40,6 +43,16 @@ public class FilesUtils {
 				.getIdentifier()
 				.equals((bufferedIOArg).getIdentifier()))
 			.findFirst();
+	}
+
+	static Optional<ClassInstanceCreation> findClassInstanceCreationAsInitializer(VariableDeclarationFragment fragment,
+			String qualifiedTypeName) {
+
+		Expression initializer = fragment.getInitializer();
+		if (ClassRelationUtil.isNewInstanceCreationOf(initializer, qualifiedTypeName)) {
+			return Optional.of((ClassInstanceCreation) initializer);
+		}
+		return Optional.empty();
 	}
 
 }

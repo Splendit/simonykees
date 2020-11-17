@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.files;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -69,6 +70,9 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		if (fileIOResource == null) {
 			return true;
 		}
+
+		ClassInstanceCreation bufferedWriterInstanceCreation = FilesUtils.findClassInstanceCreationAsInitializer(fileIOResource, java.io.BufferedWriter.class.getName())
+			.orElse(null);
 		return true;
 	}
 }
