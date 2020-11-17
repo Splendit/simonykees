@@ -1,7 +1,5 @@
 package eu.jsparrow.core.visitor.files;
 
-import java.util.Optional;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -34,7 +32,8 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		Expression methodInvocationExpression = methodInvocation.getExpression();
 		if (methodInvocationExpression == null ||
 				!ClassRelationUtil.isContentOfType(methodInvocationExpression.resolveTypeBinding(),
-				java.io.BufferedWriter.class.getName()) ||
+						java.io.BufferedWriter.class.getName())
+				||
 				methodInvocationExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return true;
 		}
@@ -52,18 +51,24 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		Block block = (Block) expressionStatement.getParent();
 
-		TryStatement tryStatement = null;
-		if (block.getLocationInParent() == TryStatement.BODY_PROPERTY) {
-			tryStatement = (TryStatement) block.getParent();
-			VariableDeclarationFragment fileIOResource = FilesUtils
-				.findVariableDeclarationFragmentAsResource(methodExpressionName,
-						tryStatement)
-				.orElse(null);
-			if (fileIOResource == null) {
-				return true;
-			}
+		if (block.getLocationInParent() != TryStatement.BODY_PROPERTY) {
+			return true;
+		}
+
+		if (block.statements()
+			.size() != 1) {
+			return true;
+		}
+
+		TryStatement tryStatement = (TryStatement) block.getParent();
+
+		VariableDeclarationFragment fileIOResource = FilesUtils
+			.findVariableDeclarationFragmentAsResource(methodExpressionName, tryStatement)
+			.orElse(null);
+
+		if (fileIOResource == null) {
+			return true;
 		}
 		return true;
 	}
-
 }
