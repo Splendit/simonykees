@@ -77,7 +77,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
 		if (bufferedIOArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION
 				&& newBufferedIOArgumentsAnalyzer.analyzeInitializer((ClassInstanceCreation) bufferedIOArgument)) {
-			
+
 			List<Expression> pathExpressions = newBufferedIOArgumentsAnalyzer.getPathExpressions();
 			TransformationData transformationData = newBufferedIOArgumentsAnalyzer.getCharset()
 				.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet))
@@ -86,7 +86,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 
 		} else if (isDeclarationInTWRHeader(fragment, bufferedIOArgument)) {
 			createTransformationDataUsingFileIOResource(fragment, newBufferedIO,
-					bufferedIOArgument).ifPresent(this::transform);
+					(SimpleName) bufferedIOArgument).ifPresent(this::transform);
 		}
 
 		return true;
@@ -138,12 +138,12 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 
 	private Optional<TransformationData> createTransformationDataUsingFileIOResource(
 			VariableDeclarationFragment fragment,
-			ClassInstanceCreation newBufferedIO, Expression bufferedIOArg) {
+			ClassInstanceCreation newBufferedIO, SimpleName bufferedIOArg) {
 		VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment
 			.getParent();
 		TryStatement tryStatement = (TryStatement) declarationExpression.getParent();
 
-		VariableDeclarationFragment fileIOResource = findFileIOResource(bufferedIOArg,
+		VariableDeclarationFragment fileIOResource = FilesUtils.findVariableDeclarationFragmentAsResource(bufferedIOArg,
 				tryStatement).orElse(null);
 		if (fileIOResource == null) {
 			return Optional.empty();
@@ -165,20 +165,6 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 			.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet, fileIOResource))
 			.orElse(new TransformationData(newBufferedIO, pathExpressions, fileIOResource));
 		return Optional.of(transformationData);
-	}
-
-	private Optional<VariableDeclarationFragment> findFileIOResource(Expression bufferedIOArg,
-			TryStatement tryStatement) {
-		List<VariableDeclarationExpression> resources = ASTNodeUtil
-			.convertToTypedList(tryStatement.resources(), VariableDeclarationExpression.class);
-		return resources.stream()
-			.flatMap(resource -> ASTNodeUtil
-				.convertToTypedList(resource.fragments(), VariableDeclarationFragment.class)
-				.stream())
-			.filter(resource -> resource.getName()
-				.getIdentifier()
-				.equals(((SimpleName) bufferedIOArg).getIdentifier()))
-			.findFirst();
 	}
 
 	private boolean hasUsagesOn(Block body, SimpleName fileIOName) {

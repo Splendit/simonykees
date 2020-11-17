@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.files;
 
+import java.util.Optional;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -7,6 +9,8 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -48,6 +52,18 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		Block block = (Block) expressionStatement.getParent();
 
+		TryStatement tryStatement = null;
+		if (block.getLocationInParent() == TryStatement.BODY_PROPERTY) {
+			tryStatement = (TryStatement) block.getParent();
+			VariableDeclarationFragment fileIOResource = FilesUtils
+				.findVariableDeclarationFragmentAsResource(methodExpressionName,
+						tryStatement)
+				.orElse(null);
+			if (fileIOResource == null) {
+				return true;
+			}
+		}
 		return true;
 	}
+
 }
