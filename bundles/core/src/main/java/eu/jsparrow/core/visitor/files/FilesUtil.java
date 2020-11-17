@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -55,4 +56,32 @@ class FilesUtil {
 		return Optional.empty();
 	}
 
+	/**
+	 * 
+	 * @param classInstanceCreation
+	 *            expecting a {@link ClassInstanceCreation} of either
+	 *            {@link java.io.BufferedReader} or
+	 *            {@link java.io.BufferedWriter}
+	 * @param fileIOQualifiedTypeName
+	 *            expecting the qualified name of either
+	 *            {@link java.io.FileReader} or {@link java.io.FileWriter}
+	 * @return an {@link java.util.Optional} storing the argument of the class
+	 *         instance creation if it has exactly one argument of the required
+	 *         type, otherwise an empty {@link java.util.Optional}.
+	 */
+	static Optional<Expression> findBufferedIOArgument(ClassInstanceCreation classInstanceCreation,
+			String fileIOQualifiedTypeName) {
+
+		List<Expression> newBufferedIOArgs = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(),
+				Expression.class);
+		if (newBufferedIOArgs.size() != 1) {
+			return Optional.empty();
+		}
+		Expression bufferedIOArg = newBufferedIOArgs.get(0);
+		ITypeBinding firstArgType = bufferedIOArg.resolveTypeBinding();
+		if (!ClassRelationUtil.isContentOfType(firstArgType, fileIOQualifiedTypeName)) {
+			return Optional.empty();
+		}
+		return Optional.of(bufferedIOArg);
+	}
 }

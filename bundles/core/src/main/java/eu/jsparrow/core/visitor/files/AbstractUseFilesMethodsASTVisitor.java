@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
@@ -69,7 +68,8 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		if (newBufferedIO == null) {
 			return true;
 		}
-		Expression bufferedIOArgument = findBufferedIOArgument(newBufferedIO);
+		Expression bufferedIOArgument = FilesUtil.findBufferedIOArgument(newBufferedIO, fileIOQualifiedTypeName)
+			.orElse(null);
 		if (bufferedIOArgument == null) {
 			return true;
 		}
@@ -106,22 +106,8 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		if (!ClassRelationUtil.isContentOfType(typeBinding, bufferedIOQualifiedTypeName)) {
 			return null;
 		}
-		return FilesUtil.findClassInstanceCreationAsInitializer(fragment, bufferedIOQualifiedTypeName).orElse(null);
-	}
-
-	private Expression findBufferedIOArgument(ClassInstanceCreation classInstanceCreation) {
-
-		List<Expression> newBufferedIOArgs = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(),
-				Expression.class);
-		if (newBufferedIOArgs.size() != 1) {
-			return null;
-		}
-		Expression bufferedIOArg = newBufferedIOArgs.get(0);
-		ITypeBinding firstArgType = bufferedIOArg.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(firstArgType, fileIOQualifiedTypeName)) {
-			return null;
-		}
-		return bufferedIOArg;
+		return FilesUtil.findClassInstanceCreationAsInitializer(fragment, bufferedIOQualifiedTypeName)
+			.orElse(null);
 	}
 
 	private boolean isDeclarationInTWRHeader(VariableDeclarationFragment fragment, Expression bufferedIOArg) {
@@ -139,7 +125,8 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		TryStatement tryStatement = (TryStatement) declarationExpression.getParent();
 
 		VariableDeclarationFragment fileIOResource = FilesUtil.findVariableDeclarationFragmentAsResource(bufferedIOArg,
-				tryStatement).orElse(null);
+				tryStatement)
+			.orElse(null);
 		if (fileIOResource == null) {
 			return Optional.empty();
 		}
