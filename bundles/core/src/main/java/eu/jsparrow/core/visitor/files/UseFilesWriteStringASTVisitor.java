@@ -63,7 +63,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 		TryStatement tryStatement = (TryStatement) block.getParent();
 
-		VariableDeclarationFragment fileIOResource = FilesUtils
+		VariableDeclarationFragment fileIOResource = FilesUtil
 			.findVariableDeclarationFragmentAsResource(methodExpressionName, tryStatement)
 			.orElse(null);
 
@@ -71,7 +71,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			return true;
 		}
 
-		ClassInstanceCreation bufferedWriterInstanceCreation = FilesUtils.findClassInstanceCreationAsInitializer(fileIOResource, java.io.BufferedWriter.class.getName())
+		ClassInstanceCreation bufferedWriterInstanceCreation = FilesUtil.findClassInstanceCreationAsInitializer(fileIOResource, java.io.BufferedWriter.class.getName())
 			.orElse(null);
 		return true;
 	}

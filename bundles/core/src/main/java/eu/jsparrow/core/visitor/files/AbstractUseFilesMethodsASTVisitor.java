@@ -106,7 +106,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		if (!ClassRelationUtil.isContentOfType(typeBinding, bufferedIOQualifiedTypeName)) {
 			return null;
 		}
-		return FilesUtils.findClassInstanceCreationAsInitializer(fragment, bufferedIOQualifiedTypeName).orElse(null);
+		return FilesUtil.findClassInstanceCreationAsInitializer(fragment, bufferedIOQualifiedTypeName).orElse(null);
 	}
 
 	private Expression findBufferedIOArgument(ClassInstanceCreation classInstanceCreation) {
@@ -138,7 +138,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 			.getParent();
 		TryStatement tryStatement = (TryStatement) declarationExpression.getParent();
 
-		VariableDeclarationFragment fileIOResource = FilesUtils.findVariableDeclarationFragmentAsResource(bufferedIOArg,
+		VariableDeclarationFragment fileIOResource = FilesUtil.findVariableDeclarationFragmentAsResource(bufferedIOArg,
 				tryStatement).orElse(null);
 		if (fileIOResource == null) {
 			return Optional.empty();

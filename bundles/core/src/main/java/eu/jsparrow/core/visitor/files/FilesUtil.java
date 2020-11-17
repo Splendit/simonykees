@@ -13,9 +13,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
-public class FilesUtils {
+class FilesUtil {
 
-	private FilesUtils() {
+	private FilesUtil() {
 		/*
 		 * Hide default constructor.
 		 */

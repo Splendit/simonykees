@@ -53,7 +53,7 @@ class FileIOAnalyzer {
 		if (fragments.size() != 1) {
 			return false;
 		}
-		ClassInstanceCreation fileIOCreation = FilesUtils
+		ClassInstanceCreation fileIOCreation = FilesUtil
 			.findClassInstanceCreationAsInitializer(fragments.get(0), fileIOClassQualifiedName)
 			.orElse(null);
 
