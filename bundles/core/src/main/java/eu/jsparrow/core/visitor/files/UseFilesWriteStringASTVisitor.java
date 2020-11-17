@@ -1,15 +1,12 @@
 package eu.jsparrow.core.visitor.files;
 
-import java.util.Optional;
-
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.internal.compiler.ast.TryStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -27,35 +24,30 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		
-		Expression stringArgument = extractStringArgument(methodInvocation).orElse(null);
-		if(stringArgument == null || methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+		if (!write.isEquivalentTo(methodInvocation.resolveMethodBinding())) {
 			return true;
 		}
-		ExpressionStatement expressionStatement = (ExpressionStatement)methodInvocation.getParent();
-		if(expressionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+		Expression methodInvocationExpression = methodInvocation.getExpression();
+		if (methodInvocationExpression == null ||
+				!ClassRelationUtil.isContentOfType(methodInvocationExpression.resolveTypeBinding(),
+				java.io.BufferedWriter.class.getName()) ||
+				methodInvocationExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return true;
 		}
-		Block block = (Block)expressionStatement.getParent();
+		SimpleName methodExpressionName = (SimpleName) methodInvocationExpression;
+
+		Expression writeStringArgument = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
+			.get(0);
+
+		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return true;
+		}
+		ExpressionStatement expressionStatement = (ExpressionStatement) methodInvocation.getParent();
+		if (expressionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return true;
+		}
+		Block block = (Block) expressionStatement.getParent();
 
 		return true;
 	}
-
-	private Optional<Expression> extractStringArgument(MethodInvocation methodInvocation) {
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		if (!write.isEquivalentTo(methodBinding)) {
-			return Optional.empty();
-		}
-
-		ITypeBinding methodExpressionTypeBinding = methodInvocation.getExpression()
-			.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(methodExpressionTypeBinding, java.io.BufferedWriter.class.getName())) {
-			return Optional.empty();
-		}
-		
-		Expression stringArgument = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class).get(0);
-	
-		return Optional.of(stringArgument);
-	}
-
 }
