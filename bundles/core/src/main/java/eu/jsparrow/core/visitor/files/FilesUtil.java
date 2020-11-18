@@ -32,7 +32,7 @@ class FilesUtil {
 	 *         {@link SimpleName} if such a resource has been found, otherwise
 	 *         an empty {@link Optional}.
 	 */
-	static Optional<VariableDeclarationFragment> findVariableDeclarationFragmentAsResource(SimpleName bufferedIOArg,
+	static Optional<VariableDeclarationFragment> findVariableDeclarationFragmentAsResource(SimpleName variableName,
 			TryStatement tryStatement) {
 		List<VariableDeclarationExpression> resources = ASTNodeUtil
 			.convertToTypedList(tryStatement.resources(), VariableDeclarationExpression.class);
@@ -42,7 +42,7 @@ class FilesUtil {
 				.stream())
 			.filter(resource -> resource.getName()
 				.getIdentifier()
-				.equals((bufferedIOArg).getIdentifier()))
+				.equals((variableName).getIdentifier()))
 			.findFirst();
 	}
 
