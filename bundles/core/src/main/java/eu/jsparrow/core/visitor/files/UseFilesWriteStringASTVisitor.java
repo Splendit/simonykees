@@ -14,9 +14,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
-import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
-public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
+/**
+ * 
+ * @since 3.24.0
+ *
+ */
+public class UseFilesWriteStringASTVisitor extends AbstractUseFilesMethodsASTVisitor {
 
 	private final SignatureData write = new SignatureData(java.io.Writer.class, "write", java.lang.String.class); //$NON-NLS-1$
 
