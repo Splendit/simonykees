@@ -33,7 +33,6 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  */
 abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractUseFilesMethodsASTVisitor {
 	private static final String FILES_QUALIFIED_NAME = java.nio.file.Files.class.getName();
-	private static final String PATHS_QUALIFIED_NAME = java.nio.file.Paths.class.getName();
 	private static final String CHARSET_QUALIFIED_NAME = java.nio.charset.Charset.class.getName();
 
 	private final String bufferedIOQualifiedTypeName;
@@ -54,7 +53,6 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractUseFi
 		if (!continueVisiting) {
 			return false;
 		}
-		verifyImport(compilationUnit, PATHS_QUALIFIED_NAME);
 		verifyImport(compilationUnit, FILES_QUALIFIED_NAME);
 		verifyImport(compilationUnit, CHARSET_QUALIFIED_NAME);
 		return continueVisiting;
@@ -174,16 +172,7 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractUseFi
 		Expression charset = transformationData.getCharSet()
 			.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
 			.orElse(createDefaultCharSetExpression(transformationData.getBufferedIOInstanceCreation()));
-		MethodInvocation pathsGet = ast.newMethodInvocation();
-		Name pathsTypeName = addImport(PATHS_QUALIFIED_NAME, transformationData.getBufferedIOInstanceCreation());
-		pathsGet.setExpression(pathsTypeName);
-		pathsGet.setName(ast.newSimpleName("get")); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Expression> pathsGetParameters = pathsGet.arguments();
-		List<Expression> pathExpressions = transformationData.getPathExpressions();
-		pathExpressions
-			.forEach(pathArgument -> pathsGetParameters.add((Expression) astRewrite.createCopyTarget(pathArgument)));
-
+		MethodInvocation pathsGet = createPathsGetInvocation(transformationData, ast);
 		List<Expression> arguments = new ArrayList<>();
 		arguments.add(pathsGet);
 		arguments.add(charset);
