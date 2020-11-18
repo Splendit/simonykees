@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.files;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -19,6 +20,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String PATHS_QUALIFIED_NAME = java.nio.file.Paths.class.getName();
+	private static final String CHARSET_QUALIFIED_NAME = java.nio.charset.Charset.class.getName();
+	static final String FILES_QUALIFIED_NAME = java.nio.file.Files.class.getName();
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
@@ -27,6 +30,8 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 			return false;
 		}
 		verifyImport(compilationUnit, PATHS_QUALIFIED_NAME);
+		verifyImport(compilationUnit, CHARSET_QUALIFIED_NAME);
+		verifyImport(compilationUnit, FILES_QUALIFIED_NAME);
 		return continueVisiting;
 	}
 
@@ -43,4 +48,12 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		return pathsGet;
 	}
 
+	protected Expression createDefaultCharSetExpression(ASTNode context) {
+		AST ast = context.getAST();
+		MethodInvocation defaultCharset = ast.newMethodInvocation();
+		Name charsetTypeName = addImport(CHARSET_QUALIFIED_NAME, context);
+		defaultCharset.setExpression(charsetTypeName);
+		defaultCharset.setName(ast.newSimpleName("defaultCharset")); //$NON-NLS-1$
+		return defaultCharset;
+	}
 }

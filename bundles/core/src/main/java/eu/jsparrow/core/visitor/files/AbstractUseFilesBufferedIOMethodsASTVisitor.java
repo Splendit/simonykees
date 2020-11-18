@@ -32,8 +32,6 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
  *
  */
 abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractUseFilesMethodsASTVisitor {
-	private static final String FILES_QUALIFIED_NAME = java.nio.file.Files.class.getName();
-	private static final String CHARSET_QUALIFIED_NAME = java.nio.charset.Charset.class.getName();
 
 	private final String bufferedIOQualifiedTypeName;
 	private final String fileIOQualifiedTypeName;
@@ -53,8 +51,7 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractUseFi
 		if (!continueVisiting) {
 			return false;
 		}
-		verifyImport(compilationUnit, FILES_QUALIFIED_NAME);
-		verifyImport(compilationUnit, CHARSET_QUALIFIED_NAME);
+		
 		return continueVisiting;
 	}
 
@@ -156,15 +153,6 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractUseFi
 		MethodInvocation filesNewBufferedIO = createFilesNewBufferedIOMethodInvocation(transformationData);
 		astRewrite.replace(bufferedIOInstanceCreation, filesNewBufferedIO, null);
 		onRewrite();
-	}
-
-	private Expression createDefaultCharSetExpression(ASTNode context) {
-		AST ast = context.getAST();
-		MethodInvocation defaultCharset = ast.newMethodInvocation();
-		Name charsetTypeName = addImport(CHARSET_QUALIFIED_NAME, context);
-		defaultCharset.setExpression(charsetTypeName);
-		defaultCharset.setName(ast.newSimpleName("defaultCharset")); //$NON-NLS-1$
-		return defaultCharset;
 	}
 
 	private MethodInvocation createFilesNewBufferedIOMethodInvocation(TransformationData transformationData) {
