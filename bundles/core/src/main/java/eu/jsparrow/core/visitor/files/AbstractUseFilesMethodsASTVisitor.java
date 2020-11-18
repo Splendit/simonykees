@@ -78,11 +78,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 		if (bufferedIOArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION
 				&& newBufferedIOArgumentsAnalyzer.analyzeInitializer((ClassInstanceCreation) bufferedIOArgument)) {
 
-			List<Expression> pathExpressions = newBufferedIOArgumentsAnalyzer.getPathExpressions();
-			TransformationData transformationData = newBufferedIOArgumentsAnalyzer.getCharset()
-				.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet))
-				.orElse(new TransformationData(newBufferedIO, pathExpressions));
-			transform(transformationData);
+			transform(newBufferedIOArgumentsAnalyzer.createTransformationData(newBufferedIO));
 
 		} else if (isDeclarationInTWRHeader(fragment, bufferedIOArgument)) {
 			createTransformationDataUsingFileIOResource(fragment, newBufferedIO,

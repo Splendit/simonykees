@@ -82,6 +82,15 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		Expression bufferedWriterArgument = FilesUtil
 			.findBufferedIOArgument(bufferedWriterInstanceCreation, java.io.FileWriter.class.getName())
 			.orElse(null);
+
+		TransformationData transformationData = null;
+		NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
+		if (bufferedWriterArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION
+				&& newBufferedIOArgumentsAnalyzer.analyzeInitializer((ClassInstanceCreation) bufferedWriterArgument)) {
+			transformationData = newBufferedIOArgumentsAnalyzer
+				.createTransformationData(bufferedWriterInstanceCreation);
+		}
+
 		return true;
 	}
 }
