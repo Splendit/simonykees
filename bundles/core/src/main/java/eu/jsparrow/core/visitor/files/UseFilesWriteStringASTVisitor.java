@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.files;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -22,19 +23,27 @@ import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
  * 
  * @since 3.24.0
  *
  */
-public class UseFilesWriteStringASTVisitor extends AbstractUseFilesMethodsASTVisitor {
+public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	private final SignatureData write = new SignatureData(java.io.Writer.class, "write", java.lang.String.class); //$NON-NLS-1$
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
-		return super.visit(compilationUnit);
+		boolean continueVisiting = super.visit(compilationUnit);
+		if (!continueVisiting) {
+			return false;
+		}
+		verifyImport(compilationUnit, FilesUtil.PATHS_QUALIFIED_NAME);
+		verifyImport(compilationUnit, FilesUtil.CHARSET_QUALIFIED_NAME);
+		verifyImport(compilationUnit, FilesUtil.FILES_QUALIFIED_NAME);
+		return continueVisiting;
 	}
 
 	@Override
@@ -116,8 +125,8 @@ public class UseFilesWriteStringASTVisitor extends AbstractUseFilesMethodsASTVis
 			astRewrite.replace(methodInvocation, writeStringMethodInvocation, null);
 			ListRewrite resourceRewriter = astRewrite.getListRewrite(tryStatement, TryStatement.RESOURCES2_PROPERTY);
 			List<ASTNode> resources = ASTNodeUtil.convertToTypedList(tryStatement.resources(), ASTNode.class);
-			for(ASTNode resurce : resources) {
-				if(resurce == parentVariableDeclarationExpression)
+			for (ASTNode resurce : resources) {
+				if (resurce == parentVariableDeclarationExpression)
 					resourceRewriter.remove(resurce, null);
 			}
 			onRewrite();
@@ -128,15 +137,32 @@ public class UseFilesWriteStringASTVisitor extends AbstractUseFilesMethodsASTVis
 	private MethodInvocation createFilesWriteStringMethodInvocation(TransformationData transformationData,
 			Expression writeStringArgument) {
 		AST ast = astRewrite.getAST();
+		Name pathsTypeName = addImport(FilesUtil.PATHS_QUALIFIED_NAME,
+				transformationData.getBufferedIOInstanceCreation());
+		List<Expression> pathsGetArguments = transformationData.getPathExpressions()
+			.stream()
+			.map(pathExpression -> (Expression) astRewrite.createCopyTarget(pathExpression))
+			.collect(Collectors.toList());
+		MethodInvocation pathsGet = NodeBuilder.newMethodInvocation(ast, pathsTypeName,
+				ast.newSimpleName(FilesUtil.GET), pathsGetArguments);
+
+		Expression writeStringArgumentCopy = (Expression) astRewrite.createCopyTarget(writeStringArgument);
+
 		Expression charset = transformationData.getCharSet()
 			.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
-			.orElse(createDefaultCharSetExpression(transformationData.getBufferedIOInstanceCreation()));
-		MethodInvocation pathsGet = createPathsGetInvocation(transformationData, ast);
+			.orElse(null);
+		if (charset == null) {
+			Name charsetTypeName = addImport(FilesUtil.CHARSET_QUALIFIED_NAME,
+					transformationData.getBufferedIOInstanceCreation());
+			charset = NodeBuilder.newMethodInvocation(ast, charsetTypeName, FilesUtil.DEFAULT_CHARSET);
+		}
+
 		List<Expression> arguments = new ArrayList<>();
 		arguments.add(pathsGet);
-		arguments.add((Expression) astRewrite.createCopyTarget(writeStringArgument));
+		arguments.add(writeStringArgumentCopy);
 		arguments.add(charset);
-		Name filesTypeName = addImport(FILES_QUALIFIED_NAME, transformationData.getBufferedIOInstanceCreation());
+		Name filesTypeName = addImport(FilesUtil.FILES_QUALIFIED_NAME,
+				transformationData.getBufferedIOInstanceCreation());
 		return NodeBuilder.newMethodInvocation(ast, filesTypeName,
 				ast.newSimpleName("writeString"), arguments); //$NON-NLS-1$
 	}
