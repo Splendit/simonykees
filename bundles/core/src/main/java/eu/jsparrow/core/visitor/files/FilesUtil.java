@@ -89,4 +89,23 @@ class FilesUtil {
 		}
 		return Optional.of(bufferedIOArg);
 	}
+
+	/**
+	 * 
+	 * @return If the variable declared by the given
+	 *         {@link VariableDeclarationFragment} has the specified type and is
+	 *         also initialized with a constructor of the specified type, then
+	 *         the corresponding {@link ClassInstanceCreation} is returned.
+	 *         Otherwise, null is returned.
+	 */
+	static Optional<ClassInstanceCreation> findBufferIOInstanceCreationAsInitializer(
+			VariableDeclarationFragment fragment, String bufferedIOQualifiedTypeName) {
+		SimpleName name = fragment.getName();
+		ITypeBinding typeBinding = name.resolveTypeBinding();
+		if (!ClassRelationUtil.isContentOfType(typeBinding, bufferedIOQualifiedTypeName)) {
+			return Optional.empty();
+		}
+		return FilesUtil.findClassInstanceCreationAsInitializer(fragment, bufferedIOQualifiedTypeName);
+	}
+
 }

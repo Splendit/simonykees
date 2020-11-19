@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -20,7 +19,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
@@ -62,10 +60,13 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
 
-		ClassInstanceCreation newBufferedIO = findBufferIOInstanceCreationAsInitializer(fragment);
+		ClassInstanceCreation newBufferedIO = FilesUtil.findBufferIOInstanceCreationAsInitializer(fragment,
+				bufferedIOQualifiedTypeName)
+			.orElse(null);
 		if (newBufferedIO == null) {
 			return true;
 		}
+
 		Expression bufferedIOArgument = FilesUtil.findBufferedIOArgument(newBufferedIO, fileIOQualifiedTypeName)
 			.orElse(null);
 		if (bufferedIOArgument == null) {
@@ -84,24 +85,6 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 		}
 
 		return true;
-	}
-
-	/**
-	 * 
-	 * @return If the variable declared by the given
-	 *         {@link VariableDeclarationFragment} has the specified type and is
-	 *         also initialized with a constructor of the specified type, then
-	 *         the corresponding {@link ClassInstanceCreation} is returned.
-	 *         Otherwise, null is returned.
-	 */
-	private ClassInstanceCreation findBufferIOInstanceCreationAsInitializer(VariableDeclarationFragment fragment) {
-		SimpleName name = fragment.getName();
-		ITypeBinding typeBinding = name.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(typeBinding, bufferedIOQualifiedTypeName)) {
-			return null;
-		}
-		return FilesUtil.findClassInstanceCreationAsInitializer(fragment, bufferedIOQualifiedTypeName)
-			.orElse(null);
 	}
 
 	private boolean isDeclarationInTWRHeader(VariableDeclarationFragment fragment, Expression bufferedIOArg) {
