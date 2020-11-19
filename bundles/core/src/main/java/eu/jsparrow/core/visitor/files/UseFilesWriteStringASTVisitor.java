@@ -10,19 +10,15 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
@@ -31,8 +27,6 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  *
  */
 public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
-
-	private final SignatureData write = new SignatureData(java.io.Writer.class, "write", java.lang.String.class); //$NON-NLS-1$
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
@@ -48,90 +42,71 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		if (!write.isEquivalentTo(methodInvocation.resolveMethodBinding())) {
-			return true;
-		}
-		Expression methodInvocationExpression = methodInvocation.getExpression();
-		if (methodInvocationExpression == null ||
-				!ClassRelationUtil.isContentOfType(methodInvocationExpression.resolveTypeBinding(),
-						java.io.BufferedWriter.class.getName())
-				||
-				methodInvocationExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return true;
-		}
-		SimpleName methodExpressionName = (SimpleName) methodInvocationExpression;
-
-		Expression writeStringArgument = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
-			.get(0);
-
-		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return true;
-		}
-		ExpressionStatement expressionStatement = (ExpressionStatement) methodInvocation.getParent();
-		if (expressionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return true;
-		}
-		Block block = (Block) expressionStatement.getParent();
-
-		if (block.getLocationInParent() != TryStatement.BODY_PROPERTY) {
+		UseFilesWriteStringAnalyzer analyzer = new UseFilesWriteStringAnalyzer();
+		if (!analyzer.analyze(methodInvocation, getCompilationUnit())) {
 			return true;
 		}
 
-		if (block.statements()
-			.size() != 1) {
-			return true;
-		}
-
-		TryStatement tryStatement = (TryStatement) block.getParent();
-
-		VariableDeclarationFragment fileIOResource = FilesUtil
-			.findVariableDeclarationFragmentAsResource(methodExpressionName, tryStatement)
-			.orElse(null);
-
-		if (fileIOResource == null) {
-			return true;
-		}
-
-		VariableDeclarationExpression parentVariableDeclarationExpression = (VariableDeclarationExpression) fileIOResource
-			.getParent();
-		if (parentVariableDeclarationExpression.fragments()
-			.size() != 1) {
-			return true;
-		}
-
-		ClassInstanceCreation bufferedWriterInstanceCreation = FilesUtil
-			.findClassInstanceCreationAsInitializer(fileIOResource, java.io.BufferedWriter.class.getName())
-			.orElse(null);
-
-		if (bufferedWriterInstanceCreation == null) {
-			return true;
-		}
-
-		Expression bufferedWriterArgument = FilesUtil
-			.findBufferedIOArgument(bufferedWriterInstanceCreation, java.io.FileWriter.class.getName())
-			.orElse(null);
-		if (bufferedWriterArgument == null) {
-			return true;
-		}
-
-		TransformationData transformationData = null;
-		NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
-		if (bufferedWriterArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION
-				&& newBufferedIOArgumentsAnalyzer.analyzeInitializer((ClassInstanceCreation) bufferedWriterArgument)) {
-			transformationData = newBufferedIOArgumentsAnalyzer
-				.createTransformationData(bufferedWriterInstanceCreation);
-			MethodInvocation writeStringMethodInvocation = createFilesWriteStringMethodInvocation(transformationData,
-					writeStringArgument);
-			astRewrite.replace(methodInvocation, writeStringMethodInvocation, null);
-			ListRewrite resourceRewriter = astRewrite.getListRewrite(tryStatement, TryStatement.RESOURCES2_PROPERTY);
-			List<ASTNode> resources = ASTNodeUtil.convertToTypedList(tryStatement.resources(), ASTNode.class);
-			for (ASTNode resurce : resources) {
-				if (resurce == parentVariableDeclarationExpression)
-					resourceRewriter.remove(resurce, null);
+		TransformationData transformationData;
+		if (analyzer.bufferedWriterArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
+			ClassInstanceCreation writerInstanceCreation = (ClassInstanceCreation) analyzer.bufferedWriterArgument;
+			if (newBufferedIOArgumentsAnalyzer.analyzeInitializer(writerInstanceCreation)) {
+				transformationData = newBufferedIOArgumentsAnalyzer
+					.createTransformationData(analyzer.bufferedWriterInstanceCreation);
+				transform(methodInvocation, analyzer.writeStringArgument, analyzer.fragmentDeclaringBufferedWriter,
+						transformationData);
 			}
-			onRewrite();
+		} else if (analyzer.bufferedWriterArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
+
 		}
 		return true;
+	}
+
+	private void transform(MethodInvocation methodInvocation, Expression writeStringArgument,
+			VariableDeclarationFragment fragmentDeclaringBufferedWriter, TransformationData transformationData) {
+
+		MethodInvocation writeStringMethodInvocation = createFilesWriteStringMethodInvocation(transformationData,
+				writeStringArgument);
+		astRewrite.replace(methodInvocation, writeStringMethodInvocation, null);
+		removeFragmentDeclaringBufferedWriter(fragmentDeclaringBufferedWriter);
+		onRewrite();
+	}
+
+	private void removeFragmentDeclaringBufferedWriter(VariableDeclarationFragment fragmentDeclaringBufferedWriter) {
+		if (fragmentDeclaringBufferedWriter.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY &&
+				fragmentDeclaringBufferedWriter.getParent()
+					.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
+			VariableDeclarationExpression parentVariableDeclarationExpression = (VariableDeclarationExpression) fragmentDeclaringBufferedWriter
+				.getParent();
+			TryStatement tryStatement = (TryStatement) parentVariableDeclarationExpression.getParent();
+			if (parentVariableDeclarationExpression.fragments()
+				.size() == 1) {
+				ListRewrite resourceRewriter = astRewrite.getListRewrite(tryStatement,
+						TryStatement.RESOURCES2_PROPERTY);
+				resourceRewriter.remove(parentVariableDeclarationExpression, null);
+			} else {
+				ListRewrite fragmentsRewriter = astRewrite.getListRewrite(parentVariableDeclarationExpression,
+						VariableDeclarationExpression.FRAGMENTS_PROPERTY);
+				fragmentsRewriter.remove(fragmentDeclaringBufferedWriter, null);
+			}
+		} else if (fragmentDeclaringBufferedWriter
+			.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY
+				&& fragmentDeclaringBufferedWriter.getParent()
+					.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
+			VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) fragmentDeclaringBufferedWriter
+				.getParent();
+			Block block = (Block) variableDeclarationStatement.getParent();
+			if (variableDeclarationStatement.fragments()
+				.size() == 1) {
+				ListRewrite statementsRewriter = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+				statementsRewriter.remove(variableDeclarationStatement, null);
+			} else {
+				ListRewrite fragmentsRewriter = astRewrite.getListRewrite(variableDeclarationStatement,
+						VariableDeclarationExpression.FRAGMENTS_PROPERTY);
+				fragmentsRewriter.remove(fragmentDeclaringBufferedWriter, null);
+			}
+		}
 	}
 
 	private MethodInvocation createFilesWriteStringMethodInvocation(TransformationData transformationData,
