@@ -2,24 +2,24 @@ package eu.jsparrow.core.visitor.files;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
 /**
  * 
@@ -58,7 +58,14 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 						transformationData);
 			}
 		} else if (analyzer.bufferedWriterArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-
+			SimpleName writerVariableName = (SimpleName) analyzer.bufferedWriterArgument;
+			transformationData = createTransformationDataUsingFileIOResource(analyzer.bufferedWriterInstanceCreation,
+					writerVariableName, analyzer.tryStatement, java.io.FileWriter.class.getName())
+						.orElse(null);
+			if (transformationData != null) {
+				transform(methodInvocation, analyzer.writeStringArgument, analyzer.fragmentDeclaringBufferedWriter,
+						transformationData);
+			}
 		}
 		return true;
 	}
@@ -69,44 +76,10 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		MethodInvocation writeStringMethodInvocation = createFilesWriteStringMethodInvocation(transformationData,
 				writeStringArgument);
 		astRewrite.replace(methodInvocation, writeStringMethodInvocation, null);
-		removeFragmentDeclaringBufferedWriter(fragmentDeclaringBufferedWriter);
+		astRewrite.remove(fragmentDeclaringBufferedWriter.getParent(), null);
+		transformationData.getFileIOResource()
+			.ifPresent(resource -> astRewrite.remove(resource.getParent(), null));
 		onRewrite();
-	}
-
-	private void removeFragmentDeclaringBufferedWriter(VariableDeclarationFragment fragmentDeclaringBufferedWriter) {
-		if (fragmentDeclaringBufferedWriter.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY &&
-				fragmentDeclaringBufferedWriter.getParent()
-					.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
-			VariableDeclarationExpression parentVariableDeclarationExpression = (VariableDeclarationExpression) fragmentDeclaringBufferedWriter
-				.getParent();
-			TryStatement tryStatement = (TryStatement) parentVariableDeclarationExpression.getParent();
-			if (parentVariableDeclarationExpression.fragments()
-				.size() == 1) {
-				ListRewrite resourceRewriter = astRewrite.getListRewrite(tryStatement,
-						TryStatement.RESOURCES2_PROPERTY);
-				resourceRewriter.remove(parentVariableDeclarationExpression, null);
-			} else {
-				ListRewrite fragmentsRewriter = astRewrite.getListRewrite(parentVariableDeclarationExpression,
-						VariableDeclarationExpression.FRAGMENTS_PROPERTY);
-				fragmentsRewriter.remove(fragmentDeclaringBufferedWriter, null);
-			}
-		} else if (fragmentDeclaringBufferedWriter
-			.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY
-				&& fragmentDeclaringBufferedWriter.getParent()
-					.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
-			VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) fragmentDeclaringBufferedWriter
-				.getParent();
-			Block block = (Block) variableDeclarationStatement.getParent();
-			if (variableDeclarationStatement.fragments()
-				.size() == 1) {
-				ListRewrite statementsRewriter = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-				statementsRewriter.remove(variableDeclarationStatement, null);
-			} else {
-				ListRewrite fragmentsRewriter = astRewrite.getListRewrite(variableDeclarationStatement,
-						VariableDeclarationExpression.FRAGMENTS_PROPERTY);
-				fragmentsRewriter.remove(fragmentDeclaringBufferedWriter, null);
-			}
-		}
 	}
 
 	private MethodInvocation createFilesWriteStringMethodInvocation(TransformationData transformationData,
@@ -140,5 +113,36 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 				transformationData.getBufferedIOInstanceCreation());
 		return NodeBuilder.newMethodInvocation(ast, filesTypeName,
 				ast.newSimpleName("writeString"), arguments); //$NON-NLS-1$
+	}
+
+	static Optional<TransformationData> createTransformationDataUsingFileIOResource(
+			ClassInstanceCreation newBufferedIO, SimpleName bufferedIOArg, TryStatement tryStatement,
+			String fileIOQualifiedTypeName) {
+		VariableDeclarationFragment fileIOResource = FilesUtil.findVariableDeclarationFragmentAsResource(bufferedIOArg,
+				tryStatement)
+			.orElse(null);
+		if (fileIOResource == null) {
+			return Optional.empty();
+		}
+
+		FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(fileIOQualifiedTypeName);
+		if (!fileIOAnalyzer.analyzeFileIO((VariableDeclarationExpression) fileIOResource.getParent())) {
+			return Optional.empty();
+		}
+
+		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fileIOResource.getName());
+		tryStatement.accept(visitor);
+		List<SimpleName> usages = visitor.getUsages();
+		usages.remove(fileIOResource.getName());
+		usages.remove(bufferedIOArg);
+		if (!usages.isEmpty()) {
+			return Optional.empty();
+		}
+
+		List<Expression> pathExpressions = fileIOAnalyzer.getPathExpressions();
+		TransformationData transformationData = fileIOAnalyzer.getCharset()
+			.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet, fileIOResource))
+			.orElse(new TransformationData(newBufferedIO, pathExpressions, fileIOResource));
+		return Optional.of(transformationData);
 	}
 }

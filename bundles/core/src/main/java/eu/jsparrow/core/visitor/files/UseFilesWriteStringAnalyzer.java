@@ -100,6 +100,10 @@ public class UseFilesWriteStringAnalyzer {
 
 		parentVariableDeclarationExpression = (VariableDeclarationExpression) fragmentDeclaringBufferedWriter
 			.getParent();
+		
+		if(parentVariableDeclarationExpression.fragments().size() != 1) {
+			return false;
+		}
 
 		return parentVariableDeclarationExpression.getParent() == tryStatement;
 	}

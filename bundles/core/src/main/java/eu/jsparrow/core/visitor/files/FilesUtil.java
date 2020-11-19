@@ -37,7 +37,8 @@ class FilesUtil {
 	 *         {@link SimpleName} if such a resource has been found, otherwise
 	 *         an empty {@link Optional}.
 	 */
-	static Optional<VariableDeclarationFragment> findVariableDeclarationFragmentAsResource(SimpleName variableName,
+	static Optional<VariableDeclarationFragment> findVariableDeclarationFragmentAsResource(
+			SimpleName variableName,
 			TryStatement tryStatement) {
 		List<VariableDeclarationExpression> resources = ASTNodeUtil
 			.convertToTypedList(tryStatement.resources(), VariableDeclarationExpression.class);
