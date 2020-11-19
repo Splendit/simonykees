@@ -115,3 +115,6 @@ EOF
 echo
 echo "Execution example:"
 echo "mvn jsparrow:refactor -DdefaultConfiguration"
+echo
+echo "Example without adding dependencies:"
+echo "mvn eu.jsparrow:jsparrow-maven-plugin:${MVN_VERSION}:refactor -DdefaultConfiguration"

@@ -1,12 +1,20 @@
 package eu.jsparrow.standalone;
 
+import java.io.File;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaModelException;
@@ -26,11 +34,14 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
 public class CompilationUnitProvider {
 
 	private List<ICompilationUnit> compilationUnits;
+	private static final String GLOB_ALL = "glob:**"; //$NON-NLS-1$
 
 	private YAMLExcludes excludes;
 
 	private Set<String> usedExcludedPackages = new HashSet<>();
 	private Set<String> usedExcludedClasses = new HashSet<>();
+	private List<PathMatcher> selectedSourceMatchers;
+	private String selectedSources;
 
 	private static final Logger logger = LoggerFactory.getLogger(CompilationUnitProvider.class);
 
@@ -45,10 +56,24 @@ public class CompilationUnitProvider {
 	 * @param excludes
 	 *            an instance of {@link YAMLExcludes} representing the modules,
 	 *            packages and classes that should be excluded from refactoring.
+	 * @param selectedSources
+	 *            glob pattern matchers for specifying the sources to be
+	 *            refactored. Use line breaks to separate multiple patterns.
 	 */
-	public CompilationUnitProvider(List<ICompilationUnit> compilationUnits, YAMLExcludes excludes) {
+	public CompilationUnitProvider(List<ICompilationUnit> compilationUnits, YAMLExcludes excludes,
+			String selectedSources) {
 		this.compilationUnits = compilationUnits;
 		this.excludes = excludes;
+		this.selectedSources = selectedSources;
+		String[] sources = selectedSources.split(System.lineSeparator());
+		this.selectedSourceMatchers = Arrays.asList(sources)
+			.stream()
+			.map(String::trim)
+			.filter(pattern -> !pattern.isEmpty())
+			.map(source -> String.join(File.separator, GLOB_ALL, source))
+			.map(pattern -> FileSystems.getDefault()
+				.getPathMatcher(pattern))
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -59,25 +84,42 @@ public class CompilationUnitProvider {
 	 */
 	public List<ICompilationUnit> getFilteredCompilationUnits() {
 
-		if (null == excludes) {
-			return compilationUnits;
-		}
+		String humanReadableSelectedSources = this.selectedSources == null || this.selectedSourceMatchers.isEmpty()
+				? "none" //$NON-NLS-1$
+				: this.selectedSources.replaceAll(System.lineSeparator(), File.pathSeparator);
+		logger.info("Selected sources: {}.", humanReadableSelectedSources); //$NON-NLS-1$
 
 		Collector<CharSequence, ?, String> collector = Collectors.joining(","); //$NON-NLS-1$
-
-		List<String> excludedPackages = excludes.getExcludePackages();
+		List<String> excludedPackages = Optional.ofNullable(excludes)
+			.map(YAMLExcludes::getExcludePackages)
+			.orElse(Collections.emptyList());
 		String logInfo = excludedPackages.stream()
 			.collect(collector);
 		logger.debug("Excluded packages: {} ", logInfo); //$NON-NLS-1$
 
-		List<String> exludedClasses = excludes.getExcludeClasses();
+		List<String> exludedClasses = Optional.ofNullable(excludes)
+			.map(YAMLExcludes::getExcludeClasses)
+			.orElse(Collections.emptyList());
 		logInfo = exludedClasses.stream()
 			.collect(collector);
 		logger.debug("Excluded classes: {} ", logInfo); //$NON-NLS-1$
 
 		return compilationUnits.stream()
+			.filter(this::isSelected)
 			.filter(compilationUnit -> isIncludedForRefactoring(compilationUnit, excludedPackages, exludedClasses))
 			.collect(Collectors.toList());
+	}
+
+	private boolean isSelected(ICompilationUnit compilationUnit) {
+		if (selectedSourceMatchers.isEmpty()) {
+			return false;
+		}
+		IPath compUnitPath = compilationUnit.getPath();
+		IPath iPath = compUnitPath.makeRelative();
+		File file = iPath.toFile();
+		Path path = file.toPath();
+		return this.selectedSourceMatchers.stream()
+			.anyMatch(matcher -> matcher.matches(path));
 	}
 
 	private boolean isIncludedForRefactoring(ICompilationUnit compUnit, List<String> exludedPackages,

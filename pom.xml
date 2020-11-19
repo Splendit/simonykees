@@ -5,7 +5,7 @@
 
 	<groupId>at.splendit</groupId>
 	<artifactId>eu.jsparrow</artifactId>
-	<version>3.22.0-SNAPSHOT</version>
+	<version>3.23.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
 	<description>jSparrow Parent</description>
@@ -132,6 +132,7 @@
 		<maven.release.version>2.5.3</maven.release.version>
 		<maven.resources.version>3.0.2</maven.resources.version>
 		<proguard.plugin.version>2.0.14</proguard.plugin.version>
+		<proguard.base.version>6.0.3</proguard.base.version>
 		<sonar.plugin.version>3.4.0.905</sonar.plugin.version>
 		<jacoco.plugin.version>0.8.3</jacoco.plugin.version>
 
@@ -265,7 +266,7 @@
 			<plugin>
 				<groupId>eu.jsparrow</groupId>
 				<artifactId>jsparrow-maven-plugin</artifactId>
-				<version>2.19.0</version>
+				<version>3.0.0</version>
 			</plugin>
 
 			<plugin>

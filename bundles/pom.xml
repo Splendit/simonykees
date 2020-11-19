@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>eu.jsparrow</artifactId>
-		<version>3.22.0-SNAPSHOT</version>
+		<version>3.23.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>bundles</artifactId>
@@ -64,7 +64,7 @@
 						<dependency>
 							<groupId>net.sf.proguard</groupId>
 							<artifactId>proguard-base</artifactId>
-							<version>6.0.3</version>
+							<version>${proguard.base.version}</version>
 							<scope>runtime</scope>
 						</dependency>
 					</dependencies>

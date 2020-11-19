@@ -85,15 +85,16 @@ public class UseSecureRandomASTVisitor extends AbstractAddImportASTVisitor {
 					Block.STATEMENTS_PROPERTY);
 			statementListRewrite.insertAfter(setSeedInvocationStatement, randomConstructionStatement, null);
 		}
-		astRewrite.replace(analyzer.getRandomExpressionToReplace(), getSecureRandomInstanceCreation(), null);
+		Expression expression = analyzer.getRandomExpressionToReplace();
+		astRewrite.replace(analyzer.getRandomExpressionToReplace(), getSecureRandomInstanceCreation(expression), null);
 		onRewrite();
 	}
 
-	private ClassInstanceCreation getSecureRandomInstanceCreation() {
+	private ClassInstanceCreation getSecureRandomInstanceCreation(ASTNode context) {
 
 		CompilationUnit compilationUnit = getCompilationUnit();
 		AST ast = compilationUnit.getAST();
-		Name secureRandomName = addImport(SECURE_RANDOM_QUALIFIED_NAME);
+		Name secureRandomName = addImport(SECURE_RANDOM_QUALIFIED_NAME, context);
 		SimpleType secureRandomType = ast.newSimpleType(secureRandomName);
 		ClassInstanceCreation secureRandomInstanceCreation = ast.newClassInstanceCreation();
 		secureRandomInstanceCreation.setType(secureRandomType);

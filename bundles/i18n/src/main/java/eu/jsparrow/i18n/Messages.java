@@ -553,6 +553,8 @@ public class Messages extends NLS {
 	public static String UseSecureRandomRule_name;
 	public static String UseCollectionsSingletonListRule_description;
 	public static String UseCollectionsSingletonListRule_name;
+	public static String UseComparatorMethodsRule_description;
+	public static String UseComparatorMethodsRule_name;
 	public static String UseFilesBufferedReaderRule_description;
 	public static String UseFilesBufferedReaderRule_name;
 	public static String UseFilesBufferedWriterRule_description;
