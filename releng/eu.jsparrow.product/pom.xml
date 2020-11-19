@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>releng</artifactId>
-		<version>3.23.0-SNAPSHOT</version>
+		<version>3.24.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>eu.jsparrow.product</artifactId>
