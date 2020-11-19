@@ -2,6 +2,7 @@ package eu.jsparrow.maven.mojo;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -58,6 +59,12 @@ public class RefactorMojo extends AbstractMojo {
 	private File configFileOverride;
 
 	/**
+	 * Specify an Eclipse XML formatter file to be used by the CodeFormatterRule
+	 */
+	@Parameter(property = "formatter")
+	private File formatterFile;
+
+	/**
 	 * Selected profile. Overrides the settings in the configuration file.
 	 */
 	@Parameter(defaultValue = "", property = "profile")
@@ -76,6 +83,22 @@ public class RefactorMojo extends AbstractMojo {
 	private String license;
 
 	/**
+	 * Specify the glob expression patterns relative to the project root
+	 * directory for selecting the sources to refactor. Use line breaks to
+	 * specify multiple glob patterns. If not specified, all Java sources in the
+	 * project will be considered for refactoring. Examples:
+	 * <ul>
+	 * <li><code>"core/*"</code></li>
+	 * <li><code>"core/**"</code></li>
+	 * <li><code>"core/Application.java"</code></li>
+	 * <li><code>"core/Application.java \n service/Order.java"</code></li>
+	 * <li><code>"$(git diff-tree --no-commit-id --name-only -r HEAD)"</code></li>
+	 * </ul>
+	 */
+	@Parameter(defaultValue = "**", property = "selectedSources")
+	private String selectedSources;
+
+	/**
 	 * Specify the license server to use.
 	 */
 	@Parameter(property = "url")
@@ -84,10 +107,10 @@ public class RefactorMojo extends AbstractMojo {
 	@Parameter(property = "startTime")
 	private String startTime;
 
-	@Parameter(property = "repoOwner")
+	@Parameter(defaultValue = "${project.groupId}", property = "repoOwner")
 	private String repoOwner;
 
-	@Parameter(property = "repoName")
+	@Parameter(defaultValue = "${project.name}", property = "repoName")
 	private String repoName;
 
 	@Parameter(property = "sendStatistics")
@@ -102,9 +125,11 @@ public class RefactorMojo extends AbstractMojo {
 		}
 
 		String mode = StandaloneMode.REFACTOR.name();
-		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(startTime, repoOwner, repoName);
-		MavenParameters parameters = new MavenParameters(mode, license, url, profile, defaultConfiguration,
-				statisticsMetadata, sendStatistics);
+		String start = startTime == null ? Instant.now()
+				.toString() : startTime;
+		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);
+		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
+				defaultConfiguration, statisticsMetadata, sendStatistics, selectedSources);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);
@@ -115,7 +140,7 @@ public class RefactorMojo extends AbstractMojo {
 
 		try {
 			WorkingDirectory workingDirectory = mavenAdapter.setUpConfiguration(parameters, projects,
-					configFileOverride, fallbackConfigFile, proxies);
+					configFileOverride, fallbackConfigFile, formatterFile, proxies);
 			addShutdownHook(bundleStarter, workingDirectory, mavenAdapter.isJsparrowRunningFlag());
 			bundleStarter.runStandalone(mavenAdapter.getConfiguration());
 		} catch (BundleException | InterruptedException e1) {

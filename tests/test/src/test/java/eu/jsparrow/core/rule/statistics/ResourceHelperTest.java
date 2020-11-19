@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.util;
+package eu.jsparrow.core.rule.statistics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -8,9 +8,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import eu.jsparrow.core.statistic.RuleDocumentationURLGeneratorUtil;
+
+
 public class ResourceHelperTest {
 
-	@SuppressWarnings("nls")
     public static Stream<Arguments> urls() throws Throwable
     {
         return Stream.of(Arguments.of("ArithmethicAssignment","https://jsparrow.github.io/rules/arithmethic-assignment.html"),
@@ -72,7 +74,7 @@ public class ResourceHelperTest {
 	@ParameterizedTest(name = "Run {index}: RuleId={0}, Result={1}")
 	@MethodSource("urls")
 	public void testTransformation(String ruleId, String expected) {
-		String result = ResourceHelper.generateLinkToDocumentation("https://jsparrow.github.io/rules/", ruleId);
+		String result = RuleDocumentationURLGeneratorUtil.generateLinkToDocumentation(ruleId);
 		assertEquals(expected, result);
 	}
 }

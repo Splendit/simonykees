@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>bundles</artifactId>
-		<version>3.22.0-SNAPSHOT</version>
+		<version>3.23.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>eu.jsparrow.standalone</artifactId>
@@ -119,6 +119,21 @@
 									<artifactId>snakeyaml</artifactId>
 									<version>${snakeyaml.version}</version>
 								</item>
+								<dependency>
+									<groupId>com.sun.activation</groupId>
+									<artifactId>javax.activation</artifactId>
+									<version>1.2.0</version>
+								</dependency>
+								<dependency>
+									<groupId>javax.xml.bind</groupId>
+									<artifactId>jaxb-api</artifactId>
+									<version>2.4.0-b180830.0359</version>
+								</dependency>
+								<dependency>
+									<groupId>com.sun.xml.bind</groupId>
+									<artifactId>jaxb-osgi</artifactId>
+									<version>2.4.0-b180830.0438</version>
+								</dependency>
 							</artifactItems>
 							<outputDirectory>lib</outputDirectory>
 							<stripVersion>true</stripVersion>

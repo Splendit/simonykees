@@ -93,7 +93,7 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	private String javaVersion;
 	// allowed method names
 	@SuppressWarnings("nls")
-	private List<String> collectionNonModifingMethods = Arrays.asList(
+	private List<String> collectionNonModifyingMethods = Arrays.asList(
 			// Collection
 
 			"contains", "containsAll", "equals", "hashCode", "isEmpty", "iterator", "parallelStream", "size",
@@ -216,7 +216,7 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 				String methodName = methodInvocationNode.getName()
 					.getIdentifier();
 
-				if (!collectionNonModifingMethods.contains(methodName)) {
+				if (!collectionNonModifyingMethods.contains(methodName)) {
 					excludedNames.add(expressionName);
 				}
 			} else if (methodInvocationNode.arguments() != null && !methodInvocationNode.arguments()
@@ -320,7 +320,7 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	 * @return new {@link MethodInvocation}
 	 */
 	private MethodInvocation createNewMethodInvocation(Expression initializer, String methodNameString) {
-		Name collectionsClassName = addImport(JAVA_UTIL_COLLECTIONS);
+		Name collectionsClassName = addImport(JAVA_UTIL_COLLECTIONS, initializer);
 		SimpleName methodName = astRewrite.getAST()
 			.newSimpleName(methodNameString);
 

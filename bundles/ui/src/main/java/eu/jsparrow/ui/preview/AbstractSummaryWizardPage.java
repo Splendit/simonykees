@@ -50,13 +50,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
+import eu.jsparrow.core.statistic.DurationFormatUtil;
 import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.PartialMatchContentProposalProvider;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.comparator.SortableViewerComparator;
-import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.AbstractSummaryWizardPageModel;
 import eu.jsparrow.ui.preview.model.summary.FileViewerFilter;
@@ -334,7 +334,8 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 
 	private void initializeHeaderDataBindings(DataBindingContext bindingContext) {
 		IConverter convertRunDuration = IConverter.create(Long.class, String.class,
-				x -> DurationFormatUtil.formatRunDuration((Long) x));
+				x -> String.format(Messages.DurationFormatUtil_RunDuration,
+						DurationFormatUtil.formatRunDuration((Long) x)));
 		IObservableValue<String> observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
 			.observe(labelExecutionTime);
 		IObservableValue<Object> executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$

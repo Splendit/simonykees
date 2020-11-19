@@ -1,14 +1,12 @@
 package eu.jsparrow.maven.adapter;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.apache.maven.project.MavenProject;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import eu.jsparrow.maven.util.MavenProjectUtil;
 
@@ -16,9 +14,6 @@ import eu.jsparrow.maven.util.MavenProjectUtil;
 public class MavenProjectUtilTest {
 
 	private MavenProject project;
-
-	@Rule
-	public TemporaryFolder directory = new TemporaryFolder();
 
 	@Before
 	public void setUp() throws Exception {
@@ -33,7 +28,7 @@ public class MavenProjectUtilTest {
 		when(project.getArtifactId()).thenReturn("artifact.id");
 
 		String actualValue = MavenProjectUtil.findProjectIdentifier(project);
-		assertTrue(expectedProjectId.equals(actualValue));
+		assertEquals(expectedProjectId, actualValue);
 
 	}
 

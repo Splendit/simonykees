@@ -18,13 +18,13 @@ import eu.jsparrow.rules.common.Tag;
  *
  */
 public class UseFilesBufferedReaderRule extends RefactoringRuleImpl<UseFilesBufferedReaderASTVisitor> {
-	
+
 	public UseFilesBufferedReaderRule() {
 		this.id = "UseFilesBufferedReader"; //$NON-NLS-1$
 		this.visitorClass = UseFilesBufferedReaderASTVisitor.class;
 		this.ruleDescription = new RuleDescription(Messages.UseFilesBufferedReaderRule_name,
 				Messages.UseFilesBufferedReaderRule_description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.PERFORMANCE));
+				Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.PERFORMANCE, Tag.IO_OPERATIONS));
 	}
 
 	@Override

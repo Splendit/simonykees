@@ -148,7 +148,7 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 
 	private void replaceWithStreamOf(MethodInvocation parent, List<Expression> arguments) {
 		AST ast = parent.getAST();
-		Expression expression = addImport(STREAM_QUALIFIED_NAME);
+		Expression expression = addImport(STREAM_QUALIFIED_NAME, parent);
 		ListRewrite listRewrite = astRewrite.getListRewrite(parent, MethodInvocation.ARGUMENTS_PROPERTY);
 		arguments.forEach(arg -> listRewrite.insertLast(astRewrite.createMoveTarget(arg), null));
 
@@ -177,7 +177,7 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 		if (experession != null) {
 			astRewrite.replace(stream.getExpression(), astRewrite.createCopyTarget(experession), null);
 		} else {
-			Name arraysTypeName = addImport(ARRAYS_QUALIFIED_NAME);
+			Name arraysTypeName = addImport(ARRAYS_QUALIFIED_NAME, stream);
 			astRewrite.replace(stream.getExpression(), arraysTypeName, null);
 		}
 	}

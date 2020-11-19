@@ -4,6 +4,7 @@ import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -79,8 +80,9 @@ public class StandaloneConfig {
 	 *            path to the base directory of the project
 	 * @param yamlConfig
 	 *            the default yaml configuration file of the project
-	 * @param projectName
-	 *            name of the eclipse project to be created
+	 * @param selectedSources
+	 *            GLOB expressions matching the selected sources to be
+	 *            refactored. One expression per line.
 	 * @throws CoreException
 	 *             if the classpath entries cannot be added or the source files
 	 *             cannot be parsed
@@ -88,7 +90,8 @@ public class StandaloneConfig {
 	 *             if the project cannot be created
 	 */
 	public StandaloneConfig(IJavaProject javaProject, String path, YAMLConfig yamlConfig,
-			StandaloneStatisticsMetadata statisticsMetadata) throws CoreException, StandaloneException {
+			StandaloneStatisticsMetadata statisticsMetadata, String selectedSources)
+			throws CoreException, StandaloneException {
 
 		this.javaProject = javaProject;
 		this.projectName = javaProject.getProject()
@@ -96,7 +99,8 @@ public class StandaloneConfig {
 		this.path = path;
 		this.yamlConfig = yamlConfig;
 		this.statisticsMetadata = statisticsMetadata;
-		setUp();
+
+		setUp(selectedSources);
 	}
 
 	/**
@@ -105,9 +109,10 @@ public class StandaloneConfig {
 	 * @throws CoreException
 	 *             the source files cannot be parsed
 	 */
-	protected void setUp() throws CoreException {
+	protected void setUp(String selectedSources) throws CoreException {
 		List<ICompilationUnit> compilationUnits = findProjectCompilationUnits();
-		compilationUnitsProvider = new CompilationUnitProvider(compilationUnits, yamlConfig.getExcludes());
+		compilationUnitsProvider = new CompilationUnitProvider(compilationUnits, yamlConfig.getExcludes(),
+				selectedSources);
 
 		statisticsData = new StandaloneStatisticsData(compilationUnits.size(), projectName, statisticsMetadata,
 				refactoringPipeline);
@@ -187,11 +192,11 @@ public class StandaloneConfig {
 		}
 	}
 
-	public void computeRefactoring() throws StandaloneException {
+	public List<RefactoringRule> computeRefactoring() throws StandaloneException {
 		if (!hasRefactoringStates()) {
 			String loggerInfo = NLS.bind(Messages.StandaloneConfig_noRefactoringStates, projectName);
 			logger.info(loggerInfo);
-			return;
+			return Collections.emptyList();
 		}
 
 		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
@@ -214,6 +219,9 @@ public class StandaloneConfig {
 
 		applyRules(rules);
 		statisticsData.setMetricData();
+		Instant now = Instant.now();
+		statisticsData.setEndTime(now.getEpochSecond());
+		return rules;
 	}
 
 	private Optional<StandardLoggerRule> setUpLoggerRule(Map<String, String> options) {
@@ -268,7 +276,7 @@ public class StandaloneConfig {
 		}
 	}
 
-	protected List<RefactoringRule> getProjectRules() {
+	public List<RefactoringRule> getProjectRules() {
 		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
 		return RulesContainer.getRulesForProject(getJavaProject(), true);
 	}

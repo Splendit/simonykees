@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import eu.jsparrow.core.statistic.RuleDocumentationURLGeneratorUtil;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.Tag;
@@ -69,8 +70,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		static int end = 0;
 		static String link = ""; //$NON-NLS-1$
 	}
-
-	private static final String DOCUMENTATION_SPACE_BASE_URL = "https://jsparrow.github.io/rules/"; //$NON-NLS-1$
 
 	protected AbstractSelectRulesWizardModel model;
 	protected AbstractSelectRulesWizardControler controler;
@@ -513,7 +512,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		Consumer<StyleRange> green = style -> style.foreground = getShell().getDisplay()
 			.getSystemColor(SWT.COLOR_GREEN);
 
-		SelectedRule.link = ResourceHelper.generateLinkToDocumentation(DOCUMENTATION_SPACE_BASE_URL, rule.getId());
+		SelectedRule.link = RuleDocumentationURLGeneratorUtil.generateLinkToDocumentation(rule.getId());
 		Consumer<StyleRange> documentationConfig = style -> {
 			style.underline = true;
 			style.underlineStyle = SWT.UNDERLINE_LINK;

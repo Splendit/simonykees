@@ -1,6 +1,7 @@
 package eu.jsparrow.core.http;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -44,6 +45,24 @@ public class JsonUtil {
 			logger.error(e.getMessage(), e);
 		}
 		return null;
+	}
+
+	/**
+	 * Write the Json object to a new file.
+	 * 
+	 * @param value
+	 *            the Json object.
+	 * @param path
+	 *            the file path.
+	 */
+	public static void writeJSON(Object value, String path) {
+		try {
+			File resultFile = new File(path);
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.writeValue(resultFile, value);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
 	}
 
 	public static String generateFormatedJSON(Object o) {

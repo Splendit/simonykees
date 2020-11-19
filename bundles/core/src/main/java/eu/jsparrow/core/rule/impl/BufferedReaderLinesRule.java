@@ -24,7 +24,8 @@ public class BufferedReaderLinesRule extends RefactoringRuleImpl<BufferedReaderL
 		this.id = "BufferedReaderLines"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.BufferedReaderLinesRule_name,
 				Messages.BufferedReaderLinesRule_description,
-				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP, Tag.OLD_LANGUAGE_CONSTRUCTS));
+				Duration.ofMinutes(5),
+				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.IO_OPERATIONS));
 	}
 
 	@Override
