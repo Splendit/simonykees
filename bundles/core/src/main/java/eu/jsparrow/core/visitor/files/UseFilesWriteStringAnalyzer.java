@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.files;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -9,7 +8,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -18,6 +17,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
 public class UseFilesWriteStringAnalyzer {
@@ -29,8 +29,6 @@ public class UseFilesWriteStringAnalyzer {
 	SimpleName writerVariableName;
 
 	VariableDeclarationFragment fragmentDeclaringBufferedWriter;
-
-	VariableDeclarationExpression parentVariableDeclarationExpression;
 
 	ClassInstanceCreation bufferedWriterInstanceCreation;
 
@@ -48,18 +46,52 @@ public class UseFilesWriteStringAnalyzer {
 		if (writerVariableName == null) {
 			return false;
 		}
+		ITypeBinding typeBinding = writerVariableName.resolveTypeBinding();
+		if (!ClassRelationUtil.isContentOfType(typeBinding, java.io.BufferedWriter.class.getName())) {
+			return false;
+		}
 
-		IBinding methodExpressionBinding = writerVariableName.resolveBinding();
-		ASTNode declaringNode = compilationUnit.findDeclaringNode(methodExpressionBinding);
+		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return false;
+		}
+		ExpressionStatement writeInvocationStatement = (ExpressionStatement) methodInvocation.getParent();
+
+		if (writeInvocationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return false;
+		}
+		blockOfInvocationStatement = (Block) writeInvocationStatement.getParent();
+
+		ASTNode declaringNode = compilationUnit.findDeclaringNode(writerVariableName.resolveBinding());
 		if (declaringNode == null || declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			return false;
 		}
-		fragmentDeclaringBufferedWriter = (VariableDeclarationFragment) declaringNode;
 
-		bufferedWriterInstanceCreation = FilesUtil
-			.findBufferIOInstanceCreationAsInitializer(fragmentDeclaringBufferedWriter,
-					java.io.BufferedWriter.class.getName())
-			.orElse(null);
+		fragmentDeclaringBufferedWriter = (VariableDeclarationFragment) declaringNode;
+		if (fragmentDeclaringBufferedWriter.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
+				&& fragmentDeclaringBufferedWriter.getParent()
+					.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY
+				&& fragmentDeclaringBufferedWriter.getParent()
+					.getParent() == blockOfInvocationStatement.getParent()) {
+			VariableDeclarationExpression parentVariableDeclarationExpression = (VariableDeclarationExpression) fragmentDeclaringBufferedWriter
+				.getParent();
+			if (parentVariableDeclarationExpression.fragments()
+				.size() != 1) {
+				return false;
+			}
+			tryStatement = (TryStatement) parentVariableDeclarationExpression.getParent();
+		} else {
+			return false;
+		}
+
+		if (fragmentDeclaringBufferedWriter.getInitializer() != null) {
+			Expression initializer = fragmentDeclaringBufferedWriter.getInitializer();
+			if (ClassRelationUtil.isNewInstanceCreationOf(initializer, java.io.BufferedWriter.class.getName())) {
+				bufferedWriterInstanceCreation = (ClassInstanceCreation) initializer;
+			}
+		} else {
+			return false;
+		}
+
 		if (bufferedWriterInstanceCreation == null) {
 			return false;
 		}
@@ -75,37 +107,11 @@ public class UseFilesWriteStringAnalyzer {
 		writeStringArgument = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.get(0);
 
-		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return false;
-		}
-		ExpressionStatement writeInvocationStatement = (ExpressionStatement) methodInvocation.getParent();
-
-		if (writeInvocationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return false;
-		}
-
-		blockOfInvocationStatement = (Block) writeInvocationStatement.getParent();
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(writerVariableName);
+		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(
+				writerVariableName);
 		blockOfInvocationStatement.accept(visitor);
-		List<SimpleName> usages = visitor.getUsages();
-		int usagesCount = usages.size();
-		if (usagesCount != 1) {
-			return false;
-		}
-		if (blockOfInvocationStatement.getLocationInParent() != TryStatement.BODY_PROPERTY) {
-			return false;
-		}
-
-		tryStatement = (TryStatement) blockOfInvocationStatement.getParent();
-
-		parentVariableDeclarationExpression = (VariableDeclarationExpression) fragmentDeclaringBufferedWriter
-			.getParent();
-		
-		if(parentVariableDeclarationExpression.fragments().size() != 1) {
-			return false;
-		}
-
-		return parentVariableDeclarationExpression.getParent() == tryStatement;
+		return visitor.getUsages()
+			.size() == 1;
 	}
 
 	private Optional<SimpleName> findInvocationExpressionAsSimpleName(MethodInvocation methodInvocation) {

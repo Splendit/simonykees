@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
@@ -80,10 +81,11 @@ class NewBufferedIOArgumentsAnalyzer {
 		return false;
 	}
 
-	TransformationData createTransformationData(ClassInstanceCreation newBufferedIO) {
-		if (charsetExpression != null) {
-			return new TransformationData(newBufferedIO, pathExpressions, charsetExpression);
-		}
-		return new TransformationData(newBufferedIO, pathExpressions);
+	List<Expression> getPathExpressions() {
+		return pathExpressions;
+	}
+
+	Optional<Expression> getCharsetExpression() {
+		return Optional.ofNullable(charsetExpression);
 	}
 }

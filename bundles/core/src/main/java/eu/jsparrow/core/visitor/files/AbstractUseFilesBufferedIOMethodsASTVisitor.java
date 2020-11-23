@@ -77,13 +77,12 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 		if (bufferedIOArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION
 				&& newBufferedIOArgumentsAnalyzer.analyzeInitializer((ClassInstanceCreation) bufferedIOArgument)) {
 
-			transform(newBufferedIOArgumentsAnalyzer.createTransformationData(newBufferedIO));
+			transform(createTransformationData(newBufferedIOArgumentsAnalyzer, newBufferedIO));
 
 		} else if (isDeclarationInTWRHeader(fragment, bufferedIOArgument)) {
 			createTransformationDataUsingFileIOResource(fragment, newBufferedIO,
 					(SimpleName) bufferedIOArgument).ifPresent(this::transform);
 		}
-
 		return true;
 	}
 
@@ -92,6 +91,17 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 		return bufferedIOArg.getNodeType() == ASTNode.SIMPLE_NAME
 				&& fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
 				&& fragmentParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY;
+	}
+
+	TransformationData createTransformationData(NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer,
+			ClassInstanceCreation newBufferedIO) {
+		Expression charsetExpression = newBufferedIOArgumentsAnalyzer.getCharsetExpression()
+			.orElse(null);
+		if (charsetExpression != null) {
+			return new TransformationData(newBufferedIO, newBufferedIOArgumentsAnalyzer.getPathExpressions(),
+					charsetExpression);
+		}
+		return new TransformationData(newBufferedIO, newBufferedIOArgumentsAnalyzer.getPathExpressions());
 	}
 
 	private Optional<TransformationData> createTransformationDataUsingFileIOResource(
@@ -170,4 +180,5 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 		return NodeBuilder.newMethodInvocation(ast, filesTypeName,
 				ast.newSimpleName(newBufferedIOMethodName), arguments);
 	}
+
 }
