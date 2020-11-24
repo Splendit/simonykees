@@ -3,7 +3,6 @@ package eu.jsparrow.core.visitor.files;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -20,36 +19,36 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  */
 class UseFilesWriteStringAnalysisResult {
 
-	private final ClassInstanceCreation bufferedIOInstanceCreation;
+	private final Expression bufferedIOInitializer;
 	private VariableDeclarationFragment fileIOResource;
 	private final List<Expression> pathExpressions;
 	private final Expression writeStringArgument;
 	private Expression charSet;
 
-	UseFilesWriteStringAnalysisResult(ClassInstanceCreation newBufferedIO,
+	UseFilesWriteStringAnalysisResult(Expression bufferedIOInitializer,
 			List<Expression> pathExpressions, Expression writeStringArgument, Expression charSet,
 			VariableDeclarationFragment fileIOResource) {
-		this(newBufferedIO, pathExpressions, writeStringArgument, fileIOResource);
+		this(bufferedIOInitializer, pathExpressions, writeStringArgument, fileIOResource);
 		this.charSet = charSet;
 	}
 
-	UseFilesWriteStringAnalysisResult(ClassInstanceCreation newBufferedIO,
+	UseFilesWriteStringAnalysisResult(Expression bufferedIOInitializer,
 			List<Expression> pathExpressions, Expression writeStringArgument,
 			VariableDeclarationFragment fileIOResource) {
-		this(newBufferedIO, pathExpressions, writeStringArgument);
+		this(bufferedIOInitializer, pathExpressions, writeStringArgument);
 		this.fileIOResource = fileIOResource;
 
 	}
 
-	UseFilesWriteStringAnalysisResult(ClassInstanceCreation newBufferedIO,
+	UseFilesWriteStringAnalysisResult(Expression bufferedIOInitializer,
 			List<Expression> pathExpressions, Expression writeStringArgument, Expression charSet) {
-		this(newBufferedIO, pathExpressions, writeStringArgument);
+		this(bufferedIOInitializer, pathExpressions, writeStringArgument);
 		this.charSet = charSet;
 	}
 
-	UseFilesWriteStringAnalysisResult(ClassInstanceCreation newBufferedIO,
+	UseFilesWriteStringAnalysisResult(Expression bufferedIOInitializer,
 			List<Expression> pathExpressions, Expression writeStringArgument) {
-		this.bufferedIOInstanceCreation = newBufferedIO;
+		this.bufferedIOInitializer = bufferedIOInitializer;
 		this.pathExpressions = pathExpressions;
 		this.writeStringArgument = writeStringArgument;
 	}
@@ -70,7 +69,7 @@ class UseFilesWriteStringAnalysisResult {
 		return Optional.ofNullable(charSet);
 	}
 
-	public ClassInstanceCreation getBufferedIOInstanceCreation() {
-		return bufferedIOInstanceCreation;
+	public Expression getBufferedIOInitializer() {
+		return bufferedIOInitializer;
 	}
 }
