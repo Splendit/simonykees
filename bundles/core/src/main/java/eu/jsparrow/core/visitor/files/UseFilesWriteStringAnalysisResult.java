@@ -15,40 +15,43 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * {@link java.nio.file.Files}.
  * 
  * 
- * @since 3.22.0
+ * @since 3.24.0
  *
  */
 class UseFilesWriteStringAnalysisResult {
 
 	private final ClassInstanceCreation bufferedIOInstanceCreation;
-	private final List<Expression> pathExpressions;
 	private VariableDeclarationFragment fileIOResource;
+	private final List<Expression> pathExpressions;
+	private final Expression writeStringArgument;
 	private Expression charSet;
 
-	public UseFilesWriteStringAnalysisResult(ClassInstanceCreation newBufferedIO,
-			List<Expression> pathExpressions, Expression charSet,
+	UseFilesWriteStringAnalysisResult(ClassInstanceCreation newBufferedIO,
+			List<Expression> pathExpressions, Expression writeStringArgument, Expression charSet,
 			VariableDeclarationFragment fileIOResource) {
-		this(newBufferedIO, pathExpressions, fileIOResource);
+		this(newBufferedIO, pathExpressions, writeStringArgument, fileIOResource);
 		this.charSet = charSet;
 	}
 
-	public UseFilesWriteStringAnalysisResult(ClassInstanceCreation newBufferedIO,
-			List<Expression> pathExpressions, VariableDeclarationFragment fileIOResource) {
-		this(newBufferedIO, pathExpressions);
+	UseFilesWriteStringAnalysisResult(ClassInstanceCreation newBufferedIO,
+			List<Expression> pathExpressions, Expression writeStringArgument,
+			VariableDeclarationFragment fileIOResource) {
+		this(newBufferedIO, pathExpressions, writeStringArgument);
 		this.fileIOResource = fileIOResource;
 
 	}
 
-	public UseFilesWriteStringAnalysisResult(ClassInstanceCreation newBufferedIO,
-			List<Expression> pathExpressions, Expression charSet) {
-		this(newBufferedIO, pathExpressions);
+	UseFilesWriteStringAnalysisResult(ClassInstanceCreation newBufferedIO,
+			List<Expression> pathExpressions, Expression writeStringArgument, Expression charSet) {
+		this(newBufferedIO, pathExpressions, writeStringArgument);
 		this.charSet = charSet;
 	}
 
-	public UseFilesWriteStringAnalysisResult(ClassInstanceCreation newBufferedIO,
-			List<Expression> pathExpressions) {
+	UseFilesWriteStringAnalysisResult(ClassInstanceCreation newBufferedIO,
+			List<Expression> pathExpressions, Expression writeStringArgument) {
 		this.bufferedIOInstanceCreation = newBufferedIO;
 		this.pathExpressions = pathExpressions;
+		this.writeStringArgument = writeStringArgument;
 	}
 
 	public Optional<VariableDeclarationFragment> getFileIOResource() {
@@ -57,6 +60,10 @@ class UseFilesWriteStringAnalysisResult {
 
 	public List<Expression> getPathExpressions() {
 		return pathExpressions;
+	}
+
+	Expression getWriteStringArgument() {
+		return writeStringArgument;
 	}
 
 	public Optional<Expression> getCharSet() {
