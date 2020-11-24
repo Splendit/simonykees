@@ -47,21 +47,36 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		}
 
 		UseFilesWriteStringAnalysisResult transformationData;
-		if (analyzer.bufferedWriterArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
-			ClassInstanceCreation writerInstanceCreation = (ClassInstanceCreation) analyzer.bufferedWriterArgument;
-			if (newBufferedIOArgumentsAnalyzer.analyzeInitializer(writerInstanceCreation)) {
-				transformationData = createUseFilesWriteStringAnalysisResult(analyzer, newBufferedIOArgumentsAnalyzer);
-				transform(methodInvocation, transformationData);
+		if (analyzer.bufferedWriterInstanceCreationArgument != null) {
+			if (analyzer.bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+				NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
+				ClassInstanceCreation writerInstanceCreation = (ClassInstanceCreation) analyzer.bufferedWriterInstanceCreationArgument;
+				if (newBufferedIOArgumentsAnalyzer.analyzeInitializer(writerInstanceCreation)) {
+					transformationData = createUseFilesWriteStringAnalysisResult(analyzer,
+							newBufferedIOArgumentsAnalyzer);
+					transform(methodInvocation, transformationData);
+				}
+			} else if (analyzer.bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
+				SimpleName writerVariableName = (SimpleName) analyzer.bufferedWriterInstanceCreationArgument;
+				transformationData = createTransformationDataUsingFileIOResource(analyzer, writerVariableName,
+						java.io.FileWriter.class.getName())
+							.orElse(null);
+				if (transformationData != null) {
+					transform(methodInvocation, transformationData);
+				}
 			}
-		} else if (analyzer.bufferedWriterArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-			SimpleName writerVariableName = (SimpleName) analyzer.bufferedWriterArgument;
-			transformationData = createTransformationDataUsingFileIOResource(analyzer, writerVariableName,
-					java.io.FileWriter.class.getName())
-						.orElse(null);
-			if (transformationData != null) {
-				transform(methodInvocation, transformationData);
+		} else if (analyzer.bufferedIOInitializer.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			MethodInvocation filesNewBufferedWriterInvocatioon = (MethodInvocation) analyzer.bufferedIOInitializer;
+			Expression pathExpression = analyzer.filesNewBufferedWriterInvocationArguments.get(0);
+			if (analyzer.filesNewBufferedWriterInvocationArguments.size() == 2) {
+				Expression charSetExpression = analyzer.filesNewBufferedWriterInvocationArguments.get(1);
+				transformationData = new UseFilesWriteStringAnalysisResult(filesNewBufferedWriterInvocatioon,
+						pathExpression, charSetExpression, analyzer.writeStringArgument);
+			} else {
+				transformationData = new UseFilesWriteStringAnalysisResult(filesNewBufferedWriterInvocatioon,
+						pathExpression, analyzer.writeStringArgument);
 			}
+			transform(methodInvocation, transformationData);
 		}
 		return true;
 	}
@@ -83,14 +98,19 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	private MethodInvocation createFilesWriteStringMethodInvocation(
 			UseFilesWriteStringAnalysisResult transformationData) {
 		AST ast = astRewrite.getAST();
-		Name pathsTypeName = addImport(FilesUtil.PATHS_QUALIFIED_NAME,
-				transformationData.getBufferedIOInitializer());
-		List<Expression> pathsGetArguments = transformationData.getPathExpressions()
-			.stream()
-			.map(pathExpression -> (Expression) astRewrite.createCopyTarget(pathExpression))
-			.collect(Collectors.toList());
-		MethodInvocation pathsGet = NodeBuilder.newMethodInvocation(ast, pathsTypeName,
-				ast.newSimpleName(FilesUtil.GET), pathsGetArguments);
+		Expression pathArgument = transformationData.getPathExpression()
+			.map(p -> (Expression) astRewrite.createCopyTarget(p))
+			.orElse(null);
+		if (pathArgument == null) {
+			Name pathsTypeName = addImport(FilesUtil.PATHS_QUALIFIED_NAME,
+					transformationData.getBufferedIOInitializer());
+			List<Expression> pathsGetArguments = transformationData.getPathExpressions()
+				.stream()
+				.map(pathExpression -> (Expression) astRewrite.createCopyTarget(pathExpression))
+				.collect(Collectors.toList());
+			pathArgument = NodeBuilder.newMethodInvocation(ast, pathsTypeName,
+					ast.newSimpleName(FilesUtil.GET), pathsGetArguments);
+		}
 
 		Expression writeStringArgumentCopy = (Expression) astRewrite
 			.createCopyTarget(transformationData.getWriteStringArgument());
@@ -105,7 +125,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		}
 
 		List<Expression> arguments = new ArrayList<>();
-		arguments.add(pathsGet);
+		arguments.add(pathArgument);
 		arguments.add(writeStringArgumentCopy);
 		arguments.add(charset);
 		Name filesTypeName = addImport(FilesUtil.FILES_QUALIFIED_NAME,
@@ -140,10 +160,10 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 		List<Expression> pathExpressions = fileIOAnalyzer.getPathExpressions();
 		UseFilesWriteStringAnalysisResult transformationData = fileIOAnalyzer.getCharset()
-			.map(charSet -> new UseFilesWriteStringAnalysisResult(analyzer.bufferedWriterInstanceCreation,
+			.map(charSet -> new UseFilesWriteStringAnalysisResult(analyzer.bufferedIOInitializer,
 					pathExpressions, analyzer.writeStringArgument, charSet,
 					fileIOResource))
-			.orElse(new UseFilesWriteStringAnalysisResult(analyzer.bufferedWriterInstanceCreation, pathExpressions,
+			.orElse(new UseFilesWriteStringAnalysisResult(analyzer.bufferedIOInitializer, pathExpressions,
 					analyzer.writeStringArgument,
 					fileIOResource));
 		return Optional.of(transformationData);
@@ -154,11 +174,11 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		Expression charsetExpression = newBufferedIOArgumentsAnalyzer.getCharsetExpression()
 			.orElse(null);
 		if (charsetExpression != null) {
-			return new UseFilesWriteStringAnalysisResult(analyzer.bufferedWriterInstanceCreation,
+			return new UseFilesWriteStringAnalysisResult(analyzer.bufferedIOInitializer,
 					newBufferedIOArgumentsAnalyzer.getPathExpressions(), analyzer.writeStringArgument,
 					charsetExpression);
 		}
-		return new UseFilesWriteStringAnalysisResult(analyzer.bufferedWriterInstanceCreation,
+		return new UseFilesWriteStringAnalysisResult(analyzer.bufferedIOInitializer,
 				newBufferedIOArgumentsAnalyzer.getPathExpressions(), analyzer.writeStringArgument);
 	}
 }

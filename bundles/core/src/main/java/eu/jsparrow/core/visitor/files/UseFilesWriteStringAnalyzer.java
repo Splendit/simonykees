@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.files;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -8,8 +9,10 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -28,9 +31,11 @@ public class UseFilesWriteStringAnalyzer {
 
 	SimpleName writerVariableName;
 
-	ClassInstanceCreation bufferedWriterInstanceCreation;
+	Expression bufferedIOInitializer;
 
-	Expression bufferedWriterArgument;
+	Expression bufferedWriterInstanceCreationArgument;
+
+	List<Expression> filesNewBufferedWriterInvocationArguments;
 
 	Block blockOfInvocationStatement;
 
@@ -80,25 +85,40 @@ public class UseFilesWriteStringAnalyzer {
 			return false;
 		}
 
-		if (fragmentDeclaringBufferedWriter.getInitializer() != null) {
-			Expression initializer = fragmentDeclaringBufferedWriter.getInitializer();
-			if (ClassRelationUtil.isNewInstanceCreationOf(initializer, java.io.BufferedWriter.class.getName())) {
-				bufferedWriterInstanceCreation = (ClassInstanceCreation) initializer;
+		bufferedIOInitializer = fragmentDeclaringBufferedWriter.getInitializer();
+		if (bufferedIOInitializer == null) {
+			return false;
+		}
+		if (ClassRelationUtil.isNewInstanceCreationOf(bufferedIOInitializer, java.io.BufferedWriter.class.getName())) {
+			ClassInstanceCreation bufferedWriterInstanceCreation = (ClassInstanceCreation) bufferedIOInitializer;
+			bufferedWriterInstanceCreationArgument = FilesUtil
+				.findBufferedIOArgument(bufferedWriterInstanceCreation, java.io.FileWriter.class.getName())
+				.orElse(null);
+			if (bufferedWriterInstanceCreationArgument == null) {
+				return false;
 			}
-		} else {
-			return false;
-		}
+		} else if (isFilesNewBufferedWriterInvocation(bufferedIOInitializer)) {
+			MethodInvocation filesNewBufferedWriterInvocation = (MethodInvocation) bufferedIOInitializer;
+			filesNewBufferedWriterInvocationArguments = ASTNodeUtil
+				.convertToTypedList(filesNewBufferedWriterInvocation.arguments(), Expression.class);
+			if (filesNewBufferedWriterInvocationArguments.isEmpty()
+					|| filesNewBufferedWriterInvocationArguments.size() > 2) {
+				return false;
+			}
 
-		if (bufferedWriterInstanceCreation == null) {
-			return false;
-		}
-
-		bufferedWriterArgument = FilesUtil
-			.findBufferedIOArgument(bufferedWriterInstanceCreation, java.io.FileWriter.class.getName())
-			.orElse(null);
-
-		if (bufferedWriterArgument == null) {
-			return false;
+			ITypeBinding firstArgumentTypeBinding = filesNewBufferedWriterInvocationArguments.get(0)
+				.resolveTypeBinding();
+			if (!ClassRelationUtil.isContentOfType(firstArgumentTypeBinding, java.nio.file.Path.class.getName())) {
+				return false;
+			}
+			if (filesNewBufferedWriterInvocationArguments.size() == 2) {
+				ITypeBinding secondArgumentTypeBinding = filesNewBufferedWriterInvocationArguments.get(1)
+					.resolveTypeBinding();
+				if (!ClassRelationUtil.isContentOfType(secondArgumentTypeBinding,
+						java.nio.charset.Charset.class.getName())) {
+					return false;
+				}
+			}
 		}
 
 		writeStringArgument = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
@@ -109,6 +129,27 @@ public class UseFilesWriteStringAnalyzer {
 		blockOfInvocationStatement.accept(visitor);
 		return visitor.getUsages()
 			.size() == 1;
+	}
+
+	private boolean isFilesNewBufferedWriterInvocation(Expression initializer) {
+		if (initializer.getNodeType() != ASTNode.METHOD_INVOCATION) {
+			return false;
+		}
+		MethodInvocation invocation = (MethodInvocation) initializer;
+		Expression invocationExpression = invocation.getExpression();
+		if (invocationExpression == null) {
+			return false;
+		}
+		IMethodBinding methodBinding = invocation.resolveMethodBinding();
+		if (!ClassRelationUtil.isContentOfType(methodBinding
+			.getDeclaringClass(), java.nio.file.Files.class.getName())) {
+			return false;
+		}
+		if (!Modifier.isStatic(methodBinding.getModifiers())) {
+			return false;
+		}
+		return methodBinding.getName()
+			.equals("newBufferedWriter"); //$NON-NLS-1$
 	}
 
 	private Optional<SimpleName> findInvocationExpressionAsSimpleName(MethodInvocation methodInvocation) {

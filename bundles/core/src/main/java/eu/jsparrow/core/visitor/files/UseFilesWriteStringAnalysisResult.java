@@ -1,9 +1,11 @@
 package eu.jsparrow.core.visitor.files;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
@@ -21,9 +23,24 @@ class UseFilesWriteStringAnalysisResult {
 
 	private final Expression bufferedIOInitializer;
 	private VariableDeclarationFragment fileIOResource;
+	private Expression pathExpression;
 	private final List<Expression> pathExpressions;
 	private final Expression writeStringArgument;
 	private Expression charSet;
+
+	UseFilesWriteStringAnalysisResult(MethodInvocation filesNewBufferedWriterInvocation, Expression pathExpression,
+			Expression charSet, Expression writeStringArgument) {
+		this(filesNewBufferedWriterInvocation, pathExpression, writeStringArgument);
+		this.charSet = charSet;
+	}
+
+	UseFilesWriteStringAnalysisResult(MethodInvocation filesNewBufferedWriterInvocation, Expression pathExpression,
+			Expression writeStringArgument) {
+		this.bufferedIOInitializer = filesNewBufferedWriterInvocation;
+		this.pathExpression = pathExpression;
+		this.pathExpressions = Collections.emptyList();
+		this.writeStringArgument = writeStringArgument;
+	}
 
 	UseFilesWriteStringAnalysisResult(Expression bufferedIOInitializer,
 			List<Expression> pathExpressions, Expression writeStringArgument, Expression charSet,
@@ -37,7 +54,6 @@ class UseFilesWriteStringAnalysisResult {
 			VariableDeclarationFragment fileIOResource) {
 		this(bufferedIOInitializer, pathExpressions, writeStringArgument);
 		this.fileIOResource = fileIOResource;
-
 	}
 
 	UseFilesWriteStringAnalysisResult(Expression bufferedIOInitializer,
@@ -57,6 +73,16 @@ class UseFilesWriteStringAnalysisResult {
 		return Optional.ofNullable(fileIOResource);
 	}
 
+	public Optional<Expression> getPathExpression() {
+		return Optional.ofNullable(pathExpression);
+	}
+
+	/**
+	 * 
+	 * @return if {@link #getPathExpression()} returns an empty
+	 *         {@link Optional}, then this method is expected to return a
+	 *         non-null list containing at least one item.
+	 */
 	public List<Expression> getPathExpressions() {
 		return pathExpressions;
 	}
