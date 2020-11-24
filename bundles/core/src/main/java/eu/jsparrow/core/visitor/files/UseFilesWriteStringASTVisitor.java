@@ -54,7 +54,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			if (newBufferedIOArgumentsAnalyzer.analyzeInitializer(writerInstanceCreation)) {
 				transformationData = createUseFilesWriteStringAnalysisResult(newBufferedIOArgumentsAnalyzer,
 						analyzer.bufferedWriterInstanceCreation);
-				transform(methodInvocation, analyzer.writeStringArgument, analyzer.fragmentDeclaringBufferedWriter,
+				transform(methodInvocation, analyzer.writeStringArgument,
 						transformationData);
 			}
 		} else if (analyzer.bufferedWriterArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
@@ -63,21 +63,23 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 					writerVariableName, analyzer.tryStatement, java.io.FileWriter.class.getName())
 						.orElse(null);
 			if (transformationData != null) {
-				transform(methodInvocation, analyzer.writeStringArgument, analyzer.fragmentDeclaringBufferedWriter,
-						transformationData);
+				transform(methodInvocation, analyzer.writeStringArgument, transformationData);
 			}
 		}
 		return true;
 	}
 
 	private void transform(MethodInvocation methodInvocation, Expression writeStringArgument,
-			VariableDeclarationFragment fragmentDeclaringBufferedWriter,
 			UseFilesWriteStringAnalysisResult transformationData) {
 
 		MethodInvocation writeStringMethodInvocation = createFilesWriteStringMethodInvocation(transformationData,
 				writeStringArgument);
 		astRewrite.replace(methodInvocation, writeStringMethodInvocation, null);
-		astRewrite.remove(fragmentDeclaringBufferedWriter.getParent(), null);
+
+		Expression bufferedIOInitializer = transformationData.getBufferedIOInstanceCreation();
+		ASTNode bufferedIODeclarationFragment = bufferedIOInitializer.getParent();
+		ASTNode bufferedIOResourceToRemove = bufferedIODeclarationFragment.getParent();
+		astRewrite.remove(bufferedIOResourceToRemove, null);
 		transformationData.getFileIOResource()
 			.ifPresent(resource -> astRewrite.remove(resource.getParent(), null));
 		onRewrite();

@@ -28,8 +28,6 @@ public class UseFilesWriteStringAnalyzer {
 
 	SimpleName writerVariableName;
 
-	VariableDeclarationFragment fragmentDeclaringBufferedWriter;
-
 	ClassInstanceCreation bufferedWriterInstanceCreation;
 
 	Expression bufferedWriterArgument;
@@ -65,8 +63,7 @@ public class UseFilesWriteStringAnalyzer {
 		if (declaringNode == null || declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			return false;
 		}
-
-		fragmentDeclaringBufferedWriter = (VariableDeclarationFragment) declaringNode;
+		VariableDeclarationFragment fragmentDeclaringBufferedWriter = (VariableDeclarationFragment) declaringNode;
 		if (fragmentDeclaringBufferedWriter.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
 				&& fragmentDeclaringBufferedWriter.getParent()
 					.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY
