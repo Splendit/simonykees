@@ -36,12 +36,10 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		UseFilesWriteStringAnalyzer analyzer = new UseFilesWriteStringAnalyzer();
-
 		analyzer.findAnalysisResult(methodInvocation, getCompilationUnit())
 			.ifPresent(result -> {
 				transform(methodInvocation, result);
 			});
-
 		return true;
 	}
 
@@ -96,18 +94,5 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 				transformationData.getBufferedIOInitializer());
 		return NodeBuilder.newMethodInvocation(ast, filesTypeName,
 				ast.newSimpleName("writeString"), arguments); //$NON-NLS-1$
-	}
-
-	UseFilesWriteStringAnalysisResult createUseFilesWriteStringAnalysisResult(UseFilesWriteStringAnalyzer analyzer,
-			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer) {
-		Expression charsetExpression = newBufferedIOArgumentsAnalyzer.getCharsetExpression()
-			.orElse(null);
-		if (charsetExpression != null) {
-			return new UseFilesWriteStringAnalysisResult(analyzer.bufferedIOInitializer,
-					newBufferedIOArgumentsAnalyzer.getPathExpressions(), analyzer.writeStringArgument,
-					charsetExpression);
-		}
-		return new UseFilesWriteStringAnalysisResult(analyzer.bufferedIOInitializer,
-				newBufferedIOArgumentsAnalyzer.getPathExpressions(), analyzer.writeStringArgument);
 	}
 }
