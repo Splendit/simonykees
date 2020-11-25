@@ -58,9 +58,8 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 				}
 			} else if (analyzer.bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
 				SimpleName writerVariableName = (SimpleName) analyzer.bufferedWriterInstanceCreationArgument;
-				transformationData = createTransformationDataUsingFileIOResource(analyzer, writerVariableName,
-						java.io.FileWriter.class.getName())
-							.orElse(null);
+				transformationData = createTransformationDataUsingFileIOResource(analyzer, writerVariableName)
+					.orElse(null);
 				if (transformationData != null) {
 					transform(methodInvocation, transformationData);
 				}
@@ -134,9 +133,8 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 				ast.newSimpleName("writeString"), arguments); //$NON-NLS-1$
 	}
 
-	static Optional<UseFilesWriteStringAnalysisResult> createTransformationDataUsingFileIOResource(
-			UseFilesWriteStringAnalyzer analyzer, SimpleName bufferedIOArg,
-			String fileIOQualifiedTypeName) {
+	private Optional<UseFilesWriteStringAnalysisResult> createTransformationDataUsingFileIOResource(
+			UseFilesWriteStringAnalyzer analyzer, SimpleName bufferedIOArg) {
 		VariableDeclarationFragment fileIOResource = FilesUtil.findVariableDeclarationFragmentAsResource(bufferedIOArg,
 				analyzer.tryStatement)
 			.orElse(null);
@@ -144,7 +142,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			return Optional.empty();
 		}
 
-		FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(fileIOQualifiedTypeName);
+		FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(java.io.FileWriter.class.getName());
 		if (!fileIOAnalyzer.analyzeFileIO((VariableDeclarationExpression) fileIOResource.getParent())) {
 			return Optional.empty();
 		}

@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -19,6 +20,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
@@ -60,9 +62,7 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
 
-		ClassInstanceCreation newBufferedIO = FilesUtil.findBufferIOInstanceCreationAsInitializer(fragment,
-				bufferedIOQualifiedTypeName)
-			.orElse(null);
+		ClassInstanceCreation newBufferedIO = findBufferIOInstanceCreationAsInitializer(fragment).orElse(null);
 		if (newBufferedIO == null) {
 			return true;
 		}
@@ -128,7 +128,6 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 			return Optional.empty();
 		}
 
-		// Now the transformation happens
 		List<Expression> pathExpressions = fileIOAnalyzer.getPathExpressions();
 		TransformationData transformationData = fileIOAnalyzer.getCharset()
 			.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet, fileIOResource))
@@ -181,4 +180,13 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 				ast.newSimpleName(newBufferedIOMethodName), arguments);
 	}
 
+	private Optional<ClassInstanceCreation> findBufferIOInstanceCreationAsInitializer(
+			VariableDeclarationFragment fragment) {
+		SimpleName name = fragment.getName();
+		ITypeBinding typeBinding = name.resolveTypeBinding();
+		if (!ClassRelationUtil.isContentOfType(typeBinding, bufferedIOQualifiedTypeName)) {
+			return Optional.empty();
+		}
+		return FilesUtil.findClassInstanceCreationAsInitializer(fragment, bufferedIOQualifiedTypeName);
+	}
 }
