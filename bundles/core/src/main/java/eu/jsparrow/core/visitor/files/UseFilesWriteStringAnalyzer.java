@@ -27,22 +27,12 @@ public class UseFilesWriteStringAnalyzer {
 
 	private final SignatureData write = new SignatureData(java.io.Writer.class, "write", java.lang.String.class); //$NON-NLS-1$
 
-	Expression writeStringArgument;
-
-	Expression bufferedIOInitializer;
-
-	Expression bufferedWriterInstanceCreationArgument;
-
-	List<Expression> filesNewBufferedWriterInvocationArguments;
-
-	TryStatement tryStatement;
-
 	Optional<UseFilesWriteStringAnalysisResult> findAnalysisResult(MethodInvocation methodInvocation,
 			CompilationUnit compilationUnit) {
 		if (!write.isEquivalentTo(methodInvocation.resolveMethodBinding())) {
 			return Optional.empty();
 		}
-		writeStringArgument = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
+		Expression writeStringArgument = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.get(0);
 
 		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
@@ -66,27 +56,41 @@ public class UseFilesWriteStringAnalyzer {
 			return Optional.empty();
 		}
 		VariableDeclarationFragment fragmentDeclaringBufferedWriter = (VariableDeclarationFragment) declaringNode;
-		tryStatement = findSurroundingTryStatement(fragmentDeclaringBufferedWriter, blockOfInvocationStatement)
+		TryStatement tryStatement = findSurroundingTryStatement(fragmentDeclaringBufferedWriter, blockOfInvocationStatement)
 			.orElse(null);
 		if (tryStatement == null) {
 			return Optional.empty();
 		}
-
+		Expression bufferedIOInitializer;
 		bufferedIOInitializer = fragmentDeclaringBufferedWriter.getInitializer();
 		if (bufferedIOInitializer == null) {
 			return Optional.empty();
 		}
 		if (ClassRelationUtil.isNewInstanceCreationOf(bufferedIOInitializer, java.io.BufferedWriter.class.getName())) {
 			ClassInstanceCreation bufferedWriterInstanceCreation = (ClassInstanceCreation) bufferedIOInitializer;
-			bufferedWriterInstanceCreationArgument = FilesUtil
+			Expression bufferedWriterInstanceCreationArgument = FilesUtil
 				.findBufferedIOArgument(bufferedWriterInstanceCreation, java.io.FileWriter.class.getName())
 				.orElse(null);
 			if (bufferedWriterInstanceCreationArgument == null) {
 				return Optional.empty();
 			}
+			if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+				NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
+				ClassInstanceCreation writerInstanceCreation = (ClassInstanceCreation) bufferedWriterInstanceCreationArgument;
+				if (newBufferedIOArgumentsAnalyzer.analyzeInitializer(writerInstanceCreation)) {
+					return Optional.of(createUseFilesWriteStringAnalysisResult(newBufferedIOArgumentsAnalyzer,
+							bufferedWriterInstanceCreation,
+							writeStringArgument));
+				}
+			} else if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
+				return createTransformationDataUsingFileIOResource(tryStatement, bufferedWriterInstanceCreation,
+						(SimpleName) bufferedWriterInstanceCreationArgument,
+						writeStringArgument);
+			}
+
 		} else if (isFilesNewBufferedWriterInvocation(bufferedIOInitializer)) {
 			MethodInvocation filesNewBufferedWriterInvocation = (MethodInvocation) bufferedIOInitializer;
-			filesNewBufferedWriterInvocationArguments = ASTNodeUtil
+			List<Expression> filesNewBufferedWriterInvocationArguments = ASTNodeUtil
 				.convertToTypedList(filesNewBufferedWriterInvocation.arguments(), Expression.class);
 			if (filesNewBufferedWriterInvocationArguments.isEmpty()
 					|| filesNewBufferedWriterInvocationArguments.size() > 2) {
@@ -106,28 +110,13 @@ public class UseFilesWriteStringAnalyzer {
 					return Optional.empty();
 				}
 			}
-		}
-
-		if (bufferedWriterInstanceCreationArgument != null) {
-			if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-				NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
-				ClassInstanceCreation writerInstanceCreation = (ClassInstanceCreation) bufferedWriterInstanceCreationArgument;
-				if (newBufferedIOArgumentsAnalyzer.analyzeInitializer(writerInstanceCreation)) {
-					return Optional.of(createUseFilesWriteStringAnalysisResult(newBufferedIOArgumentsAnalyzer));
-				}
-			} else if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-
-				return createTransformationDataUsingFileIOResource((SimpleName) bufferedWriterInstanceCreationArgument);
-			}
-		} else if (bufferedIOInitializer.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			MethodInvocation filesNewBufferedWriterInvocatioon = (MethodInvocation) bufferedIOInitializer;
 			Expression pathExpression = filesNewBufferedWriterInvocationArguments.get(0);
 			if (filesNewBufferedWriterInvocationArguments.size() == 2) {
 				Expression charSetExpression = filesNewBufferedWriterInvocationArguments.get(1);
-				return Optional.of(new UseFilesWriteStringAnalysisResult(filesNewBufferedWriterInvocatioon,
+				return Optional.of(new UseFilesWriteStringAnalysisResult(filesNewBufferedWriterInvocation,
 						pathExpression, charSetExpression, writeStringArgument));
 			} else {
-				return Optional.of(new UseFilesWriteStringAnalysisResult(filesNewBufferedWriterInvocatioon,
+				return Optional.of(new UseFilesWriteStringAnalysisResult(filesNewBufferedWriterInvocation,
 						pathExpression, writeStringArgument));
 			}
 		}
@@ -135,20 +124,24 @@ public class UseFilesWriteStringAnalyzer {
 	}
 
 	UseFilesWriteStringAnalysisResult createUseFilesWriteStringAnalysisResult(
-			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer) {
+			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer,
+			ClassInstanceCreation bufferedWriterInstanceCreation,
+			Expression writeStringArgument) {
 		Expression charsetExpression = newBufferedIOArgumentsAnalyzer.getCharsetExpression()
 			.orElse(null);
 		if (charsetExpression != null) {
-			return new UseFilesWriteStringAnalysisResult(bufferedIOInitializer,
+			return new UseFilesWriteStringAnalysisResult(bufferedWriterInstanceCreation,
 					newBufferedIOArgumentsAnalyzer.getPathExpressions(), writeStringArgument,
 					charsetExpression);
 		}
-		return new UseFilesWriteStringAnalysisResult(bufferedIOInitializer,
+		return new UseFilesWriteStringAnalysisResult(bufferedWriterInstanceCreation,
 				newBufferedIOArgumentsAnalyzer.getPathExpressions(), writeStringArgument);
 	}
 
 	private Optional<UseFilesWriteStringAnalysisResult> createTransformationDataUsingFileIOResource(
-			SimpleName bufferedIOArgAsSimpleName) {
+			TryStatement tryStatement,
+			ClassInstanceCreation bufferedWriterInstanceCreation,
+			SimpleName bufferedIOArgAsSimpleName, Expression writeStringArgument) {
 		VariableDeclarationFragment fileIOResource = FilesUtil
 			.findVariableDeclarationFragmentAsResource(bufferedIOArgAsSimpleName,
 					tryStatement)
@@ -173,10 +166,10 @@ public class UseFilesWriteStringAnalyzer {
 
 		List<Expression> pathExpressions = fileIOAnalyzer.getPathExpressions();
 		UseFilesWriteStringAnalysisResult transformationData = fileIOAnalyzer.getCharset()
-			.map(charSet -> new UseFilesWriteStringAnalysisResult(bufferedIOInitializer,
+			.map(charSet -> new UseFilesWriteStringAnalysisResult(bufferedWriterInstanceCreation,
 					pathExpressions, writeStringArgument, charSet,
 					fileIOResource))
-			.orElse(new UseFilesWriteStringAnalysisResult(bufferedIOInitializer, pathExpressions,
+			.orElse(new UseFilesWriteStringAnalysisResult(bufferedWriterInstanceCreation, pathExpressions,
 					writeStringArgument,
 					fileIOResource));
 		return Optional.of(transformationData);
