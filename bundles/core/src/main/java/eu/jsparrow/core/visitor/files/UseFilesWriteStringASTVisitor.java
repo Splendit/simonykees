@@ -36,7 +36,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		UseFilesWriteStringAnalyzer analyzer = new UseFilesWriteStringAnalyzer();
-		analyzer.findAnalysisResult(methodInvocation, getCompilationUnit())
+		analyzer.analyze(methodInvocation, getCompilationUnit())
 			.ifPresent(result -> {
 				transform(methodInvocation, result);
 			});
