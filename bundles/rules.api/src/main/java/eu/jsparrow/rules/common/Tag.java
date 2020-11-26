@@ -41,7 +41,8 @@ public enum Tag {
 	SECURITY("security"),
 	FREE("free"),
 	LOGGING("logging"),
-	IO_OPERATIONS("io operations");
+	IO_OPERATIONS("io operations"), 
+	JUNIT("junit");
 
 	private List<String> tagName;
 
