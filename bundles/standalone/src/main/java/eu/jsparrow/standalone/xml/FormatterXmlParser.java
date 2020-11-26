@@ -1,15 +1,19 @@
 package eu.jsparrow.standalone.xml;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLInputFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ctc.wstx.api.WstxInputProperties;
+import com.ctc.wstx.stax.WstxInputFactory;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import eu.jsparrow.standalone.xml.model.Profile;
 import eu.jsparrow.standalone.xml.model.Profiles;
@@ -23,99 +27,102 @@ import eu.jsparrow.standalone.xml.model.Setting;
  */
 public class FormatterXmlParser {
 
-	private static final Logger logger = LoggerFactory.getLogger(FormatterXmlParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(FormatterXmlParser.class);
 
-	private static final String CODE_FORMATTER_PROFILE_KEY = "CodeFormatterProfile"; //$NON-NLS-1$
+    private static final String CODE_FORMATTER_PROFILE_KEY = "CodeFormatterProfile"; //$NON-NLS-1$
 
-	private FormatterXmlParser() {
-		// methods should be called statically, no instance needed
-	}
+    private FormatterXmlParser() {
+        // methods should be called statically, no instance needed
+    }
 
-	/**
-	 * Returns a {@link Map} of formatter settings entries, with id as key and
-	 * value as value.
-	 * </p>
-	 * Note: The XML is structured to allow more than one profile. In case there
-	 * is more than one profile, this method will always return the first one!
-	 * </p>
-	 * Shortened example Eclipse formatter file:
-	 *
-	 * <pre>
-	 * <code>
-	 * {@code
-	 * <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-	 * <profiles version="17">
-	 *     <profile kind="CodeFormatterProfile" name=
-	"Eclipse Splendit default" version="17">
-	 *         <setting id=
-	"org.eclipse.jdt.core.formatter.insert_space_after_ellipsis" value=
-	"insert"/>
-	 *         <setting id=
-	"org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations" value
-	="insert"/>
-	 *     </profile>
-	 * </profiles>}
-	 * </code>
-	 * </pre>
-	 *
-	 * @param file
-	 *            Eclipse formatter file
-	 * @return a {@link Map} of settings
-	 * @throws FormatterXmlParserException
-	 *             when parsing of the provided file is impossible (e.g.,
-	 *             invalid XML, non-existing file, etc.)
-	 */
-	public static Map<String, String> getFormatterSettings(File file) throws FormatterXmlParserException {
-		Profiles profiles;
+    /**
+     * Returns a {@link Map} of formatter settings entries, with id as key and
+     * value as value.
+     * </p>
+     * Note: The XML is structured to allow more than one profile. In case there
+     * is more than one profile, this method will always return the first one!
+     * </p>
+     * Shortened example Eclipse formatter file:
+     *
+     * <pre>
+     * <code>
+     * {@code
+     * <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+     * <profiles version="17">
+     *     <profile kind="CodeFormatterProfile" name=
+     * "Eclipse Splendit default" version="17">
+     *         <setting id=
+     * "org.eclipse.jdt.core.formatter.insert_space_after_ellipsis" value=
+     * "insert"/>
+     *         <setting id=
+     * "org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations" value
+     * ="insert"/>
+     *     </profile>
+     * </profiles>}
+     * </code>
+     * </pre>
+     *
+     * @param file Eclipse formatter file
+     * @return a {@link Map} of settings
+     * @throws FormatterXmlParserException when parsing of the provided file is impossible (e.g.,
+     *                                     invalid XML, non-existing file, etc.)
+     */
+    public static Map<String, String> getFormatterSettings(File file) throws FormatterXmlParserException {
+        Profiles profiles;
 
-		if (file == null) {
-			throw new FormatterXmlParserException("File path is null"); //$NON-NLS-1$
-		}
+        if (file == null) {
+            throw new FormatterXmlParserException("File path is null"); //$NON-NLS-1$
+        }
 
-		String absolutePath = file.getAbsolutePath();
+        String absolutePath = file.getAbsolutePath();
 
-		if (!file.exists()) {
-			throw new FormatterXmlParserException(String.format("Path unavailable: %s", absolutePath)); //$NON-NLS-1$
-		}
+        if (!file.exists()) {
+            throw new FormatterXmlParserException(String.format("Path unavailable: %s", absolutePath)); //$NON-NLS-1$
+        }
 
-		try {
-			JAXBContext context = JAXBContext.newInstance(Profiles.class);
-			Unmarshaller unmarshaller = context.createUnmarshaller();
+        String fileContent = null;
+        try {
+            fileContent = new String(Files.readAllBytes(file.toPath()));
+        } catch (IOException e) {
+            throw new FormatterXmlParserException(
+                    String.format("Unable to parse the given formatting file: %s", absolutePath), e);
+        }
 
-			Object o = unmarshaller.unmarshal(file);
-			if (o instanceof Profiles) {
-				profiles = (Profiles) o;
-			} else {
-				throw new FormatterXmlParserException(String.format("Unexpected XML structure in: %s", absolutePath)); //$NON-NLS-1$
-			}
-		} catch (JAXBException e) {
-			throw new FormatterXmlParserException(
-					String.format("Unable to parse the given formatting file: %s", absolutePath), e); //$NON-NLS-1$
-		}
+        try {
+            XMLInputFactory ifactory = new WstxInputFactory(); // Woodstox XMLInputFactory impl
+            ifactory.setProperty(WstxInputProperties.P_MAX_ATTRIBUTE_SIZE, 32000);
+            XmlMapper xmlMapper = new XmlMapper(ifactory);
 
-		Profile relevantProfile = profiles.getProfileList()
-			.stream()
-			.filter(p -> CODE_FORMATTER_PROFILE_KEY.equals(p.getKind()))
-			.findFirst()
-			.orElse(null);
+            profiles = xmlMapper.readValue(fileContent, Profiles.class);
+        } catch (JsonProcessingException e) {
+            throw new FormatterXmlParserException(
+                    String.format("Unexpected XML structure in: %s", absolutePath), e); //$NON-NLS-1$
+        }
 
-		if (relevantProfile == null) {
-			throw new FormatterXmlParserException(
-					String.format("No CodeFormatterProfile found in: %s", absolutePath)); //$NON-NLS-1$
-		}
+        Profile relevantProfile = profiles.getProfileList()
+                .stream()
+                .filter(p -> CODE_FORMATTER_PROFILE_KEY.equals(p.getKind()))
+                .findFirst()
+                .orElse(null);
 
-		Map<String, String> settings = relevantProfile.getSettings()
-			.stream()
-			.collect(Collectors.toMap(Setting::getId, Setting::getValue));
+        if (relevantProfile == null) {
+            throw new FormatterXmlParserException(
+                    String.format("No CodeFormatterProfile found in: %s", absolutePath)); //$NON-NLS-1$
+        }
 
-		if (settings.isEmpty()) {
-			throw new FormatterXmlParserException(
-					String.format("No formatter settings found in: %s", absolutePath)); //$NON-NLS-1$
-		}
+        Map<String, String> settings = relevantProfile.getSettings()
+                .stream()
+                .collect(Collectors.toMap(Setting::getId, Setting::getValue));
 
-		logger.debug("'{}' settings loaded for formatting profile '{}' in '{}'", settings.size(), //$NON-NLS-1$
-				relevantProfile.getName(), absolutePath);
+        if (settings.isEmpty()) {
+            throw new FormatterXmlParserException(
+                    String.format("No formatter settings found in: %s", absolutePath)); //$NON-NLS-1$
+        }
 
-		return settings;
-	}
+        logger.debug("'{}' settings loaded for formatting profile '{}' in '{}'", settings.size(), //$NON-NLS-1$
+                relevantProfile.getName(), absolutePath);
+
+        return settings;
+    }
+
 }

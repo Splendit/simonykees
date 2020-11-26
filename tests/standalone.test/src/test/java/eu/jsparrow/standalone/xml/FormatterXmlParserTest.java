@@ -63,6 +63,14 @@ public class FormatterXmlParserTest {
 			.getFormatterSettings(loadResource("second-profile-is-formatter.xml"));
 		assertThat(settings.entrySet(), equalTo(expected.entrySet()));
 	}
+	
+    @Test
+    public void readSettings_5000EntriesLargeFile_shouldReturn5000Settings() throws Exception {
+        int expectedSize = 5000;
+
+        Map<String, String> settings = FormatterXmlParser.getFormatterSettings(loadResource("5000-entries-large.xml"));
+        assertThat(settings.size(), equalTo(expectedSize));
+    }
 
 	@Test
 	public void readSettings_invalidPath_shouldThrowException() throws Exception {
