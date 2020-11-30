@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ctc.wstx.api.WstxInputProperties;
 import com.ctc.wstx.stax.WstxInputFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import eu.jsparrow.standalone.xml.model.Profile;
@@ -85,7 +86,7 @@ public class FormatterXmlParser {
             fileContent = new String(Files.readAllBytes(file.toPath()));
         } catch (IOException e) {
             throw new FormatterXmlParserException(
-                    String.format("Unable to parse the given formatting file: %s", absolutePath), e);
+                    String.format("Unable to parse the given formatting file: %s", absolutePath), e); //$NON-NLS-1$
         }
 
         try {

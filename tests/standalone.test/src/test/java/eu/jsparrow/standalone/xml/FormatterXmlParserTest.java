@@ -60,17 +60,17 @@ public class FormatterXmlParserTest {
 		expected.put("2_org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations", "2_insert");
 
 		Map<String, String> settings = FormatterXmlParser
-			.getFormatterSettings(loadResource("second-profile-is-formatter.xml"));
+				.getFormatterSettings(loadResource("second-profile-is-formatter.xml"));
 		assertThat(settings.entrySet(), equalTo(expected.entrySet()));
 	}
-	
-    @Test
-    public void readSettings_5000EntriesLargeFile_shouldReturn5000Settings() throws Exception {
-        int expectedSize = 5000;
 
-        Map<String, String> settings = FormatterXmlParser.getFormatterSettings(loadResource("5000-entries-large.xml"));
-        assertThat(settings.size(), equalTo(expectedSize));
-    }
+	@Test
+	public void readSettings_5000EntriesLargeFile_shouldReturn5000Settings() throws Exception {
+		int expectedSize = 5000;
+
+		Map<String, String> settings = FormatterXmlParser.getFormatterSettings(loadResource("5000-entries-large.xml"));
+		assertThat(settings.size(), equalTo(expectedSize));
+	}
 
 	@Test
 	public void readSettings_invalidPath_shouldThrowException() throws Exception {
@@ -102,7 +102,7 @@ public class FormatterXmlParserTest {
 		ThrowingRunnable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("missing-profile.xml"));
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
-		assertThat(e.getMessage(), startsWith(NO_CODE_FORMATTER_PROFILE_FOUND));
+		assertThat(e.getMessage(), startsWith(UNEXPECTED_XML_STRUCTURE));
 	}
 
 	@Test
@@ -122,12 +122,11 @@ public class FormatterXmlParserTest {
 	}
 
 	/**
-	 * Gets a file name, adds a relative path and uses OSGi mechanisms to
-	 * retrieve the actual path of the file. Note: This method does not work
-	 * with invalid paths.
+	 * Gets a file name, adds a relative path and uses OSGi mechanisms to retrieve
+	 * the actual path of the file. Note: This method does not work with invalid
+	 * paths.
 	 * 
-	 * @param resource
-	 *            a valid file name
+	 * @param resource a valid file name
 	 * @return a file instance with the resolved path
 	 * @throws IOException
 	 * @throws URISyntaxException

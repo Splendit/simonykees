@@ -32,7 +32,11 @@ Bundle-ClassPath: lib/plexus-utils.jar,
  lib/maven-invoker.jar,
  lib/snakeyaml.jar,
  lib/jackson-dataformat-xml.jar,
+ lib/jackson-annotations.jar,
+ lib/jackson-core.jar,
+ lib/jackson-databind.jar,
+ lib/jackson-module-jaxb-annotations.jar,
+ lib/stax2-api.jar,
  lib/woodstox-core.jar,
  .
 Import-Package: org.eclipse.jdt.launching
-Multi-Release: true

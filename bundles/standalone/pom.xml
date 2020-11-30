@@ -16,6 +16,7 @@
 
 	<properties>
 		<snakeyaml.version>1.23</snakeyaml.version>
+		<jackson.version>2.12.0</jackson.version>
 		<standalone.properties.destinationFile>src/main/resources/standalone.properties</standalone.properties.destinationFile>
 		<standalone.properties.sourceFile></standalone.properties.sourceFile>
 		<proguard.extra.options>
@@ -103,7 +104,7 @@
 							<goal>copy</goal>
 						</goals>
 						<configuration>
-						
+
 							<artifactItems>
 								<item>
 									<groupId>org.apache.maven.shared</groupId>
@@ -124,7 +125,32 @@
 								<dependency>
 									<groupId>com.fasterxml.jackson.dataformat</groupId>
 									<artifactId>jackson-dataformat-xml</artifactId>
-									<version>2.11.3</version>
+									<version>${jackson.version}</version>
+								</dependency>
+								<dependency>
+									<groupId>com.fasterxml.jackson.core</groupId>
+									<artifactId>jackson-annotations</artifactId>
+									<version>${jackson.version}</version>
+								</dependency>
+								<dependency>
+									<groupId>com.fasterxml.jackson.core</groupId>
+									<artifactId>jackson-core</artifactId>
+									<version>${jackson.version}</version>
+								</dependency>
+								<dependency>
+									<groupId>com.fasterxml.jackson.core</groupId>
+									<artifactId>jackson-databind</artifactId>
+									<version>${jackson.version}</version>
+								</dependency>
+								<depdendency>
+									<groupId>com.fasterxml.jackson.module</groupId>
+									<artifactId>jackson-module-jaxb-annotations</artifactId>
+									<version>${jackson.version}</version>
+								</depdendency>
+								<dependency>
+									<groupId>org.codehaus.woodstox</groupId>
+									<artifactId>stax2-api</artifactId>
+									<version>4.2.1</version>
 								</dependency>
 								<dependency>
 									<groupId>com.fasterxml.woodstox</groupId>
@@ -132,7 +158,7 @@
 									<version>6.2.3</version>
 								</dependency>
 							</artifactItems>
-							
+
 							<outputDirectory>lib</outputDirectory>
 							<stripVersion>true</stripVersion>
 							<overWriteReleases>true</overWriteReleases>
