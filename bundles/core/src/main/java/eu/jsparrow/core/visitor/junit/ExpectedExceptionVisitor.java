@@ -62,27 +62,22 @@ public class ExpectedExceptionVisitor extends ASTVisitor {
 	}
 
 	public List<Expression> getExpectedExceptionsTypes() {
-		List<MethodInvocation> expectedInvocations = this.expectedExceptionInvocations.stream()
-			.filter(mi -> "expect".equals(mi.getName()
-				.getIdentifier()))
-			.collect(Collectors.toList());
+		List<MethodInvocation> expectedInvocations = getExpectExceptionInvocations();
 		List<Expression> expectedExceptions = new ArrayList<>();
-		List<ITypeBinding> expectedExceptionTypes = new ArrayList<>();
 		for (MethodInvocation expected : expectedInvocations) {
 			List<Expression> arguments = ASTNodeUtil.convertToTypedList(expected.arguments(), Expression.class);
 			for (Expression argument : arguments) {
 				expectedExceptions.add(argument);
-				ITypeBinding argumentType = argument.resolveTypeBinding();
-				if (argumentType.isParameterizedType()) {
-					ITypeBinding[] typeArguments = argumentType.getTypeArguments();
-					for (ITypeBinding arg : typeArguments) {
-						expectedExceptionTypes.add(arg);
-					}
-				}
 			}
 		}
 		return expectedExceptions;
 
+	}
+
+	public List<MethodInvocation> getExpectExceptionInvocations() {
+		return this.expectedExceptionInvocations.stream()
+			.filter(mi -> "expect".equals(mi.getName().getIdentifier()))
+			.collect(Collectors.toList());
 	}
 
 	public List<Expression> getExpectedMessages(Predicate<MethodInvocation> argTypeFilter) {
@@ -102,14 +97,15 @@ public class ExpectedExceptionVisitor extends ASTVisitor {
 	public boolean hasMatcherParameter(MethodInvocation methodInvocation) {
 		return false;
 	}
-	
+
 	public List<Expression> getExpectedCauses() {
 		return this.expectedExceptionInvocations.stream()
-				.filter(mi -> "expectCause".equals(mi.getName().getIdentifier()))
-				.filter(this::hasMatcherParameter)
-				.flatMap(mi -> ASTNodeUtil.convertToTypedList(mi.arguments(), Expression.class)
-					.stream())
-				.collect(Collectors.toList());
+			.filter(mi -> "expectCause".equals(mi.getName()
+				.getIdentifier()))
+			.filter(this::hasMatcherParameter)
+			.flatMap(mi -> ASTNodeUtil.convertToTypedList(mi.arguments(), Expression.class)
+				.stream())
+			.collect(Collectors.toList());
 	}
 
 }
