@@ -60,7 +60,7 @@ public class FormatterXmlParserTest {
 		expected.put("2_org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations", "2_insert");
 
 		Map<String, String> settings = FormatterXmlParser
-				.getFormatterSettings(loadResource("second-profile-is-formatter.xml"));
+			.getFormatterSettings(loadResource("second-profile-is-formatter.xml"));
 		assertThat(settings.entrySet(), equalTo(expected.entrySet()));
 	}
 
@@ -122,11 +122,12 @@ public class FormatterXmlParserTest {
 	}
 
 	/**
-	 * Gets a file name, adds a relative path and uses OSGi mechanisms to retrieve
-	 * the actual path of the file. Note: This method does not work with invalid
-	 * paths.
+	 * Gets a file name, adds a relative path and uses OSGi mechanisms to
+	 * retrieve the actual path of the file. Note: This method does not work
+	 * with invalid paths.
 	 * 
-	 * @param resource a valid file name
+	 * @param resource
+	 *            a valid file name
 	 * @return a file instance with the resolved path
 	 * @throws IOException
 	 * @throws URISyntaxException
