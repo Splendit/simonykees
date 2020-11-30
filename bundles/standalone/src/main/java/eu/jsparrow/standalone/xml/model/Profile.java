@@ -13,8 +13,13 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
  */
 public class Profile {
 
+	@JsonProperty("kind")
 	private String kind;
+	
+	@JsonProperty("name")
 	private String name;
+	
+	@JsonProperty("version")
 	private int version;
 
 	@JsonProperty("setting")

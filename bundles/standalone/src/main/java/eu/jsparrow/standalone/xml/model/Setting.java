@@ -1,5 +1,7 @@
 package eu.jsparrow.standalone.xml.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * XML model class used to parse Eclipse formatter files.
  *
@@ -7,7 +9,10 @@ package eu.jsparrow.standalone.xml.model;
  */
 public class Setting {
 
+	@JsonProperty("id")
 	private String id;
+	
+	@JsonProperty("value")
 	private String value;
 
 	public String getId() {
