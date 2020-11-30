@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Statement;
@@ -54,27 +55,58 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	private void transform(MethodInvocation methodInvocation, UseFilesWriteStringAnalysisResult transformationData) {
-
-		MethodInvocation writeStringMethodInvocation = createFilesWriteStringMethodInvocation(transformationData);
-		astRewrite.replace(methodInvocation, writeStringMethodInvocation, null);
-
-		/*
-		 * TODO: 
-		 * 1. use the method createNewTryStatement to completely replace the try statement with a new one. 
-		 * This is a JDT bug that cannot handle TWR statements properly. For this reason, the TryStatement 
-		 * has to be provided from the transformationData. I tried to track it back but it is very complicated
-		 * process. Maybe you can do it faster. 
-		 * 2. If you have a transformationData object, that should provide everything 
-		 * you need for the transformation. You should not have more logic here that
-		 * gets the parents of a node until you reach the node to transform. 
+		/**
+		 * TODO:
+		 * <p>
+		 * 1. use the method createNewTryStatement to completely replace the try
+		 * statement with a new one. This is a JDT bug that cannot handle TWR
+		 * statements properly. For this reason, the TryStatement has to be
+		 * provided from the transformationData. I tried to track it back but it
+		 * is very complicated process. Maybe you can do it faster.
+		 * <p>
+		 * 2. If you have a transformationData object, that should provide
+		 * everything you need for the transformation. You should not have more
+		 * logic here that gets the parents of a node until you reach the node
+		 * to transform.
 		 */
 		Expression bufferedIOInitializer = transformationData.getBufferedIOInitializer();
 		ASTNode bufferedIODeclarationFragment = bufferedIOInitializer.getParent();
 		ASTNode bufferedIOResourceToRemove = bufferedIODeclarationFragment.getParent();
-		astRewrite.remove(bufferedIOResourceToRemove, null);
-		transformationData.getFileIOResource()
-			.ifPresent(resource -> astRewrite.remove(resource.getParent(), null));
+
+		if (calculateResourcesSizeAfterTransformation(transformationData) > 0) {
+			MethodInvocation writeStringMethodInvocation = createFilesWriteStringMethodInvocation(transformationData);
+			astRewrite.replace(methodInvocation, writeStringMethodInvocation, null);
+			astRewrite.remove(bufferedIOResourceToRemove, null);
+			transformationData.getFileIOResource()
+				.ifPresent(resource -> astRewrite.remove(resource.getParent(),
+						null));
+		} else {
+			List<VariableDeclarationExpression> newResources = ASTNodeUtil
+				.convertToTypedList(transformationData.getTryStatement()
+					.resources(), VariableDeclarationExpression.class);
+			newResources.remove(bufferedIOResourceToRemove);
+			transformationData.getFileIOResource()
+				.ifPresent(resource -> newResources.remove(resource.getParent()));
+			List<VariableDeclarationExpression> newResoursesCopyTargets = new ArrayList<>();
+			newResources.stream()
+				.forEach(r -> newResoursesCopyTargets
+					.add((VariableDeclarationExpression) astRewrite.createCopyTarget(r)));
+			TryStatement tryStatementReplacement = createNewTryStatement(transformationData,
+					newResoursesCopyTargets, methodInvocation);
+			astRewrite.replace(transformationData.getTryStatement(), tryStatementReplacement, null);
+		}
 		onRewrite();
+	}
+
+	private int calculateResourcesSizeAfterTransformation(UseFilesWriteStringAnalysisResult transformationData) {
+		int sizeBefore = transformationData.getTryStatement()
+			.resources()
+			.size();
+		if (transformationData.getFileIOResource()
+			.isPresent()) {
+			return sizeBefore - 2;
+		}
+		return sizeBefore - 1;
 	}
 
 	private MethodInvocation createFilesWriteStringMethodInvocation(
@@ -117,43 +149,52 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	@SuppressWarnings("unchecked")
-	private TryStatement createNewTryStatement(TryStatement node, List<VariableDeclarationExpression> resourceList) {
-
-		TryStatement tryStatement = getASTRewrite().getAST()
+	private TryStatement createNewTryStatement(UseFilesWriteStringAnalysisResult transformationData,
+			List<VariableDeclarationExpression> resourceList, MethodInvocation methodInvocationToReplace) {
+		TryStatement tryStatement = transformationData.getTryStatement();
+		TryStatement tryStatementReplacement = getASTRewrite().getAST()
 			.newTryStatement();
-		tryStatement.resources()
+		tryStatementReplacement.resources()
 			.addAll(resourceList);
 
-		Block newBody = (Block) ASTNode.copySubtree(node.getAST(), node.getBody());
-		
-		List<Statement> newBodyStatements = ASTNodeUtil.convertToTypedList(newBody.statements(), Statement.class);
-		Map<Integer, List<Comment>> comments = TwrCommentsUtil.findBodyComments(node, getCommentRewriter());
+		Block oldBody = tryStatement.getBody();
+		Block newBody = (Block) ASTNode.copySubtree(tryStatement.getAST(), oldBody);
+		List<Statement> newBodyStatementsTypedList = newBody.statements();
+		Map<Integer, List<Comment>> comments = TwrCommentsUtil.findBodyComments(tryStatement, getCommentRewriter());
 		CommentRewriter commentRewriter = getCommentRewriter();
 		comments.forEach((key, value) -> {
-			int newBodySize = newBodyStatements.size();
+			int newBodySize = newBodyStatementsTypedList.size();
 			if (newBodySize > key) {
-				Statement statement = newBodyStatements.get(key);
+				Statement statement = newBodyStatementsTypedList.get(key);
 				commentRewriter.saveBeforeStatement(statement, value);
-			} else if (!newBodyStatements.isEmpty()) {
-				Statement statement = newBodyStatements.get(newBodySize - 1);
+			} else if (!newBodyStatementsTypedList.isEmpty()) {
+				Statement statement = newBodyStatementsTypedList.get(newBodySize - 1);
 				commentRewriter.saveAfterStatement(statement, value);
 			} else {
-				commentRewriter.saveBeforeStatement(node, value);
+				commentRewriter.saveBeforeStatement(tryStatement, value);
 			}
 		});
+		ASTNode invocationStatementToReplace = methodInvocationToReplace.getParent();
+		int replacementIndex = oldBody.statements()
+			.indexOf(invocationStatementToReplace);
+		newBodyStatementsTypedList.remove(replacementIndex);
+		ExpressionStatement invocationStatementReplacement = getASTRewrite().getAST()
+			.newExpressionStatement(createFilesWriteStringMethodInvocation(transformationData));
+		newBodyStatementsTypedList.add(replacementIndex, invocationStatementReplacement);
 
-		List<CatchClause> newCatchClauses = ASTNodeUtil.convertToTypedList(node.catchClauses(), CatchClause.class)
+		List<CatchClause> newCatchClauses = ASTNodeUtil
+			.convertToTypedList(tryStatement.catchClauses(), CatchClause.class)
 			.stream()
-			.map(clause -> (CatchClause) ASTNode.copySubtree(node.getAST(), clause))
+			.map(clause -> (CatchClause) ASTNode.copySubtree(tryStatement.getAST(), clause))
 			.collect(Collectors.toList());
 
-		tryStatement.setBody(newBody);
-		tryStatement.catchClauses()
+		tryStatementReplacement.setBody(newBody);
+		tryStatementReplacement.catchClauses()
 			.addAll(newCatchClauses);
-		tryStatement.setFinally((Block) ASTNode.copySubtree(node.getAST(), node.getFinally()));
+		tryStatementReplacement
+			.setFinally((Block) ASTNode.copySubtree(tryStatement.getAST(), tryStatement.getFinally()));
 
-		return tryStatement;
+		return tryStatementReplacement;
 	}
-	
 
 }

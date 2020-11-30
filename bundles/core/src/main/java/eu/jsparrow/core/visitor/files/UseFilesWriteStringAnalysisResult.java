@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
@@ -21,6 +22,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  */
 class UseFilesWriteStringAnalysisResult {
 
+	private final TryStatement tryStatement;
+
 	private final Expression bufferedIOInitializer;
 	private VariableDeclarationFragment fileIOResource;
 	private Expression pathExpression;
@@ -28,45 +31,53 @@ class UseFilesWriteStringAnalysisResult {
 	private final Expression writeStringArgument;
 	private Expression charSet;
 
-	UseFilesWriteStringAnalysisResult(MethodInvocation filesNewBufferedWriterInvocation, Expression pathExpression,
+	UseFilesWriteStringAnalysisResult(TryStatement tryStatement, MethodInvocation filesNewBufferedWriterInvocation,
+			Expression pathExpression,
 			Expression charSet, Expression writeStringArgument) {
-		this(filesNewBufferedWriterInvocation, pathExpression, writeStringArgument);
+		this(tryStatement, filesNewBufferedWriterInvocation, pathExpression, writeStringArgument);
 		this.charSet = charSet;
 	}
 
-	UseFilesWriteStringAnalysisResult(MethodInvocation filesNewBufferedWriterInvocation, Expression pathExpression,
+	UseFilesWriteStringAnalysisResult(TryStatement tryStatement, MethodInvocation filesNewBufferedWriterInvocation,
+			Expression pathExpression,
 			Expression writeStringArgument) {
+		this.tryStatement = tryStatement;
 		this.bufferedIOInitializer = filesNewBufferedWriterInvocation;
 		this.pathExpression = pathExpression;
 		this.pathExpressions = Collections.emptyList();
 		this.writeStringArgument = writeStringArgument;
 	}
 
-	UseFilesWriteStringAnalysisResult(Expression bufferedIOInitializer,
+	UseFilesWriteStringAnalysisResult(TryStatement tryStatement, Expression bufferedIOInitializer,
 			List<Expression> pathExpressions, Expression writeStringArgument, Expression charSet,
 			VariableDeclarationFragment fileIOResource) {
-		this(bufferedIOInitializer, pathExpressions, writeStringArgument, fileIOResource);
+		this(tryStatement, bufferedIOInitializer, pathExpressions, writeStringArgument, fileIOResource);
 		this.charSet = charSet;
 	}
 
-	UseFilesWriteStringAnalysisResult(Expression bufferedIOInitializer,
+	UseFilesWriteStringAnalysisResult(TryStatement tryStatement, Expression bufferedIOInitializer,
 			List<Expression> pathExpressions, Expression writeStringArgument,
 			VariableDeclarationFragment fileIOResource) {
-		this(bufferedIOInitializer, pathExpressions, writeStringArgument);
+		this(tryStatement, bufferedIOInitializer, pathExpressions, writeStringArgument);
 		this.fileIOResource = fileIOResource;
 	}
 
-	UseFilesWriteStringAnalysisResult(Expression bufferedIOInitializer,
+	UseFilesWriteStringAnalysisResult(TryStatement tryStatement, Expression bufferedIOInitializer,
 			List<Expression> pathExpressions, Expression writeStringArgument, Expression charSet) {
-		this(bufferedIOInitializer, pathExpressions, writeStringArgument);
+		this(tryStatement, bufferedIOInitializer, pathExpressions, writeStringArgument);
 		this.charSet = charSet;
 	}
 
-	UseFilesWriteStringAnalysisResult(Expression bufferedIOInitializer,
+	UseFilesWriteStringAnalysisResult(TryStatement tryStatement, Expression bufferedIOInitializer,
 			List<Expression> pathExpressions, Expression writeStringArgument) {
+		this.tryStatement = tryStatement;
 		this.bufferedIOInitializer = bufferedIOInitializer;
 		this.pathExpressions = pathExpressions;
 		this.writeStringArgument = writeStringArgument;
+	}
+
+	TryStatement getTryStatement() {
+		return tryStatement;
 	}
 
 	public Optional<VariableDeclarationFragment> getFileIOResource() {
