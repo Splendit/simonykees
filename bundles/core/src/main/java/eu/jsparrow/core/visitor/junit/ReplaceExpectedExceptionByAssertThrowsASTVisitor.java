@@ -98,7 +98,7 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		assertionArguments.add(lambdaExpression);
 		ExpressionStatement assertionStatement = ast.newExpressionStatement(assertThrows);
 		
-		astRewrite.replace(nodeThrowingException, assertionStatement, null);
+		astRewrite.replace(nodeThrowingException.getParent(), assertionStatement, null);
 		astRewrite.remove(expectExceptionInvocation.getParent(), null);
 		onRewrite();
 		
