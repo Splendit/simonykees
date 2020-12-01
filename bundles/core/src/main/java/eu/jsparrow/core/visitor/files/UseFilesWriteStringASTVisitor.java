@@ -17,7 +17,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 import eu.jsparrow.core.visitor.impl.trycatch.TwrCommentsUtil;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
@@ -81,18 +80,8 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 				.ifPresent(resource -> astRewrite.remove(resource.getParent(),
 						null));
 		} else {
-			List<VariableDeclarationExpression> newResources = ASTNodeUtil
-				.convertToTypedList(transformationData.getTryStatement()
-					.resources(), VariableDeclarationExpression.class);
-			newResources.remove(bufferedIOResourceToRemove);
-			transformationData.getFileIOResource()
-				.ifPresent(resource -> newResources.remove(resource.getParent()));
-			List<VariableDeclarationExpression> newResoursesCopyTargets = new ArrayList<>();
-			newResources.stream()
-				.forEach(r -> newResoursesCopyTargets
-					.add((VariableDeclarationExpression) astRewrite.createCopyTarget(r)));
-			TryStatement tryStatementReplacement = createNewTryStatement(transformationData,
-					newResoursesCopyTargets, methodInvocation);
+			TryStatement tryStatementReplacement = createNewTryStatementWithoutResources(transformationData,
+					methodInvocation);
 			astRewrite.replace(transformationData.getTryStatement(), tryStatementReplacement, null);
 		}
 		onRewrite();
@@ -149,13 +138,11 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	@SuppressWarnings("unchecked")
-	private TryStatement createNewTryStatement(UseFilesWriteStringAnalysisResult transformationData,
-			List<VariableDeclarationExpression> resourceList, MethodInvocation methodInvocationToReplace) {
+	private TryStatement createNewTryStatementWithoutResources(UseFilesWriteStringAnalysisResult transformationData,
+			MethodInvocation methodInvocationToReplace) {
 		TryStatement tryStatement = transformationData.getTryStatement();
 		TryStatement tryStatementReplacement = getASTRewrite().getAST()
 			.newTryStatement();
-		tryStatementReplacement.resources()
-			.addAll(resourceList);
 
 		Block oldBody = tryStatement.getBody();
 		Block newBody = (Block) ASTNode.copySubtree(tryStatement.getAST(), oldBody);
