@@ -21,45 +21,54 @@ public class ExpressionsThrowingExceptionVisitor extends ASTVisitor {
 	private ITypeBinding exceptionType;
 	private List<ASTNode> nodesThrowingExpectedException = new ArrayList<>();
 
-	public List<ASTNode> getNodesThrowingExpectedException() {
-		return nodesThrowingExpectedException;
-	}
-
 	public ExpressionsThrowingExceptionVisitor(ITypeBinding exceptionType) {
 		this.exceptionType = exceptionType;
 	}
-	
+
+	@Override
 	public boolean visit(ClassInstanceCreation instanceCreation) {
 		IMethodBinding constructorBinding = instanceCreation.resolveConstructorBinding();
-		// TODO: check if the constructor binding throws the expected exception 
-		return true; 
-	}
-	
-	public boolean visit(ThrowStatement throwStatement) {
-		Expression expression = throwStatement.getExpression();
-		ITypeBinding thrownType = expression.resolveTypeBinding();
-		//TODO: check if the thrown type is a subtype or matches the expectedException type.
-		
+		boolean throwsException = verifyThrownExceptions(constructorBinding);
+		if (throwsException) {
+			nodesThrowingExpectedException.add(instanceCreation);
+		}
 		return true;
 	}
- 
+
+	@Override
+	public boolean visit(ThrowStatement throwStatement) {
+		Expression expression = throwStatement.getExpression();
+		String qualifiedExceptionName = exceptionType.getQualifiedName();
+		ITypeBinding thrownType = expression.resolveTypeBinding();
+		boolean throwsException = ClassRelationUtil.isContentOfType(thrownType, qualifiedExceptionName)
+				|| ClassRelationUtil.isInheritingContentOfTypes(thrownType,
+						Collections.singletonList(qualifiedExceptionName));
+		if (throwsException) {
+			nodesThrowingExpectedException.add(throwStatement.getExpression());
+		}
+		return true;
+	}
+
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		boolean throwsExpectedException = verifyThrownExceptions(methodBinding);
+		if (throwsExpectedException) {
+			nodesThrowingExpectedException.add(methodInvocation);
+		}
+		return true;
+	}
+
+	private boolean verifyThrownExceptions(IMethodBinding methodBinding) {
 		ITypeBinding[] exceptionTypes = methodBinding.getExceptionTypes();
-
 		String qualifiedExceptionName = exceptionType.getQualifiedName();
-
-		boolean throwsExpectedException = Arrays.stream(exceptionTypes)
+		return Arrays.stream(exceptionTypes)
 			.anyMatch(exception -> ClassRelationUtil.isContentOfType(exception, qualifiedExceptionName)
 					|| ClassRelationUtil.isInheritingContentOfTypes(exception,
 							Collections.singletonList(qualifiedExceptionName)));
-		if(throwsExpectedException) {
-			nodesThrowingExpectedException.add(methodInvocation);
-		}
-		
-		return true;
-		
+	}
+
+	public List<ASTNode> getNodesThrowingExpectedException() {
+		return nodesThrowingExpectedException;
 	}
 }

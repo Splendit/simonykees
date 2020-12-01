@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.junit;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,8 @@ import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -23,14 +26,17 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAddImportASTVisitor {
 	
-	private static final String ORG_JUNIT_TEST = "org.junit.Test";
+	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
+	private static final String ASSERT_THROWS = "assertThrows"; //$NON-NLS-1$
+	private static final String ORG_JUNIT_ASSERT_ASSERT_THROWS = "org.junit.Assert.assertThrows"; //$NON-NLS-1$
+	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
 	private static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
 	
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		boolean continueVisiting = super.visit(compilationUnit);
 		if(continueVisiting) {
-			verifyStaticMethodImport(compilationUnit, "org.junit.Assert.assertThrows");
+			verifyStaticMethodImport(compilationUnit, ORG_JUNIT_ASSERT_ASSERT_THROWS);
 		}
 		return continueVisiting;
 	}
@@ -38,7 +44,7 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 	
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
-		// check for @Test
+
 		List<MarkerAnnotation> annotations = ASTNodeUtil.convertToTypedList(methodDeclaration.modifiers(), MarkerAnnotation.class);
 		if(annotations.size() != 1) {
 			return false;
@@ -46,6 +52,7 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		MarkerAnnotation annotation = annotations.get(0);
 		Name typeName = annotation.getTypeName();
 		ITypeBinding annotationTypeBinding = typeName.resolveTypeBinding();
+		ClassRelationUtil.isContentOfTypes(annotationTypeBinding, Arrays.asList(ORG_JUNIT_JUPITER_API_TEST, ORG_JUNIT_TEST));
 		if(!ClassRelationUtil.isContentOfType(annotationTypeBinding, ORG_JUNIT_TEST)) {
 			return true;
 		}
@@ -80,27 +87,18 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 			return true;
 		}
 		ASTNode nodeThrowingException = nodesThrowingException.get(0);
-		if(nodeThrowingException.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+		if(nodeThrowingException.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY 
+				&& nodeThrowingException.getLocationInParent() != ThrowStatement.EXPRESSION_PROPERTY) {
 			return true;
 		}
-		Expression expressionThrowingException = (Expression)nodeThrowingException;
-		AST ast = methodDeclaration.getAST();
-		//TODO: use a fully qualified name as an expression if the static import cannot be added. 
-		Name name = addImportForStaticMethod("org.junit.Assert.assertThrows", methodDeclaration)
-				.orElse(ast.newName("org.junit.Assert.assertThrows"));
-		MethodInvocation assertThrows = ast.newMethodInvocation();
-		assertThrows.setName(ast.newSimpleName("assertThrows"));
-		Expression firstArg = (Expression) astRewrite.createCopyTarget(expectedException);
-		LambdaExpression lambdaExpression = ast.newLambdaExpression();
-		lambdaExpression.setBody(astRewrite.createCopyTarget(nodeThrowingException));
-		List assertionArguments = assertThrows.arguments();
-		assertionArguments.add(firstArg);
-		assertionArguments.add(lambdaExpression);
-		ExpressionStatement assertionStatement = ast.newExpressionStatement(assertThrows);
 		
-		astRewrite.replace(nodeThrowingException.getParent(), assertionStatement, null);
-		astRewrite.remove(expectExceptionInvocation.getParent(), null);
-		onRewrite();
+		boolean isLastStatement = verifyPosition(methodDeclaration, nodeThrowingException);
+		if(!isLastStatement) {
+			return true;
+		}
+		
+
+		refactor(methodDeclaration, expectExceptionInvocation, expectedException, nodeThrowingException);
 		
 		
 		
@@ -112,11 +110,59 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		// make sure the transformation is feasible: no duplicated expect, no statement after expect, etc..
 		// generate transformation 
 		
-		// verify the positioning. 
+		// verify the positioning. -> the statement throwing the exception should be the last one
 		
 		return false;
 	}
+
+
+	private boolean verifyPosition(MethodDeclaration methodDeclaration, ASTNode nodeThrowingException) {
+		Block testBody = methodDeclaration.getBody();
+		List<Statement> statements = ASTNodeUtil.convertToTypedList(testBody.statements(), Statement.class);
+		Statement lastStatement = statements.get(statements.size() - 1);
+		return lastStatement == nodeThrowingException.getParent();
+	}
+
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void refactor(MethodDeclaration methodDeclaration, MethodInvocation expectExceptionInvocation,
+			Expression expectedException, ASTNode nodeThrowingException) {
+		AST ast = methodDeclaration.getAST();
+		Optional<Name> qualifiedPrefix = addImportForStaticMethod(ORG_JUNIT_ASSERT_ASSERT_THROWS, methodDeclaration);
+		MethodInvocation assertThrows = ast.newMethodInvocation();
+		assertThrows.setName(ast.newSimpleName(ASSERT_THROWS));
+		qualifiedPrefix.ifPresent(assertThrows::setExpression);
+		Expression firstArg = (Expression) astRewrite.createCopyTarget(expectedException);
+		LambdaExpression lambdaExpression = ast.newLambdaExpression();
+		ASTNode lambdaBody = createThrowRunnable(nodeThrowingException);
+		lambdaExpression.setBody(lambdaBody);
+		List assertionArguments = assertThrows.arguments();
+		assertionArguments.add(firstArg);
+		assertionArguments.add(lambdaExpression);
+		ExpressionStatement assertionStatement = ast.newExpressionStatement(assertThrows);
+		
+		astRewrite.replace(nodeThrowingException.getParent(), assertionStatement, null);
+		astRewrite.remove(expectExceptionInvocation.getParent(), null);
+		onRewrite();
+	}
 	
+
+	@SuppressWarnings("unchecked")
+	private ASTNode createThrowRunnable(ASTNode nodeThrowingException) {
+		if(nodeThrowingException.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+			return astRewrite.createCopyTarget(nodeThrowingException);
+		} else {
+			AST ast = nodeThrowingException.getAST();
+			Block body = ast.newBlock();
+			@SuppressWarnings("rawtypes")
+			List statements = body.statements();
+			statements.add(astRewrite.createCopyTarget(nodeThrowingException.getParent()));
+			return body;
+		}
+		
+	}
+
+
 	private Optional<ITypeBinding> findExceptionTypeArgument(Expression excpetionClass) {
 		ITypeBinding argumentType = excpetionClass.resolveTypeBinding();
 		if (argumentType.isParameterizedType()) {
