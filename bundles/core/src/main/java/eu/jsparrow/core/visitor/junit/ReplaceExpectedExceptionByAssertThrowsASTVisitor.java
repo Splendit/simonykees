@@ -25,96 +25,101 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAddImportASTVisitor {
-	
+
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	private static final String ASSERT_THROWS = "assertThrows"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_ASSERT_ASSERT_THROWS = "org.junit.Assert.assertThrows"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
 	private static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
-	
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		boolean continueVisiting = super.visit(compilationUnit);
-		if(continueVisiting) {
+		if (continueVisiting) {
 			verifyStaticMethodImport(compilationUnit, ORG_JUNIT_ASSERT_ASSERT_THROWS);
 		}
 		return continueVisiting;
 	}
-	
-	
+
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
 
-		List<MarkerAnnotation> annotations = ASTNodeUtil.convertToTypedList(methodDeclaration.modifiers(), MarkerAnnotation.class);
-		if(annotations.size() != 1) {
+		List<MarkerAnnotation> annotations = ASTNodeUtil.convertToTypedList(methodDeclaration.modifiers(),
+				MarkerAnnotation.class);
+		if (annotations.size() != 1) {
 			return false;
 		}
 		MarkerAnnotation annotation = annotations.get(0);
 		Name typeName = annotation.getTypeName();
 		ITypeBinding annotationTypeBinding = typeName.resolveTypeBinding();
-		ClassRelationUtil.isContentOfTypes(annotationTypeBinding, Arrays.asList(ORG_JUNIT_JUPITER_API_TEST, ORG_JUNIT_TEST));
-		if(!ClassRelationUtil.isContentOfType(annotationTypeBinding, ORG_JUNIT_TEST)) {
+		ClassRelationUtil.isContentOfTypes(annotationTypeBinding,
+				Arrays.asList(ORG_JUNIT_JUPITER_API_TEST, ORG_JUNIT_TEST));
+		if (!ClassRelationUtil.isContentOfType(annotationTypeBinding, ORG_JUNIT_TEST)) {
 			return true;
 		}
-		
+
 		Block body = methodDeclaration.getBody();
 		ExpectedExceptionVisitor visitor = new ExpectedExceptionVisitor();
 		body.accept(visitor);
 		
-		List<MethodInvocation> expectExceptionsInvocations = visitor.getExpectExceptionInvocations();
-		if(expectExceptionsInvocations.size() !=1) {
-			return true;
-		}
-		MethodInvocation expectExceptionInvocation = expectExceptionsInvocations.get(0);
-		if(expectExceptionInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+		if(visitor.hasUnsupportedMethods() || visitor.hasUnresolvedInvocations()) {
 			return true;
 		}
 		
+		if(!visitor.hasUniqueExpectedExceptionRule()) {
+			return true;
+		}
+
+		List<MethodInvocation> expectExceptionsInvocations = visitor.getExpectExceptionInvocations();
+		if (expectExceptionsInvocations.size() != 1) {
+			return true;
+		}
+		MethodInvocation expectExceptionInvocation = expectExceptionsInvocations.get(0);
+		if (expectExceptionInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return true;
+		}
+
 		List<Expression> expectedExceptions = visitor.getExpectedExceptionsTypes();
-		if(expectedExceptions.size() != 1) {
+		if (expectedExceptions.size() != 1) {
 			return true;
 		}
 		Expression expectedException = expectedExceptions.get(0);
 		ITypeBinding exceptionType = findExceptionTypeArgument(expectedException).orElse(null);
-		if(exceptionType == null) {
+		if (exceptionType == null) {
 			return true;
 		}
-		 
-		ExpressionsThrowingExceptionVisitor expressionsThrowingExceptionVisitor = new ExpressionsThrowingExceptionVisitor(exceptionType);
-		body.accept(expressionsThrowingExceptionVisitor);
-		List<ASTNode> nodesThrowingException = expressionsThrowingExceptionVisitor.getNodesThrowingExpectedException();
-		if(nodesThrowingException.size() != 1) {
+
+		ExpressionsThrowingExceptionVisitor throwingExceptionsVisitor = new ExpressionsThrowingExceptionVisitor(
+				exceptionType);
+		body.accept(throwingExceptionsVisitor);
+		List<ASTNode> nodesThrowingException = throwingExceptionsVisitor.getNodesThrowingExpectedException();
+		if (nodesThrowingException.size() != 1) {
 			return true;
 		}
 		ASTNode nodeThrowingException = nodesThrowingException.get(0);
-		if(nodeThrowingException.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY 
+		if (nodeThrowingException.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY
 				&& nodeThrowingException.getLocationInParent() != ThrowStatement.EXPRESSION_PROPERTY) {
 			return true;
 		}
-		
+
 		boolean isLastStatement = verifyPosition(methodDeclaration, nodeThrowingException);
-		if(!isLastStatement) {
+		if (!isLastStatement) {
 			return true;
 		}
-		
 
 		refactor(methodDeclaration, expectExceptionInvocation, expectedException, nodeThrowingException);
-		
-		
-		
-		// Make a helper visitor to find expectedException.expect(class)
-		// make sure the last statement throws that exception 
-		// 
 
-		// check for expectedException.expect()
-		// make sure the transformation is feasible: no duplicated expect, no statement after expect, etc..
-		// generate transformation 
-		
-		// verify the positioning. -> the statement throwing the exception should be the last one
-		
+		/*
+		 * TODO: 0. Make sure there is no other expctExcetion.___
+		 * invocation/usage. 1. all the expressions of
+		 * expect/expectMessage/expectCause match with each other. 2. replace
+		 * all expectMessage by expect assertions. 3. replace all expectCause by
+		 * assertions 4. make more unit tests. 5. run the rule in opensource
+		 * projects.
+		 */
+
 		return false;
 	}
-
 
 	private boolean verifyPosition(MethodDeclaration methodDeclaration, ASTNode nodeThrowingException) {
 		Block testBody = methodDeclaration.getBody();
@@ -122,7 +127,6 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		Statement lastStatement = statements.get(statements.size() - 1);
 		return lastStatement == nodeThrowingException.getParent();
 	}
-
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void refactor(MethodDeclaration methodDeclaration, MethodInvocation expectExceptionInvocation,
@@ -140,16 +144,15 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		assertionArguments.add(firstArg);
 		assertionArguments.add(lambdaExpression);
 		ExpressionStatement assertionStatement = ast.newExpressionStatement(assertThrows);
-		
+
 		astRewrite.replace(nodeThrowingException.getParent(), assertionStatement, null);
 		astRewrite.remove(expectExceptionInvocation.getParent(), null);
 		onRewrite();
 	}
-	
 
 	@SuppressWarnings("unchecked")
 	private ASTNode createThrowRunnable(ASTNode nodeThrowingException) {
-		if(nodeThrowingException.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+		if (nodeThrowingException.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
 			return astRewrite.createCopyTarget(nodeThrowingException);
 		} else {
 			AST ast = nodeThrowingException.getAST();
@@ -159,24 +162,24 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 			statements.add(astRewrite.createCopyTarget(nodeThrowingException.getParent()));
 			return body;
 		}
-		
-	}
 
+	}
 
 	private Optional<ITypeBinding> findExceptionTypeArgument(Expression excpetionClass) {
 		ITypeBinding argumentType = excpetionClass.resolveTypeBinding();
 		if (argumentType.isParameterizedType()) {
 			ITypeBinding[] typeArguments = argumentType.getTypeArguments();
-			if(typeArguments.length == 1) {
+			if (typeArguments.length == 1) {
 				ITypeBinding typeArgument = typeArguments[0];
 				boolean isException = ClassRelationUtil.isContentOfType(typeArgument, EXCEPTION_TYPE_NAME)
-						|| ClassRelationUtil.isInheritingContentOfTypes(typeArgument, Collections.singletonList(EXCEPTION_TYPE_NAME));
-				if(isException) {
+						|| ClassRelationUtil.isInheritingContentOfTypes(typeArgument,
+								Collections.singletonList(EXCEPTION_TYPE_NAME));
+				if (isException) {
 					return Optional.of(typeArgument);
 				}
 			}
 		}
-		
+
 		return Optional.empty();
 	}
 
