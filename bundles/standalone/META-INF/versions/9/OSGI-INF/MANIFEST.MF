@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-ClassPath: lib/javax.activation.jar,
- lib/jaxb-api.jar,
- lib/jaxb-osgi.jar,
- .

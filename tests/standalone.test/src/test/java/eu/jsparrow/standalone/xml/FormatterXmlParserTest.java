@@ -65,6 +65,14 @@ public class FormatterXmlParserTest {
 	}
 
 	@Test
+	public void readSettings_5000EntriesLargeFile_shouldReturn5000Settings() throws Exception {
+		int expectedSize = 5000;
+
+		Map<String, String> settings = FormatterXmlParser.getFormatterSettings(loadResource("5000-entries-large.xml"));
+		assertThat(settings.size(), equalTo(expectedSize));
+	}
+
+	@Test
 	public void readSettings_invalidPath_shouldThrowException() throws Exception {
 		String invalidPath = String.join("/", "/xyz", "unavailable.xml");
 		ThrowingRunnable tr = () -> FormatterXmlParser.getFormatterSettings(new File(invalidPath));
@@ -94,7 +102,7 @@ public class FormatterXmlParserTest {
 		ThrowingRunnable tr = () -> FormatterXmlParser.getFormatterSettings(loadResource("missing-profile.xml"));
 		FormatterXmlParserException e = assertThrows(FormatterXmlParserException.class, tr);
 
-		assertThat(e.getMessage(), startsWith(NO_CODE_FORMATTER_PROFILE_FOUND));
+		assertThat(e.getMessage(), startsWith(UNEXPECTED_XML_STRUCTURE));
 	}
 
 	@Test

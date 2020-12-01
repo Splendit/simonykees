@@ -1,23 +1,28 @@
 package eu.jsparrow.standalone.xml.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+
 /**
  * XML model class used to parse Eclipse formatter files.
- * 
+ *
  * @since 3.23.0
  */
-@XmlRootElement(name = "profiles")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class Profiles {
 
-	@XmlElement(name = "profile")
+	@JsonProperty("version")
+	private int version;
+
+	@JsonProperty("profile")
+	@JacksonXmlElementWrapper(useWrapping = false)
 	private List<Profile> profileList = new ArrayList<>();
+
+	public int getVersion() {
+		return version;
+	}
 
 	public List<Profile> getProfileList() {
 		return profileList;
@@ -26,8 +31,6 @@ public class Profiles {
 	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
-		return "Profiles{" +
-				"profileList=" + profileList +
-				'}';
+		return "Profiles{" + "version=" + version + ", profileList=" + profileList + '}';
 	}
 }

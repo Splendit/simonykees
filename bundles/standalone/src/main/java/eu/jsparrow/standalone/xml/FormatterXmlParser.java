@@ -1,15 +1,20 @@
 package eu.jsparrow.standalone.xml;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLInputFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ctc.wstx.api.WstxInputProperties;
+import com.ctc.wstx.stax.WstxInputFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import eu.jsparrow.standalone.xml.model.Profile;
 import eu.jsparrow.standalone.xml.model.Profiles;
@@ -46,13 +51,13 @@ public class FormatterXmlParser {
 	 * <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 	 * <profiles version="17">
 	 *     <profile kind="CodeFormatterProfile" name=
-	"Eclipse Splendit default" version="17">
+	 * "Eclipse Splendit default" version="17">
 	 *         <setting id=
-	"org.eclipse.jdt.core.formatter.insert_space_after_ellipsis" value=
-	"insert"/>
+	 * "org.eclipse.jdt.core.formatter.insert_space_after_ellipsis" value=
+	 * "insert"/>
 	 *         <setting id=
-	"org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations" value
-	="insert"/>
+	 * "org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations" value
+	 * ="insert"/>
 	 *     </profile>
 	 * </profiles>}
 	 * </code>
@@ -78,19 +83,24 @@ public class FormatterXmlParser {
 			throw new FormatterXmlParserException(String.format("Path unavailable: %s", absolutePath)); //$NON-NLS-1$
 		}
 
+		String fileContent = null;
 		try {
-			JAXBContext context = JAXBContext.newInstance(Profiles.class);
-			Unmarshaller unmarshaller = context.createUnmarshaller();
-
-			Object o = unmarshaller.unmarshal(file);
-			if (o instanceof Profiles) {
-				profiles = (Profiles) o;
-			} else {
-				throw new FormatterXmlParserException(String.format("Unexpected XML structure in: %s", absolutePath)); //$NON-NLS-1$
-			}
-		} catch (JAXBException e) {
+			fileContent = new String(Files.readAllBytes(file.toPath()));
+		} catch (IOException e) {
 			throw new FormatterXmlParserException(
 					String.format("Unable to parse the given formatting file: %s", absolutePath), e); //$NON-NLS-1$
+		}
+
+		try {
+			// Woodstox XMLInputFactory impl
+			XMLInputFactory ifactory = new WstxInputFactory();
+			ifactory.setProperty(WstxInputProperties.P_MAX_ATTRIBUTE_SIZE, 32000);
+			XmlMapper xmlMapper = new XmlMapper(ifactory);
+
+			profiles = xmlMapper.readValue(fileContent, Profiles.class);
+		} catch (JsonProcessingException e) {
+			throw new FormatterXmlParserException(
+					String.format("Unexpected XML structure in: %s", absolutePath), e); //$NON-NLS-1$
 		}
 
 		Profile relevantProfile = profiles.getProfileList()
@@ -118,4 +128,5 @@ public class FormatterXmlParser {
 
 		return settings;
 	}
+
 }
