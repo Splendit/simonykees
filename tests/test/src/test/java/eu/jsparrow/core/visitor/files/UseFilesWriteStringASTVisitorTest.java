@@ -173,4 +173,70 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				+ "		}";
 		assertChange(original, expected);
 	}
+
+	@Test
+	public void visit_TWRUsingNewFileWriterWithoutCharset_shouldTransform() throws Exception {
+		fixture.addImport(java.io.BufferedWriter.class.getName());
+		fixture.addImport(java.io.FileWriter.class.getName());
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString))) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		String expected = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		try {\n"
+				+ "			Files.writeString(Paths.get(pathString), value, Charset.defaultCharset());\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_TWRUsingFileWriterVariableWithoutCharset_shouldTransform() throws Exception {
+		fixture.addImport(java.io.BufferedWriter.class.getName());
+		fixture.addImport(java.io.FileWriter.class.getName());
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		try (FileWriter fileWriter = new FileWriter(pathString);\n"
+				+ "				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		String expected = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		try {\n"
+				+ "			Files.writeString(Paths.get(pathString), value, Charset.defaultCharset());\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_TWRUsingFilesNewBufferedWriterWithoutCharset_shouldTransform() throws Exception {
+		fixture.addImport(java.io.BufferedWriter.class.getName());
+		fixture.addImport(java.nio.file.Files.class.getName());
+		fixture.addImport(java.nio.file.Path.class.getName());
+		fixture.addImport(java.nio.file.Paths.class.getName());
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		String expected = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try {\n"
+				+ "			Files.writeString(path, value, Charset.defaultCharset());\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		assertChange(original, expected);
+	}
 }

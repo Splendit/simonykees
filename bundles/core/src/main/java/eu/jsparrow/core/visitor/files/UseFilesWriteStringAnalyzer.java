@@ -181,14 +181,19 @@ public class UseFilesWriteStringAnalyzer {
 		}
 
 		List<Expression> pathExpressions = fileIOAnalyzer.getPathExpressions();
-		UseFilesWriteStringAnalysisResult transformationData = fileIOAnalyzer.getCharset()
-			.map(charSet -> new UseFilesWriteStringAnalysisResult(tryStatement, bufferedWriterInstanceCreation,
-					pathExpressions, writeStringArgument, charSet,
-					fileIOResource))
-			.orElse(new UseFilesWriteStringAnalysisResult(tryStatement, bufferedWriterInstanceCreation, pathExpressions,
-					writeStringArgument,
+		Expression charsetExpression = fileIOAnalyzer.getCharset()
+			.orElse(null);
+
+		if (charsetExpression != null) {
+			return Optional.of(new UseFilesWriteStringAnalysisResult(tryStatement,
+					bufferedWriterInstanceCreation,
+					pathExpressions, writeStringArgument, charsetExpression,
 					fileIOResource));
-		return Optional.of(transformationData);
+		}
+		return Optional.of(new UseFilesWriteStringAnalysisResult(tryStatement,
+				bufferedWriterInstanceCreation, pathExpressions,
+				writeStringArgument,
+				fileIOResource));
 	}
 
 	private boolean isFilesNewBufferedWriterInvocation(Expression initializer) {
