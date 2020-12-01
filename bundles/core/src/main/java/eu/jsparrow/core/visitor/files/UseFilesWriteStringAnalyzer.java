@@ -44,6 +44,10 @@ public class UseFilesWriteStringAnalyzer {
 			return Optional.empty();
 		}
 		Block blockOfInvocationStatement = (Block) writeInvocationStatement.getParent();
+		if (blockOfInvocationStatement.getLocationInParent() != TryStatement.BODY_PROPERTY) {
+			return Optional.empty();
+		}
+		TryStatement tryStatement = (TryStatement) blockOfInvocationStatement.getParent();
 
 		SimpleName writerVariableSimpleName = findWriterVariableNameUsedOnce(methodInvocation,
 				blockOfInvocationStatement)
@@ -71,7 +75,10 @@ public class UseFilesWriteStringAnalyzer {
 		if (parentVariableDeclarationExpression.getLocationInParent() != TryStatement.RESOURCES2_PROPERTY) {
 			return Optional.empty();
 		}
-		TryStatement tryStatement = (TryStatement) parentVariableDeclarationExpression.getParent();
+
+		if (parentVariableDeclarationExpression.getParent() != tryStatement) {
+			return Optional.empty();
+		}
 
 		Expression bufferedIOInitializer;
 		bufferedIOInitializer = fragmentDeclaringBufferedWriter.getInitializer();
