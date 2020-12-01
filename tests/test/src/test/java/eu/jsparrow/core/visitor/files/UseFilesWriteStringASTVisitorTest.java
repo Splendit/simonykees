@@ -14,12 +14,18 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 		setJavaVersion(JavaCore.VERSION_11);
 	}
 
+	private void addImports(Class<?>... classes) throws Exception {
+		for (Class<?> c : classes) {
+			fixture.addImport(c.getName());
+		}
+	}
+
 	@Test
 	public void visit_TWRUsingNewFileWriter_shouldTransform() throws Exception {
-		fixture.addImport(java.io.BufferedWriter.class.getName());
-		fixture.addImport(java.io.FileWriter.class.getName());
-		fixture.addImport(java.nio.charset.Charset.class.getName());
-		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
 
 		String original = "" +
 				"String value = \"Hello World!\";\n" +
@@ -42,8 +48,8 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 
 	@Test
 	public void visit_TWRUsingQualifiedClassNames_shouldTransform() throws Exception {
-		fixture.addImport(java.nio.charset.Charset.class.getName());
-		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
+		addImports(java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
 
 		String original = "" +
 				"String value = \"Hello World!\";\n" +
@@ -67,10 +73,10 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 
 	@Test
 	public void visit_TWRUsingFileWriterVariable_shouldTransform() throws Exception {
-		fixture.addImport(java.io.BufferedWriter.class.getName());
-		fixture.addImport(java.io.FileWriter.class.getName());
-		fixture.addImport(java.nio.charset.Charset.class.getName());
-		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
 
 		String original = "" +
 				"String value = \"Hello World!\";\n" +
@@ -94,12 +100,13 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 
 	@Test
 	public void visit_TWRUsingFilesNewBufferedWriterAndPathVariable_shouldTransform() throws Exception {
-		fixture.addImport(java.io.BufferedWriter.class.getName());
-		fixture.addImport(java.nio.charset.Charset.class.getName());
-		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
-		fixture.addImport(java.nio.file.Files.class.getName());
-		fixture.addImport(java.nio.file.Path.class.getName());
-		fixture.addImport(java.nio.file.Paths.class.getName());
+		addImports(java.io.BufferedWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class,
+				java.nio.file.Files.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class);
+
 		String original = "" +
 				"String value = \"Hello World!\";\n" +
 				"Charset cs = StandardCharsets.UTF_8;\n" +
@@ -121,10 +128,11 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 
 	@Test
 	public void visit_TWRUsingNewFileWriterNotAllResourcesRemoved_shouldTransform() throws Exception {
-		fixture.addImport(java.io.BufferedWriter.class.getName());
-		fixture.addImport(java.io.FileWriter.class.getName());
-		fixture.addImport(java.nio.charset.Charset.class.getName());
-		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
 		String original = "" +
 				"String value = \"Hello World!\";\n" +
 				"String pathString = \"/home/test/testpath\";\n" +
@@ -147,96 +155,100 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 
 	@Test
 	public void visit_TWRUsingFileWriterVariableNotAllResourcesRemoved_shouldTransform() throws Exception {
-		fixture.addImport(java.io.BufferedWriter.class.getName());
-		fixture.addImport(java.io.FileWriter.class.getName());
-		fixture.addImport(java.nio.charset.Charset.class.getName());
-		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
 		String original = "" +
-				"		String value = \"Hello World!\";\n"
-				+ "		String pathString = \"/home/test/testpath\";\n"
-				+ "		Charset cs = StandardCharsets.UTF_8;\n"
-				+ "		try (FileWriter fileWriter = new FileWriter(pathString, cs);\n"
-				+ "				FileWriter fileWriter2 = new FileWriter(pathString, cs);\n"
-				+ "				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);\n"
-				+ "				BufferedWriter bufferedWriter2 = new BufferedWriter(fileWriter2)) {\n"
-				+ "			bufferedWriter.write(value);\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
+				"String value = \"Hello World!\";\n" +
+				"String pathString = \"/home/test/testpath\";\n" +
+				"Charset cs = StandardCharsets.UTF_8;\n" +
+				"try (FileWriter fileWriter = new FileWriter(pathString, cs);\n" +
+				"		FileWriter fileWriter2 = new FileWriter(pathString, cs);\n" +
+				"		BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);\n" +
+				"		BufferedWriter bufferedWriter2 = new BufferedWriter(fileWriter2)) {\n" +
+				"	bufferedWriter.write(value);\n" +
+				"} catch (Exception exception) {\n" +
+				"}";
 		String expected = "" +
-				"		String value = \"Hello World!\";\n"
-				+ "		String pathString = \"/home/test/testpath\";\n"
-				+ "		Charset cs = StandardCharsets.UTF_8;\n"
-				+ "		try (FileWriter fileWriter2 = new FileWriter(pathString, cs);\n"
-				+ "				BufferedWriter bufferedWriter2 = new BufferedWriter(fileWriter2)) {\n"
-				+ "			Files.writeString(Paths.get(pathString), value, cs);\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
+				"String value = \"Hello World!\";\n" +
+				"String pathString = \"/home/test/testpath\";\n" +
+				"Charset cs = StandardCharsets.UTF_8;\n" +
+				"try (FileWriter fileWriter2 = new FileWriter(pathString, cs);\n" +
+				"		BufferedWriter bufferedWriter2 = new BufferedWriter(fileWriter2)) {\n" +
+				"	Files.writeString(Paths.get(pathString), value, cs);\n" +
+				"} catch (Exception exception) {\n" +
+				"}";
 		assertChange(original, expected);
 	}
 
 	@Test
 	public void visit_TWRUsingNewFileWriterWithoutCharset_shouldTransform() throws Exception {
-		fixture.addImport(java.io.BufferedWriter.class.getName());
-		fixture.addImport(java.io.FileWriter.class.getName());
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class);
+
 		String original = "" +
-				"		String value = \"Hello World!\";\n"
-				+ "		String pathString = \"/home/test/testpath\";\n"
-				+ "		try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString))) {\n"
-				+ "			bufferedWriter.write(value);\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
+				"String value = \"Hello World!\";\n" +
+				"String pathString = \"/home/test/testpath\";\n" +
+				"try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString))) {\n" +
+				"	bufferedWriter.write(value);\n" +
+				"} catch (Exception exception) {\n" +
+				"}";
 		String expected = "" +
-				"		String value = \"Hello World!\";\n"
-				+ "		String pathString = \"/home/test/testpath\";\n"
-				+ "		try {\n"
-				+ "			Files.writeString(Paths.get(pathString), value, Charset.defaultCharset());\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
+				"String value = \"Hello World!\";\n" +
+				"String pathString = \"/home/test/testpath\";\n" +
+				"try {\n" +
+				"	Files.writeString(Paths.get(pathString), value, Charset.defaultCharset());\n" +
+				"} catch (Exception exception) {\n" +
+				"}";
 		assertChange(original, expected);
 	}
 
 	@Test
 	public void visit_TWRUsingFileWriterVariableWithoutCharset_shouldTransform() throws Exception {
-		fixture.addImport(java.io.BufferedWriter.class.getName());
-		fixture.addImport(java.io.FileWriter.class.getName());
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class);
+
 		String original = "" +
-				"		String value = \"Hello World!\";\n"
-				+ "		String pathString = \"/home/test/testpath\";\n"
-				+ "		try (FileWriter fileWriter = new FileWriter(pathString);\n"
-				+ "				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {\n"
-				+ "			bufferedWriter.write(value);\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
+				"String value = \"Hello World!\";\n" +
+				"String pathString = \"/home/test/testpath\";\n" +
+				"try (FileWriter fileWriter = new FileWriter(pathString);\n" +
+				"		BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {\n" +
+				"	bufferedWriter.write(value);\n" +
+				"} catch (Exception exception) {\n" +
+				"}";
 		String expected = "" +
-				"		String value = \"Hello World!\";\n"
-				+ "		String pathString = \"/home/test/testpath\";\n"
-				+ "		try {\n"
-				+ "			Files.writeString(Paths.get(pathString), value, Charset.defaultCharset());\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
+				"String value = \"Hello World!\";\n" +
+				"String pathString = \"/home/test/testpath\";\n" +
+				"try {\n" +
+				"	Files.writeString(Paths.get(pathString), value, Charset.defaultCharset());\n" +
+				"} catch (Exception exception) {\n" +
+				"}";
 		assertChange(original, expected);
 	}
 
 	@Test
 	public void visit_TWRUsingFilesNewBufferedWriterWithoutCharset_shouldTransform() throws Exception {
-		fixture.addImport(java.io.BufferedWriter.class.getName());
-		fixture.addImport(java.nio.file.Files.class.getName());
-		fixture.addImport(java.nio.file.Path.class.getName());
-		fixture.addImport(java.nio.file.Paths.class.getName());
+		addImports(java.io.BufferedWriter.class,
+				java.nio.file.Files.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class);
+
 		String original = "" +
-				"		String value = \"Hello World!\";\n"
-				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
-				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path)) {\n"
-				+ "			bufferedWriter.write(value);\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
+				"String value = \"Hello World!\";\n" +
+				"Path path = Paths.get(\"/home/test/testpath\");\n" +
+				"try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path)) {\n" +
+				"	bufferedWriter.write(value);\n" +
+				"} catch (Exception exception) {\n" +
+				"}";
 		String expected = "" +
-				"		String value = \"Hello World!\";\n"
-				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
-				+ "		try {\n"
-				+ "			Files.writeString(path, value, Charset.defaultCharset());\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
+				"String value = \"Hello World!\";\n" +
+				"Path path = Paths.get(\"/home/test/testpath\");\n" +
+				"try {\n" +
+				"	Files.writeString(path, value, Charset.defaultCharset());\n" +
+				"} catch (Exception exception) {\n" +
+				"}";
 		assertChange(original, expected);
 	}
 }
