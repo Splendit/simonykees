@@ -51,8 +51,12 @@ public class UseFilesWriteStringAnalyzer {
 		if (writeInvocationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return Optional.empty();
 		}
-		
 		Block blockOfInvocationStatement = (Block) writeInvocationStatement.getParent();
+		
+		if (!checkWriterVariableUsage(writerVariableSimpleName, blockOfInvocationStatement)) {
+			return Optional.empty();
+		}
+
 		if (blockOfInvocationStatement.getLocationInParent() != TryStatement.BODY_PROPERTY) {
 			return Optional.empty();
 		}
@@ -228,12 +232,8 @@ public class UseFilesWriteStringAnalyzer {
 			.equals("newBufferedWriter"); //$NON-NLS-1$
 	}
 
-	private boolean checkWriterVariableNameTypeAndUsage(SimpleName writerVariableName,
+	private boolean checkWriterVariableUsage(SimpleName writerVariableName,
 			Block blockOfInvocationStatement) {
-		ITypeBinding typeBinding = writerVariableName.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(typeBinding, java.io.BufferedWriter.class.getName())) {
-			return false;
-		}
 		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(
 				writerVariableName);
 		blockOfInvocationStatement.accept(visitor);
@@ -244,7 +244,7 @@ public class UseFilesWriteStringAnalyzer {
 	private Optional<VariableDeclarationFragment> findFragmentDeclaringBufferedWriter(
 			SimpleName writerVariableSimpleName,
 			Block blockOfInvocationStatement, CompilationUnit compilationUnit) {
-		if (!checkWriterVariableNameTypeAndUsage(writerVariableSimpleName,
+		if (!checkWriterVariableUsage(writerVariableSimpleName,
 				blockOfInvocationStatement)) {
 			return Optional.empty();
 		}

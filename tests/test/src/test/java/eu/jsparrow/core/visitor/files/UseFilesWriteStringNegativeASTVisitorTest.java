@@ -131,23 +131,10 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 		assertNoChange(original);
 	}
 
-	class DeclareWriterAsResource {
-		void test() {
-		}
-	}
-
-	/**
-	 * SIM-1817: This test will fail because transformation is carried out even
-	 * in cases where a {@link java.io.BufferedWriter} is assigned to a resource
-	 * declared as {@link java.io.Writer}.
-	 * 
-	 * @throws Exception
-	 */
 	@Test
-	public void visit_DeclareWriterAsResource_shouldNotTransform() throws Exception {
+	public void visit_BufferedWriterUsedTwice_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
-				java.io.Writer.class,
 				java.nio.charset.Charset.class,
 				java.nio.charset.StandardCharsets.class);
 
@@ -155,14 +142,14 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 				"			String value = \"Hello World!\";\n"
 				+ "			String pathString = \"/home/test/testpath\";\n"
 				+ "			Charset cs = StandardCharsets.UTF_8;\n"
-				+ "			try (Writer writer = new BufferedWriter(new FileWriter(pathString, cs))) {\n"
-				+ "				writer.write(value);\n"
+				+ "			try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString, cs))) {\n"
+				+ "				bufferedWriter.write(value);\n"
+				+ "				bufferedWriter.write(value);\n"
 				+ "			} catch (Exception exception) {\n"
-				+ "			}\n"
-				+ "";
+				+ "			}";
 		assertNoChange(original);
 	}
-	
+
 	// @Test
 	// public void visit__shouldNotTransform() throws Exception {
 	// addImports();

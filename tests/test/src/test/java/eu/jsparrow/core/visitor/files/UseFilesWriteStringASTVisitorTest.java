@@ -251,4 +251,32 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				"}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_DeclareWriterAsResource_shouldTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.io.Writer.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"			String value = \"Hello World!\";\n"
+				+ "			String pathString = \"/home/test/testpath\";\n"
+				+ "			Charset cs = StandardCharsets.UTF_8;\n"
+				+ "			try (Writer writer = new BufferedWriter(new FileWriter(pathString, cs))) {\n"
+				+ "				writer.write(value);\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}\n"
+				+ "";
+		String expected = "" +
+				"			String value = \"Hello World!\";\n"
+				+ "			String pathString = \"/home/test/testpath\";\n"
+				+ "			Charset cs = StandardCharsets.UTF_8;\n"
+				+ "			try {\n"
+				+ "				Files.writeString(Paths.get(pathString), value, cs);\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}";
+		assertChange(original, expected);
+	}
 }
