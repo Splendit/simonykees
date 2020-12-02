@@ -29,37 +29,41 @@ public class UseFilesWriteStringAnalyzer {
 
 	Optional<UseFilesWriteStringAnalysisResult> analyze(MethodInvocation methodInvocation,
 			CompilationUnit compilationUnit) {
-		if (!write.isEquivalentTo(methodInvocation.resolveMethodBinding())) {
+
+		Expression methodInvocationExpression = methodInvocation.getExpression();
+		if (methodInvocationExpression == null || methodInvocationExpression
+			.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return Optional.empty();
 		}
-		Expression writeStringArgument = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
-			.get(0);
+		SimpleName writerVariableSimpleName = (SimpleName) methodInvocationExpression;
 
 		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return Optional.empty();
 		}
 		ExpressionStatement writeInvocationStatement = (ExpressionStatement) methodInvocation.getParent();
 
+		if (!write.isEquivalentTo(methodInvocation.resolveMethodBinding())) {
+			return Optional.empty();
+		}
+		Expression writeStringArgument = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
+			.get(0);
+
 		if (writeInvocationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 			return Optional.empty();
 		}
+		
 		Block blockOfInvocationStatement = (Block) writeInvocationStatement.getParent();
 		if (blockOfInvocationStatement.getLocationInParent() != TryStatement.BODY_PROPERTY) {
 			return Optional.empty();
 		}
 		TryStatement tryStatement = (TryStatement) blockOfInvocationStatement.getParent();
 
-		SimpleName writerVariableSimpleName = findWriterVariableNameUsedOnce(methodInvocation,
-				blockOfInvocationStatement)
-					.orElse(null);
-		if (writerVariableSimpleName == null) {
+		VariableDeclarationFragment fragmentDeclaringBufferedWriter = findFragmentDeclaringBufferedWriter(
+				writerVariableSimpleName, blockOfInvocationStatement, compilationUnit).orElse(null);
+		if (fragmentDeclaringBufferedWriter == null) {
 			return Optional.empty();
 		}
-		ASTNode declaringNode = compilationUnit.findDeclaringNode(writerVariableSimpleName.resolveBinding());
-		if (declaringNode == null || declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return Optional.empty();
-		}
-		VariableDeclarationFragment fragmentDeclaringBufferedWriter = (VariableDeclarationFragment) declaringNode;
+
 		if (fragmentDeclaringBufferedWriter
 			.getLocationInParent() != VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
 			return Optional.empty();
@@ -224,24 +228,32 @@ public class UseFilesWriteStringAnalyzer {
 			.equals("newBufferedWriter"); //$NON-NLS-1$
 	}
 
-	private Optional<SimpleName> findWriterVariableNameUsedOnce(MethodInvocation methodInvocation,
+	private boolean checkWriterVariableNameTypeAndUsage(SimpleName writerVariableName,
 			Block blockOfInvocationStatement) {
-		Expression methodInvocationExpression = methodInvocation.getExpression();
-		if (methodInvocationExpression == null || methodInvocationExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return Optional.empty();
-		}
-		SimpleName writerVariableName = (SimpleName) methodInvocationExpression;
 		ITypeBinding typeBinding = writerVariableName.resolveTypeBinding();
 		if (!ClassRelationUtil.isContentOfType(typeBinding, java.io.BufferedWriter.class.getName())) {
-			return Optional.empty();
+			return false;
 		}
 		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(
 				writerVariableName);
 		blockOfInvocationStatement.accept(visitor);
-		if (visitor.getUsages()
-			.size() != 1) {
+		return visitor.getUsages()
+			.size() == 1;
+	}
+
+	private Optional<VariableDeclarationFragment> findFragmentDeclaringBufferedWriter(
+			SimpleName writerVariableSimpleName,
+			Block blockOfInvocationStatement, CompilationUnit compilationUnit) {
+		if (!checkWriterVariableNameTypeAndUsage(writerVariableSimpleName,
+				blockOfInvocationStatement)) {
 			return Optional.empty();
 		}
-		return Optional.of(writerVariableName);
+
+		ASTNode declaringNode = compilationUnit.findDeclaringNode(writerVariableSimpleName.resolveBinding());
+		if (declaringNode == null || declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			return Optional.empty();
+		}
+		VariableDeclarationFragment fragmentDeclaringBufferedWriter = (VariableDeclarationFragment) declaringNode;
+		return Optional.of(fragmentDeclaringBufferedWriter);
 	}
 }

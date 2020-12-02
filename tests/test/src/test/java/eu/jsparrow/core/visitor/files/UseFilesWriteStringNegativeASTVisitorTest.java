@@ -97,6 +97,72 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 		assertNoChange(original);
 	}
 
+	@Test
+	public void visit_MethodInvocationWithoutExpression_shouldNotTransform() throws Exception {
+		fixture.addMethod("exampleMethod");
+		String original = "exampleMethod();";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ThisMethodInvocation_shouldNotTransform() throws Exception {
+		fixture.addMethod("exampleMethod");
+		String original = "this.exampleMethod();";
+		assertNoChange(original);
+	}
+
+	// TestLocalClassMethod
+
+	@Test
+	public void visit_VarMethodInvocationWithSimpleNameExpression_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		var o = new Object() {\n"
+				+ "			void exampeMethod() {}\n"
+				+ "		};\n"
+				+ "		o.exampeMethod();";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_MethodInvocationNotInExpressionStatement_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		String s = \"Hello World!\";\n"
+				+ "		int i = s.length();";
+		assertNoChange(original);
+	}
+
+	class DeclareWriterAsResource {
+		void test() {
+		}
+	}
+
+	/**
+	 * SIM-1817: This test will fail because transformation is carried out even
+	 * in cases where a {@link java.io.BufferedWriter} is assigned to a resource
+	 * declared as {@link java.io.Writer}.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void visit_DeclareWriterAsResource_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.io.Writer.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"			String value = \"Hello World!\";\n"
+				+ "			String pathString = \"/home/test/testpath\";\n"
+				+ "			Charset cs = StandardCharsets.UTF_8;\n"
+				+ "			try (Writer writer = new BufferedWriter(new FileWriter(pathString, cs))) {\n"
+				+ "				writer.write(value);\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}\n"
+				+ "";
+		assertNoChange(original);
+	}
+	
 	// @Test
 	// public void visit__shouldNotTransform() throws Exception {
 	// addImports();
