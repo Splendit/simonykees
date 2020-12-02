@@ -19,6 +19,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -37,6 +41,8 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		boolean continueVisiting = super.visit(compilationUnit);
 		if (continueVisiting) {
 			verifyStaticMethodImport(compilationUnit, ORG_JUNIT_ASSERT_ASSERT_THROWS);
+			verifyStaticMethodImport(compilationUnit, "org.junit.Assert.assertTrue");
+			verifyStaticMethodImport(compilationUnit, "org.junit.Assert.assertThat");
 		}
 		return continueVisiting;
 	}
@@ -61,12 +67,12 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		Block body = methodDeclaration.getBody();
 		ExpectedExceptionVisitor visitor = new ExpectedExceptionVisitor();
 		body.accept(visitor);
-		
-		if(visitor.hasUnsupportedMethods() || visitor.hasUnresolvedInvocations()) {
+
+		if (visitor.hasUnsupportedMethods() || visitor.hasUnresolvedInvocations()) {
 			return true;
 		}
-		
-		if(!visitor.hasUniqueExpectedExceptionRule()) {
+
+		if (!visitor.hasUniqueExpectedExceptionRule()) {
 			return true;
 		}
 
@@ -107,15 +113,13 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 			return true;
 		}
 
-		refactor(methodDeclaration, expectExceptionInvocation, expectedException, nodeThrowingException);
-
+		refactor(methodDeclaration, expectExceptionInvocation, expectedException, nodeThrowingException, visitor);
 		/*
-		 * TODO: 0. Make sure there is no other expctExcetion.___
-		 * invocation/usage. 1. all the expressions of
-		 * expect/expectMessage/expectCause match with each other. 2. replace
-		 * all expectMessage by expect assertions. 3. replace all expectCause by
-		 * assertions 4. make more unit tests. 5. run the rule in opensource
-		 * projects.
+		 * TODO: 0. Make sure there is no other expctExcetion invocation/usage.
+		 * 1. all the expressions of expect/expectMessage/expectCause match with
+		 * each other. 2. replace all expectMessage by expect assertions. 3.
+		 * replace all expectCause by assertions 4. make more unit tests. 5. run
+		 * the rule in opensource projects.
 		 */
 
 		return false;
@@ -130,7 +134,14 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void refactor(MethodDeclaration methodDeclaration, MethodInvocation expectExceptionInvocation,
-			Expression expectedException, ASTNode nodeThrowingException) {
+			Expression expectedException, ASTNode nodeThrowingException, ExpectedExceptionVisitor visitor) {
+
+		List<Expression> expectedMessages = visitor
+			.getExpectedMessages(mi -> visitor.hasSingleParameterOfType(mi, java.lang.String.class.getName()));
+		List<Expression> expectedMessageMatchers = visitor
+			.getExpectedMessages(mi -> visitor.hasSingleParameterOfType(mi, "org.hamcrest.Matcher"));
+		List<Expression> expectedCauseMatchers = visitor.getExpectedCauses();
+
 		AST ast = methodDeclaration.getAST();
 		Optional<Name> qualifiedPrefix = addImportForStaticMethod(ORG_JUNIT_ASSERT_ASSERT_THROWS, methodDeclaration);
 		MethodInvocation assertThrows = ast.newMethodInvocation();
@@ -143,11 +154,79 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		List assertionArguments = assertThrows.arguments();
 		assertionArguments.add(firstArg);
 		assertionArguments.add(lambdaExpression);
-		ExpressionStatement assertionStatement = ast.newExpressionStatement(assertThrows);
 
-		astRewrite.replace(nodeThrowingException.getParent(), assertionStatement, null);
-		astRewrite.remove(expectExceptionInvocation.getParent(), null);
-		onRewrite();
+		if (expectedMessages.isEmpty() && expectedMessageMatchers.isEmpty() && expectedCauseMatchers.isEmpty()) {
+			ExpressionStatement assertionStatement = ast.newExpressionStatement(assertThrows);
+			astRewrite.replace(nodeThrowingException.getParent(), assertionStatement, null);
+			astRewrite.remove(expectExceptionInvocation.getParent(), null);
+			onRewrite();
+		} else {
+			VariableDeclarationFragment fragment = ast.newVariableDeclarationFragment();
+			fragment.setInitializer(assertThrows);
+			//TODO: make sure exception is a valid name
+			fragment.setName(ast.newSimpleName("exception"));
+			VariableDeclarationStatement exceptionDeclaration = ast.newVariableDeclarationStatement(fragment);
+			// TODO:get the exception type as a parameter or resolve it here, and use the a specific exception type. 
+			Type type = ast.newSimpleType(ast.newSimpleName("Exception"));
+			exceptionDeclaration.setType(type);
+			
+			astRewrite.replace(nodeThrowingException.getParent(), exceptionDeclaration, null);
+			astRewrite.remove(expectExceptionInvocation.getParent(), null);
+			ListRewrite rewriter = astRewrite.getListRewrite(methodDeclaration.getBody(), Block.STATEMENTS_PROPERTY);
+			for(Expression expectedMmessage : expectedMessages) {
+				MethodInvocation assertTrue = ast.newMethodInvocation();
+				Optional<Name> qualifier = addImportForStaticMethod("org.junit.Assert.assertTrue", methodDeclaration);
+				qualifier.ifPresent(assertTrue::setExpression);
+				assertTrue.setName(ast.newSimpleName("assertTrue"));
+				MethodInvocation getMessage = ast.newMethodInvocation();
+				getMessage.setName(ast.newSimpleName("getMessage"));
+				//FIXME use the one from above
+				getMessage.setExpression(ast.newSimpleName("exception"));
+				MethodInvocation contains = ast.newMethodInvocation();
+				contains.setName(ast.newSimpleName("contains"));
+				contains.setExpression(getMessage);
+				contains.arguments().add(astRewrite.createCopyTarget(expectedMmessage));
+				assertTrue.arguments().add(contains);
+				ExpressionStatement expressionStatement = ast.newExpressionStatement(assertTrue);
+				rewriter.insertLast(expressionStatement, null);
+				astRewrite.remove(ASTNodeUtil.getSpecificAncestor(expectedMmessage, Statement.class), null);
+			}
+			
+			for(Expression expectedMmessage : expectedMessageMatchers) {
+				MethodInvocation assertTrue = ast.newMethodInvocation();
+				Optional<Name> qualifier = addImportForStaticMethod("org.hamcrest.MatcherAssert.assertThat", methodDeclaration);
+				qualifier.ifPresent(assertTrue::setExpression);
+				assertTrue.setName(ast.newSimpleName("assertThat"));
+				MethodInvocation getMessage = ast.newMethodInvocation();
+				getMessage.setName(ast.newSimpleName("getMessage"));
+				//FIXME use the one from above
+				getMessage.setExpression(ast.newSimpleName("exception"));
+				assertTrue.arguments().add(getMessage);
+				assertTrue.arguments().add(astRewrite.createCopyTarget(expectedMmessage));
+				ExpressionStatement expressionStatement = ast.newExpressionStatement(assertTrue);
+				rewriter.insertLast(expressionStatement, null);
+				astRewrite.remove(ASTNodeUtil.getSpecificAncestor(expectedMmessage, Statement.class), null);
+			}
+			
+			for(Expression expectedMmessage : expectedCauseMatchers) {
+				MethodInvocation assertTrue = ast.newMethodInvocation();
+				Optional<Name> qualifier = addImportForStaticMethod("org.hamcrest.MatcherAssert.assertThat", methodDeclaration);
+				qualifier.ifPresent(assertTrue::setExpression);
+				assertTrue.setName(ast.newSimpleName("assertThat"));
+				MethodInvocation getMessage = ast.newMethodInvocation();
+				getMessage.setName(ast.newSimpleName("getCause"));
+				//FIXME use the one from above
+				getMessage.setExpression(ast.newSimpleName("exception"));
+				assertTrue.arguments().add(getMessage);
+				assertTrue.arguments().add(astRewrite.createCopyTarget(expectedMmessage));
+				ExpressionStatement expressionStatement = ast.newExpressionStatement(assertTrue);
+				rewriter.insertLast(expressionStatement, null);
+				astRewrite.remove(ASTNodeUtil.getSpecificAncestor(expectedMmessage, Statement.class), null);
+			}
+
+			onRewrite();
+		}
+
 	}
 
 	@SuppressWarnings("unchecked")
