@@ -58,6 +58,11 @@ public class UseFilesWriteStringAnalyzer {
 		if (fragmentDeclaringBufferedWriter == null) {
 			return Optional.empty();
 		}
+		
+		Expression bufferedIOInitializer = fragmentDeclaringBufferedWriter.getInitializer();
+		if (bufferedIOInitializer == null) {
+			return Optional.empty();
+		}
 
 		if (fragmentDeclaringBufferedWriter
 			.getLocationInParent() != VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
@@ -88,10 +93,6 @@ public class UseFilesWriteStringAnalyzer {
 			return Optional.empty();
 		}
 
-		Expression bufferedIOInitializer = fragmentDeclaringBufferedWriter.getInitializer();
-		if (bufferedIOInitializer == null) {
-			return Optional.empty();
-		}
 		if (ClassRelationUtil.isNewInstanceCreationOf(bufferedIOInitializer, java.io.BufferedWriter.class.getName())) {
 			ClassInstanceCreation bufferedWriterInstanceCreation = (ClassInstanceCreation) bufferedIOInitializer;
 			return analyze(tryStatement, bufferedWriterInstanceCreation, writeStringArgument);
@@ -236,8 +237,8 @@ public class UseFilesWriteStringAnalyzer {
 		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(
 				writerVariableName);
 		blockOfInvocationStatement.accept(visitor);
-		return visitor.getUsages()
-			.size() == 1;
+		int usages = visitor.getUsages().size();
+		return usages == 1;
 	}
 
 	private Optional<VariableDeclarationFragment> findFragmentDeclaringBufferedWriter(

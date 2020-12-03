@@ -210,6 +210,41 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 		assertNoChange(original);
 	}
 
+	@Test
+	public void visit_InitializerIsNull_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class);
+		String original = "" +
+				"			class LocalClass {\n"
+				+ "				BufferedWriter bufferedWriter;\n"
+				+ "				void test() {\n"
+				+ "					String value = \"Hello World!\";\n"
+				+ "					try {\n"
+				+ "						bufferedWriter.write(value);\n"
+				+ "					} catch (Exception exception) {\n"
+				+ "					}\n"
+				+ "				}\n"
+				+ "			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_BufferedWriterWithTwoArguments_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"			String value = \"Hello World!\";\n"
+				+ "			String pathString = \"/home/test/testpath\";\n"
+				+ "			Charset cs = StandardCharsets.UTF_8;\n"
+				+ "			try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString, cs), 1000)) {\n"
+				+ "				bufferedWriter.write(value);\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}";
+		assertNoChange(original);
+	}
+
 	// @Test
 	// public void visit__shouldNotTransform() throws Exception {
 	// addImports();
