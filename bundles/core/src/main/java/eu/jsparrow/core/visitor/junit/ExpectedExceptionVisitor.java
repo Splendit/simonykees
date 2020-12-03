@@ -82,7 +82,7 @@ public class ExpectedExceptionVisitor extends ASTVisitor {
 		return false;
 	}
 
-	public List<Expression> getExpectedExceptionsTypes() {
+	public List<Expression> getExpectedExceptionsExpression() {
 		List<MethodInvocation> expectedInvocations = getExpectExceptionInvocations();
 		List<Expression> expectedExceptions = new ArrayList<>();
 		for (MethodInvocation expected : expectedInvocations) {
@@ -155,6 +155,24 @@ public class ExpectedExceptionVisitor extends ASTVisitor {
 	
 	public List<SimpleName> getExpectedExceptionNames() {
 		return this.expectedExceptionNames;
+	}
+
+	public boolean verifyExpectCauseMatchers() {
+		List<Expression> matchers = getExpectedCauses();
+		for(Expression matcher : matchers) {
+			ITypeBinding type = matcher.resolveTypeBinding();
+			if(type.isParameterizedType()) {
+				ITypeBinding[] typeParameters = type.getTypeArguments();
+				if(typeParameters.length == 1) {
+					ITypeBinding matcherType = typeParameters[0];
+					boolean isThrowable = ClassRelationUtil.isContentOfType(matcherType, Throwable.class.getName());
+					if(matcherType.isCapture() || !isThrowable) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 }

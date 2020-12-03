@@ -30,6 +30,11 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAddImportASTVisitor {
 
+	private static final String GET_MESSAGE = "getMessage"; //$NON-NLS-1$
+	private static final String ASSERT_TRUE = "assertTrue"; //$NON-NLS-1$
+	private static final String ORG_HAMCREST_MATCHER = "org.hamcrest.Matcher"; //$NON-NLS-1$
+	private static final String ORG_JUNIT_ASSERT_ASSERT_TRUE = "org.junit.Assert.assertTrue"; //$NON-NLS-1$
+	private static final String ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT = "org.hamcrest.MatcherAssert.assertThat"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	private static final String ASSERT_THROWS = "assertThrows"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_ASSERT_ASSERT_THROWS = "org.junit.Assert.assertThrows"; //$NON-NLS-1$
@@ -41,8 +46,8 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		boolean continueVisiting = super.visit(compilationUnit);
 		if (continueVisiting) {
 			verifyStaticMethodImport(compilationUnit, ORG_JUNIT_ASSERT_ASSERT_THROWS);
-			verifyStaticMethodImport(compilationUnit, "org.junit.Assert.assertTrue");
-			verifyStaticMethodImport(compilationUnit, "org.junit.Assert.assertThat");
+			verifyStaticMethodImport(compilationUnit, ORG_JUNIT_ASSERT_ASSERT_TRUE);
+			verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT);
 		}
 		return continueVisiting;
 	}
@@ -80,12 +85,17 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		if (expectExceptionsInvocations.size() != 1) {
 			return true;
 		}
+		
+		if(!visitor.verifyExpectCauseMatchers()) {
+			return true;
+		}
+		
 		MethodInvocation expectExceptionInvocation = expectExceptionsInvocations.get(0);
 		if (expectExceptionInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return true;
 		}
 
-		List<Expression> expectedExceptions = visitor.getExpectedExceptionsTypes();
+		List<Expression> expectedExceptions = visitor.getExpectedExceptionsExpression();
 		if (expectedExceptions.size() != 1) {
 			return true;
 		}
@@ -139,7 +149,7 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		List<Expression> expectedMessages = visitor
 			.getExpectedMessages(mi -> visitor.hasSingleParameterOfType(mi, java.lang.String.class.getName()));
 		List<Expression> expectedMessageMatchers = visitor
-			.getExpectedMessages(mi -> visitor.hasSingleParameterOfType(mi, "org.hamcrest.Matcher"));
+			.getExpectedMessages(mi -> visitor.hasSingleParameterOfType(mi, ORG_HAMCREST_MATCHER));
 		List<Expression> expectedCauseMatchers = visitor.getExpectedCauses();
 
 		AST ast = methodDeclaration.getAST();
@@ -175,11 +185,11 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 			ListRewrite rewriter = astRewrite.getListRewrite(methodDeclaration.getBody(), Block.STATEMENTS_PROPERTY);
 			for(Expression expectedMmessage : expectedMessages) {
 				MethodInvocation assertTrue = ast.newMethodInvocation();
-				Optional<Name> qualifier = addImportForStaticMethod("org.junit.Assert.assertTrue", methodDeclaration);
+				Optional<Name> qualifier = addImportForStaticMethod(ORG_JUNIT_ASSERT_ASSERT_TRUE, methodDeclaration);
 				qualifier.ifPresent(assertTrue::setExpression);
-				assertTrue.setName(ast.newSimpleName("assertTrue"));
+				assertTrue.setName(ast.newSimpleName(ASSERT_TRUE));
 				MethodInvocation getMessage = ast.newMethodInvocation();
-				getMessage.setName(ast.newSimpleName("getMessage"));
+				getMessage.setName(ast.newSimpleName(GET_MESSAGE));
 				//FIXME use the one from above
 				getMessage.setExpression(ast.newSimpleName("exception"));
 				MethodInvocation contains = ast.newMethodInvocation();
@@ -194,11 +204,11 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 			
 			for(Expression expectedMmessage : expectedMessageMatchers) {
 				MethodInvocation assertTrue = ast.newMethodInvocation();
-				Optional<Name> qualifier = addImportForStaticMethod("org.hamcrest.MatcherAssert.assertThat", methodDeclaration);
+				Optional<Name> qualifier = addImportForStaticMethod(ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT, methodDeclaration);
 				qualifier.ifPresent(assertTrue::setExpression);
 				assertTrue.setName(ast.newSimpleName("assertThat"));
 				MethodInvocation getMessage = ast.newMethodInvocation();
-				getMessage.setName(ast.newSimpleName("getMessage"));
+				getMessage.setName(ast.newSimpleName(GET_MESSAGE));
 				//FIXME use the one from above
 				getMessage.setExpression(ast.newSimpleName("exception"));
 				assertTrue.arguments().add(getMessage);
@@ -210,7 +220,7 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 			
 			for(Expression expectedMmessage : expectedCauseMatchers) {
 				MethodInvocation assertTrue = ast.newMethodInvocation();
-				Optional<Name> qualifier = addImportForStaticMethod("org.hamcrest.MatcherAssert.assertThat", methodDeclaration);
+				Optional<Name> qualifier = addImportForStaticMethod(ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT, methodDeclaration);
 				qualifier.ifPresent(assertTrue::setExpression);
 				assertTrue.setName(ast.newSimpleName("assertThat"));
 				MethodInvocation getMessage = ast.newMethodInvocation();
