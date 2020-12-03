@@ -130,7 +130,7 @@ class ReplaceExpectedExceptionByAssertThrowsASTVisitorTest extends UsesJDTUnitFi
 				+ ""
 				+ "@Test\n"
 				+ "public void expectMessageString() throws IOException {\n"
-				+ "	Exception exception=assertThrows(IOException.class,() -> throwIOException());\n"
+				+ "	IOException exception=assertThrows(IOException.class,() -> throwIOException());\n"
 				+ "	assertTrue(exception.getMessage().contains(\"some message\"));"
 				+ "}";
 		assertChange(original, expected);
@@ -160,7 +160,7 @@ class ReplaceExpectedExceptionByAssertThrowsASTVisitorTest extends UsesJDTUnitFi
 				+ "@Test\n"
 				+ "public void expectMessage() throws IOException {\n"
 				+ "	Matcher<String> causeMatcher = null;\n"
-				+ "	Exception exception = assertThrows(IOException.class, () -> throwIOException());\n"
+				+ "	IOException exception = assertThrows(IOException.class, () -> throwIOException());\n"
 				+ "	assertThat(exception.getMessage(), causeMatcher);\n"
 				+ "}";
 		assertChange(original, expected);
@@ -189,7 +189,7 @@ class ReplaceExpectedExceptionByAssertThrowsASTVisitorTest extends UsesJDTUnitFi
 				+ ""
 				+ "@Test\n"
 				+ "public void expectMessageContainsMatcher() throws IOException {\n"
-				+ "	Exception exception=assertThrows(IOException.class,() -> throwIOException());\n"
+				+ "	IOException exception=assertThrows(IOException.class,() -> throwIOException());\n"
 				+ "	assertThat(exception.getMessage(),Matchers.containsString(\"\"));"
 				+ "}";
 		assertChange(original, expected);
@@ -219,7 +219,7 @@ class ReplaceExpectedExceptionByAssertThrowsASTVisitorTest extends UsesJDTUnitFi
 				+ "@Test\n"
 				+ "public void throwableMatcher() throws IOException {\n"
 				+ "	Matcher<Throwable> causeMatcher = null;\n"
-				+ "	Exception exception = assertThrows(IOException.class, () -> throwIOException());\n"
+				+ "	IOException exception = assertThrows(IOException.class, () -> throwIOException());\n"
 				+ "	assertThat(exception.getCause(), causeMatcher);\n"
 				+ "}";
 		

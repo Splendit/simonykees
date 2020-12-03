@@ -123,7 +123,7 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 			return true;
 		}
 
-		refactor(methodDeclaration, expectExceptionInvocation, expectedException, nodeThrowingException, visitor);
+		refactor(methodDeclaration, expectExceptionInvocation, expectedException,  exceptionType, nodeThrowingException, visitor);
 		/*
 		 * TODO: 0. Make sure there is no other expctExcetion invocation/usage.
 		 * 1. all the expressions of expect/expectMessage/expectCause match with
@@ -144,7 +144,7 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void refactor(MethodDeclaration methodDeclaration, MethodInvocation expectExceptionInvocation,
-			Expression expectedException, ASTNode nodeThrowingException, ExpectedExceptionVisitor visitor) {
+			Expression expectedException, ITypeBinding exceptionType, ASTNode nodeThrowingException, ExpectedExceptionVisitor visitor) {
 
 		List<Expression> expectedMessages = visitor
 			.getExpectedMessages(mi -> visitor.hasSingleParameterOfType(mi, java.lang.String.class.getName()));
@@ -177,7 +177,9 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 			fragment.setName(ast.newSimpleName("exception"));
 			VariableDeclarationStatement exceptionDeclaration = ast.newVariableDeclarationStatement(fragment);
 			// TODO:get the exception type as a parameter or resolve it here, and use the a specific exception type. 
-			Type type = ast.newSimpleType(ast.newSimpleName("Exception"));
+			verifyImport(getCompilationUnit(), exceptionType.getQualifiedName());
+			Name exceptionTypeName = addImport(exceptionType.getQualifiedName(), methodDeclaration);
+			Type type = ast.newSimpleType(exceptionTypeName);
 			exceptionDeclaration.setType(type);
 			
 			astRewrite.replace(nodeThrowingException.getParent(), exceptionDeclaration, null);
