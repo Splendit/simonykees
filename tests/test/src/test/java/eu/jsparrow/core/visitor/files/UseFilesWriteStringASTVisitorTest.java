@@ -229,7 +229,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterWithoutCharset_shouldTransform() throws Exception {
+	public void visit_TWRUsingFilesNewBufferedWriterOnlyWithPath_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.file.Files.class,
 				java.nio.file.Path.class,
@@ -246,12 +246,76 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				"String value = \"Hello World!\";\n" +
 				"Path path = Paths.get(\"/home/test/testpath\");\n" +
 				"try {\n" +
-				"	Files.writeString(path, value, Charset.defaultCharset());\n" +
+				"	Files.writeString(path, value);\n" +
 				"} catch (Exception exception) {\n" +
 				"}";
 		assertChange(original, expected);
 	}
-	
+
+	@Test
+	public void visit_TWRUsingFilesNewBufferedWriterWithCharsetAndOpenOptions_shouldTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class,
+				java.nio.file.Files.class,
+				java.nio.file.OpenOption.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class,
+				java.nio.file.StandardOpenOption.class);
+
+		String original = "" +
+				"		OpenOption openOption1 = StandardOpenOption.CREATE;\n"
+				+ "		OpenOption openOption2 = StandardOpenOption.APPEND;\n"
+				+ "		String value = \"Hello World!\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, cs, openOption1, openOption2)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		String expected = "" +
+				"		OpenOption openOption1 = StandardOpenOption.CREATE;\n"
+				+ "		OpenOption openOption2 = StandardOpenOption.APPEND;\n"
+				+ "		String value = \"Hello World!\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try {\n"
+				+ "			Files.writeString(path, value, cs, openOption1, openOption2);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_TWRUsingFilesNewBufferedWriterWithoutCharsetWithOpenOptions_shouldTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.nio.file.Files.class,
+				java.nio.file.OpenOption.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class,
+				java.nio.file.StandardOpenOption.class);
+
+		String original = "" +
+				"		OpenOption openOption1 = StandardOpenOption.CREATE;\n"
+				+ "		OpenOption openOption2 = StandardOpenOption.APPEND;\n"
+				+ "		String value = \"Hello World!\";\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, openOption1, openOption2)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		String expected = "" +
+				"		OpenOption openOption1 = StandardOpenOption.CREATE;\n"
+				+ "		OpenOption openOption2 = StandardOpenOption.APPEND;\n"
+				+ "		String value = \"Hello World!\";\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try {\n"
+				+ "			Files.writeString(path, value, openOption1, openOption2);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		assertChange(original, expected);
+	}
+
 	@Test
 	public void visit_DeclareWriterAsResource_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
