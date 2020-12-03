@@ -11,7 +11,9 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -20,6 +22,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -27,6 +30,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
 
 public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAddImportASTVisitor {
 
@@ -40,6 +44,9 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 	private static final String ORG_JUNIT_ASSERT_ASSERT_THROWS = "org.junit.Assert.assertThrows"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
 	private static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
+	private static final String EXCEPTION_NAME = "exception"; //$NON-NLS-1$
+
+	private LiveVariableScope aliveVariableScope = new LiveVariableScope();
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
@@ -85,11 +92,11 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		if (expectExceptionsInvocations.size() != 1) {
 			return true;
 		}
-		
-		if(!visitor.verifyExpectCauseMatchers()) {
+
+		if (!visitor.verifyExpectCauseMatchers()) {
 			return true;
 		}
-		
+
 		MethodInvocation expectExceptionInvocation = expectExceptionsInvocations.get(0);
 		if (expectExceptionInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return true;
@@ -123,13 +130,11 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 			return true;
 		}
 
-		refactor(methodDeclaration, expectExceptionInvocation, expectedException,  exceptionType, nodeThrowingException, visitor);
+		refactor(methodDeclaration, expectExceptionInvocation, expectedException, exceptionType, nodeThrowingException,
+				visitor);
 		/*
 		 * TODO: 0. Make sure there is no other expctExcetion invocation/usage.
-		 * 1. all the expressions of expect/expectMessage/expectCause match with
-		 * each other. 2. replace all expectMessage by expect assertions. 3.
-		 * replace all expectCause by assertions 4. make more unit tests. 5. run
-		 * the rule in opensource projects.
+		 * 4. make more unit tests. 5. run the rule in opensource projects.
 		 */
 
 		return false;
@@ -144,7 +149,8 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void refactor(MethodDeclaration methodDeclaration, MethodInvocation expectExceptionInvocation,
-			Expression expectedException, ITypeBinding exceptionType, ASTNode nodeThrowingException, ExpectedExceptionVisitor visitor) {
+			Expression expectedException, ITypeBinding exceptionType, ASTNode nodeThrowingException,
+			ExpectedExceptionVisitor visitor) {
 
 		List<Expression> expectedMessages = visitor
 			.getExpectedMessages(mi -> visitor.hasSingleParameterOfType(mi, java.lang.String.class.getName()));
@@ -173,64 +179,70 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		} else {
 			VariableDeclarationFragment fragment = ast.newVariableDeclarationFragment();
 			fragment.setInitializer(assertThrows);
-			//TODO: make sure exception is a valid name
-			fragment.setName(ast.newSimpleName("exception"));
+			// the scope is already the methodDeclaration
+			aliveVariableScope.lazyLoadScopeNames(methodDeclaration);
+			String exceptionIdentifier = createExceptionName();
+			fragment.setName(ast.newSimpleName(exceptionIdentifier));
 			VariableDeclarationStatement exceptionDeclaration = ast.newVariableDeclarationStatement(fragment);
-			// TODO:get the exception type as a parameter or resolve it here, and use the a specific exception type. 
 			verifyImport(getCompilationUnit(), exceptionType.getQualifiedName());
 			Name exceptionTypeName = addImport(exceptionType.getQualifiedName(), methodDeclaration);
 			Type type = ast.newSimpleType(exceptionTypeName);
 			exceptionDeclaration.setType(type);
-			
+
 			astRewrite.replace(nodeThrowingException.getParent(), exceptionDeclaration, null);
 			astRewrite.remove(expectExceptionInvocation.getParent(), null);
 			ListRewrite rewriter = astRewrite.getListRewrite(methodDeclaration.getBody(), Block.STATEMENTS_PROPERTY);
-			for(Expression expectedMmessage : expectedMessages) {
+			for (Expression expectedMmessage : expectedMessages) {
 				MethodInvocation assertTrue = ast.newMethodInvocation();
 				Optional<Name> qualifier = addImportForStaticMethod(ORG_JUNIT_ASSERT_ASSERT_TRUE, methodDeclaration);
 				qualifier.ifPresent(assertTrue::setExpression);
 				assertTrue.setName(ast.newSimpleName(ASSERT_TRUE));
 				MethodInvocation getMessage = ast.newMethodInvocation();
 				getMessage.setName(ast.newSimpleName(GET_MESSAGE));
-				//FIXME use the one from above
-				getMessage.setExpression(ast.newSimpleName("exception"));
+				getMessage.setExpression(ast.newSimpleName(exceptionIdentifier));
 				MethodInvocation contains = ast.newMethodInvocation();
-				contains.setName(ast.newSimpleName("contains"));
+				contains.setName(ast.newSimpleName("contains")); //$NON-NLS-1$
 				contains.setExpression(getMessage);
-				contains.arguments().add(astRewrite.createCopyTarget(expectedMmessage));
-				assertTrue.arguments().add(contains);
+				contains.arguments()
+					.add(astRewrite.createCopyTarget(expectedMmessage));
+				assertTrue.arguments()
+					.add(contains);
 				ExpressionStatement expressionStatement = ast.newExpressionStatement(assertTrue);
 				rewriter.insertLast(expressionStatement, null);
 				astRewrite.remove(ASTNodeUtil.getSpecificAncestor(expectedMmessage, Statement.class), null);
 			}
-			
-			for(Expression expectedMmessage : expectedMessageMatchers) {
+
+			for (Expression expectedMmessage : expectedMessageMatchers) {
 				MethodInvocation assertTrue = ast.newMethodInvocation();
-				Optional<Name> qualifier = addImportForStaticMethod(ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT, methodDeclaration);
+				Optional<Name> qualifier = addImportForStaticMethod(ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT,
+						methodDeclaration);
 				qualifier.ifPresent(assertTrue::setExpression);
-				assertTrue.setName(ast.newSimpleName("assertThat"));
+				assertTrue.setName(ast.newSimpleName("assertThat")); //$NON-NLS-1$
 				MethodInvocation getMessage = ast.newMethodInvocation();
 				getMessage.setName(ast.newSimpleName(GET_MESSAGE));
-				//FIXME use the one from above
-				getMessage.setExpression(ast.newSimpleName("exception"));
-				assertTrue.arguments().add(getMessage);
-				assertTrue.arguments().add(astRewrite.createCopyTarget(expectedMmessage));
+				getMessage.setExpression(ast.newSimpleName(exceptionIdentifier));
+				assertTrue.arguments()
+					.add(getMessage);
+				assertTrue.arguments()
+					.add(astRewrite.createCopyTarget(expectedMmessage));
 				ExpressionStatement expressionStatement = ast.newExpressionStatement(assertTrue);
 				rewriter.insertLast(expressionStatement, null);
 				astRewrite.remove(ASTNodeUtil.getSpecificAncestor(expectedMmessage, Statement.class), null);
 			}
-			
-			for(Expression expectedMmessage : expectedCauseMatchers) {
+
+			for (Expression expectedMmessage : expectedCauseMatchers) {
 				MethodInvocation assertTrue = ast.newMethodInvocation();
-				Optional<Name> qualifier = addImportForStaticMethod(ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT, methodDeclaration);
+				Optional<Name> qualifier = addImportForStaticMethod(ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT,
+						methodDeclaration);
 				qualifier.ifPresent(assertTrue::setExpression);
-				assertTrue.setName(ast.newSimpleName("assertThat"));
+				assertTrue.setName(ast.newSimpleName("assertThat")); //$NON-NLS-1$
 				MethodInvocation getMessage = ast.newMethodInvocation();
-				getMessage.setName(ast.newSimpleName("getCause"));
-				//FIXME use the one from above
-				getMessage.setExpression(ast.newSimpleName("exception"));
-				assertTrue.arguments().add(getMessage);
-				assertTrue.arguments().add(astRewrite.createCopyTarget(expectedMmessage));
+				getMessage.setName(ast.newSimpleName("getCause")); //$NON-NLS-1$
+				getMessage.setExpression(ast.newSimpleName(exceptionIdentifier));
+				assertTrue.arguments()
+					.add(getMessage);
+				assertTrue.arguments()
+					.add(astRewrite.createCopyTarget(expectedMmessage));
 				ExpressionStatement expressionStatement = ast.newExpressionStatement(assertTrue);
 				rewriter.insertLast(expressionStatement, null);
 				astRewrite.remove(ASTNodeUtil.getSpecificAncestor(expectedMmessage, Statement.class), null);
@@ -272,6 +284,42 @@ public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAd
 		}
 
 		return Optional.empty();
+	}
+	
+	@Override
+	public void endVisit(CompilationUnit compilationUnit) {
+		aliveVariableScope.clearCompilationUnitScope(compilationUnit);
+		super.endVisit(compilationUnit);
+	}
+
+	@Override
+	public void endVisit(TypeDeclaration typeDeclaration) {
+		aliveVariableScope.clearFieldScope(typeDeclaration);
+	}
+
+	@Override
+	public void endVisit(MethodDeclaration methodDeclaration) {
+		aliveVariableScope.clearLocalVariablesScope(methodDeclaration);
+	}
+
+	@Override
+	public void endVisit(FieldDeclaration fieldDeclaration) {
+		aliveVariableScope.clearLocalVariablesScope(fieldDeclaration);
+	}
+
+	@Override
+	public void endVisit(Initializer initializer) {
+		aliveVariableScope.clearLocalVariablesScope(initializer);
+	}
+
+	private String createExceptionName() {
+		String name = EXCEPTION_NAME;
+		int suffix = 1;
+		while (aliveVariableScope.isInScope(name)) {
+			name = EXCEPTION_NAME + suffix;
+			suffix++;
+		}
+		return name;
 	}
 
 }
