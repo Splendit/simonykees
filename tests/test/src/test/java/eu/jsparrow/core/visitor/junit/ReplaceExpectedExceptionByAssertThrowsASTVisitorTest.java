@@ -109,7 +109,94 @@ class ReplaceExpectedExceptionByAssertThrowsASTVisitorTest extends UsesJDTUnitFi
 	}
 	
 	@Test
-	void visit_throwableTypeMatcher_shouldTransform() throws Exception {
+	void visit_expectMessageString_shouldTransform() throws Exception {
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void expectMessageString() throws IOException {\n"
+				+ "	expectedException.expect(IOException.class);\n"
+				+ "	expectedException.expectMessage(\"some message\");\n"
+				+ "	throwIOException();\n"
+				+ "}";
+		String expected = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void expectMessageString() throws IOException {\n"
+				+ "	Exception exception=assertThrows(IOException.class,() -> throwIOException());\n"
+				+ "	assertTrue(exception.getMessage().contains(\"some message\"));"
+				+ "}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_expectMessage_shouldTransform() throws Exception {
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void expectMessage() throws IOException {\n"
+				+ "	Matcher<String> causeMatcher = null;\n"
+				+ "	expectedException.expect(IOException.class);\n"
+				+ "	expectedException.expectMessage(causeMatcher);\n"
+				+ "	throwIOException();\n"
+				+ "}";
+		String expected = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void expectMessage() throws IOException {\n"
+				+ "	Matcher<String> causeMatcher = null;\n"
+				+ "	Exception exception = assertThrows(IOException.class, () -> throwIOException());\n"
+				+ "	assertThat(exception.getMessage(), causeMatcher);\n"
+				+ "}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_expectMessageContainsMatcher_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.hamcrest.Matchers");
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void expectMessageContainsMatcher() throws IOException {\n"
+				+ "	expectedException.expect(IOException.class);\n"
+				+ "	expectedException.expectMessage(Matchers.containsString(\"\"));\n"
+				+ "	throwIOException();\n"
+				+ "}";
+		String expected = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void expectMessageContainsMatcher() throws IOException {\n"
+				+ "	Exception exception=assertThrows(IOException.class,() -> throwIOException());\n"
+				+ "	assertThat(exception.getMessage(),Matchers.containsString(\"\"));"
+				+ "}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_expectCause_shouldTransform() throws Exception {
 		String original = ""
 				+ "@Rule\n"
 				+ "public ExpectedException expectedException = ExpectedException.none();"
