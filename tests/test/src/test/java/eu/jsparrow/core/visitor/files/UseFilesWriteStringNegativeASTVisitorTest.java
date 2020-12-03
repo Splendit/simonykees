@@ -150,6 +150,66 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 		assertNoChange(original);
 	}
 
+	@Test
+	public void visit_VariableDeclarationExpressionNotResource_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"			String value = \"Hello World!\";\n"
+				+ "			String pathString = \"/home/test/testpath\";\n"
+				+ "			Charset cs = StandardCharsets.UTF_8;\n"
+				+ "			try {\n"
+				+ "				for (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString, cs));;) {\n"
+				+ "					bufferedWriter.write(value);\n"
+				+ "				}\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_VariableDeclarationExpressionsWithTwoFragments_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"			String value = \"Hello World!\";\n"
+				+ "			String pathString = \"/home/test/testpath\";\n"
+				+ "			Charset cs = StandardCharsets.UTF_8;\n"
+				+ "			try {\n"
+				+ "				for (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString,\n"
+				+ "						cs)), bufferedWriter2 = new BufferedWriter(new FileWriter(pathString, cs));;) {\n"
+				+ "					bufferedWriter.write(value);\n"
+				+ "				}\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_NoVariableDeclarationExpressionFound_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"			String value = \"Hello World!\";\n"
+				+ "			String pathString = \"/home/test/testpath\";\n"
+				+ "			Charset cs = StandardCharsets.UTF_8;			\n"
+				+ "			try {\n"
+				+ "				BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString, cs));\n"
+				+ "				bufferedWriter.write(value);\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}";
+		assertNoChange(original);
+	}
+
 	// @Test
 	// public void visit__shouldNotTransform() throws Exception {
 	// addImports();

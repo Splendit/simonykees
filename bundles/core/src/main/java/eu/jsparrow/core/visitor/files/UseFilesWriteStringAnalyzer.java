@@ -52,18 +52,9 @@ public class UseFilesWriteStringAnalyzer {
 			return Optional.empty();
 		}
 		Block blockOfInvocationStatement = (Block) writeInvocationStatement.getParent();
-		
-		if (!checkWriterVariableUsage(writerVariableSimpleName, blockOfInvocationStatement)) {
-			return Optional.empty();
-		}
-
-		if (blockOfInvocationStatement.getLocationInParent() != TryStatement.BODY_PROPERTY) {
-			return Optional.empty();
-		}
-		TryStatement tryStatement = (TryStatement) blockOfInvocationStatement.getParent();
 
 		VariableDeclarationFragment fragmentDeclaringBufferedWriter = findFragmentDeclaringBufferedWriter(
-				writerVariableSimpleName, blockOfInvocationStatement, compilationUnit).orElse(null);
+				writerVariableSimpleName, compilationUnit).orElse(null);
 		if (fragmentDeclaringBufferedWriter == null) {
 			return Optional.empty();
 		}
@@ -83,13 +74,21 @@ public class UseFilesWriteStringAnalyzer {
 		if (parentVariableDeclarationExpression.getLocationInParent() != TryStatement.RESOURCES2_PROPERTY) {
 			return Optional.empty();
 		}
+		TryStatement tryStatement = (TryStatement) parentVariableDeclarationExpression.getParent();
 
-		if (parentVariableDeclarationExpression.getParent() != tryStatement) {
+		if (blockOfInvocationStatement.getLocationInParent() != TryStatement.BODY_PROPERTY) {
 			return Optional.empty();
 		}
 
-		Expression bufferedIOInitializer;
-		bufferedIOInitializer = fragmentDeclaringBufferedWriter.getInitializer();
+		if (blockOfInvocationStatement.getParent() != tryStatement) {
+			return Optional.empty();
+		}
+
+		if (!checkWriterVariableUsage(writerVariableSimpleName, blockOfInvocationStatement)) {
+			return Optional.empty();
+		}
+
+		Expression bufferedIOInitializer = fragmentDeclaringBufferedWriter.getInitializer();
 		if (bufferedIOInitializer == null) {
 			return Optional.empty();
 		}
@@ -242,13 +241,7 @@ public class UseFilesWriteStringAnalyzer {
 	}
 
 	private Optional<VariableDeclarationFragment> findFragmentDeclaringBufferedWriter(
-			SimpleName writerVariableSimpleName,
-			Block blockOfInvocationStatement, CompilationUnit compilationUnit) {
-		if (!checkWriterVariableUsage(writerVariableSimpleName,
-				blockOfInvocationStatement)) {
-			return Optional.empty();
-		}
-
+			SimpleName writerVariableSimpleName, CompilationUnit compilationUnit) {
 		ASTNode declaringNode = compilationUnit.findDeclaringNode(writerVariableSimpleName.resolveBinding());
 		if (declaringNode == null || declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			return Optional.empty();
