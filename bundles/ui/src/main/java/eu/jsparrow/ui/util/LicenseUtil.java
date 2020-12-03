@@ -331,7 +331,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	public void updateValidationResult() {
 		LicenseModel model = tryLoadModelFromPersistence();
-		
+
 		Optional<String> encryptedEndpointOpt = loadEncryptedEndpointFromPersistence();
 
 		try {
@@ -344,7 +344,8 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		} catch (ValidationException | EndpointEncryptionException e) {
 			logger.error("Failed to validate license", e); //$NON-NLS-1$
 			result = new LicenseValidationResult(model.getType(), "", false, //$NON-NLS-1$
-					Messages.MessageDialog_licensingError_failedToValidate, model.getExpirationDate());
+					NLS.bind(Messages.MessageDialog_licensingError_failedToValidate, e.getMessage()),
+					model.getExpirationDate());
 		}
 	}
 
@@ -370,9 +371,9 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			logger.warn("Error while loading stored license, using default demo license", e); //$NON-NLS-1$
 			model = factoryService.createDemoLicenseModel();
 		}
-		
+
 		String secret = systemInfoWrapper.createUniqueHardwareId();
-		if(!licenseService.verifySecretKey(model, secret)) {
+		if (!licenseService.verifySecretKey(model, secret)) {
 			model = factoryService.createDemoLicenseModel();
 		}
 		return model;
@@ -394,7 +395,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	private void handleStartUpPersistenceFailure(Shell shell, PersistenceException e) {
 		logger.error("Failed to load stored license. Falling back to free license.", e); //$NON-NLS-1$
 		String message = NLS.bind(Messages.MessageDialog_licensingError_failedToLoad, e.getMessage());
-		
+
 		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
 	}
 
