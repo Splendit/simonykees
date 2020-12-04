@@ -261,4 +261,282 @@ class ReplaceExpectedExceptionASTVisitorTest extends UsesJDTUnitFixture {
 				+ "}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_getterMethodForExpectedExceptions_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void getterMethodForExpectedExceptions() throws IOException {\n"
+				+ "	getExpectedeException().expect(IOException.class);\n"
+				+ "	throwIOException();\n"
+				+ "}\n"
+				+ "\n"
+				+ "private ExpectedException getExpectedeException() {\n"
+				+ "	return this.expectedException;\n"
+				+ "}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_unsupportedMethodInvocation_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void unsupportedMethodInvocation() throws IOException {\n"
+				+ "	expectedException.expect(IOException.class);\n"
+				+ "	expectedException.apply(null, null);\n"
+				+ "	throwIOException();\n"
+				+ "}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_missingExceptionClassName_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void expectMatcher() throws IOException {\n"
+				+ "	Matcher<Exception> matcher = null;\n"
+				+ "	expectedException.expect(matcher);\n"
+				+ "	throwIOException();\n"
+				+ "}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_multipleExpectInvocations_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.io.FileNotFoundException.class.getName());
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void multipleExpectInvocations() throws IOException {\n"
+				+ "	expectedException.expect(IOException.class);\n"
+				+ "	expectedException.expect(FileNotFoundException.class);\n"
+				+ "	throwIOException();\n"
+				+ "}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_multipleNodesThrowingExceptions_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.io.FileNotFoundException.class.getName());
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void multipleNodesThrowingException() throws IOException {\n"
+				+ "	expectedException.expect(IOException.class);\n"
+				+ "	throwIOException();\n"
+				+ "	throwIOException();\n"
+				+ "}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_statementsAfterThrowingException_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.io.FileNotFoundException.class.getName());
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void statementsAfterThrowingException() throws IOException {\n"
+				+ "	expectedException.expect(IOException.class);\n"
+				+ "	throwIOException();\n"
+				+ "	System.out.println();\n"
+				+ "}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_multipleExpectedExceptionRules_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.io.FileNotFoundException.class.getName());
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException2 = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void multipleExpectedExceptionRules() throws IOException {\n"
+				+ "	expectedException.expect(IOException.class);\n"
+				+ "	expectedException2.expect(IOException.class);\n"
+				+ "	throwIOException();\n"
+				+ "}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_fieldAccessExpectedException_shouldTransform() throws Exception {
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void fieldAccess() throws IOException {\n"
+				+ "	this.expectedException.expect(IOException.class);\n"
+				+ "	throwIOException();\n"
+				+ "}";
+		String expected = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void fieldAccess() throws IOException {\n"
+				+ "	assertThrows(IOException.class, () -> throwIOException());\n"
+				+ "}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_expectingExceptionSuperType_shouldTransform() throws Exception {
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void expectingExceptionSuperType() throws IOException {\n"
+				+ "	expectedException.expect(Exception.class);\n"
+				+ "	throwIOException();\n"
+				+ "}";
+		String expected = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void expectingExceptionSuperType() throws IOException {\n"
+				+ "	assertThrows(Exception.class, () -> throwIOException());\n"
+				+ "}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_existingVarNameException_shouldTransform() throws Exception {
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void existingVarNameException() throws IOException {\n"
+				+ "	String exception = \"\";\n"
+				+ "	expectedException.expect(IOException.class);\n"
+				+ "	expectedException.expectMessage(\"value\");\n"
+				+ "	throwIOException();\n"
+				+ "}";
+		String expected = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void existingVarNameException() throws IOException {\n"
+				+ "	String exception = \"\";\n"
+				+ "	IOException exception1 = assertThrows(IOException.class, () -> throwIOException());\n"
+				+ "	assertTrue(exception1.getMessage().contains(\"value\"));\n"
+				+ "}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_multipleExpectMessage_shouldTransform() throws Exception {
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void multipleExpectMessage() throws IOException {\n"
+				+ "	expectedException.expect(IOException.class);\n"
+				+ "	expectedException.expectMessage(\"value\");\n"
+				+ "	expectedException.expectMessage(\"value2\");\n"
+				+ "	throwIOException();\n"
+				+ "}";
+		String expected = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void multipleExpectMessage() throws IOException {\n"
+				+ "	IOException exception = assertThrows(IOException.class, () -> throwIOException());\n"
+				+ "	assertTrue(exception.getMessage().contains(\"value\"));\n"
+				+ "	assertTrue(exception.getMessage().contains(\"value2\"));\n"
+				+ "}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_multipleExpectCause_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.hamcrest.Matchers");
+		defaultFixture.addImport(java.io.FileNotFoundException.class.getName());
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void multipleExpectCause() throws IOException {\n"
+				+ "	Matcher<Throwable> isIO = Matchers.is(new IOException());\n"
+				+ "	Matcher<Throwable> isNotFileException = Matchers.not(Matchers.is(new FileNotFoundException()));\n"
+				+ "	expectedException.expect(IOException.class);\n"
+				+ "	expectedException.expectCause(isIO);\n"
+				+ "	expectedException.expectCause(isNotFileException);\n"
+				+ "	throwIOException();\n"
+				+ "}\n"
+				+ "";
+		String expected = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException() throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void multipleExpectCause() throws IOException {\n"
+				+ "	Matcher<Throwable> isIO = Matchers.is(new IOException());\n"
+				+ "	Matcher<Throwable> isNotFileException = Matchers.not(Matchers.is(new FileNotFoundException()));\n"
+				+ "	IOException exception = assertThrows(IOException.class, () -> throwIOException());\n"
+				+ "	assertThat(exception.getCause(), isIO);\n"
+				+ "	assertThat(exception.getCause(), isNotFileException);\n"
+				+ "}";
+		assertChange(original, expected);
+	}
 }
