@@ -215,6 +215,8 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 		List assertionArguments = assertThrows.arguments();
 		assertionArguments.add(firstArg);
 		assertionArguments.add(lambdaExpression);
+		
+		removeThrowsDeclarations(methodDeclaration, exceptionType);
 
 		if (expectedMessages.isEmpty() && expectedMessageMatchers.isEmpty() && expectedCauseMatchers.isEmpty()) {
 			ExpressionStatement assertionStatement = ast.newExpressionStatement(assertThrows);
@@ -247,6 +249,17 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 					getCauseIdentifier);
 
 			onRewrite();
+		}
+	}
+
+	private void removeThrowsDeclarations(MethodDeclaration methodDeclaration, ITypeBinding exceptionType) {
+		List<Type> exceptionTypes =  ASTNodeUtil.convertToTypedList(methodDeclaration.thrownExceptionTypes(), Type.class);
+		ListRewrite listRewrite = astRewrite.getListRewrite(methodDeclaration, MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY);		
+		for(Type type : exceptionTypes) {
+			ITypeBinding typeBinding = type.resolveBinding();
+			if(ClassRelationUtil.compareITypeBinding(typeBinding, exceptionType)) {
+				listRewrite.remove(type, null);
+			}
 		}
 	}
 
