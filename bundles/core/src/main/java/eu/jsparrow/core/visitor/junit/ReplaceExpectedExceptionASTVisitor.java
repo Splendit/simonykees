@@ -32,7 +32,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
 
-public class ReplaceExpectedExceptionByAssertThrowsASTVisitor extends AbstractAddImportASTVisitor {
+public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String GET_MESSAGE = "getMessage"; //$NON-NLS-1$
 	private static final String ASSERT_TRUE = "assertTrue"; //$NON-NLS-1$

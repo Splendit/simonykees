@@ -8,21 +8,21 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 
-import eu.jsparrow.core.visitor.junit.ReplaceExpectedExceptionByAssertThrowsASTVisitor;
+import eu.jsparrow.core.visitor.junit.ReplaceExpectedExceptionASTVisitor;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-public class ReplaceExpectedExceptionByAssertThrowsRule
-		extends RefactoringRuleImpl<ReplaceExpectedExceptionByAssertThrowsASTVisitor> {
+public class ReplaceExpectedExceptionRule
+		extends RefactoringRuleImpl<ReplaceExpectedExceptionASTVisitor> {
 
 	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert";
 	private static final String MIN_JUNIT_4_VERSION = "4.13";
 	private static final String MIN_JUNIT_5_VERSION = "5.0";
 
-	public ReplaceExpectedExceptionByAssertThrowsRule() {
-		this.visitorClass = ReplaceExpectedExceptionByAssertThrowsASTVisitor.class;
-		this.id = "ReplaceExpectedWithAssertThrows"; //$NON-NLS-1$
+	public ReplaceExpectedExceptionRule() {
+		this.visitorClass = ReplaceExpectedExceptionASTVisitor.class;
+		this.id = "ReplaceExpectedException"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
 				"Replace ExpectedException rule with assertThrows",
 				"The expected exception rule is deperecated since 4.13. Assert throws should be used instead.",
