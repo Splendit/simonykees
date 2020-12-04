@@ -318,7 +318,8 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 
 	private Optional<ITypeBinding> findExceptionTypeArgument(Expression excpetionClass) {
 		ITypeBinding argumentType = excpetionClass.resolveTypeBinding();
-		if (argumentType.isParameterizedType()) {
+		boolean isClass = ClassRelationUtil.isContentOfType(argumentType, java.lang.Class.class.getName());
+		if (isClass && argumentType.isParameterizedType()) {
 			ITypeBinding[] typeArguments = argumentType.getTypeArguments();
 			if (typeArguments.length == 1) {
 				ITypeBinding typeArgument = typeArguments[0];
