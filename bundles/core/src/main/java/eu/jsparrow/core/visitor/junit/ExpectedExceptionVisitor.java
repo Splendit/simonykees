@@ -152,10 +152,6 @@ public class ExpectedExceptionVisitor extends ASTVisitor {
 	public boolean hasUnresolvedInvocations() {
 		return !this.unresolvedInvocations.isEmpty();
 	}
-	
-	public List<SimpleName> getExpectedExceptionNames() {
-		return this.expectedExceptionNames;
-	}
 
 	public boolean verifyExpectCauseMatchers() {
 		List<Expression> matchers = getExpectedCauses();
