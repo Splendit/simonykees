@@ -148,10 +148,6 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			return Optional.empty();
 		}
 		MethodInvocation methodInvocation = (MethodInvocation) bufferedIOInitializer;
-		Expression invocationExpression = methodInvocation.getExpression();
-		if (invocationExpression == null) {
-			return Optional.empty();
-		}
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 
 		if (!ClassRelationUtil.isContentOfType(methodBinding

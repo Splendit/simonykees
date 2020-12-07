@@ -406,6 +406,34 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
+	public void visit_TWRUsingFilesNewBufferedWriterRemovingNotAllResources_shouldTransform()
+			throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.nio.file.Files.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path);\n"
+				+ "				BufferedWriter bufferedWriter2 = Files.newBufferedWriter(path)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		String expected = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try (BufferedWriter bufferedWriter2 = Files.newBufferedWriter(path)) {\n"
+				+ "			Files.writeString(path, value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_DeclareWriterAsResource_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,

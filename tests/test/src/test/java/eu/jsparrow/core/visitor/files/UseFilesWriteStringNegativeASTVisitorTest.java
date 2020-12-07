@@ -245,6 +245,100 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 		assertNoChange(original);
 	}
 
+	@Test
+	public void visit_TWRUsingMethodNotOfFilesClass_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class,
+				java.nio.file.OpenOption.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class,
+				java.nio.file.StandardOpenOption.class);
+
+		String original = "" +
+				"		class LocalClass {\n"
+				+ "			BufferedWriter newBufferedWriter(Path path, Charset cs, OpenOption... openOptions) {\n"
+				+ "				return null;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "		OpenOption openOption1 = StandardOpenOption.CREATE;\n"
+				+ "		OpenOption openOption2 = StandardOpenOption.APPEND;\n"
+				+ "		String value = \"Hello World!\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try (BufferedWriter bufferedWriter = new LocalClass().newBufferedWriter(path, cs, openOption1, openOption2)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_TWRUsingFileWriterVariableNotResource_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		try {\n"
+				+ "			FileWriter fileWriter = new FileWriter(pathString, cs);\n"
+				+ "			try (BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {\n"
+				+ "				bufferedWriter.write(value);\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}\n"
+				+ "		} catch (Exception exception1) {\n"
+				+ "		}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_TWRUsingFileWriterResourceInitializedWithVariable_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		try {\n"
+				+ "			FileWriter fileWriter0 = new FileWriter(pathString, cs);\n"
+				+ "			try (FileWriter fileWriter = fileWriter0; BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {\n"
+				+ "				bufferedWriter.write(value);\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}\n"
+				+ "		} catch (Exception exception1) {\n"
+				+ "		}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_TWRAdditionalWriteOnFileWriterResource_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		try {\n"
+				+ "			try (FileWriter fileWriter = new FileWriter(pathString, cs); BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {\n"
+				+ "				bufferedWriter.write(value);\n"
+				+ "				fileWriter.write(value);\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}\n"
+				+ "		} catch (Exception exception1) {\n"
+				+ "		}";
+		assertNoChange(original);
+	}
+
 	// @Test
 	// public void visit__shouldNotTransform() throws Exception {
 	// addImports();
