@@ -33,7 +33,40 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
 
 /**
- *  
+ * Replaces {@code ExpectedException.expect()} with {@code assertThrows}.
+ * Inserts further assertion to replace {@code ExpectedException.expectMessage}
+ * and {@code ExpectedException.expectCause}. For example:
+ * 
+ * <pre>
+ * <code>
+ * &#64;Rule
+ * public ExpectedException expectedException = ExpectedException.none();
+ * 
+ * &#64;Test
+ * public void testingExceptionCause() throws IOException {
+ *    Matcher<Throwable> isNotFileNotFoundException = not(is(new FileNotFoundException()));
+ *    expectedException.expect(IOException.class);
+ *    expectedException.expectCause(isNotFileNotFoundException);
+ *    assertThat(exception.getMessage(), containsString("IO"));
+ *    throwIOException();
+ * }
+ * </code>
+ * </pre>
+ * 
+ * becomes:
+ * 
+ * <pre>
+ * <code>
+ * &#64;Test
+ * public void testingExceptionCause() {
+ *    Matcher<Throwable> isNotFileNotFoundException = not(is(new FileNotFoundException()));
+ *    IOException exception = assertThrows(IOException.class, () -> throwIOException());
+ *    assertThat(exception.getCause(), isNotFileNotFoundException);
+ *    assertThat(exception.getMessage(), containsString("IO"));
+ * }
+ * </code>
+ * </pre>
+ * 
  * @since 3.24.0
  *
  */
@@ -49,10 +82,11 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
 	private static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
 	private static final String EXCEPTION_NAME = "exception"; //$NON-NLS-1$
-	
+
 	private String assertThrowsQualifiedName;
 
 	private LiveVariableScope aliveVariableScope = new LiveVariableScope();
+
 	public ReplaceExpectedExceptionASTVisitor(String assertThrowsQualifiedName) {
 		this.assertThrowsQualifiedName = assertThrowsQualifiedName;
 	}
@@ -224,7 +258,7 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 		List assertionArguments = assertThrows.arguments();
 		assertionArguments.add(firstArg);
 		assertionArguments.add(lambdaExpression);
-		
+
 		removeThrowsDeclarations(methodDeclaration, exceptionType);
 
 		if (expectedMessages.isEmpty() && expectedMessageMatchers.isEmpty() && expectedCauseMatchers.isEmpty()) {
@@ -262,11 +296,13 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 	}
 
 	private void removeThrowsDeclarations(MethodDeclaration methodDeclaration, ITypeBinding exceptionType) {
-		List<Type> exceptionTypes =  ASTNodeUtil.convertToTypedList(methodDeclaration.thrownExceptionTypes(), Type.class);
-		ListRewrite listRewrite = astRewrite.getListRewrite(methodDeclaration, MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY);		
-		for(Type type : exceptionTypes) {
+		List<Type> exceptionTypes = ASTNodeUtil.convertToTypedList(methodDeclaration.thrownExceptionTypes(),
+				Type.class);
+		ListRewrite listRewrite = astRewrite.getListRewrite(methodDeclaration,
+				MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY);
+		for (Type type : exceptionTypes) {
 			ITypeBinding typeBinding = type.resolveBinding();
-			if(ClassRelationUtil.compareITypeBinding(typeBinding, exceptionType)) {
+			if (ClassRelationUtil.compareITypeBinding(typeBinding, exceptionType)) {
 				listRewrite.remove(type, null);
 			}
 		}

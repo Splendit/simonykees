@@ -16,6 +16,13 @@ import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * A visitor for collecting all {@link Expression}s that throw an
+ * {@link Exception} of the given type.
+ * 
+ * @since 3.24.0
+ *
+ */
 public class ExpressionsThrowingExceptionVisitor extends ASTVisitor {
 
 	private ITypeBinding exceptionType;
@@ -68,6 +75,11 @@ public class ExpressionsThrowingExceptionVisitor extends ASTVisitor {
 							Collections.singletonList(qualifiedExceptionName)));
 	}
 
+	/**
+	 * 
+	 * @return the list of {@link Expression} that throw the provided
+	 *         {@link Exception} type.
+	 */
 	public List<ASTNode> getNodesThrowingExpectedException() {
 		return nodesThrowingExpectedException;
 	}

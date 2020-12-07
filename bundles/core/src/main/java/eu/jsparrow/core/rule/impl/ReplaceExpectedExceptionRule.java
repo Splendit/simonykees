@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 
 import eu.jsparrow.core.visitor.junit.ReplaceExpectedExceptionASTVisitor;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
@@ -33,9 +34,9 @@ public class ReplaceExpectedExceptionRule
 		this.visitorClass = ReplaceExpectedExceptionASTVisitor.class;
 		this.id = "ReplaceExpectedException"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
-				"Replace ExpectedException JUnit Rule with assertThrows",
-				"The ExpectedException.none() is deprecated since deprecated since JUnit 4.13. The recommended alternative is to use assertThrows(). This makes JUnit tests easier to understand and prevents the scenarios where some parts the test code is unreachable.\nThe goal of this rule is to replace expectedException.expect() with assertThrows. Additionally, new assertions are added for each invocation of expectMessage() and expectCause().",
-				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_1, Tag.JUNIT));
+				Messages.ReplaceExpectedExceptionRule_name,
+				Messages.ReplaceExpectedExceptionRule_description,
+				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_1, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY));
 	}
 
 	@Override

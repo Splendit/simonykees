@@ -241,6 +241,19 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 		return this.ruleDescription;
 	}
 
+	/**
+	 * If the given type name is present in the classpath of the project and the
+	 * version of the found library satisfies the provided predicate.
+	 * 
+	 * @param project
+	 *            the project being analyzed.
+	 * @param fullyQuallifiedClassName
+	 *            the fully qualified type name to search for.
+	 * @param versionComparator
+	 *            a predicate for verifying the library version.
+	 * @return if a library containing the qualified type name is found and the
+	 *         version of the library satisfies the given predicate.
+	 */
 	protected boolean isInProjectLibraries(IJavaProject project, String fullyQuallifiedClassName,
 			Predicate<Version> versionComparator) {
 		try {
