@@ -253,6 +253,31 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	}
 
 	@Test
+	public void visit_TWRUsingFilesNewBufferedWriterWithStandardCharsetUTF8_shouldTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.nio.charset.StandardCharsets.class,
+				java.nio.file.Files.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		String expected = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try {\n"
+				+ "			Files.writeString(path, value, StandardCharsets.UTF_8);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_TWRUsingFilesNewBufferedWriterWithCharsetAndOpenOptions_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.charset.Charset.class,
@@ -314,6 +339,67 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				+ "		} catch (Exception exception) {\n"
 				+ "		}";
 		assertChange(original, expected);
+	}
+
+	/**
+	 * SIM-1817: This test will fail as soon as the corresponding bug in
+	 * connection with the methods
+	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.file.OpenOption...) }
+	 * and
+	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.charset.Charset, java.nio.file.OpenOption...) }
+	 * is fixed.
+	 * 
+	 */
+	@Test
+	public void visit_TWRUsingFilesNewBufferedWriterWithOpenOptionCreate_shouldTransformButDoesNot() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.nio.file.Files.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class,
+				java.nio.file.StandardOpenOption.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, StandardOpenOption.CREATE)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		assertNoChange(original);
+	}
+
+	/**
+	 * SIM-1817: This test will fail as soon as the corresponding bug in
+	 * connection with the methods
+	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.file.OpenOption...) }
+	 * and
+	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.charset.Charset, java.nio.file.OpenOption...) }
+	 * is fixed.
+	 * 
+	 */
+	@Test
+	public void visit_TWRUsingFilesNewBufferedWriterWithArrayOfOpenOptions_shouldTransformButDoesNot() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class,
+				java.nio.file.Files.class,
+				java.nio.file.OpenOption.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class,
+				java.nio.file.StandardOpenOption.class);
+
+		String original = "" +
+				"		OpenOption[] openOptions = new OpenOption[] { StandardOpenOption.CREATE, StandardOpenOption.APPEND };\n"
+				+ "		String value = \"Hello World!\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, cs, openOptions)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		assertNoChange(original);
 	}
 
 	@Test

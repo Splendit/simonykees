@@ -109,10 +109,11 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		if (findFilesNewBufferedIOTransformationData != null) {
 			transform(methodInvocation, findFilesNewBufferedIOTransformationData);
 		} else {
-			findResult(writeInvocationAnalyzer.getCharSequenceArgument(), bufferedIOInitializer, tryStatement)
-				.ifPresent(result -> {
-					transform(methodInvocation, result);
-				});
+			findResultByBufferedWriterInstanceCreation(tryStatement, bufferedIOInitializer,
+					writeInvocationAnalyzer)
+						.ifPresent(result -> {
+							transform(methodInvocation, result);
+						});
 		}
 		return true;
 	}
@@ -131,6 +132,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			return Optional.empty();
 		}
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+
 		if (!ClassRelationUtil.isContentOfType(methodBinding
 			.getDeclaringClass(), java.nio.file.Files.class.getName())) {
 			return Optional.empty();
@@ -149,6 +151,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		ITypeBinding firstArgumentTypeBinding = argumentsToCopy.get(0)
 			.resolveTypeBinding();
+
 		if (!ClassRelationUtil.isContentOfType(firstArgumentTypeBinding, java.nio.file.Path.class.getName())) {
 			return Optional.empty();
 		}
@@ -176,18 +179,15 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	}
 
-	private Optional<UseFilesWriteStringAnalysisResult> findResult(Expression writeStringArgument,
-			Expression bufferedIOInitializer, TryStatement tryStatement) {
-		if (ClassRelationUtil.isNewInstanceCreationOf(bufferedIOInitializer, java.io.BufferedWriter.class.getName())) {
-			ClassInstanceCreation bufferedWriterInstanceCreation = (ClassInstanceCreation) bufferedIOInitializer;
-			return findResultByBufferedWriterInstanceCreation(tryStatement, bufferedWriterInstanceCreation,
-					writeStringArgument);
-		}
-		return Optional.empty();
-	}
-
 	Optional<UseFilesWriteStringAnalysisResult> findResultByBufferedWriterInstanceCreation(TryStatement tryStatement,
-			ClassInstanceCreation bufferedWriterInstanceCreation, Expression writeStringArgument) {
+			Expression bufferedIOInitializer, WriteMethodInvocationAnalyzer writeInvocationAnalyzer) {
+
+		Expression writeStringArgument = writeInvocationAnalyzer.getCharSequenceArgument();
+		if (!ClassRelationUtil.isNewInstanceCreationOf(bufferedIOInitializer, java.io.BufferedWriter.class.getName())) {
+			return Optional.empty();
+		}
+		ClassInstanceCreation bufferedWriterInstanceCreation = (ClassInstanceCreation) bufferedIOInitializer;
+
 		Expression bufferedWriterInstanceCreationArgument = FilesUtil
 			.findBufferedIOArgument(bufferedWriterInstanceCreation, java.io.FileWriter.class.getName())
 			.orElse(null);
