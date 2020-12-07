@@ -118,6 +118,27 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		return true;
 	}
 
+	private boolean checkFilesNewBufferedWriterParameterTypes(IMethodBinding methodBinding) {
+		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
+		if (parameterTypes.length == 2) {
+			if (!ClassRelationUtil.isContentOfType(parameterTypes[0], java.nio.file.Path.class.getName())) {
+				return false;
+			}
+			return ClassRelationUtil.isContentOfType(parameterTypes[1].getElementType(),
+					java.nio.file.OpenOption.class.getName());
+		} else if (parameterTypes.length == 3) {
+			if (!ClassRelationUtil.isContentOfType(parameterTypes[0], java.nio.file.Path.class.getName())) {
+				return false;
+			}
+			if (!ClassRelationUtil.isContentOfType(parameterTypes[1], java.nio.charset.Charset.class.getName())) {
+				return false;
+			}
+			return ClassRelationUtil.isContentOfType(parameterTypes[2].getElementType(),
+					java.nio.file.OpenOption.class.getName());
+		}
+		return false;
+	}
+
 	private Optional<FilesNewBufferedIOTransformationData> findFilesNewBufferedIOTransformationData(
 			TryStatement tryStatement, VariableDeclarationExpression resourceToRemove,
 			WriteMethodInvocationAnalyzer writeInvocationAnalyzer,
@@ -144,34 +165,13 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			.equals("newBufferedWriter")) { //$NON-NLS-1$
 			return Optional.empty();
 		}
+		if (!checkFilesNewBufferedWriterParameterTypes(methodBinding)) {
+			return Optional.empty();
+		}
+
 		List<Expression> argumentsToCopy = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
-		if (argumentsToCopy.isEmpty()) {
-			return Optional.empty();
-		}
-		ITypeBinding firstArgumentTypeBinding = argumentsToCopy.get(0)
-			.resolveTypeBinding();
 
-		if (!ClassRelationUtil.isContentOfType(firstArgumentTypeBinding, java.nio.file.Path.class.getName())) {
-			return Optional.empty();
-		}
-		int firstOpenOptionArgumentIndex = 1;
-		if (argumentsToCopy.size() > 1) {
-			ITypeBinding secondArgumentTypeBinding = argumentsToCopy.get(1)
-				.resolveTypeBinding();
-			if (ClassRelationUtil.isContentOfType(secondArgumentTypeBinding,
-					java.nio.charset.Charset.class.getName())) {
-				firstOpenOptionArgumentIndex++;
-			}
-		}
-		for (int i = firstOpenOptionArgumentIndex; i < argumentsToCopy.size(); i++) {
-			ITypeBinding argumentTypeBinding = argumentsToCopy.get(i)
-				.resolveTypeBinding();
-			if (!ClassRelationUtil.isContentOfType(argumentTypeBinding,
-					java.nio.file.OpenOption.class.getName())) {
-				return Optional.empty();
-			}
-		}
 		argumentsToCopy.add(1, writeInvocationAnalyzer.getCharSequenceArgument());
 		return Optional.of(
 				new FilesNewBufferedIOTransformationData(tryStatement, resourceToRemove,

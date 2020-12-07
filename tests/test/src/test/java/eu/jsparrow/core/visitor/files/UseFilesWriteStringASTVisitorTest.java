@@ -195,6 +195,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				"	bufferedWriter.write(value);\n" +
 				"} catch (Exception exception) {\n" +
 				"}";
+
 		String expected = "" +
 				"String value = \"Hello World!\";\n" +
 				"String pathString = \"/home/test/testpath\";\n" +
@@ -218,6 +219,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				"	bufferedWriter.write(value);\n" +
 				"} catch (Exception exception) {\n" +
 				"}";
+
 		String expected = "" +
 				"String value = \"Hello World!\";\n" +
 				"String pathString = \"/home/test/testpath\";\n" +
@@ -341,17 +343,8 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 		assertChange(original, expected);
 	}
 
-	/**
-	 * SIM-1817: This test will fail as soon as the corresponding bug in
-	 * connection with the methods
-	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.file.OpenOption...) }
-	 * and
-	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.charset.Charset, java.nio.file.OpenOption...) }
-	 * is fixed.
-	 * 
-	 */
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterWithOpenOptionCreate_shouldTransformButDoesNot() throws Exception {
+	public void visit_TWRUsingFilesNewBufferedWriterWithOpenOptionCreate_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.file.Files.class,
 				java.nio.file.Path.class,
@@ -366,20 +359,20 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				+ "		} catch (Exception exception) {\n"
 				+ "		}";
 
-		assertNoChange(original);
+		String expected = ""
+				+ "		String value = \"Hello World!\";\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try {\n"
+				+ "			Files.writeString(path, value, StandardOpenOption.CREATE);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		assertChange(original, expected);
 	}
 
-	/**
-	 * SIM-1817: This test will fail as soon as the corresponding bug in
-	 * connection with the methods
-	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.file.OpenOption...) }
-	 * and
-	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.charset.Charset, java.nio.file.OpenOption...) }
-	 * is fixed.
-	 * 
-	 */
 	@Test
-	public void visit_TWRUsingFilesNewBufferedWriterWithArrayOfOpenOptions_shouldTransformButDoesNot() throws Exception {
+	public void visit_TWRUsingFilesNewBufferedWriterWithArrayOfOpenOptions_shouldTransform()
+			throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.nio.charset.Charset.class,
 				java.nio.charset.StandardCharsets.class,
@@ -399,7 +392,17 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				+ "		} catch (Exception exception) {\n"
 				+ "		}";
 
-		assertNoChange(original);
+		String expected = ""
+				+ "		OpenOption[] openOptions = new OpenOption[] { StandardOpenOption.CREATE, StandardOpenOption.APPEND };\n"
+				+ "		String value = \"Hello World!\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try {\n"
+				+ "			Files.writeString(path, value, cs, openOptions);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		assertChange(original, expected);
 	}
 
 	@Test
