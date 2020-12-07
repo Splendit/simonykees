@@ -32,6 +32,11 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
 
+/**
+ *  
+ * @since 3.24.0
+ *
+ */
 public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String GET_MESSAGE = "getMessage"; //$NON-NLS-1$
@@ -41,18 +46,22 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 	private static final String ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT = "org.hamcrest.MatcherAssert.assertThat"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	private static final String ASSERT_THROWS = "assertThrows"; //$NON-NLS-1$
-	private static final String ORG_JUNIT_ASSERT_ASSERT_THROWS = "org.junit.Assert.assertThrows"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
 	private static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
 	private static final String EXCEPTION_NAME = "exception"; //$NON-NLS-1$
+	
+	private String assertThrowsQualifiedName;
 
 	private LiveVariableScope aliveVariableScope = new LiveVariableScope();
+	public ReplaceExpectedExceptionASTVisitor(String assertThrowsQualifiedName) {
+		this.assertThrowsQualifiedName = assertThrowsQualifiedName;
+	}
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		boolean continueVisiting = super.visit(compilationUnit);
 		if (continueVisiting) {
-			verifyStaticMethodImport(compilationUnit, ORG_JUNIT_ASSERT_ASSERT_THROWS);
+			verifyStaticMethodImport(compilationUnit, assertThrowsQualifiedName);
 			verifyStaticMethodImport(compilationUnit, ORG_JUNIT_ASSERT_ASSERT_TRUE);
 			verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT);
 		}
@@ -203,7 +212,7 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 			.get(0);
 
 		AST ast = methodDeclaration.getAST();
-		Optional<Name> qualifiedPrefix = addImportForStaticMethod(ORG_JUNIT_ASSERT_ASSERT_THROWS, methodDeclaration);
+		Optional<Name> qualifiedPrefix = addImportForStaticMethod(assertThrowsQualifiedName, methodDeclaration);
 		MethodInvocation assertThrows = ast.newMethodInvocation();
 		assertThrows.setName(ast.newSimpleName(ASSERT_THROWS));
 		qualifiedPrefix.ifPresent(assertThrows::setExpression);

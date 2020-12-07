@@ -19,7 +19,7 @@ class ReplaceExpectedExceptionASTVisitorTest extends UsesJDTUnitFixture {
 		defaultFixture.addImport("org.junit.rules.ExpectedException");
 		defaultFixture.addImport("java.io.IOException");
 		defaultFixture.addImport("org.hamcrest.Matcher");
-		setDefaultVisitor(new ReplaceExpectedExceptionASTVisitor());
+		setDefaultVisitor(new ReplaceExpectedExceptionASTVisitor("org.junit.Assert.assertThrows"));
 	}
 
 	@AfterEach
