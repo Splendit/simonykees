@@ -21,8 +21,6 @@ import eu.jsparrow.rules.common.Tag;
 
 class ReplaceExpectedExceptionRuleTest extends SingleRuleTest {
 
-	private static final String SAMPLE_FILE = "ReplaceExpectedExceptionRule.java";
-	private static final String POSTRULE_SUBDIRECTORY = "expectedException";
 	private ReplaceExpectedExceptionRule rule;
 
 	@BeforeEach
@@ -51,7 +49,7 @@ class ReplaceExpectedExceptionRuleTest extends SingleRuleTest {
 						+ "The goal of this rule is to replace expectedException.expect() with assertThrows. Additionally, new "
 						+ "assertions are added for each invocation of expectMessage() and expectCause()."));
 	}
-	
+
 	@Test
 	void test_requiredLibraries() throws Exception {
 		addToClasspath(testProject, Arrays
@@ -63,7 +61,7 @@ class ReplaceExpectedExceptionRuleTest extends SingleRuleTest {
 
 		assertThat(rule.requiredLibraries(), equalTo("JUnit 4.13 or JUnit 5.0 and above"));
 	}
-	
+
 	@Test
 	void test_requiredJavaVersion() throws Exception {
 		addToClasspath(testProject, Arrays
@@ -75,7 +73,7 @@ class ReplaceExpectedExceptionRuleTest extends SingleRuleTest {
 
 		assertThat(rule.getRequiredJavaVersion(), equalTo("1.8"));
 	}
-	
+
 	@Test
 	void calculateEnabledForProject_supportLibraryVersion_4_13_shouldReturnTrue_shouldReturnTrue() throws Exception {
 		addToClasspath(testProject, Arrays
@@ -88,7 +86,7 @@ class ReplaceExpectedExceptionRuleTest extends SingleRuleTest {
 		assertTrue(rule.isSatisfiedLibraries());
 		assertTrue(rule.isSatisfiedJavaVersion());
 	}
-	
+
 	@Test
 	void calculateEnabledForProject_supportJunitJupiter_5_0_shouldReturnTrue() throws Exception {
 		addToClasspath(testProject, Arrays
