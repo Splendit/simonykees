@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.files;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,18 +77,18 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			.getLocationInParent() != VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
 			return true;
 		}
-		VariableDeclarationExpression parentVariableDeclarationExpression = (VariableDeclarationExpression) fragmentDeclaringBufferedWriter
+		VariableDeclarationExpression resourceDeclaringBufferedWriter = (VariableDeclarationExpression) fragmentDeclaringBufferedWriter
 			.getParent();
 
-		if (parentVariableDeclarationExpression.fragments()
+		if (resourceDeclaringBufferedWriter.fragments()
 			.size() != 1) {
 			return true;
 		}
 
-		if (parentVariableDeclarationExpression.getLocationInParent() != TryStatement.RESOURCES2_PROPERTY) {
+		if (resourceDeclaringBufferedWriter.getLocationInParent() != TryStatement.RESOURCES2_PROPERTY) {
 			return true;
 		}
-		TryStatement tryStatement = (TryStatement) parentVariableDeclarationExpression.getParent();
+		TryStatement tryStatement = (TryStatement) resourceDeclaringBufferedWriter.getParent();
 
 		if (writeInvocationAnalyzer.getBlockOfInvocationStatement()
 			.getLocationInParent() != TryStatement.BODY_PROPERTY) {
@@ -112,12 +113,13 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			return true;
 		}
 		FilesNewBufferedIOTransformationData findFilesNewBufferedIOTransformationData = findFilesNewBufferedIOTransformationData(
-				tryStatement, parentVariableDeclarationExpression,
+				tryStatement, resourceDeclaringBufferedWriter,
 				writeInvocationAnalyzer, bufferedIOInitializer).orElse(null);
 		if (findFilesNewBufferedIOTransformationData != null) {
 			transform(methodInvocation, findFilesNewBufferedIOTransformationData);
 		} else {
-			findResultByBufferedWriterInstanceCreation(tryStatement, bufferedIOInitializer,
+			findResultByBufferedWriterInstanceCreation(tryStatement, resourceDeclaringBufferedWriter,
+					bufferedIOInitializer,
 					writeInvocationAnalyzer)
 						.ifPresent(result -> {
 							transform(methodInvocation, result);
@@ -184,6 +186,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	Optional<UseFilesWriteStringAnalysisResult> findResultByBufferedWriterInstanceCreation(TryStatement tryStatement,
+			VariableDeclarationExpression resourceDeclaringBufferedWriter,
 			Expression bufferedIOInitializer, WriteMethodInvocationAnalyzer writeInvocationAnalyzer) {
 
 		Expression writeStringArgument = writeInvocationAnalyzer.getCharSequenceArgument();
@@ -204,17 +207,18 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			if (newBufferedIOArgumentsAnalyzer.analyzeInitializer(writerInstanceCreation)) {
 				Expression charsetExpression = newBufferedIOArgumentsAnalyzer.getCharsetExpression()
 					.orElse(null);
+				List<VariableDeclarationExpression> resourcesToRemove = Arrays.asList(resourceDeclaringBufferedWriter);
 				if (charsetExpression != null) {
 					return Optional
-						.of(new UseFilesWriteStringAnalysisResult(tryStatement, bufferedWriterInstanceCreation,
+						.of(new UseFilesWriteStringAnalysisResult(tryStatement, resourcesToRemove,
 								newBufferedIOArgumentsAnalyzer.getPathExpressions(), writeStringArgument,
 								charsetExpression));
 				}
-				return Optional.of(new UseFilesWriteStringAnalysisResult(tryStatement, bufferedWriterInstanceCreation,
+				return Optional.of(new UseFilesWriteStringAnalysisResult(tryStatement, resourcesToRemove,
 						newBufferedIOArgumentsAnalyzer.getPathExpressions(), writeStringArgument));
 			}
 		} else if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-			return createTransformationDataUsingFileIOResource(tryStatement, bufferedWriterInstanceCreation,
+			return createTransformationDataUsingFileIOResource(tryStatement, resourceDeclaringBufferedWriter,
 					(SimpleName) bufferedWriterInstanceCreationArgument,
 					writeStringArgument);
 		}
@@ -223,7 +227,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	private Optional<UseFilesWriteStringAnalysisResult> createTransformationDataUsingFileIOResource(
 			TryStatement tryStatement,
-			ClassInstanceCreation bufferedWriterInstanceCreation,
+			VariableDeclarationExpression resourceDeclaringBufferedWriter,
 			SimpleName bufferedIOArgAsSimpleName, Expression writeStringArgument) {
 		VariableDeclarationFragment fileIOResource = FilesUtil
 			.findVariableDeclarationFragmentAsResource(bufferedIOArgAsSimpleName,
@@ -233,8 +237,11 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			return Optional.empty();
 		}
 
+		VariableDeclarationExpression resourceDeclaringFileIO = (VariableDeclarationExpression) fileIOResource
+			.getParent();
+
 		FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(java.io.FileWriter.class.getName());
-		if (!fileIOAnalyzer.analyzeFileIO((VariableDeclarationExpression) fileIOResource.getParent())) {
+		if (!fileIOAnalyzer.analyzeFileIO(resourceDeclaringFileIO)) {
 			return Optional.empty();
 		}
 
@@ -251,16 +258,14 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		Expression charsetExpression = fileIOAnalyzer.getCharset()
 			.orElse(null);
 
+		List<VariableDeclarationExpression> resourcesToRemove = Arrays.asList(resourceDeclaringBufferedWriter,
+				resourceDeclaringFileIO);
 		if (charsetExpression != null) {
-			return Optional.of(new UseFilesWriteStringAnalysisResult(tryStatement,
-					bufferedWriterInstanceCreation,
-					pathExpressions, writeStringArgument, charsetExpression,
-					fileIOResource));
+			return Optional.of(new UseFilesWriteStringAnalysisResult(tryStatement, resourcesToRemove,
+					pathExpressions, writeStringArgument, charsetExpression));
 		}
-		return Optional.of(new UseFilesWriteStringAnalysisResult(tryStatement,
-				bufferedWriterInstanceCreation, pathExpressions,
-				writeStringArgument,
-				fileIOResource));
+		return Optional.of(new UseFilesWriteStringAnalysisResult(tryStatement, resourcesToRemove,
+				pathExpressions, writeStringArgument));
 	}
 
 	private boolean checkWriterVariableUsage(SimpleName writerVariableName,
@@ -300,7 +305,8 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		onRewrite();
 	}
 
-	private void transform(MethodInvocation methodInvocation, UseFilesWriteStringAnalysisResult transformationData) {
+	private void transform(MethodInvocation methodInvocationToReplace,
+			UseFilesWriteStringAnalysisResult transformationData) {
 		/**
 		 * TODO:
 		 * <p>
@@ -315,35 +321,24 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		 * logic here that gets the parents of a node until you reach the node
 		 * to transform.
 		 */
-		Expression bufferedIOInitializer = transformationData.getBufferedIOInitializer();
-		ASTNode bufferedIODeclarationFragment = bufferedIOInitializer.getParent();
-		ASTNode bufferedIOResourceToRemove = bufferedIODeclarationFragment.getParent();
-		MethodInvocation writeStringMethodInvocation = createFilesWriteStringMethodInvocation(transformationData);
-		if (calculateResourcesSizeAfterTransformation(transformationData) > 0) {
 
-			astRewrite.replace(methodInvocation, writeStringMethodInvocation, null);
-			astRewrite.remove(bufferedIOResourceToRemove, null);
-			transformationData.getFileIOResource()
-				.ifPresent(resource -> astRewrite.remove(resource.getParent(),
-						null));
+		MethodInvocation writeStringMethodInvocation = createFilesWriteStringMethodInvocation(methodInvocationToReplace,
+				transformationData);
+		List<VariableDeclarationExpression> resourcesToRemove = transformationData.getResourcesToRemove();
+		int allResourcesSize = transformationData.getTryStatement()
+			.resources()
+			.size();
+		if (allResourcesSize > resourcesToRemove.size()) {
+			astRewrite.replace(methodInvocationToReplace, writeStringMethodInvocation, null);
+			resourcesToRemove.stream()
+				.forEach(resource -> astRewrite.remove(resource, null));
 		} else {
 			TryStatement tryStatementReplacement = createNewTryStatementWithoutResources(
 					transformationData.getTryStatement(),
-					methodInvocation.getParent(), writeStringMethodInvocation);
+					methodInvocationToReplace.getParent(), writeStringMethodInvocation);
 			astRewrite.replace(transformationData.getTryStatement(), tryStatementReplacement, null);
 		}
 		onRewrite();
-	}
-
-	private int calculateResourcesSizeAfterTransformation(UseFilesWriteStringAnalysisResult transformationData) {
-		int sizeBefore = transformationData.getTryStatement()
-			.resources()
-			.size();
-		if (transformationData.getFileIOResource()
-			.isPresent()) {
-			return sizeBefore - 2;
-		}
-		return sizeBefore - 1;
 	}
 
 	private MethodInvocation createFilesWriteStringMethodInvocation(
@@ -361,10 +356,10 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	private MethodInvocation createFilesWriteStringMethodInvocation(
+			MethodInvocation methodInvocationToReplace,
 			UseFilesWriteStringAnalysisResult transformationData) {
 		AST ast = astRewrite.getAST();
-		Name pathsTypeName = addImport(FilesUtil.PATHS_QUALIFIED_NAME,
-				transformationData.getBufferedIOInitializer());
+		Name pathsTypeName = addImport(FilesUtil.PATHS_QUALIFIED_NAME, methodInvocationToReplace);
 		List<Expression> pathsGetArguments = transformationData.getPathExpressions()
 			.stream()
 			.map(pathExpression -> (Expression) astRewrite.createCopyTarget(pathExpression))
@@ -379,8 +374,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
 			.orElse(null);
 		if (charset == null) {
-			Name charsetTypeName = addImport(FilesUtil.CHARSET_QUALIFIED_NAME,
-					transformationData.getBufferedIOInitializer());
+			Name charsetTypeName = addImport(FilesUtil.CHARSET_QUALIFIED_NAME, methodInvocationToReplace);
 			charset = NodeBuilder.newMethodInvocation(ast, charsetTypeName, FilesUtil.DEFAULT_CHARSET);
 		}
 
@@ -388,8 +382,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		arguments.add(pathArgument);
 		arguments.add(writeStringArgumentCopy);
 		arguments.add(charset);
-		Name filesTypeName = addImport(FilesUtil.FILES_QUALIFIED_NAME,
-				transformationData.getBufferedIOInitializer());
+		Name filesTypeName = addImport(FilesUtil.FILES_QUALIFIED_NAME, methodInvocationToReplace);
 		return NodeBuilder.newMethodInvocation(ast, filesTypeName,
 				ast.newSimpleName("writeString"), arguments); //$NON-NLS-1$
 	}

@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 /**
  * 
@@ -21,47 +21,28 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 class UseFilesWriteStringAnalysisResult {
 
 	private final TryStatement tryStatement;
+	private final List<VariableDeclarationExpression> resourcesToRemove;
 
-	private final Expression bufferedIOInitializer;
-	private VariableDeclarationFragment fileIOResource;
 	private final List<Expression> pathExpressions;
 	private final Expression writeStringArgument;
 	private Expression charSet;
 
-	UseFilesWriteStringAnalysisResult(TryStatement tryStatement, Expression bufferedIOInitializer,
-			List<Expression> pathExpressions, Expression writeStringArgument, Expression charSet,
-			VariableDeclarationFragment fileIOResource) {
-		this(tryStatement, bufferedIOInitializer, pathExpressions, writeStringArgument, fileIOResource);
-		this.charSet = charSet;
-	}
-
-	UseFilesWriteStringAnalysisResult(TryStatement tryStatement, Expression bufferedIOInitializer,
-			List<Expression> pathExpressions, Expression writeStringArgument,
-			VariableDeclarationFragment fileIOResource) {
-		this(tryStatement, bufferedIOInitializer, pathExpressions, writeStringArgument);
-		this.fileIOResource = fileIOResource;
-	}
-
-	UseFilesWriteStringAnalysisResult(TryStatement tryStatement, Expression bufferedIOInitializer,
+	UseFilesWriteStringAnalysisResult(TryStatement tryStatement, List<VariableDeclarationExpression> resourcesToRemove,
 			List<Expression> pathExpressions, Expression writeStringArgument, Expression charSet) {
-		this(tryStatement, bufferedIOInitializer, pathExpressions, writeStringArgument);
+		this(tryStatement, resourcesToRemove, pathExpressions, writeStringArgument);
 		this.charSet = charSet;
 	}
 
-	UseFilesWriteStringAnalysisResult(TryStatement tryStatement, Expression bufferedIOInitializer,
+	UseFilesWriteStringAnalysisResult(TryStatement tryStatement, List<VariableDeclarationExpression> resourcesToRemove,
 			List<Expression> pathExpressions, Expression writeStringArgument) {
 		this.tryStatement = tryStatement;
-		this.bufferedIOInitializer = bufferedIOInitializer;
+		this.resourcesToRemove = resourcesToRemove;
 		this.pathExpressions = pathExpressions;
 		this.writeStringArgument = writeStringArgument;
 	}
 
 	TryStatement getTryStatement() {
 		return tryStatement;
-	}
-
-	public Optional<VariableDeclarationFragment> getFileIOResource() {
-		return Optional.ofNullable(fileIOResource);
 	}
 
 	public List<Expression> getPathExpressions() {
@@ -76,7 +57,7 @@ class UseFilesWriteStringAnalysisResult {
 		return Optional.ofNullable(charSet);
 	}
 
-	public Expression getBufferedIOInitializer() {
-		return bufferedIOInitializer;
+	List<VariableDeclarationExpression> getResourcesToRemove() {
+		return resourcesToRemove;
 	}
 }
