@@ -472,4 +472,75 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_TestTwoBufferedWriterResourcesToRemove_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class,
+				java.nio.file.Files.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, cs);\n"
+				+ "				BufferedWriter bufferedWriter2 = Files.newBufferedWriter(path, cs)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "			bufferedWriter.write(value, 10, 1000);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_TestTwoWriterResourcesToRemove_shouldNotTransform() throws Exception {
+		addImports(java.io.Writer.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class,
+				java.nio.file.Files.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
+				+ "		try (Writer bufferedWriter = Files.newBufferedWriter(path, cs);\n"
+				+ "				Writer bufferedWriter2 = Files.newBufferedWriter(path, cs)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "			bufferedWriter2.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_AdditionalWriteInvocationOfAnonymousClass_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.io.IOException.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString));\n"
+				+ "				BufferedWriter bufferedWriterAnonymous = new BufferedWriter(new FileWriter(pathString)) {\n"
+				+ "					@Override\n"
+				+ "					public void write(String s) throws IOException {\n"
+				+ "						super.write(s);\n"
+				+ "					}\n"
+				+ "				}) //\n"
+				+ "		{\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "			bufferedWriterAnonymous.write(value, 10, 1000);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		assertNoChange(original);
+	}
 }

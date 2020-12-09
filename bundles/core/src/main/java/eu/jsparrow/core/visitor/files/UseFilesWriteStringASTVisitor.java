@@ -99,6 +99,14 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			return true;
 		}
 
+		WriteInvocationsInTryStatementBodyASTVisitor writeInvocationsVisitor = new WriteInvocationsInTryStatementBodyASTVisitor();
+		tryStatement.getBody()
+			.accept(writeInvocationsVisitor);
+		if (writeInvocationsVisitor.getWriteMethodInvocations()
+			.size() != 1) {
+			return true;
+		}
+
 		if (!checkWriterVariableUsage(writeInvocationAnalyzer.getWriterVariableSimpleName(),
 				writeInvocationAnalyzer.getBlockOfInvocationStatement())) {
 			return true;

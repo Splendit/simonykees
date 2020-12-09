@@ -551,4 +551,39 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 
 		assertChange(original, expected);
 	}
+
+	@Test
+	public void visit_AdditionalNonWriterWriteMethodInvocation_shouldTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.io.IOException.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		class LocalClass {\n"
+				+ "			public void write(String s) throws IOException {\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "		try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString))) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "			new LocalClass().write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		String expected = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		class LocalClass {\n"
+				+ "			public void write(String s) throws IOException {\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "		try {\n"
+				+ "			Files.writeString(Paths.get(pathString), value, Charset.defaultCharset());\n"
+				+ "			new LocalClass().write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		assertChange(original, expected);
+	}
 }
