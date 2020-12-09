@@ -460,4 +460,95 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				+ "			}";
 		assertChange(original, expected);
 	}
+
+	@Test
+	public void visit_FileWriterResourceFromNewFileWithOneStringArgument_shouldTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.File.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		try (FileWriter fileWriter = new FileWriter(new File(pathString), cs);\n"
+				+ "				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		String expected = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		try {\n"
+				+ "			Files.writeString(Paths.get(pathString), value, cs);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_FileWriterResourceFromNewFileWithTwoStringArguments_shouldTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.File.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathStringParent = \"/home/test/\";\n"
+				+ "		String pathStringChild = \"testpath\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		try (FileWriter fileWriter = new FileWriter(new File(pathStringParent, pathStringChild), cs);\n"
+				+ "				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		String expected = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathStringParent = \"/home/test/\";\n"
+				+ "		String pathStringChild = \"testpath\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		try {\n"
+				+ "			Files.writeString(Paths.get(pathStringParent, pathStringChild), value, cs);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_newFileWriterFromNewFileWithOneStringArgument_shouldTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.File.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(new File(pathString), cs))) {\n"
+				+ "			bufferedWriter.write(value);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		String expected = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		String pathString = \"/home/test/testpath\";\n"
+				+ "		Charset cs = StandardCharsets.UTF_8;\n"
+				+ "		try {\n"
+				+ "			Files.writeString(Paths.get(pathString), value, cs);\n"
+				+ "		} catch (Exception exception) {\n"
+				+ "		}";
+
+		assertChange(original, expected);
+	}
 }
