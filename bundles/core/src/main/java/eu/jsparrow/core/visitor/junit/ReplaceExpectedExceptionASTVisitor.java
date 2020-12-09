@@ -254,8 +254,7 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 		LambdaExpression lambdaExpression = ast.newLambdaExpression();
 		ASTNode lambdaBody = createThrowRunnable(nodeThrowingException);
 		lambdaExpression.setBody(lambdaBody);
-		@SuppressWarnings("rawtypes")
-		List assertionArguments = assertThrows.arguments();
+		List<Expression> assertionArguments = assertThrows.arguments();
 		assertionArguments.add(firstArg);
 		assertionArguments.add(lambdaExpression);
 
@@ -338,7 +337,6 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 	private void createAssertThatInvocations(MethodDeclaration methodDeclaration,
 			List<Expression> expectedCauseMatchers,
 			String exceptionIdentifier, String getCauseIdentifier) {
-		String assertThatIdentifer = "assertThat"; //$NON-NLS-1$
 		AST ast = methodDeclaration.getAST();
 		ListRewrite rewriter = astRewrite.getListRewrite(methodDeclaration.getBody(), Block.STATEMENTS_PROPERTY);
 		for (Expression expectedMmessage : expectedCauseMatchers) {
@@ -346,7 +344,7 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 			Optional<Name> qualifier = addImportForStaticMethod(ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT,
 					methodDeclaration);
 			qualifier.ifPresent(assertTrue::setExpression);
-			assertTrue.setName(ast.newSimpleName(assertThatIdentifer));
+			assertTrue.setName(ast.newSimpleName("assertThat")); //$NON-NLS-1$
 			MethodInvocation getMessage = ast.newMethodInvocation();
 			getMessage.setName(ast.newSimpleName(getCauseIdentifier));
 			getMessage.setExpression(ast.newSimpleName(exceptionIdentifier));
@@ -367,9 +365,8 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 		} else {
 			AST ast = nodeThrowingException.getAST();
 			Block body = ast.newBlock();
-			@SuppressWarnings("rawtypes")
-			List statements = body.statements();
-			statements.add(astRewrite.createCopyTarget(nodeThrowingException.getParent()));
+			List<Statement> statements = body.statements();
+			statements.add((Statement) astRewrite.createCopyTarget(nodeThrowingException.getParent()));
 			return body;
 		}
 	}

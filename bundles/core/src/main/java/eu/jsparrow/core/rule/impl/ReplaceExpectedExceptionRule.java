@@ -42,7 +42,7 @@ public class ReplaceExpectedExceptionRule
 	@Override
 	protected String provideRequiredJavaVersion() {
 		/*
-		 * assertThrows expects a lambda expression. 
+		 * assertThrows expects a lambda expression.
 		 */
 		return JavaCore.VERSION_1_8;
 	}
@@ -57,18 +57,18 @@ public class ReplaceExpectedExceptionRule
 		Predicate<Version> versionComparator = version -> version
 			.compareTo(Version.parseVersion(MIN_JUNIT_4_VERSION)) >= 0
 				|| version.compareTo(Version.parseVersion(MIN_JUNIT_5_VERSION)) >= 0;
-		if(isInProjectLibraries(project, ORG_JUNIT_JUPITER_API_TEST, versionComparator)) {
+		if (isInProjectLibraries(project, ORG_JUNIT_JUPITER_API_TEST, versionComparator)) {
 			this.assertThrowsQualifiedName = JUPITER_ASSERT_THROWS;
 			return true;
 		}
-		
-		if(isInProjectLibraries(project, ORG_JUNIT_TEST, versionComparator)) {
+
+		if (isInProjectLibraries(project, ORG_JUNIT_TEST, versionComparator)) {
 			this.assertThrowsQualifiedName = JUNIT_ASSERT_THROWS;
 			return true;
 		}
 		return false;
 	}
-	
+
 	@Override
 	public ReplaceExpectedExceptionASTVisitor visitorFactory() {
 		return new ReplaceExpectedExceptionASTVisitor(assertThrowsQualifiedName);
