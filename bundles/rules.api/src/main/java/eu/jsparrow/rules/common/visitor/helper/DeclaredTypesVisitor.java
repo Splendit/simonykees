@@ -22,12 +22,12 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
  * @since 2.0
  *
  */
-public class DeclaredTypesASTVisitor extends ASTVisitor {
+public class DeclaredTypesVisitor extends ASTVisitor {
 
 	private Map<String, List<ITypeBinding>> typesMap;
 	private List<ITypeBinding> allTypes;
 
-	public DeclaredTypesASTVisitor() {
+	public DeclaredTypesVisitor() {
 		typesMap = new HashMap<>();
 		allTypes = new ArrayList<>();
 	}

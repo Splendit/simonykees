@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import eu.jsparrow.core.visitor.loop.LoopIteratingIndexASTVisitor;
+import eu.jsparrow.core.visitor.loop.LoopIteratingIndexVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -25,7 +25,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @author Ardit Ymeri
  * @since 1.2
  */
-abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisitor {
+abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexVisitor {
 
 	protected static final String OUTSIDE_LOOP_INDEX_DECLARATION = "outside-declaration-fragment"; //$NON-NLS-1$
 	protected static final String LOOP_INITIALIZER = "loop-initializer"; //$NON-NLS-1$

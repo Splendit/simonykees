@@ -16,10 +16,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * @since 1.2
  *
  */
-class BlockVariableDeclarationsASTVisitor extends ASTVisitor {
+class BlockVariableDeclarationsVisitor extends ASTVisitor {
 	private List<SimpleName> blockVariableNames;
 
-	public BlockVariableDeclarationsASTVisitor() {
+	public BlockVariableDeclarationsVisitor() {
 		blockVariableNames = new ArrayList<>();
 	}
 

@@ -50,7 +50,7 @@ public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisito
 				return true;
 			}
 
-			ArithmeticExpressionASTVisitor arithExpASTVisitor = new ArithmeticExpressionASTVisitor(astRewrite,
+			ArithmeticExpressionVisitor arithExpASTVisitor = new ArithmeticExpressionVisitor(astRewrite,
 					leftHandSide);
 
 			node.getRightHandSide()

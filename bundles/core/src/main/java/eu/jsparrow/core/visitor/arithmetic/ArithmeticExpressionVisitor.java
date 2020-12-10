@@ -15,14 +15,14 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
  * @author Martin Huter
  * @since 0.9
  */
-class ArithmeticExpressionASTVisitor extends ASTVisitor {
+class ArithmeticExpressionVisitor extends ASTVisitor {
 
 	private String varName;
 
 	private ASTRewrite astRewrite;
 	private InfixExpression.Operator newOperator;
 
-	public ArithmeticExpressionASTVisitor(ASTRewrite astRewrite, SimpleName optimizationVariable) {
+	public ArithmeticExpressionVisitor(ASTRewrite astRewrite, SimpleName optimizationVariable) {
 		super();
 		this.astRewrite = astRewrite;
 		newOperator = null;

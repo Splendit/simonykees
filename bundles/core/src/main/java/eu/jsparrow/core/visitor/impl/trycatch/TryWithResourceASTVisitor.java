@@ -89,7 +89,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 
 				SimpleName varName = variableDeclarationFragment.getName();
 
-				TwrPreconditionASTVisitor visitor = new TwrPreconditionASTVisitor(varName, toBeMovedToResources);
+				TwrPreconditionVisitor visitor = new TwrPreconditionVisitor(varName, toBeMovedToResources);
 				node.accept(visitor);
 
 				if (variableDeclarationFragment.getInitializer() != null && visitor.safeToGo()) {
@@ -158,7 +158,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			ChildListPropertyDescriptor resourcesProperty = JdtCoreVersionBindingUtil.findTryWithResourcesProperty(version);
 			ListRewrite listRewrite = astRewrite.getListRewrite(node, resourcesProperty);
 			resourceList.forEach(iteratorNode -> listRewrite.insertLast(iteratorNode, null));
-			TwrCloseStatementsASTVisitor visitor = new TwrCloseStatementsASTVisitor(closeInvocations);
+			TwrCloseStatementsVisitor visitor = new TwrCloseStatementsVisitor(closeInvocations);
 			node.accept(visitor);
 			List<Statement> invocations = visitor.getCloseInvocationStatements();
 			invocations.forEach(invocation -> {
@@ -182,7 +182,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		Map<Integer, List<Comment>> comments = findBodyComments(node, toBeMovedToResources, closeInvocations);
 		Block newBody = (Block) ASTNode.copySubtree(node.getAST(), node.getBody());
 
-		TwrRemoveNodesASTVisitor visitor = new TwrRemoveNodesASTVisitor(toBeMovedToResources, closeInvocations);
+		TwrRemoveNodesVisitor visitor = new TwrRemoveNodesVisitor(toBeMovedToResources, closeInvocations);
 		newBody.accept(visitor);
 
 		List<Statement> newBodyStatements = convertToTypedList(newBody.statements(), Statement.class);
