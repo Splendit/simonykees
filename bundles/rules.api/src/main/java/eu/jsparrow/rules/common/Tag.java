@@ -42,7 +42,7 @@ public enum Tag {
 	FREE("free"),
 	LOGGING("logging"),
 	IO_OPERATIONS("io operations"), 
-	JUNIT("junit");
+	TESTING("testing");
 
 	private List<String> tagName;
 
