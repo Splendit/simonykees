@@ -130,7 +130,7 @@ class ReplaceExpectedExceptionASTVisitorTest extends UsesJDTUnitFixture {
 				+ ""
 				+ "@Test\n"
 				+ "public void expectMessageString() {\n"
-				+ "	IOException exception=assertThrows(IOException.class,() -> throwIOException());\n"
+				+ "	IOException exception = assertThrows(IOException.class,() -> throwIOException());\n"
 				+ "	assertTrue(exception.getMessage().contains(\"some message\"));"
 				+ "}";
 		assertChange(original, expected);
@@ -189,7 +189,7 @@ class ReplaceExpectedExceptionASTVisitorTest extends UsesJDTUnitFixture {
 				+ ""
 				+ "@Test\n"
 				+ "public void expectMessageContainsMatcher() {\n"
-				+ "	IOException exception=assertThrows(IOException.class,() -> throwIOException());\n"
+				+ "	IOException exception = assertThrows(IOException.class,() -> throwIOException());\n"
 				+ "	assertThat(exception.getMessage(),Matchers.containsString(\"\"));"
 				+ "}";
 		assertChange(original, expected);
