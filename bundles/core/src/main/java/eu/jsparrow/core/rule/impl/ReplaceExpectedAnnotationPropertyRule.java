@@ -27,7 +27,7 @@ public class ReplaceExpectedAnnotationPropertyRule extends RefactoringRuleImpl<R
 		this.visitorClass = ReplaceExpectedAnnotationPropertyASTVisitor.class;
 		this.id = "ReplaceExpectedAnnotationProperty"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
-				"Replace Expected Annotation Property",
+				"Replace Expected Annotation Property with assertThrows",
 				"Replaces Expected Annotation Property with assertThrows",
 				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_8, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY));
 	}
