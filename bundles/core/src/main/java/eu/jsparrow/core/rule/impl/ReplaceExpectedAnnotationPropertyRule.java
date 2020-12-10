@@ -8,12 +8,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 
-import eu.jsparrow.core.visitor.junit.RemoveExpectedAnnotationPropertyASTVisitor;
+import eu.jsparrow.core.visitor.junit.ReplaceExpectedAnnotationPropertyASTVisitor;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-public class RemoveExpectedAnnotationPropertyRule extends RefactoringRuleImpl<RemoveExpectedAnnotationPropertyASTVisitor> {
+public class ReplaceExpectedAnnotationPropertyRule extends RefactoringRuleImpl<ReplaceExpectedAnnotationPropertyASTVisitor> {
 
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
@@ -23,9 +23,9 @@ public class RemoveExpectedAnnotationPropertyRule extends RefactoringRuleImpl<Re
 	private static final String JUNIT_ASSERT_THROWS = "org.junit.Assert.assertThrows"; //$NON-NLS-1$
 	private String assertThrowsQualifiedName = JUNIT_ASSERT_THROWS;
 
-	public RemoveExpectedAnnotationPropertyRule() {
-		this.visitorClass = RemoveExpectedAnnotationPropertyASTVisitor.class;
-		this.id = "ReplaceExpectedException"; //$NON-NLS-1$
+	public ReplaceExpectedAnnotationPropertyRule() {
+		this.visitorClass = ReplaceExpectedAnnotationPropertyASTVisitor.class;
+		this.id = "ReplaceExpectedAnnotationProperty"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
 				"Replace Expected Annotation Property",
 				"Replaces Expected Annotation Property with assertThrows",
@@ -63,8 +63,8 @@ public class RemoveExpectedAnnotationPropertyRule extends RefactoringRuleImpl<Re
 	}
 
 	@Override
-	public RemoveExpectedAnnotationPropertyASTVisitor visitorFactory() {
-		return new RemoveExpectedAnnotationPropertyASTVisitor(assertThrowsQualifiedName);
+	public ReplaceExpectedAnnotationPropertyASTVisitor visitorFactory() {
+		return new ReplaceExpectedAnnotationPropertyASTVisitor(assertThrowsQualifiedName);
 	}
 
 

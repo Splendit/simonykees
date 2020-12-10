@@ -29,7 +29,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
-public class RemoveExpectedAnnotationPropertyASTVisitor extends AbstractAddImportASTVisitor {
+public class ReplaceExpectedAnnotationPropertyASTVisitor extends AbstractAddImportASTVisitor {
 	
 	private static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
@@ -37,7 +37,7 @@ public class RemoveExpectedAnnotationPropertyASTVisitor extends AbstractAddImpor
 	
 	private String assertThrowsQualifiedName;
 	
-	public RemoveExpectedAnnotationPropertyASTVisitor(String assertThrowsQualifiedName) {
+	public ReplaceExpectedAnnotationPropertyASTVisitor(String assertThrowsQualifiedName) {
 		this.assertThrowsQualifiedName = assertThrowsQualifiedName;
 	}
 	

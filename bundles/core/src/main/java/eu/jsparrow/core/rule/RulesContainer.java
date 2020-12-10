@@ -65,7 +65,7 @@ import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
 import eu.jsparrow.core.rule.impl.RemoveCollectionAddAllRule;
 import eu.jsparrow.core.rule.impl.RemoveDoubleNegationRule;
 import eu.jsparrow.core.rule.impl.RemoveEmptyStatementRule;
-import eu.jsparrow.core.rule.impl.RemoveExpectedAnnotationPropertyRule;
+import eu.jsparrow.core.rule.impl.ReplaceExpectedAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
 import eu.jsparrow.core.rule.impl.RemoveModifiersInInterfacePropertiesRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
@@ -185,7 +185,7 @@ public class RulesContainer {
 				new UseSecureRandomRule(),
 				new CreateTempFilesUsingJavaNIORule(),
 				
-				new ReplaceExpectedExceptionRule(), new RemoveExpectedAnnotationPropertyRule(),
+				new ReplaceExpectedExceptionRule(), new ReplaceExpectedAnnotationPropertyRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
