@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -80,7 +81,7 @@ public class RemoveExpectedAnnotationPropertyASTVisitor extends AbstractAddImpor
 			return false;
 		}
 		
-		refactor(methodDeclaration, exceptionType, nodeThrowingException, expectedExpressionExpression);
+		refactor(methodDeclaration, exceptionType, nodeThrowingException, expectedExpressionExpression, annotation);
 		
 		return true;
 	}
@@ -156,7 +157,7 @@ public class RemoveExpectedAnnotationPropertyASTVisitor extends AbstractAddImpor
 	
 	@SuppressWarnings("unchecked")
 	private void refactor(MethodDeclaration methodDeclaration,
-			ITypeBinding exceptionType, ASTNode nodeThrowingException, Expression expectedException) {
+			ITypeBinding exceptionType, ASTNode nodeThrowingException, Expression expectedException, NormalAnnotation annotation) {
 
 
 		AST ast = methodDeclaration.getAST();
@@ -176,7 +177,15 @@ public class RemoveExpectedAnnotationPropertyASTVisitor extends AbstractAddImpor
 		
 		ExpressionStatement assertionStatement = ast.newExpressionStatement(assertThrows);
 		astRewrite.replace(nodeThrowingException.getParent(), assertionStatement, null);
-		astRewrite.remove(expectedException.getParent(), null);
+		List<MemberValuePair> annotationProperties = annotation.values();
+		if(annotationProperties.size() > 1) {
+			astRewrite.remove(expectedException.getParent(), null);
+		} else {
+			MarkerAnnotation markerAnnotation = ast.newMarkerAnnotation();
+			markerAnnotation.setTypeName((Name)astRewrite.createCopyTarget(annotation.getTypeName()));
+			astRewrite.replace(annotation, markerAnnotation, null);
+		}
+
 		onRewrite();
 		
 	}
