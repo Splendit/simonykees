@@ -14,6 +14,17 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Offers utility methods used in connection with the transformation of code by
+ * one of the following visitors:
+ * 
+ * <ul>
+ * <li>{@link eu.jsparrow.core.visitor.files.UseFilesBufferedReaderASTVisitor}</li>
+ * <li>{@link eu.jsparrow.core.visitor.files.UseFilesBufferedWriterASTVisitor}</li>
+ * <li>{@link eu.jsparrow.core.visitor.files.UseFilesWriteStringASTVisitor}</li>
+ * </ul>
+ *
+ */
 class FilesUtil {
 	static final String PATHS_QUALIFIED_NAME = java.nio.file.Paths.class.getName();
 	static final String CHARSET_QUALIFIED_NAME = java.nio.charset.Charset.class.getName();

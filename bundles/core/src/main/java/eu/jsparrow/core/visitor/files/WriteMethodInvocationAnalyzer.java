@@ -10,6 +10,15 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * Helper class to determine whether a method invocation is an invocation of
+ * <br>
+ * {@link java.io.Writer#write(String)} <br>
+ * which can be transformed by the <br>
+ * {@link eu.jsparrow.core.visitor.files.UseFilesWriteStringASTVisitor}.
+ *
+ * @since 3.24.0
+ */
 class WriteMethodInvocationAnalyzer {
 
 	private final SignatureData write = new SignatureData(java.io.Writer.class, "write", java.lang.String.class); //$NON-NLS-1$
@@ -59,5 +68,4 @@ class WriteMethodInvocationAnalyzer {
 	Block getBlockOfInvocationStatement() {
 		return blockOfInvocationStatement;
 	}
-
 }

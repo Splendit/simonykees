@@ -36,6 +36,31 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
 
 /**
+ * This visitor looks for invocations of {@link java.io.Writer#write(String)}
+ * which can be replaced by invocations of methods with the name "writeString"
+ * which are available as static methods of the class
+ * {@link java.nio.file.Files} since Java 11.
+ * 
+ * Example:
+ * 
+ * <pre>
+ * try (BufferedWriter bufferedWriter = new BufferedWriter(
+ * 		new FileWriter("/home/test/testpath", StandardCharsets.UTF_8))) {
+ * 	bufferedWriter.write("Hello World!");
+ * } catch (IOException ioException) {
+ * 	logError("File could not be written.", ioException);
+ * }
+ * </pre>
+ * 
+ * is transformed to
+ * 
+ * <pre>
+ * try {
+ * 	Files.writeString(Paths.get("/home/test/testpath"), "Hello World!", StandardCharsets.UTF_8);
+ * } catch (IOException ioException) {
+ * 	logError("File could not be written.", ioException);
+ * }
+ * </pre>
  * 
  * @since 3.24.0
  *

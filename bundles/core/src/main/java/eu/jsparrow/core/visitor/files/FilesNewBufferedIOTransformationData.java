@@ -7,6 +7,14 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
+/**
+ * Stores all Data needed necessary for a transformation of code in connection
+ * with invocations of <br>
+ * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.charset.Charset, java.nio.file.OpenOption...)}
+ * or <br>
+ * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.file.OpenOption...)}.
+ *
+ */
 public class FilesNewBufferedIOTransformationData {
 	private final TryStatement tryStatement;
 	private final VariableDeclarationExpression resourceToRemove;

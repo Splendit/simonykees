@@ -23,6 +23,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * }
  * </pre>
  * 
+ * @since 3.24.0
  *
  */
 public class WriteInvocationsInTryStatementBodyASTVisitor extends ASTVisitor {
