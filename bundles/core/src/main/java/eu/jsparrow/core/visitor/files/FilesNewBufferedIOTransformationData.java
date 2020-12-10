@@ -10,15 +10,15 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 public class FilesNewBufferedIOTransformationData {
 	private final TryStatement tryStatement;
 	private final VariableDeclarationExpression resourceToRemove;
-	private final ExpressionStatement invocationStatementToReplace;
+	private final ExpressionStatement writeInvocationStatementToReplace;
 	private final List<Expression> argumentsToCopy;
 
 	public FilesNewBufferedIOTransformationData(TryStatement tryStatement,
-			VariableDeclarationExpression resourceToRemove, ExpressionStatement invocationStatementToReplace,
+			VariableDeclarationExpression resourceToRemove, ExpressionStatement writeInvocationStatementToReplace,
 			List<Expression> argumentsToCopy) {
 		this.tryStatement = tryStatement;
 		this.resourceToRemove = resourceToRemove;
-		this.invocationStatementToReplace = invocationStatementToReplace;
+		this.writeInvocationStatementToReplace = writeInvocationStatementToReplace;
 		this.argumentsToCopy = argumentsToCopy;
 	}
 
@@ -30,8 +30,8 @@ public class FilesNewBufferedIOTransformationData {
 		return resourceToRemove;
 	}
 
-	ExpressionStatement getInvocationStatementToReplace() {
-		return invocationStatementToReplace;
+	ExpressionStatement getWriteInvocationStatementToReplace() {
+		return writeInvocationStatementToReplace;
 	}
 
 	List<Expression> getArgumentsToCopy() {
