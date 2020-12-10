@@ -21,7 +21,7 @@ import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
  * 
  * @since 3.7.0
  */
-public class RemoveGeneratedNodesASTVisitor extends ASTVisitor {
+public class RemoveGeneratedNodesVisitor extends ASTVisitor {
 
 	private static final String IS_GENERATED_PROPERTY = "$isGenerated"; //$NON-NLS-1$
 

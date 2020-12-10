@@ -35,7 +35,7 @@ public final class Matchers {
 		assertNotNull(actual);
 		ASTMatcher astMatcher = new ASTMatcher();
 		if (!astMatcher.match(expected, actual)) {
-			assertEquals("ASTNodes do not match. expected:", expected.toString(), actual.toString());
+			assertEquals(expected.toString(), actual.toString(), "ASTNodes do not match. expected.");
 			fail();
 		}
 	}
@@ -45,7 +45,7 @@ public final class Matchers {
 		assertNotNull(actual);
 		ASTMatcher astMatcher = new ASTMatcher();
 		if (!astMatcher.match(expected, actual)) {
-			assertEquals("ASTNodes do not match. expected:", expected.toString(), actual.toString());
+			assertEquals(expected.toString(), actual.toString(), "ASTNodes do not match. expected");
 			fail();
 		}
 	}
@@ -55,7 +55,7 @@ public final class Matchers {
 		assertNotNull(actual);
 		ASTMatcher astMatcher = new ASTMatcher();
 		if (!astMatcher.match(expected, actual)) {
-			assertEquals("ASTNodes do not match:", expected.toString(), actual.toString());
+			assertEquals(expected.toString(), actual.toString(), "ASTNodes do not match");
 			fail();
 		}
 	}

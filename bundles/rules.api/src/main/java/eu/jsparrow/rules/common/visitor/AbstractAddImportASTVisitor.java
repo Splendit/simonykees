@@ -27,8 +27,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.visitor.helper.DeclaredMethodNamesASTVisitor;
-import eu.jsparrow.rules.common.visitor.helper.DeclaredTypesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.DeclaredMethodNamesVisitor;
+import eu.jsparrow.rules.common.visitor.helper.DeclaredTypesVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
 
 /**
@@ -158,7 +158,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 *         given {@link CompilationUnit}.
 	 */
 	private boolean containsTypeDeclarationWithName(CompilationUnit compilationUnit, String simpleTypeName) {
-		DeclaredTypesASTVisitor visitor = new DeclaredTypesASTVisitor();
+		DeclaredTypesVisitor visitor = new DeclaredTypesVisitor();
 		compilationUnit.accept(visitor);
 		return visitor.getAllTypes()
 			.stream()
@@ -260,7 +260,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	 *         given {@link CompilationUnit}.
 	 */
 	private boolean containsMethodDeclarationWithName(CompilationUnit compilationUnit, String simpleMethod) {
-		DeclaredMethodNamesASTVisitor visitor = new DeclaredMethodNamesASTVisitor();
+		DeclaredMethodNamesVisitor visitor = new DeclaredMethodNamesVisitor();
 		compilationUnit.accept(visitor);
 		return visitor.getDeclaredMethodNames()
 			.stream()

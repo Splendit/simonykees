@@ -28,7 +28,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * Replaces {@code Map.get([key])} by
@@ -231,7 +231,7 @@ public class MapGetOrDefaultASTVisitor extends AbstractASTRewriteASTVisitor {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) mapGetInvocation.getParent();
 			SimpleName fragmentName = fragment.getName();
 			ASTNode parent = fragment.getParent();
-			LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fragmentName);
+			LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(fragmentName);
 			parent.accept(visitor);
 			/*
 			 * The variable should not be used in other fragments.

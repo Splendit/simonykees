@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * This rule replaces {@link StringBuffer} with {@link StringBuilder}. This is
@@ -192,7 +192,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 			.collect(Collectors.toList());
 		ASTNode declarationParent = declaration.getParent();
 		for (SimpleName stringBuffername : fragmentNames) {
-			LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(stringBuffername);
+			LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(stringBuffername);
 			declarationParent.accept(visitor);
 			List<SimpleName> references = visitor.getUsages();
 			for (SimpleName reference : references) {

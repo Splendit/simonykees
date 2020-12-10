@@ -22,12 +22,12 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.0.0
  *
  */
-public class CatchExceptionUsagesASTVisitor extends ASTVisitor {
+public class CatchExceptionUsagesVisitor extends ASTVisitor {
 
 	private String exceptionIdentifer;
 	private boolean exceptionUsedInTypeInference = false;
 
-	public CatchExceptionUsagesASTVisitor(SimpleName exceptionName) {
+	public CatchExceptionUsagesVisitor(SimpleName exceptionName) {
 		this.exceptionIdentifer = exceptionName.getIdentifier();
 	}
 

@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
  * @since 1.2
  *
  */
-class ClashingLoggerTypesASTVisitor extends ASTVisitor {
+class ClashingLoggerTypesVisitor extends ASTVisitor {
 
 	private final StandardLoggerASTVisitor standardLoggerASTVisitor;
 	boolean clashingFound = false;
@@ -26,7 +26,7 @@ class ClashingLoggerTypesASTVisitor extends ASTVisitor {
 	 * @param standardLoggerASTVisitor
 	 *            the parent ASTVisitor
 	 */
-	ClashingLoggerTypesASTVisitor(StandardLoggerASTVisitor standardLoggerASTVisitor) {
+	ClashingLoggerTypesVisitor(StandardLoggerASTVisitor standardLoggerASTVisitor) {
 		this.standardLoggerASTVisitor = standardLoggerASTVisitor;
 	}
 

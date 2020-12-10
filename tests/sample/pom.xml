@@ -47,6 +47,16 @@
 			<artifactId>persistence-api</artifactId>
 			<version>1.0.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.0.0</version>
+		</dependency>
+		 <dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-runner</artifactId>
+			<version>1.6.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -272,6 +282,66 @@
 						</goals>
 						<configuration>
 							<artifact>ch.qos.logback:logback-core:1.2.3</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>junit-4-13</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>junit:junit:4.13</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>junit-jupiter-engine-5-0-0</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.junit.jupiter:junit-jupiter-engine:5.0.0</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>junit-jupiter-api-5-0-0</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.junit.jupiter:junit-jupiter-api:5.0.0</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>junit-platform-runner-1-6-0</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.junit.platform:junit-platform-runner:1.6.0</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>hamcrest-library-1-3</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.hamcrest:hamcrest-library:1.3</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>hamcrest-core-1-3</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.hamcrest:hamcrest-core:1.3</artifact>
 						</configuration>
 					</execution>
 				</executions>

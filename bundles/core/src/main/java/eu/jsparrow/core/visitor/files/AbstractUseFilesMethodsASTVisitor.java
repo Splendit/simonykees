@@ -22,7 +22,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * Parent class for visitors which replace the initializations of
@@ -182,7 +182,7 @@ abstract class AbstractUseFilesMethodsASTVisitor extends AbstractAddImportASTVis
 	}
 
 	private boolean hasUsagesOn(Block body, SimpleName fileIOName) {
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fileIOName);
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(fileIOName);
 		body.accept(visitor);
 		List<SimpleName> usages = visitor.getUsages();
 		return !usages.isEmpty();

@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -16,7 +17,6 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import eu.jsparrow.core.visitor.loop.stream.StreamForEachCheckValidStatementASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * This visitor checks whether an unhandled checked exception is thrown.
@@ -25,7 +25,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 2.1.1
  *
  */
-public class UnhandledExceptionVisitor extends AbstractASTRewriteASTVisitor {
+public class UnhandledExceptionVisitor extends ASTVisitor {
 
 	private static final String CHECKED_EXCEPTION_SUPERTYPE = java.lang.Exception.class.getName();
 	private static final List<String> CHECKED_EXCEPTION_TYPE_LIST = Collections

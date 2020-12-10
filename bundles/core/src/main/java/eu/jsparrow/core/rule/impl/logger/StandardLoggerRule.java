@@ -13,12 +13,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.core.visitor.logger.StandardLoggerASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.SemiAutomaticRefactoringRule;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.rules.common.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
 /**
