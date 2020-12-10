@@ -87,41 +87,16 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			return true;
 		}
 
-		VariableDeclarationFragment fragmentDeclaringBufferedWriter = findFragmentDeclaringBufferedWriter(
-				writeInvocationAnalyzer.getWriterVariableSimpleName(), getCompilationUnit()).orElse(null);
-		if (fragmentDeclaringBufferedWriter == null) {
-			return true;
-		}
-
-		Expression bufferedIOInitializer = fragmentDeclaringBufferedWriter.getInitializer();
-		if (bufferedIOInitializer == null) {
-			return true;
-		}
-
-		if (fragmentDeclaringBufferedWriter
-			.getLocationInParent() != VariableDeclarationExpression.FRAGMENTS_PROPERTY) {
-			return true;
-		}
-		VariableDeclarationExpression resourceDeclaringBufferedWriter = (VariableDeclarationExpression) fragmentDeclaringBufferedWriter
-			.getParent();
-
-		if (resourceDeclaringBufferedWriter.fragments()
-			.size() != 1) {
-			return true;
-		}
-
-		if (resourceDeclaringBufferedWriter.getLocationInParent() != TryStatement.RESOURCES2_PROPERTY) {
-			return true;
-		}
-		TryStatement tryStatement = (TryStatement) resourceDeclaringBufferedWriter.getParent();
-
 		if (writeInvocationAnalyzer.getBlockOfInvocationStatement()
 			.getLocationInParent() != TryStatement.BODY_PROPERTY) {
 			return true;
 		}
+		TryStatement tryStatement = (TryStatement) writeInvocationAnalyzer.getBlockOfInvocationStatement()
+			.getParent();
 
-		if (writeInvocationAnalyzer.getBlockOfInvocationStatement()
-			.getParent() != tryStatement) {
+		TryResourceAnalyzer bufferedWriterResourceAnalyzer = new TryResourceAnalyzer();
+		if (!bufferedWriterResourceAnalyzer.analyze(tryStatement,
+				writeInvocationAnalyzer.getWriterVariableSimpleName())) {
 			return true;
 		}
 
@@ -137,18 +112,15 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 				writeInvocationAnalyzer.getBlockOfInvocationStatement())) {
 			return true;
 		}
-		FilesNewBufferedIOTransformationData findFilesNewBufferedIOTransformationData = findFilesNewBufferedIOTransformationData(
-				tryStatement, resourceDeclaringBufferedWriter,
-				writeInvocationAnalyzer, bufferedIOInitializer).orElse(null);
-		if (findFilesNewBufferedIOTransformationData != null) {
-			transform(methodInvocation, findFilesNewBufferedIOTransformationData);
+		FilesNewBufferedIOTransformationData filesNewBufferedIOTransformationData = findFilesNewBufferedIOTransformationData(
+				bufferedWriterResourceAnalyzer, writeInvocationAnalyzer).orElse(null);
+		if (filesNewBufferedIOTransformationData != null) {
+			transform(methodInvocation, filesNewBufferedIOTransformationData);
 		} else {
-			findResultByBufferedWriterInstanceCreation(tryStatement, resourceDeclaringBufferedWriter,
-					bufferedIOInitializer,
-					writeInvocationAnalyzer)
-						.ifPresent(result -> {
-							transform(methodInvocation, result);
-						});
+			findResultByBufferedWriterInstanceCreation(bufferedWriterResourceAnalyzer, writeInvocationAnalyzer)
+				.ifPresent(result -> {
+					transform(methodInvocation, result);
+				});
 		}
 		return true;
 	}
@@ -175,10 +147,9 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	private Optional<FilesNewBufferedIOTransformationData> findFilesNewBufferedIOTransformationData(
-			TryStatement tryStatement, VariableDeclarationExpression resourceToRemove,
-			WriteMethodInvocationAnalyzer writeInvocationAnalyzer,
-			Expression bufferedIOInitializer) {
+			TryResourceAnalyzer bufferedWriterResourceAnalyzer, WriteMethodInvocationAnalyzer writeInvocationAnalyzer) {
 
+		Expression bufferedIOInitializer = bufferedWriterResourceAnalyzer.getResourceInitializer();
 		if (bufferedIOInitializer.getNodeType() != ASTNode.METHOD_INVOCATION) {
 			return Optional.empty();
 		}
@@ -204,16 +175,18 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 				Expression.class);
 
 		argumentsToCopy.add(1, writeInvocationAnalyzer.getCharSequenceArgument());
+		TryStatement tryStatement = bufferedWriterResourceAnalyzer.getTryStatement();
+		VariableDeclarationExpression resourceToRemove = bufferedWriterResourceAnalyzer.getResource();
 		return Optional.of(
 				new FilesNewBufferedIOTransformationData(tryStatement, resourceToRemove,
 						writeInvocationAnalyzer.getWriteInvocationStatementToReplace(), argumentsToCopy));
 
 	}
 
-	Optional<UseFilesWriteStringAnalysisResult> findResultByBufferedWriterInstanceCreation(TryStatement tryStatement,
-			VariableDeclarationExpression resourceDeclaringBufferedWriter,
-			Expression bufferedIOInitializer, WriteMethodInvocationAnalyzer writeInvocationAnalyzer) {
+	Optional<UseFilesWriteStringAnalysisResult> findResultByBufferedWriterInstanceCreation(
+			TryResourceAnalyzer bufferedWriterResourceAnalyzer, WriteMethodInvocationAnalyzer writeInvocationAnalyzer) {
 
+		Expression bufferedIOInitializer = bufferedWriterResourceAnalyzer.getResourceInitializer();
 		if (!ClassRelationUtil.isNewInstanceCreationOf(bufferedIOInitializer, java.io.BufferedWriter.class.getName())) {
 			return Optional.empty();
 		}
@@ -225,6 +198,8 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		if (bufferedWriterInstanceCreationArgument == null) {
 			return Optional.empty();
 		}
+		TryStatement tryStatement = bufferedWriterResourceAnalyzer.getTryStatement();
+		VariableDeclarationExpression resourceDeclaringBufferedWriter = bufferedWriterResourceAnalyzer.getResource();
 		if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
 			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
 			ClassInstanceCreation writerInstanceCreation = (ClassInstanceCreation) bufferedWriterInstanceCreationArgument;
@@ -235,45 +210,42 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 							tryStatement, resourcesToRemove));
 			}
 		} else if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-			return createTransformationDataUsingFileIOResource(tryStatement, resourceDeclaringBufferedWriter,
-					writeInvocationAnalyzer,
+			return createTransformationDataUsingFileIOResource(bufferedWriterResourceAnalyzer, writeInvocationAnalyzer,
 					(SimpleName) bufferedWriterInstanceCreationArgument);
 		}
 		return Optional.empty();
 	}
 
 	private Optional<UseFilesWriteStringAnalysisResult> createTransformationDataUsingFileIOResource(
-			TryStatement tryStatement,
-			VariableDeclarationExpression resourceDeclaringBufferedWriter,
+			TryResourceAnalyzer bufferedWriterResourceAnalyzer,
 			WriteMethodInvocationAnalyzer writeInvocationAnalyzer,
 			SimpleName bufferedIOArgAsSimpleName) {
-		VariableDeclarationFragment fileIOResource = FilesUtil
-			.findVariableDeclarationFragmentAsResource(bufferedIOArgAsSimpleName,
-					tryStatement)
-			.orElse(null);
-		if (fileIOResource == null) {
+
+		TryStatement tryStatement = bufferedWriterResourceAnalyzer.getTryStatement();
+		TryResourceAnalyzer fileWriterResourceAnalyzer = new TryResourceAnalyzer();
+		if (!fileWriterResourceAnalyzer.analyze(tryStatement, bufferedIOArgAsSimpleName)) {
 			return Optional.empty();
 		}
 
-		VariableDeclarationExpression resourceDeclaringFileIO = (VariableDeclarationExpression) fileIOResource
-			.getParent();
+		VariableDeclarationFragment fileWriterResourceFragment = fileWriterResourceAnalyzer.getResourceFragment();
+		VariableDeclarationExpression fileWriterResource = fileWriterResourceAnalyzer.getResource();
 
 		FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(java.io.FileWriter.class.getName());
-		if (!fileIOAnalyzer.analyzeFileIO(resourceDeclaringFileIO)) {
+		if (!fileIOAnalyzer.analyzeFileIO(fileWriterResource)) {
 			return Optional.empty();
 		}
 
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fileIOResource.getName());
+		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fileWriterResourceFragment.getName());
 		tryStatement.accept(visitor);
 		List<SimpleName> usages = visitor.getUsages();
-		usages.remove(fileIOResource.getName());
+		usages.remove(fileWriterResourceFragment.getName());
 		usages.remove(bufferedIOArgAsSimpleName);
 		if (!usages.isEmpty()) {
 			return Optional.empty();
 		}
-
+		VariableDeclarationExpression resourceDeclaringBufferedWriter = bufferedWriterResourceAnalyzer.getResource();
 		List<VariableDeclarationExpression> resourcesToRemove = Arrays.asList(resourceDeclaringBufferedWriter,
-				resourceDeclaringFileIO);
+				fileWriterResource);
 		return Optional.of(new UseFilesWriteStringAnalysisResult(writeInvocationAnalyzer, fileIOAnalyzer, tryStatement,
 				resourcesToRemove));
 	}
@@ -286,16 +258,6 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		int usages = visitor.getUsages()
 			.size();
 		return usages == 1;
-	}
-
-	private Optional<VariableDeclarationFragment> findFragmentDeclaringBufferedWriter(
-			SimpleName writerVariableSimpleName, CompilationUnit compilationUnit) {
-		ASTNode declaringNode = compilationUnit.findDeclaringNode(writerVariableSimpleName.resolveBinding());
-		if (declaringNode == null || declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return Optional.empty();
-		}
-		VariableDeclarationFragment fragmentDeclaringBufferedWriter = (VariableDeclarationFragment) declaringNode;
-		return Optional.of(fragmentDeclaringBufferedWriter);
 	}
 
 	private void transform(MethodInvocation methodInvocation, FilesNewBufferedIOTransformationData transformationData) {

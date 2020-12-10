@@ -142,48 +142,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 				+ "			Charset cs = StandardCharsets.UTF_8;\n"
 				+ "			try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString, cs))) {\n"
 				+ "				bufferedWriter.write(value);\n"
-				+ "				bufferedWriter.write(value);\n"
-				+ "			} catch (Exception exception) {\n"
-				+ "			}";
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_VariableDeclarationExpressionNotResource_shouldNotTransform() throws Exception {
-		addImports(java.io.BufferedWriter.class,
-				java.io.FileWriter.class,
-				java.nio.charset.Charset.class,
-				java.nio.charset.StandardCharsets.class);
-
-		String original = "" +
-				"			String value = \"Hello World!\";\n"
-				+ "			String pathString = \"/home/test/testpath\";\n"
-				+ "			Charset cs = StandardCharsets.UTF_8;\n"
-				+ "			try {\n"
-				+ "				for (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString, cs));;) {\n"
-				+ "					bufferedWriter.write(value);\n"
-				+ "				}\n"
-				+ "			} catch (Exception exception) {\n"
-				+ "			}";
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_VariableDeclarationExpressionsWithTwoFragments_shouldNotTransform() throws Exception {
-		addImports(java.io.BufferedWriter.class,
-				java.io.FileWriter.class,
-				java.nio.charset.Charset.class,
-				java.nio.charset.StandardCharsets.class);
-
-		String original = "" +
-				"			String value = \"Hello World!\";\n"
-				+ "			String pathString = \"/home/test/testpath\";\n"
-				+ "			Charset cs = StandardCharsets.UTF_8;\n"
-				+ "			try {\n"
-				+ "				for (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString,\n"
-				+ "						cs)), bufferedWriter2 = new BufferedWriter(new FileWriter(pathString, cs));;) {\n"
-				+ "					bufferedWriter.write(value);\n"
-				+ "				}\n"
+				+ "				String s = bufferedWriter.toString();\n"
 				+ "			} catch (Exception exception) {\n"
 				+ "			}";
 		assertNoChange(original);
@@ -204,23 +163,6 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 				+ "				BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString, cs));\n"
 				+ "				bufferedWriter.write(value);\n"
 				+ "			} catch (Exception exception) {\n"
-				+ "			}";
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_InitializerIsNull_shouldNotTransform() throws Exception {
-		addImports(java.io.BufferedWriter.class);
-		String original = "" +
-				"			class LocalClass {\n"
-				+ "				BufferedWriter bufferedWriter;\n"
-				+ "				void test() {\n"
-				+ "					String value = \"Hello World!\";\n"
-				+ "					try {\n"
-				+ "						bufferedWriter.write(value);\n"
-				+ "					} catch (Exception exception) {\n"
-				+ "					}\n"
-				+ "				}\n"
 				+ "			}";
 		assertNoChange(original);
 	}
@@ -316,7 +258,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_TWRAdditionalWriteOnFileWriterResource_shouldNotTransform() throws Exception {
+	public void visit_TWRFileWriterResourceToString_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.charset.Charset.class,
@@ -329,7 +271,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 				+ "		try {\n"
 				+ "			try (FileWriter fileWriter = new FileWriter(pathString, cs); BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {\n"
 				+ "				bufferedWriter.write(value);\n"
-				+ "				fileWriter.write(value);\n"
+				+ "				String s = fileWriter.toString();\n"
 				+ "			} catch (Exception exception) {\n"
 				+ "			}\n"
 				+ "		} catch (Exception exception1) {\n"
@@ -489,7 +431,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, cs);\n"
 				+ "				BufferedWriter bufferedWriter2 = Files.newBufferedWriter(path, cs)) {\n"
 				+ "			bufferedWriter.write(value);\n"
-				+ "			bufferedWriter.write(value, 10, 1000);\n"
+				+ "			bufferedWriter2.write(value, 10, 1000);\n"
 				+ "		} catch (Exception exception) {\n"
 				+ "		}";
 
