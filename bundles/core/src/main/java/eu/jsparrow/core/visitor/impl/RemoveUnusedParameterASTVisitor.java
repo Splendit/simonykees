@@ -26,7 +26,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * Visitor for removing unused parameters in private methods.
@@ -82,7 +82,7 @@ public class RemoveUnusedParameterASTVisitor extends AbstractASTRewriteASTVisito
 			return;
 		}
 
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(parameter.getName());
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(parameter.getName());
 		Block methodBody = methodDeclaration.getBody();
 		if (methodBody == null) {
 			return;

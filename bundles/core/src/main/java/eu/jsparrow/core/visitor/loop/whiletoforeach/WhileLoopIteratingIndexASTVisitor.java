@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import eu.jsparrow.core.visitor.loop.LoopIteratingIndexASTVisitor;
+import eu.jsparrow.core.visitor.loop.LoopIteratingIndexVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -23,7 +23,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 1.2
  *
  */
-abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisitor {
+abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexVisitor {
 
 	protected static final String INDEX_DECLARATION = "index-declaration-fragment"; //$NON-NLS-1$
 	protected static final String INDEX_UPDATER = "index-updater"; //$NON-NLS-1$

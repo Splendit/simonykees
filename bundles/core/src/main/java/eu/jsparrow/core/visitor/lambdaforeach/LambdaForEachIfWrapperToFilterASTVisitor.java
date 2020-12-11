@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import eu.jsparrow.core.visitor.sub.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * {@link IfStatement}s, which wrap the whole execution block of a
@@ -198,7 +198,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 	 *         {@link Expression}, false otherwise
 	 */
 	private boolean isParameterUsedInExpression(SimpleName parameter, Expression expression) {
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(parameter);
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(parameter);
 		expression.accept(visitor);
 		return !visitor.getUsages()
 			.isEmpty();

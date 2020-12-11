@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * @since 1.2
  *
  */
-class CheckNativeMethodInvocationASTVisitor extends ASTVisitor {
+class CheckNativeMethodInvocationVisitor extends ASTVisitor {
 
 	private static String object = java.lang.Object.class.getName();
 

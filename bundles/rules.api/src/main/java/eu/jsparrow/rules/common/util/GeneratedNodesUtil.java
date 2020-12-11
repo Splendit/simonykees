@@ -7,7 +7,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.rules.common.visitor.helper.RemoveGeneratedNodesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.RemoveGeneratedNodesVisitor;
 
 /**
  * This class is used to remove {@link ASTNode}s that contain the
@@ -34,7 +34,7 @@ public class GeneratedNodesUtil {
 	}
 
 	/**
-	 * See {@link RemoveGeneratedNodesASTVisitor} for more details.
+	 * See {@link RemoveGeneratedNodesVisitor} for more details.
 	 * 
 	 * @param astRoot
 	 *            the {@link CompilationUnit} where generated nodes should be
@@ -42,7 +42,7 @@ public class GeneratedNodesUtil {
 	 */
 	public static void removeAllGeneratedNodes(CompilationUnit astRoot) {
 		if (needsChecking) {
-			RemoveGeneratedNodesASTVisitor visitor = new RemoveGeneratedNodesASTVisitor();
+			RemoveGeneratedNodesVisitor visitor = new RemoveGeneratedNodesVisitor();
 			astRoot.accept(visitor);
 
 			if (!visitor.isHasIsGeneratedField()) {

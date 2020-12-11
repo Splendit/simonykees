@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * A helper class for analyzing the block body of a lambda expression.
@@ -378,7 +378,7 @@ public class LambdaExpressionBodyAnalyzer {
 	 *         in the node, and {@code false otherwise}
 	 */
 	private boolean referencesName(ASTNode node, SimpleName simpleName) {
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(simpleName);
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(simpleName);
 		node.accept(visitor);
 		return !visitor.getUsages()
 			.isEmpty();

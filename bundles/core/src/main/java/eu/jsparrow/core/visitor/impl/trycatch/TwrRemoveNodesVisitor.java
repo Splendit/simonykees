@@ -21,12 +21,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
  * @since 2.4.0
  *
  */
-class TwrRemoveNodesASTVisitor extends ASTVisitor {
+class TwrRemoveNodesVisitor extends ASTVisitor {
 	private List<VariableDeclarationFragment> toBeRemoved;
 	private List<MethodInvocation> closeStatements;
 	private ASTMatcher matcher;
 
-	public TwrRemoveNodesASTVisitor(List<VariableDeclarationFragment> toBeRemoved,
+	public TwrRemoveNodesVisitor(List<VariableDeclarationFragment> toBeRemoved,
 			List<MethodInvocation> closeStatements) {
 		this.toBeRemoved = toBeRemoved;
 		this.closeStatements = closeStatements;

@@ -26,7 +26,7 @@ import eu.jsparrow.core.visitor.lambdaforeach.AbstractLambdaForEachASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * This rule transforms a nested for loop to a
@@ -347,7 +347,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 				.get(0);
 			Expression methodArg = (Expression) methodInvocation.arguments()
 				.get(0);
-			LocalVariableUsagesASTVisitor localVariableVisitor = new LocalVariableUsagesASTVisitor(
+			LocalVariableUsagesVisitor localVariableVisitor = new LocalVariableUsagesVisitor(
 					lambdaParam.getName());
 			methodArg.accept(localVariableVisitor);
 			List<SimpleName> usages = localVariableVisitor.getUsages();

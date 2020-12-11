@@ -33,7 +33,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 1.2
  *
  */
-public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
+public abstract class LoopIteratingIndexVisitor extends ASTVisitor {
 
 	protected static final String ONE = "1"; //$NON-NLS-1$
 	protected static final String ZERO = "0"; //$NON-NLS-1$
@@ -55,7 +55,7 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	private boolean indexReferencedOutsideLoop = false;
 	private boolean indexReferencedInsideLoop = false;
 
-	protected LoopIteratingIndexASTVisitor(SimpleName iterableNode) {
+	protected LoopIteratingIndexVisitor(SimpleName iterableNode) {
 		this.iterableName = iterableNode;
 		isParameterizedIteratorType = isIterableWithParameterizedElements(iterableNode);
 		this.nodesToBeRemoved = new ArrayList<>();

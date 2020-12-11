@@ -33,7 +33,7 @@ import eu.jsparrow.core.visitor.sub.ReferencedVariablesASTVisitor;
  * @author Ardit Ymeri
  * @since 1.0
  */
-class TwrPreconditionASTVisitor extends ASTVisitor {
+class TwrPreconditionVisitor extends ASTVisitor {
 	private SimpleName targetName;
 	private boolean assigned = false;
 	private boolean closeOccurred = false;
@@ -47,7 +47,7 @@ class TwrPreconditionASTVisitor extends ASTVisitor {
 
 	private MethodInvocation closeStatement = null;
 
-	public TwrPreconditionASTVisitor(SimpleName targetName, List<VariableDeclarationFragment> toBeMovedToResources) {
+	public TwrPreconditionVisitor(SimpleName targetName, List<VariableDeclarationFragment> toBeMovedToResources) {
 		this.targetName = targetName;
 		this.toBeMovedToResources = toBeMovedToResources;
 		precedingSimpleNames = new ArrayList<>();

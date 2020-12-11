@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 /**
  * A functional interface for pointing to a method that constructs a
- * {@link LoopIteratingIndexASTVisitor}.
+ * {@link LoopIteratingIndexVisitor}.
  * 
  * @author Ardit Ymeri
  * @since 1.2
@@ -19,6 +19,6 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  */
 @FunctionalInterface
 public interface IteratingIndexVisitorFactory<T extends Statement> {
-	LoopIteratingIndexASTVisitor create(SimpleName iteratingIndexName, SimpleName iterableName, T loopStatement,
+	LoopIteratingIndexVisitor create(SimpleName iteratingIndexName, SimpleName iterableName, T loopStatement,
 			Block scopeBlock);
 }

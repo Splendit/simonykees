@@ -17,11 +17,11 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * @since 1.2
  *
  */
-public class LocalVariableUsagesASTVisitor extends ASTVisitor {
+public class LocalVariableUsagesVisitor extends ASTVisitor {
 	private List<SimpleName> usages;
 	private SimpleName targetName;
 
-	public LocalVariableUsagesASTVisitor(SimpleName targetName) {
+	public LocalVariableUsagesVisitor(SimpleName targetName) {
 		usages = new ArrayList<>();
 		this.targetName = targetName;
 	}
