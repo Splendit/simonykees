@@ -14,12 +14,6 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 		setJavaVersion(JavaCore.VERSION_11);
 	}
 
-	private void addImports(Class<?>... classes) throws Exception {
-		for (Class<?> c : classes) {
-			fixture.addImport(c.getName());
-		}
-	}
-
 	@Test
 	public void visit_WriteIntToFile_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,

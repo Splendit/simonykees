@@ -14,12 +14,6 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 		setJavaVersion(JavaCore.VERSION_11);
 	}
 
-	private void addImports(Class<?>... classes) throws Exception {
-		for (Class<?> c : classes) {
-			fixture.addImport(c.getName());
-		}
-	}
-
 	@Test
 	public void visit_TWRUsingNewFileWriter_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
