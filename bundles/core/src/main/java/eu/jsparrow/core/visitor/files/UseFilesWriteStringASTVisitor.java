@@ -100,7 +100,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			return true;
 		}
 
-		WriteInvocationsInTryStatementBodyASTVisitor writeInvocationsVisitor = new WriteInvocationsInTryStatementBodyASTVisitor();
+		WriteInvocationsInTryStatementBodyVisitor writeInvocationsVisitor = new WriteInvocationsInTryStatementBodyVisitor();
 		tryStatement.getBody()
 			.accept(writeInvocationsVisitor);
 		if (writeInvocationsVisitor.getWriteMethodInvocations()
@@ -118,9 +118,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			transform(methodInvocation, filesNewBufferedIOTransformationData);
 		} else {
 			findResultByBufferedWriterInstanceCreation(bufferedWriterResourceAnalyzer, writeInvocationAnalyzer)
-				.ifPresent(result -> {
-					transform(methodInvocation, result);
-				});
+				.ifPresent(result -> transform(methodInvocation, result));
 		}
 		return true;
 	}

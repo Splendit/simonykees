@@ -26,7 +26,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * @since 3.24.0
  *
  */
-public class WriteInvocationsInTryStatementBodyASTVisitor extends ASTVisitor {
+public class WriteInvocationsInTryStatementBodyVisitor extends ASTVisitor {
 	private final List<MethodInvocation> writeMethodInvocations = new ArrayList<>();
 
 	@Override

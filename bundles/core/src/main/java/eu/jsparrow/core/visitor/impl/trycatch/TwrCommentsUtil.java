@@ -16,11 +16,10 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 /**
  * A utility class for finding the comments on a {@link TryStatement}. As a
  * workaround for manipulating resources in a {@link TryStatement}, we clone the
- * entire statement and replace it with alter the resources. The comments on the
- * cloned statement are completely lost, for this reason, we have to extract the
+ * entire statement's body and alter the resources. The comments on the cloned
+ * statement are completely lost, for this reason, we have to extract the
  * comments from the original {@link TryStatement} and insert them in the
  * correct positions in the new node. It's a little pain in the head.
- * 
  * 
  * @since 3.24.0
  *

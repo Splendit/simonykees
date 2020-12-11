@@ -36,7 +36,8 @@ class UseFilesWriteStringAnalysisResult {
 		this.tryStatement = tryStatement;
 		this.resourcesToRemove = resourcesToRemove;
 		this.pathExpressions = newBufferedIOArgumentsAnalyzer.getPathExpressions();
-		this.charSet = newBufferedIOArgumentsAnalyzer.getCharsetExpression().orElse(null);
+		this.charSet = newBufferedIOArgumentsAnalyzer.getCharsetExpression()
+			.orElse(null);
 	}
 
 	UseFilesWriteStringAnalysisResult(WriteMethodInvocationAnalyzer writeInvocationAnalyzer,
