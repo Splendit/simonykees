@@ -1,7 +1,6 @@
 package eu.jsparrow.core.visitor.junit;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,14 +19,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
-import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
  * This visitor replaces expected annotation property in
@@ -57,9 +52,9 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.24.0
  *
  */
-public class ReplaceExpectedAnnotationPropertyASTVisitor extends AbstractAddImportASTVisitor {
+public class ReplaceExpectedAnnotationPropertyASTVisitor extends AbstractReplaceExpectedASTVisitor {
 
-	private static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
+	protected static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
 	private static final String ASSERT_THROWS = "assertThrows"; //$NON-NLS-1$
 
@@ -155,34 +150,6 @@ public class ReplaceExpectedAnnotationPropertyASTVisitor extends AbstractAddImpo
 				|| nodeThrowingException.getLocationInParent() == ThrowStatement.EXPRESSION_PROPERTY;
 	}
 
-	// PULL up
-	private Optional<ITypeBinding> findExceptionTypeArgument(Expression excpetionClass) {
-		ITypeBinding argumentType = excpetionClass.resolveTypeBinding();
-		boolean isClass = ClassRelationUtil.isContentOfType(argumentType, java.lang.Class.class.getName());
-		if (isClass && argumentType.isParameterizedType()) {
-			ITypeBinding[] typeArguments = argumentType.getTypeArguments();
-			if (typeArguments.length == 1) {
-				ITypeBinding typeArgument = typeArguments[0];
-				boolean isException = ClassRelationUtil.isContentOfType(typeArgument, EXCEPTION_TYPE_NAME)
-						|| ClassRelationUtil.isInheritingContentOfTypes(typeArgument,
-								Collections.singletonList(EXCEPTION_TYPE_NAME));
-				if (isException) {
-					return Optional.of(typeArgument);
-				}
-			}
-		}
-
-		return Optional.empty();
-	}
-
-	// pull up
-	private boolean verifyPosition(MethodDeclaration methodDeclaration, ASTNode nodeThrowingException) {
-		Block testBody = methodDeclaration.getBody();
-		List<Statement> statements = ASTNodeUtil.convertToTypedList(testBody.statements(), Statement.class);
-		Statement lastStatement = statements.get(statements.size() - 1);
-		return lastStatement == nodeThrowingException.getParent();
-	}
-
 	@SuppressWarnings("unchecked")
 	private void refactor(MethodDeclaration methodDeclaration,
 			ITypeBinding exceptionType, ASTNode nodeThrowingException, Expression expectedException,
@@ -216,32 +183,6 @@ public class ReplaceExpectedAnnotationPropertyASTVisitor extends AbstractAddImpo
 
 		onRewrite();
 
-	}
-
-	private void removeThrowsDeclarations(MethodDeclaration methodDeclaration, ITypeBinding exceptionType) {
-		List<Type> exceptionTypes = ASTNodeUtil.convertToTypedList(methodDeclaration.thrownExceptionTypes(),
-				Type.class);
-		ListRewrite listRewrite = astRewrite.getListRewrite(methodDeclaration,
-				MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY);
-		for (Type type : exceptionTypes) {
-			ITypeBinding typeBinding = type.resolveBinding();
-			if (ClassRelationUtil.compareITypeBinding(typeBinding, exceptionType)) {
-				listRewrite.remove(type, null);
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private ASTNode createThrowRunnable(ASTNode nodeThrowingException) {
-		if (nodeThrowingException.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-			return astRewrite.createCopyTarget(nodeThrowingException);
-		} else {
-			AST ast = nodeThrowingException.getAST();
-			Block body = ast.newBlock();
-			List<Statement> statements = body.statements();
-			statements.add((Statement) astRewrite.createCopyTarget(nodeThrowingException.getParent()));
-			return body;
-		}
 	}
 
 }

@@ -1,7 +1,6 @@
 package eu.jsparrow.core.visitor.junit;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +28,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
-import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
 
 /**
@@ -70,7 +68,7 @@ import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
  * @since 3.24.0
  *
  */
-public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisitor {
+public class ReplaceExpectedExceptionASTVisitor extends AbstractReplaceExpectedASTVisitor {
 
 	private static final String GET_MESSAGE = "getMessage"; //$NON-NLS-1$
 	private static final String ASSERT_TRUE = "assertTrue"; //$NON-NLS-1$
@@ -80,7 +78,6 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	private static final String ASSERT_THROWS = "assertThrows"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
-	private static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
 	private static final String EXCEPTION_NAME = "exception"; //$NON-NLS-1$
 
 	private String assertThrowsQualifiedName;
@@ -223,13 +220,6 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 				Arrays.asList(ORG_JUNIT_JUPITER_API_TEST, ORG_JUNIT_TEST));
 	}
 
-	private boolean verifyPosition(MethodDeclaration methodDeclaration, ASTNode nodeThrowingException) {
-		Block testBody = methodDeclaration.getBody();
-		List<Statement> statements = ASTNodeUtil.convertToTypedList(testBody.statements(), Statement.class);
-		Statement lastStatement = statements.get(statements.size() - 1);
-		return lastStatement == nodeThrowingException.getParent();
-	}
-
 	@SuppressWarnings("unchecked")
 	private void refactor(MethodDeclaration methodDeclaration,
 			ITypeBinding exceptionType, ASTNode nodeThrowingException,
@@ -294,19 +284,6 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 		}
 	}
 
-	private void removeThrowsDeclarations(MethodDeclaration methodDeclaration, ITypeBinding exceptionType) {
-		List<Type> exceptionTypes = ASTNodeUtil.convertToTypedList(methodDeclaration.thrownExceptionTypes(),
-				Type.class);
-		ListRewrite listRewrite = astRewrite.getListRewrite(methodDeclaration,
-				MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY);
-		for (Type type : exceptionTypes) {
-			ITypeBinding typeBinding = type.resolveBinding();
-			if (ClassRelationUtil.compareITypeBinding(typeBinding, exceptionType)) {
-				listRewrite.remove(type, null);
-			}
-		}
-	}
-
 	@SuppressWarnings("unchecked")
 	private void createAssertTrueInvocations(MethodDeclaration methodDeclaration, List<Expression> expectedMessages,
 			String exceptionIdentifier) {
@@ -356,38 +333,6 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractAddImportASTVisi
 			rewriter.insertLast(expressionStatement, null);
 			astRewrite.remove(ASTNodeUtil.getSpecificAncestor(expectedMmessage, Statement.class), null);
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private ASTNode createThrowRunnable(ASTNode nodeThrowingException) {
-		if (nodeThrowingException.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
-			return astRewrite.createCopyTarget(nodeThrowingException);
-		} else {
-			AST ast = nodeThrowingException.getAST();
-			Block body = ast.newBlock();
-			List<Statement> statements = body.statements();
-			statements.add((Statement) astRewrite.createCopyTarget(nodeThrowingException.getParent()));
-			return body;
-		}
-	}
-
-	private Optional<ITypeBinding> findExceptionTypeArgument(Expression excpetionClass) {
-		ITypeBinding argumentType = excpetionClass.resolveTypeBinding();
-		boolean isClass = ClassRelationUtil.isContentOfType(argumentType, java.lang.Class.class.getName());
-		if (isClass && argumentType.isParameterizedType()) {
-			ITypeBinding[] typeArguments = argumentType.getTypeArguments();
-			if (typeArguments.length == 1) {
-				ITypeBinding typeArgument = typeArguments[0];
-				boolean isException = ClassRelationUtil.isContentOfType(typeArgument, EXCEPTION_TYPE_NAME)
-						|| ClassRelationUtil.isInheritingContentOfTypes(typeArgument,
-								Collections.singletonList(EXCEPTION_TYPE_NAME));
-				if (isException) {
-					return Optional.of(typeArgument);
-				}
-			}
-		}
-
-		return Optional.empty();
 	}
 
 	private String createExceptionName() {
