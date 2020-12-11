@@ -49,7 +49,7 @@ class ReplaceExpectedAnnotationPropertyRuleTest  extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace Expected Annotation Property with assertThrows"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_8, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY));
+				contains(Tag.JAVA_1_8, Tag.TESTING, Tag.LAMBDA, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
 				equalTo("Replaces Expected Annotation Property with assertThrows"));
