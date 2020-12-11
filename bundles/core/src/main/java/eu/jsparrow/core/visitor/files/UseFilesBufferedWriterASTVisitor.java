@@ -17,7 +17,7 @@ package eu.jsparrow.core.visitor.files;
  * @since 3.22.0
  *
  */
-public class UseFilesBufferedWriterASTVisitor extends AbstractUseFilesMethodsASTVisitor {
+public class UseFilesBufferedWriterASTVisitor extends AbstractUseFilesBufferedIOMethodsASTVisitor {
 
 	public UseFilesBufferedWriterASTVisitor() {
 		super(java.io.BufferedWriter.class.getName(), java.io.FileWriter.class.getName(), "newBufferedWriter"); //$NON-NLS-1$

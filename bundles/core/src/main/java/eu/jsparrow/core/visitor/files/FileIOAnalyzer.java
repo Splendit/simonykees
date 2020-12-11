@@ -53,19 +53,14 @@ class FileIOAnalyzer {
 		if (fragments.size() != 1) {
 			return false;
 		}
-		VariableDeclarationFragment fragment = fragments.get(0);
+		ClassInstanceCreation fileIOCreation = FilesUtil
+			.findClassInstanceCreationAsInitializer(fragments.get(0), fileIOClassQualifiedName)
+			.orElse(null);
 
-		Expression initialzier = fragment.getInitializer();
-		if (initialzier == null) {
+		if (fileIOCreation == null) {
 			return false;
 		}
 
-		boolean isFileIOCreation = isNewInstanceCreationOf(initialzier, fileIOClassQualifiedName);
-		if (!isFileIOCreation) {
-			return false;
-		}
-
-		ClassInstanceCreation fileIOCreation = (ClassInstanceCreation) initialzier;
 		List<Expression> arguments = convertToTypedList(fileIOCreation.arguments(), Expression.class);
 		int argumentSize = arguments.size();
 		if (argumentSize == 0 || argumentSize > 2) {

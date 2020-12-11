@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -102,7 +103,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 							(Type) ASTNode.copySubtree(varDeclStatmentNode.getAST(), varDeclStatmentNode.getType()));
 
 					List<Modifier> modifierList = convertToTypedList(varDeclStatmentNode.modifiers(), Modifier.class);
-					Function<Modifier, Modifier> cloneModifier = modifier -> (Modifier) ASTNode
+					UnaryOperator<Modifier> cloneModifier = modifier -> (Modifier) ASTNode
 						.copySubtree(modifier.getAST(), modifier);
 
 					variableDeclarationExpression.modifiers()
@@ -265,7 +266,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		unconnected.removeAll(connectedComments);
 		unconnected.removeAll(skippedComments);
-		putUnconnectedComments(bodyComments, unconnected);
+		TwrCommentsUtil.putUnconnectedComments(bodyComments, unconnected);
 		return bodyComments;
 	}
 
@@ -284,57 +285,5 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		MethodInvocation methodInvocation = (MethodInvocation) expression;
 		return closeInvocations.stream()
 			.anyMatch(closeInvocation -> matcher.match(methodInvocation, closeInvocation));
-	}
-
-	/**
-	 * Finds the position of the comments that are not connected to any node
-	 * based on the position in the compilation unit of the connected and
-	 * unconnected body comments.
-	 * 
-	 * @param bodyComments
-	 *            a map of the connected body comments
-	 * @param unconnectedComments
-	 *            the list of unconnected body comments.
-	 */
-	private void putUnconnectedComments(Map<Integer, List<Comment>> bodyComments, List<Comment> unconnectedComments) {
-		List<Integer> keySet = new ArrayList<>(bodyComments.keySet());
-		if (keySet.isEmpty()) {
-			return;
-		}
-
-		if (keySet.size() == 1) {
-			int key = keySet.get(0);
-			List<Comment> commentList = bodyComments.get(key);
-			commentList.addAll(unconnectedComments);
-			unconnectedComments.clear();
-			return;
-		}
-		int index = 0;
-
-		for (Comment comment : unconnectedComments) {
-			int startPos = comment.getStartPosition();
-			Integer key = keySet.get(index);
-			List<Comment> commentList = bodyComments.get(key);
-			while (commentList.get(0)
-				.getStartPosition() < startPos && index < keySet.size()) {
-				index++;
-				key = keySet.get(index);
-				commentList = bodyComments.get(key);
-			}
-
-			if (index >= keySet.size()) {
-				break;
-			}
-
-			commentList.add(0, comment);
-			unconnectedComments.remove(comment);
-		}
-
-		if (unconnectedComments.isEmpty()) {
-			return;
-		}
-
-		Integer newKey = keySet.get(keySet.size() - 1) + 1;
-		bodyComments.put(newKey, unconnectedComments);
 	}
 }
