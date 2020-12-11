@@ -9,11 +9,19 @@ import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 
 import eu.jsparrow.core.visitor.junit.ReplaceExpectedAnnotationPropertyASTVisitor;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-public class ReplaceExpectedAnnotationPropertyRule extends RefactoringRuleImpl<ReplaceExpectedAnnotationPropertyASTVisitor> {
+/**
+ * @see ReplaceExpectedAnnotationPropertyASTVisitor
+ * 
+ * @since 3.24.0
+ *
+ */
+public class ReplaceExpectedAnnotationPropertyRule
+		extends RefactoringRuleImpl<ReplaceExpectedAnnotationPropertyASTVisitor> {
 
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
@@ -27,8 +35,8 @@ public class ReplaceExpectedAnnotationPropertyRule extends RefactoringRuleImpl<R
 		this.visitorClass = ReplaceExpectedAnnotationPropertyASTVisitor.class;
 		this.id = "ReplaceExpectedAnnotationProperty"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
-				"Replace Expected Annotation Property with assertThrows",
-				"Replaces Expected Annotation Property with assertThrows",
+				Messages.ReplaceExpectedAnnotationPropertyRule_name,
+				Messages.ReplaceExpectedAnnotationPropertyRule_description,
 				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_8, Tag.JUNIT, Tag.LAMBDA, Tag.READABILITY));
 	}
 
@@ -66,6 +74,5 @@ public class ReplaceExpectedAnnotationPropertyRule extends RefactoringRuleImpl<R
 	public ReplaceExpectedAnnotationPropertyASTVisitor visitorFactory() {
 		return new ReplaceExpectedAnnotationPropertyASTVisitor(assertThrowsQualifiedName);
 	}
-
 
 }
