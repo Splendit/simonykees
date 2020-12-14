@@ -68,7 +68,7 @@ import eu.jsparrow.rules.common.visitor.helper.LiveVariableScope;
  * @since 3.24.0
  *
  */
-public class ReplaceExpectedExceptionASTVisitor extends AbstractReplaceExpectedASTVisitor {
+public class ReplaceJUnitExpectedExceptionASTVisitor extends AbstractReplaceExpectedASTVisitor {
 
 	private static final String GET_MESSAGE = "getMessage"; //$NON-NLS-1$
 	private static final String ASSERT_TRUE = "assertTrue"; //$NON-NLS-1$
@@ -84,7 +84,7 @@ public class ReplaceExpectedExceptionASTVisitor extends AbstractReplaceExpectedA
 
 	private LiveVariableScope aliveVariableScope = new LiveVariableScope();
 
-	public ReplaceExpectedExceptionASTVisitor(String assertThrowsQualifiedName) {
+	public ReplaceJUnitExpectedExceptionASTVisitor(String assertThrowsQualifiedName) {
 		this.assertThrowsQualifiedName = assertThrowsQualifiedName;
 	}
 

@@ -19,20 +19,20 @@ import eu.jsparrow.core.SingleRuleTest;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-class ReplaceExpectedExceptionRuleTest extends SingleRuleTest {
+class ReplaceJUnitExpectedExceptionRuleTest extends SingleRuleTest {
 
-	private ReplaceExpectedExceptionRule rule;
+	private ReplaceJUnitExpectedExceptionRule rule;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		rule = new ReplaceExpectedExceptionRule();
+		rule = new ReplaceJUnitExpectedExceptionRule();
 		testProject = createJavaProject("javaVersionTestProject", "bin");
 	}
 
 	@Test
 	void test_ruleId() {
 		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceExpectedException"));
+		assertThat(ruleId, equalTo("ReplaceJUnitExpectedException"));
 	}
 
 	@Test
