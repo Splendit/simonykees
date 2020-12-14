@@ -8,20 +8,20 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 
-import eu.jsparrow.core.visitor.junit.ReplaceExpectedAnnotationPropertyASTVisitor;
+import eu.jsparrow.core.visitor.junit.ReplaceJUnitExpectedAnnotationPropertyASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
- * @see ReplaceExpectedAnnotationPropertyASTVisitor
+ * @see ReplaceJUnitExpectedAnnotationPropertyASTVisitor
  * 
  * @since 3.24.0
  *
  */
-public class ReplaceExpectedAnnotationPropertyRule
-		extends RefactoringRuleImpl<ReplaceExpectedAnnotationPropertyASTVisitor> {
+public class ReplaceJUnitExpectedAnnotationPropertyRule
+		extends RefactoringRuleImpl<ReplaceJUnitExpectedAnnotationPropertyASTVisitor> {
 
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
@@ -31,9 +31,9 @@ public class ReplaceExpectedAnnotationPropertyRule
 	private static final String JUNIT_ASSERT_THROWS = "org.junit.Assert.assertThrows"; //$NON-NLS-1$
 	private String assertThrowsQualifiedName = JUNIT_ASSERT_THROWS;
 
-	public ReplaceExpectedAnnotationPropertyRule() {
-		this.visitorClass = ReplaceExpectedAnnotationPropertyASTVisitor.class;
-		this.id = "ReplaceExpectedAnnotationProperty"; //$NON-NLS-1$
+	public ReplaceJUnitExpectedAnnotationPropertyRule() {
+		this.visitorClass = ReplaceJUnitExpectedAnnotationPropertyASTVisitor.class;
+		this.id = "ReplaceJUnitExpectedAnnotationProperty"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceExpectedAnnotationPropertyRule_name,
 				Messages.ReplaceExpectedAnnotationPropertyRule_description,
@@ -71,8 +71,8 @@ public class ReplaceExpectedAnnotationPropertyRule
 	}
 
 	@Override
-	public ReplaceExpectedAnnotationPropertyASTVisitor visitorFactory() {
-		return new ReplaceExpectedAnnotationPropertyASTVisitor(assertThrowsQualifiedName);
+	public ReplaceJUnitExpectedAnnotationPropertyASTVisitor visitorFactory() {
+		return new ReplaceJUnitExpectedAnnotationPropertyASTVisitor(assertThrowsQualifiedName);
 	}
 
 }

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
-class ReplaceExpectedAnnotationPropertyASTVisitorTest extends UsesJDTUnitFixture {
+class ReplaceJUnitExpectedAnnotationPropertyASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
@@ -19,7 +19,7 @@ class ReplaceExpectedAnnotationPropertyASTVisitorTest extends UsesJDTUnitFixture
 		defaultFixture.addImport("org.junit.rules.ExpectedException");
 		defaultFixture.addImport("java.io.IOException");
 		defaultFixture.addImport("org.hamcrest.Matcher");
-		setDefaultVisitor(new ReplaceExpectedAnnotationPropertyASTVisitor("org.junit.Assert.assertThrows"));
+		setDefaultVisitor(new ReplaceJUnitExpectedAnnotationPropertyASTVisitor("org.junit.Assert.assertThrows"));
 	}
 
 	@AfterEach

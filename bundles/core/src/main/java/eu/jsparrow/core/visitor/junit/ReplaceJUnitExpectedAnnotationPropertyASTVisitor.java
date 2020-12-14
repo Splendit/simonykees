@@ -52,7 +52,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * @since 3.24.0
  *
  */
-public class ReplaceExpectedAnnotationPropertyASTVisitor extends AbstractReplaceExpectedASTVisitor {
+public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractReplaceExpectedASTVisitor {
 
 	protected static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
@@ -60,7 +60,7 @@ public class ReplaceExpectedAnnotationPropertyASTVisitor extends AbstractReplace
 
 	private String assertThrowsQualifiedName;
 
-	public ReplaceExpectedAnnotationPropertyASTVisitor(String assertThrowsQualifiedName) {
+	public ReplaceJUnitExpectedAnnotationPropertyASTVisitor(String assertThrowsQualifiedName) {
 		this.assertThrowsQualifiedName = assertThrowsQualifiedName;
 	}
 

@@ -24,23 +24,23 @@ import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-class ReplaceExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
+class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 
 	private static final String STANDARD_FILE = "ReplaceExpectedAnnotationPropertyRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "expectedAnnotationProperty";
 	private static final String JUPTIER_POSTRULE_SUBDIRECTORY = "expectedAnnotationPropertyJupiter";
-	private ReplaceExpectedAnnotationPropertyRule rule;
+	private ReplaceJUnitExpectedAnnotationPropertyRule rule;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		rule = new ReplaceExpectedAnnotationPropertyRule();
+		rule = new ReplaceJUnitExpectedAnnotationPropertyRule();
 		testProject = createJavaProject("javaVersionTestProject", "bin");
 	}
 
 	@Test
 	void test_ruleId() {
 		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceExpectedAnnotationProperty"));
+		assertThat(ruleId, equalTo("ReplaceJUnitExpectedAnnotationProperty"));
 	}
 
 	@Test
