@@ -33,7 +33,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * This visitor looks for invocations of {@link java.io.Writer#write(String)}
@@ -233,7 +233,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			return Optional.empty();
 		}
 
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(fileWriterResourceFragment.getName());
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(fileWriterResourceFragment.getName());
 		tryStatement.accept(visitor);
 		List<SimpleName> usages = visitor.getUsages();
 		usages.remove(fileWriterResourceFragment.getName());
@@ -250,7 +250,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	private boolean checkWriterVariableUsage(SimpleName writerVariableName,
 			Block blockOfInvocationStatement) {
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(
 				writerVariableName);
 		blockOfInvocationStatement.accept(visitor);
 		int usages = visitor.getUsages()
