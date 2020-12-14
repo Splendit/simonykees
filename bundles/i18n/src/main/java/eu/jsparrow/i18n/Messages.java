@@ -563,6 +563,8 @@ public class Messages extends NLS {
 	public static String UseFilesBufferedReaderRule_name;
 	public static String UseFilesBufferedWriterRule_description;
 	public static String UseFilesBufferedWriterRule_name;
+	public static String UseFilesWriteStringRule_description;
+	public static String UseFilesWriteStringRule_name;
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String UseListSortRule_description;

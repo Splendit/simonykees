@@ -91,6 +91,7 @@ import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseComparatorMethodsRule;
 import eu.jsparrow.core.rule.impl.UseFilesBufferedReaderRule;
 import eu.jsparrow.core.rule.impl.UseFilesBufferedWriterRule;
+import eu.jsparrow.core.rule.impl.UseFilesWriteStringRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.UseListSortRule;
 import eu.jsparrow.core.rule.impl.UseOffsetBasedStringMethodsRule;
@@ -173,6 +174,7 @@ public class RulesContainer {
 				new RemoveCollectionAddAllRule(), new RemoveRedundantTypeCastRule(),
 				new UseFilesBufferedReaderRule(), new UseFilesBufferedWriterRule(),
 				new UsePredefinedStandardCharsetRule(),
+				new UseFilesWriteStringRule(),
 
 				/*
 				 * Security
