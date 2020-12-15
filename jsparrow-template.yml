@@ -1,6 +1,6 @@
 !jsparrow.config
 
-selectedProfile:
+selectedProfile: 'firstSuggestion'
 
 profiles:
 - name: firstSuggestion
@@ -62,6 +62,9 @@ profiles:
   - LambdaForEachIfWrapperToFilter
   - StatementLambdaToExpression
   - CodeFormatter
+  - UseComparatorMethods
+  - ReplaceJUnitExpectedException
+  - ReplaceJUnitExpectedAnnotationProperty
 
 - name: conventions
   rules:
@@ -92,6 +95,7 @@ profiles:
   - StringBufferToBuilder
   - PrimitiveObjectUseEquals
   - StringBuildingLoop
+  - UseComparatorMethods
 
 - name: Lambdas
   rules:
@@ -112,6 +116,14 @@ profiles:
   - StringBuildingLoop
   - LambdaToMethodReference
   - OptionalIfPresentOrElse
+  - UseComparatorMethods
+  - ReplaceJUnitExpectedException
+  - ReplaceJUnitExpectedAnnotationProperty
+
+- name: Testing
+  rules:
+  - ReplaceJUnitExpectedException
+  - ReplaceJUnitExpectedAnnotationProperty
 
 loggerRule:
   addMissingLoggingStatement: ERROR
@@ -218,6 +230,10 @@ rules:
   - UseFilesBufferedReader
   - UsePredefinedStandardCharset
   - UseOffsetBasedStringMethods
+  - UseFilesBufferedWriter
+  - UseComparatorMethods
+  - ReplaceJUnitExpectedException
+  - ReplaceJUnitExpectedAnnotationProperty
   - UseFilesBufferedWriter
 
 excludes:
