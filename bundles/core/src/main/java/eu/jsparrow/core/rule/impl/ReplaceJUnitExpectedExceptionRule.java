@@ -8,19 +8,19 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 
-import eu.jsparrow.core.visitor.junit.ReplaceExpectedExceptionASTVisitor;
+import eu.jsparrow.core.visitor.junit.ReplaceJUnitExpectedExceptionASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
- * @see ReplaceExpectedExceptionASTVisitor
+ * @see ReplaceJUnitExpectedExceptionASTVisitor
  * 
  * @since 3.24.0
  */
-public class ReplaceExpectedExceptionRule
-		extends RefactoringRuleImpl<ReplaceExpectedExceptionASTVisitor> {
+public class ReplaceJUnitExpectedExceptionRule
+		extends RefactoringRuleImpl<ReplaceJUnitExpectedExceptionASTVisitor> {
 
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
@@ -30,9 +30,9 @@ public class ReplaceExpectedExceptionRule
 	private static final String JUNIT_ASSERT_THROWS = "org.junit.Assert.assertThrows"; //$NON-NLS-1$
 	private String assertThrowsQualifiedName = JUNIT_ASSERT_THROWS;
 
-	public ReplaceExpectedExceptionRule() {
-		this.visitorClass = ReplaceExpectedExceptionASTVisitor.class;
-		this.id = "ReplaceExpectedException"; //$NON-NLS-1$
+	public ReplaceJUnitExpectedExceptionRule() {
+		this.visitorClass = ReplaceJUnitExpectedExceptionASTVisitor.class;
+		this.id = "ReplaceJUnitExpectedException"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceExpectedExceptionRule_name,
 				Messages.ReplaceExpectedExceptionRule_description,
@@ -70,8 +70,8 @@ public class ReplaceExpectedExceptionRule
 	}
 
 	@Override
-	public ReplaceExpectedExceptionASTVisitor visitorFactory() {
-		return new ReplaceExpectedExceptionASTVisitor(assertThrowsQualifiedName);
+	public ReplaceJUnitExpectedExceptionASTVisitor visitorFactory() {
+		return new ReplaceJUnitExpectedExceptionASTVisitor(assertThrowsQualifiedName);
 	}
 
 }

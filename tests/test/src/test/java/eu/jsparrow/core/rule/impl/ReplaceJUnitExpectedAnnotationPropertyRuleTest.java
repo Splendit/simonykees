@@ -6,8 +6,12 @@ import static eu.jsparrow.core.util.RulesTestUtil.generateMavenEntryFromDepedenc
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
 
@@ -16,38 +20,38 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.SingleRuleTest;
+import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-class ReplaceExpectedExceptionRuleTest extends SingleRuleTest {
+class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 
-	private ReplaceExpectedExceptionRule rule;
+	private static final String STANDARD_FILE = "ReplaceExpectedAnnotationPropertyRule.java";
+	private static final String POSTRULE_SUBDIRECTORY = "expectedAnnotationProperty";
+	private static final String JUPTIER_POSTRULE_SUBDIRECTORY = "expectedAnnotationPropertyJupiter";
+	private ReplaceJUnitExpectedAnnotationPropertyRule rule;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		rule = new ReplaceExpectedExceptionRule();
+		rule = new ReplaceJUnitExpectedAnnotationPropertyRule();
 		testProject = createJavaProject("javaVersionTestProject", "bin");
 	}
 
 	@Test
 	void test_ruleId() {
 		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceExpectedException"));
+		assertThat(ruleId, equalTo("ReplaceJUnitExpectedAnnotationProperty"));
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace ExpectedException JUnit Rule with assertThrows"));
+		assertThat(description.getName(), equalTo("Replace JUnit Expected Annotation Property with assertThrows"));
 		assertThat(description.getTags(),
 				contains(Tag.JAVA_1_8, Tag.TESTING, Tag.LAMBDA, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
-				equalTo("The ExpectedException.none() is deprecated since deprecated since JUnit 4.13. The "
-						+ "recommended alternative is to use assertThrows(). This makes JUnit tests easier to understand "
-						+ "and prevents the scenarios where some parts the test code is unreachable.\n"
-						+ "The goal of this rule is to replace expectedException.expect() with assertThrows. Additionally, new "
-						+ "assertions are added for each invocation of expectMessage() and expectCause()."));
+				equalTo("Using 'expected' annotation property for testing the thrown exceptions is rather misleading. It is unclear which part of the code is responsible for throwing the exception. This rule aims to overcome this problem by replacing the 'expected' annotation property with 'assertThrows' introduced in JUnit 4.13."));
 	}
 
 	@Test
@@ -98,4 +102,44 @@ class ReplaceExpectedExceptionRuleTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
+
+	@Test
+	void testTransformationWithDefaultFile() throws Exception {
+		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
+
+		RulesTestUtil.addToClasspath(testProject, Arrays.asList(
+				RulesTestUtil.generateMavenEntryFromDepedencyString("junit", "junit", "4.13")));
+		rule.calculateEnabledForProject(testProject);
+
+		Path preRule = getPreRuleFile(STANDARD_FILE);
+		Path postRule = getPostRuleFile(STANDARD_FILE, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	void testTransformationWithJupiter() throws Exception {
+		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
+
+		RulesTestUtil.addToClasspath(testProject, Arrays.asList(
+				RulesTestUtil.generateMavenEntryFromDepedencyString("junit", "junit", "4.13"),
+				RulesTestUtil.generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-engine",
+						"5.0.0"),
+				RulesTestUtil.generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
+						"5.0.0")));
+		rule.calculateEnabledForProject(testProject);
+
+		Path preRule = getPreRuleFile(STANDARD_FILE);
+		Path postRule = getPostRuleFile(STANDARD_FILE, JUPTIER_POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule),
+				getPostRulePackage(JUPTIER_POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+
 }
