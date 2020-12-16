@@ -133,7 +133,7 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 		argumentsToCopy.add(1, writeInvocationAnalyzer.getCharSequenceArgument());
 		VariableDeclarationExpression resourceToRemove = bufferedWriterResourceAnalyzer.getResource();
 		return Optional.of(
-				new FilesNewBufferedIOTransformationData(tryStatement, resourceToRemove,
+				new FilesNewBufferedIOTransformationData(resourceToRemove,
 						writeInvocationAnalyzer.getWriteInvocationStatementToReplace(), argumentsToCopy));
 
 	}
@@ -162,7 +162,7 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 				List<VariableDeclarationExpression> resourcesToRemove = Arrays.asList(resourceDeclaringBufferedWriter);
 				return Optional
 					.of(new UseFilesWriteStringAnalysisResult(writeInvocationAnalyzer, newBufferedIOArgumentsAnalyzer,
-							tryStatement, resourcesToRemove));
+							resourcesToRemove));
 			}
 		} else if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
 			return createTransformationDataUsingFileIOResource(bufferedWriterResourceAnalyzer, writeInvocationAnalyzer,
@@ -200,7 +200,7 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 		VariableDeclarationExpression resourceDeclaringBufferedWriter = bufferedWriterResourceAnalyzer.getResource();
 		List<VariableDeclarationExpression> resourcesToRemove = Arrays.asList(resourceDeclaringBufferedWriter,
 				fileWriterResource);
-		return Optional.of(new UseFilesWriteStringAnalysisResult(writeInvocationAnalyzer, fileIOAnalyzer, tryStatement,
+		return Optional.of(new UseFilesWriteStringAnalysisResult(writeInvocationAnalyzer, fileIOAnalyzer,
 				resourcesToRemove));
 	}
 

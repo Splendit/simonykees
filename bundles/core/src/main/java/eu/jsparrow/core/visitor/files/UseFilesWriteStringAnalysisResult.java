@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 /**
@@ -22,18 +21,16 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 class UseFilesWriteStringAnalysisResult {
 	private final ExpressionStatement writeInvocationStatementToReplace;
 	private final Expression charSequenceArgument;
-	private final TryStatement tryStatement;
 	private final List<VariableDeclarationExpression> resourcesToRemove;
 	private final List<Expression> pathExpressions;
 
 	private final Expression charSet;
 
 	UseFilesWriteStringAnalysisResult(WriteMethodInvocationAnalyzer writeInvocationAnalyzer,
-			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer, TryStatement tryStatement,
+			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer,
 			List<VariableDeclarationExpression> resourcesToRemove) {
 		this.writeInvocationStatementToReplace = writeInvocationAnalyzer.getWriteInvocationStatementToReplace();
 		this.charSequenceArgument = writeInvocationAnalyzer.getCharSequenceArgument();
-		this.tryStatement = tryStatement;
 		this.resourcesToRemove = resourcesToRemove;
 		this.pathExpressions = newBufferedIOArgumentsAnalyzer.getPathExpressions();
 		this.charSet = newBufferedIOArgumentsAnalyzer.getCharsetExpression()
@@ -41,20 +38,13 @@ class UseFilesWriteStringAnalysisResult {
 	}
 
 	UseFilesWriteStringAnalysisResult(WriteMethodInvocationAnalyzer writeInvocationAnalyzer,
-			FileIOAnalyzer fileIOAnalyzer,
-			TryStatement tryStatement,
-			List<VariableDeclarationExpression> resourcesToRemove) {
+			FileIOAnalyzer fileIOAnalyzer, List<VariableDeclarationExpression> resourcesToRemove) {
 		this.writeInvocationStatementToReplace = writeInvocationAnalyzer.getWriteInvocationStatementToReplace();
 		this.charSequenceArgument = writeInvocationAnalyzer.getCharSequenceArgument();
-		this.tryStatement = tryStatement;
 		this.resourcesToRemove = resourcesToRemove;
 		this.pathExpressions = fileIOAnalyzer.getPathExpressions();
 		this.charSet = fileIOAnalyzer.getCharset()
 			.orElse(null);
-	}
-
-	TryStatement getTryStatement() {
-		return tryStatement;
 	}
 
 	public List<Expression> getPathExpressions() {

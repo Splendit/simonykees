@@ -16,22 +16,16 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
  *
  */
 public class FilesNewBufferedIOTransformationData {
-	private final TryStatement tryStatement;
 	private final VariableDeclarationExpression resourceToRemove;
 	private final ExpressionStatement writeInvocationStatementToReplace;
 	private final List<Expression> argumentsToCopy;
 
-	public FilesNewBufferedIOTransformationData(TryStatement tryStatement,
+	public FilesNewBufferedIOTransformationData(
 			VariableDeclarationExpression resourceToRemove, ExpressionStatement writeInvocationStatementToReplace,
 			List<Expression> argumentsToCopy) {
-		this.tryStatement = tryStatement;
 		this.resourceToRemove = resourceToRemove;
 		this.writeInvocationStatementToReplace = writeInvocationStatementToReplace;
 		this.argumentsToCopy = argumentsToCopy;
-	}
-
-	TryStatement getTryStatement() {
-		return tryStatement;
 	}
 
 	VariableDeclarationExpression getResourceToRemove() {
