@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 /**
  * Stores all Data needed necessary for a transformation of code in connection
@@ -16,20 +14,14 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
  *
  */
 public class FilesNewBufferedIOTransformationData {
-	private final VariableDeclarationExpression resourceToRemove;
 	private final ExpressionStatement writeInvocationStatementToReplace;
 	private final List<Expression> argumentsToCopy;
 
 	public FilesNewBufferedIOTransformationData(
-			VariableDeclarationExpression resourceToRemove, ExpressionStatement writeInvocationStatementToReplace,
+			ExpressionStatement writeInvocationStatementToReplace,
 			List<Expression> argumentsToCopy) {
-		this.resourceToRemove = resourceToRemove;
 		this.writeInvocationStatementToReplace = writeInvocationStatementToReplace;
 		this.argumentsToCopy = argumentsToCopy;
-	}
-
-	VariableDeclarationExpression getResourceToRemove() {
-		return resourceToRemove;
 	}
 
 	ExpressionStatement getWriteInvocationStatementToReplace() {

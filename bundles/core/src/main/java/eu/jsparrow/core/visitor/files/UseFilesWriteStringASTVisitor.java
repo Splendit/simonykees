@@ -83,23 +83,16 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		List<UseFilesWriteStringAnalysisResult> bufferedWriterInstanceCreationDataList = visitor
 			.getBufferedWriterInstanceCreationDataList();
 		if (!filesNewBufferedWriterInvocationDataList.isEmpty() || !bufferedWriterInstanceCreationDataList.isEmpty()) {
-			transform(tryStatement, filesNewBufferedWriterInvocationDataList, bufferedWriterInstanceCreationDataList);
+			transform(tryStatement, filesNewBufferedWriterInvocationDataList, bufferedWriterInstanceCreationDataList,
+					visitor.getResourcesToRemove());
 		}
 		return true;
 	}
 
 	private void transform(TryStatement tryStatement,
 			List<FilesNewBufferedIOTransformationData> filesNewBufferedWriterInvocationDataList,
-			List<UseFilesWriteStringAnalysisResult> bufferedWriterInstanceCreationDataList) {
-		List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
-
-		filesNewBufferedWriterInvocationDataList.stream()
-			.map(FilesNewBufferedIOTransformationData::getResourceToRemove)
-			.forEach(resourcesToRemove::add);
-
-		bufferedWriterInstanceCreationDataList.stream()
-			.map(UseFilesWriteStringAnalysisResult::getResourcesToRemove)
-			.forEach(resourcesToRemove::addAll);
+			List<UseFilesWriteStringAnalysisResult> bufferedWriterInstanceCreationDataList,
+			List<VariableDeclarationExpression> resourcesToRemove) {
 
 		if (resourcesToRemove.size() < tryStatement.resources()
 			.size()) {

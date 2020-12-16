@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 /**
  * This visitor is a helper visitor intended to be used for visiting
@@ -26,6 +27,7 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 	private final TryStatement tryStatement;
 	private final List<FilesNewBufferedIOTransformationData> filesNewBufferedWriterInvocationDataList = new ArrayList<>();
 	private final List<UseFilesWriteStringAnalysisResult> bufferedWriterInstanceCreationDataList = new ArrayList<>();
+	List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
 
 	public WriteInvocationInTWRBodyVisitor(TryStatement tryStatement) {
 		this.tryStatement = tryStatement;
@@ -46,8 +48,10 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 
 			if (replacementDataWithFilesNewBufferedWriter != null) {
 				filesNewBufferedWriterInvocationDataList.add(replacementDataWithFilesNewBufferedWriter);
+				resourcesToRemove.addAll(writeInvocationAnalyzer.getResourcesToRemove());
 			} else if (replacementDataWithBufferedWriterConstructor != null) {
 				bufferedWriterInstanceCreationDataList.add(replacementDataWithBufferedWriterConstructor);
+				resourcesToRemove.addAll(writeInvocationAnalyzer.getResourcesToRemove());
 			}
 		}
 		return true;
@@ -59,5 +63,9 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 
 	List<UseFilesWriteStringAnalysisResult> getBufferedWriterInstanceCreationDataList() {
 		return bufferedWriterInstanceCreationDataList;
+	}
+
+	List<VariableDeclarationExpression> getResourcesToRemove() {
+		return resourcesToRemove;
 	}
 }
