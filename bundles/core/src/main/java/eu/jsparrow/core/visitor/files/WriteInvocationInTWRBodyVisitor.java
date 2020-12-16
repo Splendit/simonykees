@@ -75,7 +75,6 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 		if (filesNewBufferedIOTransformationData != null) {
 			filesNewBufferedWriterInvocationDataList.add(filesNewBufferedIOTransformationData);
 		} else {
-			
 			findResultByBufferedWriterInstanceCreation(bufferedWriterResourceAnalyzer, writeInvocationAnalyzer)
 				.ifPresent(bufferedWriterInstanceCreationDataList::add);
 		}
@@ -213,5 +212,13 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 		int usages = visitor.getUsages()
 			.size();
 		return usages == 1;
+	}
+
+	List<FilesNewBufferedIOTransformationData> getFilesNewBufferedWriterInvocationDataList() {
+		return filesNewBufferedWriterInvocationDataList;
+	}
+
+	List<UseFilesWriteStringAnalysisResult> getBufferedWriterInstanceCreationDataList() {
+		return bufferedWriterInstanceCreationDataList;
 	}
 }

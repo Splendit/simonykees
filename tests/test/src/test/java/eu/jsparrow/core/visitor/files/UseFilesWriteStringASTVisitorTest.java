@@ -580,4 +580,31 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 
 		assertChange(original, expected);
 	}
+
+	@Test
+	public void visit_TwoBufferedWritersWriting_shouldTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.FileWriter.class,
+				java.nio.file.Files.class,
+				java.nio.file.Paths.class);
+
+		String original = "" +
+				"			String value = \"Hello World!\";\n"
+				+ "			try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Paths.get(\"/home/test/testpath\"));\n"
+				+ "					BufferedWriter bufferedWriter2 = new BufferedWriter(new FileWriter(\"/home/test/testpath-2\"))) {\n"
+				+ "				bufferedWriter.write(value);\n"
+				+ "				bufferedWriter2.write(value);\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}";
+
+		String expected = "" +
+				"			String value = \"Hello World!\";\n"
+				+ "			try {\n"
+				+ "				Files.writeString(Paths.get(\"/home/test/testpath\"), value);\n"
+				+ "				Files.writeString(Paths.get(\"/home/test/testpath-2\"), value, Charset.defaultCharset());\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}";
+
+		assertChange(original, expected);
+	}
 }
