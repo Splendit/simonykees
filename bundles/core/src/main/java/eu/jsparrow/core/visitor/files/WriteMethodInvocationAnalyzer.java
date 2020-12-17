@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.files;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,9 +26,8 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * Helper class to determine whether a method invocation is an invocation of
- * <br>
- * {@link java.io.Writer#write(String)} <br>
- * which can be transformed by the <br>
+ * 
+ * {@link java.io.Writer#write(String)} which can be transformed by the
  * {@link eu.jsparrow.core.visitor.files.UseFilesWriteStringASTVisitor}.
  *
  * @since 3.24.0
@@ -35,92 +35,66 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 class WriteMethodInvocationAnalyzer {
 
 	private final SignatureData write = new SignatureData(java.io.Writer.class, "write", java.lang.String.class); //$NON-NLS-1$
-	private ExpressionStatement writeInvocationStatementToReplace;
-	private Expression charSequenceArgument;
-	private Block blockOfInvocationStatement;
-	private TryResourceAnalyzer bufferedWriterResourceAnalyzer;
-	private FilesNewBufferedIOTransformationData invocationReplacementDataWithFilesMethod;
-	private UseFilesWriteStringAnalysisResult invocationReplacementDataWithConstructor;
-	private List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
+	private final TryStatement tryStatement;
+	private final List<FilesNewBufferedIOTransformationData> filesNewBufferedWriterInvocationDataList = new ArrayList<>();
+	private final List<UseFilesWriteStringAnalysisResult> bufferedWriterInstanceCreationDataList = new ArrayList<>();
 
-	boolean analyze(TryStatement tryStatement, MethodInvocation methodInvocation) {
+	public WriteMethodInvocationAnalyzer(TryStatement tryStatement) {
+		this.tryStatement = tryStatement;
+	}
+
+	void analyze(MethodInvocation methodInvocation) {
 		Expression methodInvocationExpression = methodInvocation.getExpression();
 		if (methodInvocationExpression == null || methodInvocationExpression
 			.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return false;
+			return;
 		}
 		SimpleName writerVariableSimpleName = (SimpleName) methodInvocationExpression;
 
 		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return false;
+			return;
 		}
-		writeInvocationStatementToReplace = (ExpressionStatement) methodInvocation.getParent();
+		ExpressionStatement writeInvocationStatementToReplace = (ExpressionStatement) methodInvocation.getParent();
 
 		if (!write.isEquivalentTo(methodInvocation.resolveMethodBinding())) {
-			return false;
+			return;
 		}
-		charSequenceArgument = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
+		Expression charSequenceArgument = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.get(0);
 
 		if (writeInvocationStatementToReplace.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return false;
+			return;
 		}
-		blockOfInvocationStatement = (Block) writeInvocationStatementToReplace.getParent();
+		Block blockOfInvocationStatement = (Block) writeInvocationStatementToReplace.getParent();
 
 		if (blockOfInvocationStatement.getParent() != tryStatement) {
-			return false;
+			return;
 		}
 
-		bufferedWriterResourceAnalyzer = new TryResourceAnalyzer();
+		TryResourceAnalyzer bufferedWriterResourceAnalyzer = new TryResourceAnalyzer();
 		if (!bufferedWriterResourceAnalyzer.analyze(tryStatement, writerVariableSimpleName)) {
-			return false;
+			return;
 		}
 
 		if (!checkWriterVariableUsage(writerVariableSimpleName, blockOfInvocationStatement)) {
-			return false;
+			return;
 		}
 
 		Expression bufferedIOInitializer = bufferedWriterResourceAnalyzer.getResourceInitializer();
-		invocationReplacementDataWithFilesMethod = findFilesNewBufferedIOTransformationData(
-				bufferedWriterResourceAnalyzer).orElse(null);
-
-		if (invocationReplacementDataWithFilesMethod != null) {
-			resourcesToRemove.add(bufferedWriterResourceAnalyzer.getResource());
-			return true;
-		}
-
-		if (!ClassRelationUtil.isNewInstanceCreationOf(bufferedIOInitializer,
+		if (bufferedIOInitializer.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			MethodInvocation bufferedIOInitializerMethodInvocation = (MethodInvocation) bufferedIOInitializer;
+			VariableDeclarationExpression resourceToRemove = bufferedWriterResourceAnalyzer.getResource();
+			findTransformationDataUsingFilesNewBufferedWriter(
+					writeInvocationStatementToReplace, charSequenceArgument,
+					bufferedIOInitializerMethodInvocation, resourceToRemove)
+						.ifPresent(filesNewBufferedWriterInvocationDataList::add);
+		} else if (ClassRelationUtil.isNewInstanceCreationOf(bufferedIOInitializer,
 				java.io.BufferedWriter.class.getName())) {
-			return false;
+			findTransformationDataUsingBufferedWriterConstructor(
+					writeInvocationStatementToReplace, charSequenceArgument,
+					(ClassInstanceCreation) bufferedIOInitializer, bufferedWriterResourceAnalyzer)
+						.ifPresent(bufferedWriterInstanceCreationDataList::add);
 		}
-
-		ClassInstanceCreation bufferedWriterInstanceCreation = (ClassInstanceCreation) bufferedIOInitializer;
-		Expression bufferedWriterInstanceCreationArgument = FilesUtil
-			.findBufferedIOArgument(bufferedWriterInstanceCreation, java.io.FileWriter.class.getName())
-			.orElse(null);
-		if (bufferedWriterInstanceCreationArgument == null) {
-			return false;
-		}
-
-		if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-			invocationReplacementDataWithConstructor = findInvocationStatementReplacementData(
-					(ClassInstanceCreation) bufferedWriterInstanceCreationArgument, bufferedWriterResourceAnalyzer)
-						.orElse(null);
-			resourcesToRemove.add(bufferedWriterResourceAnalyzer.getResource());
-		}
-
-		if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-			SimpleName bufferedIOArgAsSimpleName = (SimpleName) bufferedWriterInstanceCreationArgument;
-			TryResourceAnalyzer fileWriterResourceAnalyzer = new TryResourceAnalyzer();
-			if (!fileWriterResourceAnalyzer.analyze(tryStatement, bufferedIOArgAsSimpleName)) {
-				return false;
-			}
-			invocationReplacementDataWithConstructor = findInvocationStatementReplacementData(
-					bufferedWriterResourceAnalyzer, bufferedIOArgAsSimpleName, fileWriterResourceAnalyzer).orElse(null);
-			resourcesToRemove.add(bufferedWriterResourceAnalyzer.getResource());
-			resourcesToRemove.add(fileWriterResourceAnalyzer.getResource());
-		}
-		return invocationReplacementDataWithConstructor != null;
 	}
 
 	private boolean checkWriterVariableUsage(SimpleName writerVariableName,
@@ -154,15 +128,12 @@ class WriteMethodInvocationAnalyzer {
 		return false;
 	}
 
-	private Optional<FilesNewBufferedIOTransformationData> findFilesNewBufferedIOTransformationData(
-			TryResourceAnalyzer bufferedWriterResourceAnalyzer) {
+	private Optional<FilesNewBufferedIOTransformationData> findTransformationDataUsingFilesNewBufferedWriter(
+			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
+			MethodInvocation bufferedIOInitializerMethodInvocation,
+			VariableDeclarationExpression resourceToRemove) {
 
-		Expression bufferedIOInitializer = bufferedWriterResourceAnalyzer.getResourceInitializer();
-		if (bufferedIOInitializer.getNodeType() != ASTNode.METHOD_INVOCATION) {
-			return Optional.empty();
-		}
-		MethodInvocation methodInvocation = (MethodInvocation) bufferedIOInitializer;
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		IMethodBinding methodBinding = bufferedIOInitializerMethodInvocation.resolveMethodBinding();
 
 		if (!ClassRelationUtil.isContentOfType(methodBinding
 			.getDeclaringClass(), java.nio.file.Files.class.getName())) {
@@ -179,30 +150,65 @@ class WriteMethodInvocationAnalyzer {
 			return Optional.empty();
 		}
 
-		List<Expression> argumentsToCopy = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+		List<Expression> argumentsToCopy = ASTNodeUtil.convertToTypedList(
+				bufferedIOInitializerMethodInvocation.arguments(),
 				Expression.class);
 
-		argumentsToCopy.add(1, getCharSequenceArgument());
+		argumentsToCopy.add(1, charSequenceArgument);
+
 		return Optional.of(
-				new FilesNewBufferedIOTransformationData(writeInvocationStatementToReplace, argumentsToCopy));
+				new FilesNewBufferedIOTransformationData(resourceToRemove,
+						writeInvocationStatementToReplace, argumentsToCopy));
 
 	}
 
-	private Optional<UseFilesWriteStringAnalysisResult> findInvocationStatementReplacementData(
-			ClassInstanceCreation writerInstanceCreation, TryResourceAnalyzer bufferedWriterResourceAnalyze) {
+	private Optional<UseFilesWriteStringAnalysisResult> findTransformationDataUsingBufferedWriterConstructor(
+			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
+			ClassInstanceCreation bufferedWriterInstanceCreation, TryResourceAnalyzer bufferedWriterResourceAnalyzer) {
+
+		Expression bufferedWriterInstanceCreationArgument = FilesUtil
+			.findBufferedIOArgument(bufferedWriterInstanceCreation, java.io.FileWriter.class.getName())
+			.orElse(null);
+
+		if (bufferedWriterInstanceCreationArgument != null) {
+			if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+				return findTransformationDataUsingWriterInstanceCreation(writeInvocationStatementToReplace,
+						charSequenceArgument, bufferedWriterResourceAnalyzer,
+						(ClassInstanceCreation) bufferedWriterInstanceCreationArgument);
+
+			}
+			if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
+				return findTransformationDataUsingWriterResource(writeInvocationStatementToReplace,
+						charSequenceArgument, bufferedWriterResourceAnalyzer,
+						(SimpleName) bufferedWriterInstanceCreationArgument);
+			}
+		}
+		return Optional.empty();
+	}
+
+	private Optional<UseFilesWriteStringAnalysisResult> findTransformationDataUsingWriterInstanceCreation(
+			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
+			TryResourceAnalyzer bufferedWriterResourceAnalyzer,
+			ClassInstanceCreation writerInstanceCreation) {
 		NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
 		if (!newBufferedIOArgumentsAnalyzer.analyzeInitializer(writerInstanceCreation)) {
 			return Optional.empty();
 		}
-		return Optional.of(new UseFilesWriteStringAnalysisResult(this, newBufferedIOArgumentsAnalyzer));
+
+		return Optional.of(new UseFilesWriteStringAnalysisResult(
+				Arrays.asList(bufferedWriterResourceAnalyzer.getResource()), writeInvocationStatementToReplace,
+				charSequenceArgument, newBufferedIOArgumentsAnalyzer));
 	}
 
-	private Optional<UseFilesWriteStringAnalysisResult> findInvocationStatementReplacementData(
+	private Optional<UseFilesWriteStringAnalysisResult> findTransformationDataUsingWriterResource(
+			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			TryResourceAnalyzer bufferedWriterResourceAnalyzer,
-			SimpleName bufferedIOArgAsSimpleName,
-			TryResourceAnalyzer fileWriterResourceAnalyzer) {
+			SimpleName bufferedIOArgAsSimpleName) {
+		TryResourceAnalyzer fileWriterResourceAnalyzer = new TryResourceAnalyzer();
 
-		TryStatement tryStatement = bufferedWriterResourceAnalyzer.getTryStatement();
+		if (!fileWriterResourceAnalyzer.analyze(tryStatement, bufferedIOArgAsSimpleName)) {
+			return Optional.empty();
+		}
 
 		VariableDeclarationFragment fileWriterResourceFragment = fileWriterResourceAnalyzer
 			.getResourceFragment();
@@ -222,34 +228,35 @@ class WriteMethodInvocationAnalyzer {
 		if (!usages.isEmpty()) {
 			return Optional.empty();
 		}
-		return Optional.of(new UseFilesWriteStringAnalysisResult(this, fileIOAnalyzer));
+
+		List<VariableDeclarationExpression> resourcesToRemoveList = Arrays
+			.asList(bufferedWriterResourceAnalyzer.getResource(), fileWriterResourceAnalyzer.getResource());
+		return Optional.of(new UseFilesWriteStringAnalysisResult(resourcesToRemoveList,
+				writeInvocationStatementToReplace, charSequenceArgument, fileIOAnalyzer));
+	}
+	
+	boolean hasTransformationData() {
+		return !filesNewBufferedWriterInvocationDataList.isEmpty() || !bufferedWriterInstanceCreationDataList.isEmpty();
 	}
 
-	ExpressionStatement getWriteInvocationStatementToReplace() {
-		return writeInvocationStatementToReplace;
+	List<FilesNewBufferedIOTransformationData> getFilesNewBufferedWriterInvocationDataList() {
+		return filesNewBufferedWriterInvocationDataList;
 	}
 
-	Expression getCharSequenceArgument() {
-		return charSequenceArgument;
-	}
-
-	Block getBlockOfInvocationStatement() {
-		return blockOfInvocationStatement;
-	}
-
-	TryResourceAnalyzer getBufferedWriterResourceAnalyzer() {
-		return bufferedWriterResourceAnalyzer;
-	}
-
-	Optional<FilesNewBufferedIOTransformationData> getInvocationReplecementDataWithFilesMethod() {
-		return Optional.ofNullable(invocationReplacementDataWithFilesMethod);
-	}
-
-	Optional<UseFilesWriteStringAnalysisResult> getInvocationReplacementDataWithConstructor() {
-		return Optional.ofNullable(invocationReplacementDataWithConstructor);
+	List<UseFilesWriteStringAnalysisResult> getBufferedWriterInstanceCreationDataList() {
+		return bufferedWriterInstanceCreationDataList;
 	}
 
 	List<VariableDeclarationExpression> getResourcesToRemove() {
+		List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
+		filesNewBufferedWriterInvocationDataList.stream()
+			.map(FilesNewBufferedIOTransformationData::getResourceToRemove)
+			.forEach(resourcesToRemove::add);
+
+		bufferedWriterInstanceCreationDataList.stream()
+			.map(UseFilesWriteStringAnalysisResult::getResourcesToRemove)
+			.forEach(resourcesToRemove::addAll);
+
 		return resourcesToRemove;
 	}
 }

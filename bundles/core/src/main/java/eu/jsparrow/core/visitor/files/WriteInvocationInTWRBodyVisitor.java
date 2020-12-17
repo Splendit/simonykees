@@ -1,12 +1,8 @@
 package eu.jsparrow.core.visitor.files;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 /**
  * This visitor is a helper visitor intended to be used for visiting
@@ -23,49 +19,19 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
  *
  */
 public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
-
-	private final TryStatement tryStatement;
-	private final List<FilesNewBufferedIOTransformationData> filesNewBufferedWriterInvocationDataList = new ArrayList<>();
-	private final List<UseFilesWriteStringAnalysisResult> bufferedWriterInstanceCreationDataList = new ArrayList<>();
-	List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
+	private final WriteMethodInvocationAnalyzer writeInvocationAnalyzer;
 
 	public WriteInvocationInTWRBodyVisitor(TryStatement tryStatement) {
-		this.tryStatement = tryStatement;
+		this.writeInvocationAnalyzer = new WriteMethodInvocationAnalyzer(tryStatement);
 	}
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-
-		WriteMethodInvocationAnalyzer writeInvocationAnalyzer = new WriteMethodInvocationAnalyzer();
-		if (writeInvocationAnalyzer.analyze(tryStatement, methodInvocation)) {
-
-			FilesNewBufferedIOTransformationData replacementDataWithFilesNewBufferedWriter = writeInvocationAnalyzer
-				.getInvocationReplecementDataWithFilesMethod()
-				.orElse(null);
-			UseFilesWriteStringAnalysisResult replacementDataWithBufferedWriterConstructor = writeInvocationAnalyzer
-				.getInvocationReplacementDataWithConstructor()
-				.orElse(null);
-
-			if (replacementDataWithFilesNewBufferedWriter != null) {
-				filesNewBufferedWriterInvocationDataList.add(replacementDataWithFilesNewBufferedWriter);
-				resourcesToRemove.addAll(writeInvocationAnalyzer.getResourcesToRemove());
-			} else if (replacementDataWithBufferedWriterConstructor != null) {
-				bufferedWriterInstanceCreationDataList.add(replacementDataWithBufferedWriterConstructor);
-				resourcesToRemove.addAll(writeInvocationAnalyzer.getResourcesToRemove());
-			}
-		}
+		writeInvocationAnalyzer.analyze(methodInvocation);
 		return true;
 	}
-
-	List<FilesNewBufferedIOTransformationData> getFilesNewBufferedWriterInvocationDataList() {
-		return filesNewBufferedWriterInvocationDataList;
-	}
-
-	List<UseFilesWriteStringAnalysisResult> getBufferedWriterInstanceCreationDataList() {
-		return bufferedWriterInstanceCreationDataList;
-	}
-
-	List<VariableDeclarationExpression> getResourcesToRemove() {
-		return resourcesToRemove;
+	
+	WriteMethodInvocationAnalyzer getWriteInvocationAnalyzer() {
+		return writeInvocationAnalyzer;
 	}
 }

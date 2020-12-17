@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 /**
  * 
@@ -18,28 +19,36 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
  *
  */
 class UseFilesWriteStringAnalysisResult {
+	private final List<VariableDeclarationExpression> resourcesToRemove;
 	private final ExpressionStatement writeInvocationStatementToReplace;
 	private final Expression charSequenceArgument;
 	private final List<Expression> pathExpressions;
-
 	private final Expression charSet;
 
-	UseFilesWriteStringAnalysisResult(WriteMethodInvocationAnalyzer writeInvocationAnalyzer,
+	UseFilesWriteStringAnalysisResult(List<VariableDeclarationExpression> resourcesToRemove,
+			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer) {
-		this.writeInvocationStatementToReplace = writeInvocationAnalyzer.getWriteInvocationStatementToReplace();
-		this.charSequenceArgument = writeInvocationAnalyzer.getCharSequenceArgument();
+		this.resourcesToRemove = resourcesToRemove;
+		this.writeInvocationStatementToReplace = writeInvocationStatementToReplace;
+		this.charSequenceArgument = charSequenceArgument;
 		this.pathExpressions = newBufferedIOArgumentsAnalyzer.getPathExpressions();
 		this.charSet = newBufferedIOArgumentsAnalyzer.getCharsetExpression()
 			.orElse(null);
 	}
 
-	UseFilesWriteStringAnalysisResult(WriteMethodInvocationAnalyzer writeInvocationAnalyzer,
+	UseFilesWriteStringAnalysisResult(List<VariableDeclarationExpression> resourcesToRemove,
+			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			FileIOAnalyzer fileIOAnalyzer) {
-		this.writeInvocationStatementToReplace = writeInvocationAnalyzer.getWriteInvocationStatementToReplace();
-		this.charSequenceArgument = writeInvocationAnalyzer.getCharSequenceArgument();
+		this.resourcesToRemove = resourcesToRemove;
+		this.writeInvocationStatementToReplace = writeInvocationStatementToReplace;
+		this.charSequenceArgument = charSequenceArgument;
 		this.pathExpressions = fileIOAnalyzer.getPathExpressions();
 		this.charSet = fileIOAnalyzer.getCharset()
 			.orElse(null);
+	}
+
+	List<VariableDeclarationExpression> getResourcesToRemove() {
+		return resourcesToRemove;
 	}
 
 	public List<Expression> getPathExpressions() {
