@@ -37,7 +37,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
-import eu.jsparrow.rules.common.visitor.helper.WildCardTypeASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.WildCardTypeVisitor;
 
 /**
  * A utility class for computing different properties of {@link ASTNode}s.
@@ -412,7 +412,7 @@ public class ASTNodeUtil {
 	 * @return {@code true} if the above condition is met and false otherwise.
 	 */
 	public static boolean containsWildCards(ASTNode node) {
-		WildCardTypeASTVisitor wildCardsVisitor = new WildCardTypeASTVisitor();
+		WildCardTypeVisitor wildCardsVisitor = new WildCardTypeVisitor();
 		node.accept(wildCardsVisitor);
 		return !wildCardsVisitor.getWildCardTypes()
 			.isEmpty();

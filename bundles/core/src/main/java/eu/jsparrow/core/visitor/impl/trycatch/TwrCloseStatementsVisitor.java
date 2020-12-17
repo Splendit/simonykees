@@ -8,13 +8,13 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 
-class TwrCloseStatementsASTVisitor extends ASTVisitor {
+class TwrCloseStatementsVisitor extends ASTVisitor {
 
 	private List<MethodInvocation> methodInvocationList;
 	private ASTMatcher astMatcher;
 	private List<Statement> closeInvocations;
 
-	public TwrCloseStatementsASTVisitor(List<MethodInvocation> methodInvocationList) {
+	public TwrCloseStatementsVisitor(List<MethodInvocation> methodInvocationList) {
 		this.methodInvocationList = methodInvocationList;
 		this.astMatcher = new ASTMatcher();
 		this.closeInvocations = new ArrayList<>();

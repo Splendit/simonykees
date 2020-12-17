@@ -24,13 +24,13 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * 
  * @since 3.16.0
  */
-public class DefaultMethodInvocationASTVisitor extends ASTVisitor {
+public class DefaultMethodInvocationVisitor extends ASTVisitor {
 
 	private final ITypeBinding anonymousClassTypeBinding;
 
 	private boolean flagCancelTransformation;
 
-	public DefaultMethodInvocationASTVisitor(AnonymousClassDeclaration anonymousClassDeclaration) {
+	public DefaultMethodInvocationVisitor(AnonymousClassDeclaration anonymousClassDeclaration) {
 		anonymousClassTypeBinding = anonymousClassDeclaration.resolveBinding();
 	}
 

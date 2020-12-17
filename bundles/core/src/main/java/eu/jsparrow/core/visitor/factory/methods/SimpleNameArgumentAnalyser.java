@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * Analyzes collection initialization of this form:
@@ -122,7 +122,7 @@ public class SimpleNameArgumentAnalyser extends ArgumentAnalyser<SimpleName> {
 		List<SimpleName> allNonRemovableUsages = new ArrayList<>();
 		for (Statement statement : statements) {
 
-			LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(name);
+			LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(name);
 			statement.accept(visitor);
 			List<SimpleName> usages = visitor.getUsages();
 			if (statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
@@ -262,7 +262,7 @@ public class SimpleNameArgumentAnalyser extends ArgumentAnalyser<SimpleName> {
 	}
 
 	private boolean uses(Statement statement, SimpleName name) {
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(name);
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(name);
 		statement.accept(visitor);
 		List<SimpleName> usages = visitor.getUsages();
 		return !usages.isEmpty();

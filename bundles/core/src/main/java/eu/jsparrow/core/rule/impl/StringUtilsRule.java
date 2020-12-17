@@ -1,29 +1,15 @@
 package eu.jsparrow.core.rule.impl;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.jar.Attributes;
-import java.util.jar.Attributes.Name;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
+import java.util.function.Predicate;
 
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.osgi.util.NLS;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.framework.Version;
 
-import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.core.visitor.impl.StringUtilsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
@@ -38,8 +24,6 @@ import eu.jsparrow.rules.common.Tag;
  *
  */
 public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> {
-
-	private static final Logger logger = LoggerFactory.getLogger(StringUtilsRule.class);
 
 	private static final String STRING_UTILS_QUALIFIED_NAME = org.apache.commons.lang3.StringUtils.class.getName();
 
@@ -78,65 +62,15 @@ public class StringUtilsRule extends RefactoringRuleImpl<StringUtilsASTVisitor> 
 
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
-		try {
-			String fullyQuallifiedClassName = STRING_UTILS_QUALIFIED_NAME;
-			IType classtype = project.findType(fullyQuallifiedClassName);
-			if (classtype != null) {
-
-				IPackageFragmentRoot commonsLangLib = getProject(classtype.getParent());
-				if (commonsLangLib != null) {
-					// file with path to library jar
-					IPath resourcePath = commonsLangLib.getPath();
-					File file = new File(resourcePath.toString());
-
-					return isImplementationVersionValid(file);
-				}
-			} else {
-				String loggerDebug = NLS.bind(Messages.StringUtilsRule_classNotInClassPath, fullyQuallifiedClassName);
-				logger.debug(loggerDebug);
-			}
-		} catch (JavaModelException e) {
-			logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
-		}
-		return false;
+		String fullyQuallifiedClassName = STRING_UTILS_QUALIFIED_NAME;
+		Predicate<Version> versionComparator = currentVersion -> supportedVersion.stream()
+			.map(Version::parseVersion)
+			.anyMatch(suppportedVersion -> currentVersion.compareTo(suppportedVersion) == 0);
+		return isInProjectLibraries(project, fullyQuallifiedClassName, versionComparator);
 	}
 
 	@Override
 	public String requiredLibraries() {
 		return STRING_UTILS_QUALIFIED_NAME;
-	}
-
-	private IPackageFragmentRoot getProject(IJavaElement iJavaElement) {
-		if (null == iJavaElement) {
-			return null;
-		}
-		IJavaElement parent = iJavaElement.getParent();
-		if (null == parent || parent instanceof IPackageFragmentRoot) {
-			return (IPackageFragmentRoot) parent;
-		}
-		return getProject(parent);
-	}
-
-	private boolean isImplementationVersionValid(File file) {
-		try (JarFile jar = new JarFile(file)) {
-
-			Manifest manifest = jar.getManifest();
-			Attributes attributes = manifest.getMainAttributes();
-
-			if (attributes != null) {
-				for (Object attribute : attributes.keySet()) {
-					Name key = (Name) attribute;
-					String keyword = key.toString();
-					if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
-						return supportedVersion.stream()
-							.anyMatch(s -> StringUtils.equals(attributes.getValue(key), s));
-					}
-				}
-			}
-		} catch (IOException e) {
-			logger.debug("Jar Manifest load error in:", e); //$NON-NLS-1$
-			// Resolving version failed, rule can't be executed
-		}
-		return false;
 	}
 }

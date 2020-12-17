@@ -103,7 +103,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 		SingleVariableDeclaration exceptionDeclaration = catchClause.getException();
 		SimpleName exceptionName = exceptionDeclaration.getName();
 		Block body = catchClause.getBody();
-		CatchExceptionUsagesASTVisitor visitor = new CatchExceptionUsagesASTVisitor(exceptionName);
+		CatchExceptionUsagesVisitor visitor = new CatchExceptionUsagesVisitor(exceptionName);
 		body.accept(visitor);
 		return visitor.isExceptionUsedInTypeInference();
 	}

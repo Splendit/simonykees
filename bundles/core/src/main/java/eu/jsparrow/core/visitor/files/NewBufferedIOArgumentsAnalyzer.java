@@ -81,11 +81,11 @@ class NewBufferedIOArgumentsAnalyzer {
 		return false;
 	}
 
-	public List<Expression> getPathExpressions() {
-		return this.pathExpressions;
+	List<Expression> getPathExpressions() {
+		return pathExpressions;
 	}
 
-	public Optional<Expression> getCharset() {
+	Optional<Expression> getCharsetExpression() {
 		return Optional.ofNullable(charsetExpression);
 	}
 }

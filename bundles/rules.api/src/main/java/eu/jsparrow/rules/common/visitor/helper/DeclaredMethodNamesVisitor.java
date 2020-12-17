@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
  *
  * @since 3.21.0
  */
-public class DeclaredMethodNamesASTVisitor extends ASTVisitor {
+public class DeclaredMethodNamesVisitor extends ASTVisitor {
 
 	private Set<String> declaredMethodNames = new HashSet<>();
 

@@ -40,7 +40,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
-import eu.jsparrow.rules.common.visitor.helper.DeclaredTypesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.DeclaredTypesVisitor;
 import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
 
 /**
@@ -78,7 +78,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
-		DeclaredTypesASTVisitor declaredTypesVisitor = new DeclaredTypesASTVisitor();
+		DeclaredTypesVisitor declaredTypesVisitor = new DeclaredTypesVisitor();
 		compilationUnit.accept(declaredTypesVisitor);
 		innerTypesMap = declaredTypesVisitor.getDeclaredTypes();
 		topLevelTypes = declaredTypesVisitor.getTopLevelTypes();
@@ -313,7 +313,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 *            the type binding of the elements of the iterable object.
 	 */
 	protected void replaceWithEnhancedFor(T loop, Statement loopBody, SimpleName iterableNode,
-			LoopIteratingIndexASTVisitor indexVisitor, Type iteratorType) {
+			LoopIteratingIndexVisitor indexVisitor, Type iteratorType) {
 		/*
 		 * invocations of List::get to be replaced with the iterator object
 		 */
@@ -474,7 +474,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			if (iterableTypeBinding != null && iterableTypeBinding.isArray()) {
 
 				Block outerBlock = ASTNodeUtil.getSpecificAncestor(loop, Block.class);
-				LoopIteratingIndexASTVisitor indexVisitor = createIteratingIndexVisitor(index, iterableNode, loop,
+				LoopIteratingIndexVisitor indexVisitor = createIteratingIndexVisitor(index, iterableNode, loop,
 						outerBlock, factory);
 				outerBlock.accept(indexVisitor);
 
@@ -535,7 +535,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 				 * precondition and gathering the replacement information
 				 */
 				Block outerBlock = ASTNodeUtil.getSpecificAncestor(loop, Block.class);
-				LoopIteratingIndexASTVisitor indexVisitor = createIteratingIndexVisitor(index, iterableNode, loop,
+				LoopIteratingIndexVisitor indexVisitor = createIteratingIndexVisitor(index, iterableNode, loop,
 						outerBlock, factory);
 				outerBlock.accept(indexVisitor);
 
@@ -557,7 +557,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 	/**
 	 * Makes use of {@link IteratingIndexVisitorFactory} to construct an
-	 * instance of {@link LoopIteratingIndexASTVisitor}.
+	 * instance of {@link LoopIteratingIndexVisitor}.
 	 * 
 	 * @param index
 	 *            a simple name representing the iterating index of the loop
@@ -570,11 +570,11 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 *            the outer block of the loop
 	 * @param factory
 	 *            a pointer to the constructor of a
-	 *            {@link LoopIteratingIndexASTVisitor}
+	 *            {@link LoopIteratingIndexVisitor}
 	 * 
-	 * @return an instance of {@link LoopIteratingIndexASTVisitor}
+	 * @return an instance of {@link LoopIteratingIndexVisitor}
 	 */
-	private LoopIteratingIndexASTVisitor createIteratingIndexVisitor(SimpleName index, SimpleName iterable, T node,
+	private LoopIteratingIndexVisitor createIteratingIndexVisitor(SimpleName index, SimpleName iterable, T node,
 			Block outerBlock, IteratingIndexVisitorFactory<T> factory) {
 		return factory.create(index, iterable, node, outerBlock);
 	}

@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
-class ExceptionsASTVisitor extends ASTVisitor {
+class ExceptionsVisitor extends ASTVisitor {
 	private List<Expression> foundExceptions = new ArrayList<>();
 
 	@Override

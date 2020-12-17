@@ -47,7 +47,7 @@ import eu.jsparrow.core.visitor.sub.VariableDefinitionASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * Finds anonymous classes and converts them to lambdas, if they are functional
@@ -192,7 +192,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					if (moveBlock != null && isCommentFree(node, moveBlock)) {
 
 						// find variable declarations inside the method block
-						BlockVariableDeclarationsASTVisitor varDeclarationVisitor = new BlockVariableDeclarationsASTVisitor();
+						BlockVariableDeclarationsVisitor varDeclarationVisitor = new BlockVariableDeclarationsVisitor();
 						moveBlock.accept(varDeclarationVisitor);
 						List<SimpleName> blockLocalVarNames = varDeclarationVisitor.getBlockVariableDeclarations();
 
@@ -216,7 +216,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						}
 
 						if (modifiers != null && ASTNodeUtil.hasModifier(modifiers, Modifier::isStatic)) {
-							CheckNativeMethodInvocationASTVisitor visitor = new CheckNativeMethodInvocationASTVisitor();
+							CheckNativeMethodInvocationVisitor visitor = new CheckNativeMethodInvocationVisitor();
 							node.accept(visitor);
 							if (visitor.objectMethodDeclarationInvocated()) {
 								return true;
@@ -229,7 +229,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 							 * initializer of a field
 							 */
 
-							PublicVariableReferencesASTVisitor fieldReferencesVisitor = new PublicVariableReferencesASTVisitor();
+							PublicVariableReferencesVisitor fieldReferencesVisitor = new PublicVariableReferencesVisitor();
 							node.accept(fieldReferencesVisitor);
 							List<SimpleName> unAssignedReferences = fieldReferencesVisitor
 								.getUnassignedVariableReferences();
@@ -253,7 +253,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 								 */
 								List<SimpleName> assignedVariables = findAssignedVariablesTillNodeOccurrence(
 										methodDeclaration, relevantBlocks, node);
-								PublicVariableReferencesASTVisitor fieldReferencesVisitor = new PublicVariableReferencesASTVisitor();
+								PublicVariableReferencesVisitor fieldReferencesVisitor = new PublicVariableReferencesVisitor();
 								node.accept(fieldReferencesVisitor);
 								/*
 								 * List of public variables in the body of the
@@ -334,7 +334,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	private boolean hasInvocationsOfInstanceMethods(AnonymousClassDeclaration node,
 			MethodDeclaration onlyFunctionalInterfaceMethod) {
 		Block onlyFunctionalInterfaceMethodImplBody = onlyFunctionalInterfaceMethod.getBody();
-		DefaultMethodInvocationASTVisitor defaultMethodInvocationASTVisitor = new DefaultMethodInvocationASTVisitor(
+		DefaultMethodInvocationVisitor defaultMethodInvocationASTVisitor = new DefaultMethodInvocationVisitor(
 				node);
 		onlyFunctionalInterfaceMethodImplBody.accept(defaultMethodInvocationASTVisitor);
 		if (defaultMethodInvocationASTVisitor.isFlagCancelTransformation()) {
@@ -562,9 +562,9 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	 */
 	private void renameLocalVariables(AnonymousClassDeclaration node, List<SimpleName> scopeNames,
 			List<SimpleName> conflictingNames) {
-		LocalVariableUsagesASTVisitor visitor;
+		LocalVariableUsagesVisitor visitor;
 		for (SimpleName conflictingName : conflictingNames) {
-			visitor = new LocalVariableUsagesASTVisitor(conflictingName);
+			visitor = new LocalVariableUsagesVisitor(conflictingName);
 			node.accept(visitor);
 			String newName = calcNewName(scopeNames, conflictingName);
 			List<SimpleName> usages = visitor.getUsages();

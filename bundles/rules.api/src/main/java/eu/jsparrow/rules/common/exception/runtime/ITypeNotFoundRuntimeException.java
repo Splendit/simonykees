@@ -1,4 +1,4 @@
-package eu.jsparrow.core.exception.runtime;
+package eu.jsparrow.rules.common.exception.runtime;
 
 /**
  * TODO SIM-103 add class description

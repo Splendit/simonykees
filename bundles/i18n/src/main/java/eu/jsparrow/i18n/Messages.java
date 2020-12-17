@@ -414,6 +414,10 @@ public class Messages extends NLS {
 	public static String ReorderModifiersRule_name;
 	public static String ReplaceDynamicQueryByPreparedStatementRule_description;
 	public static String ReplaceDynamicQueryByPreparedStatementRule_name;
+	public static String ReplaceExpectedAnnotationPropertyRule_description;
+	public static String ReplaceExpectedAnnotationPropertyRule_name;
+	public static String ReplaceExpectedExceptionRule_description;
+	public static String ReplaceExpectedExceptionRule_name;
 	public static String ReuseRandomObjectsRule_description;
 	public static String ReuseRandomObjectsRule_name;
 	public static String SelectRulesWizardHandler_allready_running;
@@ -559,6 +563,8 @@ public class Messages extends NLS {
 	public static String UseFilesBufferedReaderRule_name;
 	public static String UseFilesBufferedWriterRule_description;
 	public static String UseFilesBufferedWriterRule_name;
+	public static String UseFilesWriteStringRule_description;
+	public static String UseFilesWriteStringRule_name;
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String UseListSortRule_description;
