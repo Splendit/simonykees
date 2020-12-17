@@ -43,11 +43,7 @@ class ReplaceJUnitExpectedExceptionRuleTest extends SingleRuleTest {
 				contains(Tag.JAVA_1_8, Tag.TESTING, Tag.LAMBDA, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
-				equalTo("The ExpectedException.none() is deprecated since deprecated since JUnit 4.13. The "
-						+ "recommended alternative is to use assertThrows(). This makes JUnit tests easier to understand "
-						+ "and prevents the scenarios where some parts the test code is unreachable.\n"
-						+ "The goal of this rule is to replace expectedException.expect() with assertThrows. Additionally, new "
-						+ "assertions are added for each invocation of expectMessage() and expectCause()."));
+				equalTo("The 'ExpectedException.none()' rule is deprecated since deprecated since JUnit 4.13. The recommended alternative is to use 'assertThrows()'. This makes JUnit tests easier to understand and prevents scenarios where some parts of the test code are unreachable. \nThe goal of this rule is to replace 'expectedException.expect()' with 'assertThrows()'. Additionally, new assertions are added for each invocation of 'expectMessage()' and 'expectCause()'."));
 	}
 
 	@Test
