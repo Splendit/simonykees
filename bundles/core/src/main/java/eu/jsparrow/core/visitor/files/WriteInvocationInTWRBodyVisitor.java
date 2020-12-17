@@ -44,21 +44,27 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 
-		Expression methodInvocationExpression = methodInvocation.getExpression();
-		if (methodInvocationExpression == null || methodInvocationExpression
-			.getNodeType() != ASTNode.SIMPLE_NAME) {
+		if (!write.isEquivalentTo(methodInvocation.resolveMethodBinding())) {
 			return true;
 		}
+
+		Expression methodInvocationExpression = methodInvocation.getExpression();
+		if (methodInvocationExpression == null) {
+			return true;
+		}
+
+		if (methodInvocationExpression.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return true;
+		}
+
 		SimpleName writerVariableSimpleName = (SimpleName) methodInvocationExpression;
 
 		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return true;
 		}
+
 		ExpressionStatement writeInvocationStatementToReplace = (ExpressionStatement) methodInvocation.getParent();
 
-		if (!write.isEquivalentTo(methodInvocation.resolveMethodBinding())) {
-			return true;
-		}
 		Expression charSequenceArgument = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.get(0);
 

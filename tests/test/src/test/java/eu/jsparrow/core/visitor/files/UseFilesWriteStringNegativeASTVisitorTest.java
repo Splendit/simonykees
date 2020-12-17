@@ -430,4 +430,65 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_WriteWithoutExpression_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.Writer.class);
+
+		String original = "" +
+				"			class LocalClass extends BufferedWriter {\n"
+				+ "				public LocalClass(Writer out) {super(out);}\n"
+				+ "				void test(String value) {\n"
+				+ "					try {\n"
+				+ "						write(value);\n"
+				+ "					} catch (Exception exception) {\n"
+				+ "					}\n"
+				+ "				}\n"
+				+ "			}";
+
+		assertNoChange(original);
+	}
+
+	
+	@Test
+	public void visit_WriteWithThisQualifier_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.Writer.class);
+
+		String original = "" +
+				"			class LocalClass extends BufferedWriter {\n"
+				+ "				public LocalClass(Writer out) {super(out);}\n"
+				+ "				void test(String value) {\n"
+				+ "					try {\n"
+				+ "						this.write(value);\n"
+				+ "					} catch (Exception exception) {\n"
+				+ "					}\n"
+				+ "				}\n"
+				+ "			}";
+
+		assertNoChange(original);
+	}
+	
+	
+	@Test
+	public void visit_WriteWithSuperQualifier_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.Writer.class);
+
+		String original = "" +
+				"			class LocalClass extends BufferedWriter {\n"
+				+ "				public LocalClass(Writer out) {super(out);}\n"
+				+ "				@Override\n"
+				+ "				public void write(String value) {\n"
+				+ "					try {\n"
+				+ "						super.write(value);\n"
+				+ "					} catch (Exception exception) {\n"
+				+ "					}\n"
+				+ "				}\n"
+				+ "			}";
+
+		assertNoChange(original);
+	}
+
 }
