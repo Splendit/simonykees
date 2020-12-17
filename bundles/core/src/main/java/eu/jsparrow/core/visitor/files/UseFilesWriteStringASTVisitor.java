@@ -77,20 +77,20 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		WriteInvocationInTWRBodyVisitor visitor = new WriteInvocationInTWRBodyVisitor(tryStatement);
 		tryStatement.getBody()
 			.accept(visitor);
-		WriteMethodInvocationAnalyzer writeInvocationAnalyzer = visitor.getWriteInvocationAnalyzer();
-		if (writeInvocationAnalyzer.hasTransformationData()) {
-			transform(tryStatement, writeInvocationAnalyzer);
+
+		if (visitor.hasTransformationData()) {
+			transform(tryStatement, visitor);
 		}
 		return true;
 	}
 
-	private void transform(TryStatement tryStatement, WriteMethodInvocationAnalyzer writeInvocationAnalyzer) {
+	private void transform(TryStatement tryStatement, WriteInvocationInTWRBodyVisitor visitor) {
 
-		List<FilesNewBufferedIOTransformationData> filesNewBufferedWriterInvocationDataList = writeInvocationAnalyzer
+		List<FilesNewBufferedIOTransformationData> filesNewBufferedWriterInvocationDataList = visitor
 			.getFilesNewBufferedWriterInvocationDataList();
-		List<UseFilesWriteStringAnalysisResult> bufferedWriterInstanceCreationDataList = writeInvocationAnalyzer
+		List<UseFilesWriteStringAnalysisResult> bufferedWriterInstanceCreationDataList = visitor
 			.getBufferedWriterInstanceCreationDataList();
-		List<VariableDeclarationExpression> resourcesToRemove = writeInvocationAnalyzer.getResourcesToRemove();
+		List<VariableDeclarationExpression> resourcesToRemove = visitor.getResourcesToRemove();
 		if (resourcesToRemove.size() < tryStatement.resources()
 			.size()) {
 			filesNewBufferedWriterInvocationDataList.stream()
