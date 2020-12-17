@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * This visitor looks for invocations of
@@ -124,7 +124,7 @@ public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTV
 		if (initializer.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION) {
 			return false;
 		}
-		LocalVariableUsagesASTVisitor usagesVisitor = new LocalVariableUsagesASTVisitor(directoryName);
+		LocalVariableUsagesVisitor usagesVisitor = new LocalVariableUsagesVisitor(directoryName);
 		Block block = ASTNodeUtil.getSpecificAncestor(localVariableDeclarationFragment, Block.class);
 		block.accept(usagesVisitor);
 

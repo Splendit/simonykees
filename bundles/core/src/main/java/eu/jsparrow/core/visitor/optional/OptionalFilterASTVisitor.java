@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import eu.jsparrow.core.visitor.sub.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * Extracts an {@link Optional#filter(Predicate)} from the consumer used in {@link Optional#ifPresent(Consumer)}. 
@@ -146,7 +146,7 @@ public class OptionalFilterASTVisitor extends AbstractOptionalASTVisitor {
 	}
 
 	private boolean usesSimpleName(Expression expression, SimpleName simpleName) {
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(simpleName);
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(simpleName);
 		expression.accept(visitor);
 		return !visitor.getUsages()
 			.isEmpty();

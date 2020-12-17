@@ -3,15 +3,16 @@ Automatic-Module-Name: eu.jsparrow.rules.api
 Bundle-ManifestVersion: 2
 Bundle-Name: jsparrow::rules.api
 Bundle-SymbolicName: eu.jsparrow.rules.api
-Bundle-Version: 3.23.0.qualifier
+Bundle-Version: 3.24.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Export-Package: eu.jsparrow.rules.api,
  eu.jsparrow.rules.common,
+ eu.jsparrow.rules.common.builder,
  eu.jsparrow.rules.common.exception,
+ eu.jsparrow.rules.common.exception.runtime,
  eu.jsparrow.rules.common.statistics,
  eu.jsparrow.rules.common.util,
- eu.jsparrow.rules.common.builder,
  eu.jsparrow.rules.common.visitor,
  eu.jsparrow.rules.common.visitor.helper
 Require-Bundle: eu.jsparrow.logging,

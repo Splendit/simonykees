@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 import eu.jsparrow.rules.common.visitor.helper.VariableAssignmentVisitor;
 
 /**
@@ -347,7 +347,7 @@ public class LocalVariableTypeInferenceASTVisitor extends AbstractASTRewriteASTV
 	}
 
 	private boolean isUsedInOverloadedMethod(SimpleName variableName) {
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(variableName);
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(variableName);
 		Block block = ASTNodeUtil.getSpecificAncestor(variableName, Block.class);
 		block.accept(visitor);
 		List<SimpleName> usages = visitor.getUsages();

@@ -87,4 +87,10 @@ public abstract class UsesSimpleJDTUnitFixture {
 		Block methodBlock = fixture.getMethodBlock();
 		assertMatch(ASTNodeBuilder.createBlockFromString(expected), methodBlock);
 	}
+
+	protected void addImports(Class<?>... classes) throws Exception {
+		for (Class<?> c : classes) {
+			fixture.addImport(c.getName());
+		}
+	}
 }

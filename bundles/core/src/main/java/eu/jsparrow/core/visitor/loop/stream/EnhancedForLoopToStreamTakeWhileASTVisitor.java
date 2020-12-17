@@ -26,7 +26,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * A visitor for replacing for-loops with {@code Stream::takeWhile}.
@@ -129,7 +129,7 @@ public class EnhancedForLoopToStreamTakeWhileASTVisitor extends AbstractEnhanced
 		}
 
 		SimpleName simpleName = (SimpleName) loopExpression;
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(simpleName);
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(simpleName);
 		body.accept(visitor);
 		return !visitor.getUsages()
 			.isEmpty();

@@ -42,7 +42,7 @@ import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
 
 /**
@@ -145,7 +145,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		importsNeeded = false;
 		this.compilationUnit = compilationUnit;
 
-		ClashingLoggerTypesASTVisitor clashingTypesVisitor = new ClashingLoggerTypesASTVisitor(this);
+		ClashingLoggerTypesVisitor clashingTypesVisitor = new ClashingLoggerTypesVisitor(this);
 		compilationUnit.accept(clashingTypesVisitor);
 		boolean noClashingTypes = clashingTypesVisitor.isLoggerFree();
 
@@ -256,7 +256,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		SimpleName exceptionName = exception.getName();
 
 		Block catchBody = catchClause.getBody();
-		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(exceptionName);
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(exceptionName);
 		catchBody.accept(visitor);
 		List<SimpleName> exceptionUsages = visitor.getUsages();
 		if (!exceptionUsages.isEmpty()) {
@@ -301,7 +301,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				return false;
 			}
 
-			ExceptionsASTVisitor visitor = new ExceptionsASTVisitor();
+			ExceptionsVisitor visitor = new ExceptionsVisitor();
 			arguments.forEach(argument -> argument.accept(visitor));
 			List<Expression> exceptions = visitor.getExceptions();
 			boolean logsException = !exceptions.isEmpty();

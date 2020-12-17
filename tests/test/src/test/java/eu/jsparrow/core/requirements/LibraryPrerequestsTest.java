@@ -65,7 +65,18 @@ public class LibraryPrerequestsTest {
 					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
 							"commons-lang3", "3.6"), true ),
 					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
-							"commons-lang3", "3.7"), true )
+							"commons-lang3", "3.7"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.8"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.8"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.8.1"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.10"), true ),
+					Arguments.of(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+							"commons-lang3", "3.11"), true )
+					
 				);
 	}
 
@@ -76,6 +87,7 @@ public class LibraryPrerequestsTest {
 
 		StringUtilsRule sur = new StringUtilsRule();
 		sur.calculateEnabledForProject(testproject);
+		
 
 		Assertions.assertEquals(enabled, sur.isEnabled());
 	}

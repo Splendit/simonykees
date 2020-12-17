@@ -38,7 +38,7 @@ import eu.jsparrow.maven.util.ProxyUtil;
  * @since 2.20.0
  *
  */
-@Mojo(name = "demo", requiresDependencyResolution = ResolutionScope.COMPILE, defaultPhase = LifecyclePhase.INITIALIZE, aggregator = true)
+@Mojo(name = "report", requiresDependencyResolution = ResolutionScope.COMPILE, defaultPhase = LifecyclePhase.INITIALIZE, aggregator = true)
 public class DemoMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${session}", readonly = true)
