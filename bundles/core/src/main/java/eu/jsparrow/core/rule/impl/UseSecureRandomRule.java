@@ -25,7 +25,7 @@ public class UseSecureRandomRule extends RefactoringRuleImpl<UseSecureRandomASTV
 		this.ruleDescription = new RuleDescription(Messages.UseSecureRandomRule_name,
 				Messages.UseSecureRandomRule_description,
 				Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_2, Tag.SECURITY));
+				Arrays.asList(Tag.JAVA_1_2, Tag.SECURITY, Tag.FREE));
 	}
 
 	@Override

@@ -24,7 +24,7 @@ public class OptionalFilterRule extends RefactoringRuleImpl<OptionalFilterASTVis
 		this.id = "OptionalFilter"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.OptionalFilterRule_name,
 				Messages.OptionalFilterRule_description, Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_1_8, Tag.CODING_CONVENTIONS, Tag.LAMBDA, Tag.READABILITY));
+				Arrays.asList(Tag.JAVA_1_8, Tag.CODING_CONVENTIONS, Tag.LAMBDA, Tag.READABILITY, Tag.FREE));
 	}
 
 	@Override

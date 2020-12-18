@@ -25,7 +25,7 @@ public class CollapseIfStatementsRule extends RefactoringRuleImpl<CollapseIfStat
 		String name = Messages.CollapseIfStatementsRule_name;
 		String description = Messages.CollapseIfStatementsRule_description;
 		this.ruleDescription = new RuleDescription(name, description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY));
+				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY, Tag.FREE));
 	}
 
 	@Override

@@ -24,7 +24,7 @@ public class RemoveNullCheckBeforeInstanceofRule
 		this.id = "RemoveNullCheckBeforeInstanceof"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.RemoveNullCheckBeforeInstanceofRule_name,
 				Messages.RemoveNullCheckBeforeInstanceofRule_description, Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS));
+				Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS, Tag.FREE));
 	}
 
 	@Override
