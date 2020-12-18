@@ -34,9 +34,4 @@ public class ForToForEachRule extends RefactoringRuleImpl<ForToForEachASTVisitor
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_5;
 	}
-
-	@Override
-	public boolean isFree() {
-		return true;
-	}
 }
