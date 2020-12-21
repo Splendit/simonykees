@@ -34,9 +34,4 @@ public class InefficientConstructorRule extends RefactoringRuleImpl<InefficientC
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_5;
 	}
-
-	@Override
-	public boolean isFree() {
-		return true;
-	}
 }

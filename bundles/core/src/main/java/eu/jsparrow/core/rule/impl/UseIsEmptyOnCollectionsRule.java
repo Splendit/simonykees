@@ -35,9 +35,4 @@ public class UseIsEmptyOnCollectionsRule extends RefactoringRuleImpl<UseIsEmptyO
 		// string 1.6, collection 1.2, map 1.2
 		return JavaCore.VERSION_1_6;
 	}
-
-	@Override
-	public boolean isFree() {
-		return true;
-	}
 }

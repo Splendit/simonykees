@@ -35,9 +35,4 @@ public class MultiVariableDeclarationLineRule extends RefactoringRuleImpl<MultiV
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_1;
 	}
-
-	@Override
-	public boolean isFree() {
-		return true;
-	}
 }
