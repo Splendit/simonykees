@@ -82,7 +82,7 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 			return true;
 		}
 
-		if (!checkWriterVariableUsage(writerVariableSimpleName, blockOfInvocationStatement)) {
+		if (!checkWriterVariableUsage(writerVariableSimpleName, bufferedWriterResourceAnalyzer)) {
 			return true;
 		}
 
@@ -104,13 +104,16 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 	}
 
 	private boolean checkWriterVariableUsage(SimpleName writerVariableName,
-			Block blockOfInvocationStatement) {
+			TryResourceAnalyzer bufferedWriterResourceAnalyzer) {
 		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(
 				writerVariableName);
-		blockOfInvocationStatement.accept(visitor);
-		int usages = visitor.getUsages()
-			.size();
-		return usages == 1;
+		bufferedWriterResourceAnalyzer.getTryStatement()
+			.accept(visitor);
+		List<SimpleName> usagesList = visitor.getUsages();
+		usagesList.remove(bufferedWriterResourceAnalyzer.getResourceFragment()
+			.getName());
+		usagesList.remove(writerVariableName);
+		return usagesList.isEmpty();
 	}
 
 	boolean hasTransformationData() {
