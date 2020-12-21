@@ -450,7 +450,6 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 		assertNoChange(original);
 	}
 
-	
 	@Test
 	public void visit_WriteWithThisQualifier_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
@@ -469,8 +468,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 
 		assertNoChange(original);
 	}
-	
-	
+
 	@Test
 	public void visit_WriteWithSuperQualifier_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
@@ -490,5 +488,4 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 
 		assertNoChange(original);
 	}
-
 }
