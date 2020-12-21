@@ -19,9 +19,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class OptionalFilterRule extends RefactoringRuleImpl<OptionalFilterASTVisitor> {
 
+	public static final String OPTIONAL_FILTER_RULE_ID = "OptionalFilter"; //$NON-NLS-1$
+
 	public OptionalFilterRule() {
 		this.visitorClass = OptionalFilterASTVisitor.class;
-		this.id = "OptionalFilter"; //$NON-NLS-1$
+		this.id = OPTIONAL_FILTER_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.OptionalFilterRule_name,
 				Messages.OptionalFilterRule_description, Duration.ofMinutes(2),
 				Arrays.asList(Tag.JAVA_1_8, Tag.CODING_CONVENTIONS, Tag.LAMBDA, Tag.READABILITY, Tag.FREE));

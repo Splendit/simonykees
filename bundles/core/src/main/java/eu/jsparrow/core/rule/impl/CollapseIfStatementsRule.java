@@ -19,9 +19,11 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class CollapseIfStatementsRule extends RefactoringRuleImpl<CollapseIfStatementsASTVisitor> {
 
+	public static final String COLLAPSE_IF_STATEMENTS_RULE_ID = "CollapseIfStatements"; //$NON-NLS-1$
+
 	public CollapseIfStatementsRule() {
 		this.visitorClass = CollapseIfStatementsASTVisitor.class;
-		this.id = "CollapseIfStatements"; //$NON-NLS-1$
+		this.id = COLLAPSE_IF_STATEMENTS_RULE_ID;
 		String name = Messages.CollapseIfStatementsRule_name;
 		String description = Messages.CollapseIfStatementsRule_description;
 		this.ruleDescription = new RuleDescription(name, description, Duration.ofMinutes(5),
