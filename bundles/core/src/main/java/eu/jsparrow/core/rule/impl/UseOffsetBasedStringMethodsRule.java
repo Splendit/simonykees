@@ -20,13 +20,15 @@ import eu.jsparrow.rules.common.Tag;
 public class UseOffsetBasedStringMethodsRule
 		extends RefactoringRuleImpl<UseOffsetBasedStringMethodsASTVisitor> {
 
+	public static final String USE_OFFSET_BASED_STRING_METHODS_RULE_ID = "UseOffsetBasedStringMethods"; //$NON-NLS-1$
+
 	public UseOffsetBasedStringMethodsRule() {
 		this.visitorClass = UseOffsetBasedStringMethodsASTVisitor.class;
-		this.id = "UseOffsetBasedStringMethods"; //$NON-NLS-1$
+		this.id = USE_OFFSET_BASED_STRING_METHODS_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.UseOffsetBasedStringMethodsRule_name,
 				Messages.UseOffsetBasedStringMethodsRule_description,
 				Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE));
+				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE, Tag.FREE));
 	}
 
 	@Override
