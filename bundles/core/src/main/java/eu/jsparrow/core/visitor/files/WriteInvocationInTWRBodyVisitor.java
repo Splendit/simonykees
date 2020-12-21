@@ -90,13 +90,13 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 		if (bufferedIOInitializer.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation bufferedIOInitializerMethodInvocation = (MethodInvocation) bufferedIOInitializer;
 			VariableDeclarationExpression resourceToRemove = bufferedWriterResourceAnalyzer.getResource();
-			new WriteAnalyzerUsingFilesNewBufferedWriter().findTransformationDataUsingFilesNewBufferedWriter(
+			TransformationDataUsingFilesNewBufferedWriter.findTransformationData(
 					writeInvocationStatementToReplace, charSequenceArgument,
 					bufferedIOInitializerMethodInvocation, resourceToRemove)
 				.ifPresent(filesNewBufferedWriterInvocationDataList::add);
 		} else {
-			new WriteAnalyzerUsingBufferedWriterConstructor()
-				.findTransformationDataUsingBufferedWriterConstructor(writeInvocationStatementToReplace,
+			TransformationDataUsingBufferedWriterConstructor
+				.findTransformationData(writeInvocationStatementToReplace,
 						charSequenceArgument, bufferedWriterResourceAnalyzer)
 				.ifPresent(bufferedWriterInstanceCreationDataList::add);
 		}
