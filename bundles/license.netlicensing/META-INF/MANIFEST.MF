@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.license.netlicensing
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Licensing
 Bundle-SymbolicName: eu.jsparrow.license.netlicensing
-Bundle-Version: 3.25.0.qualifier
+Bundle-Version: 3.26.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: eu.jsparrow.license.api,
  eu.jsparrow.i18n,
