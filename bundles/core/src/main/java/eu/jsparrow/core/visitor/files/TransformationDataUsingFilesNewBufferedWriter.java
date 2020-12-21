@@ -14,12 +14,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
  * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.file.OpenOption...)}.
  *
  */
-public class FilesNewBufferedIOTransformationData {
+class TransformationDataUsingFilesNewBufferedWriter {
 	private final VariableDeclarationExpression resourceToRemove;
 	private final ExpressionStatement writeInvocationStatementToReplace;
 	private final List<Expression> argumentsToCopy;
 
-	public FilesNewBufferedIOTransformationData(
+	TransformationDataUsingFilesNewBufferedWriter(
 			VariableDeclarationExpression resourceToRemove,
 			ExpressionStatement writeInvocationStatementToReplace,
 			List<Expression> argumentsToCopy) {

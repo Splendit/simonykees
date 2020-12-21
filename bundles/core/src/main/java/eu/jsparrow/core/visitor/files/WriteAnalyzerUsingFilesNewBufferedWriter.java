@@ -16,7 +16,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class WriteAnalyzerUsingFilesNewBufferedWriter {
 
-	Optional<FilesNewBufferedIOTransformationData> findTransformationDataUsingFilesNewBufferedWriter(
+	Optional<TransformationDataUsingFilesNewBufferedWriter> findTransformationDataUsingFilesNewBufferedWriter(
 			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			MethodInvocation bufferedIOInitializerMethodInvocation,
 			VariableDeclarationExpression resourceToRemove) {
@@ -45,7 +45,7 @@ public class WriteAnalyzerUsingFilesNewBufferedWriter {
 		argumentsToCopy.add(1, charSequenceArgument);
 
 		return Optional.of(
-				new FilesNewBufferedIOTransformationData(resourceToRemove,
+				new TransformationDataUsingFilesNewBufferedWriter(resourceToRemove,
 						writeInvocationStatementToReplace, argumentsToCopy));
 
 	}

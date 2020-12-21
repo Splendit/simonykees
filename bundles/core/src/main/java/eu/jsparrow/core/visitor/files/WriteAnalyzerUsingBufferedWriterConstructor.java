@@ -18,7 +18,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 public class WriteAnalyzerUsingBufferedWriterConstructor {
 	
-	Optional<UseFilesWriteStringAnalysisResult> findTransformationDataUsingBufferedWriterConstructor(
+	Optional<TransformationDataUsingBufferedWriterConstructor> findTransformationDataUsingBufferedWriterConstructor(
 			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			TryResourceAnalyzer bufferedWriterResourceAnalyzer) {
 
@@ -49,7 +49,7 @@ public class WriteAnalyzerUsingBufferedWriterConstructor {
 		return Optional.empty();
 	}
 
-	private Optional<UseFilesWriteStringAnalysisResult> findTransformationDataUsingWriterInstanceCreation(
+	private Optional<TransformationDataUsingBufferedWriterConstructor> findTransformationDataUsingWriterInstanceCreation(
 			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			TryResourceAnalyzer bufferedWriterResourceAnalyzer,
 			ClassInstanceCreation writerInstanceCreation) {
@@ -58,12 +58,12 @@ public class WriteAnalyzerUsingBufferedWriterConstructor {
 			return Optional.empty();
 		}
 
-		return Optional.of(new UseFilesWriteStringAnalysisResult(
+		return Optional.of(new TransformationDataUsingBufferedWriterConstructor(
 				Arrays.asList(bufferedWriterResourceAnalyzer.getResource()), writeInvocationStatementToReplace,
 				charSequenceArgument, newBufferedIOArgumentsAnalyzer));
 	}
 
-	private Optional<UseFilesWriteStringAnalysisResult> findTransformationDataUsingWriterResource(
+	private Optional<TransformationDataUsingBufferedWriterConstructor> findTransformationDataUsingWriterResource(
 			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			TryResourceAnalyzer bufferedWriterResourceAnalyzer,
 			SimpleName bufferedIOArgAsSimpleName) {
@@ -95,7 +95,7 @@ public class WriteAnalyzerUsingBufferedWriterConstructor {
 
 		List<VariableDeclarationExpression> resourcesToRemoveList = Arrays
 			.asList(bufferedWriterResourceAnalyzer.getResource(), fileWriterResourceAnalyzer.getResource());
-		return Optional.of(new UseFilesWriteStringAnalysisResult(resourcesToRemoveList,
+		return Optional.of(new TransformationDataUsingBufferedWriterConstructor(resourcesToRemoveList,
 				writeInvocationStatementToReplace, charSequenceArgument, fileIOAnalyzer));
 	}
 

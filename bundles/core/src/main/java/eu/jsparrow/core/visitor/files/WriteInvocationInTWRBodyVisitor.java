@@ -34,8 +34,8 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 	private final SignatureData write = new SignatureData(java.io.Writer.class, "write", java.lang.String.class); //$NON-NLS-1$
 	private final TryStatement tryStatement;
-	private final List<FilesNewBufferedIOTransformationData> filesNewBufferedWriterInvocationDataList = new ArrayList<>();
-	private final List<UseFilesWriteStringAnalysisResult> bufferedWriterInstanceCreationDataList = new ArrayList<>();
+	private final List<TransformationDataUsingFilesNewBufferedWriter> filesNewBufferedWriterInvocationDataList = new ArrayList<>();
+	private final List<TransformationDataUsingBufferedWriterConstructor> bufferedWriterInstanceCreationDataList = new ArrayList<>();
 
 	public WriteInvocationInTWRBodyVisitor(TryStatement tryStatement) {
 		this.tryStatement = tryStatement;
@@ -120,22 +120,22 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 		return !filesNewBufferedWriterInvocationDataList.isEmpty() || !bufferedWriterInstanceCreationDataList.isEmpty();
 	}
 
-	List<FilesNewBufferedIOTransformationData> getFilesNewBufferedWriterInvocationDataList() {
+	List<TransformationDataUsingFilesNewBufferedWriter> getFilesNewBufferedWriterInvocationDataList() {
 		return filesNewBufferedWriterInvocationDataList;
 	}
 
-	List<UseFilesWriteStringAnalysisResult> getBufferedWriterInstanceCreationDataList() {
+	List<TransformationDataUsingBufferedWriterConstructor> getBufferedWriterInstanceCreationDataList() {
 		return bufferedWriterInstanceCreationDataList;
 	}
 
 	List<VariableDeclarationExpression> getResourcesToRemove() {
 		List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
 		filesNewBufferedWriterInvocationDataList.stream()
-			.map(FilesNewBufferedIOTransformationData::getResourceToRemove)
+			.map(TransformationDataUsingFilesNewBufferedWriter::getResourceToRemove)
 			.forEach(resourcesToRemove::add);
 
 		bufferedWriterInstanceCreationDataList.stream()
-			.map(UseFilesWriteStringAnalysisResult::getResourcesToRemove)
+			.map(TransformationDataUsingBufferedWriterConstructor::getResourcesToRemove)
 			.forEach(resourcesToRemove::addAll);
 
 		return resourcesToRemove;

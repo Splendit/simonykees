@@ -18,14 +18,14 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
  * @since 3.24.0
  *
  */
-class UseFilesWriteStringAnalysisResult {
+class TransformationDataUsingBufferedWriterConstructor {
 	private final List<VariableDeclarationExpression> resourcesToRemove;
 	private final ExpressionStatement writeInvocationStatementToReplace;
 	private final Expression charSequenceArgument;
 	private final List<Expression> pathExpressions;
 	private final Expression charSet;
 
-	UseFilesWriteStringAnalysisResult(List<VariableDeclarationExpression> resourcesToRemove,
+	TransformationDataUsingBufferedWriterConstructor(List<VariableDeclarationExpression> resourcesToRemove,
 			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer) {
 		this.resourcesToRemove = resourcesToRemove;
@@ -36,7 +36,7 @@ class UseFilesWriteStringAnalysisResult {
 			.orElse(null);
 	}
 
-	UseFilesWriteStringAnalysisResult(List<VariableDeclarationExpression> resourcesToRemove,
+	TransformationDataUsingBufferedWriterConstructor(List<VariableDeclarationExpression> resourcesToRemove,
 			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			FileIOAnalyzer fileIOAnalyzer) {
 		this.resourcesToRemove = resourcesToRemove;
