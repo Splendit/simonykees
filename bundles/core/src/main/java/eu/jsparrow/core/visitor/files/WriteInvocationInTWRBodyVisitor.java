@@ -86,20 +86,19 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 			return true;
 		}
 
-		Expression bufferedIOInitializer = bufferedWriterResourceAnalyzer.getResourceInitializer();
-		if (bufferedIOInitializer.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			MethodInvocation bufferedIOInitializerMethodInvocation = (MethodInvocation) bufferedIOInitializer;
-			VariableDeclarationExpression resourceToRemove = bufferedWriterResourceAnalyzer.getResource();
-			TransformationDataUsingFilesNewBufferedWriter.findTransformationData(
-					writeInvocationStatementToReplace, charSequenceArgument,
-					bufferedIOInitializerMethodInvocation, resourceToRemove)
-				.ifPresent(filesNewBufferedWriterInvocationDataList::add);
-		} else {
-			TransformationDataUsingBufferedWriterConstructor
-				.findTransformationData(writeInvocationStatementToReplace,
-						charSequenceArgument, bufferedWriterResourceAnalyzer)
-				.ifPresent(bufferedWriterInstanceCreationDataList::add);
+		TransformationDataUsingFilesNewBufferedWriter dataUsingFilesNewBufferedWriter = TransformationDataUsingFilesNewBufferedWriter
+			.findTransformationData(
+					writeInvocationStatementToReplace, charSequenceArgument, bufferedWriterResourceAnalyzer)
+			.orElse(null);
+		if (dataUsingFilesNewBufferedWriter != null) {
+			filesNewBufferedWriterInvocationDataList.add(dataUsingFilesNewBufferedWriter);
+			return true;
 		}
+
+		TransformationDataUsingBufferedWriterConstructor
+			.findTransformationData(
+					writeInvocationStatementToReplace, charSequenceArgument, bufferedWriterResourceAnalyzer)
+			.ifPresent(bufferedWriterInstanceCreationDataList::add);
 		return true;
 	}
 

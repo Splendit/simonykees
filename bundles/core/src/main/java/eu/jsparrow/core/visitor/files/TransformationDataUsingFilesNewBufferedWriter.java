@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.files;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -38,9 +39,15 @@ class TransformationDataUsingFilesNewBufferedWriter {
 	
 	static Optional<TransformationDataUsingFilesNewBufferedWriter> findTransformationData(
 			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
-			MethodInvocation bufferedIOInitializerMethodInvocation,
-			VariableDeclarationExpression resourceToRemove) {
-
+			TryResourceAnalyzer bufferedWriterResourceAnalyzer) {
+		
+		Expression bufferedIOInitializer = bufferedWriterResourceAnalyzer.getResourceInitializer();
+		if (bufferedIOInitializer.getNodeType() != ASTNode.METHOD_INVOCATION) {
+			return Optional.empty();
+		}
+		MethodInvocation bufferedIOInitializerMethodInvocation = (MethodInvocation) bufferedIOInitializer;
+		VariableDeclarationExpression resourceToRemove = bufferedWriterResourceAnalyzer.getResource();
+		
 		IMethodBinding methodBinding = bufferedIOInitializerMethodInvocation.resolveMethodBinding();
 
 		if (!ClassRelationUtil.isContentOfType(methodBinding
