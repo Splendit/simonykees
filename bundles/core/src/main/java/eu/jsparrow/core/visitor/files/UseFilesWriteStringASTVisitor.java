@@ -74,11 +74,9 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	@Override
 	public boolean visit(TryStatement tryStatement) {
-		WriteInvocationInTWRBodyVisitor visitor = new WriteInvocationInTWRBodyVisitor(tryStatement);
-		visitor.analyze();
-
-		if (visitor.hasTransformationData()) {
-			transform(tryStatement, visitor);
+		WriteInvocationInTWRBodyVisitor analyzer = new WriteInvocationInTWRBodyVisitor(tryStatement);
+		if (analyzer.analyze()) {
+			transform(tryStatement, analyzer);
 		}
 		return true;
 	}

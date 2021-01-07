@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * Helper class with a method to determine whether for the given
@@ -46,6 +47,28 @@ public class TryResourceAnalyzer {
 					}
 				}
 			}
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * @return true if in a given {@link TryStatement} a resource can be found
+	 *         which has the specified name and - after declaration - is used
+	 *         exactly once as specified by the argument for the expected usage
+	 *         after declaration.
+	 */
+	boolean analyzeCheckingUsage(TryStatement tryStatement, SimpleName resourceNameExpected,
+			SimpleName expectedUsageAfterDeclaration) {
+		if (analyze(tryStatement, resourceNameExpected)) {
+			LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(
+					resourceNameExpected);
+			tryStatement.accept(visitor);
+			List<SimpleName> usagesList = visitor.getUsages();
+			SimpleName nameAtDeclaration = resourceFragment.getName();
+			usagesList.remove(nameAtDeclaration);
+			usagesList.remove(expectedUsageAfterDeclaration);
+			return usagesList.isEmpty();
 		}
 		return false;
 	}
