@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.files;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -10,6 +11,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
@@ -31,7 +33,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @since 3.25.0
  *
  */
-public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
+public class WriteInvocationInTWRBodyVisitor {
 	private final SignatureData write = new SignatureData(java.io.Writer.class, "write", java.lang.String.class); //$NON-NLS-1$
 	private final TryStatement tryStatement;
 	private final List<TransformationDataUsingFilesNewBufferedWriter> filesNewBufferedWriterInvocationDataList = new ArrayList<>();
@@ -40,8 +42,18 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 	public WriteInvocationInTWRBodyVisitor(TryStatement tryStatement) {
 		this.tryStatement = tryStatement;
 	}
-
-	@Override
+	
+	void analyze() {
+		Block tryStatementBody = tryStatement.getBody();
+		List<ExpressionStatement> childExpressionStatements = findChildExpressionStatements(tryStatementBody);
+		for(ExpressionStatement expressionStatement : childExpressionStatements) {
+			Expression expression = expressionStatement.getExpression();
+			if(expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
+				visit((MethodInvocation)expression);
+			}
+		}
+	}
+	
 	public boolean visit(MethodInvocation methodInvocation) {
 
 		if (!write.isEquivalentTo(methodInvocation.resolveMethodBinding())) {
@@ -100,6 +112,12 @@ public class WriteInvocationInTWRBodyVisitor extends ASTVisitor {
 					writeInvocationStatementToReplace, charSequenceArgument, bufferedWriterResourceAnalyzer)
 			.ifPresent(bufferedWriterInstanceCreationDataList::add);
 		return true;
+	}
+
+	private List<ExpressionStatement> findChildExpressionStatements(Block tryStatementBody) {
+		return ASTNodeUtil.convertToTypedList(tryStatementBody.statements(), Statement.class)
+			.stream()
+			.filter(statement -> statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT).map(statement -> (ExpressionStatement)statement).collect(Collectors.toList());
 	}
 
 	private boolean checkWriterVariableUsage(SimpleName writerVariableName,
