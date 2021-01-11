@@ -13,6 +13,8 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
+
 /**
  * Analyzes whether the declaration of a {@link java.io.FileReader} or a
  * {@link java.io.FileWriter} satisfies the preconditions for replacing, as
@@ -48,13 +50,12 @@ class FileIOAnalyzer {
 
 	public boolean analyzeFileIO(VariableDeclarationFragment fragmentDeclaringFileIO) {
 
-		ClassInstanceCreation fileIOCreation = FilesUtil
-			.findClassInstanceCreationAsInitializer(fragmentDeclaringFileIO, fileIOClassQualifiedName)
-			.orElse(null);
-
-		if (fileIOCreation == null) {
+		Expression initializer = fragmentDeclaringFileIO.getInitializer();
+		if (!ClassRelationUtil.isNewInstanceCreationOf(initializer, fileIOClassQualifiedName)) {
 			return false;
 		}
+
+		ClassInstanceCreation fileIOCreation = (ClassInstanceCreation) initializer;
 
 		List<Expression> arguments = convertToTypedList(fileIOCreation.arguments(), Expression.class);
 		int argumentSize = arguments.size();
@@ -74,7 +75,6 @@ class FileIOAnalyzer {
 			}
 			this.charsetExpression = charset;
 		}
-
 		return true;
 	}
 

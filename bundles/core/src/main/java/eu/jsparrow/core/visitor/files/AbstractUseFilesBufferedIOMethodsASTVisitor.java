@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -60,13 +61,20 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
 
-		ClassInstanceCreation newBufferedIO = findBufferIOInstanceCreationAsInitializer(fragment).orElse(null);
-		if (newBufferedIO == null) {
+		ITypeBinding typeBinding = fragment.getName()
+			.resolveTypeBinding();
+		if (!ClassRelationUtil.isContentOfType(typeBinding, bufferedIOQualifiedTypeName)) {
 			return true;
 		}
 
-		Expression bufferedIOArgument = FilesUtil.findBufferedIOArgument(newBufferedIO, fileIOQualifiedTypeName)
-			.orElse(null);
+		Expression initializer = fragment.getInitializer();
+		if (!ClassRelationUtil.isNewInstanceCreationOf(initializer, bufferedIOQualifiedTypeName)) {
+			return true;
+		}
+
+		ClassInstanceCreation newBufferedIO = (ClassInstanceCreation) initializer;
+
+		Expression bufferedIOArgument = findBufferedIOArgument(newBufferedIO).orElse(null);
 		if (bufferedIOArgument == null) {
 			return true;
 		}
@@ -82,6 +90,21 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 				.ifPresent(this::transform);
 		}
 		return true;
+	}
+
+	private Optional<Expression> findBufferedIOArgument(ClassInstanceCreation classInstanceCreation) {
+
+		List<Expression> newBufferedIOArgs = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(),
+				Expression.class);
+		if (newBufferedIOArgs.size() != 1) {
+			return Optional.empty();
+		}
+		Expression bufferedIOArg = newBufferedIOArgs.get(0);
+		ITypeBinding firstArgType = bufferedIOArg.resolveTypeBinding();
+		if (!ClassRelationUtil.isContentOfType(firstArgType, fileIOQualifiedTypeName)) {
+			return Optional.empty();
+		}
+		return Optional.of(bufferedIOArg);
 	}
 
 	TransformationData createTransformationData(NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer,
@@ -122,7 +145,8 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 
 		List<Expression> pathExpressions = fileIOAnalyzer.getPathExpressions();
 		TransformationData transformationData = fileIOAnalyzer.getCharset()
-			.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet, fileIOResourceDeclarationFragment))
+			.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet,
+					fileIOResourceDeclarationFragment))
 			.orElse(new TransformationData(newBufferedIO, pathExpressions, fileIOResourceDeclarationFragment));
 		return Optional.of(transformationData);
 	}
@@ -163,15 +187,5 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 				transformationData.getBufferedIOInstanceCreation());
 		return NodeBuilder.newMethodInvocation(ast, filesTypeName,
 				ast.newSimpleName(newBufferedIOMethodName), arguments);
-	}
-
-	private Optional<ClassInstanceCreation> findBufferIOInstanceCreationAsInitializer(
-			VariableDeclarationFragment fragment) {
-		SimpleName name = fragment.getName();
-		ITypeBinding typeBinding = name.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(typeBinding, bufferedIOQualifiedTypeName)) {
-			return Optional.empty();
-		}
-		return FilesUtil.findClassInstanceCreationAsInitializer(fragment, bufferedIOQualifiedTypeName);
 	}
 }

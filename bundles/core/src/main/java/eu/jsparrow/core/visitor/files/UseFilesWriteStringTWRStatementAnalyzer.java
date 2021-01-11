@@ -177,8 +177,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 		}
 		ClassInstanceCreation bufferedWriterInstanceCreation = (ClassInstanceCreation) bufferedWriterResourceInitializer;
 
-		Expression bufferedWriterInstanceCreationArgument = FilesUtil
-			.findBufferedIOArgument(bufferedWriterInstanceCreation, java.io.FileWriter.class.getName())
+		Expression bufferedWriterInstanceCreationArgument = findBufferedIOArgument(bufferedWriterInstanceCreation)
 			.orElse(null);
 
 		Expression charSequenceArgument = writeInvocationData.getCharSequenceArgument();
@@ -198,6 +197,21 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 			}
 		}
 		return Optional.empty();
+	}
+
+	static Optional<Expression> findBufferedIOArgument(ClassInstanceCreation classInstanceCreation) {
+
+		List<Expression> newBufferedIOArgs = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(),
+				Expression.class);
+		if (newBufferedIOArgs.size() != 1) {
+			return Optional.empty();
+		}
+		Expression bufferedIOArg = newBufferedIOArgs.get(0);
+		ITypeBinding firstArgType = bufferedIOArg.resolveTypeBinding();
+		if (!ClassRelationUtil.isContentOfType(firstArgType, java.io.FileWriter.class.getName())) {
+			return Optional.empty();
+		}
+		return Optional.of(bufferedIOArg);
 	}
 
 	private Optional<WriteReplacementUsingBufferedWriterConstructor> findResultUsingWriterInstanceCreation(
