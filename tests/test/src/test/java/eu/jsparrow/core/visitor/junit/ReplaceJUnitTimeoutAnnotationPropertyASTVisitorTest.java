@@ -27,7 +27,7 @@ public class ReplaceJUnitTimeoutAnnotationPropertyASTVisitorTest extends UsesJDT
 	}
 	
 	@Test
-	void visit_singleMemberValuePair_shouldTransform() throws Exception {
+	void visit_singleStatementTestBody_shouldTransform() throws Exception {
 		String original = ""
 				+ "@Test(timeout = 1)\n"
 				+ "public void methodInvocation() {\n"
@@ -40,5 +40,25 @@ public class ReplaceJUnitTimeoutAnnotationPropertyASTVisitorTest extends UsesJDT
 				+ "}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	void visit_multipleStatements_shouldTransform() throws Exception {
+		String original = ""
+				+ "@Test(timeout = 1)\n"
+				+ "public void methodInvocation() {\n"
+				+ "		Thread.sleep(500);\n"
+				+ "		Thread.sleep(500);\n"
+				+ "}";
+		String expected = ""
+				+ "@Test\n"
+				+ "public void methodInvocation() {\n"
+				+ "		assertTimeout(ofMillis(1), () -> {"
+				+ "			Thread.sleep(500);\n"
+				+ "			Thread.sleep(500);\n"
+				+ "		});"
+				+ "}";
+		assertChange(original, expected);
+	}
+
 
 }
