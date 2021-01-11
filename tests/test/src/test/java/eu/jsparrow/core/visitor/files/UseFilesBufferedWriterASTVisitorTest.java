@@ -310,13 +310,8 @@ public class UseFilesBufferedWriterASTVisitorTest extends UsesSimpleJDTUnitFixtu
 		assertNoChange(original);
 	}
 
-	/**
-	 * SIM-1799: this test demonstrates a corner case with invalid
-	 * transformation. It will fail as soon the corresponding bug will have been
-	 * fixed.
-	 */
 	@Test
-	public void visit_WriterUsedByAdditionalAnonymousClass_invalidTransformation() throws Exception {
+	public void visit_WriterUsedByAdditionalAnonymousClass_shouldNotTransform() throws Exception {
 		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
 		String original = "" +
 				"			try (FileWriter writer = new FileWriter(new File(\"/home/test/testpath\"), StandardCharsets.UTF_8);\n"
@@ -328,15 +323,6 @@ public class UseFilesBufferedWriterASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				+ "				e.printStackTrace();\n"
 				+ "			}";
 
-		String expected = "" +
-				"			try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(\"/home/test/testpath\"), StandardCharsets.UTF_8);\n"
-				+ "					BufferedWriter bw2 = new BufferedWriter(writer) {\n"
-				+ "					}) {\n"
-				+ "\n"
-				+ "			} catch (IOException e) {\n"
-				+ "				e.printStackTrace();\n"
-				+ "			}";
-
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 }

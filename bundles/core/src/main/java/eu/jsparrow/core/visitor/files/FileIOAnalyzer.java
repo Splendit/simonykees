@@ -11,7 +11,6 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
@@ -47,14 +46,10 @@ class FileIOAnalyzer {
 		this.fileIOClassQualifiedName = fileIOClassQualifiedName;
 	}
 
-	public boolean analyzeFileIO(VariableDeclarationExpression variableDeclaration) {
-		List<VariableDeclarationFragment> fragments = convertToTypedList(variableDeclaration.fragments(),
-				VariableDeclarationFragment.class);
-		if (fragments.size() != 1) {
-			return false;
-		}
+	public boolean analyzeFileIO(VariableDeclarationFragment fragmentDeclaringFileIO) {
+
 		ClassInstanceCreation fileIOCreation = FilesUtil
-			.findClassInstanceCreationAsInitializer(fragments.get(0), fileIOClassQualifiedName)
+			.findClassInstanceCreationAsInitializer(fragmentDeclaringFileIO, fileIOClassQualifiedName)
 			.orElse(null);
 
 		if (fileIOCreation == null) {

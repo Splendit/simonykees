@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -22,7 +21,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * Parent class for visitors which replace the initializations of
@@ -79,18 +77,11 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 
 			transform(createTransformationData(newBufferedIOArgumentsAnalyzer, newBufferedIO));
 
-		} else if (isDeclarationInTWRHeader(fragment, bufferedIOArgument)) {
-			createTransformationDataUsingFileIOResource(fragment, newBufferedIO,
-					(SimpleName) bufferedIOArgument).ifPresent(this::transform);
+		} else if (bufferedIOArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
+			createTransformationDataUsingFileIOResource(fragment, newBufferedIO, (SimpleName) bufferedIOArgument)
+				.ifPresent(this::transform);
 		}
 		return true;
-	}
-
-	private boolean isDeclarationInTWRHeader(VariableDeclarationFragment fragment, Expression bufferedIOArg) {
-		ASTNode fragmentParent = fragment.getParent();
-		return bufferedIOArg.getNodeType() == ASTNode.SIMPLE_NAME
-				&& fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
-				&& fragmentParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY;
 	}
 
 	TransformationData createTransformationData(NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer,
@@ -106,40 +97,34 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 
 	private Optional<TransformationData> createTransformationDataUsingFileIOResource(
 			VariableDeclarationFragment fragment,
-			ClassInstanceCreation newBufferedIO, SimpleName bufferedIOArg) {
-		VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment
-			.getParent();
-		TryStatement tryStatement = (TryStatement) declarationExpression.getParent();
+			ClassInstanceCreation newBufferedIO, SimpleName bufferedIOArgSimpleName) {
 
-		VariableDeclarationFragment fileIOResource = FilesUtil.findVariableDeclarationFragmentAsResource(bufferedIOArg,
-				tryStatement)
-			.orElse(null);
-		if (fileIOResource == null) {
+		TryStatement tryStatement;
+		ASTNode fragmentParent = fragment.getParent();
+		if (fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
+				&& fragmentParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
+			tryStatement = (TryStatement) fragmentParent.getParent();
+		} else {
 			return Optional.empty();
 		}
+
+		TryResourceAnalyzer fileIOResourceAnalyzer = new TryResourceAnalyzer();
+		if (!fileIOResourceAnalyzer.analyzeResourceUsedOnce(tryStatement, bufferedIOArgSimpleName)) {
+			return Optional.empty();
+		}
+
+		VariableDeclarationFragment fileIOResourceDeclarationFragment = fileIOResourceAnalyzer.getResourceFragment();
 
 		FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(fileIOQualifiedTypeName);
-		if (!fileIOAnalyzer.analyzeFileIO((VariableDeclarationExpression) fileIOResource.getParent())) {
-			return Optional.empty();
-		}
-
-		boolean isUsedInTryBody = hasUsagesOn(tryStatement.getBody(), fileIOResource.getName());
-		if (isUsedInTryBody) {
+		if (!fileIOAnalyzer.analyzeFileIO(fileIOResourceDeclarationFragment)) {
 			return Optional.empty();
 		}
 
 		List<Expression> pathExpressions = fileIOAnalyzer.getPathExpressions();
 		TransformationData transformationData = fileIOAnalyzer.getCharset()
-			.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet, fileIOResource))
-			.orElse(new TransformationData(newBufferedIO, pathExpressions, fileIOResource));
+			.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet, fileIOResourceDeclarationFragment))
+			.orElse(new TransformationData(newBufferedIO, pathExpressions, fileIOResourceDeclarationFragment));
 		return Optional.of(transformationData);
-	}
-
-	private boolean hasUsagesOn(Block body, SimpleName fileIOName) {
-		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(fileIOName);
-		body.accept(visitor);
-		List<SimpleName> usages = visitor.getUsages();
-		return !usages.isEmpty();
 	}
 
 	private void transform(TransformationData transformationData) {

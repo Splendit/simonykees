@@ -225,10 +225,8 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 			return Optional.empty();
 		}
 
-		VariableDeclarationExpression fileWriterResource = fileWriterResourceAnalyzer.getResource();
-
 		FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(java.io.FileWriter.class.getName());
-		if (!fileIOAnalyzer.analyzeFileIO(fileWriterResource)) {
+		if (!fileIOAnalyzer.analyzeFileIO(fileWriterResourceAnalyzer.getResourceFragment())) {
 			return Optional.empty();
 		}
 
