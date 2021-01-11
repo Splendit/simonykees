@@ -55,20 +55,21 @@ public class TryResourceAnalyzer {
 	 * 
 	 * @return true if in a given {@link TryStatement} a resource can be found
 	 *         which has the specified name and - after declaration - is used
-	 *         exactly once as specified by the argument for the expected usage
-	 *         after declaration.
+	 *         exactly once.
 	 */
-	boolean analyzeCheckingUsage(TryStatement tryStatement, SimpleName resourceNameExpected,
-			SimpleName expectedUsageAfterDeclaration) {
-		if (analyze(tryStatement, resourceNameExpected)) {
+	boolean analyzeResourceUsedOnce(TryStatement tryStatement, SimpleName expectedResourceUsage) {
+		if (analyze(tryStatement, expectedResourceUsage)) {
 			LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(
-					resourceNameExpected);
+					expectedResourceUsage);
 			tryStatement.accept(visitor);
 			List<SimpleName> usagesList = visitor.getUsages();
 			SimpleName nameAtDeclaration = resourceFragment.getName();
-			usagesList.remove(nameAtDeclaration);
-			usagesList.remove(expectedUsageAfterDeclaration);
-			return usagesList.isEmpty();
+			for (SimpleName usage : usagesList) {
+				if (usage != nameAtDeclaration && usage != expectedResourceUsage) {
+					return false;
+				}
+			}
+			return true;
 		}
 		return false;
 	}
@@ -79,10 +80,6 @@ public class TryResourceAnalyzer {
 
 	VariableDeclarationExpression getResource() {
 		return resource;
-	}
-
-	VariableDeclarationFragment getResourceFragment() {
-		return resourceFragment;
 	}
 
 	Expression getResourceInitializer() {

@@ -274,6 +274,26 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
+	public void visit_FileWriterResourceUsedByTwoBufferedWriters_shouldNotTransform() throws Exception {
+		addImports(
+				java.io.BufferedWriter.class,
+				java.io.File.class,
+				java.io.FileWriter.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		try (FileWriter writer = new FileWriter(new File(\"/home/test/testpath\"), StandardCharsets.UTF_8);\n"
+				+ "				BufferedWriter bw = new BufferedWriter(writer);\n"
+				+ "				BufferedWriter bw2 = new BufferedWriter(writer)) {\n"
+				+ "			bw.write(value);\n"
+				+ "			bw2.write(value);\n"
+				+ "		} catch (Exception e) {\n"
+				+ "		}";
+		assertNoChange(original);
+	}
+
+	@Test
 	public void visit_FileWriterResourceFromFileVariable_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
