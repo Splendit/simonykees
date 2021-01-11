@@ -23,24 +23,39 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- * This helper class analyzes a {@link org.eclipse.jdt.core.dom.TryStatement} by
- * looking for child expression statements which contain an invocation of
- * {@link java.io.Writer#write(String)} and can be replaced by an invocation of
- * one of the methods which have the name "writeString" and are available as
- * static methods of the class {@link java.nio.file.Files} since Java 11.<br>
+ * Helper class used exclusively by
+ * {@link eu.jsparrow.core.visitor.files.UseFilesWriteStringASTVisitor} for
+ * providing transformation data. It looks for
+ * {@link org.eclipse.jdt.core.dom.ExpressionStatement}-nodes which are child
+ * nodes of the TWR-body of a given
+ * {@link org.eclipse.jdt.core.dom.TryStatement} and call the method
+ * {@link java.io.Writer#write(String)} on a resource variable declared in the
+ * TWR-header.
  * 
  * 
  * @since 3.25.0
  *
  */
-public class WriteInvocationInTWRBodyVisitor {
+class UseFilesWriteStringTWRStatementAnalyzer {
 	private final SignatureData write = new SignatureData(java.io.Writer.class, "write", java.lang.String.class); //$NON-NLS-1$
-	private final List<TransformationDataUsingFilesNewBufferedWriter> filesNewBufferedWriterInvocationDataList = new ArrayList<>();
-	private final List<TransformationDataUsingBufferedWriterConstructor> bufferedWriterInstanceCreationDataList = new ArrayList<>();
+	private List<WriteReplacementUsingFilesNewBufferedWriter> resultsUsingFilesNewBufferedWriter;
+	private List<WriteReplacementUsingBufferedWriterConstructor> resultsUsingBufferedWriterConstructor;
 
-	boolean analyze(TryStatement tryStatement) {
-		filesNewBufferedWriterInvocationDataList.clear();
-		bufferedWriterInstanceCreationDataList.clear();
+	/**
+	 * Collects data in connection with
+	 * {@link org.eclipse.jdt.core.dom.ExpressionStatement}-nodes found as child
+	 * nodes of the body of the given
+	 * {@link org.eclipse.jdt.core.dom.TryStatement} and containing an
+	 * invocation of {@link java.io.Writer#write(String)} on a resource.
+	 * 
+	 * @return {@code true} if at least one instance of either
+	 *         {@link WriteReplacementUsingFilesNewBufferedWriter} or
+	 *         {@link WriteReplacementUsingBufferedWriterConstructor} could be
+	 *         found, otherwise {@code false}.
+	 */
+	boolean collectTransformationData(TryStatement tryStatement) {
+		resultsUsingFilesNewBufferedWriter = new ArrayList<>();
+		resultsUsingBufferedWriterConstructor = new ArrayList<>();
 		List<Statement> tryBodyStatements = ASTNodeUtil.convertToTypedList(tryStatement.getBody()
 			.statements(), Statement.class);
 		for (Statement statement : tryBodyStatements) {
@@ -50,20 +65,20 @@ public class WriteInvocationInTWRBodyVisitor {
 				SimpleName writerVariableSimpleName = writeInvocationData.getWriterVariableSimpleName();
 				if (bufferedWriterResourceAnalyzer.analyzeResourceUsedOnce(tryStatement, writerVariableSimpleName)) {
 
-					TransformationDataUsingFilesNewBufferedWriter dataUsingFilesNewBufferedWriter = findTransformationDataUsingFilesNewBufferedWriter(
+					WriteReplacementUsingFilesNewBufferedWriter dataUsingFilesNewBufferedWriter = findResultUsingFilesNewBufferedWriter(
 							writeInvocationData, bufferedWriterResourceAnalyzer).orElse(null);
 					if (dataUsingFilesNewBufferedWriter != null) {
-						filesNewBufferedWriterInvocationDataList.add(dataUsingFilesNewBufferedWriter);
+						resultsUsingFilesNewBufferedWriter.add(dataUsingFilesNewBufferedWriter);
 
 					} else {
-						findTransformationDataUsingBufferedWriterConstructor(
+						findResultUsingBufferedWriterConstructor(
 								writeInvocationData, bufferedWriterResourceAnalyzer)
-									.ifPresent(bufferedWriterInstanceCreationDataList::add);
+									.ifPresent(resultsUsingBufferedWriterConstructor::add);
 					}
 				}
 			}
 		}
-		return !filesNewBufferedWriterInvocationDataList.isEmpty() || !bufferedWriterInstanceCreationDataList.isEmpty();
+		return !resultsUsingFilesNewBufferedWriter.isEmpty() || !resultsUsingBufferedWriterConstructor.isEmpty();
 	}
 
 	private Optional<WriteInvocationData> findWriteInvocationData(Statement statement) {
@@ -92,7 +107,7 @@ public class WriteInvocationInTWRBodyVisitor {
 			.of(new WriteInvocationData(expressionStatement, writerVariableSimpleName, charSequenceArgument));
 	}
 
-	private Optional<TransformationDataUsingFilesNewBufferedWriter> findTransformationDataUsingFilesNewBufferedWriter(
+	private Optional<WriteReplacementUsingFilesNewBufferedWriter> findResultUsingFilesNewBufferedWriter(
 			WriteInvocationData writeInvocationData,
 			TryResourceAnalyzer bufferedWriterResourceAnalyzer) {
 
@@ -126,7 +141,7 @@ public class WriteInvocationInTWRBodyVisitor {
 
 		argumentsToCopy.add(1, writeInvocationData.getCharSequenceArgument());
 		return Optional.of(
-				new TransformationDataUsingFilesNewBufferedWriter(resourceToRemove,
+				new WriteReplacementUsingFilesNewBufferedWriter(resourceToRemove,
 						writeInvocationData.getWriteInvocationStatementToReplace(), argumentsToCopy));
 	}
 
@@ -151,7 +166,7 @@ public class WriteInvocationInTWRBodyVisitor {
 		return false;
 	}
 
-	private Optional<TransformationDataUsingBufferedWriterConstructor> findTransformationDataUsingBufferedWriterConstructor(
+	private Optional<WriteReplacementUsingBufferedWriterConstructor> findResultUsingBufferedWriterConstructor(
 			WriteInvocationData writeInvocationData,
 			TryResourceAnalyzer bufferedWriterResourceAnalyzer) {
 
@@ -171,13 +186,13 @@ public class WriteInvocationInTWRBodyVisitor {
 			.getWriteInvocationStatementToReplace();
 		if (bufferedWriterInstanceCreationArgument != null) {
 			if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-				return findTransformationDataUsingWriterInstanceCreation(writeInvocationStatementToReplace,
+				return findResultUsingWriterInstanceCreation(writeInvocationStatementToReplace,
 						charSequenceArgument, bufferedWriterResourceAnalyzer,
 						(ClassInstanceCreation) bufferedWriterInstanceCreationArgument);
 
 			}
 			if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-				return findTransformationDataUsingWriterResource(writeInvocationStatementToReplace,
+				return findResultUsingWriterResource(writeInvocationStatementToReplace,
 						charSequenceArgument, bufferedWriterResourceAnalyzer,
 						(SimpleName) bufferedWriterInstanceCreationArgument);
 			}
@@ -185,7 +200,7 @@ public class WriteInvocationInTWRBodyVisitor {
 		return Optional.empty();
 	}
 
-	private Optional<TransformationDataUsingBufferedWriterConstructor> findTransformationDataUsingWriterInstanceCreation(
+	private Optional<WriteReplacementUsingBufferedWriterConstructor> findResultUsingWriterInstanceCreation(
 			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			TryResourceAnalyzer bufferedWriterResourceAnalyzer,
 			ClassInstanceCreation writerInstanceCreation) {
@@ -194,12 +209,12 @@ public class WriteInvocationInTWRBodyVisitor {
 			return Optional.empty();
 		}
 
-		return Optional.of(new TransformationDataUsingBufferedWriterConstructor(
+		return Optional.of(new WriteReplacementUsingBufferedWriterConstructor(
 				Arrays.asList(bufferedWriterResourceAnalyzer.getResource()), writeInvocationStatementToReplace,
 				charSequenceArgument, newBufferedIOArgumentsAnalyzer));
 	}
 
-	private Optional<TransformationDataUsingBufferedWriterConstructor> findTransformationDataUsingWriterResource(
+	private Optional<WriteReplacementUsingBufferedWriterConstructor> findResultUsingWriterResource(
 			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			TryResourceAnalyzer bufferedWriterResourceAnalyzer,
 			SimpleName bufferedIOArgAsSimpleName) {
@@ -219,37 +234,63 @@ public class WriteInvocationInTWRBodyVisitor {
 
 		List<VariableDeclarationExpression> resourcesToRemoveList = Arrays
 			.asList(bufferedWriterResourceAnalyzer.getResource(), fileWriterResourceAnalyzer.getResource());
-		return Optional.of(new TransformationDataUsingBufferedWriterConstructor(resourcesToRemoveList,
+		return Optional.of(new WriteReplacementUsingBufferedWriterConstructor(resourcesToRemoveList,
 				writeInvocationStatementToReplace, charSequenceArgument, fileIOAnalyzer));
 	}
 
-	List<TransformationDataUsingFilesNewBufferedWriter> getFilesNewBufferedWriterInvocationDataList() {
-		return filesNewBufferedWriterInvocationDataList;
+	/**
+	 * List of transformation data where the corresponding resource is
+	 * initialized by an invocation of
+	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.charset.Charset, java.nio.file.OpenOption...)}
+	 * or
+	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.file.OpenOption...)}.
+	 * 
+	 */
+	List<WriteReplacementUsingFilesNewBufferedWriter> getResultsUsingFilesNewBufferedWriter() {
+		return resultsUsingFilesNewBufferedWriter;
 	}
 
-	List<TransformationDataUsingBufferedWriterConstructor> getBufferedWriterInstanceCreationDataList() {
-		return bufferedWriterInstanceCreationDataList;
+	/**
+	 * List of transformation data where the corresponding resource is
+	 * initialized by an invocation of a constructor of
+	 * {@link java.io.BufferedWriter}.
+	 * 
+	 */
+	List<WriteReplacementUsingBufferedWriterConstructor> getResultsUsingBufferedWriterConstructor() {
+		return resultsUsingBufferedWriterConstructor;
 	}
 
+	/**
+	 * 
+	 * @return all
+	 *         {@link org.eclipse.jdt.core.dom.VariableDeclarationExpression} -
+	 *         nodes which can be removed from the TWR-header of the
+	 *         corresponding {@link org.eclipse.jdt.core.dom.TryStatement}.
+	 */
 	List<VariableDeclarationExpression> getResourcesToRemove() {
 		List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
-		filesNewBufferedWriterInvocationDataList.stream()
-			.map(TransformationDataUsingFilesNewBufferedWriter::getResourceToRemove)
+		resultsUsingFilesNewBufferedWriter.stream()
+			.map(WriteReplacementUsingFilesNewBufferedWriter::getResourceToRemove)
 			.forEach(resourcesToRemove::add);
 
-		bufferedWriterInstanceCreationDataList.stream()
-			.map(TransformationDataUsingBufferedWriterConstructor::getResourcesToRemove)
+		resultsUsingBufferedWriterConstructor.stream()
+			.map(WriteReplacementUsingBufferedWriterConstructor::getResourcesToRemove)
 			.forEach(resourcesToRemove::addAll);
 
 		return resourcesToRemove;
 	}
 
+	/**
+	 * Acts as a "Record" making possible to return all results of
+	 * {@link #findWriteInvocationData}.
+	 *
+	 */
 	private class WriteInvocationData {
 		private final ExpressionStatement writeInvocationStatementToReplace;
 		private final SimpleName writerVariableSimpleName;
 		private final Expression charSequenceArgument;
 
-		public WriteInvocationData(ExpressionStatement writeInvocationStatementToReplace,
+		private WriteInvocationData(ExpressionStatement writeInvocationStatementToReplace,
 				SimpleName writerVariableSimpleName, Expression charSequenceArgument) {
 			super();
 			this.writeInvocationStatementToReplace = writeInvocationStatementToReplace;
@@ -268,6 +309,5 @@ public class WriteInvocationInTWRBodyVisitor {
 		Expression getCharSequenceArgument() {
 			return charSequenceArgument;
 		}
-
 	}
 }

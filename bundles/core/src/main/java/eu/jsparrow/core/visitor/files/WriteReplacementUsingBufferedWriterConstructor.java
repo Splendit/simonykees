@@ -8,24 +8,23 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 /**
- * 
- * Helper class storing informations for visitors which replace the
- * initializations of {@link java.io.BufferedReader}-objects or
- * {@link java.io.BufferedWriter}-objects by the corresponding methods of
- * {@link java.nio.file.Files}.
+ * Stores all informations in connection with the replacement of invocation
+ * statements calling {@link java.io.Writer#write(String)} on a resource which
+ * is initialized by the invocation of a constructor of
+ * {@link java.io.BufferedWriter}.
  * 
  * 
  * @since 3.24.0
  *
  */
-class TransformationDataUsingBufferedWriterConstructor {
+class WriteReplacementUsingBufferedWriterConstructor {
 	private final List<VariableDeclarationExpression> resourcesToRemove;
 	private final ExpressionStatement writeInvocationStatementToReplace;
 	private final Expression charSequenceArgument;
 	private final List<Expression> pathExpressions;
 	private final Expression charSet;
 
-	TransformationDataUsingBufferedWriterConstructor(List<VariableDeclarationExpression> resourcesToRemove,
+	WriteReplacementUsingBufferedWriterConstructor(List<VariableDeclarationExpression> resourcesToRemove,
 			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer) {
 		this.resourcesToRemove = resourcesToRemove;
@@ -36,7 +35,7 @@ class TransformationDataUsingBufferedWriterConstructor {
 			.orElse(null);
 	}
 
-	TransformationDataUsingBufferedWriterConstructor(List<VariableDeclarationExpression> resourcesToRemove,
+	WriteReplacementUsingBufferedWriterConstructor(List<VariableDeclarationExpression> resourcesToRemove,
 			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
 			FileIOAnalyzer fileIOAnalyzer) {
 		this.resourcesToRemove = resourcesToRemove;
