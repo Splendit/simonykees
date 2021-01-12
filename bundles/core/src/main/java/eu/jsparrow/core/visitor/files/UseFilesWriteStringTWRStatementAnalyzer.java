@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.files;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -259,7 +260,8 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	 * 
 	 */
 	List<WriteReplacementUsingFilesNewBufferedWriter> getResultsUsingFilesNewBufferedWriter() {
-		return resultsUsingFilesNewBufferedWriter;
+		return resultsUsingFilesNewBufferedWriter != null ? resultsUsingFilesNewBufferedWriter
+				: Collections.emptyList();
 	}
 
 	/**
@@ -269,7 +271,8 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	 * 
 	 */
 	List<WriteReplacementUsingBufferedWriterConstructor> getResultsUsingBufferedWriterConstructor() {
-		return resultsUsingBufferedWriterConstructor;
+		return resultsUsingBufferedWriterConstructor != null ? resultsUsingBufferedWriterConstructor
+				: Collections.emptyList();
 	}
 
 	/**
@@ -281,11 +284,11 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	 */
 	List<VariableDeclarationExpression> getResourcesToRemove() {
 		List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
-		resultsUsingFilesNewBufferedWriter.stream()
+		getResultsUsingFilesNewBufferedWriter().stream()
 			.map(WriteReplacementUsingFilesNewBufferedWriter::getResourceToRemove)
 			.forEach(resourcesToRemove::add);
 
-		resultsUsingBufferedWriterConstructor.stream()
+		getResultsUsingBufferedWriterConstructor().stream()
 			.map(WriteReplacementUsingBufferedWriterConstructor::getResourcesToRemove)
 			.forEach(resourcesToRemove::addAll);
 
