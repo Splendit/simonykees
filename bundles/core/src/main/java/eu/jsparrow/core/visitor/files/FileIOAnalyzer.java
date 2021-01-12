@@ -16,9 +16,22 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- * Analyzes whether the declaration of a {@link java.io.FileReader} or a
- * {@link java.io.FileWriter} satisfies the preconditions for replacing, as
- * shown in the following example with a {@link java.io.FileReader}:
+ * Analyzes a {@link VariableDeclarationFragment} which is assumed to be
+ * declared in a TWR-header. Furthermore, the following requirements must be
+ * fulfilled:
+ * <ul>
+ * <li>If this class is used to analyze a file input resource, then the
+ * initializer of the declaration fragment must be an invocation of a
+ * constructor of {@link java.io.FileReader}, and if this class is used to
+ * analyze a file output resource, then a constructor of
+ * {@link java.io.FileWriter} is expected.</li>
+ * <li>It must be possible to extract a list of path string expressions from the
+ * arguments of the constructor mentioned above.</li>
+ * <li>Additionally, an optional {@link java.nio.charset.Charset}-argument may
+ * be extracted.</li>
+ * </ul>
+ * Example for use cases of {@link FileIOAnalyzer}: A {@link java.io.FileReader}
+ * used by a {@link BufferedReader}, see the following code:
  * 
  * <pre>
  * try (FileReader fileReader = new FileReader(new File("path/to/file"));
@@ -26,7 +39,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * }
  * </pre>
  * 
- * by:
+ * which can be: transformed to
  * 
  * <pre>
  *  try(BufferedReader buffer = Files.newBufferedReader(Paths.get("pat/to/file"), Charset.defaultCharset()) {}
@@ -34,6 +47,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * 
  * @see UseFilesBufferedReaderASTVisitor
  * @see UseFilesBufferedWriterASTVisitor
+ * @see UseFilesWriteStringASTVisitor
  * 
  * @since 3.21.0
  *

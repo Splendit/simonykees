@@ -2,10 +2,6 @@ package eu.jsparrow.core.visitor.files;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,13 +14,19 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- * An analyzer for the arguments of new {@link BufferedReader}s and
- * {@link BufferedWriter}s initializers.
- * 
+ * Analyzes the arguments of a {@link ClassInstanceCreation} where the following
+ * requirements must be fulfilled:
+ * <ul>
+ * <li>It must be possible to extract a list of path string expressions from the
+ * arguments of the constructor mentioned above.</li>
+ * <li>Additionally, an optional {@link java.nio.charset.Charset}-argument may
+ * be extracted.</li>
+ * </ul>
  * 
  * 
  * @see UseFilesBufferedReaderASTVisitor
  * @see UseFilesBufferedWriterASTVisitor
+ * @see UseFilesWriteStringASTVisitor
  * 
  * @since 3.21.0
  *
@@ -35,11 +37,12 @@ class NewBufferedIOArgumentsAnalyzer {
 
 	/**
 	 * Checks if the arguments of the {@link ClassInstanceCreation} represent
-	 * the expected parameters for constructors of {@link FileReader} or
-	 * {@link FileWriter}.
+	 * the expected parameters for constructors of {@link java.io.FileReader} or
+	 * {@link java.io.FileWriter}.
 	 * 
 	 * @param newInstanceCreation
-	 * @return
+	 * @return {@code true} if the arguments meet the requirements mentioned
+	 *         above.
 	 */
 	public boolean analyzeInitializer(ClassInstanceCreation newInstanceCreation) {
 
