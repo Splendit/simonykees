@@ -52,7 +52,7 @@ class ReplaceJUnitTimeoutAnnotationPropertyRuleTest extends SingleRuleTest {
 				contains(Tag.JAVA_1_8, Tag.TESTING, Tag.LAMBDA, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
-				equalTo("JUnit 5 Jupiter API provides timeout assertions, i.e., assertions that execution of some code completes before a timeout exceeds. In JUnit 4, this only was possible by using the timeout property of the @Test annotation. \nThis rule removes the 'timeout' annotation property and inserts an 'assertTimeout' instead."));
+				equalTo("JUnit Jupiter API provides timeout assertions, i.e., assertions that execution of some code completes before a timeout exceeds. In JUnit 4 this was only possible through the timeout property of @Test annotation. \nThis rule removes the 'timeout' annotation property and inserts an 'assertTimeout' instead."));
 	}
 
 	@Test
