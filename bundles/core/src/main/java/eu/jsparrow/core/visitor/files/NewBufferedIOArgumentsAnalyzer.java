@@ -30,7 +30,6 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  *
  */
 class NewBufferedIOArgumentsAnalyzer {
-
 	private List<Expression> pathExpressions = new ArrayList<>();
 	private Expression charsetExpression;
 
@@ -57,17 +56,17 @@ class NewBufferedIOArgumentsAnalyzer {
 		if (argumentsSize == 2) {
 			Expression secondArgument = arguments.get(1);
 			ITypeBinding secondArgType = secondArgument.resolveTypeBinding();
-			if (!isContentOfType(secondArgType, java.nio.charset.Charset.class.getName())) {
+			if (!isContentOfType(secondArgType, FilesConstants.CHARSET_QUALIFIED_NAME)) {
 				return false;
 			}
 			this.charsetExpression = secondArgument;
 		}
 
 		Expression firstArgument = arguments.get(0);
-		if (isContentOfType(firstArgument.resolveTypeBinding(), java.lang.String.class.getName())) {
+		if (isContentOfType(firstArgument.resolveTypeBinding(), FilesConstants.STRING_QUALIFIED_NAME)) {
 			pathExpressions.add(firstArgument);
 			return true;
-		} else if (ClassRelationUtil.isNewInstanceCreationOf(firstArgument, java.io.File.class.getName())) {
+		} else if (ClassRelationUtil.isNewInstanceCreationOf(firstArgument, FilesConstants.FILE_QUALIFIED_NAME)) {
 			ClassInstanceCreation fileInstanceCreation = (ClassInstanceCreation) firstArgument;
 			List<Expression> fileArgs = ASTNodeUtil.convertToTypedList(fileInstanceCreation.arguments(),
 					Expression.class);
@@ -75,8 +74,7 @@ class NewBufferedIOArgumentsAnalyzer {
 			return fileArgs
 				.stream()
 				.map(Expression::resolveTypeBinding)
-				.allMatch(fileArgType -> isContentOfType(fileArgType, java.lang.String.class.getName()));
-
+				.allMatch(fileArgType -> isContentOfType(fileArgType, FilesConstants.STRING_QUALIFIED_NAME));
 		}
 		return false;
 	}

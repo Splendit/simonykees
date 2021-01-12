@@ -66,9 +66,9 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		if (!continueVisiting) {
 			return false;
 		}
-		verifyImport(compilationUnit, FilesUtil.PATHS_QUALIFIED_NAME);
-		verifyImport(compilationUnit, FilesUtil.CHARSET_QUALIFIED_NAME);
-		verifyImport(compilationUnit, FilesUtil.FILES_QUALIFIED_NAME);
+		verifyImport(compilationUnit, FilesConstants.PATHS_QUALIFIED_NAME);
+		verifyImport(compilationUnit, FilesConstants.CHARSET_QUALIFIED_NAME);
+		verifyImport(compilationUnit, FilesConstants.FILES_QUALIFIED_NAME);
 		return continueVisiting;
 	}
 
@@ -181,7 +181,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			.stream()
 			.forEach(arg -> arguments.add((Expression) astRewrite.createCopyTarget(arg)));
 
-		Name filesTypeName = addImport(FilesUtil.FILES_QUALIFIED_NAME,
+		Name filesTypeName = addImport(FilesConstants.FILES_QUALIFIED_NAME,
 				transformationData.getWriteInvocationStatementToReplace());
 		AST ast = astRewrite.getAST();
 		return ast.newExpressionStatement(NodeBuilder.newMethodInvocation(ast, filesTypeName,
@@ -191,14 +191,14 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	private ExpressionStatement createFilesWriteStringMethodInvocationStatement(
 			WriteReplacementUsingBufferedWriterConstructor transformationData) {
 		AST ast = astRewrite.getAST();
-		Name pathsTypeName = addImport(FilesUtil.PATHS_QUALIFIED_NAME,
+		Name pathsTypeName = addImport(FilesConstants.PATHS_QUALIFIED_NAME,
 				transformationData.getWriteInvocationStatementToReplace());
 		List<Expression> pathsGetArguments = transformationData.getPathExpressions()
 			.stream()
 			.map(pathExpression -> (Expression) astRewrite.createCopyTarget(pathExpression))
 			.collect(Collectors.toList());
 		Expression pathArgument = NodeBuilder.newMethodInvocation(ast, pathsTypeName,
-				ast.newSimpleName(FilesUtil.GET), pathsGetArguments);
+				ast.newSimpleName(FilesConstants.GET), pathsGetArguments);
 
 		Expression writeStringArgumentCopy = (Expression) astRewrite
 			.createCopyTarget(transformationData.getCharSequenceArgument());
@@ -207,16 +207,16 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
 			.orElse(null);
 		if (charset == null) {
-			Name charsetTypeName = addImport(FilesUtil.CHARSET_QUALIFIED_NAME,
+			Name charsetTypeName = addImport(FilesConstants.CHARSET_QUALIFIED_NAME,
 					transformationData.getWriteInvocationStatementToReplace());
-			charset = NodeBuilder.newMethodInvocation(ast, charsetTypeName, FilesUtil.DEFAULT_CHARSET);
+			charset = NodeBuilder.newMethodInvocation(ast, charsetTypeName, FilesConstants.DEFAULT_CHARSET);
 		}
 
 		List<Expression> arguments = new ArrayList<>();
 		arguments.add(pathArgument);
 		arguments.add(writeStringArgumentCopy);
 		arguments.add(charset);
-		Name filesTypeName = addImport(FilesUtil.FILES_QUALIFIED_NAME,
+		Name filesTypeName = addImport(FilesConstants.FILES_QUALIFIED_NAME,
 				transformationData.getWriteInvocationStatementToReplace());
 		return ast.newExpressionStatement(NodeBuilder.newMethodInvocation(ast, filesTypeName,
 				ast.newSimpleName("writeString"), arguments)); //$NON-NLS-1$

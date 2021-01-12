@@ -121,7 +121,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 		IMethodBinding methodBinding = bufferedIOInitializerMethodInvocation.resolveMethodBinding();
 
 		if (!ClassRelationUtil.isContentOfType(methodBinding
-			.getDeclaringClass(), java.nio.file.Files.class.getName())) {
+			.getDeclaringClass(), FilesConstants.FILES_QUALIFIED_NAME)) {
 			return Optional.empty();
 		}
 		if (!Modifier.isStatic(methodBinding.getModifiers())) {
@@ -148,16 +148,16 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	private boolean checkFilesNewBufferedWriterParameterTypes(IMethodBinding methodBinding) {
 		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
 		if (parameterTypes.length == 2) {
-			if (!ClassRelationUtil.isContentOfType(parameterTypes[0], java.nio.file.Path.class.getName())) {
+			if (!ClassRelationUtil.isContentOfType(parameterTypes[0], FilesConstants.PATH_QUALIFIED_NAME)) {
 				return false;
 			}
 			return ClassRelationUtil.isContentOfType(parameterTypes[1].getElementType(),
 					java.nio.file.OpenOption.class.getName());
 		} else if (parameterTypes.length == 3) {
-			if (!ClassRelationUtil.isContentOfType(parameterTypes[0], java.nio.file.Path.class.getName())) {
+			if (!ClassRelationUtil.isContentOfType(parameterTypes[0], FilesConstants.PATH_QUALIFIED_NAME)) {
 				return false;
 			}
-			if (!ClassRelationUtil.isContentOfType(parameterTypes[1], java.nio.charset.Charset.class.getName())) {
+			if (!ClassRelationUtil.isContentOfType(parameterTypes[1], FilesConstants.CHARSET_QUALIFIED_NAME)) {
 				return false;
 			}
 			return ClassRelationUtil.isContentOfType(parameterTypes[2].getElementType(),
@@ -172,7 +172,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 
 		Expression bufferedWriterResourceInitializer = bufferedWriterResourceAnalyzer.getResourceInitializer();
 		if (!ClassRelationUtil.isNewInstanceCreationOf(bufferedWriterResourceInitializer,
-				java.io.BufferedWriter.class.getName())) {
+				FilesConstants.BUFFERED_WRITER_QUALIFIED_NAME)) {
 			return Optional.empty();
 		}
 		ClassInstanceCreation bufferedWriterInstanceCreation = (ClassInstanceCreation) bufferedWriterResourceInitializer;
@@ -208,7 +208,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 		}
 		Expression bufferedIOArg = newBufferedIOArgs.get(0);
 		ITypeBinding firstArgType = bufferedIOArg.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(firstArgType, java.io.FileWriter.class.getName())) {
+		if (!ClassRelationUtil.isContentOfType(firstArgType, FilesConstants.FILE_WRITER_QUALIFIED_NAME)) {
 			return Optional.empty();
 		}
 		return Optional.of(bufferedIOArg);
@@ -239,7 +239,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 			return Optional.empty();
 		}
 
-		FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(java.io.FileWriter.class.getName());
+		FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(FilesConstants.FILE_WRITER_QUALIFIED_NAME);
 		if (!fileIOAnalyzer.analyzeFileIO(fileWriterResourceAnalyzer.getResourceFragment())) {
 			return Optional.empty();
 		}

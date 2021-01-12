@@ -52,9 +52,9 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 		if (!continueVisiting) {
 			return false;
 		}
-		verifyImport(compilationUnit, FilesUtil.PATHS_QUALIFIED_NAME);
-		verifyImport(compilationUnit, FilesUtil.CHARSET_QUALIFIED_NAME);
-		verifyImport(compilationUnit, FilesUtil.FILES_QUALIFIED_NAME);
+		verifyImport(compilationUnit, FilesConstants.PATHS_QUALIFIED_NAME);
+		verifyImport(compilationUnit, FilesConstants.CHARSET_QUALIFIED_NAME);
+		verifyImport(compilationUnit, FilesConstants.FILES_QUALIFIED_NAME);
 		return continueVisiting;
 	}
 
@@ -162,28 +162,28 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 
 	private MethodInvocation createFilesNewBufferedIOMethodInvocation(TransformationData transformationData) {
 		AST ast = astRewrite.getAST();
-		Name pathsTypeName = addImport(FilesUtil.PATHS_QUALIFIED_NAME,
+		Name pathsTypeName = addImport(FilesConstants.PATHS_QUALIFIED_NAME,
 				transformationData.getBufferedIOInstanceCreation());
 		List<Expression> pathsGetArguments = transformationData.getPathExpressions()
 			.stream()
 			.map(pathExpression -> (Expression) astRewrite.createCopyTarget(pathExpression))
 			.collect(Collectors.toList());
 		MethodInvocation pathsGet = NodeBuilder.newMethodInvocation(ast, pathsTypeName,
-				ast.newSimpleName(FilesUtil.GET), pathsGetArguments);
+				ast.newSimpleName(FilesConstants.GET), pathsGetArguments);
 
 		Expression charset = transformationData.getCharSet()
 			.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
 			.orElse(null);
 		if (charset == null) {
-			Name charsetTypeName = addImport(FilesUtil.CHARSET_QUALIFIED_NAME,
+			Name charsetTypeName = addImport(FilesConstants.CHARSET_QUALIFIED_NAME,
 					transformationData.getBufferedIOInstanceCreation());
-			charset = NodeBuilder.newMethodInvocation(ast, charsetTypeName, FilesUtil.DEFAULT_CHARSET);
+			charset = NodeBuilder.newMethodInvocation(ast, charsetTypeName, FilesConstants.DEFAULT_CHARSET);
 		}
 
 		List<Expression> arguments = new ArrayList<>();
 		arguments.add(pathsGet);
 		arguments.add(charset);
-		Name filesTypeName = addImport(FilesUtil.FILES_QUALIFIED_NAME,
+		Name filesTypeName = addImport(FilesConstants.FILES_QUALIFIED_NAME,
 				transformationData.getBufferedIOInstanceCreation());
 		return NodeBuilder.newMethodInvocation(ast, filesTypeName,
 				ast.newSimpleName(newBufferedIOMethodName), arguments);
