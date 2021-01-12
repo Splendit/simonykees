@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
-import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -75,7 +74,7 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 			return false;
 		}
 
-		MemberValuePair expectedValuePair = TestMethodUtil.findExpectedValuePair(annotation, "expected");
+		MemberValuePair expectedValuePair = TestMethodUtil.findNamedValuePair(annotation, "expected"); //$NON-NLS-1$
 		if (expectedValuePair == null) {
 			return false;
 		}
@@ -99,7 +98,7 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 			return false;
 		}
 
-		refactor(methodDeclaration, exceptionType, nodeThrowingException, expectedExpressionExpression, annotation);
+		refactor(methodDeclaration, exceptionType, nodeThrowingException, expectedValuePair, annotation);
 
 		return true;
 	}
@@ -119,7 +118,7 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 
 	@SuppressWarnings("unchecked")
 	private void refactor(MethodDeclaration methodDeclaration,
-			ITypeBinding exceptionType, ASTNode nodeThrowingException, Expression expectedException,
+			ITypeBinding exceptionType, ASTNode nodeThrowingException, MemberValuePair expectedException,
 			NormalAnnotation annotation) {
 
 		AST ast = methodDeclaration.getAST();
@@ -127,7 +126,7 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 		MethodInvocation assertThrows = ast.newMethodInvocation();
 		assertThrows.setName(ast.newSimpleName(ASSERT_THROWS));
 		qualifiedPrefix.ifPresent(assertThrows::setExpression);
-		Expression firstArg = (Expression) astRewrite.createCopyTarget(expectedException);
+		Expression firstArg = (Expression) astRewrite.createCopyTarget(expectedException.getValue());
 		LambdaExpression lambdaExpression = ast.newLambdaExpression();
 		ASTNode lambdaBody = createThrowRunnable(nodeThrowingException);
 		lambdaExpression.setBody(lambdaBody);
