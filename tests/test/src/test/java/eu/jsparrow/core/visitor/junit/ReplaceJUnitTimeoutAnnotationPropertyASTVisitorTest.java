@@ -125,13 +125,23 @@ class ReplaceJUnitTimeoutAnnotationPropertyASTVisitorTest extends UsesJDTUnitFix
 	}
 	
 	@Test
-	void visit_missingTestAnnotation_shouldNotTransform() throws Exception {
+	void visit_annotationWithoutProperties_shouldNotTransform() throws Exception {
 		String original = ""
 				+ "@Override"
 				+ "public String toString() {\n"
 				+ "		return \"\";\n"
 				+ "}";
 
+		assertNoChange(original);
+	}
+
+	@Test
+	void visit_annotationWithProperties_shouldTransform() throws Exception {
+		String original = ""
+				+ "@SuppressWarnings(value=\"\")\n"
+				+ "public void methodInvocation() {\n"
+				+ "		Thread.sleep(500);\n"
+				+ "}";
 		assertNoChange(original);
 	}
 }
