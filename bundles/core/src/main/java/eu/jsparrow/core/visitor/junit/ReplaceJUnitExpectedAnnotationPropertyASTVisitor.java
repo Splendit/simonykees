@@ -69,7 +69,8 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
-		NormalAnnotation annotation = TestMethodUtil.isTestAnnotatedMethod(methodDeclaration);
+		NormalAnnotation annotation = TestMethodUtil.findTestAnnotatedMethod(methodDeclaration)
+			.orElse(null);
 		if (annotation == null) {
 			return false;
 		}

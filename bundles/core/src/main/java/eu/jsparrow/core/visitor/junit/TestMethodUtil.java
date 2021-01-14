@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.junit;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -43,7 +44,7 @@ public class TestMethodUtil {
 	 * @return a {@link NormalAnnotation} or {@code null} if the method
 	 *         declaration is not annotated with {@link NormalAnnotation}.
 	 */
-	public static NormalAnnotation isTestAnnotatedMethod(MethodDeclaration methodDeclaration) {
+	public static Optional<NormalAnnotation> findTestAnnotatedMethod(MethodDeclaration methodDeclaration) {
 		List<NormalAnnotation> annotations = ASTNodeUtil.convertToTypedList(methodDeclaration.modifiers(),
 				NormalAnnotation.class);
 
@@ -53,10 +54,10 @@ public class TestMethodUtil {
 			boolean isTest = ClassRelationUtil.isContentOfTypes(annotationTypeBinding,
 					Arrays.asList(ORG_JUNIT_TEST));
 			if (isTest) {
-				return annotation;
+				return Optional.of(annotation);
 			}
 		}
-		return null;
+		return Optional.empty();
 	}
 
 	/**
