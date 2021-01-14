@@ -83,7 +83,7 @@ class FileIOAnalyzer {
 		if (argumentSize == 2) {
 			Expression charset = arguments.get(1);
 			ITypeBinding charsetBinding = charset.resolveTypeBinding();
-			if (!isContentOfType(charsetBinding, FilesConstants.CHARSET_QUALIFIED_NAME)) {
+			if (!isContentOfType(charsetBinding, java.nio.charset.Charset.class.getName())) {
 				return false;
 			}
 			this.charsetExpression = charset;
@@ -93,7 +93,7 @@ class FileIOAnalyzer {
 
 	private boolean isStringExpression(Expression expression) {
 		ITypeBinding typeBinding = expression.resolveTypeBinding();
-		boolean isString = isContentOfType(typeBinding, FilesConstants.STRING_QUALIFIED_NAME);
+		boolean isString = isContentOfType(typeBinding, java.lang.String.class.getName());
 		if (isString) {
 			this.pathExpressions = new ArrayList<>();
 			this.pathExpressions.add(expression);
@@ -102,7 +102,7 @@ class FileIOAnalyzer {
 	}
 
 	private boolean isFileInstanceCreation(Expression expression) {
-		boolean isNewInstanceCreation = isNewInstanceCreationOf(expression, FilesConstants.FILE_QUALIFIED_NAME);
+		boolean isNewInstanceCreation = isNewInstanceCreationOf(expression, java.io.File.class.getName());
 		if (!isNewInstanceCreation) {
 			return false;
 		}
@@ -110,7 +110,7 @@ class FileIOAnalyzer {
 		List<Expression> arguments = convertToTypedList(fileInstanceCreation.arguments(), Expression.class);
 		boolean allStrings = arguments
 			.stream()
-			.allMatch(argument -> isContentOfType(argument.resolveTypeBinding(), FilesConstants.STRING_QUALIFIED_NAME));
+			.allMatch(argument -> isContentOfType(argument.resolveTypeBinding(), java.lang.String.class.getName()));
 		if (allStrings) {
 			this.pathExpressions = new ArrayList<>();
 			this.pathExpressions.addAll(arguments);

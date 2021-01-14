@@ -20,6 +20,6 @@ package eu.jsparrow.core.visitor.files;
 public class UseFilesBufferedWriterASTVisitor extends AbstractUseFilesBufferedIOMethodsASTVisitor {
 
 	public UseFilesBufferedWriterASTVisitor() {
-		super(FilesConstants.BUFFERED_WRITER_QUALIFIED_NAME, FilesConstants.FILE_WRITER_QUALIFIED_NAME, "newBufferedWriter"); //$NON-NLS-1$
+		super(java.io.BufferedWriter.class.getName(), java.io.FileWriter.class.getName(), "newBufferedWriter"); //$NON-NLS-1$
 	}
 }

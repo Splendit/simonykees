@@ -52,9 +52,9 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 		if (!continueVisiting) {
 			return false;
 		}
-		verifyImport(compilationUnit, FilesConstants.PATHS_QUALIFIED_NAME);
-		verifyImport(compilationUnit, FilesConstants.CHARSET_QUALIFIED_NAME);
-		verifyImport(compilationUnit, FilesConstants.FILES_QUALIFIED_NAME);
+		verifyImport(compilationUnit, java.nio.file.Paths.class.getName());
+		verifyImport(compilationUnit, java.nio.charset.Charset.class.getName());
+		verifyImport(compilationUnit, java.nio.file.Files.class.getName());
 		return continueVisiting;
 	}
 
@@ -162,28 +162,28 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 
 	private MethodInvocation createFilesNewBufferedIOMethodInvocation(TransformationData transformationData) {
 		AST ast = astRewrite.getAST();
-		Name pathsTypeName = addImport(FilesConstants.PATHS_QUALIFIED_NAME,
+		Name pathsTypeName = addImport(java.nio.file.Paths.class.getName(),
 				transformationData.getBufferedIOInstanceCreation());
 		List<Expression> pathsGetArguments = transformationData.getPathExpressions()
 			.stream()
 			.map(pathExpression -> (Expression) astRewrite.createCopyTarget(pathExpression))
 			.collect(Collectors.toList());
 		MethodInvocation pathsGet = NodeBuilder.newMethodInvocation(ast, pathsTypeName,
-				ast.newSimpleName(FilesConstants.GET), pathsGetArguments);
+				ast.newSimpleName("get"), pathsGetArguments); //$NON-NLS-1$
 
 		Expression charset = transformationData.getCharSet()
 			.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
 			.orElse(null);
 		if (charset == null) {
-			Name charsetTypeName = addImport(FilesConstants.CHARSET_QUALIFIED_NAME,
+			Name charsetTypeName = addImport(java.nio.charset.Charset.class.getName(),
 					transformationData.getBufferedIOInstanceCreation());
-			charset = NodeBuilder.newMethodInvocation(ast, charsetTypeName, FilesConstants.DEFAULT_CHARSET);
+			charset = NodeBuilder.newMethodInvocation(ast, charsetTypeName, "defaultCharset"); //$NON-NLS-1$
 		}
 
 		List<Expression> arguments = new ArrayList<>();
 		arguments.add(pathsGet);
 		arguments.add(charset);
-		Name filesTypeName = addImport(FilesConstants.FILES_QUALIFIED_NAME,
+		Name filesTypeName = addImport(java.nio.file.Files.class.getName(),
 				transformationData.getBufferedIOInstanceCreation());
 		return NodeBuilder.newMethodInvocation(ast, filesTypeName,
 				ast.newSimpleName(newBufferedIOMethodName), arguments);
