@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.files;
+package eu.jsparrow.core.visitor.files.writestring;
 
 import java.util.ArrayList;
 import java.util.List;

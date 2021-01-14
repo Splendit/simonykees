@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.files;
+package eu.jsparrow.core.visitor.files.writestring;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;

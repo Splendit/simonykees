@@ -31,7 +31,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * be extracted.</li>
  * </ul>
  * Example for use cases of {@link FileIOAnalyzer}: A {@link java.io.FileReader}
- * used by a {@link BufferedReader}, see the following code:
+ * used by a {@link java.io.BufferedReader.BufferedReader}, see the following code:
  * 
  * <pre>
  * try (FileReader fileReader = new FileReader(new File("path/to/file"));
@@ -47,12 +47,11 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * 
  * @see UseFilesBufferedReaderASTVisitor
  * @see UseFilesBufferedWriterASTVisitor
- * @see UseFilesWriteStringASTVisitor
  * 
  * @since 3.21.0
  *
  */
-class FileIOAnalyzer {
+public class FileIOAnalyzer {
 	private Expression charsetExpression;
 	private List<Expression> pathExpressions = new ArrayList<>();
 	private final String fileIOClassQualifiedName;

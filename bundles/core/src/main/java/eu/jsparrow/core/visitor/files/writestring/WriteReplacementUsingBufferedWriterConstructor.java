@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.files;
+package eu.jsparrow.core.visitor.files.writestring;
 
 import java.util.List;
 import java.util.Optional;
@@ -6,6 +6,9 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+
+import eu.jsparrow.core.visitor.files.FileIOAnalyzer;
+import eu.jsparrow.core.visitor.files.NewBufferedIOArgumentsAnalyzer;
 
 /**
  * Stores all informations in connection with the replacement of invocation

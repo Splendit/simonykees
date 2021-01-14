@@ -52,7 +52,7 @@ public class TryResourceAnalyzer {
 	 *         {@link SimpleName} and meeting all requirements as described
 	 *         above.
 	 */
-	boolean analyzeResourceUsedOnce(TryStatement tryStatement, SimpleName expectedResourceUsage) {
+	public boolean analyzeResourceUsedOnce(TryStatement tryStatement, SimpleName expectedResourceUsage) {
 		if (analyze(tryStatement, expectedResourceUsage)) {
 			LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(
 					expectedResourceUsage);
@@ -97,19 +97,19 @@ public class TryResourceAnalyzer {
 		return false;
 	}
 
-	TryStatement getTryStatement() {
+	public TryStatement getTryStatement() {
 		return tryStatement;
 	}
 
-	VariableDeclarationExpression getResource() {
+	public VariableDeclarationExpression getResource() {
 		return resource;
 	}
 
-	VariableDeclarationFragment getResourceFragment() {
+	public VariableDeclarationFragment getResourceFragment() {
 		return resourceFragment;
 	}
 
-	Expression getResourceInitializer() {
+	public Expression getResourceInitializer() {
 		return resourceInitializer;
 	}
 

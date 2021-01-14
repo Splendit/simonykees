@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.files;
+package eu.jsparrow.core.visitor.files.writestring;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,13 +19,16 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
+import eu.jsparrow.core.visitor.files.FileIOAnalyzer;
+import eu.jsparrow.core.visitor.files.NewBufferedIOArgumentsAnalyzer;
+import eu.jsparrow.core.visitor.files.TryResourceAnalyzer;
 import eu.jsparrow.core.visitor.sub.SignatureData;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Helper class used exclusively by
- * {@link eu.jsparrow.core.visitor.files.UseFilesWriteStringASTVisitor} for
+ * {@link eu.jsparrow.core.visitor.files.writestring.UseFilesWriteStringASTVisitor} for
  * providing transformation data. It looks for
  * {@link org.eclipse.jdt.core.dom.ExpressionStatement}-nodes which are child
  * nodes of the TWR-body of a given

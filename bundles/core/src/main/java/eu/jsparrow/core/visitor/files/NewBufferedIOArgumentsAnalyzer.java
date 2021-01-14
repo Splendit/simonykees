@@ -26,12 +26,11 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * 
  * @see UseFilesBufferedReaderASTVisitor
  * @see UseFilesBufferedWriterASTVisitor
- * @see UseFilesWriteStringASTVisitor
  * 
  * @since 3.21.0
  *
  */
-class NewBufferedIOArgumentsAnalyzer {
+public class NewBufferedIOArgumentsAnalyzer {
 	private List<Expression> pathExpressions = new ArrayList<>();
 	private Expression charsetExpression;
 
@@ -82,11 +81,11 @@ class NewBufferedIOArgumentsAnalyzer {
 		return false;
 	}
 
-	List<Expression> getPathExpressions() {
+	public List<Expression> getPathExpressions() {
 		return pathExpressions;
 	}
 
-	Optional<Expression> getCharsetExpression() {
+	public Optional<Expression> getCharsetExpression() {
 		return Optional.ofNullable(charsetExpression);
 	}
 }
