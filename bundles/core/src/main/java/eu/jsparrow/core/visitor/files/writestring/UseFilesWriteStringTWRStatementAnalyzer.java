@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -54,11 +54,9 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	List<WriteReplacementUsingBufferedWriterConstructor> collectDataUsingBufferedWriterConstructor(
 			TryStatement tryStatement) {
 		List<WriteReplacementUsingBufferedWriterConstructor> resultsUsingBufferedWriterConstructor = new ArrayList<>();
-		collectTransformationData(tryStatement, (writeInvocationData,
-				bufferedWriterResourceAnalyzer) -> {
-			findResultUsingBufferedWriterConstructor(writeInvocationData, bufferedWriterResourceAnalyzer)
-				.ifPresent(resultsUsingBufferedWriterConstructor::add);
-		});
+		collectTransformationData(tryStatement,
+				writeInvocationData -> findResultUsingBufferedWriterConstructor(writeInvocationData)
+					.ifPresent(resultsUsingBufferedWriterConstructor::add));
 		return resultsUsingBufferedWriterConstructor;
 	}
 
@@ -74,31 +72,25 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	 */
 	List<WriteReplacementUsingFilesNewBufferedWriter> collectDataUsingNewBufferedWriter(TryStatement tryStatement) {
 		List<WriteReplacementUsingFilesNewBufferedWriter> resultsUsingFilesNewBufferedWriter = new ArrayList<>();
-		collectTransformationData(tryStatement, (writeInvocationData,
-				bufferedWriterResourceAnalyzer) -> {
-			findResultUsingFilesNewBufferedWriter(writeInvocationData, bufferedWriterResourceAnalyzer)
-				.ifPresent(resultsUsingFilesNewBufferedWriter::add);
-		});
+		collectTransformationData(tryStatement,
+				writeInvocationData -> findResultUsingFilesNewBufferedWriter(writeInvocationData)
+					.ifPresent(resultsUsingFilesNewBufferedWriter::add));
 		return resultsUsingFilesNewBufferedWriter;
 	}
 
 	void collectTransformationData(TryStatement tryStatement,
-			BiConsumer<WriteInvocationData, TryResourceAnalyzer> dataCollector) {
+			Consumer<WriteInvocationData> dataCollector) {
 		List<Statement> tryBodyStatements = ASTNodeUtil.convertToTypedList(tryStatement.getBody()
 			.statements(), Statement.class);
 		for (Statement statement : tryBodyStatements) {
-			WriteInvocationData writeInvocationData = findWriteInvocationData(statement).orElse(null);
+			WriteInvocationData writeInvocationData = findWriteInvocationData(tryStatement, statement).orElse(null);
 			if (writeInvocationData != null) {
-				TryResourceAnalyzer bufferedWriterResourceAnalyzer = new TryResourceAnalyzer();
-				SimpleName writerVariableSimpleName = writeInvocationData.getWriterVariableSimpleName();
-				if (bufferedWriterResourceAnalyzer.analyzeResourceUsedOnce(tryStatement, writerVariableSimpleName)) {
-					dataCollector.accept(writeInvocationData, bufferedWriterResourceAnalyzer);
-				}
+				dataCollector.accept(writeInvocationData);
 			}
 		}
 	}
 
-	private Optional<WriteInvocationData> findWriteInvocationData(Statement statement) {
+	private Optional<WriteInvocationData> findWriteInvocationData(TryStatement tryStatement, Statement statement) {
 		if (statement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
 			return Optional.empty();
 		}
@@ -120,13 +112,20 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 			return Optional.empty();
 		}
 		SimpleName writerVariableSimpleName = (SimpleName) methodInvocationExpression;
+		TryResourceAnalyzer bufferedWriterResourceAnalyzer = new TryResourceAnalyzer();
+		if (!bufferedWriterResourceAnalyzer.analyzeResourceUsedOnce(tryStatement, writerVariableSimpleName)) {
+			return Optional.empty();
+		}
+
 		return Optional
-			.of(new WriteInvocationData(expressionStatement, writerVariableSimpleName, charSequenceArgument));
+			.of(new WriteInvocationData(expressionStatement, writerVariableSimpleName, charSequenceArgument,
+					bufferedWriterResourceAnalyzer));
 	}
 
 	private Optional<WriteReplacementUsingFilesNewBufferedWriter> findResultUsingFilesNewBufferedWriter(
-			WriteInvocationData writeInvocationData,
-			TryResourceAnalyzer bufferedWriterResourceAnalyzer) {
+			WriteInvocationData writeInvocationData) {
+
+		TryResourceAnalyzer bufferedWriterResourceAnalyzer = writeInvocationData.getBufferedWriterResourceAnalyzer();
 
 		Expression bufferedIOInitializer = bufferedWriterResourceAnalyzer.getResourceInitializer();
 		if (bufferedIOInitializer.getNodeType() != ASTNode.METHOD_INVOCATION) {
@@ -184,9 +183,8 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	}
 
 	private Optional<WriteReplacementUsingBufferedWriterConstructor> findResultUsingBufferedWriterConstructor(
-			WriteInvocationData writeInvocationData,
-			TryResourceAnalyzer bufferedWriterResourceAnalyzer) {
-
+			WriteInvocationData writeInvocationData) {
+		TryResourceAnalyzer bufferedWriterResourceAnalyzer = writeInvocationData.getBufferedWriterResourceAnalyzer();
 		Expression bufferedWriterResourceInitializer = bufferedWriterResourceAnalyzer.getResourceInitializer();
 		if (!ClassRelationUtil.isNewInstanceCreationOf(bufferedWriterResourceInitializer,
 				java.io.BufferedWriter.class.getName())) {
@@ -272,17 +270,20 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	 * {@link #findWriteInvocationData}.
 	 *
 	 */
-	private class WriteInvocationData {
+	class WriteInvocationData {
 		private final ExpressionStatement writeInvocationStatementToReplace;
 		private final SimpleName writerVariableSimpleName;
 		private final Expression charSequenceArgument;
+		private final TryResourceAnalyzer bufferedWriterResourceAnalyzer;
 
 		private WriteInvocationData(ExpressionStatement writeInvocationStatementToReplace,
-				SimpleName writerVariableSimpleName, Expression charSequenceArgument) {
-			super();
+				SimpleName writerVariableSimpleName, Expression charSequenceArgument,
+				TryResourceAnalyzer bufferedWriterResourceAnalyzer) {
+
 			this.writeInvocationStatementToReplace = writeInvocationStatementToReplace;
 			this.writerVariableSimpleName = writerVariableSimpleName;
 			this.charSequenceArgument = charSequenceArgument;
+			this.bufferedWriterResourceAnalyzer = bufferedWriterResourceAnalyzer;
 		}
 
 		ExpressionStatement getWriteInvocationStatementToReplace() {
@@ -296,5 +297,10 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 		Expression getCharSequenceArgument() {
 			return charSequenceArgument;
 		}
+
+		TryResourceAnalyzer getBufferedWriterResourceAnalyzer() {
+			return bufferedWriterResourceAnalyzer;
+		}
+
 	}
 }
