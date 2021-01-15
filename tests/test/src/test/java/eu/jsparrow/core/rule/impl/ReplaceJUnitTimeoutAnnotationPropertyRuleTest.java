@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
@@ -24,34 +25,34 @@ import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
+class ReplaceJUnitTimeoutAnnotationPropertyRuleTest extends SingleRuleTest {
+	
+	private static final String STANDARD_FILE = "ReplaceTimeoutAnnotationPropertyRule.java";
+	private static final String POSTRULE_SUBDIRECTORY = "timeoutAnnotationProperty";
 
-	private static final String STANDARD_FILE = "ReplaceExpectedAnnotationPropertyRule.java";
-	private static final String POSTRULE_SUBDIRECTORY = "expectedAnnotationProperty";
-	private static final String JUPTIER_POSTRULE_SUBDIRECTORY = "expectedAnnotationPropertyJupiter";
-	private ReplaceJUnitExpectedAnnotationPropertyRule rule;
-
+	private ReplaceJUnitTimeoutAnnotationPropertyRule rule;
+	
 	@BeforeEach
 	public void setUp() throws Exception {
-		rule = new ReplaceJUnitExpectedAnnotationPropertyRule();
+		rule = new ReplaceJUnitTimeoutAnnotationPropertyRule();
 		testProject = createJavaProject("javaVersionTestProject", "bin");
 	}
 
 	@Test
 	void test_ruleId() {
 		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceJUnitExpectedAnnotationProperty"));
+		assertThat(ruleId, equalTo("ReplaceJUnitTimeoutAnnotationProperty"));
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace JUnit Expected Annotation Property with assertThrows"));
+		assertThat(description.getName(), equalTo("Replace JUnit Timeout Annotation Property with assertTimeout"));
 		assertThat(description.getTags(),
 				contains(Tag.JAVA_1_8, Tag.TESTING, Tag.LAMBDA, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
-				equalTo("Using the 'expected' annotation property for testing the thrown exceptions is rather misleading. Often it becomes unclear which part of the test code is responsible for throwing the exception. This rule aims to overcome this problem by replacing the 'expected' annotation property with 'assertThrows()' introduced in JUnit 4.13."));
+				equalTo("JUnit Jupiter API provides timeout assertions, i.e., assertions that execution of some code completes before a timeout exceeds. In JUnit 4 this is achieved by using the 'timeout' property of '@Test(timeout=...)' annotation. \nThis rule removes the 'timeout' annotation property and inserts an  'assertTimeout' instead."));
 	}
 
 	@Test
@@ -63,7 +64,7 @@ class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), equalTo("JUnit 4.13 or JUnit 5"));
+		assertThat(rule.requiredLibraries(), equalTo("JUnit 5"));
 	}
 
 	@Test
@@ -86,8 +87,8 @@ class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertTrue(rule.isEnabled());
-		assertTrue(rule.isSatisfiedLibraries());
+		assertFalse(rule.isEnabled());
+		assertFalse(rule.isSatisfiedLibraries());
 		assertTrue(rule.isSatisfiedJavaVersion());
 	}
 
@@ -104,23 +105,6 @@ class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 	}
 
 	@Test
-	void testTransformationWithDefaultFile() throws Exception {
-		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
-
-		RulesTestUtil.addToClasspath(testProject, Arrays.asList(
-				RulesTestUtil.generateMavenEntryFromDepedencyString("junit", "junit", "4.13")));
-		rule.calculateEnabledForProject(testProject);
-
-		Path preRule = getPreRuleFile(STANDARD_FILE);
-		Path postRule = getPostRuleFile(STANDARD_FILE, POSTRULE_SUBDIRECTORY);
-
-		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
-
-		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
-		assertEquals(expected, actual);
-	}
-
-	@Test
 	void testTransformationWithJupiter() throws Exception {
 		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
 
@@ -133,10 +117,10 @@ class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 		rule.calculateEnabledForProject(testProject);
 
 		Path preRule = getPreRuleFile(STANDARD_FILE);
-		Path postRule = getPostRuleFile(STANDARD_FILE, JUPTIER_POSTRULE_SUBDIRECTORY);
+		Path postRule = getPostRuleFile(STANDARD_FILE, POSTRULE_SUBDIRECTORY);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule),
-				getPostRulePackage(JUPTIER_POSTRULE_SUBDIRECTORY));
+				getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
