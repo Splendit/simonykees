@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -43,51 +42,14 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 class UseFilesWriteStringTWRStatementAnalyzer {
 	private final SignatureData write = new SignatureData(java.io.Writer.class, "write", java.lang.String.class); //$NON-NLS-1$
 
-	/**
-	 * Collects data in connection with resources initialized by calling a
-	 * constructor of {@link java.io.BufferedWriter}.
-	 * 
-	 * @return list of {@link WriteReplacementUsingBufferedWriterConstructor}
-	 *         objects used for code transformation by
-	 *         {@link UseFilesWriteStringASTVisitor}
-	 */
-	List<WriteReplacementUsingBufferedWriterConstructor> collectDataUsingBufferedWriterConstructor(
-			TryStatement tryStatement) {
-		List<WriteReplacementUsingBufferedWriterConstructor> resultsUsingBufferedWriterConstructor = new ArrayList<>();
-		collectTransformationData(tryStatement,
-				writeInvocationData -> findResultUsingBufferedWriterConstructor(writeInvocationData)
-					.ifPresent(resultsUsingBufferedWriterConstructor::add));
-		return resultsUsingBufferedWriterConstructor;
-	}
-
-	/**
-	 * Collects data in connection with resources initialized by calling
-	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.charset.Charset, java.nio.file.OpenOption...)}
-	 * or
-	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.file.OpenOption...)}.
-	 * 
-	 * @return list of {@link WriteReplacementUsingFilesNewBufferedWriter}
-	 *         objects used for code transformation by
-	 *         {@link UseFilesWriteStringASTVisitor}
-	 */
-	List<WriteReplacementUsingFilesNewBufferedWriter> collectDataUsingNewBufferedWriter(TryStatement tryStatement) {
-		List<WriteReplacementUsingFilesNewBufferedWriter> resultsUsingFilesNewBufferedWriter = new ArrayList<>();
-		collectTransformationData(tryStatement,
-				writeInvocationData -> findResultUsingFilesNewBufferedWriter(writeInvocationData)
-					.ifPresent(resultsUsingFilesNewBufferedWriter::add));
-		return resultsUsingFilesNewBufferedWriter;
-	}
-
-	void collectTransformationData(TryStatement tryStatement,
-			Consumer<WriteInvocationData> dataCollector) {
+	List<WriteInvocationData> createWriteInvocationDataList(TryStatement tryStatement) {
+		List<WriteInvocationData> invocationDataList = new ArrayList<>();
 		List<Statement> tryBodyStatements = ASTNodeUtil.convertToTypedList(tryStatement.getBody()
 			.statements(), Statement.class);
 		for (Statement statement : tryBodyStatements) {
-			WriteInvocationData writeInvocationData = findWriteInvocationData(tryStatement, statement).orElse(null);
-			if (writeInvocationData != null) {
-				dataCollector.accept(writeInvocationData);
-			}
+			findWriteInvocationData(tryStatement, statement).ifPresent(invocationDataList::add);
 		}
+		return invocationDataList;
 	}
 
 	private Optional<WriteInvocationData> findWriteInvocationData(TryStatement tryStatement, Statement statement) {
@@ -122,7 +84,17 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 					bufferedWriterResourceAnalyzer));
 	}
 
-	private Optional<WriteReplacementUsingFilesNewBufferedWriter> findResultUsingFilesNewBufferedWriter(
+	/**
+	 * Collects data in connection with a resource initialized by calling
+	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.charset.Charset, java.nio.file.OpenOption...)}
+	 * or
+	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.file.OpenOption...)}.
+	 * 
+	 * @return list of {@link WriteReplacementUsingFilesNewBufferedWriter}
+	 *         objects used for code transformation by
+	 *         {@link UseFilesWriteStringASTVisitor}
+	 */
+	Optional<WriteReplacementUsingFilesNewBufferedWriter> findResultUsingFilesNewBufferedWriter(
 			WriteInvocationData writeInvocationData) {
 
 		TryResourceAnalyzer bufferedWriterResourceAnalyzer = writeInvocationData.getBufferedWriterResourceAnalyzer();
@@ -182,7 +154,15 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 		return false;
 	}
 
-	private Optional<WriteReplacementUsingBufferedWriterConstructor> findResultUsingBufferedWriterConstructor(
+	/**
+	 * Collects data in connection with a resource initialized by calling a
+	 * constructor of {@link java.io.BufferedWriter}.
+	 * 
+	 * @return list of {@link WriteReplacementUsingBufferedWriterConstructor}
+	 *         objects used for code transformation by
+	 *         {@link UseFilesWriteStringASTVisitor}
+	 */
+	Optional<WriteReplacementUsingBufferedWriterConstructor> findResultUsingBufferedWriterConstructor(
 			WriteInvocationData writeInvocationData) {
 		TryResourceAnalyzer bufferedWriterResourceAnalyzer = writeInvocationData.getBufferedWriterResourceAnalyzer();
 		Expression bufferedWriterResourceInitializer = bufferedWriterResourceAnalyzer.getResourceInitializer();

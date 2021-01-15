@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
+import eu.jsparrow.core.visitor.files.writestring.UseFilesWriteStringTWRStatementAnalyzer.WriteInvocationData;
 import eu.jsparrow.core.visitor.impl.trycatch.TwrCommentsUtil;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -74,11 +75,17 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	@Override
 	public boolean visit(TryStatement tryStatement) {
+
 		UseFilesWriteStringTWRStatementAnalyzer analyzer = new UseFilesWriteStringTWRStatementAnalyzer();
-		List<WriteReplacementUsingFilesNewBufferedWriter> resultsUsingFilesNewBufferedWriter = analyzer
-			.collectDataUsingNewBufferedWriter(tryStatement);
-		List<WriteReplacementUsingBufferedWriterConstructor> resultsUsingBufferedWriterConstructor = analyzer
-			.collectDataUsingBufferedWriterConstructor(tryStatement);
+		List<WriteInvocationData> writeInvocationDataList = analyzer.createWriteInvocationDataList(tryStatement);
+
+		List<WriteReplacementUsingFilesNewBufferedWriter> resultsUsingFilesNewBufferedWriter = new ArrayList<>();
+		writeInvocationDataList.forEach(data -> analyzer.findResultUsingFilesNewBufferedWriter(data)
+			.ifPresent(resultsUsingFilesNewBufferedWriter::add));
+
+		List<WriteReplacementUsingBufferedWriterConstructor> resultsUsingBufferedWriterConstructor = new ArrayList<>();
+		writeInvocationDataList.forEach(data -> analyzer.findResultUsingBufferedWriterConstructor(data)
+			.ifPresent(resultsUsingBufferedWriterConstructor::add));
 
 		if (resultsUsingFilesNewBufferedWriter.isEmpty() && resultsUsingBufferedWriterConstructor.isEmpty()) {
 			return true;
