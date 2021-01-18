@@ -6,6 +6,8 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
+import eu.jsparrow.core.visitor.files.writestring.UseFilesWriteStringTWRStatementAnalyzer.WriteInvocationData;
+
 /**
  * Stores all informations in connection with the replacement of invocation
  * statements calling {@link java.io.Writer#write(String)} on a resource which
@@ -20,15 +22,21 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 class WriteReplacementUsingFilesNewBufferedWriter {
 	private final VariableDeclarationExpression resourceToRemove;
 	private final ExpressionStatement writeInvocationStatementToReplace;
-	private final List<Expression> argumentsToCopy;
+	private final Expression charSequenceArgument;
+	private final Expression pathArgument;
+	private final List<Expression> additionalArguments;
 
 	WriteReplacementUsingFilesNewBufferedWriter(
-			VariableDeclarationExpression resourceToRemove,
-			ExpressionStatement writeInvocationStatementToReplace,
-			List<Expression> argumentsToCopy) {
-		this.resourceToRemove = resourceToRemove;
-		this.writeInvocationStatementToReplace = writeInvocationStatementToReplace;
-		this.argumentsToCopy = argumentsToCopy;
+			WriteInvocationData writeInvocationData,
+			Expression pathArgument,
+			List<Expression> additionalArguments
+
+	) {
+		this.resourceToRemove = writeInvocationData.getResource();
+		this.writeInvocationStatementToReplace = writeInvocationData.getWriteInvocationStatementToReplace();
+		this.charSequenceArgument = writeInvocationData.getCharSequenceArgument();
+		this.pathArgument = pathArgument;
+		this.additionalArguments = additionalArguments;
 	}
 
 	VariableDeclarationExpression getResourceToRemove() {
@@ -39,7 +47,25 @@ class WriteReplacementUsingFilesNewBufferedWriter {
 		return writeInvocationStatementToReplace;
 	}
 
-	List<Expression> getArgumentsToCopy() {
-		return argumentsToCopy;
+	Expression getPathArgument() {
+		return pathArgument;
+	}
+
+	Expression getCharSequenceArgument() {
+		return charSequenceArgument;
+	}
+
+	/**
+	 * @return a {@link List} representing all optional resource arguments
+	 *         following {@link java.nio.file.Path} - argument:<br>
+	 *         <ul>
+	 *         <li>an optional argument for
+	 *         {@link java.nio.charset.Charset}</li>
+	 *         <li>subsequent optional {@link java.nio.file.OpenOption}
+	 *         arguments</li>
+	 *         </ul>
+	 */
+	List<Expression> getAdditionalArguments() {
+		return additionalArguments;
 	}
 }

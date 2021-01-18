@@ -192,16 +192,23 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	private ExpressionStatement createFilesWriteStringMethodInvocationStatement(
 			WriteReplacementUsingFilesNewBufferedWriter transformationData) {
+
+		Expression originalPathArgument = transformationData.getPathArgument();
+		Expression charSequenceArgument = transformationData.getCharSequenceArgument();
+		List<Expression> originalArgumentsAfterPath = transformationData.getAdditionalArguments();
+
 		List<Expression> arguments = new ArrayList<>();
-		transformationData.getArgumentsToCopy()
-			.stream()
-			.forEach(arg -> arguments.add((Expression) astRewrite.createCopyTarget(arg)));
+		arguments.add((Expression) astRewrite.createCopyTarget(originalPathArgument));
+		arguments.add((Expression) astRewrite.createCopyTarget(charSequenceArgument));
+		originalArgumentsAfterPath
+			.forEach(argument -> arguments.add((Expression) astRewrite.createCopyTarget(argument)));
 
 		Name filesTypeName = addImport(java.nio.file.Files.class.getName(),
 				transformationData.getWriteInvocationStatementToReplace());
 		AST ast = astRewrite.getAST();
 		return ast.newExpressionStatement(NodeBuilder.newMethodInvocation(ast, filesTypeName,
 				ast.newSimpleName("writeString"), arguments)); //$NON-NLS-1$
+
 	}
 
 	private ExpressionStatement createFilesWriteStringMethodInvocationStatement(

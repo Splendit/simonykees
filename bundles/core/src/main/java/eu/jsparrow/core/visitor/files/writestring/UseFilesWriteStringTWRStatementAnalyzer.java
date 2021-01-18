@@ -100,34 +100,40 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 		if (bufferedIOInitializer.getNodeType() != ASTNode.METHOD_INVOCATION) {
 			return Optional.empty();
 		}
-		MethodInvocation bufferedIOInitializerMethodInvocation = (MethodInvocation) bufferedIOInitializer;
-		VariableDeclarationExpression resourceToRemove = writeInvocationData.getResource();
+
+		MethodInvocation filesNewBufferedWriterInvocation = (MethodInvocation) bufferedIOInitializer;
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(filesNewBufferedWriterInvocation.arguments(),
+				Expression.class);
+		
+		if (!arguments.isEmpty() && isFilesNewBufferedWriterInvocation(filesNewBufferedWriterInvocation)) {
+			Expression pathArgument = arguments.get(0);
+			List<Expression> additionalArguments = new ArrayList<>();
+			for (int i = 1; i < arguments.size(); i++) {
+				additionalArguments.add(arguments.get(i));
+			}
+			return Optional.of(
+					new WriteReplacementUsingFilesNewBufferedWriter(writeInvocationData, pathArgument,
+							additionalArguments));
+		}
+		return Optional.empty();
+	}
+
+	private boolean isFilesNewBufferedWriterInvocation(MethodInvocation bufferedIOInitializerMethodInvocation) {
 
 		IMethodBinding methodBinding = bufferedIOInitializerMethodInvocation.resolveMethodBinding();
 
 		if (!ClassRelationUtil.isContentOfType(methodBinding
 			.getDeclaringClass(), java.nio.file.Files.class.getName())) {
-			return Optional.empty();
+			return false;
 		}
 		if (!Modifier.isStatic(methodBinding.getModifiers())) {
-			return Optional.empty();
+			return false;
 		}
 		if (!methodBinding.getName()
 			.equals("newBufferedWriter")) { //$NON-NLS-1$
-			return Optional.empty();
+			return false;
 		}
-		if (!checkFilesNewBufferedWriterParameterTypes(methodBinding)) {
-			return Optional.empty();
-		}
-
-		List<Expression> argumentsToCopy = ASTNodeUtil.convertToTypedList(
-				bufferedIOInitializerMethodInvocation.arguments(),
-				Expression.class);
-
-		argumentsToCopy.add(1, writeInvocationData.getCharSequenceArgument());
-		return Optional.of(
-				new WriteReplacementUsingFilesNewBufferedWriter(resourceToRemove,
-						writeInvocationData.getWriteInvocationStatementToReplace(), argumentsToCopy));
+		return checkFilesNewBufferedWriterParameterTypes(methodBinding);
 	}
 
 	private boolean checkFilesNewBufferedWriterParameterTypes(IMethodBinding methodBinding) {
