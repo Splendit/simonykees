@@ -89,11 +89,11 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	 * or
 	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.file.OpenOption...)}.
 	 * 
-	 * @return list of {@link WriteReplacementUsingFilesNewBufferedWriter}
-	 *         objects used for code transformation by
+	 * @return list of {@link WriteInvocationStatementReplacementData} objects
+	 *         used for code transformation by
 	 *         {@link UseFilesWriteStringASTVisitor}
 	 */
-	Optional<WriteReplacementUsingFilesNewBufferedWriter> findResultUsingFilesNewBufferedWriter(
+	Optional<WriteInvocationStatementReplacementData> findResultUsingFilesNewBufferedWriter(
 			WriteInvocationData writeInvocationData) {
 
 		Expression bufferedIOInitializer = writeInvocationData.getResourceInitializer();
@@ -112,7 +112,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 				additionalArguments.add(arguments.get(i));
 			}
 			return Optional.of(
-					new WriteReplacementUsingFilesNewBufferedWriter(writeInvocationData, pathArgument,
+					new WriteInvocationStatementReplacementData(writeInvocationData, pathArgument,
 							additionalArguments));
 		}
 		return Optional.empty();
@@ -158,11 +158,11 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	 * Collects data in connection with a resource initialized by calling a
 	 * constructor of {@link java.io.BufferedWriter}.
 	 * 
-	 * @return list of {@link WriteReplacementUsingBufferedWriterConstructor}
-	 *         objects used for code transformation by
+	 * @return list of {@link WriteInvocationStatementReplacementData} objects
+	 *         used for code transformation by
 	 *         {@link UseFilesWriteStringASTVisitor}
 	 */
-	Optional<WriteReplacementUsingBufferedWriterConstructor> findResultUsingBufferedWriterConstructor(
+	Optional<WriteInvocationStatementReplacementData> findResultUsingBufferedWriterConstructor(
 			WriteInvocationData writeInvocationData) {
 		Expression bufferedWriterResourceInitializer = writeInvocationData.getResourceInitializer();
 		if (!ClassRelationUtil.isNewInstanceCreationOf(bufferedWriterResourceInitializer,
@@ -178,10 +178,11 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 
 			if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
 				NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
-				if (!newBufferedIOArgumentsAnalyzer.analyzeInitializer((ClassInstanceCreation) bufferedWriterInstanceCreationArgument)) {
+				if (!newBufferedIOArgumentsAnalyzer
+					.analyzeInitializer((ClassInstanceCreation) bufferedWriterInstanceCreationArgument)) {
 					return Optional.empty();
 				}
-				return Optional.of(new WriteReplacementUsingBufferedWriterConstructor(writeInvocationData,
+				return Optional.of(new WriteInvocationStatementReplacementData(writeInvocationData,
 						newBufferedIOArgumentsAnalyzer));
 
 			}
@@ -199,7 +200,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 					return Optional.empty();
 				}
 
-				return Optional.of(new WriteReplacementUsingBufferedWriterConstructor(writeInvocationData,
+				return Optional.of(new WriteInvocationStatementReplacementData(writeInvocationData,
 						fileWriterResourceAnalyzer, fileIOAnalyzer));
 			}
 		}

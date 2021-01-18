@@ -25,12 +25,24 @@ import eu.jsparrow.core.visitor.files.writestring.UseFilesWriteStringTWRStatemen
  * @since 3.24.0
  *
  */
-class WriteReplacementUsingBufferedWriterConstructor {
+class WriteInvocationStatementReplacementData {
 	private final List<VariableDeclarationExpression> resourcesToRemove;
 	private final ExpressionStatement writeInvocationStatementToReplace;
 	private final Function<UseFilesWriteStringASTVisitor, ExpressionStatement> functionCreatingExpressionStatementReplacement;
 
-	WriteReplacementUsingBufferedWriterConstructor(WriteInvocationData writeInvocationData,
+	WriteInvocationStatementReplacementData(
+			WriteInvocationData writeInvocationData,
+			Expression pathArgument,
+			List<Expression> additionalArguments
+
+	) {
+		this.resourcesToRemove = Arrays.asList(writeInvocationData.getResource());
+		this.writeInvocationStatementToReplace = writeInvocationData.getWriteInvocationStatementToReplace();
+		this.functionCreatingExpressionStatementReplacement = visitor -> visitor
+			.createFilesWriteStringMethodInvocationStatement(writeInvocationData, pathArgument, additionalArguments);
+	}
+
+	WriteInvocationStatementReplacementData(WriteInvocationData writeInvocationData,
 			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer) {
 		this.resourcesToRemove = Arrays.asList(writeInvocationData.getResource());
 		this.writeInvocationStatementToReplace = writeInvocationData.getWriteInvocationStatementToReplace();
@@ -42,7 +54,7 @@ class WriteReplacementUsingBufferedWriterConstructor {
 					charSetExpressionSupplier);
 	}
 
-	WriteReplacementUsingBufferedWriterConstructor(WriteInvocationData writeInvocationData,
+	WriteInvocationStatementReplacementData(WriteInvocationData writeInvocationData,
 			TryResourceAnalyzer fileWriterResourceAnalyzer, FileIOAnalyzer fileIOAnalyzer) {
 		this.resourcesToRemove = Arrays
 			.asList(writeInvocationData.getResource(), fileWriterResourceAnalyzer.getResource());
