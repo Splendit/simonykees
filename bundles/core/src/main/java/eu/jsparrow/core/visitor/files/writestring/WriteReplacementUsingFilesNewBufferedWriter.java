@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.files.writestring;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -22,9 +23,7 @@ import eu.jsparrow.core.visitor.files.writestring.UseFilesWriteStringTWRStatemen
 class WriteReplacementUsingFilesNewBufferedWriter {
 	private final VariableDeclarationExpression resourceToRemove;
 	private final ExpressionStatement writeInvocationStatementToReplace;
-	private final Expression charSequenceArgument;
-	private final Expression pathArgument;
-	private final List<Expression> additionalArguments;
+	private final Function<UseFilesWriteStringASTVisitor, ExpressionStatement> functionCreatingExpressionStatementReplacement;
 
 	WriteReplacementUsingFilesNewBufferedWriter(
 			WriteInvocationData writeInvocationData,
@@ -34,9 +33,8 @@ class WriteReplacementUsingFilesNewBufferedWriter {
 	) {
 		this.resourceToRemove = writeInvocationData.getResource();
 		this.writeInvocationStatementToReplace = writeInvocationData.getWriteInvocationStatementToReplace();
-		this.charSequenceArgument = writeInvocationData.getCharSequenceArgument();
-		this.pathArgument = pathArgument;
-		this.additionalArguments = additionalArguments;
+		this.functionCreatingExpressionStatementReplacement = visitor -> visitor
+			.createFilesWriteStringMethodInvocationStatement(writeInvocationData, pathArgument, additionalArguments);
 	}
 
 	VariableDeclarationExpression getResourceToRemove() {
@@ -47,25 +45,8 @@ class WriteReplacementUsingFilesNewBufferedWriter {
 		return writeInvocationStatementToReplace;
 	}
 
-	Expression getPathArgument() {
-		return pathArgument;
+	ExpressionStatement createWriteInvocationStatementReplacement(UseFilesWriteStringASTVisitor visitor) {
+		return functionCreatingExpressionStatementReplacement.apply(visitor);
 	}
 
-	Expression getCharSequenceArgument() {
-		return charSequenceArgument;
-	}
-
-	/**
-	 * @return a {@link List} representing all optional resource arguments
-	 *         following {@link java.nio.file.Path} - argument:<br>
-	 *         <ul>
-	 *         <li>an optional argument for
-	 *         {@link java.nio.charset.Charset}</li>
-	 *         <li>subsequent optional {@link java.nio.file.OpenOption}
-	 *         arguments</li>
-	 *         </ul>
-	 */
-	List<Expression> getAdditionalArguments() {
-		return additionalArguments;
-	}
 }

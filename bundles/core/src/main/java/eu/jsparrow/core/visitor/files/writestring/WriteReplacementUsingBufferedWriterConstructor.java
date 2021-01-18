@@ -3,6 +3,8 @@ package eu.jsparrow.core.visitor.files.writestring;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -26,18 +28,18 @@ import eu.jsparrow.core.visitor.files.writestring.UseFilesWriteStringTWRStatemen
 class WriteReplacementUsingBufferedWriterConstructor {
 	private final List<VariableDeclarationExpression> resourcesToRemove;
 	private final ExpressionStatement writeInvocationStatementToReplace;
-	private final Expression charSequenceArgument;
-	private final List<Expression> pathExpressions;
-	private final Expression charSet;
+	private final Function<UseFilesWriteStringASTVisitor, ExpressionStatement> functionCreatingExpressionStatementReplacement;
 
 	WriteReplacementUsingBufferedWriterConstructor(WriteInvocationData writeInvocationData,
 			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer) {
 		this.resourcesToRemove = Arrays.asList(writeInvocationData.getResource());
 		this.writeInvocationStatementToReplace = writeInvocationData.getWriteInvocationStatementToReplace();
-		this.charSequenceArgument = writeInvocationData.getCharSequenceArgument();
-		this.pathExpressions = newBufferedIOArgumentsAnalyzer.getPathExpressions();
-		this.charSet = newBufferedIOArgumentsAnalyzer.getCharsetExpression()
-			.orElse(null);
+
+		List<Expression> pathExpressions = newBufferedIOArgumentsAnalyzer.getPathExpressions();
+		Supplier<Optional<Expression>> charSetExpressionSupplier = newBufferedIOArgumentsAnalyzer::getCharsetExpression;
+		this.functionCreatingExpressionStatementReplacement = visitor -> visitor
+			.createFilesWriteStringMethodInvocationStatement(writeInvocationData, pathExpressions,
+					charSetExpressionSupplier);
 	}
 
 	WriteReplacementUsingBufferedWriterConstructor(WriteInvocationData writeInvocationData,
@@ -45,29 +47,23 @@ class WriteReplacementUsingBufferedWriterConstructor {
 		this.resourcesToRemove = Arrays
 			.asList(writeInvocationData.getResource(), fileWriterResourceAnalyzer.getResource());
 		this.writeInvocationStatementToReplace = writeInvocationData.getWriteInvocationStatementToReplace();
-		this.charSequenceArgument = writeInvocationData.getCharSequenceArgument();
-		this.pathExpressions = fileIOAnalyzer.getPathExpressions();
-		this.charSet = fileIOAnalyzer.getCharset()
-			.orElse(null);
+
+		List<Expression> pathExpressions = fileIOAnalyzer.getPathExpressions();
+		Supplier<Optional<Expression>> charSetExpressionSupplier = fileIOAnalyzer::getCharset;
+		this.functionCreatingExpressionStatementReplacement = visitor -> visitor
+			.createFilesWriteStringMethodInvocationStatement(writeInvocationData, pathExpressions,
+					charSetExpressionSupplier);
 	}
 
 	List<VariableDeclarationExpression> getResourcesToRemove() {
 		return resourcesToRemove;
 	}
 
-	public List<Expression> getPathExpressions() {
-		return pathExpressions;
-	}
-
-	Expression getCharSequenceArgument() {
-		return charSequenceArgument;
-	}
-
-	public Optional<Expression> getCharSet() {
-		return Optional.ofNullable(charSet);
-	}
-
 	ExpressionStatement getWriteInvocationStatementToReplace() {
 		return writeInvocationStatementToReplace;
+	}
+
+	ExpressionStatement createWriteInvocationStatementReplacement(UseFilesWriteStringASTVisitor visitor) {
+		return functionCreatingExpressionStatementReplacement.apply(visitor);
 	}
 }
