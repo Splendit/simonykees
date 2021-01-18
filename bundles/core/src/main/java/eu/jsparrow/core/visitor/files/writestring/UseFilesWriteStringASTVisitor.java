@@ -79,33 +79,23 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	public boolean visit(TryStatement tryStatement) {
 
 		UseFilesWriteStringTWRStatementAnalyzer analyzer = new UseFilesWriteStringTWRStatementAnalyzer();
-		List<WriteInvocationData> writeInvocationDataList = analyzer.createWriteInvocationDataList(tryStatement);
 
-		List<WriteInvocationStatementReplacementData> resultsUsingFilesNewBufferedWriter = new ArrayList<>();
-		writeInvocationDataList.forEach(data -> analyzer.findResultUsingFilesNewBufferedWriter(data)
-			.ifPresent(resultsUsingFilesNewBufferedWriter::add));
+		List<WriteInvocationStatementReplacementData> transformationDataList = analyzer
+			.createTransformationDataList(tryStatement);
 
-		List<WriteInvocationStatementReplacementData> resultsUsingBufferedWriterConstructor = new ArrayList<>();
-		writeInvocationDataList.forEach(data -> analyzer.findResultUsingBufferedWriterConstructor(data)
-			.ifPresent(resultsUsingBufferedWriterConstructor::add));
-
-		if (resultsUsingFilesNewBufferedWriter.isEmpty() && resultsUsingBufferedWriterConstructor.isEmpty()) {
+		if (transformationDataList.isEmpty()) {
 			return true;
 		}
 
 		List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
-		resultsUsingFilesNewBufferedWriter.stream()
-			.map(WriteInvocationStatementReplacementData::getResourcesToRemove)
-			.forEach(resourcesToRemove::addAll);
-
-		resultsUsingBufferedWriterConstructor.stream()
+		transformationDataList.stream()
 			.map(WriteInvocationStatementReplacementData::getResourcesToRemove)
 			.forEach(resourcesToRemove::addAll);
 
 		if (resourcesToRemove.size() < tryStatement.resources()
 			.size()) {
 
-			resultsUsingFilesNewBufferedWriter.stream()
+			transformationDataList.stream()
 				.forEach(data -> {
 					ExpressionStatement invocationStatementReplacement = data
 						.createWriteInvocationStatementReplacement(this);
@@ -113,24 +103,14 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 							null);
 					onRewrite();
 				});
-			resultsUsingBufferedWriterConstructor.stream()
-				.forEach(data -> {
-					ExpressionStatement invocationStatementReplacement = data
-						.createWriteInvocationStatementReplacement(this);
-					astRewrite.replace(data.getWriteInvocationStatementToReplace(), invocationStatementReplacement,
-							null);
-					onRewrite();
-				});
+
 			resourcesToRemove.stream()
 				.forEach(resource -> astRewrite.remove(resource, null));
 		} else {
 			TryStatement newTryStatementWithoutResources = createNewTryStatementWithoutResources(tryStatement,
-					resultsUsingFilesNewBufferedWriter,
-					resultsUsingBufferedWriterConstructor);
+					transformationDataList);
 			astRewrite.replace(tryStatement, newTryStatementWithoutResources, null);
-			resultsUsingFilesNewBufferedWriter.stream()
-				.forEach(data -> onRewrite());
-			resultsUsingBufferedWriterConstructor.stream()
+			transformationDataList.stream()
 				.forEach(data -> onRewrite());
 		}
 
@@ -139,8 +119,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	@SuppressWarnings("unchecked")
 	private TryStatement createNewTryStatementWithoutResources(TryStatement tryStatement,
-			List<WriteInvocationStatementReplacementData> resultsUsingFilesNewBufferedWriter,
-			List<WriteInvocationStatementReplacementData> resultsUsingBufferedWriterConstructor) {
+			List<WriteInvocationStatementReplacementData> transformationDataList) {
 		TryStatement tryStatementReplacement = getASTRewrite().getAST()
 			.newTryStatement();
 
@@ -162,17 +141,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			}
 		});
 
-		for (WriteInvocationStatementReplacementData data : resultsUsingFilesNewBufferedWriter) {
-			ExpressionStatement writeInvocationStatementToReplace = data.getWriteInvocationStatementToReplace();
-			ExpressionStatement writeInvocationStatementReplacement = data
-				.createWriteInvocationStatementReplacement(this);
-			int replacementIndex = oldBody.statements()
-				.indexOf(writeInvocationStatementToReplace);
-			newBodyStatementsTypedList.remove(replacementIndex);
-			newBodyStatementsTypedList.add(replacementIndex, writeInvocationStatementReplacement);
-		}
-
-		for (WriteInvocationStatementReplacementData data : resultsUsingBufferedWriterConstructor) {
+		for (WriteInvocationStatementReplacementData data : transformationDataList) {
 			ExpressionStatement writeInvocationStatementToReplace = data.getWriteInvocationStatementToReplace();
 			ExpressionStatement writeInvocationStatementReplacement = data
 				.createWriteInvocationStatementReplacement(this);

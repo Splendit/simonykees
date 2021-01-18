@@ -41,14 +41,28 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 class UseFilesWriteStringTWRStatementAnalyzer {
 	private final SignatureData write = new SignatureData(java.io.Writer.class, "write", java.lang.String.class); //$NON-NLS-1$
 
-	List<WriteInvocationData> createWriteInvocationDataList(TryStatement tryStatement) {
-		List<WriteInvocationData> invocationDataList = new ArrayList<>();
+	List<WriteInvocationStatementReplacementData> createTransformationDataList(TryStatement tryStatement) {
+		List<WriteInvocationStatementReplacementData> invocationDataList = new ArrayList<>();
 		List<Statement> tryBodyStatements = ASTNodeUtil.convertToTypedList(tryStatement.getBody()
 			.statements(), Statement.class);
 		for (Statement statement : tryBodyStatements) {
-			findWriteInvocationData(tryStatement, statement).ifPresent(invocationDataList::add);
+			findTransformationData(tryStatement, statement).ifPresent(invocationDataList::add);
 		}
 		return invocationDataList;
+	}
+
+	private Optional<WriteInvocationStatementReplacementData> findTransformationData(TryStatement tryStatement,
+			Statement statement) {
+		WriteInvocationData writeInvocationData = findWriteInvocationData(tryStatement, statement).orElse(null);
+		if (writeInvocationData != null) {
+			Optional<WriteInvocationStatementReplacementData> findResultUsingFilesNewBufferedWriter = findResultUsingFilesNewBufferedWriter(
+					writeInvocationData);
+			if (findResultUsingFilesNewBufferedWriter.isPresent()) {
+				return findResultUsingFilesNewBufferedWriter;
+			}
+			return findResultUsingBufferedWriterConstructor(writeInvocationData);
+		}
+		return Optional.empty();
 	}
 
 	private Optional<WriteInvocationData> findWriteInvocationData(TryStatement tryStatement, Statement statement) {
@@ -93,7 +107,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	 *         used for code transformation by
 	 *         {@link UseFilesWriteStringASTVisitor}
 	 */
-	Optional<WriteInvocationStatementReplacementData> findResultUsingFilesNewBufferedWriter(
+	private Optional<WriteInvocationStatementReplacementData> findResultUsingFilesNewBufferedWriter(
 			WriteInvocationData writeInvocationData) {
 
 		Expression bufferedIOInitializer = writeInvocationData.getResourceInitializer();
@@ -162,8 +176,9 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	 *         used for code transformation by
 	 *         {@link UseFilesWriteStringASTVisitor}
 	 */
-	Optional<WriteInvocationStatementReplacementData> findResultUsingBufferedWriterConstructor(
+	private Optional<WriteInvocationStatementReplacementData> findResultUsingBufferedWriterConstructor(
 			WriteInvocationData writeInvocationData) {
+
 		Expression bufferedWriterResourceInitializer = writeInvocationData.getResourceInitializer();
 		if (!ClassRelationUtil.isNewInstanceCreationOf(bufferedWriterResourceInitializer,
 				java.io.BufferedWriter.class.getName())) {
@@ -207,7 +222,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 		return Optional.empty();
 	}
 
-	static Optional<Expression> findBufferedIOArgument(ClassInstanceCreation classInstanceCreation) {
+	private Optional<Expression> findBufferedIOArgument(ClassInstanceCreation classInstanceCreation) {
 
 		List<Expression> newBufferedIOArgs = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(),
 				Expression.class);
