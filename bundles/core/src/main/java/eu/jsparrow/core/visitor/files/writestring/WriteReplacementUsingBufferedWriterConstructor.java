@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.files.writestring;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +10,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 import eu.jsparrow.core.visitor.files.FileIOAnalyzer;
 import eu.jsparrow.core.visitor.files.NewBufferedIOArgumentsAnalyzer;
+import eu.jsparrow.core.visitor.files.TryResourceAnalyzer;
+import eu.jsparrow.core.visitor.files.writestring.UseFilesWriteStringTWRStatementAnalyzer.WriteInvocationData;
 
 /**
  * Stores all informations in connection with the replacement of invocation
@@ -27,23 +30,22 @@ class WriteReplacementUsingBufferedWriterConstructor {
 	private final List<Expression> pathExpressions;
 	private final Expression charSet;
 
-	WriteReplacementUsingBufferedWriterConstructor(List<VariableDeclarationExpression> resourcesToRemove,
-			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
+	WriteReplacementUsingBufferedWriterConstructor(WriteInvocationData writeInvocationData,
 			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer) {
-		this.resourcesToRemove = resourcesToRemove;
-		this.writeInvocationStatementToReplace = writeInvocationStatementToReplace;
-		this.charSequenceArgument = charSequenceArgument;
+		this.resourcesToRemove = Arrays.asList(writeInvocationData.getResource());
+		this.writeInvocationStatementToReplace = writeInvocationData.getWriteInvocationStatementToReplace();
+		this.charSequenceArgument = writeInvocationData.getCharSequenceArgument();
 		this.pathExpressions = newBufferedIOArgumentsAnalyzer.getPathExpressions();
 		this.charSet = newBufferedIOArgumentsAnalyzer.getCharsetExpression()
 			.orElse(null);
 	}
 
-	WriteReplacementUsingBufferedWriterConstructor(List<VariableDeclarationExpression> resourcesToRemove,
-			ExpressionStatement writeInvocationStatementToReplace, Expression charSequenceArgument,
-			FileIOAnalyzer fileIOAnalyzer) {
-		this.resourcesToRemove = resourcesToRemove;
-		this.writeInvocationStatementToReplace = writeInvocationStatementToReplace;
-		this.charSequenceArgument = charSequenceArgument;
+	WriteReplacementUsingBufferedWriterConstructor(WriteInvocationData writeInvocationData,
+			TryResourceAnalyzer fileWriterResourceAnalyzer, FileIOAnalyzer fileIOAnalyzer) {
+		this.resourcesToRemove = Arrays
+			.asList(writeInvocationData.getResource(), fileWriterResourceAnalyzer.getResource());
+		this.writeInvocationStatementToReplace = writeInvocationData.getWriteInvocationStatementToReplace();
+		this.charSequenceArgument = writeInvocationData.getCharSequenceArgument();
 		this.pathExpressions = fileIOAnalyzer.getPathExpressions();
 		this.charSet = fileIOAnalyzer.getCharset()
 			.orElse(null);
