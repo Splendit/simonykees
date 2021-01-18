@@ -37,9 +37,11 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -209,6 +211,37 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						if (methodInvocationExpressionNameStr.equals(lambdaParamNameStr) && checkMethodParameters(
 								lambdaParams.subList(1, lambdaParams.size()), methodArguments)) {
 
+							/*
+							 * Bug fix SIM-1826
+							 */
+							ParameterizedType explicitParameterizedType = findExplicitParameterizedLambdaParameterType(
+									lambdaParams.get(0)).orElse(null);
+							if (explicitParameterizedType != null) {
+								String typeNameStr = findTypeOfSimpleName(methodInvocationExpressionName);
+								List<ITypeBinding> ambTypes = lambdaParams.stream()
+									.map(var -> var.resolveBinding()
+										.getType())
+									.collect(Collectors.toList());
+								if (typeNameStr != null && !StringUtils.isEmpty(typeNameStr)
+										&& !isAmbiguousMethodReference(methodInvocation, ambTypes)) {
+									SimpleName methodName = (SimpleName) astRewrite
+										.createCopyTarget(methodInvocation.getName());
+									TypeMethodReference ref = astRewrite.getAST()
+										.newTypeMethodReference();
+
+									saveTypeArguments(methodInvocation, ref);
+									ref.setType((ParameterizedType) astRewrite
+										.createCopyTarget(explicitParameterizedType));
+									ref.setName(methodName);
+
+									astRewrite.replace(lambdaExpressionNode, ref, null);
+									getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
+									onRewrite();
+
+								}
+								return true;
+							}
+							
 							String typeNameStr = findTypeOfSimpleName(methodInvocationExpressionName);
 							List<ITypeBinding> ambTypes = lambdaParams.stream()
 								.map(var -> var.resolveBinding()
@@ -278,6 +311,23 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		}
 
 		return true;
+	}
+
+	private Optional<ParameterizedType> findExplicitParameterizedLambdaParameterType(
+			VariableDeclaration lambdaParameter) {
+		if (lambdaParameter.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
+			SingleVariableDeclaration declarationWithType = (SingleVariableDeclaration) lambdaParameter;
+			Type explicitType = declarationWithType.getType();
+			if (explicitType.getNodeType() == ASTNode.PARAMETERIZED_TYPE) {
+				ParameterizedType parameterizedType = (ParameterizedType) explicitType;
+				List<Type> typeArguments = ASTNodeUtil.convertToTypedList(parameterizedType.typeArguments(),
+						Type.class);
+				if (!typeArguments.isEmpty()) {
+					return Optional.of(parameterizedType);
+				}
+			}
+		}
+		return Optional.empty();
 	}
 
 	private boolean isWrappedInOverloadedMethod(LambdaExpression lambdaExpressionNode,
@@ -404,12 +454,28 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	 *            original method invocation with possibly nonempty list of type
 	 *            arguments
 	 * @param ref
-	 *            the new method reference
+	 *            the new {@link ExpressionMethodReference}
 	 */
 	private void saveTypeArguments(MethodInvocation methodInvocation, ExpressionMethodReference ref) {
 		List<Type> typeArguments = ASTNodeUtil.convertToTypedList(methodInvocation.typeArguments(), Type.class);
 		ListRewrite typeArgumentsRewrite = astRewrite.getListRewrite(ref,
 				ExpressionMethodReference.TYPE_ARGUMENTS_PROPERTY);
+		typeArguments.forEach(typeArgument -> typeArgumentsRewrite.insertLast(typeArgument, null));
+	}
+
+	/**
+	 * Inserts the existing type arguments to the method reference.
+	 * 
+	 * @param methodInvocation
+	 *            original method invocation with possibly nonempty list of type
+	 *            arguments
+	 * @param ref
+	 *            the new {@link TypeMethodReference}
+	 */
+	private void saveTypeArguments(MethodInvocation methodInvocation, TypeMethodReference ref) {
+		List<Type> typeArguments = ASTNodeUtil.convertToTypedList(methodInvocation.typeArguments(), Type.class);
+		ListRewrite typeArgumentsRewrite = astRewrite.getListRewrite(ref,
+				TypeMethodReference.TYPE_ARGUMENTS_PROPERTY);
 		typeArguments.forEach(typeArgument -> typeArgumentsRewrite.insertLast(typeArgument, null));
 	}
 
