@@ -15,7 +15,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 
 import eu.jsparrow.core.visitor.files.FileIOAnalyzer;
 import eu.jsparrow.core.visitor.files.NewBufferedIOArgumentsAnalyzer;
@@ -235,49 +234,5 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 			return Optional.empty();
 		}
 		return Optional.of(bufferedIOArg);
-	}
-
-	/**
-	 * Acts as a "Record" making possible to return all results of
-	 * {@link #findWriteInvocationData}.
-	 *
-	 */
-	class WriteInvocationData {
-		private final ExpressionStatement writeInvocationStatementToReplace;
-		private final Expression charSequenceArgument;
-		private final TryStatement tryStatement;
-		private final VariableDeclarationExpression resource;
-		private final Expression resourceInitializer;
-
-		private WriteInvocationData(ExpressionStatement writeInvocationStatementToReplace,
-				Expression charSequenceArgument,
-				TryResourceAnalyzer bufferedWriterResourceAnalyzer) {
-
-			this.writeInvocationStatementToReplace = writeInvocationStatementToReplace;
-			this.charSequenceArgument = charSequenceArgument;
-			tryStatement = bufferedWriterResourceAnalyzer.getTryStatement();
-			resource = bufferedWriterResourceAnalyzer.getResource();
-			resourceInitializer = bufferedWriterResourceAnalyzer.getResourceInitializer();
-		}
-
-		ExpressionStatement getWriteInvocationStatementToReplace() {
-			return writeInvocationStatementToReplace;
-		}
-
-		Expression getCharSequenceArgument() {
-			return charSequenceArgument;
-		}
-
-		public TryStatement getTryStatement() {
-			return tryStatement;
-		}
-
-		public VariableDeclarationExpression getResource() {
-			return resource;
-		}
-
-		public Expression getResourceInitializer() {
-			return resourceInitializer;
-		}
 	}
 }

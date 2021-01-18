@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import eu.jsparrow.core.visitor.files.FileIOAnalyzer;
 import eu.jsparrow.core.visitor.files.NewBufferedIOArgumentsAnalyzer;
 import eu.jsparrow.core.visitor.files.TryResourceAnalyzer;
-import eu.jsparrow.core.visitor.files.writestring.UseFilesWriteStringTWRStatementAnalyzer.WriteInvocationData;
 
 /**
  * Stores all informations in connection with the replacement of invocation
