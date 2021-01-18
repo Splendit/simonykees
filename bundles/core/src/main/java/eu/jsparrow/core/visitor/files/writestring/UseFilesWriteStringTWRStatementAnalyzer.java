@@ -104,7 +104,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 		MethodInvocation filesNewBufferedWriterInvocation = (MethodInvocation) bufferedIOInitializer;
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(filesNewBufferedWriterInvocation.arguments(),
 				Expression.class);
-		
+
 		if (!arguments.isEmpty() && isFilesNewBufferedWriterInvocation(filesNewBufferedWriterInvocation)) {
 			Expression pathArgument = arguments.get(0);
 			List<Expression> additionalArguments = new ArrayList<>();
@@ -133,10 +133,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 			.equals("newBufferedWriter")) { //$NON-NLS-1$
 			return false;
 		}
-		return checkFilesNewBufferedWriterParameterTypes(methodBinding);
-	}
 
-	private boolean checkFilesNewBufferedWriterParameterTypes(IMethodBinding methodBinding) {
 		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
 		if (parameterTypes.length == 2) {
 			if (!ClassRelationUtil.isContentOfType(parameterTypes[0], java.nio.file.Path.class.getName())) {
@@ -178,14 +175,32 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 			.orElse(null);
 
 		if (bufferedWriterInstanceCreationArgument != null) {
+
 			if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-				return findResultUsingWriterInstanceCreation(writeInvocationData,
-						(ClassInstanceCreation) bufferedWriterInstanceCreationArgument);
+				NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
+				if (!newBufferedIOArgumentsAnalyzer.analyzeInitializer((ClassInstanceCreation) bufferedWriterInstanceCreationArgument)) {
+					return Optional.empty();
+				}
+				return Optional.of(new WriteReplacementUsingBufferedWriterConstructor(writeInvocationData,
+						newBufferedIOArgumentsAnalyzer));
 
 			}
+
 			if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-				return findResultUsingWriterResource(writeInvocationData,
-						(SimpleName) bufferedWriterInstanceCreationArgument);
+
+				TryResourceAnalyzer fileWriterResourceAnalyzer = new TryResourceAnalyzer();
+
+				if (!fileWriterResourceAnalyzer.analyzeResourceUsedOnce(writeInvocationData.getTryStatement(),
+						(SimpleName) bufferedWriterInstanceCreationArgument)) {
+					return Optional.empty();
+				}
+				FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(java.io.FileWriter.class.getName());
+				if (!fileIOAnalyzer.analyzeFileIO(fileWriterResourceAnalyzer.getResourceFragment())) {
+					return Optional.empty();
+				}
+
+				return Optional.of(new WriteReplacementUsingBufferedWriterConstructor(writeInvocationData,
+						fileWriterResourceAnalyzer, fileIOAnalyzer));
 			}
 		}
 		return Optional.empty();
@@ -204,38 +219,6 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 			return Optional.empty();
 		}
 		return Optional.of(bufferedIOArg);
-	}
-
-	private Optional<WriteReplacementUsingBufferedWriterConstructor> findResultUsingWriterInstanceCreation(
-			WriteInvocationData writeInvocationData,
-			ClassInstanceCreation writerInstanceCreation) {
-
-		NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
-		if (!newBufferedIOArgumentsAnalyzer.analyzeInitializer(writerInstanceCreation)) {
-			return Optional.empty();
-		}
-		return Optional.of(new WriteReplacementUsingBufferedWriterConstructor(writeInvocationData,
-				newBufferedIOArgumentsAnalyzer));
-	}
-
-	private Optional<WriteReplacementUsingBufferedWriterConstructor> findResultUsingWriterResource(
-			WriteInvocationData writeInvocationData,
-			SimpleName bufferedIOArgAsSimpleName) {
-
-		TryResourceAnalyzer fileWriterResourceAnalyzer = new TryResourceAnalyzer();
-
-		if (!fileWriterResourceAnalyzer.analyzeResourceUsedOnce(writeInvocationData.getTryStatement(),
-				bufferedIOArgAsSimpleName)) {
-			return Optional.empty();
-		}
-
-		FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(java.io.FileWriter.class.getName());
-		if (!fileIOAnalyzer.analyzeFileIO(fileWriterResourceAnalyzer.getResourceFragment())) {
-			return Optional.empty();
-		}
-
-		return Optional.of(new WriteReplacementUsingBufferedWriterConstructor(writeInvocationData,
-				fileWriterResourceAnalyzer, fileIOAnalyzer));
 	}
 
 	/**
