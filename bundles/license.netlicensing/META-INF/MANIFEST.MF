@@ -15,7 +15,7 @@ Require-Bundle: eu.jsparrow.license.api,
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: eu.jsparrow.license.netlicensing.Activator
 Bundle-Vendor: Splendit IT-Consulting GmbH
-Bundle-ClassPath: lib/netlicensing-client-2.5.0.jar,
+Bundle-ClassPath: lib/netlicensing-client-2.5.8.jar,
  .
 Export-Package: 
  eu.jsparrow.license.netlicensing,
