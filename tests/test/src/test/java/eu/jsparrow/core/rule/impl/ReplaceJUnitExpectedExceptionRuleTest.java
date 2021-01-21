@@ -55,7 +55,7 @@ class ReplaceJUnitExpectedExceptionRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), equalTo("JUnit 4.13 or JUnit 5.0 and above"));
+		assertThat(rule.requiredLibraries(), equalTo("JUnit 4.13 or JUnit 5"));
 	}
 
 	@Test

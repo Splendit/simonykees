@@ -45,11 +45,6 @@ public abstract class OrganiseImportsRuleBase extends RefactoringRuleImpl<Abstra
 	}
 
 	@Override
-	public boolean isFree() {
-		return true;
-	}
-
-	@Override
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_1;
 	}

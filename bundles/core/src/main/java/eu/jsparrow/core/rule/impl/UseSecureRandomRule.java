@@ -19,13 +19,15 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class UseSecureRandomRule extends RefactoringRuleImpl<UseSecureRandomASTVisitor> {
 
+	public static final String USE_SECURE_RANDOM_RULE_ID = "UseSecureRandomRule"; //$NON-NLS-1$
+
 	public UseSecureRandomRule() {
 		this.visitorClass = UseSecureRandomASTVisitor.class;
-		this.id = "UseSecureRandomRule"; //$NON-NLS-1$
+		this.id = USE_SECURE_RANDOM_RULE_ID;
 		this.ruleDescription = new RuleDescription(Messages.UseSecureRandomRule_name,
 				Messages.UseSecureRandomRule_description,
 				Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_1_2, Tag.SECURITY));
+				Arrays.asList(Tag.JAVA_1_2, Tag.SECURITY, Tag.FREE));
 	}
 
 	@Override

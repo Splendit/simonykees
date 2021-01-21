@@ -190,4 +190,18 @@ class ReplaceJUnitExpectedAnnotationPropertyASTVisitorTest extends UsesJDTUnitFi
 				+ "}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_nonEffectivelyFinal_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "private void throwIOException(String message) throws IOException {}"
+				+ ""
+				+ "@Test(expected = IOException.class)\n"
+				+ "public void methodInvocation() throws IOException {\n"
+				+ "		String message = \"\";"
+				+ "		message = \"test\";"
+				+ "		throwIOException(message);\n"
+				+ "}";
+		assertNoChange(original);
+	}
 }

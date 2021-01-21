@@ -35,9 +35,4 @@ public class LambdaToMethodReferenceRule extends RefactoringRuleImpl<LambdaToMet
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_8;
 	}
-
-	@Override
-	public boolean isFree() {
-		return true;
-	}
 }

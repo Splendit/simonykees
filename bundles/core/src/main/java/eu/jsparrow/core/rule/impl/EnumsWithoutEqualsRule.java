@@ -35,9 +35,4 @@ public class EnumsWithoutEqualsRule extends RefactoringRuleImpl<EnumsWithoutEqua
 		// Enums exist since 1.5
 		return JavaCore.VERSION_1_5;
 	}
-
-	@Override
-	public boolean isFree() {
-		return true;
-	}
 }
