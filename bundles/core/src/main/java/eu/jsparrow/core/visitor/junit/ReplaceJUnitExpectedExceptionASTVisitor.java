@@ -129,6 +129,11 @@ public class ReplaceJUnitExpectedExceptionASTVisitor extends AbstractReplaceExpe
 
 		ASTNode nodeThrowingException = throwingExceptionsVisitor.getNodesThrowingExpectedException()
 			.get(0);
+
+		if (hasNonEffectivelyFinalVariables(nodeThrowingException)) {
+			return false;
+		}
+
 		boolean isLastStatement = verifyPosition(methodDeclaration, nodeThrowingException);
 		if (!isLastStatement) {
 			return false;

@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.junit;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,17 +11,12 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
-import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.ThrowStatement;
-
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * This visitor replaces expected annotation property in
@@ -55,7 +49,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractReplaceExpectedASTVisitor {
 
 	protected static final String EXCEPTION_TYPE_NAME = java.lang.Exception.class.getName();
-	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
+	public static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
 	private static final String ASSERT_THROWS = "assertThrows"; //$NON-NLS-1$
 
 	private String assertThrowsQualifiedName;
@@ -75,12 +69,13 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
-		NormalAnnotation annotation = isTestAnnotatedMethod(methodDeclaration);
+		NormalAnnotation annotation = TestMethodUtil.findTestAnnotatedMethod(methodDeclaration)
+			.orElse(null);
 		if (annotation == null) {
 			return false;
 		}
 
-		MemberValuePair expectedValuePair = findExpectedValuePair(annotation);
+		MemberValuePair expectedValuePair = TestMethodUtil.findNamedValuePair(annotation, "expected"); //$NON-NLS-1$
 		if (expectedValuePair == null) {
 			return false;
 		}
@@ -99,42 +94,17 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 
 		ASTNode nodeThrowingException = throwingExceptionsVisitor.getNodesThrowingExpectedException()
 			.get(0);
+		if(hasNonEffectivelyFinalVariables(nodeThrowingException)) {
+			return false;
+		}
 		boolean isLastStatement = verifyPosition(methodDeclaration, nodeThrowingException);
 		if (!isLastStatement) {
 			return false;
 		}
 
-		refactor(methodDeclaration, exceptionType, nodeThrowingException, expectedExpressionExpression, annotation);
+		refactor(methodDeclaration, exceptionType, nodeThrowingException, expectedValuePair, annotation);
 
 		return true;
-	}
-
-	private MemberValuePair findExpectedValuePair(NormalAnnotation annotation) {
-		List<MemberValuePair> values = ASTNodeUtil.convertToTypedList(annotation.values(), MemberValuePair.class);
-		for (MemberValuePair memberValuePair : values) {
-			SimpleName name = memberValuePair.getName();
-			String identifier = name.getIdentifier();
-			if ("expected".equals(identifier)) { //$NON-NLS-1$
-				return memberValuePair;
-			}
-		}
-		return null;
-	}
-
-	private NormalAnnotation isTestAnnotatedMethod(MethodDeclaration methodDeclaration) {
-		List<NormalAnnotation> annotations = ASTNodeUtil.convertToTypedList(methodDeclaration.modifiers(),
-				NormalAnnotation.class);
-
-		for (NormalAnnotation annotation : annotations) {
-			Name typeName = annotation.getTypeName();
-			ITypeBinding annotationTypeBinding = typeName.resolveTypeBinding();
-			boolean isTest = ClassRelationUtil.isContentOfTypes(annotationTypeBinding,
-					Arrays.asList(ORG_JUNIT_TEST));
-			if (isTest) {
-				return annotation;
-			}
-		}
-		return null;
 	}
 
 	private boolean hasSingleNodeThrowingException(MethodDeclaration methodDeclaration,
@@ -152,7 +122,7 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 
 	@SuppressWarnings("unchecked")
 	private void refactor(MethodDeclaration methodDeclaration,
-			ITypeBinding exceptionType, ASTNode nodeThrowingException, Expression expectedException,
+			ITypeBinding exceptionType, ASTNode nodeThrowingException, MemberValuePair expectedException,
 			NormalAnnotation annotation) {
 
 		AST ast = methodDeclaration.getAST();
@@ -160,7 +130,7 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 		MethodInvocation assertThrows = ast.newMethodInvocation();
 		assertThrows.setName(ast.newSimpleName(ASSERT_THROWS));
 		qualifiedPrefix.ifPresent(assertThrows::setExpression);
-		Expression firstArg = (Expression) astRewrite.createCopyTarget(expectedException);
+		Expression firstArg = (Expression) astRewrite.createCopyTarget(expectedException.getValue());
 		LambdaExpression lambdaExpression = ast.newLambdaExpression();
 		ASTNode lambdaBody = createThrowRunnable(nodeThrowingException);
 		lambdaExpression.setBody(lambdaBody);
@@ -172,15 +142,8 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 
 		ExpressionStatement assertionStatement = ast.newExpressionStatement(assertThrows);
 		astRewrite.replace(nodeThrowingException.getParent(), assertionStatement, null);
-		List<MemberValuePair> annotationProperties = annotation.values();
-		if (annotationProperties.size() > 1) {
-			astRewrite.remove(expectedException.getParent(), null);
-		} else {
-			MarkerAnnotation markerAnnotation = ast.newMarkerAnnotation();
-			markerAnnotation.setTypeName((Name) astRewrite.createCopyTarget(annotation.getTypeName()));
-			astRewrite.replace(annotation, markerAnnotation, null);
-		}
 
+		TestMethodUtil.removeAnnotationProperty(astRewrite, annotation, expectedException);
 		onRewrite();
 
 	}

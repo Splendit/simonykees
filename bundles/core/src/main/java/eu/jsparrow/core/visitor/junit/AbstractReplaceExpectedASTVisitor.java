@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.sub.ExternalNonEffectivelyFinalReferencesVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -80,6 +81,12 @@ abstract class AbstractReplaceExpectedASTVisitor extends AbstractAddImportASTVis
 				listRewrite.remove(type, null);
 			}
 		}
+	}
+
+	protected boolean hasNonEffectivelyFinalVariables(ASTNode nodeThrowingException) {
+		ExternalNonEffectivelyFinalReferencesVisitor visitor = new ExternalNonEffectivelyFinalReferencesVisitor();
+		nodeThrowingException.accept(visitor);
+		return visitor.containsReferencesToExternalNonFinalVariables();
 	}
 
 }

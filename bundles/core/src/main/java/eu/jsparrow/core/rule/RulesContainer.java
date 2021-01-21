@@ -76,6 +76,7 @@ import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedExceptionRule;
+import eu.jsparrow.core.rule.impl.ReplaceJUnitTimeoutAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.ReuseRandomObjectsRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
@@ -186,8 +187,12 @@ public class RulesContainer {
 				new ReuseRandomObjectsRule(),
 				new UseSecureRandomRule(),
 				new CreateTempFilesUsingJavaNIORule(),
-				
+
+				/*
+				 * Testing
+				 */
 				new ReplaceJUnitExpectedExceptionRule(), new ReplaceJUnitExpectedAnnotationPropertyRule(),
+				new ReplaceJUnitTimeoutAnnotationPropertyRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

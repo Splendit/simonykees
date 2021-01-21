@@ -593,5 +593,23 @@ class ReplaceJUnitExpectedExceptionASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_nonEffectivelyFinalVariable_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "@Rule\n"
+				+ "public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "private void throwIOException(String message) throws IOException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void multipleExpectMessage() throws IOException {\n"
+				+ " String message = \"\";"
+				+ " message += \"value\";"
+				+ "	expectedException.expect(IOException.class);\n"
+				+ "	throwIOException(message);\n"
+				+ "}";
+		assertNoChange(original);
+	}
 
 }
