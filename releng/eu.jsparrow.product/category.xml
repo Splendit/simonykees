@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/eu.jsparrow.standalone.feature_3.26.0.qualifier.jar" id="eu.jsparrow.standalone.feature" version="3.26.0.qualifier">
+   <feature url="features/eu.jsparrow.standalone.feature_3.27.0.qualifier.jar" id="eu.jsparrow.standalone.feature" version="3.27.0.qualifier">
       <category name="splendit"/>
    </feature>
    <bundle id="org.eclipse.osgi" version="3.12.50.v20170928-1321">
