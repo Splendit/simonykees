@@ -50,6 +50,7 @@ import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
 import eu.jsparrow.core.rule.impl.MakeFieldsAndVariablesFinalRule;
 import eu.jsparrow.core.rule.impl.MapGetOrDefaultRule;
+import eu.jsparrow.core.rule.impl.MigrateJUnit4ToJupiterRule;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
 import eu.jsparrow.core.rule.impl.OptionalFilterRule;
@@ -65,7 +66,6 @@ import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
 import eu.jsparrow.core.rule.impl.RemoveCollectionAddAllRule;
 import eu.jsparrow.core.rule.impl.RemoveDoubleNegationRule;
 import eu.jsparrow.core.rule.impl.RemoveEmptyStatementRule;
-import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.RemoveExplicitCallToSuperRule;
 import eu.jsparrow.core.rule.impl.RemoveModifiersInInterfacePropertiesRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
@@ -75,6 +75,7 @@ import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.RemoveUnnecessaryThrownExceptionsRule;
 import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
+import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedExceptionRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitTimeoutAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.ReuseRandomObjectsRule;
@@ -193,6 +194,7 @@ public class RulesContainer {
 				 */
 				new ReplaceJUnitExpectedExceptionRule(), new ReplaceJUnitExpectedAnnotationPropertyRule(),
 				new ReplaceJUnitTimeoutAnnotationPropertyRule(),
+				new MigrateJUnit4ToJupiterRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
