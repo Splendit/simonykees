@@ -104,4 +104,58 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends UsesJDTUnitFixture {
 		assertNoChange(original);
 
 	}
+
+	@Test
+	public void visit_AllSupportedAnnotations_forDebug() throws Exception {
+		defaultFixture.addImport(org.junit.After.class.getName());
+		defaultFixture.addImport(org.junit.AfterClass.class.getName());
+		defaultFixture.addImport(org.junit.Before.class.getName());
+		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
+		defaultFixture.addImport(org.junit.Ignore.class.getName());
+		defaultFixture.addImport(org.junit.Test.class.getName());		
+		
+		String original = "" +
+				"class TestStub {\n"
+				+ "\n"
+				+ "	@Before\n"
+				+ "	public void beforeEach() throws Exception {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@After\n"
+				+ "	public void afterEach() throws Exception {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@BeforeClass\n"
+				+ "	public void beforeAll() throws Exception {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@AfterClass\n"
+				+ "	public void afterAll() throws Exception {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@Test\n"
+				+ "	public void testWithTestMarkerAnnotation() throws Exception {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@Test()\n"
+				+ "	public void testWithTestNormalAnnotation() throws Exception {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@Ignore\n"
+				+ "	@Test\n"
+				+ "	public void testWithIgnoreMarkerAnnotation() throws Exception {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@Ignore(value = \"This test is ignored\")\n"
+				+ "	@Test\n"
+				+ "	public void testWithIgnoreNormalAnnotation() throws Exception {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@Ignore(\"This test is ignored\")\n"
+				+ "	@Test\n"
+				+ "	public void testWithIgnoreSingleMemberAnnotation() throws Exception {\n"
+				+ "	}\n"
+				+ "}";
+		assertNoChange(original);
+	}
 }
