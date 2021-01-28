@@ -1,12 +1,16 @@
 package eu.jsparrow.core.visitor.junit.jupiter;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -94,7 +98,41 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 	}
 
 	private void transform(List<Annotation> jUnit4Annotations) {
+		List<SimpleName> simpleAnnotationTypeNames = jUnit4Annotations.stream()
+			.filter(annotation -> isJUnit4AnnotationType(annotation.resolveTypeBinding()))
+			.map(annotation -> annotation.getTypeName())
+			.filter(Name::isSimpleName)
+			.map(SimpleName.class::cast)
+			.collect(Collectors.toList());
+		simpleAnnotationTypeNames.size();
 
+		simpleAnnotationTypeNames.forEach(simpleName -> {
+			findIdentifierReplacement(simpleName).ifPresent(newIdentifier -> {
+				SimpleName newSimpleName = astRewrite.getAST()
+					.newSimpleName(newIdentifier);
+				this.astRewrite.replace(simpleName, newSimpleName, null);
+				onRewrite();
+			});
+		});
 	}
 
+	private Optional<String> findIdentifierReplacement(SimpleName simpleName) {
+		String identifier = simpleName.getIdentifier();
+		if (identifier.equals("Ignore")) { //$NON-NLS-1$
+			return Optional.of("Disabled"); //$NON-NLS-1$
+		}
+		if (identifier.equals("Before")) { //$NON-NLS-1$
+			return Optional.of("BeforeEach"); //$NON-NLS-1$
+		}
+		if (identifier.equals("BeforeClass")) { //$NON-NLS-1$
+			return Optional.of("BeforeAll"); //$NON-NLS-1$
+		}
+		if (identifier.equals("After")) { //$NON-NLS-1$
+			return Optional.of("AfterEach"); //$NON-NLS-1$
+		}
+		if (identifier.equals("AfterClass")) { //$NON-NLS-1$
+			return Optional.of("AfterAll"); //$NON-NLS-1$
+		}
+		return Optional.empty();
+	}
 }
