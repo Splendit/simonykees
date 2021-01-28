@@ -73,7 +73,9 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 
 		String simpleTypeName = typeBinding.getName();
 		if (simpleTypeName.equals("Ignore")) { //$NON-NLS-1$
-			return isJUnit4AnnotationType(typeBinding);
+			return isJUnit4AnnotationType(typeBinding)
+					&& annotation.getTypeName()
+						.isSimpleName();
 		}
 		if (simpleTypeName.equals("Test") //$NON-NLS-1$
 				|| simpleTypeName.equals("Before") //$NON-NLS-1$
@@ -81,7 +83,9 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 				|| simpleTypeName.equals("After") //$NON-NLS-1$
 				|| simpleTypeName.equals("AfterClass") //$NON-NLS-1$
 		) {
-			return isJUnit4AnnotationType(typeBinding) && isEmptyAnnotation(annotation);
+			return isJUnit4AnnotationType(typeBinding) &&
+					isEmptyAnnotation(annotation) && annotation.getTypeName()
+						.isSimpleName();
 		}
 
 		String qualifiedTypeName = typeBinding.getQualifiedName();

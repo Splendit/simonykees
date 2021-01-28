@@ -41,6 +41,18 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_JUnit4TestAnnotationNotSimpleTypeName_forDebug() throws Exception {
+
+		String original = "" +
+				"\n" +
+				"	@org.junit.Test\n" +
+				"	public void test1() {\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
 	public void visit_NotJUnit4TestAnnotation_forDebug() throws Exception {
 		defaultFixture.addImport(java.lang.annotation.Retention.class.getName());
 		defaultFixture.addImport(java.lang.annotation.RetentionPolicy.class.getName());
@@ -112,8 +124,8 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends UsesJDTUnitFixture {
 		defaultFixture.addImport(org.junit.Before.class.getName());
 		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
 		defaultFixture.addImport(org.junit.Ignore.class.getName());
-		defaultFixture.addImport(org.junit.Test.class.getName());		
-		
+		defaultFixture.addImport(org.junit.Test.class.getName());
+
 		String original = "" +
 				"class TestStub {\n"
 				+ "\n"
