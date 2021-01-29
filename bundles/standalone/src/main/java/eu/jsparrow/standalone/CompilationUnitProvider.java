@@ -34,7 +34,7 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
 public class CompilationUnitProvider {
 
 	private List<ICompilationUnit> compilationUnits;
-	private static final String GLOB_ALL = "glob:**"; //$NON-NLS-1$
+	private static final String GLOB_ALL = "glob:**/"; //$NON-NLS-1$
 
 	private YAMLExcludes excludes;
 
@@ -70,7 +70,7 @@ public class CompilationUnitProvider {
 			.stream()
 			.map(String::trim)
 			.filter(pattern -> !pattern.isEmpty())
-			.map(source -> String.join(File.separator, GLOB_ALL, source))
+			.map(source -> GLOB_ALL + source)
 			.map(pattern -> FileSystems.getDefault()
 				.getPathMatcher(pattern))
 			.collect(Collectors.toList());
