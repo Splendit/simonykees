@@ -34,7 +34,7 @@ import eu.jsparrow.standalone.exceptions.StandaloneException;
 public class CompilationUnitProvider {
 
 	private List<ICompilationUnit> compilationUnits;
-	private static final String GLOB_ALL = "glob:**/"; //$NON-NLS-1$
+	private static final String GLOB_ALL = "glob:{**/,*}"; //$NON-NLS-1$
 
 	private YAMLExcludes excludes;
 
