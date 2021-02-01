@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-@SuppressWarnings("nls")
 public class MultiCatchRuleTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE = "TestMultiCatchRule.java";
@@ -50,7 +49,7 @@ public class MultiCatchRuleTest extends SingleRuleTest {
 	}
 
 	@Test
-	public void calculateEnabledforProjectShouldBeDisabled() {
+	public void calculateEnabledForProjectShouldBeDisabled() {
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
 
 		rule.calculateEnabledForProject(testProject);
