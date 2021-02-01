@@ -1,6 +1,9 @@
 package eu.jsparrow.core.visitor.junit.jupiter;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,6 +31,32 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisitor {
 
+	private final Map<String, String> annotationQualifiedNamesReplacementMap;
+	private final Map<String, String> annotationSimpleNamesReplacementMap;
+
+	public MigrateJUnit4ToJupiterASTVisitor() {
+
+		Map<String, String> tmpMap = new HashMap<>();
+		tmpMap.put("org.junit.Ignore", "org.junit.jupiter.api.Disabled"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("org.junit.Test", "org.junit.jupiter.api.Test"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("org.junit.After", "org.junit.jupiter.api.AfterEach"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("org.junit.AfterClass", "org.junit.jupiter.api.AfterAll"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("org.junit.Before", "org.junit.jupiter.api.BeforeEach"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("org.junit.BeforeClass", "org.junit.jupiter.api.BeforeAll"); //$NON-NLS-1$//$NON-NLS-2$
+
+		annotationQualifiedNamesReplacementMap = Collections.unmodifiableMap(tmpMap);
+
+		tmpMap = new HashMap<>();
+		tmpMap.put("Ignore", "Disabled"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("Test", "Test"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("After", "AfterEach"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("AfterClass", "AfterAll"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("Before", "BeforeEach"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("BeforeClass", "BeforeAll"); //$NON-NLS-1$//$NON-NLS-2$
+
+		annotationSimpleNamesReplacementMap = Collections.unmodifiableMap(tmpMap);
+	}
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		boolean continueVisiting = super.visit(compilationUnit);
@@ -46,11 +75,19 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 			.filter(this::isOrgJUnitAnnotationImport)
 			.collect(Collectors.toList());
 
-		boolean analysisOK = jUnit4Annotations.stream()
+		boolean annotationsOK = jUnit4Annotations.stream()
 			.allMatch(annotation -> this.checkAnnotation(annotation, orgJUnitAnnotationImports));
 
-		if (analysisOK) {
-			transform(jUnit4Annotations);
+		List<SimpleName> annotationNamesToTransform = jUnit4Annotations.stream()
+			.filter(annotation -> isAnnotationTypeInPackageOrgJUnit(annotation.resolveTypeBinding()))
+			.map(annotation -> annotation.getTypeName())
+			.filter(Name::isSimpleName)
+			.map(SimpleName.class::cast)
+			.filter(simpleName -> annotationSimpleNamesReplacementMap.containsKey(simpleName.getIdentifier()))
+			.collect(Collectors.toList());
+
+		if (annotationsOK) {
+			transform(annotationNamesToTransform);
 		}
 		return true;
 	}
@@ -65,18 +102,10 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 		if (!typeBinding.isAnnotation()) {
 			return false;
 		}
-		IPackageBinding packageBinding = typeBinding.getPackage();
-
-		if (packageBinding == null) {
-			return false;
-
-		}
-		return packageBinding.getName()
-			.equals("org.junit"); //$NON-NLS-1$
-
+		return isAnnotationTypeInPackageOrgJUnit(typeBinding);
 	}
 
-	private boolean isJUnit4AnnotationType(ITypeBinding typeBinding) {
+	private boolean isAnnotationTypeInPackageOrgJUnit(ITypeBinding typeBinding) {
 		IPackageBinding packageBinding = typeBinding.getPackage();
 
 		if (packageBinding == null) {
@@ -97,13 +126,7 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 		ITypeBinding typeBinding = annotation.resolveTypeBinding();
 
 		String simpleTypeName = typeBinding.getName();
-		if (simpleTypeName.equals("Ignore") //$NON-NLS-1$
-				|| simpleTypeName.equals("Test") //$NON-NLS-1$
-				|| simpleTypeName.equals("Before") //$NON-NLS-1$
-				|| simpleTypeName.equals("BeforeClass") //$NON-NLS-1$
-				|| simpleTypeName.equals("After") //$NON-NLS-1$
-				|| simpleTypeName.equals("AfterClass") //$NON-NLS-1$
-		) {
+		if (annotationSimpleNamesReplacementMap.containsKey(simpleTypeName)) {
 			if (!annotation.getTypeName()
 				.isSimpleName()) {
 				return false;
@@ -132,17 +155,10 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 				&& !qualifiedTypeName.startsWith("junit."); //$NON-NLS-1$
 	}
 
-	private void transform(List<Annotation> jUnit4Annotations) {
-		List<SimpleName> simpleAnnotationTypeNames = jUnit4Annotations.stream()
-			.filter(annotation -> isJUnit4AnnotationType(annotation.resolveTypeBinding()))
-			.map(annotation -> annotation.getTypeName())
-			.filter(Name::isSimpleName)
-			.map(SimpleName.class::cast)
-			.collect(Collectors.toList());
+	private void transform(List<SimpleName> annotationNamesToTransform) {
+		transformImports(annotationNamesToTransform);
 
-		transformImports(simpleAnnotationTypeNames);
-
-		simpleAnnotationTypeNames.forEach(simpleName -> {
+		annotationNamesToTransform.forEach(simpleName -> {
 			findIdentifierReplacement(simpleName).ifPresent(newIdentifier -> {
 				SimpleName newSimpleName = astRewrite.getAST()
 					.newSimpleName(newIdentifier);
@@ -152,9 +168,9 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 		});
 	}
 
-	private void transformImports(List<SimpleName> simpleAnnotationTypeNames) {
+	private void transformImports(List<SimpleName> transformedAnnotationSimpleNames) {
 
-		Set<String> supportedJUnit4AnnotationsUsed = simpleAnnotationTypeNames.stream()
+		Set<String> supportedJUnit4AnnotationsUsed = transformedAnnotationSimpleNames.stream()
 			.map(SimpleName::getIdentifier)
 			.collect(Collectors.toSet());
 
