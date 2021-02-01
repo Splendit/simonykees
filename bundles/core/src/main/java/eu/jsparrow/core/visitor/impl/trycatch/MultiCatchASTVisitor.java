@@ -213,12 +213,12 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 		return false;
 	}
 
-	private boolean definesMethod(ITypeBinding type, IMethodBinding method) {
-		ITypeBinding declaringClass = method.getDeclaringClass();
+	private boolean definesMethod(ITypeBinding originalExceptionType, IMethodBinding originalInvocationBinding) {
+		ITypeBinding declaringClass = originalInvocationBinding.getDeclaringClass();
 		String declaringClassname = declaringClass.getQualifiedName();
-		boolean isSubtype = ClassRelationUtil.isInheritingContentOfTypes(type,
+		boolean isSubtype = ClassRelationUtil.isInheritingContentOfTypes(originalExceptionType,
 				Collections.singletonList(declaringClassname)) ||
-				ClassRelationUtil.isContentOfType(type, declaringClassname);
+				ClassRelationUtil.isContentOfType(originalExceptionType, declaringClassname);
 		if (isSubtype) {
 			return true;
 		}
@@ -228,13 +228,13 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 			return false;
 		}
 
-		if (isDefinedInCommonParent(type, method, parent)) {
+		if (isDefinedInCommonParent(originalExceptionType, originalInvocationBinding, parent)) {
 			return true;
 		}
 
 		ITypeBinding[] interfaces = parent.getInterfaces();
 		for (ITypeBinding parentInterface : interfaces) {
-			if (isDefinedInCommonParent(type, method, parentInterface)) {
+			if (isDefinedInCommonParent(originalExceptionType, originalInvocationBinding, parentInterface)) {
 				return true;
 			}
 		}
@@ -242,11 +242,11 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 		return false;
 	}
 
-	private boolean isDefinedInCommonParent(ITypeBinding type, IMethodBinding method, ITypeBinding parent) {
-		IMethodBinding[] methods = parent.getDeclaredMethods();
+	private boolean isDefinedInCommonParent(ITypeBinding originalExceptionType, IMethodBinding method, ITypeBinding currentExceptionParent) {
+		IMethodBinding[] methods = currentExceptionParent.getDeclaredMethods();
 		for (IMethodBinding parentMethod : methods) {
-			if (parentMethod.overrides(method)) {
-				boolean definedInCommonParent = definesMethod(type, parentMethod);
+			if (method.overrides(parentMethod)) {
+				boolean definedInCommonParent = definesMethod(originalExceptionType, parentMethod);
 				if (definedInCommonParent) {
 					return true;
 				}
