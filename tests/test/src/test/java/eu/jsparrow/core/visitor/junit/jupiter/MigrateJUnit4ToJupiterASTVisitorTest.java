@@ -225,4 +225,17 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends UsesJDTUnitFixture {
 		
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_IgnoreImportedOnDemand_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.junit", false, true);
+
+		String original = "" +
+				"	@Ignore\n" +
+				"	public void test() {\n" +
+				"	}";
+		
+		
+		assertNoChange(original);
+	}
 }

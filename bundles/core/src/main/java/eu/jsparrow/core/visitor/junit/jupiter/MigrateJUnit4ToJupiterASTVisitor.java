@@ -40,8 +40,14 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 		compilationUnit.accept(collectorVisitor);
 		List<Annotation> jUnit4Annotations = collectorVisitor.getAnnotations();
 
+		List<ImportDeclaration> orgJUnitAnnotationImports = ASTNodeUtil.convertToTypedList(this.getCompilationUnit()
+			.imports(), ImportDeclaration.class)
+			.stream()
+			.filter(this::isOrgJUnitAnnotationImport)
+			.collect(Collectors.toList());
+
 		boolean analysisOK = jUnit4Annotations.stream()
-			.allMatch(this::checkAnnotation);
+			.allMatch(annotation -> this.checkAnnotation(annotation, orgJUnitAnnotationImports));
 
 		if (analysisOK) {
 			transform(jUnit4Annotations);
@@ -49,18 +55,25 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 		return true;
 	}
 
-	private boolean isEmptyAnnotation(Annotation annotation) {
-		if (annotation.isMarkerAnnotation()) {
-			return true;
+	private boolean isOrgJUnitAnnotationImport(ImportDeclaration importDeclaration) {
+
+		IBinding binding = importDeclaration.resolveBinding();
+		if (binding.getKind() != IBinding.TYPE) {
+			return false;
 		}
-		if (annotation.isNormalAnnotation()) {
-			NormalAnnotation normalAnnotation = (NormalAnnotation) annotation;
-			if (normalAnnotation.values()
-				.isEmpty()) {
-				return true;
-			}
+		ITypeBinding typeBinding = (ITypeBinding) binding;
+		if (!typeBinding.isAnnotation()) {
+			return false;
 		}
-		return false;
+		IPackageBinding packageBinding = typeBinding.getPackage();
+
+		if (packageBinding == null) {
+			return false;
+
+		}
+		return packageBinding.getName()
+			.equals("org.junit"); //$NON-NLS-1$
+
 	}
 
 	private boolean isJUnit4AnnotationType(ITypeBinding typeBinding) {
@@ -75,27 +88,43 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 			return false;
 		}
 		return true;
+
 	}
 
-	private boolean checkAnnotation(Annotation annotation) {
+	private boolean checkAnnotation(Annotation annotation,
+			List<ImportDeclaration> annotationImportsFromOrgJUnitPackage) {
 
 		ITypeBinding typeBinding = annotation.resolveTypeBinding();
 
 		String simpleTypeName = typeBinding.getName();
-		if (simpleTypeName.equals("Ignore")) { //$NON-NLS-1$
-			return isJUnit4AnnotationType(typeBinding)
-					&& annotation.getTypeName()
-						.isSimpleName();
-		}
-		if (simpleTypeName.equals("Test") //$NON-NLS-1$
+		if (simpleTypeName.equals("Ignore") //$NON-NLS-1$
+				|| simpleTypeName.equals("Test") //$NON-NLS-1$
 				|| simpleTypeName.equals("Before") //$NON-NLS-1$
 				|| simpleTypeName.equals("BeforeClass") //$NON-NLS-1$
 				|| simpleTypeName.equals("After") //$NON-NLS-1$
 				|| simpleTypeName.equals("AfterClass") //$NON-NLS-1$
 		) {
-			return isJUnit4AnnotationType(typeBinding) &&
-					isEmptyAnnotation(annotation) && annotation.getTypeName()
-						.isSimpleName();
+			if (!annotation.getTypeName()
+				.isSimpleName()) {
+				return false;
+			}
+			if (annotationImportsFromOrgJUnitPackage.stream()
+				.noneMatch(importDeclaration -> importDeclaration.getName()
+					.getFullyQualifiedName()
+					.equals(typeBinding.getQualifiedName()))) {
+				return false;
+			}
+			if (annotation.isMarkerAnnotation()) {
+				return true;
+			}
+			if (annotation.isNormalAnnotation()) {
+				NormalAnnotation normalAnnotation = (NormalAnnotation) annotation;
+				if (normalAnnotation.values()
+					.isEmpty()) {
+					return true;
+				}
+			}
+			return simpleTypeName.equals("Ignore"); //$NON-NLS-1$
 		}
 
 		String qualifiedTypeName = typeBinding.getQualifiedName();
