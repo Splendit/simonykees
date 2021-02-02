@@ -68,7 +68,7 @@ public class CompilationUnitProviderTest {
 
 		assertEquals(2, compilationUnits.size());
 	}
-	
+
 	@Test
 	public void getFilteredCompilationUnits_selectAll_shouldReturnAllCompilationUnits()
 			throws Exception {
@@ -99,6 +99,23 @@ public class CompilationUnitProviderTest {
 		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
 
 		assertEquals(2, compilationUnits.size());
+	}
+
+	@Test
+	public void getFilteredCompilationUnits_fullPath_shouldReturnOneCompilationUnit() throws Exception {
+		/*
+		 * SIM-1875
+		 */
+		ICompilationUnit compUnit2 = createICompilationUnitMock("CompUnit2.java", "eu/jsparrow/test/CompUnit2.java",
+				packageDeclarationMock);
+		ICompilationUnit compUnit3 = createICompilationUnitMock("CompUnit3.java", "eu/jsparrow/test/CompUnit3.java",
+				packageDeclarationMock);
+		CompilationUnitProvider compilationUnitProvider = new CompilationUnitProvider(
+				Arrays.asList(compUnitMock, compUnit2, compUnit3), null, "eu/jsparrow/test/CompUnit2.java");
+
+		List<ICompilationUnit> compilationUnits = compilationUnitProvider.getFilteredCompilationUnits();
+
+		assertEquals(1, compilationUnits.size());
 	}
 
 	@Test
