@@ -85,12 +85,12 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends UsesJDTUnitFixture {
 				"	@Ignore\n" +
 				"	public void test() {\n" +
 				"	}";
-		
+
 		String expected = "" +
 				"	@Disabled\n" +
 				"	public void test() {\n" +
 				"	}";
-		
+
 		assertChange(original, expected);
 	}
 
@@ -106,7 +106,7 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends UsesJDTUnitFixture {
 				"	@Ignore(\"Test is not carried out.\")\n" +
 				"	public void test() {\n" +
 				"	}";
-		
+
 		String expected = "" +
 				"	@Disabled(\"Test is not carried out.\")\n" +
 				"	public void test() {\n" +
@@ -179,7 +179,7 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	public void testWithIgnoreSingleMemberAnnotation() throws Exception {\n"
 				+ "	}\n"
 				+ "}";
-		
+
 		String expected = "" +
 				"class TestStub {\n"
 				+ "\n"
@@ -222,10 +222,10 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	public void testWithIgnoreSingleMemberAnnotation() throws Exception {\n"
 				+ "	}\n"
 				+ "}";
-		
+
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_IgnoreImportedOnDemand_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("org.junit", false, true);
@@ -234,8 +234,7 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends UsesJDTUnitFixture {
 				"	@Ignore\n" +
 				"	public void test() {\n" +
 				"	}";
-		
-		
+
 		assertNoChange(original);
 	}
 }
