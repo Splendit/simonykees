@@ -15,10 +15,10 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-@SuppressWarnings("nls")
 public class MultiCatchRuleTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE = "TestMultiCatchRule.java";
+	private static final String LUB_FILE = "TestMultiCatchLUBRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "multiCatch";
 
 	private MultiCatchRule rule;
@@ -39,6 +39,17 @@ public class MultiCatchRuleTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testTransformationWithLUBFile() throws Exception {
+		Path preRule = getPreRuleFile(LUB_FILE);
+		Path postRule = getPostRuleFile(LUB_FILE, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
 
 	@Test
 	public void calculateEnabledForProjectShouldBeEnabled() {
@@ -50,7 +61,7 @@ public class MultiCatchRuleTest extends SingleRuleTest {
 	}
 
 	@Test
-	public void calculateEnabledforProjectShouldBeDisabled() {
+	public void calculateEnabledForProjectShouldBeDisabled() {
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
 
 		rule.calculateEnabledForProject(testProject);
