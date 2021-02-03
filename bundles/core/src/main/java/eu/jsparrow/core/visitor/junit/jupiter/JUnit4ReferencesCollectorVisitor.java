@@ -1,12 +1,10 @@
 package eu.jsparrow.core.visitor.junit.jupiter;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
@@ -19,7 +17,6 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 
 /**
  * Collects the following annotations: <br>
@@ -33,6 +30,8 @@ import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
  */
 class JUnit4ReferencesCollectorVisitor extends ASTVisitor {
 
+	private static final String ORG_JUNIT_IGNORE = "org.junit.Ignore"; //$NON-NLS-1$
+
 	private static final String PACKAGE_ORG_JUNIT = "org.junit"; //$NON-NLS-1$
 
 	private static final Predicate<String> PREDICATE_J_UNIT_4_PACKAGE = RegexPredicateFactory
@@ -41,49 +40,73 @@ class JUnit4ReferencesCollectorVisitor extends ASTVisitor {
 	private static final Predicate<String> PREDICATE_J_UNIT_4_SUPPORTED_ANNOTATIONS = RegexPredicateFactory
 		.createSupportedAnnotationPredicate();
 
-	private final List<Annotation> supportedAnnotations = new ArrayList<>();
-
-	private final List<ImportDeclaration> supportedAnnotationInports = new ArrayList<>();
-
-	private final List<Name> unexpectedReferencesToJUnit = new ArrayList<>();
+	private boolean transformationPossible = true;
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
 
-		return super.preVisit2(node) && referencesOK();
+		return transformationPossible && super.preVisit2(node);
 	}
 
 	@Override
 	public boolean visit(QualifiedName node) {
-		if (isNameOfSupportedAnnotation(node)) {
-			supportedAnnotations.add((Annotation) node.getParent());
-		} else if (isNameOfSupportedAnnotationImport(node)) {
-			supportedAnnotationInports.add((ImportDeclaration) node.getParent());
-		} else if (isUnexpectedReferenceToJUnit(node)) {
-			unexpectedReferencesToJUnit.add(node);
-		}
+		transformationPossible = analyzeQualifiedName(node);
 		return false;
 	}
 
 	@Override
 	public boolean visit(SimpleName node) {
-		if (isNameOfSupportedAnnotation(node)) {
-			supportedAnnotations.add((Annotation) node.getParent());
-		} else if (isUnexpectedReferenceToJUnit(node)) {
-			unexpectedReferencesToJUnit.add(node);
-		}
+		transformationPossible = analyzeSimpleName(node);
 		return false;
 	}
 
+	private boolean analyzeSimpleName(SimpleName node) {
+		if (isNameOfSupportedAnnotation(node)) {
+			return true;
+		}
+		if (isIgnoreAnnotationValueName(node)) {
+			return true;
+		}
+		return !isUnexpectedReferenceToJUnit(node.resolveBinding());
+	}
+
+	private boolean analyzeQualifiedName(QualifiedName node) {
+
+		if (isNameOfSupportedAnnotation(node)) {
+			return true;
+		}
+		if (isNameOfSupportedAnnotationImport(node)) {
+			return true;
+		}
+		return !isUnexpectedReferenceToJUnit(node.resolveBinding());
+	}
+
 	private boolean isNameOfSupportedAnnotation(Name name) {
+		
+		IBinding binding = name.resolveBinding();
+		if (binding.getKind() != IBinding.TYPE) {
+			return false;
+		}
 
-		if (name.getLocationInParent() == MarkerAnnotation.TYPE_NAME_PROPERTY
-				|| name.getLocationInParent() == NormalAnnotation.TYPE_NAME_PROPERTY
-				|| name.getLocationInParent() == SingleMemberAnnotation.TYPE_NAME_PROPERTY) {
+		ITypeBinding typeBinding = (ITypeBinding) binding;
+		if (PREDICATE_J_UNIT_4_SUPPORTED_ANNOTATIONS.test(typeBinding.getQualifiedName())) {
 
-			ITypeBinding typeBinding = name.resolveTypeBinding();
-			return PREDICATE_J_UNIT_4_SUPPORTED_ANNOTATIONS.test(typeBinding.getQualifiedName());
+			if (name.getLocationInParent() == MarkerAnnotation.TYPE_NAME_PROPERTY) {
+				return true;
+			}
 
+			if (name.getLocationInParent() == NormalAnnotation.TYPE_NAME_PROPERTY) {
+				NormalAnnotation normalAnnotation = (NormalAnnotation) name.getParent();
+				if (normalAnnotation.values()
+					.isEmpty()) {
+					return true;
+				}
+			}
+
+			if (typeBinding.getQualifiedName()
+				.equals(ORG_JUNIT_IGNORE)) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -105,66 +128,70 @@ class JUnit4ReferencesCollectorVisitor extends ASTVisitor {
 		return false;
 	}
 
-	private boolean isUnexpectedReferenceToJUnit(Name name) {
-
-		if (name.getLocationInParent() == MemberValuePair.NAME_PROPERTY &&
-				name.getParent()
-					.getLocationInParent() == NormalAnnotation.VALUES_PROPERTY) {
-			NormalAnnotation annotation = (NormalAnnotation) name.getParent()
-				.getParent();
-			// Special case for annotations like
-			// @Ignore(value = "This test is ignored")
-			// where reference to JUNit 4 is not unexpected
-			if (annotation.resolveTypeBinding()
-				.getQualifiedName()
-				.equals("org.junit.Ignore")) { //$NON-NLS-1$
-				return false;
-			}
+	private boolean isIgnoreAnnotationValueName(SimpleName simpleName) {
+		if (simpleName.getLocationInParent() != MemberValuePair.NAME_PROPERTY) {
+			return false;
 		}
+		MemberValuePair memberValuePair = (MemberValuePair) simpleName.getParent();
 
-		IBinding binding = name.resolveBinding();
-		IPackageBinding packageBinding = null;
+		if (memberValuePair.getLocationInParent() != NormalAnnotation.VALUES_PROPERTY) {
+			return false;
+		}
+		NormalAnnotation annotation = (NormalAnnotation) memberValuePair.getParent();
+		return annotation.resolveTypeBinding()
+			.getQualifiedName()
+			.equals(ORG_JUNIT_IGNORE);
+	}
+
+	private boolean isUnexpectedReferenceToJUnit(IBinding binding) {
 
 		if (binding.getKind() == IBinding.PACKAGE) {
-			packageBinding = (IPackageBinding) binding;
+			return isJUnit4Package((IPackageBinding) binding);
 
 		}
-
 		if (binding.getKind() == IBinding.TYPE) {
-			ITypeBinding typeBinding = (ITypeBinding) binding;
-			packageBinding = typeBinding.getPackage();
-		}
+			return isJUnit4Type((ITypeBinding) binding);
 
+		}
 		if (binding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = (IMethodBinding) binding;
-			ITypeBinding typeBinding = methodBinding.getDeclaringClass();
-			packageBinding = typeBinding.getPackage();
+			return isJUnit4Type(methodBinding.getDeclaringClass());
+
 		}
 
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
-			ITypeBinding typeBinding = variableBinding.getDeclaringClass();
-			if (typeBinding != null) {
-				packageBinding = typeBinding.getPackage();
+			if (isJUnit4Type(variableBinding.getType())) {
+				return true;
 			}
+			return isJUnit4Type(variableBinding.getDeclaringClass());
 		}
 
+		if (binding.getKind() == IBinding.ANNOTATION) {
+			IAnnotationBinding annotationBinding = (IAnnotationBinding) binding;
+			return isJUnit4Type(annotationBinding.getAnnotationType());
+
+		}
+
+		return false;
+	}
+
+	private boolean isJUnit4Package(IPackageBinding packageBinding) {
 		if (packageBinding != null) {
 			return PREDICATE_J_UNIT_4_PACKAGE.test(packageBinding.getName());
 		}
 		return false;
 	}
 
-	List<Annotation> getSupportedAnnotations() {
-		return supportedAnnotations;
+	private boolean isJUnit4Type(ITypeBinding typeBinding) {
+		if (typeBinding != null) {
+			return isJUnit4Package(typeBinding.getPackage());
+		}
+		return false;
 	}
 
-	List<ImportDeclaration> getSupportedAnnotationImports() {
-		return supportedAnnotationInports;
-	}
-
-	boolean referencesOK() {
-		return unexpectedReferencesToJUnit.isEmpty();
+	boolean isTransformationPossible() {
+		return transformationPossible;
 	}
 
 }

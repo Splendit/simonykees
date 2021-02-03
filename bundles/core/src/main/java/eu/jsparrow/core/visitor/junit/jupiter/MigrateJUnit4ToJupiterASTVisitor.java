@@ -68,11 +68,14 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 		JUnit4ReferencesCollectorVisitor jUnit4ReferencesVisitor = new JUnit4ReferencesCollectorVisitor();
 		compilationUnit.accept(jUnit4ReferencesVisitor);
 		
-		if(!jUnit4ReferencesVisitor.referencesOK()) {
+		if(!jUnit4ReferencesVisitor.isTransformationPossible()) {
 			return false;
 		}
+		
+		AnnotationCollectorVisitor annotationsCollectorVisitor = new AnnotationCollectorVisitor();
+		compilationUnit.accept(annotationsCollectorVisitor);
 
-		List<Annotation> jUnit4Annotations = jUnit4ReferencesVisitor.getSupportedAnnotations();
+		List<Annotation> jUnit4Annotations = annotationsCollectorVisitor.getAnnotations();
 
 		List<ImportDeclaration> orgJUnitAnnotationImports = ASTNodeUtil.convertToTypedList(this.getCompilationUnit()
 			.imports(), ImportDeclaration.class)
