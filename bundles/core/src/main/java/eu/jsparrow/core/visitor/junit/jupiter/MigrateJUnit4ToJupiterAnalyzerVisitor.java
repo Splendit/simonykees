@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * </ul>
  *
  */
-class JUnit4ReferencesCollectorVisitor extends ASTVisitor {
+class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 
 	private static final String ANNOTATION_TYPE_ORG_JUNIT_IGNORE = "org.junit.Ignore"; //$NON-NLS-1$
 

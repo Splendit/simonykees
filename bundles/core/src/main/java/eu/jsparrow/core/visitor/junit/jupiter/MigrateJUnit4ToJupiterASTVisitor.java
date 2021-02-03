@@ -70,7 +70,7 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 			return false;
 		}
 		
-		JUnit4ReferencesCollectorVisitor jUnit4ReferencesVisitor = new JUnit4ReferencesCollectorVisitor();
+		MigrateJUnit4ToJupiterAnalyzerVisitor jUnit4ReferencesVisitor = new MigrateJUnit4ToJupiterAnalyzerVisitor();
 		compilationUnit.accept(jUnit4ReferencesVisitor);
 		
 		if(!jUnit4ReferencesVisitor.isTransformationPossible()) {
