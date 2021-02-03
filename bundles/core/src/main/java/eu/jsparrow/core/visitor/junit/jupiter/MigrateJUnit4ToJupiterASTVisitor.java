@@ -31,10 +31,10 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisitor {
 
-	private final Map<String, String> annotationQualifiedNamesReplacementMap;
-	private final Map<String, String> annotationSimpleNamesReplacementMap;
-
-	public MigrateJUnit4ToJupiterASTVisitor() {
+	static final Map<String, String> ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
+	static final Map<String, String> ANNOTATION_SIMPLE_NAMES_REPLACEMENT_MAP;
+	
+	static {
 
 		Map<String, String> tmpMap = new HashMap<>();
 		tmpMap.put("org.junit.Ignore", "org.junit.jupiter.api.Disabled"); //$NON-NLS-1$//$NON-NLS-2$
@@ -44,7 +44,7 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 		tmpMap.put("org.junit.Before", "org.junit.jupiter.api.BeforeEach"); //$NON-NLS-1$//$NON-NLS-2$
 		tmpMap.put("org.junit.BeforeClass", "org.junit.jupiter.api.BeforeAll"); //$NON-NLS-1$//$NON-NLS-2$
 
-		annotationQualifiedNamesReplacementMap = Collections.unmodifiableMap(tmpMap);
+		ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP = Collections.unmodifiableMap(tmpMap);
 
 		tmpMap = new HashMap<>();
 		tmpMap.put("Ignore", "Disabled"); //$NON-NLS-1$//$NON-NLS-2$
@@ -54,7 +54,12 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 		tmpMap.put("Before", "BeforeEach"); //$NON-NLS-1$//$NON-NLS-2$
 		tmpMap.put("BeforeClass", "BeforeAll"); //$NON-NLS-1$//$NON-NLS-2$
 
-		annotationSimpleNamesReplacementMap = Collections.unmodifiableMap(tmpMap);
+		ANNOTATION_SIMPLE_NAMES_REPLACEMENT_MAP = Collections.unmodifiableMap(tmpMap);
+	}
+	
+
+	public MigrateJUnit4ToJupiterASTVisitor() {
+
 	}
 
 	@Override
@@ -91,7 +96,7 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 			.map(annotation -> annotation.getTypeName())
 			.filter(Name::isSimpleName)
 			.map(SimpleName.class::cast)
-			.filter(simpleName -> annotationSimpleNamesReplacementMap.containsKey(simpleName.getIdentifier()))
+			.filter(simpleName -> ANNOTATION_SIMPLE_NAMES_REPLACEMENT_MAP.containsKey(simpleName.getIdentifier()))
 			.collect(Collectors.toList());
 
 		if (annotationsOK) {
@@ -134,7 +139,7 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 		ITypeBinding typeBinding = annotation.resolveTypeBinding();
 
 		String simpleTypeName = typeBinding.getName();
-		if (annotationSimpleNamesReplacementMap.containsKey(simpleTypeName)) {
+		if (ANNOTATION_SIMPLE_NAMES_REPLACEMENT_MAP.containsKey(simpleTypeName)) {
 			if (!annotation.getTypeName()
 				.isSimpleName()) {
 				return false;

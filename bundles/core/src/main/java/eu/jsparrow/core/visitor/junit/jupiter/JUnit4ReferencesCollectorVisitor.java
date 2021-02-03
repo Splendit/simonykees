@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.junit.jupiter;
 
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -30,22 +31,27 @@ import org.eclipse.jdt.core.dom.SimpleName;
  */
 class JUnit4ReferencesCollectorVisitor extends ASTVisitor {
 
-	private static final String ORG_JUNIT_IGNORE = "org.junit.Ignore"; //$NON-NLS-1$
+	private static final String ANNOTATION_TYPE_ORG_JUNIT_IGNORE = "org.junit.Ignore"; //$NON-NLS-1$
 
 	private static final String PACKAGE_ORG_JUNIT = "org.junit"; //$NON-NLS-1$
 
-	private static final Predicate<String> PREDICATE_J_UNIT_4_PACKAGE = RegexPredicateFactory
-		.createjUnit4PackagePredicate();
-
-	private static final Predicate<String> PREDICATE_J_UNIT_4_SUPPORTED_ANNOTATIONS = RegexPredicateFactory
-		.createSupportedAnnotationPredicate();
+	private static final Predicate<String> PREDICATE_J_UNIT_4_PACKAGE = createjUnit4PackagePredicate();
 
 	private boolean transformationPossible = true;
 
+	static Predicate<String> createjUnit4PackagePredicate() {
+		String regexOrgJunitChildPackages = "experimental|function|internal|matchers|rules|runner|runners|validator"; //$NON-NLS-1$
+		String regexOrgJUnit = "org\\.junit(\\.(" + regexOrgJunitChildPackages + ")(\\..+)?)?$"; //$NON-NLS-1$ //$NON-NLS-2$
+
+		String regexJUnit = "junit\\.(extensions|framework|runner|textui)$"; //$NON-NLS-1$
+		Pattern pattern = Pattern.compile("^(" + regexJUnit + ")|(" + regexOrgJUnit + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		return pattern.asPredicate();
+	}
+
 	@Override
 	public boolean preVisit2(ASTNode node) {
-
-		return transformationPossible && super.preVisit2(node);
+		return transformationPossible;
 	}
 
 	@Override
@@ -82,14 +88,14 @@ class JUnit4ReferencesCollectorVisitor extends ASTVisitor {
 	}
 
 	private boolean isNameOfSupportedAnnotation(Name name) {
-		
+
 		IBinding binding = name.resolveBinding();
 		if (binding.getKind() != IBinding.TYPE) {
 			return false;
 		}
 
 		ITypeBinding typeBinding = (ITypeBinding) binding;
-		if (PREDICATE_J_UNIT_4_SUPPORTED_ANNOTATIONS.test(typeBinding.getQualifiedName())) {
+		if (isSupportedJUnit4AnnotationType(typeBinding)) {
 
 			if (name.getLocationInParent() == MarkerAnnotation.TYPE_NAME_PROPERTY) {
 				return true;
@@ -104,7 +110,7 @@ class JUnit4ReferencesCollectorVisitor extends ASTVisitor {
 			}
 
 			if (typeBinding.getQualifiedName()
-				.equals(ORG_JUNIT_IGNORE)) {
+				.equals(ANNOTATION_TYPE_ORG_JUNIT_IGNORE)) {
 				return true;
 			}
 		}
@@ -121,11 +127,31 @@ class JUnit4ReferencesCollectorVisitor extends ASTVisitor {
 			}
 			if (binding.getKind() == IBinding.TYPE) {
 				ITypeBinding typeBinding = (ITypeBinding) binding;
-				return PREDICATE_J_UNIT_4_SUPPORTED_ANNOTATIONS.test(typeBinding.getQualifiedName());
+				return isSupportedJUnit4AnnotationType(typeBinding);
 			}
 
 		}
 		return false;
+	}
+
+	private boolean isSupportedJUnit4AnnotationType(ITypeBinding typeBinding) {
+		IPackageBinding packageBinding = typeBinding.getPackage();
+		if (packageBinding == null) {
+			return false;
+		}
+		if (!packageBinding.getName()
+			.equals(PACKAGE_ORG_JUNIT)) {
+			return false;
+		}
+		;
+		String simpleTypeName = typeBinding.getName();
+		return simpleTypeName.equals("Ignore") //$NON-NLS-1$
+				|| simpleTypeName.equals("Test") //$NON-NLS-1$
+				|| simpleTypeName.equals("After") //$NON-NLS-1$
+				|| simpleTypeName.equals("AfterClass") //$NON-NLS-1$
+				|| simpleTypeName.equals("Before") //$NON-NLS-1$
+				|| simpleTypeName.equals("BeforeClass"); //$NON-NLS-1$
+
 	}
 
 	private boolean isIgnoreAnnotationValueName(SimpleName simpleName) {
@@ -140,7 +166,7 @@ class JUnit4ReferencesCollectorVisitor extends ASTVisitor {
 		NormalAnnotation annotation = (NormalAnnotation) memberValuePair.getParent();
 		return annotation.resolveTypeBinding()
 			.getQualifiedName()
-			.equals(ORG_JUNIT_IGNORE);
+			.equals(ANNOTATION_TYPE_ORG_JUNIT_IGNORE);
 	}
 
 	private boolean isUnexpectedReferenceToJUnit(IBinding binding) {
