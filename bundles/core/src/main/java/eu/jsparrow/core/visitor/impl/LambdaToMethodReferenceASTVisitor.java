@@ -19,7 +19,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.CreationReference;
@@ -28,6 +30,7 @@ import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -36,13 +39,16 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -70,7 +76,17 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	@Override
 	public boolean visit(LambdaExpression lambdaExpressionNode) {
 
+		ITypeBinding contextType = findContextType(lambdaExpressionNode).orElse(null);
+		if(contextType == null) {
+			return true;
+		}
+
+		ITypeBinding lambdaType = lambdaExpressionNode.resolveTypeBinding();
 		Expression body = extractSingleBodyExpression(lambdaExpressionNode);
+		
+		if(areIncompatibleFunctions(contextType, lambdaType)) {
+			return true;
+		}
 
 		// work only with expression lambdas
 		if (body != null) {
@@ -85,7 +101,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						Expression.class);
 				Expression methodInvocationExpression = methodInvocation.getExpression();
 
-				if (isWrappedInOverloadedMethod(lambdaExpressionNode, methodInvocation)) {
+				if (isWrappedInOverloadedMethod(lambdaExpressionNode, methodInvocation)) { 
 					return true;
 				}
 
@@ -311,6 +327,103 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		}
 
 		return true;
+	}
+	
+	
+	private boolean areIncompatibleFunctions(ITypeBinding contextType, ITypeBinding lambdaType) {
+		
+		if(contextType.isParameterizedType() && lambdaType.isParameterizedType()) {
+			ITypeBinding[] contextTypeArgs = contextType.getTypeArguments();
+			ITypeBinding[] lambdaTypeArgs = lambdaType.getTypeArguments();
+			int length = contextTypeArgs.length;
+			if(length != lambdaTypeArgs.length) {
+				return true;
+			}
+			
+			for(int i = 0; i<length; i++) {
+				ITypeBinding contextArg = contextTypeArgs[i];
+				ITypeBinding lambdaArg = lambdaTypeArgs[i];
+				if(contextArg.isWildcardType()) {
+					ITypeBinding bound = contextArg.getBound();
+					boolean incompatible = areIncompatible(bound, lambdaArg);
+					if(incompatible) return true;
+				} else {
+					boolean incompatible = areIncompatible(contextArg, lambdaArg);
+					if(incompatible) return true;
+				}
+			}
+			return false;
+		}
+		
+		return areIncompatible(contextType, lambdaType);
+	}
+	
+
+	private boolean areIncompatible(ITypeBinding contextType, ITypeBinding lambdaType) {
+		if(contextType == null) {
+			return true;
+		}
+		
+		if(contextType.isParameterizedType() && lambdaType.isParameterizedType()) {
+			ITypeBinding[] contextTypeArgs = contextType.getTypeArguments();
+			ITypeBinding[] lambdaTypeArgs = lambdaType.getTypeArguments();
+			int length = contextTypeArgs.length;
+			if(length != lambdaTypeArgs.length) {
+				return true;
+			}
+			
+			for(int i = 0; i<length; i++) {
+				ITypeBinding contextArg = contextTypeArgs[i];
+				ITypeBinding lambdaArg = lambdaTypeArgs[i];
+				if(areIncompatible(contextArg, lambdaArg)) {
+					return true;
+				}
+			}
+		}
+		
+		if(contextType.isCapture() && !lambdaType.isCapture()) {
+			return true;
+		}
+		
+		if(contextType.isWildcardType()) {
+			if(!lambdaType.isWildcardType()) {
+				return true;
+			}
+			ITypeBinding contextBound = contextType.getBound();
+			ITypeBinding lambdaBound = lambdaType.getBound();
+			return areIncompatible(contextBound, lambdaBound);
+		}
+		
+		return !contextType.isAssignmentCompatible(lambdaType);
+		
+	}
+
+	private Optional<ITypeBinding> findContextType(LambdaExpression lambdaExpressionNode) {
+		StructuralPropertyDescriptor locationInParent = lambdaExpressionNode.getLocationInParent();
+		ITypeBinding contextTypeBinding = null;
+		if(locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			Assignment assignment = (Assignment)lambdaExpressionNode.getParent();
+			Expression lhs = assignment.getLeftHandSide();
+			contextTypeBinding = lhs.resolveTypeBinding();
+		} else if(locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment fragment = (VariableDeclarationFragment)lambdaExpressionNode.getParent();
+			IVariableBinding variableBinding = fragment.resolveBinding();
+			contextTypeBinding = variableBinding.getType();
+		} else if(locationInParent == CastExpression.EXPRESSION_PROPERTY) {
+			CastExpression cast = (CastExpression)lambdaExpressionNode.getParent();
+			contextTypeBinding = cast.resolveTypeBinding();
+		} else if(locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
+			MethodInvocation methodInvocation = (MethodInvocation)lambdaExpressionNode.getParent();
+			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
+			List<Expression>arguments = methodInvocation.arguments();
+			int index = arguments.indexOf(lambdaExpressionNode);
+			contextTypeBinding = parameterTypes[index];
+		} else if(locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
+			ReturnStatement returnStatement = (ReturnStatement)lambdaExpressionNode.getParent();
+			
+		}
+		return Optional.ofNullable(contextTypeBinding);
 	}
 
 	private Optional<ParameterizedType> findExplicitParameterizedLambdaParameterType(
