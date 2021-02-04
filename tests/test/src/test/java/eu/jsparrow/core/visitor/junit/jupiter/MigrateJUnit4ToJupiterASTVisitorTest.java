@@ -194,12 +194,8 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends AbstractMigrateJUnit4ToJupite
 		assertChange(original, expected, importsToStringExpected);
 	}
 
-	/**
-	 * Expected to fail as soon as the {@link org.junit.Assert} - class will be
-	 * supported.
-	 */
 	@Test
-	public void visit_JUnit4AssertImportedExplicitly_shouldNotTransform() throws Exception {
+	public void visit_JUnit4AssertImportedExplicitly_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Assert.class.getName());
 		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
 
@@ -222,12 +218,8 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends AbstractMigrateJUnit4ToJupite
 		assertChange(original, expected, importsToStringExpected);
 	}
 
-	/**
-	 * Expected to fail as soon as both the {@link org.junit.Assert} - class and
-	 * the static on-demand import of its methods will be supported.
-	 */
 	@Test
-	public void visit_JUnit4AssertEqualsStaticImportOnDemand_shouldNotTransform() throws Exception {
+	public void visit_JUnit4AssertEqualsStaticImportOnDemand_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.junit.Assert", true, true);
 		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
 
@@ -250,4 +242,47 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends AbstractMigrateJUnit4ToJupite
 		assertChange(original, expected, importsToStringExpected);
 	}
 
+	@Test
+	public void visit_JUnit4AssertAndBeforeClassImportedOnDemand_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.junit", false, true);
+
+		String original = "" +
+				"	@BeforeClass\n" +
+				"	public void beforeAll() {\n" +
+				"		Assert.assertEquals(\"1\", \"1\");" +
+				"	}";
+
+		String expected = "" +
+				"	@BeforeAll\n" +
+				"	public void beforeAll() {\n" +
+				"		Assert.assertEquals(\"1\", \"1\");" +
+				"	}";
+
+		List<String> importsToStringExpected = Arrays.asList(
+				"import org.junit.*;",
+				"import org.junit.jupiter.api.BeforeAll;");
+
+		assertChange(original, expected, importsToStringExpected);
+	}
+
+	@Test
+	public void visit_IgnoreImportedOnDemand_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.junit", false, true);
+
+		String original = "" +
+				"	@Ignore\n" +
+				"	public void test() {\n" +
+				"	}";
+
+		String expected = "" +
+				"	@Disabled\n" +
+				"	public void test() {\n" +
+				"	}";
+
+		List<String> importsToStringExpected = Arrays.asList(
+				"import org.junit.*;",
+				"import org.junit.jupiter.api.Disabled;");
+
+		assertChange(original, expected, importsToStringExpected);
+	}
 }

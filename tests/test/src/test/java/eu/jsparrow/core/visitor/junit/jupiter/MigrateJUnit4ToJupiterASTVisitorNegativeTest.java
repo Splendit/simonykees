@@ -17,23 +17,6 @@ class MigrateJUnit4ToJupiterASTVisitorNegativeTest extends AbstractMigrateJUnit4
 		fixtureProject.clear();
 	}
 
-	/**
-	 * Expected to fail as soon as both import on demand and the
-	 * {@link org.junit.Assert} - class will be supported.
-	 */
-	@Test
-	public void visit_JUnit4AssertImportedOnDemand_shouldNotTransform() throws Exception {
-		defaultFixture.addImport("org.junit", false, true);
-
-		String original = "" +
-				"	@BeforeClass\n" +
-				"	public void beforeAll() {\n" +
-				"		Assert.assertEquals(\"1\", \"1\");" +
-				"	}";
-
-		assertNoChange(original);
-	}
-
 	@Test
 	public void visit_JUnit4TestAnnotation_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
@@ -74,21 +57,6 @@ class MigrateJUnit4ToJupiterASTVisitorNegativeTest extends AbstractMigrateJUnit4
 				+ "	@interface BeforeClass {\n"
 				+ "		\n"
 				+ "	}";
-
-		assertNoChange(original);
-	}
-
-	/*
-	 * SIM-1873: expected to fail as soon import on demand will be supported
-	 */
-	@Test
-	public void visit_IgnoreImportedOnDemand_shouldNotTransform() throws Exception {
-		defaultFixture.addImport("org.junit", false, true);
-
-		String original = "" +
-				"	@Ignore\n" +
-				"	public void test() {\n" +
-				"	}";
 
 		assertNoChange(original);
 	}
