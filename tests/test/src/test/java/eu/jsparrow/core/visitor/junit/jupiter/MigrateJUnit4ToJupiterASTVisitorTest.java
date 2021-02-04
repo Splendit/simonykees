@@ -73,7 +73,7 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends AbstractMigrateJUnit4ToJupite
 		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
 		defaultFixture.addImport(org.junit.Ignore.class.getName());
 		defaultFixture.addImport(org.junit.Test.class.getName());
-		
+
 		List<String> importsToStringExpected = Arrays.asList(
 				"import " + org.junit.jupiter.api.AfterEach.class.getName() + ";",
 				"import " + org.junit.jupiter.api.AfterAll.class.getName() + ";",
@@ -167,6 +167,85 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends AbstractMigrateJUnit4ToJupite
 				+ "	public void testWithIgnoreSingleMemberAnnotation() throws Exception {\n"
 				+ "	}\n"
 				+ "}";
+
+		assertChange(original, expected, importsToStringExpected);
+	}
+
+	@Test
+	public void visit_JUnit4AssertEqualsStaticImport_shouldTansform() throws Exception {
+		defaultFixture.addImport("org.junit.Assert.assertEquals", true, false);
+		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
+
+		String original = "" +
+				"	@BeforeClass\n" +
+				"	public void beforeAll() {\n" +
+				"		assertEquals(\"1\", \"1\");" +
+				"	}";
+
+		String expected = "" +
+				"	@BeforeAll\n" +
+				"	public void beforeAll() {\n" +
+				"		assertEquals(\"1\", \"1\");\n" +
+				"	}";
+		List<String> importsToStringExpected = Arrays.asList(
+				"import static org.junit.Assert.assertEquals;",
+				"import org.junit.jupiter.api.BeforeAll;");
+
+		assertChange(original, expected, importsToStringExpected);
+	}
+
+	/**
+	 * Expected to fail as soon as the {@link org.junit.Assert} - class will be
+	 * supported.
+	 */
+	@Test
+	public void visit_JUnit4AssertImportedExplicitly_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(org.junit.Assert.class.getName());
+		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
+
+		String original = "" +
+				"	@BeforeClass\n" +
+				"	public void beforeAll() {\n" +
+				"		Assert.assertEquals(\"1\", \"1\");" +
+				"	}";
+
+		String expected = "" +
+				"	@BeforeAll\n" +
+				"	public void beforeAll() {\n" +
+				"		Assert.assertEquals(\"1\", \"1\");\n" +
+				"	}";
+
+		List<String> importsToStringExpected = Arrays.asList(
+				"import org.junit.Assert;",
+				"import org.junit.jupiter.api.BeforeAll;");
+
+		assertChange(original, expected, importsToStringExpected);
+	}
+
+	/**
+	 * Expected to fail as soon as both the {@link org.junit.Assert} - class and
+	 * the static on-demand import of its methods will be supported.
+	 */
+	@Test
+	public void visit_JUnit4AssertEqualsStaticImportOnDemand_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assert", true, true);
+		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
+
+		String original = "" +
+				"	@BeforeClass\n" +
+				"	public void beforeAll() throws Exception {\n" +
+				"		assertEquals(\"1\", \"1\");\n" +
+				"	}";
+
+		String expected = "" +
+				"	@BeforeAll\n" +
+				"	public void beforeAll() throws Exception {\n" +
+				"		assertEquals(\"1\", \"1\");\n" +
+				"	}";
+
+		List<String> importsToStringExpected = Arrays.asList(
+				"import static org.junit.Assert.*;",
+				"import org.junit.jupiter.api.BeforeAll;");
 
 		assertChange(original, expected, importsToStringExpected);
 	}

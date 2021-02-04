@@ -36,60 +36,6 @@ class MigrateJUnit4ToJupiterASTVisitorNegativeTest extends AbstractMigrateJUnit4
 		assertNoChange(original);
 	}
 
-	/**
-	 * Expected to fail as soon as the {@link org.junit.Assert} - class will be
-	 * supported.
-	 */
-	@Test
-	public void visit_JUnit4AssertImportedExplicitly_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(org.junit.Assert.class.getName());
-		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
-
-		String original = "" +
-				"	@BeforeClass\n" +
-				"	public void beforeAll() {\n" +
-				"		Assert.assertEquals(\"1\", \"1\");" +
-				"	}";
-
-		assertNoChange(original);
-	}
-
-	/**
-	 * Expected to fail as soon as both the {@link org.junit.Assert} - class and
-	 * the static import of its methods will be supported.
-	 */
-	@Test
-	public void visit_JUnit4AssertEqualsStaticImport_shouldNotTransform() throws Exception {
-		defaultFixture.addImport("org.junit.Assert.assertEquals", true, false);
-		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
-
-		String original = "" +
-				"	@BeforeClass\n" +
-				"	public void beforeAll() {\n" +
-				"		assertEquals(\"1\", \"1\");" +
-				"	}";
-
-		assertNoChange(original);
-	}
-
-	/**
-	 * Expected to fail as soon as both the {@link org.junit.Assert} - class and
-	 * the static on-demand import of its methods will be supported.
-	 */
-	@Test
-	public void visit_JUnit4AssertEqualsStaticImportOnDemand_shouldNotTransform() throws Exception {
-		defaultFixture.addImport("org.junit.Assert", true, true);
-		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
-
-		String original = "" +
-				"	@BeforeClass\n" +
-				"	public void beforeAll() throws Exception {\n" +
-				"		assertEquals(\"1\", \"1\");\n" +
-				"	}";
-
-		assertNoChange(original);
-	}
-
 	@SuppressWarnings("restriction")
 	@ParameterizedTest
 	@ValueSource(classes = {
@@ -114,12 +60,19 @@ class MigrateJUnit4ToJupiterASTVisitorNegativeTest extends AbstractMigrateJUnit4
 
 		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
 
-		String toStringInvocation = clazz.getName() + ".toString();";
+		String toStringInvocation = clazz.getName() + ".class.toString();";
 		String original = "" +
 				"	@BeforeClass\n" +
 				"	public void beforeClass() {\n" +
 				"	" + toStringInvocation +
 				"	}";
+
+		// org.junit.Assert.toString();
+		if (clazz.getSimpleName()
+			.equals("Assert")) {
+			toStringInvocation.length();
+			// org.junit.Assert.toString();
+		}
 
 		assertNoChange(original);
 	}

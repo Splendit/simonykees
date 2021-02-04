@@ -14,10 +14,15 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
  * Collects the following annotations: <br>
@@ -31,12 +36,11 @@ import org.eclipse.jdt.core.dom.SimpleName;
  */
 class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 
-	private static final String ANNOTATION_TYPE_ORG_JUNIT_IGNORE = "org.junit.Ignore"; //$NON-NLS-1$
-
+	private static final String TYPE_ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
+	private static final String TYPE_ORG_JUNIT_IGNORE = "org.junit.Ignore"; //$NON-NLS-1$
 	private static final String PACKAGE_ORG_JUNIT = "org.junit"; //$NON-NLS-1$
 
 	private static final Predicate<String> PREDICATE_J_UNIT_4_PACKAGE = createjUnit4PackagePredicate();
-
 	private boolean transformationPossible = true;
 
 	static Predicate<String> createjUnit4PackagePredicate() {
@@ -55,6 +59,18 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(ImportDeclaration node) {
+		transformationPossible = analyzeImport(node);
+		return false;
+	}
+
+	@Override
+	public boolean visit(MethodInvocation node) {
+		transformationPossible = analyzeMethodInvocation(node);
+		return transformationPossible;
+	}
+
+	@Override
 	public boolean visit(QualifiedName node) {
 		transformationPossible = analyzeQualifiedName(node);
 		return false;
@@ -66,7 +82,53 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		return false;
 	}
 
+	private boolean analyzeImport(ImportDeclaration node) {
+		IBinding binding = node.resolveBinding();
+
+		if (binding.getKind() == IBinding.PACKAGE) {
+			IPackageBinding packageBinding = (IPackageBinding) binding;
+			if (packageBinding.getName()
+				.equals(PACKAGE_ORG_JUNIT)) {
+				return true;
+			}
+		}
+
+		if (binding.getKind() == IBinding.TYPE) {
+			ITypeBinding typeBinding = (ITypeBinding) binding;
+			if (isJUnit4AssertClass(typeBinding) || isSupportedJUnit4AnnotationType(typeBinding)) {
+				return true;
+			}
+		}
+
+		if (binding.getKind() == IBinding.METHOD) {
+			if (isJUnit4AssertClass(((IMethodBinding) binding).getDeclaringClass())) {
+				return true;
+			}
+		}
+
+		return !isUnexpectedReferenceToJUnit(binding);
+	}
+
+	private boolean isJUnit4AssertClass(ITypeBinding typeBinding) {
+		String qualifiedTypeName = typeBinding.getQualifiedName();
+		return qualifiedTypeName.equals(TYPE_ORG_JUNIT_ASSERT);
+	}
+
+	private boolean analyzeMethodInvocation(MethodInvocation node) {
+
+		ITypeBinding declaringClass = node.resolveMethodBinding()
+			.getDeclaringClass();
+		if (isJUnit4AssertClass(declaringClass)) {
+			return true;
+		}
+
+		return !isUnexpectedReferenceToJUnit(node.resolveMethodBinding());
+	}
+
 	private boolean analyzeSimpleName(SimpleName node) {
+		if (isNameReferencingJUnit4Assert(node)) {
+			return true;
+		}
 		if (isNameOfSupportedAnnotation(node)) {
 			return true;
 		}
@@ -77,7 +139,9 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 	}
 
 	private boolean analyzeQualifiedName(QualifiedName node) {
-
+		if (isNameReferencingJUnit4Assert(node)) {
+			return true;
+		}
 		if (isNameOfSupportedAnnotation(node)) {
 			return true;
 		}
@@ -85,6 +149,47 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 			return true;
 		}
 		return !isUnexpectedReferenceToJUnit(node.resolveBinding());
+	}
+
+	private boolean isNameReferencingJUnit4Assert(Name name) {
+		IBinding binding = name.resolveBinding();
+		if (binding.getKind() == IBinding.METHOD) {
+			if (isJUnit4AssertClass(((IMethodBinding) binding).getDeclaringClass())) {
+				return true;
+			}
+		}
+
+		if (binding.getKind() == IBinding.TYPE) {
+
+			if (isJUnit4AssertClass((ITypeBinding) binding)) {
+				boolean supported = false;
+				if (name.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {
+					supported = true;
+				}
+				if (name.getLocationInParent() == TypeDeclaration.SUPERCLASS_TYPE_PROPERTY) {
+					supported = true;
+				}
+				if (name.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
+					supported = true;
+				}
+				if (name.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY) {
+					supported = true;
+				}
+				if (name.getLocationInParent() == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
+					supported = true;
+				}
+				if (supported) {
+					return true;
+				}
+			}
+		}
+		if (binding.getKind() == IBinding.VARIABLE) {
+			IVariableBinding variableBinding = (IVariableBinding) binding;
+			if (isJUnit4AssertClass(variableBinding.getType())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean isNameOfSupportedAnnotation(Name name) {
@@ -110,16 +215,16 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 			}
 
 			if (typeBinding.getQualifiedName()
-				.equals(ANNOTATION_TYPE_ORG_JUNIT_IGNORE)) {
+				.equals(TYPE_ORG_JUNIT_IGNORE)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private boolean isNameOfSupportedAnnotationImport(Name name) {
-		if (name.getLocationInParent() == ImportDeclaration.NAME_PROPERTY) {
-			IBinding binding = name.resolveBinding();
+	private boolean isNameOfSupportedAnnotationImport(QualifiedName qualifiedName) {
+		if (qualifiedName.getLocationInParent() == ImportDeclaration.NAME_PROPERTY) {
+			IBinding binding = qualifiedName.resolveBinding();
 			if (binding.getKind() == IBinding.PACKAGE) {
 				IPackageBinding packageBinding = (IPackageBinding) binding;
 				return packageBinding.getName()
@@ -143,7 +248,7 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 			.equals(PACKAGE_ORG_JUNIT)) {
 			return false;
 		}
-		;
+
 		String simpleTypeName = typeBinding.getName();
 		return simpleTypeName.equals("Ignore") //$NON-NLS-1$
 				|| simpleTypeName.equals("Test") //$NON-NLS-1$
@@ -166,7 +271,7 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		NormalAnnotation annotation = (NormalAnnotation) memberValuePair.getParent();
 		return annotation.resolveTypeBinding()
 			.getQualifiedName()
-			.equals(ANNOTATION_TYPE_ORG_JUNIT_IGNORE);
+			.equals(TYPE_ORG_JUNIT_IGNORE);
 	}
 
 	private boolean isUnexpectedReferenceToJUnit(IBinding binding) {
