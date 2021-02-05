@@ -72,7 +72,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	@Override
 	public boolean visit(LambdaExpression lambdaExpressionNode) {
 
-		ITypeBinding contextType = LambdaNodeUtil.findContextType(lambdaExpressionNode).orElse(null);
+		ITypeBinding contextType = LambdaNodeUtil.findContextType(lambdaExpressionNode)
+			.orElse(null);
 		if (contextType == null) {
 			return true;
 		}
@@ -587,7 +588,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		AST ast = astRewrite.getAST();
 		Type type;
 		Type explicitParameterType = LambdaNodeUtil.findExplicitLambdaParameterType(
-				lambdaParams.get(0)).orElse(null);
+				lambdaParams.get(0))
+			.orElse(null);
 		if (explicitParameterType != null) {
 			type = (Type) astRewrite.createCopyTarget(explicitParameterType);
 		} else {

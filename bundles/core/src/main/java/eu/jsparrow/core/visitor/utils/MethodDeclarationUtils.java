@@ -9,10 +9,10 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 
 public class MethodDeclarationUtils {
-	
+
 	private MethodDeclarationUtils() {
 		/*
-		 * Hide default constructor. 
+		 * Hide default constructor.
 		 */
 	}
 
@@ -35,7 +35,7 @@ public class MethodDeclarationUtils {
 		ASTNode parent = returnStatement.getParent();
 		Expression returnExpression = returnStatement.getExpression();
 		ITypeBinding returnExpBinding = returnExpression.resolveTypeBinding();
-	
+
 		do {
 			if (ASTNode.METHOD_DECLARATION == parent.getNodeType()) {
 				MethodDeclaration methodDecl = (MethodDeclaration) parent;
@@ -48,10 +48,7 @@ public class MethodDeclarationUtils {
 			}
 			parent = parent.getParent();
 		} while (parent != null);
-	
+
 		return returnExpBinding;
 	}
-	
-	
-
 }

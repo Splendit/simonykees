@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.sub.LambdaExpressionBodyAnalyzer;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -206,7 +207,9 @@ public class LambdaNodeUtil {
 
 	/**
 	 * 
-	 * @param lambdaParameter a {@link VariableDeclaration} of a lambda expression parameter. 
+	 * @param lambdaParameter
+	 *            a {@link VariableDeclaration} of a lambda expression
+	 *            parameter.
 	 * @return the explicit type of a {@link VariableDeclaration} or an empty
 	 *         {@link Optional} if the type of a is implicit.
 	 */
