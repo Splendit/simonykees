@@ -250,9 +250,9 @@ public class LambdaToMethodReferenceRule {
 
 		map.entrySet().stream().forEach(Map.Entry::getValue);
 
-		map.entrySet().stream().forEach(Map.Entry::getValue);
+		map.entrySet().stream().forEach(Entry::getValue);
 
-		map.entrySet().stream().forEach(Map.Entry::getValue);
+		map.entrySet().stream().forEach(Entry<String, String>::getValue);
 
 		map.entrySet().stream().forEach(Entry<String, String>::getValue);
 

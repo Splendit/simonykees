@@ -251,11 +251,11 @@ public class LambdaToMethodReferenceRule {
 
 		map.entrySet()
 			.stream()
-			.forEach(Map.Entry::getValue);
+			.forEach(Entry::getValue);
 
 		map.entrySet()
 			.stream()
-			.forEach(Map.Entry::getValue);
+			.forEach(Entry<String, String>::getValue);
 
 		map.entrySet()
 			.stream()
