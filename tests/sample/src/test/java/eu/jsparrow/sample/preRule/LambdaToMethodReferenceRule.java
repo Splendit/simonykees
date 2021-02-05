@@ -499,6 +499,17 @@ public class LambdaToMethodReferenceRule {
 		Function<? extends Deque<Integer>, Integer> jokerExtendsDequeToInteger = (Deque<Integer> x1) -> x1.getFirst();
 		Function<? extends Deque<Integer>, Comparable<?>> jokerExtendsDequeToComparable = (Deque<Integer> x1) -> x1.getFirst();
 		Function<? extends Deque<Integer>, ? extends Comparable<?>> jokerExtendsDequeToJokerExtendsComparable = (Deque<Integer> x1) -> x1.getFirst();
+		Function<? super Deque<Integer>, Integer> casted = (Function<? super Deque<Integer>, Integer>) (Deque<Integer> x1) -> x1.getFirst();
+	}
+	
+	/**
+	 * SIM-1826
+	 */
+	public Function<? super Deque<Integer>, Integer> shouldTransform() {
+		Function<?, Function> casted = (Object x12) -> {
+			return (Object x1) -> x1.toString();
+		} ;
+		return (Deque<Integer> x1) -> x1.getFirst();
 	}
 	
 	/*
