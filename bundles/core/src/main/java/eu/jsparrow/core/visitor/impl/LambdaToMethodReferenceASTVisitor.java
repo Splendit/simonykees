@@ -229,7 +229,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 							/*
 							 * Bug fix SIM-1826
 							 */
-							ParameterizedType explicitParameterizedType = findExplicitParameterizedLambdaParameterType(
+							Type explicitParameterizedType = findExplicitLambdaParameterType(
 									lambdaParams.get(0)).orElse(null);
 							if (explicitParameterizedType != null) {
 								String typeNameStr = findTypeOfSimpleName(methodInvocationExpressionName);
@@ -358,19 +358,12 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		return Optional.ofNullable(contextTypeBinding);
 	}
 
-	private Optional<ParameterizedType> findExplicitParameterizedLambdaParameterType(
+	private Optional<Type> findExplicitLambdaParameterType(
 			VariableDeclaration lambdaParameter) {
 		if (lambdaParameter.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
 			SingleVariableDeclaration declarationWithType = (SingleVariableDeclaration) lambdaParameter;
 			Type explicitType = declarationWithType.getType();
-			if (explicitType.getNodeType() == ASTNode.PARAMETERIZED_TYPE) {
-				ParameterizedType parameterizedType = (ParameterizedType) explicitType;
-				List<Type> typeArguments = ASTNodeUtil.convertToTypedList(parameterizedType.typeArguments(),
-						Type.class);
-				if (!typeArguments.isEmpty()) {
-					return Optional.of(parameterizedType);
-				}
-			}
+			return Optional.of(explicitType);
 		}
 		return Optional.empty();
 	}
