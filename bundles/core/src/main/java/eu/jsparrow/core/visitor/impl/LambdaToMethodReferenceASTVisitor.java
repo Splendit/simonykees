@@ -80,14 +80,12 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		if(contextType == null) {
 			return true;
 		}
-
-		ITypeBinding lambdaType = lambdaExpressionNode.resolveTypeBinding();
-		Expression body = extractSingleBodyExpression(lambdaExpressionNode);
-		
-		if(areIncompatibleFunctions(contextType, lambdaType)) {
+		IMethodBinding expectedFunctionalInterface = contextType.getFunctionalInterfaceMethod();
+		IMethodBinding lambdaBinding = lambdaExpressionNode.resolveMethodBinding();
+		if (areIncompatibleFunctionalInterfaces(expectedFunctionalInterface, lambdaBinding)) {
 			return true;
 		}
-
+		Expression body = extractSingleBodyExpression(lambdaExpressionNode);
 		// work only with expression lambdas
 		if (body != null) {
 
@@ -327,75 +325,6 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		}
 
 		return true;
-	}
-	
-	
-	private boolean areIncompatibleFunctions(ITypeBinding contextType, ITypeBinding lambdaType) {
-		
-		if(contextType.isParameterizedType() && lambdaType.isParameterizedType()) {
-			ITypeBinding[] contextTypeArgs = contextType.getTypeArguments();
-			ITypeBinding[] lambdaTypeArgs = lambdaType.getTypeArguments();
-			int length = contextTypeArgs.length;
-			if(length != lambdaTypeArgs.length) {
-				return true;
-			}
-			
-			for(int i = 0; i<length; i++) {
-				ITypeBinding contextArg = contextTypeArgs[i];
-				ITypeBinding lambdaArg = lambdaTypeArgs[i];
-				if(contextArg.isWildcardType()) {
-					ITypeBinding bound = contextArg.getBound();
-					boolean incompatible = areIncompatible(bound, lambdaArg);
-					if(incompatible) return true;
-				} else {
-					boolean incompatible = areIncompatible(contextArg, lambdaArg);
-					if(incompatible) return true;
-				}
-			}
-			return false;
-		}
-		
-		return areIncompatible(contextType, lambdaType);
-	}
-	
-
-	private boolean areIncompatible(ITypeBinding contextType, ITypeBinding lambdaType) {
-		if(contextType == null) {
-			return true;
-		}
-		
-		if(contextType.isParameterizedType() && lambdaType.isParameterizedType()) {
-			ITypeBinding[] contextTypeArgs = contextType.getTypeArguments();
-			ITypeBinding[] lambdaTypeArgs = lambdaType.getTypeArguments();
-			int length = contextTypeArgs.length;
-			if(length != lambdaTypeArgs.length) {
-				return true;
-			}
-			
-			for(int i = 0; i<length; i++) {
-				ITypeBinding contextArg = contextTypeArgs[i];
-				ITypeBinding lambdaArg = lambdaTypeArgs[i];
-				if(areIncompatible(contextArg, lambdaArg)) {
-					return true;
-				}
-			}
-		}
-		
-		if(contextType.isCapture() && !lambdaType.isCapture()) {
-			return true;
-		}
-		
-		if(contextType.isWildcardType()) {
-			if(!lambdaType.isWildcardType()) {
-				return true;
-			}
-			ITypeBinding contextBound = contextType.getBound();
-			ITypeBinding lambdaBound = lambdaType.getBound();
-			return areIncompatible(contextBound, lambdaBound);
-		}
-		
-		return !contextType.isAssignmentCompatible(lambdaType);
-		
 	}
 
 	private Optional<ITypeBinding> findContextType(LambdaExpression lambdaExpressionNode) {
@@ -740,4 +669,22 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			.filter(element -> element instanceof Name)
 			.anyMatch(nameIter -> name.equals(((Name) nameIter).getFullyQualifiedName()));
 	}
+	private boolean areIncompatibleFunctionalInterfaces(IMethodBinding contextFI, IMethodBinding actualFI) {
+		ITypeBinding contextReturnType = contextFI.getReturnType();
+		ITypeBinding actualReturnType = actualFI.getReturnType();
+		if(!actualReturnType.isAssignmentCompatible(contextReturnType)) {
+			return true;
+		}
+		ITypeBinding[] actualParameters = actualFI.getParameterTypes();
+		ITypeBinding[] expectedParameters = contextFI.getParameterTypes();
+		for(int i =0; i<actualParameters.length; i++) {
+			ITypeBinding actualParameter = actualParameters[i];
+			ITypeBinding expectedParameter = expectedParameters[i];
+			if(!expectedParameter.isAssignmentCompatible(actualParameter)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }
