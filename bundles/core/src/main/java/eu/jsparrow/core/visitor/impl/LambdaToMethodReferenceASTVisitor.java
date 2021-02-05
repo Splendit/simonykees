@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -345,11 +346,13 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			MethodInvocation methodInvocation = (MethodInvocation)lambdaExpressionNode.getParent();
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 			ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
+			@SuppressWarnings("unchecked")
 			List<Expression>arguments = methodInvocation.arguments();
 			int index = arguments.indexOf(lambdaExpressionNode);
 			contextTypeBinding = parameterTypes[index];
 		} else if(locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
 			ReturnStatement returnStatement = (ReturnStatement)lambdaExpressionNode.getParent();
+			contextTypeBinding = MethodDeclarationUtils.findExpectedReturnType(returnStatement);
 			
 		}
 		return Optional.ofNullable(contextTypeBinding);
