@@ -20,9 +20,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.CreationReference;
@@ -40,19 +38,15 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
+import eu.jsparrow.core.visitor.sub.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -78,7 +72,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	@Override
 	public boolean visit(LambdaExpression lambdaExpressionNode) {
 
-		ITypeBinding contextType = findContextType(lambdaExpressionNode).orElse(null);
+		ITypeBinding contextType = LambdaNodeUtil.findContextType(lambdaExpressionNode).orElse(null);
 		if (contextType == null) {
 			return true;
 		}
@@ -262,46 +256,6 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		}
 
 		return true;
-	}
-
-	private Optional<ITypeBinding> findContextType(LambdaExpression lambdaExpressionNode) {
-		StructuralPropertyDescriptor locationInParent = lambdaExpressionNode.getLocationInParent();
-		ITypeBinding contextTypeBinding = null;
-		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			Assignment assignment = (Assignment) lambdaExpressionNode.getParent();
-			Expression lhs = assignment.getLeftHandSide();
-			contextTypeBinding = lhs.resolveTypeBinding();
-		} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			VariableDeclarationFragment fragment = (VariableDeclarationFragment) lambdaExpressionNode.getParent();
-			IVariableBinding variableBinding = fragment.resolveBinding();
-			contextTypeBinding = variableBinding.getType();
-		} else if (locationInParent == CastExpression.EXPRESSION_PROPERTY) {
-			CastExpression cast = (CastExpression) lambdaExpressionNode.getParent();
-			contextTypeBinding = cast.resolveTypeBinding();
-		} else if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
-			MethodInvocation methodInvocation = (MethodInvocation) lambdaExpressionNode.getParent();
-			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-			ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
-			@SuppressWarnings("unchecked")
-			List<Expression> arguments = methodInvocation.arguments();
-			int index = arguments.indexOf(lambdaExpressionNode);
-			contextTypeBinding = parameterTypes[index];
-		} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
-			ReturnStatement returnStatement = (ReturnStatement) lambdaExpressionNode.getParent();
-			contextTypeBinding = MethodDeclarationUtils.findExpectedReturnType(returnStatement);
-
-		}
-		return Optional.ofNullable(contextTypeBinding);
-	}
-
-	private Optional<Type> findExplicitLambdaParameterType(
-			VariableDeclaration lambdaParameter) {
-		if (lambdaParameter.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
-			SingleVariableDeclaration declarationWithType = (SingleVariableDeclaration) lambdaParameter;
-			Type explicitType = declarationWithType.getType();
-			return Optional.of(explicitType);
-		}
-		return Optional.empty();
 	}
 
 	private boolean isWrappedInOverloadedMethod(LambdaExpression lambdaExpressionNode,
@@ -632,7 +586,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 		AST ast = astRewrite.getAST();
 		Type type;
-		Type explicitParameterType = findExplicitLambdaParameterType(
+		Type explicitParameterType = LambdaNodeUtil.findExplicitLambdaParameterType(
 				lambdaParams.get(0)).orElse(null);
 		if (explicitParameterType != null) {
 			type = (Type) astRewrite.createCopyTarget(explicitParameterType);
