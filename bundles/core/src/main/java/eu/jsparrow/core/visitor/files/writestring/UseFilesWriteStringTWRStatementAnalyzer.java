@@ -40,8 +40,8 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 class UseFilesWriteStringTWRStatementAnalyzer {
 	private final SignatureData write = new SignatureData(java.io.Writer.class, "write", java.lang.String.class); //$NON-NLS-1$
 
-	List<WriteInvocationStatementReplacementData> createTransformationDataList(TryStatement tryStatement) {
-		List<WriteInvocationStatementReplacementData> invocationDataList = new ArrayList<>();
+	List<WriteInvocationData> createTransformationDataList(TryStatement tryStatement) {
+		List<WriteInvocationData> invocationDataList = new ArrayList<>();
 		List<Statement> tryBodyStatements = ASTNodeUtil.convertToTypedList(tryStatement.getBody()
 			.statements(), Statement.class);
 		for (Statement statement : tryBodyStatements) {
@@ -50,11 +50,13 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 		return invocationDataList;
 	}
 
-	private Optional<WriteInvocationStatementReplacementData> findTransformationData(TryStatement tryStatement,
+	private Optional<WriteInvocationData> findTransformationData(TryStatement tryStatement,
 			Statement statement) {
 		WriteInvocationData writeInvocationData = findWriteInvocationData(tryStatement, statement).orElse(null);
+
 		if (writeInvocationData != null) {
-			Optional<WriteInvocationStatementReplacementData> findResultUsingFilesNewBufferedWriter = findResultUsingFilesNewBufferedWriter(
+			writeInvocationData.addResourcesToRemove(writeInvocationData.getResource()); // very stupid
+			Optional<WriteInvocationData> findResultUsingFilesNewBufferedWriter = findResultUsingFilesNewBufferedWriter(
 					writeInvocationData);
 			if (findResultUsingFilesNewBufferedWriter.isPresent()) {
 				return findResultUsingFilesNewBufferedWriter;
@@ -102,11 +104,11 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	 * or
 	 * {@link java.nio.file.Files#newBufferedWriter(java.nio.file.Path, java.nio.file.OpenOption...)}.
 	 * 
-	 * @return list of {@link WriteInvocationStatementReplacementData} objects
+	 * @return list of {@link WriteInvocationData} objects
 	 *         used for code transformation by
 	 *         {@link UseFilesWriteStringASTVisitor}
 	 */
-	private Optional<WriteInvocationStatementReplacementData> findResultUsingFilesNewBufferedWriter(
+	private Optional<WriteInvocationData> findResultUsingFilesNewBufferedWriter(
 			WriteInvocationData writeInvocationData) {
 
 		Expression bufferedIOInitializer = writeInvocationData.getResourceInitializer();
@@ -124,9 +126,10 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 			for (int i = 1; i < arguments.size(); i++) {
 				additionalArguments.add(arguments.get(i));
 			}
-			return Optional.of(
-					new WriteInvocationStatementReplacementData(writeInvocationData, pathArgument,
-							additionalArguments));
+			writeInvocationData.addAdditionalArguments(additionalArguments);
+			writeInvocationData.setFunctionCreatingExpressionStatementReplacement(
+					visitor -> visitor.createFilesWriteStringMethodInvocationStatement(writeInvocationData, pathArgument, additionalArguments));
+			return Optional.of(writeInvocationData);
 		}
 		return Optional.empty();
 	}
@@ -171,11 +174,11 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	 * Collects data in connection with a resource initialized by calling a
 	 * constructor of {@link java.io.BufferedWriter}.
 	 * 
-	 * @return list of {@link WriteInvocationStatementReplacementData} objects
+	 * @return list of {@link WriteInvocationData} objects
 	 *         used for code transformation by
 	 *         {@link UseFilesWriteStringASTVisitor}
 	 */
-	private Optional<WriteInvocationStatementReplacementData> findResultUsingBufferedWriterConstructor(
+	private Optional<WriteInvocationData> findResultUsingBufferedWriterConstructor(
 			WriteInvocationData writeInvocationData) {
 
 		Expression bufferedWriterResourceInitializer = writeInvocationData.getResourceInitializer();
@@ -196,8 +199,13 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 					.analyzeInitializer((ClassInstanceCreation) bufferedWriterInstanceCreationArgument)) {
 					return Optional.empty();
 				}
-				return Optional.of(new WriteInvocationStatementReplacementData(writeInvocationData,
-						newBufferedIOArgumentsAnalyzer));
+				newBufferedIOArgumentsAnalyzer.getCharsetExpression()
+					.ifPresent(writeInvocationData::setCharsetExpression);
+				writeInvocationData.setFunctionCreatingExpressionStatementReplacement(
+						visitor -> visitor
+						.createFilesWriteStringMethodInvocationStatement(writeInvocationData, newBufferedIOArgumentsAnalyzer.getPathExpressions(),
+								writeInvocationData::getCharsetExpression));
+				return Optional.of(writeInvocationData);
 
 			}
 
@@ -214,8 +222,13 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 					return Optional.empty();
 				}
 
-				return Optional.of(new WriteInvocationStatementReplacementData(writeInvocationData,
-						fileWriterResourceAnalyzer, fileIOAnalyzer));
+				writeInvocationData.addResourcesToRemove(fileWriterResourceAnalyzer.getResource());
+				fileIOAnalyzer.getCharset().ifPresent(writeInvocationData::setCharsetExpression);
+				writeInvocationData.setFunctionCreatingExpressionStatementReplacement(
+						visitor -> visitor
+						.createFilesWriteStringMethodInvocationStatement(writeInvocationData, fileIOAnalyzer.getPathExpressions(),
+								writeInvocationData::getCharsetExpression));
+				return Optional.of(writeInvocationData);
 			}
 		}
 		return Optional.empty();

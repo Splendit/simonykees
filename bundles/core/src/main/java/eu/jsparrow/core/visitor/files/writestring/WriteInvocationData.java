@@ -1,5 +1,10 @@
 package eu.jsparrow.core.visitor.files.writestring;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -18,6 +23,11 @@ class WriteInvocationData {
 	private final TryStatement tryStatement;
 	private final VariableDeclarationExpression resource;
 	private final Expression resourceInitializer;
+	private List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
+	private  Function<UseFilesWriteStringASTVisitor, ExpressionStatement> functionCreatingExpressionStatementReplacement;
+
+	private Expression charsetExpression;
+	private List<Expression> additionalArguments = new ArrayList<>();
 
 	WriteInvocationData(ExpressionStatement writeInvocationStatementToReplace,
 			Expression charSequenceArgument,
@@ -48,5 +58,45 @@ class WriteInvocationData {
 
 	public Expression getResourceInitializer() {
 		return resourceInitializer;
+	}
+	
+	public void addResourcesToRemove(VariableDeclarationExpression variableDeclarationExpression) {
+		this.resourcesToRemove.add(variableDeclarationExpression);
+	}
+	
+	public void addResourcesToRemove(List<VariableDeclarationExpression> variableDeclarationExpressions) {
+		this.resourcesToRemove.addAll(variableDeclarationExpressions);
+	}
+	
+	public List<VariableDeclarationExpression> getResourcesToRemove() {
+		return this.resourcesToRemove;
+	}
+	
+	public Optional<Expression> getCharsetExpression() {
+		return Optional.ofNullable(charsetExpression);
+	}
+
+	public void setCharsetExpression(Expression charsetExpression) {
+		this.charsetExpression = charsetExpression;
+	}
+
+	public List<Expression> getAdditionalArguments() {
+		return this.additionalArguments;
+	}
+	public void addAdditionalArguments(List<Expression> additionalArguments) {
+		this.additionalArguments.addAll(additionalArguments);
+	}
+	
+	public Function<UseFilesWriteStringASTVisitor, ExpressionStatement> getFunctionCreatingExpressionStatementReplacement() {
+		return functionCreatingExpressionStatementReplacement;
+	}
+
+	public void setFunctionCreatingExpressionStatementReplacement(
+			Function<UseFilesWriteStringASTVisitor, ExpressionStatement> functionCreatingExpressionStatementReplacement) {
+		this.functionCreatingExpressionStatementReplacement = functionCreatingExpressionStatementReplacement;
+	}
+	
+	ExpressionStatement createWriteInvocationStatementReplacement(UseFilesWriteStringASTVisitor visitor) {
+		return functionCreatingExpressionStatementReplacement.apply(visitor);
 	}
 }

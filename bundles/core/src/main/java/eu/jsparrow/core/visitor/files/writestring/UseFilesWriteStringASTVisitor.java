@@ -79,7 +79,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 		UseFilesWriteStringTWRStatementAnalyzer analyzer = new UseFilesWriteStringTWRStatementAnalyzer();
 
-		List<WriteInvocationStatementReplacementData> transformationDataList = analyzer
+		List<WriteInvocationData> transformationDataList = analyzer
 			.createTransformationDataList(tryStatement);
 
 		if (transformationDataList.isEmpty()) {
@@ -88,7 +88,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 		List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
 		transformationDataList.stream()
-			.map(WriteInvocationStatementReplacementData::getResourcesToRemove)
+			.map(WriteInvocationData::getResourcesToRemove)
 			.forEach(resourcesToRemove::addAll);
 
 		if (resourcesToRemove.size() < tryStatement.resources()
@@ -118,7 +118,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	@SuppressWarnings("unchecked")
 	private TryStatement createNewTryStatementWithoutResources(TryStatement tryStatement,
-			List<WriteInvocationStatementReplacementData> transformationDataList) {
+			List<WriteInvocationData> transformationDataList) {
 		TryStatement tryStatementReplacement = getASTRewrite().getAST()
 			.newTryStatement();
 
@@ -140,7 +140,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			}
 		});
 
-		for (WriteInvocationStatementReplacementData data : transformationDataList) {
+		for (WriteInvocationData data : transformationDataList) {
 			ExpressionStatement writeInvocationStatementToReplace = data.getWriteInvocationStatementToReplace();
 			ExpressionStatement writeInvocationStatementReplacement = data
 				.createWriteInvocationStatementReplacement(this);
