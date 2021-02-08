@@ -62,9 +62,6 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 		}
 
 		List<AnnotationTransformationData> transformationDataList = createAnnotationDataList(compilationUnit);
-		if (transformationDataList.isEmpty()) {
-			return false;
-		}
 
 		Set<String> safeNewAnnotationImports = new HashSet<>();
 		transformationDataList.stream()

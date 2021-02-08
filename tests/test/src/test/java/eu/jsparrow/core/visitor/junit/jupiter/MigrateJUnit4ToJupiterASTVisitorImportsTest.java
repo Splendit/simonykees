@@ -44,12 +44,10 @@ public class MigrateJUnit4ToJupiterASTVisitorImportsTest extends AbstractMigrate
 	})
 	public void visit_unexpectedJUnitTypeImports_shouldNotTransform(Class<?> clazz) throws Exception {
 
-		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
 		defaultFixture.addImport(clazz.getName());
 
 		String original = "" +
-				"	@BeforeClass\n" +
-				"	public void beforeClass() {\n" +
+				"	public void test() {\n" +
 				"	}";
 
 		assertNoChange(original);
@@ -76,22 +74,33 @@ public class MigrateJUnit4ToJupiterASTVisitorImportsTest extends AbstractMigrate
 	})
 	public void visit_unexpectedJUnitImportsOnDemand_shouldNotTransform(Class<?> clazz) throws Exception {
 
-		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
 		defaultFixture.addImport(clazz.getPackage()
 			.getName(), false, true);
 
 		String original = "" +
-				"	@BeforeClass\n" +
-				"	public void beforeClass() {\n" +
+				"	public void test() {\n" +
 				"	}";
 
 		assertNoChange(original);
 	}
-
+	
 	@Test
-	public void visit_supportedImportsOnDemand_shouldTransform() throws Exception {
+	public void visit_UnusedBeforeClassImport_shouldTransform() throws Exception {
 
 		defaultFixture.addImport(org.junit.BeforeClass.class.getName());
+
+		String original = "" +
+				"	public void test() {\n" +
+				"	}";
+
+		List<String> importsToStringExpected = Arrays.asList();
+		
+		assertChange(original, original, importsToStringExpected);
+	}
+
+	@Test
+	public void visit_ImplicitBeforeClassImport_shouldTransform() throws Exception {
+
 		defaultFixture.addImport("org.junit", false, true);
 
 		String original = "" +
