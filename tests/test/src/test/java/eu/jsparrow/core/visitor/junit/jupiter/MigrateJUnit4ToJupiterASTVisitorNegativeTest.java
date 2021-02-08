@@ -61,21 +61,7 @@ class MigrateJUnit4ToJupiterASTVisitorNegativeTest extends AbstractMigrateJUnit4
 		assertNoChange(original);
 	}
 
-	/*
-	 * SIM-1873: expected to fail as soon qualified annotation names will be
-	 * supported
-	 */
-	@Test
-	public void visit_JUnit4TestAnnotationNotSimpleTypeName_shouldNotTransform() throws Exception {
 
-		String original = "" +
-				"\n" +
-				"	@org.junit.BeforeClass\n" +
-				"	public void beforeAll() {\n" +
-				"	}";
-
-		assertNoChange(original);
-	}
 
 	@Test
 	public void visit_SingleMemberAnnotationRunWith_shouldNotTransform() throws Exception {

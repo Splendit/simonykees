@@ -285,4 +285,22 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends AbstractMigrateJUnit4ToJupite
 
 		assertChange(original, expected, importsToStringExpected);
 	}
+
+	/*
+	 * SIM-1873: expected to fail as soon qualified annotation names will be
+	 * supported
+	 */
+	@Test
+	public void visit_JUnit4TestAnnotationNotSimpleTypeName_shouldNotTransform() throws Exception {
+
+		String original = "" +
+				"\n" +
+				"	@org.junit.BeforeClass\n" +
+				"	public void beforeAll() {\n" +
+				"	}";
+		
+		List<String> importsToStringExpected = Arrays.asList(
+				"import org.junit.jupiter.api.BeforeAll;");
+		assertChange(original, original, importsToStringExpected);
+	}
 }
