@@ -26,7 +26,7 @@ class WriteInvocationData {
 	private final TryStatement tryStatement;
 	private final Expression resourceInitializer;
 	private List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
-	private Function<UseFilesWriteStringASTVisitor, ExpressionStatement> functionCreatingExpressionStatementReplacement;
+	private Function<UseFilesWriteStringASTVisitor, ExpressionStatement> replacementStatementProducer;
 
 	private Expression charsetExpression;
 	private List<Expression> additionalArguments = new ArrayList<>();
@@ -82,16 +82,12 @@ class WriteInvocationData {
 		this.additionalArguments.addAll(additionalArguments);
 	}
 
-	public Function<UseFilesWriteStringASTVisitor, ExpressionStatement> getFunctionCreatingExpressionStatementReplacement() {
-		return functionCreatingExpressionStatementReplacement;
-	}
-
-	public void setFunctionCreatingExpressionStatementReplacement(
-			Function<UseFilesWriteStringASTVisitor, ExpressionStatement> functionCreatingExpressionStatementReplacement) {
-		this.functionCreatingExpressionStatementReplacement = functionCreatingExpressionStatementReplacement;
+	public void setReplacementStatementProducer(
+			Function<UseFilesWriteStringASTVisitor, ExpressionStatement> replacementStatementProducer) {
+		this.replacementStatementProducer = replacementStatementProducer;
 	}
 
 	ExpressionStatement createWriteInvocationStatementReplacement(UseFilesWriteStringASTVisitor visitor) {
-		return functionCreatingExpressionStatementReplacement.apply(visitor);
+		return replacementStatementProducer.apply(visitor);
 	}
 }

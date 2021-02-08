@@ -95,10 +95,9 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 			transformationDataList.stream()
 				.forEach(data -> {
-					ExpressionStatement invocationStatementReplacement = data
+					ExpressionStatement replacementStatement = data
 						.createWriteInvocationStatementReplacement(this);
-					astRewrite.replace(data.getWriteInvocationStatementToReplace(), invocationStatementReplacement,
-							null);
+					astRewrite.replace(data.getWriteInvocationStatementToReplace(), replacementStatement, null);
 					onRewrite();
 				});
 

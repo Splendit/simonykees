@@ -125,7 +125,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 				additionalArguments.add(arguments.get(i));
 			}
 			writeInvocationData.addAdditionalArguments(additionalArguments);
-			writeInvocationData.setFunctionCreatingExpressionStatementReplacement(
+			writeInvocationData.setReplacementStatementProducer(
 					visitor -> visitor.createFilesWriteStringMethodInvocationStatement(writeInvocationData,
 							pathArgument));
 			return Optional.of(writeInvocationData);
@@ -204,7 +204,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 			}
 			newBufferedIOArgumentsAnalyzer.getCharsetExpression()
 				.ifPresent(writeInvocationData::setCharsetExpression);
-			writeInvocationData.setFunctionCreatingExpressionStatementReplacement(visitor -> visitor
+			writeInvocationData.setReplacementStatementProducer(visitor -> visitor
 				.createFilesWriteStringMethodInvocationStatement(writeInvocationData,
 						newBufferedIOArgumentsAnalyzer.getPathExpressions()));
 			return Optional.of(writeInvocationData);
@@ -227,7 +227,7 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 			writeInvocationData.addResourcesToRemove(fileWriterResourceAnalyzer.getResource());
 			fileIOAnalyzer.getCharset()
 				.ifPresent(writeInvocationData::setCharsetExpression);
-			writeInvocationData.setFunctionCreatingExpressionStatementReplacement(visitor -> visitor
+			writeInvocationData.setReplacementStatementProducer(visitor -> visitor
 				.createFilesWriteStringMethodInvocationStatement(writeInvocationData,
 						fileIOAnalyzer.getPathExpressions()));
 			return Optional.of(writeInvocationData);
