@@ -25,7 +25,7 @@ public class UseFilesWriteStringRule extends RefactoringRuleImpl<UseFilesWriteSt
 		this.ruleDescription = new RuleDescription(Messages.UseFilesWriteStringRule_name,
 				Messages.UseFilesWriteStringRule_description,
 				Duration.ofMinutes(5),
-				Arrays.asList(Tag.JAVA_11, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.PERFORMANCE, Tag.IO_OPERATIONS));
+				Arrays.asList(Tag.JAVA_11, Tag.PERFORMANCE, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.IO_OPERATIONS));
 	}
 
 	@Override

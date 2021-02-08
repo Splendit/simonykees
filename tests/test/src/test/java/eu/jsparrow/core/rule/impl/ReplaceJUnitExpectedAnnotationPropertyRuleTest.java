@@ -51,7 +51,7 @@ class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 				contains(Tag.JAVA_1_8, Tag.TESTING, Tag.LAMBDA, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
-				equalTo("Using 'expected' annotation property for testing the thrown exceptions is rather misleading. It is unclear which part of the code is responsible for throwing the exception. This rule aims to overcome this problem by replacing the 'expected' annotation property with 'assertThrows' introduced in JUnit 4.13."));
+				equalTo("Using the 'expected' annotation property for testing the thrown exceptions is rather misleading. Often it becomes unclear which part of the test code is responsible for throwing the exception. This rule aims to overcome this problem by replacing the 'expected' annotation property with 'assertThrows()' introduced in JUnit 4.13."));
 	}
 
 	@Test
@@ -63,7 +63,7 @@ class ReplaceJUnitExpectedAnnotationPropertyRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), equalTo("JUnit 4.13 or JUnit 5.0 and above"));
+		assertThat(rule.requiredLibraries(), equalTo("JUnit 4.13 or JUnit 5"));
 	}
 
 	@Test

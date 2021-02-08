@@ -2,6 +2,7 @@ package eu.jsparrow.rules.common;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
@@ -86,7 +87,9 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 
 	@Override
 	public boolean isFree() {
-		return false;
+		RuleDescription description = getRuleDescription();
+		List<Tag> tags = description.getTags();
+		return tags.contains(Tag.FREE);
 	}
 
 	public Class<T> getVisitor() {

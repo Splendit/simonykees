@@ -418,6 +418,8 @@ public class Messages extends NLS {
 	public static String ReplaceExpectedAnnotationPropertyRule_name;
 	public static String ReplaceExpectedExceptionRule_description;
 	public static String ReplaceExpectedExceptionRule_name;
+	public static String ReplaceJUnitTimeoutAnnotationPropertyRule_description;
+	public static String ReplaceJUnitTimeoutAnnotationPropertyRule_name;
 	public static String ReuseRandomObjectsRule_description;
 	public static String ReuseRandomObjectsRule_name;
 	public static String SelectRulesWizardHandler_allready_running;

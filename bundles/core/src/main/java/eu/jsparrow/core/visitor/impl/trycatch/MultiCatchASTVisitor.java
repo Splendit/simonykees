@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.impl.trycatch;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,7 +9,9 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -18,8 +21,10 @@ import org.eclipse.jdt.core.dom.UnionType;
 
 import eu.jsparrow.core.matcher.BijectiveSimpleNameASTMatcher;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * This visitor finds duplicated catch-blocks and combines it to a
@@ -68,7 +73,9 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 				if (reference.subtreeMatch(
 						new BijectiveSimpleNameASTMatcher(referenceException.getName(), compareException.getName()),
 						compareBlock) && !jumpsSuperType(compareExceptionType, jumpedTypes)
-						&& !usesExceptionForTypeInferene(compareCatch)) {
+						&& !usesExceptionForTypeInferene(compareCatch)
+						&& !usesUndefinedMethodsInLUB(compareException.getName(), referenceException.getName(),
+								compareBlock)) {
 					combined = true;
 					addTypesFromBlock(allNewTypes, compareExceptionType);
 					astRewrite.remove(compareCatch, null);
@@ -181,6 +188,71 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return isSubType(supertypeBinding, subtypeBinding.getSuperclass());
+	}
+
+	private boolean usesUndefinedMethodsInLUB(SimpleName currentException, SimpleName originalException,
+			Block currentCatchBlock) {
+		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(currentException);
+		currentCatchBlock.accept(visitor);
+		List<SimpleName> exceptionUsages = visitor.getUsages();
+		List<MethodInvocation> invocations = exceptionUsages.stream()
+			.filter(name -> name.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY)
+			.map(name -> (MethodInvocation) name.getParent())
+			.collect(Collectors.toList());
+		if (invocations.isEmpty()) {
+			return false;
+		}
+		ITypeBinding originalType = originalException.resolveTypeBinding();
+		for (MethodInvocation invocation : invocations) {
+			IMethodBinding methodBinding = invocation.resolveMethodBinding();
+			boolean isInUpperBound = definesMethod(originalType, methodBinding);
+			if (!isInUpperBound) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean definesMethod(ITypeBinding originalExceptionType, IMethodBinding originalInvocationBinding) {
+		ITypeBinding declaringClass = originalInvocationBinding.getDeclaringClass();
+		String declaringClassname = declaringClass.getQualifiedName();
+		boolean isSubtype = ClassRelationUtil.isInheritingContentOfTypes(originalExceptionType,
+				Collections.singletonList(declaringClassname)) ||
+				ClassRelationUtil.isContentOfType(originalExceptionType, declaringClassname);
+		if (isSubtype) {
+			return true;
+		}
+
+		ITypeBinding parent = declaringClass.getSuperclass();
+		if (parent == null) {
+			return false;
+		}
+
+		if (isDefinedInCommonParent(originalExceptionType, originalInvocationBinding, parent)) {
+			return true;
+		}
+
+		ITypeBinding[] interfaces = parent.getInterfaces();
+		for (ITypeBinding parentInterface : interfaces) {
+			if (isDefinedInCommonParent(originalExceptionType, originalInvocationBinding, parentInterface)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean isDefinedInCommonParent(ITypeBinding originalExceptionType, IMethodBinding method, ITypeBinding currentExceptionParent) {
+		IMethodBinding[] methods = currentExceptionParent.getDeclaredMethods();
+		for (IMethodBinding parentMethod : methods) {
+			if (method.overrides(parentMethod)) {
+				boolean definedInCommonParent = definesMethod(originalExceptionType, parentMethod);
+				if (definedInCommonParent) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }
