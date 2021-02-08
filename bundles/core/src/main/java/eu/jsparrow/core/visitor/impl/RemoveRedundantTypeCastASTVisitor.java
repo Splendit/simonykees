@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -126,11 +127,29 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 				return false;
 			}
 			ITypeBinding componentType = lastFormalParamType.getComponentType();
-			return componentType.getFunctionalInterfaceMethod() != null;
+			return componentType.getFunctionalInterfaceMethod() != null
+					&& !containsUndefinedTypeParameters(componentType, (LambdaExpression)castExpression.getExpression());
 
 		} else {
-			return formalParameterTypes[castParamIndex].getFunctionalInterfaceMethod() != null;
+			ITypeBinding formalParameterType = formalParameterTypes[castParamIndex];
+			return formalParameterType.getFunctionalInterfaceMethod() != null 
+					&& !containsUndefinedTypeParameters(formalParameterType, (LambdaExpression)castExpression.getExpression());
 		}
+	}
+	
+	private boolean containsUndefinedTypeParameters(ITypeBinding formalParameter, LambdaExpression lambda) {
+		List<VariableDeclarationFragment> inferedTypeParams = ASTNodeUtil.convertToTypedList(lambda.parameters(), VariableDeclarationFragment.class);
+		if(inferedTypeParams.isEmpty()) {
+			return false;
+		}
+		IMethodBinding fiMethod = formalParameter.getFunctionalInterfaceMethod();
+		ITypeBinding[] fiParameterTypes = fiMethod.getParameterTypes();
+		for(ITypeBinding fiParameterType : fiParameterTypes) {
+			if(containsWildCardTypeArgument(fiParameterType)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void applyRule(CastExpression typeCast) {
