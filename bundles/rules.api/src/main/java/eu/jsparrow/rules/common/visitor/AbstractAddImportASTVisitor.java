@@ -413,5 +413,27 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	protected void addAlreadyVerifiedImports(Collection<String> newImports) {
 		addImports.addAll(newImports);
 	}
-	
+
+	/**
+	 * Note that this method is only reliable to be used for a given qualified
+	 * type name after {@link #verifyImport(CompilationUnit, String)} has been
+	 * invoked for it.
+	 * 
+	 * @return true if within the given context the simple name corresponding to
+	 *         the given qualified type name can be used without any ambiguity,
+	 *         otherwise false.
+	 * 
+	 */
+	protected boolean isSimpleTypeNameUnivocal(String qualifiedName, ASTNode context) {
+		ASTNode enclosingScope = liveVariableScope.findEnclosingScope(context)
+			.orElse(null);
+		if (enclosingScope != null) {
+			String simpleTypeName = getSimpleName(qualifiedName);
+			this.liveVariableScope.lazyLoadScopeNames(enclosingScope);
+			if (liveVariableScope.isInScope(simpleTypeName, enclosingScope)) {
+				return false;
+			}
+		}
+		return safeImports.contains(qualifiedName) && !typesImportedOnDemand.contains(qualifiedName);
+	}
 }
