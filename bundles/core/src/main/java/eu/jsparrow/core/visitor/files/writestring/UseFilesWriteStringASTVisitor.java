@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -86,10 +85,10 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			return true;
 		}
 
-		List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
-		transformationDataList.stream()
+		List<VariableDeclarationExpression> resourcesToRemove = transformationDataList.stream()
 			.map(WriteInvocationData::getResourcesToRemove)
-			.forEach(resourcesToRemove::addAll);
+			.flatMap(List::stream)
+			.collect(Collectors.toList());
 
 		if (resourcesToRemove.size() < tryStatement.resources()
 			.size()) {
@@ -112,7 +111,6 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			transformationDataList.stream()
 				.forEach(data -> onRewrite());
 		}
-
 		return true;
 	}
 
@@ -167,17 +165,14 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	ExpressionStatement createFilesWriteStringMethodInvocationStatement(
 			WriteInvocationData writeInvocationData,
-			Expression pathArgument,
-			List<Expression> additionalArguments) {
+			Expression pathArgument) {
 
-		Expression originalPathArgument = pathArgument;
 		Expression charSequenceArgument = writeInvocationData.getCharSequenceArgument();
-		List<Expression> originalArgumentsAfterPath = additionalArguments;
-
 		List<Expression> arguments = new ArrayList<>();
-		arguments.add((Expression) astRewrite.createCopyTarget(originalPathArgument));
+		arguments.add((Expression) astRewrite.createCopyTarget(pathArgument));
 		arguments.add((Expression) astRewrite.createCopyTarget(charSequenceArgument));
-		originalArgumentsAfterPath
+		List<Expression> additionalArguments = writeInvocationData.getAdditionalArguments();
+		additionalArguments
 			.forEach(argument -> arguments.add((Expression) astRewrite.createCopyTarget(argument)));
 
 		Name filesTypeName = addImport(java.nio.file.Files.class.getName(),
