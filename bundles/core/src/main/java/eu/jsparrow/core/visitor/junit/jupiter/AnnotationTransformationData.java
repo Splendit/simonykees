@@ -4,16 +4,16 @@ import org.eclipse.jdt.core.dom.Name;
 
 public class AnnotationTransformationData {
 	private final Name originalTypeName;
-	private final String newTypeQualifiedName;	
+	private final String newTypeName;	
 	
-	public AnnotationTransformationData(Name originalTypeName, String newTypeQualifiedName) {
+	public AnnotationTransformationData(Name originalTypeName, String newTypeName) {
 		this.originalTypeName = originalTypeName;
-		this.newTypeQualifiedName = newTypeQualifiedName;
+		this.newTypeName = newTypeName;
 	}
 	public Name getOriginalTypeName() {
 		return originalTypeName;
 	}
-	public String getNewTypeQualifiedName() {
-		return newTypeQualifiedName;
+	public String getNewTypeName() {
+		return newTypeName;
 	}
 }

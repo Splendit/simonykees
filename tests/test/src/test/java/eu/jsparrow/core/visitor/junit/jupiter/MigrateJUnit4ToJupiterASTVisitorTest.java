@@ -299,8 +299,14 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends AbstractMigrateJUnit4ToJupite
 				"	public void beforeAll() {\n" +
 				"	}";
 		
+		String expected = "" +
+				"\n" +
+				"	@BeforeAll\n" +
+				"	public void beforeAll() {\n" +
+				"	}";
+		
 		List<String> importsToStringExpected = Arrays.asList(
 				"import org.junit.jupiter.api.BeforeAll;");
-		assertChange(original, original, importsToStringExpected);
+		assertChange(original, expected, importsToStringExpected);
 	}
 }

@@ -33,6 +33,8 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 
 	private static final Map<String, String> ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
 
+	private static final int ORG_JJUNIT_JUPITER_API_PACKAGE_LENGTH = "org.junit.jupiter.api.".length(); //$NON-NLS-1$
+
 	static {
 
 		Map<String, String> tmpMap = new HashMap<>();
@@ -72,18 +74,27 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 		List<Annotation> allAnnotations = annotationsCollectorVisitor.getAnnotations();
 		List<AnnotationTransformationData> annotationTransformationDataList = new ArrayList<>();
 		Set<String> safeJUnitJupiterAnnotationImports = new HashSet<>();
+
 		allAnnotations.stream()
 			.forEach(annotation -> {
 				String qualifiedTypeName = annotation.resolveTypeBinding()
 					.getQualifiedName();
 				if (ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP.containsKey(qualifiedTypeName)) {
 					String newQualifiedTypeName = ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP.get(qualifiedTypeName);
-					if (isNewSimpleTypeNameUnivocal(annotation, newQualifiedTypeName)) {
+					boolean isNewSimpleNameUnivocal = isNewSimpleTypeNameUnivocal(annotation, newQualifiedTypeName);
+					if (isNewSimpleNameUnivocal) {
 						safeJUnitJupiterAnnotationImports.add(newQualifiedTypeName);
 					}
 					if (!isTestAnnotationWithSimpleName(annotation)) {
+						String newAnnotationTypeName;
+						if (isNewSimpleNameUnivocal) {
+							newAnnotationTypeName = newQualifiedTypeName
+								.substring(ORG_JJUNIT_JUPITER_API_PACKAGE_LENGTH);
+						} else {
+							newAnnotationTypeName = newQualifiedTypeName;
+						}
 						annotationTransformationDataList
-							.add(new AnnotationTransformationData(annotation.getTypeName(), qualifiedTypeName));
+							.add(new AnnotationTransformationData(annotation.getTypeName(), newAnnotationTypeName));
 					}
 				}
 			});
@@ -97,7 +108,7 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 			.map(SimpleName.class::cast)
 			.collect(Collectors.toList());
 
-		transform(annotationNamesToTransform);
+		transformAnnotationNames(annotationTransformationDataList);
 		return false;
 	}
 
@@ -127,9 +138,19 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 			findIdentifierReplacement(simpleName).ifPresent(newIdentifier -> {
 				SimpleName newSimpleName = astRewrite.getAST()
 					.newSimpleName(newIdentifier);
-				this.astRewrite.replace(simpleName, newSimpleName, null);
+				astRewrite.replace(simpleName, newSimpleName, null);
 				onRewrite();
 			});
+		});
+	}
+	// AnnotationTransformationData
+
+	private void transformAnnotationNames(List<AnnotationTransformationData> annotationTransormationDataList) {
+		AST ast = astRewrite.getAST();
+		annotationTransormationDataList.forEach(data -> {
+			Name newAnnotationTypeName = ast.newName(data.getNewTypeName());
+			astRewrite.replace(data.getOriginalTypeName(), newAnnotationTypeName, null);
+			onRewrite();
 		});
 	}
 
