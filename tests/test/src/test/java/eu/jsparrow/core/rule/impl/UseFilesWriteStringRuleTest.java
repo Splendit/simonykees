@@ -40,12 +40,12 @@ public class UseFilesWriteStringRuleTest {
 	@Test
 	public void calculateEnabledForProjectShouldBeEnabled() {
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_11);
-		
+
 		rule.calculateEnabledForProject(testProject);
 
 		assertTrue(rule.isEnabled());
 	}
-	
+
 	@Test
 	public void test_ruleId() {
 		String ruleId = rule.getId();
@@ -56,12 +56,13 @@ public class UseFilesWriteStringRuleTest {
 	public void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_11, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.PERFORMANCE, Tag.IO_OPERATIONS));
+				contains(Tag.JAVA_11, Tag.PERFORMANCE, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.IO_OPERATIONS));
 		assertThat(description.getTags(), hasSize(4));
 		assertThat(description.getName(), equalTo("Use Files.writeString"));
 		assertThat(description.getDescription(), equalTo(
-				"Java 11 introduced some new methods in 'java.nio.file.Files' to write a string value into a file."
-				+ " This rule replaces 'BufferedWriter's that are used for writing single string values into files"
-				+ " with 'Files.writeString'."));
+				"Java 11 introduced 'Files.writeString(Path, CharSequence, Charset, OpenOption...)' and "
+						+ "'Files.writeString(Path, CharSequence, OpenOption...)' for writing text into a file by one "
+						+ "single invocation and in an efficient non-blocking manner. \nThis rule replaces 'BufferedWriters' "
+						+ "that are used to write a single value into a file, with 'Files.write(...)'."));
 	}
 }
