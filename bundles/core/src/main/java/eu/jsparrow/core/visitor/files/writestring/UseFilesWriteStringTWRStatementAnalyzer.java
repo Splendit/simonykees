@@ -128,7 +128,8 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 			}
 			writeInvocationData.addAdditionalArguments(additionalArguments);
 			writeInvocationData.setFunctionCreatingExpressionStatementReplacement(
-					visitor -> visitor.createFilesWriteStringMethodInvocationStatement(writeInvocationData, pathArgument, additionalArguments));
+					visitor -> visitor.createFilesWriteStringMethodInvocationStatement(writeInvocationData,
+							pathArgument, additionalArguments));
 			return Optional.of(writeInvocationData);
 		}
 		return Optional.empty();
@@ -191,45 +192,45 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 		Expression bufferedWriterInstanceCreationArgument = findBufferedIOArgument(bufferedWriterInstanceCreation)
 			.orElse(null);
 
-		if (bufferedWriterInstanceCreationArgument != null) {
+		if (bufferedWriterInstanceCreationArgument == null) {
+			return Optional.empty();
+		}
 
-			if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-				NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
-				if (!newBufferedIOArgumentsAnalyzer
-					.analyzeInitializer((ClassInstanceCreation) bufferedWriterInstanceCreationArgument)) {
-					return Optional.empty();
-				}
-				newBufferedIOArgumentsAnalyzer.getCharsetExpression()
-					.ifPresent(writeInvocationData::setCharsetExpression);
-				writeInvocationData.setFunctionCreatingExpressionStatementReplacement(
-						visitor -> visitor
-						.createFilesWriteStringMethodInvocationStatement(writeInvocationData, newBufferedIOArgumentsAnalyzer.getPathExpressions(),
-								writeInvocationData::getCharsetExpression));
-				return Optional.of(writeInvocationData);
+		if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+			NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer = new NewBufferedIOArgumentsAnalyzer();
+			if (!newBufferedIOArgumentsAnalyzer
+				.analyzeInitializer((ClassInstanceCreation) bufferedWriterInstanceCreationArgument)) {
+				return Optional.empty();
+			}
+			newBufferedIOArgumentsAnalyzer.getCharsetExpression()
+				.ifPresent(writeInvocationData::setCharsetExpression);
+			writeInvocationData.setFunctionCreatingExpressionStatementReplacement(visitor -> visitor
+				.createFilesWriteStringMethodInvocationStatement(writeInvocationData,
+						newBufferedIOArgumentsAnalyzer.getPathExpressions()));
+			return Optional.of(writeInvocationData);
 
+		}
+
+		if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
+
+			TryResourceAnalyzer fileWriterResourceAnalyzer = new TryResourceAnalyzer();
+
+			if (!fileWriterResourceAnalyzer.analyzeResourceUsedOnce(writeInvocationData.getTryStatement(),
+					(SimpleName) bufferedWriterInstanceCreationArgument)) {
+				return Optional.empty();
+			}
+			FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(java.io.FileWriter.class.getName());
+			if (!fileIOAnalyzer.analyzeFileIO(fileWriterResourceAnalyzer.getResourceFragment())) {
+				return Optional.empty();
 			}
 
-			if (bufferedWriterInstanceCreationArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
-
-				TryResourceAnalyzer fileWriterResourceAnalyzer = new TryResourceAnalyzer();
-
-				if (!fileWriterResourceAnalyzer.analyzeResourceUsedOnce(writeInvocationData.getTryStatement(),
-						(SimpleName) bufferedWriterInstanceCreationArgument)) {
-					return Optional.empty();
-				}
-				FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(java.io.FileWriter.class.getName());
-				if (!fileIOAnalyzer.analyzeFileIO(fileWriterResourceAnalyzer.getResourceFragment())) {
-					return Optional.empty();
-				}
-
-				writeInvocationData.addResourcesToRemove(fileWriterResourceAnalyzer.getResource());
-				fileIOAnalyzer.getCharset().ifPresent(writeInvocationData::setCharsetExpression);
-				writeInvocationData.setFunctionCreatingExpressionStatementReplacement(
-						visitor -> visitor
-						.createFilesWriteStringMethodInvocationStatement(writeInvocationData, fileIOAnalyzer.getPathExpressions(),
-								writeInvocationData::getCharsetExpression));
-				return Optional.of(writeInvocationData);
-			}
+			writeInvocationData.addResourcesToRemove(fileWriterResourceAnalyzer.getResource());
+			fileIOAnalyzer.getCharset()
+				.ifPresent(writeInvocationData::setCharsetExpression);
+			writeInvocationData.setFunctionCreatingExpressionStatementReplacement(visitor -> visitor
+				.createFilesWriteStringMethodInvocationStatement(writeInvocationData,
+						fileIOAnalyzer.getPathExpressions()));
+			return Optional.of(writeInvocationData);
 		}
 		return Optional.empty();
 	}

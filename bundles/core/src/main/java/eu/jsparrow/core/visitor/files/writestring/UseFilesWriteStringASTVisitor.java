@@ -189,8 +189,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 	ExpressionStatement createFilesWriteStringMethodInvocationStatement(
 			WriteInvocationData writeInvocationData,
-			List<Expression> pathExpressions,
-			Supplier<Optional<Expression>> charSetExpressionSupplier) {
+			List<Expression> pathExpressions) {
 		AST ast = astRewrite.getAST();
 		Name pathsTypeName = addImport(java.nio.file.Paths.class.getName(),
 				writeInvocationData.getWriteInvocationStatementToReplace());
@@ -203,7 +202,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 
 		Expression writeStringArgumentCopy = (Expression) astRewrite
 			.createCopyTarget(writeInvocationData.getCharSequenceArgument());
-		Optional<Expression> optionalCharset = charSetExpressionSupplier.get();
+		Optional<Expression> optionalCharset = writeInvocationData.getCharsetExpression();
 		Expression charset = optionalCharset.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
 			.orElse(null);
 		if (charset == null) {

@@ -15,16 +15,18 @@ import eu.jsparrow.core.visitor.files.TryResourceAnalyzer;
 /**
  * Acts as a "Record" making possible to return all results of
  * {@link #findWriteInvocationData}.
+ * 
+ * @since 3.27.0
  *
  */
 class WriteInvocationData {
+
 	private final ExpressionStatement writeInvocationStatementToReplace;
 	private final Expression charSequenceArgument;
 	private final TryStatement tryStatement;
-	private final VariableDeclarationExpression resource;
 	private final Expression resourceInitializer;
 	private List<VariableDeclarationExpression> resourcesToRemove = new ArrayList<>();
-	private  Function<UseFilesWriteStringASTVisitor, ExpressionStatement> functionCreatingExpressionStatementReplacement;
+	private Function<UseFilesWriteStringASTVisitor, ExpressionStatement> functionCreatingExpressionStatementReplacement;
 
 	private Expression charsetExpression;
 	private List<Expression> additionalArguments = new ArrayList<>();
@@ -36,7 +38,7 @@ class WriteInvocationData {
 		this.writeInvocationStatementToReplace = writeInvocationStatementToReplace;
 		this.charSequenceArgument = charSequenceArgument;
 		tryStatement = bufferedWriterResourceAnalyzer.getTryStatement();
-		resource = bufferedWriterResourceAnalyzer.getResource();
+		addResourcesToRemove(bufferedWriterResourceAnalyzer.getResource());
 		resourceInitializer = bufferedWriterResourceAnalyzer.getResourceInitializer();
 	}
 
@@ -52,26 +54,18 @@ class WriteInvocationData {
 		return tryStatement;
 	}
 
-	public VariableDeclarationExpression getResource() {
-		return resource;
-	}
-
 	public Expression getResourceInitializer() {
 		return resourceInitializer;
 	}
-	
+
 	public void addResourcesToRemove(VariableDeclarationExpression variableDeclarationExpression) {
 		this.resourcesToRemove.add(variableDeclarationExpression);
 	}
-	
-	public void addResourcesToRemove(List<VariableDeclarationExpression> variableDeclarationExpressions) {
-		this.resourcesToRemove.addAll(variableDeclarationExpressions);
-	}
-	
+
 	public List<VariableDeclarationExpression> getResourcesToRemove() {
 		return this.resourcesToRemove;
 	}
-	
+
 	public Optional<Expression> getCharsetExpression() {
 		return Optional.ofNullable(charsetExpression);
 	}
@@ -83,10 +77,11 @@ class WriteInvocationData {
 	public List<Expression> getAdditionalArguments() {
 		return this.additionalArguments;
 	}
+
 	public void addAdditionalArguments(List<Expression> additionalArguments) {
 		this.additionalArguments.addAll(additionalArguments);
 	}
-	
+
 	public Function<UseFilesWriteStringASTVisitor, ExpressionStatement> getFunctionCreatingExpressionStatementReplacement() {
 		return functionCreatingExpressionStatementReplacement;
 	}
@@ -95,7 +90,7 @@ class WriteInvocationData {
 			Function<UseFilesWriteStringASTVisitor, ExpressionStatement> functionCreatingExpressionStatementReplacement) {
 		this.functionCreatingExpressionStatementReplacement = functionCreatingExpressionStatementReplacement;
 	}
-	
+
 	ExpressionStatement createWriteInvocationStatementReplacement(UseFilesWriteStringASTVisitor visitor) {
 		return functionCreatingExpressionStatementReplacement.apply(visitor);
 	}
