@@ -61,8 +61,6 @@ class MigrateJUnit4ToJupiterASTVisitorNegativeTest extends AbstractMigrateJUnit4
 		assertNoChange(original);
 	}
 
-
-
 	@Test
 	public void visit_SingleMemberAnnotationRunWith_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(org.junit.runner.RunWith.class.getName());

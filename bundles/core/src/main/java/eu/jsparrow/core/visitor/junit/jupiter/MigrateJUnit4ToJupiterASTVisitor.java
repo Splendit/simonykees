@@ -6,12 +6,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -49,159 +47,134 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 
 	}
 
-	public MigrateJUnit4ToJupiterASTVisitor() {
-
-	}
-
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
-		boolean continueVisiting = super.visit(compilationUnit);
 
+		boolean continueVisiting = super.visit(compilationUnit);
 		if (!continueVisiting) {
 			return false;
 		}
 
 		MigrateJUnit4ToJupiterAnalyzerVisitor jUnit4ReferencesVisitor = new MigrateJUnit4ToJupiterAnalyzerVisitor();
 		compilationUnit.accept(jUnit4ReferencesVisitor);
-
 		if (!jUnit4ReferencesVisitor.isTransformationPossible()) {
 			return false;
 		}
 
+		List<AnnotationTransformationData> transformationDataList = createAnnotationDataList(compilationUnit);
+		if (transformationDataList.isEmpty()) {
+			return false;
+		}
+
+		Set<String> safeNewAnnotationImports = new HashSet<>();
+		transformationDataList.stream()
+			.map(AnnotationTransformationData::getSafeNewTypeImport)
+			.forEach(safeImport -> {
+				safeImport.ifPresent(safeNewAnnotationImports::add);
+			});
+
+		List<AnnotationTransformationData> annotationNameReplacementDataList = transformationDataList
+			.stream()
+			.filter(data -> !isTestAnnotationSimpleName(data.getOriginalTypeName()))
+			.collect(Collectors.toList());
+
+		List<ImportDeclaration> importsToRemove = ASTNodeUtil.convertToTypedList(this.getCompilationUnit()
+			.imports(), ImportDeclaration.class)
+			.stream()
+			.filter(this::isJUnit4AnnotationImport)
+			.collect(Collectors.toList());
+
+		transform(importsToRemove, safeNewAnnotationImports, annotationNameReplacementDataList);
+		return false;
+	}
+
+	private List<AnnotationTransformationData> createAnnotationDataList(CompilationUnit compilationUnit) {
+
 		AnnotationCollectorVisitor annotationsCollectorVisitor = new AnnotationCollectorVisitor();
 		compilationUnit.accept(annotationsCollectorVisitor);
 
-		List<Annotation> allAnnotations = annotationsCollectorVisitor.getAnnotations();
-		List<AnnotationTransformationData> annotationTransformationDataList = new ArrayList<>();
-		Set<String> safeJUnitJupiterAnnotationImports = new HashSet<>();
-
-		allAnnotations.stream()
+		List<AnnotationTransformationData> jUnit4AnnotationsDataList = new ArrayList<>();
+		annotationsCollectorVisitor.getAnnotations()
+			.stream()
 			.forEach(annotation -> {
-				String qualifiedTypeName = annotation.resolveTypeBinding()
-					.getQualifiedName();
-				if (ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP.containsKey(qualifiedTypeName)) {
-					String newQualifiedTypeName = ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP.get(qualifiedTypeName);
-					boolean isNewSimpleNameUnivocal = isNewSimpleTypeNameUnivocal(annotation, newQualifiedTypeName);
-					if (isNewSimpleNameUnivocal) {
-						safeJUnitJupiterAnnotationImports.add(newQualifiedTypeName);
+				ITypeBinding typeBinding = annotation.resolveTypeBinding();
+				String originalQualifiedTypeName = typeBinding.getQualifiedName();
+				if (ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP.containsKey(originalQualifiedTypeName)) {
+					String newQualifiedTypeName = ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP
+						.get(originalQualifiedTypeName);
+
+					Name originalTypeName = annotation.getTypeName();
+					boolean safeToImportNewType = isSafeToImportNewType(newQualifiedTypeName, originalTypeName);
+					AnnotationTransformationData jUnit4AnnotationData;
+					if (safeToImportNewType) {
+						String newTypeUnqualifiedName = newQualifiedTypeName
+							.substring(ORG_JJUNIT_JUPITER_API_PACKAGE_LENGTH);
+						jUnit4AnnotationData = new AnnotationTransformationData(
+								originalTypeName, newTypeUnqualifiedName, newQualifiedTypeName);
+					} else {
+						jUnit4AnnotationData = new AnnotationTransformationData(
+								originalTypeName, newQualifiedTypeName);
 					}
-					if (!isTestAnnotationWithSimpleName(annotation)) {
-						String newAnnotationTypeName;
-						if (isNewSimpleNameUnivocal) {
-							newAnnotationTypeName = newQualifiedTypeName
-								.substring(ORG_JJUNIT_JUPITER_API_PACKAGE_LENGTH);
-						} else {
-							newAnnotationTypeName = newQualifiedTypeName;
-						}
-						annotationTransformationDataList
-							.add(new AnnotationTransformationData(annotation.getTypeName(), newAnnotationTypeName));
-					}
+					jUnit4AnnotationsDataList.add(jUnit4AnnotationData);
 				}
 			});
-
-		removeJUnit4AnnotationTypeImports();
-		addSafeJUnitJupiterAnnotationImports(safeJUnitJupiterAnnotationImports);
-
-		List<SimpleName> annotationNamesToTransform = annotationTransformationDataList.stream()
-			.map(data -> data.getOriginalTypeName())
-			.filter(Name::isSimpleName)
-			.map(SimpleName.class::cast)
-			.collect(Collectors.toList());
-
-		transformAnnotationNames(annotationTransformationDataList);
-		return false;
+		return jUnit4AnnotationsDataList;
 	}
 
-	private boolean isNewSimpleTypeNameUnivocal(Annotation annotation, String newQualifiedTypeName) {
-		if (isTestAnnotationWithSimpleName(annotation)) {
+	private boolean isSafeToImportNewType(String newQualifiedTypeName, Name originalTypeName) {
+		if (isTestAnnotationSimpleName(originalTypeName)) {
 			return true;
 		}
 		verifyImport(getCompilationUnit(), newQualifiedTypeName);
-		return isSimpleTypeNameUnivocal(newQualifiedTypeName, annotation);
+		return isSimpleTypeNameUnivocal(newQualifiedTypeName, originalTypeName);
 
 	}
 
-	private boolean isTestAnnotationWithSimpleName(Annotation annotation) {
-		Name annotationTypeName = annotation.getTypeName();
-		if (annotationTypeName.isSimpleName()) {
-			SimpleName simpleTypeName = (SimpleName) annotationTypeName;
-			if (simpleTypeName.getIdentifier()
-				.equals("Test")) { //$NON-NLS-1$
-				return true;
-			}
+	private boolean isTestAnnotationSimpleName(Name annotationTypeName) {
+		if (!annotationTypeName.isSimpleName()) {
+			return false;
 		}
-		return false;
+		String identifier = ((SimpleName) annotationTypeName).getIdentifier();
+		return identifier.equals("Test"); //$NON-NLS-1$
 	}
 
-	private void transform(List<SimpleName> annotationNamesToTransform) {
-		annotationNamesToTransform.forEach(simpleName -> {
-			findIdentifierReplacement(simpleName).ifPresent(newIdentifier -> {
-				SimpleName newSimpleName = astRewrite.getAST()
-					.newSimpleName(newIdentifier);
-				astRewrite.replace(simpleName, newSimpleName, null);
-				onRewrite();
-			});
-		});
+	private boolean isJUnit4AnnotationImport(ImportDeclaration importDeclaration) {
+		IBinding importBinding = importDeclaration.resolveBinding();
+		if (importBinding.getKind() != IBinding.TYPE) {
+			return false;
+		}
+		ITypeBinding typeBinding = (ITypeBinding) importBinding;
+		String qualifiedName = typeBinding.getQualifiedName();
+		return ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP.containsKey(qualifiedName);
 	}
-	// AnnotationTransformationData
 
-	private void transformAnnotationNames(List<AnnotationTransformationData> annotationTransormationDataList) {
-		AST ast = astRewrite.getAST();
-		annotationTransormationDataList.forEach(data -> {
-			Name newAnnotationTypeName = ast.newName(data.getNewTypeName());
-			astRewrite.replace(data.getOriginalTypeName(), newAnnotationTypeName, null);
+	private void transform(List<ImportDeclaration> importsToRemove, Set<String> safeNewAnnotationImports,
+			List<AnnotationTransformationData> annotationNameReplacementDataList) {
+		importsToRemove.forEach(importDeclaration -> {
+			astRewrite.remove(importDeclaration, null);
 			onRewrite();
 		});
-	}
 
-	private void removeJUnit4AnnotationTypeImports() {
-
-		List<ImportDeclaration> importDeclarations = ASTNodeUtil.convertToTypedList(this.getCompilationUnit()
-			.imports(), ImportDeclaration.class);
-		for (ImportDeclaration importDeclaration : importDeclarations) {
-			IBinding importBinding = importDeclaration.resolveBinding();
-			if (importBinding.getKind() == IBinding.TYPE) {
-				ITypeBinding typeBinding = (ITypeBinding) importBinding;
-				String qualifiedName = typeBinding.getQualifiedName();
-				if (ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP.containsKey(qualifiedName)) {
-					astRewrite.remove(importDeclaration, null);
-					onRewrite();
-				}
-			}
-		}
-	}
-
-	private void addSafeJUnitJupiterAnnotationImports(Set<String> safeJUnitJupiterAnnotationImports) {
-		ListRewrite listRewrite = astRewrite.getListRewrite(getCompilationUnit(), CompilationUnit.IMPORTS_PROPERTY);
 		AST ast = astRewrite.getAST();
+		ListRewrite newImportsListRewrite = astRewrite.getListRewrite(getCompilationUnit(),
+				CompilationUnit.IMPORTS_PROPERTY);
 
-		safeJUnitJupiterAnnotationImports
+		safeNewAnnotationImports
 			.stream()
-			.forEach(newQualifiedTypeName -> {
+			.forEach(newAnnotationImport -> {
 				ImportDeclaration newImportDeclaration = ast.newImportDeclaration();
-				newImportDeclaration.setName(ast.newName(newQualifiedTypeName));
-				listRewrite.insertLast(newImportDeclaration, null);
+				newImportDeclaration.setName(ast.newName(newAnnotationImport));
+				newImportsListRewrite.insertLast(newImportDeclaration, null);
 				onRewrite();
 			});
-	}
 
-	private Optional<String> findIdentifierReplacement(SimpleName simpleName) {
-		String identifier = simpleName.getIdentifier();
-		if (identifier.equals("Ignore")) { //$NON-NLS-1$
-			return Optional.of("Disabled"); //$NON-NLS-1$
-		}
-		if (identifier.equals("Before")) { //$NON-NLS-1$
-			return Optional.of("BeforeEach"); //$NON-NLS-1$
-		}
-		if (identifier.equals("BeforeClass")) { //$NON-NLS-1$
-			return Optional.of("BeforeAll"); //$NON-NLS-1$
-		}
-		if (identifier.equals("After")) { //$NON-NLS-1$
-			return Optional.of("AfterEach"); //$NON-NLS-1$
-		}
-		if (identifier.equals("AfterClass")) { //$NON-NLS-1$
-			return Optional.of("AfterAll"); //$NON-NLS-1$
-		}
-		return Optional.empty();
+		annotationNameReplacementDataList.stream()
+			.forEach(data -> {
+				Name originalTypeName = data.getOriginalTypeName();
+				String newTapeNameAsString = data.getNewTypeName();
+				Name newAnnotationTypeName = ast.newName(newTapeNameAsString);
+				astRewrite.replace(originalTypeName, newAnnotationTypeName, null);
+				onRewrite();
+			});
 	}
 }
