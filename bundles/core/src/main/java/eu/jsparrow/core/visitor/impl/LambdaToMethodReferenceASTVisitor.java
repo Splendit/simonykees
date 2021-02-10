@@ -558,9 +558,9 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	}
 
 	/**
-	 * The soution for case 4 is extracted in this method.
+	 * The solution for case 4 is extracted in this method.
 	 * <p>
-	 * <emp>case 4:</emp> reference to instance method of arbitrary type i.e.
+	 * case 4: reference to instance method of arbitrary type i.e.
 	 * 
 	 * <pre>
 	 * {@code Arrays.sort(stringArray, (a, b) -> a.compareToIgnoreCase(b))} 
@@ -571,14 +571,14 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	 * </pre>
 	 * 
 	 * @param lambdaExpressionNode
-	 *            the lambda to be replaced bt netgid referebce
+	 *            the lambda to be replaced by the method reference
 	 * @param lambdaParams
 	 *            a list of parameters of the lambda expression
 	 * @param methodInvocation
 	 *            the method invocation occurring as the single expression in
 	 *            the lambda body
 	 * @param methodArguments
-	 *            the arguments of the method invcation in the lambda body.
+	 *            the arguments of the method invocation in the lambda body.
 	 */
 	private void replaceWithExpressionMethodReference(LambdaExpression lambdaExpressionNode,
 			List<VariableDeclaration> lambdaParams, MethodInvocation methodInvocation,
