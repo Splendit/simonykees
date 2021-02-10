@@ -54,6 +54,33 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(ImportDeclaration node) {
+		transformationPossible = analyzeImport(node);
+		return false;
+	}
+
+	private boolean analyzeImport(ImportDeclaration node) {
+		IBinding binding = node.resolveBinding();
+		if (binding.getKind() == IBinding.PACKAGE) {
+			String packageName = ((IPackageBinding) binding).getName();
+			return packageName.equals(PACKAGE_ORG_JUNIT);
+		}
+		if (binding.getKind() == IBinding.TYPE) {
+			ITypeBinding typeBinding = (ITypeBinding) binding;
+			if (isSupportedJUnit4AnnotationType(typeBinding)) {
+				return true;
+			}
+		}
+		if (isNameOfSupportedImportOnDemand(node.getName())) {
+			return true;
+		}
+		if (isNameOfSupportedAnnotationImport(node.getName())) {
+			return true;
+		}
+		return checkOtherReference(binding);
+	}
+
+	@Override
 	public boolean visit(QualifiedName node) {
 		transformationPossible = analyzeQualifiedName(node);
 		return false;
@@ -71,26 +98,16 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 	}
 
 	private boolean analyzeSimpleName(SimpleName node) {
-		if (isNameReferencingJUnit4Assert(node)) {
-			return true;
-		}
 		if (isNameOfSupportedAnnotation(node)) {
 			return true;
 		}
 		if (isIgnoreAnnotationValueName(node)) {
 			return true;
 		}
-		return !isUnexpectedReferenceToJUnit(node.resolveBinding());
+		return checkOtherReference(node.resolveBinding());
 	}
 
 	private boolean analyzeQualifiedName(QualifiedName node) {
-//		if (node.getFullyQualifiedName()
-//			.equals(PACKAGE_ORG_JUNIT)) {
-//			return true;
-//		}
-		if (isNameReferencingJUnit4Assert(node)) {
-			return true;
-		}
 		if (isNameOfSupportedAnnotation(node)) {
 			return true;
 		}
@@ -100,11 +117,10 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		if (isNameOfSupportedAnnotationImport(node)) {
 			return true;
 		}
-		return !isUnexpectedReferenceToJUnit(node.resolveBinding());
+		return checkOtherReference(node.resolveBinding());
 	}
 
-	private boolean isNameReferencingJUnit4Assert(Name name) {
-		IBinding binding = name.resolveBinding();
+	private boolean isNameReferencingJUnit4Assert(IBinding binding) {
 		if (binding.getKind() == IBinding.METHOD) {
 			if (isJUnit4AssertClass(((IMethodBinding) binding).getDeclaringClass())) {
 				return true;
@@ -126,7 +142,6 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 	}
 
 	private boolean isNameOfSupportedAnnotation(Name name) {
-
 		IBinding binding = name.resolveBinding();
 		if (binding.getKind() != IBinding.TYPE) {
 			return false;
@@ -155,7 +170,7 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		return false;
 	}
 
-	private boolean isNameOfSupportedImportOnDemand(QualifiedName qualifiedName) {
+	private boolean isNameOfSupportedImportOnDemand(Name qualifiedName) {
 		if (qualifiedName.getLocationInParent() != ImportDeclaration.NAME_PROPERTY) {
 			return false;
 		}
@@ -167,24 +182,17 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		return packageName.equals(PACKAGE_ORG_JUNIT);
 	}
 
-	private boolean isNameOfSupportedAnnotationImport(QualifiedName qualifiedName) {
-		
+	private boolean isNameOfSupportedAnnotationImport(Name qualifiedName) {
+
 		if (qualifiedName.getLocationInParent() == ImportDeclaration.NAME_PROPERTY) {
 			IBinding binding = qualifiedName.resolveBinding();
-			// if (binding.getKind() == IBinding.PACKAGE) {
-			// IPackageBinding packageBinding = (IPackageBinding) binding;
-			// if (packageBinding.getName()
-			// .equals(PACKAGE_ORG_JUNIT)) {
-			// return true;
-			// }
-			// }
+
 			if (binding.getKind() == IBinding.TYPE) {
 				ITypeBinding typeBinding = (ITypeBinding) binding;
 				if (isSupportedJUnit4AnnotationType(typeBinding)) {
 					return true;
 				}
 			}
-
 		}
 		return false;
 	}
@@ -224,36 +232,40 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 			.equals(TYPE_ORG_JUNIT_IGNORE);
 	}
 
-	private boolean isUnexpectedReferenceToJUnit(IBinding binding) {
-
+	private boolean checkOtherReference(IBinding binding) {
+		if (isNameReferencingJUnit4Assert(binding)) {
+			return true;
+		}
 		if (binding.getKind() == IBinding.PACKAGE) {
-			return isJUnit4Package((IPackageBinding) binding);
+			return !isJUnit4Package((IPackageBinding) binding);
 
 		}
 		if (binding.getKind() == IBinding.TYPE) {
-			return isJUnit4Type((ITypeBinding) binding);
+			return !isJUnit4Type((ITypeBinding) binding);
 
 		}
 		if (binding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = (IMethodBinding) binding;
-			return isJUnit4Type(methodBinding.getDeclaringClass());
+			return !isJUnit4Type(methodBinding.getDeclaringClass());
 
 		}
-
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
 			if (isJUnit4Type(variableBinding.getType())) {
-				return true;
+				return false;
 			}
-			return isJUnit4Type(variableBinding.getDeclaringClass());
+			return !isJUnit4Type(variableBinding.getDeclaringClass());
 		}
-
 		if (binding.getKind() == IBinding.ANNOTATION) {
 			IAnnotationBinding annotationBinding = (IAnnotationBinding) binding;
-			return isJUnit4Type(annotationBinding.getAnnotationType());
-
+			return !isJUnit4Type(annotationBinding.getAnnotationType());
 		}
-
+		if (binding.getKind() == IBinding.MEMBER_VALUE_PAIR) {
+			return true;
+		}
+		if (binding.getKind() == IBinding.MODULE) {
+			return true;
+		}
 		return false;
 	}
 
@@ -274,5 +286,4 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 	boolean isTransformationPossible() {
 		return transformationPossible;
 	}
-
 }
