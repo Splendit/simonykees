@@ -1,9 +1,12 @@
 package eu.jsparrow.sample.postRule.allRules;
 
 import java.time.LocalDate;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -251,11 +254,11 @@ public class LambdaToMethodReferenceRule {
 
 		map.entrySet()
 			.stream()
-			.forEach(Map.Entry::getValue);
+			.forEach(Entry::getValue);
 
 		map.entrySet()
 			.stream()
-			.forEach(Map.Entry::getValue);
+			.forEach(Entry<String, String>::getValue);
 
 		map.entrySet()
 			.stream()
@@ -415,6 +418,79 @@ public class LambdaToMethodReferenceRule {
 		queue.withLock(() -> doSomething(2));
 	}
 
+	/**
+	 * SIM-1826
+	 */
+	void testValidTransformation() {
+		Comparator<?> comparator;
+		final Comparator<?>[] comparators;
+		comparator = Comparator.<Integer>naturalOrder();
+		comparator = (Deque<Integer> lhs, Deque<Integer> rhs) -> lhs.getFirst()
+			.compareTo(lhs.getFirst());
+
+		comparator = Comparator.comparingInt(Deque<Integer>::getFirst);
+		comparator = Comparator.comparing(Deque<String>::getFirst);
+		comparator = (Comparator<?>) Comparator.comparingInt(Deque<Integer>::getFirst);
+		comparator = (Comparator<?>) Comparator.comparing(Deque<String>::getFirst);
+
+		// invalid transformation
+		comparators = new Comparator[] { (Comparator<Integer>) Comparator.<Integer>naturalOrder(),
+				Comparator.comparingInt(Deque<Integer>::getFirst), Comparator.comparing(Deque<String>::getFirst),
+				(Comparator<?>) Comparator.comparingInt(Deque<Integer>::getFirst),
+				(Comparator<?>) Comparator.comparing(Deque<String>::getFirst) };
+
+		final Function<? super ArrayDeque<Integer>, Number> jokerSuperArrayDequeToInteger = Deque<Integer>::getFirst;
+		final Function<Deque<Integer>, Integer> DequeOfIntegerToInteger = Deque<Integer>::getFirst;
+
+		final Function<? super Deque<Integer>, Integer> jokerSuperDequeToInteger = Deque<Integer>::getFirst;
+		final Function<? super Deque<Integer>, Number> jokerSuperDequeToInteger2 = Deque<Integer>::getFirst;
+
+		final Function<? super Deque<Integer>, Comparable<?>> jokerSuperDequeToComparable = Deque<Integer>::getFirst;
+		final Function<? super ArrayDeque<Integer>, Comparable<?>> jokerSuperArrayDequeToComparable = Deque<Integer>::getFirst;
+		final Function<? super Deque<Integer>, ? extends Comparable<?>> jokerSuperDequeToJokerExtendsComparable = Deque<Integer>::getFirst;
+		final Function<? extends Deque<Integer>, Integer> jokerExtendsDequeToInteger = Deque<Integer>::getFirst;
+		final Function<? extends Deque<Integer>, Comparable<?>> jokerExtendsDequeToComparable = Deque<Integer>::getFirst;
+		final Function<? extends Deque<Integer>, ? extends Comparable<?>> jokerExtendsDequeToJokerExtendsComparable = Deque<Integer>::getFirst;
+		final Function<? super Deque<Integer>, Integer> casted = (Function<? super Deque<Integer>, Integer>) (
+				Deque<Integer> x1) -> x1.getFirst();
+	}
+
+	/**
+	 * SIM-1826
+	 */
+	public Function<? super Deque<Integer>, Integer> shouldTransform() {
+		final Function<?, Function> casted = (Object x12) -> (Object x1) -> x1.toString();
+		return Deque<Integer>::getFirst;
+	}
+
+	/*
+	 * SIM-1826
+	 */
+	void testInvalidTransformation() {
+
+		final Function<? extends Deque<? super Integer>, Integer> jokerToInteger4 = (Deque<Integer> x1) -> x1
+			.getFirst();
+		final Function<? extends Deque<? super Integer>, Integer> jokerToInteger41 = (ArrayDeque<Integer> x1) -> x1
+			.getFirst();
+		final Function<? extends Deque<Integer>, Integer> jokerExtendsDequeToInteger1 = (ArrayDeque<Integer> x1) -> x1
+			.getFirst();
+
+		final Function<? extends Deque<? extends Integer>, Integer> jokerToInteger5 = (Deque<Integer> x1) -> x1
+			.getFirst();
+		final Function<? extends Deque<? extends Comparable<?>>, Integer> jokerToInteger51 = (Deque<Integer> x1) -> x1
+			.getFirst();
+
+		final Function<?, ?> jokerToJoker = (Deque<Integer> x1) -> x1.getFirst();
+
+		final Function<?, ? extends Comparable<?>> jokerToJokerExtendsComparable = (
+				Deque<? extends Comparable<?>> x1) -> x1.getFirst();
+
+		final Function<?, Integer> jokerToInteger = (Deque<Integer> x1) -> x1.getFirst();
+
+		final FunctionToInt<?> localFunction = (Deque<Integer> x1) -> x1.getFirst();
+
+	}
+
 	class NestedClass {
 		public void referencingMethodInNestedClass() {
 			final List<Person> persons = new ArrayList<>();
@@ -466,6 +542,13 @@ public class LambdaToMethodReferenceRule {
 		public org.apache.commons.lang3.math.NumberUtils getNumber() {
 			return null;
 		}
+	}
+
+	/**
+	 * SIM-1826
+	 */
+	interface FunctionToInt<T> extends Function<T, Integer> {
+
 	}
 }
 

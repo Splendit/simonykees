@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -28,6 +29,7 @@ import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -40,9 +42,11 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.utils.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -68,212 +72,187 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	@Override
 	public boolean visit(LambdaExpression lambdaExpressionNode) {
 
+		ITypeBinding contextType = LambdaNodeUtil.findContextType(lambdaExpressionNode)
+			.orElse(null);
+		if (contextType == null) {
+			return true;
+		}
+		IMethodBinding expectedFunctionalInterface = contextType.getFunctionalInterfaceMethod();
+		IMethodBinding lambdaBinding = lambdaExpressionNode.resolveMethodBinding();
+		if (areIncompatibleFunctionalInterfaces(expectedFunctionalInterface, lambdaBinding)) {
+			return true;
+		}
 		Expression body = extractSingleBodyExpression(lambdaExpressionNode);
-
 		// work only with expression lambdas
-		if (body != null) {
+		if (body == null) {
+			return true;
+		}
 
-			List<VariableDeclaration> lambdaParams = ASTNodeUtil.convertToTypedList(lambdaExpressionNode.parameters(),
-					VariableDeclaration.class);
+		List<VariableDeclaration> lambdaParams = ASTNodeUtil.convertToTypedList(lambdaExpressionNode.parameters(),
+				VariableDeclaration.class);
 
-			// only single method invocations are relevant for cases 1, 2 and 3
-			if (ASTNode.METHOD_INVOCATION == body.getNodeType()) {
-				MethodInvocation methodInvocation = (MethodInvocation) body;
-				List<Expression> methodArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-						Expression.class);
-				Expression methodInvocationExpression = methodInvocation.getExpression();
+		// only single method invocations are relevant for cases 1, 2 and 3
+		if (ASTNode.METHOD_INVOCATION == body.getNodeType()) {
+			MethodInvocation methodInvocation = (MethodInvocation) body;
+			List<Expression> methodArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+					Expression.class);
+			Expression methodInvocationExpression = methodInvocation.getExpression();
 
-				if (isWrappedInOverloadedMethod(lambdaExpressionNode, methodInvocation)) {
-					return true;
-				}
-
-				/*
-				 * case 1: reference to static method
-				 * 
-				 * case 2: reference to instance method i.e.
-				 * 
-				 * personList.forEach(element -> System.out.println(element))
-				 * 
-				 * becomes
-				 * 
-				 * personList.forEach(System.out::println)
-				 * 
-				 * case 3: reference to 'this' i.e.
-				 * 
-				 * personList.forEach(person -> doSomething(person))
-				 * 
-				 * becomes
-				 * 
-				 * personList.forEach(this::doSomething)
-				 */
-				if (methodArguments.size() == lambdaParams.size()
-						&& checkMethodParameters(lambdaParams, methodArguments)) {
-
-					IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-
-					List<ITypeBinding> ambParams = methodArguments.stream()
-						.skip(1)
-						.map(Expression::resolveTypeBinding)
-						.collect(Collectors.toList());
-					if (isAmbiguousMethodReference(methodInvocation, ambParams)) {
-						return true;
-					}
-
-					ExpressionMethodReference ref = astRewrite.getAST()
-						.newExpressionMethodReference();
-
-					// save type arguments
-					saveTypeArguments(methodInvocation, ref);
-
-					boolean isReferenceExpressionSet = false;
-
-					// no expression present -> assume 'this'
-					if (methodInvocationExpression == null) {
-
-						/*
-						 * Ensure that the lambda expression is enclosed in the
-						 * same class as the method which is being referenced.
-						 * We have to check this, because the method could be
-						 * declared in the outer class.
-						 */
-						ITypeBinding methodsDeclaringClass = methodBinding.getDeclaringClass();
-						AbstractTypeDeclaration lambdaEnclosing = ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode,
-								AbstractTypeDeclaration.class);
-						ITypeBinding lambdaEnclosingType = lambdaEnclosing.resolveBinding();
-
-						if (Modifier.isStatic(methodBinding.getModifiers())) {
-							ITypeBinding declaringClassErasure = methodsDeclaringClass.getErasure();
-							newImports.add(declaringClassErasure.getQualifiedName());
-							SimpleName staticClassName = astRewrite.getAST()
-								.newSimpleName(declaringClassErasure.getName());
-							ref.setExpression(staticClassName);
-							isReferenceExpressionSet = true;
-						} else if (compareITypeBinding(methodsDeclaringClass, lambdaEnclosingType)) {
-							ClassInstanceCreation enclosingAnonymousInnerClass = ASTNodeUtil
-								.getSpecificAncestor(lambdaExpressionNode, ClassInstanceCreation.class);
-							if (enclosingAnonymousInnerClass == null) {
-								ThisExpression thisExpression = astRewrite.getAST()
-									.newThisExpression();
-								ref.setExpression(thisExpression);
-								isReferenceExpressionSet = true;
-							}
-						}
-
-					}
-					// simple name, qualified name or 'this'
-					else if (methodInvocationExpression instanceof Name
-							|| ASTNode.THIS_EXPRESSION == methodInvocationExpression.getNodeType()) {
-
-						boolean paramUserForMethodInvocation = false;
-						if (methodInvocationExpression instanceof Name) {
-							Name name = (Name) methodInvocationExpression;
-							String nameStr = name.getFullyQualifiedName();
-							paramUserForMethodInvocation = this.containsName(methodArguments, nameStr);
-						}
-
-						if (!paramUserForMethodInvocation) {
-							Expression newMethodInvocationExpression = (Expression) astRewrite
-								.createCopyTarget(methodInvocation.getExpression());
-							ref.setExpression(newMethodInvocationExpression);
-							isReferenceExpressionSet = true;
-						}
-					}
-
-					if (isReferenceExpressionSet) {
-						SimpleName methodName = (SimpleName) astRewrite.createCopyTarget(methodInvocation.getName());
-						ref.setName(methodName);
-						astRewrite.replace(lambdaExpressionNode, ref, null);
-						getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
-						onRewrite();
-					}
-				}
-
-				/*
-				 * case 4: reference to instance method of arbitrary type i.e.
-				 * 
-				 * Arrays.sort(stringArray, (a, b) -> a.compareToIgnoreCase(b))
-				 * 
-				 * becomes
-				 * 
-				 * Arrays.sort(stringArray, String::compareToIgnoreCase)
-				 */
-				else if ((lambdaParams.size() - 1) == methodArguments.size() && methodInvocationExpression != null) {
-
-					if (ASTNode.SIMPLE_NAME == methodInvocationExpression.getNodeType()) {
-						SimpleName methodInvocationExpressionName = (SimpleName) methodInvocationExpression;
-						String methodInvocationExpressionNameStr = methodInvocationExpressionName.getIdentifier();
-						String lambdaParamNameStr = lambdaParams.get(0)
-							.getName()
-							.getIdentifier();
-
-						if (methodInvocationExpressionNameStr.equals(lambdaParamNameStr) && checkMethodParameters(
-								lambdaParams.subList(1, lambdaParams.size()), methodArguments)) {
-
-							String typeNameStr = findTypeOfSimpleName(methodInvocationExpressionName);
-							List<ITypeBinding> ambTypes = lambdaParams.stream()
-								.map(var -> var.resolveBinding()
-									.getType())
-								.collect(Collectors.toList());
-							if (typeNameStr != null && !StringUtils.isEmpty(typeNameStr)
-									&& !isAmbiguousMethodReference(methodInvocation, ambTypes)) {
-
-								Name typeName = astRewrite.getAST()
-									.newName(typeNameStr);
-								SimpleName methodName = (SimpleName) astRewrite
-									.createCopyTarget(methodInvocation.getName());
-
-								ExpressionMethodReference ref = astRewrite.getAST()
-									.newExpressionMethodReference();
-								saveTypeArguments(methodInvocation, ref);
-								ref.setExpression(typeName);
-								ref.setName(methodName);
-
-								astRewrite.replace(lambdaExpressionNode, ref, null);
-								getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
-								onRewrite();
-
-							}
-						}
-					}
-				}
+			if (isWrappedInOverloadedMethod(lambdaExpressionNode, methodInvocation)) {
+				return true;
 			}
 
 			/*
-			 * case 5: reference to class instance creation (new) i.e.
+			 * case 1: reference to static method
 			 * 
-			 * Set<Person> persSet2 = transferElements(personList, () -> new
-			 * HashSet<>())
+			 * case 2: reference to instance method i.e.
+			 * 
+			 * personList.forEach(element -> System.out.println(element))
 			 * 
 			 * becomes
 			 * 
-			 * Set<Person> persSet3 = transferElements(personList,
-			 * HashSet<Person>::new)
+			 * personList.forEach(System.out::println)
+			 * 
+			 * case 3: reference to 'this' i.e.
+			 * 
+			 * personList.forEach(person -> doSomething(person))
+			 * 
+			 * becomes
+			 * 
+			 * personList.forEach(this::doSomething)
 			 */
-			else if (ASTNode.CLASS_INSTANCE_CREATION == body.getNodeType()) {
-				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) body;
-				List<Expression> classInstanceCreationArguments = ASTNodeUtil
-					.convertToTypedList(classInstanceCreation.arguments(), Expression.class);
+			if (methodArguments.size() == lambdaParams.size()
+					&& checkMethodParameters(lambdaParams, methodArguments)) {
 
-				AnonymousClassDeclaration annonymousClass = classInstanceCreation.getAnonymousClassDeclaration();
-				if (annonymousClass == null && lambdaParams.size() == classInstanceCreation.arguments()
-					.size() && checkMethodParameters(lambdaParams, classInstanceCreationArguments)) {
-					Type classInstanceCreationType = classInstanceCreation.getType();
+				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 
-					CreationReference ref = astRewrite.getAST()
-						.newCreationReference();
-					if (ASTNode.PARAMETERIZED_TYPE == classInstanceCreationType.getNodeType()
-							&& ((ParameterizedType) classInstanceCreationType).typeArguments()
-								.isEmpty()) {
-						ref.setType((Type) astRewrite
-							.createMoveTarget(((ParameterizedType) classInstanceCreationType).getType()));
-					} else {
-						ref.setType((Type) astRewrite.createCopyTarget(classInstanceCreationType));
+				List<ITypeBinding> ambParams = methodArguments.stream()
+					.skip(1)
+					.map(Expression::resolveTypeBinding)
+					.collect(Collectors.toList());
+				if (isAmbiguousMethodReference(methodInvocation, ambParams)) {
+					return true;
+				}
+
+				ExpressionMethodReference ref = astRewrite.getAST()
+					.newExpressionMethodReference();
+
+				// save type arguments
+				saveTypeArguments(methodInvocation, ref);
+
+				boolean isReferenceExpressionSet = false;
+
+				// no expression present -> assume 'this'
+				if (methodInvocationExpression == null) {
+
+					/*
+					 * Ensure that the lambda expression is enclosed in the same
+					 * class as the method which is being referenced. We have to
+					 * check this, because the method could be declared in the
+					 * outer class.
+					 */
+					ITypeBinding methodsDeclaringClass = methodBinding.getDeclaringClass();
+					AbstractTypeDeclaration lambdaEnclosing = ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode,
+							AbstractTypeDeclaration.class);
+					ITypeBinding lambdaEnclosingType = lambdaEnclosing.resolveBinding();
+
+					if (Modifier.isStatic(methodBinding.getModifiers())) {
+						ITypeBinding declaringClassErasure = methodsDeclaringClass.getErasure();
+						newImports.add(declaringClassErasure.getQualifiedName());
+						SimpleName staticClassName = astRewrite.getAST()
+							.newSimpleName(declaringClassErasure.getName());
+						ref.setExpression(staticClassName);
+						isReferenceExpressionSet = true;
+					} else if (compareITypeBinding(methodsDeclaringClass, lambdaEnclosingType)) {
+						ClassInstanceCreation enclosingAnonymousInnerClass = ASTNodeUtil
+							.getSpecificAncestor(lambdaExpressionNode, ClassInstanceCreation.class);
+						if (enclosingAnonymousInnerClass == null) {
+							ThisExpression thisExpression = astRewrite.getAST()
+								.newThisExpression();
+							ref.setExpression(thisExpression);
+							isReferenceExpressionSet = true;
+						}
 					}
 
+				}
+				// simple name, qualified name or 'this'
+				else if (methodInvocationExpression instanceof Name
+						|| ASTNode.THIS_EXPRESSION == methodInvocationExpression.getNodeType()) {
+
+					boolean paramUserForMethodInvocation = false;
+					if (methodInvocationExpression instanceof Name) {
+						Name name = (Name) methodInvocationExpression;
+						String nameStr = name.getFullyQualifiedName();
+						paramUserForMethodInvocation = this.containsName(methodArguments, nameStr);
+					}
+
+					if (!paramUserForMethodInvocation) {
+						Expression newMethodInvocationExpression = (Expression) astRewrite
+							.createCopyTarget(methodInvocation.getExpression());
+						ref.setExpression(newMethodInvocationExpression);
+						isReferenceExpressionSet = true;
+					}
+				}
+
+				if (isReferenceExpressionSet) {
+					SimpleName methodName = (SimpleName) astRewrite.createCopyTarget(methodInvocation.getName());
+					ref.setName(methodName);
 					astRewrite.replace(lambdaExpressionNode, ref, null);
 					getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 					onRewrite();
 				}
+			}
+
+			/*
+			 * case 4: reference to instance method of arbitrary type i.e.
+			 * 
+			 * Arrays.sort(stringArray, (a, b) -> a.compareToIgnoreCase(b))
+			 * 
+			 * becomes
+			 * 
+			 * Arrays.sort(stringArray, String::compareToIgnoreCase)
+			 */
+			else if ((lambdaParams.size() - 1) == methodArguments.size() && methodInvocationExpression != null) {
+				replaceWithExpressionMethodReference(lambdaExpressionNode, lambdaParams, methodInvocation,
+						methodArguments);
+			}
+		}
+
+		/*
+		 * case 5: reference to class instance creation (new) i.e.
+		 * 
+		 * Set<Person> persSet2 = transferElements(personList, () -> new
+		 * HashSet<>())
+		 * 
+		 * becomes
+		 * 
+		 * Set<Person> persSet3 = transferElements(personList,
+		 * HashSet<Person>::new)
+		 */
+		else if (ASTNode.CLASS_INSTANCE_CREATION == body.getNodeType()) {
+			ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) body;
+			List<Expression> classInstanceCreationArguments = ASTNodeUtil
+				.convertToTypedList(classInstanceCreation.arguments(), Expression.class);
+
+			AnonymousClassDeclaration annonymousClass = classInstanceCreation.getAnonymousClassDeclaration();
+			if (annonymousClass == null && lambdaParams.size() == classInstanceCreation.arguments()
+				.size() && checkMethodParameters(lambdaParams, classInstanceCreationArguments)) {
+				Type classInstanceCreationType = classInstanceCreation.getType();
+
+				CreationReference ref = astRewrite.getAST()
+					.newCreationReference();
+				if (ASTNode.PARAMETERIZED_TYPE == classInstanceCreationType.getNodeType()
+						&& ((ParameterizedType) classInstanceCreationType).typeArguments()
+							.isEmpty()) {
+					ref.setType((Type) astRewrite
+						.createMoveTarget(((ParameterizedType) classInstanceCreationType).getType()));
+				} else {
+					ref.setType((Type) astRewrite.createCopyTarget(classInstanceCreationType));
+				}
+
+				astRewrite.replace(lambdaExpressionNode, ref, null);
+				getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
+				onRewrite();
 			}
 		}
 
@@ -404,12 +383,28 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	 *            original method invocation with possibly nonempty list of type
 	 *            arguments
 	 * @param ref
-	 *            the new method reference
+	 *            the new {@link ExpressionMethodReference}
 	 */
 	private void saveTypeArguments(MethodInvocation methodInvocation, ExpressionMethodReference ref) {
 		List<Type> typeArguments = ASTNodeUtil.convertToTypedList(methodInvocation.typeArguments(), Type.class);
 		ListRewrite typeArgumentsRewrite = astRewrite.getListRewrite(ref,
 				ExpressionMethodReference.TYPE_ARGUMENTS_PROPERTY);
+		typeArguments.forEach(typeArgument -> typeArgumentsRewrite.insertLast(typeArgument, null));
+	}
+
+	/**
+	 * Inserts the existing type arguments to the method reference.
+	 * 
+	 * @param methodInvocation
+	 *            original method invocation with possibly nonempty list of type
+	 *            arguments
+	 * @param ref
+	 *            the new {@link TypeMethodReference}
+	 */
+	private void saveTypeArguments(MethodInvocation methodInvocation, TypeMethodReference ref) {
+		List<Type> typeArguments = ASTNodeUtil.convertToTypedList(methodInvocation.typeArguments(), Type.class);
+		ListRewrite typeArgumentsRewrite = astRewrite.getListRewrite(ref,
+				TypeMethodReference.TYPE_ARGUMENTS_PROPERTY);
 		typeArguments.forEach(typeArgument -> typeArgumentsRewrite.insertLast(typeArgument, null));
 	}
 
@@ -431,8 +426,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		if (binding == null) {
 			return ""; //$NON-NLS-1$
 		}
-		
-		if(binding.isArray()) {
+
+		if (binding.isArray()) {
 			// see SIM-1453
 			return ""; //$NON-NLS-1$
 		}
@@ -561,4 +556,105 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			.filter(element -> element instanceof Name)
 			.anyMatch(nameIter -> name.equals(((Name) nameIter).getFullyQualifiedName()));
 	}
+
+	/**
+	 * The solution for case 4 is extracted in this method.
+	 * <p>
+	 * case 4: reference to instance method of arbitrary type i.e.
+	 * 
+	 * <pre>
+	 * {@code Arrays.sort(stringArray, (a, b) -> a.compareToIgnoreCase(b))} 
+	 * 
+	 * becomes
+	 * 
+	 * {@code Arrays.sort(stringArray, String::compareToIgnoreCase)}
+	 * </pre>
+	 * 
+	 * @param lambdaExpressionNode
+	 *            the lambda to be replaced by the method reference
+	 * @param lambdaParams
+	 *            a list of parameters of the lambda expression
+	 * @param methodInvocation
+	 *            the method invocation occurring as the single expression in
+	 *            the lambda body
+	 * @param methodArguments
+	 *            the arguments of the method invocation in the lambda body.
+	 */
+	private void replaceWithExpressionMethodReference(LambdaExpression lambdaExpressionNode,
+			List<VariableDeclaration> lambdaParams, MethodInvocation methodInvocation,
+			List<Expression> methodArguments) {
+
+		Expression methodInvocationExpression = methodInvocation.getExpression();
+		if (ASTNode.SIMPLE_NAME != methodInvocationExpression.getNodeType()) {
+			return;
+		}
+
+		SimpleName methodInvocationExpressionName = (SimpleName) methodInvocationExpression;
+		String methodInvocationExpressionNameStr = methodInvocationExpressionName.getIdentifier();
+		String lambdaParamNameStr = lambdaParams.get(0)
+			.getName()
+			.getIdentifier();
+
+		if (!methodInvocationExpressionNameStr.equals(lambdaParamNameStr) || !checkMethodParameters(
+				lambdaParams.subList(1, lambdaParams.size()), methodArguments)) {
+			return;
+		}
+
+		List<ITypeBinding> ambTypes = lambdaParams.stream()
+			.map(VariableDeclaration::resolveBinding)
+			.map(IVariableBinding::getType)
+			.collect(Collectors.toList());
+		if (isAmbiguousMethodReference(methodInvocation, ambTypes)) {
+			return;
+		}
+
+		AST ast = astRewrite.getAST();
+		Type type;
+		Type explicitParameterType = LambdaNodeUtil.findExplicitLambdaParameterType(
+				lambdaParams.get(0))
+			.orElse(null);
+		if (explicitParameterType != null) {
+			type = (Type) astRewrite.createCopyTarget(explicitParameterType);
+		} else {
+			String typeNameStr = findTypeOfSimpleName(methodInvocationExpressionName);
+			if (typeNameStr == null || StringUtils.isEmpty(typeNameStr)) {
+				return;
+			}
+			Name typeName = ast.newName(typeNameStr);
+			type = ast.newSimpleType(typeName);
+
+		}
+
+		SimpleName methodName = (SimpleName) astRewrite
+			.createCopyTarget(methodInvocation.getName());
+
+		TypeMethodReference ref = ast.newTypeMethodReference();
+		saveTypeArguments(methodInvocation, ref);
+		ref.setType(type);
+		ref.setName(methodName);
+
+		astRewrite.replace(lambdaExpressionNode, ref, null);
+		getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
+		onRewrite();
+
+	}
+
+	private boolean areIncompatibleFunctionalInterfaces(IMethodBinding contextFI, IMethodBinding actualFI) {
+		ITypeBinding contextReturnType = contextFI.getReturnType();
+		ITypeBinding actualReturnType = actualFI.getReturnType();
+		if (!actualReturnType.isAssignmentCompatible(contextReturnType)) {
+			return true;
+		}
+		ITypeBinding[] actualParameters = actualFI.getParameterTypes();
+		ITypeBinding[] expectedParameters = contextFI.getParameterTypes();
+		for (int i = 0; i < actualParameters.length; i++) {
+			ITypeBinding actualParameter = actualParameters[i];
+			ITypeBinding expectedParameter = expectedParameters[i];
+			if (!expectedParameter.isAssignmentCompatible(actualParameter)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }
