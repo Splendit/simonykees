@@ -3,9 +3,9 @@ package eu.jsparrow.core.visitor.junit.jupiter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,9 +29,9 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisitor {
 
-	private static final Map<String, String> ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
+	static final Map<String, String> ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
 
-	private static final int ORG_JJUNIT_JUPITER_API_PACKAGE_LENGTH = "org.junit.jupiter.api.".length(); //$NON-NLS-1$
+	private static final int ORG_J_UNIT_JUPITER_API_PACKAGE_LENGTH = "org.junit.jupiter.api.".length(); //$NON-NLS-1$
 
 	static {
 
@@ -63,22 +63,21 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 
 		List<AnnotationTransformationData> transformationDataList = createAnnotationDataList(compilationUnit);
 
-		Set<String> safeNewAnnotationImports = new HashSet<>();
-		transformationDataList.stream()
+		List<ImportDeclaration> importsToRemove = ASTNodeUtil.convertToTypedList(this.getCompilationUnit()
+				.imports(), ImportDeclaration.class)
+				.stream()
+				.filter(this::isJUnit4AnnotationImport)
+				.collect(Collectors.toList());
+
+		Set<String> safeNewAnnotationImports = transformationDataList.stream()
 			.map(AnnotationTransformationData::getSafeNewTypeImport)
-			.forEach(safeImport -> {
-				safeImport.ifPresent(safeNewAnnotationImports::add);
-			});
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toSet());
 
 		List<AnnotationTransformationData> annotationNameReplacementDataList = transformationDataList
 			.stream()
 			.filter(data -> !isTestAnnotationSimpleName(data.getOriginalTypeName()))
-			.collect(Collectors.toList());
-
-		List<ImportDeclaration> importsToRemove = ASTNodeUtil.convertToTypedList(this.getCompilationUnit()
-			.imports(), ImportDeclaration.class)
-			.stream()
-			.filter(this::isJUnit4AnnotationImport)
 			.collect(Collectors.toList());
 
 		transform(importsToRemove, safeNewAnnotationImports, annotationNameReplacementDataList);
@@ -105,7 +104,7 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 					AnnotationTransformationData jUnit4AnnotationData;
 					if (safeToImportNewType) {
 						String newTypeUnqualifiedName = newQualifiedTypeName
-							.substring(ORG_JJUNIT_JUPITER_API_PACKAGE_LENGTH);
+							.substring(ORG_J_UNIT_JUPITER_API_PACKAGE_LENGTH);
 						jUnit4AnnotationData = new AnnotationTransformationData(
 								originalTypeName, newTypeUnqualifiedName, newQualifiedTypeName);
 					} else {

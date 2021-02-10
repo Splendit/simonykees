@@ -47,7 +47,7 @@ public class MigrateJUnit4ToJupiterRule
 
 	@Override
 	public String requiredLibraries() {
-		return "JUnit 4.13 or JUnit 5"; //$NON-NLS-1$
+		return "JUnit 4.13 and JUnit 5"; //$NON-NLS-1$
 	}
 
 	@Override
