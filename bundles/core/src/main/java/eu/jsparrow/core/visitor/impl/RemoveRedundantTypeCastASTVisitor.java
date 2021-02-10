@@ -109,7 +109,8 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		MethodInvocation parent = (MethodInvocation) castExpression.getParent();
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(parent.arguments(), Expression.class);
 		int castParamIndex = arguments.indexOf(castExpression);
-		IMethodBinding iMethodBinding = parent.resolveMethodBinding();
+		IMethodBinding iMethodInvocationBinding = parent.resolveMethodBinding();
+		IMethodBinding iMethodBinding = iMethodInvocationBinding.getMethodDeclaration();
 		ITypeBinding[] formalParameterTypes = iMethodBinding.getParameterTypes();
 
 		List<IMethodBinding> overloadedMethods = ClassRelationUtil.findOverloadedMethods(parent);

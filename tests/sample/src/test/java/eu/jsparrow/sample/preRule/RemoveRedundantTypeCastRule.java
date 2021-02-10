@@ -1,5 +1,6 @@
 package eu.jsparrow.sample.preRule;
 
+import java.lang.invoke.MethodHandle;
 import java.util.concurrent.Future;
 
 import eu.jsparrow.sample.utilities.Person;
@@ -25,6 +26,11 @@ public class RemoveRedundantTypeCastRule {
 		});
 	}
 	
+	public void usingVaragMethod_shouldNotTransform(MethodHandle methodHandle) throws Throwable {
+		varArgObjects((Runnable)() -> {});
+		methodHandle.invoke((Runnable)() -> {});
+	}
+	
 	private void addUserListener(GenericFutureListener<? extends Future<? super Person>> listener) {
 		try {
 			listener.operationComplete(null);
@@ -39,6 +45,11 @@ public class RemoveRedundantTypeCastRule {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	
+	private void varArgObjects(Object... objects) {
+		int numObjects = objects.length;//just to use the param once
 	}
 
 }
