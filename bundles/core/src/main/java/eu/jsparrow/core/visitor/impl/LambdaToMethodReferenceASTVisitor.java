@@ -557,6 +557,29 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			.anyMatch(nameIter -> name.equals(((Name) nameIter).getFullyQualifiedName()));
 	}
 
+	/**
+	 * The soution for case 4 is extracted in this method.
+	 * <p>
+	 * <emp>case 4:</emp> reference to instance method of arbitrary type i.e.
+	 * 
+	 * <pre>
+	 * {@code Arrays.sort(stringArray, (a, b) -> a.compareToIgnoreCase(b))} 
+	 * 
+	 * becomes
+	 * 
+	 * {@code Arrays.sort(stringArray, String::compareToIgnoreCase)}
+	 * </pre>
+	 * 
+	 * @param lambdaExpressionNode
+	 *            the lambda to be replaced bt netgid referebce
+	 * @param lambdaParams
+	 *            a list of parameters of the lambda expression
+	 * @param methodInvocation
+	 *            the method invocation occurring as the single expression in
+	 *            the lambda body
+	 * @param methodArguments
+	 *            the arguments of the method invcation in the lambda body.
+	 */
 	private void replaceWithExpressionMethodReference(LambdaExpression lambdaExpressionNode,
 			List<VariableDeclaration> lambdaParams, MethodInvocation methodInvocation,
 			List<Expression> methodArguments) {
