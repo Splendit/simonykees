@@ -371,4 +371,51 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends AbstractMigrateJUnit4ToJupite
 		List<String> importsToStringExpected = Arrays.asList();
 		assertChange(original, expected, importsToStringExpected);
 	}
+
+	@Test
+	public void visit_LabeledLoopWithBreakLOOP_shouldTransform() throws Exception {
+		defaultFixture.addImport(org.junit.Ignore.class.getName());
+		String original = "" +
+				"	@Ignore\n" +
+				"	void test() {\n" +
+				"		LOOP: for (int i = 0; i < 10; i++) {\n" +
+				"			break LOOP;\n" +
+				"		}\n" +
+				"	}";
+
+		String expected = "" +
+				"	@Disabled\n" +
+				"	void test() {\n" +
+				"		LOOP: for (int i = 0; i < 10; i++) {\n" +
+				"			break LOOP;\n" +
+				"		}\n" +
+				"	}";
+
+		List<String> importsToStringExpected = Arrays.asList("import org.junit.jupiter.api.Disabled;");
+		assertChange(original, expected, importsToStringExpected);
+	}
+
+	@Test
+	public void visit_LabeledLoopWithContinueLOOP_shouldTransform() throws Exception {
+		defaultFixture.addImport(org.junit.Ignore.class.getName());
+		String original = "" +
+				"	@Ignore\n" +
+				"	void test() {\n" +
+				"		LOOP: for (int i = 0; i < 10; i++) {\n" +
+				"			continue LOOP;\n" +
+				"		}\n" +
+				"	}";
+
+		String expected = "" +
+				"	@Disabled\n" +
+				"	void test() {\n" +
+				"		LOOP: for (int i = 0; i < 10; i++) {\n" +
+				"			continue LOOP;\n" +
+				"		}\n" +
+				"	}";
+
+		List<String> importsToStringExpected = Arrays.asList("import org.junit.jupiter.api.Disabled;");
+		assertChange(original, expected, importsToStringExpected);
+
+	}
 }
