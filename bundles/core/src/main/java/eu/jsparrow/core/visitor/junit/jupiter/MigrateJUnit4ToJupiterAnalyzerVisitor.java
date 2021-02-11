@@ -98,6 +98,9 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		) {
 			return true;
 		}
+		if( node.resolveBinding() == null)  {
+			return false;
+		}
 		if (isNameOfSupportedAnnotation(node)) {
 			return true;
 		}
