@@ -50,17 +50,17 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 
 		if (castExpression.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
 			MethodInvocation mi = (MethodInvocation) castExpression.getParent();
-			
-			boolean notTypeVariable = findFormalParameterType(castExpression, mi)
-				.filter(t -> !t.isTypeVariable())
-				.map(t -> true)
-				.orElse(false);
-			if (!notTypeVariable) {
+			ITypeBinding formalParamType = findFormalParameterType(castExpression, mi).orElse(null);
+			if (formalParamType == null) {
+				return true;
+			}
+			ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
+			boolean compatible = expressionTypeBinding.isAssignmentCompatible(formalParamType);
+			if (!compatible) {
 				return true;
 			}
 		}
-		ITypeBinding typeFrom = castExpression.getExpression()
-			.resolveTypeBinding();
+		ITypeBinding typeFrom = expression.resolveTypeBinding();
 		ITypeBinding typeTo = castExpression.getType()
 			.resolveBinding();
 
@@ -200,14 +200,14 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		IMethodBinding declaration = miMethodBinding.getMethodDeclaration();
 		ITypeBinding[] formalParameterTypes = declaration.getParameterTypes();
 		int formalParamLength = formalParameterTypes.length;
-		if(formalParamLength == 0) {
+		if (formalParamLength == 0) {
 			return Optional.empty();
 		}
 		int lastIndex = formalParamLength - 1;
 		@SuppressWarnings("unchecked")
 		List<Expression> arguments = methodInvocation.arguments();
 		int castParamIndex = arguments.indexOf(argument);
-		if(castParamIndex < 0) {
+		if (castParamIndex < 0) {
 			return Optional.empty();
 		}
 
