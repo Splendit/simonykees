@@ -124,7 +124,6 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		int castParamIndex = arguments.indexOf(castExpression);
 		IMethodBinding iMethodInvocationBinding = parent.resolveMethodBinding();
 		IMethodBinding iMethodBinding = iMethodInvocationBinding.getMethodDeclaration();
-		ITypeBinding[] formalParameterTypes = iMethodBinding.getParameterTypes();
 
 		List<IMethodBinding> overloadedMethods = ClassRelationUtil.findOverloadedMethods(parent);
 		boolean isOverloaded = overloadedMethods.stream()
@@ -133,24 +132,14 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 			return false;
 		}
 
-		int lastParameterIndex = formalParameterTypes.length - 1;
-		if (iMethodBinding.isVarargs() && castParamIndex >= lastParameterIndex) {
-			ITypeBinding lastFormalParamType = formalParameterTypes[lastParameterIndex];
-			boolean isArray = lastFormalParamType.isArray();
-			if (!isArray) {
-				return false;
-			}
-			ITypeBinding componentType = lastFormalParamType.getComponentType();
-			return componentType.getFunctionalInterfaceMethod() != null
-					&& !containsUndefinedTypeParameters(componentType,
-							(LambdaExpression) castExpression.getExpression());
-
-		} else {
-			ITypeBinding formalParameterType = formalParameterTypes[castParamIndex];
-			return formalParameterType.getFunctionalInterfaceMethod() != null
-					&& !containsUndefinedTypeParameters(formalParameterType,
-							(LambdaExpression) castExpression.getExpression());
+		ITypeBinding formalType = findFormalParameterType(castExpression, parent).orElse(null);
+		if (formalType == null) {
+			return false;
 		}
+
+		return formalType.getFunctionalInterfaceMethod() != null
+				&& !containsUndefinedTypeParameters(formalType,
+						(LambdaExpression) castExpression.getExpression());
 	}
 
 	private boolean containsUndefinedTypeParameters(ITypeBinding formalParameter, LambdaExpression lambda) {
