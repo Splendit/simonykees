@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.impl;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isOverloadedOnParameter;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -46,8 +47,20 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		if (isLambdaExpression && !isRedundantLambdaTypeCast(castExpression)) {
 			return true;
 		}
-		ITypeBinding typeFrom = castExpression.getExpression()
-			.resolveTypeBinding();
+
+		if (castExpression.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+			MethodInvocation mi = (MethodInvocation) castExpression.getParent();
+			ITypeBinding formalParamType = findFormalParameterType(castExpression, mi).orElse(null);
+			if (formalParamType == null) {
+				return true;
+			}
+			ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
+			boolean compatible = expressionTypeBinding.isAssignmentCompatible(formalParamType);
+			if (!compatible) {
+				return true;
+			}
+		}
+		ITypeBinding typeFrom = expression.resolveTypeBinding();
 		ITypeBinding typeTo = castExpression.getType()
 			.resolveBinding();
 
@@ -111,7 +124,6 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		int castParamIndex = arguments.indexOf(castExpression);
 		IMethodBinding iMethodInvocationBinding = parent.resolveMethodBinding();
 		IMethodBinding iMethodBinding = iMethodInvocationBinding.getMethodDeclaration();
-		ITypeBinding[] formalParameterTypes = iMethodBinding.getParameterTypes();
 
 		List<IMethodBinding> overloadedMethods = ClassRelationUtil.findOverloadedMethods(parent);
 		boolean isOverloaded = overloadedMethods.stream()
@@ -120,33 +132,26 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 			return false;
 		}
 
-		int lastParameterIndex = formalParameterTypes.length - 1;
-		if (iMethodBinding.isVarargs() && castParamIndex >= lastParameterIndex) {
-			ITypeBinding lastFormalParamType = formalParameterTypes[lastParameterIndex];
-			boolean isArray = lastFormalParamType.isArray();
-			if (!isArray) {
-				return false;
-			}
-			ITypeBinding componentType = lastFormalParamType.getComponentType();
-			return componentType.getFunctionalInterfaceMethod() != null
-					&& !containsUndefinedTypeParameters(componentType, (LambdaExpression)castExpression.getExpression());
-
-		} else {
-			ITypeBinding formalParameterType = formalParameterTypes[castParamIndex];
-			return formalParameterType.getFunctionalInterfaceMethod() != null 
-					&& !containsUndefinedTypeParameters(formalParameterType, (LambdaExpression)castExpression.getExpression());
+		ITypeBinding formalType = findFormalParameterType(castExpression, parent).orElse(null);
+		if (formalType == null) {
+			return false;
 		}
+
+		return formalType.getFunctionalInterfaceMethod() != null
+				&& !containsUndefinedTypeParameters(formalType,
+						(LambdaExpression) castExpression.getExpression());
 	}
-	
+
 	private boolean containsUndefinedTypeParameters(ITypeBinding formalParameter, LambdaExpression lambda) {
-		List<VariableDeclarationFragment> inferedTypeParams = ASTNodeUtil.convertToTypedList(lambda.parameters(), VariableDeclarationFragment.class);
-		if(inferedTypeParams.isEmpty()) {
+		List<VariableDeclarationFragment> inferedTypeParams = ASTNodeUtil.convertToTypedList(lambda.parameters(),
+				VariableDeclarationFragment.class);
+		if (inferedTypeParams.isEmpty()) {
 			return false;
 		}
 		IMethodBinding fiMethod = formalParameter.getFunctionalInterfaceMethod();
 		ITypeBinding[] fiParameterTypes = fiMethod.getParameterTypes();
-		for(ITypeBinding fiParameterType : fiParameterTypes) {
-			if(containsWildCardTypeArgument(fiParameterType)) {
+		for (ITypeBinding fiParameterType : fiParameterTypes) {
+			if (containsWildCardTypeArgument(fiParameterType)) {
 				return true;
 			}
 		}
@@ -188,6 +193,32 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		}
 
 		return ASTNodeUtil.unwrapParenthesizedExpression(expressionToBeCasted);
+	}
+
+	private Optional<ITypeBinding> findFormalParameterType(Expression argument, MethodInvocation methodInvocation) {
+		IMethodBinding miMethodBinding = methodInvocation.resolveMethodBinding();
+		IMethodBinding declaration = miMethodBinding.getMethodDeclaration();
+		ITypeBinding[] formalParameterTypes = declaration.getParameterTypes();
+		int formalParamLength = formalParameterTypes.length;
+		if (formalParamLength == 0) {
+			return Optional.empty();
+		}
+		int lastIndex = formalParamLength - 1;
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments = methodInvocation.arguments();
+		int castParamIndex = arguments.indexOf(argument);
+		if (castParamIndex < 0) {
+			return Optional.empty();
+		}
+
+		ITypeBinding expecteFormalType;
+		if (castParamIndex >= lastIndex && declaration.isVarargs()) {
+			ITypeBinding varArgType = formalParameterTypes[lastIndex];
+			expecteFormalType = varArgType.getComponentType();
+		} else {
+			expecteFormalType = formalParameterTypes[castParamIndex];
+		}
+		return Optional.of(expecteFormalType);
 	}
 
 }

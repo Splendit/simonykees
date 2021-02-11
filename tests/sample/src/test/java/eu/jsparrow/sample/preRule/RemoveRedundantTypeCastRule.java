@@ -51,9 +51,48 @@ public class RemoveRedundantTypeCastRule {
 	private void varArgObjects(Object... objects) {
 		int numObjects = objects.length;//just to use the param once
 	}
+	
+	
+	public void castingNeededForTypeVariables_shouldNotTransform(Object o) {
+		/* SIM-1885 */
+		findFooSomething((Foo)getFoo());
+		findFooSomething((Foo)findFooSomething(o));
+		findFooSomething((Foo)getFooSubtype(o));
+		findFooSomething((Foo)getFooSubtype(o)).fooMethod();
+		
+		findFooSomething((Foo)getFoo()).fooMethod();
+	}
+	
+	public void castingInMethodArguments_shouldTransform(Object o) {
+		/* SIM-1885 */
+		useFoo((Foo)getFooSubtype(o)).fooMethod();
+	}
+	
+	private Foo getFoo() {
+		return null;
+	}
+	
+	private <T extends Foo> T getFooSubtype(Object o) {
+		return (T)new Foo();
+	}
+	
+	
+	private <T extends Object> T findFooSomething(T t) {
+		return t;
+	}
+	
+	<T extends Foo> T useFoo(Foo foo) {
+		return (T)new Foo();
+	}
+	
+	class Foo {
+		public void fooMethod() {}
+	}
 
 }
 
 interface GenericFutureListener<F extends Future<?>> {
     void operationComplete(F future) throws Exception;
 }
+
+
