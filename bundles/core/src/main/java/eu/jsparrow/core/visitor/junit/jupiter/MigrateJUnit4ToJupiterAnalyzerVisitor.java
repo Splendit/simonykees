@@ -2,14 +2,10 @@ package eu.jsparrow.core.visitor.junit.jupiter;
 
 import static eu.jsparrow.core.visitor.junit.jupiter.MigrateJUnit4ToJupiterASTVisitor.ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
 
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
@@ -21,6 +17,7 @@ import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
@@ -36,25 +33,19 @@ import org.eclipse.jdt.core.dom.SimpleName;
  */
 class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 
-	private static final String TYPE_ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
 	private static final String TYPE_ORG_JUNIT_IGNORE = "org.junit.Ignore"; //$NON-NLS-1$
-	private static final String PACKAGE_ORG_JUNIT = "org.junit"; //$NON-NLS-1$
 
-	private static final Predicate<String> PREDICATE_J_UNIT_4_PACKAGE = createjUnit4PackagePredicate();
 	private boolean transformationPossible = true;
-
-	private static Predicate<String> createjUnit4PackagePredicate() {
-		final String regexOrgJunitChildPackages = "experimental|function|internal|matchers|rules|runner|runners|validator"; //$NON-NLS-1$
-		final String regexOrgJUnit = "org\\.junit(\\.(" + regexOrgJunitChildPackages + ")(\\..+)?)?$"; //$NON-NLS-1$ //$NON-NLS-2$
-		final String regexJUnit = "junit\\.(extensions|framework|runner|textui)$"; //$NON-NLS-1$
-		Pattern pattern = Pattern.compile("^(" + regexJUnit + ")|(" + regexOrgJUnit + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-		return pattern.asPredicate();
-	}
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		return transformationPossible;
+	}
+
+	@Override
+	public boolean visit(PackageDeclaration node) {
+		transformationPossible = analyzePackageBinding(node.resolveBinding());
+		return false;
 	}
 
 	@Override
@@ -78,9 +69,9 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 	private boolean analyzeImport(ImportDeclaration node) {
 		IBinding binding = node.resolveBinding();
 		if (binding.getKind() == IBinding.PACKAGE) {
-			String packageName = ((IPackageBinding) binding).getName();
-			return packageName.equals(PACKAGE_ORG_JUNIT);
+			return analyzePackageBinding((IPackageBinding) binding);
 		}
+
 		if (binding.getKind() == IBinding.TYPE) {
 			ITypeBinding typeBinding = (ITypeBinding) binding;
 			if (isSupportedJUnit4AnnotationType(typeBinding)) {
@@ -88,6 +79,36 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 			}
 		}
 		return checkOtherReference(binding);
+	}
+
+	private boolean analyzePackageBinding(IPackageBinding packageBinding) {
+		String packageName = packageBinding.getName();
+		// Not supported
+		if (packageName.equals("junit")) { //$NON-NLS-1$
+			return false;
+		}
+		// Not supported
+		if (packageName.startsWith("junit.")) { //$NON-NLS-1$
+			return false;
+		}
+		// supported
+		if (packageName.equals("org.junit")) { //$NON-NLS-1$
+			return true;
+		}
+		// inside "org.junit."
+		// Not supported except for "org.junit.jupiter.api" or any package
+		// inside org.junit.jupiter.api
+		if (packageName.startsWith("org.junit.")) { //$NON-NLS-1$
+			if (packageName.equals("org.junit.jupiter.api")) { //$NON-NLS-1$
+				return true;
+			}
+			if (packageName.startsWith("org.junit.jupiter.api.")) { //$NON-NLS-1$
+				return true;
+			}
+			return false;
+		}
+		// outside "org.junit." and therefore supported
+		return true;
 	}
 
 	private boolean analyzeName(Name node) {
@@ -109,29 +130,6 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 			return true;
 		}
 		return checkOtherReference(binding);
-	}
-
-	private boolean isNameReferencingJUnit4Assert(IBinding binding) {
-		if (binding.getKind() == IBinding.METHOD) {
-			if (isJUnit4AssertClass(((IMethodBinding) binding).getDeclaringClass())) {
-				return true;
-			}
-		}
-		if (binding.getKind() == IBinding.TYPE) {
-			if (isJUnit4AssertClass((ITypeBinding) binding)) {
-				return true;
-			}
-		}
-		if (binding.getKind() == IBinding.VARIABLE) {
-			IVariableBinding variableBinding = (IVariableBinding) binding;
-			if (isJUnit4AssertClass(variableBinding.getType())) {
-				return true;
-			}
-			if (isJUnit4AssertClass(variableBinding.getDeclaringClass())) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private boolean isNameOfSupportedAnnotation(Name name, IBinding binding) {
@@ -180,62 +178,77 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 	}
 
 	private boolean checkOtherReference(IBinding binding) {
-		if (isNameReferencingJUnit4Assert(binding)) {
-			return true;
-		}
 		if (binding.getKind() == IBinding.PACKAGE) {
-			return !isJUnit4Package((IPackageBinding) binding);
-
+			// assumed that this part of code will never be covered because all
+			// cases with a package binding are handled on the level of the
+			// package declaration and the imports.
+			return false;
 		}
 		if (binding.getKind() == IBinding.TYPE) {
-			return !isJUnit4Type((ITypeBinding) binding);
+			return checkTypeBinding((ITypeBinding) binding);
 
 		}
 		if (binding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = (IMethodBinding) binding;
-			return !isJUnit4Type(methodBinding.getDeclaringClass());
+			return checkTypeBinding(methodBinding.getDeclaringClass());
 
 		}
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
-			if (isJUnit4Type(variableBinding.getType())) {
+			if (!checkTypeBinding(variableBinding.getType())) {
 				return false;
 			}
-			return !isJUnit4Type(variableBinding.getDeclaringClass());
+			return checkTypeBinding(variableBinding.getDeclaringClass());
 		}
 		if (binding.getKind() == IBinding.ANNOTATION) {
-			IAnnotationBinding annotationBinding = (IAnnotationBinding) binding;
-			return !isJUnit4Type(annotationBinding.getAnnotationType());
-		}
-		if (binding.getKind() == IBinding.MEMBER_VALUE_PAIR) {
-			return true;
-		}
-		if (binding.getKind() == IBinding.MODULE) {
-			return true;
-		}
-		return false;
-	}
-
-	private boolean isJUnit4AssertClass(ITypeBinding typeBinding) {
-		if (typeBinding == null) {
+			/**
+			 * assumed that this part of code will never be covered because only
+			 * an annotation can can have an annotation binding.
+			 */
 			return false;
 		}
-		String qualifiedTypeName = typeBinding.getQualifiedName();
-		return qualifiedTypeName.equals(TYPE_ORG_JUNIT_ASSERT);
-	}
-
-	private boolean isJUnit4Package(IPackageBinding packageBinding) {
-		if (packageBinding != null) {
-			return PREDICATE_J_UNIT_4_PACKAGE.test(packageBinding.getName());
+		if (binding.getKind() == IBinding.MEMBER_VALUE_PAIR) {
+			/**
+			 * assumed that this part of code will never be covered because only
+			 * a member-value-pair can have a member-value-pair binding.
+			 */
+			return false;
+		}
+		if (binding.getKind() == IBinding.MODULE) {
+			/**
+			 * Not clear what value to return... seams to be used only in Java 9
+			 */
+			return true;
 		}
 		return false;
 	}
 
-	private boolean isJUnit4Type(ITypeBinding typeBinding) {
+	private boolean checkTypeBinding(ITypeBinding typeBinding) {
 		if (typeBinding != null) {
-			return isJUnit4Package(typeBinding.getPackage());
+			String qualifiedTypeName = typeBinding.getQualifiedName();
+			// Not supported as soon as inside "junit."
+			if (qualifiedTypeName.startsWith("junit.")) { //$NON-NLS-1$
+				return false;
+			}
+			if (qualifiedTypeName.startsWith("org.junit.")) { //$NON-NLS-1$
+				// supported because "org.junit.Assert" although inside
+				// "org.junit."
+				if (qualifiedTypeName.equals("org.junit.Assert")) { //$NON-NLS-1$
+					return true;
+				}
+				// supported because JUnit Jupiter
+				if (qualifiedTypeName.startsWith("org.junit.jupiter.api.")) { //$NON-NLS-1$
+					return true;
+				}
+				// Not supported because other type inside "org.junit."
+				return false;
+			}
 		}
-		return false;
+		// OK:
+		// type not within "junit."
+		// type not within "org.junit."
+		return true;
+
 	}
 
 	boolean isTransformationPossible() {
