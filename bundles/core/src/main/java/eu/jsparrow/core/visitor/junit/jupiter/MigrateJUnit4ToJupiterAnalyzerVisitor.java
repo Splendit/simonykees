@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -14,6 +16,7 @@ import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.Name;
@@ -88,6 +91,13 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 	}
 
 	private boolean analyzeName(Name node) {
+		if (node.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
+				|| node.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
+				|| node.getLocationInParent() == BreakStatement.LABEL_PROPERTY
+
+		) {
+			return true;
+		}
 		if (isNameOfSupportedAnnotation(node)) {
 			return true;
 		}
