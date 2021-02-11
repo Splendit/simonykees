@@ -611,5 +611,18 @@ class ReplaceJUnitExpectedExceptionASTVisitorTest extends UsesJDTUnitFixture {
 				+ "}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_abstractTestMethod_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "abstract class AbstractTestClass { "
+				+ "	@Rule\n"
+				+ "	public ExpectedException expectedException = ExpectedException.none();\n"
+				+ ""
+				+ "	@Test\n"
+				+ "	public abstract void abstractTestCase() throws IOException; "
+				+ "}";
+		assertNoChange(original);
+	}
 
 }
