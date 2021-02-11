@@ -98,16 +98,17 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		) {
 			return true;
 		}
-		if( node.resolveBinding() == null)  {
+		IBinding binding = node.resolveBinding();
+		if (binding == null) {
 			return false;
 		}
-		if (isNameOfSupportedAnnotation(node)) {
+		if (isNameOfSupportedAnnotation(node, binding)) {
 			return true;
 		}
 		if (isIgnoreAnnotationValueName(node)) {
 			return true;
 		}
-		return checkOtherReference(node.resolveBinding());
+		return checkOtherReference(binding);
 	}
 
 	private boolean isNameReferencingJUnit4Assert(IBinding binding) {
@@ -133,8 +134,7 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		return false;
 	}
 
-	private boolean isNameOfSupportedAnnotation(Name name) {
-		IBinding binding = name.resolveBinding();
+	private boolean isNameOfSupportedAnnotation(Name name, IBinding binding) {
 		if (binding.getKind() != IBinding.TYPE) {
 			return false;
 		}
