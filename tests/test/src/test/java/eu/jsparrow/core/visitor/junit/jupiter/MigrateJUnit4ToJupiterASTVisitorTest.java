@@ -266,6 +266,51 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends AbstractMigrateJUnit4ToJupite
 	}
 
 	@Test
+	public void visit_IgnoreTestWithAssertClassToString_shouldTransform() throws Exception {
+		defaultFixture.addImport(org.junit.Assert.class.getName());
+		defaultFixture.addImport(org.junit.Ignore.class.getName());
+
+		String original = "" +
+				"		@Ignore\n" +
+				"		void test() {\n" +
+				"			Assert.class.toString();\n" +
+				"		}";
+
+		String expected = "" +
+				"		@Disabled\n" +
+				"		void test() {\n" +
+				"			Assert.class.toString();\n" +
+				"		}";
+
+		List<String> importsToStringExpected = Arrays.asList("import org.junit.Assert;",
+				"import org.junit.jupiter.api.Disabled;");
+		assertChange(original, expected, importsToStringExpected);
+
+	}
+
+	@Test
+	public void visit_IgnoreTestWithAssertAsVariable_shouldTransform() throws Exception {
+		defaultFixture.addImport(org.junit.Assert.class.getName());
+		defaultFixture.addImport(org.junit.Ignore.class.getName());
+
+		String original = "" +
+				"		@Ignore\n" +
+				"		void test() {\n" +
+				"			Assert xAssert;\n" +
+				"		}";
+
+		String expected = "" +
+				"		@Disabled\n" +
+				"		void test() {\n" +
+				"			Assert xAssert;\n" +
+				"		}";
+
+		List<String> importsToStringExpected = Arrays.asList("import org.junit.Assert;",
+				"import org.junit.jupiter.api.Disabled;");
+		assertChange(original, expected, importsToStringExpected);
+	}
+
+	@Test
 	public void visit_IgnoreImportedOnDemand_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.junit", false, true);
 
@@ -298,15 +343,32 @@ class MigrateJUnit4ToJupiterASTVisitorTest extends AbstractMigrateJUnit4ToJupite
 				"	@org.junit.BeforeClass\n" +
 				"	public void beforeAll() {\n" +
 				"	}";
-		
+
 		String expected = "" +
 				"\n" +
 				"	@BeforeAll\n" +
 				"	public void beforeAll() {\n" +
 				"	}";
-		
+
 		List<String> importsToStringExpected = Arrays.asList(
 				"import org.junit.jupiter.api.BeforeAll;");
+		assertChange(original, expected, importsToStringExpected);
+	}
+
+	@Test
+	public void visit_ClassWithNameDisabledAndIgnoreAnnotation_shouldTransform() throws Exception {
+		defaultFixture.addImport(org.junit.Ignore.class.getName());
+		String original = "" +
+				"	@Ignore\n" +
+				"	class Disabled {" +
+				"	}";
+
+		String expected = "" +
+				"	@org.junit.jupiter.api.Disabled\n" +
+				"	class Disabled {" +
+				"	}";
+
+		List<String> importsToStringExpected = Arrays.asList();
 		assertChange(original, expected, importsToStringExpected);
 	}
 }

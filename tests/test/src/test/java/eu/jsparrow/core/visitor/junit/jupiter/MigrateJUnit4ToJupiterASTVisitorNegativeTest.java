@@ -18,19 +18,10 @@ class MigrateJUnit4ToJupiterASTVisitorNegativeTest extends AbstractMigrateJUnit4
 	}
 
 	@Test
-	public void visit_JUnit4TestAnnotation_shouldNotTransform() throws Exception {
+	public void visit_JUnit4TestAnnotationWithTimeOut_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
 
 		String original = "" +
-				"\n" +
-				"	@Test\n" +
-				"	public void test1() {\n" +
-				"	}\n" +
-				"\n" +
-				"	@Test()\n" +
-				"	public void test2() {\n" +
-				"	}\n" +
-				"\n" +
 				"	@Test(timeout=1000L)\n" +
 				"	public void test3() {\n" +
 				"	}";
@@ -40,7 +31,7 @@ class MigrateJUnit4ToJupiterASTVisitorNegativeTest extends AbstractMigrateJUnit4
 	}
 
 	@Test
-	public void visit_NotJUnit4TestAnnotation_shouldNotTransform() throws Exception {
+	public void visit_BeforeClassNotJUnit4TestAnnotation_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.lang.annotation.Retention.class.getName());
 		defaultFixture.addImport(java.lang.annotation.RetentionPolicy.class.getName());
 		defaultFixture.addImport(java.lang.annotation.Target.class.getName());
@@ -63,14 +54,23 @@ class MigrateJUnit4ToJupiterASTVisitorNegativeTest extends AbstractMigrateJUnit4
 
 	@Test
 	public void visit_SingleMemberAnnotationRunWith_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(org.junit.runner.RunWith.class.getName());
-		defaultFixture.addImport(org.junit.runners.Parameterized.class.getName());
-
 		String original = "" +
-				"	@RunWith(Parameterized.class)\n" +
+				"	@org.junit.runner.RunWith(org.junit.runners.Parameterized.class)\n" +
 				"	class TestRunningWithParameterized {\n" +
 				"		\n" +
 				"	}";
 		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_TestRuleAsField_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	org.junit.rules.TestRule testRule;\n"
+				+ "\n"
+				+ "	@BeforeClass\n"
+				+ "	public void beforeClass() {\n"
+				+ "	}";
+		assertNoChange(original);
+
 	}
 }
