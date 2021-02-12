@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.impl;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -305,4 +306,19 @@ public class ReuseRandomObjectsASTVisitorTest extends UsesJDTUnitFixture {
 		assertChange(actual, expected);
 	}
 
+	@Test
+	public void test_usingLocalVarTypeInference_shouldTransform() throws Exception {
+		setJavaVersion(JavaCore.VERSION_11);
+		String actual = "" + 
+				"private void sampleMethod() {\n" + 
+				"	var random = new Random();\n" + 
+				"	int i = random.nextInt();\n" + 
+				"}";
+		String expected = "" + 
+				"private Random random = new Random();\n" + 
+				"private void sampleMethod() {\n" + 
+				"	int i = random.nextInt();\n" + 
+				"}";
+		assertChange(actual, expected);
+	}
 }

@@ -17,7 +17,9 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -27,7 +29,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import eu.jsparrow.core.visitor.sub.ReferencedVariablesASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
@@ -59,8 +61,9 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @since 3.20.0
  *
  */
-public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class ReuseRandomObjectsASTVisitor extends AbstractAddImportASTVisitor {
 
+	private static final String JAVA_UTIL_RANDOM = java.util.Random.class.getName();
 	private List<FieldProperties> introducedFields = new ArrayList<>();
 	private List<FieldProperties> existingRandomFields = new ArrayList<>();
 	private List<String> remainingFieldNames = new ArrayList<>();
@@ -279,7 +282,14 @@ public class ReuseRandomObjectsASTVisitor extends AbstractASTRewriteASTVisitor {
 		AST ast = typeDeclaration.getAST();
 		FieldDeclaration newField = ast
 			.newFieldDeclaration((VariableDeclarationFragment) astRewrite.createMoveTarget(fragment));
-		newField.setType((Type) astRewrite.createCopyTarget(type));
+		if (type.isVar()) {
+			verifyImport(getCompilationUnit(), JAVA_UTIL_RANDOM);
+			Name typeName = addImport(JAVA_UTIL_RANDOM, fragment);
+			SimpleType randomTypeName = ast.newSimpleType(typeName);
+			newField.setType(randomTypeName);
+		} else {
+			newField.setType((Type) astRewrite.createCopyTarget(type));
+		}
 		ListRewrite fieldsModifersRewriter = astRewrite.getListRewrite(newField, FieldDeclaration.MODIFIERS2_PROPERTY);
 		modifiers.forEach(modifier -> fieldsModifersRewriter.insertLast(ast.newModifier(modifier), null));
 		ListRewrite listRewrite = astRewrite.getListRewrite(typeDeclaration,
