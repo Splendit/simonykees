@@ -52,12 +52,13 @@ public class MigrateJUnit4ToJupiterRule
 
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
-		Predicate<Version> versionComparator = version -> version
-			.compareTo(Version.parseVersion(MIN_JUNIT_4_VERSION)) >= 0
-				|| version.compareTo(Version.parseVersion(MIN_JUNIT_5_VERSION)) >= 0;
+		Predicate<Version> jupiterVersionComparator = version -> version
+			.compareTo(Version.parseVersion(MIN_JUNIT_5_VERSION)) >= 0;
+		Predicate<Version> junitVersionComparator = version -> version
+			.compareTo(Version.parseVersion(MIN_JUNIT_4_VERSION)) >= 0;
 
-		return isInProjectLibraries(project, ORG_JUNIT_JUPITER_API_TEST, versionComparator)
-				&& isInProjectLibraries(project, ORG_JUNIT_TEST, versionComparator);
+		return isInProjectLibraries(project, ORG_JUNIT_JUPITER_API_TEST, jupiterVersionComparator)
+				&& isInProjectLibraries(project, ORG_JUNIT_TEST, junitVersionComparator);
 
 	}
 }
