@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.files;
+package eu.jsparrow.core.visitor.files.writestring;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -274,6 +274,26 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
+	public void visit_FileWriterResourceUsedByTwoBufferedWriters_shouldNotTransform() throws Exception {
+		addImports(
+				java.io.BufferedWriter.class,
+				java.io.File.class,
+				java.io.FileWriter.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"		String value = \"Hello World!\";\n"
+				+ "		try (FileWriter writer = new FileWriter(new File(\"/home/test/testpath\"), StandardCharsets.UTF_8);\n"
+				+ "				BufferedWriter bw = new BufferedWriter(writer);\n"
+				+ "				BufferedWriter bw2 = new BufferedWriter(writer)) {\n"
+				+ "			bw.write(value);\n"
+				+ "			bw2.write(value);\n"
+				+ "		} catch (Exception e) {\n"
+				+ "		}";
+		assertNoChange(original);
+	}
+
+	@Test
 	public void visit_FileWriterResourceFromFileVariable_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.File.class,
@@ -410,53 +430,7 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 	}
 
 	@Test
-	public void visit_TestTwoBufferedWriterResourcesToRemove_shouldNotTransform() throws Exception {
-		addImports(java.io.BufferedWriter.class,
-				java.nio.charset.Charset.class,
-				java.nio.charset.StandardCharsets.class,
-				java.nio.file.Files.class,
-				java.nio.file.Path.class,
-				java.nio.file.Paths.class);
-
-		String original = "" +
-				"		String value = \"Hello World!\";\n"
-				+ "		Charset cs = StandardCharsets.UTF_8;\n"
-				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
-				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, cs);\n"
-				+ "				BufferedWriter bufferedWriter2 = Files.newBufferedWriter(path, cs)) {\n"
-				+ "			bufferedWriter.write(value);\n"
-				+ "			bufferedWriter2.write(value, 10, 1000);\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
-
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_TestTwoWriterResourcesToRemove_shouldNotTransform() throws Exception {
-		addImports(java.io.Writer.class,
-				java.nio.charset.Charset.class,
-				java.nio.charset.StandardCharsets.class,
-				java.nio.file.Files.class,
-				java.nio.file.Path.class,
-				java.nio.file.Paths.class);
-
-		String original = "" +
-				"		String value = \"Hello World!\";\n"
-				+ "		Charset cs = StandardCharsets.UTF_8;\n"
-				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
-				+ "		try (Writer bufferedWriter = Files.newBufferedWriter(path, cs);\n"
-				+ "				Writer bufferedWriter2 = Files.newBufferedWriter(path, cs)) {\n"
-				+ "			bufferedWriter.write(value);\n"
-				+ "			bufferedWriter2.write(value);\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
-
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_AdditionalWriteInvocationOfAnonymousClass_shouldNotTransform() throws Exception {
+	public void visit_WriteInvocationOfAnonymousClass_shouldNotTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.io.IOException.class);
@@ -464,18 +438,94 @@ public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnit
 		String original = "" +
 				"		String value = \"Hello World!\";\n"
 				+ "		String pathString = \"/home/test/testpath\";\n"
-				+ "		try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathString));\n"
-				+ "				BufferedWriter bufferedWriterAnonymous = new BufferedWriter(new FileWriter(pathString)) {\n"
-				+ "					@Override\n"
-				+ "					public void write(String s) throws IOException {\n"
-				+ "						super.write(s);\n"
-				+ "					}\n"
-				+ "				}) //\n"
-				+ "		{\n"
-				+ "			bufferedWriter.write(value);\n"
-				+ "			bufferedWriterAnonymous.write(value, 10, 1000);\n"
+				+ "		try (BufferedWriter bufferedWriterAnonymous = new BufferedWriter(new FileWriter(pathString)) {\n"
+				+ "			@Override\n"
+				+ "			public void write(String s) throws IOException {\n"
+				+ "				super.write(s);\n"
+				+ "			}\n"
+				+ "		}) {\n"
+				+ "			bufferedWriterAnonymous.write(value);\n"
 				+ "		} catch (Exception exception) {\n"
 				+ "		}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_WriteWithoutExpression_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.Writer.class);
+
+		String original = "" +
+				"			class LocalClass extends BufferedWriter {\n"
+				+ "				public LocalClass(Writer out) {super(out);}\n"
+				+ "				void test(String value) {\n"
+				+ "					try {\n"
+				+ "						write(value);\n"
+				+ "					} catch (Exception exception) {\n"
+				+ "					}\n"
+				+ "				}\n"
+				+ "			}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_WriteWithThisQualifier_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.Writer.class);
+
+		String original = "" +
+				"			class LocalClass extends BufferedWriter {\n"
+				+ "				public LocalClass(Writer out) {super(out);}\n"
+				+ "				void test(String value) {\n"
+				+ "					try {\n"
+				+ "						this.write(value);\n"
+				+ "					} catch (Exception exception) {\n"
+				+ "					}\n"
+				+ "				}\n"
+				+ "			}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_WriteWithSuperQualifier_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.Writer.class);
+
+		String original = "" +
+				"			class LocalClass extends BufferedWriter {\n"
+				+ "				public LocalClass(Writer out) {super(out);}\n"
+				+ "				@Override\n"
+				+ "				public void write(String value) {\n"
+				+ "					try {\n"
+				+ "						super.write(value);\n"
+				+ "					} catch (Exception exception) {\n"
+				+ "					}\n"
+				+ "				}\n"
+				+ "			}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_BufferedWriterAsInputForBufferedWriter_shouldNotTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.io.File.class,
+				java.io.FileWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class);
+
+		String original = "" +
+				"			String value = \"Hello World!\";\n"
+				+ "			String pathString = \"/home/test/testpath\";\n"
+				+ "			Charset cs = StandardCharsets.UTF_8;\n"
+				+ "			try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(new File(pathString), cs));\n"
+				+ "					BufferedWriter bufferedWriter2 = new BufferedWriter(bufferedWriter);) {\n"
+				+ "				bufferedWriter.write(value);\n"
+				+ "			} catch (Exception exception) {\n"
+				+ "			}";
 
 		assertNoChange(original);
 	}

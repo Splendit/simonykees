@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -20,9 +19,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
-import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * Parent class for visitors which replace the initializations of
@@ -53,22 +52,29 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 		if (!continueVisiting) {
 			return false;
 		}
-		verifyImport(compilationUnit, FilesUtil.PATHS_QUALIFIED_NAME);
-		verifyImport(compilationUnit, FilesUtil.CHARSET_QUALIFIED_NAME);
-		verifyImport(compilationUnit, FilesUtil.FILES_QUALIFIED_NAME);
+		verifyImport(compilationUnit, java.nio.file.Paths.class.getName());
+		verifyImport(compilationUnit, java.nio.charset.Charset.class.getName());
+		verifyImport(compilationUnit, java.nio.file.Files.class.getName());
 		return continueVisiting;
 	}
 
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
 
-		ClassInstanceCreation newBufferedIO = findBufferIOInstanceCreationAsInitializer(fragment).orElse(null);
-		if (newBufferedIO == null) {
+		ITypeBinding typeBinding = fragment.getName()
+			.resolveTypeBinding();
+		if (!ClassRelationUtil.isContentOfType(typeBinding, bufferedIOQualifiedTypeName)) {
 			return true;
 		}
 
-		Expression bufferedIOArgument = FilesUtil.findBufferedIOArgument(newBufferedIO, fileIOQualifiedTypeName)
-			.orElse(null);
+		Expression initializer = fragment.getInitializer();
+		if (!ClassRelationUtil.isNewInstanceCreationOf(initializer, bufferedIOQualifiedTypeName)) {
+			return true;
+		}
+
+		ClassInstanceCreation newBufferedIO = (ClassInstanceCreation) initializer;
+
+		Expression bufferedIOArgument = findBufferedIOArgument(newBufferedIO).orElse(null);
 		if (bufferedIOArgument == null) {
 			return true;
 		}
@@ -79,18 +85,26 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 
 			transform(createTransformationData(newBufferedIOArgumentsAnalyzer, newBufferedIO));
 
-		} else if (isDeclarationInTWRHeader(fragment, bufferedIOArgument)) {
-			createTransformationDataUsingFileIOResource(fragment, newBufferedIO,
-					(SimpleName) bufferedIOArgument).ifPresent(this::transform);
+		} else if (bufferedIOArgument.getNodeType() == ASTNode.SIMPLE_NAME) {
+			createTransformationDataUsingFileIOResource(fragment, newBufferedIO, (SimpleName) bufferedIOArgument)
+				.ifPresent(this::transform);
 		}
 		return true;
 	}
 
-	private boolean isDeclarationInTWRHeader(VariableDeclarationFragment fragment, Expression bufferedIOArg) {
-		ASTNode fragmentParent = fragment.getParent();
-		return bufferedIOArg.getNodeType() == ASTNode.SIMPLE_NAME
-				&& fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
-				&& fragmentParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY;
+	private Optional<Expression> findBufferedIOArgument(ClassInstanceCreation classInstanceCreation) {
+
+		List<Expression> newBufferedIOArgs = ASTNodeUtil.convertToTypedList(classInstanceCreation.arguments(),
+				Expression.class);
+		if (newBufferedIOArgs.size() != 1) {
+			return Optional.empty();
+		}
+		Expression bufferedIOArg = newBufferedIOArgs.get(0);
+		ITypeBinding firstArgType = bufferedIOArg.resolveTypeBinding();
+		if (!ClassRelationUtil.isContentOfType(firstArgType, fileIOQualifiedTypeName)) {
+			return Optional.empty();
+		}
+		return Optional.of(bufferedIOArg);
 	}
 
 	TransformationData createTransformationData(NewBufferedIOArgumentsAnalyzer newBufferedIOArgumentsAnalyzer,
@@ -106,40 +120,35 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 
 	private Optional<TransformationData> createTransformationDataUsingFileIOResource(
 			VariableDeclarationFragment fragment,
-			ClassInstanceCreation newBufferedIO, SimpleName bufferedIOArg) {
-		VariableDeclarationExpression declarationExpression = (VariableDeclarationExpression) fragment
-			.getParent();
-		TryStatement tryStatement = (TryStatement) declarationExpression.getParent();
+			ClassInstanceCreation newBufferedIO, SimpleName bufferedIOArgSimpleName) {
 
-		VariableDeclarationFragment fileIOResource = FilesUtil.findVariableDeclarationFragmentAsResource(bufferedIOArg,
-				tryStatement)
-			.orElse(null);
-		if (fileIOResource == null) {
+		TryStatement tryStatement;
+		ASTNode fragmentParent = fragment.getParent();
+		if (fragment.getLocationInParent() == VariableDeclarationExpression.FRAGMENTS_PROPERTY
+				&& fragmentParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
+			tryStatement = (TryStatement) fragmentParent.getParent();
+		} else {
 			return Optional.empty();
 		}
+
+		TryResourceAnalyzer fileIOResourceAnalyzer = new TryResourceAnalyzer();
+		if (!fileIOResourceAnalyzer.analyzeResourceUsedOnce(tryStatement, bufferedIOArgSimpleName)) {
+			return Optional.empty();
+		}
+
+		VariableDeclarationFragment fileIOResourceDeclarationFragment = fileIOResourceAnalyzer.getResourceFragment();
 
 		FileIOAnalyzer fileIOAnalyzer = new FileIOAnalyzer(fileIOQualifiedTypeName);
-		if (!fileIOAnalyzer.analyzeFileIO((VariableDeclarationExpression) fileIOResource.getParent())) {
-			return Optional.empty();
-		}
-
-		boolean isUsedInTryBody = hasUsagesOn(tryStatement.getBody(), fileIOResource.getName());
-		if (isUsedInTryBody) {
+		if (!fileIOAnalyzer.analyzeFileIO(fileIOResourceDeclarationFragment)) {
 			return Optional.empty();
 		}
 
 		List<Expression> pathExpressions = fileIOAnalyzer.getPathExpressions();
 		TransformationData transformationData = fileIOAnalyzer.getCharset()
-			.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet, fileIOResource))
-			.orElse(new TransformationData(newBufferedIO, pathExpressions, fileIOResource));
+			.map(charSet -> new TransformationData(newBufferedIO, pathExpressions, charSet,
+					fileIOResourceDeclarationFragment))
+			.orElse(new TransformationData(newBufferedIO, pathExpressions, fileIOResourceDeclarationFragment));
 		return Optional.of(transformationData);
-	}
-
-	private boolean hasUsagesOn(Block body, SimpleName fileIOName) {
-		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(fileIOName);
-		body.accept(visitor);
-		List<SimpleName> usages = visitor.getUsages();
-		return !usages.isEmpty();
 	}
 
 	private void transform(TransformationData transformationData) {
@@ -153,40 +162,30 @@ abstract class AbstractUseFilesBufferedIOMethodsASTVisitor extends AbstractAddIm
 
 	private MethodInvocation createFilesNewBufferedIOMethodInvocation(TransformationData transformationData) {
 		AST ast = astRewrite.getAST();
-		Name pathsTypeName = addImport(FilesUtil.PATHS_QUALIFIED_NAME,
+		Name pathsTypeName = addImport(java.nio.file.Paths.class.getName(),
 				transformationData.getBufferedIOInstanceCreation());
 		List<Expression> pathsGetArguments = transformationData.getPathExpressions()
 			.stream()
 			.map(pathExpression -> (Expression) astRewrite.createCopyTarget(pathExpression))
 			.collect(Collectors.toList());
 		MethodInvocation pathsGet = NodeBuilder.newMethodInvocation(ast, pathsTypeName,
-				ast.newSimpleName(FilesUtil.GET), pathsGetArguments);
+				ast.newSimpleName("get"), pathsGetArguments); //$NON-NLS-1$
 
 		Expression charset = transformationData.getCharSet()
 			.map(exp -> (Expression) astRewrite.createCopyTarget(exp))
 			.orElse(null);
 		if (charset == null) {
-			Name charsetTypeName = addImport(FilesUtil.CHARSET_QUALIFIED_NAME,
+			Name charsetTypeName = addImport(java.nio.charset.Charset.class.getName(),
 					transformationData.getBufferedIOInstanceCreation());
-			charset = NodeBuilder.newMethodInvocation(ast, charsetTypeName, FilesUtil.DEFAULT_CHARSET);
+			charset = NodeBuilder.newMethodInvocation(ast, charsetTypeName, "defaultCharset"); //$NON-NLS-1$
 		}
 
 		List<Expression> arguments = new ArrayList<>();
 		arguments.add(pathsGet);
 		arguments.add(charset);
-		Name filesTypeName = addImport(FilesUtil.FILES_QUALIFIED_NAME,
+		Name filesTypeName = addImport(java.nio.file.Files.class.getName(),
 				transformationData.getBufferedIOInstanceCreation());
 		return NodeBuilder.newMethodInvocation(ast, filesTypeName,
 				ast.newSimpleName(newBufferedIOMethodName), arguments);
-	}
-
-	private Optional<ClassInstanceCreation> findBufferIOInstanceCreationAsInitializer(
-			VariableDeclarationFragment fragment) {
-		SimpleName name = fragment.getName();
-		ITypeBinding typeBinding = name.resolveTypeBinding();
-		if (!ClassRelationUtil.isContentOfType(typeBinding, bufferedIOQualifiedTypeName)) {
-			return Optional.empty();
-		}
-		return FilesUtil.findClassInstanceCreationAsInitializer(fragment, bufferedIOQualifiedTypeName);
 	}
 }

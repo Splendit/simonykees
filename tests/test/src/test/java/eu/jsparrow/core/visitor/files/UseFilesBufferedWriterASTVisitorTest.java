@@ -309,4 +309,20 @@ public class UseFilesBufferedWriterASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"}";
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_WriterUsedByAdditionalAnonymousClass_shouldNotTransform() throws Exception {
+		fixture.addImport(java.nio.charset.StandardCharsets.class.getName());
+		String original = "" +
+				"			try (FileWriter writer = new FileWriter(new File(\"/home/test/testpath\"), StandardCharsets.UTF_8);\n"
+				+ "					BufferedWriter bw = new BufferedWriter(writer);\n"
+				+ "					BufferedWriter bw2 = new BufferedWriter(writer) {\n"
+				+ "					}) {\n"
+				+ "\n"
+				+ "			} catch (IOException e) {\n"
+				+ "				e.printStackTrace();\n"
+				+ "			}";
+
+		assertNoChange(original);
+	}
 }
