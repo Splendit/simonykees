@@ -36,6 +36,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * <li>All other annotations which are JUnit-4-annotations.</li>
  * </ul>
  *
+ * @since 3.27.0
  */
 class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 

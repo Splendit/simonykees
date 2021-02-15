@@ -22,10 +22,30 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
- * 
+ * Replaces JUnit 4 annotations with the corresponding JUnit Jupiter. The
+ * following annotations:
+ * <ul>
+ * <li>{@code org.junit.Ignore}</li>
+ * <li>{@code org.junit.Test}</li>
+ * <li>{@code org.junit.After}</li>
+ * <li>{@code org.junit.AfterClass}</li>
+ * <li>{@code org.junit.Before}</li>
+ * <li>{@code org.junit.BeforeClass}</li>
+ * </ul>
+ * are mapped respectively to:
+ * <ul>
+ * <li>{@code org.junit.jupiter.api.Disabled}</li>
+ * <li>{@code org.junit.jupiter.api.Test}</li>
+ * <li>{@code org.junit.jupiter.api.AfterEach}</li>
+ * <li>{@code org.junit.jupiter.api.AfterAll}</li>
+ * <li>{@code org.junit.jupiter.api.BeforeEach}</li>
+ * <li>{@code org.junit.jupiter.api.BeforeAll}</li>
+ * </ul>
+ * The transformation in one class is atomic. If any unsupported annotation
+ * occurs, it would prevent the transformation on the entire class.
  * 
  * @since 3.27.0
- *
+ * 
  */
 public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisitor {
 
@@ -63,8 +83,8 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 
 		List<AnnotationTransformationData> transformationDataList = createAnnotationDataList(compilationUnit);
 
-		List<ImportDeclaration> importsToRemove = ASTNodeUtil.convertToTypedList(this.getCompilationUnit()
-			.imports(), ImportDeclaration.class)
+		List<ImportDeclaration> importsToRemove = ASTNodeUtil
+			.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
 			.stream()
 			.filter(this::isJUnit4AnnotationImport)
 			.collect(Collectors.toList());
@@ -146,9 +166,7 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 
 	private void transform(List<ImportDeclaration> importsToRemove, Set<String> safeNewAnnotationImports,
 			List<AnnotationTransformationData> annotationNameReplacementDataList) {
-		importsToRemove.forEach(importDeclaration -> {
-			astRewrite.remove(importDeclaration, null);
-		});
+		importsToRemove.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
 
 		AST ast = astRewrite.getAST();
 		ListRewrite newImportsListRewrite = astRewrite.getListRewrite(getCompilationUnit(),

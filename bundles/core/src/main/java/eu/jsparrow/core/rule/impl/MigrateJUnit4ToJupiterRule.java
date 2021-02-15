@@ -40,7 +40,7 @@ public class MigrateJUnit4ToJupiterRule
 	@Override
 	protected String provideRequiredJavaVersion() {
 		/*
-		 * assertThrows expects a lambda expression.
+		 * JUnit Jupiter Requires Java 8.
 		 */
 		return JavaCore.VERSION_1_8;
 	}

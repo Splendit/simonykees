@@ -17,7 +17,8 @@ import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
  * {@code After} and {@code AfterClass}</li>
  * <li>All other annotations which are JUnit-4-annotations.</li>
  * </ul>
- *
+ * 
+ * @since 3.27.0
  */
 public class AnnotationCollectorVisitor extends ASTVisitor {
 
