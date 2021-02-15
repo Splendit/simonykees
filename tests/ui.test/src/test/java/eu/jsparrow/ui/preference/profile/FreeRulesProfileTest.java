@@ -37,7 +37,7 @@ class FreeRulesProfileTest {
 				"CollapseIfStatements",
 				"RemoveEmptyStatement",
 				"RemoveUnnecessaryThrows",
-				"UseSecureRandomRule",
+				"UseSecureRandom",
 				"InefficientConstructor",
 				"PrimitiveBoxedForString",
 				"RemoveToStringOnString",
