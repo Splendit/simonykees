@@ -356,6 +356,16 @@ public class TestFunctionalInterfaceRule {
 		};
 	}
 
+	public void usingFunctionsWithTypeParameters() {
+		// SIM-1889
+		final FunctionWithTypeParameters foo = new FunctionWithTypeParameters() {
+			@Override
+			public String foo(int a, String b) {
+				return "";
+			}
+		};
+	}
+
 	private void sampleMethodAcceptingFunction(GenericFoo foo) {
 		foo.hashCode();
 		// do nothing
@@ -385,5 +395,12 @@ public class TestFunctionalInterfaceRule {
 
 	private interface GenericFoo<T> {
 		T foo(String t, List<T> fooList);
+	}
+
+	/**
+	 * SIM-1889
+	 */
+	public interface FunctionWithTypeParameters {
+		<T> T foo(int a, String b);
 	}
 }
