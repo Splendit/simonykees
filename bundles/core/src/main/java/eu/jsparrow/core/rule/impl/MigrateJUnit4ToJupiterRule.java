@@ -31,10 +31,10 @@ public class MigrateJUnit4ToJupiterRule
 	public MigrateJUnit4ToJupiterRule() {
 		this.visitorClass = MigrateJUnit4ToJupiterASTVisitor.class;
 		this.id = "MigrateJUnit4ToJupiter"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription( // eu.jsparrow.i18n;
-				Messages.MigrateJUnit4ToJupiterRule_name, 
+		this.ruleDescription = new RuleDescription(
+				Messages.MigrateJUnit4ToJupiterRule_name,
 				Messages.MigrateJUnit4ToJupiterRule_description,
-				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING));
+				Duration.ofMinutes(15), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING));
 	}
 
 	@Override

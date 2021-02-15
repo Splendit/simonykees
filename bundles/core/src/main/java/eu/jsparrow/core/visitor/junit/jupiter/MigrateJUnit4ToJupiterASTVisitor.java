@@ -148,7 +148,6 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 			List<AnnotationTransformationData> annotationNameReplacementDataList) {
 		importsToRemove.forEach(importDeclaration -> {
 			astRewrite.remove(importDeclaration, null);
-			onRewrite();
 		});
 
 		AST ast = astRewrite.getAST();
@@ -161,7 +160,6 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 				ImportDeclaration newImportDeclaration = ast.newImportDeclaration();
 				newImportDeclaration.setName(ast.newName(newAnnotationImport));
 				newImportsListRewrite.insertLast(newImportDeclaration, null);
-				onRewrite();
 			});
 
 		annotationNameReplacementDataList.stream()
@@ -170,7 +168,7 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 				String newTapeNameAsString = data.getNewTypeName();
 				Name newAnnotationTypeName = ast.newName(newTapeNameAsString);
 				astRewrite.replace(originalTypeName, newAnnotationTypeName, null);
-				onRewrite();
 			});
+		onRewrite();
 	}
 }
