@@ -224,7 +224,7 @@ rules:
   - UseParameterizedJPAQuery
   - UseArraysStream
   - UseParameterizedLDAPQuery
-  - UseSecureRandomRule
+  - UseSecureRandom
   - ReuseRandomObjects
   - CreateTempFilesUsingJavaNIO
   - UseFilesBufferedReader
