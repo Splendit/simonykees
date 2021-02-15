@@ -4,6 +4,8 @@ import static eu.jsparrow.core.visitor.junit.jupiter.MigrateJUnit4ToJupiterASTVi
 import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitJupiterName;
 import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BreakStatement;
@@ -22,6 +24,8 @@ import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Collects the following annotations: <br>
@@ -158,9 +162,11 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 
 	private boolean checkOtherBinding(IBinding binding) {
 		if (binding.getKind() == IBinding.PACKAGE) {
-			// assumed that this part of code will never be covered because all
-			// cases with a package binding are handled on the level of the
-			// package declaration and the imports and types
+			/*
+			 * assumed that this part of code will never be covered because all
+			 * cases with a package binding are handled on the level of the
+			 * package declaration and the imports and types
+			 */
 			return false;
 		}
 		if (binding.getKind() == IBinding.TYPE) {
@@ -169,8 +175,11 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		}
 		if (binding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = (IMethodBinding) binding;
-			return analyzeOtherTypeBinding(methodBinding.getDeclaringClass());
-
+			if (!analyzeOtherTypeBinding(methodBinding.getDeclaringClass())) {
+				return false;
+			}
+			ITypeBinding returnType = methodBinding.getReturnType();
+			return !isUnsupportedType(returnType);
 		}
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
@@ -184,37 +193,92 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 			return analyzeOtherTypeBinding(declaringClass);
 		}
 		if (binding.getKind() == IBinding.ANNOTATION) {
-			/**
+			/*
 			 * assumed that this part of code will never be covered because only
 			 * an annotation can can have an annotation binding.
 			 */
 			return false;
 		}
 		if (binding.getKind() == IBinding.MEMBER_VALUE_PAIR) {
-			/**
+			/*
 			 * assumed that this part of code will never be covered because only
 			 * a member-value-pair can have a member-value-pair binding.
 			 */
 			return false;
 		}
 		if (binding.getKind() == IBinding.MODULE) {
-			/**
-			 * Not clear what value to return... seams to be used only in Java 9
-			 */
-			return true;
+			return false;
 		}
 		return false;
 	}
 
-	private boolean analyzeOtherTypeBinding(ITypeBinding typeBinding) {
+	private boolean analyzeOtherTypeBinding(ITypeBinding typeBinding) {// isSupportedType
+		boolean isUnsupportedType = this.isUnsupportedType(typeBinding);
+		if (isUnsupportedType) {
+			return false;
+		}
+		boolean hasUnsupportedSuperType = this.hasUnsupportedSuperType(typeBinding);
+		if (hasUnsupportedSuperType) {
+			return false;
+		}
+
+		boolean hasUnsupportedTypeArg = this.hasUnsupportedTypeArgument(typeBinding);
+		if (hasUnsupportedTypeArg) {
+			return false;
+		}
+
+		return true;
+	}
+
+	private boolean isUnsupportedType(ITypeBinding typeBinding) {
+
+		if (typeBinding.isPrimitive()) {
+			return false;
+		}
 		String qualifiedTypeName = typeBinding.getQualifiedName();
 		if (qualifiedTypeName.equals("org.junit.Assert")) { //$NON-NLS-1$
-			return true;
+			return false;
 		}
 		if (isJUnitName(qualifiedTypeName)) {
-			return isJUnitJupiterName(qualifiedTypeName);
+			return !isJUnitJupiterName(qualifiedTypeName);
 		}
-		return true;
+		return false;
+	}
+
+	private boolean hasUnsupportedSuperType(ITypeBinding typeBinding) {
+
+		List<ITypeBinding> ancestors = ClassRelationUtil.findAncestors(typeBinding);
+		for (ITypeBinding ancestor : ancestors) {
+			if (isUnsupportedType(ancestor)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean hasUnsupportedTypeArgument(ITypeBinding typeBinding) {
+		if (!typeBinding.isParameterizedType()) {
+			return false;
+
+		}
+		ITypeBinding[] typeParameters = typeBinding.getTypeArguments();
+		for (ITypeBinding parameterType : typeParameters) {
+			if (isUnsupportedType(parameterType)) {
+				return true;
+			}
+			if (hasUnsupportedSuperType(parameterType)) {
+				return true;
+			}
+
+			if (parameterType.isParameterizedType()) {
+				boolean hasUnsupportedTypeArg = hasUnsupportedTypeArgument(parameterType);
+				if (hasUnsupportedTypeArg) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	boolean isTransformationPossible() {
