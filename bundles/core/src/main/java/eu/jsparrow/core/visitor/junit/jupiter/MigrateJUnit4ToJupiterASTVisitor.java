@@ -64,10 +64,10 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 		List<AnnotationTransformationData> transformationDataList = createAnnotationDataList(compilationUnit);
 
 		List<ImportDeclaration> importsToRemove = ASTNodeUtil.convertToTypedList(this.getCompilationUnit()
-				.imports(), ImportDeclaration.class)
-				.stream()
-				.filter(this::isJUnit4AnnotationImport)
-				.collect(Collectors.toList());
+			.imports(), ImportDeclaration.class)
+			.stream()
+			.filter(this::isJUnit4AnnotationImport)
+			.collect(Collectors.toList());
 
 		Set<String> safeNewAnnotationImports = transformationDataList.stream()
 			.map(AnnotationTransformationData::getSafeNewTypeImport)

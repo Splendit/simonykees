@@ -1,6 +1,8 @@
 package eu.jsparrow.core.visitor.junit.jupiter;
 
 import static eu.jsparrow.core.visitor.junit.jupiter.MigrateJUnit4ToJupiterASTVisitor.ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
+import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitJupiterName;
+import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -33,8 +35,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
  */
 class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 
+	private static final String PKG_ORG_JUNIT = "org.junit"; //$NON-NLS-1$
 	private static final String TYPE_ORG_JUNIT_IGNORE = "org.junit.Ignore"; //$NON-NLS-1$
-
 	private boolean transformationPossible = true;
 
 	@Override
@@ -44,7 +46,9 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(PackageDeclaration node) {
-		transformationPossible = analyzePackageBinding(node.resolveBinding());
+		String packageName = node.resolveBinding()
+			.getName();
+		transformationPossible = !isJUnitName(packageName);
 		return false;
 	}
 
@@ -69,46 +73,21 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 	private boolean analyzeImport(ImportDeclaration node) {
 		IBinding binding = node.resolveBinding();
 		if (binding.getKind() == IBinding.PACKAGE) {
-			return analyzePackageBinding((IPackageBinding) binding);
-		}
-
-		if (binding.getKind() == IBinding.TYPE) {
-			ITypeBinding typeBinding = (ITypeBinding) binding;
-			if (isSupportedJUnit4AnnotationType(typeBinding)) {
+			String packageName = ((IPackageBinding) binding).getName();
+			if (node.isOnDemand() && packageName.equals(PKG_ORG_JUNIT)) {
 				return true;
 			}
-		}
-		return checkOtherReference(binding);
-	}
-
-	private boolean analyzePackageBinding(IPackageBinding packageBinding) {
-		String packageName = packageBinding.getName();
-		// Not supported
-		if (packageName.equals("junit")) { //$NON-NLS-1$
-			return false;
-		}
-		// Not supported
-		if (packageName.startsWith("junit.")) { //$NON-NLS-1$
-			return false;
-		}
-		// supported
-		if (packageName.equals("org.junit")) { //$NON-NLS-1$
+			if (isJUnitName(packageName)) {
+				return isJUnitJupiterName(packageName);
+			}
 			return true;
 		}
-		// inside "org.junit."
-		// Not supported except for "org.junit.jupiter.api" or any package
-		// inside org.junit.jupiter.api
-		if (packageName.startsWith("org.junit.")) { //$NON-NLS-1$
-			if (packageName.equals("org.junit.jupiter.api")) { //$NON-NLS-1$
+		if (binding.getKind() == IBinding.TYPE) {
+			if (isSupportedJUnit4AnnotationType((ITypeBinding) binding)) {
 				return true;
 			}
-			if (packageName.startsWith("org.junit.jupiter.api.")) { //$NON-NLS-1$
-				return true;
-			}
-			return false;
 		}
-		// outside "org.junit." and therefore supported
-		return true;
+		return checkOtherBinding(binding);
 	}
 
 	private boolean analyzeName(Name node) {
@@ -129,7 +108,7 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		if (isIgnoreAnnotationValueName(node)) {
 			return true;
 		}
-		return checkOtherReference(binding);
+		return checkOtherBinding(binding);
 	}
 
 	private boolean isNameOfSupportedAnnotation(Name name, IBinding binding) {
@@ -177,28 +156,32 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 			.equals(TYPE_ORG_JUNIT_IGNORE);
 	}
 
-	private boolean checkOtherReference(IBinding binding) {
+	private boolean checkOtherBinding(IBinding binding) {
 		if (binding.getKind() == IBinding.PACKAGE) {
 			// assumed that this part of code will never be covered because all
 			// cases with a package binding are handled on the level of the
-			// package declaration and the imports.
+			// package declaration and the imports and types
 			return false;
 		}
 		if (binding.getKind() == IBinding.TYPE) {
-			return checkTypeBinding((ITypeBinding) binding);
+			return analyzeOtherTypeBinding((ITypeBinding) binding);
 
 		}
 		if (binding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = (IMethodBinding) binding;
-			return checkTypeBinding(methodBinding.getDeclaringClass());
+			return analyzeOtherTypeBinding(methodBinding.getDeclaringClass());
 
 		}
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
-			if (!checkTypeBinding(variableBinding.getType())) {
+			if (!analyzeOtherTypeBinding(variableBinding.getType())) {
 				return false;
 			}
-			return checkTypeBinding(variableBinding.getDeclaringClass());
+			ITypeBinding declaringClass = variableBinding.getDeclaringClass();
+			if (declaringClass == null) {
+				return true;
+			}
+			return analyzeOtherTypeBinding(declaringClass);
 		}
 		if (binding.getKind() == IBinding.ANNOTATION) {
 			/**
@@ -223,32 +206,15 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		return false;
 	}
 
-	private boolean checkTypeBinding(ITypeBinding typeBinding) {
-		if (typeBinding != null) {
-			String qualifiedTypeName = typeBinding.getQualifiedName();
-			// Not supported as soon as inside "junit."
-			if (qualifiedTypeName.startsWith("junit.")) { //$NON-NLS-1$
-				return false;
-			}
-			if (qualifiedTypeName.startsWith("org.junit.")) { //$NON-NLS-1$
-				// supported because "org.junit.Assert" although inside
-				// "org.junit."
-				if (qualifiedTypeName.equals("org.junit.Assert")) { //$NON-NLS-1$
-					return true;
-				}
-				// supported because JUnit Jupiter
-				if (qualifiedTypeName.startsWith("org.junit.jupiter.api.")) { //$NON-NLS-1$
-					return true;
-				}
-				// Not supported because other type inside "org.junit."
-				return false;
-			}
+	private boolean analyzeOtherTypeBinding(ITypeBinding typeBinding) {
+		String qualifiedTypeName = typeBinding.getQualifiedName();
+		if (qualifiedTypeName.equals("org.junit.Assert")) { //$NON-NLS-1$
+			return true;
 		}
-		// OK:
-		// type not within "junit."
-		// type not within "org.junit."
+		if (isJUnitName(qualifiedTypeName)) {
+			return isJUnitJupiterName(qualifiedTypeName);
+		}
 		return true;
-
 	}
 
 	boolean isTransformationPossible() {
