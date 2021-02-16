@@ -75,7 +75,7 @@ public class ReplaceJUnit4AnnotationsWithJupiterASTVisitor extends AbstractAddIm
 			return false;
 		}
 
-		ReplaceJUnit4AnnotationsWithJupiterVisitor jUnit4ReferencesVisitor = new ReplaceJUnit4AnnotationsWithJupiterVisitor();
+		JUnit4AnnotationsAnalyzerVisitor jUnit4ReferencesVisitor = new JUnit4AnnotationsAnalyzerVisitor();
 		compilationUnit.accept(jUnit4ReferencesVisitor);
 		if (!jUnit4ReferencesVisitor.isTransformationPossible()) {
 			return false;

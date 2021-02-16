@@ -33,7 +33,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  *
  * @since 3.27.0
  */
-class ReplaceJUnit4AnnotationsWithJupiterVisitor extends ASTVisitor {
+class JUnit4AnnotationsAnalyzerVisitor extends ASTVisitor {
 
 	private static final String PKG_ORG_JUNIT = "org.junit"; //$NON-NLS-1$
 	private static final String TYPE_ORG_JUNIT_IGNORE = "org.junit.Ignore"; //$NON-NLS-1$
