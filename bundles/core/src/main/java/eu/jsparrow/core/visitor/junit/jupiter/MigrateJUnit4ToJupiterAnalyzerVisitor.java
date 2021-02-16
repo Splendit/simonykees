@@ -28,13 +28,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- * Collects the following annotations: <br>
- * <ul>
- * <li>Annotations having the simple type names<br>
- * {@code Test}, {@code Ignore}, {@code Before}, {@code BeforeClass},
- * {@code After} and {@code AfterClass}</li>
- * <li>All other annotations which are JUnit-4-annotations.</li>
- * </ul>
+ * Helper visitor analyzing a compilation unit to decide if it is possible to
+ * migrate JUnit-4-annotations to JUnit-Jupiter-annotations.
  *
  * @since 3.27.0
  */
@@ -92,7 +87,7 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 				return true;
 			}
 		}
-		return checkOtherBinding(binding);
+		return isSupportedBinding(binding);
 	}
 
 	private boolean analyzeName(Name node) {
@@ -113,7 +108,7 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		if (isIgnoreAnnotationValueName(node)) {
 			return true;
 		}
-		return checkOtherBinding(binding);
+		return isSupportedBinding(binding);
 	}
 
 	private boolean isNameOfSupportedAnnotation(Name name, IBinding binding) {
@@ -161,7 +156,7 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 			.equals(TYPE_ORG_JUNIT_IGNORE);
 	}
 
-	private boolean checkOtherBinding(IBinding binding) {
+	private boolean isSupportedBinding(IBinding binding) {// isSupportedBinding
 		if (binding.getKind() == IBinding.PACKAGE) {
 			/*
 			 * assumed that this part of code will never be covered because all
@@ -171,12 +166,12 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 			return false;
 		}
 		if (binding.getKind() == IBinding.TYPE) {
-			return analyzeOtherTypeBinding((ITypeBinding) binding);
+			return isSupportedTypeBinding((ITypeBinding) binding);
 
 		}
 		if (binding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = (IMethodBinding) binding;
-			if (!analyzeOtherTypeBinding(methodBinding.getDeclaringClass())) {
+			if (!isSupportedTypeBinding(methodBinding.getDeclaringClass())) {
 				return false;
 			}
 			ITypeBinding returnType = methodBinding.getReturnType();
@@ -184,14 +179,14 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		}
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
-			if (!analyzeOtherTypeBinding(variableBinding.getType())) {
+			if (!isSupportedTypeBinding(variableBinding.getType())) {
 				return false;
 			}
 			ITypeBinding declaringClass = variableBinding.getDeclaringClass();
 			if (declaringClass == null) {
 				return true;
 			}
-			return analyzeOtherTypeBinding(declaringClass);
+			return isSupportedTypeBinding(declaringClass);
 		}
 		if (binding.getKind() == IBinding.ANNOTATION) {
 			/*
@@ -213,7 +208,7 @@ class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
 		return false;
 	}
 
-	private boolean analyzeOtherTypeBinding(ITypeBinding typeBinding) {// isSupportedType
+	private boolean isSupportedTypeBinding(ITypeBinding typeBinding) {
 		boolean isUnsupportedType = this.isUnsupportedType(typeBinding);
 		if (isUnsupportedType) {
 			return false;
