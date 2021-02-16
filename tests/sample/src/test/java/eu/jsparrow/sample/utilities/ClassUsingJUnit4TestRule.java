@@ -13,4 +13,8 @@ public class ClassUsingJUnit4TestRule {
 			return null;
 		}
 	};
+	
+	public TestRule getTestRule() {
+		return testRule;
+	}
 }
