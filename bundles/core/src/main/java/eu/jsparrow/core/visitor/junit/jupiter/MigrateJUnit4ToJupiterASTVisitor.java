@@ -187,6 +187,10 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 				Name newAnnotationTypeName = ast.newName(newTapeNameAsString);
 				astRewrite.replace(originalTypeName, newAnnotationTypeName, null);
 			});
-		onRewrite();
+		if(!importsToRemove.isEmpty() 
+				|| !safeNewAnnotationImports.isEmpty() 
+				|| !annotationNameReplacementDataList.isEmpty()) {
+			onRewrite();
+		}
 	}
 }
