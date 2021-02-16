@@ -1,8 +1,8 @@
-package eu.jsparrow.sample.postRule.migrateJUnitToJupiter;
+package eu.jsparrow.sample.postRule.allRules;
 
 import org.junit.Before;
 
-public class MigrateJUnit4ToJupiteUnsupportedSuperTypeRule {
+public class ReplaceJUnit4AnnotationsWithJupiterUnsupportedSuperTypeRule {
 
 	private eu.jsparrow.sample.utilities.DummyTestRule rule;
 

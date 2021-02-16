@@ -14,24 +14,24 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.rule.impl.MigrateJUnit4ToJupiterRule;
+import eu.jsparrow.core.rule.impl.ReplaceJUnit4AnnotationsWithJupiterRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-public class TestMigrateJUnit4ToJupiterRule extends SingleRuleTest {
+public class TestReplaceJUnit4AnnotationsWithJUnitJupiter extends SingleRuleTest {
 
-	private static final String SAMPLE_FILE_ALWAYS_TRANSFORMED = "MigrateJUnit4ToJupiterAlwaysTransformedRule.java";
-	private static final String SAMPLE_FILE_CONDITIONALLY_TRANSFORMED = "MigrateJUnit4ToJupiterConditionallyTransformedRule.java";
-	private static final String SAMPLE_REFERENCE_ON_TESTRULE_NOT_TRANSFORMED = "MigrateJUnit4ToJupiteWithUnit4TestRuleToStringRule.java";
-	private static final String SAMPLE_UNSUPPORTED_IMPLICIT_USED_TYPE = "MigrateJUnit4ToJupiteUnsupportedImplicitUsedTypeRule.java";
-	private static final String SAMPLE_UNSUPPORTED_SUPER_TYPE = "MigrateJUnit4ToJupiteUnsupportedSuperTypeRule.java";
-	private static final String SAMPLE_UNSUPPORTED_TYPE_ARGUMENT = "MigrateJUnit4ToJupiteUnsupportedTypeArgumentRule.java";
+	private static final String SAMPLE_FILE_ALWAYS_TRANSFORMED = "ReplaceJUnit4AnnotationsWithJupiterAlwaysTransformedRule.java";
+	private static final String SAMPLE_FILE_CONDITIONALLY_TRANSFORMED = "ReplaceJUnit4AnnotationsWithJupiterConditionallyTransformedRule.java";
+	private static final String SAMPLE_REFERENCE_ON_TESTRULE_NOT_TRANSFORMED = "ReplaceJUnit4AnnotationsWithJupiterWithUnit4TestRuleToStringRule.java";
+	private static final String SAMPLE_UNSUPPORTED_IMPLICIT_USED_TYPE = "ReplaceJUnit4AnnotationsWithJupiterUnsupportedImplicitUsedTypeRule.java";
+	private static final String SAMPLE_UNSUPPORTED_SUPER_TYPE = "ReplaceJUnit4AnnotationsWithJupiterUnsupportedSuperTypeRule.java";
+	private static final String SAMPLE_UNSUPPORTED_TYPE_ARGUMENT = "ReplaceJUnit4AnnotationsWithJupiterUnsupportedTypeArgumentRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnitToJupiter";
 
-	private MigrateJUnit4ToJupiterRule rule;
+	private ReplaceJUnit4AnnotationsWithJupiterRule rule;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		rule = new MigrateJUnit4ToJupiterRule();
+		rule = new ReplaceJUnit4AnnotationsWithJupiterRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

@@ -4,12 +4,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class MigrateJUnit4ToJupiterASTVisitorNegativeTest extends AbstractMigrateJUnit4ToJupiterASTVisitorTest {
+class ReplaceJUnit4AnnotationsWithJupiterASTVisitorNegativeTest extends AbstractReplaceJUnit4AnnotationsWithJupiterASTVisitorTest {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
 		addDependency("junit", "junit", "4.13");
-		setDefaultVisitor(new MigrateJUnit4ToJupiterASTVisitor());
+		setDefaultVisitor(new ReplaceJUnit4AnnotationsWithJupiterASTVisitor());
 	}
 
 	@AfterEach

@@ -1,4 +1,4 @@
-package eu.jsparrow.sample.preRule;
+package eu.jsparrow.sample.postRule.migrateJUnitToJupiter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.junit.Before;
 
-public class MigrateJUnit4ToJupiteUnsupportedTypeArgumentRule {
+public class ReplaceJUnit4AnnotationsWithJupiterUnsupportedTypeArgumentRule {
 
 	private Map<String, List<eu.jsparrow.sample.utilities.DummyTestRule>> rules;
 	

@@ -8,32 +8,32 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 
-import eu.jsparrow.core.visitor.junit.jupiter.MigrateJUnit4ToJupiterASTVisitor;
+import eu.jsparrow.core.visitor.junit.jupiter.ReplaceJUnit4AnnotationsWithJupiterASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
- * @see MigrateJUnit4ToJupiterASTVisitor
+ * @see ReplaceJUnit4AnnotationsWithJupiterASTVisitor
  * 
  * @since 3.24.0
  *
  */
-public class MigrateJUnit4ToJupiterRule
-		extends RefactoringRuleImpl<MigrateJUnit4ToJupiterASTVisitor> {
+public class ReplaceJUnit4AnnotationsWithJupiterRule
+		extends RefactoringRuleImpl<ReplaceJUnit4AnnotationsWithJupiterASTVisitor> {
 
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_TEST = "org.junit.Test"; //$NON-NLS-1$
 	private static final String MIN_JUNIT_4_VERSION = "4.13"; //$NON-NLS-1$
 	private static final String MIN_JUNIT_5_VERSION = "5.0.0"; //$NON-NLS-1$
 
-	public MigrateJUnit4ToJupiterRule() {
-		this.visitorClass = MigrateJUnit4ToJupiterASTVisitor.class;
-		this.id = "MigrateJUnit4ToJupiter"; //$NON-NLS-1$
+	public ReplaceJUnit4AnnotationsWithJupiterRule() {
+		this.visitorClass = ReplaceJUnit4AnnotationsWithJupiterASTVisitor.class;
+		this.id = "ReplaceJUnit4AnnotationsWithJupiter"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
-				Messages.MigrateJUnit4ToJupiterRule_name,
-				Messages.MigrateJUnit4ToJupiterRule_description,
+				Messages.ReplaceJUnit4AnnotationsWithJupiterRule_name,
+				Messages.ReplaceJUnit4AnnotationsWithJupiterRule_description,
 				Duration.ofMinutes(15), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING));
 	}
 

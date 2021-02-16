@@ -50,7 +50,7 @@ import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
 import eu.jsparrow.core.rule.impl.MakeFieldsAndVariablesFinalRule;
 import eu.jsparrow.core.rule.impl.MapGetOrDefaultRule;
-import eu.jsparrow.core.rule.impl.MigrateJUnit4ToJupiterRule;
+import eu.jsparrow.core.rule.impl.ReplaceJUnit4AnnotationsWithJupiterRule;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
 import eu.jsparrow.core.rule.impl.OptionalFilterRule;
@@ -194,7 +194,7 @@ public class RulesContainer {
 				 */
 				new ReplaceJUnitExpectedExceptionRule(), new ReplaceJUnitExpectedAnnotationPropertyRule(),
 				new ReplaceJUnitTimeoutAnnotationPropertyRule(),
-				new MigrateJUnit4ToJupiterRule(),
+				new ReplaceJUnit4AnnotationsWithJupiterRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

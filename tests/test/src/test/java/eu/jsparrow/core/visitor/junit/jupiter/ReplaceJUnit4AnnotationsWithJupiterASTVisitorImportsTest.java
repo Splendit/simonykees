@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class MigrateJUnit4ToJupiterASTVisitorImportsTest extends AbstractMigrateJUnit4ToJupiterASTVisitorTest {
+public class ReplaceJUnit4AnnotationsWithJupiterASTVisitorImportsTest extends AbstractReplaceJUnit4AnnotationsWithJupiterASTVisitorTest {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
 		addDependency("junit", "junit", "4.13");
-		setDefaultVisitor(new MigrateJUnit4ToJupiterASTVisitor());
+		setDefaultVisitor(new ReplaceJUnit4AnnotationsWithJupiterASTVisitor());
 	}
 
 	@AfterEach

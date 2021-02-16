@@ -1,13 +1,13 @@
-package eu.jsparrow.sample.postRule.allRules;
+package eu.jsparrow.sample.postRule.migrateJUnitToJupiter;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 
-public class MigrateJUnit4ToJupiterAlwaysTransformedRule {
+public class ReplaceJUnit4AnnotationsWithJupiterAlwaysTransformedRule {
 
 	class TestWithAllTestMethodAnnotations {
 

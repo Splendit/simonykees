@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions;
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 import eu.jsparrow.jdtunit.JdtUnitException;
 
-public abstract class AbstractMigrateJUnit4ToJupiterASTVisitorTest extends UsesJDTUnitFixture {
+public abstract class AbstractReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends UsesJDTUnitFixture {
 	
 	protected void assertChange(String original, String expected, List<String> expectedImportsToString)
 			throws JavaModelException, JdtUnitException, BadLocationException {

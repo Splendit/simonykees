@@ -1,6 +1,6 @@
 package eu.jsparrow.core.visitor.junit.jupiter;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.MigrateJUnit4ToJupiterASTVisitor.ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
+import static eu.jsparrow.core.visitor.junit.jupiter.ReplaceJUnit4AnnotationsWithJupiterASTVisitor.ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
 import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitJupiterName;
 import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
 
@@ -33,7 +33,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  *
  * @since 3.27.0
  */
-class MigrateJUnit4ToJupiterAnalyzerVisitor extends ASTVisitor {
+class ReplaceJUnit4AnnotationsWithJupiterVisitor extends ASTVisitor {
 
 	private static final String PKG_ORG_JUNIT = "org.junit"; //$NON-NLS-1$
 	private static final String TYPE_ORG_JUNIT_IGNORE = "org.junit.Ignore"; //$NON-NLS-1$

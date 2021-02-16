@@ -1,29 +1,29 @@
-package eu.jsparrow.sample.preRule;
+package eu.jsparrow.sample.postRule.allRules;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-public class MigrateJUnit4ToJupiterAlwaysTransformedRule {
+public class ReplaceJUnit4AnnotationsWithJupiterAlwaysTransformedRule {
 
 	class TestWithAllTestMethodAnnotations {
 
-		@Before
+		@BeforeEach
 		public void beforeEach() throws Exception {
 		}
 
-		@After
+		@AfterEach
 		public void afterEach() throws Exception {
 		}
 
-		@BeforeClass
+		@BeforeAll
 		public void beforeAll() throws Exception {
 		}
 
-		@AfterClass
+		@AfterAll
 		public void afterAll() throws Exception {
 		}
 
@@ -35,17 +35,17 @@ public class MigrateJUnit4ToJupiterAlwaysTransformedRule {
 		public void testWithTestNormalAnnotation() throws Exception {
 		}
 
-		@Ignore
+		@Disabled
 		@Test
 		public void testWithIgnoreMarkerAnnotation() throws Exception {
 		}
 
-		@Ignore(value = "This test is ignored")
+		@Disabled(value = "This test is ignored")
 		@Test
 		public void testWithIgnoreNormalAnnotation() throws Exception {
 		}
 
-		@Ignore("This test is ignored")
+		@Disabled("This test is ignored")
 		@Test
 		public void testWithIgnoreSingleMemberAnnotation() throws Exception {
 		}

@@ -47,7 +47,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.27.0
  * 
  */
-public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisitor {
+public class ReplaceJUnit4AnnotationsWithJupiterASTVisitor extends AbstractAddImportASTVisitor {
 
 	static final Map<String, String> ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
 
@@ -75,7 +75,7 @@ public class MigrateJUnit4ToJupiterASTVisitor extends AbstractAddImportASTVisito
 			return false;
 		}
 
-		MigrateJUnit4ToJupiterAnalyzerVisitor jUnit4ReferencesVisitor = new MigrateJUnit4ToJupiterAnalyzerVisitor();
+		ReplaceJUnit4AnnotationsWithJupiterVisitor jUnit4ReferencesVisitor = new ReplaceJUnit4AnnotationsWithJupiterVisitor();
 		compilationUnit.accept(jUnit4ReferencesVisitor);
 		if (!jUnit4ReferencesVisitor.isTransformationPossible()) {
 			return false;

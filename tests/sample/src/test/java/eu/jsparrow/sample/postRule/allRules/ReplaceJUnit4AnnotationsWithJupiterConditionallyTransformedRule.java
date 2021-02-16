@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
-public class MigrateJUnit4ToJupiterConditionallyTransformedRule {
+public class ReplaceJUnit4AnnotationsWithJupiterConditionallyTransformedRule {
 
 	class ConditionallyTransformed {
 

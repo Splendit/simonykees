@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.junit.Before;
 
-public class MigrateJUnit4ToJupiteUnsupportedTypeArgumentRule {
+public class ReplaceJUnit4AnnotationsWithJupiterUnsupportedTypeArgumentRule {
 
 	private Map<String, List<eu.jsparrow.sample.utilities.DummyTestRule>> rules;
 
