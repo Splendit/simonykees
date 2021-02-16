@@ -1,4 +1,4 @@
-package eu.jsparrow.core;
+package eu.jsparrow.core.rule.impl;
 
 import static eu.jsparrow.core.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.core.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
@@ -14,10 +14,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.rule.impl.ReplaceJUnit4AnnotationsWithJupiterRule;
+import eu.jsparrow.core.SingleRuleTest;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-public class TestReplaceJUnit4AnnotationsWithJUnitJupiter extends SingleRuleTest {
+public class ReplaceJUnit4AnnotationsWithJUnitJupiterRuleTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE_ALWAYS_TRANSFORMED = "ReplaceJUnit4AnnotationsWithJupiterAlwaysTransformedRule.java";
 	private static final String SAMPLE_FILE_CONDITIONALLY_TRANSFORMED = "ReplaceJUnit4AnnotationsWithJupiterConditionallyTransformedRule.java";
