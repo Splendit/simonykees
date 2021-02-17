@@ -28,9 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.exception.InvalidLibraryVersionException;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
+import eu.jsparrow.rules.common.util.LibrariesVersionUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -303,8 +305,13 @@ public abstract class RefactoringRuleImpl<T extends AbstractASTRewriteASTVisitor
 					Name key = (Name) attribute;
 					String keyword = key.toString();
 					if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
-						Version actualVersion = Version.parseVersion(attributes.getValue(key));
-						return versionComparator.test(actualVersion);
+						String actualVersion = attributes.getValue(key);
+						try {
+							return LibrariesVersionUtil.satisfies(actualVersion, versionComparator);
+						} catch (InvalidLibraryVersionException e) {
+							logger.warn(e.getMessage(), e);
+						}
+						return false;
 					}
 				}
 			}
