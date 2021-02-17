@@ -30,10 +30,10 @@ public class LibrariesVersionUtil {
 	 *            a predicate to verify if the version is satisfied
 	 * @return if the predicate is satisfied
 	 * @throws InvalidLibraryVersionException
-	 *             if the given version does not match the pattern:
+	 *             if the given version does not match this (simplified) pattern:
 	 * 
 	 *             <pre>
-	 *             ^\d+(\.\d+){0,3}[-.*]*$
+	 *             NUMBERS[.NUMBERS[.NUMBERS[.NUMBERS]]]-ANYTHING
 	 */
 	public static boolean satisfies(String version, Predicate<Version> condition)
 			throws InvalidLibraryVersionException {
@@ -52,7 +52,7 @@ public class LibrariesVersionUtil {
 			throw new InvalidLibraryVersionException(message);
 		}
 
-		boolean isVersionPattern = version.matches("\\d+(\\.\\d+){0,3}"); //$NON-NLS-1$
+		boolean isVersionPattern = version.matches("^\\d+(\\.\\d+){0,3}$"); //$NON-NLS-1$
 		if (!isVersionPattern) {
 			String message = String.format("Invalid library version %s.", version); //$NON-NLS-1$
 			throw new InvalidLibraryVersionException(message);
@@ -60,12 +60,12 @@ public class LibrariesVersionUtil {
 	}
 
 	private static String chopNonNumeric(String version) {
-		boolean hasDash = version.matches("^\\d+[\\.\\d+]*-.*$"); //$NON-NLS-1$
-		if (!hasDash) {
-			return version;
-		}
 		String[] parts = version.split("-"); //$NON-NLS-1$
-		return parts[0];
+		if (parts.length > 0) {
+			return parts[0];
+		} else {
+			return ""; //$NON-NLS-1$
+		}
 	}
 
 }
