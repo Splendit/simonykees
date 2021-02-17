@@ -176,4 +176,13 @@ public class RemoveCollectionAddAllASTVisitorTest extends UsesSimpleJDTUnitFixtu
 				"ArrayListSubclass<String> list = new ArrayListSubclass<>();\n" +
 				"list.addAll(Arrays.asList(\"value1\", \"value2\"));");
 	}
+	
+	@Test
+	public void visit_stackAddAll_shouldNotTransform() throws Exception {
+		fixture.addImport(java.util.Stack.class.getName());
+		fixture.addImport(java.util.Collections.class.getName());
+		assertNoChange("" +
+				"Stack<String> stack = new Stack<>();\n" +
+				"stack.addAll(Collections.singletonList(\"value\"));");
+	}
 }

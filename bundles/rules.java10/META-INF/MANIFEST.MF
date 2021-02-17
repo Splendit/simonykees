@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.rules.java10
 Bundle-ManifestVersion: 2
 Bundle-Name: jsparrow :: rules java10
 Bundle-SymbolicName: eu.jsparrow.rules.java10
-Bundle-Version: 3.26.1.qualifier
+Bundle-Version: 3.27.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Require-Bundle: eu.jsparrow.logging,

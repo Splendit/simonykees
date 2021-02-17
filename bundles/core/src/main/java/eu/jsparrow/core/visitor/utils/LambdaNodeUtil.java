@@ -1,22 +1,33 @@
-package eu.jsparrow.core.visitor.sub;
+package eu.jsparrow.core.visitor.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.sub.LambdaExpressionBodyAnalyzer;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -134,19 +145,82 @@ public class LambdaNodeUtil {
 		ListRewrite lambdaParamsListRewrite = astRewrite.getListRewrite(lambda, LambdaExpression.PARAMETERS_PROPERTY);
 		lambdaParamsListRewrite.insertFirst(parameter, null);
 
-		if (body.getNodeType() == ASTNode.BLOCK) {
-			lambda.setBody((Block) astRewrite.createCopyTarget(body));
+		if (body.getNodeType() == ASTNode.BLOCK || body instanceof Expression) {
+			lambda.setBody(astRewrite.createCopyTarget(body));
 			return lambda;
 		} else if (body.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
 			Expression expression = ((ExpressionStatement) body).getExpression();
-			lambda.setBody((Expression) astRewrite.createCopyTarget(expression));
-			return lambda;
-		} else if (body instanceof Expression) {
-			lambda.setBody((Expression) astRewrite.createCopyTarget(body));
+			lambda.setBody(astRewrite.createCopyTarget(expression));
 			return lambda;
 		}
 
 		return null;
+	}
+
+	/**
+	 * The context of a lambda can be:
+	 * <ul>
+	 * <li>an assignment</li>
+	 * <li>a declaration fragment</li>
+	 * <li>a parameter of a method invocation</li>
+	 * <li>a cast expression</li>
+	 * <li>an expression of a return statement</li>
+	 * <ul>
+	 * 
+	 * @param lambdaExpression
+	 *            the lambda expression to find the context for
+	 * @return the {@link ITypeBinding} of the context. In case of a return
+	 *         statement, the context type is the return type of the method. In
+	 *         case of a method invoctioan parameter, the context type is the
+	 *         type of the formal parameter in the corresponding position.
+	 *         Otherwise, the context type is obvious.
+	 */
+	public static Optional<ITypeBinding> findContextType(LambdaExpression lambdaExpression) {
+		StructuralPropertyDescriptor locationInParent = lambdaExpression.getLocationInParent();
+		ITypeBinding contextTypeBinding = null;
+		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			Assignment assignment = (Assignment) lambdaExpression.getParent();
+			Expression lhs = assignment.getLeftHandSide();
+			contextTypeBinding = lhs.resolveTypeBinding();
+		} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment fragment = (VariableDeclarationFragment) lambdaExpression.getParent();
+			IVariableBinding variableBinding = fragment.resolveBinding();
+			contextTypeBinding = variableBinding.getType();
+		} else if (locationInParent == CastExpression.EXPRESSION_PROPERTY) {
+			CastExpression cast = (CastExpression) lambdaExpression.getParent();
+			contextTypeBinding = cast.resolveTypeBinding();
+		} else if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
+			MethodInvocation methodInvocation = (MethodInvocation) lambdaExpression.getParent();
+			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
+			@SuppressWarnings("unchecked")
+			List<Expression> arguments = methodInvocation.arguments();
+			int index = arguments.indexOf(lambdaExpression);
+			contextTypeBinding = parameterTypes[index];
+		} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
+			ReturnStatement returnStatement = (ReturnStatement) lambdaExpression.getParent();
+			contextTypeBinding = MethodDeclarationUtils.findExpectedReturnType(returnStatement);
+
+		}
+		return Optional.ofNullable(contextTypeBinding);
+	}
+
+	/**
+	 * 
+	 * @param lambdaParameter
+	 *            a {@link VariableDeclaration} of a lambda expression
+	 *            parameter.
+	 * @return the explicit type of a {@link VariableDeclaration} or an empty
+	 *         {@link Optional} if the type of a is implicit.
+	 */
+	public static Optional<Type> findExplicitLambdaParameterType(
+			VariableDeclaration lambdaParameter) {
+		if (lambdaParameter.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
+			SingleVariableDeclaration declarationWithType = (SingleVariableDeclaration) lambdaParameter;
+			Type explicitType = declarationWithType.getType();
+			return Optional.of(explicitType);
+		}
+		return Optional.empty();
 	}
 
 }

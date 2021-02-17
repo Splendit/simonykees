@@ -11,13 +11,27 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
+
 /**
- * Analyzes whether the declaration of a {@link java.io.FileReader} or a
- * {@link java.io.FileWriter} satisfies the preconditions for replacing, as
- * shown in the following example with a {@link java.io.FileReader}:
+ * Analyzes a {@link VariableDeclarationFragment} which is assumed to be
+ * declared in a TWR-header. Furthermore, the following requirements must be
+ * fulfilled:
+ * <ul>
+ * <li>If this class is used to analyze a file input resource, then the
+ * initializer of the declaration fragment must be an invocation of a
+ * constructor of {@link java.io.FileReader}, and if this class is used to
+ * analyze a file output resource, then a constructor of
+ * {@link java.io.FileWriter} is expected.</li>
+ * <li>It must be possible to extract a list of path string expressions from the
+ * arguments of the constructor mentioned above.</li>
+ * <li>Additionally, an optional {@link java.nio.charset.Charset}-argument may
+ * be extracted.</li>
+ * </ul>
+ * Example for use cases of {@link FileIOAnalyzer}: A {@link java.io.FileReader}
+ * used by a {@link java.io.BufferedReader.BufferedReader}, see the following code:
  * 
  * <pre>
  * try (FileReader fileReader = new FileReader(new File("path/to/file"));
@@ -25,7 +39,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * }
  * </pre>
  * 
- * by:
+ * which can be: transformed to
  * 
  * <pre>
  *  try(BufferedReader buffer = Files.newBufferedReader(Paths.get("pat/to/file"), Charset.defaultCharset()) {}
@@ -37,8 +51,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * @since 3.21.0
  *
  */
-class FileIOAnalyzer {
-
+public class FileIOAnalyzer {
 	private Expression charsetExpression;
 	private List<Expression> pathExpressions = new ArrayList<>();
 	private final String fileIOClassQualifiedName;
@@ -47,19 +60,14 @@ class FileIOAnalyzer {
 		this.fileIOClassQualifiedName = fileIOClassQualifiedName;
 	}
 
-	public boolean analyzeFileIO(VariableDeclarationExpression variableDeclaration) {
-		List<VariableDeclarationFragment> fragments = convertToTypedList(variableDeclaration.fragments(),
-				VariableDeclarationFragment.class);
-		if (fragments.size() != 1) {
-			return false;
-		}
-		ClassInstanceCreation fileIOCreation = FilesUtil
-			.findClassInstanceCreationAsInitializer(fragments.get(0), fileIOClassQualifiedName)
-			.orElse(null);
+	public boolean analyzeFileIO(VariableDeclarationFragment fragmentDeclaringFileIO) {
 
-		if (fileIOCreation == null) {
+		Expression initializer = fragmentDeclaringFileIO.getInitializer();
+		if (!ClassRelationUtil.isNewInstanceCreationOf(initializer, fileIOClassQualifiedName)) {
 			return false;
 		}
+
+		ClassInstanceCreation fileIOCreation = (ClassInstanceCreation) initializer;
 
 		List<Expression> arguments = convertToTypedList(fileIOCreation.arguments(), Expression.class);
 		int argumentSize = arguments.size();
@@ -79,7 +87,6 @@ class FileIOAnalyzer {
 			}
 			this.charsetExpression = charset;
 		}
-
 		return true;
 	}
 

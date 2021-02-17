@@ -2,7 +2,7 @@ package eu.jsparrow.sample.postRule.allRules;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,6 +169,18 @@ public class TestMultiCatchRule {
 		}
 	}
 
+	public void invokingChildSpecificMethod(int i) {
+		try {
+			throwSomethingWithInheritance(i);
+		} catch (SecondChildException e) {
+			e.secondChildMethod();
+		} catch (SecondChildSecondException e) {
+			e.secondChildMethod();
+		} catch (SecondException | FirstException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+
 	private void throwSomething(int i)
 			throws FirstException, SecondException, ThirdException, FourthException, FifthException, SixthException {
 		switch (i) {
@@ -260,6 +272,8 @@ public class TestMultiCatchRule {
 	 */
 	@SuppressWarnings("serial")
 	class SecondChildException extends SecondException {
+		public void secondChildMethod() {
+		}
 	}
 
 	/**
@@ -274,6 +288,8 @@ public class TestMultiCatchRule {
 	 */
 	@SuppressWarnings("serial")
 	class SecondChildSecondException extends SecondException {
+		public void secondChildMethod() {
+		}
 	}
 
 	@SuppressWarnings("serial")

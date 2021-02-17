@@ -13,6 +13,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
 /**
  * @see ReplaceJUnitExpectedExceptionASTVisitor
@@ -71,7 +72,10 @@ public class ReplaceJUnitExpectedExceptionRule
 
 	@Override
 	public ReplaceJUnitExpectedExceptionASTVisitor visitorFactory() {
-		return new ReplaceJUnitExpectedExceptionASTVisitor(assertThrowsQualifiedName);
+		ReplaceJUnitExpectedExceptionASTVisitor visitor = new ReplaceJUnitExpectedExceptionASTVisitor(
+				assertThrowsQualifiedName);
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
+		return visitor;
 	}
 
 }

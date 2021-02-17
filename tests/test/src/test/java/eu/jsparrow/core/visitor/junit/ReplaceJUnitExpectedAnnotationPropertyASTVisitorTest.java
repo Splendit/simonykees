@@ -204,4 +204,14 @@ class ReplaceJUnitExpectedAnnotationPropertyASTVisitorTest extends UsesJDTUnitFi
 				+ "}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_abstractTestCase_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "abstract class AbstractTestClass { "
+				+ "	@Test(expected = IOException.class)\n"
+				+ "	public void methodInvocation() throws IOException;\n"
+				+ "}";
+		assertNoChange(original);
+	}
 }

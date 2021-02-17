@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.visitor.sub.LambdaExpressionBodyAnalyzer;
-import eu.jsparrow.core.visitor.sub.LambdaNodeUtil;
+import eu.jsparrow.core.visitor.utils.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**

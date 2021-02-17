@@ -72,6 +72,10 @@ public class ReplaceJUnitTimeoutAnnotationPropertyASTVisitor extends AbstractAdd
 
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
+		Block body = methodDeclaration.getBody();
+		if (body == null) {
+			return false;
+		}
 		NormalAnnotation annotation = TestMethodUtil.findTestAnnotatedMethod(methodDeclaration)
 			.orElse(null);
 		if (annotation == null) {

@@ -19,7 +19,7 @@ import eu.jsparrow.rules.common.Tag;
  */
 public class UseSecureRandomRule extends RefactoringRuleImpl<UseSecureRandomASTVisitor> {
 
-	public static final String USE_SECURE_RANDOM_RULE_ID = "UseSecureRandomRule"; //$NON-NLS-1$
+	public static final String USE_SECURE_RANDOM_RULE_ID = "UseSecureRandom"; //$NON-NLS-1$
 
 	public UseSecureRandomRule() {
 		this.visitorClass = UseSecureRandomASTVisitor.class;
