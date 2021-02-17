@@ -94,7 +94,7 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 
 		ASTNode nodeThrowingException = throwingExceptionsVisitor.getNodesThrowingExpectedException()
 			.get(0);
-		if(hasNonEffectivelyFinalVariables(nodeThrowingException)) {
+		if (hasNonEffectivelyFinalVariables(nodeThrowingException)) {
 			return false;
 		}
 		boolean isLastStatement = verifyPosition(methodDeclaration, nodeThrowingException);
@@ -110,6 +110,9 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 	private boolean hasSingleNodeThrowingException(MethodDeclaration methodDeclaration,
 			ExpressionsThrowingExceptionVisitor throwingExceptionsVisitor) {
 		Block body = methodDeclaration.getBody();
+		if (body == null) {
+			return false;
+		}
 		body.accept(throwingExceptionsVisitor);
 		List<ASTNode> nodesThrowingException = throwingExceptionsVisitor.getNodesThrowingExpectedException();
 		if (nodesThrowingException.size() != 1) {

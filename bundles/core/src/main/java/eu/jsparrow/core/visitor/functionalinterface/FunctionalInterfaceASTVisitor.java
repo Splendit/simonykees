@@ -516,7 +516,12 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			return null;
 		}
 
-		if (parentNodeTypeBinding.getFunctionalInterfaceMethod() == null) {
+		IMethodBinding functionalInterfaceMethod = parentNodeTypeBinding.getFunctionalInterfaceMethod();
+		if (functionalInterfaceMethod == null) {
+			return null;
+		}
+		
+		if(functionalInterfaceMethod.isGenericMethod()) {
 			return null;
 		}
 
@@ -534,8 +539,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 			MethodDeclaration methodDeclaration = (MethodDeclaration) node.bodyDeclarations()
 				.get(0);
-			String functionalInterfaceMethodName = parentNodeTypeBinding.getFunctionalInterfaceMethod()
-				.getName();
+			String functionalInterfaceMethodName = functionalInterfaceMethod.getName();
 
 			if (StringUtils.equals(functionalInterfaceMethodName, methodDeclaration.getName()
 				.getIdentifier())) {

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ReplaceTimeoutAnnotationPropertyRule {
 
@@ -35,5 +35,4 @@ public class ReplaceTimeoutAnnotationPropertyRule {
 	private void throwsIOException(String message) throws IOException {
 		throw new IOException(message);
 	}
-
 }

@@ -172,6 +172,9 @@ public class ReplaceJUnitExpectedExceptionASTVisitor extends AbstractReplaceExpe
 	private boolean analyzeUsagesOfExpectedException(MethodDeclaration methodDeclaration,
 			ExpectedExceptionVisitor visitor) {
 		Block body = methodDeclaration.getBody();
+		if(body == null) {
+			return false;
+		}
 		body.accept(visitor);
 		if (visitor.hasUnsupportedMethods() || visitor.hasUnresolvedInvocations()) {
 			return false;

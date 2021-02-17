@@ -13,6 +13,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
 /**
  * @see ReplaceJUnitExpectedAnnotationPropertyASTVisitor
@@ -72,7 +73,10 @@ public class ReplaceJUnitExpectedAnnotationPropertyRule
 
 	@Override
 	public ReplaceJUnitExpectedAnnotationPropertyASTVisitor visitorFactory() {
-		return new ReplaceJUnitExpectedAnnotationPropertyASTVisitor(assertThrowsQualifiedName);
+		ReplaceJUnitExpectedAnnotationPropertyASTVisitor visitor = new ReplaceJUnitExpectedAnnotationPropertyASTVisitor(
+				assertThrowsQualifiedName);
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
+		return visitor;
 	}
 
 }

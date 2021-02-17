@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -66,6 +67,8 @@ import eu.jsparrow.ui.util.ResourceHelper;
 public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardPageModel> extends WizardPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractSummaryWizardPage.class);
+
+	private static final int REPORT_PATH_LIMIT = 32;
 
 	protected Composite rootComposite;
 
@@ -168,8 +171,9 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 		metric.ifPresent(m -> {
 			try {
 				ObjectMapper om = new ObjectMapper();
-				final Path filePath = Paths.get(path, statisticsMetadata.getRepoName(), Instant.now()
-					.getEpochSecond() + ".json"); //$NON-NLS-1$
+				final Path filePath = Paths.get(path,
+						StringUtils.substring(statisticsMetadata.getRepoName(), 0, REPORT_PATH_LIMIT), Instant.now()
+							.getEpochSecond() + ".json"); //$NON-NLS-1$
 
 				File file = filePath.toFile();
 				file.getParentFile()

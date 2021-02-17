@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -182,6 +183,15 @@ public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisit
 		IMethodBinding constructorBinding = instanceCreation.resolveConstructorBinding();
 		ITypeBinding declaringClass = constructorBinding.getDeclaringClass();
 
+		IMethodBinding[] declaredMethods = declaringClass.getDeclaredMethods();
+		boolean hasCollectionConstructor = Arrays.stream(declaredMethods)
+			.filter(IMethodBinding::isConstructor)
+			.anyMatch(this::hasSingleCollectionParameter);
+
+		if (!hasCollectionConstructor) {
+			return null;
+		}
+
 		if (!declaringClass.getQualifiedName()
 			.startsWith("java.util")) { //$NON-NLS-1$
 			return null;
@@ -231,5 +241,14 @@ public class RemoveCollectionAddAllASTVisitor extends AbstractASTRewriteASTVisit
 			this.addAllStatement = addAllStatement;
 		}
 
+	}
+
+	private boolean hasSingleCollectionParameter(IMethodBinding iMethodbinding) {
+		ITypeBinding[] parameterTypes = iMethodbinding.getParameterTypes();
+		if (parameterTypes.length != 1) {
+			return false;
+		}
+		ITypeBinding parameterType = parameterTypes[0];
+		return isCollectionVariable(parameterType);
 	}
 }

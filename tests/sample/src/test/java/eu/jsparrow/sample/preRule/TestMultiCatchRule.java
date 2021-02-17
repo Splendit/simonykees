@@ -217,6 +217,22 @@ public class TestMultiCatchRule {
 			log.debug("Same as the most general exception");
 		}
 	}
+	
+	public void invokingChildSpecificMethod(int i) {
+		try {
+			throwSomethingWithInheritance(i);
+		} catch (SecondChildChildException e) {
+			e.secondChildMethod();
+		} catch (SecondChildException e) {
+			e.secondChildMethod();
+		} catch (SecondChildSecondException e) {
+			e.secondChildMethod();
+		} catch (FirstException e) {
+			e.printStackTrace();
+		} catch (SecondException e) {
+			e.printStackTrace();
+		}
+	}
 
 	private void throwSomething(int i)
 			throws FirstException, SecondException, ThirdException, FourthException, FifthException, SixthException {
@@ -311,6 +327,7 @@ public class TestMultiCatchRule {
 	 */
 	@SuppressWarnings("serial")
 	class SecondChildException extends SecondException {
+		public void secondChildMethod() {}
 	}
 
 	/**
@@ -325,6 +342,7 @@ public class TestMultiCatchRule {
 	 */
 	@SuppressWarnings("serial")
 	class SecondChildSecondException extends SecondException {
+		public void secondChildMethod() {}
 	}
 
 	@SuppressWarnings("serial")

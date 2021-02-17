@@ -1,0 +1,17 @@
+package eu.jsparrow.sample.preRule;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.Before;
+
+public class ReplaceJUnit4AnnotationsWithJupiterUnsupportedTypeArgumentRule {
+
+	private Map<String, List<eu.jsparrow.sample.utilities.DummyTestRule>> rules;
+	
+	@Before
+	public void before() {
+		rules = new HashMap<>();
+	}
+}

@@ -34,5 +34,4 @@ public class ReplaceTimeoutAnnotationPropertyRule {
 	private void throwsIOException(String message) throws IOException {
 		throw new IOException(message);
 	}
-
 }
