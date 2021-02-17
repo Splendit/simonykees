@@ -34,10 +34,4 @@ public class ReplaceTimeoutAnnotationPropertyRule {
 	private void throwsIOException(String message) throws IOException {
 		throw new IOException(message);
 	}
-
-	abstract class AbstractTestClass {
-		@Test(timeout = 500)
-		public abstract void combinedAnnotationProperties() throws IOException;
-	}
-
 }

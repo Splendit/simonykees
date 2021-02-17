@@ -28,6 +28,7 @@ import eu.jsparrow.rules.common.Tag;
 class ReplaceJUnitTimeoutAnnotationPropertyRuleTest extends SingleRuleTest {
 	
 	private static final String STANDARD_FILE = "ReplaceTimeoutAnnotationPropertyRule.java";
+	private static final String ABSTRAC_FILE = "ReplaceTimeoutAnnotationPropertyRuleAbstrasctClass.java";
 	private static final String POSTRULE_SUBDIRECTORY = "timeoutAnnotationProperty";
 
 	private ReplaceJUnitTimeoutAnnotationPropertyRule rule;
@@ -118,6 +119,28 @@ class ReplaceJUnitTimeoutAnnotationPropertyRuleTest extends SingleRuleTest {
 
 		Path preRule = getPreRuleFile(STANDARD_FILE);
 		Path postRule = getPostRuleFile(STANDARD_FILE, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule),
+				getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	void testAnnotationsInAbstractMethods() throws Exception {
+		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
+
+		RulesTestUtil.addToClasspath(testProject, Arrays.asList(
+				RulesTestUtil.generateMavenEntryFromDepedencyString("junit", "junit", "4.13"),
+				RulesTestUtil.generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-engine",
+						"5.0.0"),
+				RulesTestUtil.generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
+						"5.0.0")));
+		rule.calculateEnabledForProject(testProject);
+
+		Path preRule = getPreRuleFile(ABSTRAC_FILE);
+		Path postRule = getPostRuleFile(ABSTRAC_FILE, POSTRULE_SUBDIRECTORY);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule),
 				getPostRulePackage(POSTRULE_SUBDIRECTORY));
