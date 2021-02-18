@@ -6,17 +6,36 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.Expression;
 
 public class AssertTransformationData {
+	private final String newMethodName;
 	private final List<Expression> assertionArguments;
 	private final Expression assertionMessage;
 
-	public AssertTransformationData(List<Expression> newArguments, Expression assertionMessage) {
-		this.assertionArguments = newArguments;
+	public AssertTransformationData(String newMethodName, List<Expression> assertionArguments, Expression assertionMessage) {
+		this.newMethodName = newMethodName;
+		this.assertionArguments = assertionArguments;
 		this.assertionMessage = assertionMessage;
 	}
 	
-	public AssertTransformationData(List<Expression> newArguments) {
-		this.assertionArguments = newArguments;
+	public AssertTransformationData(String newMethodName, List<Expression> assertionArguments) {
+		this.newMethodName = newMethodName;
+		this.assertionArguments = assertionArguments;
 		this.assertionMessage = null;
+	}
+	
+	public AssertTransformationData(List<Expression> assertionArguments, Expression assertionMessage) {
+		this.newMethodName = null;
+		this.assertionArguments = assertionArguments;
+		this.assertionMessage = assertionMessage;
+	}
+	
+	public AssertTransformationData(List<Expression> assertionArguments) {
+		this.newMethodName = null;
+		this.assertionArguments = assertionArguments;
+		this.assertionMessage = null;
+	}
+	
+	public Optional<String> getNewMethodName() {
+		return Optional.ofNullable(newMethodName);
 	}
 
 	public List<Expression> getAssertionArguments() {
