@@ -44,6 +44,9 @@ public class SignatureData {
 	 *         regarding the declaring type, name and the parameter types.
 	 */
 	public boolean isEquivalentTo(IMethodBinding methodBinding) {
+		if(methodBinding == null) {
+			return false;
+		}
 		if (!methodBinding.getName()
 			.equals(methodName)) {
 			return false;

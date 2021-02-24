@@ -192,11 +192,13 @@ public class LambdaNodeUtil {
 		} else if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
 			MethodInvocation methodInvocation = (MethodInvocation) lambdaExpression.getParent();
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-			ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
-			@SuppressWarnings("unchecked")
-			List<Expression> arguments = methodInvocation.arguments();
-			int index = arguments.indexOf(lambdaExpression);
-			contextTypeBinding = parameterTypes[index];
+			if(methodBinding != null) {
+				ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
+				@SuppressWarnings("unchecked")
+				List<Expression> arguments = methodInvocation.arguments();
+				int index = arguments.indexOf(lambdaExpression);
+				contextTypeBinding = parameterTypes[index];
+			}
 		} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
 			ReturnStatement returnStatement = (ReturnStatement) lambdaExpression.getParent();
 			contextTypeBinding = MethodDeclarationUtils.findExpectedReturnType(returnStatement);

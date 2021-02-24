@@ -98,6 +98,10 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 					Expression.class);
 			Expression methodInvocationExpression = methodInvocation.getExpression();
 
+			if (methodInvocation.resolveMethodBinding() == null) {
+				return true;
+			}
+
 			if (isWrappedInOverloadedMethod(lambdaExpressionNode, methodInvocation)) {
 				return true;
 			}
@@ -311,6 +315,9 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		}
 
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
 		ITypeBinding returnType = methodBinding.getReturnType();
 		if (returnType == null) {
 			return false;
@@ -338,6 +345,9 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	private boolean isAmbiguousMethodReference(MethodInvocation methodInvocation, List<ITypeBinding> params) {
 		Expression expression = methodInvocation.getExpression();
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return true;
+		}
 		ITypeBinding type;
 		List<IMethodBinding> methods = new ArrayList<>();
 		if (expression != null) {

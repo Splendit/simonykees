@@ -424,6 +424,9 @@ public class ClassRelationUtil {
 
 		Expression expression = methodInvocation.getExpression();
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return Collections.emptyList();
+		}
 		ITypeBinding type;
 		if (expression != null) {
 			type = expression.resolveTypeBinding();
@@ -464,7 +467,7 @@ public class ClassRelationUtil {
 			.filter(method -> !methodBinding.overrides(method))
 			// exclude the binding of the method itself
 			.filter(method -> method.getMethodDeclaration() != null && !method.getMethodDeclaration()
-							.isEqualTo(methodBinding.getMethodDeclaration()))
+				.isEqualTo(methodBinding.getMethodDeclaration()))
 			.collect(Collectors.toList());
 	}
 
