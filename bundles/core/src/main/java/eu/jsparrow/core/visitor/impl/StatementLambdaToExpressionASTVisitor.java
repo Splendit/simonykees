@@ -86,6 +86,9 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 		}
 
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
 		return overloads.stream()
 			.anyMatch(overloadingMethod -> isOverloadedOnParameter(methodBinding, overloadingMethod, index));
 	}

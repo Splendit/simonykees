@@ -83,6 +83,9 @@ public abstract class AbstractDynamicQueryASTVisitor extends AbstractAddImportAS
 	}
 
 	protected boolean hasRequiredDeclaringClass(IMethodBinding methodBinding) {
+		if (methodBinding == null) {
+			return false;
+		}
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		return ClassRelationUtil.isContentOfType(declaringClass, java.sql.Statement.class.getName());
 	}
