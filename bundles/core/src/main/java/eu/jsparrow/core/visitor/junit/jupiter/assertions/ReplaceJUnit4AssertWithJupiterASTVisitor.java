@@ -27,7 +27,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		}
 		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
 		compilationUnit.accept(invocationCollectorVisitor);
-		JUnit4AssertMethodAnalyzer methodAnalyzer = new JUnit4AssertMethodAnalyzer();
+		JUnit4AssertMethodAnalyzerAlternative1 methodAnalyzer = new JUnit4AssertMethodAnalyzerAlternative1();
 		List<AssertTransformationData> assertTransformationDataList = invocationCollectorVisitor.getMethodInvocations()
 			.stream()
 			.map(methodAnalyzer::findAssertTransformationData)
