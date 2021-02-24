@@ -148,5 +148,41 @@ public class LambdaToMethodReferenceASTVisitorTest extends UsesJDTUnitFixture {
 				"}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_toleratingNullMethodDeclarationBindings_shouldTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+		String original = ""
+				+ "	public void usingAnOverloadWithCompilationErrors(CompilationErrorInMethodDeclarationClass cls) {\n"
+				+ "		cls.run(() -> { cls.foo();});\n"
+				+ "	}\n"
+				+ ""
+				+ "class CompilationErrorInMethodDeclarationClass<T extends org.apache.IDoNotExist> {\n"
+				+ "	\n"
+				+ "	public void run(Runnable r) {}\n"
+				+ "	\n"
+				+ "	public void foo() {}\n"
+				+ "	\n"
+				+ "	public List<Lisst<org.apache.IDoNotExist>> foo2(int i) {\n"
+				+ "		return;\n"
+				+ "	}\n"
+				+ "}";
+		String expected = ""
+				+ "	public void usingAnOverloadWithCompilationErrors(CompilationErrorInMethodDeclarationClass cls) {\n"
+				+ "		cls.run(cls::foo);\n"
+				+ "	}\n"
+				+ ""
+				+ "class CompilationErrorInMethodDeclarationClass<T extends org.apache.IDoNotExist> {\n"
+				+ "	\n"
+				+ "	public void run(Runnable r) {}\n"
+				+ "	\n"
+				+ "	public void foo() {}\n"
+				+ "	\n"
+				+ "	public List<Lisst<org.apache.IDoNotExist>> foo2(int i) {\n"
+				+ "		return;\n"
+				+ "	}\n"
+				+ "}";
+		assertChange(original, expected);
+	}
 
 }
