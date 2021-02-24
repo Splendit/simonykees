@@ -10,6 +10,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * 
+ * @since 3.28.0
+ *
+ */
 class JUnit4AssertMethodAnalyzerAlternative1 {
 
 	Optional<AssertTransformationData> findAssertTransformationData(MethodInvocation methodInvocation) {
@@ -18,9 +23,10 @@ class JUnit4AssertMethodAnalyzerAlternative1 {
 			return Optional.empty();
 		}
 		String newMethodName = isAssertEqualsComparingObjectArrays(methodBinding) ? "assertArrayEquals" : null;
-		
+
 		methodBinding.getParameterTypes();
-		methodBinding.getMethodDeclaration().getParameterTypes();
+		methodBinding.getMethodDeclaration()
+			.getParameterTypes();
 
 		List<Expression> invocationArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
@@ -106,5 +112,4 @@ class JUnit4AssertMethodAnalyzerAlternative1 {
 		}
 		return false;
 	}
-
 }

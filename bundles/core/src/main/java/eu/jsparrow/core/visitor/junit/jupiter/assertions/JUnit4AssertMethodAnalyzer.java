@@ -11,6 +11,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * 
+ * @since 3.28.0
+ *
+ */
 class JUnit4AssertMethodAnalyzer {
 
 	Optional<AssertTransformationData> findAssertTransformationData(MethodInvocation methodInvocation) {

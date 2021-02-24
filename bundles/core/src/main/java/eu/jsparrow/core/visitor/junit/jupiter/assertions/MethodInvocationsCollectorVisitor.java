@@ -6,6 +6,11 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+/**
+ * 
+ * @since 3.28.0
+ *
+ */
 public class MethodInvocationsCollectorVisitor extends ASTVisitor {
 
 	private final List<MethodInvocation> methodInvocations = new ArrayList<>();
