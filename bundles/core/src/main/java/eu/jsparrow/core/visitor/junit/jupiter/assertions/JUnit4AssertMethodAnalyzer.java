@@ -24,7 +24,7 @@ class JUnit4AssertMethodAnalyzer {
 		IMethodBinding methodDeclaration = methodInvocation.resolveMethodBinding()
 			.getMethodDeclaration();
 
-		if (isSupportedJUnit4Method(methodDeclaration)) {
+		if (!isSupportedJUnit4Method(methodDeclaration)) {
 			return Optional.empty();
 		}
 		String newMethodName = isAssertEqualsComparingObjectArrays(methodDeclaration) ? "assertArrayEquals" : null; //$NON-NLS-1$
