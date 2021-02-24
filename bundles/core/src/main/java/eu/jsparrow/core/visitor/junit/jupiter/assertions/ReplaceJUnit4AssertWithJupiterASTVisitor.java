@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodReference;
 
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -35,15 +36,18 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			.map(Optional::get)
 			.collect(Collectors.toList());
 
-		if (!assertTransformationDataList.isEmpty()) {
-			transform(assertTransformationDataList);
-		}
+		MethodReferenceCollectorVisitor methodReferenceCollectorVisitor = new MethodReferenceCollectorVisitor();
+		compilationUnit.accept(methodReferenceCollectorVisitor);
+		List<MethodReference> methodReferences = methodReferenceCollectorVisitor.getMethodReferences();
 
+		if (!assertTransformationDataList.isEmpty() || !methodReferences.isEmpty()) {
+			transform(assertTransformationDataList, methodReferences);
+		}
 		return false;
 	}
 
-	private void transform(List<AssertTransformationData> assertTransformationDataList) {
+	private void transform(List<AssertTransformationData> assertTransformationDataList,
+			List<MethodReference> methodReferences) {
 		// ...
 	}
-
 }
