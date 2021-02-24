@@ -17,28 +17,23 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 class JUnit4AssertMethodAnalyzer {
 
+	private static final String JAVA_LANG_OBJECT = "java.lang.Object"; //$NON-NLS-1$
+	private static final String JAVA_LANG_STRING = "java.lang.String"; //$NON-NLS-1$
+
 	Optional<AssertTransformationData> findAssertTransformationData(MethodInvocation methodInvocation) {
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		if (isSupportedJUnit4Method(methodBinding)) {
+		IMethodBinding methodDeclaration = methodInvocation.resolveMethodBinding()
+			.getMethodDeclaration();
+
+		if (isSupportedJUnit4Method(methodDeclaration)) {
 			return Optional.empty();
 		}
-		String newMethodName = isAssertEqualsComparingObjectArrays(methodBinding) ? "assertArrayEquals" : null;
-
-		methodBinding.getParameterTypes();
-		methodBinding.getMethodDeclaration()
-			.getParameterTypes();
+		String newMethodName = isAssertEqualsComparingObjectArrays(methodDeclaration) ? "assertArrayEquals" : null; //$NON-NLS-1$
 
 		List<Expression> invocationArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
 		Expression assertionMessage = null;
-		if (invocationArguments.size() > 0) {
-			Expression invocationArgument = invocationArguments.get(0);
-			if (invocationArgument.resolveTypeBinding()
-				.getQualifiedName()
-				.equals("java.lang.String")) {
-				assertionMessage = invocationArgument;
-			}
-			invocationArguments.remove(0);
+		if (invocationArguments.size() > 0 && isParameterTypeString(methodDeclaration.getParameterTypes()[0])) {
+			assertionMessage = invocationArguments.remove(0);
 		}
 
 		if (assertionMessage != null) {
@@ -55,11 +50,11 @@ class JUnit4AssertMethodAnalyzer {
 		return Optional.of(new AssertTransformationData(invocationArguments));
 	}
 
-	private boolean isSupportedJUnit4Method(IMethodBinding methodBinding) {
-		String declaringClassQualifiedName = methodBinding.getDeclaringClass()
-			.getQualifiedName();
+	private boolean isSupportedJUnit4Method(IMethodBinding methodDeclaration) {
+		ITypeBinding declaringClass = methodDeclaration.getDeclaringClass();
+		String declaringClassQualifiedName = declaringClass.getQualifiedName();
 		if (declaringClassQualifiedName.equals("org.junit.Assert")) { //$NON-NLS-1$
-			String methodName = methodBinding.getName();
+			String methodName = methodDeclaration.getName();
 			return !methodName.equals("assertThat") //$NON-NLS-1$
 					&& !methodName.equals("assertThrows"); //$NON-NLS-1$
 		}
@@ -77,7 +72,7 @@ class JUnit4AssertMethodAnalyzer {
 	 */
 	private boolean isAssertEqualsComparingObjectArrays(IMethodBinding methodBinding) {
 		if (!methodBinding.getName()
-			.equals("assertEquals")) {
+			.equals("assertEquals")) { //$NON-NLS-1$
 			return false;
 		}
 		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
@@ -85,31 +80,28 @@ class JUnit4AssertMethodAnalyzer {
 		 * applies to {@code assertEquals(Object[], Object[])}
 		 */
 		if (parameterTypes.length == 2) {
-			return parameterTypes[0].getComponentType()
-				.getQualifiedName()
-				.equals("java.lang.Object")
-					&& parameterTypes[0].getDimensions() == 1
-					&& parameterTypes[1].getComponentType()
-						.getQualifiedName()
-						.equals("java.lang.Object")
-					&& parameterTypes[1].getDimensions() == 1;
+			return isParameterTypeObjectArray(parameterTypes[0])
+					&& isParameterTypeObjectArray(parameterTypes[1]);
 		}
 		/*
 		 * applies to {@code assertEquals(String, Object[], Object[])}
 		 */
 		if (parameterTypes.length == 3) {
-			return parameterTypes[0].getComponentType()
-				.getQualifiedName()
-				.equals("java.lang.String")
-					&& parameterTypes[1].getComponentType()
-						.getQualifiedName()
-						.equals("java.lang.Object")
-					&& parameterTypes[1].getDimensions() == 1
-					&& parameterTypes[2].getComponentType()
-						.getQualifiedName()
-						.equals("java.lang.Object")
-					&& parameterTypes[2].getDimensions() == 1;
+			return isParameterTypeString(parameterTypes[0])
+					&& isParameterTypeObjectArray(parameterTypes[1])
+					&& isParameterTypeObjectArray(parameterTypes[2]);
 		}
 		return false;
+	}
+
+	private boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
+		return parameterType.getComponentType()
+			.getQualifiedName()
+			.equals(JAVA_LANG_OBJECT) && parameterType.getDimensions() == 1;
+	}
+
+	private boolean isParameterTypeString(ITypeBinding parameterType) {
+		return parameterType.getQualifiedName()
+			.equals(JAVA_LANG_STRING);
 	}
 }
