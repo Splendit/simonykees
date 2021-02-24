@@ -459,12 +459,12 @@ public class ClassRelationUtil {
 		String methodIdentifier = methodBinding.getName();
 
 		return methods.stream()
+			.filter(method -> methodIdentifier.equals(method.getName()))
 			// exclude overridden methods
 			.filter(method -> !methodBinding.overrides(method))
 			// exclude the binding of the method itself
-			.filter(method -> !method.getMethodDeclaration()
-				.isEqualTo(methodBinding.getMethodDeclaration()))
-			.filter(method -> methodIdentifier.equals(method.getName()))
+			.filter(method -> method.getMethodDeclaration() != null && !method.getMethodDeclaration()
+							.isEqualTo(methodBinding.getMethodDeclaration()))
 			.collect(Collectors.toList());
 	}
 
