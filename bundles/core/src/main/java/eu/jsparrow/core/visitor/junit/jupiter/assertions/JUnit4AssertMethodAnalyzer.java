@@ -6,8 +6,10 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -37,7 +39,6 @@ class JUnit4AssertMethodAnalyzer {
 	private Optional<AssertTransformationData> findAssertTransformationData(MethodInvocation methodInvocation) {
 		IMethodBinding methodDeclaration = methodInvocation.resolveMethodBinding()
 			.getMethodDeclaration();
-
 		if (!isSupportedJUnit4Method(methodDeclaration)) {
 			return Optional.empty();
 		}
@@ -65,14 +66,17 @@ class JUnit4AssertMethodAnalyzer {
 	}
 
 	private boolean isSupportedJUnit4Method(IMethodBinding methodDeclaration) {
-		ITypeBinding declaringClass = methodDeclaration.getDeclaringClass();
-		String declaringClassQualifiedName = declaringClass.getQualifiedName();
-		if (declaringClassQualifiedName.equals("org.junit.Assert")) { //$NON-NLS-1$
+		if (isOrgJUnitAssertClass(methodDeclaration.getDeclaringClass())) {
 			String methodName = methodDeclaration.getName();
 			return !methodName.equals("assertThat") //$NON-NLS-1$
 					&& !methodName.equals("assertThrows"); //$NON-NLS-1$
 		}
 		return false;
+	}
+
+	private boolean isOrgJUnitAssertClass(ITypeBinding declaringClass) {
+		return declaringClass.getQualifiedName()
+			.equals("org.junit.Assert");//$NON-NLS-1$
 	}
 
 	/**
@@ -117,5 +121,29 @@ class JUnit4AssertMethodAnalyzer {
 	private boolean isParameterTypeString(ITypeBinding parameterType) {
 		return parameterType.getQualifiedName()
 			.equals(JAVA_LANG_STRING);
+	}
+
+	List<ImportDeclaration> collectAssertMethodStaticImports(CompilationUnit compilationUnit) {
+		return ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
+			.stream()
+			.filter(this::isAssertMethodStaticImport)
+			.collect(Collectors.toList());
+	}
+
+	private boolean isAssertMethodStaticImport(ImportDeclaration importDeclaration) {
+		if (!importDeclaration.isStatic()) {
+			return false;
+		}
+
+		if (!importDeclaration.isOnDemand()) {
+			return false;
+		}
+		IBinding importBinding = importDeclaration.resolveBinding();
+		if (importBinding.getKind() == IBinding.METHOD) {
+			IMethodBinding methodBinding = ((IMethodBinding) importBinding);
+			return isSupportedJUnit4Method(methodBinding);
+		}
+
+		return false;
 	}
 }
