@@ -191,18 +191,34 @@ public class LambdaNodeUtil {
 			contextTypeBinding = cast.resolveTypeBinding();
 		} else if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
 			MethodInvocation methodInvocation = (MethodInvocation) lambdaExpression.getParent();
-			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-			ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
 			@SuppressWarnings("unchecked")
 			List<Expression> arguments = methodInvocation.arguments();
 			int index = arguments.indexOf(lambdaExpression);
-			contextTypeBinding = parameterTypes[index];
+			contextTypeBinding = findFormalParameterType(methodInvocation, index).orElse(null);
 		} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
 			ReturnStatement returnStatement = (ReturnStatement) lambdaExpression.getParent();
 			contextTypeBinding = MethodDeclarationUtils.findExpectedReturnType(returnStatement);
 
 		}
 		return Optional.ofNullable(contextTypeBinding);
+	}
+
+	private static Optional<ITypeBinding> findFormalParameterType(MethodInvocation methodInvocation, int index) {
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return Optional.empty();
+		}
+		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
+		if (methodBinding.isVarargs() && index == parameterTypes.length - 1) {
+			ITypeBinding vargArgParam = parameterTypes[index];
+			if (vargArgParam.isArray()) {
+				return Optional.of(vargArgParam.getComponentType());
+			}
+		} else if (index < parameterTypes.length) {
+			ITypeBinding parameterType = parameterTypes[index];
+			return Optional.of(parameterType);
+		}
+		return Optional.empty();
 	}
 
 	/**
