@@ -2,7 +2,9 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -20,7 +22,19 @@ class JUnit4AssertMethodAnalyzer {
 	private static final String JAVA_LANG_OBJECT = "java.lang.Object"; //$NON-NLS-1$
 	private static final String JAVA_LANG_STRING = "java.lang.String"; //$NON-NLS-1$
 
-	Optional<AssertTransformationData> findAssertTransformationData(MethodInvocation methodInvocation) {
+	List<AssertTransformationData> createAssertInvocationTransformationDataList(CompilationUnit compilationUnit) {
+
+		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
+		compilationUnit.accept(invocationCollectorVisitor);
+		return invocationCollectorVisitor.getMethodInvocations()
+			.stream()
+			.map(this::findAssertTransformationData)
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toList());
+	}
+
+	private Optional<AssertTransformationData> findAssertTransformationData(MethodInvocation methodInvocation) {
 		IMethodBinding methodDeclaration = methodInvocation.resolveMethodBinding()
 			.getMethodDeclaration();
 

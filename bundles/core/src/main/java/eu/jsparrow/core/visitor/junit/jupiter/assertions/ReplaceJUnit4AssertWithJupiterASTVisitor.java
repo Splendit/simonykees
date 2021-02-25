@@ -1,8 +1,6 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodReference;
@@ -26,15 +24,9 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		if (!continueVisiting) {
 			return false;
 		}
-		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
-		compilationUnit.accept(invocationCollectorVisitor);
 		JUnit4AssertMethodAnalyzer methodAnalyzer = new JUnit4AssertMethodAnalyzer();
-		List<AssertTransformationData> assertTransformationDataList = invocationCollectorVisitor.getMethodInvocations()
-			.stream()
-			.map(methodAnalyzer::findAssertTransformationData)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toList());
+		List<AssertTransformationData> assertTransformationDataList = methodAnalyzer
+			.createAssertInvocationTransformationDataList(compilationUnit);
 
 		MethodReferenceCollectorVisitor methodReferenceCollectorVisitor = new MethodReferenceCollectorVisitor();
 		compilationUnit.accept(methodReferenceCollectorVisitor);
