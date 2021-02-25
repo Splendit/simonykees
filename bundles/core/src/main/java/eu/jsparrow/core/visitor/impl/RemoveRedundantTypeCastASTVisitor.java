@@ -139,10 +139,15 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 
 		return formalType.getFunctionalInterfaceMethod() != null
 				&& !containsUndefinedTypeParameters(formalType,
-						(LambdaExpression) castExpression.getExpression());
+						castExpression);
 	}
 
-	private boolean containsUndefinedTypeParameters(ITypeBinding formalParameter, LambdaExpression lambda) {
+	private boolean containsUndefinedTypeParameters(ITypeBinding formalParameter, CastExpression castExpression) {
+		Expression expression = castExpression.getExpression();
+		if (expression.getNodeType() != ASTNode.LAMBDA_EXPRESSION) {
+			return false;
+		}
+		LambdaExpression lambda = (LambdaExpression) expression;
 		List<VariableDeclarationFragment> inferedTypeParams = ASTNodeUtil.convertToTypedList(lambda.parameters(),
 				VariableDeclarationFragment.class);
 		if (inferedTypeParams.isEmpty()) {

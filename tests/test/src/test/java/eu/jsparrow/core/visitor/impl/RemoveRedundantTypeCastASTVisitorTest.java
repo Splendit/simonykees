@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -255,6 +256,19 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		fixture.addImport(List.class.getName());
 		fixture.addImport(ArrayList.class.getName());
 		fixture.addImport(Supplier.class.getName());
+
+		assertChange(before, after);
+	}
+
+	@Test
+	public void visit_CastMethodReferenceArgument_shouldTransform() throws Exception {
+		String before = "usingFunction((Function<Object, String>) Object::toString);";
+		String after = "usingFunction(Object::toString);";
+
+		MethodDeclarationBuilder.factory(fixture, "usingFunction")
+			.withParameterizedTypeParameter(Function.class.getSimpleName(), Object.class.getSimpleName(), String.class.getSimpleName());
+
+		fixture.addImport(Function.class.getName());
 
 		assertChange(before, after);
 	}
