@@ -1,9 +1,10 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
 /**
  * 
@@ -11,45 +12,27 @@ import org.eclipse.jdt.core.dom.Expression;
  *
  */
 public class AssertTransformationData {
-	private final String newMethodName;
-	private final List<Expression> assertionArguments;
-	private final Expression assertionMessage;
+	private final MethodInvocation methodInvocationToReplace;
+	private final Supplier<MethodInvocation> newMethodInvocationSupplier;
+	private final Supplier<List<Expression>> newArgumentsSupplier;
 
-	public AssertTransformationData(String newMethodName, List<Expression> assertionArguments,
-			Expression assertionMessage) {
-		this.newMethodName = newMethodName;
-		this.assertionArguments = assertionArguments;
-		this.assertionMessage = assertionMessage;
+	public AssertTransformationData(MethodInvocation methodInvocationToReplace,
+			Supplier<MethodInvocation> newMethodInvocationSupplier, Supplier<List<Expression>> newArgumentsSupplier) {
+		this.newArgumentsSupplier = newArgumentsSupplier;
+		this.methodInvocationToReplace = methodInvocationToReplace;
+		this.newMethodInvocationSupplier = newMethodInvocationSupplier;
 	}
 
-	public AssertTransformationData(String newMethodName, List<Expression> assertionArguments) {
-		this.newMethodName = newMethodName;
-		this.assertionArguments = assertionArguments;
-		this.assertionMessage = null;
+	public MethodInvocation getMethodInvocationToReplace() {
+		return methodInvocationToReplace;
 	}
 
-	public AssertTransformationData(List<Expression> assertionArguments, Expression assertionMessage) {
-		this.newMethodName = null;
-		this.assertionArguments = assertionArguments;
-		this.assertionMessage = assertionMessage;
+	public MethodInvocation createAssertionMethodInvocation() {
+		return newMethodInvocationSupplier.get();
 	}
 
-	public AssertTransformationData(List<Expression> assertionArguments) {
-		this.newMethodName = null;
-		this.assertionArguments = assertionArguments;
-		this.assertionMessage = null;
-	}
-
-	public Optional<String> getNewMethodName() {
-		return Optional.ofNullable(newMethodName);
-	}
-
-	public List<Expression> getAssertionArguments() {
-		return assertionArguments;
-	}
-
-	public Optional<Expression> getAssertionMessage() {
-		return Optional.ofNullable(assertionMessage);
+	public List<Expression> createNewArgumentList() {
+		return newArgumentsSupplier.get();
 	}
 
 }

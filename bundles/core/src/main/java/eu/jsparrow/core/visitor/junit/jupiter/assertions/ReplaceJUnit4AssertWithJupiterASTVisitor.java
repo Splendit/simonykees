@@ -1,16 +1,20 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Name;
@@ -30,6 +34,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportASTVisitor {
 
+	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 
@@ -37,6 +43,8 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		if (!continueVisiting) {
 			return false;
 		}
+
+		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_ASSERTIONS);
 
 		List<ImportDeclaration> assertMethodStaticImportsToReplace = collectAssertMethodStaticImports(compilationUnit);
 		Set<String> assertMethodStaticImportsSimpleNames = assertMethodStaticImportsToReplace.stream()
@@ -47,58 +55,92 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			.map(SimpleName::getIdentifier)
 			.collect(Collectors.toSet());
 
-		List<AssertTransformationData> assertTransformationDataList = createAssertInvocationTransformationDataList(
-				compilationUnit);
+		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
+		compilationUnit.accept(invocationCollectorVisitor);
+		List<AssertTransformationData> assertTransformationDataList = invocationCollectorVisitor.getMethodInvocations()
+			.stream()
+			.map(invocation -> findAssertTransformationData(invocation, assertMethodStaticImportsSimpleNames))
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toList());
 
 		MethodReferenceCollectorVisitor methodReferenceCollectorVisitor = new MethodReferenceCollectorVisitor();
 		compilationUnit.accept(methodReferenceCollectorVisitor);
 		List<MethodReference> methodReferences = methodReferenceCollectorVisitor.getMethodReferences();
 
-		if (!assertTransformationDataList.isEmpty() || !methodReferences.isEmpty()) {
+		if (!assertMethodStaticImportsToReplace.isEmpty() || !assertTransformationDataList.isEmpty()
+				|| !methodReferences.isEmpty()) {
 			transform(assertTransformationDataList, methodReferences);
 		}
 		return false;
 	}
 
-	List<AssertTransformationData> createAssertInvocationTransformationDataList(CompilationUnit compilationUnit) {
-
-		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
-		compilationUnit.accept(invocationCollectorVisitor);
-		return invocationCollectorVisitor.getMethodInvocations()
-			.stream()
-			.map(this::findAssertTransformationData)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toList());
-	}
-
-	private Optional<AssertTransformationData> findAssertTransformationData(MethodInvocation methodInvocation) {
+	private Optional<AssertTransformationData> findAssertTransformationData(MethodInvocation methodInvocation,
+			Set<String> assertMethodStaticImportsSimpleNames) {
 		IMethodBinding methodDeclaration = methodInvocation.resolveMethodBinding()
 			.getMethodDeclaration();
 		if (!isSupportedJUnit4Method(methodDeclaration)) {
 			return Optional.empty();
 		}
-		String newMethodName = isAssertEqualsComparingObjectArrays(methodDeclaration) ? "assertArrayEquals" : null; //$NON-NLS-1$
+
+		boolean keepNewInvocationWithoutExpression = keepInvocationWithoutExpression(methodInvocation,
+				assertMethodStaticImportsSimpleNames);
+
+		boolean isNameChangedToAssertArrayEquals = isAssertEqualsComparingObjectArrays(methodDeclaration);
 
 		List<Expression> invocationArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
-		Expression assertionMessage = null;
-		if (invocationArguments.size() > 0 && isParameterTypeString(methodDeclaration.getParameterTypes()[0])) {
-			assertionMessage = invocationArguments.remove(0);
+
+		Expression assertionMessage = findAssertionMessage(invocationArguments, methodDeclaration).orElse(null);
+
+		if (keepNewInvocationWithoutExpression && !isNameChangedToAssertArrayEquals && assertionMessage == null) {
+			/*
+			 * No changes for the given method invocation.
+			 */
+			return Optional.empty();
+		}
+		String newMethodName = isNameChangedToAssertArrayEquals ? "assertArrayEquals" //$NON-NLS-1$
+				: methodDeclaration.getName();
+
+		Supplier<MethodInvocation> newMethodInvocationSupplier;
+		if (keepNewInvocationWithoutExpression) {
+			newMethodInvocationSupplier = () -> this.createNewAssertionInvocationWithoutExpression(newMethodName);
+		} else {
+			newMethodInvocationSupplier = () -> this.createNewAssertionInvocationWithExpression(methodInvocation,
+					newMethodName);
 		}
 
+		Supplier<List<Expression>> newArgumentsSupplier;
 		if (assertionMessage != null) {
-			if (newMethodName != null) {
-				return Optional.of(new AssertTransformationData(newMethodName, invocationArguments, assertionMessage));
-			}
-			return Optional.of(new AssertTransformationData(invocationArguments, assertionMessage));
+			invocationArguments.remove(assertionMessage);
+			newArgumentsSupplier = () -> this.createAssertionMethodArguments(invocationArguments, assertionMessage);
+		} else {
+			newArgumentsSupplier = () -> this.createAssertionMethodArguments(invocationArguments);
 		}
+		return Optional
+			.of(new AssertTransformationData(methodInvocation, newMethodInvocationSupplier, newArgumentsSupplier));
 
-		if (newMethodName != null) {
-			return Optional.of(new AssertTransformationData(newMethodName, invocationArguments));
+	}
+
+	private Optional<Expression> findAssertionMessage(List<Expression> invocationArguments,
+			IMethodBinding methodDeclaration) {
+		if (!invocationArguments.isEmpty() && isParameterTypeString(methodDeclaration.getParameterTypes()[0])) {
+			Expression firstArgument = invocationArguments.get(0);
+			return Optional.of(firstArgument);
+
 		}
+		return Optional.empty();
+	}
 
-		return Optional.of(new AssertTransformationData(invocationArguments));
+	private boolean keepInvocationWithoutExpression(MethodInvocation methodInvocation,
+			Set<String> assertMethodStaticImportsSimpleNames) {
+
+		if (methodInvocation.getExpression() != null) {
+			return false;
+		}
+		String methodIdentifier = methodInvocation.getName()
+			.getIdentifier();
+		return assertMethodStaticImportsSimpleNames.contains(methodIdentifier);
 	}
 
 	private boolean isSupportedJUnit4Method(IMethodBinding methodDeclaration) {
@@ -181,6 +223,38 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		}
 
 		return false;
+	}
+
+	private MethodInvocation createNewAssertionInvocationWithoutExpression(String newMethodName) {
+		AST ast = astRewrite.getAST();
+		MethodInvocation newInvocation = ast.newMethodInvocation();
+		newInvocation.setName(ast.newSimpleName(newMethodName));
+		return newInvocation;
+	}
+
+	private MethodInvocation createNewAssertionInvocationWithExpression(MethodInvocation contextForImport,
+			String newMethodName) {
+		MethodInvocation newInvocation = createNewAssertionInvocationWithoutExpression(newMethodName);
+		Name assertionTypeName = addImport(ORG_JUNIT_JUPITER_API_ASSERTIONS, contextForImport);
+		newInvocation.setExpression(assertionTypeName);
+		return newInvocation;
+	}
+
+	private List<Expression> createAssertionMethodArguments(List<Expression> arguments) {
+		return arguments.stream()
+			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
+			.collect(Collectors.toList());
+	}
+
+	private List<Expression> createAssertionMethodArguments(List<Expression> arguments, Expression assertionMessage) {
+		List<Expression> assertionMethodArguments = new ArrayList<>();
+		arguments.stream()
+			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
+			.forEach(assertionMethodArguments::add);
+		LambdaExpression messageSupplierLambdaExpression = astRewrite.getAST().newLambdaExpression();
+		messageSupplierLambdaExpression.setBody((Expression) astRewrite.createCopyTarget(assertionMessage));
+		assertionMethodArguments.add(messageSupplierLambdaExpression);
+		return assertionMethodArguments;
 	}
 
 	private void transform(List<AssertTransformationData> assertTransformationDataList,
