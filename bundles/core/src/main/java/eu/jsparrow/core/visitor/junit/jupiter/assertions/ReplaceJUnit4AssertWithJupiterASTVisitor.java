@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -12,6 +13,9 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodReference;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -33,6 +37,15 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		if (!continueVisiting) {
 			return false;
 		}
+
+		List<ImportDeclaration> assertMethodStaticImportsToReplace = collectAssertMethodStaticImports(compilationUnit);
+		Set<String> assertMethodStaticImportsSimpleNames = assertMethodStaticImportsToReplace.stream()
+			.map(ImportDeclaration::getName)
+			.filter(Name::isQualifiedName)
+			.map(QualifiedName.class::cast)
+			.map(QualifiedName::getName)
+			.map(SimpleName::getIdentifier)
+			.collect(Collectors.toSet());
 
 		List<AssertTransformationData> assertTransformationDataList = createAssertInvocationTransformationDataList(
 				compilationUnit);
