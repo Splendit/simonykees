@@ -61,6 +61,15 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 
 		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
 		compilationUnit.accept(invocationCollectorVisitor);
+
+		List<AssertInvocationAnalysisResult> assertInvocationAnalysisResults = invocationCollectorVisitor
+			.getMethodInvocations()
+			.stream()
+			.map(invocation -> analyzeAssertMethodInvocation(invocation, assertMethodStaticImportsSimpleNames))
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toList());
+
 		List<AssertTransformationData> assertTransformationDataList = invocationCollectorVisitor.getMethodInvocations()
 			.stream()
 			.map(invocation -> findAssertTransformationData(invocation, assertMethodStaticImportsSimpleNames))
@@ -77,6 +86,47 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			transform(assertTransformationDataList, methodReferences);
 		}
 		return false;
+	}
+
+	private Optional<AssertInvocationAnalysisResult> analyzeAssertMethodInvocation(MethodInvocation methodInvocation,
+			Set<String> assertMethodStaticImportsSimpleNames) {
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (!isSupportedJUnit4Method(methodBinding)) {
+			return Optional.empty();
+		}
+		IMethodBinding methodDeclaration = methodBinding
+			.getMethodDeclaration();
+		ITypeBinding[] declaredParameterTypes = methodDeclaration.getParameterTypes();
+
+		boolean isNameChangedToAssertArrayEquals = isAssertEqualsComparingObjectArrays(methodBinding.getName(),
+				declaredParameterTypes);
+		boolean keepAlsoNewInvocationWithoutExpression;
+		if (methodInvocation.getExpression() == null) {
+			if (isNameChangedToAssertArrayEquals) {
+				keepAlsoNewInvocationWithoutExpression = assertMethodStaticImportsSimpleNames
+					.contains("assertArrayEquals"); //$NON-NLS-1$
+			} else {
+				keepAlsoNewInvocationWithoutExpression = assertMethodStaticImportsSimpleNames
+					.contains(methodDeclaration.getName());
+			}
+		} else {
+			keepAlsoNewInvocationWithoutExpression = false;
+		}
+
+		List<Expression> invocationArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+				Expression.class);
+
+		if (!invocationArguments.isEmpty() && isParameterTypeString(declaredParameterTypes[0])) {
+			Expression assertionMessageAsFirstArgument = invocationArguments.get(0);
+			return Optional
+				.of(new AssertInvocationAnalysisResult(methodInvocation, keepAlsoNewInvocationWithoutExpression,
+						isNameChangedToAssertArrayEquals, assertionMessageAsFirstArgument));
+		} else {
+			return Optional
+				.of(new AssertInvocationAnalysisResult(methodInvocation, keepAlsoNewInvocationWithoutExpression,
+						isNameChangedToAssertArrayEquals));
+		}
+
 	}
 
 	private Optional<AssertTransformationData> findAssertTransformationData(MethodInvocation methodInvocation,
@@ -136,9 +186,9 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		return Optional.empty();
 	}
 
-	private boolean isSupportedJUnit4Method(IMethodBinding methodDeclaration) {
-		if (isOrgJUnitAssertClass(methodDeclaration.getDeclaringClass())) {
-			String methodName = methodDeclaration.getName();
+	private boolean isSupportedJUnit4Method(IMethodBinding methodBinding) {
+		if (isOrgJUnitAssertClass(methodBinding.getDeclaringClass())) {
+			String methodName = methodBinding.getName();
 			return !methodName.equals("assertThat") //$NON-NLS-1$
 					&& !methodName.equals("assertThrows"); //$NON-NLS-1$
 		}
@@ -148,6 +198,37 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 	private boolean isOrgJUnitAssertClass(ITypeBinding declaringClass) {
 		return declaringClass.getQualifiedName()
 			.equals("org.junit.Assert");//$NON-NLS-1$
+	}
+
+	/**
+	 * This applies to the following signatures:<br>
+	 * {@code assertEquals(Object[], Object[])}
+	 * {@code assertEquals(String, Object[], Object[])} where a corresponding
+	 * method with the name "assertArrayEquals" is available
+	 * 
+	 * @param methodBinding
+	 * @return
+	 */
+	private boolean isAssertEqualsComparingObjectArrays(String methodName, ITypeBinding[] declaredParameterTypes) {
+		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$
+			return false;
+		}
+		/*
+		 * applies to {@code assertEquals(Object[], Object[])}
+		 */
+		if (declaredParameterTypes.length == 2) {
+			return isParameterTypeObjectArray(declaredParameterTypes[0])
+					&& isParameterTypeObjectArray(declaredParameterTypes[1]);
+		}
+		/*
+		 * applies to {@code assertEquals(String, Object[], Object[])}
+		 */
+		if (declaredParameterTypes.length == 3) {
+			return isParameterTypeString(declaredParameterTypes[0])
+					&& isParameterTypeObjectArray(declaredParameterTypes[1])
+					&& isParameterTypeObjectArray(declaredParameterTypes[2]);
+		}
+		return false;
 	}
 
 	/**
