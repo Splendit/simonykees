@@ -59,6 +59,10 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 			if (!compatible) {
 				return true;
 			}
+
+			if (hasAmbiguousOverloads(mi, castExpression)) {
+				return true;
+			}
 		}
 		ITypeBinding typeFrom = expression.resolveTypeBinding();
 		ITypeBinding typeTo = castExpression.getType()
@@ -74,6 +78,45 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 
 		if (ClassRelationUtil.compareITypeBinding(typeFrom, typeTo)) {
 			applyRule(castExpression);
+		}
+		return true;
+	}
+
+	private boolean hasAmbiguousOverloads(MethodInvocation mi, CastExpression castExpression) {
+		List<IMethodBinding> overloads = ClassRelationUtil.findOverloadedMethods(mi);
+		IMethodBinding methodBinding = mi.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
+
+		@SuppressWarnings("rawtypes")
+		List arguments = mi.arguments();
+		final int actualIndex = arguments.indexOf(castExpression);
+		if (actualIndex < 0) {
+			return false;
+		}
+
+		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
+		final int paramLength = parameterTypes.length;
+		int formalIndex = methodBinding.isVarargs() && actualIndex >= paramLength - 1 ? paramLength - 1 : actualIndex;
+
+		return overloads.stream()
+			.filter(overload -> overload.getParameterTypes().length == paramLength)
+			.anyMatch(overload -> areAssignmentCompatibleParameters(parameterTypes, formalIndex, overload));
+	}
+
+	private boolean areAssignmentCompatibleParameters(ITypeBinding[] parameterTypes, int formalIndex,
+			IMethodBinding overload) {
+		ITypeBinding[] overloadParams = overload.getParameterTypes();
+		if (overloadParams.length != parameterTypes.length) {
+			return false;
+		}
+		for (int i = 0; i < overloadParams.length; i++) {
+			ITypeBinding paramType = parameterTypes[i];
+			ITypeBinding overloadParamType = overloadParams[i];
+			if (i != formalIndex && !paramType.isAssignmentCompatible(overloadParamType)) {
+				return false;
+			}
 		}
 		return true;
 	}

@@ -1,6 +1,8 @@
 package eu.jsparrow.sample.postRule.redundantTypeCast;
 
 import java.lang.invoke.MethodHandle;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import eu.jsparrow.sample.utilities.Person;
@@ -67,6 +69,31 @@ public class RemoveRedundantTypeCastRule {
 		/* SIM-1885 */
 		useFoo(getFooSubtype(o)).fooMethod();
 	}
+	
+	public void usingAmbiguousOverloadedMethods() {
+		/**
+		 * Should not transform. Corner case similar to io.vertx.core.http.Http2ClientTest:
+		 * 
+		 * <code>
+		 * resp.putHeader("juu_response", (List<String>) Arrays.asList("juu_value_1", "juu_value_2"));
+		 * </code>
+		 */
+		overloadedMethod("", (List<String>) Arrays.asList("", ""));
+		
+		/*
+		 * Should transform. Method resolution works in these cases. 
+		 */
+		overloadedMethod(1, Arrays.asList("", ""));
+		overloadedMethod("", Arrays.asList("", ""), 1);
+	}
+
+	public void overloadedMethod(String value, List<String> values, int i) {}
+
+	public void overloadedMethod(String value, List<String> values) {}
+	
+	public void overloadedMethod(CharSequence value, List<CharSequence> values) {}
+	
+	public void overloadedMethod(Integer value, List<String> values) {}
 	
 	private Foo getFoo() {
 		return null;
