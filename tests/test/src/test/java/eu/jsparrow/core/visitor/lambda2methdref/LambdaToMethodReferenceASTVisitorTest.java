@@ -148,5 +148,16 @@ public class LambdaToMethodReferenceASTVisitorTest extends UsesJDTUnitFixture {
 				"}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_arrayInstanceCreation_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.function.Predicate.class.getName());
+
+		String original = "" +
+				"public void visit_arrayInstanceCreation_shouldTransform() {\n" +
+				"	Predicate[] arr = new Predicate[] {s -> \"\".equals(s)};" +
+				"}";
+		assertNoChange(original);
+	}
 
 }

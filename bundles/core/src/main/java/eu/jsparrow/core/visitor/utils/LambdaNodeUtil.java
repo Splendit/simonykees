@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -194,31 +193,13 @@ public class LambdaNodeUtil {
 			@SuppressWarnings("unchecked")
 			List<Expression> arguments = methodInvocation.arguments();
 			int index = arguments.indexOf(lambdaExpression);
-			contextTypeBinding = findFormalParameterType(methodInvocation, index).orElse(null);
+			contextTypeBinding = MethodDeclarationUtils.findFormalParameterType(methodInvocation, index).orElse(null);
 		} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
 			ReturnStatement returnStatement = (ReturnStatement) lambdaExpression.getParent();
 			contextTypeBinding = MethodDeclarationUtils.findExpectedReturnType(returnStatement);
 
 		}
 		return Optional.ofNullable(contextTypeBinding);
-	}
-
-	private static Optional<ITypeBinding> findFormalParameterType(MethodInvocation methodInvocation, int index) {
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		if (methodBinding == null) {
-			return Optional.empty();
-		}
-		ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
-		if (methodBinding.isVarargs() && index == parameterTypes.length - 1) {
-			ITypeBinding vargArgParam = parameterTypes[index];
-			if (vargArgParam.isArray()) {
-				return Optional.of(vargArgParam.getComponentType());
-			}
-		} else if (index < parameterTypes.length) {
-			ITypeBinding parameterType = parameterTypes[index];
-			return Optional.of(parameterType);
-		}
-		return Optional.empty();
 	}
 
 	/**
