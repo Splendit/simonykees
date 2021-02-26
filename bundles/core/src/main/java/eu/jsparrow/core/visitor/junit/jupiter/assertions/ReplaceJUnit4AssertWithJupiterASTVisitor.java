@@ -46,8 +46,12 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_ASSERTIONS);
 
-		List<ImportDeclaration> assertMethodStaticImportsToReplace = collectAssertMethodStaticImports(compilationUnit);
-		Set<String> assertMethodStaticImportsSimpleNames = assertMethodStaticImportsToReplace.stream()
+		List<ImportDeclaration> assertMethodStaticImportsToRemove = ASTNodeUtil
+			.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
+			.stream()
+			.filter(this::isStaticImportOfAssertMethodToRemove)
+			.collect(Collectors.toList());
+		Set<String> assertMethodStaticImportsSimpleNames = assertMethodStaticImportsToRemove.stream()
 			.map(ImportDeclaration::getName)
 			.filter(Name::isQualifiedName)
 			.map(QualifiedName.class::cast)
@@ -68,7 +72,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		compilationUnit.accept(methodReferenceCollectorVisitor);
 		List<MethodReference> methodReferences = methodReferenceCollectorVisitor.getMethodReferences();
 
-		if (!assertMethodStaticImportsToReplace.isEmpty() || !assertTransformationDataList.isEmpty()
+		if (!assertMethodStaticImportsToRemove.isEmpty() || !assertTransformationDataList.isEmpty()
 				|| !methodReferences.isEmpty()) {
 			transform(assertTransformationDataList, methodReferences);
 		}
@@ -190,14 +194,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			.equals("java.lang.String"); //$NON-NLS-1$
 	}
 
-	List<ImportDeclaration> collectAssertMethodStaticImports(CompilationUnit compilationUnit) {
-		return ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
-			.stream()
-			.filter(this::isAssertMethodStaticImport)
-			.collect(Collectors.toList());
-	}
-
-	private boolean isAssertMethodStaticImport(ImportDeclaration importDeclaration) {
+	private boolean isStaticImportOfAssertMethodToRemove(ImportDeclaration importDeclaration) {
 		if (!importDeclaration.isStatic()) {
 			return false;
 		}
@@ -210,7 +207,6 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			IMethodBinding methodBinding = ((IMethodBinding) importBinding);
 			return isSupportedJUnit4Method(methodBinding);
 		}
-
 		return false;
 	}
 
