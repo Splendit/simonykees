@@ -83,10 +83,12 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			return Optional.empty();
 		}
 
-		boolean keepNewInvocationWithoutExpression = keepInvocationWithoutExpression(methodInvocation,
-				assertMethodStaticImportsSimpleNames);
-
 		boolean isNameChangedToAssertArrayEquals = isAssertEqualsComparingObjectArrays(methodDeclaration);
+		String newMethodName = isNameChangedToAssertArrayEquals ? "assertArrayEquals" //$NON-NLS-1$
+				: methodDeclaration.getName();
+
+		boolean keepNewInvocationWithoutExpression = methodInvocation.getExpression() == null
+				&& assertMethodStaticImportsSimpleNames.contains(newMethodName);
 
 		List<Expression> invocationArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
@@ -99,8 +101,6 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			 */
 			return Optional.empty();
 		}
-		String newMethodName = isNameChangedToAssertArrayEquals ? "assertArrayEquals" //$NON-NLS-1$
-				: methodDeclaration.getName();
 
 		Supplier<MethodInvocation> newMethodInvocationSupplier;
 		if (keepNewInvocationWithoutExpression) {
@@ -130,17 +130,6 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 
 		}
 		return Optional.empty();
-	}
-
-	private boolean keepInvocationWithoutExpression(MethodInvocation methodInvocation,
-			Set<String> assertMethodStaticImportsSimpleNames) {
-
-		if (methodInvocation.getExpression() != null) {
-			return false;
-		}
-		String methodIdentifier = methodInvocation.getName()
-			.getIdentifier();
-		return assertMethodStaticImportsSimpleNames.contains(methodIdentifier);
 	}
 
 	private boolean isSupportedJUnit4Method(IMethodBinding methodDeclaration) {
@@ -251,7 +240,8 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		arguments.stream()
 			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
 			.forEach(assertionMethodArguments::add);
-		LambdaExpression messageSupplierLambdaExpression = astRewrite.getAST().newLambdaExpression();
+		LambdaExpression messageSupplierLambdaExpression = astRewrite.getAST()
+			.newLambdaExpression();
 		messageSupplierLambdaExpression.setBody((Expression) astRewrite.createCopyTarget(assertionMessage));
 		assertionMethodArguments.add(messageSupplierLambdaExpression);
 		return assertionMethodArguments;
