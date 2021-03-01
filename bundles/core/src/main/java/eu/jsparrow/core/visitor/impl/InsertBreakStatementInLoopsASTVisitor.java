@@ -162,6 +162,9 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 		}
 
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return true;
+		}
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		if (ClassRelationUtil.isContentOfTypes(declaringClass,
 				Arrays.asList(java.lang.Object.class.getName(), java.lang.String.class.getName()))) {
@@ -176,7 +179,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 		}
 		return true;
 	}
-	
+
 	/**
 	 * @param expression
 	 *            expression to be checked
@@ -185,7 +188,7 @@ public class InsertBreakStatementInLoopsASTVisitor extends AbstractASTRewriteAST
 	 */
 	private static boolean isLiteral(Expression expression) {
 		/*
-		 * TODO: fix the obfuscation and move this back to ASTNodeUtil class. 
+		 * TODO: fix the obfuscation and move this back to ASTNodeUtil class.
 		 */
 		int nodeType = expression.getNodeType();
 		return nodeType == ASTNode.BOOLEAN_LITERAL || nodeType == ASTNode.CHARACTER_LITERAL

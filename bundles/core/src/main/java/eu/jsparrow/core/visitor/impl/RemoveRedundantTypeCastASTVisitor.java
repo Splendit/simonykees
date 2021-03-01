@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -123,7 +124,13 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(parent.arguments(), Expression.class);
 		int castParamIndex = arguments.indexOf(castExpression);
 		IMethodBinding iMethodInvocationBinding = parent.resolveMethodBinding();
+		if (iMethodInvocationBinding == null) {
+			return false;
+		}
 		IMethodBinding iMethodBinding = iMethodInvocationBinding.getMethodDeclaration();
+		if (iMethodBinding == null) {
+			return false;
+		}
 
 		List<IMethodBinding> overloadedMethods = ClassRelationUtil.findOverloadedMethods(parent);
 		boolean isOverloaded = overloadedMethods.stream()
@@ -197,7 +204,13 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 
 	private Optional<ITypeBinding> findFormalParameterType(Expression argument, MethodInvocation methodInvocation) {
 		IMethodBinding miMethodBinding = methodInvocation.resolveMethodBinding();
+		if (miMethodBinding == null) {
+			return Optional.empty();
+		}
 		IMethodBinding declaration = miMethodBinding.getMethodDeclaration();
+		if (declaration == null) {
+			return Optional.empty();
+		}
 		ITypeBinding[] formalParameterTypes = declaration.getParameterTypes();
 		int formalParamLength = formalParameterTypes.length;
 		if (formalParamLength == 0) {

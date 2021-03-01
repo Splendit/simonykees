@@ -424,6 +424,9 @@ public class ClassRelationUtil {
 
 		Expression expression = methodInvocation.getExpression();
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return Collections.emptyList();
+		}
 		ITypeBinding type;
 		if (expression != null) {
 			type = expression.resolveTypeBinding();
@@ -459,12 +462,12 @@ public class ClassRelationUtil {
 		String methodIdentifier = methodBinding.getName();
 
 		return methods.stream()
+			.filter(method -> methodIdentifier.equals(method.getName()))
 			// exclude overridden methods
 			.filter(method -> !methodBinding.overrides(method))
 			// exclude the binding of the method itself
-			.filter(method -> !method.getMethodDeclaration()
+			.filter(method -> method.getMethodDeclaration() != null && !method.getMethodDeclaration()
 				.isEqualTo(methodBinding.getMethodDeclaration()))
-			.filter(method -> methodIdentifier.equals(method.getName()))
 			.collect(Collectors.toList());
 	}
 

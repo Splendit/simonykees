@@ -80,7 +80,7 @@ public class UseOffsetBasedStringMethodsASTVisitor extends AbstractAddImportASTV
 	@Override
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
-		if (!checkSignature(methodBinding)) {
+		if (methodBinding == null || !checkSignature(methodBinding)) {
 			return true;
 		}
 
