@@ -1,5 +1,8 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,13 +23,8 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 		fixtureProject.clear();
 	}
 
-	/**
-	 * SIM-1892: This test is expected to fail as soon as the visitor will carry
-	 * out re-factoring operations
-	 * 
-	 */
 	@Test
-	public void visit_assertArrayEqualsForObjectArray_shouldNotTransform() throws Exception {
+	public void visit_assertArrayEqualsForObjectArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Assert.class.getName());
 		defaultFixture.addImport(org.junit.Test.class.getName());
 		String original = "" +
@@ -34,7 +32,15 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 				"	void test() {\n" +
 				"		Assert.assertEquals(new Object[] {}, new Object[] {});\n" +
 				"	}";
-		assertNoChange(original);
+		String expected = "" +
+				"	@Test\n" +
+				"	void test(){\n" +
+				"		Assertions.assertArrayEquals(new Object[]{},new Object[]{});\n" +
+				"	}";
+
+		List<String> expectedImports = Arrays.asList("import org.junit.Assert;", "import org.junit.Test;",
+				"import org.junit.jupiter.api.Assertions;");
+		assertChange(original, expected, expectedImports);
 	}
 
 	/**

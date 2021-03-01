@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -71,7 +72,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			.map(Optional::get)
 			.collect(Collectors.toList());
 
-		Set<String> assertionMethodNamesForNewStaticImports = assertInvocationAnalysisResults
+		Set<String> assertionMethodSimpleNamesForNewStaticImports = assertInvocationAnalysisResults
 			.stream()
 			.filter(AssertInvocationAnalysisResult::isAlsoNewInvocationWithoutQualifier)
 			.map(result -> result.isNameChangedToAssertArrayEquals() ? ASSERT_ARRAY_EQUALS
@@ -91,9 +92,11 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		compilationUnit.accept(methodReferenceCollectorVisitor);
 		List<MethodReference> methodReferences = methodReferenceCollectorVisitor.getMethodReferences();
 
-		if (!assertMethodStaticImportsToRemove.isEmpty() || !invocationReplacementData.isEmpty()
+		if (!assertMethodStaticImportsToRemove.isEmpty()
+				|| !assertionMethodSimpleNamesForNewStaticImports.isEmpty()
+				|| !invocationReplacementData.isEmpty()
 				|| !methodReferences.isEmpty()) {
-			transform(assertMethodStaticImportsToRemove, assertionMethodNamesForNewStaticImports,
+			transform(assertMethodStaticImportsToRemove, assertionMethodSimpleNamesForNewStaticImports,
 					invocationReplacementData, methodReferences);
 		}
 		return false;
@@ -133,7 +136,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 				.of(new AssertInvocationAnalysisResult(methodInvocation, keepAlsoNewInvocationWithoutExpression,
 						isNameChangedToAssertArrayEquals, assertionMessageAsFirstArgument));
 		}
-		
+
 		return Optional
 			.of(new AssertInvocationAnalysisResult(methodInvocation, keepAlsoNewInvocationWithoutExpression,
 					isNameChangedToAssertArrayEquals));
@@ -288,9 +291,31 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 	}
 
 	private void transform(List<ImportDeclaration> assertMethodStaticImportsToRemove,
-			Set<String> assertionMethodNamesForNewStaticImports,
+			Set<String> assertionMethodSimpleNamesForNewStaticImports,
 			List<AssertTransformationData> assertTransformationDataList,
 			List<MethodReference> methodReferences) {
-		// ...
+
+		assertMethodStaticImportsToRemove.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
+		AST ast = astRewrite.getAST();
+		ListRewrite newImportsListRewrite = astRewrite.getListRewrite(getCompilationUnit(),
+				CompilationUnit.IMPORTS_PROPERTY);
+		assertionMethodSimpleNamesForNewStaticImports
+			.forEach(methodName -> {
+				ImportDeclaration newImportDeclaration = ast.newImportDeclaration();
+				newImportDeclaration.setName(ast.newName(ORG_JUNIT_JUPITER_API_ASSERTIONS + '.' + methodName));
+				newImportDeclaration.setStatic(true);
+				newImportsListRewrite.insertLast(newImportDeclaration, null);
+			});
+		assertTransformationDataList.forEach(this::replaceAssertMethodInvocation);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void replaceAssertMethodInvocation(AssertTransformationData invocationReplacementData) {
+		MethodInvocation methodInvocationToReplace = invocationReplacementData.getMethodInvocationToReplace();
+		MethodInvocation methodInvocationReplacement = invocationReplacementData.createAssertionMethodInvocation();
+		List newArguments = methodInvocationReplacement.arguments();
+		invocationReplacementData.createNewArgumentList()
+			.forEach(newArguments::add);
+		astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
 	}
 }
