@@ -649,14 +649,17 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 	}
 
-	private boolean areIncompatibleFunctionalInterfaces(IMethodBinding contextFI, IMethodBinding actualFI) {
-		ITypeBinding contextReturnType = contextFI.getReturnType();
-		ITypeBinding actualReturnType = actualFI.getReturnType();
+	private boolean areIncompatibleFunctionalInterfaces(IMethodBinding contextFunctionalInterface, IMethodBinding actualFunctionalInterface) {
+		ITypeBinding contextReturnType = contextFunctionalInterface.getReturnType();
+		ITypeBinding actualReturnType = actualFunctionalInterface.getReturnType();
 		if (!actualReturnType.isAssignmentCompatible(contextReturnType)) {
 			return true;
 		}
-		ITypeBinding[] actualParameters = actualFI.getParameterTypes();
-		ITypeBinding[] expectedParameters = contextFI.getParameterTypes();
+		ITypeBinding[] actualParameters = actualFunctionalInterface.getParameterTypes();
+		ITypeBinding[] expectedParameters = contextFunctionalInterface.getParameterTypes();
+		if (actualParameters.length != expectedParameters.length) {
+			return true;
+		}
 		for (int i = 0; i < actualParameters.length; i++) {
 			ITypeBinding actualParameter = actualParameters[i];
 			ITypeBinding expectedParameter = expectedParameters[i];

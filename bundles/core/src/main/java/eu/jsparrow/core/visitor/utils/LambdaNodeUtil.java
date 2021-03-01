@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -191,14 +190,10 @@ public class LambdaNodeUtil {
 			contextTypeBinding = cast.resolveTypeBinding();
 		} else if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
 			MethodInvocation methodInvocation = (MethodInvocation) lambdaExpression.getParent();
-			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-			if(methodBinding != null) {
-				ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
-				@SuppressWarnings("unchecked")
-				List<Expression> arguments = methodInvocation.arguments();
-				int index = arguments.indexOf(lambdaExpression);
-				contextTypeBinding = parameterTypes[index];
-			}
+			@SuppressWarnings("unchecked")
+			List<Expression> arguments = methodInvocation.arguments();
+			int index = arguments.indexOf(lambdaExpression);
+			contextTypeBinding = MethodDeclarationUtils.findFormalParameterType(methodInvocation, index).orElse(null);
 		} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
 			ReturnStatement returnStatement = (ReturnStatement) lambdaExpression.getParent();
 			contextTypeBinding = MethodDeclarationUtils.findExpectedReturnType(returnStatement);
