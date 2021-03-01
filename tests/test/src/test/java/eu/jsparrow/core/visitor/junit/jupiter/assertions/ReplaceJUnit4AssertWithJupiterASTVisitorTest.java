@@ -42,25 +42,4 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 				"import org.junit.jupiter.api.Assertions;");
 		assertChange(original, expected, expectedImports);
 	}
-
-	/**
-	 * SIM-1892: This test is expected to fail as soon as the visitor will carry
-	 * out re-factoring operations
-	 * 
-	 */
-	@Test
-	public void visit_assertArrayEqualsMethodReference_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(java.util.function.BiConsumer.class.getName());
-		defaultFixture.addImport(org.junit.Assert.class.getName());
-		defaultFixture.addImport(org.junit.Test.class.getName());
-
-		String original = "" +
-				"	@Test\n" +
-				"	void test() {\n" +
-				"		BiConsumer<Byte[], Byte[]> assertByteArrayEquals = Assert::assertArrayEquals;\n" +
-				"	}";
-
-		assertNoChange(original);
-	}
-
 }

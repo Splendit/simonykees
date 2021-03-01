@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -88,16 +87,12 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			.map(Optional::get)
 			.collect(Collectors.toList());
 
-		MethodReferenceCollectorVisitor methodReferenceCollectorVisitor = new MethodReferenceCollectorVisitor();
-		compilationUnit.accept(methodReferenceCollectorVisitor);
-		List<MethodReference> methodReferences = methodReferenceCollectorVisitor.getMethodReferences();
 
 		if (!assertMethodStaticImportsToRemove.isEmpty()
 				|| !assertionMethodSimpleNamesForNewStaticImports.isEmpty()
-				|| !invocationReplacementData.isEmpty()
-				|| !methodReferences.isEmpty()) {
+				|| !invocationReplacementData.isEmpty()) {
 			transform(assertMethodStaticImportsToRemove, assertionMethodSimpleNamesForNewStaticImports,
-					invocationReplacementData, methodReferences);
+					invocationReplacementData);
 		}
 		return false;
 	}
@@ -292,8 +287,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 
 	private void transform(List<ImportDeclaration> assertMethodStaticImportsToRemove,
 			Set<String> assertionMethodSimpleNamesForNewStaticImports,
-			List<AssertTransformationData> assertTransformationDataList,
-			List<MethodReference> methodReferences) {
+			List<AssertTransformationData> assertTransformationDataList) {
 
 		assertMethodStaticImportsToRemove.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
 		AST ast = astRewrite.getAST();
