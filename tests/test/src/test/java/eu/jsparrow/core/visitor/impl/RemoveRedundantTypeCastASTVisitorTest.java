@@ -443,4 +443,19 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		assertChange(orignial, expected);
 	}
 	
+	@Test
+	public void visit_unresolvedMethodDeclarationBinding_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "CompilationErrorInMethodDeclaration cls = new CompilationErrorInMethodDeclaration<>();\n"
+				+ "cls.foo((Runnable) () -> {});\n"
+				+ ""
+				+ "class CompilationErrorInMethodDeclaration<T extends org.apache.Tee> {\n"
+				+ "	\n"
+				+ "	public List<Lisst<org.apache.Tee>> foo(Runnable r) {\n"
+				+ "		return;\n"
+				+ "	}\n"
+				+ "}";
+		assertNoChange(original);
+	}
+	
 }

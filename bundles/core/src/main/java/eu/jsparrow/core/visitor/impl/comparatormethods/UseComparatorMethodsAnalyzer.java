@@ -177,6 +177,9 @@ public class UseComparatorMethodsAnalyzer {
 			.getIdentifier();
 
 		IMethodBinding methodBinding = invocationFirst.resolveMethodBinding();
+		if (methodBinding == null) {
+			return Optional.empty();
+		}
 		if (parameterNameFirst.equals(invocationExpressionNameFirst)
 				&& parameterNameSecond.equals(invocationExpressionNameSecond)) {
 			return Optional.of(new LambdaAnalysisResult(parameterFirst, methodBinding, false));
@@ -190,6 +193,9 @@ public class UseComparatorMethodsAnalyzer {
 
 	private boolean isCompareToMethodOfComparator(MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
 
 		if (!methodBinding.getName()
 			.equals("compareTo")) { //$NON-NLS-1$

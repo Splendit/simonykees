@@ -59,6 +59,9 @@ public class ExpressionsThrowingExceptionVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return true;
+		}
 		boolean throwsExpectedException = verifyThrownExceptions(methodBinding);
 		if (throwsExpectedException) {
 			nodesThrowingExpectedException.add(methodInvocation);
