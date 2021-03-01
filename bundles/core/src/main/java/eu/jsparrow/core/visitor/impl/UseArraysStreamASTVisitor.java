@@ -238,11 +238,13 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 		if (locationInParent == MethodInvocation.EXPRESSION_PROPERTY) {
 			MethodInvocation parent = (MethodInvocation) methodInvocation.getParent();
 			IMethodBinding parentMethodBinding = parent.resolveMethodBinding();
-			ITypeBinding declaringClass = parentMethodBinding.getDeclaringClass();
-			boolean isStreamMethod = ClassRelationUtil.isContentOfType(declaringClass, STREAM_QUALIFIED_NAME);
-			if (isStreamMethod) {
-				chain.add(parent);
-				chain.addAll(extractStreamChain(parent));
+			if (parentMethodBinding != null) {
+				ITypeBinding declaringClass = parentMethodBinding.getDeclaringClass();
+				boolean isStreamMethod = ClassRelationUtil.isContentOfType(declaringClass, STREAM_QUALIFIED_NAME);
+				if (isStreamMethod) {
+					chain.add(parent);
+					chain.addAll(extractStreamChain(parent));
+				}
 			}
 		}
 		return chain;
@@ -267,6 +269,9 @@ public class UseArraysStreamASTVisitor extends AbstractAddImportASTVisitor {
 			return false;
 		}
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		return ClassRelationUtil.isContentOfType(declaringClass, expectedType);
 	}

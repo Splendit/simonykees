@@ -136,6 +136,9 @@ class UseFilesWriteStringTWRStatementAnalyzer {
 	private boolean isFilesNewBufferedWriterInvocation(MethodInvocation bufferedIOInitializerMethodInvocation) {
 
 		IMethodBinding methodBinding = bufferedIOInitializerMethodInvocation.resolveMethodBinding();
+		if(methodBinding == null) {
+			return false;
+		}
 
 		if (!ClassRelationUtil.isContentOfType(methodBinding
 			.getDeclaringClass(), java.nio.file.Files.class.getName())) {

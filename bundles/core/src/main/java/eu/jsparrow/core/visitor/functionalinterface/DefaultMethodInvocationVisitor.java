@@ -14,8 +14,8 @@ import org.eclipse.jdt.core.dom.Modifier;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- * Finds invocations of default methods which prohibit transformation of a functional
- * anonymous class to a lambda.
+ * Finds invocations of default methods which prohibit transformation of a
+ * functional anonymous class to a lambda.
  * <p>
  * A method invocation will prohibit the transformation of a functional
  * anonymous class to a lambda if the corresponding method is declared (mostly
@@ -37,11 +37,14 @@ public class DefaultMethodInvocationVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
+		if (methodBinding == null) {
+			return true;
+		}
 		int modifiers = methodBinding.getModifiers();
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 
 		if (Modifier.isDefault(modifiers)) {
-			
+
 			String declaringClassQualifiedName = declaringClass.getErasure()
 				.getQualifiedName();
 
@@ -54,15 +57,15 @@ public class DefaultMethodInvocationVisitor extends ASTVisitor {
 				return false;
 			}
 		}
-		
-		if(ClassRelationUtil.isContentOfType(declaringClass, java.lang.Object.class.getName())) {
+
+		if (ClassRelationUtil.isContentOfType(declaringClass, java.lang.Object.class.getName())) {
 			Expression expression = node.getExpression();
-			if(expression == null || expression.getNodeType() == ASTNode.THIS_EXPRESSION) {
+			if (expression == null || expression.getNodeType() == ASTNode.THIS_EXPRESSION) {
 				flagCancelTransformation = true;
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
