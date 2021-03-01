@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,10 +16,10 @@ import eu.jsparrow.jdtunit.util.MethodDeclarationBuilder;
 @SuppressWarnings("nls")
 public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
-	 @BeforeEach
-	 public void setupTest() {
-		 setVisitor(new RemoveRedundantTypeCastASTVisitor());
-	 }
+	@BeforeEach
+	public void setupTest() {
+		setVisitor(new RemoveRedundantTypeCastASTVisitor());
+	}
 
 	@Test
 	public void visit_CastStringLiteralToString_shouldTransform() throws Exception {
@@ -266,7 +267,8 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		String after = "usingFunction(Object::toString);";
 
 		MethodDeclarationBuilder.factory(fixture, "usingFunction")
-			.withParameterizedTypeParameter(Function.class.getSimpleName(), Object.class.getSimpleName(), String.class.getSimpleName());
+			.withParameterizedTypeParameter(Function.class.getSimpleName(), Object.class.getSimpleName(),
+					String.class.getSimpleName());
 
 		fixture.addImport(Function.class.getName());
 
@@ -397,13 +399,46 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 	}
 
 	@Test
-	public void visit_MethodReference_shouldNotTransform() throws Exception {
-		String before = "Supplier<String> supplier = (Supplier<String> )i::toString;";
+	public void visit_castExpressionMethodReferenceInDeclarationFragment_shouldTransform() throws Exception {
+		String before = "Function<Object, String> function = (Function<Object, String>) Object::toString;";
+		String after = "Function<Object, String> function = Object::toString;";
 
-		fixture.addImport(List.class.getName());
-		fixture.addImport(ArrayList.class.getName());
+		fixture.addImport(Function.class.getName());
+		assertChange(before, after);
+	}
+
+	@Test
+	public void visit_castTypeMethodReferenceInDeclarationFragment_shouldTransform() throws Exception {
+		String before = "Predicate<List<String>> function4 = (Predicate<List<String>>) List<String>::isEmpty;";
+		String after = "Predicate<List<String>> function4 = List<String>::isEmpty;";
+
+		fixture.addImport(Predicate.class.getName());
+		assertChange(before, after);
+	}
+
+	@Test
+	public void visit_castCreationMethodReference_shouldTransform() throws Exception {
+		String before = "Supplier<Object> sup = (Supplier<Object>) Object::new;";
+		String after = "Supplier<Object> sup = Object::new;";
+
 		fixture.addImport(Supplier.class.getName());
+		assertChange(before, after);
+	}
 
+	@Test
+	public void visit_castSuperMethodReference_shouldTransform() throws Exception {
+		String before = "Supplier<String> function2 = (Supplier<String>) super::toString";
+		String after = "Supplier<String> function2 = super::toString";
+
+		fixture.addImport(Supplier.class.getName());
+		assertChange(before, after);
+	}
+
+	@Test
+	public void visit_MethodReferenceAsInvocationExpression_shouldNotTransform() throws Exception {
+		String before = "((Function<Object, String>) Object::toString).apply(new Object());";
+
+		fixture.addImport(Function.class.getName());
 		assertNoChange(before);
 	}
 
@@ -426,7 +461,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		assertNoChange(before);
 	}
-	
+
 	@Test
 	public void visit_ambiguousOverloadedMethods_shouldNotTransform() throws Exception {
 		fixture.addImport(java.util.concurrent.Callable.class.getName());
@@ -440,7 +475,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		assertNoChange(orignial);
 	}
-	
+
 	@Test
 	public void visit_overloadedWithDifferentParameters_shouldTransform() throws Exception {
 		fixture.addImport(java.util.concurrent.Callable.class.getName());
@@ -456,5 +491,5 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		assertChange(orignial, expected);
 	}
-	
+
 }

@@ -43,7 +43,11 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 	public boolean visit(CastExpression castExpression) {
 		Expression expression = castExpression.getExpression();
 		boolean isLambdaExpression = expression.getNodeType() == ASTNode.LAMBDA_EXPRESSION
-				|| expression.getNodeType() == ASTNode.EXPRESSION_METHOD_REFERENCE;
+				|| expression.getNodeType() == ASTNode.EXPRESSION_METHOD_REFERENCE
+				|| expression.getNodeType() == ASTNode.TYPE_METHOD_REFERENCE
+				|| expression.getNodeType() == ASTNode.CREATION_REFERENCE
+				|| expression.getNodeType() == ASTNode.SUPER_METHOD_REFERENCE;
+
 		if (isLambdaExpression && !isRedundantLambdaTypeCast(castExpression)) {
 			return true;
 		}
