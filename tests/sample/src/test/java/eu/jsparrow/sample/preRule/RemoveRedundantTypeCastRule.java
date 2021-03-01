@@ -115,7 +115,28 @@ public class RemoveRedundantTypeCastRule {
 	class Foo {
 		public void fooMethod() {}
 	}
-
+	
+	class ShadowingTypeVariables<T extends Person> {
+		
+		List<T> users;
+		
+		/**
+		 * Should transform
+		 */
+		public List<T> findUsers() {
+			List<T> myUsers = users;
+			return (List<T>) myUsers;
+		}
+		
+		/**
+		 * The type <T> is hiding the type <T> in class declaration type arguments. 
+		 * Should not transform. 
+		 */
+		public <T extends Person> List<T> findAllUsers() {
+			List<T> someUsers = (List<T>)users;
+			return (List<T>) users;
+		}
+	}
 }
 
 interface GenericFutureListener<F extends Future<?>> {

@@ -80,10 +80,17 @@ public class RemoveRedundantTypeCastASTVisitor extends AbstractASTRewriteASTVisi
 			return true;
 		}
 
-		if (ClassRelationUtil.compareITypeBinding(typeFrom, typeTo)) {
+		if (areSameTypes(typeFrom, typeTo)) {
 			applyRule(castExpression);
 		}
 		return true;
+	}
+
+	private boolean areSameTypes(ITypeBinding typeFrom, ITypeBinding typeTo) {
+		if (!typeFrom.isAssignmentCompatible(typeTo)) {
+			return false;
+		}
+		return ClassRelationUtil.compareITypeBinding(typeFrom, typeTo);
 	}
 
 	private boolean hasAmbiguousOverloads(MethodInvocation mi, CastExpression castExpression) {

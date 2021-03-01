@@ -413,6 +413,7 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 		String after = "Predicate<List<String>> function4 = List<String>::isEmpty;";
 
 		fixture.addImport(Predicate.class.getName());
+		fixture.addImport(java.util.List.class.getName());
 		assertChange(before, after);
 	}
 
@@ -427,8 +428,8 @@ public class RemoveRedundantTypeCastASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 	@Test
 	public void visit_castSuperMethodReference_shouldTransform() throws Exception {
-		String before = "Supplier<String> function2 = (Supplier<String>) super::toString";
-		String after = "Supplier<String> function2 = super::toString";
+		String before = "Supplier<String> function2 = (Supplier<String>) super::toString;";
+		String after = "Supplier<String> function2 = super::toString;";
 
 		fixture.addImport(Supplier.class.getName());
 		assertChange(before, after);
