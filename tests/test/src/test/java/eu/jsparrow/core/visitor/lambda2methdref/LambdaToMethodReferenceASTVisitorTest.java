@@ -163,7 +163,7 @@ public class LambdaToMethodReferenceASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	\n"
 				+ "	public void foo() {}\n"
 				+ "	\n"
-				+ "	public List<Lisst<org.apache.IDoNotExist>> foo2(int i) {\n"
+				+ "	public List<Lisst<org.apache.IDoNotExist>> foo(int i) {\n"
 				+ "		return;\n"
 				+ "	}\n"
 				+ "}";
@@ -178,7 +178,7 @@ public class LambdaToMethodReferenceASTVisitorTest extends UsesJDTUnitFixture {
 				+ "	\n"
 				+ "	public void foo() {}\n"
 				+ "	\n"
-				+ "	public List<Lisst<org.apache.IDoNotExist>> foo2(int i) {\n"
+				+ "	public List<Lisst<org.apache.IDoNotExist>> foo(int i) {\n"
 				+ "		return;\n"
 				+ "	}\n"
 				+ "}";
