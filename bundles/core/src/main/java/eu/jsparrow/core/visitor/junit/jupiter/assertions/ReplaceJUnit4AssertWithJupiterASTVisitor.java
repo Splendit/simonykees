@@ -87,7 +87,6 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			.map(Optional::get)
 			.collect(Collectors.toList());
 
-
 		if (!assertMethodStaticImportsToRemove.isEmpty()
 				|| !assertionMethodSimpleNamesForNewStaticImports.isEmpty()
 				|| !invocationReplacementData.isEmpty()) {
@@ -181,17 +180,14 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 	}
 
 	private boolean isSupportedJUnit4Method(IMethodBinding methodBinding) {
-		if (isOrgJUnitAssertClass(methodBinding.getDeclaringClass())) {
+		if (methodBinding.getDeclaringClass()
+			.getQualifiedName()
+			.equals("org.junit.Assert")) { //$NON-NLS-1$
 			String methodName = methodBinding.getName();
 			return !methodName.equals("assertThat") //$NON-NLS-1$
 					&& !methodName.equals("assertThrows"); //$NON-NLS-1$
 		}
 		return false;
-	}
-
-	private boolean isOrgJUnitAssertClass(ITypeBinding declaringClass) {
-		return declaringClass.getQualifiedName()
-			.equals("org.junit.Assert");//$NON-NLS-1$
 	}
 
 	/**
