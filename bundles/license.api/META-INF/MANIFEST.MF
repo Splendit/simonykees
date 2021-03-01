@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.license.api
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Api
 Bundle-SymbolicName: eu.jsparrow.license.api
-Bundle-Version: 3.27.1.qualifier
+Bundle-Version: 3.27.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.apache.commons.lang3;bundle-version="[3.1.0,4.0.0)",
  eu.jsparrow.logging,
