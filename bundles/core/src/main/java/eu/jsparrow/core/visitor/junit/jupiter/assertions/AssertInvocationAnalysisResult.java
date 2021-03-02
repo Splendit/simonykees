@@ -31,7 +31,7 @@ class AssertInvocationAnalysisResult {
 		return originalInvocation;
 	}
 
-	boolean isAlsoNewInvocationWithoutQualifier() {
+	boolean isWithoutQualifierToChange() {
 		return newInvocationWithoutQualifier;
 	}
 
