@@ -319,6 +319,16 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>junit-jupiter-api-5-4-0</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.junit.jupiter:junit-jupiter-api:5.4.0</artifact>
+						</configuration>
+					</execution>
+					<execution>
 						<id>junit-platform-runner-1-6-0</id>
 						<phase>package</phase>
 						<goals>
