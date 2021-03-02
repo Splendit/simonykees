@@ -36,11 +36,11 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 		String expected = "" +
 				"	@Test\n" +
 				"	void test() {\n" +
-				"		Assertions.assertArrayEquals(new Object[]{},new Object[]{});\n" +
+				"		assertArrayEquals(new Object[]{},new Object[]{});\n" +
 				"	}";
 
-		List<String> expectedImports = Arrays.asList("import org.junit.Assert;",
-				"import org.junit.jupiter.api.Assertions;", "import org.junit.jupiter.api.Test;");
+		List<String> expectedImports = Arrays.asList("import org.junit.Assert;", "import org.junit.jupiter.api.Test;",
+				"import static org.junit.jupiter.api.Assertions.assertArrayEquals;");
 		assertChange(original, expected, expectedImports);
 	}
 }

@@ -42,6 +42,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 
 	private static final String ASSERT_ARRAY_EQUALS = "assertArrayEquals"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
+	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS_PREFIX = ORG_JUNIT_JUPITER_API_ASSERTIONS + "."; //$NON-NLS-1$
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 
 	@Override
@@ -183,7 +184,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		if (analysisResult.isWithoutQualifierToChange()) {
 			newMethodInvocationSupplier = () -> this.createNewInvocationWithoutQualifier(newMethodName);
 		} else {
-			newMethodInvocationSupplier = () -> this.createNewInvocationWithAssertionsAsQualifier(originalInvocation,
+			newMethodInvocationSupplier = () -> this.createNewInvocationWithOptionalQualifier(originalInvocation,
 					newMethodName);
 		}
 
@@ -304,11 +305,13 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		return newInvocation;
 	}
 
-	private MethodInvocation createNewInvocationWithAssertionsAsQualifier(MethodInvocation contextForImport,
+	private MethodInvocation createNewInvocationWithOptionalQualifier(MethodInvocation contextForImport,
 			String newMethodName) {
 		MethodInvocation newInvocation = createNewInvocationWithoutQualifier(newMethodName);
-		Name assertionTypeName = addImport(ORG_JUNIT_JUPITER_API_ASSERTIONS, contextForImport);
-		newInvocation.setExpression(assertionTypeName);
+		String fullyQualifiedMethodName = ORG_JUNIT_JUPITER_API_ASSERTIONS_PREFIX + newMethodName;
+		verifyStaticMethodImport(getCompilationUnit(), fullyQualifiedMethodName);
+		Optional<Name> optionalQualifier = addImportForStaticMethod(fullyQualifiedMethodName, contextForImport);
+		optionalQualifier.ifPresent(newInvocation::setExpression);
 		return newInvocation;
 	}
 
@@ -341,7 +344,8 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		assertionMethodSimpleNamesForNewStaticImports
 			.forEach(methodName -> {
 				ImportDeclaration newImportDeclaration = ast.newImportDeclaration();
-				newImportDeclaration.setName(ast.newName(ORG_JUNIT_JUPITER_API_ASSERTIONS + '.' + methodName));
+				String qualifiedName = ORG_JUNIT_JUPITER_API_ASSERTIONS_PREFIX;
+				newImportDeclaration.setName(ast.newName(qualifiedName + methodName));
 				newImportDeclaration.setStatic(true);
 				newImportsListRewrite.insertLast(newImportDeclaration, null);
 			});
