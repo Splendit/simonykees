@@ -53,6 +53,12 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			return false;
 		}
 
+		JUnit4AssertToJupiterAnalyzerVisitor analyzerVisitor = new JUnit4AssertToJupiterAnalyzerVisitor();
+		compilationUnit.accept(analyzerVisitor);
+		if (!analyzerVisitor.isTransformationPossible()) {
+			return false;
+		}
+
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_ASSERTIONS);
 
 		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
