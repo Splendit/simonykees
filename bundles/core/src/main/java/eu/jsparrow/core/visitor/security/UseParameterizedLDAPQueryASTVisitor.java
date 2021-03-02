@@ -50,6 +50,9 @@ public class UseParameterizedLDAPQueryASTVisitor extends AbstractDynamicQueryAST
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return true;
+		}
 		if (!OVERLOAD_WITH_NAME_OF_TYPE_NAME.isEquivalentTo(methodBinding) &&
 				!OVERLOAD_WITH_NAME_OF_TYPE_STRING.isEquivalentTo(methodBinding)) {
 			return true;

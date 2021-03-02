@@ -205,6 +205,9 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 		ITypeBinding originalType = originalException.resolveTypeBinding();
 		for (MethodInvocation invocation : invocations) {
 			IMethodBinding methodBinding = invocation.resolveMethodBinding();
+			if (methodBinding == null) {
+				return false;
+			}
 			boolean isInUpperBound = definesMethod(originalType, methodBinding);
 			if (!isInUpperBound) {
 				return true;
@@ -242,7 +245,8 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 		return false;
 	}
 
-	private boolean isDefinedInCommonParent(ITypeBinding originalExceptionType, IMethodBinding method, ITypeBinding currentExceptionParent) {
+	private boolean isDefinedInCommonParent(ITypeBinding originalExceptionType, IMethodBinding method,
+			ITypeBinding currentExceptionParent) {
 		IMethodBinding[] methods = currentExceptionParent.getDeclaredMethods();
 		for (IMethodBinding parentMethod : methods) {
 			if (method.overrides(parentMethod)) {

@@ -46,6 +46,9 @@ public class ExpectedExceptionVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return true;
+		}
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		boolean isExpectedException = ClassRelationUtil.isContentOfTypes(declaringClass,
 				Arrays.asList(EXPECTED_EXCEPTION, TEST_RULE));

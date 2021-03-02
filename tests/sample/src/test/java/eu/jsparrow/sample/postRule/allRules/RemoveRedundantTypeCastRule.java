@@ -1,6 +1,8 @@
 package eu.jsparrow.sample.postRule.allRules;
 
 import java.lang.invoke.MethodHandle;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -76,6 +78,36 @@ public class RemoveRedundantTypeCastRule {
 		useFoo(getFooSubtype()).fooMethod();
 	}
 
+	public void usingAmbiguousOverloadedMethods() {
+		/**
+		 * Should not transform. Corner case similar to
+		 * io.vertx.core.http.Http2ClientTest:
+		 * 
+		 * <code>
+		 * resp.putHeader("juu_response", (List<String>) Arrays.asList("juu_value_1", "juu_value_2"));
+		 * </code>
+		 */
+		overloadedMethod("", (List<String>) Arrays.asList("", ""));
+
+		/*
+		 * Should transform. Method resolution works in these cases.
+		 */
+		overloadedMethod(1, Arrays.asList("", ""));
+		overloadedMethod("", Arrays.asList("", ""), 1);
+	}
+
+	public void overloadedMethod(String value, List<String> values, int i) {
+	}
+
+	public void overloadedMethod(String value, List<String> values) {
+	}
+
+	public void overloadedMethod(CharSequence value, List<CharSequence> values) {
+	}
+
+	public void overloadedMethod(Integer value, List<String> values) {
+	}
+
 	private Foo getFoo() {
 		return null;
 	}
@@ -97,6 +129,27 @@ public class RemoveRedundantTypeCastRule {
 		}
 	}
 
+	class ShadowingTypeVariables<T extends Person> {
+
+		List<T> users;
+
+		/**
+		 * Should transform
+		 */
+		public List<T> findUsers() {
+			final List<T> myUsers = users;
+			return myUsers;
+		}
+
+		/**
+		 * The type <T> is hiding the type <T> in class declaration type
+		 * arguments. Should not transform.
+		 */
+		public <T extends Person> List<T> findAllUsers() {
+			final List<T> someUsers = (List<T>) users;
+			return (List<T>) users;
+		}
+	}
 }
 
 interface GenericFutureListener<F extends Future<?>> {
