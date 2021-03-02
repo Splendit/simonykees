@@ -250,9 +250,12 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 	}
 
 	private boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
-		return parameterType.getComponentType()
-			.getQualifiedName()
-			.equals("java.lang.Object") && parameterType.getDimensions() == 1; //$NON-NLS-1$
+		if (parameterType.isArray()) {
+			return parameterType.getComponentType()
+				.getQualifiedName()
+				.equals("java.lang.Object") && parameterType.getDimensions() == 1; //$NON-NLS-1$
+		}
+		return false;
 	}
 
 	private boolean isParameterTypeString(ITypeBinding parameterType) {
@@ -265,7 +268,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			return false;
 		}
 
-		if (!importDeclaration.isOnDemand()) {
+		if (importDeclaration.isOnDemand()) {
 			return false;
 		}
 		IBinding importBinding = importDeclaration.resolveBinding();

@@ -43,4 +43,19 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 				"import static org.junit.jupiter.api.Assertions.assertArrayEquals;");
 		assertChange(original, expected, expectedImports);
 	}
+
+	@Test
+	public void visit_withoutChangingAssertEqualsInvocation_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assert.assertEquals", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+		String original = "" +
+				"@Test\n"
+				+ "	void test() {\n"
+				+ "		assertEquals(10L, 10L);\n"
+				+ "	}";
+
+		List<String> expectedImports = Arrays.asList("import org.junit.jupiter.api.Test;",
+				"import static org.junit.jupiter.api.Assertions.assertEquals;");
+		assertChange(original, original, expectedImports);
+	}
 }
