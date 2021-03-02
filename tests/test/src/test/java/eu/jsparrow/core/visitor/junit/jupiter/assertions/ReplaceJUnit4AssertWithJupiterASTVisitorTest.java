@@ -26,7 +26,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 	@Test
 	public void visit_assertArrayEqualsForObjectArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Assert.class.getName());
-		defaultFixture.addImport(org.junit.Test.class.getName());
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		String original = "" +
 				"	@Test\n" +
 				"	void test() {\n" +
