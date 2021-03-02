@@ -25,7 +25,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 	}
 
 	@Test
-	public void visit_assertArrayEqualsForObjectArray_shouldTransform() throws Exception {
+	public void visit_assertEqualsForObjectArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Assert.class.getName());
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		String original = "" +
@@ -45,6 +45,26 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 	}
 
 	@Test
+	public void visit_AssertEqualsForObjectArrayWithoutQualifier_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assert.assertEquals", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+		String original = "" +
+				"	@Test\n"
+				+ "	void test() {\n"
+				+ "		assertEquals(new Object[] {}, new Object[] {});\n"
+				+ "	}";
+		String expected = "" +
+				"	@Test\n"
+				+ "	void test() {\n"
+				+ "		assertArrayEquals(new Object[] {}, new Object[] {});\n"
+				+ "	}";
+
+		List<String> expectedImports = Arrays.asList("import org.junit.jupiter.api.Test;",
+				"import static org.junit.jupiter.api.Assertions.assertArrayEquals;");
+		assertChange(original, expected, expectedImports);
+	}
+
+	@Test
 	public void visit_withoutChangingAssertEqualsInvocation_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.junit.Assert.assertEquals", true, false);
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
@@ -57,5 +77,26 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 		List<String> expectedImports = Arrays.asList("import org.junit.jupiter.api.Test;",
 				"import static org.junit.jupiter.api.Assertions.assertEquals;");
 		assertChange(original, original, expectedImports);
+	}
+
+	@Test
+	public void visit_assertEqualsInvocationWithMessage_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assert.assertEquals", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+		String original = "" +
+				"	@Test\n"
+				+ "	void test() {\n"
+				+ "		assertEquals(\"10L should be equal to 10L\", 10L, 10L);\n"
+				+ "	}";
+
+		String expected = "" +
+				"	@Test\n"
+				+ "	void test() {\n"
+				+ "		assertEquals(10L, 10L, () -> \"10L should be equal to 10L\");\n"
+				+ "	}";
+
+		List<String> expectedImports = Arrays.asList("import org.junit.jupiter.api.Test;",
+				"import static org.junit.jupiter.api.Assertions.assertEquals;");
+		assertChange(original, expected, expectedImports);
 	}
 }
