@@ -15,6 +15,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
 		addDependency("junit", "junit", "4.13");
+		addDependency("org.junit.jupiter", "junit-jupiter-api", "5.4.0");
 		setDefaultVisitor(new ReplaceJUnit4AssertWithJupiterASTVisitor());
 	}
 
@@ -34,12 +35,12 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 				"	}";
 		String expected = "" +
 				"	@Test\n" +
-				"	void test(){\n" +
+				"	void test() {\n" +
 				"		Assertions.assertArrayEquals(new Object[]{},new Object[]{});\n" +
 				"	}";
 
-		List<String> expectedImports = Arrays.asList("import org.junit.Assert;", "import org.junit.Test;",
-				"import org.junit.jupiter.api.Assertions;");
+		List<String> expectedImports = Arrays.asList("import org.junit.Assert;",
+				"import org.junit.jupiter.api.Assertions;", "import org.junit.jupiter.api.Test;");
 		assertChange(original, expected, expectedImports);
 	}
 }
