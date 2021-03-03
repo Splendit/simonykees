@@ -18,7 +18,7 @@ class AssertInvocationAnalysisResult {
 		this.nameChangedToAssertArrayEquals = nameChangedToAssertArrayEquals;
 		this.messageAsFirstArgument = messageAsFirstArgument;
 	}
-	
+
 	AssertInvocationAnalysisResult(MethodInvocation originalInvocation, boolean newInvocationWithoutQualifier,
 			boolean nameChangedToAssertArrayEquals) {
 		this.originalInvocation = originalInvocation;
@@ -31,7 +31,7 @@ class AssertInvocationAnalysisResult {
 		return originalInvocation;
 	}
 
-	boolean isWithoutQualifierToChange() {
+	public boolean isNewInvocationWithoutQualifier() {
 		return newInvocationWithoutQualifier;
 	}
 
