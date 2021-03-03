@@ -35,7 +35,7 @@ public class MethodInvocationArgumentAnalyser extends ArgumentAnalyser<MethodInv
 		 */
 		IMethodBinding methodBinding = argumentMethod.resolveMethodBinding();
 
-		if ("asList".equals(methodBinding.getName()) && ClassRelationUtil //$NON-NLS-1$
+		if (methodBinding != null && "asList".equals(methodBinding.getName()) && ClassRelationUtil //$NON-NLS-1$
 			.isContentOfType(methodBinding.getDeclaringClass(), java.util.Arrays.class.getName())) {
 			elements = convertToTypedList(argumentMethod.arguments(), Expression.class);
 		}

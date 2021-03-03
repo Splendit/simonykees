@@ -105,6 +105,9 @@ public class UseStringJoinASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		IMethodBinding streamMethodBinding = stream.resolveMethodBinding();
+		if (streamMethodBinding == null) {
+			return Optional.empty();
+		}
 		ITypeBinding streamDeclaringClass = streamMethodBinding.getDeclaringClass();
 		if (!ClassRelationUtil.isContentOfType(streamDeclaringClass, java.util.Collection.class.getName())) {
 			return Optional.empty();
@@ -125,6 +128,9 @@ public class UseStringJoinASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		IMethodBinding parentMethodBinding = parentMethod.resolveMethodBinding();
+		if (parentMethodBinding == null) {
+			return Optional.empty();
+		}
 		ITypeBinding parentMethodDeclaringClass = parentMethodBinding.getDeclaringClass();
 		if (!ClassRelationUtil.isContentOfType(parentMethodDeclaringClass, java.util.stream.Stream.class.getName())) {
 			return Optional.empty();
@@ -143,6 +149,9 @@ public class UseStringJoinASTVisitor extends AbstractASTRewriteASTVisitor {
 			return false;
 		}
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		if (!ClassRelationUtil.isContentOfType(declaringClass, java.util.stream.Collectors.class.getName())) {
 			return false;

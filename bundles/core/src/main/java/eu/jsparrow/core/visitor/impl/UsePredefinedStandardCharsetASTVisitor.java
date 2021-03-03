@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -71,7 +72,11 @@ public class UsePredefinedStandardCharsetASTVisitor extends AbstractAddImportAST
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-		if (!charsetForName.isEquivalentTo(node.resolveMethodBinding())) {
+		IMethodBinding methodBinding = node.resolveMethodBinding();
+		if(methodBinding == null) {
+			return true;
+		}
+		if (!charsetForName.isEquivalentTo(methodBinding)) {
 			return true;
 		}
 		Expression charsetArgument = ASTNodeUtil.returnTypedList(node.arguments(), Expression.class)

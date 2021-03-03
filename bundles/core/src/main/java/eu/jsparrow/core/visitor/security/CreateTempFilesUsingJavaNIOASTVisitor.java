@@ -63,6 +63,9 @@ public class CreateTempFilesUsingJavaNIOASTVisitor extends AbstractAddImportASTV
 	public boolean visit(MethodInvocation node) {
 
 		IMethodBinding methodBinding = node.resolveMethodBinding();
+		if (methodBinding == null) {
+			return true;
+		}
 		List<Expression> createTempFileArguments = ASTNodeUtil.convertToTypedList(node.arguments(), Expression.class);
 		TransformationData data = null;
 

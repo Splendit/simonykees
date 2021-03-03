@@ -171,4 +171,32 @@ public class UseComparatorMethodsASTVisitorComplexCasesTest extends UsesJDTUnitF
 				+ "}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	public void visit_compilationErrorsInMethodDeclaration_shouldTransform() throws Exception {
+		String original = ""
+				+ "void compilationErrorsInMethodDeclaration() {"
+				+ "	CompilationErrorInMethodDeclaration c = new CompilationErrorInMethodDeclaration();\n"
+				+ "	c.foo((String lhs, String rhs) -> lhs.compareTo(rhs));"
+				+ "}"
+				+ ""
+				+ "class CompilationErrorInMethodDeclaration<T extends org.apache.IDontExist> {\n"
+				+ "	\n"
+				+ "	public List<Lisst<org.apache.IDontExist>> foo(Comparator<String> c) {\n"
+				+ "	}"
+				+ "}";
+		String expected = ""
+				+ "void compilationErrorsInMethodDeclaration(){"
+				+ " CompilationErrorInMethodDeclaration c = new CompilationErrorInMethodDeclaration();\n"
+				+ " c.foo(Comparator.<String>naturalOrder());"
+				+ "}"
+				+ ""
+				+ "class CompilationErrorInMethodDeclaration<T extends org.apache.IDontExist> {\n"
+				+ "	\n"
+				+ "	public List<Lisst<org.apache.IDontExist>> foo(Comparator<String> c) {\n"
+				+ "	}"
+				+ "}";
+
+		assertChange(original, expected);
+	}
 }

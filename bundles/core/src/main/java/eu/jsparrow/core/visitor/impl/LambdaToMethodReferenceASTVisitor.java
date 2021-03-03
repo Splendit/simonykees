@@ -98,6 +98,10 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 					Expression.class);
 			Expression methodInvocationExpression = methodInvocation.getExpression();
 
+			if (methodInvocation.resolveMethodBinding() == null) {
+				return true;
+			}
+
 			if (isWrappedInOverloadedMethod(lambdaExpressionNode, methodInvocation)) {
 				return true;
 			}
@@ -311,6 +315,9 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		}
 
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
 		ITypeBinding returnType = methodBinding.getReturnType();
 		if (returnType == null) {
 			return false;
@@ -338,6 +345,9 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	private boolean isAmbiguousMethodReference(MethodInvocation methodInvocation, List<ITypeBinding> params) {
 		Expression expression = methodInvocation.getExpression();
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return true;
+		}
 		ITypeBinding type;
 		List<IMethodBinding> methods = new ArrayList<>();
 		if (expression != null) {
@@ -639,14 +649,17 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 	}
 
-	private boolean areIncompatibleFunctionalInterfaces(IMethodBinding contextFI, IMethodBinding actualFI) {
-		ITypeBinding contextReturnType = contextFI.getReturnType();
-		ITypeBinding actualReturnType = actualFI.getReturnType();
+	private boolean areIncompatibleFunctionalInterfaces(IMethodBinding contextFunctionalInterface, IMethodBinding actualFunctionalInterface) {
+		ITypeBinding contextReturnType = contextFunctionalInterface.getReturnType();
+		ITypeBinding actualReturnType = actualFunctionalInterface.getReturnType();
 		if (!actualReturnType.isAssignmentCompatible(contextReturnType)) {
 			return true;
 		}
-		ITypeBinding[] actualParameters = actualFI.getParameterTypes();
-		ITypeBinding[] expectedParameters = contextFI.getParameterTypes();
+		ITypeBinding[] actualParameters = actualFunctionalInterface.getParameterTypes();
+		ITypeBinding[] expectedParameters = contextFunctionalInterface.getParameterTypes();
+		if (actualParameters.length != expectedParameters.length) {
+			return true;
+		}
 		for (int i = 0; i < actualParameters.length; i++) {
 			ITypeBinding actualParameter = actualParameters[i];
 			ITypeBinding expectedParameter = expectedParameters[i];
