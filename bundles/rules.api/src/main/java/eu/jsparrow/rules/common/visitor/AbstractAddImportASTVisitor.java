@@ -436,4 +436,19 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		}
 		return safeImports.contains(qualifiedName) && !typesImportedOnDemand.contains(qualifiedName);
 	}
+
+	/**
+	 * Adds the fully qualified static method name to the static method names
+	 * which will be imported. <br>
+	 * Before calling this method, call
+	 * {@link #verifyStaticMethodImport(CompilationUnit, String) } for the given
+	 * fully qualified static method name.
+	 * 
+	 * @param fullyQualifiedMethodName
+	 * @return true if a safe import of a stratic method is possible, otherwise
+	 *         false.
+	 */
+	protected boolean canAddStaticMethodImport(String fullyQualifiedMethodName) {
+		return safeStaticMethodImports.contains(fullyQualifiedMethodName);
+	}
 }
