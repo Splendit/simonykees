@@ -24,10 +24,12 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 class JUnit4AssertMethodInvocationData {
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	private final MethodInvocation methodInvocation;
-	private final IMethodBinding methodBinding;
 	private final boolean invocationWithinJUnitJupiterTest;
+	private final String methodName;
+	private final ITypeBinding[] declaredParameterTypes;
 
-	static Optional<JUnit4AssertMethodInvocationData> findJUnit4MethodInvocationData(MethodInvocation methodInvocation) {
+	static Optional<JUnit4AssertMethodInvocationData> findJUnit4MethodInvocationData(
+			MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (isSupportedJUnit4AssertMethod(methodBinding)) {
 			return Optional.of(new JUnit4AssertMethodInvocationData(methodInvocation, methodBinding));
@@ -75,7 +77,9 @@ class JUnit4AssertMethodInvocationData {
 
 	private JUnit4AssertMethodInvocationData(MethodInvocation methodInvocation, IMethodBinding methodBinding) {
 		this.methodInvocation = methodInvocation;
-		this.methodBinding = methodBinding;
+		this.methodName = methodBinding.getName();
+		this.declaredParameterTypes = methodBinding.getMethodDeclaration()
+			.getParameterTypes();
 		this.invocationWithinJUnitJupiterTest = isInvocationWithinJUnitJupiterTest(methodInvocation);
 	}
 
@@ -83,8 +87,12 @@ class JUnit4AssertMethodInvocationData {
 		return methodInvocation;
 	}
 
-	IMethodBinding getMethodBinding() {
-		return methodBinding;
+	public String getMethodName() {
+		return methodName;
+	}
+
+	public ITypeBinding[] getDeclaredParameterTypes() {
+		return declaredParameterTypes;
 	}
 
 	public boolean isInvocationWithinJUnitJupiterTest() {

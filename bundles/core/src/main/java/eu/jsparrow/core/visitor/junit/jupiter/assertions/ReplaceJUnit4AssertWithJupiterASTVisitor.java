@@ -34,7 +34,6 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportASTVisitor {
 
-	private static final String ASSERT_ARRAY_EQUALS = "assertArrayEquals"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS_PREFIX = ORG_JUNIT_JUPITER_API_ASSERTIONS + "."; //$NON-NLS-1$
 
@@ -78,30 +77,15 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			.map(SimpleName::getIdentifier)
 			.collect(Collectors.toSet());
 
-		List<AssertInvocationAnalysisResult> assertInvocationAnalysisResults = jUnit4AssertInvocationDataList
+		List<JUnit4AssertTransformationData> jUnit4AssertTransformationDataList = jUnit4AssertInvocationDataList
 			.stream()
-			.filter(JUnit4AssertMethodInvocationData::isInvocationWithinJUnitJupiterTest)
-			.map(data -> analyzeAssertMethodInvocation(data, methodNamesOfAssertMethodImportsToRemove))
+			.map(data -> this.findTransformationData(data, methodNamesOfAssertMethodImportsToRemove))
+			.filter(Optional::isPresent)
+			.map(Optional::get)
 			.collect(Collectors.toList());
 
-		Set<String> assertionMethodSimpleNamesForNewStaticImports = assertInvocationAnalysisResults
-			.stream()
-			.filter(AssertInvocationAnalysisResult::isNewInvocationWithoutQualifier)
-			.map(this::getNewMethodName)
-			.collect(Collectors.toSet());
+		transform(staticAssertMethodImportsToRemove, jUnit4AssertTransformationDataList);
 
-		List<AssertTransformationData> invocationReplacementData = assertInvocationAnalysisResults
-			.stream()
-			.filter(this::isAnyChangeOnMethodInvocation)
-			.map(this::findInvocationReplacementData)
-			.collect(Collectors.toList());
-
-		if (!staticAssertMethodImportsToRemove.isEmpty()
-				|| !assertionMethodSimpleNamesForNewStaticImports.isEmpty()
-				|| !invocationReplacementData.isEmpty()) {
-			transform(staticAssertMethodImportsToRemove, assertionMethodSimpleNamesForNewStaticImports,
-					invocationReplacementData);
-		}
 		return false;
 	}
 
@@ -112,103 +96,53 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			.filter(data -> !data.isInvocationWithinJUnitJupiterTest())
 			.filter(data -> data.getMethodInvocation()
 				.getExpression() == null)
-			.map(JUnit4AssertMethodInvocationData::getMethodBinding)
-			.map(IMethodBinding::getName)
+			.map(JUnit4AssertMethodInvocationData::getMethodName)
 			.collect(Collectors.toSet());
 
-		List<ImportDeclaration> originalStaticAssertMethodImportsToRemove = ASTNodeUtil
+		return ASTNodeUtil
 			.convertToTypedList(getCompilationUnit().imports(), ImportDeclaration.class)
 			.stream()
 			.filter(importDeclaration -> canRemoveStaticImport(importDeclaration,
 					simpleNamesOfStaticAssertMethodImportsToKeep))
 			.collect(Collectors.toList());
-		return originalStaticAssertMethodImportsToRemove;
 	}
 
-	private AssertInvocationAnalysisResult analyzeAssertMethodInvocation(
-			JUnit4AssertMethodInvocationData methodInvocationData, Set<String> methodNamesOfAssertMethodImportsToRemove) {
-
-		MethodInvocation methodInvocation = methodInvocationData.getMethodInvocation();
-		IMethodBinding methodBinding = methodInvocationData.getMethodBinding();
-		String methodName = methodBinding.getName();
-		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
-			.getParameterTypes();
-
-		boolean isNameChangedToAssertArrayEquals;
-		if (isAssertEqualsComparingObjectArrays(methodName, declaredParameterTypes)) {
-			isNameChangedToAssertArrayEquals = true;
-		} else {
-			isNameChangedToAssertArrayEquals = false;
+	private Optional<JUnit4AssertTransformationData> findTransformationData(
+			JUnit4AssertMethodInvocationData invocationData,
+			Set<String> methodNamesOfAssertMethodImportsToRemove) {
+		if (!invocationData.isInvocationWithinJUnitJupiterTest()) {
+			return Optional.empty();
 		}
-		String newMethodName = isNameChangedToAssertArrayEquals ? ASSERT_ARRAY_EQUALS : methodName;
-		boolean newInvocationWithoutQualifier;
-
-		if (methodNamesOfAssertMethodImportsToRemove.contains(newMethodName)) {
-			newInvocationWithoutQualifier = true;
+		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
+		String methodName = invocationData.getMethodName();
+		String methodNameReplacement;
+		if (isAssertEqualsComparingObjectArrays(methodName, invocationData.getDeclaredParameterTypes())) {
+			methodNameReplacement = "assertArrayEquals"; //$NON-NLS-1$
 		} else {
-			String fullyQualifiedAssertionsMethodName = ORG_JUNIT_JUPITER_API_ASSERTIONS_PREFIX
-					+ newMethodName;
-			verifyStaticMethodImport(getCompilationUnit(), fullyQualifiedAssertionsMethodName);
-			newInvocationWithoutQualifier = canAddStaticMethodImport(fullyQualifiedAssertionsMethodName);
+			methodNameReplacement = null;
 		}
+		String newMethodName = methodNameReplacement != null ? methodNameReplacement : methodName;
+		String staticImportForNewInvocation = findStaticImportForNewInvocation(
+				methodNamesOfAssertMethodImportsToRemove, newMethodName).orElse(null);
 
 		List<Expression> invocationArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
+		Expression assertionMessageAsFirstArgument;
 
-		if (!invocationArguments.isEmpty() && isParameterTypeString(declaredParameterTypes[0])) {
-			Expression assertionMessageAsFirstArgument = invocationArguments.get(0);
-			return new AssertInvocationAnalysisResult(methodInvocation, newInvocationWithoutQualifier,
-					isNameChangedToAssertArrayEquals, assertionMessageAsFirstArgument);
-		}
-
-		return new AssertInvocationAnalysisResult(methodInvocation, newInvocationWithoutQualifier,
-				isNameChangedToAssertArrayEquals);
-
-	}
-
-	String getNewMethodName(AssertInvocationAnalysisResult analysisResult) {
-		if (analysisResult.isNameChangedToAssertArrayEquals()) {
-			return ASSERT_ARRAY_EQUALS;
-		}
-		return analysisResult.getOriginalInvocation()
-			.getName()
-			.getIdentifier();
-	}
-
-	private boolean isAnyChangeOnMethodInvocation(AssertInvocationAnalysisResult analysisResult) {
-
-		if (analysisResult.getOriginalInvocation()
-			.getExpression() != null) {
-			return true;
-		}
-		boolean isNewInvocationQualified = !analysisResult.isNewInvocationWithoutQualifier();
-		if (isNewInvocationQualified) {
-			return true;
-		}
-		if (analysisResult.isNameChangedToAssertArrayEquals()) {
-			return true;
-		}
-		return analysisResult.getMessageAsFirstArgument()
-			.isPresent();
-	}
-
-	private AssertTransformationData findInvocationReplacementData(
-			AssertInvocationAnalysisResult analysisResult) {
-
-		MethodInvocation originalInvocation = analysisResult.getOriginalInvocation();
-		String newMethodName = getNewMethodName(analysisResult);
-		Supplier<MethodInvocation> newMethodInvocationSupplier;
-		if (analysisResult.isNewInvocationWithoutQualifier()) {
-			newMethodInvocationSupplier = () -> this.createNewInvocationWithoutQualifier(newMethodName);
+		if (!invocationArguments.isEmpty() && isParameterTypeString(invocationData.getDeclaredParameterTypes()[0])) {
+			assertionMessageAsFirstArgument = invocationArguments.get(0);
 		} else {
-			newMethodInvocationSupplier = () -> this.createNewInvocationWithAssertionsQualifier(originalInvocation,
-					newMethodName);
+			assertionMessageAsFirstArgument = null;
 		}
 
-		List<Expression> invocationArguments = ASTNodeUtil.convertToTypedList(originalInvocation.arguments(),
-				Expression.class);
-		Expression assertionMessageAsFirstArgument = analysisResult.getMessageAsFirstArgument()
-			.orElse(null);
+		if (staticImportForNewInvocation != null
+				&& methodInvocation.getExpression() == null
+				&& assertionMessageAsFirstArgument == null
+				&& methodNameReplacement == null) {
+			return Optional
+				.of(new JUnit4AssertTransformationData(methodInvocation, staticImportForNewInvocation));
+		}
+
 		Supplier<List<Expression>> newArgumentsSupplier;
 		if (assertionMessageAsFirstArgument != null) {
 			invocationArguments.remove(assertionMessageAsFirstArgument);
@@ -217,7 +151,34 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		} else {
 			newArgumentsSupplier = () -> this.createAssertionMethodArguments(invocationArguments);
 		}
-		return new AssertTransformationData(originalInvocation, newMethodInvocationSupplier, newArgumentsSupplier);
+
+		Supplier<MethodInvocation> newMethodInvocationSupplier;
+		if (staticImportForNewInvocation != null) {
+			newMethodInvocationSupplier = () -> this.createNewInvocationWithoutQualifier(newMethodName,
+					newArgumentsSupplier);
+		} else {
+			newMethodInvocationSupplier = () -> this.createNewInvocationWithAssertionsQualifier(methodInvocation,
+					newMethodName, newArgumentsSupplier);
+		}
+
+		if (staticImportForNewInvocation != null) {
+			return Optional.of(new JUnit4AssertTransformationData(methodInvocation, staticImportForNewInvocation,
+					newMethodInvocationSupplier));
+		}
+		return Optional.of(new JUnit4AssertTransformationData(methodInvocation, newMethodInvocationSupplier));
+	}
+
+	private Optional<String> findStaticImportForNewInvocation(
+			Set<String> methodNamesOfAssertMethodImportsToRemove, String newMethodName) {
+		String fullyQualifiedAssertionsMethodName = ORG_JUNIT_JUPITER_API_ASSERTIONS_PREFIX + newMethodName;
+		if (methodNamesOfAssertMethodImportsToRemove.contains(newMethodName)) {
+			return Optional.of(fullyQualifiedAssertionsMethodName);
+		}
+		verifyStaticMethodImport(getCompilationUnit(), fullyQualifiedAssertionsMethodName);
+		if (canAddStaticMethodImport(fullyQualifiedAssertionsMethodName)) {
+			return Optional.of(fullyQualifiedAssertionsMethodName);
+		}
+		return Optional.empty();
 	}
 
 	/**
@@ -226,7 +187,6 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 	 * {@code assertEquals(String, Object[], Object[])} where a corresponding
 	 * method with the name "assertArrayEquals" is available
 	 * 
-	 * @param methodBinding
 	 * @return
 	 */
 	private boolean isAssertEqualsComparingObjectArrays(String methodName, ITypeBinding[] declaredParameterTypes) {
@@ -283,16 +243,21 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		return false;
 	}
 
-	private MethodInvocation createNewInvocationWithoutQualifier(String newMethodName) {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private MethodInvocation createNewInvocationWithoutQualifier(String newMethodName,
+			Supplier<List<Expression>> newArgumentsSupplier) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation newInvocation = ast.newMethodInvocation();
 		newInvocation.setName(ast.newSimpleName(newMethodName));
+		List newArguments = newInvocation.arguments();
+		newArgumentsSupplier.get()
+			.forEach(newArguments::add);
 		return newInvocation;
 	}
 
 	private MethodInvocation createNewInvocationWithAssertionsQualifier(MethodInvocation contextForImport,
-			String newMethodName) {
-		MethodInvocation newInvocation = createNewInvocationWithoutQualifier(newMethodName);
+			String newMethodName, Supplier<List<Expression>> newArgumentsSupplier) {
+		MethodInvocation newInvocation = createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier);
 		Name newQualifier = addImport(ORG_JUNIT_JUPITER_API_ASSERTIONS, contextForImport);
 		newInvocation.setExpression(newQualifier);
 		return newInvocation;
@@ -311,37 +276,44 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			.forEach(assertionMethodArguments::add);
 		LambdaExpression messageSupplierLambdaExpression = astRewrite.getAST()
 			.newLambdaExpression();
-		messageSupplierLambdaExpression.setBody((Expression) astRewrite.createCopyTarget(assertionMessage));
+		messageSupplierLambdaExpression.setBody(astRewrite.createCopyTarget(assertionMessage));
 		assertionMethodArguments.add(messageSupplierLambdaExpression);
 		return assertionMethodArguments;
 	}
 
-	private void transform(List<ImportDeclaration> assertMethodStaticImportsToRemove,
-			Set<String> assertionMethodSimpleNamesForNewStaticImports,
-			List<AssertTransformationData> assertTransformationDataList) {
+	private void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
+			List<JUnit4AssertTransformationData> jUnit4AssertTransformationDataList) {
+		if (!staticAssertMethodImportsToRemove.isEmpty() || !jUnit4AssertTransformationDataList.isEmpty()) {
 
-		assertMethodStaticImportsToRemove.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
-		AST ast = astRewrite.getAST();
-		ListRewrite newImportsListRewrite = astRewrite.getListRewrite(getCompilationUnit(),
-				CompilationUnit.IMPORTS_PROPERTY);
-		assertionMethodSimpleNamesForNewStaticImports
-			.forEach(methodName -> {
-				ImportDeclaration newImportDeclaration = ast.newImportDeclaration();
-				String qualifiedName = ORG_JUNIT_JUPITER_API_ASSERTIONS_PREFIX;
-				newImportDeclaration.setName(ast.newName(qualifiedName + methodName));
-				newImportDeclaration.setStatic(true);
-				newImportsListRewrite.insertLast(newImportDeclaration, null);
-			});
-		assertTransformationDataList.forEach(this::replaceAssertMethodInvocation);
+			staticAssertMethodImportsToRemove.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
+
+			Set<String> qualifiedNamesOfNewStaticImports = jUnit4AssertTransformationDataList
+				.stream()
+				.map(JUnit4AssertTransformationData::getNewStaticMethodImport)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toSet());
+
+			AST ast = astRewrite.getAST();
+			ListRewrite newImportsListRewrite = astRewrite.getListRewrite(getCompilationUnit(),
+					CompilationUnit.IMPORTS_PROPERTY);
+			qualifiedNamesOfNewStaticImports
+				.forEach(fullyQualifiedMethodName -> {
+					ImportDeclaration newImportDeclaration = ast.newImportDeclaration();
+					newImportDeclaration.setName(ast.newName(fullyQualifiedMethodName));
+					newImportDeclaration.setStatic(true);
+					newImportsListRewrite.insertLast(newImportDeclaration, null);
+				});
+
+			jUnit4AssertTransformationDataList.forEach(this::replaceAssertMethodInvocation);
+		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void replaceAssertMethodInvocation(AssertTransformationData invocationReplacementData) {
-		MethodInvocation methodInvocationToReplace = invocationReplacementData.getMethodInvocationToReplace();
-		MethodInvocation methodInvocationReplacement = invocationReplacementData.createAssertionMethodInvocation();
-		List newArguments = methodInvocationReplacement.arguments();
-		invocationReplacementData.createNewArgumentList()
-			.forEach(newArguments::add);
-		astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
+	private void replaceAssertMethodInvocation(JUnit4AssertTransformationData transformationData) {
+		transformationData.createMethodInvocationReplacement()
+			.ifPresent(methodInvocationReplacement -> {
+				MethodInvocation methodInvocationToReplace = transformationData.getOriginalMethodInvocation();
+				astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
+			});
 	}
 }
