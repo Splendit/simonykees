@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -108,48 +107,37 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 	}
 
 	private Optional<JUnit4AssertTransformationData> findTransformationData(
-			JUnit4AssertMethodInvocationData invocationData,
-			Set<String> methodNamesOfAssertMethodImportsToRemove) {
+			JUnit4AssertMethodInvocationData invocationData, Set<String> methodNamesOfAssertMethodImportsToRemove) {
+
 		if (!invocationData.isInvocationWithinJUnitJupiterTest()) {
 			return Optional.empty();
 		}
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
-		String methodName = invocationData.getMethodName();
-		String methodNameReplacement;
-		if (isAssertEqualsComparingObjectArrays(methodName, invocationData.getDeclaredParameterTypes())) {
-			methodNameReplacement = "assertArrayEquals"; //$NON-NLS-1$
-		} else {
-			methodNameReplacement = null;
-		}
-		String newMethodName = methodNameReplacement != null ? methodNameReplacement : methodName;
+		String deprecatedethodNameReplacement = invocationData.getDeprecatedMethodNameReplacement()
+			.orElse(null);
+		String newMethodName = deprecatedethodNameReplacement != null ? deprecatedethodNameReplacement : invocationData.getMethodName();
 		String staticImportForNewInvocation = findStaticImportForNewInvocation(
 				methodNamesOfAssertMethodImportsToRemove, newMethodName).orElse(null);
 
-		List<Expression> invocationArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-				Expression.class);
-		Expression assertionMessageAsFirstArgument;
-
-		if (!invocationArguments.isEmpty() && isParameterTypeString(invocationData.getDeclaredParameterTypes()[0])) {
-			assertionMessageAsFirstArgument = invocationArguments.get(0);
-		} else {
-			assertionMessageAsFirstArgument = null;
-		}
+		Expression assertionMessageArgument = invocationData.getMessageArgument()
+			.orElse(null);
 
 		if (staticImportForNewInvocation != null
 				&& methodInvocation.getExpression() == null
-				&& assertionMessageAsFirstArgument == null
-				&& methodNameReplacement == null) {
+				&& assertionMessageArgument == null
+				&& deprecatedethodNameReplacement == null) {
 			return Optional
 				.of(new JUnit4AssertTransformationData(methodInvocation, staticImportForNewInvocation));
 		}
 
 		Supplier<List<Expression>> newArgumentsSupplier;
-		if (assertionMessageAsFirstArgument != null) {
-			invocationArguments.remove(assertionMessageAsFirstArgument);
-			newArgumentsSupplier = () -> this.createAssertionMethodArguments(invocationArguments,
-					assertionMessageAsFirstArgument);
+		if (assertionMessageArgument != null) {
+			newArgumentsSupplier = () -> this.createAssertionMethodArguments(
+					invocationData.getArgumentsExceptForMessage(),
+					assertionMessageArgument);
 		} else {
-			newArgumentsSupplier = () -> this.createAssertionMethodArguments(invocationArguments);
+			newArgumentsSupplier = () -> this
+				.createAssertionMethodArguments(invocationData.getArgumentsExceptForMessage());
 		}
 
 		Supplier<MethodInvocation> newMethodInvocationSupplier;
@@ -179,50 +167,6 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			return Optional.of(fullyQualifiedAssertionsMethodName);
 		}
 		return Optional.empty();
-	}
-
-	/**
-	 * This applies to the following signatures:<br>
-	 * {@code assertEquals(Object[], Object[])}
-	 * {@code assertEquals(String, Object[], Object[])} where a corresponding
-	 * method with the name "assertArrayEquals" is available
-	 * 
-	 * @return
-	 */
-	private boolean isAssertEqualsComparingObjectArrays(String methodName, ITypeBinding[] declaredParameterTypes) {
-		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$
-			return false;
-		}
-		/*
-		 * applies to {@code assertEquals(Object[], Object[])}
-		 */
-		if (declaredParameterTypes.length == 2) {
-			return isParameterTypeObjectArray(declaredParameterTypes[0])
-					&& isParameterTypeObjectArray(declaredParameterTypes[1]);
-		}
-		/*
-		 * applies to {@code assertEquals(String, Object[], Object[])}
-		 */
-		if (declaredParameterTypes.length == 3) {
-			return isParameterTypeString(declaredParameterTypes[0])
-					&& isParameterTypeObjectArray(declaredParameterTypes[1])
-					&& isParameterTypeObjectArray(declaredParameterTypes[2]);
-		}
-		return false;
-	}
-
-	private boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
-		if (parameterType.isArray()) {
-			return parameterType.getComponentType()
-				.getQualifiedName()
-				.equals("java.lang.Object") && parameterType.getDimensions() == 1; //$NON-NLS-1$
-		}
-		return false;
-	}
-
-	private boolean isParameterTypeString(ITypeBinding parameterType) {
-		return parameterType.getQualifiedName()
-			.equals("java.lang.String"); //$NON-NLS-1$
 	}
 
 	private boolean canRemoveStaticImport(ImportDeclaration importDeclaration,

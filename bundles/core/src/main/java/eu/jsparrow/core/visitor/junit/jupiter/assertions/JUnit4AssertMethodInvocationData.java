@@ -1,9 +1,12 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -14,9 +17,10 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * Stores a {@link MethodInvocation} together with its corresponding
- * {@link IMethodBinding}. This helps to avoid resolving the same method binding
- * repeatedly.
+ * Immutable class storing all necessary informations about the given invocation
+ * of a static method of the class {@code org.junit.Assert} which may be
+ * replaced by an invocation of the corresponding method of
+ * {@code org.junit.jupiter.api.Assertions}.
  * 
  * @since 3.28.0
  *
@@ -26,7 +30,9 @@ class JUnit4AssertMethodInvocationData {
 	private final MethodInvocation methodInvocation;
 	private final boolean invocationWithinJUnitJupiterTest;
 	private final String methodName;
-	private final ITypeBinding[] declaredParameterTypes;
+	private final String deprecatedMethodNameReplacement;
+	private final Expression assertionMessageAsFirstArgument;
+	private final List<Expression> assertionArgumentsExceptForMessage;
 
 	static Optional<JUnit4AssertMethodInvocationData> findJUnit4MethodInvocationData(
 			MethodInvocation methodInvocation) {
@@ -75,27 +81,90 @@ class JUnit4AssertMethodInvocationData {
 		return false;
 	}
 
+	/**
+	 * This applies to the following signatures:<br>
+	 * {@code assertEquals(Object[], Object[])}
+	 * {@code assertEquals(String, Object[], Object[])} where a corresponding
+	 * method with the name "assertArrayEquals" is available
+	 * 
+	 * @return
+	 */
+	private static boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
+			ITypeBinding[] declaredParameterTypes) {
+		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$
+			return false;
+		}
+
+		if (declaredParameterTypes.length == 2) {
+			return isParameterTypeObjectArray(declaredParameterTypes[0])
+					&& isParameterTypeObjectArray(declaredParameterTypes[1]);
+		}
+
+		if (declaredParameterTypes.length == 3) {
+			return isParameterTypeString(declaredParameterTypes[0])
+					&& isParameterTypeObjectArray(declaredParameterTypes[1])
+					&& isParameterTypeObjectArray(declaredParameterTypes[2]);
+		}
+		return false;
+	}
+
+	private static boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
+		if (parameterType.isArray()) {
+			return parameterType.getComponentType()
+				.getQualifiedName()
+				.equals("java.lang.Object") && parameterType.getDimensions() == 1; //$NON-NLS-1$
+		}
+		return false;
+	}
+
+	private static boolean isParameterTypeString(ITypeBinding parameterType) {
+		return parameterType.getQualifiedName()
+			.equals("java.lang.String"); //$NON-NLS-1$
+	}
+
 	private JUnit4AssertMethodInvocationData(MethodInvocation methodInvocation, IMethodBinding methodBinding) {
 		this.methodInvocation = methodInvocation;
 		this.methodName = methodBinding.getName();
-		this.declaredParameterTypes = methodBinding.getMethodDeclaration()
-			.getParameterTypes();
 		this.invocationWithinJUnitJupiterTest = isInvocationWithinJUnitJupiterTest(methodInvocation);
+		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
+			.getParameterTypes();
+		if (isDeprecatedAssertEqualsComparingObjectArrays(methodName, declaredParameterTypes)) {
+			deprecatedMethodNameReplacement = "assertArrayEquals"; //$NON-NLS-1$
+		} else {
+			deprecatedMethodNameReplacement = null;
+		}
+		List<Expression> invocationArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+				Expression.class);
+
+		if (!invocationArguments.isEmpty() && isParameterTypeString(declaredParameterTypes[0])) {
+			assertionMessageAsFirstArgument = invocationArguments.remove(0);
+		} else {
+			assertionMessageAsFirstArgument = null;
+		}
+		assertionArgumentsExceptForMessage = Collections.unmodifiableList(invocationArguments);
 	}
 
 	MethodInvocation getMethodInvocation() {
 		return methodInvocation;
 	}
 
-	public String getMethodName() {
+	String getMethodName() {
 		return methodName;
 	}
 
-	public ITypeBinding[] getDeclaredParameterTypes() {
-		return declaredParameterTypes;
+	Optional<String> getDeprecatedMethodNameReplacement() {
+		return Optional.ofNullable(deprecatedMethodNameReplacement);
 	}
 
-	public boolean isInvocationWithinJUnitJupiterTest() {
+	Optional<Expression> getMessageArgument() {
+		return Optional.ofNullable(assertionMessageAsFirstArgument);
+	}
+
+	List<Expression> getArgumentsExceptForMessage() {
+		return assertionArgumentsExceptForMessage;
+	}
+
+	boolean isInvocationWithinJUnitJupiterTest() {
 		return invocationWithinJUnitJupiterTest;
 	}
 }
