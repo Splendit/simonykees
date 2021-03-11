@@ -156,6 +156,20 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 	}
 
 	@Test
+	public void visit_failWithoutQualifierAndWithMessage_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assert.fail", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+		String original = "" +
+				"	@Test\n"
+				+ "	void test() {\n"
+				+ "		fail(\"This test fails.\");\n"
+				+ "	}";
+		List<String> expectedImports = Arrays.asList("import org.junit.jupiter.api.Test;",
+				"import static org.junit.jupiter.api.Assertions.fail;");
+		assertChange(original, original, expectedImports);
+	}
+
+	@Test
 	public void visit_assertEqualsNewStaticImportNotPossible_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Assert.class.getName());
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
@@ -291,7 +305,5 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 				"import static org.junit.Assert.*;");
 		assertChange(original, expected, expectedImports);
 	}
-	
-	
 
 }

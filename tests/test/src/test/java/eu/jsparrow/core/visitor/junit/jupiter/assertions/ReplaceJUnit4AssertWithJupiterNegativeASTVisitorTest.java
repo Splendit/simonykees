@@ -66,6 +66,17 @@ public class ReplaceJUnit4AssertWithJupiterNegativeASTVisitorTest
 
 		assertNoChange(original);
 	}
+	
+	@Test
+	public void visit_assertEqualsWithQualifierAsLambdaBody_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(org.junit.Assert.class.getName());
+		String original = "" +
+				"	void test() {\n"
+				+ "		Runnable r = () -> Assert.assertEquals(10L, 10L);\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
 
 	@Test
 	public void visit_assertEqualsInTestMethodOfLocalClass_shouldNotTransform() throws Exception {
