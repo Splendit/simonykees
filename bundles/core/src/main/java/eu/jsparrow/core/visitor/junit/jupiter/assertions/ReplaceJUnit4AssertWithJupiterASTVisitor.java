@@ -241,7 +241,8 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 	private void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
 			Set<String> newStaticAssertionMethodImports,
 			List<JUnit4AssertTransformationData> jUnit4AssertTransformationDataList) {
-		if (!staticAssertMethodImportsToRemove.isEmpty() || !jUnit4AssertTransformationDataList.isEmpty()) {
+		if (!staticAssertMethodImportsToRemove.isEmpty() || !newStaticAssertionMethodImports.isEmpty()
+				|| !jUnit4AssertTransformationDataList.isEmpty()) {
 
 			staticAssertMethodImportsToRemove.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
 
@@ -261,6 +262,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 				MethodInvocation methodInvocationReplacement = data.createMethodInvocationReplacement();
 				astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
 			});
+			onRewrite();
 		}
 	}
 }
