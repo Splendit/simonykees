@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -168,74 +167,56 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 
 		boolean newInvocationWithoutQualifier = unqualifiedNamesOfNewAssertionMwethodImports.contains(newMethodName);
 
-		Expression assertionMessageArgument = invocationData.getMessageArgument()
-			.orElse(null);
+		List<Expression> originalArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+				Expression.class);
+
+		List<Expression> newArguments;
+		if (invocationData.isMessageAsFirstParameter() && originalArguments.size() > 1) {
+			newArguments = new ArrayList<>();
+			Expression messageArgument = originalArguments.remove(0);
+			newArguments.addAll(originalArguments);
+			newArguments.add(messageArgument);
+		} else {
+			newArguments = originalArguments;
+		}
 
 		if (methodInvocation.getExpression() == null
 				&& newInvocationWithoutQualifier
-				&& assertionMessageArgument == null
+				&& newArguments == originalArguments
 				&& deprecatedethodNameReplacement == null) {
 			return Optional.empty();
 		}
 
-		Supplier<List<Expression>> newArgumentsSupplier;
-		if (assertionMessageArgument != null) {
-			newArgumentsSupplier = () -> this.createAssertionMethodArguments(
-					invocationData.getArgumentsExceptForMessage(),
-					assertionMessageArgument);
-		} else {
-			newArgumentsSupplier = () -> this
-				.createAssertionMethodArguments(invocationData.getArgumentsExceptForMessage());
-		}
-
 		Supplier<MethodInvocation> newMethodInvocationSupplier;
 		if (newInvocationWithoutQualifier) {
-			newMethodInvocationSupplier = () -> this.createNewInvocationWithoutQualifier(newMethodName,
-					newArgumentsSupplier);
+			newMethodInvocationSupplier = () -> this.createNewInvocationWithoutQualifier(newMethodName, newArguments);
 		} else {
 			newMethodInvocationSupplier = () -> this.createNewInvocationWithAssertionsQualifier(methodInvocation,
-					newMethodName, newArgumentsSupplier);
+					newMethodName, newArguments);
 		}
 
 		return Optional.of(new JUnit4AssertTransformationData(methodInvocation, newMethodInvocationSupplier));
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	private MethodInvocation createNewInvocationWithoutQualifier(String newMethodName,
-			Supplier<List<Expression>> newArgumentsSupplier) {
+			List<Expression> arguments) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation newInvocation = ast.newMethodInvocation();
 		newInvocation.setName(ast.newSimpleName(newMethodName));
-		List newArguments = newInvocation.arguments();
-		newArgumentsSupplier.get()
-			.forEach(newArguments::add);
+		List<Expression> newInvocationArguments = newInvocation.arguments();
+		arguments.stream()
+			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
+			.forEach(newInvocationArguments::add);
 		return newInvocation;
 	}
 
 	private MethodInvocation createNewInvocationWithAssertionsQualifier(MethodInvocation contextForImport,
-			String newMethodName, Supplier<List<Expression>> newArgumentsSupplier) {
-		MethodInvocation newInvocation = createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier);
+			String newMethodName, List<Expression> arguments) {
+		MethodInvocation newInvocation = createNewInvocationWithoutQualifier(newMethodName, arguments);
 		Name newQualifier = addImport(ORG_JUNIT_JUPITER_API_ASSERTIONS, contextForImport);
 		newInvocation.setExpression(newQualifier);
 		return newInvocation;
-	}
-
-	private List<Expression> createAssertionMethodArguments(List<Expression> arguments) {
-		return arguments.stream()
-			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
-			.collect(Collectors.toList());
-	}
-
-	private List<Expression> createAssertionMethodArguments(List<Expression> arguments, Expression assertionMessage) {
-		List<Expression> assertionMethodArguments = new ArrayList<>();
-		arguments.stream()
-			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
-			.forEach(assertionMethodArguments::add);
-		LambdaExpression messageSupplierLambdaExpression = astRewrite.getAST()
-			.newLambdaExpression();
-		messageSupplierLambdaExpression.setBody(astRewrite.createCopyTarget(assertionMessage));
-		assertionMethodArguments.add(messageSupplierLambdaExpression);
-		return assertionMethodArguments;
 	}
 
 	private void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,

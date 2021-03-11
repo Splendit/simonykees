@@ -56,7 +56,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 		String expected = "" +
 				"	@Test\n" +
 				"	void test() {\n" +
-				"		assertArrayEquals(new Object[]{},new Object[]{},() -> \"Both arrays should be equal!\");\n" +
+				"		assertArrayEquals(new Object[]{},new Object[]{}, \"Both arrays should be equal!\");\n" +
 				"	}";
 
 		List<String> expectedImports = Arrays.asList("import org.junit.Assert;", "import org.junit.jupiter.api.Test;",
@@ -133,7 +133,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
 		String expected = "" +
 				"	@Test\n"
 				+ "	void test() {\n"
-				+ "		assertEquals(10L, 10L, () -> \"10L should be equal to 10L\");\n"
+				+ "		assertEquals(10L, 10L, \"10L should be equal to 10L\");\n"
 				+ "	}";
 
 		List<String> expectedImports = Arrays.asList("import org.junit.jupiter.api.Test;",

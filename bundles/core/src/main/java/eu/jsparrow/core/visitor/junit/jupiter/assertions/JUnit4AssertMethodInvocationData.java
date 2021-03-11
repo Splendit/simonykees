@@ -1,12 +1,9 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -31,8 +28,7 @@ class JUnit4AssertMethodInvocationData {
 	private final boolean invocationWithinJUnitJupiterTest;
 	private final String methodName;
 	private final String deprecatedMethodNameReplacement;
-	private final Expression assertionMessageAsFirstArgument;
-	private final List<Expression> assertionArgumentsExceptForMessage;
+	private final boolean messageAsFirstParameter;
 
 	static Optional<JUnit4AssertMethodInvocationData> findJUnit4MethodInvocationData(
 			MethodInvocation methodInvocation) {
@@ -81,14 +77,6 @@ class JUnit4AssertMethodInvocationData {
 		return false;
 	}
 
-	/**
-	 * This applies to the following signatures:<br>
-	 * {@code assertEquals(Object[], Object[])}
-	 * {@code assertEquals(String, Object[], Object[])} where a corresponding
-	 * method with the name "assertArrayEquals" is available
-	 * 
-	 * @return
-	 */
 	private static boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
 			ITypeBinding[] declaredParameterTypes) {
 		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$
@@ -133,15 +121,7 @@ class JUnit4AssertMethodInvocationData {
 		} else {
 			deprecatedMethodNameReplacement = null;
 		}
-		List<Expression> invocationArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-				Expression.class);
-
-		if (!invocationArguments.isEmpty() && isParameterTypeString(declaredParameterTypes[0])) {
-			assertionMessageAsFirstArgument = invocationArguments.remove(0);
-		} else {
-			assertionMessageAsFirstArgument = null;
-		}
-		assertionArgumentsExceptForMessage = Collections.unmodifiableList(invocationArguments);
+		messageAsFirstParameter = declaredParameterTypes.length > 0 && isParameterTypeString(declaredParameterTypes[0]);
 	}
 
 	MethodInvocation getMethodInvocation() {
@@ -156,12 +136,8 @@ class JUnit4AssertMethodInvocationData {
 		return Optional.ofNullable(deprecatedMethodNameReplacement);
 	}
 
-	Optional<Expression> getMessageArgument() {
-		return Optional.ofNullable(assertionMessageAsFirstArgument);
-	}
-
-	List<Expression> getArgumentsExceptForMessage() {
-		return assertionArgumentsExceptForMessage;
+	public boolean isMessageAsFirstParameter() {
+		return messageAsFirstParameter;
 	}
 
 	boolean isInvocationWithinJUnitJupiterTest() {

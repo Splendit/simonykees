@@ -15,7 +15,7 @@ public class ReplaceJUnit4AssertWithJupiterAlwaysTransformedRule {
 
 		@Test
 		public void testAssertEqualsWithMessageAndStrings() throws Exception {
-			assertEquals("HelloWorld!", "HelloWorld!", () -> "expected that \"HelloWorld!\" equals \"HelloWorld!\".");
+			assertEquals("HelloWorld!", "HelloWorld!", "expected that \"HelloWorld!\" equals \"HelloWorld!\".");
 		}
 	};
 
@@ -29,7 +29,7 @@ public class ReplaceJUnit4AssertWithJupiterAlwaysTransformedRule {
 		@Test
 		public void testAssertEqualsWithMessageAndStrings() throws Exception {
 			assertEquals(Double.valueOf(1.0), Double.valueOf(1.0),
-					() -> "expected that Double.valueOf(1.0)equals Double.valueOf(1.0).");
+					"expected that Double.valueOf(1.0)equals Double.valueOf(1.0).");
 		}
 	};
 }
