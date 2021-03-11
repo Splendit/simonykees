@@ -94,7 +94,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 			}
 		});
 
-		List<JUnit4AssertTransformationData> jUnit4AssertTransformationDataList = allJUnit4AssertInvocations
+		List<JUnit4AssertInvocationReplacementData> jUnit4AssertTransformationDataList = allJUnit4AssertInvocations
 			.stream()
 			.map(data -> this.findTransformationData(data, unqualifiedNamesOfNewAssertionMwethodImports))
 			.filter(Optional::isPresent)
@@ -152,7 +152,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		return canAddStaticMethodImport(fullyQualifiedAssertionsMethodName);
 	}
 
-	private Optional<JUnit4AssertTransformationData> findTransformationData(
+	private Optional<JUnit4AssertInvocationReplacementData> findTransformationData(
 			JUnit4AssertMethodInvocationData invocationData,
 			Set<String> unqualifiedNamesOfNewAssertionMwethodImports) {
 
@@ -195,7 +195,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 					newMethodName, newArguments);
 		}
 
-		return Optional.of(new JUnit4AssertTransformationData(methodInvocation, newMethodInvocationSupplier));
+		return Optional.of(new JUnit4AssertInvocationReplacementData(methodInvocation, newMethodInvocationSupplier));
 	}
 
 	@SuppressWarnings({ "unchecked" })
@@ -221,7 +221,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 
 	private void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
 			Set<String> newStaticAssertionMethodImports,
-			List<JUnit4AssertTransformationData> jUnit4AssertTransformationDataList) {
+			List<JUnit4AssertInvocationReplacementData> jUnit4AssertTransformationDataList) {
 		if (!staticAssertMethodImportsToRemove.isEmpty() || !newStaticAssertionMethodImports.isEmpty()
 				|| !jUnit4AssertTransformationDataList.isEmpty()) {
 

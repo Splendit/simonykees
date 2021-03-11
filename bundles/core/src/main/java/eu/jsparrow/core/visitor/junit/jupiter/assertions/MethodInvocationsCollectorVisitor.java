@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 /**
+ * Collects all {@link MethodInvocation} nodes in a list.
  * 
  * @since 3.28.0
  *
