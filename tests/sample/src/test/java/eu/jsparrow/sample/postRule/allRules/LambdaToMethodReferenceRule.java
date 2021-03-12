@@ -5,6 +5,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -489,6 +491,29 @@ public class LambdaToMethodReferenceRule {
 
 		final FunctionToInt<?> localFunction = (Deque<Integer> x1) -> x1.getFirst();
 
+	}
+
+	/**
+	 * SIM-1826 - lambda expressions in vararg method
+	 */
+	public void lambdasInVarArg() {
+		final List<Function<Object, String>> functions = Arrays.asList(Object::toString, Object::toString);
+		final List<Function<Object, String>> function = Collections.singletonList(Object::toString);
+		varArgMethod(Person::getName, s -> "value".matches(s), s -> "test".matches(s));
+		normalArgMethod(Person::getName, s -> "value".matches(s));
+	}
+
+	private void varArgMethod(Function<Person, String> function, Predicate<String>... predicates) {
+		function.apply(new Person("Name", LocalDate.of(2019, 01, 01)));
+		for (Predicate<String> predicate : predicates) {
+			predicate.negate()
+				.test("");
+		}
+	}
+
+	private void normalArgMethod(Function<Person, String> function, Predicate<String> predicate) {
+		function.apply(new Person("Name", LocalDate.of(2019, 01, 01)));
+		predicate.test("value");
 	}
 
 	class NestedClass {

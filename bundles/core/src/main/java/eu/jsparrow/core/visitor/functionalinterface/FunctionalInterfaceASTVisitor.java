@@ -131,7 +131,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 				if (gParent != null && ASTNode.METHOD_INVOCATION == gParent.getNodeType()) {
 					MethodInvocation methodInvocation = (MethodInvocation) gParent;
 					IMethodBinding miBinding = methodInvocation.resolveMethodBinding();
-					if (Modifier.isStatic(miBinding.getModifiers())) {
+					if (miBinding == null || Modifier.isStatic(miBinding.getModifiers())) {
 						/*
 						 * If the anonymous class is parameterized and is
 						 * occurring as a parameter of a static method
@@ -164,11 +164,11 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					if (onlyFunctionalInterfaceMethod == null) {
 						return false;
 					}
-					if(hasInvocationsOfInstanceMethods(node, onlyFunctionalInterfaceMethod)) {
+					if (hasInvocationsOfInstanceMethods(node, onlyFunctionalInterfaceMethod)) {
 						return true;
 					}
 					Block onlyFunctionalInterfaceMethodImplBody = onlyFunctionalInterfaceMethod.getBody();
-					if(hasOccurrencesOfThisKeyWord(onlyFunctionalInterfaceMethod)) {
+					if (hasOccurrencesOfThisKeyWord(onlyFunctionalInterfaceMethod)) {
 						return true;
 					}
 					// find parent scope and variable declarations in it
@@ -340,7 +340,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		if (defaultMethodInvocationASTVisitor.isFlagCancelTransformation()) {
 			return true;
 		}
-		
+
 		return hasRecursiveCalls(onlyFunctionalInterfaceMethod);
 	}
 
@@ -520,8 +520,8 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		if (functionalInterfaceMethod == null) {
 			return null;
 		}
-		
-		if(functionalInterfaceMethod.isGenericMethod()) {
+
+		if (functionalInterfaceMethod.isGenericMethod()) {
 			return null;
 		}
 

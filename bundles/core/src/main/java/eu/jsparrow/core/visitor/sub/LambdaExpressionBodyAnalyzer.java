@@ -34,12 +34,11 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  *
  */
 public class LambdaExpressionBodyAnalyzer {
-	
+
 	private static final String MAP = "map"; //$NON-NLS-1$
 	private static final String MAP_TO_INT = "mapToInt"; //$NON-NLS-1$
 	private static final String MAP_TO_LONG = "mapToLong"; //$NON-NLS-1$
 	private static final String MAP_TO_DOUBLE = "mapToDouble"; //$NON-NLS-1$
-
 
 	private ASTNode extractableBlock;
 	private ASTNode remainingBlock;
@@ -66,8 +65,8 @@ public class LambdaExpressionBodyAnalyzer {
 				// search for a map variable
 				if (ASTNode.VARIABLE_DECLARATION_STATEMENT == statement.getNodeType()) {
 					/*
-					 * only variable declaration statements can introduce a
-					 * map variable
+					 * only variable declaration statements can introduce a map
+					 * variable
 					 */
 					VariableDeclarationStatement declStatement = (VariableDeclarationStatement) statement;
 
@@ -129,7 +128,7 @@ public class LambdaExpressionBodyAnalyzer {
 		prepareRemainingBlock(astRewrite);
 		prepareExtractableBlock(astRewrite);
 	}
-	
+
 	/**
 	 * Checks if the given type is a type variable or involves a type variable
 	 * as a parameter.
@@ -183,9 +182,9 @@ public class LambdaExpressionBodyAnalyzer {
 	}
 
 	/**
-	 * Store the statement and the name of the declaration fragment so that
-	 * the it is possible to check for references in the rest of the
-	 * statements of the body.
+	 * Store the statement and the name of the declaration fragment so that the
+	 * it is possible to check for references in the rest of the statements of
+	 * the body.
 	 * 
 	 * @param statement
 	 *            the whole statement representing a variable declaration.
@@ -200,19 +199,17 @@ public class LambdaExpressionBodyAnalyzer {
 	}
 
 	/**
-	 * Checks if the given type binding corresponds to either of the
-	 * primitives: {@code int}, {@code long} or {@code double}, and if yes
-	 * returns the corresponding method name which returns the respective
-	 * stream type.
+	 * Checks if the given type binding corresponds to either of the primitives:
+	 * {@code int}, {@code long} or {@code double}, and if yes returns the
+	 * corresponding method name which returns the respective stream type.
 	 * 
 	 * @param initializerBinding
 	 *            type binding of the resulting stream type.
 	 * 
-	 * @return {@value #MAP} if the given type is not any of the
-	 *         aforementioned types, or any of the following:
-	 *         {@value #MAP_TO_INT}, {@value #MAP_TO_DOUBLE} or
-	 *         {@value #MAP_TO_LONG} respectively for {@code int},
-	 *         {@code double} or {@code long} primitives.
+	 * @return {@value #MAP} if the given type is not any of the aforementioned
+	 *         types, or any of the following: {@value #MAP_TO_INT},
+	 *         {@value #MAP_TO_DOUBLE} or {@value #MAP_TO_LONG} respectively for
+	 *         {@code int}, {@code double} or {@code long} primitives.
 	 */
 	private String calcMappingMethodName(ITypeBinding initializerBinding) {
 		if (initializerBinding.isPrimitive()) {
@@ -237,13 +234,16 @@ public class LambdaExpressionBodyAnalyzer {
 	 * 
 	 * @param expression
 	 *            expression to be checked
-	 * @return {@code true} if expression is a method invocation without
-	 *         type arguments, {@code false} otherwise.
+	 * @return {@code true} if expression is a method invocation without type
+	 *         arguments, {@code false} otherwise.
 	 */
 	private boolean isDerivableInitializerType(Expression expression) {
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			if (methodBinding == null) {
+				return false;
+			}
 			if (methodBinding.isParameterizedMethod() && methodInvocation.typeArguments()
 				.isEmpty()) {
 				return true;
@@ -272,9 +272,8 @@ public class LambdaExpressionBodyAnalyzer {
 	}
 
 	/**
-	 * An indicator for showing whether all parameters are found for
-	 * extracting a part of the {@code Stream::forEach} to a
-	 * {@code Stream::map}.
+	 * An indicator for showing whether all parameters are found for extracting
+	 * a part of the {@code Stream::forEach} to a {@code Stream::map}.
 	 * 
 	 * @return
 	 */
@@ -284,8 +283,8 @@ public class LambdaExpressionBodyAnalyzer {
 	}
 
 	/**
-	 * Creates the body of the lambda expression to be used in the
-	 * introduced {@code Stream::map}
+	 * Creates the body of the lambda expression to be used in the introduced
+	 * {@code Stream::map}
 	 * 
 	 * @param ast
 	 *            either a {@link Block} or a {@link Expression}
@@ -314,8 +313,8 @@ public class LambdaExpressionBodyAnalyzer {
 	 * extracting the part to be placed in {@code Stream::map}.
 	 * 
 	 * @param ast
-	 *            either a {@link Block} or a single {@link Expression} if
-	 *            the remaining block has only one expression.
+	 *            either a {@link Block} or a single {@link Expression} if the
+	 *            remaining block has only one expression.
 	 */
 	private void prepareRemainingBlock(ASTRewrite astRewrite) {
 		ASTNode block;
@@ -327,7 +326,8 @@ public class LambdaExpressionBodyAnalyzer {
 			replacedRemainingStatement = remainingStm;
 
 		} else {
-			block = astRewrite.getAST().newBlock();
+			block = astRewrite.getAST()
+				.newBlock();
 			ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 			this.remainingStatements
 				.forEach(statement -> listRewrite.insertLast(astRewrite.createCopyTarget(statement), null));
@@ -366,16 +366,16 @@ public class LambdaExpressionBodyAnalyzer {
 	}
 
 	/**
-	 * Checks whether there is a reference of the variable with the given
-	 * simple name in the code represented by the given ast node.
+	 * Checks whether there is a reference of the variable with the given simple
+	 * name in the code represented by the given ast node.
 	 * 
 	 * @param node
 	 *            node to look for
 	 * @param simpleName
 	 *            name of the variable to look for
 	 * 
-	 * @return {@code true} if there is a reference of the given simple name
-	 *         in the node, and {@code false otherwise}
+	 * @return {@code true} if there is a reference of the given simple name in
+	 *         the node, and {@code false otherwise}
 	 */
 	private boolean referencesName(ASTNode node, SimpleName simpleName) {
 		LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(simpleName);
@@ -391,8 +391,7 @@ public class LambdaExpressionBodyAnalyzer {
 	public String getMappingMethodName() {
 		return mappingMethodName;
 	}
-	
-	
+
 	/**
 	 * A visitor searching for return statements.
 	 *

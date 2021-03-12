@@ -235,11 +235,13 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 			MethodInvocation methodInvocation = (MethodInvocation) parent;
 			int argumentIndex = methodInvocation.arguments()
 				.indexOf(lambda);
-			IMethodBinding parentInvocationMethodBinding = methodInvocation.resolveMethodBinding()
-				.getMethodDeclaration();
-			ITypeBinding[] parameterTypes = parentInvocationMethodBinding.getParameterTypes();
-			int parameterIndex = Math.min(argumentIndex, parameterTypes.length - 1);
-			comparatorTypeBinding = parameterTypes[parameterIndex];
+			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			if (methodBinding != null && methodBinding.getMethodDeclaration() != null) {
+				IMethodBinding parentInvocationMethodBinding = methodBinding.getMethodDeclaration();
+				ITypeBinding[] parameterTypes = parentInvocationMethodBinding.getParameterTypes();
+				int parameterIndex = Math.min(argumentIndex, parameterTypes.length - 1);
+				comparatorTypeBinding = parameterTypes[parameterIndex];
+			}
 		}
 
 		if (comparatorTypeBinding != null) {
