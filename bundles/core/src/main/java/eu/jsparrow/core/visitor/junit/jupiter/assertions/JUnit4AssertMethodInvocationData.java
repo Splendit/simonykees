@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -11,6 +12,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -115,16 +117,24 @@ class JUnit4AssertMethodInvocationData {
 	private static boolean isArgumentWithUnambiguousType(Expression expression) {
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
-			return !methodInvocation.resolveMethodBinding().isParameterizedMethod();
+			List<Type> typeArguments = ASTNodeUtil.convertToTypedList(methodInvocation.typeArguments(), Type.class);
+			return !(methodInvocation.resolveMethodBinding()
+				.isParameterizedMethod() && typeArguments.isEmpty());
 		}
 		if (expression.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
 			SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation) expression;
-			return !superMethodInvocation.resolveMethodBinding().isParameterizedMethod();
+			List<Type> typeArguments = ASTNodeUtil.convertToTypedList(superMethodInvocation.typeArguments(),
+					Type.class);
+			return !(superMethodInvocation.resolveMethodBinding()
+				.isParameterizedMethod() && typeArguments.isEmpty());
 		}
 		return true;
 	}
 
-	private static boolean checkArgumentTypesUnambiguous(MethodInvocation methodInvocation) {
+	private static boolean canTransformInvocation(MethodInvocation methodInvocation) {
+		if (!isInvocationWithinJUnitJupiterTest(methodInvocation)) {
+			return false;
+		}
 		return ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.stream()
 			.allMatch(JUnit4AssertMethodInvocationData::isArgumentWithUnambiguousType);
@@ -133,9 +143,7 @@ class JUnit4AssertMethodInvocationData {
 	private JUnit4AssertMethodInvocationData(MethodInvocation methodInvocation, IMethodBinding methodBinding) {
 		this.methodInvocation = methodInvocation;
 		this.methodName = methodBinding.getName();
-		boolean argumentTypesUnambiguous = checkArgumentTypesUnambiguous(methodInvocation);
-		boolean invocationWithinJUnitJupiterTest = isInvocationWithinJUnitJupiterTest(methodInvocation);
-		this.invocationAbleToBeTransformed = argumentTypesUnambiguous && invocationWithinJUnitJupiterTest;
+		this.invocationAbleToBeTransformed = canTransformInvocation(methodInvocation);
 
 		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
 			.getParameterTypes();
@@ -159,7 +167,7 @@ class JUnit4AssertMethodInvocationData {
 		return Optional.ofNullable(deprecatedMethodNameReplacement);
 	}
 
-	public boolean isMessageAsFirstParameter() {
+	boolean isMessageAsFirstParameter() {
 		return messageAsFirstParameter;
 	}
 

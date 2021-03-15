@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-public class ReplaceJUnit4AssertWithJupiterAmbiguousArgumentTypeRule {
+public class ReplaceJUnit4AssertWithJupiterGenericMethodCallsAsArgumentsRule {
 
 	class TestAmbiguousMethodInvocationReturnType {
 		@Test
@@ -23,6 +23,26 @@ public class ReplaceJUnit4AssertWithJupiterAmbiguousArgumentTypeRule {
 		@Test
 		void test() {
 			assertEquals(super.getGenericReturnValue(), super.getGenericReturnValue());
+		}
+	}
+
+	class TestUnAmbiguousMethodInvocationReturnType {
+		@Test
+		void test() {
+			assertEquals(this.<Byte>getGenericReturnValue(), this.<Byte>getGenericReturnValue());
+		}
+
+		@SuppressWarnings("unchecked")
+		<RET> RET getGenericReturnValue() {
+			return (RET) Byte.valueOf((byte) 0);
+		}
+	}
+
+	class TestUnAmbiguousSuperMethodInvocationReturnType extends TestUnAmbiguousMethodInvocationReturnType {
+		@Override
+		@Test
+		void test() {
+			assertEquals(super.<Byte>getGenericReturnValue(), super.<Byte>getGenericReturnValue());
 		}
 	}
 }
