@@ -14,6 +14,7 @@ public class OptionalIfPresentRule {
 
 	private static final Logger logger = LoggerFactory.getLogger(OptionalIfPresentRule.class);
 	private final String value2 = "";
+	String nonConstant = "";
 
 	{
 		final Optional<String> input = Optional.empty();
@@ -412,6 +413,15 @@ public class OptionalIfPresentRule {
 				}
 			}
 		});
+	}
+
+	private void setNonConstant(String value) {
+		nonConstant = value;
+	}
+
+	public void usingFieldsInIfPresent() {
+		final Optional<String> input = findUserName("");
+		input.ifPresent(value -> logger.info(value + nonConstant));
 	}
 
 	private Optional<String> findUserName(String user) {
