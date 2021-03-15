@@ -4,11 +4,13 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -25,7 +27,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 class JUnit4AssertMethodInvocationData {
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	private final MethodInvocation methodInvocation;
-	private final boolean invocationWithinJUnitJupiterTest;
+	private final boolean invocationAbleToBeTransformed;
 	private final String methodName;
 	private final String deprecatedMethodNameReplacement;
 	private final boolean messageAsFirstParameter;
@@ -110,10 +112,31 @@ class JUnit4AssertMethodInvocationData {
 			.equals("java.lang.String"); //$NON-NLS-1$
 	}
 
+	private static boolean isArgumentWithUnambiguousType(Expression expression) {
+		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			MethodInvocation methodInvocation = (MethodInvocation) expression;
+			return !methodInvocation.resolveMethodBinding().isParameterizedMethod();
+		}
+		if (expression.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
+			SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation) expression;
+			return !superMethodInvocation.resolveMethodBinding().isParameterizedMethod();
+		}
+		return true;
+	}
+
+	private static boolean checkArgumentTypesUnambiguous(MethodInvocation methodInvocation) {
+		return ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
+			.stream()
+			.allMatch(JUnit4AssertMethodInvocationData::isArgumentWithUnambiguousType);
+	}
+
 	private JUnit4AssertMethodInvocationData(MethodInvocation methodInvocation, IMethodBinding methodBinding) {
 		this.methodInvocation = methodInvocation;
 		this.methodName = methodBinding.getName();
-		this.invocationWithinJUnitJupiterTest = isInvocationWithinJUnitJupiterTest(methodInvocation);
+		boolean argumentTypesUnambiguous = checkArgumentTypesUnambiguous(methodInvocation);
+		boolean invocationWithinJUnitJupiterTest = isInvocationWithinJUnitJupiterTest(methodInvocation);
+		this.invocationAbleToBeTransformed = argumentTypesUnambiguous && invocationWithinJUnitJupiterTest;
+
 		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
 			.getParameterTypes();
 		if (isDeprecatedAssertEqualsComparingObjectArrays(methodName, declaredParameterTypes)) {
@@ -140,7 +163,7 @@ class JUnit4AssertMethodInvocationData {
 		return messageAsFirstParameter;
 	}
 
-	boolean isInvocationWithinJUnitJupiterTest() {
-		return invocationWithinJUnitJupiterTest;
+	boolean isInvocationAbleToBeTransformed() {
+		return invocationAbleToBeTransformed;
 	}
 }

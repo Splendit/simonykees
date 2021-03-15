@@ -21,7 +21,8 @@ public class ReplaceJUnit4AssertWithJupiterRuleTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE_ALWAYS_TRANSFORMED = "ReplaceJUnit4AssertWithJupiterAlwaysTransformedRule.java";
 	private static final String SAMPLE_FILE_CONDITIONALLY_TRANSFORMED = "ReplaceJUnit4AssertWithJupiterConditionallyTransformedRule.java";
-
+	private static final String SAMPLE_FILE_AMBIGUOUS_ARGUMENT_TYPE = "ReplaceJUnit4AssertWithJupiterAmbiguousArgumentTypeRule.java";
+	
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnitToJupiter";
 
 	private ReplaceJUnit4AssertWithJupiterRule rule;
@@ -54,6 +55,19 @@ public class ReplaceJUnit4AssertWithJupiterRuleTest extends SingleRuleTest {
 
 		Path preRule = getPreRuleFile(SAMPLE_FILE_CONDITIONALLY_TRANSFORMED);
 		Path postRule = getPostRuleFile(SAMPLE_FILE_CONDITIONALLY_TRANSFORMED, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testAmbiguousArgumentType() throws Exception {
+		loadUtilities();
+
+		Path preRule = getPreRuleFile(SAMPLE_FILE_AMBIGUOUS_ARGUMENT_TYPE);
+		Path postRule = getPostRuleFile(SAMPLE_FILE_AMBIGUOUS_ARGUMENT_TYPE, POSTRULE_SUBDIRECTORY);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
