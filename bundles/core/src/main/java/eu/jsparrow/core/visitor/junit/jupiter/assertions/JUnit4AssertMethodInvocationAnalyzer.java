@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -12,7 +11,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -33,6 +31,9 @@ class JUnit4AssertMethodInvocationAnalyzer {
 	Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
 			MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return Optional.empty();
+		}
 		if (!isSupportedJUnit4AssertMethod(methodBinding)) {
 			return Optional.empty();
 		}
@@ -127,16 +128,16 @@ class JUnit4AssertMethodInvocationAnalyzer {
 	private boolean isArgumentWithUnambiguousType(Expression expression) {
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
-			List<Type> typeArguments = ASTNodeUtil.convertToTypedList(methodInvocation.typeArguments(), Type.class);
-			return !(methodInvocation.resolveMethodBinding()
-				.isParameterizedMethod() && typeArguments.isEmpty());
+			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			return methodBinding != null && !(methodBinding.isParameterizedMethod() && methodInvocation.typeArguments()
+				.isEmpty());
 		}
 		if (expression.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
 			SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation) expression;
-			List<Type> typeArguments = ASTNodeUtil.convertToTypedList(superMethodInvocation.typeArguments(),
-					Type.class);
-			return !(superMethodInvocation.resolveMethodBinding()
-				.isParameterizedMethod() && typeArguments.isEmpty());
+			IMethodBinding superMethodBinding = superMethodInvocation.resolveMethodBinding();
+			return superMethodBinding != null
+					&& !(superMethodBinding.isParameterizedMethod() && superMethodInvocation.typeArguments()
+						.isEmpty());
 		}
 		return true;
 	}
