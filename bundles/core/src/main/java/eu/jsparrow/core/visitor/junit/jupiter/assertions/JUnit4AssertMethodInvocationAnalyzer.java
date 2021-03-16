@@ -18,29 +18,39 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * Immutable class storing all necessary informations about the given invocation
- * of a static method of the class {@code org.junit.Assert} which may be
- * replaced by an invocation of the corresponding method of
- * {@code org.junit.jupiter.api.Assertions}.
+ * Helper class analyzing a {@link MethodInvocation}-node . If the
+ * {@link MethodInvocation} represents the invocation of one of the supported
+ * methods of the class {@code org.junit.Assert}, then all necessary
+ * informations for a possible transformation are collected in an instance of
+ * {@link JUnit4AssertMethodInvocationAnalysisResult}.
  * 
  * @since 3.28.0
  *
  */
-class JUnit4AssertMethodInvocationData {
+class JUnit4AssertMethodInvocationAnalyzer {
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
-	private final MethodInvocation methodInvocation;
-	private final boolean invocationAbleToBeTransformed;
-	private final String methodName;
-	private final String deprecatedMethodNameReplacement;
-	private final boolean messageAsFirstParameter;
 
-	static Optional<JUnit4AssertMethodInvocationData> findJUnit4MethodInvocationData(
+	Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
 			MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		if (isSupportedJUnit4AssertMethod(methodBinding)) {
-			return Optional.of(new JUnit4AssertMethodInvocationData(methodInvocation, methodBinding));
+		if (!isSupportedJUnit4AssertMethod(methodBinding)) {
+			return Optional.empty();
 		}
-		return Optional.empty();
+		boolean invocationAbleToBeTransformed = canTransformInvocation(methodInvocation);
+
+		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
+			.getParameterTypes();
+		boolean messageAsFirstParameter = declaredParameterTypes.length > 0
+				&& isParameterTypeString(declaredParameterTypes[0]);
+
+		String methodName = methodBinding.getName();
+		if (isDeprecatedAssertEqualsComparingObjectArrays(methodName, declaredParameterTypes)) {
+			return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
+					"assertArrayEquals", messageAsFirstParameter, invocationAbleToBeTransformed)); //$NON-NLS-1$
+		} else {
+			return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
+					messageAsFirstParameter, invocationAbleToBeTransformed));
+		}
 	}
 
 	static boolean isSupportedJUnit4AssertMethod(IMethodBinding methodBinding) {
@@ -54,7 +64,7 @@ class JUnit4AssertMethodInvocationData {
 		return false;
 	}
 
-	private static boolean isInvocationWithinJUnitJupiterTest(MethodInvocation methodInvocation) {
+	private boolean isInvocationWithinJUnitJupiterTest(MethodInvocation methodInvocation) {
 		ASTNode parent = methodInvocation.getParent();
 		while (parent != null) {
 			if (parent.getNodeType() == ASTNode.METHOD_DECLARATION) {
@@ -81,7 +91,7 @@ class JUnit4AssertMethodInvocationData {
 		return false;
 	}
 
-	private static boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
+	private boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
 			ITypeBinding[] declaredParameterTypes) {
 		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$
 			return false;
@@ -100,7 +110,7 @@ class JUnit4AssertMethodInvocationData {
 		return false;
 	}
 
-	private static boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
+	private boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
 		if (parameterType.isArray()) {
 			return parameterType.getComponentType()
 				.getQualifiedName()
@@ -109,12 +119,12 @@ class JUnit4AssertMethodInvocationData {
 		return false;
 	}
 
-	private static boolean isParameterTypeString(ITypeBinding parameterType) {
+	private boolean isParameterTypeString(ITypeBinding parameterType) {
 		return parameterType.getQualifiedName()
 			.equals("java.lang.String"); //$NON-NLS-1$
 	}
 
-	private static boolean isArgumentWithUnambiguousType(Expression expression) {
+	private boolean isArgumentWithUnambiguousType(Expression expression) {
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
 			List<Type> typeArguments = ASTNodeUtil.convertToTypedList(methodInvocation.typeArguments(), Type.class);
@@ -131,47 +141,12 @@ class JUnit4AssertMethodInvocationData {
 		return true;
 	}
 
-	private static boolean canTransformInvocation(MethodInvocation methodInvocation) {
+	private boolean canTransformInvocation(MethodInvocation methodInvocation) {
 		if (!isInvocationWithinJUnitJupiterTest(methodInvocation)) {
 			return false;
 		}
 		return ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.stream()
-			.allMatch(JUnit4AssertMethodInvocationData::isArgumentWithUnambiguousType);
-	}
-
-	private JUnit4AssertMethodInvocationData(MethodInvocation methodInvocation, IMethodBinding methodBinding) {
-		this.methodInvocation = methodInvocation;
-		this.methodName = methodBinding.getName();
-		this.invocationAbleToBeTransformed = canTransformInvocation(methodInvocation);
-
-		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
-			.getParameterTypes();
-		if (isDeprecatedAssertEqualsComparingObjectArrays(methodName, declaredParameterTypes)) {
-			deprecatedMethodNameReplacement = "assertArrayEquals"; //$NON-NLS-1$
-		} else {
-			deprecatedMethodNameReplacement = null;
-		}
-		messageAsFirstParameter = declaredParameterTypes.length > 0 && isParameterTypeString(declaredParameterTypes[0]);
-	}
-
-	MethodInvocation getMethodInvocation() {
-		return methodInvocation;
-	}
-
-	String getMethodName() {
-		return methodName;
-	}
-
-	Optional<String> getDeprecatedMethodNameReplacement() {
-		return Optional.ofNullable(deprecatedMethodNameReplacement);
-	}
-
-	boolean isMessageAsFirstParameter() {
-		return messageAsFirstParameter;
-	}
-
-	boolean isInvocationAbleToBeTransformed() {
-		return invocationAbleToBeTransformed;
+			.allMatch(this::isArgumentWithUnambiguousType);
 	}
 }

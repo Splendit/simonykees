@@ -56,17 +56,18 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		compilationUnit.accept(invocationCollectorVisitor);
 
 		List<MethodInvocation> allMethodInvocations = invocationCollectorVisitor.getMethodInvocations();
+		JUnit4AssertMethodInvocationAnalyzer invocationAnalyzer = new JUnit4AssertMethodInvocationAnalyzer();
 
-		List<JUnit4AssertMethodInvocationData> allJUnit4AssertInvocations = allMethodInvocations
+		List<JUnit4AssertMethodInvocationAnalysisResult> allJUnit4AssertInvocations = allMethodInvocations
 			.stream()
-			.map(JUnit4AssertMethodInvocationData::findJUnit4MethodInvocationData)
+			.map(invocationAnalyzer::findAnalysisResult)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.collect(Collectors.toList());
 
-		List<JUnit4AssertMethodInvocationData> jUnit4AssertInvocationsInJUnitJupiterTest = allJUnit4AssertInvocations
+		List<JUnit4AssertMethodInvocationAnalysisResult> jUnit4AssertInvocationsInJUnitJupiterTest = allJUnit4AssertInvocations
 			.stream()
-			.filter(JUnit4AssertMethodInvocationData::isInvocationAbleToBeTransformed)
+			.filter(JUnit4AssertMethodInvocationAnalysisResult::isInvocationAbleToBeTransformed)
 			.collect(Collectors.toList());
 
 		List<ImportDeclaration> staticAssertMethodImportsToRemove = collectStaticAssertMethodImportsToRemove(
@@ -112,13 +113,13 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 	}
 
 	private List<ImportDeclaration> collectStaticAssertMethodImportsToRemove(
-			List<JUnit4AssertMethodInvocationData> jUnit4AssertInvocationDataList) {
+			List<JUnit4AssertMethodInvocationAnalysisResult> jUnit4AssertInvocationDataList) {
 		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = jUnit4AssertInvocationDataList
 			.stream()
 			.filter(data -> !data.isInvocationAbleToBeTransformed())
 			.filter(data -> data.getMethodInvocation()
 				.getExpression() == null)
-			.map(JUnit4AssertMethodInvocationData::getMethodName)
+			.map(JUnit4AssertMethodInvocationAnalysisResult::getMethodName)
 			.collect(Collectors.toSet());
 
 		return ASTNodeUtil
@@ -141,7 +142,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 		IBinding importBinding = importDeclaration.resolveBinding();
 		if (importBinding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = ((IMethodBinding) importBinding);
-			return JUnit4AssertMethodInvocationData.isSupportedJUnit4AssertMethod(methodBinding)
+			return JUnit4AssertMethodInvocationAnalyzer.isSupportedJUnit4AssertMethod(methodBinding)
 					&& !simpleNamesOfStaticAssertMethodImportsToKeep.contains(methodBinding.getName());
 		}
 		return false;
@@ -153,7 +154,7 @@ public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportA
 	}
 
 	private Optional<JUnit4AssertInvocationReplacementData> findTransformationData(
-			JUnit4AssertMethodInvocationData invocationData,
+			JUnit4AssertMethodInvocationAnalysisResult invocationData,
 			Set<String> unqualifiedNamesOfNewAssertionMwethodImports) {
 
 		if (!invocationData.isInvocationAbleToBeTransformed()) {
