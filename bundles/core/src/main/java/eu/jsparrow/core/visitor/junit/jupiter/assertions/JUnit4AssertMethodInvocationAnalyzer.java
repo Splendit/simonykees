@@ -39,7 +39,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		if (!isSupportedJUnit4AssertMethod(methodBinding)) {
 			return Optional.empty();
 		}
-		boolean invocationAbleToBeTransformed = canTransformInvocation(methodInvocation);
+		boolean transformableInvocation = isTransformableInvocation(methodInvocation);
 
 		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
 			.getParameterTypes();
@@ -49,10 +49,10 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		String methodName = methodBinding.getName();
 		if (isDeprecatedAssertEqualsComparingObjectArrays(methodName, declaredParameterTypes)) {
 			return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					"assertArrayEquals", messageAsFirstParameter, invocationAbleToBeTransformed)); //$NON-NLS-1$
+					"assertArrayEquals", messageAsFirstParameter, transformableInvocation)); //$NON-NLS-1$
 		} else {
 			return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					messageAsFirstParameter, invocationAbleToBeTransformed));
+					messageAsFirstParameter, transformableInvocation));
 		}
 	}
 
@@ -138,7 +138,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		return true;
 	}
 
-	private boolean canTransformInvocation(MethodInvocation methodInvocation) {
+	private boolean isTransformableInvocation(MethodInvocation methodInvocation) {
 		if (!isInvocationWithinJUnitJupiterTest(methodInvocation)) {
 			return false;
 		}

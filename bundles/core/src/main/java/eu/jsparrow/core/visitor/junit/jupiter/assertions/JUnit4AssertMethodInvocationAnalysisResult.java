@@ -19,28 +19,28 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 	private final String methodName;
 	private final String deprecatedMethodNameReplacement;
 	private final boolean messageAsFirstParameter;
-	private final boolean invocationAbleToBeTransformed;
+	private final boolean transformableInvocation;
 
 	public JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
 			String deprecatedMethodNameReplacement, boolean messageAsFirstParameter,
-			boolean invocationAbleToBeTransformed) {
+			boolean transformableInvocation) {
 		this.methodInvocation = methodInvocation;
 		this.methodName = methodInvocation.getName()
 			.getIdentifier();
 		this.deprecatedMethodNameReplacement = deprecatedMethodNameReplacement;
 		this.messageAsFirstParameter = messageAsFirstParameter;
-		this.invocationAbleToBeTransformed = invocationAbleToBeTransformed;
+		this.transformableInvocation = transformableInvocation;
 	}
 
 	public JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
 			boolean messageAsFirstParameter,
-			boolean invocationAbleToBeTransformed) {
+			boolean transformableInvocation) {
 		this.methodInvocation = methodInvocation;
 		this.methodName = methodInvocation.getName()
 			.getIdentifier();
 		this.deprecatedMethodNameReplacement = null;
 		this.messageAsFirstParameter = messageAsFirstParameter;
-		this.invocationAbleToBeTransformed = invocationAbleToBeTransformed;
+		this.transformableInvocation = transformableInvocation;
 	}
 
 	MethodInvocation getMethodInvocation() {
@@ -59,7 +59,7 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 		return messageAsFirstParameter;
 	}
 
-	boolean isInvocationAbleToBeTransformed() {
-		return invocationAbleToBeTransformed;
+	boolean isTransformableInvocation() {
+		return transformableInvocation;
 	}
 }
