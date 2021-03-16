@@ -401,6 +401,20 @@ public class OptionalIfPresentRule {
 			}
 	}
 
+	String nonConstant = "";
+
+	private void setNonConstant(String value) {
+		nonConstant = value;
+	}
+
+	public void usingFieldsInIfPresent() {
+		Optional<String> input = findUserName("");
+		if(input.isPresent()) {
+			String value = input.get();
+			System.out.println(value + nonConstant);
+		}
+	}
+
 	private Optional<String> findUserName(String user) {
 		Optional.of(user);
 		return Optional.empty();
