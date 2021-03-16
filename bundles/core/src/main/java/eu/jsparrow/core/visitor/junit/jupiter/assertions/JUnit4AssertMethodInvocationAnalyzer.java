@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
+
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -55,9 +57,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 	}
 
 	static boolean isSupportedJUnit4AssertMethod(IMethodBinding methodBinding) {
-		if (methodBinding.getDeclaringClass()
-			.getQualifiedName()
-			.equals("org.junit.Assert")) { //$NON-NLS-1$
+		if (isContentOfType(methodBinding.getDeclaringClass(), "org.junit.Assert")) { //$NON-NLS-1$
 			String methodName = methodBinding.getName();
 			return !methodName.equals("assertThat") //$NON-NLS-1$
 					&& !methodName.equals("assertThrows"); //$NON-NLS-1$
@@ -81,8 +81,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 					.stream()
 					.map(Annotation::resolveAnnotationBinding)
 					.map(IAnnotationBinding::getAnnotationType)
-					.map(ITypeBinding::getQualifiedName)
-					.anyMatch(ORG_JUNIT_JUPITER_API_TEST::equals);
+					.anyMatch(typeBinding -> isContentOfType(typeBinding, ORG_JUNIT_JUPITER_API_TEST));
 			}
 			if (parent.getNodeType() == ASTNode.LAMBDA_EXPRESSION) {
 				return false;
@@ -112,17 +111,14 @@ class JUnit4AssertMethodInvocationAnalyzer {
 	}
 
 	private boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
-		if (parameterType.isArray()) {
-			return parameterType.getComponentType()
-				.getQualifiedName()
-				.equals("java.lang.Object") && parameterType.getDimensions() == 1; //$NON-NLS-1$
+		if (parameterType.isArray() && parameterType.getDimensions() == 1) {
+			return isContentOfType(parameterType.getComponentType(), "java.lang.Object"); //$NON-NLS-1$
 		}
 		return false;
 	}
 
 	private boolean isParameterTypeString(ITypeBinding parameterType) {
-		return parameterType.getQualifiedName()
-			.equals("java.lang.String"); //$NON-NLS-1$
+		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
 	}
 
 	private boolean isArgumentWithUnambiguousType(Expression expression) {
