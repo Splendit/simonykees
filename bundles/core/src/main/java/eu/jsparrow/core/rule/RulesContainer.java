@@ -51,6 +51,7 @@ import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
 import eu.jsparrow.core.rule.impl.MakeFieldsAndVariablesFinalRule;
 import eu.jsparrow.core.rule.impl.MapGetOrDefaultRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnit4AnnotationsWithJupiterRule;
+import eu.jsparrow.core.rule.impl.ReplaceJUnit4AssertThrowsWithJupiterRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnit4AssertionsWithJupiterRule;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
@@ -197,6 +198,7 @@ public class RulesContainer {
 				new ReplaceJUnitTimeoutAnnotationPropertyRule(),
 				new ReplaceJUnit4AnnotationsWithJupiterRule(),
 				new ReplaceJUnit4AssertionsWithJupiterRule(),
+				new ReplaceJUnit4AssertThrowsWithJupiterRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
