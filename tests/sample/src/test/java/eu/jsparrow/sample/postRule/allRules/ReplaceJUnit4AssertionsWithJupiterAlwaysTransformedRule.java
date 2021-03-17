@@ -1,10 +1,10 @@
-package eu.jsparrow.sample.preRule;
+package eu.jsparrow.sample.postRule.allRules;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-public class ReplaceJUnit4AssertWithJupiterAlwaysTransformedRule {
+public class ReplaceJUnit4AssertionsWithJupiterAlwaysTransformedRule {
 
 	class TestAssertEqualsWithStrings {
 
@@ -15,7 +15,7 @@ public class ReplaceJUnit4AssertWithJupiterAlwaysTransformedRule {
 
 		@Test
 		public void testAssertEqualsWithMessageAndStrings() throws Exception {
-			assertEquals("expected that \"HelloWorld!\" equals \"HelloWorld!\".", "HelloWorld!", "HelloWorld!");
+			assertEquals("HelloWorld!", "HelloWorld!", "expected that \"HelloWorld!\" equals \"HelloWorld!\".");
 		}
 	};
 
@@ -28,8 +28,8 @@ public class ReplaceJUnit4AssertWithJupiterAlwaysTransformedRule {
 
 		@Test
 		public void testAssertEqualsWithMessageAndStrings() throws Exception {
-			assertEquals("expected that Double.valueOf(1.0)equals Double.valueOf(1.0).", Double.valueOf(1.0),
-					Double.valueOf(1.0));
+			assertEquals(Double.valueOf(1.0), Double.valueOf(1.0),
+					"expected that Double.valueOf(1.0)equals Double.valueOf(1.0).");
 		}
 	};
 }

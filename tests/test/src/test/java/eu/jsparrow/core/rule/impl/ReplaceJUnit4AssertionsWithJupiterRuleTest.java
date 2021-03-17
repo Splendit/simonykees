@@ -17,19 +17,19 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.SingleRuleTest;
 import eu.jsparrow.core.util.RulesTestUtil;
 
-public class ReplaceJUnit4AssertWithJupiterRuleTest extends SingleRuleTest {
+public class ReplaceJUnit4AssertionsWithJupiterRuleTest extends SingleRuleTest {
 
-	private static final String SAMPLE_FILE_ALWAYS_TRANSFORMED = "ReplaceJUnit4AssertWithJupiterAlwaysTransformedRule.java";
-	private static final String SAMPLE_FILE_CONDITIONALLY_TRANSFORMED = "ReplaceJUnit4AssertWithJupiterConditionallyTransformedRule.java";
-	private static final String SAMPLE_FILE_GENERIC_METHOD_CALLS_AS_ARGUMENTS = "ReplaceJUnit4AssertWithJupiterGenericMethodCallsAsArgumentsRule.java";
+	private static final String SAMPLE_FILE_ALWAYS_TRANSFORMED = "ReplaceJUnit4AssertionsWithJupiterAlwaysTransformedRule.java";
+	private static final String SAMPLE_FILE_CONDITIONALLY_TRANSFORMED = "ReplaceJUnit4AssertionsWithJupiterConditionallyTransformedRule.java";
+	private static final String SAMPLE_FILE_GENERIC_METHOD_CALLS_AS_ARGUMENTS = "ReplaceJUnit4AssertionsWithJupiterGenericMethodCallsAsArgumentsRule.java";
 	
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnitToJupiter";
 
-	private ReplaceJUnit4AssertWithJupiterRule rule;
+	private ReplaceJUnit4AssertionsWithJupiterRule rule;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		rule = new ReplaceJUnit4AssertWithJupiterRule();
+		rule = new ReplaceJUnit4AssertionsWithJupiterRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

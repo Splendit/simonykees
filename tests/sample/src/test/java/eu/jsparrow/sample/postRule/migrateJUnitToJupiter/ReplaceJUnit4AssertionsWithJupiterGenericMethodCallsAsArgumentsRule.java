@@ -1,10 +1,11 @@
-package eu.jsparrow.sample.preRule;
+package eu.jsparrow.sample.postRule.migrateJUnitToJupiter;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
-public class ReplaceJUnit4AssertWithJupiterGenericMethodCallsAsArgumentsRule {
+public class ReplaceJUnit4AssertionsWithJupiterGenericMethodCallsAsArgumentsRule {
 
 	class TestAmbiguousMethodInvocationReturnType {
 		@Test
@@ -29,7 +30,7 @@ public class ReplaceJUnit4AssertWithJupiterGenericMethodCallsAsArgumentsRule {
 	class TestUnAmbiguousMethodInvocationReturnType {
 		@Test
 		void test() {
-			assertEquals(this.<Byte>getGenericReturnValue(), this.<Byte>getGenericReturnValue());
+			Assertions.assertEquals(this.<Byte>getGenericReturnValue(), this.<Byte>getGenericReturnValue());
 		}
 
 		@SuppressWarnings("unchecked")
@@ -42,7 +43,7 @@ public class ReplaceJUnit4AssertWithJupiterGenericMethodCallsAsArgumentsRule {
 		@Override
 		@Test
 		void test() {
-			assertEquals(super.<Byte>getGenericReturnValue(), super.<Byte>getGenericReturnValue());
+			Assertions.assertEquals(super.<Byte>getGenericReturnValue(), super.<Byte>getGenericReturnValue());
 		}
 	}
 }

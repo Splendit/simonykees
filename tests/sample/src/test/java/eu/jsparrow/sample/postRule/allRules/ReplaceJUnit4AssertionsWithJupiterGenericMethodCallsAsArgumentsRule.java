@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class ReplaceJUnit4AssertWithJupiterGenericMethodCallsAsArgumentsRule {
+public class ReplaceJUnit4AssertionsWithJupiterGenericMethodCallsAsArgumentsRule {
 
 	class TestAmbiguousMethodInvocationReturnType {
 		@Test

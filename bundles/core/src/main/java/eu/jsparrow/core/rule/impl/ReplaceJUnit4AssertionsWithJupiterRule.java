@@ -8,29 +8,29 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 
-import eu.jsparrow.core.visitor.junit.jupiter.assertions.ReplaceJUnit4AssertWithJupiterASTVisitor;
+import eu.jsparrow.core.visitor.junit.jupiter.assertions.ReplaceJUnit4AssertionsWithJupiterASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
- * @see ReplaceJUnit4AssertWithJupiterASTVisitor
+ * @see ReplaceJUnit4AssertionsWithJupiterASTVisitor
  * 
  * @since 3.28.0
  *
  */
-public class ReplaceJUnit4AssertWithJupiterRule
-		extends RefactoringRuleImpl<ReplaceJUnit4AssertWithJupiterASTVisitor> {
+public class ReplaceJUnit4AssertionsWithJupiterRule
+		extends RefactoringRuleImpl<ReplaceJUnit4AssertionsWithJupiterASTVisitor> {
 
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
 	private static final String MIN_JUNIT_4_VERSION = "4.13"; //$NON-NLS-1$
 	private static final String MIN_JUNIT_5_VERSION = "5.4"; //$NON-NLS-1$
 
-	public ReplaceJUnit4AssertWithJupiterRule() {
-		this.visitorClass = ReplaceJUnit4AssertWithJupiterASTVisitor.class;
-		this.id = "ReplaceJUnit4AssertWithJupiter"; //$NON-NLS-1$
+	public ReplaceJUnit4AssertionsWithJupiterRule() {
+		this.visitorClass = ReplaceJUnit4AssertionsWithJupiterASTVisitor.class;
+		this.id = "ReplaceJUnit4AssertionsWithJupiter"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceJUnit4AssertWithJupiterRule_name, 
 				Messages.ReplaceJUnit4AssertWithJupiterRule_description,

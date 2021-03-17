@@ -31,7 +31,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.28.0
  * 
  */
-public class ReplaceJUnit4AssertWithJupiterASTVisitor extends AbstractAddImportASTVisitor {
+public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS_PREFIX = ORG_JUNIT_JUPITER_API_ASSERTIONS + "."; //$NON-NLS-1$

@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-public class ReplaceJUnit4AssertWithJupiterConditionallyTransformedRule {
+public class ReplaceJUnit4AssertionsWithJupiterConditionallyTransformedRule {
 
 	class ConditionallyTransformed {
 

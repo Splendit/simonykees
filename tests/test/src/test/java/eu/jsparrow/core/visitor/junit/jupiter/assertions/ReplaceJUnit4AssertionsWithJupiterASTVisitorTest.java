@@ -7,16 +7,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.junit.jupiter.AbstractReplaceJUnit4AnnotationsWithJupiterASTVisitorTest;
+import eu.jsparrow.core.visitor.junit.jupiter.AbstractReplaceJUnit4WithJupiterASTVisitorTest;
 
-public class ReplaceJUnit4AssertWithJupiterASTVisitorTest
-		extends AbstractReplaceJUnit4AnnotationsWithJupiterASTVisitorTest {
+public class ReplaceJUnit4AssertionsWithJupiterASTVisitorTest
+		extends AbstractReplaceJUnit4WithJupiterASTVisitorTest {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
 		addDependency("junit", "junit", "4.13");
 		addDependency("org.junit.jupiter", "junit-jupiter-api", "5.4.0");
-		setDefaultVisitor(new ReplaceJUnit4AssertWithJupiterASTVisitor());
+		setDefaultVisitor(new ReplaceJUnit4AssertionsWithJupiterASTVisitor());
 	}
 
 	@AfterEach

@@ -10,7 +10,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class ReplaceJUnit4AssertWithJupiterConditionallyTransformedRule {
+public class ReplaceJUnit4AssertionsWithJupiterConditionallyTransformedRule {
 
 	class ConditionallyTransformed {
 
