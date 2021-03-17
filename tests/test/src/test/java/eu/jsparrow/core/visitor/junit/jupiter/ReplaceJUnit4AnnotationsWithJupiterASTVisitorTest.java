@@ -7,7 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJUnit4AnnotationsWithJupiterASTVisitorTest {
+class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJUnit4WithJupiterASTVisitorTest {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
