@@ -21,6 +21,13 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import eu.jsparrow.core.visitor.junit.jupiter.AnnotationCollectorVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * Helper class finding out whether a given {@link MethodInvocation} is carried
+ * out within a JUnit Jupiter test.
+ *
+ * @since 3.29.0
+ *
+ */
 public class MethodInvocationInJUnitJupiterAnalyzer {
 
 	private static final List<String> ORG_JUNIT_JUPITER_API_ANNOTATIONS = Collections.unmodifiableList(Arrays.asList(
