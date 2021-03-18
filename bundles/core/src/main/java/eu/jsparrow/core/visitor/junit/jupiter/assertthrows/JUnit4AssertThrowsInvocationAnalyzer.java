@@ -1,10 +1,10 @@
-package eu.jsparrow.core.visitor.junit.jupiter.common;
+package eu.jsparrow.core.visitor.junit.jupiter.assertthrows;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-public class InvocationInJUnitTestMethodAnalyzer {
+public class JUnit4AssertThrowsInvocationAnalyzer {
 
 	boolean isSurroundedWithLambda(MethodDeclaration methodDeclaration, MethodInvocation methodInvocation) {
 
