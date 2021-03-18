@@ -28,4 +28,8 @@ public class MethodDeclarationToInvocationsMappingVisitor extends ASTVisitor {
 		methodDeclarationToInvocationsMap.put(node, invocationsCollectorVisitor.getMethodInvocations());
 		return true;
 	}
+
+	public Map<MethodDeclaration, List<MethodInvocation>> getMethodDeclarationToInvocationsMap() {
+		return methodDeclarationToInvocationsMap;
+	}
 }
