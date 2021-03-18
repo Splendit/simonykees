@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.junit.jupiter.assertthrows;
+package eu.jsparrow.core.visitor.junit.jupiter.common;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +26,11 @@ public class MethodDeclarationToInvocationsMappingVisitor extends ASTVisitor {
 
 	private final Map<MethodDeclaration, List<MethodInvocation>> methodDeclarationToInvocationsMap = new HashMap<>();
 
+	
+	public boolean visit(MethodDeclaration node) {
+		return true;
+	}
+	
 	@Override
 	public boolean visit(MethodInvocation node) {
 		MethodDeclaration surroundingMethod = findSurroundingMethod(node);
