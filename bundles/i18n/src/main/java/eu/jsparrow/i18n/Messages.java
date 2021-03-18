@@ -167,6 +167,8 @@ public class Messages extends NLS {
 	public static String MessageDialog_licensingError_failedToValidate;
 	public static String ReplaceJUnit4AnnotationsWithJupiterRule_description;
 	public static String ReplaceJUnit4AnnotationsWithJupiterRule_name;
+	public static String ReplaceJUnit4AssertWithJupiterRule_description;
+	public static String ReplaceJUnit4AssertWithJupiterRule_name;
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
 	public static String FieldNameConventionRule_description;

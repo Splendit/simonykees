@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>tests</artifactId>
-		<version>3.27.1-SNAPSHOT</version>
+		<version>3.28.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>eu.jsparrow.sample</artifactId>
@@ -29,12 +29,12 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.0.0</version>
+			<version>5.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.0.0</version>
+			<version>5.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -316,6 +316,16 @@
 						</goals>
 						<configuration>
 							<artifact>org.junit.jupiter:junit-jupiter-api:5.0.0</artifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>junit-jupiter-api-5-4-0</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.junit.jupiter:junit-jupiter-api:5.4.0</artifact>
 						</configuration>
 					</execution>
 					<execution>

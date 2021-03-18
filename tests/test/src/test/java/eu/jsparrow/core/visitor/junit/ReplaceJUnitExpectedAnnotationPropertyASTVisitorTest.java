@@ -108,6 +108,51 @@ class ReplaceJUnitExpectedAnnotationPropertyASTVisitorTest extends UsesJDTUnitFi
 		assertChange(original, expected);
 	}
 
+	@Test
+	void visit_exceptionThrownByField_shouldTransform() throws Exception {
+		String original = ""
+				+ "	private FileFinder fileFinder;\n"
+				+ "\n"
+				+ "	@Before\n"
+				+ "	public void init() {\n"
+				+ "		fileFinder = new FileFinder();\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@Test(expected = IOException.class)\n"
+				+ "	public void test_fileFinder() throws IOException {\n"
+				+ "		fileFinder.find(null);\n"
+				+ "	}\n"
+				+ ""
+				+ "\n"
+				+ ""
+				+ "class FileFinder {\n"
+				+ "\n"
+				+ "	public void find(String path) throws IOException {\n"
+				+ "		throw new IOException();\n"
+				+ "	}\n"
+				+ "}";
+		String expected = ""
+				+ "	private FileFinder fileFinder;\n"
+				+ "\n"
+				+ "	@Before\n"
+				+ "	public void init() {\n"
+				+ "		fileFinder = new FileFinder();\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@Test\n"
+				+ "	public void test_fileFinder() {\n"
+				+ "		assertThrows(IOException.class, () -> fileFinder.find(null));\n"
+				+ "	}"
+				+ ""
+				+ "class FileFinder {\n"
+				+ "\n"
+				+ "	public void find(String path) throws IOException {\n"
+				+ "		throw new IOException();\n"
+				+ "	}\n"
+				+ "}";
+		assertChange(original, expected);
+	}
+	
 	/*
 	 * Negative tests
 	 */

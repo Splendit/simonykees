@@ -2,7 +2,7 @@
 <feature
       id="eu.jsparrow.3rd.party.feature"
       label="jSparrow Third-party Dependencies"
-      version="3.27.1.qualifier"
+      version="3.28.0.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
    <description url="https://jsparrow.github.io/">

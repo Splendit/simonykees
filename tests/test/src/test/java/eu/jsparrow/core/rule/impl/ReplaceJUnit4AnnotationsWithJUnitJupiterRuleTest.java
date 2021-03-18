@@ -38,6 +38,8 @@ public class ReplaceJUnit4AnnotationsWithJUnitJupiterRuleTest extends SingleRule
 	@Test
 	public void testAlwaysTransformed() throws Exception {
 		loadUtilities();
+		
+		rule.calculateEnabledForProject(testProject);
 
 		Path preRule = getPreRuleFile(SAMPLE_FILE_ALWAYS_TRANSFORMED);
 		Path postRule = getPostRuleFile(SAMPLE_FILE_ALWAYS_TRANSFORMED, POSTRULE_SUBDIRECTORY);
