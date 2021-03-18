@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class ReplaceJUnit4AnnotationsWithJupiterASTVisitorImportsTest extends AbstractReplaceJUnit4AnnotationsWithJupiterASTVisitorTest {
+public class ReplaceJUnit4AnnotationsWithJupiterASTVisitorImportsTest extends AbstractReplaceJUnit4WithJupiterASTVisitorTest {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {

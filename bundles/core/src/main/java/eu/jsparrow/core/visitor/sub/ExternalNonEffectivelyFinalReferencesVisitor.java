@@ -22,11 +22,11 @@ public class ExternalNonEffectivelyFinalReferencesVisitor extends ASTVisitor {
 	private List<String> declarations = new ArrayList<>();
 
 	private boolean containsExternalNonFinalVariable = false;
-	
+
 	public ExternalNonEffectivelyFinalReferencesVisitor() {
 
 	}
-	
+
 	public ExternalNonEffectivelyFinalReferencesVisitor(List<String> excludes) {
 		declarations.addAll(excludes);
 	}
@@ -55,7 +55,9 @@ public class ExternalNonEffectivelyFinalReferencesVisitor extends ASTVisitor {
 		IBinding binding = name.resolveBinding();
 		if (binding != null && IBinding.VARIABLE == binding.getKind() && binding instanceof IVariableBinding) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
-			if (!Modifier.isFinal(variableBinding.getModifiers()) && !variableBinding.isEffectivelyFinal()) {
+
+			if (!variableBinding.isField() && !Modifier.isFinal(variableBinding.getModifiers())
+					&& !variableBinding.isEffectivelyFinal()) {
 				this.containsExternalNonFinalVariable = true;
 			}
 		}
