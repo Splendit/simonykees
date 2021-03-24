@@ -11,9 +11,9 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
-public abstract class AbstractJUnit4AssertionAnalyzer<T> {
+public abstract class AbstractJUnit4AssertionAnalyzer {
 
-	public List<T> collectJUnit4AssertionAnalysisResults(
+	public List<JUnit4AssertMethodInvocationAnalysisResult> collectJUnit4AssertionAnalysisResults(
 			CompilationUnit compilationUnit) {
 
 		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
@@ -49,7 +49,7 @@ public abstract class AbstractJUnit4AssertionAnalyzer<T> {
 		return true;
 	}
 
-	protected abstract Optional<T> findAnalysisResult(
+	protected abstract Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
 			MethodInvocation methodInvocation);
 
 }

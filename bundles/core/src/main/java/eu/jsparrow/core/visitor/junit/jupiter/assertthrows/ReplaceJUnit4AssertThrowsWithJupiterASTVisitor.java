@@ -1,6 +1,11 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertthrows;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import eu.jsparrow.core.visitor.junit.jupiter.common.JUnit4AssertMethodInvocationAnalysisResult;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.AbstractReplaceJUnit4AssertionsWithJupiterASTVisitor;
 /**
@@ -16,10 +21,18 @@ public class ReplaceJUnit4AssertThrowsWithJupiterASTVisitor extends AbstractRepl
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 
-		boolean continueVisiting = super.visit(compilationUnit);
-		if (!continueVisiting) {
-			return false;
-		}
+		super.visit(compilationUnit);
+		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_ASSERTIONS);
+
+		JUnit4AssertThrowsInvocationAnalyzer assertionAnalyzer = new JUnit4AssertThrowsInvocationAnalyzer(
+				compilationUnit);
+		List<JUnit4AssertMethodInvocationAnalysisResult> allJUnit4AssertThrowsAnalysisResults = assertionAnalyzer
+			.collectJUnit4AssertionAnalysisResults(compilationUnit);
+
+		List<JUnit4AssertMethodInvocationAnalysisResult> transformableJUnit4AssertThrowsAnalysisResults = allJUnit4AssertThrowsAnalysisResults
+			.stream()
+			.filter(JUnit4AssertMethodInvocationAnalysisResult::isTransformableInvocation)
+			.collect(Collectors.toList());
 
 		return false;
 	}

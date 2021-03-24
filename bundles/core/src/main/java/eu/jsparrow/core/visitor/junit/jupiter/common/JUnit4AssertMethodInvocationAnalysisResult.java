@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.junit.jupiter.assertions;
+package eu.jsparrow.core.visitor.junit.jupiter.common;
 
 import java.util.Optional;
 
@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * @since 3.28.0
  *
  */
-class JUnit4AssertMethodInvocationAnalysisResult {
+public class JUnit4AssertMethodInvocationAnalysisResult {
 
 	private final MethodInvocation methodInvocation;
 	private final String methodName;
@@ -43,23 +43,23 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 		this.transformableInvocation = transformableInvocation;
 	}
 
-	MethodInvocation getMethodInvocation() {
+	public MethodInvocation getMethodInvocation() {
 		return methodInvocation;
 	}
 
-	String getMethodName() {
+	public String getMethodName() {
 		return methodName;
 	}
 
-	Optional<String> getDeprecatedMethodNameReplacement() {
+	public Optional<String> getDeprecatedMethodNameReplacement() {
 		return Optional.ofNullable(deprecatedMethodNameReplacement);
 	}
 
-	boolean isMessageAsFirstParameter() {
+	public boolean isMessageAsFirstParameter() {
 		return messageAsFirstParameter;
 	}
 
-	boolean isTransformableInvocation() {
+	public boolean isTransformableInvocation() {
 		return transformableInvocation;
 	}
 }

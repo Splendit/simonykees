@@ -12,6 +12,8 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+import eu.jsparrow.core.visitor.junit.jupiter.common.JUnit4AssertMethodInvocationAnalysisResult;
+
 import eu.jsparrow.core.visitor.junit.jupiter.common.AbstractJUnit4AssertionAnalyzer;
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationInJUnitJupiterAnalyzer;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -21,12 +23,12 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * {@link MethodInvocation} represents the invocation of
  * {@code org.junit.Assert.assertThrows}, then all necessary informations for a
  * possible transformation are collected in an instance of
- * {@link JUnit4AssertThrowsInvocationAnalysisResult}.
+ * {@link JUnit4AssertMethodInvocationAnalysisResult}.
  * 
  * @since 3.29.0
  *
  */
-public class JUnit4AssertThrowsInvocationAnalyzer extends AbstractJUnit4AssertionAnalyzer<JUnit4AssertThrowsInvocationAnalysisResult> {
+public class JUnit4AssertThrowsInvocationAnalyzer extends AbstractJUnit4AssertionAnalyzer {
 
 	private final MethodInvocationInJUnitJupiterAnalyzer invocationInJUnitJupiterAnalyzer;
 
@@ -34,7 +36,7 @@ public class JUnit4AssertThrowsInvocationAnalyzer extends AbstractJUnit4Assertio
 		invocationInJUnitJupiterAnalyzer = new MethodInvocationInJUnitJupiterAnalyzer(compilationUnit);
 	}
 
-	public Optional<JUnit4AssertThrowsInvocationAnalysisResult> findAnalysisResult(
+	public Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
 			MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding == null) {
@@ -51,7 +53,7 @@ public class JUnit4AssertThrowsInvocationAnalyzer extends AbstractJUnit4Assertio
 
 		boolean transformableInvocation = isTransformableInvocation(methodInvocation);
 
-		return Optional.of(new JUnit4AssertThrowsInvocationAnalysisResult(methodInvocation, messageAsFirstParameter,
+		return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, messageAsFirstParameter,
 				transformableInvocation));
 	}
 
