@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import eu.jsparrow.core.visitor.junit.jupiter.common.CommonJUnit4Analysis;
+import eu.jsparrow.core.visitor.junit.jupiter.common.AbstractJUnit4AssertionAnalyzer;
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationInJUnitJupiterAnalyzer;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -26,7 +26,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.29.0
  *
  */
-public class JUnit4AssertThrowsInvocationAnalyzer {
+public class JUnit4AssertThrowsInvocationAnalyzer extends AbstractJUnit4AssertionAnalyzer<JUnit4AssertThrowsInvocationAnalysisResult> {
 
 	private final MethodInvocationInJUnitJupiterAnalyzer invocationInJUnitJupiterAnalyzer;
 
@@ -34,7 +34,7 @@ public class JUnit4AssertThrowsInvocationAnalyzer {
 		invocationInJUnitJupiterAnalyzer = new MethodInvocationInJUnitJupiterAnalyzer(compilationUnit);
 	}
 
-	Optional<JUnit4AssertThrowsInvocationAnalysisResult> findAnalysisResult(
+	public Optional<JUnit4AssertThrowsInvocationAnalysisResult> findAnalysisResult(
 			MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding == null) {
@@ -77,6 +77,6 @@ public class JUnit4AssertThrowsInvocationAnalyzer {
 
 		return arguments
 			.stream()
-			.allMatch(CommonJUnit4Analysis::isArgumentWithUnambiguousType);
+			.allMatch(this::isArgumentWithUnambiguousType);
 	}
 }

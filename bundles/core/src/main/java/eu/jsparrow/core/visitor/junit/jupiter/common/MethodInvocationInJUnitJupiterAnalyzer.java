@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.junit.jupiter.common;
 
 import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitJupiterName;
 import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
+import static eu.jsparrow.core.visitor.junit.jupiter.ReplaceJUnit4AnnotationsWithJupiterASTVisitor.JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfTypes;
 
 import java.util.Collections;
@@ -30,7 +31,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 public class MethodInvocationInJUnitJupiterAnalyzer {
 
 	private static final List<String> ORG_JUNIT_JUPITER_API_ANNOTATIONS = Collections.unmodifiableList(
-			CommonJUnit4Analysis.JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP.values()
+			JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP.values()
 				.stream()
 				.collect(Collectors.toList()));
 

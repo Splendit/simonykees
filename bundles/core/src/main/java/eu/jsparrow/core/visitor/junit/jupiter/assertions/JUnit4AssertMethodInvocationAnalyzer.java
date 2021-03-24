@@ -15,7 +15,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.AbstractJUnit4AssertionAnalyzer;
-import eu.jsparrow.core.visitor.junit.jupiter.common.CommonJUnit4Analysis;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -129,6 +128,6 @@ class JUnit4AssertMethodInvocationAnalyzer
 		}
 		return ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.stream()
-			.allMatch(CommonJUnit4Analysis::isArgumentWithUnambiguousType);
+			.allMatch(this::isArgumentWithUnambiguousType);
 	}
 }

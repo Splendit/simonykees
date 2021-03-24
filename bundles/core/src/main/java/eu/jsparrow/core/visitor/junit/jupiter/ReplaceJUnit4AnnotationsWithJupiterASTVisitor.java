@@ -1,9 +1,10 @@
 package eu.jsparrow.core.visitor.junit.jupiter;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.common.CommonJUnit4Analysis.JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP;
-
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,11 +49,23 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class ReplaceJUnit4AnnotationsWithJupiterASTVisitor extends AbstractAddImportASTVisitor {
 
-	
+	public static final Map<String, String> JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP;
 
 	private static final int ORG_J_UNIT_JUPITER_API_PACKAGE_LENGTH = "org.junit.jupiter.api.".length(); //$NON-NLS-1$
 
-	
+	static {
+
+		Map<String, String> tmpMap = new HashMap<>();
+		tmpMap.put("org.junit.Ignore", "org.junit.jupiter.api.Disabled"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("org.junit.Test", "org.junit.jupiter.api.Test"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("org.junit.After", "org.junit.jupiter.api.AfterEach"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("org.junit.AfterClass", "org.junit.jupiter.api.AfterAll"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("org.junit.Before", "org.junit.jupiter.api.BeforeEach"); //$NON-NLS-1$//$NON-NLS-2$
+		tmpMap.put("org.junit.BeforeClass", "org.junit.jupiter.api.BeforeAll"); //$NON-NLS-1$//$NON-NLS-2$
+
+		JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP = Collections.unmodifiableMap(tmpMap);
+	}
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 
@@ -173,8 +186,8 @@ public class ReplaceJUnit4AnnotationsWithJupiterASTVisitor extends AbstractAddIm
 				Name newAnnotationTypeName = ast.newName(newTapeNameAsString);
 				astRewrite.replace(originalTypeName, newAnnotationTypeName, null);
 			});
-		if(!importsToRemove.isEmpty() 
-				|| !safeNewAnnotationImports.isEmpty() 
+		if (!importsToRemove.isEmpty()
+				|| !safeNewAnnotationImports.isEmpty()
 				|| !annotationNameReplacementDataList.isEmpty()) {
 			onRewrite();
 		}
