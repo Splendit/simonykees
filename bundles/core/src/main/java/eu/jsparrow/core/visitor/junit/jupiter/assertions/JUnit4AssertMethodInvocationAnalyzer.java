@@ -14,8 +14,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import eu.jsparrow.core.visitor.junit.jupiter.common.AbstractJUnit4AssertionAnalyzer;
-import eu.jsparrow.core.visitor.junit.jupiter.common.JUnit4AssertMethodInvocationAnalysisResult;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**

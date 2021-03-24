@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.junit.jupiter.common;
+package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +10,8 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+
+import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
 
 public abstract class AbstractJUnit4AssertionAnalyzer {
 

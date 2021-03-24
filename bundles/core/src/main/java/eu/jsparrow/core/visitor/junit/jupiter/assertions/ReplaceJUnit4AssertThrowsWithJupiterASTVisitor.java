@@ -1,6 +1,4 @@
-package eu.jsparrow.core.visitor.junit.jupiter.assertthrows;
-
-import eu.jsparrow.core.visitor.junit.jupiter.assertions.ReplaceJUnit4AssertionsWithJupiterASTVisitor;
+package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 /**
  * Replaces invocations of methods of the JUnit-4-class

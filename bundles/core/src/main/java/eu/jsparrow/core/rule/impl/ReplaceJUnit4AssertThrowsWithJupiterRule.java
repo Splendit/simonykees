@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 
-import eu.jsparrow.core.visitor.junit.jupiter.assertthrows.ReplaceJUnit4AssertThrowsWithJupiterASTVisitor;
+import eu.jsparrow.core.visitor.junit.jupiter.assertions.ReplaceJUnit4AssertThrowsWithJupiterASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;

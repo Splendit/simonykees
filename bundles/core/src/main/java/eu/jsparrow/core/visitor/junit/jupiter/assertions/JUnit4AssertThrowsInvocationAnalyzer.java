@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.junit.jupiter.assertthrows;
+package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
@@ -12,9 +12,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import eu.jsparrow.core.visitor.junit.jupiter.common.JUnit4AssertMethodInvocationAnalysisResult;
-
-import eu.jsparrow.core.visitor.junit.jupiter.common.AbstractJUnit4AssertionAnalyzer;
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationInJUnitJupiterAnalyzer;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 

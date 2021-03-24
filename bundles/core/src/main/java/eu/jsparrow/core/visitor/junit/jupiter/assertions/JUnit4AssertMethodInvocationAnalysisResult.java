@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.junit.jupiter.common;
+package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import java.util.Optional;
 
