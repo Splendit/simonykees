@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import eu.jsparrow.core.visitor.junit.jupiter.common.AbstractJUnit4AssertionAnalyzer;
 import eu.jsparrow.core.visitor.junit.jupiter.common.CommonJUnit4Analysis;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -27,10 +28,11 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.28.0
  *
  */
-class JUnit4AssertMethodInvocationAnalyzer {
+class JUnit4AssertMethodInvocationAnalyzer
+		extends AbstractJUnit4AssertionAnalyzer<JUnit4AssertMethodInvocationAnalysisResult> {
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 
-	Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
+	protected Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
 			MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding == null) {

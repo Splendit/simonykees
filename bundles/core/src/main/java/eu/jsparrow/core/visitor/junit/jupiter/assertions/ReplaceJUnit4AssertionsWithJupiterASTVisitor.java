@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.AbstractReplaceJUnit4AssertionsWithJupiterASTVisitor;
-import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -50,18 +49,10 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_ASSERTIONS);
 
-		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
-		compilationUnit.accept(invocationCollectorVisitor);
-
-		List<MethodInvocation> allMethodInvocations = invocationCollectorVisitor.getMethodInvocations();
 		JUnit4AssertMethodInvocationAnalyzer invocationAnalyzer = new JUnit4AssertMethodInvocationAnalyzer();
-
-		List<JUnit4AssertMethodInvocationAnalysisResult> allJUnit4AssertInvocations = allMethodInvocations
-			.stream()
-			.map(invocationAnalyzer::findAnalysisResult)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toList());
+		List<JUnit4AssertMethodInvocationAnalysisResult> allJUnit4AssertInvocations = invocationAnalyzer
+			.collectJUnit4AssertionAnalysisResults(
+					compilationUnit);
 
 		List<JUnit4AssertMethodInvocationAnalysisResult> jUnit4AssertInvocationsInJUnitJupiterTest = allJUnit4AssertInvocations
 			.stream()
