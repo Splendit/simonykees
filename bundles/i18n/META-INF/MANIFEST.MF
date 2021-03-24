@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.i18n
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow I18n
 Bundle-SymbolicName: eu.jsparrow.i18n
-Bundle-Version: 3.28.1.qualifier
+Bundle-Version: 3.28.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.osgi;bundle-version="[3.10.0,4.0.0)"
 Export-Package: eu.jsparrow.i18n
