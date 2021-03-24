@@ -1,10 +1,9 @@
 package eu.jsparrow.core.visitor.junit.jupiter;
 
+import static eu.jsparrow.core.visitor.junit.jupiter.common.CommonJUnit4Analysis.ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
+
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,24 +48,11 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class ReplaceJUnit4AnnotationsWithJupiterASTVisitor extends AbstractAddImportASTVisitor {
 
-	static final Map<String, String> ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
+	
 
 	private static final int ORG_J_UNIT_JUPITER_API_PACKAGE_LENGTH = "org.junit.jupiter.api.".length(); //$NON-NLS-1$
 
-	static {
-
-		Map<String, String> tmpMap = new HashMap<>();
-		tmpMap.put("org.junit.Ignore", "org.junit.jupiter.api.Disabled"); //$NON-NLS-1$//$NON-NLS-2$
-		tmpMap.put("org.junit.Test", "org.junit.jupiter.api.Test"); //$NON-NLS-1$//$NON-NLS-2$
-		tmpMap.put("org.junit.After", "org.junit.jupiter.api.AfterEach"); //$NON-NLS-1$//$NON-NLS-2$
-		tmpMap.put("org.junit.AfterClass", "org.junit.jupiter.api.AfterAll"); //$NON-NLS-1$//$NON-NLS-2$
-		tmpMap.put("org.junit.Before", "org.junit.jupiter.api.BeforeEach"); //$NON-NLS-1$//$NON-NLS-2$
-		tmpMap.put("org.junit.BeforeClass", "org.junit.jupiter.api.BeforeAll"); //$NON-NLS-1$//$NON-NLS-2$
-
-		ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP = Collections.unmodifiableMap(tmpMap);
-
-	}
-
+	
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 
