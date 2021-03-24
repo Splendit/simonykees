@@ -1,6 +1,6 @@
 package eu.jsparrow.core.visitor.junit.jupiter;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.common.CommonJUnit4Analysis.ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
+import static eu.jsparrow.core.visitor.junit.jupiter.common.CommonJUnit4Analysis.JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,8 +101,8 @@ public class ReplaceJUnit4AnnotationsWithJupiterASTVisitor extends AbstractAddIm
 			.forEach(annotation -> {
 				ITypeBinding typeBinding = annotation.resolveTypeBinding();
 				String originalQualifiedTypeName = typeBinding.getQualifiedName();
-				if (ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP.containsKey(originalQualifiedTypeName)) {
-					String newQualifiedTypeName = ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP
+				if (JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP.containsKey(originalQualifiedTypeName)) {
+					String newQualifiedTypeName = JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP
 						.get(originalQualifiedTypeName);
 
 					Name originalTypeName = annotation.getTypeName();
@@ -147,7 +147,7 @@ public class ReplaceJUnit4AnnotationsWithJupiterASTVisitor extends AbstractAddIm
 		}
 		ITypeBinding typeBinding = (ITypeBinding) importBinding;
 		String qualifiedName = typeBinding.getQualifiedName();
-		return ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP.containsKey(qualifiedName);
+		return JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP.containsKey(qualifiedName);
 	}
 
 	private void transform(List<ImportDeclaration> importsToRemove, Set<String> safeNewAnnotationImports,

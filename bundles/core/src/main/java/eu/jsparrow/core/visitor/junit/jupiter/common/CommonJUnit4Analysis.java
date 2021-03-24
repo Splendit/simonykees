@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
  */
 public class CommonJUnit4Analysis {
 
-	public static final Map<String, String> ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
+	public static final Map<String, String> JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP;
 
 	static {
 
@@ -31,7 +31,7 @@ public class CommonJUnit4Analysis {
 		tmpMap.put("org.junit.Before", "org.junit.jupiter.api.BeforeEach"); //$NON-NLS-1$//$NON-NLS-2$
 		tmpMap.put("org.junit.BeforeClass", "org.junit.jupiter.api.BeforeAll"); //$NON-NLS-1$//$NON-NLS-2$
 
-		ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP = Collections.unmodifiableMap(tmpMap);
+		JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP = Collections.unmodifiableMap(tmpMap);
 
 	}
 
