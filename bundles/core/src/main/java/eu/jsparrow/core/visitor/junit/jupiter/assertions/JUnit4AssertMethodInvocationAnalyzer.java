@@ -12,9 +12,9 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import eu.jsparrow.core.visitor.junit.jupiter.common.CommonJUnit4Analysis;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -121,29 +121,12 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
 	}
 
-	private boolean isArgumentWithUnambiguousType(Expression expression) {
-		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			MethodInvocation methodInvocation = (MethodInvocation) expression;
-			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-			return methodBinding != null && !(methodBinding.isParameterizedMethod() && methodInvocation.typeArguments()
-				.isEmpty());
-		}
-		if (expression.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
-			SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation) expression;
-			IMethodBinding superMethodBinding = superMethodInvocation.resolveMethodBinding();
-			return superMethodBinding != null
-					&& !(superMethodBinding.isParameterizedMethod() && superMethodInvocation.typeArguments()
-						.isEmpty());
-		}
-		return true;
-	}
-
 	private boolean isTransformableInvocation(MethodInvocation methodInvocation) {
 		if (!isInvocationWithinJUnitJupiterTest(methodInvocation)) {
 			return false;
 		}
 		return ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
 			.stream()
-			.allMatch(this::isArgumentWithUnambiguousType);
+			.allMatch(CommonJUnit4Analysis::isArgumentWithUnambiguousType);
 	}
 }
