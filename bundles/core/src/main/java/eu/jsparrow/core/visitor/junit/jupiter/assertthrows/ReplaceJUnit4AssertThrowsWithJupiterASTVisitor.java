@@ -2,8 +2,7 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertthrows;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
-
+import eu.jsparrow.core.visitor.junit.jupiter.common.AbstractReplaceJUnit4AssertionsWithJupiterASTVisitor;
 /**
  * Replaces invocations of methods of the JUnit-4-class
  * {@code org.junit.Assert#assertThrows} by invocations of the corresponding
@@ -12,7 +11,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.29.0
  *
  */
-public class ReplaceJUnit4AssertThrowsWithJupiterASTVisitor extends AbstractAddImportASTVisitor {
+public class ReplaceJUnit4AssertThrowsWithJupiterASTVisitor extends AbstractReplaceJUnit4AssertionsWithJupiterASTVisitor {
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {

@@ -20,9 +20,9 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.junit.jupiter.common.AbstractReplaceJUnit4AssertionsWithJupiterASTVisitor;
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
  * Replaces invocations of methods of the JUnit-4-class {@code org.junit.Assert}
@@ -32,10 +32,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.28.0
  * 
  */
-public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImportASTVisitor {
-
-	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
-	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS_PREFIX = ORG_JUNIT_JUPITER_API_ASSERTIONS + "."; //$NON-NLS-1$
+public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplaceJUnit4AssertionsWithJupiterASTVisitor {
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
@@ -198,27 +195,6 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 		}
 
 		return Optional.of(new JUnit4AssertInvocationReplacementData(methodInvocation, newMethodInvocationSupplier));
-	}
-
-	@SuppressWarnings({ "unchecked" })
-	private MethodInvocation createNewInvocationWithoutQualifier(String newMethodName,
-			List<Expression> arguments) {
-		AST ast = astRewrite.getAST();
-		MethodInvocation newInvocation = ast.newMethodInvocation();
-		newInvocation.setName(ast.newSimpleName(newMethodName));
-		List<Expression> newInvocationArguments = newInvocation.arguments();
-		arguments.stream()
-			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
-			.forEach(newInvocationArguments::add);
-		return newInvocation;
-	}
-
-	private MethodInvocation createNewInvocationWithAssertionsQualifier(MethodInvocation contextForImport,
-			String newMethodName, List<Expression> arguments) {
-		MethodInvocation newInvocation = createNewInvocationWithoutQualifier(newMethodName, arguments);
-		Name newQualifier = addImport(ORG_JUNIT_JUPITER_API_ASSERTIONS, contextForImport);
-		newInvocation.setExpression(newQualifier);
-		return newInvocation;
 	}
 
 	private void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
