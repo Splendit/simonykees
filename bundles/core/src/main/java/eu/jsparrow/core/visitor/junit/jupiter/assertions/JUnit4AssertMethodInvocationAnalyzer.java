@@ -4,6 +4,7 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -28,11 +29,15 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  *
  */
 class JUnit4AssertMethodInvocationAnalyzer {
-	private final MethodInvocationInJUnitJupiterAnalyzer invocationInJUnitJupiterAnalyzer;
+	static final String ASSERT_THROWS = "assertThrows"; //$NON-NLS-1$
 
-	public JUnit4AssertMethodInvocationAnalyzer(CompilationUnit compilationUnit) {
+	private final MethodInvocationInJUnitJupiterAnalyzer invocationInJUnitJupiterAnalyzer;
+	private final Predicate<String> methodNamePredicate;
+
+	public JUnit4AssertMethodInvocationAnalyzer(CompilationUnit compilationUnit,
+			Predicate<String> methodNamePredicate) {
 		this.invocationInJUnitJupiterAnalyzer = new MethodInvocationInJUnitJupiterAnalyzer(compilationUnit);
-		;
+		this.methodNamePredicate = methodNamePredicate;
 	}
 
 	List<JUnit4AssertMethodInvocationAnalysisResult> collectJUnit4AssertionAnalysisResults(
@@ -78,9 +83,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 
 	boolean isSupportedJUnit4AssertMethod(IMethodBinding methodBinding) {
 		if (isContentOfType(methodBinding.getDeclaringClass(), "org.junit.Assert")) { //$NON-NLS-1$
-			String methodName = methodBinding.getName();
-			return !methodName.equals("assertThat") //$NON-NLS-1$
-					&& !methodName.equals("assertThrows"); //$NON-NLS-1$
+			return methodNamePredicate.test(methodBinding.getName());
 		}
 		return false;
 	}
@@ -136,7 +139,18 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		if (!invocationInJUnitJupiterAnalyzer.isWithinJUnitJupiterTest(methodInvocation)) {
 			return false;
 		}
-		return ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+
+		String methodIdentifier = methodInvocation.getName()
+			.getIdentifier();
+
+		if (methodIdentifier.equals(ASSERT_THROWS)) {
+			int throwingRunnableArgumentIndex = arguments.size() - 1;
+			Expression throwingRunnableArgument = arguments.get(throwingRunnableArgumentIndex);
+			return throwingRunnableArgument.getNodeType() == ASTNode.LAMBDA_EXPRESSION;
+		}
+
+		return arguments
 			.stream()
 			.allMatch(this::isArgumentWithUnambiguousType);
 	}

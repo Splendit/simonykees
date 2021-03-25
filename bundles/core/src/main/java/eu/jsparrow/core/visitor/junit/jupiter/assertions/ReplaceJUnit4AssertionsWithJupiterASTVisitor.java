@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -43,8 +44,10 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_ASSERTIONS);
 
+		Predicate<String> methodNamePredicate = getMethodNamePredicate();
 		JUnit4AssertMethodInvocationAnalyzer invocationAnalyzer = new JUnit4AssertMethodInvocationAnalyzer(
-				compilationUnit);
+				compilationUnit, methodNamePredicate);
+		
 		List<JUnit4AssertMethodInvocationAnalysisResult> allJUnit4AssertInvocations = invocationAnalyzer
 			.collectJUnit4AssertionAnalysisResults(
 					compilationUnit);
@@ -232,5 +235,10 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 			});
 			onRewrite();
 		}
+	}
+	
+	protected Predicate<String> getMethodNamePredicate() {
+		return  methodName -> !methodName.equals("assertThat") //$NON-NLS-1$
+				&& !methodName.equals("assertThrows"); //$NON-NLS-1$
 	}
 }
