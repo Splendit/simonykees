@@ -22,7 +22,8 @@ public class ReplaceJUnit4AssertionsWithJupiterRuleTest extends SingleRuleTest {
 	private static final String SAMPLE_FILE_ALWAYS_TRANSFORMED = "ReplaceJUnit4AssertionsWithJupiterAlwaysTransformedRule.java";
 	private static final String SAMPLE_FILE_CONDITIONALLY_TRANSFORMED = "ReplaceJUnit4AssertionsWithJupiterConditionallyTransformedRule.java";
 	private static final String SAMPLE_FILE_GENERIC_METHOD_CALLS_AS_ARGUMENTS = "ReplaceJUnit4AssertionsWithJupiterGenericMethodCallsAsArgumentsRule.java";
-	
+	private static final String SAMPLE_FILEMIXED_ANNOTATIONS = "ReplaceJUnit4AssertionsWithJupiterMixingAnnotationsRule.java";
+
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnitToJupiter";
 
 	private ReplaceJUnit4AssertionsWithJupiterRule rule;
@@ -37,7 +38,6 @@ public class ReplaceJUnit4AssertionsWithJupiterRuleTest extends SingleRuleTest {
 	public void testAlwaysTransformed() throws Exception {
 		loadUtilities();
 
-		
 		assertTrue(rule.isEnabled());
 
 		Path preRule = getPreRuleFile(SAMPLE_FILE_ALWAYS_TRANSFORMED);
@@ -61,13 +61,30 @@ public class ReplaceJUnit4AssertionsWithJupiterRuleTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	public void testGenericMethodCallsAsArguments() throws Exception {
 		loadUtilities();
 
 		Path preRule = getPreRuleFile(SAMPLE_FILE_GENERIC_METHOD_CALLS_AS_ARGUMENTS);
 		Path postRule = getPostRuleFile(SAMPLE_FILE_GENERIC_METHOD_CALLS_AS_ARGUMENTS, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+
+	/**
+	 * SIM-1932: This test is expected to fail as soon as mixing of JUnit4 -
+	 * annotations with JUnit Jupiter - annotations is supported.
+	 */
+	@Test
+	public void testMixedAnnotations() throws Exception {
+		loadUtilities();
+
+		Path preRule = getPreRuleFile(SAMPLE_FILEMIXED_ANNOTATIONS);
+		Path postRule = getPostRuleFile(SAMPLE_FILEMIXED_ANNOTATIONS, POSTRULE_SUBDIRECTORY);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
