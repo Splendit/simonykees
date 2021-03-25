@@ -75,10 +75,6 @@ public class ReplaceJUnit4AssertionsWithJupiterRuleTest extends SingleRuleTest {
 		assertEquals(expected, actual);
 	}
 
-	/**
-	 * SIM-1932: This test is expected to fail as soon as mixing of JUnit4 -
-	 * annotations with JUnit Jupiter - annotations is supported.
-	 */
 	@Test
 	public void testMixedAnnotations() throws Exception {
 		loadUtilities();
