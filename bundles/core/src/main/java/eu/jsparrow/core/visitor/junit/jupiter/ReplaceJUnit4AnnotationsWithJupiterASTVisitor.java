@@ -49,7 +49,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class ReplaceJUnit4AnnotationsWithJupiterASTVisitor extends AbstractAddImportASTVisitor {
 
-	public static final Map<String, String> JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP;
+	static final Map<String, String> ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP;
 
 	private static final int ORG_J_UNIT_JUPITER_API_PACKAGE_LENGTH = "org.junit.jupiter.api.".length(); //$NON-NLS-1$
 
@@ -63,7 +63,8 @@ public class ReplaceJUnit4AnnotationsWithJupiterASTVisitor extends AbstractAddIm
 		tmpMap.put("org.junit.Before", "org.junit.jupiter.api.BeforeEach"); //$NON-NLS-1$//$NON-NLS-2$
 		tmpMap.put("org.junit.BeforeClass", "org.junit.jupiter.api.BeforeAll"); //$NON-NLS-1$//$NON-NLS-2$
 
-		JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP = Collections.unmodifiableMap(tmpMap);
+		ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP = Collections.unmodifiableMap(tmpMap);
+
 	}
 
 	@Override
@@ -114,8 +115,8 @@ public class ReplaceJUnit4AnnotationsWithJupiterASTVisitor extends AbstractAddIm
 			.forEach(annotation -> {
 				ITypeBinding typeBinding = annotation.resolveTypeBinding();
 				String originalQualifiedTypeName = typeBinding.getQualifiedName();
-				if (JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP.containsKey(originalQualifiedTypeName)) {
-					String newQualifiedTypeName = JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP
+				if (ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP.containsKey(originalQualifiedTypeName)) {
+					String newQualifiedTypeName = ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP
 						.get(originalQualifiedTypeName);
 
 					Name originalTypeName = annotation.getTypeName();
@@ -160,7 +161,7 @@ public class ReplaceJUnit4AnnotationsWithJupiterASTVisitor extends AbstractAddIm
 		}
 		ITypeBinding typeBinding = (ITypeBinding) importBinding;
 		String qualifiedName = typeBinding.getQualifiedName();
-		return JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP.containsKey(qualifiedName);
+		return ANNOTATION_QUALIFIED_NAMES_REPLACEMENT_MAP.containsKey(qualifiedName);
 	}
 
 	private void transform(List<ImportDeclaration> importsToRemove, Set<String> safeNewAnnotationImports,
@@ -186,8 +187,8 @@ public class ReplaceJUnit4AnnotationsWithJupiterASTVisitor extends AbstractAddIm
 				Name newAnnotationTypeName = ast.newName(newTapeNameAsString);
 				astRewrite.replace(originalTypeName, newAnnotationTypeName, null);
 			});
-		if (!importsToRemove.isEmpty()
-				|| !safeNewAnnotationImports.isEmpty()
+		if(!importsToRemove.isEmpty() 
+				|| !safeNewAnnotationImports.isEmpty() 
 				|| !annotationNameReplacementDataList.isEmpty()) {
 			onRewrite();
 		}

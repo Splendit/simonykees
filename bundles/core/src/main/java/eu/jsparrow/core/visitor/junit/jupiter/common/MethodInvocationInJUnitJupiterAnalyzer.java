@@ -2,9 +2,9 @@ package eu.jsparrow.core.visitor.junit.jupiter.common;
 
 import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitJupiterName;
 import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
-import static eu.jsparrow.core.visitor.junit.jupiter.ReplaceJUnit4AnnotationsWithJupiterASTVisitor.JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfTypes;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,10 +30,14 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class MethodInvocationInJUnitJupiterAnalyzer {
 
-	private static final List<String> ORG_JUNIT_JUPITER_API_ANNOTATIONS = Collections.unmodifiableList(
-			JUNIT4_TO_JUPITER_TEST_ANNOTATIONS_MAP.values()
-				.stream()
-				.collect(Collectors.toList()));
+	private static final List<String> ORG_JUNIT_JUPITER_API_ANNOTATIONS = Collections.unmodifiableList(Arrays.asList(
+			"org.junit.jupiter.api.Disabled", //$NON-NLS-1$
+			"org.junit.jupiter.api.Test", //$NON-NLS-1$
+			"org.junit.jupiter.api.AfterEach", //$NON-NLS-1$
+			"org.junit.jupiter.api.AfterAll", //$NON-NLS-1$
+			"org.junit.jupiter.api.BeforeEach", //$NON-NLS-1$
+			"org.junit.jupiter.api.BeforeAll" //$NON-NLS-1$
+	));
 
 	private final List<MethodDeclaration> jUnitJupiterTestMethods;
 
