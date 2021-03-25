@@ -66,7 +66,7 @@ public class ReplaceJUnit4AssertionsWithJupiterNegativeASTVisitorTest
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_assertEqualsWithQualifierAsLambdaBody_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Assert.class.getName());
@@ -95,4 +95,20 @@ public class ReplaceJUnit4AssertionsWithJupiterNegativeASTVisitorTest
 		assertNoChange(original);
 	}
 
+	@Test
+	public void visit_assertThrows_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assert.assertThrows", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+		defaultFixture.addImport(java.io.IOException.class.getName());
+		String original = "" +
+				"	@Test\n"
+				+ "	public void unexpectedException() {\n"
+				+ "		assertThrows(IOException.class, () -> throwsIOException(\"Simply throw an IOException\"));\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private void throwsIOException(String message) throws IOException {\n"
+				+ "		throw new IOException(message);\n"
+				+ "	}";
+		assertNoChange(original);
+	}
 }
