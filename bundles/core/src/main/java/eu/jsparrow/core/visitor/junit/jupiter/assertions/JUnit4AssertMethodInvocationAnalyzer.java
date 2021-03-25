@@ -7,16 +7,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -32,7 +28,12 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  *
  */
 class JUnit4AssertMethodInvocationAnalyzer {
-	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
+	private final MethodInvocationInJUnitJupiterAnalyzer invocationInJUnitJupiterAnalyzer;
+
+	public JUnit4AssertMethodInvocationAnalyzer(CompilationUnit compilationUnit) {
+		this.invocationInJUnitJupiterAnalyzer = new MethodInvocationInJUnitJupiterAnalyzer(compilationUnit);
+		;
+	}
 
 	List<JUnit4AssertMethodInvocationAnalysisResult> collectJUnit4AssertionAnalysisResults(
 			CompilationUnit compilationUnit) {
@@ -80,32 +81,6 @@ class JUnit4AssertMethodInvocationAnalyzer {
 			String methodName = methodBinding.getName();
 			return !methodName.equals("assertThat") //$NON-NLS-1$
 					&& !methodName.equals("assertThrows"); //$NON-NLS-1$
-		}
-		return false;
-	}
-
-	private boolean isInvocationWithinJUnitJupiterTest(MethodInvocation methodInvocation) {
-		ASTNode parent = methodInvocation.getParent();
-		while (parent != null) {
-			if (parent.getNodeType() == ASTNode.METHOD_DECLARATION) {
-				MethodDeclaration methodDeclaration = (MethodDeclaration) parent;
-				if (methodDeclaration.getLocationInParent() != TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
-					return false;
-				}
-				TypeDeclaration typeDeclaration = (TypeDeclaration) methodDeclaration.getParent();
-				if (typeDeclaration.isLocalTypeDeclaration()) {
-					return false;
-				}
-				return ASTNodeUtil.convertToTypedList(methodDeclaration.modifiers(), Annotation.class)
-					.stream()
-					.map(Annotation::resolveAnnotationBinding)
-					.map(IAnnotationBinding::getAnnotationType)
-					.anyMatch(typeBinding -> isContentOfType(typeBinding, ORG_JUNIT_JUPITER_API_TEST));
-			}
-			if (parent.getNodeType() == ASTNode.LAMBDA_EXPRESSION) {
-				return false;
-			}
-			parent = parent.getParent();
 		}
 		return false;
 	}
@@ -158,7 +133,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 	}
 
 	boolean isTransformableInvocation(MethodInvocation methodInvocation) {
-		if (!isInvocationWithinJUnitJupiterTest(methodInvocation)) {
+		if (!invocationInJUnitJupiterAnalyzer.isWithinJUnitJupiterTest(methodInvocation)) {
 			return false;
 		}
 		return ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)

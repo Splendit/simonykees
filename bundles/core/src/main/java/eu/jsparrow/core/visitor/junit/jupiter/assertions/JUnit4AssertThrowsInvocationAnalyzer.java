@@ -10,7 +10,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationInJUnitJupiterAnalyzer;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -25,10 +24,8 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class JUnit4AssertThrowsInvocationAnalyzer extends JUnit4AssertMethodInvocationAnalyzer {
 
-	private final MethodInvocationInJUnitJupiterAnalyzer invocationInJUnitJupiterAnalyzer;
-
 	JUnit4AssertThrowsInvocationAnalyzer(CompilationUnit compilationUnit) {
-		invocationInJUnitJupiterAnalyzer = new MethodInvocationInJUnitJupiterAnalyzer(compilationUnit);
+		super(compilationUnit);
 	}
 
 	@Override
@@ -42,19 +39,13 @@ public class JUnit4AssertThrowsInvocationAnalyzer extends JUnit4AssertMethodInvo
 
 	@Override
 	boolean isTransformableInvocation(MethodInvocation methodInvocation) {
-		if (!invocationInJUnitJupiterAnalyzer.isWithinJUnitJupiterTest(methodInvocation)) {
+		if (!super.isTransformableInvocation(methodInvocation)) {
 			return false;
 		}
 
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
 		int throwingRunnableArgumentIndex = arguments.size() - 1;
 		Expression throwingRunnableArgument = arguments.get(throwingRunnableArgumentIndex);
-		if (throwingRunnableArgument.getNodeType() != ASTNode.LAMBDA_EXPRESSION) {
-			return false;
-		}
-
-		return arguments
-			.stream()
-			.allMatch(this::isArgumentWithUnambiguousType);
+		return throwingRunnableArgument.getNodeType() == ASTNode.LAMBDA_EXPRESSION;
 	}
 }

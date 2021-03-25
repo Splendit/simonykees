@@ -3,6 +3,7 @@ package eu.jsparrow.sample.postRule.migrateJUnitToJupiter;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 public class ReplaceJUnit4AssertionsWithJupiterMixingAnnotationsRule {
 
@@ -13,6 +14,6 @@ public class ReplaceJUnit4AssertionsWithJupiterMixingAnnotationsRule {
 
 	@Test
 	void testWithJUnitJupiterAnnotation() {
-		assertEquals(0L, 0L);
+		Assertions.assertEquals(0L, 0L);
 	}
 }

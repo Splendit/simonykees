@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.junit.jupiter.common;
+package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitJupiterName;
 import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.core.visitor.junit.jupiter.AnnotationCollectorVisitor;
+import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**

@@ -39,20 +39,12 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 
-		boolean continueVisiting = super.visit(compilationUnit);
-		if (!continueVisiting) {
-			return false;
-		}
-
-		JUnit4AssertToJupiterAnalyzerVisitor analyzerVisitor = new JUnit4AssertToJupiterAnalyzerVisitor();
-		compilationUnit.accept(analyzerVisitor);
-		if (!analyzerVisitor.isTransformationPossible()) {
-			return false;
-		}
+		super.visit(compilationUnit);
 
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_ASSERTIONS);
 
-		JUnit4AssertMethodInvocationAnalyzer invocationAnalyzer = new JUnit4AssertMethodInvocationAnalyzer();
+		JUnit4AssertMethodInvocationAnalyzer invocationAnalyzer = new JUnit4AssertMethodInvocationAnalyzer(
+				compilationUnit);
 		List<JUnit4AssertMethodInvocationAnalysisResult> allJUnit4AssertInvocations = invocationAnalyzer
 			.collectJUnit4AssertionAnalysisResults(
 					compilationUnit);
