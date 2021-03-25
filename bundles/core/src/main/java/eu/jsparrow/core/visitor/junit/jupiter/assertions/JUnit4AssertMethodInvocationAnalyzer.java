@@ -144,14 +144,16 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		String methodIdentifier = methodInvocation.getName()
 			.getIdentifier();
 
-		if (methodIdentifier.equals(ASSERT_THROWS)) {
+		boolean unambiguousArgumentTypes = arguments
+			.stream()
+			.allMatch(this::isArgumentWithUnambiguousType);
+
+		if (unambiguousArgumentTypes && methodIdentifier.equals(ASSERT_THROWS)) {
 			int throwingRunnableArgumentIndex = arguments.size() - 1;
 			Expression throwingRunnableArgument = arguments.get(throwingRunnableArgumentIndex);
 			return throwingRunnableArgument.getNodeType() == ASTNode.LAMBDA_EXPRESSION;
 		}
 
-		return arguments
-			.stream()
-			.allMatch(this::isArgumentWithUnambiguousType);
+		return unambiguousArgumentTypes;
 	}
 }
