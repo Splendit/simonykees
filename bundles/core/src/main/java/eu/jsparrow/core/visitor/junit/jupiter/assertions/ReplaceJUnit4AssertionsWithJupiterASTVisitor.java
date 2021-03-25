@@ -63,7 +63,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 			.collect(Collectors.toList());
 
 		List<ImportDeclaration> staticAssertMethodImportsToRemove = collectStaticAssertMethodImportsToRemove(
-				allJUnit4AssertInvocations);
+				allJUnit4AssertInvocations, invocationAnalyzer);
 
 		Set<String> unqualifiedNamesOfAssertMethodImportsToRemove = staticAssertMethodImportsToRemove
 			.stream()
@@ -105,7 +105,8 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 	}
 
 	private List<ImportDeclaration> collectStaticAssertMethodImportsToRemove(
-			List<JUnit4AssertMethodInvocationAnalysisResult> jUnit4AssertInvocationDataList) {
+			List<JUnit4AssertMethodInvocationAnalysisResult> jUnit4AssertInvocationDataList,
+			JUnit4AssertMethodInvocationAnalyzer invocationAnalyzer) {
 		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = jUnit4AssertInvocationDataList
 			.stream()
 			.filter(data -> !data.isTransformableInvocation())
@@ -118,12 +119,13 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 			.convertToTypedList(getCompilationUnit().imports(), ImportDeclaration.class)
 			.stream()
 			.filter(importDeclaration -> canRemoveStaticImport(importDeclaration,
-					simpleNamesOfStaticAssertMethodImportsToKeep))
+					simpleNamesOfStaticAssertMethodImportsToKeep, invocationAnalyzer))
 			.collect(Collectors.toList());
 	}
 
 	private boolean canRemoveStaticImport(ImportDeclaration importDeclaration,
-			Set<String> simpleNamesOfStaticAssertMethodImportsToKeep) {
+			Set<String> simpleNamesOfStaticAssertMethodImportsToKeep,
+			JUnit4AssertMethodInvocationAnalyzer invocationAnalyzer) {
 		if (!importDeclaration.isStatic()) {
 			return false;
 		}
@@ -134,7 +136,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 		IBinding importBinding = importDeclaration.resolveBinding();
 		if (importBinding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = ((IMethodBinding) importBinding);
-			return JUnit4AssertMethodInvocationAnalyzer.isSupportedJUnit4AssertMethod(methodBinding)
+			return invocationAnalyzer.isSupportedJUnit4AssertMethod(methodBinding)
 					&& !simpleNamesOfStaticAssertMethodImportsToKeep.contains(methodBinding.getName());
 		}
 		return false;

@@ -3,13 +3,11 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationInJUnitJupiterAnalyzer;
@@ -25,7 +23,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.29.0
  *
  */
-public class JUnit4AssertThrowsInvocationAnalyzer extends AbstractJUnit4AssertionAnalyzer {
+public class JUnit4AssertThrowsInvocationAnalyzer extends JUnit4AssertMethodInvocationAnalyzer {
 
 	private final MethodInvocationInJUnitJupiterAnalyzer invocationInJUnitJupiterAnalyzer;
 
@@ -33,27 +31,7 @@ public class JUnit4AssertThrowsInvocationAnalyzer extends AbstractJUnit4Assertio
 		invocationInJUnitJupiterAnalyzer = new MethodInvocationInJUnitJupiterAnalyzer(compilationUnit);
 	}
 
-	public Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
-			MethodInvocation methodInvocation) {
-		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		if (methodBinding == null) {
-			return Optional.empty();
-		}
-		if (!isSupportedJUnit4AssertMethod(methodBinding)) {
-			return Optional.empty();
-		}
-
-		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
-			.getParameterTypes();
-		boolean messageAsFirstParameter = declaredParameterTypes.length > 0
-				&& isContentOfType(declaredParameterTypes[0], "java.lang.String"); //$NON-NLS-1$
-
-		boolean transformableInvocation = isTransformableInvocation(methodInvocation);
-
-		return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, messageAsFirstParameter,
-				transformableInvocation));
-	}
-
+	@Override
 	boolean isSupportedJUnit4AssertMethod(IMethodBinding methodBinding) {
 		if (isContentOfType(methodBinding.getDeclaringClass(), "org.junit.Assert")) { //$NON-NLS-1$
 			return methodBinding.getName()
@@ -62,7 +40,8 @@ public class JUnit4AssertThrowsInvocationAnalyzer extends AbstractJUnit4Assertio
 		return false;
 	}
 
-	private boolean isTransformableInvocation(MethodInvocation methodInvocation) {
+	@Override
+	boolean isTransformableInvocation(MethodInvocation methodInvocation) {
 		if (!invocationInJUnitJupiterAnalyzer.isWithinJUnitJupiterTest(methodInvocation)) {
 			return false;
 		}

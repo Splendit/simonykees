@@ -2,18 +2,23 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -26,11 +31,25 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.28.0
  *
  */
-class JUnit4AssertMethodInvocationAnalyzer
-		extends AbstractJUnit4AssertionAnalyzer {
+class JUnit4AssertMethodInvocationAnalyzer {
 	private static final String ORG_JUNIT_JUPITER_API_TEST = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 
-	protected Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
+	List<JUnit4AssertMethodInvocationAnalysisResult> collectJUnit4AssertionAnalysisResults(
+			CompilationUnit compilationUnit) {
+
+		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
+		compilationUnit.accept(invocationCollectorVisitor);
+		List<MethodInvocation> allMethodInvocations = invocationCollectorVisitor.getMethodInvocations();
+
+		return allMethodInvocations
+			.stream()
+			.map(this::findAnalysisResult)
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toList());
+	}
+
+	Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
 			MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding == null) {
@@ -56,7 +75,7 @@ class JUnit4AssertMethodInvocationAnalyzer
 		}
 	}
 
-	static boolean isSupportedJUnit4AssertMethod(IMethodBinding methodBinding) {
+	boolean isSupportedJUnit4AssertMethod(IMethodBinding methodBinding) {
 		if (isContentOfType(methodBinding.getDeclaringClass(), "org.junit.Assert")) { //$NON-NLS-1$
 			String methodName = methodBinding.getName();
 			return !methodName.equals("assertThat") //$NON-NLS-1$
@@ -121,7 +140,24 @@ class JUnit4AssertMethodInvocationAnalyzer
 		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
 	}
 
-	private boolean isTransformableInvocation(MethodInvocation methodInvocation) {
+	boolean isArgumentWithUnambiguousType(Expression expression) {
+		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			MethodInvocation methodInvocation = (MethodInvocation) expression;
+			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			return methodBinding != null && !(methodBinding.isParameterizedMethod() && methodInvocation.typeArguments()
+				.isEmpty());
+		}
+		if (expression.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
+			SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation) expression;
+			IMethodBinding superMethodBinding = superMethodInvocation.resolveMethodBinding();
+			return superMethodBinding != null
+					&& !(superMethodBinding.isParameterizedMethod() && superMethodInvocation.typeArguments()
+						.isEmpty());
+		}
+		return true;
+	}
+
+	boolean isTransformableInvocation(MethodInvocation methodInvocation) {
 		if (!isInvocationWithinJUnitJupiterTest(methodInvocation)) {
 			return false;
 		}
