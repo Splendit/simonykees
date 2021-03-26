@@ -121,6 +121,10 @@ public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractAS
 			return false;
 		}
 
+		if (Modifier.isAbstract(typeDeclaration.getModifiers())) {
+			return false;
+		}
+
 		MethodDeclaration[] methodDeclarations = typeDeclaration.getMethods();
 
 		boolean isMethodsValid = Arrays.stream(methodDeclarations)
