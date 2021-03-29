@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -52,11 +51,8 @@ class JUnit4AssertMethodInvocationAnalyzer {
 	));
 
 	private final List<MethodDeclaration> jUnitJupiterTestMethods;
-	private final Predicate<String> methodNamePredicate;
 
-	JUnit4AssertMethodInvocationAnalyzer(CompilationUnit compilationUnit,
-			Predicate<String> methodNamePredicate) {
-		this.methodNamePredicate = methodNamePredicate;
+	JUnit4AssertMethodInvocationAnalyzer(CompilationUnit compilationUnit) {
 		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
 		compilationUnit.accept(methodDeclarationsCollectorVisitor);
 		jUnitJupiterTestMethods = methodDeclarationsCollectorVisitor.getMethodDeclarations()
@@ -107,10 +103,9 @@ class JUnit4AssertMethodInvocationAnalyzer {
 	}
 
 	boolean isSupportedJUnit4AssertMethod(IMethodBinding methodBinding) {
-		if (isContentOfType(methodBinding.getDeclaringClass(), "org.junit.Assert")) { //$NON-NLS-1$
-			return methodNamePredicate.test(methodBinding.getName());
-		}
-		return false;
+		return isContentOfType(methodBinding.getDeclaringClass(), "org.junit.Assert") //$NON-NLS-1$
+				&& !methodBinding.getName()
+					.equals("assertThat"); //$NON-NLS-1$
 	}
 
 	private boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,

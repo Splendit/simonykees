@@ -1,10 +1,9 @@
 package eu.jsparrow.sample.postRule.migrateJUnitToJupiter;
 
-import static org.junit.Assert.assertThrows;
-
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ReplaceJUnit4AssertionsWithJupiterAssertThrowsRule {
 
@@ -12,8 +11,7 @@ public class ReplaceJUnit4AssertionsWithJupiterAssertThrowsRule {
 
 		@Test
 		public void unexpectedException() {
-			assertThrows("Expecting IOException.", IOException.class,
-					() -> throwsIOException("Simply throw an IOException"));
+			assertThrows(IOException.class, () -> throwsIOException("Simply throw an IOException"), "Expecting IOException.");
 		}
 
 		private void throwsIOException(String message) throws IOException {
