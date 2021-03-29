@@ -189,7 +189,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 	}
 
 	@SuppressWarnings({ "unchecked" })
-	protected MethodInvocation createNewInvocationWithoutQualifier(String newMethodName,
+	private MethodInvocation createNewInvocationWithoutQualifier(String newMethodName,
 			List<Expression> arguments) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation newInvocation = ast.newMethodInvocation();
@@ -201,7 +201,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 		return newInvocation;
 	}
 
-	protected MethodInvocation createNewInvocationWithAssertionsQualifier(MethodInvocation contextForImport,
+	private MethodInvocation createNewInvocationWithAssertionsQualifier(MethodInvocation contextForImport,
 			String newMethodName, List<Expression> arguments) {
 		MethodInvocation newInvocation = createNewInvocationWithoutQualifier(newMethodName, arguments);
 		Name newQualifier = addImport(ORG_JUNIT_JUPITER_API_ASSERTIONS, contextForImport);

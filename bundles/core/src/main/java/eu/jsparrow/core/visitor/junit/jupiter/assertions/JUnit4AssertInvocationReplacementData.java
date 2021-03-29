@@ -11,21 +11,21 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * @since 3.28.0
  *
  */
-public class JUnit4AssertInvocationReplacementData {
+class JUnit4AssertInvocationReplacementData {
 	private final MethodInvocation originalMethodInvocation;
 	private final Supplier<MethodInvocation> methodInvocationReplacementSupplier;
 
-	public JUnit4AssertInvocationReplacementData(MethodInvocation originalMethodInvocation,
+	JUnit4AssertInvocationReplacementData(MethodInvocation originalMethodInvocation,
 			Supplier<MethodInvocation> newMethodInvocationSupplier) {
 		this.originalMethodInvocation = originalMethodInvocation;
 		this.methodInvocationReplacementSupplier = newMethodInvocationSupplier;
 	}
 
-	public MethodInvocation getOriginalMethodInvocation() {
+	MethodInvocation getOriginalMethodInvocation() {
 		return originalMethodInvocation;
 	}
 
-	public MethodInvocation createMethodInvocationReplacement() {
+	MethodInvocation createMethodInvocationReplacement() {
 		return methodInvocationReplacementSupplier.get();
 	}
 }

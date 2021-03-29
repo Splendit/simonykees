@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * @since 3.28.0
  *
  */
-public class JUnit4AssertMethodInvocationAnalysisResult {
+class JUnit4AssertMethodInvocationAnalysisResult {
 
 	private final MethodInvocation methodInvocation;
 	private final String methodName;
@@ -21,7 +21,7 @@ public class JUnit4AssertMethodInvocationAnalysisResult {
 	private final boolean messageAsFirstParameter;
 	private final boolean transformableInvocation;
 
-	public JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
+	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
 			String deprecatedMethodNameReplacement, boolean messageAsFirstParameter,
 			boolean transformableInvocation) {
 		this.methodInvocation = methodInvocation;
@@ -32,7 +32,7 @@ public class JUnit4AssertMethodInvocationAnalysisResult {
 		this.transformableInvocation = transformableInvocation;
 	}
 
-	public JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
+	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
 			boolean messageAsFirstParameter,
 			boolean transformableInvocation) {
 		this.methodInvocation = methodInvocation;
@@ -43,23 +43,23 @@ public class JUnit4AssertMethodInvocationAnalysisResult {
 		this.transformableInvocation = transformableInvocation;
 	}
 
-	public MethodInvocation getMethodInvocation() {
+	MethodInvocation getMethodInvocation() {
 		return methodInvocation;
 	}
 
-	public String getMethodName() {
+	String getMethodName() {
 		return methodName;
 	}
 
-	public Optional<String> getDeprecatedMethodNameReplacement() {
+	Optional<String> getDeprecatedMethodNameReplacement() {
 		return Optional.ofNullable(deprecatedMethodNameReplacement);
 	}
 
-	public boolean isMessageAsFirstParameter() {
+	boolean isMessageAsFirstParameter() {
 		return messageAsFirstParameter;
 	}
 
-	public boolean isTransformableInvocation() {
+	boolean isTransformableInvocation() {
 		return transformableInvocation;
 	}
 }

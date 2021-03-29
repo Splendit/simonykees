@@ -54,7 +54,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 	private final List<MethodDeclaration> jUnitJupiterTestMethods;
 	private final Predicate<String> methodNamePredicate;
 
-	public JUnit4AssertMethodInvocationAnalyzer(CompilationUnit compilationUnit,
+	JUnit4AssertMethodInvocationAnalyzer(CompilationUnit compilationUnit,
 			Predicate<String> methodNamePredicate) {
 		this.methodNamePredicate = methodNamePredicate;
 		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
@@ -80,7 +80,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 			.collect(Collectors.toList());
 	}
 
-	Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
+	private Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
 			MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding == null) {
@@ -143,7 +143,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
 	}
 
-	boolean isArgumentWithUnambiguousType(Expression expression) {
+	private boolean isArgumentWithUnambiguousType(Expression expression) {
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
@@ -160,7 +160,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		return true;
 	}
 
-	boolean isTransformableInvocation(MethodInvocation methodInvocation) {
+	private boolean isTransformableInvocation(MethodInvocation methodInvocation) {
 		if (!isWithinJUnitJupiterTest(methodInvocation)) {
 			return false;
 		}
@@ -215,7 +215,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		return isJUnitName(qualifiedTypeName) && !isJUnitJupiterName(qualifiedTypeName);
 	}
 
-	public boolean isWithinJUnitJupiterTest(MethodInvocation methodInvocation) {
+	private boolean isWithinJUnitJupiterTest(MethodInvocation methodInvocation) {
 		BodyDeclaration bodyDeclarationAncestor = ASTNodeUtil.getSpecificAncestor(methodInvocation,
 				BodyDeclaration.class);
 		ASTNode parent = methodInvocation.getParent();
