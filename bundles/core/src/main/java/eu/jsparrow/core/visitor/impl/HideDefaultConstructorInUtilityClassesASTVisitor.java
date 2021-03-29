@@ -55,10 +55,6 @@ public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractAS
 
 	private static final String EXCEPTION_MESSAGE = "Utility class";
 
-	public HideDefaultConstructorInUtilityClassesASTVisitor() {
-
-	}
-
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 
@@ -121,6 +117,14 @@ public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractAS
 	}
 
 	private boolean isValidUtilityClass(TypeDeclaration typeDeclaration) {
+		if (typeDeclaration.isInterface()) {
+			return false;
+		}
+
+		if (Modifier.isAbstract(typeDeclaration.getModifiers())) {
+			return false;
+		}
+
 		MethodDeclaration[] methodDeclarations = typeDeclaration.getMethods();
 
 		boolean isMethodsValid = Arrays.stream(methodDeclarations)
