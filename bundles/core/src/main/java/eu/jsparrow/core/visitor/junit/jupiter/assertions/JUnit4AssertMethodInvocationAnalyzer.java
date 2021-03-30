@@ -41,13 +41,14 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 class JUnit4AssertMethodInvocationAnalyzer {
 	static final String ASSERT_THROWS = "assertThrows"; //$NON-NLS-1$
-	private static final List<String> ORG_JUNIT_JUPITER_API_ANNOTATIONS = Collections.unmodifiableList(Arrays.asList(
+	private static final List<String> ORG_JUNIT_JUPITER_TEST_ANNOTATIONS = Collections.unmodifiableList(Arrays.asList(
 			"org.junit.jupiter.api.Disabled", //$NON-NLS-1$
 			"org.junit.jupiter.api.Test", //$NON-NLS-1$
 			"org.junit.jupiter.api.AfterEach", //$NON-NLS-1$
 			"org.junit.jupiter.api.AfterAll", //$NON-NLS-1$
 			"org.junit.jupiter.api.BeforeEach", //$NON-NLS-1$
-			"org.junit.jupiter.api.BeforeAll" //$NON-NLS-1$
+			"org.junit.jupiter.api.BeforeAll", //$NON-NLS-1$
+			"org.junit.jupiter.params.ParameterizedTest" //$NON-NLS-1$
 	));
 
 	private final List<MethodDeclaration> jUnitJupiterTestMethods;
@@ -185,14 +186,15 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		if (typeDeclaration.isLocalTypeDeclaration()) {
 			return false;
 		}
-		boolean containsJUnitJupiterAnnotation = ASTNodeUtil
+
+		boolean containsJUnitJupiterTestAnnotation = ASTNodeUtil
 			.convertToTypedList(methodDeclaration.modifiers(), Annotation.class)
 			.stream()
 			.map(Annotation::resolveAnnotationBinding)
 			.map(IAnnotationBinding::getAnnotationType)
-			.anyMatch(typeBinding -> isContentOfTypes(typeBinding, ORG_JUNIT_JUPITER_API_ANNOTATIONS));
+			.anyMatch(typeBinding -> isContentOfTypes(typeBinding, ORG_JUNIT_JUPITER_TEST_ANNOTATIONS));
 
-		if (!containsJUnitJupiterAnnotation) {
+		if (!containsJUnitJupiterTestAnnotation) {
 			return false;
 		}
 		AnnotationCollectorVisitor annotationCollector = new AnnotationCollectorVisitor();
@@ -207,7 +209,8 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		String qualifiedTypeName = resolveAnnotationBinding
 			.getAnnotationType()
 			.getQualifiedName();
-		return isJUnitName(qualifiedTypeName) && !isJUnitJupiterName(qualifiedTypeName);
+		return isJUnitName(qualifiedTypeName) && !isJUnitJupiterName(qualifiedTypeName)
+				&& !qualifiedTypeName.startsWith("org.junit.jupiter.params."); //$NON-NLS-1$
 	}
 
 	private boolean isWithinJUnitJupiterTest(MethodInvocation methodInvocation) {

@@ -40,7 +40,14 @@ public class ReplaceJUnit4AssertionsWithJupiterRuleTest extends SingleRuleTest {
 	@Test
 	public void testAlwaysTransformed() throws Exception {
 		loadUtilities();
-
+		
+		addToClasspath(testProject, Arrays.asList(
+						generateMavenEntryFromDepedencyString("junit", "junit", "4.13"),
+						generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-engine","5.4.0"),
+						generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.4.0"),
+						generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-params","5.7.0")));
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
 
 		Path preRule = getPreRuleFile(SAMPLE_FILE_ALWAYS_TRANSFORMED);
