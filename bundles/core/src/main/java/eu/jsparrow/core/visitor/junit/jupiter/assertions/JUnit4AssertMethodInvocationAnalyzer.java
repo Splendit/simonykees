@@ -79,6 +79,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 
 	private Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
 			MethodInvocation methodInvocation) {
+
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding == null) {
 			return Optional.empty();
@@ -86,7 +87,27 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		if (!isSupportedJUnit4AssertMethod(methodBinding)) {
 			return Optional.empty();
 		}
-		boolean transformableInvocation = isTransformableInvocation(methodInvocation);
+		if (!isWithinJUnitJupiterTest(methodInvocation)) {
+			return notTransformableResult(methodInvocation);
+		}
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+		boolean unambiguousArgumentTypes = arguments
+			.stream()
+			.allMatch(this::isArgumentWithUnambiguousType);
+		if (!unambiguousArgumentTypes) {
+			return notTransformableResult(methodInvocation);
+		}
+
+		String methodIdentifier = methodInvocation.getName()
+			.getIdentifier();
+		ThrowingRunnableArgumentAnalysisResult throwingRunnableArgumentAnalysisResult = null;
+		if (methodIdentifier.equals(ASSERT_THROWS)) {
+			throwingRunnableArgumentAnalysisResult = analyzeAssertThrowsThrowingRunnableArgument(arguments);
+		}
+		if (throwingRunnableArgumentAnalysisResult != null
+				&& !throwingRunnableArgumentAnalysisResult.isTransformable()) {
+			return notTransformableResult(methodInvocation);
+		}
 
 		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
 			.getParameterTypes();
@@ -96,10 +117,10 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		String methodName = methodBinding.getName();
 		if (isDeprecatedAssertEqualsComparingObjectArrays(methodName, declaredParameterTypes)) {
 			return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					"assertArrayEquals", messageAsFirstParameter, transformableInvocation)); //$NON-NLS-1$
+					"assertArrayEquals", messageAsFirstParameter, true)); //$NON-NLS-1$
 		} else {
 			return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					messageAsFirstParameter, transformableInvocation));
+					messageAsFirstParameter, true));
 		}
 	}
 
@@ -156,28 +177,6 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		return true;
 	}
 
-	private boolean isTransformableInvocation(MethodInvocation methodInvocation) {
-		if (!isWithinJUnitJupiterTest(methodInvocation)) {
-			return false;
-		}
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-
-		String methodIdentifier = methodInvocation.getName()
-			.getIdentifier();
-
-		boolean unambiguousArgumentTypes = arguments
-			.stream()
-			.allMatch(this::isArgumentWithUnambiguousType);
-
-		if (unambiguousArgumentTypes && methodIdentifier.equals(ASSERT_THROWS)) {
-			int throwingRunnableArgumentIndex = arguments.size() - 1;
-			Expression throwingRunnableArgument = arguments.get(throwingRunnableArgumentIndex);
-			return throwingRunnableArgument.getNodeType() == ASTNode.LAMBDA_EXPRESSION;
-		}
-
-		return unambiguousArgumentTypes;
-	}
-
 	private boolean isJUnitJupiterTestMethod(MethodDeclaration methodDeclaration) {
 		if (methodDeclaration.getLocationInParent() != TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
 			return false;
@@ -229,5 +228,18 @@ class JUnit4AssertMethodInvocationAnalyzer {
 			parent = parent.getParent();
 		}
 		return false;
+	}
+
+	private Optional<JUnit4AssertMethodInvocationAnalysisResult> notTransformableResult(
+			MethodInvocation methodInvocation) {
+		return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, false, false));
+	}
+
+	private ThrowingRunnableArgumentAnalysisResult analyzeAssertThrowsThrowingRunnableArgument(
+			List<Expression> arguments) {
+		int throwingRunnableArgumentIndex = arguments.size() - 1;
+		Expression throwingRunnableArgument = arguments.get(throwingRunnableArgumentIndex);
+		boolean isLambdaExpression = throwingRunnableArgument.getNodeType() == ASTNode.LAMBDA_EXPRESSION;
+		return new ThrowingRunnableArgumentAnalysisResult(isLambdaExpression);
 	}
 }
