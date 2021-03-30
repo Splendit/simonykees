@@ -209,8 +209,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		String qualifiedTypeName = resolveAnnotationBinding
 			.getAnnotationType()
 			.getQualifiedName();
-		return isJUnitName(qualifiedTypeName) && !isJUnitJupiterName(qualifiedTypeName)
-				&& !qualifiedTypeName.startsWith("org.junit.jupiter.params."); //$NON-NLS-1$
+		return isJUnitName(qualifiedTypeName) && !isJUnitJupiterName(qualifiedTypeName);
 	}
 
 	private boolean isWithinJUnitJupiterTest(MethodInvocation methodInvocation) {
