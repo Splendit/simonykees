@@ -100,13 +100,11 @@ class JUnit4AssertMethodInvocationAnalyzer {
 
 		String methodIdentifier = methodInvocation.getName()
 			.getIdentifier();
-		ThrowingRunnableArgumentAnalysisResult throwingRunnableArgumentAnalysisResult = null;
 		if (methodIdentifier.equals(ASSERT_THROWS)) {
-			throwingRunnableArgumentAnalysisResult = analyzeAssertThrowsThrowingRunnableArgument(arguments);
-		}
-		if (throwingRunnableArgumentAnalysisResult != null
-				&& !throwingRunnableArgumentAnalysisResult.isTransformable()) {
-			return notTransformableResult(methodInvocation);
+			ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
+			if (!throwingRunnableArgumentAnalyser.analyze(arguments)) {
+				return notTransformableResult(methodInvocation);
+			}
 		}
 
 		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
@@ -233,13 +231,5 @@ class JUnit4AssertMethodInvocationAnalyzer {
 	private Optional<JUnit4AssertMethodInvocationAnalysisResult> notTransformableResult(
 			MethodInvocation methodInvocation) {
 		return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, false, false));
-	}
-
-	private ThrowingRunnableArgumentAnalysisResult analyzeAssertThrowsThrowingRunnableArgument(
-			List<Expression> arguments) {
-		int throwingRunnableArgumentIndex = arguments.size() - 1;
-		Expression throwingRunnableArgument = arguments.get(throwingRunnableArgumentIndex);
-		boolean isLambdaExpression = throwingRunnableArgument.getNodeType() == ASTNode.LAMBDA_EXPRESSION;
-		return new ThrowingRunnableArgumentAnalysisResult(isLambdaExpression);
 	}
 }
