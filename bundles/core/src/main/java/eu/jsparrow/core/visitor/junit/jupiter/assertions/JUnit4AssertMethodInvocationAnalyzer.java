@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
@@ -61,7 +62,10 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		if (!isSupportedJUnit4AssertMethod(methodBinding)) {
 			return Optional.empty();
 		}
-		if (!jUnitJupiterTestMethodsStore.isWithinJUnitJupiterTest(methodInvocation)) {
+		MethodDeclaration surroundingJUnitJupiterTest = jUnitJupiterTestMethodsStore
+			.findSurroundingJUnitJupiterTest(methodInvocation)
+			.orElse(null);
+		if (surroundingJUnitJupiterTest == null) {
 			return notTransformableResult(methodInvocation);
 		}
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);

@@ -7,6 +7,7 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfTypes;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -15,7 +16,6 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.core.visitor.junit.jupiter.AnnotationCollectorVisitor;
@@ -85,22 +85,23 @@ public class JUnitJupiterTestMethodsStore {
 		return isJUnitName(qualifiedTypeName) && !isJUnitJupiterName(qualifiedTypeName);
 	}
 
-	boolean isWithinJUnitJupiterTest(MethodInvocation methodInvocation) {
-		BodyDeclaration bodyDeclarationAncestor = ASTNodeUtil.getSpecificAncestor(methodInvocation,
+	Optional<MethodDeclaration> findSurroundingJUnitJupiterTest(ASTNode node) {
+		BodyDeclaration bodyDeclarationAncestor = ASTNodeUtil.getSpecificAncestor(node,
 				BodyDeclaration.class);
-		ASTNode parent = methodInvocation.getParent();
+		ASTNode parent = node.getParent();
 		while (parent != null) {
 			if (parent == bodyDeclarationAncestor) {
-				if (parent.getNodeType() == ASTNode.METHOD_DECLARATION) {
-					return jUnitJupiterTestMethods.contains(parent);
+				if (parent.getNodeType() == ASTNode.METHOD_DECLARATION && jUnitJupiterTestMethods.contains(parent)) {
+					MethodDeclaration surroundingJUnitJupiterTest = (MethodDeclaration) parent;
+					return Optional.of(surroundingJUnitJupiterTest);
 				}
-				return false;
+				return Optional.empty();
 			}
 			if (parent.getNodeType() == ASTNode.LAMBDA_EXPRESSION) {
-				return false;
+				return Optional.empty();
 			}
 			parent = parent.getParent();
 		}
-		return false;
+		return Optional.empty();
 	}
 }
