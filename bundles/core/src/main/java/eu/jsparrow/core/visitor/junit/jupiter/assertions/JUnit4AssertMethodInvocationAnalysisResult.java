@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Type;
 
 /**
  * Immutable class storing all necessary informations about the given invocation
@@ -18,8 +19,21 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 	private final MethodInvocation methodInvocation;
 	private final String methodName;
 	private final String deprecatedMethodNameReplacement;
+	private final Type throwingRunnableTypeToReplace;
 	private final boolean messageAsFirstParameter;
 	private final boolean transformableInvocation;
+	
+	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
+			Type throwingRunnableTypeToReplace, boolean messageAsFirstParameter,
+			boolean transformableInvocation) {
+		this.methodInvocation = methodInvocation;
+		this.methodName = methodInvocation.getName()
+			.getIdentifier();
+		this.deprecatedMethodNameReplacement = null;
+		this.throwingRunnableTypeToReplace = throwingRunnableTypeToReplace;
+		this.messageAsFirstParameter = messageAsFirstParameter;
+		this.transformableInvocation = transformableInvocation;
+	}
 
 	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
 			String deprecatedMethodNameReplacement, boolean messageAsFirstParameter,
@@ -28,6 +42,7 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 		this.methodName = methodInvocation.getName()
 			.getIdentifier();
 		this.deprecatedMethodNameReplacement = deprecatedMethodNameReplacement;
+		this.throwingRunnableTypeToReplace = null;
 		this.messageAsFirstParameter = messageAsFirstParameter;
 		this.transformableInvocation = transformableInvocation;
 	}
@@ -39,6 +54,7 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 		this.methodName = methodInvocation.getName()
 			.getIdentifier();
 		this.deprecatedMethodNameReplacement = null;
+		this.throwingRunnableTypeToReplace = null;
 		this.messageAsFirstParameter = messageAsFirstParameter;
 		this.transformableInvocation = transformableInvocation;
 	}
@@ -53,6 +69,10 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 
 	Optional<String> getDeprecatedMethodNameReplacement() {
 		return Optional.ofNullable(deprecatedMethodNameReplacement);
+	}
+
+	public Optional<Type> getThrowingRunnableTypeToReplace() {
+		return Optional.ofNullable(throwingRunnableTypeToReplace);
 	}
 
 	boolean isMessageAsFirstParameter() {

@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.Type;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -78,11 +79,16 @@ class JUnit4AssertMethodInvocationAnalyzer {
 
 		String methodIdentifier = methodInvocation.getName()
 			.getIdentifier();
+		Type throwingRunnableTypeToReplace;
 		if (methodIdentifier.equals(ASSERT_THROWS)) {
 			ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
-			if (!throwingRunnableArgumentAnalyser.analyze(arguments)) {
+			if (!throwingRunnableArgumentAnalyser.analyze(surroundingJUnitJupiterTest, arguments)) {
 				return notTransformableResult(methodInvocation);
 			}
+			throwingRunnableTypeToReplace = throwingRunnableArgumentAnalyser.getLocalVariableTypeToReplace()
+				.orElse(null);
+		} else {
+			throwingRunnableTypeToReplace = null;
 		}
 
 		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
@@ -91,7 +97,10 @@ class JUnit4AssertMethodInvocationAnalyzer {
 				&& isParameterTypeString(declaredParameterTypes[0]);
 
 		String methodName = methodBinding.getName();
-		if (isDeprecatedAssertEqualsComparingObjectArrays(methodName, declaredParameterTypes)) {
+		if (throwingRunnableTypeToReplace != null) {
+			return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
+					throwingRunnableTypeToReplace, messageAsFirstParameter, true));
+		} else if (isDeprecatedAssertEqualsComparingObjectArrays(methodName, declaredParameterTypes)) {
 			return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
 					"assertArrayEquals", messageAsFirstParameter, true)); //$NON-NLS-1$
 		} else {

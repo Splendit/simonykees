@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -34,6 +36,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
+	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
+
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS_PREFIX = ORG_JUNIT_JUPITER_API_ASSERTIONS + "."; //$NON-NLS-1$
 
 	@Override
@@ -42,6 +46,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 		super.visit(compilationUnit);
 
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_ASSERTIONS);
+		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
 
 		JUnit4AssertMethodInvocationAnalyzer invocationAnalyzer = new JUnit4AssertMethodInvocationAnalyzer(
 				compilationUnit);
@@ -87,7 +92,15 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 			.map(Optional::get)
 			.collect(Collectors.toList());
 
-		transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports,
+		List<Type> throwingRunnableTypesToReplace = allJUnit4AssertInvocations.stream()
+			.filter(JUnit4AssertMethodInvocationAnalysisResult::isTransformableInvocation)
+			.map(JUnit4AssertMethodInvocationAnalysisResult::getThrowingRunnableTypeToReplace)
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toList());
+		;
+
+		transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports, throwingRunnableTypesToReplace,
 				jUnit4AssertTransformationDataList);
 
 		return false;
@@ -209,6 +222,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 
 	private void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
 			Set<String> newStaticAssertionMethodImports,
+			List<Type> throwingRunnableTypesToReplace,
 			List<JUnit4AssertInvocationReplacementData> jUnit4AssertTransformationDataList) {
 		if (!staticAssertMethodImportsToRemove.isEmpty() || !newStaticAssertionMethodImports.isEmpty()
 				|| !jUnit4AssertTransformationDataList.isEmpty()) {
@@ -230,6 +244,12 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 				MethodInvocation methodInvocationToReplace = data.getOriginalMethodInvocation();
 				MethodInvocation methodInvocationReplacement = data.createMethodInvocationReplacement();
 				astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
+			});
+
+			throwingRunnableTypesToReplace.forEach(typeToReplace -> {
+				Name executableTypeName = addImport(ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE, typeToReplace);
+				SimpleType typeReplacement = ast.newSimpleType(executableTypeName);
+				astRewrite.replace(typeToReplace, typeReplacement, null);
 			});
 			onRewrite();
 		}
