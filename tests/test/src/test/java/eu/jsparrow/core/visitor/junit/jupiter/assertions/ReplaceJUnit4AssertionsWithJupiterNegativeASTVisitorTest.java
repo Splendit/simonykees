@@ -242,4 +242,28 @@ public class ReplaceJUnit4AssertionsWithJupiterNegativeASTVisitorTest
 
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_HiddenLocalThrowingRunnable_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assert.assertThrows", true, false);
+		defaultFixture.addImport(org.junit.function.ThrowingRunnable.class.getName());
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+		defaultFixture.addImport(java.io.IOException.class.getName());
+
+		String original = ""
+				+ "	ThrowingRunnable runnable = () -> throwsIOException(\"Simply throw an IOException\");"
+				+ "	@Test\n"
+				+ "	public void testHidingLocalThrowingRunnable() {\n"
+				+ "		{\n"
+				+ "			ThrowingRunnable runnable = () -> throwsIOException(\"Simply throw an IOException\");\n"
+				+ "		}\n"
+				+ "		assertThrows(\"Expecting IOException.\", IOException.class, runnable);\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private void throwsIOException(String message) throws IOException {\n"
+				+ "		throw new IOException(message);\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
 }

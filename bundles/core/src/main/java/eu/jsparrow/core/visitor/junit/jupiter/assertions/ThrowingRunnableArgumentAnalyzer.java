@@ -2,17 +2,18 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 class ThrowingRunnableArgumentAnalyzer {
@@ -28,25 +29,26 @@ class ThrowingRunnableArgumentAnalyzer {
 		if (throwingRunnableArgument.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return false;
 		}
-		SimpleName throwingRunnableVariableName = (SimpleName) throwingRunnableArgument;
-		LocalVariableUsagesVisitor localVariableUsagesVisitor = new LocalVariableUsagesVisitor(
-				throwingRunnableVariableName);
-		surroundingMethodDeclaration.accept(localVariableUsagesVisitor);
-		Predicate<SimpleName> simpleNameEquals = throwingRunnableVariableName::equals;
-		List<SimpleName> otherUsages = localVariableUsagesVisitor.getUsages()
-			.stream()
-			.filter(simpleNameEquals.negate())
-			.collect(Collectors.toList());
 
-		if (otherUsages.size() != 1) {
+		SimpleName throwingRunnableVariableName = (SimpleName) throwingRunnableArgument;
+		IBinding binding = throwingRunnableVariableName.resolveBinding();
+		CompilationUnit compilationUnit = ASTNodeUtil.getSpecificAncestor(throwingRunnableVariableName,
+				CompilationUnit.class);
+		ASTNode declaringNode = compilationUnit.findDeclaringNode(binding);
+		if (declaringNode == null) {
 			return false;
 		}
-		SimpleName otherUsage = otherUsages.get(0);
-		ASTNode otherUsageParent = otherUsage.getParent();
-		if (otherUsage.getLocationInParent() != VariableDeclarationFragment.NAME_PROPERTY) {
+		if (declaringNode.getNodeType() != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			return false;
 		}
-		VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) otherUsageParent;
+		VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) declaringNode;
+		Expression initializer = variableDeclarationFragment.getInitializer();
+		if (initializer == null) {
+			return false;
+		}
+		if (initializer.getNodeType() != ASTNode.LAMBDA_EXPRESSION) {
+			return false;
+		}
 		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
 			return false;
 		}
@@ -56,6 +58,24 @@ class ThrowingRunnableArgumentAnalyzer {
 			.size() != 1) {
 			return false;
 		}
+
+		LocalVariableUsagesVisitor localVariableUsagesVisitor = new LocalVariableUsagesVisitor(
+				throwingRunnableVariableName);
+		surroundingMethodDeclaration.accept(localVariableUsagesVisitor);
+		if (localVariableUsagesVisitor.getUsages()
+			.size() != 2) {
+			return false;
+		}
+		if (!localVariableUsagesVisitor.getUsages()
+			.contains(throwingRunnableVariableName)) {
+			return false;
+		}
+
+		if (!localVariableUsagesVisitor.getUsages()
+			.contains(variableDeclarationFragment.getName())) {
+			return false;
+		}
+
 		localVariableTypeToReplace = variableDeclarationStatement.getType();
 		return true;
 	}
