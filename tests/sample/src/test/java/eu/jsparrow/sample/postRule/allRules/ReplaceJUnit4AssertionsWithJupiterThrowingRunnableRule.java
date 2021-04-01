@@ -20,6 +20,12 @@ public class ReplaceJUnit4AssertionsWithJupiterThrowingRunnableRule {
 	}
 
 	@Test
+	public void testThrowingRunnableAsAnonymousClass() {
+		final Executable runnable = () -> throwsIOException("Simply throw an IOException");
+		Assertions.assertThrows(IOException.class, runnable, "Expecting IOException.");
+	}
+
+	@Test
 	public void testThrowingRunnableUsedTwice() {
 		final ThrowingRunnable runnable = () -> throwsIOException("Simply throw an IOException");
 		assertThrows("Expecting IOException.", IOException.class, runnable);

@@ -113,7 +113,7 @@ public class ReplaceJUnit4AssertionsWithJupiterRuleTest extends SingleRuleTest {
 	}
 
 	@Test
-	public void testAssertThrowinmgRunnable() throws Exception {
+	public void testThrowingRunnable() throws Exception {
 		loadUtilities();
 		Path preRule = getPreRuleFile(SAMPLE_FILE_THROWING_RUNNABLE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE_THROWING_RUNNABLE, POSTRULE_SUBDIRECTORY);
