@@ -98,7 +98,6 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.collect(Collectors.toList());
-		;
 
 		transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports, throwingRunnableTypesToReplace,
 				jUnit4AssertTransformationDataList);

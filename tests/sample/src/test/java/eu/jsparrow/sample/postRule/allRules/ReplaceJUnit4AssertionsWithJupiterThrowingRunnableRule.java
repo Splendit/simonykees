@@ -49,9 +49,9 @@ public class ReplaceJUnit4AssertionsWithJupiterThrowingRunnableRule {
 
 	@Test
 	public void testAssignToNotInitializedThrowingRunnable() {
-		final ThrowingRunnable runnable;
+		final Executable runnable;
 		runnable = () -> throwsIOException("Simply throw an IOException");
-		assertThrows("Expecting IOException.", IOException.class, runnable);
+		Assertions.assertThrows(IOException.class, runnable, "Expecting IOException.");
 	}
 
 	@Test

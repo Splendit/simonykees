@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -26,6 +27,7 @@ class ThrowingRunnableArgumentAnalyzer {
 		if (throwingRunnableArgument.getNodeType() == ASTNode.LAMBDA_EXPRESSION) {
 			return true;
 		}
+
 		if (throwingRunnableArgument.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return false;
 		}
@@ -43,10 +45,8 @@ class ThrowingRunnableArgumentAnalyzer {
 		}
 		VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) declaringNode;
 		Expression initializer = variableDeclarationFragment.getInitializer();
-		if (initializer == null) {
-			return false;
-		}
-		if (initializer.getNodeType() != ASTNode.LAMBDA_EXPRESSION) {
+
+		if (initializer != null && !isSupportedRightHandSide(initializer)) {
 			return false;
 		}
 		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
@@ -59,25 +59,42 @@ class ThrowingRunnableArgumentAnalyzer {
 			return false;
 		}
 
+		if (analyzeThrowingRunnableUsages(variableDeclarationFragment, throwingRunnableVariableName,
+				surroundingMethodDeclaration)) {
+			localVariableTypeToReplace = variableDeclarationStatement.getType();
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isSupportedRightHandSide(Expression initializer) {
+		return initializer.getNodeType() == ASTNode.NULL_LITERAL
+				|| initializer.getNodeType() == ASTNode.LAMBDA_EXPRESSION;
+	}
+
+	private boolean analyzeThrowingRunnableUsages(VariableDeclarationFragment variableDeclarationFragment,
+			SimpleName nameAsAssertionArgument,
+			MethodDeclaration surroundingMethodDeclaration) {
+
 		LocalVariableUsagesVisitor localVariableUsagesVisitor = new LocalVariableUsagesVisitor(
-				throwingRunnableVariableName);
+				nameAsAssertionArgument);
 		surroundingMethodDeclaration.accept(localVariableUsagesVisitor);
-		if (localVariableUsagesVisitor.getUsages()
-			.size() != 2) {
-			return false;
-		}
-		if (!localVariableUsagesVisitor.getUsages()
-			.contains(throwingRunnableVariableName)) {
-			return false;
-		}
 
-		if (!localVariableUsagesVisitor.getUsages()
-			.contains(variableDeclarationFragment.getName())) {
+		List<SimpleName> usages = localVariableUsagesVisitor.getUsages();
+		SimpleName nameAtDeclaration = variableDeclarationFragment.getName();
+		return usages.contains(nameAtDeclaration) && usages.contains(nameAsAssertionArgument)
+				&& usages.stream()
+					.filter(usage -> usage != nameAtDeclaration)
+					.filter(usage -> usage != nameAsAssertionArgument)
+					.allMatch(this::isLeftHandSideOfSupportedAssignment);
+	}
+
+	private boolean isLeftHandSideOfSupportedAssignment(SimpleName usage) {
+		if (usage.getLocationInParent() != Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			return false;
 		}
-
-		localVariableTypeToReplace = variableDeclarationStatement.getType();
-		return true;
+		Assignment assignment = (Assignment) usage.getParent();
+		return isSupportedRightHandSide(assignment.getRightHandSide());
 	}
 
 	Optional<Type> getLocalVariableTypeToReplace() {
