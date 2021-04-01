@@ -14,14 +14,33 @@ public class ReplaceJUnit4AssertionsWithJupiterThrowingRunnableRule {
 	ThrowingRunnable runnable = () -> throwsIOException("Simply throw an IOException");
 
 	@Test
-	public void testThrowingRunnableUsedExactlyOnce() {
+	public void testInitializationWithLambda() {
 		final Executable runnable = () -> throwsIOException("Simply throw an IOException");
 		Assertions.assertThrows(IOException.class, runnable, "Expecting IOException.");
 	}
 
 	@Test
-	public void testThrowingRunnableAsAnonymousClass() {
+	public void testInitializationWithFieldThisRunnable() {
+		final ThrowingRunnable runnable = this.runnable;
+		assertThrows("Expecting IOException.", IOException.class, runnable);
+	}
+
+	@Test
+	public void testInitializationWithNull() {
+		final Executable runnable = null;
+		Assertions.assertThrows(IOException.class, runnable, "Expecting IOException.");
+	}
+
+	@Test
+	public void testInitializationWithAnonymousClass() {
 		final Executable runnable = () -> throwsIOException("Simply throw an IOException");
+		Assertions.assertThrows(IOException.class, runnable, "Expecting IOException.");
+	}
+
+	@Test
+	public void testNoInitialization() {
+		final Executable runnable;
+		runnable = () -> throwsIOException("Simply throw an IOException");
 		Assertions.assertThrows(IOException.class, runnable, "Expecting IOException.");
 	}
 
@@ -41,11 +60,6 @@ public class ReplaceJUnit4AssertionsWithJupiterThrowingRunnableRule {
 	}
 
 	@Test
-	public void testUsingThrowingRunnableField() {
-		assertThrows("Expecting IOException.", IOException.class, runnable);
-	}
-
-	@Test
 	public void testHidingLocalThrowingRunnable() {
 		{
 			final ThrowingRunnable runnable = () -> throwsIOException("Simply throw an IOException");
@@ -54,21 +68,18 @@ public class ReplaceJUnit4AssertionsWithJupiterThrowingRunnableRule {
 	}
 
 	@Test
-	public void testAssignToNotInitializedThrowingRunnable() {
-		final Executable runnable;
-		runnable = () -> throwsIOException("Simply throw an IOException");
-		Assertions.assertThrows(IOException.class, runnable, "Expecting IOException.");
-	}
-
-	@Test
-	public void testInitializationOfLocalRunnableThisRunnable() {
-		final ThrowingRunnable runnable = this.runnable;
+	public void testUsingFieldRunnable() {
 		assertThrows("Expecting IOException.", IOException.class, runnable);
 	}
 
 	@Test
-	public void testUseThisRunnable() {
+	public void testUsingFieldThisRunnable() {
 		assertThrows("Expecting IOException.", IOException.class, this.runnable);
+	}
+
+	@Test
+	public void testUsingParameterRunnable(ThrowingRunnable runnable) {
+		assertThrows("Expecting IOException.", IOException.class, runnable);
 	}
 
 	private void throwsIOException(String message) throws IOException {

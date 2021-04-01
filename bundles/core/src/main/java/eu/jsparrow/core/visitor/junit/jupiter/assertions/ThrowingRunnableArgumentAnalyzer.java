@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
@@ -24,19 +25,28 @@ class ThrowingRunnableArgumentAnalyzer {
 			List<Expression> arguments) {
 		int throwingRunnableArgumentIndex = arguments.size() - 1;
 		Expression throwingRunnableArgument = arguments.get(throwingRunnableArgumentIndex);
-		if (throwingRunnableArgument.getNodeType() == ASTNode.LAMBDA_EXPRESSION) {
+		if (isSupportedThrowingRunnableExpression(throwingRunnableArgument)) {
 			return true;
 		}
 
 		if (throwingRunnableArgument.getNodeType() != ASTNode.SIMPLE_NAME) {
 			return false;
 		}
-
 		SimpleName throwingRunnableVariableName = (SimpleName) throwingRunnableArgument;
 		IBinding binding = throwingRunnableVariableName.resolveBinding();
+		if (binding.getKind() != IBinding.VARIABLE) {
+			return false;
+		}
+		IVariableBinding variableBinding = (IVariableBinding) binding;
+		if (variableBinding.isField()) {
+			return false;
+		}
+		if (variableBinding.isParameter()) {
+			return false;
+		}
 		CompilationUnit compilationUnit = ASTNodeUtil.getSpecificAncestor(throwingRunnableVariableName,
 				CompilationUnit.class);
-		ASTNode declaringNode = compilationUnit.findDeclaringNode(binding);
+		ASTNode declaringNode = compilationUnit.findDeclaringNode(variableBinding);
 		if (declaringNode == null) {
 			return false;
 		}
@@ -46,7 +56,7 @@ class ThrowingRunnableArgumentAnalyzer {
 		VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) declaringNode;
 		Expression initializer = variableDeclarationFragment.getInitializer();
 
-		if (initializer != null && !isSupportedRightHandSide(initializer)) {
+		if (initializer != null && !isSupportedThrowingRunnableExpression(initializer)) {
 			return false;
 		}
 		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
@@ -58,16 +68,15 @@ class ThrowingRunnableArgumentAnalyzer {
 			.size() != 1) {
 			return false;
 		}
-
-		if (analyzeThrowingRunnableUsages(variableDeclarationFragment, throwingRunnableVariableName,
+		if (!analyzeThrowingRunnableUsages(variableDeclarationFragment, throwingRunnableVariableName,
 				surroundingMethodDeclaration)) {
-			localVariableTypeToReplace = variableDeclarationStatement.getType();
-			return true;
+			return false;
 		}
-		return false;
+		localVariableTypeToReplace = variableDeclarationStatement.getType();
+		return true;
 	}
 
-	private boolean isSupportedRightHandSide(Expression initializer) {
+	private boolean isSupportedThrowingRunnableExpression(Expression initializer) {
 		return initializer.getNodeType() == ASTNode.NULL_LITERAL
 				|| initializer.getNodeType() == ASTNode.LAMBDA_EXPRESSION;
 	}
@@ -94,7 +103,7 @@ class ThrowingRunnableArgumentAnalyzer {
 			return false;
 		}
 		Assignment assignment = (Assignment) usage.getParent();
-		return isSupportedRightHandSide(assignment.getRightHandSide());
+		return isSupportedThrowingRunnableExpression(assignment.getRightHandSide());
 	}
 
 	Optional<Type> getLocalVariableTypeToReplace() {
