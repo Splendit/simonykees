@@ -78,7 +78,8 @@ class ThrowingRunnableArgumentAnalyzer {
 
 	private boolean isSupportedThrowingRunnableExpression(Expression initializer) {
 		return initializer.getNodeType() == ASTNode.NULL_LITERAL
-				|| initializer.getNodeType() == ASTNode.LAMBDA_EXPRESSION;
+				|| initializer.getNodeType() == ASTNode.LAMBDA_EXPRESSION
+				|| initializer.getNodeType() == ASTNode.EXPRESSION_METHOD_REFERENCE;
 	}
 
 	private boolean analyzeThrowingRunnableUsages(VariableDeclarationFragment variableDeclarationFragment,

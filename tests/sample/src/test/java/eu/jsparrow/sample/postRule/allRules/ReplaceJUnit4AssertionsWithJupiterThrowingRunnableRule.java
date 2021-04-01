@@ -20,6 +20,12 @@ public class ReplaceJUnit4AssertionsWithJupiterThrowingRunnableRule {
 	}
 
 	@Test
+	public void testInitializationWithExpressionMethodReference() {
+		final Executable runnable = this::throwsIOException;
+		Assertions.assertThrows(IOException.class, runnable, "Expecting IOException.");
+	}
+
+	@Test
 	public void testInitializationWithFieldThisRunnable() {
 		final ThrowingRunnable runnable = this.runnable;
 		assertThrows("Expecting IOException.", IOException.class, runnable);
@@ -84,5 +90,9 @@ public class ReplaceJUnit4AssertionsWithJupiterThrowingRunnableRule {
 
 	private void throwsIOException(String message) throws IOException {
 		throw new IOException(message);
+	}
+
+	private void throwsIOException() throws IOException {
+		throw new IOException();
 	}
 }

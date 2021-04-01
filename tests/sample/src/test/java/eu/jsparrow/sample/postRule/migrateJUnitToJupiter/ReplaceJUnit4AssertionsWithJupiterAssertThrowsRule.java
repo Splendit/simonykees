@@ -2,25 +2,41 @@ package eu.jsparrow.sample.postRule.migrateJUnitToJupiter;
 
 import java.io.IOException;
 
-import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.function.Executable;
 
 public class ReplaceJUnit4AssertionsWithJupiterAssertThrowsRule {
 
 	@Test
-	public void expectingIOException() {
+	public void testUsingAndLambda() {
+		assertThrows(IOException.class, () -> throwsIOException("Simply throw an IOException"));
+	}
+
+	@Test
+	public void testUsingMessageAndLambdaWithMessage() {
 		assertThrows(IOException.class, () -> throwsIOException("Simply throw an IOException"), "Expecting IOException.");
 	}
 
 	@Test
-	public void expectingIOExceptionUsingThrowingRunnableVariable() {
-		Executable runnable = () -> throwsIOException("Simply throw an IOException");
-		assertThrows(IOException.class, runnable, "Expecting IOException.");
+	public void testUsingMessageAndLambdaWithoutMessage() {
+		assertThrows(IOException.class, () -> throwsIOException(), "Expecting IOException.");
+	}
+
+	@Test
+	public void testUsingExpressionMethodReference() {
+		assertThrows(IOException.class, this::throwsIOException);
+	}
+
+	@Test
+	public void testUsingMessageAndExpressionMethodReference() {
+		assertThrows(IOException.class, this::throwsIOException, "Expecting IOException.");
 	}
 
 	private void throwsIOException(String message) throws IOException {
 		throw new IOException(message);
+	}
+
+	private void throwsIOException() throws IOException {
+		throw new IOException();
 	}
 }
