@@ -148,7 +148,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 
 		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
 			.getParameterTypes();
-		boolean messageAsFirstParameter = declaredParameterTypes.length > 0
+		boolean messageMovingToLastPosition = declaredParameterTypes.length > 0
 				&& isParameterTypeString(declaredParameterTypes[0]);
 
 		String methodName = methodBinding.getName();
@@ -157,22 +157,22 @@ class JUnit4AssertMethodInvocationAnalyzer {
 			deprecatedMethodNameReplacement = "assertArrayEquals"; //$NON-NLS-1$
 		}
 
-		return createTransformableResult(methodInvocation, throwingRunnableTypeToReplace, messageAsFirstParameter,
+		return createTransformableResult(methodInvocation, throwingRunnableTypeToReplace, messageMovingToLastPosition,
 				deprecatedMethodNameReplacement);
 	}
 
 	private JUnit4AssertMethodInvocationAnalysisResult createTransformableResult(MethodInvocation methodInvocation,
-			Type throwingRunnableTypeToReplace, boolean messageAsFirstParameter,
+			Type throwingRunnableTypeToReplace, boolean messageMovingToLastPosition,
 			String deprecatedMethodNameReplacement) {
 		if (throwingRunnableTypeToReplace != null) {
 			return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					throwingRunnableTypeToReplace, messageAsFirstParameter, true);
+					throwingRunnableTypeToReplace, messageMovingToLastPosition, true);
 		} else if (deprecatedMethodNameReplacement != null) {
 			return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					deprecatedMethodNameReplacement, messageAsFirstParameter, true);
+					deprecatedMethodNameReplacement, messageMovingToLastPosition, true);
 		} else {
 			return (new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					messageAsFirstParameter, true));
+					messageMovingToLastPosition, true));
 		}
 	}
 

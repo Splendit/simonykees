@@ -171,7 +171,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 				Expression.class);
 
 		List<Expression> newArguments;
-		if (invocationData.isMessageAsFirstParameter() && originalArguments.size() > 1) {
+		if (invocationData.isMessageMovingToLastPosition() && originalArguments.size() > 1) {
 			newArguments = new ArrayList<>();
 			Expression messageArgument = originalArguments.remove(0);
 			newArguments.addAll(originalArguments);
