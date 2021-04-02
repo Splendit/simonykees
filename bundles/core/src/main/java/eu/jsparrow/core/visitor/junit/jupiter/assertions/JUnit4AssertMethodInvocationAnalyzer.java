@@ -55,58 +55,11 @@ class JUnit4AssertMethodInvocationAnalyzer {
 
 	private Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
 			MethodInvocation methodInvocation) {
-
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-		if (methodBinding == null) {
-			return Optional.empty();
+		if (methodBinding != null && isSupportedJUnit4AssertMethod(methodBinding)) {
+			return Optional.of(createAnalysisResult(methodInvocation, methodBinding));
 		}
-		if (!isSupportedJUnit4AssertMethod(methodBinding)) {
-			return Optional.empty();
-		}
-		MethodDeclaration surroundingJUnitJupiterTest = jUnitJupiterTestMethodsStore
-			.findSurroundingJUnitJupiterTest(methodInvocation)
-			.orElse(null);
-		if (surroundingJUnitJupiterTest == null) {
-			return notTransformableResult(methodInvocation);
-		}
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		boolean unambiguousArgumentTypes = arguments
-			.stream()
-			.allMatch(this::isArgumentWithUnambiguousType);
-		if (!unambiguousArgumentTypes) {
-			return notTransformableResult(methodInvocation);
-		}
-
-		String methodIdentifier = methodInvocation.getName()
-			.getIdentifier();
-		Type throwingRunnableTypeToReplace;
-		if (methodIdentifier.equals(ASSERT_THROWS)) {
-			ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
-			if (!throwingRunnableArgumentAnalyser.analyze(surroundingJUnitJupiterTest, arguments)) {
-				return notTransformableResult(methodInvocation);
-			}
-			throwingRunnableTypeToReplace = throwingRunnableArgumentAnalyser.getLocalVariableTypeToReplace()
-				.orElse(null);
-		} else {
-			throwingRunnableTypeToReplace = null;
-		}
-
-		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
-			.getParameterTypes();
-		boolean messageAsFirstParameter = declaredParameterTypes.length > 0
-				&& isParameterTypeString(declaredParameterTypes[0]);
-
-		String methodName = methodBinding.getName();
-		if (throwingRunnableTypeToReplace != null) {
-			return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					throwingRunnableTypeToReplace, messageAsFirstParameter, true));
-		} else if (isDeprecatedAssertEqualsComparingObjectArrays(methodName, declaredParameterTypes)) {
-			return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					"assertArrayEquals", messageAsFirstParameter, true)); //$NON-NLS-1$
-		} else {
-			return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					messageAsFirstParameter, true));
-		}
+		return Optional.empty();
 	}
 
 	boolean isSupportedJUnit4AssertMethod(IMethodBinding methodBinding) {
@@ -162,8 +115,69 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		return true;
 	}
 
-	private Optional<JUnit4AssertMethodInvocationAnalysisResult> notTransformableResult(
+	private JUnit4AssertMethodInvocationAnalysisResult createAnalysisResult(
+			MethodInvocation methodInvocation, IMethodBinding methodBinding) {
+
+		MethodDeclaration surroundingJUnitJupiterTest = jUnitJupiterTestMethodsStore
+			.findSurroundingJUnitJupiterTest(methodInvocation)
+			.orElse(null);
+		if (surroundingJUnitJupiterTest == null) {
+			return createNotTransformableResult(methodInvocation);
+		}
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+		boolean unambiguousArgumentTypes = arguments
+			.stream()
+			.allMatch(this::isArgumentWithUnambiguousType);
+		if (!unambiguousArgumentTypes) {
+			return createNotTransformableResult(methodInvocation);
+		}
+
+		String methodIdentifier = methodInvocation.getName()
+			.getIdentifier();
+		Type throwingRunnableTypeToReplace;
+		if (methodIdentifier.equals(ASSERT_THROWS)) {
+			ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
+			if (!throwingRunnableArgumentAnalyser.analyze(surroundingJUnitJupiterTest, arguments)) {
+				return createNotTransformableResult(methodInvocation);
+			}
+			throwingRunnableTypeToReplace = throwingRunnableArgumentAnalyser.getLocalVariableTypeToReplace()
+				.orElse(null);
+		} else {
+			throwingRunnableTypeToReplace = null;
+		}
+
+		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
+			.getParameterTypes();
+		boolean messageAsFirstParameter = declaredParameterTypes.length > 0
+				&& isParameterTypeString(declaredParameterTypes[0]);
+
+		String methodName = methodBinding.getName();
+		String deprecatedMethodNameReplacement = null;
+		if (isDeprecatedAssertEqualsComparingObjectArrays(methodName, declaredParameterTypes)) {
+			deprecatedMethodNameReplacement = "assertArrayEquals"; //$NON-NLS-1$
+		}
+
+		return createTransformableResult(methodInvocation, throwingRunnableTypeToReplace, messageAsFirstParameter,
+				deprecatedMethodNameReplacement);
+	}
+
+	private JUnit4AssertMethodInvocationAnalysisResult createTransformableResult(MethodInvocation methodInvocation,
+			Type throwingRunnableTypeToReplace, boolean messageAsFirstParameter,
+			String deprecatedMethodNameReplacement) {
+		if (throwingRunnableTypeToReplace != null) {
+			return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
+					throwingRunnableTypeToReplace, messageAsFirstParameter, true);
+		} else if (deprecatedMethodNameReplacement != null) {
+			return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
+					deprecatedMethodNameReplacement, messageAsFirstParameter, true);
+		} else {
+			return (new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
+					messageAsFirstParameter, true));
+		}
+	}
+
+	private JUnit4AssertMethodInvocationAnalysisResult createNotTransformableResult(
 			MethodInvocation methodInvocation) {
-		return Optional.of(new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, false, false));
+		return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, false, false);
 	}
 }
