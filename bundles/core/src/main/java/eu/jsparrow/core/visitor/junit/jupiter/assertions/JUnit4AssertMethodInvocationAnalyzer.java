@@ -166,10 +166,10 @@ class JUnit4AssertMethodInvocationAnalyzer {
 			String deprecatedMethodNameReplacement) {
 		if (throwingRunnableTypeToReplace != null) {
 			return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					throwingRunnableTypeToReplace, messageMovingToLastPosition, true);
+					messageMovingToLastPosition, true, throwingRunnableTypeToReplace);
 		} else if (deprecatedMethodNameReplacement != null) {
 			return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					deprecatedMethodNameReplacement, messageMovingToLastPosition, true);
+					messageMovingToLastPosition, true, deprecatedMethodNameReplacement);
 		} else {
 			return (new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
 					messageMovingToLastPosition, true));

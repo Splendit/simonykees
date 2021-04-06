@@ -18,33 +18,23 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 
 	private final MethodInvocation methodInvocation;
 	private final String methodName;
-	private final String deprecatedMethodNameReplacement;
-	private final Type throwingRunnableTypeToReplace;
 	private final boolean messageMovingToLastPosition;
 	private final boolean transformableInvocation;
-	
+	private String deprecatedMethodNameReplacement;
+	private Type throwingRunnableTypeToReplace;
+
 	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
-			Type throwingRunnableTypeToReplace, boolean messageMovingToLastPosition,
-			boolean transformableInvocation) {
-		this.methodInvocation = methodInvocation;
-		this.methodName = methodInvocation.getName()
-			.getIdentifier();
-		this.deprecatedMethodNameReplacement = null;
+			boolean messageMovingToLastPosition,
+			boolean transformableInvocation, Type throwingRunnableTypeToReplace) {
+		this(methodInvocation, messageMovingToLastPosition, transformableInvocation);
 		this.throwingRunnableTypeToReplace = throwingRunnableTypeToReplace;
-		this.messageMovingToLastPosition = messageMovingToLastPosition;
-		this.transformableInvocation = transformableInvocation;
 	}
 
 	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
-			String deprecatedMethodNameReplacement, boolean messageMovingToLastPosition,
-			boolean transformableInvocation) {
-		this.methodInvocation = methodInvocation;
-		this.methodName = methodInvocation.getName()
-			.getIdentifier();
+			boolean messageMovingToLastPosition,
+			boolean transformableInvocation, String deprecatedMethodNameReplacement) {
+		this(methodInvocation, messageMovingToLastPosition, transformableInvocation);
 		this.deprecatedMethodNameReplacement = deprecatedMethodNameReplacement;
-		this.throwingRunnableTypeToReplace = null;
-		this.messageMovingToLastPosition = messageMovingToLastPosition;
-		this.transformableInvocation = transformableInvocation;
 	}
 
 	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
@@ -53,8 +43,6 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 		this.methodInvocation = methodInvocation;
 		this.methodName = methodInvocation.getName()
 			.getIdentifier();
-		this.deprecatedMethodNameReplacement = null;
-		this.throwingRunnableTypeToReplace = null;
 		this.messageMovingToLastPosition = messageMovingToLastPosition;
 		this.transformableInvocation = transformableInvocation;
 	}
@@ -71,7 +59,7 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 		return Optional.ofNullable(deprecatedMethodNameReplacement);
 	}
 
-	public Optional<Type> getThrowingRunnableTypeToReplace() {
+	Optional<Type> getThrowingRunnableTypeToReplace() {
 		return Optional.ofNullable(throwingRunnableTypeToReplace);
 	}
 
