@@ -30,13 +30,16 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 public class JUnitJupiterTestMethodsStore {
 
 	private static final List<String> ORG_JUNIT_JUPITER_TEST_ANNOTATIONS = Collections.unmodifiableList(Arrays.asList(
-			"org.junit.jupiter.api.Disabled", //$NON-NLS-1$
 			"org.junit.jupiter.api.Test", //$NON-NLS-1$
-			"org.junit.jupiter.api.AfterEach", //$NON-NLS-1$
-			"org.junit.jupiter.api.AfterAll", //$NON-NLS-1$
+			"org.junit.jupiter.params.ParameterizedTest", //$NON-NLS-1$
+			"org.junit.jupiter.api.RepeatedTest", //$NON-NLS-1$
+			"org.junit.jupiter.api.TestFactory", //$NON-NLS-1$
+			"org.junit.jupiter.api.TestTemplate", //$NON-NLS-1$
 			"org.junit.jupiter.api.BeforeEach", //$NON-NLS-1$
+			"org.junit.jupiter.api.AfterEach", //$NON-NLS-1$
 			"org.junit.jupiter.api.BeforeAll", //$NON-NLS-1$
-			"org.junit.jupiter.params.ParameterizedTest" //$NON-NLS-1$
+			"org.junit.jupiter.api.AfterAll", //$NON-NLS-1$
+			"org.junit.jupiter.api.Disabled" //$NON-NLS-1$
 	));
 
 	private final List<MethodDeclaration> jUnitJupiterTestMethods;

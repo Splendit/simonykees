@@ -5,6 +5,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -46,5 +48,10 @@ public class ReplaceJUnit4AssertionsWithJupiterAlwaysTransformedRule {
 	@ValueSource(strings = { "value1", "value2", "value3", "value4" })
 	public void testWithParameterizedTestAnnotation(String value) {
 		assertEquals(value, value, "LHS equals RHS");
+	}
+
+	@RepeatedTest(10)
+	public void testWithRepeatedTestAnnotation(RepetitionInfo repetitionInfo) {
+		assertEquals(10, repetitionInfo.getTotalRepetitions(), "Expecting 10 repetitions.");
 	}
 }
