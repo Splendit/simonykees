@@ -28,6 +28,7 @@ public class ReplaceJUnit4AssertionsWithJupiterRuleTest extends SingleRuleTest {
 	private static final String SAMPLE_FILE_DOUBLE_OBJECTS = "ReplaceJUnit4AssertionsWithJupiterDoubleObjectsRule.java";
 	private static final String SAMPLE_FILE_STRINGS = "ReplaceJUnit4AssertionsWithJupiterStringsRule.java";
 	private static final String SAMPLE_TEST_FACTORY = "ReplaceJUnit4AssertionsWithJupiterTestFactoryRule.java";
+	private static final String SAMPLE_TEST_TEMPLATE = "ReplaceJUnit4AssertionsWithJupiterTestTemplateRule.java";
 
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnitToJupiter";
 
@@ -157,6 +158,19 @@ public class ReplaceJUnit4AssertionsWithJupiterRuleTest extends SingleRuleTest {
 
 		Path preRule = getPreRuleFile(SAMPLE_TEST_FACTORY);
 		Path postRule = getPostRuleFile(SAMPLE_TEST_FACTORY, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testTestTemplate() throws Exception {
+		loadUtilities();
+
+		Path preRule = getPreRuleFile(SAMPLE_TEST_TEMPLATE);
+		Path postRule = getPostRuleFile(SAMPLE_TEST_TEMPLATE, POSTRULE_SUBDIRECTORY);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
