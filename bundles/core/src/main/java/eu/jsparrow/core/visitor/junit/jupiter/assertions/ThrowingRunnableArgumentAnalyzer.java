@@ -13,11 +13,19 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
+/**
+ * Helper class analyzing the last argument of an invocation of the method
+ * {@code org.junit.Assert.assertThrows}. Transformation of the given
+ * {@code org.junit.Assert.assertThrows} can only be carried out if it is
+ * possible to change the type of the last argument from
+ * {@code org.junit.function.ThrowingRunnable} to
+ * {@code  org.junit.jupiter.api.function.Executable}.
+ *
+ */
 class ThrowingRunnableArgumentAnalyzer {
 	private Type localVariableTypeToReplace;
 
@@ -34,19 +42,9 @@ class ThrowingRunnableArgumentAnalyzer {
 		}
 		SimpleName throwingRunnableVariableName = (SimpleName) throwingRunnableArgument;
 		IBinding binding = throwingRunnableVariableName.resolveBinding();
-		if (binding.getKind() != IBinding.VARIABLE) {
-			return false;
-		}
-		IVariableBinding variableBinding = (IVariableBinding) binding;
-		if (variableBinding.isField()) {
-			return false;
-		}
-		if (variableBinding.isParameter()) {
-			return false;
-		}
 		CompilationUnit compilationUnit = ASTNodeUtil.getSpecificAncestor(throwingRunnableVariableName,
 				CompilationUnit.class);
-		ASTNode declaringNode = compilationUnit.findDeclaringNode(variableBinding);
+		ASTNode declaringNode = compilationUnit.findDeclaringNode(binding);
 		if (declaringNode == null) {
 			return false;
 		}
