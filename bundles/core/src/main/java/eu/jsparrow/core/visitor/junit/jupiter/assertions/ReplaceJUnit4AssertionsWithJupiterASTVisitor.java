@@ -75,8 +75,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 		Set<String> newStaticAssertionMethodImports = new HashSet<>();
 		Set<String> unqualifiedNamesOfNewAssertionMwethodImports = new HashSet<>();
 		jUnit4AssertInvocationsInJUnitJupiterTest.forEach(data -> {
-			String newMethodName = data.getDeprecatedMethodNameReplacement()
-				.orElse(data.getMethodName());
+			String newMethodName = data.getNewMethodName();
 			String newMethodFullyQualifiedName = createAssertionsMethodQualifiedName(newMethodName);
 			if (unqualifiedNamesOfAssertMethodImportsToRemove.contains(newMethodName)
 					|| canAddStaticAssertionsMethodImport(newMethodFullyQualifiedName)) {
@@ -117,7 +116,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 			.filter(data -> !data.isTransformableInvocation())
 			.filter(data -> data.getMethodInvocation()
 				.getExpression() == null)
-			.map(JUnit4AssertMethodInvocationAnalysisResult::getMethodName)
+			.map(JUnit4AssertMethodInvocationAnalysisResult::getOriginalMethodName)
 			.collect(Collectors.toSet());
 
 		return ASTNodeUtil
@@ -160,10 +159,8 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 			return Optional.empty();
 		}
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
-		String deprecatedethodNameReplacement = invocationData.getDeprecatedMethodNameReplacement()
-			.orElse(null);
-		String newMethodName = deprecatedethodNameReplacement != null ? deprecatedethodNameReplacement
-				: invocationData.getMethodName();
+		String originalMethodName = invocationData.getOriginalMethodName();
+		String newMethodName = invocationData.getNewMethodName();
 
 		boolean newInvocationWithoutQualifier = unqualifiedNamesOfNewAssertionMwethodImports.contains(newMethodName);
 
@@ -183,7 +180,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractAddImp
 		if (methodInvocation.getExpression() == null
 				&& newInvocationWithoutQualifier
 				&& newArguments == originalArguments
-				&& deprecatedethodNameReplacement == null) {
+				&& newMethodName.equals(originalMethodName)) {
 			return Optional.empty();
 		}
 

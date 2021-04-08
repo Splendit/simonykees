@@ -151,33 +151,23 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		boolean messageMovingToLastPosition = declaredParameterTypes.length > 0
 				&& isParameterTypeString(declaredParameterTypes[0]);
 
-		String methodName = methodBinding.getName();
-		String deprecatedMethodNameReplacement = null;
-		if (isDeprecatedAssertEqualsComparingObjectArrays(methodName, declaredParameterTypes)) {
-			deprecatedMethodNameReplacement = "assertArrayEquals"; //$NON-NLS-1$
-		}
-
-		return createTransformableResult(methodInvocation, throwingRunnableTypeToReplace, messageMovingToLastPosition,
-				deprecatedMethodNameReplacement);
-	}
-
-	private JUnit4AssertMethodInvocationAnalysisResult createTransformableResult(MethodInvocation methodInvocation,
-			Type throwingRunnableTypeToReplace, boolean messageMovingToLastPosition,
-			String deprecatedMethodNameReplacement) {
-		if (throwingRunnableTypeToReplace != null) {
-			return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					messageMovingToLastPosition, true, throwingRunnableTypeToReplace);
-		} else if (deprecatedMethodNameReplacement != null) {
-			return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					messageMovingToLastPosition, true, deprecatedMethodNameReplacement);
+		String newMethodName;
+		if (isDeprecatedAssertEqualsComparingObjectArrays(methodIdentifier, declaredParameterTypes)) {
+			newMethodName = "assertArrayEquals"; //$NON-NLS-1$
 		} else {
-			return (new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation,
-					messageMovingToLastPosition, true));
+			newMethodName = methodIdentifier;
 		}
+
+		if (throwingRunnableTypeToReplace != null) {
+			return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, newMethodName,
+					messageMovingToLastPosition, throwingRunnableTypeToReplace);
+		}
+		return (new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, newMethodName,
+				messageMovingToLastPosition));
 	}
 
 	private JUnit4AssertMethodInvocationAnalysisResult createNotTransformableResult(
 			MethodInvocation methodInvocation) {
-		return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, false, false);
+		return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation);
 	}
 }
