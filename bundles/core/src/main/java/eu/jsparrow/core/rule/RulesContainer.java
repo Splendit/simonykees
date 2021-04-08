@@ -79,6 +79,7 @@ import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedExceptionRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitTimeoutAnnotationPropertyRule;
+import eu.jsparrow.core.rule.impl.ReplaceJunitAssertThatWIthHamcrestRule;
 import eu.jsparrow.core.rule.impl.ReuseRandomObjectsRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
@@ -197,6 +198,7 @@ public class RulesContainer {
 				new ReplaceJUnitTimeoutAnnotationPropertyRule(),
 				new ReplaceJUnit4AnnotationsWithJupiterRule(),
 				new ReplaceJUnit4AssertionsWithJupiterRule(),
+				new ReplaceJunitAssertThatWIthHamcrestRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
