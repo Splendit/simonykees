@@ -7,7 +7,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
@@ -31,7 +30,7 @@ public class ReplaceJUnitAssertThatWIthHamcrestRuleTest extends SingleRuleTest {
 	private static final String POSTRULE_SUBDIRECTORY = "assertThat";
 
 	private ReplaceJUnitAssertThatWithHamcrestRule rule;
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		rule = new ReplaceJUnitAssertThatWithHamcrestRule();
@@ -41,66 +40,66 @@ public class ReplaceJUnitAssertThatWIthHamcrestRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleId() {
 		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceJunitAssertThatWIthHamcrest"));
+		assertThat(ruleId, equalTo("ReplaceJUnitAssertThatWIthHamcrest"));
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Replace JUnit Timeout Annotation Property with assertTimeout"));
+		assertThat(description.getName(), equalTo("Replace JUnit assertThat with Hamcrest"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_1_8, Tag.TESTING));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
+				contains(Tag.JAVA_1_5, Tag.TESTING));
+		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
-				equalTo("JUnit Jupiter API provides timeout assertions, i.e., assertions that execution of some code completes before a timeout exceeds. In JUnit 4 this is achieved by using the 'timeout' property of '@Test(timeout=...)' annotation. \nThis rule removes the 'timeout' annotation property and inserts an  'assertTimeout' instead."));
+				equalTo("JUnit Assert.assertThat is deprecated. The recommended alternative is to use the equivalent assertion in the Hamcrest library."));
 	}
 
 	@Test
 	void test_requiredLibraries() throws Exception {
 		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-all",
-					"1.3")));
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+			.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
+					generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3")));
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), equalTo("Hamcrest"));
+		assertThat(rule.requiredLibraries(), equalTo("Hamcrest 1.3 or later"));
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
 		addToClasspath(testProject, Arrays
-				.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-all",
-						"1.3")));
+			.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
+					generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.getRequiredJavaVersion(), equalTo("1.8"));
+		assertThat(rule.getRequiredJavaVersion(), equalTo("1.5"));
 	}
 
 	@Test
-	void calculateEnabledForProject_supportLibraryVersion_4_13_shouldReturnTrue_shouldReturnTrue() throws Exception {
+	void calculateEnabledForProject_supportHamcrestVersion_1_3_shouldReturnTrue() throws Exception {
 		addToClasspath(testProject, Arrays
-				.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-all",
-						"1.3")));
+			.asList(generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
+					generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertFalse(rule.isEnabled());
-		assertFalse(rule.isSatisfiedLibraries());
+		assertTrue(rule.isEnabled());
+		assertTrue(rule.isSatisfiedLibraries());
 		assertTrue(rule.isSatisfiedJavaVersion());
 	}
 
 	@Test
-	void testTransformationWithJupiter() throws Exception {
+	void testTransformationWithDefaultFile() throws Exception {
 		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
 
 		RulesTestUtil.addToClasspath(testProject, Arrays.asList(
-				RulesTestUtil.generateMavenEntryFromDepedencyString("junit", "junit", "4.13"),
-				RulesTestUtil.generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library","1.3"), 
-				RulesTestUtil.generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core","1.3")));
+				generateMavenEntryFromDepedencyString("junit", "junit", "4.13"),
+				generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-library", "1.3"),
+				generateMavenEntryFromDepedencyString("org.hamcrest", "hamcrest-core", "1.3")));
 		rule.calculateEnabledForProject(testProject);
 
 		Path preRule = getPreRuleFile(STANDARD_FILE);
@@ -112,6 +111,4 @@ public class ReplaceJUnitAssertThatWIthHamcrestRuleTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
-	
 }

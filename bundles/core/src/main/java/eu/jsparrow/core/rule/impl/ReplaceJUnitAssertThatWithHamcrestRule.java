@@ -13,32 +13,35 @@ import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-public class ReplaceJunitAssertThatWIthHamcrestRule extends RefactoringRuleImpl<ReplaceJUnitAssertThatWithHamcrestASTVisitor> {
+public class ReplaceJUnitAssertThatWithHamcrestRule extends RefactoringRuleImpl<ReplaceJUnitAssertThatWithHamcrestASTVisitor> {
 
-	public ReplaceJunitAssertThatWIthHamcrestRule() {
+	private static final String MIN_HAMCREST_VERSION = "1.3"; //$NON-NLS-1$
+	private static final String ORG_HAMCREST_MATCHER_ASSERT = "org.hamcrest.MatcherAssert"; //$NON-NLS-1$
+
+	public ReplaceJUnitAssertThatWithHamcrestRule() {
 		this.visitorClass = ReplaceJUnitAssertThatWithHamcrestASTVisitor.class;
-		this.id = "ReplaceJunitAssertThatWIthHamcrest"; //$NON-NLS-1$
+		this.id = "ReplaceJUnitAssertThatWIthHamcrest"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
 				"Replace JUnit assertThat with Hamcrest", 
-				"JUnit Asserts.assertThat is deprecated. The recommended alternative is to use the equivalent assertion in Hamcrest library.",
-				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING));
+				"JUnit Assert.assertThat is deprecated. The recommended alternative is to use the equivalent assertion in the Hamcrest library.",
+				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_5, Tag.TESTING));
 	}
 
 	
 	@Override
 	protected String provideRequiredJavaVersion() {
-		return JavaCore.VERSION_1_8;
+		return JavaCore.VERSION_1_5;
 	}
 
 	@Override
 	public String requiredLibraries() {
-		return "Hamcrest"; //$NON-NLS-1$
+		return "Hamcrest 1.3 or later"; //$NON-NLS-1$
 	}
 	
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 		Predicate<Version> versionComparator = version -> version
-			.compareTo(Version.parseVersion("1.3")) >= 0;
-		return isInProjectLibraries(project, "org.hamcrest.MatcherAssert", versionComparator);
+			.compareTo(Version.parseVersion(MIN_HAMCREST_VERSION)) >= 0;
+		return isInProjectLibraries(project, ORG_HAMCREST_MATCHER_ASSERT, versionComparator);
 	}
 }
