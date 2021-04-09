@@ -43,7 +43,7 @@ public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImp
 			return false;
 		}
 
-		if (!isJunitAssertThat((IMethodBinding) binding)) {
+		if (!isJUnitAssertThat((IMethodBinding) binding)) {
 			return false;
 		}
 
@@ -61,7 +61,7 @@ public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImp
 		if (methodBinding == null) {
 			return false;
 		}
-		boolean isJunitAssertThat = isJunitAssertThat(methodBinding);
+		boolean isJunitAssertThat = isJUnitAssertThat(methodBinding);
 		if (!isJunitAssertThat) {
 			return true;
 		}
@@ -77,7 +77,7 @@ public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImp
 		return true;
 	}
 
-	private boolean isJunitAssertThat(IMethodBinding methodBinding) {
+	private boolean isJUnitAssertThat(IMethodBinding methodBinding) {
 		String methodIdentifier = methodBinding.getName();
 		if (!"assertThat".equals(methodIdentifier)) { //$NON-NLS-1$
 			return false;

@@ -25,16 +25,16 @@ import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-public class ReplaceJunitAssertThatWIthHamcrestRuleTest extends SingleRuleTest {
+public class ReplaceJUnitAssertThatWIthHamcrestRuleTest extends SingleRuleTest {
 
-	private static final String STANDARD_FILE = "ReplaceJunitAssertThatWithHamcrestRule.java";
+	private static final String STANDARD_FILE = "ReplaceJUnitAssertThatWithHamcrestRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "assertThat";
 
-	private ReplaceJunitAssertThatWIthHamcrestRule rule;
+	private ReplaceJUnitAssertThatWithHamcrestRule rule;
 	
 	@BeforeEach
 	public void setUp() throws Exception {
-		rule = new ReplaceJunitAssertThatWIthHamcrestRule();
+		rule = new ReplaceJUnitAssertThatWithHamcrestRule();
 		testProject = createJavaProject("javaVersionTestProject", "bin");
 	}
 

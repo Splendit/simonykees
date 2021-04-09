@@ -1,11 +1,11 @@
-package eu.jsparrow.sample.postRule.assertThat;
+package eu.jsparrow.sample.preRule;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThat;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 
 import org.junit.Test;
 
-public class ReplaceJunitAssertThatWithHamcrestRule {
+public class ReplaceJUnitAssertThatWithHamcrestRule {
 
 	@Test
 	public void replacingAssertThat() {
