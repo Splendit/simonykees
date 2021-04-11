@@ -49,7 +49,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
 
 		JUnit4AssertMethodInvocationAnalyzer invocationAnalyzer = new JUnit4AssertMethodInvocationAnalyzer(
-				compilationUnit);
+				compilationUnit, this::isSupportedJUnit4Method);
 
 		List<JUnit4AssertMethodInvocationAnalysisResult> allJUnit4AssertInvocations = invocationAnalyzer
 			.collectJUnit4AssertionAnalysisResults(

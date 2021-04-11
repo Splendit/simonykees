@@ -4,6 +4,7 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -33,9 +34,11 @@ class JUnit4AssertMethodInvocationAnalyzer {
 	static final String ASSERT_THROWS = "assertThrows"; //$NON-NLS-1$
 
 	private final JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore;
+	private final Predicate<IMethodBinding> supportedJUnit4MethodPredicate;
 
-	JUnit4AssertMethodInvocationAnalyzer(CompilationUnit compilationUnit) {
+	JUnit4AssertMethodInvocationAnalyzer(CompilationUnit compilationUnit, Predicate<IMethodBinding> supportedJUnit4MethodPredicate) {
 		jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(compilationUnit);
+		this.supportedJUnit4MethodPredicate = supportedJUnit4MethodPredicate;
 	}
 
 	List<JUnit4AssertMethodInvocationAnalysisResult> collectJUnit4AssertionAnalysisResults(
