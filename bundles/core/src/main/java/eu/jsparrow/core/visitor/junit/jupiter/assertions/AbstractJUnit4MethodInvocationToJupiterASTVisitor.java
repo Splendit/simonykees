@@ -250,4 +250,6 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 			onRewrite();
 		}
 	}
+	
+	protected abstract boolean isSupportedJUnit4Method(IMethodBinding methodBinding);
 }
