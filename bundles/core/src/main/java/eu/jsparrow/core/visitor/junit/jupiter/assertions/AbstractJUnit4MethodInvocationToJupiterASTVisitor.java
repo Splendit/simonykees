@@ -123,13 +123,12 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 			.convertToTypedList(getCompilationUnit().imports(), ImportDeclaration.class)
 			.stream()
 			.filter(importDeclaration -> canRemoveStaticImport(importDeclaration,
-					simpleNamesOfStaticAssertMethodImportsToKeep, invocationAnalyzer))
+					simpleNamesOfStaticAssertMethodImportsToKeep))
 			.collect(Collectors.toList());
 	}
 
 	private boolean canRemoveStaticImport(ImportDeclaration importDeclaration,
-			Set<String> simpleNamesOfStaticAssertMethodImportsToKeep,
-			JUnit4AssertMethodInvocationAnalyzer invocationAnalyzer) {
+			Set<String> simpleNamesOfStaticAssertMethodImportsToKeep) {
 		if (!importDeclaration.isStatic()) {
 			return false;
 		}
@@ -140,7 +139,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		IBinding importBinding = importDeclaration.resolveBinding();
 		if (importBinding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = ((IMethodBinding) importBinding);
-			return invocationAnalyzer.isSupportedJUnit4AssertMethod(methodBinding)
+			return isSupportedJUnit4Method(methodBinding)
 					&& !simpleNamesOfStaticAssertMethodImportsToKeep.contains(methodBinding.getName());
 		}
 		return false;
@@ -250,6 +249,6 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 			onRewrite();
 		}
 	}
-	
+
 	protected abstract boolean isSupportedJUnit4Method(IMethodBinding methodBinding);
 }
