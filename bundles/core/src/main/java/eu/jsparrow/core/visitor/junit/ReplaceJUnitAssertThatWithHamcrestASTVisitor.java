@@ -50,11 +50,13 @@ public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImp
 	private static final String ORG_HAMCREST_MATCHER_ASSERT = "org.hamcrest.MatcherAssert"; //$NON-NLS-1$
 
 	private boolean updatedAssertThatStaticImport = false;
+	private boolean implicitReplacement;
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		super.visit(compilationUnit);
 		verifyImport(compilationUnit, ORG_HAMCREST_MATCHER_ASSERT);
+		resetImplicitTransformation();
 		return true;
 	}
 
@@ -79,8 +81,17 @@ public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImp
 		newImportDeclaration.setStatic(true);
 		newImportDeclaration.setName(ast.newName(ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT));
 		astRewrite.replace(importDeclaration, newImportDeclaration, null);
+		onRewrite();
 		this.updatedAssertThatStaticImport = true;
 		return true;
+	}
+
+	@Override
+	public void endVisit(CompilationUnit cu) {
+		if (hasImplicitTransformation()) {
+			onRewrite();
+		}
+		super.endVisit(cu);
 	}
 
 	@Override
@@ -102,14 +113,21 @@ public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImp
 				Optional<Name> newExpression = addImportForStaticMethod(ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT,
 						expression);
 				newExpression.ifPresent(
-						name -> astRewrite.set(methodInvocation, MethodInvocation.EXPRESSION_PROPERTY, name, null));
+						name -> {
+							onRewrite();
+							astRewrite.set(methodInvocation, MethodInvocation.EXPRESSION_PROPERTY, name, null);
+						});
+				if (!newExpression.isPresent()) {
+					setImplicitTransformation();
+				}
 			}
 		} else if (expression.getNodeType() == ASTNode.SIMPLE_NAME
 				|| expression.getNodeType() == ASTNode.QUALIFIED_NAME) {
 			Name newExpression = addImport(ORG_HAMCREST_MATCHER_ASSERT, expression);
 			astRewrite.replace(expression, newExpression, null);
+			onRewrite();
 		}
-		onRewrite();
+
 		return true;
 	}
 
@@ -120,5 +138,17 @@ public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImp
 		}
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		return ClassRelationUtil.isContentOfType(declaringClass, ORG_JUNIT_ASSERT);
+	}
+
+	private void setImplicitTransformation() {
+		implicitReplacement = true;
+	}
+
+	private void resetImplicitTransformation() {
+		implicitReplacement = false;
+	}
+
+	private boolean hasImplicitTransformation() {
+		return implicitReplacement;
 	}
 }
