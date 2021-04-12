@@ -34,8 +34,6 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * 
  */
 abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends AbstractAddImportASTVisitor {
-
-	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
 	private final String classDeclaringJUnitJupiterMethod;
 
@@ -48,7 +46,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 
 		super.visit(compilationUnit);
 
-		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_ASSERTIONS);
+		verifyImport(compilationUnit, classDeclaringJUnitJupiterMethod);
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
 
 		JUnit4AssertMethodInvocationAnalyzer invocationAnalyzer = new JUnit4AssertMethodInvocationAnalyzer(
@@ -77,7 +75,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 
 		Set<String> newStaticAssertionMethodImports = new HashSet<>();
 		Set<String> unqualifiedNamesOfNewAssertionMwethodImports = new HashSet<>();
-		String newMethodFullyQualifiedNamePrefix = ORG_JUNIT_JUPITER_API_ASSERTIONS + "."; //$NON-NLS-1$
+		String newMethodFullyQualifiedNamePrefix = classDeclaringJUnitJupiterMethod + "."; //$NON-NLS-1$
 		jUnit4AssertInvocationsInJUnitJupiterTest.forEach(data -> {
 			String newMethodName = data.getNewMethodName();
 			String newMethodFullyQualifiedName = newMethodFullyQualifiedNamePrefix + newMethodName;
@@ -209,7 +207,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 	private MethodInvocation createNewInvocationWithAssertionsQualifier(MethodInvocation contextForImport,
 			String newMethodName, List<Expression> arguments) {
 		MethodInvocation newInvocation = createNewInvocationWithoutQualifier(newMethodName, arguments);
-		Name newQualifier = addImport(ORG_JUNIT_JUPITER_API_ASSERTIONS, contextForImport);
+		Name newQualifier = addImport(classDeclaringJUnitJupiterMethod, contextForImport);
 		newInvocation.setExpression(newQualifier);
 		return newInvocation;
 	}
