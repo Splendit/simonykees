@@ -59,7 +59,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 			.collect(Collectors.toList());
 
 		List<ImportDeclaration> staticAssertMethodImportsToRemove = collectStaticAssertMethodImportsToRemove(
-				allJUnit4AssertInvocations, invocationAnalyzer);
+				allJUnit4AssertInvocations);
 
 		Set<String> unqualifiedNamesOfAssertMethodImportsToRemove = staticAssertMethodImportsToRemove
 			.stream()
@@ -104,8 +104,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 	}
 
 	private List<ImportDeclaration> collectStaticAssertMethodImportsToRemove(
-			List<JUnit4AssertMethodInvocationAnalysisResult> jUnit4AssertInvocationDataList,
-			JUnit4AssertMethodInvocationAnalyzer invocationAnalyzer) {
+			List<JUnit4AssertMethodInvocationAnalysisResult> jUnit4AssertInvocationDataList) {
 		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = jUnit4AssertInvocationDataList
 			.stream()
 			.filter(data -> !data.isTransformableInvocation())
