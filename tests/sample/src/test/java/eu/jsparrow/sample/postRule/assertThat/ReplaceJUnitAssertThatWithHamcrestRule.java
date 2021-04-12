@@ -17,6 +17,11 @@ public class ReplaceJUnitAssertThatWithHamcrestRule {
 	}
 	
 	@Test
+	public void replacingAssertThatWithReason() {
+		assertThat("Reason", "value", equalToIgnoringCase("value"));
+	}
+	
+	@Test
 	public void replaceQualifier() {
 		MatcherAssert.assertThat("value", equalToIgnoringCase("value"));
 	}
