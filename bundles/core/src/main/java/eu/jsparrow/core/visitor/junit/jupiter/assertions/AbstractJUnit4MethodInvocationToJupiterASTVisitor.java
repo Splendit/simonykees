@@ -38,8 +38,6 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
 
-	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS_PREFIX = ORG_JUNIT_JUPITER_API_ASSERTIONS + "."; //$NON-NLS-1$
-
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 
@@ -74,9 +72,10 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 
 		Set<String> newStaticAssertionMethodImports = new HashSet<>();
 		Set<String> unqualifiedNamesOfNewAssertionMwethodImports = new HashSet<>();
+		String newMethodFullyQualifiedNamePrefix = ORG_JUNIT_JUPITER_API_ASSERTIONS + "."; //$NON-NLS-1$
 		jUnit4AssertInvocationsInJUnitJupiterTest.forEach(data -> {
 			String newMethodName = data.getNewMethodName();
-			String newMethodFullyQualifiedName = createAssertionsMethodQualifiedName(newMethodName);
+			String newMethodFullyQualifiedName = newMethodFullyQualifiedNamePrefix + newMethodName;
 			if (unqualifiedNamesOfAssertMethodImportsToRemove.contains(newMethodName)
 					|| canAddStaticAssertionsMethodImport(newMethodFullyQualifiedName)) {
 				newStaticAssertionMethodImports.add(newMethodFullyQualifiedName);
@@ -102,10 +101,6 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 				jUnit4AssertTransformationDataList);
 
 		return false;
-	}
-
-	private String createAssertionsMethodQualifiedName(String methodName) {
-		return ORG_JUNIT_JUPITER_API_ASSERTIONS_PREFIX + methodName;
 	}
 
 	private List<ImportDeclaration> collectStaticAssertMethodImportsToRemove(
