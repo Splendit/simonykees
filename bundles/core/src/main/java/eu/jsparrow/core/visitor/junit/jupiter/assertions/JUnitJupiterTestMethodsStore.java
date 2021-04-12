@@ -26,6 +26,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * Helper class storing all JUnit Jupiter test methods found in a
  * {@link CompilationUnit}.
  *
+ * @since 3.29.0
  */
 public class JUnitJupiterTestMethodsStore {
 
