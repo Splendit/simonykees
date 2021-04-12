@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.junit.jupiter.assertions;
+package eu.jsparrow.core.visitor.junit.jupiter.common;
 
 import java.util.ArrayList;
 import java.util.List;

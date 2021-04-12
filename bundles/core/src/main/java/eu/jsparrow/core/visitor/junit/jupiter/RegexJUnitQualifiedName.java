@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  */
 public class RegexJUnitQualifiedName {
 	private static final String PATTERN_ORG_JUNIT_4_QUALIFIED_NAME = "^(junit|(org\\.junit))(\\..+)?$"; //$NON-NLS-1$
-	private static final String PATTERN_ORG_JUNIT_JUPITER_QUALIFIED_NAME = "^org\\.junit\\.jupiter\\.api(\\..+)?$"; //$NON-NLS-1$
+	private static final String PATTERN_ORG_JUNIT_JUPITER_QUALIFIED_NAME = "^org\\.junit\\.jupiter\\.(api|params)(\\..+)?$"; //$NON-NLS-1$
 	private static final Predicate<String> PREDICATE_J_UNIT_NAME = Pattern
 		.compile(PATTERN_ORG_JUNIT_4_QUALIFIED_NAME)
 		.asPredicate();
