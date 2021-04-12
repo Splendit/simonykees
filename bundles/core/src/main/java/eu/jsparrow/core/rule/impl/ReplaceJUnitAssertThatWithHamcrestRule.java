@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 
 import eu.jsparrow.core.visitor.junit.ReplaceJUnitAssertThatWithHamcrestASTVisitor;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
@@ -22,8 +23,8 @@ public class ReplaceJUnitAssertThatWithHamcrestRule extends RefactoringRuleImpl<
 		this.visitorClass = ReplaceJUnitAssertThatWithHamcrestASTVisitor.class;
 		this.id = "ReplaceJUnitAssertThatWIthHamcrest"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
-				"Replace JUnit assertThat with Hamcrest", 
-				"JUnit Assert.assertThat is deprecated. The recommended alternative is to use the equivalent assertion in the Hamcrest library.",
+				Messages.ReplaceJUnitAssertThatWithHamcrestRule_name, 
+				Messages.ReplaceJUnitAssertThatWithHamcrestRule_description,
 				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_5, Tag.TESTING));
 	}
 

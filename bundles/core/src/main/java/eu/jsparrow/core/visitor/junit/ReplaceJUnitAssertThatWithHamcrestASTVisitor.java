@@ -17,15 +17,38 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
+ * A visitor to replace the deprecated JUnit {@code assertThat} with the
+ * corresponding Hamcrest assertion. For example:
+ * 
+ * <pre>
+ * <code>
+ *	&#64;Test
+ *	public void replacingAssertThat() {
+ *		org.junit.Assert.assertThat("value", equalToIgnoringCase("value"));
+ *	}
+ * </code>
+ * </pre>
+ * 
+ * becomes:
+ * 
+ * <pre>
+ * <code>
+ *	&#64;Test
+ *	public void replacingAssertThat() {
+ *		org.hamcrest.MatcherAssert.assertThat("value", equalToIgnoringCase("value"));
+ *	}
+ * </code>
+ * </pre>
  * 
  * @since 3.29.0
  *
  */
 public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImportASTVisitor {
 
+	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
 	private static final String ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT = "org.hamcrest.MatcherAssert.assertThat"; //$NON-NLS-1$
 	private static final String ORG_HAMCREST_MATCHER_ASSERT = "org.hamcrest.MatcherAssert"; //$NON-NLS-1$
-	
+
 	private boolean updatedAssertThatStaticImport = false;
 
 	@Override
@@ -73,13 +96,16 @@ public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImp
 
 		Expression expression = methodInvocation.getExpression();
 
-		if(expression == null) {
-			if(!this.updatedAssertThatStaticImport) {
+		if (expression == null) {
+			if (!this.updatedAssertThatStaticImport) {
 				verifyStaticMethodImport(getCompilationUnit(), ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT);
-				Optional<Name> newExpression = addImportForStaticMethod(ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT, expression);
-				newExpression.ifPresent(name -> astRewrite.set(methodInvocation, MethodInvocation.EXPRESSION_PROPERTY, name, null));
+				Optional<Name> newExpression = addImportForStaticMethod(ORG_HAMCREST_MATCHER_ASSERT_ASSERT_THAT,
+						expression);
+				newExpression.ifPresent(
+						name -> astRewrite.set(methodInvocation, MethodInvocation.EXPRESSION_PROPERTY, name, null));
 			}
-		} else if (expression.getNodeType() == ASTNode.SIMPLE_NAME || expression.getNodeType() == ASTNode.QUALIFIED_NAME) {
+		} else if (expression.getNodeType() == ASTNode.SIMPLE_NAME
+				|| expression.getNodeType() == ASTNode.QUALIFIED_NAME) {
 			Name newExpression = addImport(ORG_HAMCREST_MATCHER_ASSERT, expression);
 			astRewrite.replace(expression, newExpression, null);
 		}
@@ -93,6 +119,6 @@ public class ReplaceJUnitAssertThatWithHamcrestASTVisitor extends AbstractAddImp
 			return false;
 		}
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-		return ClassRelationUtil.isContentOfType(declaringClass, "org.junit.Assert");
+		return ClassRelationUtil.isContentOfType(declaringClass, ORG_JUNIT_ASSERT);
 	}
 }
