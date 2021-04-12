@@ -37,6 +37,11 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
+	private final String classDeclaringJUnitJupiterMethod;
+
+	AbstractJUnit4MethodInvocationToJupiterASTVisitor(String classDeclaringJUnitJupiterMethod) {
+		this.classDeclaringJUnitJupiterMethod = classDeclaringJUnitJupiterMethod;
+	}
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
