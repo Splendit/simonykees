@@ -160,14 +160,19 @@ class JUnit4AssertMethodInvocationAnalyzer {
 
 		if (throwingRunnableTypeToReplace != null) {
 			return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, newMethodName,
-					messageMovingToLastPosition, throwingRunnableTypeToReplace);
+					messageMovingToLastPosition, throwingRunnableTypeToReplace, true);
 		}
-		return (new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, newMethodName,
-				messageMovingToLastPosition));
+		return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, newMethodName,
+				messageMovingToLastPosition, true);
 	}
 
 	private JUnit4AssertMethodInvocationAnalysisResult createNotTransformableResult(
 			MethodInvocation methodInvocation) {
-		return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation);
+		String newMethodName = methodInvocation.getName()
+			.getIdentifier();
+		boolean messageMovingToLastPosition = false;
+		boolean transformableInvocation = false;
+		return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, newMethodName,
+				messageMovingToLastPosition, transformableInvocation);
 	}
 }

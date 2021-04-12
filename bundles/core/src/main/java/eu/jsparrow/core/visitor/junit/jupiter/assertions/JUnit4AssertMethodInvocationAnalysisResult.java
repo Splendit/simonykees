@@ -24,24 +24,12 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 	private Type throwingRunnableTypeToReplace;
 
 	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
-			boolean messageMovingToLastPosition, Type throwingRunnableTypeToReplace) {
-		this(methodInvocation, newMethodName, messageMovingToLastPosition, true);
+			boolean messageMovingToLastPosition, Type throwingRunnableTypeToReplace, boolean transformableInvocation) {
+		this(methodInvocation, newMethodName, messageMovingToLastPosition, transformableInvocation);
 		this.throwingRunnableTypeToReplace = throwingRunnableTypeToReplace;
 	}
 
 	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
-			boolean messageMovingToLastPosition) {
-		this(methodInvocation, newMethodName, messageMovingToLastPosition, true);
-	}
-
-	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation) {
-		this(methodInvocation,
-				methodInvocation.getName()
-					.getIdentifier(),
-				false, false);
-	}
-
-	private JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
 			boolean messageMovingToLastPosition,
 			boolean transformableInvocation) {
 		this.methodInvocation = methodInvocation;
