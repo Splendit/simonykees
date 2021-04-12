@@ -66,7 +66,7 @@ public class ReplaceJUnit4AssertionsWithJupiterNegativeASTVisitorTest
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_assertEqualsWithQualifierAsLambdaBody_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Assert.class.getName());
@@ -94,5 +94,4 @@ public class ReplaceJUnit4AssertionsWithJupiterNegativeASTVisitorTest
 
 		assertNoChange(original);
 	}
-
 }
