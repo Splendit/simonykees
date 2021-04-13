@@ -30,6 +30,7 @@ class ReplaceJUnitAssertThatWithHamcrestRuleTest extends SingleRuleTest {
 
 	private static final String STANDARD_FILE = "ReplaceJUnitAssertThatWithHamcrestRule.java";
 	private static final String ON_DEMAND_IMPORTS = "ReplaceJUnitAssertThatWithHamcrestOnDemandImportsRule.java";
+	private static final String DUPLICATE_IMPORTS = "ReplaceJUnitAssertThatWithHamcrestDuplicateImportRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "assertThat";
 
 	private ReplaceJUnitAssertThatWithHamcrestRule rule;
@@ -98,7 +99,8 @@ class ReplaceJUnitAssertThatWithHamcrestRuleTest extends SingleRuleTest {
 	@ParameterizedTest
 	@ValueSource(strings = {
 			STANDARD_FILE,
-			ON_DEMAND_IMPORTS })
+			ON_DEMAND_IMPORTS, 
+			DUPLICATE_IMPORTS })
 	void testTransformationWithDefaultFile(String preRuleFileName) throws Exception {
 		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
 		loadUtilities();

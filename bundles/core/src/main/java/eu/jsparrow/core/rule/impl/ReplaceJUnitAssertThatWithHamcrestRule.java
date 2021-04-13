@@ -14,7 +14,14 @@ import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-public class ReplaceJUnitAssertThatWithHamcrestRule extends RefactoringRuleImpl<ReplaceJUnitAssertThatWithHamcrestASTVisitor> {
+/**
+ * @see ReplaceJUnitAssertThatWithHamcrestASTVisitor
+ * 
+ * @since 3.29.0
+ *
+ */
+public class ReplaceJUnitAssertThatWithHamcrestRule
+		extends RefactoringRuleImpl<ReplaceJUnitAssertThatWithHamcrestASTVisitor> {
 
 	private static final String MIN_HAMCREST_VERSION = "1.3"; //$NON-NLS-1$
 	private static final String ORG_HAMCREST_MATCHER_ASSERT = "org.hamcrest.MatcherAssert"; //$NON-NLS-1$
@@ -23,12 +30,11 @@ public class ReplaceJUnitAssertThatWithHamcrestRule extends RefactoringRuleImpl<
 		this.visitorClass = ReplaceJUnitAssertThatWithHamcrestASTVisitor.class;
 		this.id = "ReplaceJUnitAssertThatWithHamcrest"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
-				Messages.ReplaceJUnitAssertThatWithHamcrestRule_name, 
+				Messages.ReplaceJUnitAssertThatWithHamcrestRule_name,
 				Messages.ReplaceJUnitAssertThatWithHamcrestRule_description,
 				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_5, Tag.TESTING));
 	}
 
-	
 	@Override
 	protected String provideRequiredJavaVersion() {
 		return JavaCore.VERSION_1_5;
@@ -38,7 +44,7 @@ public class ReplaceJUnitAssertThatWithHamcrestRule extends RefactoringRuleImpl<
 	public String requiredLibraries() {
 		return "Hamcrest 1.3 or later"; //$NON-NLS-1$
 	}
-	
+
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 		Predicate<Version> versionComparator = version -> version
