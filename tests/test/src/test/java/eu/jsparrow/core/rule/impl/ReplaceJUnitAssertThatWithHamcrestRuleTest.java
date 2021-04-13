@@ -43,7 +43,7 @@ class ReplaceJUnitAssertThatWithHamcrestRuleTest extends SingleRuleTest {
 	@Test
 	void test_ruleId() {
 		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("ReplaceJUnitAssertThatWIthHamcrest"));
+		assertThat(ruleId, equalTo("ReplaceJUnitAssertThatWithHamcrest"));
 	}
 
 	@Test

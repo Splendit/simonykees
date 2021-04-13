@@ -21,7 +21,7 @@ public class ReplaceJUnitAssertThatWithHamcrestRule extends RefactoringRuleImpl<
 
 	public ReplaceJUnitAssertThatWithHamcrestRule() {
 		this.visitorClass = ReplaceJUnitAssertThatWithHamcrestASTVisitor.class;
-		this.id = "ReplaceJUnitAssertThatWIthHamcrest"; //$NON-NLS-1$
+		this.id = "ReplaceJUnitAssertThatWithHamcrest"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceJUnitAssertThatWithHamcrestRule_name, 
 				Messages.ReplaceJUnitAssertThatWithHamcrestRule_description,
