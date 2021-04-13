@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
  * by invocations of the corresponding methods of the JUnit-Jupiter-class
  * {@code org.junit.jupiter.api.Assertions}.
  * 
- * @since 3.28.0
+ * @since 3.30.0
  * 
  */
 public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractJUnit4MethodInvocationToJupiterASTVisitor {

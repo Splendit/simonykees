@@ -30,7 +30,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * by invocations of the corresponding methods of the JUnit-Jupiter-class
  * {@code org.junit.jupiter.api.Assertions}.
  * 
- * @since 3.28.0
+ * @since 3.30.0
  * 
  */
 abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends AbstractAddImportASTVisitor {
