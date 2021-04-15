@@ -219,7 +219,10 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		if (!staticAssertMethodImportsToRemove.isEmpty() || !newStaticAssertionMethodImports.isEmpty()
 				|| !jUnit4AssertTransformationDataList.isEmpty()) {
 
-			staticAssertMethodImportsToRemove.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
+			staticAssertMethodImportsToRemove.forEach(importDeclaration -> {
+				astRewrite.remove(importDeclaration, null);
+				onRewrite();
+			});
 
 			AST ast = astRewrite.getAST();
 			ListRewrite newImportsListRewrite = astRewrite.getListRewrite(getCompilationUnit(),
@@ -236,6 +239,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 				MethodInvocation methodInvocationToReplace = data.getOriginalMethodInvocation();
 				MethodInvocation methodInvocationReplacement = data.createMethodInvocationReplacement();
 				astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
+				onRewrite();
 			});
 
 			throwingRunnableTypesToReplace.forEach(typeToReplace -> {
@@ -243,7 +247,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 				SimpleType typeReplacement = ast.newSimpleType(executableTypeName);
 				astRewrite.replace(typeToReplace, typeReplacement, null);
 			});
-			onRewrite();
+			
 		}
 	}
 
