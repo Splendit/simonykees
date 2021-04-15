@@ -15,7 +15,7 @@ import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
- * @see ReplaceJUnit4AssertionsWithJupiterASTVisitor
+ * @see ReplaceJUnit4AssumptionsWithJupiterASTVisitor
  * 
  * @since 3.30.0
  *

@@ -5,9 +5,9 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 
 /**
- * Replaces invocations of methods of the JUnit-4-class {@code org.junit.Assert}
+ * Replaces invocations of methods of the JUnit-4-class {@code org.junit.Assume}
  * by invocations of the corresponding methods of the JUnit-Jupiter-class
- * {@code org.junit.jupiter.api.Assertions}.
+ * {@code org.junit.jupiter.api.Assumptions}.
  * 
  * @since 3.30.0
  * 
