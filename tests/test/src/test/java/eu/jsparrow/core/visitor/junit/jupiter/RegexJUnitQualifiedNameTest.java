@@ -28,8 +28,17 @@ public class RegexJUnitQualifiedNameTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {"org.junit.jupiter.api", "org.junit.jupiter.api.x", "org.junit.jupiter.api.x.y.T"})
-	public void testIsJUnitAndJUnitJupiterName(String name) throws Exception {
+	@ValueSource(strings = { "org.junit.jupiter.api", "org.junit.jupiter.api.x", "org.junit.jupiter.api.x.y.T" })
+	public void testIsJUnitAndJUnitJupiterAPIName(String name) throws Exception {
+		Assertions.assertTrue(RegexJUnitQualifiedName.isJUnitName(name));
+		Assertions.assertTrue(RegexJUnitQualifiedName.isJUnitJupiterName(name));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "org.junit.jupiter.params.ParameterizedTest",
+			"org.junit.jupiter.params.provider.ValueSource", "org.junit.jupiter.params",
+			"org.junit.jupiter.params.provider" })
+	public void testIsJUnitAndJUnitJupiterParamsTypeName(String name) throws Exception {
 		Assertions.assertTrue(RegexJUnitQualifiedName.isJUnitName(name));
 		Assertions.assertTrue(RegexJUnitQualifiedName.isJUnitJupiterName(name));
 	}

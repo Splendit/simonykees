@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Type;
 
 /**
  * Immutable class storing all necessary informations about the given invocation
@@ -16,30 +17,26 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 class JUnit4AssertMethodInvocationAnalysisResult {
 
 	private final MethodInvocation methodInvocation;
-	private final String methodName;
-	private final String deprecatedMethodNameReplacement;
-	private final boolean messageAsFirstParameter;
+	private final String originalMethodName;
+	private final String newMethodName;
+	private final boolean messageMovingToLastPosition;
 	private final boolean transformableInvocation;
+	private Type throwingRunnableTypeToReplace;
 
-	public JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
-			String deprecatedMethodNameReplacement, boolean messageAsFirstParameter,
-			boolean transformableInvocation) {
-		this.methodInvocation = methodInvocation;
-		this.methodName = methodInvocation.getName()
-			.getIdentifier();
-		this.deprecatedMethodNameReplacement = deprecatedMethodNameReplacement;
-		this.messageAsFirstParameter = messageAsFirstParameter;
-		this.transformableInvocation = transformableInvocation;
+	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
+			boolean messageMovingToLastPosition, Type throwingRunnableTypeToReplace, boolean transformableInvocation) {
+		this(methodInvocation, newMethodName, messageMovingToLastPosition, transformableInvocation);
+		this.throwingRunnableTypeToReplace = throwingRunnableTypeToReplace;
 	}
 
-	public JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation,
-			boolean messageAsFirstParameter,
+	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
+			boolean messageMovingToLastPosition,
 			boolean transformableInvocation) {
 		this.methodInvocation = methodInvocation;
-		this.methodName = methodInvocation.getName()
+		this.originalMethodName = methodInvocation.getName()
 			.getIdentifier();
-		this.deprecatedMethodNameReplacement = null;
-		this.messageAsFirstParameter = messageAsFirstParameter;
+		this.newMethodName = newMethodName;
+		this.messageMovingToLastPosition = messageMovingToLastPosition;
 		this.transformableInvocation = transformableInvocation;
 	}
 
@@ -47,16 +44,20 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 		return methodInvocation;
 	}
 
-	String getMethodName() {
-		return methodName;
+	String getOriginalMethodName() {
+		return originalMethodName;
 	}
 
-	Optional<String> getDeprecatedMethodNameReplacement() {
-		return Optional.ofNullable(deprecatedMethodNameReplacement);
+	public String getNewMethodName() {
+		return newMethodName;
 	}
 
-	boolean isMessageAsFirstParameter() {
-		return messageAsFirstParameter;
+	Optional<Type> getThrowingRunnableTypeToReplace() {
+		return Optional.ofNullable(throwingRunnableTypeToReplace);
+	}
+
+	boolean isMessageMovingToLastPosition() {
+		return messageMovingToLastPosition;
 	}
 
 	boolean isTransformableInvocation() {

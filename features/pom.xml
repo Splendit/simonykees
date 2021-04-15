@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>eu.jsparrow</artifactId>
-		<version>3.28.1-SNAPSHOT</version>
+		<version>3.29.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>features</artifactId>
