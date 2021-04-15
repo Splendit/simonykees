@@ -305,5 +305,4 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitorTest
 				"import static org.junit.Assert.*;");
 		assertChange(original, expected, expectedImports);
 	}
-
 }

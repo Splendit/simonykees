@@ -163,6 +163,7 @@ public class MavenAdapterTest {
 		String expectedUrl = "https://localhost:8081";
 		String expectedLicenseKey = "license-key";
 		String expectedMode = "list-rules";
+		String expectedBootFrameworkDelegation = "javax.*,org.xml.*,sun.*,com.sun.*,jdk.internal.reflect,jdk.internal.reflect.*";
 		MavenParameters mavenParameters = new MavenParameters(expectedMode, expectedLicenseKey, expectedUrl);
 
 		mavenAdapter.setUpConfiguration(mavenParameters);
@@ -172,6 +173,7 @@ public class MavenAdapterTest {
 		assertEquals(expectedUrl, configuration.getOrDefault("URL", ""));
 		assertEquals(expectedLicenseKey, configuration.getOrDefault("LICENSE", ""));
 		assertEquals(expectedMode, configuration.getOrDefault("STANDALONE.MODE", expectedMode));
+		assertEquals(expectedBootFrameworkDelegation, configuration.get("org.osgi.framework.bootdelegation"));
 	}
 
 	class TestableMavenAdapter extends MavenAdapter {

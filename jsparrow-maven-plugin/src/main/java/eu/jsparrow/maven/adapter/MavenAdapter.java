@@ -154,7 +154,7 @@ public class MavenAdapter {
 		 * https://spring.io/blog/2009/01/19/exposing-the-boot-classpath-in-
 		 * osgi/
 		 */
-		configuration.put(Constants.FRAMEWORK_BOOTDELEGATION, "javax.*,org.xml.*"); //$NON-NLS-1$
+		configuration.put(Constants.FRAMEWORK_BOOTDELEGATION, "javax.*,org.xml.*,sun.*,com.sun.*,jdk.internal.reflect,jdk.internal.reflect.*"); //$NON-NLS-1$
 		configuration.put(DEBUG_ENABLED, Boolean.toString(log.isDebugEnabled()));
 		configuration.put(STANDALONE_MODE_KEY, config.getMode());
 		configuration.put(SELECTED_PROFILE, config.getProfile());
