@@ -147,13 +147,57 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 		String original = ""
 				+ "	@Category(value = {})\n"
 				+ "	@Test\n"
-				+ "	void test_NormalAnnotationWithEmptyArray() {\n"
+				+ "	void test() {\n"
 				+ "	}" +
 				CATEGORY_CLASS_DECLARATIONS;
 
 		String expected = ""
 				+ "	@Test\n"
-				+ "	void test_NormalAnnotationWithEmptyArray() {\n"
+				+ "	void test() {\n"
+				+ "	}" +
+				CATEGORY_CLASS_DECLARATIONS;
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_SingleMemberArrayClassliteral_shouldTransform() throws Exception {
+		defaultFixture.addImport(org.junit.Test.class.getName());
+		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+
+		String original = ""
+				+ "	@Category({ FirstCategory[].class })\n"
+				+ "	@Test\n"
+				+ "	void test() {\n"
+				+ "	}" +
+				CATEGORY_CLASS_DECLARATIONS;
+
+		String expected = ""
+				+ "	@Tag(\"fixturepackage.TestCU.FirstCategory[]\")\n"
+				+ "	@Test\n"
+				+ "	void test() {\n"
+				+ "	}" +
+				CATEGORY_CLASS_DECLARATIONS;
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_SingleMember2DArrayClassliteral_shouldTransform() throws Exception {
+		defaultFixture.addImport(org.junit.Test.class.getName());
+		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+
+		String original = ""
+				+ "	@Category({ FirstCategory[][].class })\n"
+				+ "	@Test\n"
+				+ "	void test() {\n"
+				+ "	}" +
+				CATEGORY_CLASS_DECLARATIONS;
+
+		String expected = ""
+				+ "	@Tag(\"fixturepackage.TestCU.FirstCategory[][]\")\n"
+				+ "	@Test\n"
+				+ "	void test() {\n"
 				+ "	}" +
 				CATEGORY_CLASS_DECLARATIONS;
 
