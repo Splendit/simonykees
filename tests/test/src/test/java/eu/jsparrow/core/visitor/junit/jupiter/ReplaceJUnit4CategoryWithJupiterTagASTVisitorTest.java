@@ -28,117 +28,135 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 		fixtureProject.clear();
 	}
 
-	/**
-	 * This test is expected to fail as soon as the replacement of
-	 * {@link org.junit.experimental.categories.Category} has been implemented.
-	 * 
-	 * @throws Exception
-	 */
 	@Test
 	public void visit_SingleMemberClassLiteral_underConstruction() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
 		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+
 		String original = "" +
 				"	@Category(FirstCategory.class)\n" +
 				"	@Test\n" +
 				"	void test() {\n" +
 				"	}" +
 				CATEGORY_CLASS_DECLARATIONS;
-		assertNoChange(original);
+
+		String expected = "" +
+				"	@Tag(\"fixturepackage.TestCU.FirstCategory\")\n" +
+				"	@Test\n" +
+				"	void test() {\n" +
+				"	}" +
+				CATEGORY_CLASS_DECLARATIONS;
+
+		assertChange(original, expected);
 	}
 
-	/**
-	 * This test is expected to fail as soon as the replacement of
-	 * {@link org.junit.experimental.categories.Category} has been implemented.
-	 * 
-	 * @throws Exception
-	 */
 	@Test
 	public void visit_SingleMemberClassLiteralArray_underConstruction() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
 		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+
 		String original = "" +
 				"	@Category({ FirstCategory.class, SecondCategory.class })\n"
 				+ "	@Test\n"
 				+ "	void test() {\n"
 				+ "	}" +
 				CATEGORY_CLASS_DECLARATIONS;
-		assertNoChange(original);
-	}
 
-	/**
-	 * This test is expected to fail as soon as the replacement of
-	 * {@link org.junit.experimental.categories.Category} has been implemented.
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public void visit_SingleMemberEmptyArray_underConstruction() throws Exception {
-		defaultFixture.addImport(org.junit.Test.class.getName());
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
-		String original = "" +
-				"	@Category({})\n"
+		String expected = "" +
+				"	@Tag(\"fixturepackage.TestCU.FirstCategory\")"
+				+ " @Tag(\"fixturepackage.TestCU.SecondCategory\")\n"
 				+ "	@Test\n"
 				+ "	void test() {\n"
 				+ "	}" +
 				CATEGORY_CLASS_DECLARATIONS;
-		assertNoChange(original);
+
+		assertChange(original, expected);
 	}
 
-	/**
-	 * This test is expected to fail as soon as the replacement of
-	 * {@link org.junit.experimental.categories.Category} has been implemented.
-	 *
-	 * @throws Exception
-	 */
+	@Test
+	public void visit_SingleMemberEmptyArray_underConstruction() throws Exception {
+		defaultFixture.addImport(org.junit.Test.class.getName());
+		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+
+		String original = ""
+				+ "	@Category({})\n"
+				+ "	@Test\n"
+				+ "	void test() {\n"
+				+ "	}" +
+				CATEGORY_CLASS_DECLARATIONS;
+
+		String expected = ""
+				+ "	@Test\n"
+				+ "	void test() {\n"
+				+ "	}" +
+				CATEGORY_CLASS_DECLARATIONS;
+
+		assertChange(original, expected);
+	}
+
 	@Test
 	public void visit_NormalAnnotationWithClassLiteral_underConstruction() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
 		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+
 		String original = "" +
 				"	@Category(value = FirstCategory.class)\n"
 				+ "	@Test\n"
 				+ "	void test() {\n"
 				+ "	}" +
 				CATEGORY_CLASS_DECLARATIONS;
-		assertNoChange(original);
+
+		String expected = "" +
+				"	@Tag(\"fixturepackage.TestCU.FirstCategory\")\n"
+				+ "	@Test\n"
+				+ "	void test() {\n"
+				+ "	}" +
+				CATEGORY_CLASS_DECLARATIONS;
+
+		assertChange(original, expected);
 	}
 
-	/**
-	 * This test is expected to fail as soon as the replacement of
-	 * {@link org.junit.experimental.categories.Category} has been implemented.
-	 *
-	 * @throws Exception
-	 */
 	@Test
 	public void visit_NormalAnnotationWithClassLiteralArray_underConstruction() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
 		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+
 		String original = "" +
 				"	@Category(value = { FirstCategory.class, SecondCategory.class })\n"
 				+ "	@Test\n"
 				+ "	void test() {\n"
 				+ "	}" +
 				CATEGORY_CLASS_DECLARATIONS;
-		assertNoChange(original);
+
+		String expected = "" +
+				"	@Tag(\"fixturepackage.TestCU.FirstCategory\")"
+				+ " @Tag(\"fixturepackage.TestCU.SecondCategory\")\n"
+				+ "	@Test\n"
+				+ "	void test() {\n"
+				+ "	}" +
+				CATEGORY_CLASS_DECLARATIONS;
+
+		assertChange(original, expected);
 	}
 
-	/**
-	 * This test is expected to fail as soon as the replacement of
-	 * {@link org.junit.experimental.categories.Category} has been implemented.
-	 *
-	 * @throws Exception
-	 */
 	@Test
 	public void visit_NormalAnnotationWithEmptyArray_underConstruction() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
 		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
-		String original = "" +
-				"	@Category(value = {})\n"
+
+		String original = ""
+				+ "	@Category(value = {})\n"
 				+ "	@Test\n"
 				+ "	void test_NormalAnnotationWithEmptyArray() {\n"
 				+ "	}" +
 				CATEGORY_CLASS_DECLARATIONS;
-		assertNoChange(original);
+
+		String expected = ""
+				+ "	@Test\n"
+				+ "	void test_NormalAnnotationWithEmptyArray() {\n"
+				+ "	}" +
+				CATEGORY_CLASS_DECLARATIONS;
+
+		assertChange(original, expected);
 	}
 }

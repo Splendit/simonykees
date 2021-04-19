@@ -1,7 +1,30 @@
 package eu.jsparrow.core.visitor.junit.jupiter;
 
-import org.eclipse.jdt.core.dom.CompilationUnit;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MemberValuePair;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
@@ -14,10 +37,115 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddImportASTVisitor {
 
+	private static final String ORG_JUNIT_JUPITER_API_TAG = "org.junit.jupiter.api.Tag"; //$NON-NLS-1$
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		super.visit(compilationUnit);
-
+		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_TAG); // $NON-NLS-1$
 		return true;
 	}
+
+	@Override
+	public boolean visit(NormalAnnotation node) {
+		if (node.getLocationInParent() != MethodDeclaration.MODIFIERS2_PROPERTY) {
+			return false;
+		}
+		if (!isCategoryAnnotation(node)) {
+			return false;
+		}
+		MethodDeclaration methodDeclaration = (MethodDeclaration) node.getParent();
+
+		List<MemberValuePair> values = ASTNodeUtil.convertToTypedList(node.values(), MemberValuePair.class);
+		if (values.size() != 1) {
+			return false;
+		}
+		MemberValuePair memberValuePair = values.get(0);
+		Expression value = memberValuePair.getValue();
+		List<String> categoryNames = findCategoryNames(value).orElse(null);
+		if (categoryNames != null) {
+			replaceCategoryAnnotation(methodDeclaration, node, categoryNames);
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean visit(SingleMemberAnnotation node) {
+		if (node.getLocationInParent() != MethodDeclaration.MODIFIERS2_PROPERTY) {
+			return false;
+		}
+		if (!isCategoryAnnotation(node)) {
+			return false;
+		}
+		MethodDeclaration methodDeclaration = (MethodDeclaration) node.getParent();
+
+		Expression value = node.getValue();
+		List<String> categoryNames = findCategoryNames(value).orElse(null);
+		if (categoryNames != null) {
+			replaceCategoryAnnotation(methodDeclaration, node, categoryNames);
+		}
+		return false;
+	}
+
+	private boolean isCategoryAnnotation(Annotation annotation) {
+		IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
+		ITypeBinding typeBinding = annotationBinding.getAnnotationType();
+		return ClassRelationUtil.isContentOfType(typeBinding, "org.junit.experimental.categories.Category"); //$NON-NLS-1$
+	}
+
+	private Optional<List<String>> findCategoryNames(Expression value) {
+
+		if (value.getNodeType() == ASTNode.TYPE_LITERAL) {
+			TypeLiteral typeLiteral = (TypeLiteral) value;
+
+			String qualifiedName = typeLiteral.getType()
+				.resolveBinding()
+				.getQualifiedName();
+			return Optional.of(Arrays.asList(qualifiedName));
+		}
+		if (value.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
+			ArrayInitializer arrayInitializer = (ArrayInitializer) value;
+			List<Expression> expressions = ASTNodeUtil.convertToTypedList(arrayInitializer.expressions(),
+					Expression.class);
+			List<String> categoryNames = expressions.stream()
+				.filter(expression -> expression.getNodeType() == ASTNode.TYPE_LITERAL)
+				.map(TypeLiteral.class::cast)
+				.map(TypeLiteral::getType)
+				.map(Type::resolveBinding)
+				.map(ITypeBinding::getQualifiedName)
+				.collect(Collectors.toList());
+
+			if (categoryNames.size() == expressions.size()) {
+				return Optional.of(categoryNames);
+			}
+		}
+		return Optional.empty();
+	}
+
+	private void replaceCategoryAnnotation(MethodDeclaration methodDeclaration, Annotation annotation,
+			List<String> categoryNames) {
+		ListRewrite listRewrite = astRewrite.getListRewrite(methodDeclaration, MethodDeclaration.MODIFIERS2_PROPERTY);
+
+		Annotation previousAnnotation = annotation;
+		for(String categoryName : categoryNames) {
+			SingleMemberAnnotation newTagAnnotation = createTagAnnotation(methodDeclaration, categoryName);
+			listRewrite.insertAfter(newTagAnnotation, previousAnnotation, null);
+			previousAnnotation = newTagAnnotation;
+		}
+		listRewrite.remove(annotation, null);
+		onRewrite();
+	}
+
+	private SingleMemberAnnotation createTagAnnotation(MethodDeclaration context, String categoryName) {
+		AST ast = astRewrite.getAST();
+		SingleMemberAnnotation tagAnnotation = ast.newSingleMemberAnnotation();
+		Name typeName = addImport(ORG_JUNIT_JUPITER_API_TAG, context);
+		StringLiteral stringLiteral = ast.newStringLiteral();
+		stringLiteral.setLiteralValue(categoryName);
+		tagAnnotation.setTypeName(typeName);
+		tagAnnotation.setValue(stringLiteral);
+		return tagAnnotation;
+	}
+
 }
