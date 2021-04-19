@@ -29,7 +29,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_SingleMemberClassLiteral_underConstruction() throws Exception {
+	public void visit_SingleMemberClassLiteral_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
 		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
@@ -51,7 +51,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_SingleMemberClassLiteralArray_underConstruction() throws Exception {
+	public void visit_SingleMemberClassLiteralArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
 		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
@@ -74,7 +74,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_SingleMemberEmptyArray_underConstruction() throws Exception {
+	public void visit_SingleMemberEmptyArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
 		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
@@ -95,7 +95,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_NormalAnnotationWithClassLiteral_underConstruction() throws Exception {
+	public void visit_NormalAnnotationWithClassLiteral_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
 		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
@@ -117,7 +117,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_NormalAnnotationWithClassLiteralArray_underConstruction() throws Exception {
+	public void visit_NormalAnnotationWithClassLiteralArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
 		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
@@ -140,7 +140,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_NormalAnnotationWithEmptyArray_underConstruction() throws Exception {
+	public void visit_NormalAnnotationWithEmptyArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
 		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
