@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.dom.Type;
  * @since 3.28.0
  *
  */
-class JUnit4AssertMethodInvocationAnalysisResult {
+class JUnit4MethodInvocationAnalysisResult {
 
 	private final MethodInvocation methodInvocation;
 	private final String originalMethodName;
@@ -23,13 +23,13 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 	private final boolean transformableInvocation;
 	private Type throwingRunnableTypeToReplace;
 
-	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
+	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
 			boolean messageMovingToLastPosition, Type throwingRunnableTypeToReplace, boolean transformableInvocation) {
 		this(methodInvocation, newMethodName, messageMovingToLastPosition, transformableInvocation);
 		this.throwingRunnableTypeToReplace = throwingRunnableTypeToReplace;
 	}
 
-	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
+	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
 			boolean messageMovingToLastPosition,
 			boolean transformableInvocation) {
 		this.methodInvocation = methodInvocation;

@@ -25,24 +25,24 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * {@link MethodInvocation} represents the invocation of one of the supported
  * methods of the class {@code org.junit.Assert} or {@code org.junit.Assume},
  * then all necessary informations for a possible transformation are collected
- * in an instance of {@link JUnit4AssertMethodInvocationAnalysisResult}.
+ * in an instance of {@link JUnit4MethodInvocationAnalysisResult}.
  * 
  * @since 3.28.0
  *
  */
-class JUnit4AssertMethodInvocationAnalyzer {
+class JUnit4MethodInvocationAnalyzer {
 	static final String ASSERT_THROWS = "assertThrows"; //$NON-NLS-1$
 
 	private final JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore;
 	private final Predicate<IMethodBinding> supportedJUnit4MethodPredicate;
 
-	JUnit4AssertMethodInvocationAnalyzer(CompilationUnit compilationUnit,
+	JUnit4MethodInvocationAnalyzer(CompilationUnit compilationUnit,
 			Predicate<IMethodBinding> supportedJUnit4MethodPredicate) {
 		jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(compilationUnit);
 		this.supportedJUnit4MethodPredicate = supportedJUnit4MethodPredicate;
 	}
 
-	List<JUnit4AssertMethodInvocationAnalysisResult> collectJUnit4AssertionAnalysisResults(
+	List<JUnit4MethodInvocationAnalysisResult> collectJUnit4AssertionAnalysisResults(
 			CompilationUnit compilationUnit) {
 
 		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
@@ -57,7 +57,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 			.collect(Collectors.toList());
 	}
 
-	private Optional<JUnit4AssertMethodInvocationAnalysisResult> findAnalysisResult(
+	private Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(
 			MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding != null && supportedJUnit4MethodPredicate.test(methodBinding)) {
@@ -113,7 +113,7 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		return true;
 	}
 
-	private JUnit4AssertMethodInvocationAnalysisResult createAnalysisResult(
+	private JUnit4MethodInvocationAnalysisResult createAnalysisResult(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding) {
 
 		MethodDeclaration surroundingJUnitJupiterTest = jUnitJupiterTestMethodsStore
@@ -157,20 +157,20 @@ class JUnit4AssertMethodInvocationAnalyzer {
 		}
 
 		if (throwingRunnableTypeToReplace != null) {
-			return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, newMethodName,
+			return new JUnit4MethodInvocationAnalysisResult(methodInvocation, newMethodName,
 					messageMovingToLastPosition, throwingRunnableTypeToReplace, true);
 		}
-		return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, newMethodName,
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, newMethodName,
 				messageMovingToLastPosition, true);
 	}
 
-	private JUnit4AssertMethodInvocationAnalysisResult createNotTransformableResult(
+	private JUnit4MethodInvocationAnalysisResult createNotTransformableResult(
 			MethodInvocation methodInvocation) {
 		String newMethodName = methodInvocation.getName()
 			.getIdentifier();
 		boolean messageMovingToLastPosition = false;
 		boolean transformableInvocation = false;
-		return new JUnit4AssertMethodInvocationAnalysisResult(methodInvocation, newMethodName,
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, newMethodName,
 				messageMovingToLastPosition, transformableInvocation);
 	}
 }
