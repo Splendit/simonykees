@@ -21,11 +21,11 @@ import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorV
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * Helper class analyzing a {@link MethodInvocation}-node . If the
+ * Helper class analyzing a {@link MethodInvocation}-node. If the
  * {@link MethodInvocation} represents the invocation of one of the supported
- * methods of the class {@code org.junit.Assert}, then all necessary
- * informations for a possible transformation are collected in an instance of
- * {@link JUnit4AssertMethodInvocationAnalysisResult}.
+ * methods of the class {@code org.junit.Assert} or {@code org.junit.Assume},
+ * then all necessary informations for a possible transformation are collected
+ * in an instance of {@link JUnit4AssertMethodInvocationAnalysisResult}.
  * 
  * @since 3.28.0
  *

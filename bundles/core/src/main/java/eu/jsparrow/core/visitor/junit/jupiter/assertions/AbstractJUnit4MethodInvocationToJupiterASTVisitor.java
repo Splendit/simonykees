@@ -26,9 +26,9 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
- * Replaces invocations of methods of the JUnit-4-class {@code org.junit.Assert}
- * by invocations of the corresponding methods of the JUnit-Jupiter-class
- * {@code org.junit.jupiter.api.Assertions}.
+ * This visitor replaces invocations of methods which are declared in a JUnit 4
+ * class like {@code org.junit.Assert} or {@code org.junit.Assume} by
+ * invocations of the corresponding JUnit Jupiter methods.
  * 
  * @since 3.30.0
  * 
@@ -247,7 +247,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 				SimpleType typeReplacement = ast.newSimpleType(executableTypeName);
 				astRewrite.replace(typeToReplace, typeReplacement, null);
 			});
-			
+
 		}
 	}
 

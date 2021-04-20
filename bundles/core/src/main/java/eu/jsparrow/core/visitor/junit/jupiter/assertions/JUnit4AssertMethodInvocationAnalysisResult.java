@@ -7,9 +7,9 @@ import org.eclipse.jdt.core.dom.Type;
 
 /**
  * Immutable class storing all necessary informations about the given invocation
- * of a static method of the class {@code org.junit.Assert} which may be
- * replaced by an invocation of the corresponding method of
- * {@code org.junit.jupiter.api.Assertions}.
+ * of a static method declared in a JUnit 4 class like {@code org.junit.Assert}
+ * or {@code org.junit.Assume} which may be transformed to an invocation of a
+ * the corresponding JUnit Jupiter method.
  * 
  * @since 3.28.0
  *

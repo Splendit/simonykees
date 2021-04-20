@@ -22,7 +22,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * {@code org.junit.Assert.assertThrows}. Transformation of the given
  * {@code assertThrows} can only be carried out if it is possible to change the
  * type of the last argument from {@code org.junit.function.ThrowingRunnable} to
- * {@code  org.junit.jupiter.api.function.Executable}.
+ * {@code org.junit.jupiter.api.function.Executable}.
  *
  * @since 3.29.0
  */
