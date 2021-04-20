@@ -48,7 +48,7 @@ class JUnit4MethodInvocationAnalysisResult {
 		return originalMethodName;
 	}
 
-	public String getNewMethodName() {
+	String getNewMethodName() {
 		return newMethodName;
 	}
 
