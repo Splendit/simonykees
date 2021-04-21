@@ -62,26 +62,9 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 			.map(Optional::get)
 			.collect(Collectors.toList());
 
-		boolean allAnnotationsTransformed = categoryAnnotations.size() == categoryAnnotationReplacementdataList.size();
-		boolean removeCategoryImport;
-		if (allAnnotationsTransformed) {
-			SimpleTypeReferencingImportVisitor simpleTypeReferencingImportVisitor = new SimpleTypeReferencingImportVisitor(
-					ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
-			compilationUnit.accept(simpleTypeReferencingImportVisitor);
-			removeCategoryImport = !simpleTypeReferencingImportVisitor
-				.isSimpleTypeReferencingImport();
-		} else {
-			removeCategoryImport = false;
-		}
-
-		if (removeCategoryImport) {
-			ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
-				.stream()
-				.filter(importDeclaration -> importDeclaration.getName()
-					.getFullyQualifiedName()
-					.equals(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY))
-				.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
-		}
+		findUnusedCategoryImports(compilationUnit, categoryAnnotations, categoryAnnotationReplacementdataList)
+			.ifPresent(unusedCategoryImports -> unusedCategoryImports
+				.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null)));
 		categoryAnnotationReplacementdataList.forEach(this::replaceCategoryAnnotation);
 
 		return false;
@@ -161,6 +144,30 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 		return Optional.empty();
 	}
 
+	private Optional<List<ImportDeclaration>> findUnusedCategoryImports(CompilationUnit compilationUnit,
+			List<Annotation> categoryAnnotations,
+			List<ReplaceJUnit4CategoryData> categoryAnnotationReplacementdataList) {
+
+		boolean allAnnotationsTransformed = categoryAnnotations.size() == categoryAnnotationReplacementdataList.size();
+		if (allAnnotationsTransformed) {
+			SimpleTypeReferencingImportVisitor simpleTypeReferencingImportVisitor = new SimpleTypeReferencingImportVisitor(
+					ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
+			compilationUnit.accept(simpleTypeReferencingImportVisitor);
+
+			if (!simpleTypeReferencingImportVisitor.isSimpleTypeReferencingImport()) {
+				List<ImportDeclaration> unusedCategoryImports = ASTNodeUtil
+					.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
+					.stream()
+					.filter(importDeclaration -> importDeclaration.getName()
+						.getFullyQualifiedName()
+						.equals(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY))
+					.collect(Collectors.toList());
+				return Optional.of(unusedCategoryImports);
+			}
+		}
+		return Optional.empty();
+	}
+
 	private void replaceCategoryAnnotation(ReplaceJUnit4CategoryData replacementData) {
 
 		Annotation categoryAnnotation = replacementData.getCategoryAnnotation();
@@ -188,5 +195,4 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 		tagAnnotation.setValue(stringLiteral);
 		return tagAnnotation;
 	}
-
 }
