@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.sub.SimpleTypeReferencingImportVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -39,12 +41,28 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddImportASTVisitor {
 
+	private static final String ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY = "org.junit.experimental.categories.Category"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_JUPITER_API_TAG = "org.junit.jupiter.api.Tag"; //$NON-NLS-1$
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		super.visit(compilationUnit);
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_TAG); // $NON-NLS-1$
+
+		SimpleTypeReferencingImportVisitor simpleTypeReferencingImportVisitor = new SimpleTypeReferencingImportVisitor(
+				ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
+		compilationUnit.accept(simpleTypeReferencingImportVisitor);
+		boolean removeCategoryImport = !simpleTypeReferencingImportVisitor
+			.isSimpleTypeReferencingImport();
+
+		if (removeCategoryImport) {
+			ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
+				.stream()
+				.filter(importDeclaration -> importDeclaration.getName()
+					.getFullyQualifiedName()
+					.equals(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY))
+				.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
+		}
 		return true;
 	}
 
@@ -101,7 +119,7 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 	private boolean isCategoryAnnotation(Annotation annotation) {
 		IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
 		ITypeBinding typeBinding = annotationBinding.getAnnotationType();
-		return ClassRelationUtil.isContentOfType(typeBinding, "org.junit.experimental.categories.Category"); //$NON-NLS-1$
+		return ClassRelationUtil.isContentOfType(typeBinding, ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
 	}
 
 	private Optional<List<String>> findCategoryNames(Expression value) {
