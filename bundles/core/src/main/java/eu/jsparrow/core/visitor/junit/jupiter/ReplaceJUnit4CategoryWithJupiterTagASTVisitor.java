@@ -49,11 +49,30 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 		super.visit(compilationUnit);
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_TAG); // $NON-NLS-1$
 
-		SimpleTypeReferencingImportVisitor simpleTypeReferencingImportVisitor = new SimpleTypeReferencingImportVisitor(
-				ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
-		compilationUnit.accept(simpleTypeReferencingImportVisitor);
-		boolean removeCategoryImport = !simpleTypeReferencingImportVisitor
-			.isSimpleTypeReferencingImport();
+		AnnotationCollectorVisitor annotationCollectorVisitor = new AnnotationCollectorVisitor();
+		compilationUnit.accept(annotationCollectorVisitor);
+		List<Annotation> categoryAnnotations = annotationCollectorVisitor.getAnnotations()
+			.stream()
+			.filter(this::isCategoryAnnotation)
+			.collect(Collectors.toList());
+
+		List<ReplaceJUnit4CategoryData> categoryAnnotationReplacementdataList = categoryAnnotations.stream()
+			.map(this::findReplaceJUnit4CategoryData)
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toList());
+
+		boolean allAnnotationsTransformed = categoryAnnotations.size() == categoryAnnotationReplacementdataList.size();
+		boolean removeCategoryImport;
+		if (allAnnotationsTransformed) {
+			SimpleTypeReferencingImportVisitor simpleTypeReferencingImportVisitor = new SimpleTypeReferencingImportVisitor(
+					ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
+			compilationUnit.accept(simpleTypeReferencingImportVisitor);
+			removeCategoryImport = !simpleTypeReferencingImportVisitor
+				.isSimpleTypeReferencingImport();
+		} else {
+			removeCategoryImport = false;
+		}
 
 		if (removeCategoryImport) {
 			ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
@@ -63,47 +82,20 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 					.equals(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY))
 				.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
 		}
-		return true;
-	}
-
-	@Override
-	public boolean visit(NormalAnnotation node) {
-		ChildListPropertyDescriptor locationInParent = findLocationInParent(node).orElse(null);
-		if (locationInParent == null) {
-			return false;
-		}
-		if (!isCategoryAnnotation(node)) {
-			return false;
-		}
-		List<MemberValuePair> values = ASTNodeUtil.convertToTypedList(node.values(), MemberValuePair.class);
-		if (values.size() != 1) {
-			return false;
-		}
-		MemberValuePair memberValuePair = values.get(0);
-		Expression value = memberValuePair.getValue();
-		List<String> categoryNames = findCategoryNames(value).orElse(null);
-		if (categoryNames != null) {
-			replaceCategoryAnnotation(node, categoryNames, locationInParent);
-		}
+		categoryAnnotationReplacementdataList.forEach(this::replaceCategoryAnnotation);
 
 		return false;
 	}
 
-	@Override
-	public boolean visit(SingleMemberAnnotation node) {
-		ChildListPropertyDescriptor locationInParent = findLocationInParent(node).orElse(null);
-		if (locationInParent == null) {
-			return false;
+	private Optional<ReplaceJUnit4CategoryData> findReplaceJUnit4CategoryData(Annotation annotation) {
+		ChildListPropertyDescriptor locationInParent = findLocationInParent(annotation).orElse(null);
+		if (locationInParent != null) {
+			List<String> categoryNames = findCategoryNames(annotation).orElse(null);
+			if (categoryNames != null) {
+				return Optional.of(new ReplaceJUnit4CategoryData(annotation, categoryNames, locationInParent));
+			}
 		}
-		if (!isCategoryAnnotation(node)) {
-			return false;
-		}
-		Expression value = node.getValue();
-		List<String> categoryNames = findCategoryNames(value).orElse(null);
-		if (categoryNames != null) {
-			replaceCategoryAnnotation(node, categoryNames, locationInParent);
-		}
-		return false;
+		return Optional.empty();
 	}
 
 	private Optional<ChildListPropertyDescriptor> findLocationInParent(Annotation annotation) {
@@ -120,6 +112,24 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 		IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
 		ITypeBinding typeBinding = annotationBinding.getAnnotationType();
 		return ClassRelationUtil.isContentOfType(typeBinding, ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
+	}
+
+	private Optional<List<String>> findCategoryNames(Annotation annotation) {
+
+		if (annotation.getNodeType() == ASTNode.SINGLE_MEMBER_ANNOTATION) {
+			Expression value = ((SingleMemberAnnotation) annotation).getValue();
+			return findCategoryNames(value);
+		}
+		if (annotation.getNodeType() == ASTNode.NORMAL_ANNOTATION) {
+			List<MemberValuePair> values = ASTNodeUtil.convertToTypedList(((NormalAnnotation) annotation).values(),
+					MemberValuePair.class);
+			if (values.size() == 1) {
+				MemberValuePair memberValuePair = values.get(0);
+				Expression value = memberValuePair.getValue();
+				return findCategoryNames(value);
+			}
+		}
+		return Optional.empty();
 	}
 
 	private Optional<List<String>> findCategoryNames(Expression value) {
@@ -151,10 +161,13 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 		return Optional.empty();
 	}
 
-	private void replaceCategoryAnnotation(Annotation categoryAnnotation,
-			List<String> categoryNames, ChildListPropertyDescriptor locationInParent) {
-		ListRewrite listRewrite = astRewrite.getListRewrite(categoryAnnotation.getParent(), locationInParent);
+	private void replaceCategoryAnnotation(ReplaceJUnit4CategoryData replacementData) {
 
+		Annotation categoryAnnotation = replacementData.getCategoryAnnotation();
+		ChildListPropertyDescriptor locationInParent = replacementData.getLocationInParent();
+		List<String> categoryNames = replacementData.getCategoryNames();
+
+		ListRewrite listRewrite = astRewrite.getListRewrite(categoryAnnotation.getParent(), locationInParent);
 		Annotation previousAnnotation = categoryAnnotation;
 		for (String categoryName : categoryNames) {
 			SingleMemberAnnotation newTagAnnotation = createTagAnnotation(categoryAnnotation, categoryName);
