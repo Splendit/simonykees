@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
@@ -20,6 +21,7 @@ import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -48,14 +50,13 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 
 	@Override
 	public boolean visit(NormalAnnotation node) {
-		if (node.getLocationInParent() != MethodDeclaration.MODIFIERS2_PROPERTY) {
+		ChildListPropertyDescriptor locationInParent = findLocationInParent(node).orElse(null);
+		if (locationInParent == null) {
 			return false;
 		}
 		if (!isCategoryAnnotation(node)) {
 			return false;
 		}
-		MethodDeclaration methodDeclaration = (MethodDeclaration) node.getParent();
-
 		List<MemberValuePair> values = ASTNodeUtil.convertToTypedList(node.values(), MemberValuePair.class);
 		if (values.size() != 1) {
 			return false;
@@ -64,7 +65,7 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 		Expression value = memberValuePair.getValue();
 		List<String> categoryNames = findCategoryNames(value).orElse(null);
 		if (categoryNames != null) {
-			replaceCategoryAnnotation(methodDeclaration, node, categoryNames);
+			replaceCategoryAnnotation(node, categoryNames, locationInParent);
 		}
 
 		return false;
@@ -72,20 +73,29 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 
 	@Override
 	public boolean visit(SingleMemberAnnotation node) {
-		if (node.getLocationInParent() != MethodDeclaration.MODIFIERS2_PROPERTY) {
+		ChildListPropertyDescriptor locationInParent = findLocationInParent(node).orElse(null);
+		if (locationInParent == null) {
 			return false;
 		}
 		if (!isCategoryAnnotation(node)) {
 			return false;
 		}
-		MethodDeclaration methodDeclaration = (MethodDeclaration) node.getParent();
-
 		Expression value = node.getValue();
 		List<String> categoryNames = findCategoryNames(value).orElse(null);
 		if (categoryNames != null) {
-			replaceCategoryAnnotation(methodDeclaration, node, categoryNames);
+			replaceCategoryAnnotation(node, categoryNames, locationInParent);
 		}
 		return false;
+	}
+
+	private Optional<ChildListPropertyDescriptor> findLocationInParent(Annotation annotation) {
+		if (annotation.getLocationInParent() == MethodDeclaration.MODIFIERS2_PROPERTY) {
+			return Optional.of(MethodDeclaration.MODIFIERS2_PROPERTY);
+		}
+		if (annotation.getLocationInParent() == TypeDeclaration.MODIFIERS2_PROPERTY) {
+			return Optional.of(TypeDeclaration.MODIFIERS2_PROPERTY);
+		}
+		return Optional.empty();
 	}
 
 	private boolean isCategoryAnnotation(Annotation annotation) {
@@ -123,24 +133,24 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 		return Optional.empty();
 	}
 
-	private void replaceCategoryAnnotation(MethodDeclaration methodDeclaration, Annotation annotation,
-			List<String> categoryNames) {
-		ListRewrite listRewrite = astRewrite.getListRewrite(methodDeclaration, MethodDeclaration.MODIFIERS2_PROPERTY);
+	private void replaceCategoryAnnotation(Annotation categoryAnnotation,
+			List<String> categoryNames, ChildListPropertyDescriptor locationInParent) {
+		ListRewrite listRewrite = astRewrite.getListRewrite(categoryAnnotation.getParent(), locationInParent);
 
-		Annotation previousAnnotation = annotation;
-		for(String categoryName : categoryNames) {
-			SingleMemberAnnotation newTagAnnotation = createTagAnnotation(methodDeclaration, categoryName);
+		Annotation previousAnnotation = categoryAnnotation;
+		for (String categoryName : categoryNames) {
+			SingleMemberAnnotation newTagAnnotation = createTagAnnotation(categoryAnnotation, categoryName);
 			listRewrite.insertAfter(newTagAnnotation, previousAnnotation, null);
 			previousAnnotation = newTagAnnotation;
 		}
-		listRewrite.remove(annotation, null);
+		listRewrite.remove(categoryAnnotation, null);
 		onRewrite();
 	}
 
-	private SingleMemberAnnotation createTagAnnotation(MethodDeclaration context, String categoryName) {
+	private SingleMemberAnnotation createTagAnnotation(Annotation categoryAnnotation, String categoryName) {
 		AST ast = astRewrite.getAST();
 		SingleMemberAnnotation tagAnnotation = ast.newSingleMemberAnnotation();
-		Name typeName = addImport(ORG_JUNIT_JUPITER_API_TAG, context);
+		Name typeName = addImport(ORG_JUNIT_JUPITER_API_TAG, categoryAnnotation);
 		StringLiteral stringLiteral = ast.newStringLiteral();
 		stringLiteral.setLiteralValue(categoryName);
 		tagAnnotation.setTypeName(typeName);

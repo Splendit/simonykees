@@ -203,4 +203,27 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 
 		assertChange(original, expected);
 	}
+
+	@Test
+	public void visit_CategoryAnnotationOnClass_shouldTransform() throws Exception {
+		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+
+		String original = ""
+				+ "@Category(ExampleCategory.class)\n"
+				+ "public class TestJUnit4CategoryAnnotationOnClass {\n"
+				+ "}\n"
+				+ "\n"
+				+ "interface ExampleCategory {\n"
+				+ "}";
+
+		String expected = ""
+				+ "@Tag(\"fixturepackage.TestCU.ExampleCategory\")\n"
+				+ "public class TestJUnit4CategoryAnnotationOnClass {\n"
+				+ "}\n"
+				+ "\n"
+				+ "interface ExampleCategory {\n"
+				+ "}";
+
+		assertChange(original, expected);
+	}
 }
