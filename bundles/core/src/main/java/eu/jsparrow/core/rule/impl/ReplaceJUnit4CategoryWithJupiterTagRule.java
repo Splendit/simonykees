@@ -17,7 +17,7 @@ import eu.jsparrow.rules.common.Tag;
 /**
  * @see ReplaceJUnit4CategoryWithJupiterTagASTVisitor
  * 
- * @since 3.24.0
+ * @since 3.30.0
  *
  */
 public class ReplaceJUnit4CategoryWithJupiterTagRule
@@ -34,7 +34,7 @@ public class ReplaceJUnit4CategoryWithJupiterTagRule
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceJUnit4CategoryWithJupiterTagRule_name,
 				Messages.ReplaceJUnit4CategoryWithJupiterTagRule_description,
-				Duration.ofMinutes(15), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING));
+				Duration.ofMinutes(5), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING));
 	}
 
 	@Override
