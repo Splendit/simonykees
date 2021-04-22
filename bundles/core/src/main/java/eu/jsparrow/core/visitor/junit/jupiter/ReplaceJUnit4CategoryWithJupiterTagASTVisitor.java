@@ -91,20 +91,20 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 	private Optional<ChildListPropertyDescriptor> findLocationInParent(Annotation categoryAnnotation) {
 		if (categoryAnnotation.getLocationInParent() == MethodDeclaration.MODIFIERS2_PROPERTY) {
 			MethodDeclaration methodDeclaration = (MethodDeclaration) categoryAnnotation.getParent();
-
-			long testAnnotationsCount = ASTNodeUtil
-				.convertToTypedList(methodDeclaration.modifiers(), IExtendedModifier.class)
-				.stream()
-				.filter(IExtendedModifier::isAnnotation)
-				.map(Annotation.class::cast)
-				.map(Annotation::resolveAnnotationBinding)
-				.map(IAnnotationBinding::getAnnotationType)
-				.map(ITypeBinding::getQualifiedName)
-				.filter(qualifiedName -> qualifiedName.equals("org.junit.Test") || //$NON-NLS-1$
-						qualifiedName.equals("org.junit.jupiter.api.Test")) //$NON-NLS-1$
-				.count();
-			if (testAnnotationsCount == 1) {
-				return Optional.of(MethodDeclaration.MODIFIERS2_PROPERTY);
+			if (!methodDeclaration.isConstructor()) {
+				long testAnnotationsCount = ASTNodeUtil
+					.convertToTypedList(methodDeclaration.modifiers(), IExtendedModifier.class)
+					.stream()
+					.filter(IExtendedModifier::isAnnotation)
+					.map(Annotation.class::cast)
+					.map(Annotation::resolveAnnotationBinding)
+					.map(IAnnotationBinding::getAnnotationType)
+					.filter(typeBinding -> ClassRelationUtil.isContentOfType(typeBinding, "org.junit.Test") || //$NON-NLS-1$
+							ClassRelationUtil.isContentOfType(typeBinding, "org.junit.jupiter.api.Test")) //$NON-NLS-1$
+					.count();
+				if (testAnnotationsCount == 1) {
+					return Optional.of(MethodDeclaration.MODIFIERS2_PROPERTY);
+				}
 			}
 
 		} else if (categoryAnnotation.getLocationInParent() == TypeDeclaration.MODIFIERS2_PROPERTY) {
