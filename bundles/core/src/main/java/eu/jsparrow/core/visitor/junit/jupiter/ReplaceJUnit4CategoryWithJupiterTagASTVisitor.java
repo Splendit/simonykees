@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberValuePair;
@@ -89,10 +90,28 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 
 	private Optional<ChildListPropertyDescriptor> findLocationInParent(Annotation categoryAnnotation) {
 		if (categoryAnnotation.getLocationInParent() == MethodDeclaration.MODIFIERS2_PROPERTY) {
-			return Optional.of(MethodDeclaration.MODIFIERS2_PROPERTY);
-		}
-		if (categoryAnnotation.getLocationInParent() == TypeDeclaration.MODIFIERS2_PROPERTY) {
-			return Optional.of(TypeDeclaration.MODIFIERS2_PROPERTY);
+			MethodDeclaration methodDeclaration = (MethodDeclaration) categoryAnnotation.getParent();
+
+			long testAnnotationsCount = ASTNodeUtil
+				.convertToTypedList(methodDeclaration.modifiers(), IExtendedModifier.class)
+				.stream()
+				.filter(IExtendedModifier::isAnnotation)
+				.map(Annotation.class::cast)
+				.map(Annotation::resolveAnnotationBinding)
+				.map(IAnnotationBinding::getAnnotationType)
+				.map(ITypeBinding::getQualifiedName)
+				.filter(qualifiedName -> qualifiedName.equals("org.junit.Test") || //$NON-NLS-1$
+						qualifiedName.equals("org.junit.jupiter.api.Test")) //$NON-NLS-1$
+				.count();
+			if (testAnnotationsCount == 1) {
+				return Optional.of(MethodDeclaration.MODIFIERS2_PROPERTY);
+			}
+
+		} else if (categoryAnnotation.getLocationInParent() == TypeDeclaration.MODIFIERS2_PROPERTY) {
+			TypeDeclaration typeDeclaration = (TypeDeclaration) categoryAnnotation.getParent();
+			if (!typeDeclaration.isInterface() && !typeDeclaration.isLocalTypeDeclaration()) {
+				return Optional.of(TypeDeclaration.MODIFIERS2_PROPERTY);
+			}
 		}
 		return Optional.empty();
 	}
@@ -124,7 +143,7 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 			String qualifiedName = typeLiteral.getType()
 				.resolveBinding()
 				.getQualifiedName();
-			
+
 			return Optional.of(Arrays.asList(qualifiedName));
 		}
 		if (value.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
