@@ -13,8 +13,6 @@ public class ReplaceJUnit4AssertionsWithJupiterNegativeASTVisitorTest
 	public void setUpVisitor() throws Exception {
 		addDependency("junit", "junit", "4.13");
 		addDependency("org.junit.jupiter", "junit-jupiter-api", "5.4.0");
-		addDependency("org.hamcrest", "hamcrest-library", "1.3");
-		addDependency("org.hamcrest", "hamcrest-core", "1.3");
 		setDefaultVisitor(new ReplaceJUnit4AssertionsWithJupiterASTVisitor());
 	}
 
@@ -99,6 +97,9 @@ public class ReplaceJUnit4AssertionsWithJupiterNegativeASTVisitorTest
 
 	@Test
 	public void visit_assertThat_shouldNotTransform() throws Exception {
+		addDependency("org.hamcrest", "hamcrest-library", "1.3");
+		addDependency("org.hamcrest", "hamcrest-core", "1.3");
+
 		defaultFixture.addImport("org.junit.Assert.assertThat", true, false);
 		defaultFixture.addImport("org.hamcrest.Matchers.equalToIgnoringCase", true, false);
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
