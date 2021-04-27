@@ -10,6 +10,8 @@ import org.eclipse.jdt.core.dom.SimpleType;
 /**
  * Looks for the first occurrence of {@link SimpleType} referencing an import of
  * the given type.
+ * 
+ * @since 3.30.0
  *
  */
 public class SimpleTypeReferencingImportVisitor extends ASTVisitor {

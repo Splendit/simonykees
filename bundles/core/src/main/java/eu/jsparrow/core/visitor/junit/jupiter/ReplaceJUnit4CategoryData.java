@@ -9,7 +9,8 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
  * Stores all informations which are necessary to replace a JUnit4
  * {@code @Category} annotation with a JUnit Jupiter {@code @Tag} annotation
  * 
- *
+ * @since 3.30.0
+ * 
  */
 public class ReplaceJUnit4CategoryData {
 	private final Annotation categoryAnnotation;
