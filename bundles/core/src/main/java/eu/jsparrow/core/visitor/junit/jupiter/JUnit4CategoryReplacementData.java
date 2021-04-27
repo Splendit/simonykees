@@ -12,12 +12,12 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
  * @since 3.30.0
  * 
  */
-public class ReplaceJUnit4CategoryData {
+public class JUnit4CategoryReplacementData {
 	private final Annotation categoryAnnotation;
 	private final List<String> categoryNames;
 	private final ChildListPropertyDescriptor locationInParent;
 
-	public ReplaceJUnit4CategoryData(Annotation categoryAnnotation, List<String> categoryNames,
+	public JUnit4CategoryReplacementData(Annotation categoryAnnotation, List<String> categoryNames,
 			ChildListPropertyDescriptor locationInParent) {
 		this.categoryAnnotation = categoryAnnotation;
 		this.categoryNames = categoryNames;

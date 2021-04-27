@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.visitor.sub.SimpleTypeReferencingImportVisitor;
+import eu.jsparrow.core.visitor.sub.FirstSimpleTypeOccurrenceVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -57,8 +57,8 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 			.filter(this::isCategoryAnnotation)
 			.collect(Collectors.toList());
 
-		List<ReplaceJUnit4CategoryData> categoryAnnotationReplacementdataList = categoryAnnotations.stream()
-			.map(this::findReplaceJUnit4CategoryData)
+		List<JUnit4CategoryReplacementData> categoryAnnotationReplacementdataList = categoryAnnotations.stream()
+			.map(this::findJUnit4CategoryReplacementData)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.collect(Collectors.toList());
@@ -77,12 +77,12 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 		return ClassRelationUtil.isContentOfType(typeBinding, ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
 	}
 
-	private Optional<ReplaceJUnit4CategoryData> findReplaceJUnit4CategoryData(Annotation categoryAnnotation) {
+	private Optional<JUnit4CategoryReplacementData> findJUnit4CategoryReplacementData(Annotation categoryAnnotation) {
 		ChildListPropertyDescriptor locationInParent = findLocationInParent(categoryAnnotation).orElse(null);
 		if (locationInParent != null) {
 			List<String> categoryNames = findCategoryNames(categoryAnnotation).orElse(null);
 			if (categoryNames != null) {
-				return Optional.of(new ReplaceJUnit4CategoryData(categoryAnnotation, categoryNames, locationInParent));
+				return Optional.of(new JUnit4CategoryReplacementData(categoryAnnotation, categoryNames, locationInParent));
 			}
 		}
 		return Optional.empty();
@@ -167,11 +167,11 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 
 	private Optional<List<ImportDeclaration>> findUnusedCategoryImports(CompilationUnit compilationUnit,
 			List<Annotation> categoryAnnotations,
-			List<ReplaceJUnit4CategoryData> categoryAnnotationReplacementdataList) {
+			List<JUnit4CategoryReplacementData> categoryAnnotationReplacementdataList) {
 
 		boolean allAnnotationsTransformed = categoryAnnotations.size() == categoryAnnotationReplacementdataList.size();
 		if (allAnnotationsTransformed) {
-			SimpleTypeReferencingImportVisitor simpleTypeReferencingImportVisitor = new SimpleTypeReferencingImportVisitor(
+			FirstSimpleTypeOccurrenceVisitor simpleTypeReferencingImportVisitor = new FirstSimpleTypeOccurrenceVisitor(
 					ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
 			compilationUnit.accept(simpleTypeReferencingImportVisitor);
 
@@ -189,7 +189,7 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 		return Optional.empty();
 	}
 
-	private void replaceCategoryAnnotation(ReplaceJUnit4CategoryData replacementData) {
+	private void replaceCategoryAnnotation(JUnit4CategoryReplacementData replacementData) {
 
 		Annotation categoryAnnotation = replacementData.getCategoryAnnotation();
 		ChildListPropertyDescriptor locationInParent = replacementData.getLocationInParent();

@@ -14,26 +14,26 @@ import org.eclipse.jdt.core.dom.SimpleType;
  * @since 3.30.0
  *
  */
-public class SimpleTypeReferencingImportVisitor extends ASTVisitor {
+public class FirstSimpleTypeOccurrenceVisitor extends ASTVisitor {
 	private final String qualifiedTypeName;
-	private boolean simpleTypeReferencingImport;
+	private boolean firstOccurrenceFound;
 
-	public SimpleTypeReferencingImportVisitor(String qualifiedTypeName) {
+	public FirstSimpleTypeOccurrenceVisitor(String qualifiedTypeName) {
 		this.qualifiedTypeName = qualifiedTypeName;
 	}
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
-		return !simpleTypeReferencingImport;
+		return !firstOccurrenceFound;
 	}
 
 	@Override
 	public boolean visit(SimpleType node) {
-		simpleTypeReferencingImport = isContentOfType(node.resolveBinding(), qualifiedTypeName);
-		return !simpleTypeReferencingImport;
+		firstOccurrenceFound = isContentOfType(node.resolveBinding(), qualifiedTypeName);
+		return !firstOccurrenceFound;
 	}
 
 	public boolean isSimpleTypeReferencingImport() {
-		return simpleTypeReferencingImport;
+		return firstOccurrenceFound;
 	}
 }
