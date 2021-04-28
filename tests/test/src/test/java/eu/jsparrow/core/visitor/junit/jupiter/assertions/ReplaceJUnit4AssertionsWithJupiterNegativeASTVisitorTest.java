@@ -94,4 +94,22 @@ public class ReplaceJUnit4AssertionsWithJupiterNegativeASTVisitorTest
 
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_assertThat_shouldNotTransform() throws Exception {
+		addDependency("org.hamcrest", "hamcrest-library", "1.3");
+		addDependency("org.hamcrest", "hamcrest-core", "1.3");
+
+		defaultFixture.addImport("org.junit.Assert.assertThat", true, false);
+		defaultFixture.addImport("org.hamcrest.Matchers.equalToIgnoringCase", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+		String original = ""
+				+ "		@Test\n"
+				+ "		public void test() {\n"
+				+ "			assertThat(\"value\", equalToIgnoringCase(\"value\"));\n"
+				+ "		}\n"
+				+ "	";
+
+		assertNoChange(original);
+	}
 }

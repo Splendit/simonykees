@@ -235,6 +235,9 @@ class JUnit4AnnotationsAnalyzerVisitor extends ASTVisitor {
 		if (qualifiedTypeName.equals("org.junit.Assert")) { //$NON-NLS-1$
 			return false;
 		}
+		if (qualifiedTypeName.equals("org.junit.Assume")) { //$NON-NLS-1$
+			return false;
+		}
 		if (isJUnitName(qualifiedTypeName)) {
 			return !isJUnitJupiterName(qualifiedTypeName);
 		}

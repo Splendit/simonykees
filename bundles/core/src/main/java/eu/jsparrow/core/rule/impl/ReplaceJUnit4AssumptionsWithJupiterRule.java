@@ -8,32 +8,32 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 
-import eu.jsparrow.core.visitor.junit.jupiter.assertions.ReplaceJUnit4AssertionsWithJupiterASTVisitor;
+import eu.jsparrow.core.visitor.junit.jupiter.assertions.ReplaceJUnit4AssumptionsWithJupiterASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
 /**
- * @see ReplaceJUnit4AssertionsWithJupiterASTVisitor
+ * @see ReplaceJUnit4AssumptionsWithJupiterASTVisitor
  * 
- * @since 3.28.0
+ * @since 3.30.0
  *
  */
-public class ReplaceJUnit4AssertionsWithJupiterRule
-		extends RefactoringRuleImpl<ReplaceJUnit4AssertionsWithJupiterASTVisitor> {
+public class ReplaceJUnit4AssumptionsWithJupiterRule
+		extends RefactoringRuleImpl<ReplaceJUnit4AssumptionsWithJupiterASTVisitor> {
 
-	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
-	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
+	private static final String ORG_JUNIT_JUPITER_API_ASSUMPTIONS = "org.junit.jupiter.api.Assumptions"; //$NON-NLS-1$
+	private static final String ORG_JUNIT_ASSUME = "org.junit.Assume"; //$NON-NLS-1$
 	private static final String MIN_JUNIT_4_VERSION = "4.13"; //$NON-NLS-1$
 	private static final String MIN_JUNIT_5_VERSION = "5.4"; //$NON-NLS-1$
 
-	public ReplaceJUnit4AssertionsWithJupiterRule() {
-		this.visitorClass = ReplaceJUnit4AssertionsWithJupiterASTVisitor.class;
-		this.id = "ReplaceJUnit4AssertionsWithJupiter"; //$NON-NLS-1$
+	public ReplaceJUnit4AssumptionsWithJupiterRule() {
+		this.visitorClass = ReplaceJUnit4AssumptionsWithJupiterASTVisitor.class;
+		this.id = "ReplaceJUnit4AssumptionsWithJupiter"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(
-				Messages.ReplaceJUnit4AssertWithJupiterRule_name, 
-				Messages.ReplaceJUnit4AssertWithJupiterRule_description,
+				Messages.ReplaceJUnit4AssumptionsWithJupiterRule_name, 
+				Messages.ReplaceJUnit4AssumptionsWithJupiterRule_description,
 				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_8, Tag.TESTING));
 	}
 
@@ -57,8 +57,8 @@ public class ReplaceJUnit4AssertionsWithJupiterRule
 		Predicate<Version> junitVersionComparator = version -> version
 			.compareTo(Version.parseVersion(MIN_JUNIT_4_VERSION)) >= 0;
 
-		return isInProjectLibraries(project, ORG_JUNIT_JUPITER_API_ASSERTIONS, jupiterVersionComparator)
-				&& isInProjectLibraries(project, ORG_JUNIT_ASSERT, junitVersionComparator);
+		return isInProjectLibraries(project, ORG_JUNIT_JUPITER_API_ASSUMPTIONS, jupiterVersionComparator)
+				&& isInProjectLibraries(project, ORG_JUNIT_ASSUME, junitVersionComparator);
 
 	}
 }

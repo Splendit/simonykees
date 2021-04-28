@@ -76,6 +76,7 @@ import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnit4AnnotationsWithJupiterRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnit4AssertionsWithJupiterRule;
+import eu.jsparrow.core.rule.impl.ReplaceJUnit4AssumptionsWithJupiterRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnit4CategoryWithJupiterTagRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedExceptionRule;
@@ -201,6 +202,7 @@ public class RulesContainer {
 				new ReplaceJUnit4AnnotationsWithJupiterRule(),
 				new ReplaceJUnit4AssertionsWithJupiterRule(),
 				new ReplaceJUnitAssertThatWithHamcrestRule(),
+				new ReplaceJUnit4AssumptionsWithJupiterRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions
