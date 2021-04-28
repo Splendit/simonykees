@@ -121,4 +121,21 @@
      </menuContribution>
   </extension>
   
+  <extension 
+  		point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator
+         markerType="eu.jsparrow.ui.marker.jsparrow"
+         class="eu.jsparrow.ui.quickfix.QuickFixer"/>
+   </extension>
+   
+   <extension 
+   		point="org.eclipse.core.resources.markers"
+   		id="eu.jsparrow.ui.marker.jsparrow"
+   		name="jSparrow Marker"> 
+      <persistent value="true"/> 
+      <super type="org.eclipse.core.resources.problemmarker"/> 
+      <super type="org.eclipse.core.resources.textmarker"/> 
+      <attribute name="owner"/> 
+   </extension> 
+  
 </plugin>
