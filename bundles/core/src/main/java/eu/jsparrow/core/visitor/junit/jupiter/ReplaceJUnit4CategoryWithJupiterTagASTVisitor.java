@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.junit.jupiter;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,8 +65,7 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 			.collect(Collectors.toList());
 
 		findUnusedCategoryImports(compilationUnit, categoryAnnotations, categoryAnnotationReplacementdataList)
-			.ifPresent(unusedCategoryImports -> unusedCategoryImports
-				.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null)));
+			.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
 		categoryAnnotationReplacementdataList.forEach(this::replaceCategoryAnnotation);
 
 		return false;
@@ -165,7 +165,7 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 			.collect(Collectors.toList());
 	}
 
-	private Optional<List<ImportDeclaration>> findUnusedCategoryImports(CompilationUnit compilationUnit,
+	private List<ImportDeclaration> findUnusedCategoryImports(CompilationUnit compilationUnit,
 			List<Annotation> categoryAnnotations,
 			List<JUnit4CategoryReplacementData> categoryAnnotationReplacementdataList) {
 
@@ -176,17 +176,16 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 			compilationUnit.accept(simpleTypeReferencingImportVisitor);
 
 			if (!simpleTypeReferencingImportVisitor.isSimpleTypeReferencingImport()) {
-				List<ImportDeclaration> unusedCategoryImports = ASTNodeUtil
+				return ASTNodeUtil
 					.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
 					.stream()
 					.filter(importDeclaration -> importDeclaration.getName()
 						.getFullyQualifiedName()
 						.equals(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY))
 					.collect(Collectors.toList());
-				return Optional.of(unusedCategoryImports);
 			}
 		}
-		return Optional.empty();
+		return Collections.emptyList();
 	}
 
 	private void replaceCategoryAnnotation(JUnit4CategoryReplacementData replacementData) {
