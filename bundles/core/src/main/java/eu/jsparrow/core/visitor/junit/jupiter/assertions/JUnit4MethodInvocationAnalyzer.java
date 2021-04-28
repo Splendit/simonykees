@@ -146,8 +146,6 @@ class JUnit4MethodInvocationAnalyzer {
 
 		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
 			.getParameterTypes();
-		boolean messageMovingToLastPosition = declaredParameterTypes.length > 0
-				&& isParameterTypeString(declaredParameterTypes[0]);
 
 		String newMethodName;
 		if (isDeprecatedAssertEqualsComparingObjectArrays(methodIdentifier, declaredParameterTypes)) {
@@ -158,19 +156,17 @@ class JUnit4MethodInvocationAnalyzer {
 
 		if (throwingRunnableTypeToReplace != null) {
 			return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, newMethodName,
-					messageMovingToLastPosition, throwingRunnableTypeToReplace, true);
+					throwingRunnableTypeToReplace, true);
 		}
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, newMethodName,
-				messageMovingToLastPosition, true);
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, newMethodName, true);
 	}
 
 	private JUnit4MethodInvocationAnalysisResult createNotTransformableResult(
-			MethodInvocation methodInvocation,  IMethodBinding methodBinding) {
+			MethodInvocation methodInvocation, IMethodBinding methodBinding) {
 		String newMethodName = methodInvocation.getName()
 			.getIdentifier();
-		boolean messageMovingToLastPosition = false;
 		boolean transformableInvocation = false;
 		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, newMethodName,
-				messageMovingToLastPosition, transformableInvocation);
+				transformableInvocation);
 	}
 }

@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +14,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -117,8 +120,15 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		List<Expression> originalArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
 
+		ITypeBinding[] declaredParameterTypes = invocationData.getMethodBinding()
+			.getMethodDeclaration()
+			.getParameterTypes();
+
+		boolean messageMovingToLastPosition = declaredParameterTypes.length > 0
+				&& isParameterTypeString(declaredParameterTypes[0]);
+
 		List<Expression> newArguments;
-		if (invocationData.isMessageMovingToLastPosition() && originalArguments.size() > 1) {
+		if (messageMovingToLastPosition && originalArguments.size() > 1) {
 			newArguments = new ArrayList<>();
 			Expression messageArgument = originalArguments.remove(0);
 			newArguments.addAll(originalArguments);
@@ -143,6 +153,10 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		}
 
 		return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodInvocationSupplier));
+	}
+
+	private boolean isParameterTypeString(ITypeBinding parameterType) {
+		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
 	}
 
 	@SuppressWarnings({ "unchecked" })

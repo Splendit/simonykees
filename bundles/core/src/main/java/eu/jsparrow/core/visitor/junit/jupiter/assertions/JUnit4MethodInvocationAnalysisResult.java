@@ -21,27 +21,24 @@ class JUnit4MethodInvocationAnalysisResult {
 	private final IMethodBinding methodBinding;
 	private final String originalMethodName;
 	private final String newMethodName;
-	private final boolean messageMovingToLastPosition;
 	private final boolean transformableInvocation;
 	private Type throwingRunnableTypeToReplace;
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			String newMethodName,
-			boolean messageMovingToLastPosition, Type throwingRunnableTypeToReplace, boolean transformableInvocation) {
-		this(methodInvocation, methodBinding, newMethodName, messageMovingToLastPosition, transformableInvocation);
+			Type throwingRunnableTypeToReplace, boolean transformableInvocation) {
+		this(methodInvocation, methodBinding, newMethodName, transformableInvocation);
 		this.throwingRunnableTypeToReplace = throwingRunnableTypeToReplace;
 	}
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			String newMethodName,
-			boolean messageMovingToLastPosition,
 			boolean transformableInvocation) {
 		this.methodInvocation = methodInvocation;
 		this.methodBinding = methodBinding;
 		this.originalMethodName = methodInvocation.getName()
 			.getIdentifier();
 		this.newMethodName = newMethodName;
-		this.messageMovingToLastPosition = messageMovingToLastPosition;
 		this.transformableInvocation = transformableInvocation;
 	}
 
@@ -63,10 +60,6 @@ class JUnit4MethodInvocationAnalysisResult {
 
 	Optional<Type> getThrowingRunnableTypeToReplace() {
 		return Optional.ofNullable(throwingRunnableTypeToReplace);
-	}
-
-	boolean isMessageMovingToLastPosition() {
-		return messageMovingToLastPosition;
 	}
 
 	boolean isTransformableInvocation() {
