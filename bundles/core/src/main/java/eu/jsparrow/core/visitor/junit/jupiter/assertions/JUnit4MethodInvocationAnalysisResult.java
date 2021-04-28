@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 
@@ -17,22 +18,26 @@ import org.eclipse.jdt.core.dom.Type;
 class JUnit4MethodInvocationAnalysisResult {
 
 	private final MethodInvocation methodInvocation;
+	private final IMethodBinding methodBinding;
 	private final String originalMethodName;
 	private final String newMethodName;
 	private final boolean messageMovingToLastPosition;
 	private final boolean transformableInvocation;
 	private Type throwingRunnableTypeToReplace;
 
-	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
+	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
+			String newMethodName,
 			boolean messageMovingToLastPosition, Type throwingRunnableTypeToReplace, boolean transformableInvocation) {
-		this(methodInvocation, newMethodName, messageMovingToLastPosition, transformableInvocation);
+		this(methodInvocation, methodBinding, newMethodName, messageMovingToLastPosition, transformableInvocation);
 		this.throwingRunnableTypeToReplace = throwingRunnableTypeToReplace;
 	}
 
-	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
+	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
+			String newMethodName,
 			boolean messageMovingToLastPosition,
 			boolean transformableInvocation) {
 		this.methodInvocation = methodInvocation;
+		this.methodBinding = methodBinding;
 		this.originalMethodName = methodInvocation.getName()
 			.getIdentifier();
 		this.newMethodName = newMethodName;
@@ -42,6 +47,10 @@ class JUnit4MethodInvocationAnalysisResult {
 
 	MethodInvocation getMethodInvocation() {
 		return methodInvocation;
+	}
+
+	public IMethodBinding getMethodBinding() {
+		return methodBinding;
 	}
 
 	String getOriginalMethodName() {

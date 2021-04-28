@@ -120,14 +120,14 @@ class JUnit4MethodInvocationAnalyzer {
 			.findSurroundingJUnitJupiterTest(methodInvocation)
 			.orElse(null);
 		if (surroundingJUnitJupiterTest == null) {
-			return createNotTransformableResult(methodInvocation);
+			return createNotTransformableResult(methodInvocation, methodBinding);
 		}
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
 		boolean unambiguousArgumentTypes = arguments
 			.stream()
 			.allMatch(this::isArgumentWithUnambiguousType);
 		if (!unambiguousArgumentTypes) {
-			return createNotTransformableResult(methodInvocation);
+			return createNotTransformableResult(methodInvocation, methodBinding);
 		}
 
 		String methodIdentifier = methodInvocation.getName()
@@ -136,7 +136,7 @@ class JUnit4MethodInvocationAnalyzer {
 		if (methodIdentifier.equals(ASSERT_THROWS)) {
 			ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
 			if (!throwingRunnableArgumentAnalyser.analyze(surroundingJUnitJupiterTest, arguments)) {
-				return createNotTransformableResult(methodInvocation);
+				return createNotTransformableResult(methodInvocation, methodBinding);
 			}
 			throwingRunnableTypeToReplace = throwingRunnableArgumentAnalyser.getLocalVariableTypeToReplace()
 				.orElse(null);
@@ -157,20 +157,20 @@ class JUnit4MethodInvocationAnalyzer {
 		}
 
 		if (throwingRunnableTypeToReplace != null) {
-			return new JUnit4MethodInvocationAnalysisResult(methodInvocation, newMethodName,
+			return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, newMethodName,
 					messageMovingToLastPosition, throwingRunnableTypeToReplace, true);
 		}
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, newMethodName,
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, newMethodName,
 				messageMovingToLastPosition, true);
 	}
 
 	private JUnit4MethodInvocationAnalysisResult createNotTransformableResult(
-			MethodInvocation methodInvocation) {
+			MethodInvocation methodInvocation,  IMethodBinding methodBinding) {
 		String newMethodName = methodInvocation.getName()
 			.getIdentifier();
 		boolean messageMovingToLastPosition = false;
 		boolean transformableInvocation = false;
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, newMethodName,
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, newMethodName,
 				messageMovingToLastPosition, transformableInvocation);
 	}
 }
