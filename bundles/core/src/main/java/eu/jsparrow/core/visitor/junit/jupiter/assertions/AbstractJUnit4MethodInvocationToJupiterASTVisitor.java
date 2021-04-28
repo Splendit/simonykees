@@ -55,7 +55,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		StaticMethodImportsToRemoveHelper staticMethodImportsToRemoveHelper = new StaticMethodImportsToRemoveHelper(
 				compilationUnit, this::isSupportedJUnit4Method, allJUnit4AssertInvocations);
 
-		List<JUnit4MethodInvocationAnalysisResult> jUnit4AssertInvocationsInJUnitJupiterTest = allJUnit4AssertInvocations
+		List<JUnit4MethodInvocationAnalysisResult> transformableJUnit4InvocationAnalysisResults = allJUnit4AssertInvocations
 			.stream()
 			.filter(JUnit4MethodInvocationAnalysisResult::isTransformableInvocation)
 			.collect(Collectors.toList());
@@ -64,21 +64,21 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 			.getStaticMethodImportsToRemove();
 
 		Set<String> newStaticAssertionMethodImports = new HashSet<>();
-		Set<String> unqualifiedNamesOfNewAssertionMwethodImports = new HashSet<>();
+		Set<String> unqualifiedNamesOfNewAssertionMethodImports = new HashSet<>();
 		String newMethodFullyQualifiedNamePrefix = classDeclaringJUnitJupiterMethod + "."; //$NON-NLS-1$
-		jUnit4AssertInvocationsInJUnitJupiterTest.forEach(data -> {
+		transformableJUnit4InvocationAnalysisResults.forEach(data -> {
 			String newMethodName = data.getNewMethodName();
 			String newMethodFullyQualifiedName = newMethodFullyQualifiedNamePrefix + newMethodName;
 			if (staticMethodImportsToRemoveHelper.isSimpleNameOfStaticMethodImportToRemove(newMethodName)
 					|| canAddStaticAssertionsMethodImport(newMethodFullyQualifiedName)) {
 				newStaticAssertionMethodImports.add(newMethodFullyQualifiedName);
-				unqualifiedNamesOfNewAssertionMwethodImports.add(newMethodName);
+				unqualifiedNamesOfNewAssertionMethodImports.add(newMethodName);
 			}
 		});
 
 		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = allJUnit4AssertInvocations
 			.stream()
-			.map(data -> this.findTransformationData(data, unqualifiedNamesOfNewAssertionMwethodImports))
+			.map(data -> this.findTransformationData(data, unqualifiedNamesOfNewAssertionMethodImports))
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.collect(Collectors.toList());
@@ -103,7 +103,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 
 	private Optional<JUnit4MethodInvocationReplacementData> findTransformationData(
 			JUnit4MethodInvocationAnalysisResult invocationData,
-			Set<String> unqualifiedNamesOfNewAssertionMwethodImports) {
+			Set<String> unqualifiedNamesOfNewAssertionMethodImports) {
 
 		if (!invocationData.isTransformableInvocation()) {
 			return Optional.empty();
@@ -112,7 +112,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		String originalMethodName = invocationData.getOriginalMethodName();
 		String newMethodName = invocationData.getNewMethodName();
 
-		boolean newInvocationWithoutQualifier = unqualifiedNamesOfNewAssertionMwethodImports.contains(newMethodName);
+		boolean newInvocationWithoutQualifier = unqualifiedNamesOfNewAssertionMethodImports.contains(newMethodName);
 
 		List<Expression> originalArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
