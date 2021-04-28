@@ -78,50 +78,70 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 	}
 
 	private Optional<JUnit4CategoryReplacementData> findJUnit4CategoryReplacementData(Annotation categoryAnnotation) {
-		ChildListPropertyDescriptor locationInParent = findLocationInParent(categoryAnnotation).orElse(null);
-		if (locationInParent != null) {
-			List<String> categoryNames = findCategoryNames(categoryAnnotation).orElse(null);
-			if (categoryNames != null) {
-				return Optional.of(new JUnit4CategoryReplacementData(categoryAnnotation, categoryNames, locationInParent));
-			}
-		}
-		return Optional.empty();
-	}
 
-	private Optional<ChildListPropertyDescriptor> findLocationInParent(Annotation categoryAnnotation) {
 		if (categoryAnnotation.getLocationInParent() == MethodDeclaration.MODIFIERS2_PROPERTY) {
 			MethodDeclaration methodDeclaration = (MethodDeclaration) categoryAnnotation.getParent();
-			if (!methodDeclaration.isConstructor()) {
-				long testAnnotationsCount = ASTNodeUtil
-					.convertToTypedList(methodDeclaration.modifiers(), IExtendedModifier.class)
-					.stream()
-					.filter(IExtendedModifier::isAnnotation)
-					.map(Annotation.class::cast)
-					.map(Annotation::resolveAnnotationBinding)
-					.map(IAnnotationBinding::getAnnotationType)
-					.filter(typeBinding -> ClassRelationUtil.isContentOfType(typeBinding, "org.junit.Test") || //$NON-NLS-1$
-							ClassRelationUtil.isContentOfType(typeBinding, "org.junit.jupiter.api.Test")) //$NON-NLS-1$
-					.count();
-				if (testAnnotationsCount == 1) {
-					return Optional.of(MethodDeclaration.MODIFIERS2_PROPERTY);
-				}
+			if (isValidJUnitTestMethod(methodDeclaration)) {
+				return findJUnit4CategoryReplacementData(categoryAnnotation, MethodDeclaration.MODIFIERS2_PROPERTY);
 			}
-
 		} else if (categoryAnnotation.getLocationInParent() == TypeDeclaration.MODIFIERS2_PROPERTY) {
 			TypeDeclaration typeDeclaration = (TypeDeclaration) categoryAnnotation.getParent();
 			if (!typeDeclaration.isInterface() && !typeDeclaration.isLocalTypeDeclaration()) {
-				return Optional.of(TypeDeclaration.MODIFIERS2_PROPERTY);
+				return findJUnit4CategoryReplacementData(categoryAnnotation, TypeDeclaration.MODIFIERS2_PROPERTY);
 			}
 		}
 		return Optional.empty();
 	}
 
-	private Optional<List<String>> findCategoryNames(Annotation categoryAnnotation) {
+	private Optional<JUnit4CategoryReplacementData> findJUnit4CategoryReplacementData(Annotation categoryAnnotation,
+			ChildListPropertyDescriptor locationInParent) {
+
+		Expression value = findCategoryAnnotationValue(categoryAnnotation).orElse(null);
+		if (value != null) {
+			if (value.getNodeType() == ASTNode.TYPE_LITERAL) {
+				TypeLiteral typeLiteral = (TypeLiteral) value;
+				String qualifiedName = typeLiteral.getType()
+					.resolveBinding()
+					.getQualifiedName();
+				return Optional.of(new JUnit4CategoryReplacementData(categoryAnnotation, Arrays.asList(qualifiedName),
+						locationInParent));
+			}
+
+			if (value.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
+				ArrayInitializer arrayInitializer = (ArrayInitializer) value;
+				List<Expression> expressions = ASTNodeUtil.convertToTypedList(arrayInitializer.expressions(),
+						Expression.class);
+				List<String> categoryNames = mapToTypeLiterals(expressions);
+				if (categoryNames.size() == expressions.size()) {
+					return Optional
+						.of(new JUnit4CategoryReplacementData(categoryAnnotation, categoryNames, locationInParent));
+				}
+			}
+		}
+		return Optional.empty();
+	}
+
+	private boolean isValidJUnitTestMethod(MethodDeclaration methodDeclaration) {
+		if (methodDeclaration.isConstructor()) {
+			return false;
+		}
+		return ASTNodeUtil
+			.convertToTypedList(methodDeclaration.modifiers(), IExtendedModifier.class)
+			.stream()
+			.filter(IExtendedModifier::isAnnotation)
+			.map(Annotation.class::cast)
+			.map(Annotation::resolveAnnotationBinding)
+			.map(IAnnotationBinding::getAnnotationType)
+			.filter(typeBinding -> ClassRelationUtil.isContentOfType(typeBinding, "org.junit.Test") || //$NON-NLS-1$
+					ClassRelationUtil.isContentOfType(typeBinding, "org.junit.jupiter.api.Test")) //$NON-NLS-1$
+			.count() == 1;
+	}
+
+	private Optional<Expression> findCategoryAnnotationValue(Annotation categoryAnnotation) {
 
 		if (categoryAnnotation.getNodeType() == ASTNode.SINGLE_MEMBER_ANNOTATION) {
-			SingleMemberAnnotation sungleMemberAnnotation = (SingleMemberAnnotation) categoryAnnotation;
-			Expression value = sungleMemberAnnotation.getValue();
-			return findCategoryNames(value);
+			SingleMemberAnnotation singleMemberAnnotation = (SingleMemberAnnotation) categoryAnnotation;
+			return Optional.of(singleMemberAnnotation.getValue());
 		}
 		if (categoryAnnotation.getNodeType() == ASTNode.NORMAL_ANNOTATION) {
 			NormalAnnotation normalAnnotation = (NormalAnnotation) categoryAnnotation;
@@ -129,40 +149,20 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 					MemberValuePair.class);
 			if (values.size() == 1) {
 				MemberValuePair memberValuePair = values.get(0);
-				Expression value = memberValuePair.getValue();
-				return findCategoryNames(value);
+				return Optional.of(memberValuePair.getValue());
 			}
 		}
 		return Optional.empty();
 	}
 
-	private Optional<List<String>> findCategoryNames(Expression value) {
-
-		if (value.getNodeType() == ASTNode.TYPE_LITERAL) {
-			TypeLiteral typeLiteral = (TypeLiteral) value;
-			String qualifiedName = typeLiteral.getType()
-				.resolveBinding()
-				.getQualifiedName();
-
-			return Optional.of(Arrays.asList(qualifiedName));
-		}
-		if (value.getNodeType() == ASTNode.ARRAY_INITIALIZER) {
-			ArrayInitializer arrayInitializer = (ArrayInitializer) value;
-			List<Expression> expressions = ASTNodeUtil.convertToTypedList(arrayInitializer.expressions(),
-					Expression.class);
-			List<String> categoryNames = expressions.stream()
-				.filter(expression -> expression.getNodeType() == ASTNode.TYPE_LITERAL)
-				.map(TypeLiteral.class::cast)
-				.map(TypeLiteral::getType)
-				.map(Type::resolveBinding)
-				.map(ITypeBinding::getQualifiedName)
-				.collect(Collectors.toList());
-
-			if (categoryNames.size() == expressions.size()) {
-				return Optional.of(categoryNames);
-			}
-		}
-		return Optional.empty();
+	private List<String> mapToTypeLiterals(List<Expression> expressions) {
+		return expressions.stream()
+			.filter(expression -> expression.getNodeType() == ASTNode.TYPE_LITERAL)
+			.map(TypeLiteral.class::cast)
+			.map(TypeLiteral::getType)
+			.map(Type::resolveBinding)
+			.map(ITypeBinding::getQualifiedName)
+			.collect(Collectors.toList());
 	}
 
 	private Optional<List<ImportDeclaration>> findUnusedCategoryImports(CompilationUnit compilationUnit,
