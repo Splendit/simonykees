@@ -227,10 +227,13 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 				});
 
 			jUnit4AssertTransformationDataList.forEach(data -> {
-				MethodInvocation methodInvocationToReplace = data.getOriginalMethodInvocation();
-				MethodInvocation methodInvocationReplacement = data.createMethodInvocationReplacement();
-				astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
-				onRewrite();
+				MethodInvocation methodInvocationReplacement = data.createMethodInvocationReplacement()
+					.orElse(null);
+				if (methodInvocationReplacement != null) {
+					MethodInvocation methodInvocationToReplace = data.getOriginalMethodInvocation();
+					astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
+					onRewrite();
+				}
 			});
 
 			throwingRunnableTypesToReplace.forEach(typeToReplace -> {
