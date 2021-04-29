@@ -109,14 +109,15 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		Set<String> supportedNewStaticMethodImports = new HashSet<>();
 		String newMethodFullyQualifiedNamePrefix = classDeclaringJUnitJupiterMethod + "."; //$NON-NLS-1$
 		transformableJUnit4InvocationAnalysisResults.forEach(data -> {
-			String supportedNewMethodName = data.getMethodBinding().getName();
+			String supportedNewMethodName = data.getMethodBinding()
+				.getName();
 			String supportedNewMethodFullyQualifiedName = newMethodFullyQualifiedNamePrefix + supportedNewMethodName;
 			if (staticMethodImportsToRemoveHelper.isSimpleNameOfStaticMethodImportToRemove(supportedNewMethodName)
 					|| canAddStaticAssertionsMethodImport(supportedNewMethodFullyQualifiedName)) {
 				supportedNewStaticMethodImports.add(supportedNewMethodFullyQualifiedName);
 			}
 		});
-		if(classDeclaringJUnit4Method.equals("org.junit.Assert")) { //$NON-NLS-1$
+		if (classDeclaringJUnit4Method.equals("org.junit.Assert")) { //$NON-NLS-1$
 			supportedNewStaticMethodImports.add("org.junit.Assert.assertArrayEquals"); //$NON-NLS-1$
 		}
 		return supportedNewStaticMethodImports;
