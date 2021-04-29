@@ -121,12 +121,15 @@
      </menuContribution>
   </extension>
   
+  <!-- 
   <extension 
   		point="org.eclipse.ui.ide.markerResolution">
       <markerResolutionGenerator
          markerType="eu.jsparrow.ui.marker.jsparrow"
          class="eu.jsparrow.ui.quickfix.QuickFixer"/>
    </extension>
+   
+   
    
    <extension 
    		point="org.eclipse.core.resources.markers"
@@ -137,5 +140,55 @@
       <super type="org.eclipse.core.resources.textmarker"/> 
       <attribute name="owner"/> 
    </extension> 
+   -->
+   
+     <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="jsparrow"
+            colorPreferenceKey="jsparrow.marker.color"
+            colorPreferenceValue="124,84,224"
+            contributesToHeader="false"
+            highlightPreferenceKey="jsparrow.marker.highlight"
+            highlightPreferenceValue="false"
+            icon="icons/marker.gif"
+            includeOnPreferencePage="true"
+            label="jSparrow Refactor"
+            overviewRulerPreferenceKey="jsparrow.marker.overview"
+            overviewRulerPreferenceValue="true"
+            presentationLayer="0"
+            quickFixIcon="icons/marker.gif"
+            showInNextPrevDropdownToolbarAction="true"
+            textPreferenceKey="jsparrow.marker.text"
+            textPreferenceValue="true"
+            textStylePreferenceKey="jsparrow.marker.style"
+            textStylePreferenceValue="UNDERLINE"
+            verticalRulerPreferenceKey="jsparrow.marker.ruler"
+            verticalRulerPreferenceValue="true">
+      </specification>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerSeverity="0"
+            markerType="jsparrow.marker"
+            name="jsparrow">
+      </type>
+   </extension>
+   <extension
+         id="jsparrow.marker"
+         name="jSparrow"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <super
+            type="org.eclipse.core.resources.textmarker">
+      </super>
+      <persistent
+            value="false">
+      </persistent>
+   </extension>
+
   
 </plugin>

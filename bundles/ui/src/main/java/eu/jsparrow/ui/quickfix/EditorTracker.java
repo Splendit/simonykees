@@ -1,85 +1,149 @@
 package eu.jsparrow.ui.quickfix;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPageListener;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWindowListener;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
 public abstract class EditorTracker implements IWindowListener, IPageListener, IPartListener {
-
-	@Override
-	public void partActivated(IWorkbenchPart part) {
-		// TODO Auto-generated method stub
-		
+	/**
+	 * <p>
+	 * <strong>Must be called on the UI thread</strong>
+	 * <p>
+	 * Track will add listeners to workbench to track Editors.
+	 */
+	public void track(IWorkbench workbench) {
+		for (IWorkbenchWindow workbenchWindow : workbench.getWorkbenchWindows()) {
+			track(workbenchWindow);
+		}
+		workbench.addWindowListener(this);
 	}
 
-	@Override
-	public void partBroughtToTop(IWorkbenchPart part) {
-		// TODO Auto-generated method stub
-		
+	private void track(IWorkbenchWindow workbenchWindow) {
+		IWorkbenchPage[] pages = workbenchWindow.getPages();
+		for (IWorkbenchPage page : pages) {
+			page.addPartListener(this);
+		}
+		workbenchWindow.addPageListener(this);
+
+		activate(workbenchWindow);
 	}
 
-	@Override
-	public void partClosed(IWorkbenchPart part) {
-		// TODO Auto-generated method stub
-		
+	private void activate(IWorkbenchWindow workbenchWindow) {
+		IWorkbenchPage activePage = workbenchWindow.getActivePage();
+		if (activePage != null) {
+			pageActivated(activePage);
+			IEditorPart activeEditor = activePage.getActiveEditor();
+			if (activeEditor != null) {
+				editorActivated(activeEditor);
+			}
+		}
 	}
 
-	@Override
-	public void partDeactivated(IWorkbenchPart part) {
-		// TODO Auto-generated method stub
-		
+	private void deactivate(IWorkbenchWindow workbenchWindow) {
+		for (IWorkbenchPage page : workbenchWindow.getPages()) {
+			for (IEditorReference editorReference : page.getEditorReferences()) {
+				IEditorPart editor = editorReference.getEditor(false);
+				if (editor != null) {
+					editorDeactivated(editor);
+				}
+			}
+		}
 	}
 
-	@Override
-	public void partOpened(IWorkbenchPart part) {
-		// TODO Auto-generated method stub
-		
+	/**
+	 * <p>
+	 * <strong>Must be called on the UI thread</strong>
+	 * <p>
+	 * Track will add listeners to workbench to track Editors.
+	 */
+	public void untrack(IWorkbench workbench) {
+		for (IWorkbenchWindow workbenchWindow : workbench.getWorkbenchWindows()) {
+			untrack(workbenchWindow);
+		}
+		workbench.removeWindowListener(this);
+
 	}
 
-	@Override
-	public void pageActivated(IWorkbenchPage page) {
-		// TODO Auto-generated method stub
-		
+	private void untrack(IWorkbenchWindow workbenchWindow) {
+		IWorkbenchPage[] pages = workbenchWindow.getPages();
+		for (IWorkbenchPage page : pages) {
+			page.removePartListener(this);
+		}
+		workbenchWindow.removePageListener(this);
+		deactivate(workbenchWindow);
 	}
 
-	@Override
-	public void pageClosed(IWorkbenchPage page) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void pageOpened(IWorkbenchPage page) {
-		// TODO Auto-generated method stub
-		
-	}
+	// --- Window listener
 
 	@Override
 	public void windowActivated(IWorkbenchWindow window) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void windowDeactivated(IWorkbenchWindow window) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void windowClosed(IWorkbenchWindow window) {
-		// TODO Auto-generated method stub
-		
+		untrack(window);
 	}
 
 	@Override
 	public void windowOpened(IWorkbenchWindow window) {
-		// TODO Auto-generated method stub
-		
+		track(window);
+	}
+
+	// ---- IPageListener
+
+	@Override
+	public void pageActivated(IWorkbenchPage page) {
+	}
+
+	@Override
+	public void pageClosed(IWorkbenchPage page) {
+		page.removePartListener(this);
+	}
+
+	@Override
+	public void pageOpened(IWorkbenchPage page) {
+		page.addPartListener(this);
+	}
+
+	// ---- Part Listener
+
+	@Override
+	public void partActivated(IWorkbenchPart part) {
+		if (part instanceof IEditorPart) {
+			editorActivated((IEditorPart) part);
+		}
+	}
+
+	@Override
+	public void partBroughtToTop(IWorkbenchPart part) {
+		if (part instanceof IEditorPart) {
+			editorActivated((IEditorPart) part);
+		}
+	}
+
+	@Override
+	public void partClosed(IWorkbenchPart part) {
+		if (part instanceof IEditorPart) {
+			editorDeactivated((IEditorPart) part);
+		}
+	}
+
+	@Override
+	public void partDeactivated(IWorkbenchPart part) {
+	}
+
+	@Override
+	public void partOpened(IWorkbenchPart part) {
 	}
 	
 	public abstract void editorActivated(IEditorPart part);
