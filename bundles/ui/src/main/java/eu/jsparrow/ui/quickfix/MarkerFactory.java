@@ -5,13 +5,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 
+import eu.jsparrow.rules.common.MarkerEvent;
 import eu.jsparrow.ui.Activator;
 
 public class MarkerFactory {
 	
 	public static final String JSPARROW_MARKER = "jsparrow.marker"; //$NON-NLS-1$
 	
-	public void create(RefactoringEvent event) {
+	public void create(MarkerEvent event) {
 		try {
 			IJavaElement javaElement = event.getJavaElement();
 			IResource resource = javaElement.getResource();
@@ -24,13 +25,13 @@ public class MarkerFactory {
 
 	}
 
-	private void scheduleWorkspaceJob(final String message, final IResource resource, final int start, final int end)
+	private void scheduleWorkspaceJob(final String message, final IResource resource, final int start, final int length)
 			throws CoreException {
 		IMarker marker = create(resource);
 		if (marker != null) {
 			marker.setAttributes(new String[] { IMarker.MESSAGE, IMarker.CHAR_START, IMarker.CHAR_END,
 					IMarker.SOURCE_ID },
-					new Object[] { message, Integer.valueOf(start), Integer.valueOf(end), Activator.PLUGIN_ID });
+					new Object[] { message, Integer.valueOf(start), Integer.valueOf(start + length), Activator.PLUGIN_ID });
 		}
 	}
 

@@ -1,7 +1,9 @@
 package eu.jsparrow.ui.startup;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -9,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
+import eu.jsparrow.ui.quickfix.Engine;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 
@@ -31,7 +34,9 @@ public class Startup implements IStartup {
 		PlatformUI.getWorkbench()
 			.getDisplay()
 			.asyncExec(() -> {
+				IWorkbench workbench = PlatformUI.getWorkbench();
 				if (!licenseUtil.isValidProLicensePresentInSecureStore() && !licenseUtil.isActiveRegistration()) {
+					
 					Shell activeShell = PlatformUI.getWorkbench()
 						.getActiveWorkbenchWindow()
 						.getShell();
@@ -53,6 +58,11 @@ public class Startup implements IStartup {
 					 */
 					SimonykeesPreferenceManager.setEnableDashboard(false);
 				}
+				
+				Engine engine = new Engine();
+
+				engine.track(workbench);
+				JavaCore.addElementChangedListener(engine);
 
 			});
 	}

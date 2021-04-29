@@ -3,6 +3,7 @@ package eu.jsparrow.ui.quickfix;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
@@ -17,11 +18,15 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ide.ResourceUtil;
 
+import eu.jsparrow.rules.common.EventGenerator;
+import eu.jsparrow.rules.common.MarkerEvent;
+
 public class Engine extends EditorTracker implements IElementChangedListener, IPreferenceChangeListener {
 	
 	private IResource currentResource;
 	private static final Collection<String> JAVA_EXTENSIONS = new HashSet<>(Arrays.asList(JavaCore
 			.getJavaLikeExtensions())); // We only need Java. 
+	private MarkerFactory markerFactory = new MarkerFactory();
 
 	@Override
 	public void preferenceChange(PreferenceChangeEvent event) {
@@ -111,7 +116,19 @@ public class Engine extends EditorTracker implements IElementChangedListener, IP
 	}
 
 	private void handleParentSourceReference(ICompilationUnit cu) {
-		
+		List<MarkerEvent> events = EventGenerator.generateAnonymousClassEvents(cu);
+		final IResource resource = cu.getResource();
+		MarkerJob job = new MarkerJob(resource, new MarkerJob.MarkerRunnable() {
+
+			@Override
+			public void run() {
+				markerFactory.clear(resource);
+				for (MarkerEvent event : events) {
+					markerFactory.create(event);
+				}
+			}
+		});
+		job.schedule();
 		
 	}
 

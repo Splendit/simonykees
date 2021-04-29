@@ -2,7 +2,9 @@ package eu.jsparrow.ui.quickfix;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-public class RefactoringEvent {
+import eu.jsparrow.rules.common.MarkerEvent;
+
+public class RefactoringEvent implements MarkerEvent {
 
 	private int index;
 	private int offset;
