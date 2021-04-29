@@ -69,22 +69,12 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		List<ImportDeclaration> staticAssertMethodImportsToRemove = staticMethodImportsToRemoveHelper
 			.getStaticMethodImportsToRemove();
 
-		Set<String> newStaticAssertionMethodImports = new HashSet<>();
-		Set<String> unqualifiedNamesOfNewAssertionMethodImports = new HashSet<>();
-		String newMethodFullyQualifiedNamePrefix = classDeclaringJUnitJupiterMethod + "."; //$NON-NLS-1$
-		transformableJUnit4InvocationAnalysisResults.forEach(data -> {
-			String newMethodName = data.getNewMethodName();
-			String newMethodFullyQualifiedName = newMethodFullyQualifiedNamePrefix + newMethodName;
-			if (staticMethodImportsToRemoveHelper.isSimpleNameOfStaticMethodImportToRemove(newMethodName)
-					|| canAddStaticAssertionsMethodImport(newMethodFullyQualifiedName)) {
-				newStaticAssertionMethodImports.add(newMethodFullyQualifiedName);
-				unqualifiedNamesOfNewAssertionMethodImports.add(newMethodName);
-			}
-		});
+		Set<String> supportedNewStaticMethodImports = findSupportedStaticImports(staticMethodImportsToRemoveHelper,
+				transformableJUnit4InvocationAnalysisResults);
 
 		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = allJUnit4AssertInvocations
 			.stream()
-			.map(data -> this.findTransformationData(data, unqualifiedNamesOfNewAssertionMethodImports))
+			.map(data -> this.findTransformationData(data, supportedNewStaticMethodImports))
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.collect(Collectors.toList());
@@ -96,6 +86,12 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 			.map(Optional::get)
 			.collect(Collectors.toList());
 
+		Set<String> newStaticAssertionMethodImports = jUnit4AssertTransformationDataList.stream()
+			.map(JUnit4MethodInvocationReplacementData::getStaticMethodImport)
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toSet());
+
 		transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports, throwingRunnableTypesToReplace,
 				jUnit4AssertTransformationDataList);
 
@@ -106,20 +102,28 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 			StaticMethodImportsToRemoveHelper staticMethodImportsToRemoveHelper,
 			List<JUnit4MethodInvocationAnalysisResult> transformableJUnit4InvocationAnalysisResults) {
 
+		Set<String> supportedNewMethodNames = new HashSet<>();
+		transformableJUnit4InvocationAnalysisResults.forEach(data -> {
+			supportedNewMethodNames.add(data.getMethodBinding()
+				.getName());
+		});
+
+		if (classDeclaringJUnit4Method.equals("org.junit.Assert")) { //$NON-NLS-1$
+			supportedNewMethodNames.add("assertArrayEquals"); //$NON-NLS-1$
+			// always supported because "assertEquals" may change to
+			// "assertArrayEquals"
+		}
+
 		Set<String> supportedNewStaticMethodImports = new HashSet<>();
 		String newMethodFullyQualifiedNamePrefix = classDeclaringJUnitJupiterMethod + "."; //$NON-NLS-1$
-		transformableJUnit4InvocationAnalysisResults.forEach(data -> {
-			String supportedNewMethodName = data.getMethodBinding()
-				.getName();
+		supportedNewMethodNames.forEach(supportedNewMethodName -> {
 			String supportedNewMethodFullyQualifiedName = newMethodFullyQualifiedNamePrefix + supportedNewMethodName;
 			if (staticMethodImportsToRemoveHelper.isSimpleNameOfStaticMethodImportToRemove(supportedNewMethodName)
 					|| canAddStaticAssertionsMethodImport(supportedNewMethodFullyQualifiedName)) {
 				supportedNewStaticMethodImports.add(supportedNewMethodFullyQualifiedName);
 			}
 		});
-		if (classDeclaringJUnit4Method.equals("org.junit.Assert")) { //$NON-NLS-1$
-			supportedNewStaticMethodImports.add("org.junit.Assert.assertArrayEquals"); //$NON-NLS-1$
-		}
+
 		return supportedNewStaticMethodImports;
 	}
 
@@ -130,7 +134,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 
 	private Optional<JUnit4MethodInvocationReplacementData> findTransformationData(
 			JUnit4MethodInvocationAnalysisResult invocationData,
-			Set<String> unqualifiedNamesOfNewAssertionMethodImports) {
+			Set<String> supportedNewStaticMethodImports) {
 
 		if (!invocationData.isTransformableInvocation()) {
 			return Optional.empty();
@@ -138,8 +142,6 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
 		String originalMethodName = invocationData.getOriginalMethodName();
 		String newMethodName = invocationData.getNewMethodName();
-
-		boolean newInvocationWithoutQualifier = unqualifiedNamesOfNewAssertionMethodImports.contains(newMethodName);
 
 		List<Expression> originalArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
@@ -160,21 +162,20 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		} else {
 			newArguments = originalArguments;
 		}
-
-		if (methodInvocation.getExpression() == null
-				&& newInvocationWithoutQualifier
-				&& newArguments == originalArguments
-				&& newMethodName.equals(originalMethodName)) {
-			return Optional.empty();
+		String newMethodStaticImport = classDeclaringJUnitJupiterMethod + "." + newMethodName; //$NON-NLS-1$
+		if (supportedNewStaticMethodImports.contains(newMethodStaticImport)) {
+			if (methodInvocation.getExpression() == null
+					&& newArguments == originalArguments
+					&& newMethodName.equals(originalMethodName)) {
+				return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodStaticImport));
+			}
+			return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation,
+					() -> createNewInvocationWithoutQualifier(newMethodName, newArguments), newMethodStaticImport));
 		}
 
-		Supplier<MethodInvocation> newMethodInvocationSupplier;
-		if (newInvocationWithoutQualifier) {
-			newMethodInvocationSupplier = () -> this.createNewInvocationWithoutQualifier(newMethodName, newArguments);
-		} else {
-			newMethodInvocationSupplier = () -> this.createNewInvocationWithAssertionsQualifier(methodInvocation,
-					newMethodName, newArguments);
-		}
+		Supplier<MethodInvocation> newMethodInvocationSupplier = () -> createNewInvocationWithAssertionsQualifier(
+				methodInvocation,
+				newMethodName, newArguments);
 
 		return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodInvocationSupplier));
 	}
