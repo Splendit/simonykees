@@ -35,9 +35,12 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  */
 abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
+	private final String classDeclaringJUnit4Method;
 	private final String classDeclaringJUnitJupiterMethod;
 
-	AbstractJUnit4MethodInvocationToJupiterASTVisitor(String classDeclaringJUnitJupiterMethod) {
+	AbstractJUnit4MethodInvocationToJupiterASTVisitor(String classDeclaringJUnit4Method,
+			String classDeclaringJUnitJupiterMethod) {
+		this.classDeclaringJUnit4Method = classDeclaringJUnit4Method;
 		this.classDeclaringJUnitJupiterMethod = classDeclaringJUnitJupiterMethod;
 	}
 
@@ -97,6 +100,26 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 				jUnit4AssertTransformationDataList);
 
 		return false;
+	}
+
+	private Set<String> findSupportedStaticImports(
+			StaticMethodImportsToRemoveHelper staticMethodImportsToRemoveHelper,
+			List<JUnit4MethodInvocationAnalysisResult> transformableJUnit4InvocationAnalysisResults) {
+
+		Set<String> supportedNewStaticMethodImports = new HashSet<>();
+		String newMethodFullyQualifiedNamePrefix = classDeclaringJUnitJupiterMethod + "."; //$NON-NLS-1$
+		transformableJUnit4InvocationAnalysisResults.forEach(data -> {
+			String supportedNewMethodName = data.getMethodBinding().getName();
+			String supportedNewMethodFullyQualifiedName = newMethodFullyQualifiedNamePrefix + supportedNewMethodName;
+			if (staticMethodImportsToRemoveHelper.isSimpleNameOfStaticMethodImportToRemove(supportedNewMethodName)
+					|| canAddStaticAssertionsMethodImport(supportedNewMethodFullyQualifiedName)) {
+				supportedNewStaticMethodImports.add(supportedNewMethodFullyQualifiedName);
+			}
+		});
+		if(classDeclaringJUnit4Method.equals("org.junit.Assert")) { //$NON-NLS-1$
+			supportedNewStaticMethodImports.add("org.junit.Assert.assertArrayEquals"); //$NON-NLS-1$
+		}
+		return supportedNewStaticMethodImports;
 	}
 
 	private boolean canAddStaticAssertionsMethodImport(String fullyQualifiedAssertionsMethodName) {
