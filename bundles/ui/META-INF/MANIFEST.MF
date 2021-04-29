@@ -38,6 +38,7 @@ Require-Bundle: eu.jsparrow.i18n,
  com.github.oshi.core;bundle-version="3.13.6",
  eu.jsparrow.crypto,
  com.fasterxml.jackson.core.jackson-databind,
- com.fasterxml.jackson.core.jackson-core
+ com.fasterxml.jackson.core.jackson-core,
+ org.eclipse.jface.text;bundle-version="[3.16.500,4.0.0)"
 Bundle-Vendor: Splendit IT-Consulting GmbH
  
