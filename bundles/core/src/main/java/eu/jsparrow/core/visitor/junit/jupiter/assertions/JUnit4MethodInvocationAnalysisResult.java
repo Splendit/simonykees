@@ -19,7 +19,6 @@ class JUnit4MethodInvocationAnalysisResult {
 
 	private final MethodInvocation methodInvocation;
 	private final IMethodBinding methodBinding;
-	private final String originalMethodName;
 	private final boolean transformableInvocation;
 	private Type throwingRunnableTypeToReplace;
 
@@ -33,8 +32,6 @@ class JUnit4MethodInvocationAnalysisResult {
 			boolean transformableInvocation) {
 		this.methodInvocation = methodInvocation;
 		this.methodBinding = methodBinding;
-		this.originalMethodName = methodInvocation.getName()
-			.getIdentifier();
 		this.transformableInvocation = transformableInvocation;
 	}
 
@@ -44,10 +41,6 @@ class JUnit4MethodInvocationAnalysisResult {
 
 	public IMethodBinding getMethodBinding() {
 		return methodBinding;
-	}
-
-	String getOriginalMethodName() {
-		return originalMethodName;
 	}
 
 	Optional<Type> getThrowingRunnableTypeToReplace() {

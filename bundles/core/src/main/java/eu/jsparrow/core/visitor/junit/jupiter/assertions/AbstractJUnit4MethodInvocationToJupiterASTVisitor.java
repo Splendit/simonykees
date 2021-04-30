@@ -140,9 +140,10 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 			return Optional.empty();
 		}
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
-		String originalMethodName = invocationData.getOriginalMethodName();
-
-		ITypeBinding[] declaredParameterTypes = invocationData.getMethodBinding()
+		IMethodBinding originalMethodBinding = invocationData.getMethodBinding();
+		String originalMethodName = originalMethodBinding.getName();
+		
+		ITypeBinding[] declaredParameterTypes = originalMethodBinding
 			.getMethodDeclaration()
 			.getParameterTypes();
 		String newMethodName;

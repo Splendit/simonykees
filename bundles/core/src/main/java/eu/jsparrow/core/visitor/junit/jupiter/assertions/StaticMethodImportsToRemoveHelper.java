@@ -45,7 +45,8 @@ class StaticMethodImportsToRemoveHelper {
 			.filter(data -> !data.isTransformableInvocation())
 			.filter(data -> data.getMethodInvocation()
 				.getExpression() == null)
-			.map(JUnit4MethodInvocationAnalysisResult::getOriginalMethodName)
+			.map(JUnit4MethodInvocationAnalysisResult::getMethodBinding)
+			.map(IMethodBinding::getName)
 			.collect(Collectors.toSet());
 
 		return ASTNodeUtil
