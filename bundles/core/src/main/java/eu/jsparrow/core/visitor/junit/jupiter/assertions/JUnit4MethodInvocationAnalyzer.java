@@ -9,7 +9,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
@@ -83,10 +82,7 @@ class JUnit4MethodInvocationAnalyzer {
 	private JUnit4MethodInvocationAnalysisResult createAnalysisResult(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding) {
 
-		MethodDeclaration surroundingJUnitJupiterTest = jUnitJupiterTestMethodsStore
-			.findSurroundingJUnitJupiterTest(methodInvocation)
-			.orElse(null);
-		if (surroundingJUnitJupiterTest == null) {
+		if (!jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
 			return createNotTransformableResult(methodInvocation, methodBinding);
 		}
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
@@ -102,7 +98,7 @@ class JUnit4MethodInvocationAnalyzer {
 		Type throwingRunnableTypeToReplace;
 		if (methodIdentifier.equals(ASSERT_THROWS)) {
 			ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
-			if (!throwingRunnableArgumentAnalyser.analyze(surroundingJUnitJupiterTest, arguments)) {
+			if (!throwingRunnableArgumentAnalyser.analyze(arguments)) {
 				return createNotTransformableResult(methodInvocation, methodBinding);
 			}
 			throwingRunnableTypeToReplace = throwingRunnableArgumentAnalyser.getLocalVariableTypeToReplace()
