@@ -1,7 +1,5 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -11,7 +9,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -66,36 +63,6 @@ class JUnit4MethodInvocationAnalyzer {
 		return Optional.empty();
 	}
 
-	private boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
-			ITypeBinding[] declaredParameterTypes) {
-		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$
-			return false;
-		}
-
-		if (declaredParameterTypes.length == 2) {
-			return isParameterTypeObjectArray(declaredParameterTypes[0])
-					&& isParameterTypeObjectArray(declaredParameterTypes[1]);
-		}
-
-		if (declaredParameterTypes.length == 3) {
-			return isParameterTypeString(declaredParameterTypes[0])
-					&& isParameterTypeObjectArray(declaredParameterTypes[1])
-					&& isParameterTypeObjectArray(declaredParameterTypes[2]);
-		}
-		return false;
-	}
-
-	private boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
-		if (parameterType.isArray() && parameterType.getDimensions() == 1) {
-			return isContentOfType(parameterType.getComponentType(), "java.lang.Object"); //$NON-NLS-1$
-		}
-		return false;
-	}
-
-	private boolean isParameterTypeString(ITypeBinding parameterType) {
-		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
-	}
-
 	private boolean isArgumentWithUnambiguousType(Expression expression) {
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
@@ -144,29 +111,17 @@ class JUnit4MethodInvocationAnalyzer {
 			throwingRunnableTypeToReplace = null;
 		}
 
-		ITypeBinding[] declaredParameterTypes = methodBinding.getMethodDeclaration()
-			.getParameterTypes();
-
-		String newMethodName;
-		if (isDeprecatedAssertEqualsComparingObjectArrays(methodIdentifier, declaredParameterTypes)) {
-			newMethodName = "assertArrayEquals"; //$NON-NLS-1$
-		} else {
-			newMethodName = methodIdentifier;
-		}
-
 		if (throwingRunnableTypeToReplace != null) {
-			return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, newMethodName,
+			return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding,
 					throwingRunnableTypeToReplace, true);
 		}
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, newMethodName, true);
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, true);
 	}
 
 	private JUnit4MethodInvocationAnalysisResult createNotTransformableResult(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding) {
-		String newMethodName = methodInvocation.getName()
-			.getIdentifier();
 		boolean transformableInvocation = false;
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, newMethodName,
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding,
 				transformableInvocation);
 	}
 }

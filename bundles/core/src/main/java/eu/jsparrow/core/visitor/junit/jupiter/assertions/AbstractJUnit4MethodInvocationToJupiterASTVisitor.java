@@ -141,14 +141,19 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		}
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
 		String originalMethodName = invocationData.getOriginalMethodName();
-		String newMethodName = invocationData.getNewMethodName();
-
-		List<Expression> originalArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-				Expression.class);
 
 		ITypeBinding[] declaredParameterTypes = invocationData.getMethodBinding()
 			.getMethodDeclaration()
 			.getParameterTypes();
+		String newMethodName;
+		if (isDeprecatedAssertEqualsComparingObjectArrays(originalMethodName, declaredParameterTypes)) {
+			newMethodName = "assertArrayEquals"; //$NON-NLS-1$
+		} else {
+			newMethodName = originalMethodName;
+		}
+
+		List<Expression> originalArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+				Expression.class);
 
 		boolean messageMovingToLastPosition = declaredParameterTypes.length > 0
 				&& isParameterTypeString(declaredParameterTypes[0]);
@@ -162,6 +167,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		} else {
 			newArguments = originalArguments;
 		}
+		
 		String newMethodStaticImport = classDeclaringJUnitJupiterMethod + "." + newMethodName; //$NON-NLS-1$
 		if (supportedNewStaticMethodImports.contains(newMethodStaticImport)) {
 			if (methodInvocation.getExpression() == null
@@ -180,8 +186,34 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodInvocationSupplier));
 	}
 
+	private boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
+			ITypeBinding[] declaredParameterTypes) {
+		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$
+			return false;
+		}
+
+		if (declaredParameterTypes.length == 2) {
+			return isParameterTypeObjectArray(declaredParameterTypes[0])
+					&& isParameterTypeObjectArray(declaredParameterTypes[1]);
+		}
+
+		if (declaredParameterTypes.length == 3) {
+			return isParameterTypeString(declaredParameterTypes[0])
+					&& isParameterTypeObjectArray(declaredParameterTypes[1])
+					&& isParameterTypeObjectArray(declaredParameterTypes[2]);
+		}
+		return false;
+	}
+
 	private boolean isParameterTypeString(ITypeBinding parameterType) {
 		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
+	}
+
+	private boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
+		if (parameterType.isArray() && parameterType.getDimensions() == 1) {
+			return isContentOfType(parameterType.getComponentType(), "java.lang.Object"); //$NON-NLS-1$
+		}
+		return false;
 	}
 
 	@SuppressWarnings({ "unchecked" })

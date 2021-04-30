@@ -20,25 +20,21 @@ class JUnit4MethodInvocationAnalysisResult {
 	private final MethodInvocation methodInvocation;
 	private final IMethodBinding methodBinding;
 	private final String originalMethodName;
-	private final String newMethodName;
 	private final boolean transformableInvocation;
 	private Type throwingRunnableTypeToReplace;
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			String newMethodName,
 			Type throwingRunnableTypeToReplace, boolean transformableInvocation) {
-		this(methodInvocation, methodBinding, newMethodName, transformableInvocation);
+		this(methodInvocation, methodBinding, transformableInvocation);
 		this.throwingRunnableTypeToReplace = throwingRunnableTypeToReplace;
 	}
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			String newMethodName,
 			boolean transformableInvocation) {
 		this.methodInvocation = methodInvocation;
 		this.methodBinding = methodBinding;
 		this.originalMethodName = methodInvocation.getName()
 			.getIdentifier();
-		this.newMethodName = newMethodName;
 		this.transformableInvocation = transformableInvocation;
 	}
 
@@ -52,10 +48,6 @@ class JUnit4MethodInvocationAnalysisResult {
 
 	String getOriginalMethodName() {
 		return originalMethodName;
-	}
-
-	String getNewMethodName() {
-		return newMethodName;
 	}
 
 	Optional<Type> getThrowingRunnableTypeToReplace() {
