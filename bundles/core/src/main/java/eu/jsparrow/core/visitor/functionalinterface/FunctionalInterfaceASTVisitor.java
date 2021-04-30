@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.functionalinterface;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.markers.RefactorEvent;
 import eu.jsparrow.core.visitor.sub.MethodInvocationsVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDefinitionASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -317,6 +319,13 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
 						getASTRewrite().replace(parentNode, newInitializer, null);
 						onRewrite();
+						RefactorEvent event = new RefactorEvent(0,
+								parentNode.getStartPosition(), 
+								parentNode.getLength(), 
+								"Use functional interfaces", //$NON-NLS-1$
+								getCompilationUnit().getJavaElement(), 
+								Collections.singletonMap(parentNode, newInitializer));
+						addMarkerEvent(event);
 					}
 				}
 			}
