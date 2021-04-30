@@ -1,7 +1,5 @@
 package eu.jsparrow.ui.quickfix;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
@@ -15,13 +13,14 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ide.ResourceUtil;
 
-import eu.jsparrow.rules.common.EventGenerator;
+import eu.jsparrow.core.markers.EventProducer;
 import eu.jsparrow.rules.common.MarkerEvent;
+import eu.jsparrow.rules.common.RefactoringEventProducer;
 
 public class Engine extends EditorTracker implements IElementChangedListener {
 
 	private IResource currentResource;
-	private static final Collection<String> JAVA_EXTENSIONS = Arrays.asList("java"); //$NON-NLS-1$
+	private static final String JAVA_EXTENSION = "java"; //$NON-NLS-1$
 	private MarkerFactory markerFactory = new MarkerFactory();
 
 	@Override
@@ -82,7 +81,7 @@ public class Engine extends EditorTracker implements IElementChangedListener {
 
 	private boolean shouldProcess(IResource resource) {
 		return resource != null && resource.exists() && IResource.FILE == resource.getType()
-				&& JAVA_EXTENSIONS.contains(resource.getFileExtension());
+				&& JAVA_EXTENSION.equals(resource.getFileExtension());
 	}
 
 	public void checkElement(IJavaElement element) {
@@ -115,7 +114,8 @@ public class Engine extends EditorTracker implements IElementChangedListener {
 	}
 
 	private void handleParentSourceReference(ICompilationUnit cu) {
-		List<MarkerEvent> events = EventGenerator.generateAnonymousClassEvents(cu);
+		RefactoringEventProducer eventGenerator = new EventProducer();
+		List<MarkerEvent> events = eventGenerator.generateEvents(cu);
 		final IResource resource = cu.getResource();
 		MarkerJob job = new MarkerJob(resource, () -> {
 			markerFactory.clear(resource);

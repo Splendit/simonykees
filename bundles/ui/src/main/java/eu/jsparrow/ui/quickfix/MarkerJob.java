@@ -9,8 +9,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.progress.IProgressConstants2;
 
-import eu.jsparrow.ui.Activator;
-
 public class MarkerJob extends WorkspaceJob {
 
 	private final MarkerRunnable runnable;
@@ -33,8 +31,8 @@ public class MarkerJob extends WorkspaceJob {
 		return Status.OK_STATUS;
 	}
 
+	@FunctionalInterface
 	public interface MarkerRunnable {
-
 		void run() throws CoreException;
 	}
 
