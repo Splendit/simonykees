@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.quickfix;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
@@ -8,54 +9,61 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-public class JSparrowProposal implements  IJavaCompletionProposal, ICompletionProposalExtension6 {
+import eu.jsparrow.core.markers.EventProducer;
+import eu.jsparrow.rules.common.RefactoringEventProducer;
+
+public class JSparrowProposal implements IJavaCompletionProposal, ICompletionProposalExtension6 {
+
+	private ICompilationUnit icu;
+	private int offset;
+	private int length;
+
+	public JSparrowProposal(ICompilationUnit icu, int offset, int length) {
+		this.icu = icu;
+		this.offset = offset;
+		this.length = length;
+	}
 
 	@Override
 	public int getRelevance() {
-		
-		return 0;
+		return 8;
 	}
 
 	@Override
 	public void apply(IDocument document) {
-		// TODO Auto-generated method stub
-		
+		RefactoringEventProducer eventGenerator = new EventProducer();
+		eventGenerator.resolve(icu, offset);
+
 	}
 
 	@Override
 	public Point getSelection(IDocument document) {
-		// TODO Auto-generated method stub
-		return null;
+		return new Point(offset, length);
 	}
 
 	@Override
 	public String getAdditionalProposalInfo() {
-		// TODO Auto-generated method stub
-		return null;
+		return "This anonymous class can be converted into a Lambda.";
 	}
 
 	@Override
 	public String getDisplayString() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Change to Lambda";
 	}
 
 	@Override
 	public Image getImage() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public IContextInformation getContextInformation() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public StyledString getStyledDisplayString() {
-		// TODO Auto-generated method stub
-		return null;
+		return new StyledString("Change to Lambda");
 	}
 
 }

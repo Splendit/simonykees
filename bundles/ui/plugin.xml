@@ -189,6 +189,15 @@
             value="false">
       </persistent>
    </extension>
-
+   
+   <!-- jSparrow QuickFixes Extension -->
+   <extension
+         point="org.eclipse.jdt.ui.quickFixProcessors">
+      <quickFixProcessor
+            class="eu.jsparrow.ui.quickfix.JSparrowQuickFix"
+            id="eu.jsparrow.ui.quickfix.JSparrowQuickFix"
+            name="jSparrow Refactoring Quickfix">
+      </quickFixProcessor>
+   </extension>
   
 </plugin>
