@@ -52,16 +52,32 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		verifyImport(compilationUnit, classDeclaringJUnitJupiterMethod);
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
 
-		JUnit4MethodInvocationAnalyzer invocationAnalyzer = new JUnit4MethodInvocationAnalyzer(
-				compilationUnit, this::isSupportedJUnit4Method);
 
-		List<JUnit4MethodInvocationAnalysisResult> allJUnit4AssertInvocations = invocationAnalyzer
-			.collectJUnit4AssertionAnalysisResults(compilationUnit);
+		List<JUnit4MethodInvocationAnalysisResult> allJUnit4InvocationAnalysisResults;
+		List<Type> throwingRunnableTypesToReplace = new ArrayList<>();
+		if (classDeclaringJUnit4Method.equals("org.junit.Assert")) { //$NON-NLS-1$
+			JUnit4AssertionAnalyzer assertionAnalyzer =  new JUnit4AssertionAnalyzer(
+					compilationUnit, this::isSupportedJUnit4Method);
+			allJUnit4InvocationAnalysisResults = new ArrayList<>();
+			assertionAnalyzer.collectJUnit4AssertionAnalysisResults(compilationUnit).forEach(result -> {
+				allJUnit4InvocationAnalysisResults.add(result);
+				Type throwingRunnableTypeToReplace = result.getThrowingRunnableTypeToReplace().orElse(null);
+				if(result.isTransformableInvocation() &&  throwingRunnableTypeToReplace != null) {
+					throwingRunnableTypesToReplace.add(throwingRunnableTypeToReplace);
+				}
+			});
+		} else {
+			JUnit4MethodInvocationAnalyzer invocationAnalyzer = new JUnit4MethodInvocationAnalyzer(
+					compilationUnit, this::isSupportedJUnit4Method);
+			allJUnit4InvocationAnalysisResults = invocationAnalyzer
+					.collectJUnit4AssertionAnalysisResults(compilationUnit);
+			
+		}
 
 		StaticMethodImportsToRemoveHelper staticMethodImportsToRemoveHelper = new StaticMethodImportsToRemoveHelper(
-				compilationUnit, this::isSupportedJUnit4Method, allJUnit4AssertInvocations);
+				compilationUnit, this::isSupportedJUnit4Method, allJUnit4InvocationAnalysisResults);
 
-		List<JUnit4MethodInvocationAnalysisResult> transformableJUnit4InvocationAnalysisResults = allJUnit4AssertInvocations
+		List<JUnit4MethodInvocationAnalysisResult> transformableJUnit4InvocationAnalysisResults = allJUnit4InvocationAnalysisResults
 			.stream()
 			.filter(JUnit4MethodInvocationAnalysisResult::isTransformableInvocation)
 			.collect(Collectors.toList());
@@ -72,16 +88,9 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		Set<String> supportedNewStaticMethodImports = findSupportedStaticImports(staticMethodImportsToRemoveHelper,
 				transformableJUnit4InvocationAnalysisResults);
 
-		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = allJUnit4AssertInvocations
+		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = allJUnit4InvocationAnalysisResults
 			.stream()
 			.map(data -> this.findTransformationData(data, supportedNewStaticMethodImports))
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toList());
-
-		List<Type> throwingRunnableTypesToReplace = allJUnit4AssertInvocations.stream()
-			.filter(JUnit4MethodInvocationAnalysisResult::isTransformableInvocation)
-			.map(JUnit4MethodInvocationAnalysisResult::getThrowingRunnableTypeToReplace)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.collect(Collectors.toList());
@@ -142,7 +151,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
 		IMethodBinding originalMethodBinding = invocationData.getMethodBinding();
 		String originalMethodName = originalMethodBinding.getName();
-		
+
 		ITypeBinding[] declaredParameterTypes = originalMethodBinding
 			.getMethodDeclaration()
 			.getParameterTypes();
@@ -168,7 +177,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		} else {
 			newArguments = originalArguments;
 		}
-		
+
 		String newMethodStaticImport = classDeclaringJUnitJupiterMethod + "." + newMethodName; //$NON-NLS-1$
 		if (supportedNewStaticMethodImports.contains(newMethodStaticImport)) {
 			if (methodInvocation.getExpression() == null

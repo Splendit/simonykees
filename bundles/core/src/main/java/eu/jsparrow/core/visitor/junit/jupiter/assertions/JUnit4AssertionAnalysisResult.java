@@ -30,7 +30,6 @@ class JUnit4AssertionAnalysisResult extends JUnit4MethodInvocationAnalysisResult
 		super(methodInvocation, methodBinding, transformableInvocation);
 	}
 
-	@Override
 	Optional<Type> getThrowingRunnableTypeToReplace() {
 		return Optional.ofNullable(throwingRunnableTypeToReplace);
 	}
