@@ -23,17 +23,17 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.28.0
  *
  */
-class SupportedJUnit4InvocationAnalyzer {
+class JUnit4MethodInvocationAnalyzer {
 	private final JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore;
 	private final Predicate<IMethodBinding> supportedJUnit4MethodPredicate;
 
-	SupportedJUnit4InvocationAnalyzer(CompilationUnit compilationUnit,
+	JUnit4MethodInvocationAnalyzer(CompilationUnit compilationUnit,
 			Predicate<IMethodBinding> supportedJUnit4MethodPredicate) {
 		jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(compilationUnit);
 		this.supportedJUnit4MethodPredicate = supportedJUnit4MethodPredicate;
 	}
 
-	Optional<JUnit4AssertThrowsInvocationData> findAssertThrowsAnalysisResult(
+	Optional<JUnit4AssertThrowsInvocationAnalysisResult> findAssertThrowsAnalysisResult(
 			MethodInvocation methodInvocation) {
 
 		if (!methodInvocation.getName()
@@ -42,7 +42,7 @@ class SupportedJUnit4InvocationAnalyzer {
 			return Optional.empty();
 		}
 
-		SupportedJUnit4InvocationData jUnit4InvocationData = findAnalysisResult(methodInvocation)
+		JUnit4MethodInvocationAnalysisResult jUnit4InvocationData = findAnalysisResult(methodInvocation)
 			.orElse(null);
 		if (jUnit4InvocationData == null) {
 			return Optional.empty();
@@ -50,11 +50,11 @@ class SupportedJUnit4InvocationAnalyzer {
 		return Optional.of(createAssertThrowsInvocationData(jUnit4InvocationData));
 	}
 
-	private JUnit4AssertThrowsInvocationData createAssertThrowsInvocationData(
-			SupportedJUnit4InvocationData jUnit4InvocationData) {
+	private JUnit4AssertThrowsInvocationAnalysisResult createAssertThrowsInvocationData(
+			JUnit4MethodInvocationAnalysisResult jUnit4InvocationData) {
 
 		if (!jUnit4InvocationData.isTransformable()) {
-			return new JUnit4AssertThrowsInvocationData(jUnit4InvocationData);
+			return new JUnit4AssertThrowsInvocationAnalysisResult(jUnit4InvocationData);
 		}
 
 		ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
@@ -63,18 +63,19 @@ class SupportedJUnit4InvocationAnalyzer {
 			Type throwingRunnableTypeToReplace = throwingRunnableArgumentAnalyser.getLocalVariableTypeToReplace()
 				.orElse(null);
 			if (throwingRunnableTypeToReplace != null) {
-				return new JUnit4AssertThrowsInvocationData(jUnit4InvocationData, throwingRunnableTypeToReplace);
+				return new JUnit4AssertThrowsInvocationAnalysisResult(jUnit4InvocationData,
+						throwingRunnableTypeToReplace);
 			}
-			return new JUnit4AssertThrowsInvocationData(jUnit4InvocationData);
+			return new JUnit4AssertThrowsInvocationAnalysisResult(jUnit4InvocationData);
 		}
 
 		MethodInvocation methodInvocation = jUnit4InvocationData.getMethodInvocation();
 		IMethodBinding methodBinding = jUnit4InvocationData.getMethodBinding();
-		return new JUnit4AssertThrowsInvocationData(
-				new SupportedJUnit4InvocationData(methodInvocation, methodBinding, arguments, false));
+		return new JUnit4AssertThrowsInvocationAnalysisResult(
+				new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, false));
 	}
 
-	Optional<SupportedJUnit4InvocationData> findAnalysisResult(
+	Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(
 			MethodInvocation methodInvocation) {
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding != null && supportedJUnit4MethodPredicate.test(methodBinding)) {
@@ -84,7 +85,8 @@ class SupportedJUnit4InvocationAnalyzer {
 						.stream()
 						.allMatch(this::isArgumentWithUnambiguousType);
 			return Optional
-				.of(new SupportedJUnit4InvocationData(methodInvocation, methodBinding, arguments, isTransformable));
+				.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+						isTransformable));
 		}
 		return Optional.empty();
 	}

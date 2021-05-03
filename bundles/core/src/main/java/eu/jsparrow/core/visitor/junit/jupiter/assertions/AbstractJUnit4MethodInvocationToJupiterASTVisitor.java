@@ -52,18 +52,18 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 		verifyImport(compilationUnit, classDeclaringJUnitJupiterMethod);
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
 		boolean isAssertionAnalysis = classDeclaringJUnit4Method.equals("org.junit.Assert"); //$NON-NLS-1$
-		SupportedJUnit4InvocationDataStore transformationDataStore = new SupportedJUnit4InvocationDataStore(
+		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = new JUnit4MethodInvocationAnalysisResultStore(
 				compilationUnit, this::isSupportedJUnit4Method, isAssertionAnalysis);
 		
-		List<SupportedJUnit4InvocationData> allSupportedJUnit4InvocationDataList = transformationDataStore.getSupportedJUnit4InvocationDataList();
+		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = transformationDataStore.getSupportedJUnit4InvocationDataList();
 		List<Type> throwingRunnableTypesToReplace = transformationDataStore.getThrowingRunnableTypesToReplace();
 		
 		StaticMethodImportsToRemoveHelper staticMethodImportsToRemoveHelper = new StaticMethodImportsToRemoveHelper(
 				compilationUnit, this::isSupportedJUnit4Method, allSupportedJUnit4InvocationDataList);
 
-		List<SupportedJUnit4InvocationData> transformableJUnit4InvocationAnalysisResults = allSupportedJUnit4InvocationDataList
+		List<JUnit4MethodInvocationAnalysisResult> transformableJUnit4InvocationAnalysisResults = allSupportedJUnit4InvocationDataList
 			.stream()
-			.filter(SupportedJUnit4InvocationData::isTransformable)
+			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
 			.collect(Collectors.toList());
 
 		List<ImportDeclaration> staticAssertMethodImportsToRemove = staticMethodImportsToRemoveHelper
@@ -93,7 +93,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 
 	private Set<String> findSupportedStaticImports(
 			StaticMethodImportsToRemoveHelper staticMethodImportsToRemoveHelper,
-			List<SupportedJUnit4InvocationData> transformableJUnit4InvocationAnalysisResults) {
+			List<JUnit4MethodInvocationAnalysisResult> transformableJUnit4InvocationAnalysisResults) {
 
 		Set<String> supportedNewMethodNames = new HashSet<>();
 		transformableJUnit4InvocationAnalysisResults.forEach(data -> {
@@ -126,7 +126,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 	}
 
 	private Optional<JUnit4MethodInvocationReplacementData> findTransformationData(
-			SupportedJUnit4InvocationData invocationData,
+			JUnit4MethodInvocationAnalysisResult invocationData,
 			Set<String> supportedNewStaticMethodImports) {
 
 		if (!invocationData.isTransformable()) {

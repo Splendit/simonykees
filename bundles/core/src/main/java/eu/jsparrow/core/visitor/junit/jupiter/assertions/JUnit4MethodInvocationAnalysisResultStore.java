@@ -11,22 +11,22 @@ import org.eclipse.jdt.core.dom.Type;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
 
-class SupportedJUnit4InvocationDataStore {
-	private final List<SupportedJUnit4InvocationData> supportedJUnit4InvocationDataList = new ArrayList<>();
+class JUnit4MethodInvocationAnalysisResultStore {
+	private final List<JUnit4MethodInvocationAnalysisResult> supportedJUnit4InvocationDataList = new ArrayList<>();
 	private final List<Type> throwingRunnableTypesToReplace = new ArrayList<>();
 
-	SupportedJUnit4InvocationDataStore(CompilationUnit compilationUnit,
+	JUnit4MethodInvocationAnalysisResultStore(CompilationUnit compilationUnit,
 			Predicate<IMethodBinding> supportedJUnit4MethodPredicate, boolean isAssertionAnalysis) {
 
 		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
 		compilationUnit.accept(invocationCollectorVisitor);
 
-		SupportedJUnit4InvocationAnalyzer analyzer = new SupportedJUnit4InvocationAnalyzer(compilationUnit,
+		JUnit4MethodInvocationAnalyzer analyzer = new JUnit4MethodInvocationAnalyzer(compilationUnit,
 				supportedJUnit4MethodPredicate);
 
 		for (MethodInvocation methodInvocation : invocationCollectorVisitor.getMethodInvocations()) {
 
-			JUnit4AssertThrowsInvocationData assertThrowsAnalysisResult = isAssertionAnalysis
+			JUnit4AssertThrowsInvocationAnalysisResult assertThrowsAnalysisResult = isAssertionAnalysis
 					? analyzer.findAssertThrowsAnalysisResult(methodInvocation)
 						.orElse(null)
 					: null;
@@ -41,7 +41,7 @@ class SupportedJUnit4InvocationDataStore {
 		}
 	}
 
-	List<SupportedJUnit4InvocationData> getSupportedJUnit4InvocationDataList() {
+	List<JUnit4MethodInvocationAnalysisResult> getSupportedJUnit4InvocationDataList() {
 		return supportedJUnit4InvocationDataList;
 	}
 

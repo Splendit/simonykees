@@ -3,21 +3,21 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 import org.eclipse.jdt.core.dom.Type;
 import java.util.Optional;
 
-class JUnit4AssertThrowsInvocationData {
-	private final SupportedJUnit4InvocationData jUnitInvocationData;
+class JUnit4AssertThrowsInvocationAnalysisResult {
+	private final JUnit4MethodInvocationAnalysisResult jUnitInvocationData;
 	private Type typeOfThrowingRunnableToReplace;
 
-	JUnit4AssertThrowsInvocationData(SupportedJUnit4InvocationData junitInvocationData,
+	JUnit4AssertThrowsInvocationAnalysisResult(JUnit4MethodInvocationAnalysisResult junitInvocationData,
 			Type typeOfThrowingRunnableToReplace) {
 		this(junitInvocationData);
 		this.typeOfThrowingRunnableToReplace = typeOfThrowingRunnableToReplace;
 	}
 
-	JUnit4AssertThrowsInvocationData(SupportedJUnit4InvocationData jUnitInvocationData) {
+	JUnit4AssertThrowsInvocationAnalysisResult(JUnit4MethodInvocationAnalysisResult jUnitInvocationData) {
 		this.jUnitInvocationData = jUnitInvocationData;
 	}
 
-	SupportedJUnit4InvocationData getJUnit4InvocationData() {
+	JUnit4MethodInvocationAnalysisResult getJUnit4InvocationData() {
 		return jUnitInvocationData;
 	}
 

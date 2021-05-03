@@ -22,7 +22,7 @@ class StaticMethodImportsToRemoveHelper {
 
 	StaticMethodImportsToRemoveHelper(CompilationUnit compilationUnit,
 			Predicate<IMethodBinding> supportedJUnit4MethodPredicate,
-			List<SupportedJUnit4InvocationData> jUnit4AssertInvocationDataList) {
+			List<JUnit4MethodInvocationAnalysisResult> jUnit4AssertInvocationDataList) {
 
 		staticMethodImportsToRemove = collectStaticAssertMethodImportsToRemove(compilationUnit,
 				supportedJUnit4MethodPredicate, jUnit4AssertInvocationDataList);
@@ -39,13 +39,13 @@ class StaticMethodImportsToRemoveHelper {
 
 	private List<ImportDeclaration> collectStaticAssertMethodImportsToRemove(CompilationUnit compilationUnit,
 			Predicate<IMethodBinding> supportedJUnit4MethodPredicate,
-			List<SupportedJUnit4InvocationData> jUnit4AssertInvocationDataList) {
+			List<JUnit4MethodInvocationAnalysisResult> jUnit4AssertInvocationDataList) {
 		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = jUnit4AssertInvocationDataList
 			.stream()
 			.filter(data -> !data.isTransformable())
 			.filter(data -> data.getMethodInvocation()
 				.getExpression() == null)
-			.map(SupportedJUnit4InvocationData::getMethodBinding)
+			.map(JUnit4MethodInvocationAnalysisResult::getMethodBinding)
 			.map(IMethodBinding::getName)
 			.collect(Collectors.toSet());
 

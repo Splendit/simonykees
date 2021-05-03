@@ -6,14 +6,14 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-public class SupportedJUnit4InvocationData {
+public class JUnit4MethodInvocationAnalysisResult {
 
 	private final MethodInvocation methodInvocation;
 	private final IMethodBinding methodBinding;
 	private final List<Expression> arguments;
 	private final boolean transformable;
 
-	SupportedJUnit4InvocationData(MethodInvocation methodInvocation, IMethodBinding methodBinding,
+	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			List<Expression> arguments, boolean isTransformable) {
 		this.methodInvocation = methodInvocation;
 		this.methodBinding = methodBinding;
