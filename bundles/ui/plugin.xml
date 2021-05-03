@@ -156,7 +156,7 @@
             label="jSparrow Refactor"
             overviewRulerPreferenceKey="jsparrow.marker.overview"
             overviewRulerPreferenceValue="true"
-            presentationLayer="5"
+            presentationLayer="0"
             quickFixIcon="icons/jSparrow_active_icon_16.png"
             showInNextPrevDropdownToolbarAction="true"
             textPreferenceKey="jsparrow.marker.text"
@@ -191,6 +191,7 @@
    </extension>
    
    <!-- jSparrow QuickFixes Extension -->
+   <!--
    <extension
          point="org.eclipse.jdt.ui.quickFixProcessors">
       <quickFixProcessor
@@ -199,5 +200,13 @@
             name="jSparrow Refactoring Quickfix">
       </quickFixProcessor>
    </extension>
+   -->
+	<extension
+			point="org.eclipse.ui.ide.markerResolution">
+		<markerResolutionGenerator
+			class="eu.jsparrow.ui.quickfix.QuickFixer"
+			markerType="jsparrow.marker">
+		</markerResolutionGenerator>
+	</extension>
   
 </plugin>
