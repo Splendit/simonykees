@@ -51,13 +51,26 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 
 		verifyImport(compilationUnit, classDeclaringJUnitJupiterMethod);
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
-		boolean isAssertionAnalysis = classDeclaringJUnit4Method.equals("org.junit.Assert"); //$NON-NLS-1$
 		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = new JUnit4MethodInvocationAnalysisResultStore(
-				compilationUnit, this::isSupportedJUnit4Method, isAssertionAnalysis);
-		
-		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = transformationDataStore.getSupportedJUnit4InvocationDataList();
-		List<Type> throwingRunnableTypesToReplace = transformationDataStore.getThrowingRunnableTypesToReplace();
-		
+				compilationUnit, this::isSupportedJUnit4Method);
+
+		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = new ArrayList<>();
+
+		transformationDataStore.getMethodInvocationAnalysisResults()
+			.forEach(allSupportedJUnit4InvocationDataList::add);
+
+		List<JUnit4AssertThrowsInvocationAnalysisResult> assertThrowsInvocationAnalysisResults = transformationDataStore
+			.getAssertThrowsInvocationAnalysisResults();
+		assertThrowsInvocationAnalysisResults.stream()
+			.map(JUnit4AssertThrowsInvocationAnalysisResult::getJUnit4InvocationData)
+			.forEach(allSupportedJUnit4InvocationDataList::add);
+
+		List<Type> throwingRunnableTypesToReplace = assertThrowsInvocationAnalysisResults.stream()
+			.map(JUnit4AssertThrowsInvocationAnalysisResult::getTypeOfThrowingRunnableToReplace)
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toList());
+
 		StaticMethodImportsToRemoveHelper staticMethodImportsToRemoveHelper = new StaticMethodImportsToRemoveHelper(
 				compilationUnit, this::isSupportedJUnit4Method, allSupportedJUnit4InvocationDataList);
 
