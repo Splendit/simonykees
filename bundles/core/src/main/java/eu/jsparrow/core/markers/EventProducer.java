@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.text.edits.TextEdit;
 
+import eu.jsparrow.core.markers.visitor.UseFunctionalInterfaceMarkerVisitor;
 import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
 import eu.jsparrow.rules.common.MarkerEvent;
 import eu.jsparrow.rules.common.RefactoringEventProducer;
@@ -40,7 +41,7 @@ public class EventProducer implements RefactoringEventProducer {
 		}
 		CompilationUnit cu = RefactoringUtil.parse(iCompilationUnit);
 		final ASTRewrite astRewrite = ASTRewrite.create(cu.getAST());
-		FunctionalInterfaceASTVisitor visitor = new FunctionalInterfaceASTVisitor();
+		FunctionalInterfaceASTVisitor visitor = new UseFunctionalInterfaceMarkerVisitor(offset);
 		visitor.setASTRewrite(astRewrite);
 		cu.accept(visitor);
 		
