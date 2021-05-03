@@ -107,5 +107,4 @@ class JUnit4MethodInvocationAnalyzer {
 		}
 		return true;
 	}
-
 }
