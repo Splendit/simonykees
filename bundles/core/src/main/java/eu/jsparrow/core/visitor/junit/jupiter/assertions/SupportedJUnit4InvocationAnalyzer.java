@@ -18,8 +18,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * Helper class analyzing a {@link MethodInvocation}-node. If the
  * {@link MethodInvocation} represents the invocation of one of the supported
  * methods of the class {@code org.junit.Assert} or {@code org.junit.Assume},
- * then all necessary informations for a possible transformation are collected
- * in an instance of {@link JUnit4MethodInvocationAnalysisResult}.
+ * then all necessary informations are stored in a corresponding wrapper object.
  * 
  * @since 3.28.0
  *
