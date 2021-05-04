@@ -20,11 +20,10 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends AbstractAddImportASTVisitor {
 
-	protected final String classDeclaringJUnitJupiterMethod;
+	protected final String classDeclaringJUnit4MethodReplacement;
 
-	AbstractReplaceJUnit4MethodInvocationsASTVisitor(String classDeclaringJUnitJupiterMethod) {
-		super();
-		this.classDeclaringJUnitJupiterMethod = classDeclaringJUnitJupiterMethod;
+	AbstractReplaceJUnit4MethodInvocationsASTVisitor(String classDeclaringJUnit4MethodReplacement) {
+		this.classDeclaringJUnit4MethodReplacement = classDeclaringJUnit4MethodReplacement;
 	}
 
 	protected JUnit4MethodInvocationAnalysisResultStore createTransformationDataStore(CompilationUnit compilationUnit) {
@@ -87,7 +86,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		Set<String> supportedNewMethodNames = collectSupportedNewMethodNames(transformationDataStore);
 
 		Set<String> supportedNewStaticMethodImports = new HashSet<>();
-		String newMethodFullyQualifiedNamePrefix = classDeclaringJUnitJupiterMethod + "."; //$NON-NLS-1$
+		String newMethodFullyQualifiedNamePrefix = classDeclaringJUnit4MethodReplacement + "."; //$NON-NLS-1$
 		supportedNewMethodNames.forEach(supportedNewMethodName -> {
 			String supportedNewMethodFullyQualifiedName = newMethodFullyQualifiedNamePrefix + supportedNewMethodName;
 			if (simpleNamesOfStaticMethodImportsToRemove.contains(supportedNewMethodName)

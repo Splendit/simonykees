@@ -35,8 +35,8 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 		extends AbstractReplaceJUnit4MethodInvocationsASTVisitor {
 	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
 
-	AbstractJUnit4MethodInvocationToJupiterASTVisitor(String classDeclaringJUnitJupiterMethod) {
-		super(classDeclaringJUnitJupiterMethod);
+	AbstractJUnit4MethodInvocationToJupiterASTVisitor(String classDeclaringJUnit4MethodReplacement) {
+		super(classDeclaringJUnit4MethodReplacement);
 	}
 
 	@Override
@@ -44,7 +44,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 
 		super.visit(compilationUnit);
 
-		verifyImport(compilationUnit, classDeclaringJUnitJupiterMethod);
+		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
 
 		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = createTransformationDataStore(
@@ -128,7 +128,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 			newArguments = originalArguments;
 		}
 
-		String newMethodStaticImport = classDeclaringJUnitJupiterMethod + "." + newMethodName; //$NON-NLS-1$
+		String newMethodStaticImport = classDeclaringJUnit4MethodReplacement + "." + newMethodName; //$NON-NLS-1$
 		if (supportedNewStaticMethodImports.contains(newMethodStaticImport)) {
 			if (methodInvocation.getExpression() == null
 					&& newArguments == originalArguments
@@ -192,7 +192,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 	private MethodInvocation createNewInvocationWithAssertionsQualifier(MethodInvocation contextForImport,
 			String newMethodName, List<Expression> arguments) {
 		MethodInvocation newInvocation = createNewInvocationWithoutQualifier(newMethodName, arguments);
-		Name newQualifier = addImport(classDeclaringJUnitJupiterMethod, contextForImport);
+		Name newQualifier = addImport(classDeclaringJUnit4MethodReplacement, contextForImport);
 		newInvocation.setExpression(newQualifier);
 		return newInvocation;
 	}
