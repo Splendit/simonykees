@@ -5,8 +5,6 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 
-import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
-
 /**
  * Replaces the JUnit 4 method invocations
  * {@code org.junit.Assume.assumeNoException},
