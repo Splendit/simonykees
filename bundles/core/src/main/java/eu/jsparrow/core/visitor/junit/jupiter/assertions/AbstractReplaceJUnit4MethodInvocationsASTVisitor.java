@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -9,12 +10,21 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends AbstractAddImportASTVisitor {
+	
+	protected final String classDeclaringJUnitJupiterMethod;
+
+	AbstractReplaceJUnit4MethodInvocationsASTVisitor(String classDeclaringJUnitJupiterMethod) {
+		super();
+		this.classDeclaringJUnitJupiterMethod = classDeclaringJUnitJupiterMethod;
+	}
 
 	protected JUnit4MethodInvocationAnalysisResultStore createTransformationDataStore(CompilationUnit compilationUnit) {
 		JUnit4MethodInvocationAnalyzer analyzer = new JUnit4MethodInvocationAnalyzer(compilationUnit,
@@ -58,6 +68,77 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 					&& !simpleNamesOfStaticAssertMethodImportsToKeep.contains(methodBinding.getName());
 		}
 		return false;
+	}
+	
+	protected Set<String> findSupportedStaticImports(
+			List<ImportDeclaration> staticMethodImportsToRemove,
+			JUnit4MethodInvocationAnalysisResultStore transformationDataStore) {
+
+		Set<String> simpleNamesOfStaticMethodImportsToRemove = staticMethodImportsToRemove
+			.stream()
+			.map(ImportDeclaration::getName)
+			.filter(Name::isQualifiedName)
+			.map(QualifiedName.class::cast)
+			.map(QualifiedName::getName)
+			.map(SimpleName::getIdentifier)
+			.collect(Collectors.toSet());
+
+		Set<String> supportedNewMethodNames = collectSupportedNewMethodNames(transformationDataStore);
+
+		Set<String> supportedNewStaticMethodImports = new HashSet<>();
+		String newMethodFullyQualifiedNamePrefix = classDeclaringJUnitJupiterMethod + "."; //$NON-NLS-1$
+		supportedNewMethodNames.forEach(supportedNewMethodName -> {
+			String supportedNewMethodFullyQualifiedName = newMethodFullyQualifiedNamePrefix + supportedNewMethodName;
+			if (simpleNamesOfStaticMethodImportsToRemove.contains(supportedNewMethodName)
+					|| canAddStaticAssertionsMethodImport(supportedNewMethodFullyQualifiedName)) {
+				supportedNewStaticMethodImports.add(supportedNewMethodFullyQualifiedName);
+			}
+		});
+
+		return supportedNewStaticMethodImports;
+	}
+
+	private Set<String> collectSupportedNewMethodNames(
+			JUnit4MethodInvocationAnalysisResultStore transformationDataStore) {
+		Set<String> supportedNewMethodNames = new HashSet<>();
+
+		transformationDataStore.getMethodInvocationAnalysisResults()
+			.stream()
+			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
+			.map(JUnit4MethodInvocationAnalysisResult::getMethodInvocation)
+			.map(MethodInvocation::getName)
+			.map(SimpleName::getIdentifier)
+			.forEach(supportedNewMethodNames::add);
+
+		transformationDataStore.getAssertThrowsInvocationAnalysisResults()
+			.stream()
+			.map(JUnit4AssertThrowsInvocationAnalysisResult::getJUnit4InvocationData)
+			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
+			.map(JUnit4MethodInvocationAnalysisResult::getMethodInvocation)
+			.map(MethodInvocation::getName)
+			.map(SimpleName::getIdentifier)
+			.forEach(supportedNewMethodNames::add);
+
+		transformationDataStore.getAssumeNotNullInvocationAnalysisResults()
+			.stream()
+			.filter(JUnit4AssumeNotNullInvocationAnalysisResult::isTransformable)
+			.map(JUnit4AssumeNotNullInvocationAnalysisResult::getMethodInvocation)
+			.map(MethodInvocation::getName)
+			.map(SimpleName::getIdentifier)
+			.forEach(supportedNewMethodNames::add);
+
+		if (supportedNewMethodNames.contains("assertEquals")) { //$NON-NLS-1$
+			supportedNewMethodNames.add("assertArrayEquals"); //$NON-NLS-1$
+			// there are special cases where "assertEquals" changes to
+			// "assertArrayEquals"
+		}
+
+		return supportedNewMethodNames;
+	}
+
+	private boolean canAddStaticAssertionsMethodImport(String fullyQualifiedAssertionsMethodName) {
+		verifyStaticMethodImport(getCompilationUnit(), fullyQualifiedAssertionsMethodName);
+		return canAddStaticMethodImport(fullyQualifiedAssertionsMethodName);
 	}
 
 	protected abstract boolean isSupportedJUnit4Method(IMethodBinding methodBinding);

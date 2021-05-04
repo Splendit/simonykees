@@ -3,7 +3,6 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;

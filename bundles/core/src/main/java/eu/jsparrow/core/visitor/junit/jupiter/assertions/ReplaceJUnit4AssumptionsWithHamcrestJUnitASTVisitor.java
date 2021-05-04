@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -20,6 +21,10 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
  */
 public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		extends AbstractReplaceJUnit4MethodInvocationsASTVisitor {
+	
+	public ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor() {
+		super("org.junit.jupiter.api.Assumptions"); //$NON-NLS-1$
+	}
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
@@ -27,6 +32,9 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 
 		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = createTransformationDataStore(compilationUnit);
 		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticMethodImportsToRemove(compilationUnit,
+				transformationDataStore);
+		
+		Set<String> supportedNewStaticMethodImports = findSupportedStaticImports(staticMethodImportsToRemove,
 				transformationDataStore);
 
 		return true;
