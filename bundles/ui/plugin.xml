@@ -145,6 +145,7 @@
      <extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">
       <specification
+      		annotationImageProvider="eu.jsparrow.ui.quickfix.JSparrowImageProvider"
             annotationType="jsparrow"
             colorPreferenceKey="jsparrow.marker.color"
             colorPreferenceValue="57,59,52"

@@ -1,25 +1,15 @@
 package eu.jsparrow.ui.quickfix;
 
-import java.net.URL;
-import java.util.HashMap;
-
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IMarkerResolution2;
-import org.osgi.framework.Bundle;
 
 import eu.jsparrow.core.markers.EventProducer;
 import eu.jsparrow.rules.common.RefactoringEventProducer;
-import eu.jsparrow.ui.Activator;
 
 public class QuickFix implements IMarkerResolution2 {
 
@@ -64,12 +54,7 @@ public class QuickFix implements IMarkerResolution2 {
 
 	@Override
 	public Image getImage() {
-		//TODO: make the image static
-		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
-		IPath iPathActive = new Path("icons/jSparrow_active_icon_16.png");
-		URL urlActive = FileLocator.find(bundle, iPathActive, new HashMap<>());
-		ImageDescriptor imageDesc = ImageDescriptor.createFromURL(urlActive);
-		return imageDesc.createImage();
+		return JSparrowImages.JSPARROW_ACTIVE_16;
 	}
 
 }
