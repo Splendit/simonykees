@@ -1,7 +1,5 @@
 package eu.jsparrow.core.markers;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -11,33 +9,22 @@ import eu.jsparrow.rules.common.MarkerEvent;
 
 public class RefactorEvent implements MarkerEvent {
 
-	private int index;
 	private int offset;
 	private int length;
+	private String name;
 	private String message;
 	private IJavaElement iJavaElement;
 	private Map<ASTNode, ASTNode> replacements;
-	private List<ASTNode> imports;
+	private String description;
 
-	public RefactorEvent(int index, int offset, int length, String message, IJavaElement iJavaElement,
-			List<ASTNode> imports, Map<ASTNode, ASTNode> replacements) {
-		this.index = index;
-		this.offset = offset;
-		this.length = length;
+	public RefactorEvent(String name, String message, IJavaElement iJavaElement,
+			ASTNode original, ASTNode replacement) {
+		this.name = name;
+		this.offset = original.getStartPosition();
+		this.length = original.getLength();
+		this.description = replacement.toString();
 		this.message = message;
 		this.iJavaElement = iJavaElement;
-		this.replacements = replacements;
-		this.imports = imports;
-	}
-	
-	public RefactorEvent(int index, int offset, int length, String message, IJavaElement iJavaElement,
-			Map<ASTNode, ASTNode> replacements) {
-		this(index, offset, length, message, iJavaElement, Collections.emptyList(), replacements);
-	}
-
-	@Override
-	public int getIndex() {
-		return index;
 	}
 
 	@Override
@@ -54,17 +41,23 @@ public class RefactorEvent implements MarkerEvent {
 	public String getMessage() {
 		return message;
 	}
+	
+	@Override
+	public String getName() {
+		return this.name;
+	}
 
 	@Override
 	public IJavaElement getJavaElement() {
 		return iJavaElement;
 	}
 
+	@Override
+	public String getDescription() {
+		return this.description;
+	}
+
 	public Map<ASTNode, ASTNode> getReplacements() {
 		return replacements;
-	}
-	
-	public List<ASTNode> getImports() {
-		return this.imports;
 	}
 }

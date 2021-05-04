@@ -2,7 +2,6 @@ package eu.jsparrow.core.visitor.functionalinterface;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -319,12 +318,11 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
 						getASTRewrite().replace(parentNode, newInitializer, null);
 						onRewrite();
-						RefactorEvent event = new RefactorEvent(0,
-								parentNode.getStartPosition(), 
-								parentNode.getLength(), 
-								"Use functional interfaces", //$NON-NLS-1$
+						RefactorEvent event = new RefactorEvent(
+								"Replace with Lambda Expression", //$NON-NLS-1$
+								"Anonymous class can be replaced by lambda expression", //$NON-NLS-1$
 								getCompilationUnit().getJavaElement(), 
-								Collections.singletonMap(parentNode, newInitializer));
+								parentNode, newInitializer);
 						addMarkerEvent(event);
 					}
 				}
