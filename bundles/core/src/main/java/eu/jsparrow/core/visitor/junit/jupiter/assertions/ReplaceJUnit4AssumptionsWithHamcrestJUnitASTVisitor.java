@@ -1,6 +1,9 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
+
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -18,6 +21,22 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor extends Abstrac
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
-		return super.visit(compilationUnit);
+		super.visit(compilationUnit);
+
+		JUnit4MethodInvocationAnalyzer analyzer = new JUnit4MethodInvocationAnalyzer(compilationUnit,
+				this::isSupportedJUnit4Method);
+		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = analyzer.collectAnalysisResults();
+
+		return true;
+	}
+
+	protected boolean isSupportedJUnit4Method(IMethodBinding methodBinding) {
+		if (isContentOfType(methodBinding.getDeclaringClass(), "org.junit.Assume")) {//$NON-NLS-1$
+			String methodName = methodBinding.getName();
+			return methodName.equals("assumeNoException") || //$NON-NLS-1$
+					methodName.equals("assumeNotNull") || //$NON-NLS-1$
+					methodName.equals("assumeThat"); //$NON-NLS-1$
+		}
+		return false;
 	}
 }

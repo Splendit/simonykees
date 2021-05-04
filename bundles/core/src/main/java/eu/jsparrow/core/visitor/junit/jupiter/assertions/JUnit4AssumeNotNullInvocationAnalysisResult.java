@@ -4,17 +4,22 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-public class JUnit4AssumeNotNullInvocationAnalysisResult {
+class JUnit4AssumeNotNullInvocationAnalysisResult {
 	private final MethodInvocation methodInvocation;
-	private final ExpressionStatement methodInvocationStatement;
-	private final Block block;
 	private final boolean transformable;
+	private ExpressionStatement methodInvocationStatement;
+	private Block block;
 
-	public JUnit4AssumeNotNullInvocationAnalysisResult(MethodInvocation methodInvocation,
+	JUnit4AssumeNotNullInvocationAnalysisResult(MethodInvocation methodInvocation,
 			ExpressionStatement methodInvocationStatement, Block block, boolean transformable) {
-		this.methodInvocation = methodInvocation;
+		this(methodInvocation, transformable);
 		this.methodInvocationStatement = methodInvocationStatement;
 		this.block = block;
+	}
+
+	JUnit4AssumeNotNullInvocationAnalysisResult(MethodInvocation methodInvocation,
+			boolean transformable) {
+		this.methodInvocation = methodInvocation;
 		this.transformable = transformable;
 	}
 

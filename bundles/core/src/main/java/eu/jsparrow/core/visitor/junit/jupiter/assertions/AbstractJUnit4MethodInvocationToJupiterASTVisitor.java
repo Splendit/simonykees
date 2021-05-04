@@ -51,8 +51,9 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 
 		verifyImport(compilationUnit, classDeclaringJUnitJupiterMethod);
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
-		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = new JUnit4MethodInvocationAnalysisResultStore(
-				compilationUnit, this::isSupportedJUnit4Method);
+		JUnit4MethodInvocationAnalyzer analyzer = new JUnit4MethodInvocationAnalyzer(compilationUnit,
+				this::isSupportedJUnit4Method);
+		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = analyzer.collectAnalysisResults();
 
 		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = new ArrayList<>();
 
