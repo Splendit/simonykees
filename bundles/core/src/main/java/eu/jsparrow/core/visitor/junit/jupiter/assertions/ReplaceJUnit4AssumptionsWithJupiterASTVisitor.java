@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractJUnit4MethodInvocationToJupiterASTVisitor {
 
 	public ReplaceJUnit4AssumptionsWithJupiterASTVisitor() {
-		super("org.junit.jupiter.api.Assumptions"); //$NON-NLS-1$
+		super(ORG_J_UNIT_JUPITER_API_ASSUMPTIONS);
 	}
 
 	@Override

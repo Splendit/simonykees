@@ -20,10 +20,15 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends AbstractAddImportASTVisitor {
 
+	protected static final String ORG_J_UNIT_JUPITER_API_ASSUMPTIONS = "org.junit.jupiter.api.Assumptions"; //$NON-NLS-1$
+	protected static final String ORG_J_UNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	protected final String classDeclaringJUnit4MethodReplacement;
+	protected final boolean transformingToJUnitJupiter;
 
 	AbstractReplaceJUnit4MethodInvocationsASTVisitor(String classDeclaringJUnit4MethodReplacement) {
 		this.classDeclaringJUnit4MethodReplacement = classDeclaringJUnit4MethodReplacement;
+		transformingToJUnitJupiter = classDeclaringJUnit4MethodReplacement.equals(ORG_J_UNIT_JUPITER_API_ASSERTIONS)
+				|| classDeclaringJUnit4MethodReplacement.equals(ORG_J_UNIT_JUPITER_API_ASSUMPTIONS);
 	}
 
 	protected JUnit4MethodInvocationAnalysisResultStore createTransformationDataStore(CompilationUnit compilationUnit) {
@@ -122,7 +127,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 			.forEach(supportedNewMethodSimpleNames::add);
 
 		supportedNewMethodSimpleNames.addAll(getSupportedMethodNameReplacements());
-		
+
 		return supportedNewMethodSimpleNames;
 
 	}

@@ -21,7 +21,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractJUnit4
 	private final Set<String> potentialMethodNameReplacements;
 
 	public ReplaceJUnit4AssertionsWithJupiterASTVisitor() {
-		super("org.junit.jupiter.api.Assertions"); //$NON-NLS-1$
+		super(ORG_J_UNIT_JUPITER_API_ASSERTIONS);
 		Set<String> tmp = new HashSet<>();
 		tmp.add("assertArrayEquals"); //$NON-NLS-1$
 		potentialMethodNameReplacements = Collections.unmodifiableSet(tmp);
