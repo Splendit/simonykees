@@ -78,11 +78,10 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
 			.collect(Collectors.toList());
 
-		List<ImportDeclaration> staticAssertMethodImportsToRemove = collectStaticMethodImportsToRemove(
-				compilationUnit,
-				this::isSupportedJUnit4Method, allSupportedJUnit4InvocationDataList);
+		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticMethodImportsToRemove(compilationUnit,
+				transformationDataStore);
 
-		Set<String> simpleNamesOfStaticMethodImportsToRemove = staticAssertMethodImportsToRemove
+		Set<String> simpleNamesOfStaticMethodImportsToRemove = staticMethodImportsToRemove
 			.stream()
 			.map(ImportDeclaration::getName)
 			.filter(Name::isQualifiedName)
@@ -107,7 +106,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 			.map(Optional::get)
 			.collect(Collectors.toSet());
 
-		transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports, throwingRunnableTypesToReplace,
+		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, throwingRunnableTypesToReplace,
 				jUnit4AssertTransformationDataList);
 
 		return false;

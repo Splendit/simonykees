@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -64,11 +65,40 @@ class JUnit4MethodInvocationAnalyzer {
 				}
 			});
 
+		List<MethodInvocation> notTransformedMethodInvocations = collectNotTransformedResults(
+				methodInvocationAnalysisResults, assertThrowsInvocationAnalysisResults,
+				assumeNotNullInvocationAnalysisResults);
+
 		return new JUnit4MethodInvocationAnalysisResultStore(methodInvocationAnalysisResults,
-				assertThrowsInvocationAnalysisResults, assumeNotNullInvocationAnalysisResults);
+				assertThrowsInvocationAnalysisResults, assumeNotNullInvocationAnalysisResults,
+				notTransformedMethodInvocations);
 	}
 
-	private JUnit4AssertThrowsInvocationAnalysisResult createAssertThrowsInvocationData(MethodInvocation methodInvocation,
+	private List<MethodInvocation> collectNotTransformedResults(
+			List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults,
+			List<JUnit4AssertThrowsInvocationAnalysisResult> assertThrowsInvocationAnalysisResults,
+			List<JUnit4AssumeNotNullInvocationAnalysisResult> assumeNotNullInvocationAnalysisResults) {
+		List<MethodInvocation> notTransformedMethodInvocations = new ArrayList<>();
+		methodInvocationAnalysisResults.stream()
+			.filter(result -> !result.isTransformable())
+			.map(JUnit4MethodInvocationAnalysisResult::getMethodInvocation)
+			.forEach(notTransformedMethodInvocations::add);
+
+		assertThrowsInvocationAnalysisResults.stream()
+			.map(JUnit4AssertThrowsInvocationAnalysisResult::getJUnit4InvocationData)
+			.filter(result -> !result.isTransformable())
+			.map(JUnit4MethodInvocationAnalysisResult::getMethodInvocation)
+			.forEach(notTransformedMethodInvocations::add);
+
+		assumeNotNullInvocationAnalysisResults.stream()
+			.filter(result -> !result.isTransformable())
+			.map(JUnit4AssumeNotNullInvocationAnalysisResult::getMethodInvocation)
+			.forEach(notTransformedMethodInvocations::add);
+		return notTransformedMethodInvocations;
+	}
+
+	private JUnit4AssertThrowsInvocationAnalysisResult createAssertThrowsInvocationData(
+			MethodInvocation methodInvocation,
 			IMethodBinding methodBinding) {
 
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);

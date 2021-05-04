@@ -2,8 +2,11 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 
 /**
  * Replaces the JUnit 4 method invocations
@@ -22,7 +25,9 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	public boolean visit(CompilationUnit compilationUnit) {
 		super.visit(compilationUnit);
 
-		JUnit4MethodInvocationAnalysisResultStore invocationsTransformationDataStore = createTransformationDataStore(compilationUnit);
+		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = createTransformationDataStore(compilationUnit);
+		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticMethodImportsToRemove(compilationUnit,
+				transformationDataStore);
 
 		return true;
 	}

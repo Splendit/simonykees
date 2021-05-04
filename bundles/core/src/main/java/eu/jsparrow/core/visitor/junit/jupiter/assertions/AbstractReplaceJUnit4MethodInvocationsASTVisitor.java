@@ -2,13 +2,14 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -22,28 +23,26 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 	}
 
 	protected List<ImportDeclaration> collectStaticMethodImportsToRemove(CompilationUnit compilationUnit,
-			Predicate<IMethodBinding> supportedJUnit4MethodPredicate,
-			List<JUnit4MethodInvocationAnalysisResult> jUnit4AssertInvocationDataList) {
-		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = jUnit4AssertInvocationDataList
+			JUnit4MethodInvocationAnalysisResultStore transformationDataStore) {
+
+		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = transformationDataStore
+			.getNotTransformedJUnt4MethodInvocations()
 			.stream()
-			.filter(data -> !data.isTransformable())
-			.filter(data -> data.getMethodInvocation()
+			.filter(methodInvocation -> methodInvocation
 				.getExpression() == null)
-			.map(JUnit4MethodInvocationAnalysisResult::getMethodBinding)
-			.map(IMethodBinding::getName)
+			.map(MethodInvocation::getName)
+			.map(SimpleName::getIdentifier)
 			.collect(Collectors.toSet());
 
 		return ASTNodeUtil
 			.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
 			.stream()
 			.filter(importDeclaration -> canRemoveStaticImport(importDeclaration,
-					supportedJUnit4MethodPredicate,
 					simpleNamesOfStaticAssertMethodImportsToKeep))
 			.collect(Collectors.toList());
 	}
 
-	private static boolean canRemoveStaticImport(ImportDeclaration importDeclaration,
-			Predicate<IMethodBinding> supportedJUnit4MethodPredicate,
+	private boolean canRemoveStaticImport(ImportDeclaration importDeclaration,
 			Set<String> simpleNamesOfStaticAssertMethodImportsToKeep) {
 		if (!importDeclaration.isStatic()) {
 			return false;
@@ -55,7 +54,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		IBinding importBinding = importDeclaration.resolveBinding();
 		if (importBinding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = ((IMethodBinding) importBinding);
-			return supportedJUnit4MethodPredicate.test(methodBinding)
+			return isSupportedJUnit4Method(methodBinding)
 					&& !simpleNamesOfStaticAssertMethodImportsToKeep.contains(methodBinding.getName());
 		}
 		return false;
