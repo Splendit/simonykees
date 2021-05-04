@@ -11,14 +11,16 @@ import org.eclipse.ui.IMarkerResolution2;
 import eu.jsparrow.core.markers.EventProducer;
 import eu.jsparrow.rules.common.RefactoringEventProducer;
 
-public class QuickFix implements IMarkerResolution2 {
+public class JSparrowMarkerResolution implements IMarkerResolution2 {
 
 	private String label;
 	private int offset;
+	private IResource resource;
 	
-	QuickFix(IMarker marker) {
+	public JSparrowMarkerResolution(IMarker marker) {
 		this.label = marker.getAttribute(IMarker.MESSAGE, "jSparrow QuickFix");
 		this.offset = marker.getAttribute(IMarker.CHAR_START, 0);
+		this.resource = marker.getResource();
 		
 	}
 
@@ -31,7 +33,6 @@ public class QuickFix implements IMarkerResolution2 {
 	public void run(IMarker marker) {
 		
 		RefactoringEventProducer eventGenerator = new EventProducer();
-		IResource resource = marker.getResource();
 		IJavaElement element = JavaCore.create(resource);
 		if (element == null) {
 			return;
@@ -41,8 +42,6 @@ public class QuickFix implements IMarkerResolution2 {
 		if (icu == null) {
 			return;
 		}
-		Integer offset = marker.getAttribute(IMarker.CHAR_START, this.offset);
-		
 		eventGenerator.resolve(icu, offset);
 	}
 

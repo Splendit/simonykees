@@ -205,7 +205,7 @@
 	<extension
 			point="org.eclipse.ui.ide.markerResolution">
 		<markerResolutionGenerator
-			class="eu.jsparrow.ui.quickfix.QuickFixer"
+			class="eu.jsparrow.ui.quickfix.JSparrowMarkerResolutionGenerator"
 			markerType="jsparrow.marker">
 		</markerResolutionGenerator>
 	</extension>

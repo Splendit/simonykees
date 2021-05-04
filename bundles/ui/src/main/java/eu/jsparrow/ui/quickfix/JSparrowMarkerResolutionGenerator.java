@@ -7,14 +7,13 @@ import org.eclipse.ui.IMarkerResolutionGenerator2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QuickFixer implements IMarkerResolutionGenerator2 {
+public class JSparrowMarkerResolutionGenerator implements IMarkerResolutionGenerator2 {
 
-	private static final Logger logger = LoggerFactory.getLogger(QuickFixer.class);
+	private static final Logger logger = LoggerFactory.getLogger(JSparrowMarkerResolutionGenerator.class);
 
 	@Override
 	public IMarkerResolution[] getResolutions(IMarker marker) {
-
-		return new IMarkerResolution[] { new QuickFix(marker) };
+		return new IMarkerResolution[] { new JSparrowMarkerResolution(marker) };
 
 	}
 
