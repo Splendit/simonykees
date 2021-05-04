@@ -115,10 +115,16 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 			.map(JUnit4AssumeNotNullInvocationAnalysisResult::getJUnit4InvocationData)
 			.forEach(simpleAnalysisResultList::add);
 
-		return simpleAnalysisResultList.stream()
+		Set<String> supportedNewMethodSimpleNames = new HashSet<>();
+		simpleAnalysisResultList.stream()
 			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
-			.map(JUnit4MethodInvocationAnalysisResult::getNewMethodName)
-			.collect(Collectors.toSet());
+			.map(JUnit4MethodInvocationAnalysisResult::getMethodBinding)
+			.map(IMethodBinding::getName)
+			.forEach(supportedNewMethodSimpleNames::add);
+
+		supportedNewMethodSimpleNames.addAll(getSupportedMethodNameReplacements());
+		
+		return supportedNewMethodSimpleNames;
 
 	}
 
@@ -126,6 +132,8 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		verifyStaticMethodImport(getCompilationUnit(), fullyQualifiedAssertionsMethodName);
 		return canAddStaticMethodImport(fullyQualifiedAssertionsMethodName);
 	}
+
+	protected abstract Set<String> getSupportedMethodNameReplacements();
 
 	protected abstract boolean isSupportedJUnit4Method(IMethodBinding methodBinding);
 }

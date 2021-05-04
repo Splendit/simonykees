@@ -11,14 +11,7 @@ public class JUnit4MethodInvocationAnalysisResult {
 	private final MethodInvocation methodInvocation;
 	private final IMethodBinding methodBinding;
 	private final List<Expression> arguments;
-	private String methodNameReplacement;
 	private final boolean transformable;
-
-	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			List<Expression> arguments, String methodNameReplacement, boolean isTransformable) {
-		this(methodInvocation, methodBinding, arguments, isTransformable);
-		this.methodNameReplacement = methodNameReplacement;
-	}
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			List<Expression> arguments, boolean isTransformable) {
@@ -44,7 +37,4 @@ public class JUnit4MethodInvocationAnalysisResult {
 		return transformable;
 	}
 
-	String getNewMethodName() {
-		return methodNameReplacement != null ? methodNameReplacement : methodBinding.getName();
-	}
 }

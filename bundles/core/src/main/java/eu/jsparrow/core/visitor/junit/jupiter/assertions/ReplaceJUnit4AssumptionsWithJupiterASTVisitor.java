@@ -2,6 +2,9 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.eclipse.jdt.core.dom.IMethodBinding;
 
 /**
@@ -26,5 +29,10 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractJUnit
 					methodName.equals("assumeTrue"); //$NON-NLS-1$
 		}
 		return false;
+	}
+
+	@Override
+	protected Set<String> getSupportedMethodNameReplacements() {
+		return Collections.emptySet();
 	}
 }
