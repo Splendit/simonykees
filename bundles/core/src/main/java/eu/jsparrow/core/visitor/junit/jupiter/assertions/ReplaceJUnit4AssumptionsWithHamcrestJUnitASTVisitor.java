@@ -17,19 +17,19 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.31.0
  * 
  */
-public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor extends AbstractAddImportASTVisitor {
+public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
+		extends AbstractReplaceJUnit4MethodInvocationsASTVisitor {
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		super.visit(compilationUnit);
 
-		JUnit4MethodInvocationAnalyzer analyzer = new JUnit4MethodInvocationAnalyzer(compilationUnit,
-				this::isSupportedJUnit4Method);
-		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = analyzer.collectAnalysisResults();
+		JUnit4MethodInvocationAnalysisResultStore invocationsTransformationDataStore = createTransformationDataStore(compilationUnit);
 
 		return true;
 	}
 
+	@Override
 	protected boolean isSupportedJUnit4Method(IMethodBinding methodBinding) {
 		if (isContentOfType(methodBinding.getDeclaringClass(), "org.junit.Assume")) {//$NON-NLS-1$
 			String methodName = methodBinding.getName();

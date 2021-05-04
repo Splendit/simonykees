@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
  * This visitor replaces invocations of methods which are declared in a JUnit 4
@@ -33,7 +32,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 3.30.0
  * 
  */
-abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends AbstractAddImportASTVisitor {
+abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends AbstractReplaceJUnit4MethodInvocationsASTVisitor {
 	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
 	private final String classDeclaringJUnit4Method;
 	private final String classDeclaringJUnitJupiterMethod;
@@ -51,10 +50,8 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 
 		verifyImport(compilationUnit, classDeclaringJUnitJupiterMethod);
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
-		JUnit4MethodInvocationAnalyzer analyzer = new JUnit4MethodInvocationAnalyzer(compilationUnit,
-				this::isSupportedJUnit4Method);
-		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = analyzer.collectAnalysisResults();
 
+		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = createTransformationDataStore(compilationUnit);
 		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = new ArrayList<>();
 
 		transformationDataStore.getMethodInvocationAnalysisResults()
@@ -286,6 +283,4 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor extends Abstrac
 
 		}
 	}
-
-	protected abstract boolean isSupportedJUnit4Method(IMethodBinding methodBinding);
 }
