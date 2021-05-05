@@ -141,35 +141,16 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 					&& newMethodName.equals(originalMethodName)) {
 				return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodStaticImport));
 			}
+			Supplier<List<Expression>> newArgumentsSupplier = () -> createNewMethodArguments(newArguments);
 			return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation,
-					() -> createNewInvocationWithoutQualifier(newMethodName, newArguments), newMethodStaticImport));
+					() -> createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier),
+					newMethodStaticImport));
 		}
-
-		Supplier<MethodInvocation> newMethodInvocationSupplier = () -> createNewInvocationWithAssertionsQualifier(
+		Supplier<List<Expression>> newArgumentsSupplier = () -> createNewMethodArguments(newArguments);
+		Supplier<MethodInvocation> newMethodInvocationSupplier = () -> createNewInvocationWithQualifier(
 				methodInvocation,
-				newMethodName, newArguments);
+				newMethodName, newArgumentsSupplier);
 
 		return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodInvocationSupplier));
-	}
-
-	@SuppressWarnings({ "unchecked" })
-	private MethodInvocation createNewInvocationWithoutQualifier(String newMethodName,
-			List<Expression> arguments) {
-		AST ast = astRewrite.getAST();
-		MethodInvocation newInvocation = ast.newMethodInvocation();
-		newInvocation.setName(ast.newSimpleName(newMethodName));
-		List<Expression> newInvocationArguments = newInvocation.arguments();
-		arguments.stream()
-			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
-			.forEach(newInvocationArguments::add);
-		return newInvocation;
-	}
-
-	private MethodInvocation createNewInvocationWithAssertionsQualifier(MethodInvocation contextForImport,
-			String newMethodName, List<Expression> arguments) {
-		MethodInvocation newInvocation = createNewInvocationWithoutQualifier(newMethodName, arguments);
-		Name newQualifier = addImport(classDeclaringJUnit4MethodReplacement, contextForImport);
-		newInvocation.setExpression(newQualifier);
-		return newInvocation;
 	}
 }

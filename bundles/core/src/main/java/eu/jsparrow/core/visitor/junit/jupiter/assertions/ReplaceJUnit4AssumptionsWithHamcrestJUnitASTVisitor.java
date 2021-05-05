@@ -66,5 +66,4 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	protected Set<String> getSupportedMethodNameReplacements() {
 		return potentialMethodNameReplacements;
 	}
-
 }

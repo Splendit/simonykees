@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -172,6 +174,31 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 			});
 
 		}
+	}
+	
+	protected List<Expression> createNewMethodArguments(List<Expression> arguments) {
+		return arguments.stream()
+				.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
+				.collect(Collectors.toList());
+	}
+
+	@SuppressWarnings({ "unchecked" })
+	protected MethodInvocation createNewInvocationWithoutQualifier(String newMethodName,
+			Supplier<List<Expression>> newArgumentsSupplier) {
+		AST ast = astRewrite.getAST();
+		MethodInvocation newInvocation = ast.newMethodInvocation();
+		newInvocation.setName(ast.newSimpleName(newMethodName));
+		List<Expression> newInvocationArguments = newInvocation.arguments();
+		newInvocationArguments.addAll(newArgumentsSupplier.get());
+		return newInvocation;
+	}
+
+	protected MethodInvocation createNewInvocationWithQualifier(MethodInvocation contextForImport,
+			String newMethodName, Supplier<List<Expression>> newArgumentsSupplier) {
+		MethodInvocation newInvocation = createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier);
+		Name newQualifier = addImport(classDeclaringJUnit4MethodReplacement, contextForImport);
+		newInvocation.setExpression(newQualifier);
+		return newInvocation;
 	}
 
 	protected abstract Set<String> getSupportedMethodNameReplacements();
