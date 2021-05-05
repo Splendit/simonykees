@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -11,6 +13,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
@@ -191,5 +194,36 @@ class JUnit4MethodInvocationAnalyzer {
 						.isEmpty());
 		}
 		return true;
+	}
+	
+	
+	static boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
+			ITypeBinding[] declaredParameterTypes) {
+		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$
+			return false;
+		}
+
+		if (declaredParameterTypes.length == 2) {
+			return isParameterTypeObjectArray(declaredParameterTypes[0])
+					&& isParameterTypeObjectArray(declaredParameterTypes[1]);
+		}
+
+		if (declaredParameterTypes.length == 3) {
+			return isParameterTypeString(declaredParameterTypes[0])
+					&& isParameterTypeObjectArray(declaredParameterTypes[1])
+					&& isParameterTypeObjectArray(declaredParameterTypes[2]);
+		}
+		return false;
+	}
+
+	static boolean isParameterTypeString(ITypeBinding parameterType) {
+		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
+	}
+
+	static boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
+		if (parameterType.isArray() && parameterType.getDimensions() == 1) {
+			return isContentOfType(parameterType.getComponentType(), "java.lang.Object"); //$NON-NLS-1$
+		}
+		return false;
 	}
 }

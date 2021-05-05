@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
+import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4MethodInvocationAnalyzer.isDeprecatedAssertEqualsComparingObjectArrays;
+import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4MethodInvocationAnalyzer.isParameterTypeString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -146,35 +147,7 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 		return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodInvocationSupplier));
 	}
 
-	private boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
-			ITypeBinding[] declaredParameterTypes) {
-		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$
-			return false;
-		}
 
-		if (declaredParameterTypes.length == 2) {
-			return isParameterTypeObjectArray(declaredParameterTypes[0])
-					&& isParameterTypeObjectArray(declaredParameterTypes[1]);
-		}
-
-		if (declaredParameterTypes.length == 3) {
-			return isParameterTypeString(declaredParameterTypes[0])
-					&& isParameterTypeObjectArray(declaredParameterTypes[1])
-					&& isParameterTypeObjectArray(declaredParameterTypes[2]);
-		}
-		return false;
-	}
-
-	private boolean isParameterTypeString(ITypeBinding parameterType) {
-		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
-	}
-
-	private boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
-		if (parameterType.isArray() && parameterType.getDimensions() == 1) {
-			return isContentOfType(parameterType.getComponentType(), "java.lang.Object"); //$NON-NLS-1$
-		}
-		return false;
-	}
 
 	@SuppressWarnings({ "unchecked" })
 	private MethodInvocation createNewInvocationWithoutQualifier(String newMethodName,
