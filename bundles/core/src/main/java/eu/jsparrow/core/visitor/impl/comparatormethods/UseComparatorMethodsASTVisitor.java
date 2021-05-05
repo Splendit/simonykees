@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.markers.RefactorEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -99,6 +100,10 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		}
 		astRewrite.replace(lambda, lambdaReplacement, null);
 		onRewrite();
+		this.addMarkerEvent(new RefactorEvent(
+				"Use predefined comparator", //$NON-NLS-1$
+				"Lambda expression can be replaced with predefined comparator", //$NON-NLS-1$
+				getCompilationUnit().getJavaElement(), lambda, lambdaReplacement));
 		return true;
 	}
 
