@@ -4,6 +4,7 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -45,8 +46,6 @@ class JUnit4MethodInvocationAnalyzer {
 	JUnit4MethodInvocationAnalysisResultStore collectAnalysisResults() {
 
 		List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults = new ArrayList<>();
-		List<JUnit4AssertThrowsInvocationAnalysisResult> assertThrowsInvocationAnalysisResults = new ArrayList<>();
-		List<JUnit4AssumeNotNullInvocationAnalysisResult> assumeNotNullInvocationAnalysisResults = new ArrayList<>();
 
 		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
 		compilationUnit.accept(invocationCollectorVisitor);
@@ -58,53 +57,29 @@ class JUnit4MethodInvocationAnalyzer {
 				if (methodBinding != null && supportedJUnit4MethodPredicate.test(methodBinding)) {
 					String methodIdentifier = methodInvocation.getName()
 						.getIdentifier();
+					JUnit4MethodInvocationAnalysisResult result;
 					if (methodIdentifier.equals("assertThrows")) { //$NON-NLS-1$
-						assertThrowsInvocationAnalysisResults
-							.add(createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments));
+						result = createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments);
 					} else if (methodIdentifier.equals("assumeNotNull")) { //$NON-NLS-1$
-						assumeNotNullInvocationAnalysisResults
-							.add(createAssumeNotNullInvocationAnalysisResult(methodInvocation, methodBinding,
-									arguments));
+						result = createAssumeNotNullInvocationAnalysisResult(methodInvocation, methodBinding,
+								arguments);
 					} else {
-						methodInvocationAnalysisResults
-							.add(createAnalysisResult(methodInvocation, methodBinding, arguments));
+						result = createAnalysisResult(methodInvocation, methodBinding, arguments);
 					}
+					methodInvocationAnalysisResults.add(result);
 				}
 			});
 
-		List<MethodInvocation> notTransformedMethodInvocations = collectNotTransformedResults(
-				methodInvocationAnalysisResults, assertThrowsInvocationAnalysisResults,
-				assumeNotNullInvocationAnalysisResults);
-
-		return new JUnit4MethodInvocationAnalysisResultStore(methodInvocationAnalysisResults,
-				assertThrowsInvocationAnalysisResults, assumeNotNullInvocationAnalysisResults,
-				notTransformedMethodInvocations);
-	}
-
-	private List<MethodInvocation> collectNotTransformedResults(
-			List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults,
-			List<JUnit4AssertThrowsInvocationAnalysisResult> assertThrowsInvocationAnalysisResults,
-			List<JUnit4AssumeNotNullInvocationAnalysisResult> assumeNotNullInvocationAnalysisResults) {
-
-		List<JUnit4MethodInvocationAnalysisResult> allSimpleAnalysisResults = new ArrayList<>();
-		methodInvocationAnalysisResults
-			.forEach(allSimpleAnalysisResults::add);
-
-		assertThrowsInvocationAnalysisResults.stream()
-			.map(JUnit4AssertThrowsInvocationAnalysisResult::getJUnit4InvocationData)
-			.forEach(allSimpleAnalysisResults::add);
-
-		assumeNotNullInvocationAnalysisResults.stream()
-			.map(JUnit4AssumeNotNullInvocationAnalysisResult::getJUnit4InvocationData)
-			.forEach(allSimpleAnalysisResults::add);
-
-		return allSimpleAnalysisResults.stream()
+		List<MethodInvocation> notTransformedMethodInvocations = methodInvocationAnalysisResults.stream()
 			.filter(result -> !result.isTransformable())
 			.map(JUnit4MethodInvocationAnalysisResult::getMethodInvocation)
 			.collect(Collectors.toList());
+
+		return new JUnit4MethodInvocationAnalysisResultStore(methodInvocationAnalysisResults,
+				notTransformedMethodInvocations);
 	}
 
-	private JUnit4AssertThrowsInvocationAnalysisResult createAssertThrowsInvocationData(
+	private JUnit4MethodInvocationAnalysisResult createAssertThrowsInvocationData(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 
 		ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
@@ -114,58 +89,49 @@ class JUnit4MethodInvocationAnalyzer {
 					.allMatch(this::isArgumentWithUnambiguousType)
 				&& throwingRunnableArgumentAnalyser.analyze(arguments);
 
-		JUnit4MethodInvocationAnalysisResult jUnit4InvocationData = new JUnit4MethodInvocationAnalysisResult(
-				methodInvocation, methodBinding, arguments, transformable);
+		Type throwingRunnableTypeToReplace = throwingRunnableArgumentAnalyser.getLocalVariableTypeToReplace()
+			.orElse(null);
 
-		Type throwingRunnableTypeToReplace = transformable
-				? throwingRunnableArgumentAnalyser.getLocalVariableTypeToReplace()
-					.orElse(null)
-				: null;
-
-		if (throwingRunnableTypeToReplace != null) {
-			return new JUnit4AssertThrowsInvocationAnalysisResult(jUnit4InvocationData,
+		if (transformable && throwingRunnableTypeToReplace != null) {
+			return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
 					throwingRunnableTypeToReplace);
 		}
-
-		return new JUnit4AssertThrowsInvocationAnalysisResult(
-				new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, transformable));
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, transformable);
 	}
 
-	private JUnit4AssumeNotNullInvocationAnalysisResult createAssumeNotNullInvocationAnalysisResult(
+	private JUnit4MethodInvocationAnalysisResult createAssumeNotNullInvocationAnalysisResult(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 
-		if (!jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
-			return createNotTransformableAssumeNotNullAnalysisResult(methodInvocation, methodBinding, arguments);
-		}
-		boolean argumentsUnambiguous = arguments
-			.stream()
-			.allMatch(this::isArgumentWithUnambiguousType);
-		if (!argumentsUnambiguous) {
-			return createNotTransformableAssumeNotNullAnalysisResult(methodInvocation, methodBinding, arguments);
-		}
+		boolean continueAnalysis = jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)
+				&& arguments
+					.stream()
+					.allMatch(this::isArgumentWithUnambiguousType);
 
+		if (continueAnalysis) {
+			AssumeNotNullInvocationAncestors assumeNotNullInvocationAncestors = findAssumeNotNullInvocationAncestors(
+					methodInvocation).orElse(null);
+			if (assumeNotNullInvocationAncestors != null) {
+				return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+						assumeNotNullInvocationAncestors);
+			}
+		}
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, false);
+	}
+
+	private Optional<AssumeNotNullInvocationAncestors> findAssumeNotNullInvocationAncestors(
+			MethodInvocation methodInvocation) {
 		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return createNotTransformableAssumeNotNullAnalysisResult(methodInvocation, methodBinding, arguments);
+			return Optional.empty();
 		}
 
 		ExpressionStatement methodInvocationStatement = (ExpressionStatement) methodInvocation.getParent();
 		if (methodInvocationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return createNotTransformableAssumeNotNullAnalysisResult(methodInvocation, methodBinding, arguments);
+			return Optional.empty();
 		}
 
 		Block block = (Block) methodInvocationStatement.getParent();
-		JUnit4MethodInvocationAnalysisResult simpleAnalysisResult = new JUnit4MethodInvocationAnalysisResult(
-				methodInvocation, methodBinding, arguments, true);
+		return Optional.of(new AssumeNotNullInvocationAncestors(methodInvocationStatement, block));
 
-		return new JUnit4AssumeNotNullInvocationAnalysisResult(simpleAnalysisResult, methodInvocationStatement, block);
-	}
-
-	private JUnit4AssumeNotNullInvocationAnalysisResult createNotTransformableAssumeNotNullAnalysisResult(
-			MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			List<Expression> arguments) {
-		JUnit4MethodInvocationAnalysisResult simpleAnalysisResult = new JUnit4MethodInvocationAnalysisResult(
-				methodInvocation, methodBinding, arguments, false);
-		return new JUnit4AssumeNotNullInvocationAnalysisResult(simpleAnalysisResult);
 	}
 
 	private JUnit4MethodInvocationAnalysisResult createAnalysisResult(MethodInvocation methodInvocation,
@@ -195,8 +161,7 @@ class JUnit4MethodInvocationAnalyzer {
 		}
 		return true;
 	}
-	
-	
+
 	static boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
 			ITypeBinding[] declaredParameterTypes) {
 		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$

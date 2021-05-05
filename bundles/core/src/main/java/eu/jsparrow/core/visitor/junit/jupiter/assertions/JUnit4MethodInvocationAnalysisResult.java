@@ -1,10 +1,12 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Type;
 
 public class JUnit4MethodInvocationAnalysisResult {
 
@@ -12,6 +14,8 @@ public class JUnit4MethodInvocationAnalysisResult {
 	private final IMethodBinding methodBinding;
 	private final List<Expression> arguments;
 	private final boolean transformable;
+	private AssumeNotNullInvocationAncestors assumeNotNullInvocationAncestors;
+	private Type typeOfThrowingRunnableToReplace;
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			List<Expression> arguments, boolean isTransformable) {
@@ -19,6 +23,25 @@ public class JUnit4MethodInvocationAnalysisResult {
 		this.methodBinding = methodBinding;
 		this.arguments = arguments;
 		this.transformable = isTransformable;
+	}
+
+	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
+			List<Expression> arguments, AssumeNotNullInvocationAncestors assumeNotNullInvocationAncestors) {
+		this(methodInvocation, methodBinding, arguments, true);
+		this.assumeNotNullInvocationAncestors = assumeNotNullInvocationAncestors;
+	}
+
+	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
+			List<Expression> arguments, Type typeOfThrowingRunnableToReplace) {
+		this(methodInvocation, methodBinding, arguments, true);
+		this.typeOfThrowingRunnableToReplace = typeOfThrowingRunnableToReplace;
+	}
+
+	protected JUnit4MethodInvocationAnalysisResult(JUnit4MethodInvocationAnalysisResult other) {
+		this.methodInvocation = other.methodInvocation;
+		this.methodBinding = other.methodBinding;
+		this.arguments = other.arguments;
+		this.transformable = other.transformable;
 	}
 
 	MethodInvocation getMethodInvocation() {
@@ -37,4 +60,11 @@ public class JUnit4MethodInvocationAnalysisResult {
 		return transformable;
 	}
 
+	public Optional<AssumeNotNullInvocationAncestors> getAssumeNotNullInvocationAncestors() {
+		return Optional.ofNullable(assumeNotNullInvocationAncestors);
+	}
+
+	Optional<Type> getTypeOfThrowingRunnableToReplace() {
+		return Optional.ofNullable(typeOfThrowingRunnableToReplace);
+	}
 }

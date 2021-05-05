@@ -69,9 +69,6 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 			.map(data -> this.createMethodInvocationReplacementData(data, supportedNewStaticMethodImports))
 			.collect(Collectors.toList());
 
-		List<JUnit4AssumeNotNullInvocationAnalysisResult> assumeNotNullInvocationAnalysisResults = transformationDataStore
-			.getAssumeNotNullInvocationAnalysisResults();
-
 		Set<String> newStaticAssertionMethodImports = jUnit4AssertTransformationDataList.stream()
 			.map(JUnit4MethodInvocationReplacementData::getStaticMethodImport)
 			.filter(Optional::isPresent)

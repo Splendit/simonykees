@@ -49,19 +49,10 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 
 		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = createTransformationDataStore(
 				compilationUnit);
-		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = new ArrayList<>();
+		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = transformationDataStore.getMethodInvocationAnalysisResults();
 
-		transformationDataStore.getMethodInvocationAnalysisResults()
-			.forEach(allSupportedJUnit4InvocationDataList::add);
-
-		List<JUnit4AssertThrowsInvocationAnalysisResult> assertThrowsInvocationAnalysisResults = transformationDataStore
-			.getAssertThrowsInvocationAnalysisResults();
-		assertThrowsInvocationAnalysisResults.stream()
-			.map(JUnit4AssertThrowsInvocationAnalysisResult::getJUnit4InvocationData)
-			.forEach(allSupportedJUnit4InvocationDataList::add);
-
-		List<Type> throwingRunnableTypesToReplace = assertThrowsInvocationAnalysisResults.stream()
-			.map(JUnit4AssertThrowsInvocationAnalysisResult::getTypeOfThrowingRunnableToReplace)
+		List<Type> throwingRunnableTypesToReplace = allSupportedJUnit4InvocationDataList.stream()
+			.map(JUnit4MethodInvocationAnalysisResult::getTypeOfThrowingRunnableToReplace)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.collect(Collectors.toList());

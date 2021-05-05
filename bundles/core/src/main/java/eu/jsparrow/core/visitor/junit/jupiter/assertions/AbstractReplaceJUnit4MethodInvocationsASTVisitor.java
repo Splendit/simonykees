@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -110,21 +109,9 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 	private Set<String> collectSupportedNewMethodNames(
 			JUnit4MethodInvocationAnalysisResultStore transformationDataStore) {
 
-		List<JUnit4MethodInvocationAnalysisResult> simpleAnalysisResultList = new ArrayList<>();
-
-		simpleAnalysisResultList.addAll(transformationDataStore.getMethodInvocationAnalysisResults());
-		transformationDataStore.getAssertThrowsInvocationAnalysisResults()
-			.stream()
-			.map(JUnit4AssertThrowsInvocationAnalysisResult::getJUnit4InvocationData)
-			.forEach(simpleAnalysisResultList::add);
-
-		transformationDataStore.getAssumeNotNullInvocationAnalysisResults()
-			.stream()
-			.map(JUnit4AssumeNotNullInvocationAnalysisResult::getJUnit4InvocationData)
-			.forEach(simpleAnalysisResultList::add);
-
 		Set<String> supportedNewMethodSimpleNames = new HashSet<>();
-		simpleAnalysisResultList.stream()
+		transformationDataStore.getMethodInvocationAnalysisResults()
+			.stream()
 			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
 			.map(JUnit4MethodInvocationAnalysisResult::getMethodBinding)
 			.map(IMethodBinding::getName)
@@ -133,7 +120,6 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		supportedNewMethodSimpleNames.addAll(getSupportedMethodNameReplacements());
 
 		return supportedNewMethodSimpleNames;
-
 	}
 
 	private boolean canAddStaticAssertionsMethodImport(String fullyQualifiedAssertionsMethodName) {
@@ -172,14 +158,13 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 					onRewrite();
 				}
 			});
-
 		}
 	}
-	
+
 	protected List<Expression> createNewMethodArguments(List<Expression> arguments) {
 		return arguments.stream()
-				.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
-				.collect(Collectors.toList());
+			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
+			.collect(Collectors.toList());
 	}
 
 	@SuppressWarnings({ "unchecked" })
