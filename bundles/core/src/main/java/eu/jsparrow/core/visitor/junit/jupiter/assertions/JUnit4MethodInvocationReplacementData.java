@@ -16,6 +16,13 @@ class JUnit4MethodInvocationReplacementData {
 	private final MethodInvocation originalMethodInvocation;
 	private Supplier<MethodInvocation> methodInvocationReplacementSupplier;
 	private String staticMethodImport;
+	
+	
+	JUnit4MethodInvocationReplacementData(JUnit4MethodInvocationReplacementData other) {
+		this.originalMethodInvocation = other.originalMethodInvocation;
+		this.methodInvocationReplacementSupplier = other.methodInvocationReplacementSupplier;
+		this.staticMethodImport  = other.staticMethodImport;
+	}
 
 	JUnit4MethodInvocationReplacementData(MethodInvocation originalMethodInvocation,
 			Supplier<MethodInvocation> newMethodInvocationSupplier, String staticMethodImport) {
