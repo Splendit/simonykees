@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -86,8 +85,14 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 			.map(Optional::get)
 			.collect(Collectors.toSet());
 
-		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, throwingRunnableTypesToReplace,
-				jUnit4AssertTransformationDataList);
+		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
+
+		AST ast = astRewrite.getAST();
+		throwingRunnableTypesToReplace.forEach(typeToReplace -> {
+			Name executableTypeName = addImport(ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE, typeToReplace);
+			SimpleType typeReplacement = ast.newSimpleType(executableTypeName);
+			astRewrite.replace(typeToReplace, typeReplacement, null);
+		});
 
 		return false;
 	}
@@ -147,8 +152,6 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 		return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodInvocationSupplier));
 	}
 
-
-
 	@SuppressWarnings({ "unchecked" })
 	private MethodInvocation createNewInvocationWithoutQualifier(String newMethodName,
 			List<Expression> arguments) {
@@ -168,47 +171,5 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 		Name newQualifier = addImport(classDeclaringJUnit4MethodReplacement, contextForImport);
 		newInvocation.setExpression(newQualifier);
 		return newInvocation;
-	}
-
-	private void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
-			Set<String> newStaticAssertionMethodImports,
-			List<Type> throwingRunnableTypesToReplace,
-			List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList) {
-		if (!staticAssertMethodImportsToRemove.isEmpty() || !newStaticAssertionMethodImports.isEmpty()
-				|| !jUnit4AssertTransformationDataList.isEmpty()) {
-
-			staticAssertMethodImportsToRemove.forEach(importDeclaration -> {
-				astRewrite.remove(importDeclaration, null);
-				onRewrite();
-			});
-
-			AST ast = astRewrite.getAST();
-			ListRewrite newImportsListRewrite = astRewrite.getListRewrite(getCompilationUnit(),
-					CompilationUnit.IMPORTS_PROPERTY);
-			newStaticAssertionMethodImports
-				.forEach(fullyQualifiedMethodName -> {
-					ImportDeclaration newImportDeclaration = ast.newImportDeclaration();
-					newImportDeclaration.setName(ast.newName(fullyQualifiedMethodName));
-					newImportDeclaration.setStatic(true);
-					newImportsListRewrite.insertLast(newImportDeclaration, null);
-				});
-
-			jUnit4AssertTransformationDataList.forEach(data -> {
-				MethodInvocation methodInvocationReplacement = data.createMethodInvocationReplacement()
-					.orElse(null);
-				if (methodInvocationReplacement != null) {
-					MethodInvocation methodInvocationToReplace = data.getOriginalMethodInvocation();
-					astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
-					onRewrite();
-				}
-			});
-
-			throwingRunnableTypesToReplace.forEach(typeToReplace -> {
-				Name executableTypeName = addImport(ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE, typeToReplace);
-				SimpleType typeReplacement = ast.newSimpleType(executableTypeName);
-				astRewrite.replace(typeToReplace, typeReplacement, null);
-			});
-
-		}
 	}
 }

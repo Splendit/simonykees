@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -14,6 +15,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -135,6 +137,41 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 	private boolean canAddStaticAssertionsMethodImport(String fullyQualifiedAssertionsMethodName) {
 		verifyStaticMethodImport(getCompilationUnit(), fullyQualifiedAssertionsMethodName);
 		return canAddStaticMethodImport(fullyQualifiedAssertionsMethodName);
+	}
+
+	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
+			Set<String> newStaticAssertionMethodImports,
+			List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList) {
+		if (!staticAssertMethodImportsToRemove.isEmpty() || !newStaticAssertionMethodImports.isEmpty()
+				|| !jUnit4AssertTransformationDataList.isEmpty()) {
+
+			staticAssertMethodImportsToRemove.forEach(importDeclaration -> {
+				astRewrite.remove(importDeclaration, null);
+				onRewrite();
+			});
+
+			AST ast = astRewrite.getAST();
+			ListRewrite newImportsListRewrite = astRewrite.getListRewrite(getCompilationUnit(),
+					CompilationUnit.IMPORTS_PROPERTY);
+			newStaticAssertionMethodImports
+				.forEach(fullyQualifiedMethodName -> {
+					ImportDeclaration newImportDeclaration = ast.newImportDeclaration();
+					newImportDeclaration.setName(ast.newName(fullyQualifiedMethodName));
+					newImportDeclaration.setStatic(true);
+					newImportsListRewrite.insertLast(newImportDeclaration, null);
+				});
+
+			jUnit4AssertTransformationDataList.forEach(data -> {
+				MethodInvocation methodInvocationReplacement = data.createMethodInvocationReplacement()
+					.orElse(null);
+				if (methodInvocationReplacement != null) {
+					MethodInvocation methodInvocationToReplace = data.getOriginalMethodInvocation();
+					astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
+					onRewrite();
+				}
+			});
+
+		}
 	}
 
 	protected abstract Set<String> getSupportedMethodNameReplacements();
