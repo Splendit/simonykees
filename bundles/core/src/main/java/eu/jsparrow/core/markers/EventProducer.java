@@ -2,10 +2,12 @@ package eu.jsparrow.core.markers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.Document;
@@ -28,16 +30,16 @@ public class EventProducer implements RefactoringEventProducer {
 	public List<MarkerEvent> generateEvents(ICompilationUnit iCompilationUnit) {
 		
 		List<MarkerEvent> allEvents = new ArrayList<>();
-		
+		Predicate<ASTNode> positionChecker = node -> true;
 		CompilationUnit cu = RefactoringUtil.parse(iCompilationUnit);
 		final ASTRewrite astRewrite = ASTRewrite.create(cu.getAST());
-		FunctionalInterfaceASTVisitor visitor = new FunctionalInterfaceASTVisitor();
+		FunctionalInterfaceASTVisitor visitor = new FunctionalInterfaceResolver(positionChecker);
 		visitor.setASTRewrite(astRewrite);
 		cu.accept(visitor);
 		allEvents.addAll(visitor.getMarkerEvents());
 		
 		final ASTRewrite astRewrite2 = ASTRewrite.create(cu.getAST());
-		UseComparatorMethodsASTVisitor comparatorVisitor = new UseComparatorMethodsASTVisitor();
+		UseComparatorMethodsASTVisitor comparatorVisitor = new UseComparatorMethodsResolver(positionChecker);
 		comparatorVisitor.setASTRewrite(astRewrite2);
 		cu.accept(comparatorVisitor);
 		allEvents.addAll(comparatorVisitor.getMarkerEvents());
@@ -46,7 +48,11 @@ public class EventProducer implements RefactoringEventProducer {
 
 	@Override
 	public void resolve(ICompilationUnit iCompilationUnit, int offset) {
-		
+		Predicate<ASTNode> positionChecker  = node -> {
+			int startPosition = node.getStartPosition();
+			int endPosition = startPosition + node.getLength();
+			return startPosition <= offset && endPosition >= offset;
+		}; 
 		Version jdtVersion = JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion();
 		WorkingCopyOwnerDecorator workingCopyOwner = new WorkingCopyOwnerDecorator();
 		ICompilationUnit workingCopy;
@@ -58,7 +64,7 @@ public class EventProducer implements RefactoringEventProducer {
 		}
 		CompilationUnit cu = RefactoringUtil.parse(workingCopy);
 		final ASTRewrite astRewrite = ASTRewrite.create(cu.getAST());
-		FunctionalInterfaceASTVisitor visitor = new FunctionalInterfaceResolver(offset);
+		FunctionalInterfaceASTVisitor visitor = new FunctionalInterfaceResolver(positionChecker);
 		visitor.setASTRewrite(astRewrite);
 		cu.accept(visitor);
 		
@@ -76,7 +82,7 @@ public class EventProducer implements RefactoringEventProducer {
 		}
 		
 
-		UseComparatorMethodsASTVisitor useComparatorMethodsVisitor = new UseComparatorMethodsResolver(offset);
+		UseComparatorMethodsASTVisitor useComparatorMethodsVisitor = new UseComparatorMethodsResolver(positionChecker);
 		final ASTRewrite astRewrite2 = ASTRewrite.create(cu.getAST());
 		useComparatorMethodsVisitor.setASTRewrite(astRewrite2);
 		cu.accept(useComparatorMethodsVisitor);

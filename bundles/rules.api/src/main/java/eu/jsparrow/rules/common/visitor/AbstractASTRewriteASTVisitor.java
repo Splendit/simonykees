@@ -21,7 +21,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @since 0.9
  */
 
-public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
+public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor implements MarkerEventGenerator {
 
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
@@ -122,11 +122,13 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	public void onRewrite() {
 		listeners.forEach(listener -> listener.update(new ASTRewriteEvent(this.compilationUnitHandle)));
 	}
-	
-	public void addMarkerEvent (MarkerEvent event) {
+
+	@Override
+	public void addMarkerEvent(MarkerEvent event) {
 		markerListeners.add(event);
 	}
-	
+
+	@Override
 	public List<MarkerEvent> getMarkerEvents() {
 		return this.markerListeners;
 	}

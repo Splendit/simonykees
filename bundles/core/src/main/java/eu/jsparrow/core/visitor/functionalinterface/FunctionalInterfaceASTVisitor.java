@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.markers.RefactorEvent;
 import eu.jsparrow.core.visitor.sub.MethodInvocationsVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDefinitionASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -318,12 +317,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
 						getASTRewrite().replace(parentNode, newInitializer, null);
 						onRewrite();
-						RefactorEvent event = new RefactorEvent(
-								"Replace with Lambda Expression", //$NON-NLS-1$
-								"Anonymous class can be replaced by lambda expression", //$NON-NLS-1$
-								getCompilationUnit().getJavaElement(), 
-								parentNode, newInitializer);
-						addMarkerEvent(event);
+						addMarkerEvent(parentNode, newInitializer);
 					}
 				}
 			}
