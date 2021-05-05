@@ -5,11 +5,11 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 
 import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
 
-public class UseFunctionalInterfaceMarkerVisitor extends FunctionalInterfaceASTVisitor {
+public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 	
 	private int offset;
 	
-	public UseFunctionalInterfaceMarkerVisitor(int offset) {
+	public FunctionalInterfaceResolver(int offset) {
 		this.offset = offset;
 	}
 	

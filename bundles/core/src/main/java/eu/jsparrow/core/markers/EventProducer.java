@@ -13,7 +13,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.osgi.framework.Version;
 
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
-import eu.jsparrow.core.markers.visitor.UseFunctionalInterfaceMarkerVisitor;
+import eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver;
 import eu.jsparrow.core.refactorer.WorkingCopyOwnerDecorator;
 import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
 import eu.jsparrow.core.visitor.impl.comparatormethods.UseComparatorMethodsASTVisitor;
@@ -58,7 +58,7 @@ public class EventProducer implements RefactoringEventProducer {
 		}
 		CompilationUnit cu = RefactoringUtil.parse(workingCopy);
 		final ASTRewrite astRewrite = ASTRewrite.create(cu.getAST());
-		FunctionalInterfaceASTVisitor visitor = new UseFunctionalInterfaceMarkerVisitor(offset);
+		FunctionalInterfaceASTVisitor visitor = new FunctionalInterfaceResolver(offset);
 		visitor.setASTRewrite(astRewrite);
 		cu.accept(visitor);
 		
