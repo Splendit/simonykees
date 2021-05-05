@@ -13,99 +13,92 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEdit;
 import org.osgi.framework.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
-import eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver;
 import eu.jsparrow.core.refactorer.WorkingCopyOwnerDecorator;
-import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
-import eu.jsparrow.core.visitor.impl.comparatormethods.UseComparatorMethodsASTVisitor;
 import eu.jsparrow.rules.common.MarkerEvent;
 import eu.jsparrow.rules.common.RefactoringEventProducer;
 import eu.jsparrow.rules.common.util.JdtCoreVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class EventProducer implements RefactoringEventProducer {
 
+	private static final Logger logger = LoggerFactory.getLogger(EventProducer.class);
+
 	@Override
 	public List<MarkerEvent> generateEvents(ICompilationUnit iCompilationUnit) {
-		
+
 		List<MarkerEvent> allEvents = new ArrayList<>();
 		Predicate<ASTNode> positionChecker = node -> true;
 		CompilationUnit cu = RefactoringUtil.parse(iCompilationUnit);
-		final ASTRewrite astRewrite = ASTRewrite.create(cu.getAST());
-		FunctionalInterfaceASTVisitor visitor = new FunctionalInterfaceResolver(positionChecker);
-		visitor.setASTRewrite(astRewrite);
-		cu.accept(visitor);
-		allEvents.addAll(visitor.getMarkerEvents());
-		
-		final ASTRewrite astRewrite2 = ASTRewrite.create(cu.getAST());
-		UseComparatorMethodsASTVisitor comparatorVisitor = new UseComparatorMethodsResolver(positionChecker);
-		comparatorVisitor.setASTRewrite(astRewrite2);
-		cu.accept(comparatorVisitor);
-		allEvents.addAll(comparatorVisitor.getMarkerEvents());
+		List<AbstractASTRewriteASTVisitor> resolvers = ResolverVisitorsFactory.getAllResolvers(positionChecker);
+		for (AbstractASTRewriteASTVisitor resolver : resolvers) {
+			List<MarkerEvent> events = createEvents(resolver, positionChecker, cu);
+			allEvents.addAll(events);
+		}
 		return allEvents;
+	}
+
+	private List<MarkerEvent> createEvents(AbstractASTRewriteASTVisitor resolver, Predicate<ASTNode> positionChecker,
+			CompilationUnit cu) {
+		final ASTRewrite astRewrite = ASTRewrite.create(cu.getAST());
+		resolver.setASTRewrite(astRewrite);
+		cu.accept(resolver);
+		return resolver.getMarkerEvents();
 	}
 
 	@Override
 	public void resolve(ICompilationUnit iCompilationUnit, int offset) {
-		Predicate<ASTNode> positionChecker  = node -> {
+		Predicate<ASTNode> positionChecker = node -> {
 			int startPosition = node.getStartPosition();
 			int endPosition = startPosition + node.getLength();
 			return startPosition <= offset && endPosition >= offset;
-		}; 
+		};
 		Version jdtVersion = JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion();
 		WorkingCopyOwnerDecorator workingCopyOwner = new WorkingCopyOwnerDecorator();
 		ICompilationUnit workingCopy;
 		try {
 			workingCopy = iCompilationUnit.getWorkingCopy(workingCopyOwner, new NullProgressMonitor());
-		} catch (JavaModelException e1) {
-			e1.printStackTrace();
+		} catch (JavaModelException e) {
+			logger.error("Cannot create working copy for resolving jSparrow markers", e); //$NON-NLS-1$
 			return;
 		}
 		CompilationUnit cu = RefactoringUtil.parse(workingCopy);
-		final ASTRewrite astRewrite = ASTRewrite.create(cu.getAST());
-		FunctionalInterfaceASTVisitor visitor = new FunctionalInterfaceResolver(positionChecker);
-		visitor.setASTRewrite(astRewrite);
-		cu.accept(visitor);
-		
-		TextEdit edits;
-		
-		try {
-			Document document = new Document(workingCopy.getSource());
-			edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
-			if(edits.hasChildren()) {
-				workingCopy.applyTextEdit(edits, new NullProgressMonitor());
-				cu = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null, null);
-			}
-		} catch (JavaModelException | IllegalArgumentException e) {
-			e.printStackTrace();
+		List<AbstractASTRewriteASTVisitor> resolvers = ResolverVisitorsFactory.getAllResolvers(positionChecker);
+		for (AbstractASTRewriteASTVisitor resolver : resolvers) {
+			cu = resolve(jdtVersion, workingCopy, cu, resolver);
 		}
-		
 
-		UseComparatorMethodsASTVisitor useComparatorMethodsVisitor = new UseComparatorMethodsResolver(positionChecker);
-		final ASTRewrite astRewrite2 = ASTRewrite.create(cu.getAST());
-		useComparatorMethodsVisitor.setASTRewrite(astRewrite2);
-		cu.accept(useComparatorMethodsVisitor);
-		
-		try {
-			Document document = new Document(workingCopy.getSource());
-			edits = astRewrite2.rewriteAST(document, workingCopy.getJavaProject()
-					.getOptions(true));
-			if(edits.hasChildren()) {
-				workingCopy.applyTextEdit(edits, new NullProgressMonitor());
-				cu = workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null, null);
-			}
-		} catch (JavaModelException e1) {
-			e1.printStackTrace();
-		}
-		
 		try {
 			workingCopy.commitWorkingCopy(false, new NullProgressMonitor());
 			workingCopy.discardWorkingCopy();
 			workingCopy.close();
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			logger.error("Cannot discard working copy after resolving jSparrow markers", e); //$NON-NLS-1$
 		}
+	}
+
+	private CompilationUnit resolve(Version jdtVersion, ICompilationUnit workingCopy, CompilationUnit compilationUnit,
+			AbstractASTRewriteASTVisitor resolver) {
+
+		final ASTRewrite astRewrite = ASTRewrite.create(compilationUnit.getAST());
+		resolver.setASTRewrite(astRewrite);
+		compilationUnit.accept(resolver);
+
+		try {
+			Document document = new Document(workingCopy.getSource());
+			TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject()
+				.getOptions(true));
+			if (edits.hasChildren()) {
+				workingCopy.applyTextEdit(edits, new NullProgressMonitor());
+				return workingCopy.reconcile(JdtCoreVersionBindingUtil.findJLSLevel(jdtVersion), true, null, null);
+			}
+		} catch (JavaModelException e) {
+			logger.error("Cannot resolve jSparrow Marker", e); //$NON-NLS-1$
+		}
+		return compilationUnit;
 	}
 
 }
