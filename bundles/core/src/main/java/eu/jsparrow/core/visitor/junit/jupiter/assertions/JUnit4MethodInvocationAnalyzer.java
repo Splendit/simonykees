@@ -103,8 +103,8 @@ class JUnit4MethodInvocationAnalyzer {
 
 		if (supportTransformation(methodInvocation, arguments)) {
 			if (arguments.size() == 1) {
-				Expression singleVarargs = arguments.get(0);
-				if (!singleVarargs.resolveTypeBinding()
+				Expression onlyOneArgument = arguments.get(0);
+				if (onlyOneArgument.getNodeType() == ASTNode.ARRAY_CREATION || !onlyOneArgument.resolveTypeBinding()
 					.isArray()) {
 					return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true);
 				} else if (supportSingleArrayArgumentInVararg()) {

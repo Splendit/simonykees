@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -163,25 +164,29 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	private List<Expression> createAssumeThatListIsNotNullArguments(MethodInvocation methodInvocation,
 			List<Expression> originalArguments) {
 
-		if (originalArguments.size() == 1) {
-			return Arrays.<Expression>asList(
-					(Expression) astRewrite.createCopyTarget(originalArguments.get(0)),
-					createCoreMatchersInvocation(methodInvocation, NOT_NULL_VALUE));
-		}
-		AST ast = astRewrite.getAST();
-		MethodInvocation asListInvocation = ast.newMethodInvocation();
-		asListInvocation.setName(ast.newSimpleName(AS_LIST));
-		Name qualifier = addImportForStaticMethod(JAVA_UTIL_ARRAYS + '.' + AS_LIST, methodInvocation).orElse(null);
-		if (qualifier != null) {
-			asListInvocation.setExpression(qualifier);
-		}
-		List<Expression> asListArguments = originalArguments.stream()
-			.map(arg -> (Expression) astRewrite.createCopyTarget(originalArguments.get(0)))
-			.collect(Collectors.toList());
-		asListInvocation.arguments()
-			.addAll(asListArguments);
+		if (originalArguments.size() != 1 || originalArguments.get(0)
+			.getNodeType() == ASTNode.ARRAY_CREATION) {
+			AST ast = astRewrite.getAST();
+			MethodInvocation asListInvocation = ast.newMethodInvocation();
+			asListInvocation.setName(ast.newSimpleName(AS_LIST));
+			Name qualifier = addImportForStaticMethod(JAVA_UTIL_ARRAYS + '.' + AS_LIST, methodInvocation).orElse(null);
+			if (qualifier != null) {
+				asListInvocation.setExpression(qualifier);
+			}
+			List<Expression> asListArguments = originalArguments.stream()
+				.map(arg -> (Expression) astRewrite.createCopyTarget(originalArguments.get(0)))
+				.collect(Collectors.toList());
+			asListInvocation.arguments()
+				.addAll(asListArguments);
 
-		return Arrays.<Expression>asList(asListInvocation, createCoreMatchersInvocation(methodInvocation, EVERY_ITEM));
+			return Arrays.<Expression>asList(asListInvocation,
+					createCoreMatchersInvocation(methodInvocation, EVERY_ITEM));
+		}
+		// one argument which is no array initializer
+		return Arrays.<Expression>asList(
+				(Expression) astRewrite.createCopyTarget(originalArguments.get(0)),
+				createCoreMatchersInvocation(methodInvocation, NOT_NULL_VALUE));
+
 	}
 
 	@SuppressWarnings("unchecked")
