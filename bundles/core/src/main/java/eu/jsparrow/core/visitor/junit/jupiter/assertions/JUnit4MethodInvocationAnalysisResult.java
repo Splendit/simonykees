@@ -14,7 +14,7 @@ public class JUnit4MethodInvocationAnalysisResult {
 	private final IMethodBinding methodBinding;
 	private final List<Expression> arguments;
 	private final boolean transformable;
-	private AssumeNotNullInvocationAncestors assumeNotNullInvocationAncestors;
+	private AssertThatEveryItemNotNullAnalysisResult assertThatEveryItemNotNullData;
 	private Type typeOfThrowingRunnableToReplace;
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
@@ -26,9 +26,9 @@ public class JUnit4MethodInvocationAnalysisResult {
 	}
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			List<Expression> arguments, AssumeNotNullInvocationAncestors assumeNotNullInvocationAncestors) {
+			List<Expression> arguments, AssertThatEveryItemNotNullAnalysisResult assertThatEveryItemNotNullData) {
 		this(methodInvocation, methodBinding, arguments, true);
-		this.assumeNotNullInvocationAncestors = assumeNotNullInvocationAncestors;
+		this.assertThatEveryItemNotNullData = assertThatEveryItemNotNullData;
 	}
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
@@ -60,8 +60,8 @@ public class JUnit4MethodInvocationAnalysisResult {
 		return transformable;
 	}
 
-	public Optional<AssumeNotNullInvocationAncestors> getAssumeNotNullInvocationAncestors() {
-		return Optional.ofNullable(assumeNotNullInvocationAncestors);
+	Optional<AssertThatEveryItemNotNullAnalysisResult> getAssertThatEveryItemNotNullData() {
+		return Optional.ofNullable(assertThatEveryItemNotNullData);
 	}
 
 	Optional<Type> getTypeOfThrowingRunnableToReplace() {
