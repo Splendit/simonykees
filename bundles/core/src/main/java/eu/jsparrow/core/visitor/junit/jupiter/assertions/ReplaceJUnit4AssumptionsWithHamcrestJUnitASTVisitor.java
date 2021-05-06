@@ -14,12 +14,15 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 /**
  * Replaces the JUnit 4 method invocations
@@ -87,6 +90,16 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 
 		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
 
+		boolean qualifierNeededForAssumeThat = newStaticAssertionMethodImports.stream()
+			.noneMatch(fullyQualifiedName -> fullyQualifiedName.endsWith('.' + ASSUME_THAT));
+
+		allSupportedJUnit4InvocationDataList.stream()
+			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
+			.map(JUnit4MethodInvocationAnalysisResult::getAssertThatEveryItemNotNullData)
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.forEach(data -> insertAssertThatEveryItemNotNullAnalysisResult(data, qualifierNeededForAssumeThat));
+
 		return true;
 	}
 
@@ -149,61 +162,92 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		return potentialMethodNameReplacements;
 	}
 
-	private List<Expression> createAssumeThatExceptionIsNullArguments(MethodInvocation methodInvocation,
+	private List<Expression> createAssumeThatExceptionIsNullArguments(ASTNode context,
 			List<Expression> originalArguments) {
 		List<Expression> newArguments = new ArrayList<>();
 		originalArguments.stream()
 			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
 			.forEach(newArguments::add);
-		MethodInvocation nullValueInvocation = createCoreMatchersInvocation(methodInvocation, NULL_VALUE);
+		MethodInvocation nullValueInvocation = createCoreMatchersInvocation(context, NULL_VALUE);
 		newArguments.add(nullValueInvocation);
 		return newArguments;
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<Expression> createAssumeThatListIsNotNullArguments(MethodInvocation methodInvocation,
+	private List<Expression> createAssumeThatListIsNotNullArguments(ASTNode context,
 			List<Expression> originalArguments) {
 
 		if (originalArguments.size() != 1 || originalArguments.get(0)
 			.getNodeType() == ASTNode.ARRAY_CREATION) {
-			AST ast = astRewrite.getAST();
-			MethodInvocation asListInvocation = ast.newMethodInvocation();
-			asListInvocation.setName(ast.newSimpleName(AS_LIST));
-			Name qualifier = addImportForStaticMethod(JAVA_UTIL_ARRAYS + '.' + AS_LIST, methodInvocation).orElse(null);
-			if (qualifier != null) {
-				asListInvocation.setExpression(qualifier);
-			}
-			List<Expression> asListArguments = originalArguments.stream()
-				.map(arg -> (Expression) astRewrite.createCopyTarget(originalArguments.get(0)))
-				.collect(Collectors.toList());
-			asListInvocation.arguments()
-				.addAll(asListArguments);
 
+			MethodInvocation asListInvocation = createAsListInvocation(context, originalArguments);
 			return Arrays.<Expression>asList(asListInvocation,
-					createCoreMatchersInvocation(methodInvocation, EVERY_ITEM));
+					createCoreMatchersInvocation(context, EVERY_ITEM));
 		}
-		// one argument which is no array initializer
 		return Arrays.<Expression>asList(
 				(Expression) astRewrite.createCopyTarget(originalArguments.get(0)),
-				createCoreMatchersInvocation(methodInvocation, NOT_NULL_VALUE));
+				createCoreMatchersInvocation(context, NOT_NULL_VALUE));
 
 	}
 
 	@SuppressWarnings("unchecked")
-	private MethodInvocation createCoreMatchersInvocation(MethodInvocation methodInvocation,
-			String coreMatchersMethodName) {
+	private MethodInvocation createAsListInvocation(ASTNode context, List<Expression> originalArguments) {
+		AST ast = astRewrite.getAST();
+		MethodInvocation asListInvocation = ast.newMethodInvocation();
+		asListInvocation.setName(ast.newSimpleName(AS_LIST));
+		Name qualifier = addImportForStaticMethod(JAVA_UTIL_ARRAYS + '.' + AS_LIST, context).orElse(null);
+		if (qualifier != null) {
+			asListInvocation.setExpression(qualifier);
+		}
+		List<Expression> asListArguments = originalArguments.stream()
+			.map(arg -> (Expression) astRewrite.createCopyTarget(originalArguments.get(0)))
+			.collect(Collectors.toList());
+		asListInvocation.arguments()
+			.addAll(asListArguments);
+		return asListInvocation;
+	}
+
+	@SuppressWarnings("unchecked")
+	private MethodInvocation createCoreMatchersInvocation(ASTNode context, String coreMatchersMethodName) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation coreMatchersInvocation = ast.newMethodInvocation();
 		coreMatchersInvocation.setName(ast.newSimpleName(coreMatchersMethodName));
-		Name qualifier = addImportForStaticMethod(ORG_HAMCREST_CORE_MATCHERS + '.' + coreMatchersMethodName,
-				methodInvocation).orElse(null);
+		Name qualifier = addImportForStaticMethod(ORG_HAMCREST_CORE_MATCHERS + '.' + coreMatchersMethodName, context)
+			.orElse(null);
 		if (qualifier != null) {
 			coreMatchersInvocation.setExpression(qualifier);
 		}
 		if (coreMatchersMethodName.equals(EVERY_ITEM)) {
 			coreMatchersInvocation.arguments()
-				.add(createCoreMatchersInvocation(methodInvocation, NOT_NULL_VALUE));
+				.add(createCoreMatchersInvocation(context, NOT_NULL_VALUE));
 		}
 		return coreMatchersInvocation;
+	}
+
+	@SuppressWarnings("unchecked")
+	void insertAssertThatEveryItemNotNullAnalysisResult(AssertThatEveryItemNotNullAnalysisResult data,
+			boolean qualifierNeededForAssumeThat) {
+		ExpressionStatement assumeNotNullStatement = data.getAssumeNotNullStatement();
+		List<Expression> asListArguments = Arrays.asList(data.getArrayArgument());
+		AST ast = astRewrite.getAST();
+		MethodInvocation assumeThatInvocation = ast.newMethodInvocation();
+		assumeThatInvocation.setName(ast.newSimpleName(ASSUME_THAT));
+
+		MethodInvocation asListInvocation = createAsListInvocation(assumeNotNullStatement, asListArguments);
+		MethodInvocation everyItemInvocation = createCoreMatchersInvocation(assumeNotNullStatement, EVERY_ITEM);
+		assumeThatInvocation.arguments()
+			.add(asListInvocation);
+		assumeThatInvocation.arguments()
+			.add(everyItemInvocation);
+
+		if (qualifierNeededForAssumeThat) {
+			Name qualifier = addImport(classDeclaringJUnit4MethodReplacement, assumeNotNullStatement);
+			assumeThatInvocation.setExpression(qualifier);
+		}
+
+		ExpressionStatement assumeThatStatement = ast.newExpressionStatement(assumeThatInvocation);
+
+		ListRewrite listRewrite = astRewrite.getListRewrite(data.getAssumeNotNullStatementParent(),
+				Block.STATEMENTS_PROPERTY);
+		listRewrite.insertAfter(assumeThatStatement, assumeNotNullStatement, null);
 	}
 }

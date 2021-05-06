@@ -107,25 +107,18 @@ class JUnit4MethodInvocationAnalyzer {
 				if (onlyOneArgument.getNodeType() == ASTNode.ARRAY_CREATION || !onlyOneArgument.resolveTypeBinding()
 					.isArray()) {
 					return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true);
-				} else if (supportSingleArrayArgumentInVararg()) {
-					AssertThatEveryItemNotNullAnalysisResult assumeNotNullInvocationAncestors = findAssumeNotNullInvocationAncestors(
-							methodInvocation, onlyOneArgument).orElse(null);
-					if (assumeNotNullInvocationAncestors != null) {
-						return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-								assumeNotNullInvocationAncestors);
-					}
+				}
+				AssertThatEveryItemNotNullAnalysisResult assumeNotNullInvocationAncestors = findAssumeNotNullInvocationAncestors(
+						methodInvocation, onlyOneArgument).orElse(null);
+				if (assumeNotNullInvocationAncestors != null) {
+					return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+							assumeNotNullInvocationAncestors);
 				}
 			} else {
 				return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true);
 			}
 		}
 		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, false);
-	}
-
-	private boolean supportSingleArrayArgumentInVararg() {
-		// TODO: discuss cases like the following:
-		// assumeNotNull(new Object[] { null });
-		return false;
 	}
 
 	private Optional<AssertThatEveryItemNotNullAnalysisResult> findAssumeNotNullInvocationAncestors(
