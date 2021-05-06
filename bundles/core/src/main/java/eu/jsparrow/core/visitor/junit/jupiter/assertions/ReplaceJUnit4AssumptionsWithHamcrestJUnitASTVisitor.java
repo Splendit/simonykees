@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -31,8 +32,12 @@ import org.eclipse.jdt.core.dom.Name;
  */
 public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		extends AbstractReplaceJUnit4MethodInvocationsASTVisitor {
-
-	private static final String ORG_HAMCREST_CORE_MATCHERS_NULL_VALUE = "org.hamcrest.CoreMatchers.nullValue"; //$NON-NLS-1$
+	private static final String AS_LIST = "asList"; //$NON-NLS-1$
+	private static final String JAVA_UTIL_ARRAYS = "java.util.Arrays"; //$NON-NLS-1$
+	private static final String NULL_VALUE = "nullValue"; //$NON-NLS-1$
+	private static final String NOT_NULL_VALUE = "notNullValue"; //$NON-NLS-1$
+	private static final String EVERY_ITEM = "everyItem"; //$NON-NLS-1$
+	private static final String ORG_HAMCREST_CORE_MATCHERS = "org.hamcrest.CoreMatchers"; //$NON-NLS-1$
 	private static final String ASSUME_NOT_NULL = "assumeNotNull"; //$NON-NLS-1$
 	private static final String ASSUME_NO_EXCEPTION = "assumeNoException"; //$NON-NLS-1$
 	private static final String ASSUME_THAT = "assumeThat"; //$NON-NLS-1$
@@ -50,7 +55,11 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		super.visit(compilationUnit);
 
 		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
-		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS_NULL_VALUE);
+		verifyImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS);
+		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + NULL_VALUE);
+		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + NOT_NULL_VALUE);
+		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + EVERY_ITEM);
+		verifyStaticMethodImport(compilationUnit, JAVA_UTIL_ARRAYS + '.' + AS_LIST);
 
 		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = createTransformationDataStore(
 				compilationUnit);
@@ -128,8 +137,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		if (isContentOfType(methodBinding.getDeclaringClass(), "org.junit.Assume")) {//$NON-NLS-1$
 			String methodName = methodBinding.getName();
 			return methodName.equals(ASSUME_NO_EXCEPTION) ||
-			// TODO: implement transformation of assumeNotNull
-			// methodName.equals(ASSUME_NOT_NULL) ||
+					methodName.equals(ASSUME_NOT_NULL) ||
 					methodName.equals(ASSUME_THAT);
 		}
 		return false;
@@ -146,20 +154,51 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		originalArguments.stream()
 			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
 			.forEach(newArguments::add);
-		AST ast = astRewrite.getAST();
-		MethodInvocation nullValueInvocation = ast.newMethodInvocation();
-		nullValueInvocation.setName(ast.newSimpleName("nullValue")); //$NON-NLS-1$
-		Name qualifier = addImportForStaticMethod(ORG_HAMCREST_CORE_MATCHERS_NULL_VALUE, methodInvocation).orElse(null);
-		if (qualifier != null) {
-			nullValueInvocation.setExpression(qualifier);
-		}
+		MethodInvocation nullValueInvocation = createCoreMatchersInvocation(methodInvocation, NULL_VALUE);
 		newArguments.add(nullValueInvocation);
 		return newArguments;
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<Expression> createAssumeThatListIsNotNullArguments(MethodInvocation methodInvocation,
 			List<Expression> originalArguments) {
-		List<Expression> newArguments = new ArrayList<>();
-		return newArguments;
+
+		if (originalArguments.size() == 1) {
+			return Arrays.<Expression>asList(
+					(Expression) astRewrite.createCopyTarget(originalArguments.get(0)),
+					createCoreMatchersInvocation(methodInvocation, NOT_NULL_VALUE));
+		}
+		AST ast = astRewrite.getAST();
+		MethodInvocation asListInvocation = ast.newMethodInvocation();
+		asListInvocation.setName(ast.newSimpleName(AS_LIST));
+		Name qualifier = addImportForStaticMethod(JAVA_UTIL_ARRAYS + '.' + AS_LIST, methodInvocation).orElse(null);
+		if (qualifier != null) {
+			asListInvocation.setExpression(qualifier);
+		}
+		List<Expression> asListArguments = originalArguments.stream()
+			.map(arg -> (Expression) astRewrite.createCopyTarget(originalArguments.get(0)))
+			.collect(Collectors.toList());
+		asListInvocation.arguments()
+			.addAll(asListArguments);
+
+		return Arrays.<Expression>asList(asListInvocation, createCoreMatchersInvocation(methodInvocation, EVERY_ITEM));
+	}
+
+	@SuppressWarnings("unchecked")
+	private MethodInvocation createCoreMatchersInvocation(MethodInvocation methodInvocation,
+			String coreMatchersMethodName) {
+		AST ast = astRewrite.getAST();
+		MethodInvocation coreMatchersInvocation = ast.newMethodInvocation();
+		coreMatchersInvocation.setName(ast.newSimpleName(coreMatchersMethodName));
+		Name qualifier = addImportForStaticMethod(ORG_HAMCREST_CORE_MATCHERS + '.' + coreMatchersMethodName,
+				methodInvocation).orElse(null);
+		if (qualifier != null) {
+			coreMatchersInvocation.setExpression(qualifier);
+		}
+		if (coreMatchersMethodName.equals(EVERY_ITEM)) {
+			coreMatchersInvocation.arguments()
+				.add(createCoreMatchersInvocation(methodInvocation, NOT_NULL_VALUE));
+		}
+		return coreMatchersInvocation;
 	}
 }

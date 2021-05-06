@@ -102,15 +102,30 @@ class JUnit4MethodInvocationAnalyzer {
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 
 		if (supportTransformation(methodInvocation, arguments)) {
-
-			AssumeNotNullInvocationAncestors assumeNotNullInvocationAncestors = findAssumeNotNullInvocationAncestors(
-					methodInvocation).orElse(null);
-			if (assumeNotNullInvocationAncestors != null) {
-				return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-						assumeNotNullInvocationAncestors);
+			if (arguments.size() == 1) {
+				Expression singleVarargs = arguments.get(0);
+				if (!singleVarargs.resolveTypeBinding()
+					.isArray()) {
+					return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true);
+				} else if (supportSingleArrayArgumentInVararg()) {
+					AssumeNotNullInvocationAncestors assumeNotNullInvocationAncestors = findAssumeNotNullInvocationAncestors(
+							methodInvocation).orElse(null);
+					if (assumeNotNullInvocationAncestors != null) {
+						return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+								assumeNotNullInvocationAncestors);
+					}
+				}
+			} else {
+				return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true);
 			}
 		}
 		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, false);
+	}
+
+	private boolean supportSingleArrayArgumentInVararg() {
+		// TODO: discuss cases like the following:
+		// assumeNotNull(new Object[] { null });
+		return false;
 	}
 
 	private Optional<AssumeNotNullInvocationAncestors> findAssumeNotNullInvocationAncestors(
