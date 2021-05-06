@@ -103,10 +103,10 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 
 		Supplier<List<Expression>> newArgumentsSupplier;
 		if (originalMethodName.equals(ASSUME_NO_EXCEPTION)) {
-			newArgumentsSupplier = () -> createNewAssumeThatExceptionIsNullArguments(methodInvocation,
+			newArgumentsSupplier = () -> createAssumeThatExceptionIsNullArguments(methodInvocation,
 					originalArguments);
 		} else if (originalMethodName.equals(ASSUME_NOT_NULL)) {
-			newArgumentsSupplier = () -> createNewAssumeThatListIsNotNullArguments(methodInvocation, originalArguments);
+			newArgumentsSupplier = () -> createAssumeThatListIsNotNullArguments(methodInvocation, originalArguments);
 		} else {
 			newArgumentsSupplier = () -> createNewMethodArguments(originalArguments);
 		}
@@ -140,7 +140,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		return potentialMethodNameReplacements;
 	}
 
-	private List<Expression> createNewAssumeThatExceptionIsNullArguments(MethodInvocation methodInvocation,
+	private List<Expression> createAssumeThatExceptionIsNullArguments(MethodInvocation methodInvocation,
 			List<Expression> originalArguments) {
 		List<Expression> newArguments = new ArrayList<>();
 		originalArguments.stream()
@@ -157,7 +157,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		return newArguments;
 	}
 
-	private List<Expression> createNewAssumeThatListIsNotNullArguments(MethodInvocation methodInvocation,
+	private List<Expression> createAssumeThatListIsNotNullArguments(MethodInvocation methodInvocation,
 			List<Expression> originalArguments) {
 		List<Expression> newArguments = new ArrayList<>();
 		return newArguments;

@@ -64,7 +64,8 @@ class JUnit4MethodInvocationAnalyzer {
 						result = createAssumeNotNullInvocationAnalysisResult(methodInvocation, methodBinding,
 								arguments);
 					} else {
-						result = createAnalysisResult(methodInvocation, methodBinding, arguments);
+						result = new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+								supportTransformation(methodInvocation, arguments));
 					}
 					methodInvocationAnalysisResults.add(result);
 				}
@@ -83,31 +84,25 @@ class JUnit4MethodInvocationAnalyzer {
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 
 		ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
-		boolean transformable = jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)
-				&& arguments
-					.stream()
-					.allMatch(this::isArgumentWithUnambiguousType)
+		boolean transformationSupported = supportTransformation(methodInvocation, arguments)
 				&& throwingRunnableArgumentAnalyser.analyze(arguments);
 
 		Type throwingRunnableTypeToReplace = throwingRunnableArgumentAnalyser.getLocalVariableTypeToReplace()
 			.orElse(null);
 
-		if (transformable && throwingRunnableTypeToReplace != null) {
+		if (transformationSupported && throwingRunnableTypeToReplace != null) {
 			return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
 					throwingRunnableTypeToReplace);
 		}
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, transformable);
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+				transformationSupported);
 	}
 
 	private JUnit4MethodInvocationAnalysisResult createAssumeNotNullInvocationAnalysisResult(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 
-		boolean continueAnalysis = jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)
-				&& arguments
-					.stream()
-					.allMatch(this::isArgumentWithUnambiguousType);
+		if (supportTransformation(methodInvocation, arguments)) {
 
-		if (continueAnalysis) {
 			AssumeNotNullInvocationAncestors assumeNotNullInvocationAncestors = findAssumeNotNullInvocationAncestors(
 					methodInvocation).orElse(null);
 			if (assumeNotNullInvocationAncestors != null) {
@@ -134,15 +129,11 @@ class JUnit4MethodInvocationAnalyzer {
 
 	}
 
-	private JUnit4MethodInvocationAnalysisResult createAnalysisResult(MethodInvocation methodInvocation,
-			IMethodBinding methodBinding, List<Expression> arguments) {
-		boolean transformable = jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)
+	private boolean supportTransformation(MethodInvocation methodInvocation, List<Expression> arguments) {
+		return jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)
 				&& arguments
 					.stream()
 					.allMatch(this::isArgumentWithUnambiguousType);
-
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-				transformable);
 	}
 
 	private boolean isArgumentWithUnambiguousType(Expression expression) {
