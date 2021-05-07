@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +19,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -34,11 +36,36 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 				|| classDeclaringJUnit4MethodReplacement.equals(ORG_J_UNIT_JUPITER_API_ASSUMPTIONS);
 	}
 
-	protected List<JUnit4MethodInvocationAnalysisResult> collectJUnit4MethodInvocationAnalysisResult(
+	List<JUnit4MethodInvocationAnalysisResult> collectJUnit4MethodInvocationAnalysisResult(
 			CompilationUnit compilationUnit) {
-		JUnit4MethodInvocationAnalyzer analyzer = new JUnit4MethodInvocationAnalyzer(compilationUnit,
-				this::isSupportedJUnit4Method);
-		return analyzer.collectJUnit4MethodInvocationAnalysisResult();
+
+		JUnit4MethodInvocationAnalyzer analyzer = new JUnit4MethodInvocationAnalyzer(compilationUnit);
+		List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults = new ArrayList<>();
+
+		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
+		compilationUnit.accept(invocationCollectorVisitor);
+		invocationCollectorVisitor.getMethodInvocations()
+			.forEach(methodInvocation -> {
+				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+						Expression.class);
+				if (methodBinding != null && isSupportedJUnit4Method(methodBinding)) {
+					String methodIdentifier = methodInvocation.getName()
+						.getIdentifier();
+					JUnit4MethodInvocationAnalysisResult result;
+					if (methodIdentifier.equals("assertThrows")) { //$NON-NLS-1$
+						result = analyzer.createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments);
+					} else if (methodIdentifier.equals("assumeNotNull")) { //$NON-NLS-1$
+						result = analyzer.createAssumeNotNullInvocationAnalysisResult(methodInvocation, methodBinding,
+								arguments);
+					} else {
+						result = new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+								analyzer.supportTransformation(methodInvocation, arguments));
+					}
+					methodInvocationAnalysisResults.add(result);
+				}
+			});
+		return methodInvocationAnalysisResults;
 	}
 
 	protected List<ImportDeclaration> collectStaticMethodImportsToRemove(CompilationUnit compilationUnit,

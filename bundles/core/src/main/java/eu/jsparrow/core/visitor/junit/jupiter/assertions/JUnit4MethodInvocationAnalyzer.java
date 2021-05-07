@@ -2,10 +2,8 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -18,9 +16,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 
-import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
-
 /**
  * Helper class analyzing a {@link MethodInvocation}-node. If the
  * {@link MethodInvocation} represents the invocation of one of the supported
@@ -31,48 +26,13 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  *
  */
 class JUnit4MethodInvocationAnalyzer {
-	private final CompilationUnit compilationUnit;
 	private final JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore;
-	private final Predicate<IMethodBinding> supportedJUnit4MethodPredicate;
 
-	JUnit4MethodInvocationAnalyzer(CompilationUnit compilationUnit,
-			Predicate<IMethodBinding> supportedJUnit4MethodPredicate) {
-		this.compilationUnit = compilationUnit;
+	JUnit4MethodInvocationAnalyzer(CompilationUnit compilationUnit) {
 		this.jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(compilationUnit);
-		this.supportedJUnit4MethodPredicate = supportedJUnit4MethodPredicate;
 	}
 
-	List<JUnit4MethodInvocationAnalysisResult> collectJUnit4MethodInvocationAnalysisResult() {
-
-		List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults = new ArrayList<>();
-
-		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
-		compilationUnit.accept(invocationCollectorVisitor);
-		invocationCollectorVisitor.getMethodInvocations()
-			.forEach(methodInvocation -> {
-				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-						Expression.class);
-				if (methodBinding != null && supportedJUnit4MethodPredicate.test(methodBinding)) {
-					String methodIdentifier = methodInvocation.getName()
-						.getIdentifier();
-					JUnit4MethodInvocationAnalysisResult result;
-					if (methodIdentifier.equals("assertThrows")) { //$NON-NLS-1$
-						result = createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments);
-					} else if (methodIdentifier.equals("assumeNotNull")) { //$NON-NLS-1$
-						result = createAssumeNotNullInvocationAnalysisResult(methodInvocation, methodBinding,
-								arguments);
-					} else {
-						result = new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-								supportTransformation(methodInvocation, arguments));
-					}
-					methodInvocationAnalysisResults.add(result);
-				}
-			});
-		return methodInvocationAnalysisResults;
-	}
-
-	private JUnit4MethodInvocationAnalysisResult createAssertThrowsInvocationData(
+	JUnit4MethodInvocationAnalysisResult createAssertThrowsInvocationData(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 
 		ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
@@ -90,7 +50,7 @@ class JUnit4MethodInvocationAnalyzer {
 				transformationSupported);
 	}
 
-	private JUnit4MethodInvocationAnalysisResult createAssumeNotNullInvocationAnalysisResult(
+	JUnit4MethodInvocationAnalysisResult createAssumeNotNullInvocationAnalysisResult(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 
 		if (supportTransformation(methodInvocation, arguments)) {
@@ -130,7 +90,7 @@ class JUnit4MethodInvocationAnalyzer {
 
 	}
 
-	private boolean supportTransformation(MethodInvocation methodInvocation, List<Expression> arguments) {
+	boolean supportTransformation(MethodInvocation methodInvocation, List<Expression> arguments) {
 		return jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)
 				&& arguments
 					.stream()
