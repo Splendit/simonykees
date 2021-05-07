@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.quickfix;
+package eu.jsparrow.ui.markers;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;

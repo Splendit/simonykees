@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.quickfix;
+package eu.jsparrow.ui.markers;
 
 import java.util.List;
 

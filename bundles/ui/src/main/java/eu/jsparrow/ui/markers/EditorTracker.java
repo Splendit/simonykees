@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.quickfix;
+package eu.jsparrow.ui.markers;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
