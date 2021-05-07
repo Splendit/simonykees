@@ -23,7 +23,7 @@ public class JSparrowMarkerResolutionGenerator implements IMarkerResolutionGener
 			String markerType = marker.getType();
 			return MarkerFactory.JSPARROW_MARKER.equals(markerType);
 		} catch (CoreException e) {
-			logger.error("Cannot read marker annotation type", e);
+			logger.error("Cannot read marker annotation type", e); //$NON-NLS-1$
 		}
 		return false;
 	}

@@ -13,23 +13,18 @@ import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 
 public class JSparrowMarkerResolution implements IMarkerResolution2 {
 
-	private String label;
 	private int offset;
 	private IResource resource;
 	private String description;
 	private String name;
 	private String resolver;
-	private int end;
-	
+
 	public JSparrowMarkerResolution(IMarker marker) {
-		this.label = marker.getAttribute(IMarker.MESSAGE, "jSparrow QuickFix");
 		this.offset = marker.getAttribute(IMarker.CHAR_START, 0);
-		this.name = marker.getAttribute("name", "jSparrow Quickfix");
+		this.name = marker.getAttribute("name", "jSparrow Quickfix"); //$NON-NLS-1$ //$NON-NLS-2$
 		this.resource = marker.getResource();
-		this.description = marker.getAttribute("description", "");
-		this.resolver = marker.getAttribute("resolver", "");
-		this.end = marker.getAttribute(IMarker.CHAR_END, 0);
-		
+		this.description = marker.getAttribute("description", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		this.resolver = marker.getAttribute("resolver", ""); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Override
@@ -39,7 +34,6 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 
 	@Override
 	public void run(IMarker marker) {
-		
 		RefactoringEventManager eventGenerator = new CoreRefactoringEventManager();
 		IJavaElement element = JavaCore.create(resource);
 		if (element == null) {

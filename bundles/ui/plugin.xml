@@ -120,34 +120,14 @@
         </toolbar>
      </menuContribution>
   </extension>
-  
-  <!-- 
-  <extension 
-  		point="org.eclipse.ui.ide.markerResolution">
-      <markerResolutionGenerator
-         markerType="eu.jsparrow.ui.marker.jsparrow"
-         class="eu.jsparrow.ui.quickfix.QuickFixer"/>
-   </extension>
    
-   
-   
-   <extension 
-   		point="org.eclipse.core.resources.markers"
-   		id="eu.jsparrow.ui.marker.jsparrow"
-   		name="jSparrow Marker"> 
-      <persistent value="true"/> 
-      <super type="org.eclipse.core.resources.problemmarker"/> 
-      <super type="org.eclipse.core.resources.textmarker"/> 
-      <attribute name="owner"/> 
-   </extension> 
-   -->
-   
-     <extension
+ 	<!-- jSparrow Marker Annotations -->
+	<extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">
-      <specification
-      		annotationImageProvider="eu.jsparrow.ui.quickfix.JSparrowImageProvider"
-            annotationType="jsparrow"
-            colorPreferenceKey="jsparrow.marker.color"
+		<specification
+			annotationImageProvider="eu.jsparrow.ui.quickfix.JSparrowImageProvider"
+			annotationType="jsparrow"
+			colorPreferenceKey="jsparrow.marker.color"
             colorPreferenceValue="57,59,52"
             contributesToHeader="true"
             highlightPreferenceKey="jsparrow.marker.highlight"
@@ -166,42 +146,32 @@
             textStylePreferenceValue="SQUIGGLES"
             verticalRulerPreferenceKey="jsparrow.marker.ruler"
             verticalRulerPreferenceValue="true">
-      </specification>
-   </extension>
-   <extension
-         point="org.eclipse.ui.editors.annotationTypes">
-      <type
-            markerSeverity="0"
-            markerType="jsparrow.marker"
-            name="jsparrow">
-      </type>
-   </extension>
-   <extension
-         id="jsparrow.marker"
-         name="jSparrow"
-         point="org.eclipse.core.resources.markers">
-      <super
-            type="org.eclipse.core.resources.problemmarker">
-      </super>
-      <super
-            type="org.eclipse.core.resources.textmarker">
-      </super>
-      <persistent
-            value="false">
-      </persistent>
-   </extension>
+		</specification>
+	</extension>
+	<extension
+		point="org.eclipse.ui.editors.annotationTypes">
+		<type
+			markerSeverity="0"
+			markerType="jsparrow.marker"
+			name="jsparrow">
+		</type>
+	</extension>
+	<extension
+		id="jsparrow.marker"
+		name="jSparrow"
+		point="org.eclipse.core.resources.markers">
+		<super
+			type="org.eclipse.core.resources.problemmarker">
+		</super>
+		<super
+			type="org.eclipse.core.resources.textmarker">
+		</super>
+		<persistent
+			value="false">
+		</persistent>
+	</extension>
    
-   <!-- jSparrow QuickFixes Extension -->
-   <!--
-   <extension
-         point="org.eclipse.jdt.ui.quickFixProcessors">
-      <quickFixProcessor
-            class="eu.jsparrow.ui.quickfix.JSparrowQuickFix"
-            id="eu.jsparrow.ui.quickfix.JSparrowQuickFix"
-            name="jSparrow Refactoring Quickfix">
-      </quickFixProcessor>
-   </extension>
-   -->
+   <!-- jSparrow Marker Resolution -->
 	<extension
 			point="org.eclipse.ui.ide.markerResolution">
 		<markerResolutionGenerator
