@@ -22,10 +22,6 @@ public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor
 		this.positionChecker = positionChecker;
 	}
 
-	public UseComparatorMethodsResolver() {
-		this(node -> true);
-	}
-
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		javaElement = compilationUnit.getJavaElement();

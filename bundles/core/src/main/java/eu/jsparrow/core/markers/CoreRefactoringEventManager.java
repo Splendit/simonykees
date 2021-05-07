@@ -1,6 +1,7 @@
 package eu.jsparrow.core.markers;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -21,16 +22,16 @@ import eu.jsparrow.rules.common.util.JdtCoreVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
-public class MarkerManager implements RefactoringEventManager {
+public class CoreRefactoringEventManager implements RefactoringEventManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(MarkerManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(CoreRefactoringEventManager.class);
 
 	@Override
 	public void discoverRefactoringEvents(ICompilationUnit iCompilationUnit) {
 
 		Predicate<ASTNode> positionChecker = node -> true;
 		CompilationUnit cu = RefactoringUtil.parse(iCompilationUnit);
-		List<AbstractASTRewriteASTVisitor> resolvers = ResolverVisitorsFactory.getAllResolvers();
+		List<AbstractASTRewriteASTVisitor> resolvers = ResolverVisitorsFactory.getAllResolvers(node -> true);
 		for (AbstractASTRewriteASTVisitor resolver : resolvers) {
 			createEvents(resolver, positionChecker, cu);
 		}
@@ -45,12 +46,17 @@ public class MarkerManager implements RefactoringEventManager {
 
 	@Override
 	public void resolve(ICompilationUnit iCompilationUnit, String resolverName, int offset) {
-		// TODO: get the resolver key. We do not want to apply all resolvers.
 		Predicate<ASTNode> positionChecker = node -> {
 			int startPosition = node.getStartPosition();
 			int endPosition = startPosition + node.getLength();
 			return startPosition <= offset && endPosition >= offset;
 		};
+		Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor> resolverGenerator = ResolverVisitorsFactory
+			.getResolverGenerator(resolverName);
+		AbstractASTRewriteASTVisitor resolver = resolverGenerator.apply(positionChecker);
+		if (resolver == null) {
+			return;
+		}
 
 		Version jdtVersion = JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion();
 		WorkingCopyOwnerDecorator workingCopyOwner = new WorkingCopyOwnerDecorator();
@@ -61,12 +67,9 @@ public class MarkerManager implements RefactoringEventManager {
 			logger.error("Cannot create working copy for resolving jSparrow markers", e); //$NON-NLS-1$
 			return;
 		}
-		CompilationUnit cu = RefactoringUtil.parse(workingCopy);
-		List<AbstractASTRewriteASTVisitor> resolvers = ResolverVisitorsFactory.getAllResolvers(positionChecker);
-		for (AbstractASTRewriteASTVisitor resolver : resolvers) {
-			cu = resolve(jdtVersion, workingCopy, cu, resolver);
-		}
 
+		CompilationUnit cu = RefactoringUtil.parse(workingCopy);
+		resolve(jdtVersion, workingCopy, cu, resolver);
 		try {
 			workingCopy.commitWorkingCopy(false, new NullProgressMonitor());
 			workingCopy.discardWorkingCopy();

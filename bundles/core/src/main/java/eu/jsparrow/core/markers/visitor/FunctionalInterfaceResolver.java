@@ -23,10 +23,6 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 		this.positionChecker = positionChecker;
 	}
 
-	public FunctionalInterfaceResolver() {
-		this(node -> true);
-	}
-
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		javaElement = compilationUnit.getJavaElement();

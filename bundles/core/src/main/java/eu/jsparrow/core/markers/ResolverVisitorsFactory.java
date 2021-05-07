@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -17,31 +18,27 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class ResolverVisitorsFactory {
 
-	public static List<AbstractASTRewriteASTVisitor> getAllResolvers() {
-		List<AbstractASTRewriteASTVisitor> resolvers = new ArrayList<>();
-		
-		Map<String, AbstractASTRewriteASTVisitor> registeredEventGenerators = initEventGenerators();
-		
-		registeredEventGenerators.forEach((key, value) -> {
-			RefactoringMarkerListener listener = RefactoringMarkers.getFor(key);
-			value.addMarkerListener(listener);
-			resolvers.add(value);
-		});
-		
-		return resolvers;
-	}
-	
-	public static List<AbstractASTRewriteASTVisitor> getAllResolvers(Predicate<ASTNode>poistionChcker) {
-		List<AbstractASTRewriteASTVisitor> eventResolvers = new ArrayList<>();
-		eventResolvers.add(new FunctionalInterfaceResolver(poistionChcker));
-		eventResolvers.add(new UseComparatorMethodsResolver(poistionChcker));
-		return Collections.unmodifiableList(eventResolvers);
+	private static final Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> registry = initRegistry();
+
+	private static Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> initRegistry() {
+		Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> map = new HashMap<>();
+		map.put(FunctionalInterfaceResolver.RESOLVER_NAME, FunctionalInterfaceResolver::new);
+		map.put(UseComparatorMethodsResolver.RESOLVER_NAME, UseComparatorMethodsResolver::new);
+		return Collections.unmodifiableMap(map);
 	}
 
-	private static Map<String, AbstractASTRewriteASTVisitor> initEventGenerators() {
-		Map<String, AbstractASTRewriteASTVisitor> eventGenerators = new HashMap<>();
-		eventGenerators.put(FunctionalInterfaceResolver.RESOLVER_NAME, new FunctionalInterfaceResolver());
-		eventGenerators.put(UseComparatorMethodsResolver.RESOLVER_NAME, new UseComparatorMethodsResolver());
-		return Collections.unmodifiableMap(eventGenerators);
+	public static List<AbstractASTRewriteASTVisitor> getAllResolvers(Predicate<ASTNode> checker) {
+		List<AbstractASTRewriteASTVisitor> resolvers = new ArrayList<>();
+		registry.forEach((key, value) -> {
+			AbstractASTRewriteASTVisitor resolver = value.apply(checker);
+			RefactoringMarkerListener listener = RefactoringMarkers.getFor(key);
+			resolver.addMarkerListener(listener);
+			resolvers.add(resolver);
+		});
+		return resolvers;
+	}
+
+	public static Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor> getResolverGenerator(String resolverName) {
+		return registry.getOrDefault(resolverName, p -> null);
 	}
 }
