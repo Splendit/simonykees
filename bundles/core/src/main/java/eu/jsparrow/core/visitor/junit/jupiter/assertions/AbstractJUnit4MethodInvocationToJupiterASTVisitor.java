@@ -47,9 +47,8 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
 
-		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = createTransformationDataStore(
+		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = collectJUnit4MethodInvocationAnalysisResult(
 				compilationUnit);
-		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = transformationDataStore.getMethodInvocationAnalysisResults();
 
 		List<Type> throwingRunnableTypesToReplace = allSupportedJUnit4InvocationDataList.stream()
 			.map(JUnit4MethodInvocationAnalysisResult::getTypeOfThrowingRunnableToReplace)
@@ -58,10 +57,10 @@ abstract class AbstractJUnit4MethodInvocationToJupiterASTVisitor
 			.collect(Collectors.toList());
 
 		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticMethodImportsToRemove(compilationUnit,
-				transformationDataStore);
+				allSupportedJUnit4InvocationDataList);
 
 		Set<String> supportedNewStaticMethodImports = findSupportedStaticImports(staticMethodImportsToRemove,
-				transformationDataStore);
+				allSupportedJUnit4InvocationDataList);
 
 		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = allSupportedJUnit4InvocationDataList
 			.stream()

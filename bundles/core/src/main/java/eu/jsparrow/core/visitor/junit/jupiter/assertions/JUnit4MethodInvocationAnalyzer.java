@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -43,7 +42,7 @@ class JUnit4MethodInvocationAnalyzer {
 		this.supportedJUnit4MethodPredicate = supportedJUnit4MethodPredicate;
 	}
 
-	JUnit4MethodInvocationAnalysisResultStore collectAnalysisResults() {
+	List<JUnit4MethodInvocationAnalysisResult> collectJUnit4MethodInvocationAnalysisResult() {
 
 		List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults = new ArrayList<>();
 
@@ -70,14 +69,7 @@ class JUnit4MethodInvocationAnalyzer {
 					methodInvocationAnalysisResults.add(result);
 				}
 			});
-
-		List<MethodInvocation> notTransformedMethodInvocations = methodInvocationAnalysisResults.stream()
-			.filter(result -> !result.isTransformable())
-			.map(JUnit4MethodInvocationAnalysisResult::getMethodInvocation)
-			.collect(Collectors.toList());
-
-		return new JUnit4MethodInvocationAnalysisResultStore(methodInvocationAnalysisResults,
-				notTransformedMethodInvocations);
+		return methodInvocationAnalysisResults;
 	}
 
 	private JUnit4MethodInvocationAnalysisResult createAssertThrowsInvocationData(

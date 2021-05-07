@@ -65,16 +65,14 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + EVERY_ITEM);
 		verifyStaticMethodImport(compilationUnit, JAVA_UTIL_ARRAYS + '.' + AS_LIST);
 
-		JUnit4MethodInvocationAnalysisResultStore transformationDataStore = createTransformationDataStore(
+		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = collectJUnit4MethodInvocationAnalysisResult(
 				compilationUnit);
+
 		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticMethodImportsToRemove(compilationUnit,
-				transformationDataStore);
+				allSupportedJUnit4InvocationDataList);
 
 		Set<String> supportedNewStaticMethodImports = findSupportedStaticImports(staticMethodImportsToRemove,
-				transformationDataStore);
-
-		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = transformationDataStore
-			.getMethodInvocationAnalysisResults();
+				allSupportedJUnit4InvocationDataList);
 
 		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = allSupportedJUnit4InvocationDataList
 			.stream()

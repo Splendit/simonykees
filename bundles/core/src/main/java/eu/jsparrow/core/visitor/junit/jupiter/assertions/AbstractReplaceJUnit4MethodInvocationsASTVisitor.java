@@ -34,18 +34,19 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 				|| classDeclaringJUnit4MethodReplacement.equals(ORG_J_UNIT_JUPITER_API_ASSUMPTIONS);
 	}
 
-	protected JUnit4MethodInvocationAnalysisResultStore createTransformationDataStore(CompilationUnit compilationUnit) {
+	protected List<JUnit4MethodInvocationAnalysisResult> collectJUnit4MethodInvocationAnalysisResult(
+			CompilationUnit compilationUnit) {
 		JUnit4MethodInvocationAnalyzer analyzer = new JUnit4MethodInvocationAnalyzer(compilationUnit,
 				this::isSupportedJUnit4Method);
-		return analyzer.collectAnalysisResults();
+		return analyzer.collectJUnit4MethodInvocationAnalysisResult();
 	}
 
 	protected List<ImportDeclaration> collectStaticMethodImportsToRemove(CompilationUnit compilationUnit,
-			JUnit4MethodInvocationAnalysisResultStore transformationDataStore) {
+			List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults) {
 
-		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = transformationDataStore
-			.getNotTransformedJUnt4MethodInvocations()
-			.stream()
+		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = methodInvocationAnalysisResults.stream()
+			.filter(result -> !result.isTransformable())
+			.map(JUnit4MethodInvocationAnalysisResult::getMethodInvocation)
 			.filter(methodInvocation -> methodInvocation
 				.getExpression() == null)
 			.map(MethodInvocation::getName)
@@ -80,7 +81,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 	protected Set<String> findSupportedStaticImports(
 			List<ImportDeclaration> staticMethodImportsToRemove,
-			JUnit4MethodInvocationAnalysisResultStore transformationDataStore) {
+			List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults) {
 
 		Set<String> simpleNamesOfStaticMethodImportsToRemove = staticMethodImportsToRemove
 			.stream()
@@ -91,7 +92,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 			.map(SimpleName::getIdentifier)
 			.collect(Collectors.toSet());
 
-		Set<String> supportedNewMethodNames = collectSupportedNewMethodNames(transformationDataStore);
+		Set<String> supportedNewMethodNames = collectSupportedNewMethodNames(methodInvocationAnalysisResults);
 
 		Set<String> supportedNewStaticMethodImports = new HashSet<>();
 		String newMethodFullyQualifiedNamePrefix = classDeclaringJUnit4MethodReplacement + "."; //$NON-NLS-1$
@@ -107,10 +108,10 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 	}
 
 	private Set<String> collectSupportedNewMethodNames(
-			JUnit4MethodInvocationAnalysisResultStore transformationDataStore) {
+			List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults) {
 
 		Set<String> supportedNewMethodSimpleNames = new HashSet<>();
-		transformationDataStore.getMethodInvocationAnalysisResults()
+		methodInvocationAnalysisResults
 			.stream()
 			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
 			.map(JUnit4MethodInvocationAnalysisResult::getMethodBinding)
