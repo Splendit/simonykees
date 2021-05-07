@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import eu.jsparrow.rules.common.markers.MarkerEvent;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
 import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
@@ -127,7 +127,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	protected void addMarkerEvent(ASTNode original, ASTNode newNode) {
 	}
 
-	public void addMarkerEvent(MarkerEvent event) {
+	public void addMarkerEvent(RefactoringMarkerEvent event) {
 		refactoringMarkerListeners.forEach(listener -> listener.update(event));
 	}
 

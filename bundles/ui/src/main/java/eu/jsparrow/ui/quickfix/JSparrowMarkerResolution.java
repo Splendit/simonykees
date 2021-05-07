@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IMarkerResolution2;
 
-import eu.jsparrow.core.markers.MarkerManager;
+import eu.jsparrow.core.markers.CoreRefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 
 public class JSparrowMarkerResolution implements IMarkerResolution2 {
@@ -40,7 +40,7 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 	@Override
 	public void run(IMarker marker) {
 		
-		RefactoringEventManager eventGenerator = new MarkerManager();
+		RefactoringEventManager eventGenerator = new CoreRefactoringEventManager();
 		IJavaElement element = JavaCore.create(resource);
 		if (element == null) {
 			return;

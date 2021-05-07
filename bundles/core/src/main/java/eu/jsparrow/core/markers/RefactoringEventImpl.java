@@ -1,24 +1,21 @@
 package eu.jsparrow.core.markers;
 
-import java.util.Map;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
 
-import eu.jsparrow.rules.common.markers.MarkerEvent;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 
-public class RefactorEvent implements MarkerEvent {
+public class RefactoringEventImpl implements RefactoringMarkerEvent {
 
 	private int offset;
 	private int length;
 	private String name;
 	private String message;
 	private IJavaElement iJavaElement;
-	private Map<ASTNode, ASTNode> replacements;
 	private String description;
 	private String resolver;
 
-	public RefactorEvent(String resolver, String name, String message, IJavaElement iJavaElement,
+	public RefactoringEventImpl(String resolver, String name, String message, IJavaElement iJavaElement,
 			ASTNode original, ASTNode replacement) {
 		this.resolver = resolver;
 		this.name = name;
@@ -62,9 +59,5 @@ public class RefactorEvent implements MarkerEvent {
 	@Override
 	public String getResolver() {
 		return this.resolver;
-	}
-
-	public Map<ASTNode, ASTNode> getReplacements() {
-		return replacements;
 	}
 }

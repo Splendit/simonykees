@@ -9,7 +9,7 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-import eu.jsparrow.core.markers.MarkerManager;
+import eu.jsparrow.core.markers.CoreRefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 
 public class JSparrowProposal implements IJavaCompletionProposal, ICompletionProposalExtension6 {
@@ -34,7 +34,7 @@ public class JSparrowProposal implements IJavaCompletionProposal, ICompletionPro
 
 	@Override
 	public void apply(IDocument document) {
-		RefactoringEventManager eventGenerator = new MarkerManager();
+		RefactoringEventManager eventGenerator = new CoreRefactoringEventManager();
 		eventGenerator.resolve(icu, resolverName, offset);
 
 	}

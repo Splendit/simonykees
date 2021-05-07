@@ -2,7 +2,7 @@ package eu.jsparrow.rules.common.markers;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-public interface MarkerEvent {
+public interface RefactoringMarkerEvent {
 
 	public String getResolver();
 

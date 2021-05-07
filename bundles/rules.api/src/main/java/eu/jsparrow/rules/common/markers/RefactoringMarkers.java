@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public class RefactoringMarkers implements RefactoringMarkerListener {
 	
 	private static final Map<String, RefactoringMarkers> markers = new HashMap<>();
-	private List<MarkerEvent> markersPerResolver = new ArrayList<>();
+	private List<RefactoringMarkerEvent> markersPerResolver = new ArrayList<>();
 	
 	public static RefactoringMarkers getFor(String resolver) {
 		markers.putIfAbsent(resolver, new RefactoringMarkers());
@@ -20,7 +20,7 @@ public class RefactoringMarkers implements RefactoringMarkerListener {
 		markers.clear();
 	}
 	
-	public static List<MarkerEvent> getAllEvents() {
+	public static List<RefactoringMarkerEvent> getAllEvents() {
 		return markers.values().stream()
 				.map(me -> me.getEvents())
 				.flatMap(List::stream)
@@ -28,11 +28,11 @@ public class RefactoringMarkers implements RefactoringMarkerListener {
 	}
 
 	@Override
-	public void update(MarkerEvent event) {
+	public void update(RefactoringMarkerEvent event) {
 		markersPerResolver.add(event);
 	}
 
-	public List<MarkerEvent> getEvents() {
+	public List<RefactoringMarkerEvent> getEvents() {
 		return markersPerResolver;
 	}
 }

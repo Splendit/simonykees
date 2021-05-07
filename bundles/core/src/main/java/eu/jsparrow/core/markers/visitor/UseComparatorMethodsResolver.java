@@ -7,7 +7,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 
-import eu.jsparrow.core.markers.RefactorEvent;
+import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.comparatormethods.UseComparatorMethodsASTVisitor;
 
 public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor {
@@ -42,7 +42,7 @@ public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactorEvent event = new RefactorEvent(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION, javaElement, original,
+		RefactoringEventImpl event = new RefactoringEventImpl(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION, javaElement, original,
 				newNode);
 		addMarkerEvent(event);
 	}

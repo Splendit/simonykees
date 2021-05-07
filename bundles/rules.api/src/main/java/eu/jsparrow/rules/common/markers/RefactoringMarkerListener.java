@@ -2,5 +2,5 @@ package eu.jsparrow.rules.common.markers;
 
 public interface RefactoringMarkerListener {
 
-	void update(MarkerEvent event);
+	void update(RefactoringMarkerEvent event);
 }
