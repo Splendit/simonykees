@@ -28,7 +28,7 @@ public class JSparrowQuickFix implements IQuickFixProcessor {
 		List<IJavaElement> elements = new ArrayList<>();
 		elements.add(compilationUnit.getElementAt(selectionOffset));
 		List<IJavaCompletionProposal> proposals = new ArrayList<>();
-		IJavaCompletionProposal proposal = new JSparrowProposal(compilationUnit, selectionOffset, selectionLength);
+		IJavaCompletionProposal proposal = new JSparrowProposal(compilationUnit, "", selectionOffset, selectionLength);
 		proposals.add(proposal);
 		return proposals.toArray(new IJavaCompletionProposal[proposals.size()]);
 	}

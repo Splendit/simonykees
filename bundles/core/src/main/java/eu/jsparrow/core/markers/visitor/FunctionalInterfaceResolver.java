@@ -14,12 +14,17 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 
 	private static final String MARKER_NAME = "Replace with Lambda Expression"; //$NON-NLS-1$
 	private static final String MARKER_DESCRIPTION = "Anonymous class can be replaced by lambda expression"; //$NON-NLS-1$
+	public static final String RESOLVER_NAME = FunctionalInterfaceResolver.class.getName();
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
 	public FunctionalInterfaceResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
+	}
+
+	public FunctionalInterfaceResolver() {
+		this(node -> true);
 	}
 
 	@Override
@@ -38,7 +43,8 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactorEvent event = new RefactorEvent(MARKER_NAME, MARKER_DESCRIPTION, javaElement, original, newNode);
+		RefactorEvent event = new RefactorEvent(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION, javaElement, original,
+				newNode);
 		addMarkerEvent(event);
 	}
 }

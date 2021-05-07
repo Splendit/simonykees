@@ -16,9 +16,11 @@ public class RefactorEvent implements MarkerEvent {
 	private IJavaElement iJavaElement;
 	private Map<ASTNode, ASTNode> replacements;
 	private String description;
+	private String resolver;
 
-	public RefactorEvent(String name, String message, IJavaElement iJavaElement,
+	public RefactorEvent(String resolver, String name, String message, IJavaElement iJavaElement,
 			ASTNode original, ASTNode replacement) {
+		this.resolver = resolver;
 		this.name = name;
 		this.offset = original.getStartPosition();
 		this.length = original.getLength();
@@ -41,7 +43,7 @@ public class RefactorEvent implements MarkerEvent {
 	public String getMessage() {
 		return message;
 	}
-	
+
 	@Override
 	public String getName() {
 		return this.name;
@@ -55,6 +57,11 @@ public class RefactorEvent implements MarkerEvent {
 	@Override
 	public String getDescription() {
 		return this.description;
+	}
+
+	@Override
+	public String getResolver() {
+		return this.resolver;
 	}
 
 	public Map<ASTNode, ASTNode> getReplacements() {

@@ -1,6 +1,5 @@
 package eu.jsparrow.core.markers;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -17,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.WorkingCopyOwnerDecorator;
-import eu.jsparrow.rules.common.markers.MarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.rules.common.util.JdtCoreVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
@@ -28,34 +26,32 @@ public class MarkerManager implements RefactoringEventManager {
 	private static final Logger logger = LoggerFactory.getLogger(MarkerManager.class);
 
 	@Override
-	public List<MarkerEvent> generateEvents(ICompilationUnit iCompilationUnit) {
+	public void discoverRefactoringEvents(ICompilationUnit iCompilationUnit) {
 
-		List<MarkerEvent> allEvents = new ArrayList<>();
 		Predicate<ASTNode> positionChecker = node -> true;
 		CompilationUnit cu = RefactoringUtil.parse(iCompilationUnit);
-		List<AbstractASTRewriteASTVisitor> resolvers = ResolverVisitorsFactory.getAllResolvers(positionChecker);
+		List<AbstractASTRewriteASTVisitor> resolvers = ResolverVisitorsFactory.getAllResolvers();
 		for (AbstractASTRewriteASTVisitor resolver : resolvers) {
-			List<MarkerEvent> events = createEvents(resolver, positionChecker, cu);
-			allEvents.addAll(events);
+			createEvents(resolver, positionChecker, cu);
 		}
-		return allEvents;
 	}
 
-	private List<MarkerEvent> createEvents(AbstractASTRewriteASTVisitor resolver, Predicate<ASTNode> positionChecker,
+	private void createEvents(AbstractASTRewriteASTVisitor resolver, Predicate<ASTNode> positionChecker,
 			CompilationUnit cu) {
 		final ASTRewrite astRewrite = ASTRewrite.create(cu.getAST());
 		resolver.setASTRewrite(astRewrite);
 		cu.accept(resolver);
-		return resolver.getMarkerEvents();
 	}
 
 	@Override
-	public void resolve(ICompilationUnit iCompilationUnit, int offset) {
+	public void resolve(ICompilationUnit iCompilationUnit, String resolverName, int offset) {
+		// TODO: get the resolver key. We do not want to apply all resolvers.
 		Predicate<ASTNode> positionChecker = node -> {
 			int startPosition = node.getStartPosition();
 			int endPosition = startPosition + node.getLength();
 			return startPosition <= offset && endPosition >= offset;
 		};
+
 		Version jdtVersion = JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion();
 		WorkingCopyOwnerDecorator workingCopyOwner = new WorkingCopyOwnerDecorator();
 		ICompilationUnit workingCopy;

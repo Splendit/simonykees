@@ -17,11 +17,14 @@ public class JSparrowProposal implements IJavaCompletionProposal, ICompletionPro
 	private ICompilationUnit icu;
 	private int offset;
 	private int length;
+	private String resolverName;
 
-	public JSparrowProposal(ICompilationUnit icu, int offset, int length) {
+	public JSparrowProposal(ICompilationUnit icu, String resolverName, int offset, int length) {
 		this.icu = icu;
 		this.offset = offset;
 		this.length = length;
+		this.resolverName = resolverName;
+		
 	}
 
 	@Override
@@ -32,7 +35,7 @@ public class JSparrowProposal implements IJavaCompletionProposal, ICompletionPro
 	@Override
 	public void apply(IDocument document) {
 		RefactoringEventManager eventGenerator = new MarkerManager();
-		eventGenerator.resolve(icu, offset);
+		eventGenerator.resolve(icu, resolverName, offset);
 
 	}
 

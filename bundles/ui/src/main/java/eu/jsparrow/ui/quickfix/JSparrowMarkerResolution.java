@@ -18,6 +18,8 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 	private IResource resource;
 	private String description;
 	private String name;
+	private String resolver;
+	private int end;
 	
 	public JSparrowMarkerResolution(IMarker marker) {
 		this.label = marker.getAttribute(IMarker.MESSAGE, "jSparrow QuickFix");
@@ -25,6 +27,8 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 		this.name = marker.getAttribute("name", "jSparrow Quickfix");
 		this.resource = marker.getResource();
 		this.description = marker.getAttribute("description", "");
+		this.resolver = marker.getAttribute("resolver", "");
+		this.end = marker.getAttribute(IMarker.CHAR_END, 0);
 		
 	}
 
@@ -46,7 +50,7 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 		if (icu == null) {
 			return;
 		}
-		eventGenerator.resolve(icu, offset);
+		eventGenerator.resolve(icu, this.resolver, this.offset);
 	}
 
 	@Override

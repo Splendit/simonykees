@@ -19,22 +19,22 @@ public class MarkerFactory {
 		try {
 			IJavaElement javaElement = event.getJavaElement();
 			IResource resource = javaElement.getResource();
-			scheduleWorkspaceJob(event.getName(), event.getMessage(), resource, event.getOffset(), event.getLength(),
+			scheduleWorkspaceJob(event.getResolver(), event.getName(), event.getMessage(), resource, event.getOffset(), event.getLength(),
 					event.getDescription());
 		} catch (CoreException e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
 
-	private void scheduleWorkspaceJob(final String name, final String message, final IResource resource,
+	private void scheduleWorkspaceJob(final String resolver, final String name, final String message, final IResource resource,
 			final int start, final int length, String description)
 			throws CoreException {
 		IMarker marker = create(resource);
 		if (marker != null) {
 			marker.setAttributes(
-					new String[] { "name", IMarker.MESSAGE, IMarker.CHAR_START, IMarker.CHAR_END, "description",
+					new String[] {"resolver", "name", IMarker.MESSAGE, IMarker.CHAR_START, IMarker.CHAR_END, "description",
 							IMarker.SOURCE_ID },
-					new Object[] { name, message, Integer.valueOf(start), Integer.valueOf(start + length), description,
+					new Object[] { resolver, name, message, Integer.valueOf(start), Integer.valueOf(start + length), description,
 							Activator.PLUGIN_ID });
 		}
 	}

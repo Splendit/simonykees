@@ -14,11 +14,16 @@ public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor
 
 	private static final String MARKER_NAME = "Use predefined comparator"; //$NON-NLS-1$
 	private static final String MARKER_DESCRIPTION = "Lambda expression can be replaced with predefined comparator"; //$NON-NLS-1$
+	public static final String RESOLVER_NAME = UseComparatorMethodsResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
 	public UseComparatorMethodsResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
+	}
+
+	public UseComparatorMethodsResolver() {
+		this(node -> true);
 	}
 
 	@Override
@@ -37,7 +42,8 @@ public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactorEvent event = new RefactorEvent(MARKER_NAME, MARKER_DESCRIPTION, javaElement, original, newNode);
+		RefactorEvent event = new RefactorEvent(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION, javaElement, original,
+				newNode);
 		addMarkerEvent(event);
 	}
 }

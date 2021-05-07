@@ -16,6 +16,7 @@ import org.eclipse.ui.ide.ResourceUtil;
 import eu.jsparrow.core.markers.MarkerManager;
 import eu.jsparrow.rules.common.markers.MarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
+import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 
 public class Engine extends EditorTracker implements IElementChangedListener {
 
@@ -114,8 +115,10 @@ public class Engine extends EditorTracker implements IElementChangedListener {
 	}
 
 	private void handleParentSourceReference(ICompilationUnit cu) {
+		RefactoringMarkers.clear();
 		RefactoringEventManager eventGenerator = new MarkerManager();
-		List<MarkerEvent> events = eventGenerator.generateEvents(cu);
+		eventGenerator.discoverRefactoringEvents(cu);
+		List<MarkerEvent> events = RefactoringMarkers.getAllEvents();
 		final IResource resource = cu.getResource();
 		MarkerJob job = new MarkerJob(resource, () -> {
 			markerFactory.clear(resource);

@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import eu.jsparrow.rules.common.markers.MarkerEvent;
-import eu.jsparrow.rules.common.markers.MarkerEventGenerator;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
 import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -22,7 +22,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @since 0.9
  */
 
-public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor implements MarkerEventGenerator {
+public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
@@ -31,7 +31,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor implements
 	protected String compilationUnitHandle;
 
 	protected List<ASTRewriteVisitorListener> listeners = new ArrayList<>();
-	private List<MarkerEvent> markerListeners = new ArrayList<>();
+	private List<RefactoringMarkerListener> refactoringMarkerListeners = new ArrayList<>();
 
 	protected String compilationUnitSource = EMPTY_STRING;
 
@@ -124,14 +124,19 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor implements
 		listeners.forEach(listener -> listener.update(new ASTRewriteEvent(this.compilationUnitHandle)));
 	}
 
-	@Override
-	public void addMarkerEvent(MarkerEvent event) {
-		markerListeners.add(event);
+	protected void addMarkerEvent(ASTNode original, ASTNode newNode) {
 	}
 
-	@Override
-	public List<MarkerEvent> getMarkerEvents() {
-		return this.markerListeners;
+	public void addMarkerEvent(MarkerEvent event) {
+		refactoringMarkerListeners.forEach(listener -> listener.update(event));
+	}
+
+	public void addMarkerListener(RefactoringMarkerListener listener) {
+		this.refactoringMarkerListeners.add(listener);
+	}
+
+	public void clearMarkerListeners() {
+		this.refactoringMarkerListeners.clear();
 	}
 
 	protected CommentRewriter getCommentRewriter() {
