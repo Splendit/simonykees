@@ -1,11 +1,9 @@
-package eu.jsparrow.rules.common.visitor;
+package eu.jsparrow.rules.common.markers;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-
-import eu.jsparrow.rules.common.MarkerEvent;
 
 public interface MarkerEventGenerator {
 	

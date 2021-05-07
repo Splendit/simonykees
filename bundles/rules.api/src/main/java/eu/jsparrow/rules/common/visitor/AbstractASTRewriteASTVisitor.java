@@ -9,7 +9,8 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import eu.jsparrow.rules.common.MarkerEvent;
+import eu.jsparrow.rules.common.markers.MarkerEvent;
+import eu.jsparrow.rules.common.markers.MarkerEventGenerator;
 import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 

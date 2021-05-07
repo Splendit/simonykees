@@ -17,15 +17,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.WorkingCopyOwnerDecorator;
-import eu.jsparrow.rules.common.MarkerEvent;
-import eu.jsparrow.rules.common.RefactoringEventProducer;
+import eu.jsparrow.rules.common.markers.MarkerEvent;
+import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.rules.common.util.JdtCoreVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
-public class EventProducer implements RefactoringEventProducer {
+public class MarkerManager implements RefactoringEventManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(EventProducer.class);
+	private static final Logger logger = LoggerFactory.getLogger(MarkerManager.class);
 
 	@Override
 	public List<MarkerEvent> generateEvents(ICompilationUnit iCompilationUnit) {

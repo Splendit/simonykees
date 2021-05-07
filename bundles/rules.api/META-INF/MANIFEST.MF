@@ -12,6 +12,7 @@ Export-Package: eu.jsparrow.rules.api,
  eu.jsparrow.rules.common.exception,
  eu.jsparrow.rules.common.exception.runtime,
  eu.jsparrow.rules.common.statistics,
+ eu.jsparrow.rules.common.markers,
  eu.jsparrow.rules.common.util,
  eu.jsparrow.rules.common.visitor,
  eu.jsparrow.rules.common.visitor.helper

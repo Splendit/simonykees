@@ -5,7 +5,7 @@ import java.util.Map;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
 
-import eu.jsparrow.rules.common.MarkerEvent;
+import eu.jsparrow.rules.common.markers.MarkerEvent;
 
 public class RefactorEvent implements MarkerEvent {
 

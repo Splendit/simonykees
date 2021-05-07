@@ -1,10 +1,10 @@
-package eu.jsparrow.rules.common;
+package eu.jsparrow.rules.common.markers;
 
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-public interface RefactoringEventProducer {
+public interface RefactoringEventManager {
 
 	List<MarkerEvent> generateEvents(ICompilationUnit iCompilationUnit);
 

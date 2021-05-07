@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.common;
+package eu.jsparrow.rules.common.markers;
 
 import org.eclipse.jdt.core.IJavaElement;
 

@@ -7,7 +7,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.rules.common.MarkerEvent;
+import eu.jsparrow.rules.common.markers.MarkerEvent;
 import eu.jsparrow.ui.Activator;
 
 public class MarkerFactory {
