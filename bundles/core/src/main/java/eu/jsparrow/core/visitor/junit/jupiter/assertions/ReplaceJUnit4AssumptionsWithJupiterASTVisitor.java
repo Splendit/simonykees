@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4MethodInvocationAnalyzer.isDeprecatedAssertEqualsComparingObjectArrays;
 import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4MethodInvocationAnalyzer.isParameterTypeString;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
@@ -77,17 +76,10 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 		}
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
 		IMethodBinding originalMethodBinding = invocationData.getMethodBinding();
-		String originalMethodName = originalMethodBinding.getName();
 
 		ITypeBinding[] declaredParameterTypes = originalMethodBinding
 			.getMethodDeclaration()
 			.getParameterTypes();
-		String newMethodName;
-		if (isDeprecatedAssertEqualsComparingObjectArrays(originalMethodName, declaredParameterTypes)) {
-			newMethodName = "assertArrayEquals"; //$NON-NLS-1$
-		} else {
-			newMethodName = originalMethodName;
-		}
 
 		List<Expression> originalArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
@@ -105,22 +97,22 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 			newArguments = originalArguments;
 		}
 
-		String newMethodStaticImport = classDeclaringJUnit4MethodReplacement + "." + newMethodName; //$NON-NLS-1$
+		String originalMethodName = originalMethodBinding.getName();
+		String newMethodStaticImport = classDeclaringJUnit4MethodReplacement + "." + originalMethodName; //$NON-NLS-1$
 		if (supportedNewStaticMethodImports.contains(newMethodStaticImport)) {
 			if (methodInvocation.getExpression() == null
-					&& newArguments == originalArguments
-					&& newMethodName.equals(originalMethodName)) {
+					&& newArguments == originalArguments) {
 				return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodStaticImport));
 			}
 			Supplier<List<Expression>> newArgumentsSupplier = () -> createNewMethodArguments(newArguments);
 			return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation,
-					() -> createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier),
+					() -> createNewInvocationWithoutQualifier(originalMethodName, newArgumentsSupplier),
 					newMethodStaticImport));
 		}
 		Supplier<List<Expression>> newArgumentsSupplier = () -> createNewMethodArguments(newArguments);
 		Supplier<MethodInvocation> newMethodInvocationSupplier = () -> createNewInvocationWithQualifier(
 				methodInvocation,
-				newMethodName, newArgumentsSupplier);
+				originalMethodName, newArgumentsSupplier);
 
 		return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodInvocationSupplier));
 	}
