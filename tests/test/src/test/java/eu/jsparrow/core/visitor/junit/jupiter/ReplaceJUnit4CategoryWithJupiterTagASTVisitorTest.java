@@ -21,6 +21,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	public void setUpVisitor() throws Exception {
 		addDependency("junit", "junit", "4.13");
 		setDefaultVisitor(new ReplaceJUnit4CategoryWithJupiterTagASTVisitor());
+		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 	}
 
 	@AfterEach
@@ -29,9 +30,8 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_SingleMemberClassLiteral_shouldTransform() throws Exception {
+	void visit_SingleMemberClassLiteral_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
 		String original = "" +
 				"	@Category(FirstCategory.class)\n" +
@@ -51,9 +51,8 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_SingleMemberClassLiteralArray_shouldTransform() throws Exception {
+	void visit_SingleMemberClassLiteralArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
 		String original = "" +
 				"	@Category({ FirstCategory.class, SecondCategory.class })\n"
@@ -74,9 +73,8 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_SingleMemberEmptyArray_shouldTransform() throws Exception {
+	void visit_SingleMemberEmptyArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
 		String original = ""
 				+ "	@Category({})\n"
@@ -95,9 +93,8 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_NormalAnnotationWithClassLiteral_shouldTransform() throws Exception {
+	void visit_NormalAnnotationWithClassLiteral_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
 		String original = "" +
 				"	@Category(value = FirstCategory.class)\n"
@@ -117,9 +114,8 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_NormalAnnotationWithClassLiteralArray_shouldTransform() throws Exception {
+	void visit_NormalAnnotationWithClassLiteralArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
 		String original = "" +
 				"	@Category(value = { FirstCategory.class, SecondCategory.class })\n"
@@ -140,9 +136,8 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_NormalAnnotationWithEmptyArray_shouldTransform() throws Exception {
+	void visit_NormalAnnotationWithEmptyArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
 		String original = ""
 				+ "	@Category(value = {})\n"
@@ -161,9 +156,8 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_SingleMemberArrayClassliteral_shouldTransform() throws Exception {
+	void visit_SingleMemberArrayClassliteral_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
 		String original = ""
 				+ "	@Category({ FirstCategory[].class })\n"
@@ -183,9 +177,8 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_SingleMember2DArrayClassliteral_shouldTransform() throws Exception {
+	void visit_SingleMember2DArrayClassliteral_shouldTransform() throws Exception {
 		defaultFixture.addImport(org.junit.Test.class.getName());
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
 
 		String original = ""
 				+ "	@Category({ FirstCategory[][].class })\n"
@@ -205,8 +198,7 @@ class ReplaceJUnit4CategoryWithJupiterTagASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_CategoryAnnotationOnClass_shouldTransform() throws Exception {
-		defaultFixture.addImport(org.junit.experimental.categories.Category.class.getName());
+	void visit_CategoryAnnotationOnClass_shouldTransform() throws Exception {
 
 		String original = ""
 				+ "@Category(ExampleCategory.class)\n"

@@ -2,9 +2,11 @@ package eu.jsparrow.core.rule.impl;
 
 import static eu.jsparrow.core.util.RulesTestUtil.addToClasspath;
 import static eu.jsparrow.core.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
+import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -12,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +24,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-public class ReplaceJUnit4CategoryWithJupiterTagRuleTest extends SingleRuleTest {
+class ReplaceJUnit4CategoryWithJupiterTagRuleTest extends SingleRuleTest {
 
 	private static final String CANNOT_REMOVE_CATEGORY_IMPORT = "ReplaceJUnit4CategoryWithJupiterTagCannotRemoveCategoryImportRule.java";
 	private static final String REMOVE_CATEGORY_IMPORT = "ReplaceJUnit4CategoryWithJupiterTagRemoveCategoryImportRule.java";
@@ -38,7 +39,7 @@ public class ReplaceJUnit4CategoryWithJupiterTagRuleTest extends SingleRuleTest 
 	}
 
 	@Test
-	public void testCannotRemoveCategoryImport() throws Exception {
+	void testCannotRemoveCategoryImport() throws Exception {
 		loadUtilities();
 
 		rule.calculateEnabledForProject(testProject);
@@ -53,7 +54,7 @@ public class ReplaceJUnit4CategoryWithJupiterTagRuleTest extends SingleRuleTest 
 	}
 
 	@Test
-	public void testRemoveCategoryImport() throws Exception {
+	void testRemoveCategoryImport() throws Exception {
 		loadUtilities();
 
 		rule.calculateEnabledForProject(testProject);
@@ -68,17 +69,25 @@ public class ReplaceJUnit4CategoryWithJupiterTagRuleTest extends SingleRuleTest 
 	}
 
 	@Test
-	public void calculateEnabledForProjectShouldBeEnabled() throws Exception {
-		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
-					"5.0.0")));
-		addToClasspath(testProject, Arrays
-			.asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.13")));
+	void calculateEnabledForProjectShouldBeEnabled() throws Exception {
+		addToClasspath(testProject,
+				asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api", "5.0.0")));
+		addToClasspath(testProject, asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.13")));
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 
 		rule.calculateEnabledForProject(testProject);
 
 		assertTrue(rule.isEnabled());
+	}
+
+	@Test
+	void calculateEnabledForProjectShouldBeDisabled() throws Exception {
+		addToClasspath(testProject, asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.13")));
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertFalse(rule.isEnabled());
 	}
 
 	@Test
@@ -95,7 +104,7 @@ public class ReplaceJUnit4CategoryWithJupiterTagRuleTest extends SingleRuleTest 
 				contains(Tag.JAVA_1_8, Tag.TESTING));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
-				equalTo("This rule replaces each JUnit 4 @Category annotation with one or more Jupiter @Tag annotations."
+				equalTo("This rule replaces each JUnit 4 Category annotation with one or more Jupiter Tag annotations."
 						+ " By replacing each of these JUnit 4 annotations by the corresponding Jupiter alternatives,"
 						+ " this rule promotes a stepwise transition to JUnit Jupiter."));
 	}
