@@ -82,15 +82,6 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 			.collect(Collectors.toSet());
 
 		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
-		boolean qualifierNeededForAssumeThat = newStaticAssertionMethodImports.stream()
-			.noneMatch(fullyQualifiedName -> fullyQualifiedName.endsWith('.' + ASSUME_THAT));
-
-		allSupportedJUnit4InvocationDataList.stream()
-			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
-			.map(JUnit4MethodInvocationAnalysisResult::getAssumptionThatEveryItemNotNull)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.forEach(data -> insertAssumptionThatEveryItemNotNull(data, qualifierNeededForAssumeThat));
 
 		return true;
 	}
@@ -102,6 +93,23 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + NOT_NULL_VALUE);
 		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + EVERY_ITEM);
 		verifyStaticMethodImport(compilationUnit, JAVA_UTIL_ARRAYS + '.' + AS_LIST);
+	}
+
+	@Override
+	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
+			Set<String> newStaticAssertionMethodImports,
+			List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList) {
+		super.transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports,
+				jUnit4AssertTransformationDataList);
+
+		boolean qualifierNeededForAssumeThat = newStaticAssertionMethodImports.stream()
+			.noneMatch(fullyQualifiedName -> fullyQualifiedName.endsWith('.' + ASSUME_THAT));
+
+		jUnit4AssertTransformationDataList.stream()
+			.map(JUnit4MethodInvocationReplacementData::getAssumptionThatEveryItemNotNull)
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.forEach(data -> insertAssumptionThatEveryItemNotNull(data, qualifierNeededForAssumeThat));
 	}
 
 	@Override

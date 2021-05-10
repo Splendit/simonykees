@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.Type;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -58,12 +57,6 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = collectJUnit4MethodInvocationAnalysisResult(
 				compilationUnit);
 
-		List<Type> throwingRunnableTypesToReplace = allSupportedJUnit4InvocationDataList.stream()
-			.map(JUnit4MethodInvocationAnalysisResult::getTypeOfThrowingRunnableToReplace)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toList());
-
 		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticMethodImportsToRemove(compilationUnit,
 				allSupportedJUnit4InvocationDataList);
 
@@ -84,20 +77,31 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 			.collect(Collectors.toSet());
 
 		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
-
-		AST ast = astRewrite.getAST();
-		throwingRunnableTypesToReplace.forEach(typeToReplace -> {
-			Name executableTypeName = addImport(ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE, typeToReplace);
-			SimpleType typeReplacement = ast.newSimpleType(executableTypeName);
-			astRewrite.replace(typeToReplace, typeReplacement, null);
-		});
-
 		return false;
 	}
 
 	protected void verifyImports(CompilationUnit compilationUnit) {
 		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
 		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
+	}
+
+	@Override
+	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
+			Set<String> newStaticAssertionMethodImports,
+			List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList) {
+		super.transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports,
+				jUnit4AssertTransformationDataList);
+
+		AST ast = astRewrite.getAST();
+		jUnit4AssertTransformationDataList.stream()
+			.map(JUnit4MethodInvocationReplacementData::getTypeOfThrowingRunnableToReplace)
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.forEach(typeToReplace -> {
+				Name executableTypeName = addImport(ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE, typeToReplace);
+				SimpleType typeReplacement = ast.newSimpleType(executableTypeName);
+				astRewrite.replace(typeToReplace, typeReplacement, null);
+			});
 	}
 
 	@Override
