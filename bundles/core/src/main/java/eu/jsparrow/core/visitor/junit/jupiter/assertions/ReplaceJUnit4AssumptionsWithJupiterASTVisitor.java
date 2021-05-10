@@ -6,16 +6,13 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -32,38 +29,6 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 
 	public ReplaceJUnit4AssumptionsWithJupiterASTVisitor() {
 		super(ORG_J_UNIT_JUPITER_API_ASSUMPTIONS);
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-
-		super.visit(compilationUnit);
-
-		verifyImports(compilationUnit);
-
-		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = collectJUnit4MethodInvocationAnalysisResult(
-				compilationUnit);
-
-		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticMethodImportsToRemove(compilationUnit,
-				allSupportedJUnit4InvocationDataList);
-
-		Set<String> supportedNewStaticMethodImports = findSupportedStaticImports(staticMethodImportsToRemove,
-				allSupportedJUnit4InvocationDataList);
-
-		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = allSupportedJUnit4InvocationDataList
-			.stream()
-			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
-			.map(data -> this.createTransformationData(data, supportedNewStaticMethodImports))
-			.collect(Collectors.toList());
-
-		Set<String> newStaticAssertionMethodImports = jUnit4AssertTransformationDataList.stream()
-			.map(JUnit4MethodInvocationReplacementData::getStaticMethodImport)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toSet());
-
-		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
-		return false;
 	}
 
 	@Override

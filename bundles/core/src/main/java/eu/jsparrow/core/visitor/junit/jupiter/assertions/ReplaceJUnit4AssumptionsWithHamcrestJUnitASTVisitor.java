@@ -55,38 +55,6 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	}
 
 	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		super.visit(compilationUnit);
-
-		verifyImports(compilationUnit);
-
-		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = collectJUnit4MethodInvocationAnalysisResult(
-				compilationUnit);
-
-		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticMethodImportsToRemove(compilationUnit,
-				allSupportedJUnit4InvocationDataList);
-
-		Set<String> supportedNewStaticMethodImports = findSupportedStaticImports(staticMethodImportsToRemove,
-				allSupportedJUnit4InvocationDataList);
-
-		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = allSupportedJUnit4InvocationDataList
-			.stream()
-			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
-			.map(data -> this.createTransformationData(data, supportedNewStaticMethodImports))
-			.collect(Collectors.toList());
-
-		Set<String> newStaticAssertionMethodImports = jUnit4AssertTransformationDataList.stream()
-			.map(JUnit4MethodInvocationReplacementData::getStaticMethodImport)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toSet());
-
-		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
-
-		return true;
-	}
-
-	@Override
 	protected void verifyImports(CompilationUnit compilationUnit) {
 		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
 		verifyImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS);
