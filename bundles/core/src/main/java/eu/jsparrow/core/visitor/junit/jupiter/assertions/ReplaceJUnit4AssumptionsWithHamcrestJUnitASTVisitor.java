@@ -72,7 +72,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = allSupportedJUnit4InvocationDataList
 			.stream()
 			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
-			.map(data -> this.createMethodInvocationReplacementData(data, supportedNewStaticMethodImports))
+			.map(data -> this.createTransformationData(data, supportedNewStaticMethodImports))
 			.collect(Collectors.toList());
 
 		Set<String> newStaticAssertionMethodImports = jUnit4AssertTransformationDataList.stream()
@@ -86,6 +86,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		return true;
 	}
 
+	@Override
 	protected void verifyImports(CompilationUnit compilationUnit) {
 		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
 		verifyImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS);
@@ -125,7 +126,8 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 				analyzer.supportTransformation(methodInvocation, arguments));
 	}
 
-	private JUnit4MethodInvocationReplacementData createMethodInvocationReplacementData(
+	@Override
+	protected JUnit4MethodInvocationReplacementData createTransformationData(
 			JUnit4MethodInvocationAnalysisResult invocationData,
 			Set<String> supportedNewStaticMethodImports) {
 

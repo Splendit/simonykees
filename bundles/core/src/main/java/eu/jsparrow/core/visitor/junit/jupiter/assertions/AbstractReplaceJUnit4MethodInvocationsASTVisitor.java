@@ -201,7 +201,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		newInvocation.setExpression(newQualifier);
 		return newInvocation;
 	}
-	
+
 	protected abstract void verifyImports(CompilationUnit compilationUnit);
 
 	protected abstract Set<String> getSupportedMethodNameReplacements();
@@ -210,5 +210,9 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 	protected abstract JUnit4MethodInvocationAnalysisResult findAnalysisResult(JUnit4MethodInvocationAnalyzer analyzer,
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments);
+
+	protected abstract JUnit4MethodInvocationReplacementData createTransformationData(
+			JUnit4MethodInvocationAnalysisResult invocationData,
+			Set<String> supportedNewStaticMethodImports);
 
 }

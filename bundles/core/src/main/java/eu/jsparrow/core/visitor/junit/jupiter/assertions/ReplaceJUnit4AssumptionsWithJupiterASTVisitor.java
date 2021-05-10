@@ -52,9 +52,8 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 
 		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = allSupportedJUnit4InvocationDataList
 			.stream()
-			.map(data -> this.findTransformationData(data, supportedNewStaticMethodImports))
-			.filter(Optional::isPresent)
-			.map(Optional::get)
+			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
+			.map(data -> this.createTransformationData(data, supportedNewStaticMethodImports))
 			.collect(Collectors.toList());
 
 		Set<String> newStaticAssertionMethodImports = jUnit4AssertTransformationDataList.stream()
@@ -67,6 +66,7 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 		return false;
 	}
 
+	@Override
 	protected void verifyImports(CompilationUnit compilationUnit) {
 		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
 	}
@@ -78,13 +78,11 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 				analyzer.supportTransformation(methodInvocation, arguments));
 	}
 
-	private Optional<JUnit4MethodInvocationReplacementData> findTransformationData(
+	@Override
+	protected JUnit4MethodInvocationReplacementData createTransformationData(
 			JUnit4MethodInvocationAnalysisResult invocationData,
 			Set<String> supportedNewStaticMethodImports) {
 
-		if (!invocationData.isTransformable()) {
-			return Optional.empty();
-		}
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
 		IMethodBinding originalMethodBinding = invocationData.getMethodBinding();
 
@@ -113,19 +111,19 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 		if (supportedNewStaticMethodImports.contains(newMethodStaticImport)) {
 			if (methodInvocation.getExpression() == null
 					&& newArguments == originalArguments) {
-				return Optional.of(new JUnit4MethodInvocationReplacementData(invocationData, newMethodStaticImport));
+				return new JUnit4MethodInvocationReplacementData(invocationData, newMethodStaticImport);
 			}
 			Supplier<List<Expression>> newArgumentsSupplier = () -> createNewMethodArguments(newArguments);
-			return Optional.of(new JUnit4MethodInvocationReplacementData(invocationData,
+			return new JUnit4MethodInvocationReplacementData(invocationData,
 					() -> createNewInvocationWithoutQualifier(originalMethodName, newArgumentsSupplier),
-					newMethodStaticImport));
+					newMethodStaticImport);
 		}
 		Supplier<List<Expression>> newArgumentsSupplier = () -> createNewMethodArguments(newArguments);
 		Supplier<MethodInvocation> newMethodInvocationSupplier = () -> createNewInvocationWithQualifier(
 				methodInvocation,
 				originalMethodName, newArgumentsSupplier);
 
-		return Optional.of(new JUnit4MethodInvocationReplacementData(invocationData, newMethodInvocationSupplier));
+		return new JUnit4MethodInvocationReplacementData(invocationData, newMethodInvocationSupplier);
 	}
 
 	@Override
