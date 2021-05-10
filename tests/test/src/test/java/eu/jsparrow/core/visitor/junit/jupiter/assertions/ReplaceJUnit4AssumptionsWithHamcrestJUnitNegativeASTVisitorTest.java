@@ -64,4 +64,16 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitNegativeASTVisitorTest
 
 		assertNoChange(original);
 	}
+	
+	@Test
+	public void visit_AssumeTrue_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assume.assumeTrue", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+		String original = "" +
+				"	@Test\n"
+				+ "	void test() {\n"
+				+ "		assumeTrue(1L == 1L);\n"
+				+ "	}";
+		assertNoChange(original);
+	}
 }

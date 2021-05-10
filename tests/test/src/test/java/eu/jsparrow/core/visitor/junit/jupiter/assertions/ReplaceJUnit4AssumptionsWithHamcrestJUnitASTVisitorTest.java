@@ -84,6 +84,38 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitorTest
 	}
 
 	@Test
+	public void visit_needingMatcherAssumeQualifier_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assume.assumeThat", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+		defaultFixture.addImport("org.hamcrest.CoreMatchers.notNullValue", true, false);
+		String original = "" +
+				"	void methodWithoutTestAnnotation() {\n"
+				+ "		assumeThat(new Object(),notNullValue());\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@Test\n"
+				+ "	void test() {\n"
+				+ "		assumeThat(new Object(),notNullValue());\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void methodWithoutTestAnnotation() {\n"
+				+ "		assumeThat(new Object(),notNullValue());\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@Test\n"
+				+ "	void test() {\n"
+				+ "		MatcherAssume.assumeThat(new Object(),notNullValue());\n"
+				+ "	}";
+
+		List<String> expectedImports = Arrays.asList("import org.hamcrest.junit.MatcherAssume;",
+				"import org.junit.jupiter.api.Test;",
+				"import static org.hamcrest.CoreMatchers.notNullValue;",
+				"import static org.junit.Assume.assumeThat;");
+		assertChange(original, expected, expectedImports);
+	}
+
+	@Test
 	public void visit_unqualifiedAssumeNoException_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.junit.Assume.assumeNoException", true, false);
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
@@ -368,6 +400,37 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitorTest
 				"import static org.hamcrest.CoreMatchers.everyItem;",
 				"import static org.hamcrest.CoreMatchers.notNullValue;",
 				"import static org.hamcrest.junit.MatcherAssume.assumeThat;");
+
+		assertChange(original, expected, expectedImports);
+	}
+
+	@Test
+	public void visit_AssumeNotNullWithNullableArrayAndImportOnDemand_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assume", true, true);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+
+		String original = "" +
+				"	Object[] objects;\n"
+				+ "\n"
+				+ "	@Test\n"
+				+ "	public void test() {\n"
+				+ "		assumeNotNull(objects);\n"
+				+ "	}";
+		String expected = "" +
+				"	Object[] objects;\n"
+				+ "\n"
+				+ "	@Test\n"
+				+ "	public void test() {\n"
+				+ "		MatcherAssume.assumeThat(objects,notNullValue());\n"
+				+ "		MatcherAssume.assumeThat(asList(objects),everyItem(notNullValue()));\n"
+				+ "	}";
+
+		List<String> expectedImports = Arrays.asList("import org.hamcrest.junit.MatcherAssume;",
+				"import org.junit.jupiter.api.Test;",
+				"import static java.util.Arrays.asList;",
+				"import static org.hamcrest.CoreMatchers.everyItem;",
+				"import static org.hamcrest.CoreMatchers.notNullValue;",
+				"import static org.junit.Assume.*;");
 
 		assertChange(original, expected, expectedImports);
 	}
