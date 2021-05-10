@@ -64,8 +64,11 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 			.map(Optional::get)
 			.collect(Collectors.toList());
 
-		findUnusedCategoryImports(compilationUnit, categoryAnnotations, categoryAnnotationReplacementdataList)
-			.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
+		if (categoryAnnotations.size() == categoryAnnotationReplacementdataList.size()) {
+			findUnusedCategoryImports(compilationUnit)
+				.forEach(importDeclaration -> astRewrite.remove(importDeclaration, null));
+		}
+
 		categoryAnnotationReplacementdataList.forEach(this::replaceCategoryAnnotation);
 
 		return false;
@@ -132,8 +135,8 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 			.map(Annotation.class::cast)
 			.map(Annotation::resolveAnnotationBinding)
 			.map(IAnnotationBinding::getAnnotationType)
-			.filter(typeBinding -> ClassRelationUtil.isContentOfType(typeBinding, "org.junit.Test") || //$NON-NLS-1$
-					ClassRelationUtil.isContentOfType(typeBinding, "org.junit.jupiter.api.Test")) //$NON-NLS-1$
+			.filter(typeBinding -> ClassRelationUtil.isContentOfTypes(typeBinding,
+					Arrays.asList("org.junit.Test", "org.junit.jupiter.api.Test"))) //$NON-NLS-1$//$NON-NLS-2$
 			.count() == 1;
 	}
 
@@ -165,26 +168,21 @@ public class ReplaceJUnit4CategoryWithJupiterTagASTVisitor extends AbstractAddIm
 			.collect(Collectors.toList());
 	}
 
-	private List<ImportDeclaration> findUnusedCategoryImports(CompilationUnit compilationUnit,
-			List<Annotation> categoryAnnotations,
-			List<JUnit4CategoryReplacementData> categoryAnnotationReplacementdataList) {
+	private List<ImportDeclaration> findUnusedCategoryImports(CompilationUnit compilationUnit) {
+		FirstSimpleTypeOccurrenceVisitor simpleTypeReferencingImportVisitor = new FirstSimpleTypeOccurrenceVisitor(
+				ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
+		compilationUnit.accept(simpleTypeReferencingImportVisitor);
 
-		boolean allAnnotationsTransformed = categoryAnnotations.size() == categoryAnnotationReplacementdataList.size();
-		if (allAnnotationsTransformed) {
-			FirstSimpleTypeOccurrenceVisitor simpleTypeReferencingImportVisitor = new FirstSimpleTypeOccurrenceVisitor(
-					ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY);
-			compilationUnit.accept(simpleTypeReferencingImportVisitor);
-
-			if (!simpleTypeReferencingImportVisitor.isSimpleTypeReferencingImport()) {
-				return ASTNodeUtil
-					.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
-					.stream()
-					.filter(importDeclaration -> importDeclaration.getName()
-						.getFullyQualifiedName()
-						.equals(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY))
-					.collect(Collectors.toList());
-			}
+		if (!simpleTypeReferencingImportVisitor.hasSimpleTypeOccurrence()) {
+			return ASTNodeUtil
+				.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
+				.stream()
+				.filter(importDeclaration -> importDeclaration.getName()
+					.getFullyQualifiedName()
+					.equals(ORG_JUNIT_EXPERIMENTAL_CATEGORIES_CATEGORY))
+				.collect(Collectors.toList());
 		}
+
 		return Collections.emptyList();
 	}
 

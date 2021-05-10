@@ -8,8 +8,8 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.SimpleType;
 
 /**
- * Looks for the first occurrence of {@link SimpleType} referencing an import of
- * the given type.
+ * Looks for the first occurrence of {@link SimpleType} matching the provided
+ * type name.
  * 
  * @since 3.30.0
  *
@@ -33,7 +33,7 @@ public class FirstSimpleTypeOccurrenceVisitor extends ASTVisitor {
 		return !firstOccurrenceFound;
 	}
 
-	public boolean isSimpleTypeReferencingImport() {
+	public boolean hasSimpleTypeOccurrence() {
 		return firstOccurrenceFound;
 	}
 }
