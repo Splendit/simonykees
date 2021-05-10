@@ -53,8 +53,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 
 		super.visit(compilationUnit);
 
-		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
-		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
+		verifyImports(compilationUnit);
 
 		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = collectJUnit4MethodInvocationAnalysisResult(
 				compilationUnit);
@@ -94,6 +93,11 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 		});
 
 		return false;
+	}
+
+	protected void verifyImports(CompilationUnit compilationUnit) {
+		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
+		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
 	}
 
 	@Override

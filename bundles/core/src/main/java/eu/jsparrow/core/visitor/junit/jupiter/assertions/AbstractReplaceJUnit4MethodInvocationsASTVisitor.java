@@ -201,6 +201,8 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		newInvocation.setExpression(newQualifier);
 		return newInvocation;
 	}
+	
+	protected abstract void verifyImports(CompilationUnit compilationUnit);
 
 	protected abstract Set<String> getSupportedMethodNameReplacements();
 

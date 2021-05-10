@@ -39,7 +39,7 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 
 		super.visit(compilationUnit);
 
-		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
+		verifyImports(compilationUnit);
 
 		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = collectJUnit4MethodInvocationAnalysisResult(
 				compilationUnit);
@@ -65,6 +65,10 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 
 		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
 		return false;
+	}
+
+	protected void verifyImports(CompilationUnit compilationUnit) {
+		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
 	}
 
 	@Override

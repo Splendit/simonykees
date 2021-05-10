@@ -58,12 +58,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	public boolean visit(CompilationUnit compilationUnit) {
 		super.visit(compilationUnit);
 
-		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
-		verifyImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS);
-		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + NULL_VALUE);
-		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + NOT_NULL_VALUE);
-		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + EVERY_ITEM);
-		verifyStaticMethodImport(compilationUnit, JAVA_UTIL_ARRAYS + '.' + AS_LIST);
+		verifyImports(compilationUnit);
 
 		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = collectJUnit4MethodInvocationAnalysisResult(
 				compilationUnit);
@@ -99,6 +94,15 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 			.forEach(data -> insertAssumptionThatEveryItemNotNull(data, qualifierNeededForAssumeThat));
 
 		return true;
+	}
+
+	protected void verifyImports(CompilationUnit compilationUnit) {
+		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
+		verifyImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS);
+		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + NULL_VALUE);
+		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + NOT_NULL_VALUE);
+		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + EVERY_ITEM);
+		verifyStaticMethodImport(compilationUnit, JAVA_UTIL_ARRAYS + '.' + AS_LIST);
 	}
 
 	@Override
