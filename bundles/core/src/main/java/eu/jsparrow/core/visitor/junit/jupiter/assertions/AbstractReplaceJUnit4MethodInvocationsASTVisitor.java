@@ -50,18 +50,8 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 						Expression.class);
 				if (methodBinding != null && isSupportedJUnit4Method(methodBinding)) {
-					String methodIdentifier = methodInvocation.getName()
-						.getIdentifier();
-					JUnit4MethodInvocationAnalysisResult result;
-					if (methodIdentifier.equals("assertThrows")) { //$NON-NLS-1$
-						result = analyzer.createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments);
-					} else if (methodIdentifier.equals("assumeNotNull")) { //$NON-NLS-1$
-						result = analyzer.createAssumeNotNullInvocationAnalysisResult(methodInvocation, methodBinding,
-								arguments);
-					} else {
-						result = new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-								analyzer.supportTransformation(methodInvocation, arguments));
-					}
+					JUnit4MethodInvocationAnalysisResult result = findAnalysisResult(analyzer, methodInvocation, methodBinding,
+							arguments);
 					methodInvocationAnalysisResults.add(result);
 				}
 			});
@@ -217,4 +207,9 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 	protected abstract Set<String> getSupportedMethodNameReplacements();
 
 	protected abstract boolean isSupportedJUnit4Method(IMethodBinding methodBinding);
+	
+	protected abstract JUnit4MethodInvocationAnalysisResult findAnalysisResult(JUnit4MethodInvocationAnalyzer analyzer,
+			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments);
+	
+
 }

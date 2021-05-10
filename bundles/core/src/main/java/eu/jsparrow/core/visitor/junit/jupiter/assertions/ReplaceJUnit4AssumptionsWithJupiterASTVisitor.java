@@ -67,6 +67,13 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 		return false;
 	}
 
+	@Override
+	protected JUnit4MethodInvocationAnalysisResult findAnalysisResult(JUnit4MethodInvocationAnalyzer analyzer,
+			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+				analyzer.supportTransformation(methodInvocation, arguments));
+	}
+
 	private Optional<JUnit4MethodInvocationReplacementData> findTransformationData(
 			JUnit4MethodInvocationAnalysisResult invocationData,
 			Set<String> supportedNewStaticMethodImports) {

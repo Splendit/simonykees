@@ -35,9 +35,8 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * 
  */
 public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplaceJUnit4MethodInvocationsASTVisitor {
-	
-	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
 
+	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
 
 	private final Set<String> potentialMethodNameReplacements;
 
@@ -48,7 +47,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 		potentialMethodNameReplacements = Collections.unmodifiableSet(tmp);
 
 	}
-	
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 
@@ -95,6 +94,21 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 		});
 
 		return false;
+	}
+
+	@Override
+	protected JUnit4MethodInvocationAnalysisResult findAnalysisResult(JUnit4MethodInvocationAnalyzer analyzer,
+			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
+		String methodIdentifier = methodInvocation.getName()
+			.getIdentifier();
+		JUnit4MethodInvocationAnalysisResult result;
+		if (methodIdentifier.equals("assertThrows")) { //$NON-NLS-1$
+			result = analyzer.createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments);
+		} else {
+			result = new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+					analyzer.supportTransformation(methodInvocation, arguments));
+		}
+		return result;
 	}
 
 	private Optional<JUnit4MethodInvocationReplacementData> findTransformationData(
