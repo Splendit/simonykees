@@ -36,17 +36,32 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitNegativeASTVisitorTest
 				"	}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_notResolvedAssumeThat_shouldNotTransform() throws Exception {
-		defaultFixture.addImport("org.hamcrest.junit.MatcherAssume");
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		defaultFixture.addImport("org.hamcrest.CoreMatchers.notNullValue", true, false);
 		String original = "" +
 				"	@Test\n" +
 				"	void test() {\n" +
-				"		MatcherAssume.assumeThat(new Object(), notNullValue());\n" +
+				"		assumeThat(new Object(), notNullValue());\n" +
 				"	}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ConditionalAssumeNotNull_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assume.assumeNotNull", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+		String original = "" +
+				"	Object[] objects;\n" +
+				"\n" +
+				"	@Test\n" +
+				"	public void test() {\n" +
+				"		if (true)\n" +
+				"			assumeNotNull(objects);\n" +
+				"	}";
+
 		assertNoChange(original);
 	}
 }
