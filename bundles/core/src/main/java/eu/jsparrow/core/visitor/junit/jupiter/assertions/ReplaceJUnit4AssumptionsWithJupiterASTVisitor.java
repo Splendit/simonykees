@@ -113,10 +113,10 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 		if (supportedNewStaticMethodImports.contains(newMethodStaticImport)) {
 			if (methodInvocation.getExpression() == null
 					&& newArguments == originalArguments) {
-				return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodStaticImport));
+				return Optional.of(new JUnit4MethodInvocationReplacementData(invocationData, newMethodStaticImport));
 			}
 			Supplier<List<Expression>> newArgumentsSupplier = () -> createNewMethodArguments(newArguments);
-			return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation,
+			return Optional.of(new JUnit4MethodInvocationReplacementData(invocationData,
 					() -> createNewInvocationWithoutQualifier(originalMethodName, newArgumentsSupplier),
 					newMethodStaticImport));
 		}
@@ -125,7 +125,7 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 				methodInvocation,
 				originalMethodName, newArgumentsSupplier);
 
-		return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodInvocationSupplier));
+		return Optional.of(new JUnit4MethodInvocationReplacementData(invocationData, newMethodInvocationSupplier));
 	}
 
 	@Override

@@ -154,10 +154,10 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 			if (methodInvocation.getExpression() == null
 					&& newArguments == originalArguments
 					&& newMethodName.equals(originalMethodName)) {
-				return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodStaticImport));
+				return Optional.of(new JUnit4MethodInvocationReplacementData(invocationData, newMethodStaticImport));
 			}
 			Supplier<List<Expression>> newArgumentsSupplier = () -> createNewMethodArguments(newArguments);
-			return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation,
+			return Optional.of(new JUnit4MethodInvocationReplacementData(invocationData,
 					() -> createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier),
 					newMethodStaticImport));
 		}
@@ -166,7 +166,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 				methodInvocation,
 				newMethodName, newArgumentsSupplier);
 
-		return Optional.of(new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodInvocationSupplier));
+		return Optional.of(new JUnit4MethodInvocationReplacementData(invocationData, newMethodInvocationSupplier));
 	}
 
 	@Override

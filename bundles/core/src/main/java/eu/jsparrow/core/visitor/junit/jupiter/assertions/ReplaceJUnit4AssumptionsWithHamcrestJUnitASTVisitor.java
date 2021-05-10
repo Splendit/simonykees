@@ -82,7 +82,6 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 			.collect(Collectors.toSet());
 
 		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
-
 		boolean qualifierNeededForAssumeThat = newStaticAssertionMethodImports.stream()
 			.noneMatch(fullyQualifiedName -> fullyQualifiedName.endsWith('.' + ASSUME_THAT));
 
@@ -136,7 +135,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 
 		boolean keepUnqualified = methodInvocation.getExpression() == null && useNewStaticimport;
 		if (!changeInvocation && keepUnqualified) {
-			return new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodStaticImport);
+			return new JUnit4MethodInvocationReplacementData(invocationData, newMethodStaticImport);
 		}
 
 		Supplier<List<Expression>> newArgumentsSupplier;
@@ -150,7 +149,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		}
 
 		if (useNewStaticimport) {
-			return new JUnit4MethodInvocationReplacementData(methodInvocation,
+			return new JUnit4MethodInvocationReplacementData(invocationData,
 					() -> createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier),
 					newMethodStaticImport);
 		}
@@ -158,7 +157,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 				methodInvocation,
 				newMethodName, newArgumentsSupplier);
 
-		return new JUnit4MethodInvocationReplacementData(methodInvocation, newMethodInvocationSupplier);
+		return new JUnit4MethodInvocationReplacementData(invocationData, newMethodInvocationSupplier);
 	}
 
 	@Override
