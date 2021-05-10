@@ -101,14 +101,11 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 		String methodIdentifier = methodInvocation.getName()
 			.getIdentifier();
-		JUnit4MethodInvocationAnalysisResult result;
 		if (methodIdentifier.equals("assertThrows")) { //$NON-NLS-1$
-			result = analyzer.createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments);
-		} else {
-			result = new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-					analyzer.supportTransformation(methodInvocation, arguments));
+			return analyzer.createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments);
 		}
-		return result;
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+				analyzer.supportTransformation(methodInvocation, arguments));
 	}
 
 	private Optional<JUnit4MethodInvocationReplacementData> findTransformationData(

@@ -106,15 +106,12 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 		String methodIdentifier = methodInvocation.getName()
 			.getIdentifier();
-		JUnit4MethodInvocationAnalysisResult result;
 		if (methodIdentifier.equals(ASSUME_NOT_NULL)) {
-			result = analyzer.createAssumeNotNullInvocationAnalysisResult(methodInvocation, methodBinding,
+			return analyzer.createAssumeNotNullInvocationAnalysisResult(methodInvocation, methodBinding,
 					arguments);
-		} else {
-			result = new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-					analyzer.supportTransformation(methodInvocation, arguments));
 		}
-		return result;
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+				analyzer.supportTransformation(methodInvocation, arguments));
 	}
 
 	private JUnit4MethodInvocationReplacementData createMethodInvocationReplacementData(

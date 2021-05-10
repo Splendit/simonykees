@@ -28,12 +28,9 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 	protected static final String ORG_J_UNIT_JUPITER_API_ASSUMPTIONS = "org.junit.jupiter.api.Assumptions"; //$NON-NLS-1$
 	protected static final String ORG_J_UNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	protected final String classDeclaringJUnit4MethodReplacement;
-	protected final boolean transformingToJUnitJupiter;
 
 	AbstractReplaceJUnit4MethodInvocationsASTVisitor(String classDeclaringJUnit4MethodReplacement) {
 		this.classDeclaringJUnit4MethodReplacement = classDeclaringJUnit4MethodReplacement;
-		transformingToJUnitJupiter = classDeclaringJUnit4MethodReplacement.equals(ORG_J_UNIT_JUPITER_API_ASSERTIONS)
-				|| classDeclaringJUnit4MethodReplacement.equals(ORG_J_UNIT_JUPITER_API_ASSUMPTIONS);
 	}
 
 	List<JUnit4MethodInvocationAnalysisResult> collectJUnit4MethodInvocationAnalysisResult(
@@ -50,7 +47,8 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 						Expression.class);
 				if (methodBinding != null && isSupportedJUnit4Method(methodBinding)) {
-					JUnit4MethodInvocationAnalysisResult result = findAnalysisResult(analyzer, methodInvocation, methodBinding,
+					JUnit4MethodInvocationAnalysisResult result = findAnalysisResult(analyzer, methodInvocation,
+							methodBinding,
 							arguments);
 					methodInvocationAnalysisResults.add(result);
 				}
@@ -207,9 +205,8 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 	protected abstract Set<String> getSupportedMethodNameReplacements();
 
 	protected abstract boolean isSupportedJUnit4Method(IMethodBinding methodBinding);
-	
+
 	protected abstract JUnit4MethodInvocationAnalysisResult findAnalysisResult(JUnit4MethodInvocationAnalyzer analyzer,
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments);
-	
 
 }
