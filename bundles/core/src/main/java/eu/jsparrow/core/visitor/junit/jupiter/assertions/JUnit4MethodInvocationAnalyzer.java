@@ -60,11 +60,11 @@ class JUnit4MethodInvocationAnalyzer {
 					.isArray()) {
 					return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true);
 				}
-				AssertThatEveryItemNotNullAnalysisResult assumeNotNullInvocationAncestors = findAssumeNotNullInvocationAncestors(
+				AssumptionThatEveryItemNotNull assumptionThatEveryItemNotNull = findAssumptionThatEveryItemNotNull(
 						methodInvocation, onlyOneArgument).orElse(null);
-				if (assumeNotNullInvocationAncestors != null) {
+				if (assumptionThatEveryItemNotNull != null) {
 					return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-							assumeNotNullInvocationAncestors);
+							assumptionThatEveryItemNotNull);
 				}
 			} else {
 				return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true);
@@ -73,7 +73,7 @@ class JUnit4MethodInvocationAnalyzer {
 		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, false);
 	}
 
-	private Optional<AssertThatEveryItemNotNullAnalysisResult> findAssumeNotNullInvocationAncestors(
+	private Optional<AssumptionThatEveryItemNotNull> findAssumptionThatEveryItemNotNull(
 			MethodInvocation methodInvocation, Expression arrayArgument) {
 		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return Optional.empty();
@@ -86,7 +86,7 @@ class JUnit4MethodInvocationAnalyzer {
 
 		Block block = (Block) methodInvocationStatement.getParent();
 		return Optional
-			.of(new AssertThatEveryItemNotNullAnalysisResult(arrayArgument, methodInvocationStatement, block));
+			.of(new AssumptionThatEveryItemNotNull(arrayArgument, methodInvocationStatement, block));
 
 	}
 

@@ -4,20 +4,20 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 
-class AssertThatEveryItemNotNullAnalysisResult {
-	private final Expression arrayArgument;
+class AssumptionThatEveryItemNotNull {
+	private final Expression assumeNotNullArrayArgument;
 	private final ExpressionStatement assumeNotNullStatement;
 	private final Block assumeNotNullStatementParent;
 
-	public AssertThatEveryItemNotNullAnalysisResult(Expression arrayArgument,
+	public AssumptionThatEveryItemNotNull(Expression assumeNotNullArrayArgument,
 			ExpressionStatement assumeNotNullStatement, Block assumeNotNullStatementParent) {
-		this.arrayArgument = arrayArgument;
+		this.assumeNotNullArrayArgument = assumeNotNullArrayArgument;
 		this.assumeNotNullStatement = assumeNotNullStatement;
 		this.assumeNotNullStatementParent = assumeNotNullStatementParent;
 	}
 
-	public Expression getArrayArgument() {
-		return arrayArgument;
+	public Expression getAssumeNotNullArrayArgument() {
+		return assumeNotNullArrayArgument;
 	}
 
 	public ExpressionStatement getAssumeNotNullStatement() {

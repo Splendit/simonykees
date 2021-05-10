@@ -93,10 +93,10 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 
 		allSupportedJUnit4InvocationDataList.stream()
 			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
-			.map(JUnit4MethodInvocationAnalysisResult::getAssertThatEveryItemNotNullData)
+			.map(JUnit4MethodInvocationAnalysisResult::getAssumptionThatEveryItemNotNull)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
-			.forEach(data -> insertAssertThatEveryItemNotNullAnalysisResult(data, qualifierNeededForAssumeThat));
+			.forEach(data -> insertAssumptionThatEveryItemNotNull(data, qualifierNeededForAssumeThat));
 
 		return true;
 	}
@@ -222,10 +222,10 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	}
 
 	@SuppressWarnings("unchecked")
-	void insertAssertThatEveryItemNotNullAnalysisResult(AssertThatEveryItemNotNullAnalysisResult data,
+	void insertAssumptionThatEveryItemNotNull(AssumptionThatEveryItemNotNull assumptionThatEveryItemNotNull,
 			boolean qualifierNeededForAssumeThat) {
-		ExpressionStatement assumeNotNullStatement = data.getAssumeNotNullStatement();
-		List<Expression> asListArguments = Arrays.asList(data.getArrayArgument());
+		ExpressionStatement assumeNotNullStatement = assumptionThatEveryItemNotNull.getAssumeNotNullStatement();
+		List<Expression> asListArguments = Arrays.asList(assumptionThatEveryItemNotNull.getAssumeNotNullArrayArgument());
 		AST ast = astRewrite.getAST();
 		MethodInvocation assumeThatInvocation = ast.newMethodInvocation();
 		assumeThatInvocation.setName(ast.newSimpleName(ASSUME_THAT));
@@ -244,7 +244,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 
 		ExpressionStatement assumeThatStatement = ast.newExpressionStatement(assumeThatInvocation);
 
-		ListRewrite listRewrite = astRewrite.getListRewrite(data.getAssumeNotNullStatementParent(),
+		ListRewrite listRewrite = astRewrite.getListRewrite(assumptionThatEveryItemNotNull.getAssumeNotNullStatementParent(),
 				Block.STATEMENTS_PROPERTY);
 		listRewrite.insertAfter(assumeThatStatement, assumeNotNullStatement, null);
 	}
