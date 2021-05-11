@@ -40,17 +40,35 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		super.visit(compilationUnit);
 
 		verifyImports(compilationUnit);
+		JUnit4MethodInvocationAnalyzer analyzer = new JUnit4MethodInvocationAnalyzer(compilationUnit);
+		List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults = new ArrayList<>();
+		List<MethodInvocation> notTransformedJUnit4Invocations = new ArrayList<>();
 
-		List<JUnit4MethodInvocationAnalysisResult> allSupportedJUnit4InvocationDataList = collectJUnit4MethodInvocationAnalysisResult(
-				compilationUnit);
+		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
+		compilationUnit.accept(invocationCollectorVisitor);
+		invocationCollectorVisitor.getMethodInvocations()
+			.forEach(methodInvocation -> {
+				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+						Expression.class);
+				if (methodBinding != null && isSupportedJUnit4Method(methodBinding)) {
+					JUnit4MethodInvocationAnalysisResult result = findAnalysisResult(analyzer, methodInvocation,
+							methodBinding,
+							arguments);
+					methodInvocationAnalysisResults.add(result);
+					if (!result.isTransformable()) {
+						notTransformedJUnit4Invocations.add(result.getMethodInvocation());
+					}
+				}
+			});
 
 		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticMethodImportsToRemove(compilationUnit,
-				allSupportedJUnit4InvocationDataList);
+				notTransformedJUnit4Invocations);
 
 		Set<String> supportedNewStaticMethodImports = findSupportedStaticImports(staticMethodImportsToRemove,
-				allSupportedJUnit4InvocationDataList);
+				methodInvocationAnalysisResults);
 
-		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = allSupportedJUnit4InvocationDataList
+		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = methodInvocationAnalysisResults
 			.stream()
 			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
 			.map(data -> this.createTransformationData(data, supportedNewStaticMethodImports))
@@ -66,35 +84,10 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		return false;
 	}
 
-	List<JUnit4MethodInvocationAnalysisResult> collectJUnit4MethodInvocationAnalysisResult(
-			CompilationUnit compilationUnit) {
-
-		JUnit4MethodInvocationAnalyzer analyzer = new JUnit4MethodInvocationAnalyzer(compilationUnit);
-		List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults = new ArrayList<>();
-
-		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
-		compilationUnit.accept(invocationCollectorVisitor);
-		invocationCollectorVisitor.getMethodInvocations()
-			.forEach(methodInvocation -> {
-				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-						Expression.class);
-				if (methodBinding != null && isSupportedJUnit4Method(methodBinding)) {
-					JUnit4MethodInvocationAnalysisResult result = findAnalysisResult(analyzer, methodInvocation,
-							methodBinding,
-							arguments);
-					methodInvocationAnalysisResults.add(result);
-				}
-			});
-		return methodInvocationAnalysisResults;
-	}
-
 	protected List<ImportDeclaration> collectStaticMethodImportsToRemove(CompilationUnit compilationUnit,
-			List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults) {
+			List<MethodInvocation> notTransformedJUnit4Invocations) {
 
-		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = methodInvocationAnalysisResults.stream()
-			.filter(result -> !result.isTransformable())
-			.map(JUnit4MethodInvocationAnalysisResult::getMethodInvocation)
+		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = notTransformedJUnit4Invocations.stream()
 			.filter(methodInvocation -> methodInvocation
 				.getExpression() == null)
 			.map(MethodInvocation::getName)
