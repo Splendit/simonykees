@@ -17,7 +17,7 @@ class JUnit4MethodInvocationReplacementData {
 	private final MethodInvocation originalMethodInvocation;
 	private Supplier<MethodInvocation> methodInvocationReplacementSupplier;
 	private String staticMethodImport;
-	private AssumptionThatEveryItemNotNull assumptionThatEveryItemNotNull;
+	private AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull;
 	private Type typeOfThrowingRunnableToReplace;
 
 	JUnit4MethodInvocationReplacementData(JUnit4MethodInvocationAnalysisResult jUnit4InvocationAnalysisResult,
@@ -65,7 +65,7 @@ class JUnit4MethodInvocationReplacementData {
 		return Optional.empty();
 	}
 
-	Optional<AssumptionThatEveryItemNotNull> getAssumptionThatEveryItemNotNull() {
+	Optional<AssumeNotNullWithNullableArray> getAssumptionThatEveryItemNotNull() {
 		return Optional.ofNullable(assumptionThatEveryItemNotNull);
 	}
 

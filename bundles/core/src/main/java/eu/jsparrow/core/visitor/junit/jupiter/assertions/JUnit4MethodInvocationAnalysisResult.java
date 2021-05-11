@@ -13,7 +13,7 @@ public class JUnit4MethodInvocationAnalysisResult {
 	private final MethodInvocation methodInvocation;
 	private final IMethodBinding methodBinding;
 	private final List<Expression> arguments;
-	private AssumptionThatEveryItemNotNull assumptionThatEveryItemNotNull;
+	private AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull;
 	private Type typeOfThrowingRunnableToReplace;
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
@@ -24,7 +24,7 @@ public class JUnit4MethodInvocationAnalysisResult {
 	}
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			List<Expression> arguments, AssumptionThatEveryItemNotNull assumptionThatEveryItemNotNull) {
+			List<Expression> arguments, AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull) {
 		this(methodInvocation, methodBinding, arguments);
 		this.assumptionThatEveryItemNotNull = assumptionThatEveryItemNotNull;
 	}
@@ -47,7 +47,7 @@ public class JUnit4MethodInvocationAnalysisResult {
 		return arguments;
 	}
 
-	Optional<AssumptionThatEveryItemNotNull> getAssumptionThatEveryItemNotNull() {
+	Optional<AssumeNotNullWithNullableArray> getAssumptionThatEveryItemNotNull() {
 		return Optional.ofNullable(assumptionThatEveryItemNotNull);
 	}
 

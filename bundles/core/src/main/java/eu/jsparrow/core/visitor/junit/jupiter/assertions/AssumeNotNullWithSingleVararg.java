@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.Expression;
 public class AssumeNotNullWithSingleVararg {
 	private Expression expressionResolvedAsObject;
 	private ArrayCreation arrayCreation;
-	private AssumptionThatEveryItemNotNull assumeNotNullWithNullableArray;
+	private AssumeNotNullWithNullableArray assumeNotNullWithNullableArray;
 
 	AssumeNotNullWithSingleVararg(Expression expressionResolvedAsObject) {
 		this.expressionResolvedAsObject = expressionResolvedAsObject;
@@ -23,7 +23,7 @@ public class AssumeNotNullWithSingleVararg {
 		this.arrayCreation = arrayCreation;
 	}
 
-	AssumeNotNullWithSingleVararg(AssumptionThatEveryItemNotNull assumeNotNullOnNullableArray) {
+	AssumeNotNullWithSingleVararg(AssumeNotNullWithNullableArray assumeNotNullOnNullableArray) {
 		this.assumeNotNullWithNullableArray = assumeNotNullOnNullableArray;
 	}
 
@@ -35,7 +35,7 @@ public class AssumeNotNullWithSingleVararg {
 		return Optional.ofNullable(arrayCreation);
 	}
 
-	Optional<AssumptionThatEveryItemNotNull> getAssumeNotNullWithNullableArray() {
+	Optional<AssumeNotNullWithNullableArray> getAssumeNotNullWithNullableArray() {
 		return Optional.ofNullable(assumeNotNullWithNullableArray);
 	}
 }

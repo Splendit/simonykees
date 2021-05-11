@@ -209,7 +209,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	}
 
 	@SuppressWarnings("unchecked")
-	void insertAssumptionThatEveryItemNotNull(AssumptionThatEveryItemNotNull assumptionThatEveryItemNotNull,
+	void insertAssumptionThatEveryItemNotNull(AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull,
 			boolean qualifierNeededForAssumeThat) {
 		ExpressionStatement assumeNotNullStatement = assumptionThatEveryItemNotNull.getAssumeNotNullStatement();
 		List<Expression> asListArguments = Arrays
