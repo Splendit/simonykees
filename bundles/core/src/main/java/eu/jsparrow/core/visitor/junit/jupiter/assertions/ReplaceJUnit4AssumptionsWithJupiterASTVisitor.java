@@ -6,6 +6,7 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -37,7 +38,7 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 	}
 
 	@Override
-	protected JUnit4MethodInvocationAnalysisResult findAnalysisResult(JUnit4MethodInvocationAnalyzer analyzer,
+	protected Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(JUnit4MethodInvocationAnalyzer analyzer,
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 		return analyzer.analyzeAssumptionToJupiter(methodInvocation, methodBinding, arguments);
 	}

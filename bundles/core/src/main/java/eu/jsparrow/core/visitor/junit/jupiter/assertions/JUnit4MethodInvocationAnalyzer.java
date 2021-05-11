@@ -32,53 +32,62 @@ class JUnit4MethodInvocationAnalyzer {
 		this.jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(compilationUnit);
 	}
 
-	JUnit4MethodInvocationAnalysisResult analyzeAssertionToJupiter(MethodInvocation methodInvocation,
+	Optional<JUnit4MethodInvocationAnalysisResult> analyzeAssertionToJupiter(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
+		if (!supportTransformation(methodInvocation, arguments)) {
+			return Optional.empty();
+		}
 		String methodIdentifier = methodInvocation.getName()
 			.getIdentifier();
 		if (methodIdentifier.equals("assertThrows")) { //$NON-NLS-1$
 			return createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments);
 		}
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-				supportTransformation(methodInvocation, arguments));
+		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true));
 	}
 
-	JUnit4MethodInvocationAnalysisResult analyzeAssumptionToHamcrest(MethodInvocation methodInvocation,
+	Optional<JUnit4MethodInvocationAnalysisResult> analyzeAssumptionToHamcrest(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
+		if (!supportTransformation(methodInvocation, arguments)) {
+			return Optional.empty();
+		}
 		String methodIdentifier = methodInvocation.getName()
 			.getIdentifier();
 		if (methodIdentifier.equals("assumeNotNull")) { //$NON-NLS-1$
 			return createAssumeNotNullInvocationAnalysisResult(methodInvocation, methodBinding,
 					arguments);
 		}
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-				supportTransformation(methodInvocation, arguments));
+		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true));
 	}
 
-	JUnit4MethodInvocationAnalysisResult analyzeAssumptionToJupiter(MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-				supportTransformation(methodInvocation, arguments));
+	Optional<JUnit4MethodInvocationAnalysisResult> analyzeAssumptionToJupiter(MethodInvocation methodInvocation,
+			IMethodBinding methodBinding, List<Expression> arguments) {
+		if (!supportTransformation(methodInvocation, arguments)) {
+			return Optional.empty();
+		}
+		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true));
 	}
 
-	JUnit4MethodInvocationAnalysisResult createAssertThrowsInvocationData(
+	private Optional<JUnit4MethodInvocationAnalysisResult> createAssertThrowsInvocationData(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 
 		ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
 		boolean transformationSupported = supportTransformation(methodInvocation, arguments)
 				&& throwingRunnableArgumentAnalyser.analyze(arguments);
+		if (!transformationSupported) {
+			return Optional.empty();
+		}
 
 		Type throwingRunnableTypeToReplace = throwingRunnableArgumentAnalyser.getLocalVariableTypeToReplace()
 			.orElse(null);
 
-		if (transformationSupported && throwingRunnableTypeToReplace != null) {
-			return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-					throwingRunnableTypeToReplace);
+		if (throwingRunnableTypeToReplace != null) {
+			return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+					throwingRunnableTypeToReplace));
 		}
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-				transformationSupported);
+		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true));
 	}
 
-	JUnit4MethodInvocationAnalysisResult createAssumeNotNullInvocationAnalysisResult(
+	private Optional<JUnit4MethodInvocationAnalysisResult> createAssumeNotNullInvocationAnalysisResult(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 
 		if (supportTransformation(methodInvocation, arguments)) {
@@ -86,19 +95,22 @@ class JUnit4MethodInvocationAnalyzer {
 				Expression onlyOneArgument = arguments.get(0);
 				if (onlyOneArgument.getNodeType() == ASTNode.ARRAY_CREATION || !onlyOneArgument.resolveTypeBinding()
 					.isArray()) {
-					return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true);
+					return Optional
+						.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true));
 				}
 				AssumptionThatEveryItemNotNull assumptionThatEveryItemNotNull = findAssumptionThatEveryItemNotNull(
 						methodInvocation, onlyOneArgument).orElse(null);
 				if (assumptionThatEveryItemNotNull != null) {
-					return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-							assumptionThatEveryItemNotNull);
+					return Optional
+						.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+								assumptionThatEveryItemNotNull));
 				}
 			} else {
-				return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true);
+				return Optional
+					.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true));
 			}
 		}
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, false);
+		return Optional.empty();
 	}
 
 	private Optional<AssumptionThatEveryItemNotNull> findAssumptionThatEveryItemNotNull(

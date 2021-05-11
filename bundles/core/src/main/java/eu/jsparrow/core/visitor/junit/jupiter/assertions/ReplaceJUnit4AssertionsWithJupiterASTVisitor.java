@@ -72,7 +72,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	}
 
 	@Override
-	protected JUnit4MethodInvocationAnalysisResult findAnalysisResult(JUnit4MethodInvocationAnalyzer analyzer,
+	protected Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(JUnit4MethodInvocationAnalyzer analyzer,
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 		return analyzer.analyzeAssertionToJupiter(methodInvocation, methodBinding, arguments);
 	}

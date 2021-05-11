@@ -48,16 +48,15 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		compilationUnit.accept(invocationCollectorVisitor);
 		invocationCollectorVisitor.getMethodInvocations()
 			.forEach(methodInvocation -> {
+
+				JUnit4MethodInvocationAnalysisResult result = null;
 				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-						Expression.class);
 				if (methodBinding != null && isSupportedJUnit4Method(methodBinding)) {
-					JUnit4MethodInvocationAnalysisResult result = findAnalysisResult(analyzer, methodInvocation,
-							methodBinding,
-							arguments);
-					methodInvocationAnalysisResults.add(result);
-					if (!result.isTransformable()) {
-						notTransformedJUnit4Invocations.add(result.getMethodInvocation());
+					result = findAnalysisResult(analyzer, methodInvocation, methodBinding).orElse(null);
+					if (result != null) {
+						methodInvocationAnalysisResults.add(result);
+					} else {
+						notTransformedJUnit4Invocations.add(methodInvocation);
 					}
 				}
 			});
@@ -82,6 +81,29 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
 		return false;
+	}
+
+	private Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(
+			JUnit4MethodInvocationAnalyzer analyzer, MethodInvocation methodInvocation, IMethodBinding methodBinding) {
+
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+				Expression.class);
+		JUnit4MethodInvocationAnalysisResult result = findAnalysisResult(analyzer, methodInvocation, methodBinding,
+				arguments).orElse(null);
+
+		if (result == null) {
+			return Optional.empty();
+		}
+		if (!result.isTransformable()) {
+			/**
+			 * TODO: As soon as the following return statement is not any more
+			 * covered by tests, the property
+			 * <b>{@link JUnit4MethodInvocationAnalysisResult#isTransformable()}
+			 * can be abolished.
+			 */
+			return Optional.empty();
+		}
+		return Optional.of(result);
 	}
 
 	protected List<ImportDeclaration> collectStaticMethodImportsToRemove(CompilationUnit compilationUnit,
@@ -234,7 +256,8 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 	protected abstract boolean isSupportedJUnit4Method(IMethodBinding methodBinding);
 
-	protected abstract JUnit4MethodInvocationAnalysisResult findAnalysisResult(JUnit4MethodInvocationAnalyzer analyzer,
+	protected abstract Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(
+			JUnit4MethodInvocationAnalyzer analyzer,
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments);
 
 	protected abstract JUnit4MethodInvocationReplacementData createTransformationData(
