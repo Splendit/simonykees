@@ -42,7 +42,7 @@ class JUnit4MethodInvocationAnalyzer {
 		if (methodIdentifier.equals("assertThrows")) { //$NON-NLS-1$
 			return createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments);
 		}
-		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true));
+		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments));
 	}
 
 	Optional<JUnit4MethodInvocationAnalysisResult> analyzeAssumptionToHamcrest(MethodInvocation methodInvocation,
@@ -56,7 +56,7 @@ class JUnit4MethodInvocationAnalyzer {
 			return createAssumeNotNullInvocationAnalysisResult(methodInvocation, methodBinding,
 					arguments);
 		}
-		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true));
+		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments));
 	}
 
 	Optional<JUnit4MethodInvocationAnalysisResult> analyzeAssumptionToJupiter(MethodInvocation methodInvocation,
@@ -64,7 +64,7 @@ class JUnit4MethodInvocationAnalyzer {
 		if (!supportTransformation(methodInvocation, arguments)) {
 			return Optional.empty();
 		}
-		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true));
+		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments));
 	}
 
 	private Optional<JUnit4MethodInvocationAnalysisResult> createAssertThrowsInvocationData(
@@ -84,7 +84,7 @@ class JUnit4MethodInvocationAnalyzer {
 			return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
 					throwingRunnableTypeToReplace));
 		}
-		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true));
+		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments));
 	}
 
 	private Optional<JUnit4MethodInvocationAnalysisResult> createAssumeNotNullInvocationAnalysisResult(
@@ -96,7 +96,7 @@ class JUnit4MethodInvocationAnalyzer {
 				if (onlyOneArgument.getNodeType() == ASTNode.ARRAY_CREATION || !onlyOneArgument.resolveTypeBinding()
 					.isArray()) {
 					return Optional
-						.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true));
+						.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments));
 				}
 				AssumptionThatEveryItemNotNull assumptionThatEveryItemNotNull = findAssumptionThatEveryItemNotNull(
 						methodInvocation, onlyOneArgument).orElse(null);
@@ -107,7 +107,7 @@ class JUnit4MethodInvocationAnalyzer {
 				}
 			} else {
 				return Optional
-					.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, true));
+					.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments));
 			}
 		}
 		return Optional.empty();

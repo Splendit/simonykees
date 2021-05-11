@@ -69,7 +69,6 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = methodInvocationAnalysisResults
 			.stream()
-			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
 			.map(data -> this.createTransformationData(data, supportedNewStaticMethodImports))
 			.collect(Collectors.toList());
 
@@ -88,22 +87,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
-		JUnit4MethodInvocationAnalysisResult result = findAnalysisResult(analyzer, methodInvocation, methodBinding,
-				arguments).orElse(null);
-
-		if (result == null) {
-			return Optional.empty();
-		}
-		if (!result.isTransformable()) {
-			/**
-			 * TODO: As soon as the following return statement is not any more
-			 * covered by tests, the property
-			 * <b>{@link JUnit4MethodInvocationAnalysisResult#isTransformable()}
-			 * can be abolished.
-			 */
-			return Optional.empty();
-		}
-		return Optional.of(result);
+		return findAnalysisResult(analyzer, methodInvocation, methodBinding, arguments);
 	}
 
 	protected List<ImportDeclaration> collectStaticMethodImportsToRemove(CompilationUnit compilationUnit,
@@ -176,7 +160,6 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		Set<String> supportedNewMethodSimpleNames = new HashSet<>();
 		methodInvocationAnalysisResults
 			.stream()
-			.filter(JUnit4MethodInvocationAnalysisResult::isTransformable)
 			.map(JUnit4MethodInvocationAnalysisResult::getMethodBinding)
 			.map(IMethodBinding::getName)
 			.forEach(supportedNewMethodSimpleNames::add);

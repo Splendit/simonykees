@@ -13,35 +13,26 @@ public class JUnit4MethodInvocationAnalysisResult {
 	private final MethodInvocation methodInvocation;
 	private final IMethodBinding methodBinding;
 	private final List<Expression> arguments;
-	private final boolean transformable;
 	private AssumptionThatEveryItemNotNull assumptionThatEveryItemNotNull;
 	private Type typeOfThrowingRunnableToReplace;
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			List<Expression> arguments, boolean isTransformable) {
+			List<Expression> arguments) {
 		this.methodInvocation = methodInvocation;
 		this.methodBinding = methodBinding;
 		this.arguments = arguments;
-		this.transformable = isTransformable;
 	}
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			List<Expression> arguments, AssumptionThatEveryItemNotNull assumptionThatEveryItemNotNull) {
-		this(methodInvocation, methodBinding, arguments, true);
+		this(methodInvocation, methodBinding, arguments);
 		this.assumptionThatEveryItemNotNull = assumptionThatEveryItemNotNull;
 	}
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			List<Expression> arguments, Type typeOfThrowingRunnableToReplace) {
-		this(methodInvocation, methodBinding, arguments, true);
+		this(methodInvocation, methodBinding, arguments);
 		this.typeOfThrowingRunnableToReplace = typeOfThrowingRunnableToReplace;
-	}
-
-	protected JUnit4MethodInvocationAnalysisResult(JUnit4MethodInvocationAnalysisResult other) {
-		this.methodInvocation = other.methodInvocation;
-		this.methodBinding = other.methodBinding;
-		this.arguments = other.arguments;
-		this.transformable = other.transformable;
 	}
 
 	MethodInvocation getMethodInvocation() {
@@ -54,10 +45,6 @@ public class JUnit4MethodInvocationAnalysisResult {
 
 	List<Expression> getArguments() {
 		return arguments;
-	}
-
-	boolean isTransformable() {
-		return transformable;
 	}
 
 	Optional<AssumptionThatEveryItemNotNull> getAssumptionThatEveryItemNotNull() {
