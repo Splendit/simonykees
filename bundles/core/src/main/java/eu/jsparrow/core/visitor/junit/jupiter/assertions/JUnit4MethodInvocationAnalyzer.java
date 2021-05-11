@@ -32,6 +32,34 @@ class JUnit4MethodInvocationAnalyzer {
 		this.jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(compilationUnit);
 	}
 
+	JUnit4MethodInvocationAnalysisResult analyzeAssertionToJupiter(MethodInvocation methodInvocation,
+			IMethodBinding methodBinding, List<Expression> arguments) {
+		String methodIdentifier = methodInvocation.getName()
+			.getIdentifier();
+		if (methodIdentifier.equals("assertThrows")) { //$NON-NLS-1$
+			return createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments);
+		}
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+				supportTransformation(methodInvocation, arguments));
+	}
+
+	JUnit4MethodInvocationAnalysisResult analyzeAssumptionToHamcrest(MethodInvocation methodInvocation,
+			IMethodBinding methodBinding, List<Expression> arguments) {
+		String methodIdentifier = methodInvocation.getName()
+			.getIdentifier();
+		if (methodIdentifier.equals("assumeNotNull")) { //$NON-NLS-1$
+			return createAssumeNotNullInvocationAnalysisResult(methodInvocation, methodBinding,
+					arguments);
+		}
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+				supportTransformation(methodInvocation, arguments));
+	}
+
+	JUnit4MethodInvocationAnalysisResult analyzeAssumptionToJupiter(MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
+		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+				supportTransformation(methodInvocation, arguments));
+	}
+
 	JUnit4MethodInvocationAnalysisResult createAssertThrowsInvocationData(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
 

@@ -74,13 +74,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	@Override
 	protected JUnit4MethodInvocationAnalysisResult findAnalysisResult(JUnit4MethodInvocationAnalyzer analyzer,
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
-		String methodIdentifier = methodInvocation.getName()
-			.getIdentifier();
-		if (methodIdentifier.equals("assertThrows")) { //$NON-NLS-1$
-			return analyzer.createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments);
-		}
-		return new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-				analyzer.supportTransformation(methodInvocation, arguments));
+		return analyzer.analyzeAssertionToJupiter(methodInvocation, methodBinding, arguments);
 	}
 
 	@Override
