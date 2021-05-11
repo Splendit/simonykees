@@ -29,9 +29,11 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 	protected static final String ORG_J_UNIT_JUPITER_API_ASSUMPTIONS = "org.junit.jupiter.api.Assumptions"; //$NON-NLS-1$
 	protected static final String ORG_J_UNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	protected final String classDeclaringJUnit4MethodReplacement;
+	protected final JUnit4MethodInvocationAnalyzer analyzer;
 
 	AbstractReplaceJUnit4MethodInvocationsASTVisitor(String classDeclaringJUnit4MethodReplacement) {
 		this.classDeclaringJUnit4MethodReplacement = classDeclaringJUnit4MethodReplacement;
+		this.analyzer = new JUnit4MethodInvocationAnalyzer();
 	}
 
 	@Override
@@ -40,7 +42,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		super.visit(compilationUnit);
 
 		verifyImports(compilationUnit);
-		JUnit4MethodInvocationAnalyzer analyzer = new JUnit4MethodInvocationAnalyzer(compilationUnit);
+		JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(compilationUnit);
 		List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults = new ArrayList<>();
 		List<MethodInvocation> notTransformedJUnit4Invocations = new ArrayList<>();
 
@@ -49,10 +51,19 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		invocationCollectorVisitor.getMethodInvocations()
 			.forEach(methodInvocation -> {
 
-				JUnit4MethodInvocationAnalysisResult result = null;
 				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 				if (methodBinding != null && isSupportedJUnit4Method(methodBinding)) {
-					result = findAnalysisResult(analyzer, methodInvocation, methodBinding).orElse(null);
+					JUnit4MethodInvocationAnalysisResult result = null;
+					if (jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
+						List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+								Expression.class);
+						if (arguments.stream()
+							.allMatch(analyzer::isArgumentWithUnambiguousType)) {
+							result = findAnalysisResult(methodInvocation, methodBinding, arguments)
+								.orElse(null);
+						}
+					}
+
 					if (result != null) {
 						methodInvocationAnalysisResults.add(result);
 					} else {
@@ -80,14 +91,6 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
 		return false;
-	}
-
-	private Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(
-			JUnit4MethodInvocationAnalyzer analyzer, MethodInvocation methodInvocation, IMethodBinding methodBinding) {
-
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-				Expression.class);
-		return findAnalysisResult(analyzer, methodInvocation, methodBinding, arguments);
 	}
 
 	protected List<ImportDeclaration> collectStaticMethodImportsToRemove(CompilationUnit compilationUnit,
@@ -240,7 +243,6 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 	protected abstract boolean isSupportedJUnit4Method(IMethodBinding methodBinding);
 
 	protected abstract Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(
-			JUnit4MethodInvocationAnalyzer analyzer,
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments);
 
 	protected abstract JUnit4MethodInvocationReplacementData createTransformationData(
