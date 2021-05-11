@@ -1,6 +1,7 @@
 package eu.jsparrow.core.markers;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
@@ -30,6 +31,7 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 	@AfterEach
 	public void tearDown() throws Exception {
 		fixtureProject.clear();
+		RefactoringMarkers.clear();
 	}
 	
 	@Test
@@ -43,6 +45,14 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 		eventManager.discoverRefactoringEvents(icu);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		assertEquals(1, events.size());
+		RefactoringMarkerEvent event = events.get(0);
+		assertAll(
+				()-> assertEquals("Use predefined comparator", event.getName()),
+				()-> assertEquals(136, event.getOffset()),
+				()-> assertEquals(32, event.getLength()),
+				()-> assertEquals("eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver", event.getResolver()),
+				()-> assertEquals("Comparator.naturalOrder()", event.getDescription()),
+				()-> assertEquals("Lambda expression can be replaced with predefined comparator", event.getMessage()));
 	}
 
 	@Test
@@ -95,9 +105,8 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 		 */
 		eventManager.resolve(icu, "eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver", 136);
 		
-		
-		
 		String newSource = icu.getSource();
+
 		assertMatch(
 				ASTNodeBuilder.createCompilationUnitFromString(expected),
 				ASTNodeBuilder.createCompilationUnitFromString(newSource));
