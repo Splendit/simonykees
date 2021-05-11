@@ -20,6 +20,12 @@ public class ResolverVisitorsFactory {
 
 	private static final Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> registry = initRegistry();
 
+	private ResolverVisitorsFactory() {
+		/*
+		 * Hide the default constructor.F
+		 */
+	}
+
 	private static Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> initRegistry() {
 		Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> map = new HashMap<>();
 		map.put(FunctionalInterfaceResolver.RESOLVER_NAME, FunctionalInterfaceResolver::new);
@@ -29,9 +35,9 @@ public class ResolverVisitorsFactory {
 
 	public static List<AbstractASTRewriteASTVisitor> getAllResolvers(Predicate<ASTNode> checker) {
 		List<AbstractASTRewriteASTVisitor> resolvers = new ArrayList<>();
-		registry.forEach((key, value) -> {
-			AbstractASTRewriteASTVisitor resolver = value.apply(checker);
-			RefactoringMarkerListener listener = RefactoringMarkers.getFor(key);
+		registry.forEach((name, generatingFunction) -> {
+			AbstractASTRewriteASTVisitor resolver = generatingFunction.apply(checker);
+			RefactoringMarkerListener listener = RefactoringMarkers.getFor(name);
 			resolver.addMarkerListener(listener);
 			resolvers.add(resolver);
 		});

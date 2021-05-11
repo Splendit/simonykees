@@ -22,7 +22,7 @@ public class RefactoringMarkers implements RefactoringMarkerListener {
 	
 	public static List<RefactoringMarkerEvent> getAllEvents() {
 		return markers.values().stream()
-				.map(me -> me.getEvents())
+				.map(RefactoringMarkers::getEvents)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());
 	}

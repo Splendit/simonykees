@@ -1,0 +1,106 @@
+package eu.jsparrow.core.markers;
+
+import static eu.jsparrow.jdtunit.Matchers.assertMatch;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.List;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
+import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.RefactoringMarkers;
+
+class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
+	
+	private CoreRefactoringEventManager eventManager;
+	
+	@BeforeEach
+	void setUp() throws Exception {
+		eventManager = new CoreRefactoringEventManager();
+		setDefaultVisitor(new UseComparatorMethodsResolver(node -> true));
+		defaultFixture.addImport(java.util.Comparator.class.getName());
+	}
+	
+	@AfterEach
+	public void tearDown() throws Exception {
+		fixtureProject.clear();
+	}
+	
+	@Test
+	void test_eventGenerator_shouldCreateEvents() throws Exception {
+		String method = ""
+				+ "void testMethod() {\n"
+				+ "	Comparator<Integer> comparator = (lhs, rhs) -> lhs.compareTo(rhs);\n"
+				+ "}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, method);
+		ICompilationUnit icu = defaultFixture.getICompilationUnit();
+		eventManager.discoverRefactoringEvents(icu);
+		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
+		assertEquals(1, events.size());
+	}
+
+	@Test
+	void test_resolveEvents_shouldResolveEvents() throws Exception {
+		String method = ""
+				+ "void testMethod() {\n"
+				+ "	Comparator<Integer> comparator = (lhs, rhs) -> lhs.compareTo(rhs);\n"
+				+ "}";
+		String expected = ""
+				+ "package fixturepackage;\n"
+				+ "import java.util.Comparator;\n"
+				+ "class TestCU {\n"
+				+ "  void testMethod(){\n"
+				+ "    Comparator<Integer> comparator=Comparator.naturalOrder();\n"
+				+ "  }\n"
+				+ "}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, method);
+		ICompilationUnit icu = defaultFixture.getICompilationUnit();
+		/*
+		 * Just count the offset. Or run discoverEvents to figure it out. 
+		 */
+		eventManager.resolve(icu, "eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver", 136);
+		
+		String newSource = icu.getSource();
+		assertMatch(
+				ASTNodeBuilder.createCompilationUnitFromString(expected),
+				ASTNodeBuilder.createCompilationUnitFromString(newSource));
+	}
+	
+	@Test
+	void test_resolveSingleMarker_shouldResolveMarker() throws Exception {
+		String method = ""
+				+ "void testMethod() {\n"
+				+ "	Comparator<Integer> comparator = (lhs, rhs) -> lhs.compareTo(rhs);\n"
+				+ "	Comparator<Integer> comparator2 = (lhs, rhs) -> lhs.compareTo(rhs);\n"
+				+ "}";
+		String expected = ""
+				+ "package fixturepackage;\n"
+				+ "import java.util.Comparator;\n"
+				+ "class TestCU {\n"
+				+ "  void testMethod(){\n"
+				+ "    Comparator<Integer> comparator=Comparator.naturalOrder();\n"
+				+ "    Comparator<Integer> comparator2 = (lhs, rhs) -> lhs.compareTo(rhs);\n"
+				+ "  }\n"
+				+ "}";
+		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, method);
+		ICompilationUnit icu = defaultFixture.getICompilationUnit();
+		/*
+		 * Just count the offset. Or run discoverEvents to figure it out. 
+		 */
+		eventManager.resolve(icu, "eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver", 136);
+		
+		
+		
+		String newSource = icu.getSource();
+		assertMatch(
+				ASTNodeBuilder.createCompilationUnitFromString(expected),
+				ASTNodeBuilder.createCompilationUnitFromString(newSource));
+	}
+
+}

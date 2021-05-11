@@ -18,7 +18,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 
-public class Engine extends EditorTracker implements IElementChangedListener {
+public class MarkerEngine extends EditorTracker implements IElementChangedListener {
 
 	private IResource currentResource;
 	private static final String JAVA_EXTENSION = "java"; //$NON-NLS-1$

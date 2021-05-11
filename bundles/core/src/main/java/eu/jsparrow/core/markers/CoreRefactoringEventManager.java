@@ -28,20 +28,13 @@ public class CoreRefactoringEventManager implements RefactoringEventManager {
 
 	@Override
 	public void discoverRefactoringEvents(ICompilationUnit iCompilationUnit) {
-
-		Predicate<ASTNode> positionChecker = node -> true;
-		CompilationUnit cu = RefactoringUtil.parse(iCompilationUnit);
+		CompilationUnit compilationUnit = RefactoringUtil.parse(iCompilationUnit);
 		List<AbstractASTRewriteASTVisitor> resolvers = ResolverVisitorsFactory.getAllResolvers(node -> true);
 		for (AbstractASTRewriteASTVisitor resolver : resolvers) {
-			createEvents(resolver, positionChecker, cu);
+			final ASTRewrite astRewrite = ASTRewrite.create(compilationUnit.getAST());
+			resolver.setASTRewrite(astRewrite);
+			compilationUnit.accept(resolver);
 		}
-	}
-
-	private void createEvents(AbstractASTRewriteASTVisitor resolver, Predicate<ASTNode> positionChecker,
-			CompilationUnit cu) {
-		final ASTRewrite astRewrite = ASTRewrite.create(cu.getAST());
-		resolver.setASTRewrite(astRewrite);
-		cu.accept(resolver);
 	}
 
 	@Override
