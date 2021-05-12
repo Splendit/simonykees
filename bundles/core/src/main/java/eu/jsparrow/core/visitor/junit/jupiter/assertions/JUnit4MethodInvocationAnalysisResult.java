@@ -17,21 +17,10 @@ public class JUnit4MethodInvocationAnalysisResult {
 	private Type typeOfThrowingRunnableToReplace;
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			List<Expression> arguments) {
+			List<Expression> arguments, JUnit4InvocationReplacementAnalyzer analyzer) {
 		this.methodInvocation = methodInvocation;
 		this.methodBinding = methodBinding;
 		this.arguments = arguments;
-	}
-
-	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			List<Expression> arguments, AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull) {
-		this(methodInvocation, methodBinding, arguments);
-		this.assumptionThatEveryItemNotNull = assumptionThatEveryItemNotNull;
-	}
-
-	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			List<Expression> arguments, JUnit4InvocationReplacementAnalyzer analyzer) {
-		this(methodInvocation, methodBinding, arguments);
 		assumptionThatEveryItemNotNull = analyzer.getAssumeNotNullWithNullableArray()
 			.orElse(null);
 		typeOfThrowingRunnableToReplace = analyzer.getTypeOfThrowingRunnableToReplace()

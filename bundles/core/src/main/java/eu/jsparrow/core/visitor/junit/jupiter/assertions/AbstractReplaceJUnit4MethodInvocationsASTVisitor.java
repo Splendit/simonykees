@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -18,6 +19,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
@@ -29,11 +31,9 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 	protected static final String ORG_J_UNIT_JUPITER_API_ASSUMPTIONS = "org.junit.jupiter.api.Assumptions"; //$NON-NLS-1$
 	protected static final String ORG_J_UNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	protected final String classDeclaringJUnit4MethodReplacement;
-	protected final JUnit4MethodInvocationAnalyzer analyzer;
 
 	AbstractReplaceJUnit4MethodInvocationsASTVisitor(String classDeclaringJUnit4MethodReplacement) {
 		this.classDeclaringJUnit4MethodReplacement = classDeclaringJUnit4MethodReplacement;
-		this.analyzer = new JUnit4MethodInvocationAnalyzer();
 	}
 
 	@Override
@@ -58,7 +58,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 						List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 								Expression.class);
 						if (arguments.stream()
-							.allMatch(analyzer::isArgumentWithUnambiguousType)) {
+							.allMatch(this::isArgumentWithUnambiguousType)) {
 							result = findAnalysisResult(methodInvocation, methodBinding, arguments)
 								.orElse(null);
 						}
@@ -91,6 +91,23 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
 		return false;
+	}
+
+	private boolean isArgumentWithUnambiguousType(Expression expression) {
+		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			MethodInvocation methodInvocation = (MethodInvocation) expression;
+			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			return methodBinding != null && !(methodBinding.isParameterizedMethod() && methodInvocation.typeArguments()
+				.isEmpty());
+		}
+		if (expression.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
+			SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation) expression;
+			IMethodBinding superMethodBinding = superMethodInvocation.resolveMethodBinding();
+			return superMethodBinding != null
+					&& !(superMethodBinding.isParameterizedMethod() && superMethodInvocation.typeArguments()
+						.isEmpty());
+		}
+		return true;
 	}
 
 	protected List<ImportDeclaration> collectStaticMethodImportsToRemove(CompilationUnit compilationUnit,

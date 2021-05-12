@@ -64,7 +64,7 @@ class JUnit4InvocationReplacementAnalyzer {
 		originalMethodName = methodBinding.getName();
 		newMethodName = "assumeThat"; //$NON-NLS-1$
 
-		if (originalMethodName.equals("assumeNotNull")) {//$NON-NLS-1$
+		if (!originalMethodName.equals("assumeNotNull")) {//$NON-NLS-1$
 			return true;
 		}
 
