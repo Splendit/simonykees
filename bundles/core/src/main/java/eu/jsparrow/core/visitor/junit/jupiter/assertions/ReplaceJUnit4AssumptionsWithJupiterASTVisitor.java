@@ -37,10 +37,10 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 	@Override
 	protected Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
-		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer();
-		invocationAnalyzer.analyzeAssumptionToJupiter(methodBinding, arguments);
-		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-				invocationAnalyzer));
+		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer(
+				methodInvocation, methodBinding, arguments);
+		invocationAnalyzer.analyzeAssumptionToJupiter();
+		return Optional.of(new JUnit4MethodInvocationAnalysisResult(invocationAnalyzer));
 	}
 
 	@Override

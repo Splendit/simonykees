@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 
@@ -14,20 +13,17 @@ public class JUnit4MethodInvocationAnalysisResult {
 	private final String originalMethodName;
 	private final String newMethodName;
 	private final Expression messageMovingToLastPosition;
-	private final IMethodBinding methodBinding;
 	private final List<Expression> arguments;
 	private final AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull;
 	private final Type typeOfThrowingRunnableToReplace;
 
-	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			List<Expression> arguments, JUnit4InvocationReplacementAnalyzer analyzer) {
-		this.methodInvocation = methodInvocation;
-		this.originalMethodName = analyzer.getOriginalMethodName();
-		this.newMethodName = analyzer.getNewMethodName();
-		this.messageMovingToLastPosition = analyzer.getMessageMovedToLastPosition()
+	JUnit4MethodInvocationAnalysisResult(JUnit4InvocationReplacementAnalyzer analyzer) {
+		methodInvocation = analyzer.getMethodInvocation();
+		originalMethodName = analyzer.getOriginalMethodName();
+		newMethodName = analyzer.getNewMethodName();
+		messageMovingToLastPosition = analyzer.getMessageMovedToLastPosition()
 			.orElse(null);
-		this.methodBinding = methodBinding;
-		this.arguments = arguments;
+		arguments = analyzer.getArguments();
 		assumptionThatEveryItemNotNull = analyzer.getAssumeNotNullWithNullableArray()
 			.orElse(null);
 		typeOfThrowingRunnableToReplace = analyzer.getTypeOfThrowingRunnableToReplace()
@@ -38,20 +34,16 @@ public class JUnit4MethodInvocationAnalysisResult {
 		return methodInvocation;
 	}
 
-	public String getOriginalMethodName() {
+	String getOriginalMethodName() {
 		return originalMethodName;
 	}
 
-	public String getNewMethodName() {
+	String getNewMethodName() {
 		return newMethodName;
 	}
 
-	public Optional<Expression> getMessageMovingToLastPosition() {
+	Optional<Expression> getMessageMovingToLastPosition() {
 		return Optional.ofNullable(messageMovingToLastPosition);
-	}
-
-	IMethodBinding getMethodBinding() {
-		return methodBinding;
 	}
 
 	List<Expression> getArguments() {

@@ -64,10 +64,10 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	protected Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
 
-		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer();
-		if (invocationAnalyzer.analyzeAssertion(methodBinding, arguments)) {
-			return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-					invocationAnalyzer));
+		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer(
+				methodInvocation, methodBinding, arguments);
+		if (invocationAnalyzer.analyzeAssertion()) {
+			return Optional.of(new JUnit4MethodInvocationAnalysisResult(invocationAnalyzer));
 		}
 
 		return Optional.empty();

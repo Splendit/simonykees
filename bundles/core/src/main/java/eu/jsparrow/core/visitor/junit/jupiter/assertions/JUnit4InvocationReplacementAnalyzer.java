@@ -17,14 +17,25 @@ import org.eclipse.jdt.core.dom.Type;
 
 class JUnit4InvocationReplacementAnalyzer {
 
-	private String originalMethodName;
-	private String newMethodName;
+	private final MethodInvocation methodInvocation;
+	private final IMethodBinding methodBinding;
+	private final List<Expression> arguments;
+	private final String originalMethodName;
+
+	private String methodNameReplacement;
 	private Expression messsageMovedToLastPosition;
 	private Type typeOfThrowingRunnableToReplace;
 	private AssumeNotNullWithSingleVararg assumeNotNullWithSingleVararg;
 
-	boolean analyzeAssertion(IMethodBinding methodBinding, List<Expression> arguments) {
-		originalMethodName = methodBinding.getName();
+	public JUnit4InvocationReplacementAnalyzer(MethodInvocation methodInvocation, IMethodBinding methodBinding,
+			List<Expression> arguments) {
+		this.methodInvocation = methodInvocation;
+		this.methodBinding = methodBinding;
+		this.arguments = arguments;
+		this.originalMethodName = methodBinding.getName();
+	}
+
+	boolean analyzeAssertion() {
 		if (originalMethodName.equals("assertThrows")) { //$NON-NLS-1$
 			ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
 			if (!throwingRunnableArgumentAnalyser.analyze(arguments)) {
@@ -38,19 +49,16 @@ class JUnit4InvocationReplacementAnalyzer {
 			.getMethodDeclaration()
 			.getParameterTypes();
 		if (isDeprecatedAssertEqualsComparingObjectArrays(originalMethodName, declaredParameterTypes)) {
-			newMethodName = "assertArrayEquals"; //$NON-NLS-1$
-		} else {
-			newMethodName = originalMethodName;
-		}
+			methodNameReplacement = "assertArrayEquals"; //$NON-NLS-1$
+		} 
+
 
 		messsageMovedToLastPosition = findMessageMovedDoLastPosition(arguments, declaredParameterTypes).orElse(null);
 
 		return true;
 	}
 
-	void analyzeAssumptionToJupiter(IMethodBinding methodBinding, List<Expression> arguments) {
-		originalMethodName = methodBinding.getName();
-		newMethodName = originalMethodName;
+	void analyzeAssumptionToJupiter() {
 
 		ITypeBinding[] declaredParameterTypes = methodBinding
 			.getMethodDeclaration()
@@ -59,10 +67,9 @@ class JUnit4InvocationReplacementAnalyzer {
 		messsageMovedToLastPosition = findMessageMovedDoLastPosition(arguments, declaredParameterTypes).orElse(null);
 	}
 
-	boolean analyzeAssumptionToHamcrest(MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			List<Expression> arguments) {
-		originalMethodName = methodBinding.getName();
-		newMethodName = "assumeThat"; //$NON-NLS-1$
+	boolean analyzeAssumptionToHamcrest() {
+
+		methodNameReplacement = "assumeThat"; //$NON-NLS-1$
 
 		if (!originalMethodName.equals("assumeNotNull")) {//$NON-NLS-1$
 			return true;
@@ -163,12 +170,20 @@ class JUnit4InvocationReplacementAnalyzer {
 		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
 	}
 
-	public String getOriginalMethodName() {
+	MethodInvocation getMethodInvocation() {
+		return methodInvocation;
+	}
+
+	List<Expression> getArguments() {
+		return arguments;
+	}
+
+	String getOriginalMethodName() {
 		return originalMethodName;
 	}
 
-	public String getNewMethodName() {
-		return newMethodName;
+	String getNewMethodName() {
+		return methodNameReplacement != null  ? methodNameReplacement : originalMethodName;
 	}
 
 	Optional<Type> getTypeOfThrowingRunnableToReplace() {
@@ -189,4 +204,5 @@ class JUnit4InvocationReplacementAnalyzer {
 		}
 		return Optional.empty();
 	}
+
 }
