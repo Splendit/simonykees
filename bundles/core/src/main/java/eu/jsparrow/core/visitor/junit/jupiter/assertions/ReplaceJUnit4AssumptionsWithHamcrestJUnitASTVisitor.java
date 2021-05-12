@@ -4,8 +4,6 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -45,13 +43,9 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	private static final String ASSUME_NOT_NULL = "assumeNotNull"; //$NON-NLS-1$
 	private static final String ASSUME_NO_EXCEPTION = "assumeNoException"; //$NON-NLS-1$
 	private static final String ASSUME_THAT = "assumeThat"; //$NON-NLS-1$
-	private final Set<String> potentialMethodNameReplacements;
 
 	public ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor() {
 		super("org.hamcrest.junit.MatcherAssume"); //$NON-NLS-1$
-		Set<String> tmp = new HashSet<>();
-		tmp.add(ASSUME_THAT);
-		potentialMethodNameReplacements = Collections.unmodifiableSet(tmp);
 	}
 
 	@Override
@@ -84,10 +78,11 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	@Override
 	protected Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
-		
+
 		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer();
-		if(invocationAnalyzer.analyzeAssumptionToHamcrest(methodInvocation, methodBinding, arguments)) {
-			return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, invocationAnalyzer));
+		if (invocationAnalyzer.analyzeAssumptionToHamcrest(methodInvocation, methodBinding, arguments)) {
+			return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+					invocationAnalyzer));
 		}
 		return Optional.empty();
 	}
@@ -98,8 +93,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 			Set<String> supportedNewStaticMethodImports) {
 
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
-		IMethodBinding originalMethodBinding = invocationData.getMethodBinding();
-		String originalMethodName = originalMethodBinding.getName();
+		String originalMethodName = invocationData.getOriginalMethodName();
 
 		boolean changeInvocation = originalMethodName.equals(ASSUME_NO_EXCEPTION)
 				|| originalMethodName.equals(ASSUME_NOT_NULL);
@@ -145,11 +139,6 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 					methodName.equals(ASSUME_THAT);
 		}
 		return false;
-	}
-
-	@Override
-	protected Set<String> getSupportedMethodNameReplacements() {
-		return potentialMethodNameReplacements;
 	}
 
 	private List<Expression> createAssumeThatExceptionIsNullArguments(ASTNode context,

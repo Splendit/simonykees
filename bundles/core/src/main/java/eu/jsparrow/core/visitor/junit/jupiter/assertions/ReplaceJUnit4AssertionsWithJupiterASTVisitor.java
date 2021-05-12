@@ -1,12 +1,9 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4InvocationReplacementAnalyzer.isDeprecatedAssertEqualsComparingObjectArrays;
 import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4InvocationReplacementAnalyzer.isParameterTypeString;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -36,14 +33,8 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 
 	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
 
-	private final Set<String> potentialMethodNameReplacements;
-
 	public ReplaceJUnit4AssertionsWithJupiterASTVisitor() {
 		super(ORG_J_UNIT_JUPITER_API_ASSERTIONS);
-		Set<String> tmp = new HashSet<>();
-		tmp.add("assertArrayEquals"); //$NON-NLS-1$
-		potentialMethodNameReplacements = Collections.unmodifiableSet(tmp);
-
 	}
 
 	@Override
@@ -90,17 +81,12 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
 		IMethodBinding originalMethodBinding = invocationData.getMethodBinding();
-		String originalMethodName = originalMethodBinding.getName();
+		String originalMethodName = invocationData.getOriginalMethodName();
+		String newMethodName = invocationData.getNewMethodName();
 
 		ITypeBinding[] declaredParameterTypes = originalMethodBinding
 			.getMethodDeclaration()
 			.getParameterTypes();
-		String newMethodName;
-		if (isDeprecatedAssertEqualsComparingObjectArrays(originalMethodName, declaredParameterTypes)) {
-			newMethodName = "assertArrayEquals"; //$NON-NLS-1$
-		} else {
-			newMethodName = originalMethodName;
-		}
 
 		List<Expression> originalArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
@@ -143,10 +129,5 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 		return isContentOfType(methodBinding.getDeclaringClass(), "org.junit.Assert") //$NON-NLS-1$
 				&& !methodBinding.getName()
 					.equals("assertThat"); //$NON-NLS-1$
-	}
-
-	@Override
-	protected Set<String> getSupportedMethodNameReplacements() {
-		return potentialMethodNameReplacements;
 	}
 }

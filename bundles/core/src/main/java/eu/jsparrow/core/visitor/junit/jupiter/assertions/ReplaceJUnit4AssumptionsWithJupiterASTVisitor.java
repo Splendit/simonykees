@@ -4,7 +4,6 @@ import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4Invocation
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -42,7 +41,8 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 			IMethodBinding methodBinding, List<Expression> arguments) {
 		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer();
 		invocationAnalyzer.analyzeAssumptionToJupiter(methodBinding, arguments);
-		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, invocationAnalyzer));
+		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
+				invocationAnalyzer));
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 			newArguments = originalArguments;
 		}
 
-		String originalMethodName = originalMethodBinding.getName();
+		String originalMethodName = invocationData.getOriginalMethodName();
 		String newMethodStaticImport = classDeclaringJUnit4MethodReplacement + "." + originalMethodName; //$NON-NLS-1$
 		if (supportedNewStaticMethodImports.contains(newMethodStaticImport)) {
 			if (methodInvocation.getExpression() == null
@@ -101,10 +101,5 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 					methodName.equals("assumeTrue"); //$NON-NLS-1$
 		}
 		return false;
-	}
-
-	@Override
-	protected Set<String> getSupportedMethodNameReplacements() {
-		return Collections.emptySet();
 	}
 }

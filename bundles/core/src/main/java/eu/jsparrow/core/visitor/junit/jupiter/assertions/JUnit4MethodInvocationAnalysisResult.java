@@ -11,13 +11,17 @@ import org.eclipse.jdt.core.dom.Type;
 public class JUnit4MethodInvocationAnalysisResult {
 
 	private final MethodInvocation methodInvocation;
+	private final String originalMethodName;
+	private final String newMethodName;
 	private final IMethodBinding methodBinding;
 	private final List<Expression> arguments;
-	private AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull;
-	private Type typeOfThrowingRunnableToReplace;
+	private final AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull;
+	private final Type typeOfThrowingRunnableToReplace;
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			List<Expression> arguments, JUnit4InvocationReplacementAnalyzer analyzer) {
+		this.originalMethodName = analyzer.getOriginalMethodName();
+		this.newMethodName = analyzer.getNewMethodName();
 		this.methodInvocation = methodInvocation;
 		this.methodBinding = methodBinding;
 		this.arguments = arguments;
@@ -29,6 +33,14 @@ public class JUnit4MethodInvocationAnalysisResult {
 
 	MethodInvocation getMethodInvocation() {
 		return methodInvocation;
+	}
+
+	public String getOriginalMethodName() {
+		return originalMethodName;
+	}
+
+	public String getNewMethodName() {
+		return newMethodName;
 	}
 
 	IMethodBinding getMethodBinding() {
