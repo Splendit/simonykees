@@ -1,6 +1,6 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4MethodInvocationAnalyzer.isParameterTypeString;
+import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4InvocationReplacementAnalyzer.isParameterTypeString;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.ArrayList;
@@ -40,7 +40,9 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 	@Override
 	protected Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
-		return analyzer.analyzeAssumptionToJupiter(methodInvocation, methodBinding, arguments);
+		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer();
+		invocationAnalyzer.analyzeAssumptionToJupiter(methodBinding, arguments);
+		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, invocationAnalyzer));
 	}
 
 	@Override

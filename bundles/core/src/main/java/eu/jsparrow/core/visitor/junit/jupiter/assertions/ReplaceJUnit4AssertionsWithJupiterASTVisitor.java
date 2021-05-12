@@ -1,7 +1,7 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4InvocationReplacementAnalyzer.isDeprecatedAssertEqualsComparingObjectArrays;
-import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4MethodInvocationAnalyzer.isParameterTypeString;
+import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4InvocationReplacementAnalyzer.isParameterTypeString;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.ArrayList;

@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4MethodInvocationAnalyzer.isParameterTypeString;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.List;
@@ -49,7 +48,7 @@ class JUnit4InvocationReplacementAnalyzer {
 		return true;
 	}
 
-	void analyzeAssumption(IMethodBinding methodBinding, List<Expression> arguments) {
+	void analyzeAssumptionToJupiter(IMethodBinding methodBinding, List<Expression> arguments) {
 		originalMethodName = methodBinding.getName();
 		newMethodName = originalMethodName;
 
@@ -155,6 +154,10 @@ class JUnit4InvocationReplacementAnalyzer {
 			return isContentOfType(parameterType.getComponentType(), "java.lang.Object"); //$NON-NLS-1$
 		}
 		return false;
+	}
+
+	static boolean isParameterTypeString(ITypeBinding parameterType) {
+		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
 	}
 
 	public String getOriginalMethodName() {

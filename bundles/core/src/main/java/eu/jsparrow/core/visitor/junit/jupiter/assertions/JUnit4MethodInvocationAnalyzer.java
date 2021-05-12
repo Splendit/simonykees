@@ -1,7 +1,5 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -10,7 +8,6 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
@@ -34,12 +31,6 @@ class JUnit4MethodInvocationAnalyzer {
 			return createAssumeNotNullInvocationAnalysisResult(methodInvocation, methodBinding,
 					arguments);
 		}
-		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments));
-	}
-
-	Optional<JUnit4MethodInvocationAnalysisResult> analyzeAssumptionToJupiter(MethodInvocation methodInvocation,
-			IMethodBinding methodBinding, List<Expression> arguments) {
-
 		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments));
 	}
 
@@ -99,12 +90,4 @@ class JUnit4MethodInvocationAnalyzer {
 		}
 		return true;
 	}
-
-
-
-	static boolean isParameterTypeString(ITypeBinding parameterType) {
-		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
-	}
-
-
 }
