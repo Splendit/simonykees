@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.Type;
 
 /**
  * Helper class analyzing a {@link MethodInvocation}-node. If the
@@ -25,17 +24,6 @@ import org.eclipse.jdt.core.dom.Type;
  *
  */
 class JUnit4MethodInvocationAnalyzer {
-
-	Optional<JUnit4MethodInvocationAnalysisResult> analyzeAssertionToJupiter(MethodInvocation methodInvocation,
-			IMethodBinding methodBinding, List<Expression> arguments) {
-
-		String methodIdentifier = methodInvocation.getName()
-			.getIdentifier();
-		if (methodIdentifier.equals("assertThrows")) { //$NON-NLS-1$
-			return createAssertThrowsInvocationData(methodInvocation, methodBinding, arguments);
-		}
-		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments));
-	}
 
 	Optional<JUnit4MethodInvocationAnalysisResult> analyzeAssumptionToHamcrest(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
@@ -52,24 +40,6 @@ class JUnit4MethodInvocationAnalyzer {
 	Optional<JUnit4MethodInvocationAnalysisResult> analyzeAssumptionToJupiter(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
 
-		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments));
-	}
-
-	private Optional<JUnit4MethodInvocationAnalysisResult> createAssertThrowsInvocationData(
-			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments) {
-
-		ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
-		if (!throwingRunnableArgumentAnalyser.analyze(arguments)) {
-			return Optional.empty();
-		}
-
-		Type throwingRunnableTypeToReplace = throwingRunnableArgumentAnalyser.getLocalVariableTypeToReplace()
-			.orElse(null);
-
-		if (throwingRunnableTypeToReplace != null) {
-			return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments,
-					throwingRunnableTypeToReplace));
-		}
 		return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments));
 	}
 
@@ -130,33 +100,11 @@ class JUnit4MethodInvocationAnalyzer {
 		return true;
 	}
 
-	static boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
-			ITypeBinding[] declaredParameterTypes) {
-		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$
-			return false;
-		}
 
-		if (declaredParameterTypes.length == 2) {
-			return isParameterTypeObjectArray(declaredParameterTypes[0])
-					&& isParameterTypeObjectArray(declaredParameterTypes[1]);
-		}
-
-		if (declaredParameterTypes.length == 3) {
-			return isParameterTypeString(declaredParameterTypes[0])
-					&& isParameterTypeObjectArray(declaredParameterTypes[1])
-					&& isParameterTypeObjectArray(declaredParameterTypes[2]);
-		}
-		return false;
-	}
 
 	static boolean isParameterTypeString(ITypeBinding parameterType) {
 		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
 	}
 
-	static boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
-		if (parameterType.isArray() && parameterType.getDimensions() == 1) {
-			return isContentOfType(parameterType.getComponentType(), "java.lang.Object"); //$NON-NLS-1$
-		}
-		return false;
-	}
+
 }

@@ -30,9 +30,12 @@ public class JUnit4MethodInvocationAnalysisResult {
 	}
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
-			List<Expression> arguments, Type typeOfThrowingRunnableToReplace) {
+			List<Expression> arguments, JUnit4InvocationReplacementAnalyzer analyzer) {
 		this(methodInvocation, methodBinding, arguments);
-		this.typeOfThrowingRunnableToReplace = typeOfThrowingRunnableToReplace;
+		assumptionThatEveryItemNotNull = analyzer.getAssumeNotNullWithNullableArray()
+			.orElse(null);
+		typeOfThrowingRunnableToReplace = analyzer.getTypeOfThrowingRunnableToReplace()
+			.orElse(null);
 	}
 
 	MethodInvocation getMethodInvocation() {

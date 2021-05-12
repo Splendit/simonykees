@@ -1,7 +1,7 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4MethodInvocationAnalyzer.isDeprecatedAssertEqualsComparingObjectArrays;
 import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4MethodInvocationAnalyzer.isParameterTypeString;
+import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +25,7 @@ class JUnit4InvocationReplacementAnalyzer {
 	private AssumeNotNullWithSingleVararg assumeNotNullWithSingleVararg;
 
 	boolean analyzeAssertion(IMethodBinding methodBinding, List<Expression> arguments) {
+		originalMethodName = methodBinding.getName();
 		if (originalMethodName.equals("assertThrows")) { //$NON-NLS-1$
 			ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
 			if (!throwingRunnableArgumentAnalyser.analyze(arguments)) {
@@ -34,7 +35,6 @@ class JUnit4InvocationReplacementAnalyzer {
 				.orElse(null);
 		}
 
-		originalMethodName = methodBinding.getName();
 		ITypeBinding[] declaredParameterTypes = methodBinding
 			.getMethodDeclaration()
 			.getParameterTypes();
@@ -129,6 +129,32 @@ class JUnit4InvocationReplacementAnalyzer {
 		return Optional
 			.of(new AssumeNotNullWithNullableArray(arrayArgument, methodInvocationStatement, block));
 
+	}
+
+	static boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
+			ITypeBinding[] declaredParameterTypes) {
+		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$
+			return false;
+		}
+
+		if (declaredParameterTypes.length == 2) {
+			return isParameterTypeObjectArray(declaredParameterTypes[0])
+					&& isParameterTypeObjectArray(declaredParameterTypes[1]);
+		}
+
+		if (declaredParameterTypes.length == 3) {
+			return isParameterTypeString(declaredParameterTypes[0])
+					&& isParameterTypeObjectArray(declaredParameterTypes[1])
+					&& isParameterTypeObjectArray(declaredParameterTypes[2]);
+		}
+		return false;
+	}
+
+	static boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
+		if (parameterType.isArray() && parameterType.getDimensions() == 1) {
+			return isContentOfType(parameterType.getComponentType(), "java.lang.Object"); //$NON-NLS-1$
+		}
+		return false;
 	}
 
 	public String getOriginalMethodName() {

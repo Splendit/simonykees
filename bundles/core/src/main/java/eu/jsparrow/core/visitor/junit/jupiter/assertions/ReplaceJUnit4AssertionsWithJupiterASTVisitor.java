@@ -1,6 +1,6 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4MethodInvocationAnalyzer.isDeprecatedAssertEqualsComparingObjectArrays;
+import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4InvocationReplacementAnalyzer.isDeprecatedAssertEqualsComparingObjectArrays;
 import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4MethodInvocationAnalyzer.isParameterTypeString;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
@@ -74,7 +74,13 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	@Override
 	protected Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
-		return analyzer.analyzeAssertionToJupiter(methodInvocation, methodBinding, arguments);
+		
+		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer();
+		if(invocationAnalyzer.analyzeAssertion(methodBinding, arguments)) {
+			return Optional.of(new JUnit4MethodInvocationAnalysisResult(methodInvocation, methodBinding, arguments, invocationAnalyzer));
+		}
+		
+		return Optional.empty();
 	}
 
 	@Override
