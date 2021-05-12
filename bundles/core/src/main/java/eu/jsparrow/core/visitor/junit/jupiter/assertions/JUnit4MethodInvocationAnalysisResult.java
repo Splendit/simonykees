@@ -13,6 +13,7 @@ public class JUnit4MethodInvocationAnalysisResult {
 	private final MethodInvocation methodInvocation;
 	private final String originalMethodName;
 	private final String newMethodName;
+	private final Expression messageMovingToLastPosition;
 	private final IMethodBinding methodBinding;
 	private final List<Expression> arguments;
 	private final AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull;
@@ -20,9 +21,11 @@ public class JUnit4MethodInvocationAnalysisResult {
 
 	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			List<Expression> arguments, JUnit4InvocationReplacementAnalyzer analyzer) {
+		this.methodInvocation = methodInvocation;
 		this.originalMethodName = analyzer.getOriginalMethodName();
 		this.newMethodName = analyzer.getNewMethodName();
-		this.methodInvocation = methodInvocation;
+		this.messageMovingToLastPosition = analyzer.getMessageMovedToLastPosition()
+			.orElse(null);
 		this.methodBinding = methodBinding;
 		this.arguments = arguments;
 		assumptionThatEveryItemNotNull = analyzer.getAssumeNotNullWithNullableArray()
@@ -41,6 +44,10 @@ public class JUnit4MethodInvocationAnalysisResult {
 
 	public String getNewMethodName() {
 		return newMethodName;
+	}
+
+	public Optional<Expression> getMessageMovingToLastPosition() {
+		return Optional.ofNullable(messageMovingToLastPosition);
 	}
 
 	IMethodBinding getMethodBinding() {

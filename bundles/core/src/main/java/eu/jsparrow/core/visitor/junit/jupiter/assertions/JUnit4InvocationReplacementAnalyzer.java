@@ -98,7 +98,10 @@ class JUnit4InvocationReplacementAnalyzer {
 		if (declaredParameterTypes.length == 0) {
 			return Optional.empty();
 		}
-		if (isParameterTypeString(declaredParameterTypes[0]) && arguments.size() > 1) {
+		if (arguments.size() < 2) {
+			return Optional.empty();
+		}
+		if (isParameterTypeString(declaredParameterTypes[0])) {
 			return Optional.of(arguments.get(0));
 		}
 		return Optional.empty();

@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.assertions.JUnit4InvocationReplacementAnalyzer.isParameterTypeString;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -81,26 +79,20 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 			Set<String> supportedNewStaticMethodImports) {
 
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
-		IMethodBinding originalMethodBinding = invocationData.getMethodBinding();
 		String originalMethodName = invocationData.getOriginalMethodName();
 		String newMethodName = invocationData.getNewMethodName();
-
-		ITypeBinding[] declaredParameterTypes = originalMethodBinding
-			.getMethodDeclaration()
-			.getParameterTypes();
 
 		List<Expression> originalArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
 
-		boolean messageMovingToLastPosition = declaredParameterTypes.length > 0
-				&& isParameterTypeString(declaredParameterTypes[0]);
+		Expression messageMovingToLastPosition = invocationData.getMessageMovingToLastPosition()
+			.orElse(null);
 
 		List<Expression> newArguments;
-		if (messageMovingToLastPosition && originalArguments.size() > 1) {
-			newArguments = new ArrayList<>();
-			Expression messageArgument = originalArguments.remove(0);
-			newArguments.addAll(originalArguments);
-			newArguments.add(messageArgument);
+		if (messageMovingToLastPosition != null) {
+			newArguments = new ArrayList<>(originalArguments);
+			newArguments.remove(messageMovingToLastPosition);
+			newArguments.add(messageMovingToLastPosition);
 		} else {
 			newArguments = originalArguments;
 		}
