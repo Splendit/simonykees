@@ -20,28 +20,28 @@ class JUnit4MethodInvocationReplacementData {
 	private AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull;
 	private Type typeOfThrowingRunnableToReplace;
 
-	JUnit4MethodInvocationReplacementData(JUnit4MethodInvocationAnalysisResult jUnit4InvocationAnalysisResult,
+	JUnit4MethodInvocationReplacementData(JUnit4InvocationReplacementAnalyzer jUnit4InvocationAnalysisResult,
 			Supplier<MethodInvocation> newMethodInvocationSupplier, String staticMethodImport) {
 		this(jUnit4InvocationAnalysisResult);
 		this.methodInvocationReplacementSupplier = newMethodInvocationSupplier;
 		this.staticMethodImport = staticMethodImport;
 	}
 
-	JUnit4MethodInvocationReplacementData(JUnit4MethodInvocationAnalysisResult jUnit4InvocationAnalysisResult,
+	JUnit4MethodInvocationReplacementData(JUnit4InvocationReplacementAnalyzer jUnit4InvocationAnalysisResult,
 			Supplier<MethodInvocation> newMethodInvocationSupplier) {
 		this(jUnit4InvocationAnalysisResult);
 		this.methodInvocationReplacementSupplier = newMethodInvocationSupplier;
 	}
 
-	JUnit4MethodInvocationReplacementData(JUnit4MethodInvocationAnalysisResult jUnit4InvocationAnalysisResult,
+	JUnit4MethodInvocationReplacementData(JUnit4InvocationReplacementAnalyzer jUnit4InvocationAnalysisResult,
 			String staticMethodImport) {
 		this(jUnit4InvocationAnalysisResult);
 		this.staticMethodImport = staticMethodImport;
 	}
 
-	JUnit4MethodInvocationReplacementData(JUnit4MethodInvocationAnalysisResult jUnit4InvocationAnalysisResult) {
+	JUnit4MethodInvocationReplacementData(JUnit4InvocationReplacementAnalyzer jUnit4InvocationAnalysisResult) {
 		this.originalMethodInvocation = jUnit4InvocationAnalysisResult.getMethodInvocation();
-		this.assumptionThatEveryItemNotNull = jUnit4InvocationAnalysisResult.getAssumptionThatEveryItemNotNull()
+		this.assumptionThatEveryItemNotNull = jUnit4InvocationAnalysisResult.getAssumeNotNullWithNullableArray()
 			.orElse(null);
 		this.typeOfThrowingRunnableToReplace = jUnit4InvocationAnalysisResult.getTypeOfThrowingRunnableToReplace()
 			.orElse(null);

@@ -43,7 +43,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 		verifyImports(compilationUnit);
 		JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(compilationUnit);
-		List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults = new ArrayList<>();
+		List<JUnit4InvocationReplacementAnalyzer> methodInvocationAnalysisResults = new ArrayList<>();
 		List<MethodInvocation> notTransformedJUnit4Invocations = new ArrayList<>();
 
 		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
@@ -53,7 +53,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 				if (methodBinding != null && isSupportedJUnit4Method(methodBinding)) {
-					JUnit4MethodInvocationAnalysisResult result = null;
+					JUnit4InvocationReplacementAnalyzer result = null;
 					if (jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
 						List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 								Expression.class);
@@ -148,7 +148,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 	protected Set<String> findSupportedStaticImports(
 			List<ImportDeclaration> staticMethodImportsToRemove,
-			List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults) {
+			List<JUnit4InvocationReplacementAnalyzer> methodInvocationAnalysisResults) {
 
 		Set<String> simpleNamesOfStaticMethodImportsToRemove = staticMethodImportsToRemove
 			.stream()
@@ -175,11 +175,11 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 	}
 
 	private Set<String> collectSupportedNewMethodNames(
-			List<JUnit4MethodInvocationAnalysisResult> methodInvocationAnalysisResults) {
+			List<JUnit4InvocationReplacementAnalyzer> methodInvocationAnalysisResults) {
 
 		return methodInvocationAnalysisResults
 			.stream()
-			.map(JUnit4MethodInvocationAnalysisResult::getNewMethodName)
+			.map(JUnit4InvocationReplacementAnalyzer::getNewMethodName)
 			.collect(Collectors.toSet());
 	}
 
@@ -251,11 +251,11 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 	protected abstract boolean isSupportedJUnit4Method(IMethodBinding methodBinding);
 
-	protected abstract Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(
+	protected abstract Optional<JUnit4InvocationReplacementAnalyzer> findAnalysisResult(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments);
 
 	protected abstract JUnit4MethodInvocationReplacementData createTransformationData(
-			JUnit4MethodInvocationAnalysisResult invocationData,
+			JUnit4InvocationReplacementAnalyzer invocationData,
 			Set<String> supportedNewStaticMethodImports);
 
 }

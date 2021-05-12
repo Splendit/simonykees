@@ -76,20 +76,20 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	}
 
 	@Override
-	protected Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(MethodInvocation methodInvocation,
+	protected Optional<JUnit4InvocationReplacementAnalyzer> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
 
 		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer(
 				methodInvocation, methodBinding, arguments);
 		if (invocationAnalyzer.analyzeAssumptionToHamcrest()) {
-			return Optional.of(new JUnit4MethodInvocationAnalysisResult(invocationAnalyzer));
+			return Optional.of(invocationAnalyzer);
 		}
 		return Optional.empty();
 	}
 
 	@Override
 	protected JUnit4MethodInvocationReplacementData createTransformationData(
-			JUnit4MethodInvocationAnalysisResult invocationData,
+			JUnit4InvocationReplacementAnalyzer invocationData,
 			Set<String> supportedNewStaticMethodImports) {
 
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();

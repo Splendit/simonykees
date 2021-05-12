@@ -61,13 +61,13 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	}
 
 	@Override
-	protected Optional<JUnit4MethodInvocationAnalysisResult> findAnalysisResult(MethodInvocation methodInvocation,
+	protected Optional<JUnit4InvocationReplacementAnalyzer> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
 
 		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer(
 				methodInvocation, methodBinding, arguments);
 		if (invocationAnalyzer.analyzeAssertion()) {
-			return Optional.of(new JUnit4MethodInvocationAnalysisResult(invocationAnalyzer));
+			return Optional.of(invocationAnalyzer);
 		}
 
 		return Optional.empty();
@@ -75,7 +75,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 
 	@Override
 	protected JUnit4MethodInvocationReplacementData createTransformationData(
-			JUnit4MethodInvocationAnalysisResult invocationData,
+			JUnit4InvocationReplacementAnalyzer invocationData,
 			Set<String> supportedNewStaticMethodImports) {
 
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
@@ -85,7 +85,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 		List<Expression> originalArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
 
-		Expression messageMovingToLastPosition = invocationData.getMessageMovingToLastPosition()
+		Expression messageMovingToLastPosition = invocationData.getMessageMovedToLastPosition()
 			.orElse(null);
 
 		List<Expression> newArguments;
