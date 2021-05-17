@@ -5,11 +5,7 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ArrayCreation;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -25,7 +21,7 @@ class JUnit4InvocationReplacementAnalyzer {
 	private String methodNameReplacement;
 	private Expression messsageMovedToLastPosition;
 	private Type typeOfThrowingRunnableToReplace;
-	private AssumeNotNullWithSingleVararg assumeNotNullWithSingleVararg;
+	private AssumeNotNullArgumentsAnalysis assumeNotNullArgumentsAnalysis;
 
 	public JUnit4InvocationReplacementAnalyzer(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			List<Expression> arguments) {
@@ -50,8 +46,7 @@ class JUnit4InvocationReplacementAnalyzer {
 			.getParameterTypes();
 		if (isDeprecatedAssertEqualsComparingObjectArrays(originalMethodName, declaredParameterTypes)) {
 			methodNameReplacement = "assertArrayEquals"; //$NON-NLS-1$
-		} 
-
+		}
 
 		messsageMovedToLastPosition = findMessageMovedDoLastPosition(arguments, declaredParameterTypes).orElse(null);
 
@@ -75,29 +70,8 @@ class JUnit4InvocationReplacementAnalyzer {
 			return true;
 		}
 
-		if (arguments.size() != 1) {
-			return true;
-		}
-
-		Expression singleVararrg = arguments.get(0);
-		if (!isResolvedAsObjectArray(singleVararrg)) {
-			assumeNotNullWithSingleVararg = new AssumeNotNullWithSingleVararg(singleVararrg);
-			return true;
-		}
-		if (singleVararrg.getNodeType() == ASTNode.ARRAY_CREATION) {
-			assumeNotNullWithSingleVararg = new AssumeNotNullWithSingleVararg((ArrayCreation) singleVararrg);
-			return true;
-		}
-
-		AssumeNotNullWithNullableArray assumeNotNullWithNullableArray = findAssumeNotNullWithNullableArray(
-				methodInvocation, singleVararrg).orElse(null);
-		if (assumeNotNullWithNullableArray == null) {
-			return false;
-		}
-
-		assumeNotNullWithSingleVararg = new AssumeNotNullWithSingleVararg(assumeNotNullWithNullableArray);
-
-		return true;
+		assumeNotNullArgumentsAnalysis = new AssumeNotNullArgumentsAnalysis();
+		return assumeNotNullArgumentsAnalysis.analyze(methodInvocation, arguments);
 	}
 
 	private static Optional<Expression> findMessageMovedDoLastPosition(List<Expression> arguments,
@@ -112,32 +86,6 @@ class JUnit4InvocationReplacementAnalyzer {
 			return Optional.of(arguments.get(0));
 		}
 		return Optional.empty();
-	}
-
-	private static boolean isResolvedAsObjectArray(Expression singleVararg) {
-		ITypeBinding typeBinding = singleVararg.resolveTypeBinding();
-		if (!typeBinding.isArray()) {
-			return false;
-		}
-		return !typeBinding.getComponentType()
-			.isPrimitive();
-	}
-
-	private static Optional<AssumeNotNullWithNullableArray> findAssumeNotNullWithNullableArray(
-			MethodInvocation methodInvocation, Expression arrayArgument) {
-		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return Optional.empty();
-		}
-
-		ExpressionStatement methodInvocationStatement = (ExpressionStatement) methodInvocation.getParent();
-		if (methodInvocationStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
-			return Optional.empty();
-		}
-
-		Block block = (Block) methodInvocationStatement.getParent();
-		return Optional
-			.of(new AssumeNotNullWithNullableArray(arrayArgument, methodInvocationStatement, block));
-
 	}
 
 	static boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
@@ -183,7 +131,7 @@ class JUnit4InvocationReplacementAnalyzer {
 	}
 
 	String getNewMethodName() {
-		return methodNameReplacement != null  ? methodNameReplacement : originalMethodName;
+		return methodNameReplacement != null ? methodNameReplacement : originalMethodName;
 	}
 
 	Optional<Type> getTypeOfThrowingRunnableToReplace() {
@@ -194,15 +142,14 @@ class JUnit4InvocationReplacementAnalyzer {
 		return Optional.ofNullable(messsageMovedToLastPosition);
 	}
 
-	Optional<AssumeNotNullWithSingleVararg> getAssumeNotNullWithSingleVararg() {
-		return Optional.ofNullable(assumeNotNullWithSingleVararg);
+	Optional<AssumeNotNullArgumentsAnalysis> getAssumeNotNullArgumentsAnalysis() {
+		return Optional.ofNullable(assumeNotNullArgumentsAnalysis);
 	}
 
 	Optional<AssumeNotNullWithNullableArray> getAssumeNotNullWithNullableArray() {
-		if (assumeNotNullWithSingleVararg != null) {
-			return assumeNotNullWithSingleVararg.getAssumeNotNullWithNullableArray();
+		if (assumeNotNullArgumentsAnalysis != null) {
+			return assumeNotNullArgumentsAnalysis.getAssumptionWithNullableArray();
 		}
 		return Optional.empty();
 	}
-
 }

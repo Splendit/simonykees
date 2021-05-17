@@ -104,12 +104,16 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 			return new JUnit4MethodInvocationReplacementData(invocationData, newMethodStaticImport);
 		}
 
-		Supplier<List<Expression>> newArgumentsSupplier;
-		if (originalMethodName.equals(ASSUME_NO_EXCEPTION)) {
-			newArgumentsSupplier = () -> createAssumeThatExceptionIsNullArguments(methodInvocation,
-					originalArguments);
-		} else if (originalMethodName.equals(ASSUME_NOT_NULL)) {
-			newArgumentsSupplier = () -> createAssumeThatListIsNotNullArguments(methodInvocation, originalArguments);
+		final Supplier<List<Expression>> newArgumentsSupplier;
+		AssumeNotNullArgumentsAnalysis assumeNotNullAnalysis = invocationData.getAssumeNotNullArgumentsAnalysis()
+			.orElse(null);
+		if (assumeNotNullAnalysis != null) {
+			newArgumentsSupplier = () -> createAssumeThatListIsNotNullArguments(methodInvocation, originalArguments,
+					assumeNotNullAnalysis);
+
+		} else if (originalMethodName.equals(ASSUME_NO_EXCEPTION)) {
+			newArgumentsSupplier = () -> createAssumeThatExceptionIsNullArguments(methodInvocation, originalArguments);
+
 		} else {
 			newArgumentsSupplier = () -> createNewMethodArguments(originalArguments);
 		}
@@ -149,11 +153,9 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	}
 
 	private List<Expression> createAssumeThatListIsNotNullArguments(ASTNode context,
-			List<Expression> originalArguments) {
+			List<Expression> originalArguments, AssumeNotNullArgumentsAnalysis assumeNotNullAnalysis) {
 
-		if (originalArguments.size() != 1 || originalArguments.get(0)
-			.getNodeType() == ASTNode.ARRAY_CREATION) {
-
+		if (assumeNotNullAnalysis.isMultipleVarargs() || assumeNotNullAnalysis.isSingleVarargArrayCreation()) {
 			MethodInvocation asListInvocation = createAsListInvocation(context, originalArguments);
 			return Arrays.<Expression>asList(asListInvocation,
 					createCoreMatchersInvocation(context, EVERY_ITEM));

@@ -162,7 +162,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitorTest
 	}
 
 	@Test
-	public void visit_AssumeNotNullWithNullableArray_shouldTransform() throws Exception {
+	public void visit_AssumeNotNullWithNullableObjectArray_shouldTransform() throws Exception {
 		defaultFixture.addImport("org.junit.Assume.assumeNotNull", true, false);
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 
@@ -185,6 +185,33 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitorTest
 		List<String> expectedImports = Arrays.asList("import org.junit.jupiter.api.Test;",
 				"import static java.util.Arrays.asList;",
 				"import static org.hamcrest.CoreMatchers.everyItem;",
+				"import static org.hamcrest.CoreMatchers.notNullValue;",
+				"import static org.hamcrest.junit.MatcherAssume.assumeThat;");
+
+		assertChange(original, expected, expectedImports);
+	}
+
+	@Test
+	public void visit_AssumeNotNullWithNullableIntArray_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assume.assumeNotNull", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+
+		String original = "" +
+				"	int[] intArry;\n"
+				+ "\n"
+				+ "	@Test\n"
+				+ "	public void test() {\n"
+				+ "		assumeNotNull(intArry);\n"
+				+ "	}";
+		String expected = "" +
+				"	int[] intArry;\n"
+				+ "\n"
+				+ "	@Test\n"
+				+ "	public void test() {\n"
+				+ "		assumeThat(intArry,notNullValue());\n"
+				+ "	}";
+
+		List<String> expectedImports = Arrays.asList("import org.junit.jupiter.api.Test;",
 				"import static org.hamcrest.CoreMatchers.notNullValue;",
 				"import static org.hamcrest.junit.MatcherAssume.assumeThat;");
 
