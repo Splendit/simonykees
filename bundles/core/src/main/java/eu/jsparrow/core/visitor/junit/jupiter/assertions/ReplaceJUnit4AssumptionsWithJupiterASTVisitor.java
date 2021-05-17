@@ -25,18 +25,25 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractReplaceJUnit4MethodInvocationsASTVisitor {
 
+	JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore();
+
 	public ReplaceJUnit4AssumptionsWithJupiterASTVisitor() {
 		super(ORG_J_UNIT_JUPITER_API_ASSUMPTIONS);
 	}
 
 	@Override
-	protected void verifyImports(CompilationUnit compilationUnit) {
-		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
+	public boolean visit(CompilationUnit compilationUnit) {
+		jUnitJupiterTestMethodsStore.collectJUnitJupiterTestMethods(compilationUnit);
+		return super.visit(compilationUnit);
 	}
 
 	@Override
 	protected Optional<JUnit4InvocationReplacementAnalyzer> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
+
+		if (!jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
+			return Optional.empty();
+		}
 		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer(
 				methodInvocation, methodBinding, arguments);
 		invocationAnalyzer.analyzeAssumptionToJupiter();

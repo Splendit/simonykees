@@ -30,21 +30,24 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplaceJUnit4MethodInvocationsASTVisitor {
 
 	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
+	JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore();
 
 	public ReplaceJUnit4AssertionsWithJupiterASTVisitor() {
 		super(ORG_J_UNIT_JUPITER_API_ASSERTIONS);
 	}
 
 	@Override
-	protected void verifyImports(CompilationUnit compilationUnit) {
-		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
-		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
+	public boolean visit(CompilationUnit compilationUnit) {
+		jUnitJupiterTestMethodsStore.collectJUnitJupiterTestMethods(compilationUnit);
+		return super.visit(compilationUnit);
 	}
 
 	@Override
 	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
 			Set<String> newStaticAssertionMethodImports,
 			List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList) {
+		verifyImport(getCompilationUnit(), ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
+
 		super.transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports,
 				jUnit4AssertTransformationDataList);
 
@@ -64,6 +67,9 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	protected Optional<JUnit4InvocationReplacementAnalyzer> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
 
+		if (!jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
+			return Optional.empty();
+		}
 		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer(
 				methodInvocation, methodBinding, arguments);
 		if (invocationAnalyzer.analyzeAssertion()) {

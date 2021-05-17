@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -49,19 +48,16 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	}
 
 	@Override
-	protected void verifyImports(CompilationUnit compilationUnit) {
-		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
-		verifyImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS);
-		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + NULL_VALUE);
-		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + NOT_NULL_VALUE);
-		verifyStaticMethodImport(compilationUnit, ORG_HAMCREST_CORE_MATCHERS + '.' + EVERY_ITEM);
-		verifyStaticMethodImport(compilationUnit, JAVA_UTIL_ARRAYS + '.' + AS_LIST);
-	}
-
-	@Override
 	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
 			Set<String> newStaticAssertionMethodImports,
 			List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList) {
+
+		verifyImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS);
+		verifyStaticMethodImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS + '.' + NULL_VALUE);
+		verifyStaticMethodImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS + '.' + NOT_NULL_VALUE);
+		verifyStaticMethodImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS + '.' + EVERY_ITEM);
+		verifyStaticMethodImport(getCompilationUnit(), JAVA_UTIL_ARRAYS + '.' + AS_LIST);
+
 		super.transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports,
 				jUnit4AssertTransformationDataList);
 

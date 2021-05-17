@@ -85,33 +85,31 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitorTest
 
 	@Test
 	public void visit_needingMatcherAssumeQualifier_shouldTransform() throws Exception {
-		defaultFixture.addImport("org.junit.Assume.assumeThat", true, false);
+		defaultFixture.addImport(org.junit.Assume.class.getName());
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
 		defaultFixture.addImport("org.hamcrest.CoreMatchers.notNullValue", true, false);
 		String original = "" +
-				"	void methodWithoutTestAnnotation() {\n"
-				+ "		assumeThat(new Object(),notNullValue());\n"
+				"	void assumeThat() {\n"
 				+ "	}\n"
 				+ "\n"
 				+ "	@Test\n"
-				+ "	void test() {\n"
-				+ "		assumeThat(new Object(),notNullValue());\n"
+				+ "	public void test() {\n"
+				+ "		Assume.assumeThat(\"value\", notNullValue());\n"
 				+ "	}";
 
 		String expected = "" +
-				"	void methodWithoutTestAnnotation() {\n"
-				+ "		assumeThat(new Object(),notNullValue());\n"
+				"	void assumeThat() {\n"
 				+ "	}\n"
 				+ "\n"
 				+ "	@Test\n"
-				+ "	void test() {\n"
-				+ "		MatcherAssume.assumeThat(new Object(),notNullValue());\n"
+				+ "	public void test() {\n"
+				+ "		MatcherAssume.assumeThat(\"value\", notNullValue());\n"
 				+ "	}";
 
 		List<String> expectedImports = Arrays.asList("import org.hamcrest.junit.MatcherAssume;",
+				"import org.junit.Assume;",
 				"import org.junit.jupiter.api.Test;",
-				"import static org.hamcrest.CoreMatchers.notNullValue;",
-				"import static org.junit.Assume.assumeThat;");
+				"import static org.hamcrest.CoreMatchers.notNullValue;");
 		assertChange(original, expected, expectedImports);
 	}
 
@@ -433,5 +431,20 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitorTest
 				"import static org.junit.Assume.*;");
 
 		assertChange(original, expected, expectedImports);
+	}
+
+	@Test
+	public void visit_TestJUnit4AssumeThatNotInJUnitTest_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.hamcrest.Matchers.notNullValue", true, false);
+		defaultFixture.addImport("org.junit.Assume.assumeThat", true, false);
+
+		String original = "" +
+				"	public void test() {\n"
+				+ "		assumeThat(\"value\", notNullValue());\n"
+				+ "	}";
+
+		List<String> expectedImports = Arrays.asList("import static org.hamcrest.Matchers.notNullValue;",
+				"import static org.hamcrest.junit.MatcherAssume.assumeThat;");
+		assertChange(original, original, expectedImports);
 	}
 }
