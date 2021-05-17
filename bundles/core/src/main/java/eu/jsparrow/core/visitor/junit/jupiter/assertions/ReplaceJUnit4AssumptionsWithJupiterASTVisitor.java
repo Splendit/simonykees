@@ -23,7 +23,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @since 3.30.0
  * 
  */
-public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractReplaceJUnit4MethodInvocationsASTVisitor {
+public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractReplaceJUnit4InvocationsASTVisitor {
 
 	JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore();
 
@@ -38,21 +38,21 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 	}
 
 	@Override
-	protected Optional<JUnit4InvocationReplacementAnalyzer> findAnalysisResult(MethodInvocation methodInvocation,
+	protected Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
 
 		if (!jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
 			return Optional.empty();
 		}
-		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer(
+		JUnit4InvocationReplacementAnalysis invocationAnalyzer = new JUnit4InvocationReplacementAnalysis(
 				methodInvocation, methodBinding, arguments);
 		invocationAnalyzer.analyzeAssumptionToJupiter();
 		return Optional.of(invocationAnalyzer);
 	}
 
 	@Override
-	protected JUnit4MethodInvocationReplacementData createTransformationData(
-			JUnit4InvocationReplacementAnalyzer invocationData,
+	protected JUnit4InvocationReplacementData createTransformationData(
+			JUnit4InvocationReplacementAnalysis invocationData,
 			Set<String> supportedNewStaticMethodImports) {
 
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
@@ -77,10 +77,10 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 		if (supportedNewStaticMethodImports.contains(newMethodStaticImport)) {
 			if (methodInvocation.getExpression() == null
 					&& newArguments == originalArguments) {
-				return new JUnit4MethodInvocationReplacementData(invocationData, newMethodStaticImport);
+				return new JUnit4InvocationReplacementData(invocationData, newMethodStaticImport);
 			}
 			Supplier<List<Expression>> newArgumentsSupplier = () -> createNewMethodArguments(newArguments);
-			return new JUnit4MethodInvocationReplacementData(invocationData,
+			return new JUnit4InvocationReplacementData(invocationData,
 					() -> createNewInvocationWithoutQualifier(originalMethodName, newArgumentsSupplier),
 					newMethodStaticImport);
 		}
@@ -89,7 +89,7 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 				methodInvocation,
 				originalMethodName, newArgumentsSupplier);
 
-		return new JUnit4MethodInvocationReplacementData(invocationData, newMethodInvocationSupplier);
+		return new JUnit4InvocationReplacementData(invocationData, newMethodInvocationSupplier);
 	}
 
 	@Override

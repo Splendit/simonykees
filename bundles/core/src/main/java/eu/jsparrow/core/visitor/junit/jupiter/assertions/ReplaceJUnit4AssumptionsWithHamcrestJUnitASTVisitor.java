@@ -22,17 +22,20 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 /**
- * Replaces the JUnit 4 method invocations
- * {@code org.junit.Assume.assumeNoException},
- * {@code org.junit.Assume.assumeNotNull} and
- * {@code org.junit.Assume.assumeThat} by invocations of the corresponding
- * methods of {@code org.hamcrest.junit.MatcherAssume.assumeThat}.
+ * Replaces invocations of the JUnit 4 methods invocations
+ * <ul>
+ * <li>{@code org.junit.Assume.assumeNoException},</li>
+ * <li>{@code org.junit.Assume.assumeNotNull} and</li>
+ * <li>{@code org.junit.Assume.assumeThat}</li>
+ * </ul>
+ * by corresponding invocations of
+ * {@code org.hamcrest.junit.MatcherAssume.assumeThat}.
  * 
- * @since 3.31.0
+ * @since 3.30.0
  * 
  */
 public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
-		extends AbstractReplaceJUnit4MethodInvocationsASTVisitor {
+		extends AbstractReplaceJUnit4InvocationsASTVisitor {
 	private static final String AS_LIST = "asList"; //$NON-NLS-1$
 	private static final String JAVA_UTIL_ARRAYS = "java.util.Arrays"; //$NON-NLS-1$
 	private static final String NULL_VALUE = "nullValue"; //$NON-NLS-1$
@@ -50,7 +53,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	@Override
 	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
 			Set<String> newStaticAssertionMethodImports,
-			List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList) {
+			List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList) {
 
 		verifyImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS);
 		verifyStaticMethodImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS + '.' + NULL_VALUE);
@@ -65,17 +68,17 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 			.noneMatch(fullyQualifiedName -> fullyQualifiedName.endsWith('.' + ASSUME_THAT));
 
 		jUnit4AssertTransformationDataList.stream()
-			.map(JUnit4MethodInvocationReplacementData::getAssumptionThatEveryItemNotNull)
+			.map(JUnit4InvocationReplacementData::getAssumptionThatEveryItemNotNull)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.forEach(data -> insertAssumptionThatEveryItemNotNull(data, qualifierNeededForAssumeThat));
 	}
 
 	@Override
-	protected Optional<JUnit4InvocationReplacementAnalyzer> findAnalysisResult(MethodInvocation methodInvocation,
+	protected Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
 
-		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer(
+		JUnit4InvocationReplacementAnalysis invocationAnalyzer = new JUnit4InvocationReplacementAnalysis(
 				methodInvocation, methodBinding, arguments);
 		if (invocationAnalyzer.analyzeAssumptionToHamcrest()) {
 			return Optional.of(invocationAnalyzer);
@@ -84,8 +87,8 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	}
 
 	@Override
-	protected JUnit4MethodInvocationReplacementData createTransformationData(
-			JUnit4InvocationReplacementAnalyzer invocationData,
+	protected JUnit4InvocationReplacementData createTransformationData(
+			JUnit4InvocationReplacementAnalysis invocationData,
 			Set<String> supportedNewStaticMethodImports) {
 
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
@@ -101,7 +104,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 
 		boolean keepUnqualified = methodInvocation.getExpression() == null && useNewStaticimport;
 		if (!changeInvocation && keepUnqualified) {
-			return new JUnit4MethodInvocationReplacementData(invocationData, newMethodStaticImport);
+			return new JUnit4InvocationReplacementData(invocationData, newMethodStaticImport);
 		}
 
 		final Supplier<List<Expression>> newArgumentsSupplier;
@@ -119,7 +122,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		}
 
 		if (useNewStaticimport) {
-			return new JUnit4MethodInvocationReplacementData(invocationData,
+			return new JUnit4InvocationReplacementData(invocationData,
 					() -> createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier),
 					newMethodStaticImport);
 		}
@@ -127,7 +130,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 				methodInvocation,
 				newMethodName, newArgumentsSupplier);
 
-		return new JUnit4MethodInvocationReplacementData(invocationData, newMethodInvocationSupplier);
+		return new JUnit4InvocationReplacementData(invocationData, newMethodInvocationSupplier);
 	}
 
 	@Override

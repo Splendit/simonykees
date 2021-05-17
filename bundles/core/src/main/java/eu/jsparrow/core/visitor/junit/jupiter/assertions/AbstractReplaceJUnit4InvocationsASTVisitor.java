@@ -26,13 +26,25 @@ import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorV
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
-abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends AbstractAddImportASTVisitor {
+/**
+ * Parent class of visitors which transform invocations of JUnit4 methods
+ * declared in one of the following classes:
+ * <ul>
+ * <li>{@code org.junit.Assert},</li>
+ * <li>{@code org.junit.Assume}.</li>
+ * </ul>
+ * <p>
+ * 
+ * @since 3.30.0
+ *
+ */
+abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImportASTVisitor {
 
 	protected static final String ORG_J_UNIT_JUPITER_API_ASSUMPTIONS = "org.junit.jupiter.api.Assumptions"; //$NON-NLS-1$
 	protected static final String ORG_J_UNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	protected final String classDeclaringJUnit4MethodReplacement;
 
-	AbstractReplaceJUnit4MethodInvocationsASTVisitor(String classDeclaringJUnit4MethodReplacement) {
+	AbstractReplaceJUnit4InvocationsASTVisitor(String classDeclaringJUnit4MethodReplacement) {
 		this.classDeclaringJUnit4MethodReplacement = classDeclaringJUnit4MethodReplacement;
 	}
 
@@ -42,7 +54,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		super.visit(compilationUnit);
 		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
 
-		List<JUnit4InvocationReplacementAnalyzer> methodInvocationAnalysisResults = new ArrayList<>();
+		List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults = new ArrayList<>();
 		List<MethodInvocation> notTransformedJUnit4Invocations = new ArrayList<>();
 
 		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
@@ -52,7 +64,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 				if (methodBinding != null && isSupportedJUnit4Method(methodBinding)) {
-					JUnit4InvocationReplacementAnalyzer result = null;
+					JUnit4InvocationReplacementAnalysis result = null;
 
 					List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 							Expression.class);
@@ -76,13 +88,13 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 		Set<String> supportedNewStaticMethodImports = findSupportedStaticImports(staticMethodImportsToRemove,
 				methodInvocationAnalysisResults);
 
-		List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList = methodInvocationAnalysisResults
+		List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList = methodInvocationAnalysisResults
 			.stream()
 			.map(data -> this.createTransformationData(data, supportedNewStaticMethodImports))
 			.collect(Collectors.toList());
 
 		Set<String> newStaticAssertionMethodImports = jUnit4AssertTransformationDataList.stream()
-			.map(JUnit4MethodInvocationReplacementData::getStaticMethodImport)
+			.map(JUnit4InvocationReplacementData::getStaticMethodImport)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.collect(Collectors.toSet());
@@ -146,7 +158,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 	protected Set<String> findSupportedStaticImports(
 			List<ImportDeclaration> staticMethodImportsToRemove,
-			List<JUnit4InvocationReplacementAnalyzer> methodInvocationAnalysisResults) {
+			List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults) {
 
 		Set<String> simpleNamesOfStaticMethodImportsToRemove = staticMethodImportsToRemove
 			.stream()
@@ -173,11 +185,11 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 	}
 
 	private Set<String> collectSupportedNewMethodNames(
-			List<JUnit4InvocationReplacementAnalyzer> methodInvocationAnalysisResults) {
+			List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults) {
 
 		return methodInvocationAnalysisResults
 			.stream()
-			.map(JUnit4InvocationReplacementAnalyzer::getNewMethodName)
+			.map(JUnit4InvocationReplacementAnalysis::getNewMethodName)
 			.collect(Collectors.toSet());
 	}
 
@@ -188,7 +200,7 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
 			Set<String> newStaticAssertionMethodImports,
-			List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList) {
+			List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList) {
 		if (!staticAssertMethodImportsToRemove.isEmpty() || !newStaticAssertionMethodImports.isEmpty()
 				|| !jUnit4AssertTransformationDataList.isEmpty()) {
 
@@ -247,11 +259,11 @@ abstract class AbstractReplaceJUnit4MethodInvocationsASTVisitor extends Abstract
 
 	protected abstract boolean isSupportedJUnit4Method(IMethodBinding methodBinding);
 
-	protected abstract Optional<JUnit4InvocationReplacementAnalyzer> findAnalysisResult(
+	protected abstract Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments);
 
-	protected abstract JUnit4MethodInvocationReplacementData createTransformationData(
-			JUnit4InvocationReplacementAnalyzer invocationData,
+	protected abstract JUnit4InvocationReplacementData createTransformationData(
+			JUnit4InvocationReplacementAnalysis invocationData,
 			Set<String> supportedNewStaticMethodImports);
 
 }

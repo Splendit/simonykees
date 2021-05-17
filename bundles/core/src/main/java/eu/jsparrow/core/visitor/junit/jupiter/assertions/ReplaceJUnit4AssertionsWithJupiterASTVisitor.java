@@ -20,14 +20,14 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
- * Replaces invocations of methods of the JUnit-4-class {@code org.junit.Assert}
- * by invocations of the corresponding methods of the JUnit-Jupiter-class
+ * Replaces invocations of methods of the JUnit 4 class {@code org.junit.Assert}
+ * by invocations of the corresponding methods of the JUnit Jupiter class
  * {@code org.junit.jupiter.api.Assertions}.
  * 
  * @since 3.28.0
  * 
  */
-public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplaceJUnit4MethodInvocationsASTVisitor {
+public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplaceJUnit4InvocationsASTVisitor {
 
 	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
 	JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore();
@@ -45,7 +45,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	@Override
 	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
 			Set<String> newStaticAssertionMethodImports,
-			List<JUnit4MethodInvocationReplacementData> jUnit4AssertTransformationDataList) {
+			List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList) {
 		verifyImport(getCompilationUnit(), ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
 
 		super.transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports,
@@ -53,7 +53,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 
 		AST ast = astRewrite.getAST();
 		jUnit4AssertTransformationDataList.stream()
-			.map(JUnit4MethodInvocationReplacementData::getTypeOfThrowingRunnableToReplace)
+			.map(JUnit4InvocationReplacementData::getTypeOfThrowingRunnableToReplace)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.forEach(typeToReplace -> {
@@ -64,13 +64,13 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	}
 
 	@Override
-	protected Optional<JUnit4InvocationReplacementAnalyzer> findAnalysisResult(MethodInvocation methodInvocation,
+	protected Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
 
 		if (!jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
 			return Optional.empty();
 		}
-		JUnit4InvocationReplacementAnalyzer invocationAnalyzer = new JUnit4InvocationReplacementAnalyzer(
+		JUnit4InvocationReplacementAnalysis invocationAnalyzer = new JUnit4InvocationReplacementAnalysis(
 				methodInvocation, methodBinding, arguments);
 		if (invocationAnalyzer.analyzeAssertion()) {
 			return Optional.of(invocationAnalyzer);
@@ -80,8 +80,8 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	}
 
 	@Override
-	protected JUnit4MethodInvocationReplacementData createTransformationData(
-			JUnit4InvocationReplacementAnalyzer invocationData,
+	protected JUnit4InvocationReplacementData createTransformationData(
+			JUnit4InvocationReplacementAnalysis invocationData,
 			Set<String> supportedNewStaticMethodImports) {
 
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
@@ -108,10 +108,10 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 			if (methodInvocation.getExpression() == null
 					&& newArguments == originalArguments
 					&& newMethodName.equals(originalMethodName)) {
-				return new JUnit4MethodInvocationReplacementData(invocationData, newMethodStaticImport);
+				return new JUnit4InvocationReplacementData(invocationData, newMethodStaticImport);
 			}
 			Supplier<List<Expression>> newArgumentsSupplier = () -> createNewMethodArguments(newArguments);
-			return new JUnit4MethodInvocationReplacementData(invocationData,
+			return new JUnit4InvocationReplacementData(invocationData,
 					() -> createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier),
 					newMethodStaticImport);
 		}
@@ -120,7 +120,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 				methodInvocation,
 				newMethodName, newArgumentsSupplier);
 
-		return new JUnit4MethodInvocationReplacementData(invocationData, newMethodInvocationSupplier);
+		return new JUnit4InvocationReplacementData(invocationData, newMethodInvocationSupplier);
 	}
 
 	@Override

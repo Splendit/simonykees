@@ -11,9 +11,12 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 /**
- * Wrapper class for the case that {@code assumeNotNull(Object...)} is called
- * with a single argument which may be interpreted as an object or as an array
- * of objects.
+ * Analyzes an invocation of {@code org.junit.Assume.assumeNotNull(Object...)}
+ * and stores all informations needed for the replacement by corresponding
+ * invocations of
+ * {@code org.hamcrest.junit.MatcherAssume.assertThat(T, Matcher<T>}.
+ * 
+ * @since 3.30.0
  */
 public class AssumeNotNullArgumentsAnalysis {
 	private boolean multipleVarargs;

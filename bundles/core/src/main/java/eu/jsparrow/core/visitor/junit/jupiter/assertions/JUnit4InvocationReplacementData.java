@@ -13,33 +13,33 @@ import org.eclipse.jdt.core.dom.Type;
  * @since 3.28.0
  *
  */
-class JUnit4MethodInvocationReplacementData {
+class JUnit4InvocationReplacementData {
 	private final MethodInvocation originalMethodInvocation;
 	private Supplier<MethodInvocation> methodInvocationReplacementSupplier;
 	private String staticMethodImport;
 	private AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull;
 	private Type typeOfThrowingRunnableToReplace;
 
-	JUnit4MethodInvocationReplacementData(JUnit4InvocationReplacementAnalyzer jUnit4InvocationAnalysisResult,
+	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult,
 			Supplier<MethodInvocation> newMethodInvocationSupplier, String staticMethodImport) {
 		this(jUnit4InvocationAnalysisResult);
 		this.methodInvocationReplacementSupplier = newMethodInvocationSupplier;
 		this.staticMethodImport = staticMethodImport;
 	}
 
-	JUnit4MethodInvocationReplacementData(JUnit4InvocationReplacementAnalyzer jUnit4InvocationAnalysisResult,
+	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult,
 			Supplier<MethodInvocation> newMethodInvocationSupplier) {
 		this(jUnit4InvocationAnalysisResult);
 		this.methodInvocationReplacementSupplier = newMethodInvocationSupplier;
 	}
 
-	JUnit4MethodInvocationReplacementData(JUnit4InvocationReplacementAnalyzer jUnit4InvocationAnalysisResult,
+	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult,
 			String staticMethodImport) {
 		this(jUnit4InvocationAnalysisResult);
 		this.staticMethodImport = staticMethodImport;
 	}
 
-	JUnit4MethodInvocationReplacementData(JUnit4InvocationReplacementAnalyzer jUnit4InvocationAnalysisResult) {
+	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult) {
 		this.originalMethodInvocation = jUnit4InvocationAnalysisResult.getMethodInvocation();
 		this.assumptionThatEveryItemNotNull = jUnit4InvocationAnalysisResult.getAssumeNotNullWithNullableArray()
 			.orElse(null);

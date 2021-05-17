@@ -11,7 +11,21 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 
-class JUnit4InvocationReplacementAnalyzer {
+/**
+ * Analyzes an invocation of a JUnit4 method declared in one of the following
+ * classes:
+ * <ul>
+ * <li>{@code org.junit.Assert}</li>
+ * <li>{@code org.junit.Assume}.</li>
+ * </ul>
+ * Stores all informations which are necessary for the replacement of this
+ * invocation.
+ * <p>
+ * 
+ * @since 3.30.0
+ *
+ */
+class JUnit4InvocationReplacementAnalysis {
 
 	private final MethodInvocation methodInvocation;
 	private final IMethodBinding methodBinding;
@@ -19,11 +33,11 @@ class JUnit4InvocationReplacementAnalyzer {
 	private final String originalMethodName;
 
 	private String methodNameReplacement;
-	private Expression messsageMovedToLastPosition;
+	private Expression messageMovedToLastPosition;
 	private Type typeOfThrowingRunnableToReplace;
 	private AssumeNotNullArgumentsAnalysis assumeNotNullArgumentsAnalysis;
 
-	public JUnit4InvocationReplacementAnalyzer(MethodInvocation methodInvocation, IMethodBinding methodBinding,
+	public JUnit4InvocationReplacementAnalysis(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			List<Expression> arguments) {
 		this.methodInvocation = methodInvocation;
 		this.methodBinding = methodBinding;
@@ -48,7 +62,7 @@ class JUnit4InvocationReplacementAnalyzer {
 			methodNameReplacement = "assertArrayEquals"; //$NON-NLS-1$
 		}
 
-		messsageMovedToLastPosition = findMessageMovedDoLastPosition(arguments, declaredParameterTypes).orElse(null);
+		messageMovedToLastPosition = findMessageMovedDoLastPosition(arguments, declaredParameterTypes).orElse(null);
 
 		return true;
 	}
@@ -59,7 +73,7 @@ class JUnit4InvocationReplacementAnalyzer {
 			.getMethodDeclaration()
 			.getParameterTypes();
 
-		messsageMovedToLastPosition = findMessageMovedDoLastPosition(arguments, declaredParameterTypes).orElse(null);
+		messageMovedToLastPosition = findMessageMovedDoLastPosition(arguments, declaredParameterTypes).orElse(null);
 	}
 
 	boolean analyzeAssumptionToHamcrest() {
@@ -139,7 +153,7 @@ class JUnit4InvocationReplacementAnalyzer {
 	}
 
 	Optional<Expression> getMessageMovedToLastPosition() {
-		return Optional.ofNullable(messsageMovedToLastPosition);
+		return Optional.ofNullable(messageMovedToLastPosition);
 	}
 
 	Optional<AssumeNotNullArgumentsAnalysis> getAssumeNotNullArgumentsAnalysis() {
