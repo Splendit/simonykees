@@ -16,7 +16,6 @@ class RefactoringMarkersTests {
 
 	@Test
 	void getForRule() {
-
 		RefactoringMarkers rm = RefactoringMarkers.getFor(DummyVisitor.class.getName());
 		RefactoringMarkerEvent event = new DummyRefactoringEvent("Event 1");
 		rm.update(event);

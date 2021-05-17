@@ -13,16 +13,21 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ide.ResourceUtil;
 
-import eu.jsparrow.core.markers.CoreRefactoringEventManager;
-import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 
 public class MarkerEngine extends EditorTracker implements IElementChangedListener {
 
 	private IResource currentResource;
 	private static final String JAVA_EXTENSION = "java"; //$NON-NLS-1$
-	private MarkerFactory markerFactory = new MarkerFactory();
+	private MarkerFactory markerFactory;
+	private RefactoringEventManager eventGenerator;
+
+	public MarkerEngine(MarkerFactory markerFactory, RefactoringEventManager eventGenerator) {
+		this.markerFactory = markerFactory;
+		this.eventGenerator = eventGenerator;
+	}
 
 	@Override
 	public void elementChanged(ElementChangedEvent event) {
@@ -85,7 +90,7 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 				&& JAVA_EXTENSION.equals(resource.getFileExtension());
 	}
 
-	public void checkElement(IJavaElement element) {
+	private void checkElement(IJavaElement element) {
 		if (element == null) {
 			return;
 		}
@@ -116,7 +121,7 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 
 	private void handleParentSourceReference(ICompilationUnit cu) {
 		RefactoringMarkers.clear();
-		RefactoringEventManager eventGenerator = new CoreRefactoringEventManager();
+
 		eventGenerator.discoverRefactoringEvents(cu);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		final IResource resource = cu.getResource();

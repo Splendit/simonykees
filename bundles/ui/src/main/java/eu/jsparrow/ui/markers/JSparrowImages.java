@@ -27,11 +27,10 @@ public final class JSparrowImages {
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
 		IPath iPathActive = new Path(string);
 		URL urlActive = FileLocator.find(bundle, iPathActive, new HashMap<>());
-		if(urlActive == null) {
+		if (urlActive == null) {
 			return ImageDescriptor.getMissingImageDescriptor();
 		}
-		ImageDescriptor imageDesc = ImageDescriptor.createFromURL(urlActive);
-		return imageDesc;
+		return ImageDescriptor.createFromURL(urlActive);
 	}
 
 	public static Image createImage(String string) {

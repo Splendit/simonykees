@@ -10,7 +10,9 @@ import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.markers.CoreRefactoringEventManager;
 import eu.jsparrow.ui.markers.MarkerEngine;
+import eu.jsparrow.ui.markers.MarkerFactory;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -34,7 +36,7 @@ public class Startup implements IStartup {
 		PlatformUI.getWorkbench()
 			.getDisplay()
 			.asyncExec(() -> {
-				IWorkbench workbench = PlatformUI.getWorkbench();
+
 				if (!licenseUtil.isValidProLicensePresentInSecureStore() && !licenseUtil.isActiveRegistration()) {
 
 					Shell activeShell = PlatformUI.getWorkbench()
@@ -58,11 +60,16 @@ public class Startup implements IStartup {
 					 */
 					SimonykeesPreferenceManager.setEnableDashboard(false);
 				}
-
-				MarkerEngine engine = new MarkerEngine();
+			});
+		PlatformUI.getWorkbench()
+			.getDisplay()
+			.asyncExec(() -> {
+				IWorkbench workbench = PlatformUI.getWorkbench();
+				MarkerFactory markerFactory = new MarkerFactory();
+				CoreRefactoringEventManager eventManager = new CoreRefactoringEventManager();
+				MarkerEngine engine = new MarkerEngine(markerFactory, eventManager);
 				engine.track(workbench);
 				JavaCore.addElementChangedListener(engine);
-
 			});
 	}
 }

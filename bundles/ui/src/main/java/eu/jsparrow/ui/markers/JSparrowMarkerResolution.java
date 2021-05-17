@@ -8,7 +8,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IMarkerResolution2;
 
-import eu.jsparrow.core.markers.CoreRefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 
 public class JSparrowMarkerResolution implements IMarkerResolution2 {
@@ -18,8 +17,10 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 	private String description;
 	private String name;
 	private String resolver;
+	private RefactoringEventManager eventGenerator;
 
-	public JSparrowMarkerResolution(IMarker marker) {
+	public JSparrowMarkerResolution(IMarker marker, RefactoringEventManager eventGenerator) {
+		this.eventGenerator = eventGenerator;
 		this.offset = marker.getAttribute(IMarker.CHAR_START, 0);
 		this.name = marker.getAttribute("name", "jSparrow Quickfix"); //$NON-NLS-1$ //$NON-NLS-2$
 		this.resource = marker.getResource();
@@ -34,7 +35,7 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 
 	@Override
 	public void run(IMarker marker) {
-		RefactoringEventManager eventGenerator = new CoreRefactoringEventManager();
+
 		IJavaElement element = JavaCore.create(resource);
 		if (element == null) {
 			return;

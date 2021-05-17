@@ -13,8 +13,9 @@ import eu.jsparrow.ui.Activator;
 public class MarkerFactory {
 
 	private static final Logger logger = LoggerFactory.getLogger(MarkerFactory.class);
+
 	public static final String JSPARROW_MARKER = "jsparrow.marker"; //$NON-NLS-1$
-	private static final String RESOLVER_KEY =  "resolver"; //$NON-NLS-1$
+	private static final String RESOLVER_KEY = "resolver"; //$NON-NLS-1$
 	private static final String NAME_KEY = "name"; //$NON-NLS-1$
 	private static final String DESCRIPTION_KEY = "description"; //$NON-NLS-1$
 
@@ -34,18 +35,32 @@ public class MarkerFactory {
 		}
 	}
 
-	private void scheduleWorkspaceJob(final String resolver, final String name, final String message, final IResource resource,
-			final int start, final int length, String description)
+	private void scheduleWorkspaceJob(final String resolver, final String name, final String message,
+			final IResource resource, final int start, final int length, String description)
 			throws CoreException {
 		Integer offset = Integer.valueOf(start);
 		Integer end = Integer.valueOf(start + length);
 		IMarker marker = create(resource);
-		if (marker != null) {
-			marker.setAttributes(
-					new String[] {RESOLVER_KEY, NAME_KEY, IMarker.MESSAGE, IMarker.CHAR_START, IMarker.CHAR_END, DESCRIPTION_KEY,
-							IMarker.SOURCE_ID },
-					new Object[] { resolver, name, message, offset, end, description, Activator.PLUGIN_ID });
+		if (marker == null) {
+			return;
 		}
+		String[] markerAttributeKeys = {
+				RESOLVER_KEY, NAME_KEY,
+				IMarker.MESSAGE,
+				IMarker.CHAR_START,
+				IMarker.CHAR_END,
+				DESCRIPTION_KEY,
+				IMarker.SOURCE_ID };
+		Object[] attributeValues = {
+				resolver,
+				name,
+				message,
+				offset,
+				end,
+				description,
+				Activator.PLUGIN_ID };
+		marker.setAttributes(markerAttributeKeys, attributeValues);
+
 	}
 
 	private IMarker create(IResource resource) throws CoreException {
