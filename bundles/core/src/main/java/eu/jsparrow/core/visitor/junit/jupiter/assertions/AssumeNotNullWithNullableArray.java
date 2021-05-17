@@ -27,22 +27,22 @@ class AssumeNotNullWithNullableArray {
 	private final ExpressionStatement assumeNotNullStatement;
 	private final Block assumeNotNullStatementParent;
 
-	public AssumeNotNullWithNullableArray(Expression assumeNotNullArrayArgument,
+	AssumeNotNullWithNullableArray(Expression assumeNotNullArrayArgument,
 			ExpressionStatement assumeNotNullStatement, Block assumeNotNullStatementParent) {
 		this.assumeNotNullArrayArgument = assumeNotNullArrayArgument;
 		this.assumeNotNullStatement = assumeNotNullStatement;
 		this.assumeNotNullStatementParent = assumeNotNullStatementParent;
 	}
 
-	public Expression getAssumeNotNullArrayArgument() {
+	Expression getAssumeNotNullArrayArgument() {
 		return assumeNotNullArrayArgument;
 	}
 
-	public ExpressionStatement getAssumeNotNullStatement() {
+	ExpressionStatement getAssumeNotNullStatement() {
 		return assumeNotNullStatement;
 	}
 
-	public Block getAssumeNotNullStatementParent() {
+	Block getAssumeNotNullStatementParent() {
 		return assumeNotNullStatementParent;
 	}
 }

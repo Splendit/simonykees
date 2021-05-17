@@ -37,7 +37,7 @@ class JUnit4InvocationReplacementAnalysis {
 	private Type typeOfThrowingRunnableToReplace;
 	private AssumeNotNullArgumentsAnalysis assumeNotNullArgumentsAnalysis;
 
-	public JUnit4InvocationReplacementAnalysis(MethodInvocation methodInvocation, IMethodBinding methodBinding,
+	JUnit4InvocationReplacementAnalysis(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			List<Expression> arguments) {
 		this.methodInvocation = methodInvocation;
 		this.methodBinding = methodBinding;

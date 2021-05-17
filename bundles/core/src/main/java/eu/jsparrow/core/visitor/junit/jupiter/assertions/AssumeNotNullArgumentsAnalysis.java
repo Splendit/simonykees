@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * 
  * @since 3.30.0
  */
-public class AssumeNotNullArgumentsAnalysis {
+class AssumeNotNullArgumentsAnalysis {
 	private boolean multipleVarargs;
 	private boolean singleVarargArrayCreation;
 	private AssumeNotNullWithNullableArray assumptionWithNullableArray;
