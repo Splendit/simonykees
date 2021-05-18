@@ -24,16 +24,20 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitNegativeASTVisitorTest
 	}
 
 	@Test
-	public void visit_qualifiedHamcrestJUnitAssumeThat_shouldNotTransform() throws Exception {
-		addDependency("org.hamcrest", "hamcrest-junit", "1.0.0.0");
-		defaultFixture.addImport("org.hamcrest.junit.MatcherAssume");
+	public void visit_AssumeThatNotDeclaredInJUnit4Assume_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.hamcrest.Matchers.equalToIgnoringCase", true, false);
+		defaultFixture.addImport("org.hamcrest.Matcher");
 		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
-		defaultFixture.addImport("org.hamcrest.CoreMatchers.notNullValue", true, false);
+
 		String original = "" +
-				"	@Test\n" +
-				"	void test() {\n" +
-				"		MatcherAssume.assumeThat(new Object(), notNullValue());\n" +
-				"	}";
+				"	static <T> void assumeThat(T actual, Matcher<T> matcher) {\n"
+				+ "\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@Test\n"
+				+ "	public void test() {\n"
+				+ "		assumeThat(\"value\", equalToIgnoringCase(\"value\"));\n"
+				+ "	}";
 		assertNoChange(original);
 	}
 
