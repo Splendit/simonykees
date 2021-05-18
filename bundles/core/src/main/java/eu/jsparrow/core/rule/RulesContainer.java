@@ -77,11 +77,10 @@ import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnit4AnnotationsWithJupiterRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnit4AssertionsWithJupiterRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnit4AssumptionsWithJupiterRule;
-import eu.jsparrow.core.rule.impl.ReplaceJUnit4CategoryWithJupiterTagRule;
+import eu.jsparrow.core.rule.impl.ReplaceJUnitAssertThatWithHamcrestRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedExceptionRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitTimeoutAnnotationPropertyRule;
-import eu.jsparrow.core.rule.impl.ReplaceJUnitAssertThatWithHamcrestRule;
 import eu.jsparrow.core.rule.impl.ReuseRandomObjectsRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
@@ -198,7 +197,10 @@ public class RulesContainer {
 				 */
 				new ReplaceJUnitExpectedExceptionRule(), new ReplaceJUnitExpectedAnnotationPropertyRule(),
 				new ReplaceJUnitTimeoutAnnotationPropertyRule(),
-				new ReplaceJUnit4CategoryWithJupiterTagRule(),
+				/*
+				 * We plan to release this rule in June. 
+				 * new ReplaceJUnit4CategoryWithJupiterTagRule(),
+				 */
 				new ReplaceJUnit4AnnotationsWithJupiterRule(),
 				new ReplaceJUnit4AssertionsWithJupiterRule(),
 				new ReplaceJUnitAssertThatWithHamcrestRule(),
