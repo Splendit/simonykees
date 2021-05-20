@@ -28,7 +28,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  *
  * @since 3.29.0
  */
-public class JUnitJupiterTestMethodsStore {
+class JUnitJupiterTestMethodsStore {
 
 	private static final List<String> ORG_JUNIT_JUPITER_TEST_ANNOTATIONS = Collections.unmodifiableList(Arrays.asList(
 			"org.junit.jupiter.api.Test", //$NON-NLS-1$

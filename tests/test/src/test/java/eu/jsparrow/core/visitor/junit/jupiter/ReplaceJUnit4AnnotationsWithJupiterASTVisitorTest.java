@@ -418,4 +418,17 @@ class ReplaceJUnit4AnnotationsWithJupiterASTVisitorTest extends AbstractReplaceJ
 		assertChange(original, expected, importsToStringExpected);
 
 	}
+
+	@Test
+	public void visit_AssumeTrueInTestMethod_shouldTransform() throws Exception {
+		defaultFixture.addImport(org.junit.Test.class.getName());
+		defaultFixture.addImport("org.junit.Assume.assumeTrue", true, false);
+		String original = "" +
+				"	@Test\n" +
+				"	public void test() {\n" +
+				"		assumeTrue(true);\n" +
+				"	}";
+		assertChange(original, original, Arrays.asList("import org.junit.jupiter.api.Test;",
+				"import static org.junit.Assume.assumeTrue;"));
+	}
 }
