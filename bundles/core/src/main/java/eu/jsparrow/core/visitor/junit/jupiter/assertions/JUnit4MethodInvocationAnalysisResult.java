@@ -7,14 +7,14 @@ import org.eclipse.jdt.core.dom.Type;
 
 /**
  * Immutable class storing all necessary informations about the given invocation
- * of a static method of the class {@code org.junit.Assert} which may be
- * replaced by an invocation of the corresponding method of
- * {@code org.junit.jupiter.api.Assertions}.
+ * of a static method declared in a JUnit 4 class like {@code org.junit.Assert}
+ * or {@code org.junit.Assume} which may be transformed to an invocation of a
+ * the corresponding JUnit Jupiter method.
  * 
  * @since 3.28.0
  *
  */
-class JUnit4AssertMethodInvocationAnalysisResult {
+class JUnit4MethodInvocationAnalysisResult {
 
 	private final MethodInvocation methodInvocation;
 	private final String originalMethodName;
@@ -23,13 +23,13 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 	private final boolean transformableInvocation;
 	private Type throwingRunnableTypeToReplace;
 
-	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
+	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
 			boolean messageMovingToLastPosition, Type throwingRunnableTypeToReplace, boolean transformableInvocation) {
 		this(methodInvocation, newMethodName, messageMovingToLastPosition, transformableInvocation);
 		this.throwingRunnableTypeToReplace = throwingRunnableTypeToReplace;
 	}
 
-	JUnit4AssertMethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
+	JUnit4MethodInvocationAnalysisResult(MethodInvocation methodInvocation, String newMethodName,
 			boolean messageMovingToLastPosition,
 			boolean transformableInvocation) {
 		this.methodInvocation = methodInvocation;
@@ -48,7 +48,7 @@ class JUnit4AssertMethodInvocationAnalysisResult {
 		return originalMethodName;
 	}
 
-	public String getNewMethodName() {
+	String getNewMethodName() {
 		return newMethodName;
 	}
 
