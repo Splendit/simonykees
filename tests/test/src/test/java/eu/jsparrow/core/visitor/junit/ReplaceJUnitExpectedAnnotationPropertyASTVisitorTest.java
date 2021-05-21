@@ -259,4 +259,36 @@ class ReplaceJUnitExpectedAnnotationPropertyASTVisitorTest extends UsesJDTUnitFi
 				+ "}";
 		assertNoChange(original);
 	}
+
+	@Test
+	void visit_singleStatementThrowingRuntimeException_shouldTransform() throws Exception {
+		String original = ""
+				+ "private void throwNPE() throws NullPointerException {}"
+				+ ""
+				+ "@Test(expected = NullPointerException.class)\n"
+				+ "public void methodInvocation() {\n"
+				+ "		throwNPE();\n"
+				+ "}";
+		String expected = ""
+				+ "private void throwNPE() throws NullPointerException {}"
+				+ ""
+				+ "@Test\n"
+				+ "public void methodInvocation() {\n"
+				+ "		assertThrows(NullPointerException.class, () -> throwNPE());\n"
+				+ "}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_multipleStatementsThrowingRuntimeException_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "private void throwNPE() throws NullPointerException {}"
+				+ ""
+				+ "@Test(expected = NullPointerException.class)\n"
+				+ "public void methodInvocation() {\n"
+				+ "		throwNPE();\n"
+				+ "		throwNPE();\n"
+				+ "}";
+		assertNoChange(original);
+	}
 }
