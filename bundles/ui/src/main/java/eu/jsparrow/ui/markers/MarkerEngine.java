@@ -120,10 +120,13 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 	}
 
 	private void handleParentSourceReference(ICompilationUnit cu) {
+		List<RefactoringMarkerEvent> oldEvents = RefactoringMarkers.getAllEvents();
 		RefactoringMarkers.clear();
-
 		eventGenerator.discoverRefactoringEvents(cu);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
+		if (allSame(events, oldEvents)) {
+			return;
+		}
 		final IResource resource = cu.getResource();
 		MarkerJob job = new MarkerJob(resource, () -> {
 			markerFactory.clear(resource);
@@ -132,5 +135,19 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 			}
 		});
 		job.schedule();
+	}
+
+	private boolean allSame(List<RefactoringMarkerEvent> events, List<RefactoringMarkerEvent> oldEvents) {
+		if (events.size() != oldEvents.size()) {
+			return false;
+		}
+		for (int i = 0; i < events.size(); i++) {
+			RefactoringMarkerEvent event = events.get(i);
+			RefactoringMarkerEvent oldEvent = events.get(i);
+			if (!event.equals(oldEvent)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
