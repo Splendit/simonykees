@@ -59,28 +59,27 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 
 		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
 		compilationUnit.accept(invocationCollectorVisitor);
-		invocationCollectorVisitor.getMethodInvocations()
-			.forEach(methodInvocation -> {
+		for (MethodInvocation methodInvocation : invocationCollectorVisitor.getMethodInvocations()) {
 
-				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-				if (methodBinding != null && isSupportedJUnit4Method(methodBinding)) {
-					JUnit4InvocationReplacementAnalysis result = null;
+			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			if (methodBinding != null && isSupportedJUnit4Method(methodBinding)) {
+				JUnit4InvocationReplacementAnalysis result = null;
 
-					List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-							Expression.class);
-					if (arguments.stream()
-						.allMatch(this::isArgumentWithUnambiguousType)) {
-						result = findAnalysisResult(methodInvocation, methodBinding, arguments)
-							.orElse(null);
-					}
-
-					if (result != null) {
-						methodInvocationAnalysisResults.add(result);
-					} else {
-						notTransformedJUnit4Invocations.add(methodInvocation);
-					}
+				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+						Expression.class);
+				if (arguments.stream()
+					.allMatch(this::isArgumentWithExplicitType)) {
+					result = findAnalysisResult(methodInvocation, methodBinding, arguments)
+						.orElse(null);
 				}
-			});
+
+				if (result != null) {
+					methodInvocationAnalysisResults.add(result);
+				} else {
+					notTransformedJUnit4Invocations.add(methodInvocation);
+				}
+			}
+		}
 
 		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticMethodImportsToRemove(compilationUnit,
 				notTransformedJUnit4Invocations);
@@ -103,7 +102,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		return false;
 	}
 
-	private boolean isArgumentWithUnambiguousType(Expression expression) {
+	private boolean isArgumentWithExplicitType(Expression expression) {
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
@@ -169,7 +168,10 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 			.map(SimpleName::getIdentifier)
 			.collect(Collectors.toSet());
 
-		Set<String> supportedNewMethodNames = collectSupportedNewMethodNames(methodInvocationAnalysisResults);
+		Set<String> supportedNewMethodNames = methodInvocationAnalysisResults
+			.stream()
+			.map(JUnit4InvocationReplacementAnalysis::getNewMethodName)
+			.collect(Collectors.toSet());
 
 		Set<String> supportedNewStaticMethodImports = new HashSet<>();
 		String newMethodFullyQualifiedNamePrefix = classDeclaringJUnit4MethodReplacement + "."; //$NON-NLS-1$
@@ -182,15 +184,6 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		});
 
 		return supportedNewStaticMethodImports;
-	}
-
-	private Set<String> collectSupportedNewMethodNames(
-			List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults) {
-
-		return methodInvocationAnalysisResults
-			.stream()
-			.map(JUnit4InvocationReplacementAnalysis::getNewMethodName)
-			.collect(Collectors.toSet());
 	}
 
 	private boolean canAddStaticAssertionsMethodImport(String fullyQualifiedAssertionsMethodName) {
@@ -221,21 +214,14 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 				});
 
 			jUnit4AssertTransformationDataList.forEach(data -> {
-				MethodInvocation methodInvocationReplacement = data.createMethodInvocationReplacement()
-					.orElse(null);
-				if (methodInvocationReplacement != null) {
-					MethodInvocation methodInvocationToReplace = data.getOriginalMethodInvocation();
-					astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
-					onRewrite();
-				}
+				data.createMethodInvocationReplacement()
+					.ifPresent(methodInvocationReplacement -> {
+						MethodInvocation methodInvocationToReplace = data.getOriginalMethodInvocation();
+						astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
+						onRewrite();
+					});
 			});
 		}
-	}
-
-	protected List<Expression> createNewMethodArguments(List<Expression> arguments) {
-		return arguments.stream()
-			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
-			.collect(Collectors.toList());
 	}
 
 	@SuppressWarnings({ "unchecked" })

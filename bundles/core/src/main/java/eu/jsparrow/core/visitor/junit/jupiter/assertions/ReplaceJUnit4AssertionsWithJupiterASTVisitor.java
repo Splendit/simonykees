@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -104,18 +105,25 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 		}
 
 		String newMethodStaticImport = classDeclaringJUnit4MethodReplacement + "." + newMethodName; //$NON-NLS-1$
-		if (supportedNewStaticMethodImports.contains(newMethodStaticImport)) {
-			if (methodInvocation.getExpression() == null
-					&& newArguments == originalArguments
-					&& newMethodName.equals(originalMethodName)) {
-				return new JUnit4InvocationReplacementData(invocationData, newMethodStaticImport);
-			}
-			Supplier<List<Expression>> newArgumentsSupplier = () -> createNewMethodArguments(newArguments);
+		boolean useNewMethodStaticImport = supportedNewStaticMethodImports.contains(newMethodStaticImport);
+
+		if (useNewMethodStaticImport
+				&& methodInvocation.getExpression() == null
+				&& newArguments == originalArguments
+				&& newMethodName.equals(originalMethodName)) {
+			return new JUnit4InvocationReplacementData(invocationData, newMethodStaticImport);
+		}
+
+		Supplier<List<Expression>> newArgumentsSupplier = () -> newArguments.stream()
+			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
+			.collect(Collectors.toList());
+
+		if (useNewMethodStaticImport) {
 			return new JUnit4InvocationReplacementData(invocationData,
 					() -> createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier),
 					newMethodStaticImport);
 		}
-		Supplier<List<Expression>> newArgumentsSupplier = () -> createNewMethodArguments(newArguments);
+
 		Supplier<MethodInvocation> newMethodInvocationSupplier = () -> createNewInvocationWithQualifier(
 				methodInvocation,
 				newMethodName, newArgumentsSupplier);

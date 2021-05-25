@@ -118,7 +118,9 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 			newArgumentsSupplier = () -> createAssumeThatExceptionIsNullArguments(methodInvocation, originalArguments);
 
 		} else {
-			newArgumentsSupplier = () -> createNewMethodArguments(originalArguments);
+			newArgumentsSupplier = () -> originalArguments.stream()
+				.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
+				.collect(Collectors.toList());
 		}
 
 		if (useNewStaticimport) {
