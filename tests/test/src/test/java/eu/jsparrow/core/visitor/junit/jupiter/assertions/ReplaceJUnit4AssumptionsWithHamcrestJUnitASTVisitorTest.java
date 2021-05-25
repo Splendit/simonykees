@@ -390,7 +390,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitorTest
 				+ "\n"
 				+ "	@Test\n"
 				+ "	public void test() {\n"
-				+ "		assumeThat(asList(objects1,objects1),everyItem(notNullValue()));\n"
+				+ "		assumeThat(asList(objects1,objects2),everyItem(notNullValue()));\n"
 				+ "	}";
 
 		List<String> expectedImports = Arrays.asList("import org.junit.jupiter.api.Test;",

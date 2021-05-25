@@ -179,7 +179,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 			asListInvocation.setExpression(qualifier);
 		}
 		List<Expression> asListArguments = originalArguments.stream()
-			.map(arg -> (Expression) astRewrite.createCopyTarget(originalArguments.get(0)))
+			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
 			.collect(Collectors.toList());
 		asListInvocation.arguments()
 			.addAll(asListArguments);
