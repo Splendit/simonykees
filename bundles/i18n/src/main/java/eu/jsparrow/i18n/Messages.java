@@ -171,6 +171,8 @@ public class Messages extends NLS {
 	public static String ReplaceJUnit4AssertWithJupiterRule_name;
 	public static String ReplaceJUnit4AssumptionsWithJupiterRule_description;
 	public static String ReplaceJUnit4AssumptionsWithJupiterRule_name;
+	public static String ReplaceJUnit4CategoryWithJupiterTagRule_description;
+	public static String ReplaceJUnit4CategoryWithJupiterTagRule_name;
 	public static String ReplaceJUnitAssertThatWithHamcrestRule_description;
 	public static String ReplaceJUnitAssertThatWithHamcrestRule_name;
 	public static String MultiCatchRule_description;
