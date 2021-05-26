@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver;
 import eu.jsparrow.core.markers.visitor.InefficientConstructorResolver;
 import eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver;
+import eu.jsparrow.core.markers.visitor.PutIfAbsentResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
@@ -34,6 +35,7 @@ public class ResolverVisitorsFactory {
 		map.put(UseComparatorMethodsResolver.RESOLVER_NAME, UseComparatorMethodsResolver::new);
 		map.put(InefficientConstructorResolver.RESOLVER_NAME, InefficientConstructorResolver::new);
 		map.put(LambdaToMethodReferenceResolver.RESOLVER_NAME, LambdaToMethodReferenceResolver::new);
+		map.put(PutIfAbsentResolver.RESOLVER_NAME, PutIfAbsentResolver::new);
 		return Collections.unmodifiableMap(map);
 	}
 

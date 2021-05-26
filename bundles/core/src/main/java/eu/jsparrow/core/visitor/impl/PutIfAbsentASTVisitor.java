@@ -84,7 +84,7 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(ifStatement, statement, null);
 		getCommentRewriter().saveRelatedComments(ifStatement);
 		onRewrite();
-
+		addMarkerEvent(methodInvocation, statement);
 		return true;
 	}
 
