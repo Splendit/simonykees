@@ -15,6 +15,7 @@ import eu.jsparrow.core.markers.visitor.InefficientConstructorResolver;
 import eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver;
 import eu.jsparrow.core.markers.visitor.PutIfAbsentResolver;
 import eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver;
+import eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
@@ -38,6 +39,7 @@ public class ResolverVisitorsFactory {
 		map.put(LambdaToMethodReferenceResolver.RESOLVER_NAME, LambdaToMethodReferenceResolver::new);
 		map.put(PutIfAbsentResolver.RESOLVER_NAME, PutIfAbsentResolver::new);
 		map.put(RemoveNullCheckBeforeInstanceofResolver.RESOLVER_NAME, RemoveNullCheckBeforeInstanceofResolver::new);
+		map.put(StringLiteralEqualityCheckResolver.RESOLVER_NAME, StringLiteralEqualityCheckResolver::new);
 		return Collections.unmodifiableMap(map);
 	}
 

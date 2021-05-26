@@ -92,6 +92,7 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 								astRewrite.replace(expression, newArgument, null);
 								astRewrite.replace(stringLiteral, newExpression, null);
 								onRewrite();
+								addMarkerEvent(stringLiteral, newArgument);
 							}
 						}
 					}
