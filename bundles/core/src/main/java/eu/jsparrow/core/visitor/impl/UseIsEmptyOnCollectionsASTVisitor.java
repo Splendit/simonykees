@@ -75,6 +75,7 @@ public class UseIsEmptyOnCollectionsASTVisitor extends AbstractASTRewriteASTVisi
 		astRewrite.replace(parent, replaceNode, null);
 		getCommentRewriter().saveCommentsInParentStatement(parent);
 		onRewrite();
+		addMarkerEvent(parent, replaceNode);
 		return true;
 	}
 
