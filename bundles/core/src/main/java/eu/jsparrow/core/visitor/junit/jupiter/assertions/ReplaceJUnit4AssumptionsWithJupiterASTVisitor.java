@@ -4,8 +4,8 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -54,7 +54,7 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 	@Override
 	protected JUnit4InvocationReplacementData createTransformationData(
 			JUnit4InvocationReplacementAnalysis invocationData,
-			Set<String> supportedNewStaticMethodImports) {
+			Map<String, String> supportedStaticImportsMap) {
 
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
 
@@ -74,13 +74,12 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 		}
 
 		String originalMethodName = invocationData.getOriginalMethodName();
-		String newMethodStaticImport = classDeclaringJUnit4MethodReplacement + "." + originalMethodName; //$NON-NLS-1$
-		boolean useNewMethodStaticImport = supportedNewStaticMethodImports.contains(newMethodStaticImport);
+		boolean useNewMethodStaticImport = supportedStaticImportsMap.containsKey(originalMethodName);
 
 		if (useNewMethodStaticImport
 				&& methodInvocation.getExpression() == null
 				&& newArguments == originalArguments) {
-			return new JUnit4InvocationReplacementData(invocationData, newMethodStaticImport);
+			return new JUnit4InvocationReplacementData(invocationData, supportedStaticImportsMap.get(originalMethodName));
 		}
 
 		Supplier<List<Expression>> newArgumentsSupplier = () -> newArguments.stream()
@@ -90,7 +89,7 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 		if (useNewMethodStaticImport) {
 			return new JUnit4InvocationReplacementData(invocationData,
 					() -> createNewInvocationWithoutQualifier(originalMethodName, newArgumentsSupplier),
-					newMethodStaticImport);
+					supportedStaticImportsMap.get(originalMethodName));
 
 		}
 

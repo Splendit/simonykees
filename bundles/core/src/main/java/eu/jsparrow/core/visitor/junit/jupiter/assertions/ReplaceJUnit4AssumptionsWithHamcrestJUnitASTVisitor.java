@@ -5,6 +5,7 @@ import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -89,7 +90,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	@Override
 	protected JUnit4InvocationReplacementData createTransformationData(
 			JUnit4InvocationReplacementAnalysis invocationData,
-			Set<String> supportedNewStaticMethodImports) {
+			Map<String, String> supportedStaticImportsMap) {
 
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
 		String originalMethodName = invocationData.getOriginalMethodName();
@@ -99,12 +100,11 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		String newMethodName = ASSUME_THAT;
 		List<Expression> originalArguments = invocationData.getArguments();
 
-		String newMethodStaticImport = classDeclaringJUnit4MethodReplacement + "." + newMethodName; //$NON-NLS-1$
-		boolean useNewStaticimport = supportedNewStaticMethodImports.contains(newMethodStaticImport);
+		boolean useNewStaticimport = supportedStaticImportsMap.containsKey(newMethodName);
 
 		boolean keepUnqualified = methodInvocation.getExpression() == null && useNewStaticimport;
 		if (!changeInvocation && keepUnqualified) {
-			return new JUnit4InvocationReplacementData(invocationData, newMethodStaticImport);
+			return new JUnit4InvocationReplacementData(invocationData, supportedStaticImportsMap.get(newMethodName));
 		}
 
 		final Supplier<List<Expression>> newArgumentsSupplier;
@@ -126,7 +126,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		if (useNewStaticimport) {
 			return new JUnit4InvocationReplacementData(invocationData,
 					() -> createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier),
-					newMethodStaticImport);
+					supportedStaticImportsMap.get(newMethodName));
 		}
 		Supplier<MethodInvocation> newMethodInvocationSupplier = () -> createNewInvocationWithQualifier(
 				methodInvocation,

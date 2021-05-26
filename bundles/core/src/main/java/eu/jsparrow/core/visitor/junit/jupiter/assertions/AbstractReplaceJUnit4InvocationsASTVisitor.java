@@ -1,8 +1,10 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -84,19 +86,23 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticMethodImportsToRemove(compilationUnit,
 				notTransformedJUnit4Invocations);
 
-		Set<String> supportedNewStaticMethodImports = findSupportedStaticImports(staticMethodImportsToRemove,
+		Map<String, String> supportedStaticImportsMap = collectSupportedStaticImportsMap(staticMethodImportsToRemove,
 				methodInvocationAnalysisResults);
 
 		List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList = methodInvocationAnalysisResults
 			.stream()
-			.map(data -> this.createTransformationData(data, supportedNewStaticMethodImports))
+			.map(data -> this.createTransformationData(data, supportedStaticImportsMap))
 			.collect(Collectors.toList());
 
-		Set<String> newStaticAssertionMethodImports = jUnit4AssertTransformationDataList.stream()
-			.map(JUnit4InvocationReplacementData::getStaticMethodImport)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toSet());
+		Set<String> newStaticAssertionMethodImports = new HashSet<>();
+
+		methodInvocationAnalysisResults.stream()
+			.map(JUnit4InvocationReplacementAnalysis::getNewMethodName)
+			.forEach(newMethodName -> {
+				if (supportedStaticImportsMap.containsKey(newMethodName)) {
+					newStaticAssertionMethodImports.add(supportedStaticImportsMap.get(newMethodName));
+				}
+			});
 
 		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
 		return false;
@@ -155,7 +161,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		return false;
 	}
 
-	protected Set<String> findSupportedStaticImports(
+	private Map<String, String> collectSupportedStaticImportsMap(
 			List<ImportDeclaration> staticMethodImportsToRemove,
 			List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults) {
 
@@ -173,17 +179,17 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 			.map(JUnit4InvocationReplacementAnalysis::getNewMethodName)
 			.collect(Collectors.toSet());
 
-		Set<String> supportedNewStaticMethodImports = new HashSet<>();
+		Map<String, String> simpleNameToFullyQualifiedNameMap = new HashMap<>();
 		String newMethodFullyQualifiedNamePrefix = classDeclaringJUnit4MethodReplacement + "."; //$NON-NLS-1$
 		supportedNewMethodNames.forEach(supportedNewMethodName -> {
 			String supportedNewMethodFullyQualifiedName = newMethodFullyQualifiedNamePrefix + supportedNewMethodName;
 			if (simpleNamesOfStaticMethodImportsToRemove.contains(supportedNewMethodName)
 					|| canAddStaticAssertionsMethodImport(supportedNewMethodFullyQualifiedName)) {
-				supportedNewStaticMethodImports.add(supportedNewMethodFullyQualifiedName);
+				simpleNameToFullyQualifiedNameMap.put(supportedNewMethodName, supportedNewMethodFullyQualifiedName);
 			}
 		});
 
-		return supportedNewStaticMethodImports;
+		return simpleNameToFullyQualifiedNameMap;
 	}
 
 	private boolean canAddStaticAssertionsMethodImport(String fullyQualifiedAssertionsMethodName) {
@@ -250,6 +256,6 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 
 	protected abstract JUnit4InvocationReplacementData createTransformationData(
 			JUnit4InvocationReplacementAnalysis invocationData,
-			Set<String> supportedNewStaticMethodImports);
+			Map<String, String> supportedStaticImportsMap);
 
 }
