@@ -85,6 +85,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitor extends AbstractASTRewrit
 		ASTNode newExpression = astRewrite.createCopyTarget(expression);
 		astRewrite.replace(infixExpression, newExpression, null);
 		onRewrite();
+		addMarkerEvent(infixExpression.getLeftOperand(), expression);
 	}
 
 	private PrefixExpression findNegatedPrefixExpression(Expression expression) {
