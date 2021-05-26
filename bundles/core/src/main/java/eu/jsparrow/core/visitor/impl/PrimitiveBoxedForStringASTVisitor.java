@@ -140,6 +140,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 				commentRewriter.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(node, Statement.class), relatedComments);
 				
 				onRewrite();
+				addMarkerEvent(node, staticClassType);
 			}
 
 		}
@@ -240,6 +241,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 					astRewrite.replace(node, methodInvocation, null);
 					getCommentRewriter().saveCommentsInParentStatement(node);
 					onRewrite();
+					addMarkerEvent(node, methodInvocation);
 				}
 			}
 		}
