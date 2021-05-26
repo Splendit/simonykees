@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver;
+import eu.jsparrow.core.markers.visitor.InefficientConstructorResolver;
 import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
@@ -22,7 +23,7 @@ public class ResolverVisitorsFactory {
 
 	private ResolverVisitorsFactory() {
 		/*
-		 * Hide the default constructor.F
+		 * Hide the default constructor.
 		 */
 	}
 
@@ -30,6 +31,7 @@ public class ResolverVisitorsFactory {
 		Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> map = new HashMap<>();
 		map.put(FunctionalInterfaceResolver.RESOLVER_NAME, FunctionalInterfaceResolver::new);
 		map.put(UseComparatorMethodsResolver.RESOLVER_NAME, UseComparatorMethodsResolver::new);
+		map.put(InefficientConstructorResolver.RESOLVER_NAME, InefficientConstructorResolver::new);
 		return Collections.unmodifiableMap(map);
 	}
 

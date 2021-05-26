@@ -77,6 +77,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
 				getCommentRewriter().saveCommentsInParentStatement(node);
 				onRewrite();
+				addMarkerEvent(refactorCandidateParameter, refactorCandidateParameter);
 			}
 		}
 		return true;
@@ -182,6 +183,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				astRewrite.replace(node, replacement, null);
 				commentRewriter.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(node, Statement.class), relatedComments);
 				onRewrite();
+				addMarkerEvent(node, replacement);
 			}
 		}
 		return true;
