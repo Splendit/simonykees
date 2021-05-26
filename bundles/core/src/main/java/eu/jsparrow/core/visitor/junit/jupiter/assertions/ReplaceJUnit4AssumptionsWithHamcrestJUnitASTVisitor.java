@@ -104,7 +104,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 
 		boolean keepUnqualified = methodInvocation.getExpression() == null && useNewStaticimport;
 		if (!changeInvocation && keepUnqualified) {
-			return new JUnit4InvocationReplacementData(invocationData, supportedStaticImportsMap.get(newMethodName));
+			return new JUnit4InvocationReplacementData(invocationData);
 		}
 
 		final Supplier<List<Expression>> newArgumentsSupplier;
@@ -125,8 +125,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 
 		if (useNewStaticimport) {
 			return new JUnit4InvocationReplacementData(invocationData,
-					() -> createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier),
-					supportedStaticImportsMap.get(newMethodName));
+					() -> createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier));
 		}
 		Supplier<MethodInvocation> newMethodInvocationSupplier = () -> createNewInvocationWithQualifier(
 				methodInvocation,

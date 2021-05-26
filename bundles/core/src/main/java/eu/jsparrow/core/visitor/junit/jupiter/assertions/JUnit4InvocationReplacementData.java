@@ -16,27 +16,13 @@ import org.eclipse.jdt.core.dom.Type;
 class JUnit4InvocationReplacementData {
 	private final MethodInvocation originalMethodInvocation;
 	private Supplier<MethodInvocation> methodInvocationReplacementSupplier;
-	private String staticMethodImport;
 	private AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull;
 	private Type typeOfThrowingRunnableToReplace;
-
-	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult,
-			Supplier<MethodInvocation> newMethodInvocationSupplier, String staticMethodImport) {
-		this(jUnit4InvocationAnalysisResult);
-		this.methodInvocationReplacementSupplier = newMethodInvocationSupplier;
-		this.staticMethodImport = staticMethodImport;
-	}
 
 	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult,
 			Supplier<MethodInvocation> newMethodInvocationSupplier) {
 		this(jUnit4InvocationAnalysisResult);
 		this.methodInvocationReplacementSupplier = newMethodInvocationSupplier;
-	}
-
-	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult,
-			String staticMethodImport) {
-		this(jUnit4InvocationAnalysisResult);
-		this.staticMethodImport = staticMethodImport;
 	}
 
 	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult) {
@@ -54,13 +40,6 @@ class JUnit4InvocationReplacementData {
 	Optional<MethodInvocation> createMethodInvocationReplacement() {
 		if (methodInvocationReplacementSupplier != null) {
 			return Optional.of(methodInvocationReplacementSupplier.get());
-		}
-		return Optional.empty();
-	}
-
-	Optional<String> getStaticMethodImport() {
-		if (staticMethodImport != null) {
-			return Optional.of(staticMethodImport);
 		}
 		return Optional.empty();
 	}

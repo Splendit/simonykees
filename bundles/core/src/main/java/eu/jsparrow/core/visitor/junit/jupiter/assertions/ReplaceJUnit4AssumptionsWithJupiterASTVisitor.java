@@ -79,18 +79,16 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 		if (useNewMethodStaticImport
 				&& methodInvocation.getExpression() == null
 				&& newArguments == originalArguments) {
-			return new JUnit4InvocationReplacementData(invocationData, supportedStaticImportsMap.get(originalMethodName));
+			return new JUnit4InvocationReplacementData(invocationData);
 		}
 
 		Supplier<List<Expression>> newArgumentsSupplier = () -> newArguments.stream()
 			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
 			.collect(Collectors.toList());
-		
+
 		if (useNewMethodStaticImport) {
 			return new JUnit4InvocationReplacementData(invocationData,
-					() -> createNewInvocationWithoutQualifier(originalMethodName, newArgumentsSupplier),
-					supportedStaticImportsMap.get(originalMethodName));
-
+					() -> createNewInvocationWithoutQualifier(originalMethodName, newArgumentsSupplier));
 		}
 
 		Supplier<MethodInvocation> newMethodInvocationSupplier = () -> createNewInvocationWithQualifier(
