@@ -204,6 +204,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 					astRewrite.replace(lambdaExpressionNode, ref, null);
 					getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 					onRewrite();
+					addMarkerEvent(lambdaExpressionNode, ref);
 				}
 			}
 
@@ -257,6 +258,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 				astRewrite.replace(lambdaExpressionNode, ref, null);
 				getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 				onRewrite();
+				addMarkerEvent(lambdaExpressionNode, ref);
 			}
 		}
 
@@ -646,6 +648,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		astRewrite.replace(lambdaExpressionNode, ref, null);
 		getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 		onRewrite();
+		addMarkerEvent(lambdaExpressionNode, ref);
 
 	}
 
