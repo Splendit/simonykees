@@ -16,7 +16,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 public class InefficientConstructorResolver extends InefficientConstructorASTVisitor {
 
-	private static final String MARKER_NAME = "Replace Inefficient Constructors with valueOf()"; //$NON-NLS-1$
+	private static final String MARKER_NAME = "Replace inefficient constructors with valueOf()"; //$NON-NLS-1$
 	private static final String MARKER_DESCRIPTION = "The factory method valueOf() is generally a better choice as it is likely to yield significantly better space and time performance."; //$NON-NLS-1$
 	public static final String RESOLVER_NAME = InefficientConstructorResolver.class.getName();
 

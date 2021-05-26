@@ -11,7 +11,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver;
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
@@ -24,7 +23,6 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 	@BeforeEach
 	void setUp() throws Exception {
 		eventManager = new CoreRefactoringEventManager();
-		setDefaultVisitor(new UseComparatorMethodsResolver(node -> true));
 		defaultFixture.addImport(java.util.Comparator.class.getName());
 	}
 	
@@ -44,7 +42,7 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 		ICompilationUnit icu = defaultFixture.getICompilationUnit();
 		eventManager.discoverRefactoringEvents(icu);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
-		assertEquals(1, events.size());
+		assertEquals(2, events.size());
 		RefactoringMarkerEvent event = events.get(0);
 		assertAll(
 				()-> assertEquals("Use predefined comparator", event.getName()),
@@ -53,6 +51,12 @@ class CoreRefactoringEventManagerTest extends UsesJDTUnitFixture {
 				()-> assertEquals("eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver", event.getResolver()),
 				()-> assertEquals("Comparator.naturalOrder()", event.getDescription()),
 				()-> assertEquals("Lambda expression can be replaced with predefined comparator", event.getMessage()));
+		
+		RefactoringMarkerEvent event2 = events.get(1);
+		assertAll(
+				()-> assertEquals("Replace lambda expression with method reference", event2.getName()),
+				()-> assertEquals("eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver", event2.getResolver()),
+				()-> assertEquals("Simplify the lambda expression by using a method reference.", event2.getMessage()));
 	}
 
 	@Test
