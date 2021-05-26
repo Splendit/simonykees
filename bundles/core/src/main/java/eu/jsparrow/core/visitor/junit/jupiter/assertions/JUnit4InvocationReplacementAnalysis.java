@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.Type;
  */
 class JUnit4InvocationReplacementAnalysis {
 
+	private static final String JAVA_LANG_STRING = "java.lang.String"; //$NON-NLS-1$
 	private final MethodInvocation methodInvocation;
 	private final IMethodBinding methodBinding;
 	private final List<Expression> arguments;
@@ -46,7 +47,7 @@ class JUnit4InvocationReplacementAnalysis {
 	}
 
 	boolean analyzeAssertion() {
-		if (originalMethodName.equals("assertThrows")) { //$NON-NLS-1$
+		if ("assertThrows".equals(originalMethodName)) { //$NON-NLS-1$
 			ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
 			if (!throwingRunnableArgumentAnalyser.analyze(arguments)) {
 				return false;
@@ -80,12 +81,12 @@ class JUnit4InvocationReplacementAnalysis {
 
 		methodNameReplacement = "assumeThat"; //$NON-NLS-1$
 
-		if (!originalMethodName.equals("assumeNotNull")) {//$NON-NLS-1$
+		if (!"assumeNotNull".equals(originalMethodName)) { //$NON-NLS-1$
 			return true;
 		}
 
 		assumeNotNullArgumentsAnalysis = new AssumeNotNullArgumentsAnalysis();
-		return assumeNotNullArgumentsAnalysis.analyze(methodInvocation, arguments);
+		return assumeNotNullArgumentsAnalysis.analyzeNotNullAssumptionVarargs(methodInvocation, arguments);
 	}
 
 	private static Optional<Expression> findMessageMovedDoLastPosition(List<Expression> arguments,
@@ -96,13 +97,13 @@ class JUnit4InvocationReplacementAnalysis {
 		if (arguments.size() < 2) {
 			return Optional.empty();
 		}
-		if (isParameterTypeString(declaredParameterTypes[0])) {
+		if (isContentOfType(declaredParameterTypes[0], JAVA_LANG_STRING)) {
 			return Optional.of(arguments.get(0));
 		}
 		return Optional.empty();
 	}
 
-	static boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
+	private static boolean isDeprecatedAssertEqualsComparingObjectArrays(String methodName,
 			ITypeBinding[] declaredParameterTypes) {
 		if (!methodName.equals("assertEquals")) { //$NON-NLS-1$
 			return false;
@@ -114,22 +115,18 @@ class JUnit4InvocationReplacementAnalysis {
 		}
 
 		if (declaredParameterTypes.length == 3) {
-			return isParameterTypeString(declaredParameterTypes[0])
+			return isContentOfType(declaredParameterTypes[0], JAVA_LANG_STRING)
 					&& isParameterTypeObjectArray(declaredParameterTypes[1])
 					&& isParameterTypeObjectArray(declaredParameterTypes[2]);
 		}
 		return false;
 	}
 
-	static boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
+	private static boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
 		if (parameterType.isArray() && parameterType.getDimensions() == 1) {
 			return isContentOfType(parameterType.getComponentType(), "java.lang.Object"); //$NON-NLS-1$
 		}
 		return false;
-	}
-
-	static boolean isParameterTypeString(ITypeBinding parameterType) {
-		return isContentOfType(parameterType, "java.lang.String"); //$NON-NLS-1$
 	}
 
 	MethodInvocation getMethodInvocation() {

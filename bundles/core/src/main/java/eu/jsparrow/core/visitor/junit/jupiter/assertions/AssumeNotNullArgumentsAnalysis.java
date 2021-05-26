@@ -23,7 +23,7 @@ class AssumeNotNullArgumentsAnalysis {
 	private boolean singleVarargArrayCreation;
 	private AssumeNotNullWithNullableArray assumptionWithNullableArray;
 
-	boolean analyze(MethodInvocation methodInvocation, List<Expression> arguments) {
+	boolean analyzeNotNullAssumptionVarargs(MethodInvocation methodInvocation, List<Expression> arguments) {
 
 		if (arguments.size() != 1) {
 			multipleVarargs = true;
