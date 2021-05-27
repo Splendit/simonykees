@@ -89,17 +89,10 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
 		String originalMethodName = invocationData.getOriginalMethodName();
 
-		boolean changeInvocation = originalMethodName.equals(ASSUME_NO_EXCEPTION)
-				|| originalMethodName.equals(ASSUME_NOT_NULL);
 		String newMethodName = ASSUME_THAT;
 		List<Expression> originalArguments = invocationData.getArguments();
 
 		boolean useNewStaticimport = supportedStaticImportsMap.containsKey(newMethodName);
-
-		boolean keepUnqualified = methodInvocation.getExpression() == null && useNewStaticimport;
-		if (!changeInvocation && keepUnqualified) {
-			return new JUnit4InvocationReplacementData(invocationData);
-		}
 
 		final Supplier<List<Expression>> newArgumentsSupplier;
 		AssumeNotNullArgumentsAnalysis assumeNotNullAnalysis = invocationData.getAssumeNotNullArgumentsAnalysis()

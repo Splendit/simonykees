@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.Type;
  */
 class JUnit4InvocationReplacementAnalysis {
 
+	private static final String ASSUME_THAT = "assumeThat"; //$NON-NLS-1$
 	private static final String JAVA_LANG_STRING = "java.lang.String"; //$NON-NLS-1$
 	private final MethodInvocation methodInvocation;
 	private final IMethodBinding methodBinding;
@@ -37,6 +38,7 @@ class JUnit4InvocationReplacementAnalysis {
 	private Expression messageMovedToLastPosition;
 	private Type typeOfThrowingRunnableToReplace;
 	private AssumeNotNullArgumentsAnalysis assumeNotNullArgumentsAnalysis;
+	private boolean changingArguments;
 
 	JUnit4InvocationReplacementAnalysis(MethodInvocation methodInvocation, IMethodBinding methodBinding,
 			List<Expression> arguments) {
@@ -64,6 +66,7 @@ class JUnit4InvocationReplacementAnalysis {
 		}
 
 		messageMovedToLastPosition = findMessageMovedDoLastPosition(arguments, declaredParameterTypes).orElse(null);
+		changingArguments = messageMovedToLastPosition != null;
 
 		return true;
 	}
@@ -75,11 +78,13 @@ class JUnit4InvocationReplacementAnalysis {
 			.getParameterTypes();
 
 		messageMovedToLastPosition = findMessageMovedDoLastPosition(arguments, declaredParameterTypes).orElse(null);
+		changingArguments = messageMovedToLastPosition != null;
 	}
 
 	boolean analyzeAssumptionToHamcrest() {
 
-		methodNameReplacement = "assumeThat"; //$NON-NLS-1$
+		methodNameReplacement = ASSUME_THAT;
+		changingArguments = !ASSUME_THAT.equals(originalMethodName);
 
 		if (!"assumeNotNull".equals(originalMethodName)) { //$NON-NLS-1$
 			return true;
@@ -162,5 +167,9 @@ class JUnit4InvocationReplacementAnalysis {
 			return assumeNotNullArgumentsAnalysis.getAssumptionWithNullableArray();
 		}
 		return Optional.empty();
+	}
+
+	public boolean isChangingArguments() {
+		return changingArguments;
 	}
 }

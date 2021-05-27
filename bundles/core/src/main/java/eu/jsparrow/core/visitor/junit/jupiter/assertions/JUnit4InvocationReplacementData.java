@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -14,26 +13,19 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  */
 class JUnit4InvocationReplacementData {
 	private final MethodInvocation originalMethodInvocation;
-	private Supplier<MethodInvocation> methodInvocationReplacementSupplier;
+	private final Supplier<MethodInvocation> methodInvocationReplacementSupplier;
 
 	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult,
 			Supplier<MethodInvocation> newMethodInvocationSupplier) {
-		this(jUnit4InvocationAnalysisResult);
-		this.methodInvocationReplacementSupplier = newMethodInvocationSupplier;
-	}
-
-	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult) {
 		this.originalMethodInvocation = jUnit4InvocationAnalysisResult.getMethodInvocation();
+		this.methodInvocationReplacementSupplier = newMethodInvocationSupplier;
 	}
 
 	MethodInvocation getOriginalMethodInvocation() {
 		return originalMethodInvocation;
 	}
 
-	Optional<MethodInvocation> createMethodInvocationReplacement() {
-		if (methodInvocationReplacementSupplier != null) {
-			return Optional.of(methodInvocationReplacementSupplier.get());
-		}
-		return Optional.empty();
+	MethodInvocation createMethodInvocationReplacement() {
+		return methodInvocationReplacementSupplier.get();
 	}
 }

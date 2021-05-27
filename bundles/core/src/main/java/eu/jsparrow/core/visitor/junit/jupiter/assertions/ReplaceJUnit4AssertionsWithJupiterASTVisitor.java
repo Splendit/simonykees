@@ -81,7 +81,6 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 			Map<String, String> supportedStaticImportsMap) {
 
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
-		String originalMethodName = invocationData.getOriginalMethodName();
 		String newMethodName = invocationData.getNewMethodName();
 
 		List<Expression> originalArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
@@ -100,13 +99,6 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 		}
 
 		boolean useNewMethodStaticImport = supportedStaticImportsMap.containsKey(newMethodName);
-
-		if (useNewMethodStaticImport
-				&& methodInvocation.getExpression() == null
-				&& newArguments == originalArguments
-				&& newMethodName.equals(originalMethodName)) {
-			return new JUnit4InvocationReplacementData(invocationData);
-		}
 
 		Supplier<List<Expression>> newArgumentsSupplier = () -> newArguments.stream()
 			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))

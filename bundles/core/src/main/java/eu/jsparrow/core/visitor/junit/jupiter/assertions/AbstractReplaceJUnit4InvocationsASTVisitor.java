@@ -91,6 +91,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 
 		List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList = methodInvocationAnalysisResults
 			.stream()
+			.filter(data -> !isInvocationRemaningUnchanged(data, supportedStaticImportsMap))
 			.map(data -> this.createTransformationData(data, supportedStaticImportsMap))
 			.collect(Collectors.toList());
 
@@ -109,6 +110,19 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 
 		transform(transformationDataCollections);
 		return false;
+	}
+
+	private boolean isInvocationRemaningUnchanged(JUnit4InvocationReplacementAnalysis invocationData,
+			Map<String, String> supportedStaticImportsMap) {
+		if (invocationData.isChangingArguments()) {
+			return false;
+		}
+		String newMethodName = invocationData.getNewMethodName();
+		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
+		String originalMethodName = invocationData.getOriginalMethodName();
+		boolean useNewMethodStaticImport = supportedStaticImportsMap.containsKey(newMethodName);
+		boolean keepUnqualified = useNewMethodStaticImport && methodInvocation.getExpression() == null;
+		return keepUnqualified && newMethodName.equals(originalMethodName);
 	}
 
 	private boolean isArgumentWithExplicitType(Expression expression) {
@@ -201,11 +215,14 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 	}
 
 	protected void transform(JUnit4TransformationDataCollections transformationDataCollections) {
-		
-		List<ImportDeclaration> staticAssertMethodImportsToRemove = transformationDataCollections.getStaticAssertMethodImportsToRemove();
-		Set<String> newStaticAssertionMethodImports = transformationDataCollections.getNewStaticAssertionMethodImports();
-		List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList = transformationDataCollections.getJUnit4AssertTransformationDataList();
-		
+
+		List<ImportDeclaration> staticAssertMethodImportsToRemove = transformationDataCollections
+			.getStaticAssertMethodImportsToRemove();
+		Set<String> newStaticAssertionMethodImports = transformationDataCollections
+			.getNewStaticAssertionMethodImports();
+		List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList = transformationDataCollections
+			.getJUnit4AssertTransformationDataList();
+
 		if (!staticAssertMethodImportsToRemove.isEmpty() || !newStaticAssertionMethodImports.isEmpty()
 				|| !jUnit4AssertTransformationDataList.isEmpty()) {
 
@@ -217,6 +234,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 			AST ast = astRewrite.getAST();
 			ListRewrite newImportsListRewrite = astRewrite.getListRewrite(getCompilationUnit(),
 					CompilationUnit.IMPORTS_PROPERTY);
+
 			newStaticAssertionMethodImports
 				.forEach(fullyQualifiedMethodName -> {
 					ImportDeclaration newImportDeclaration = ast.newImportDeclaration();
@@ -225,14 +243,13 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 					newImportsListRewrite.insertLast(newImportDeclaration, null);
 				});
 
-			jUnit4AssertTransformationDataList.forEach(data -> {
-				data.createMethodInvocationReplacement()
-					.ifPresent(methodInvocationReplacement -> {
-						MethodInvocation methodInvocationToReplace = data.getOriginalMethodInvocation();
-						astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
-						onRewrite();
-					});
-			});
+			jUnit4AssertTransformationDataList
+				.forEach(data -> {
+					MethodInvocation methodInvocationToReplace = data.getOriginalMethodInvocation();
+					MethodInvocation methodInvocationReplacement = data.createMethodInvocationReplacement();
+					astRewrite.replace(methodInvocationToReplace, methodInvocationReplacement, null);
+					onRewrite();
+				});
 		}
 	}
 
