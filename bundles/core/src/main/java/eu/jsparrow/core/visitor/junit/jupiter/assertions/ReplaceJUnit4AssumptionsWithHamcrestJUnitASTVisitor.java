@@ -89,10 +89,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
 		String originalMethodName = invocationData.getOriginalMethodName();
 
-		String newMethodName = ASSUME_THAT;
 		List<Expression> originalArguments = invocationData.getArguments();
-
-		boolean useNewStaticimport = supportedStaticImportsMap.containsKey(newMethodName);
 
 		final Supplier<List<Expression>> newArgumentsSupplier;
 		AssumeNotNullArgumentsAnalysis assumeNotNullAnalysis = invocationData.getAssumeNotNullArgumentsAnalysis()
@@ -109,16 +106,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 				.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
 				.collect(Collectors.toList());
 		}
-
-		if (useNewStaticimport) {
-			return new JUnit4InvocationReplacementData(invocationData,
-					() -> createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier));
-		}
-		Supplier<MethodInvocation> newMethodInvocationSupplier = () -> createNewInvocationWithQualifier(
-				methodInvocation,
-				newMethodName, newArgumentsSupplier);
-
-		return new JUnit4InvocationReplacementData(invocationData, newMethodInvocationSupplier);
+		return createTransformationData(invocationData, supportedStaticImportsMap, newArgumentsSupplier);
 	}
 
 	@Override
@@ -148,8 +136,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 
 		if (assumeNotNullAnalysis.isMultipleVarargs() || assumeNotNullAnalysis.isSingleVarargArrayCreation()) {
 			MethodInvocation asListInvocation = createAsListInvocation(context, originalArguments);
-			return Arrays.<Expression>asList(asListInvocation,
-					createCoreMatchersInvocation(context, EVERY_ITEM));
+			return Arrays.<Expression>asList(asListInvocation, createCoreMatchersInvocation(context, EVERY_ITEM));
 		}
 		return Arrays.<Expression>asList(
 				(Expression) astRewrite.createCopyTarget(originalArguments.get(0)),

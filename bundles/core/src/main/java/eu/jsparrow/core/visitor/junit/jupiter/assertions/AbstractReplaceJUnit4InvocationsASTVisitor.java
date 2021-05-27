@@ -125,6 +125,50 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		return keepUnqualified && newMethodName.equals(originalMethodName);
 	}
 
+	protected JUnit4InvocationReplacementData createTransformationData(
+			JUnit4InvocationReplacementAnalysis invocationData,
+			Map<String, String> supportedStaticImportsMap) {
+
+		List<Expression> originalArguments = invocationData.getArguments();
+		Expression messageMovingToLastPosition = invocationData.getMessageMovedToLastPosition()
+			.orElse(null);
+
+		List<Expression> newArguments;
+		if (messageMovingToLastPosition != null) {
+			newArguments = new ArrayList<>(originalArguments);
+			newArguments.remove(messageMovingToLastPosition);
+			newArguments.add(messageMovingToLastPosition);
+		} else {
+			newArguments = originalArguments;
+		}
+
+		Supplier<List<Expression>> newArgumentsSupplier = () -> newArguments.stream()
+			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
+			.collect(Collectors.toList());
+
+		return createTransformationData(invocationData, supportedStaticImportsMap, newArgumentsSupplier);
+	}
+
+	protected JUnit4InvocationReplacementData createTransformationData(
+			JUnit4InvocationReplacementAnalysis invocationData,
+			Map<String, String> supportedStaticImportsMap, Supplier<List<Expression>> newArgumentsSupplier) {
+
+		String newMethodName = invocationData.getNewMethodName();
+		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
+
+		Supplier<MethodInvocation> newMethodInvocationSupplier;
+		boolean useNewMethodStaticImport = supportedStaticImportsMap.containsKey(newMethodName);
+		if (useNewMethodStaticImport) {
+			newMethodInvocationSupplier = () -> createNewInvocationWithoutQualifier(newMethodName,
+					newArgumentsSupplier);
+		} else {
+			newMethodInvocationSupplier = () -> createNewInvocationWithQualifier(
+					methodInvocation,
+					newMethodName, newArgumentsSupplier);
+		}
+		return new JUnit4InvocationReplacementData(invocationData, newMethodInvocationSupplier);
+	}
+
 	private boolean isArgumentWithExplicitType(Expression expression) {
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
@@ -145,7 +189,8 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 	protected List<ImportDeclaration> collectStaticMethodImportsToRemove(CompilationUnit compilationUnit,
 			List<MethodInvocation> notTransformedJUnit4Invocations) {
 
-		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = notTransformedJUnit4Invocations.stream()
+		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = notTransformedJUnit4Invocations
+			.stream()
 			.filter(methodInvocation -> methodInvocation
 				.getExpression() == null)
 			.map(MethodInvocation::getName)
@@ -276,9 +321,5 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 
 	protected abstract Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(
 			MethodInvocation methodInvocation, IMethodBinding methodBinding, List<Expression> arguments);
-
-	protected abstract JUnit4InvocationReplacementData createTransformationData(
-			JUnit4InvocationReplacementAnalysis invocationData,
-			Map<String, String> supportedStaticImportsMap);
 
 }

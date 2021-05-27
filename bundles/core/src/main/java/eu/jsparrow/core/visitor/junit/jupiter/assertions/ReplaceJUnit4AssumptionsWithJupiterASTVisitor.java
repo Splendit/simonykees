@@ -2,19 +2,13 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * Replaces the JUnit 4 method invocations {@code org.junit.Assume.assumeFalse}
@@ -49,47 +43,6 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 				methodInvocation, methodBinding, arguments);
 		invocationAnalyzer.analyzeAssumptionToJupiter();
 		return Optional.of(invocationAnalyzer);
-	}
-
-	@Override
-	protected JUnit4InvocationReplacementData createTransformationData(
-			JUnit4InvocationReplacementAnalysis invocationData,
-			Map<String, String> supportedStaticImportsMap) {
-
-		MethodInvocation methodInvocation = invocationData.getMethodInvocation();
-
-		List<Expression> originalArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-				Expression.class);
-
-		Expression messageMovingToLastPosition = invocationData.getMessageMovedToLastPosition()
-			.orElse(null);
-
-		List<Expression> newArguments;
-		if (messageMovingToLastPosition != null) {
-			newArguments = new ArrayList<>(originalArguments);
-			newArguments.remove(messageMovingToLastPosition);
-			newArguments.add(messageMovingToLastPosition);
-		} else {
-			newArguments = originalArguments;
-		}
-
-		String originalMethodName = invocationData.getOriginalMethodName();
-		boolean useNewMethodStaticImport = supportedStaticImportsMap.containsKey(originalMethodName);
-
-		Supplier<List<Expression>> newArgumentsSupplier = () -> newArguments.stream()
-			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
-			.collect(Collectors.toList());
-
-		if (useNewMethodStaticImport) {
-			return new JUnit4InvocationReplacementData(invocationData,
-					() -> createNewInvocationWithoutQualifier(originalMethodName, newArgumentsSupplier));
-		}
-
-		Supplier<MethodInvocation> newMethodInvocationSupplier = () -> createNewInvocationWithQualifier(
-				methodInvocation,
-				originalMethodName, newArgumentsSupplier);
-
-		return new JUnit4InvocationReplacementData(invocationData, newMethodInvocationSupplier);
 	}
 
 	@Override
