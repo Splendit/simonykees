@@ -12,9 +12,9 @@ import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
 
 public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTVisitor {
 
-	private static final String MARKER_NAME = "Replace Equality Check with isEmpty()"; //$NON-NLS-1$
-	private static final String MARKER_DESCRIPTION = "Use isEmpty() on Strings, Maps, and Collections."; //$NON-NLS-1$
-	public static final String RESOLVER_NAME = UseIsEmptyOnCollectionsResolver.class.getName();
+	private static final String NAME = "Replace Equality Check with isEmpty()"; //$NON-NLS-1$
+	private static final String MESSAGE = "Use isEmpty() on Strings, Maps, and Collections."; //$NON-NLS-1$
+	public static final String ID = UseIsEmptyOnCollectionsResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
@@ -38,7 +38,7 @@ public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTV
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactoringEventImpl event = new RefactoringEventImpl(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
 				javaElement, original,
 				newNode);
 		addMarkerEvent(event);

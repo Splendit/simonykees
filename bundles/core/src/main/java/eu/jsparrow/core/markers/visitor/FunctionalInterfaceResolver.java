@@ -12,9 +12,9 @@ import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisito
 
 public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 
-	private static final String MARKER_NAME = "Replace with Lambda Expression"; //$NON-NLS-1$
-	private static final String MARKER_DESCRIPTION = "Anonymous class can be replaced by lambda expression"; //$NON-NLS-1$
-	public static final String RESOLVER_NAME = FunctionalInterfaceResolver.class.getName();
+	private static final String NAME = "Replace with Lambda Expression"; //$NON-NLS-1$
+	private static final String MESSAGE = "Anonymous class can be replaced by lambda expression"; //$NON-NLS-1$
+	public static final String ID = FunctionalInterfaceResolver.class.getName();
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -39,7 +39,7 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactoringEventImpl event = new RefactoringEventImpl(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION, javaElement, original,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement, original,
 				newNode);
 		addMarkerEvent(event);
 	}

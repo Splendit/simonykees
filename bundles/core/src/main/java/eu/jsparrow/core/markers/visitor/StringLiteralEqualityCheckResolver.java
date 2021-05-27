@@ -12,9 +12,9 @@ import eu.jsparrow.core.visitor.impl.StringLiteralEqualityCheckASTVisitor;
 
 public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityCheckASTVisitor {
 
-	private static final String MARKER_NAME = "Reorder String equality check"; //$NON-NLS-1$
-	private static final String MARKER_DESCRIPTION = "To avoid NullPointerExceptions, String literals should be placed on the left side when checking for equality."; //$NON-NLS-1$
-	public static final String RESOLVER_NAME = StringLiteralEqualityCheckResolver.class.getName();
+	private static final String NAME = "Reorder String equality check"; //$NON-NLS-1$
+	private static final String MESSAGE = "To avoid NullPointerExceptions, String literals should be placed on the left side when checking for equality."; //$NON-NLS-1$
+	public static final String ID = StringLiteralEqualityCheckResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
@@ -38,7 +38,7 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactoringEventImpl event = new RefactoringEventImpl(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
 				javaElement, original,
 				newNode);
 		addMarkerEvent(event);

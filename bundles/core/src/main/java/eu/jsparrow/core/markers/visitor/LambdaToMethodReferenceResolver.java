@@ -12,9 +12,9 @@ import eu.jsparrow.core.visitor.impl.LambdaToMethodReferenceASTVisitor;
 
 public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTVisitor {
 
-	private static final String MARKER_NAME = "Replace lambda expression with method reference"; //$NON-NLS-1$
-	private static final String MARKER_DESCRIPTION = "Simplify the lambda expression by using a method reference."; //$NON-NLS-1$
-	public static final String RESOLVER_NAME = LambdaToMethodReferenceResolver.class.getName();
+	private static final String NAME = "Replace lambda expression with method reference"; //$NON-NLS-1$
+	private static final String MESSAGE = "Simplify the lambda expression by using a method reference."; //$NON-NLS-1$
+	public static final String ID = LambdaToMethodReferenceResolver.class.getName();
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -39,7 +39,7 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactoringEventImpl event = new RefactoringEventImpl(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
 				javaElement, original,
 				newNode);
 		addMarkerEvent(event);

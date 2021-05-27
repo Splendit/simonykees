@@ -36,16 +36,16 @@ public class ResolverVisitorsFactory {
 
 	private static Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> initRegistry() {
 		Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> map = new HashMap<>();
-		map.put(FunctionalInterfaceResolver.RESOLVER_NAME, FunctionalInterfaceResolver::new);
-		map.put(UseComparatorMethodsResolver.RESOLVER_NAME, UseComparatorMethodsResolver::new);
-		map.put(InefficientConstructorResolver.RESOLVER_NAME, InefficientConstructorResolver::new);
-		map.put(LambdaToMethodReferenceResolver.RESOLVER_NAME, LambdaToMethodReferenceResolver::new);
-		map.put(PutIfAbsentResolver.RESOLVER_NAME, PutIfAbsentResolver::new);
-		map.put(RemoveNullCheckBeforeInstanceofResolver.RESOLVER_NAME, RemoveNullCheckBeforeInstanceofResolver::new);
-		map.put(StringLiteralEqualityCheckResolver.RESOLVER_NAME, StringLiteralEqualityCheckResolver::new);
-		map.put(PrimitiveBoxedForStringResolver.RESOLVER_NAME, PrimitiveBoxedForStringResolver::new);
-		map.put(UseIsEmptyOnCollectionsResolver.RESOLVER_NAME, UseIsEmptyOnCollectionsResolver::new);
-		map.put(EnumsWithoutEqualsResolver.RESOLVER_NAME, EnumsWithoutEqualsResolver::new);
+		map.put(FunctionalInterfaceResolver.ID, FunctionalInterfaceResolver::new);
+		map.put(UseComparatorMethodsResolver.ID, UseComparatorMethodsResolver::new);
+		map.put(InefficientConstructorResolver.ID, InefficientConstructorResolver::new);
+		map.put(LambdaToMethodReferenceResolver.ID, LambdaToMethodReferenceResolver::new);
+		map.put(PutIfAbsentResolver.ID, PutIfAbsentResolver::new);
+		map.put(RemoveNullCheckBeforeInstanceofResolver.ID, RemoveNullCheckBeforeInstanceofResolver::new);
+		map.put(StringLiteralEqualityCheckResolver.ID, StringLiteralEqualityCheckResolver::new);
+		map.put(PrimitiveBoxedForStringResolver.ID, PrimitiveBoxedForStringResolver::new);
+		map.put(UseIsEmptyOnCollectionsResolver.ID, UseIsEmptyOnCollectionsResolver::new);
+		map.put(EnumsWithoutEqualsResolver.ID, EnumsWithoutEqualsResolver::new);
 		return Collections.unmodifiableMap(map);
 	}
 

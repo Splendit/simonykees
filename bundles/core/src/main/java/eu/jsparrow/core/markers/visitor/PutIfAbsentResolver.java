@@ -12,9 +12,9 @@ import eu.jsparrow.core.visitor.impl.PutIfAbsentASTVisitor;
 
 public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 
-	private static final String MARKER_NAME = "Replace put(..) with putIfAbsent(..)"; //$NON-NLS-1$
-	private static final String MARKER_DESCRIPTION = "Use the Java 8 API that allows for conditionally adding entries to a map."; //$NON-NLS-1$
-	public static final String RESOLVER_NAME = PutIfAbsentResolver.class.getName();
+	private static final String NAME = "Replace put(..) with putIfAbsent(..)"; //$NON-NLS-1$
+	private static final String MESSAGE = "Use the Java 8 API that allows for conditionally adding entries to a map."; //$NON-NLS-1$
+	public static final String ID = PutIfAbsentResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
@@ -38,7 +38,7 @@ public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactoringEventImpl event = new RefactoringEventImpl(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
 				javaElement, original,
 				newNode);
 		addMarkerEvent(event);

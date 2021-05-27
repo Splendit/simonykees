@@ -16,9 +16,9 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 public class InefficientConstructorResolver extends InefficientConstructorASTVisitor {
 
-	private static final String MARKER_NAME = "Replace inefficient constructors with valueOf()"; //$NON-NLS-1$
-	private static final String MARKER_DESCRIPTION = "The factory method valueOf() is generally a better choice as it is likely to yield significantly better space and time performance."; //$NON-NLS-1$
-	public static final String RESOLVER_NAME = InefficientConstructorResolver.class.getName();
+	private static final String NAME = "Replace inefficient constructors with valueOf()"; //$NON-NLS-1$
+	private static final String MESSAGE = "The factory method valueOf() is generally a better choice as it is likely to yield significantly better space and time performance."; //$NON-NLS-1$
+	public static final String ID = InefficientConstructorResolver.class.getName();
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -56,7 +56,7 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactoringEventImpl event = new RefactoringEventImpl(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
 				javaElement, original,
 				newNode);
 		addMarkerEvent(event);

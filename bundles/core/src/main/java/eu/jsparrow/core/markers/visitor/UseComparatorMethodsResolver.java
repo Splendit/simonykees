@@ -12,9 +12,9 @@ import eu.jsparrow.core.visitor.impl.comparatormethods.UseComparatorMethodsASTVi
 
 public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor {
 
-	private static final String MARKER_NAME = "Use predefined comparator"; //$NON-NLS-1$
-	private static final String MARKER_DESCRIPTION = "Lambda expression can be replaced with predefined comparator"; //$NON-NLS-1$
-	public static final String RESOLVER_NAME = UseComparatorMethodsResolver.class.getName();
+	private static final String NAME = "Use predefined comparator"; //$NON-NLS-1$
+	private static final String MESSAGE = "Lambda expression can be replaced with predefined comparator"; //$NON-NLS-1$
+	public static final String ID = UseComparatorMethodsResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
@@ -38,7 +38,8 @@ public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactoringEventImpl event = new RefactoringEventImpl(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION, javaElement, original,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement,
+				original,
 				newNode);
 		addMarkerEvent(event);
 	}

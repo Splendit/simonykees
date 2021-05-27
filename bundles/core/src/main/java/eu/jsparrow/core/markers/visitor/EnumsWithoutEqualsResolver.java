@@ -12,9 +12,9 @@ import eu.jsparrow.core.visitor.impl.EnumsWithoutEqualsASTVisitor;
 
 public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
 
-	private static final String MARKER_NAME = "Replace equals() on Enum constants"; //$NON-NLS-1$
-	private static final String MARKER_DESCRIPTION = "Replace occurrences of equals() on Enum constants with an identity comparison (==)."; //$NON-NLS-1$
-	public static final String RESOLVER_NAME = EnumsWithoutEqualsResolver.class.getName();
+	private static final String NAME = "Replace equals() on Enum constants"; //$NON-NLS-1$
+	private static final String MESSAGE = "Replace occurrences of equals() on Enum constants with an identity comparison (==)."; //$NON-NLS-1$
+	public static final String ID = EnumsWithoutEqualsResolver.class.getName();
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -40,7 +40,7 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactoringEventImpl event = new RefactoringEventImpl(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
 				javaElement, original,
 				newNode);
 		addMarkerEvent(event);

@@ -13,9 +13,9 @@ import eu.jsparrow.core.visitor.impl.RemoveNullCheckBeforeInstanceofASTVisitor;
 
 public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBeforeInstanceofASTVisitor {
 
-	private static final String MARKER_NAME = "Remove Null-Checks Before Instanceof"; //$NON-NLS-1$
-	private static final String MARKER_DESCRIPTION = "null is not an instance of anything, therefore the null-check is redundant."; //$NON-NLS-1$
-	public static final String RESOLVER_NAME = RemoveNullCheckBeforeInstanceofResolver.class.getName();
+	private static final String NAME = "Remove Null-Checks Before Instanceof"; //$NON-NLS-1$
+	private static final String MESSAGE = "null is not an instance of anything, therefore the null-check is redundant."; //$NON-NLS-1$
+	public static final String ID = RemoveNullCheckBeforeInstanceofResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
@@ -43,7 +43,7 @@ public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBefo
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactoringEventImpl event = new RefactoringEventImpl(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
 				javaElement, original,
 				newNode);
 		addMarkerEvent(event);

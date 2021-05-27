@@ -13,9 +13,9 @@ import eu.jsparrow.core.visitor.impl.PrimitiveBoxedForStringASTVisitor;
 
 public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTVisitor {
 
-	private static final String MARKER_NAME = "Remove boxing for String conversions"; //$NON-NLS-1$
-	private static final String MARKER_DESCRIPTION = "Avoid constructing boxed primitives by using the factory method toString"; //$NON-NLS-1$
-	public static final String RESOLVER_NAME = PrimitiveBoxedForStringResolver.class.getName();
+	private static final String NAME = "Remove boxing for String conversions"; //$NON-NLS-1$
+	private static final String MESSAGE = "Avoid constructing boxed primitives by using the factory method toString"; //$NON-NLS-1$
+	public static final String ID = PrimitiveBoxedForStringResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
@@ -47,7 +47,7 @@ public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTV
 
 	@Override
 	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactoringEventImpl event = new RefactoringEventImpl(RESOLVER_NAME, MARKER_NAME, MARKER_DESCRIPTION,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
 				javaElement, original,
 				newNode);
 		addMarkerEvent(event);
