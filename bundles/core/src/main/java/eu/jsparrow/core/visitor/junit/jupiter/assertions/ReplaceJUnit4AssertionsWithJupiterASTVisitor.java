@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -14,7 +13,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -45,20 +43,15 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	}
 
 	@Override
-	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
-			Set<String> newStaticAssertionMethodImports,
-			List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults,
-			List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList) {
+	protected void transform(JUnit4TransformationDataCollections transformationDataCollections) {
+
 		verifyImport(getCompilationUnit(), ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
 
-		super.transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports, methodInvocationAnalysisResults,
-				jUnit4AssertTransformationDataList);
-
+		super.transform(transformationDataCollections);
 		AST ast = astRewrite.getAST();
-		methodInvocationAnalysisResults.stream()
-			.map(JUnit4InvocationReplacementAnalysis::getTypeOfThrowingRunnableToReplace)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
+		transformationDataCollections
+			.getThrowingRunnableTypesToReplace()
+			.stream()
 			.forEach(typeToReplace -> {
 				Name executableTypeName = addImport(ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE, typeToReplace);
 				SimpleType typeReplacement = ast.newSimpleType(executableTypeName);

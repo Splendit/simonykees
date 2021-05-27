@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,6 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -52,10 +50,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	}
 
 	@Override
-	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
-			Set<String> newStaticAssertionMethodImports,
-			List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults,
-			List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList) {
+	protected void transform(JUnit4TransformationDataCollections transformationDataCollections) {
 
 		verifyImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS);
 		verifyStaticMethodImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS + '.' + NULL_VALUE);
@@ -63,16 +58,14 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		verifyStaticMethodImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS + '.' + EVERY_ITEM);
 		verifyStaticMethodImport(getCompilationUnit(), JAVA_UTIL_ARRAYS + '.' + AS_LIST);
 
-		super.transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports, methodInvocationAnalysisResults,
-				jUnit4AssertTransformationDataList);
+		super.transform(transformationDataCollections);
 
-		boolean qualifierNeededForAssumeThat = newStaticAssertionMethodImports.stream()
+		boolean qualifierNeededForAssumeThat = transformationDataCollections.getNewStaticAssertionMethodImports()
+			.stream()
 			.noneMatch(fullyQualifiedName -> fullyQualifiedName.endsWith('.' + ASSUME_THAT));
 
-		methodInvocationAnalysisResults.stream()
-			.map(JUnit4InvocationReplacementAnalysis::getAssumeNotNullWithNullableArray)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
+		transformationDataCollections
+			.getNotNullAssumptionsOnNullableArray()
 			.forEach(data -> insertAssumptionThatEveryItemNotNull(data, qualifierNeededForAssumeThat));
 	}
 

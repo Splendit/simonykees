@@ -103,8 +103,11 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 					newStaticAssertionMethodImports.add(supportedStaticImportsMap.get(newMethodName));
 				}
 			});
+		JUnit4TransformationDataCollections transformationDataCollections = new JUnit4TransformationDataCollections(
+				staticMethodImportsToRemove, newStaticAssertionMethodImports, methodInvocationAnalysisResults,
+				jUnit4AssertTransformationDataList);
 
-		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, methodInvocationAnalysisResults, jUnit4AssertTransformationDataList);
+		transform(transformationDataCollections);
 		return false;
 	}
 
@@ -197,10 +200,11 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		return canAddStaticMethodImport(fullyQualifiedAssertionsMethodName);
 	}
 
-	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
-			Set<String> newStaticAssertionMethodImports,
-			List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults,
-			List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList) {
+	protected void transform(JUnit4TransformationDataCollections transformationDataCollections) {
+		
+		List<ImportDeclaration> staticAssertMethodImportsToRemove = transformationDataCollections.getStaticAssertMethodImportsToRemove();
+		Set<String> newStaticAssertionMethodImports = transformationDataCollections.getNewStaticAssertionMethodImports();
+		List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList = transformationDataCollections.getJUnit4AssertTransformationDataList();
 		
 		if (!staticAssertMethodImportsToRemove.isEmpty() || !newStaticAssertionMethodImports.isEmpty()
 				|| !jUnit4AssertTransformationDataList.isEmpty()) {
