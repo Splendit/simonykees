@@ -317,13 +317,31 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
 						getASTRewrite().replace(parentNode, newInitializer, null);
 						onRewrite();
-						addMarkerEvent(parentNode, newInitializer);
+						LambdaExpression representingNode = createRepresentingNode(parameteres, moveBlock);
+						addMarkerEvent(parentNode, representingNode);
 					}
 				}
 			}
 		}
 		return true;
 
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private LambdaExpression createRepresentingNode(List<SingleVariableDeclaration> parameters,
+			Block moveBlock) {
+		AST ast = moveBlock.getAST();
+		LambdaExpression lambda = ast.newLambdaExpression();
+		if (parameters != null) {
+			List lambdaParameters = lambda.parameters();
+			for (SingleVariableDeclaration parameter : parameters) {
+				SingleVariableDeclaration copy = (SingleVariableDeclaration) ASTNode.copySubtree(ast, parameter);
+				lambdaParameters.add(copy);
+			}
+		}
+		Block blockCopy = (Block) ASTNode.copySubtree(ast, moveBlock);
+		lambda.setBody(blockCopy);
+		return lambda;
 	}
 
 	private boolean hasOccurrencesOfThisKeyWord(MethodDeclaration methodDeclaration) {

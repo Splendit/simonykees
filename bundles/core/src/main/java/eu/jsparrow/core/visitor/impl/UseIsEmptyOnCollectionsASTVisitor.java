@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.impl;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -10,6 +11,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -75,8 +77,20 @@ public class UseIsEmptyOnCollectionsASTVisitor extends AbstractASTRewriteASTVisi
 		astRewrite.replace(parent, replaceNode, null);
 		getCommentRewriter().saveCommentsInParentStatement(parent);
 		onRewrite();
-		addMarkerEvent(parent, replaceNode);
+		ASTNode representingNode = createRepresentationNode(parent, varExpression);
+		addMarkerEvent(parent, representingNode);
 		return true;
+	}
+
+	private ASTNode createRepresentationNode(InfixExpression infixExpression, Expression varExpression) {
+		AST ast = infixExpression.getAST();
+		SimpleName isEmptyMethod = ast.newSimpleName("isEmpty"); //$NON-NLS-1$
+		MethodInvocation replaceNode = NodeBuilder.newMethodInvocation(ast,
+					(Expression) ASTNode.copySubtree(ast, varExpression), isEmptyMethod);
+		StructuralPropertyDescriptor locationInParent = infixExpression.getLocationInParent();
+		ASTNode parent = ASTNode.copySubtree(ast, infixExpression.getParent());
+		parent.setStructuralProperty(locationInParent, replaceNode);
+		return parent;
 	}
 
 	private NumberLiteral tryParseOtherOperand(Expression otherOperand) {

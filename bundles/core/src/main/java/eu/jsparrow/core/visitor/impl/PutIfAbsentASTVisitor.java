@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -84,7 +85,7 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(ifStatement, statement, null);
 		getCommentRewriter().saveRelatedComments(ifStatement);
 		onRewrite();
-		addMarkerEvent(methodInvocation, statement);
+		addMarkerEvent(methodInvocation, createRepresentingNode(methodInvocation));
 		return true;
 	}
 
@@ -160,7 +161,7 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 			.getNodeType() == ASTNode.IF_STATEMENT;
 	}
 
-	public ExpressionStatement createPutIfAbsent(MethodInvocation methodInvocation) {
+	private ExpressionStatement createPutIfAbsent(MethodInvocation methodInvocation) {
 		SimpleName putIfAbsentName = methodInvocation.getAST()
 			.newSimpleName(PUT_IF_ABSENT);
 		Expression firstArgument = (Expression) astRewrite.createMoveTarget((Expression) methodInvocation.arguments()
@@ -169,6 +170,20 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 			.get(1));
 		MethodInvocation putIfAbsent = NodeBuilder.newMethodInvocation(methodInvocation.getAST(),
 				(Expression) astRewrite.createMoveTarget(methodInvocation.getExpression()), putIfAbsentName,
+				Arrays.asList(firstArgument, secondArgument));
+
+		return NodeBuilder.newExpressionStatement(methodInvocation.getAST(), putIfAbsent);
+	}
+	
+	private ExpressionStatement createRepresentingNode(MethodInvocation methodInvocation) {
+		AST ast = methodInvocation.getAST();
+		SimpleName putIfAbsentName = ast.newSimpleName(PUT_IF_ABSENT);
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments = methodInvocation.arguments();
+		Expression firstArgument = (Expression) ASTNode.copySubtree(ast, arguments.get(0));
+		Expression secondArgument = (Expression) ASTNode.copySubtree(ast, arguments.get(1));
+		MethodInvocation putIfAbsent = NodeBuilder.newMethodInvocation(methodInvocation.getAST(),
+				(Expression) ASTNode.copySubtree(ast, methodInvocation.getExpression()), putIfAbsentName,
 				Arrays.asList(firstArgument, secondArgument));
 
 		return NodeBuilder.newExpressionStatement(methodInvocation.getAST(), putIfAbsent);

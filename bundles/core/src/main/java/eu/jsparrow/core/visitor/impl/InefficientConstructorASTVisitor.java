@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
@@ -77,10 +78,33 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
 				getCommentRewriter().saveCommentsInParentStatement(node);
 				onRewrite();
-				addMarkerEvent(refactorCandidateParameter, refactorCandidateParameter);
+				MethodInvocation representingNode = createRepresentingNode(node, replaceParameter);
+				addMarkerEvent(refactorCandidateParameter, representingNode);
 			}
 		}
 		return true;
+	}
+
+	private MethodInvocation createRepresentingNode(MethodInvocation node, Expression replaceParameter) {
+		AST ast = node.getAST();
+		MethodInvocation methodInvocation = (MethodInvocation)ASTNode.copySubtree(ast, node);
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments = methodInvocation.arguments();
+		arguments.clear();
+		arguments.add((Expression)ASTNode.copySubtree(ast, replaceParameter));
+		return methodInvocation;
+	}
+	
+	private MethodInvocation createRepresentingNode(SimpleName typeName, Expression replaceParameter) {
+		AST ast = replaceParameter.getAST();
+		MethodInvocation methodInvocation = ast.newMethodInvocation();
+		methodInvocation.setName(ast.newSimpleName(ReservedNames.MI_VALUE_OF));
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments = methodInvocation.arguments();
+		arguments.add((Expression)ASTNode.copySubtree(ast, replaceParameter));
+		SimpleName typeNameCopy = (SimpleName)ASTNode.copySubtree(ast, typeName);
+		methodInvocation.setExpression(typeNameCopy);
+		return methodInvocation;
 	}
 
 	@Override
@@ -183,7 +207,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				astRewrite.replace(node, replacement, null);
 				commentRewriter.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(node, Statement.class), relatedComments);
 				onRewrite();
-				addMarkerEvent(node, replacement);
+				addMarkerEvent(node, createRepresentingNode(refactorPrimitiveType, refactorCandidateParameter));
 			}
 		}
 		return true;

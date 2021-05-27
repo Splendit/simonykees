@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.impl;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -7,6 +8,7 @@ import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -85,7 +87,16 @@ public class RemoveNullCheckBeforeInstanceofASTVisitor extends AbstractASTRewrit
 		ASTNode newExpression = astRewrite.createCopyTarget(expression);
 		astRewrite.replace(infixExpression, newExpression, null);
 		onRewrite();
-		addMarkerEvent(infixExpression.getLeftOperand(), expression);
+		ASTNode representingNode = createRepresentingNode(infixExpression, expression);
+		addMarkerEvent(infixExpression.getLeftOperand(), representingNode);
+	}
+
+	private ASTNode createRepresentingNode(InfixExpression infixExpression, Expression expression) {
+		AST ast = infixExpression.getAST();
+		StructuralPropertyDescriptor structuralProperty = infixExpression.getLocationInParent();
+		ASTNode parent = ASTNode.copySubtree(ast, infixExpression.getParent());
+		parent.setStructuralProperty(structuralProperty, (Expression)ASTNode.copySubtree(ast, expression));
+		return parent;
 	}
 
 	private PrefixExpression findNegatedPrefixExpression(Expression expression) {
