@@ -47,7 +47,7 @@ class PrimitiveBoxedForStringResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("Remove boxing for String conversions", event.getName()),
 				() -> assertEquals("Avoid constructing boxed primitives by using the factory method toString", event.getMessage()), 
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.PrimitiveBoxedForStringResolver", event.getResolver()),
-				() -> assertEquals("Integer", event.getDescription()),
+				() -> assertEquals("Integer.toString(4)", event.getDescription()),
 				() -> assertEquals(106, event.getOffset()),
 				() -> assertEquals(25, event.getLength()));
 	}

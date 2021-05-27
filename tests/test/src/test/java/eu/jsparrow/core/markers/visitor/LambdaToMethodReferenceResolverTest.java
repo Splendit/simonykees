@@ -48,7 +48,7 @@ class LambdaToMethodReferenceResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("Replace lambda expression with method reference", event.getName()),
 				() -> assertEquals("Simplify the lambda expression by using a method reference.", event.getMessage()), 
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver", event.getResolver()),
-				() -> assertEquals("MISSING::MISSING", event.getDescription()),
+				() -> assertEquals("String::isEmpty", event.getDescription()),
 				() -> assertEquals(154, event.getOffset()),
 				() -> assertEquals(25, event.getLength()));
 	}

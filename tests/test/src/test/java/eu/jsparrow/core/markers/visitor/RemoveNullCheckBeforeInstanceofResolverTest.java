@@ -58,7 +58,9 @@ class RemoveNullCheckBeforeInstanceofResolverTest extends UsesSimpleJDTUnitFixtu
 				() -> assertEquals("Remove Null-Checks Before Instanceof", event.getName()),
 				() -> assertEquals("null is not an instance of anything, therefore the null-check is redundant.", event.getMessage()), 
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver", event.getResolver()),
-				() -> assertEquals("name instanceof String", event.getDescription()),
+				() -> assertEquals("if (name instanceof String) {\n"
+						+ "  System.out.println(name);\n"
+						+ "}\n", event.getDescription()),
 				() -> assertEquals(129, event.getOffset()),
 				() -> assertEquals(12, event.getLength()));
 	}

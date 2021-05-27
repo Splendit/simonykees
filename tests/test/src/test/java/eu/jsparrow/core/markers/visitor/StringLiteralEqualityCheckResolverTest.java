@@ -58,7 +58,7 @@ class StringLiteralEqualityCheckResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("Reorder String equality check", event.getName()),
 				() -> assertEquals("To avoid NullPointerExceptions, String literals should be placed on the left side when checking for equality.", event.getMessage()), 
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.StringLiteralEqualityCheckResolver", event.getResolver()),
-				() -> assertEquals("\"\"", event.getDescription()),
+				() -> assertEquals("\"\".equals(value)", event.getDescription()),
 				() -> assertEquals(133, event.getOffset()),
 				() -> assertEquals(2, event.getLength()));
 	}

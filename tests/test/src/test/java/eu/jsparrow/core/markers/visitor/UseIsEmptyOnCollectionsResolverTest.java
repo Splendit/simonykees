@@ -54,7 +54,7 @@ class UseIsEmptyOnCollectionsResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("Replace Equality Check with isEmpty()", event.getName()),
 				() -> assertEquals("Use isEmpty() on Strings, Maps, and Collections.", event.getMessage()), 
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.UseIsEmptyOnCollectionsResolver", event.getResolver()),
-				() -> assertEquals("MISSING.isEmpty()", event.getDescription()),
+				() -> assertEquals("if (s.isEmpty()) {\n}\n", event.getDescription()),
 				() -> assertEquals(145, event.getOffset()),
 				() -> assertEquals(15, event.getLength()));
 	}

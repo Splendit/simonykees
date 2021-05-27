@@ -48,7 +48,7 @@ class EnumsWithoutEqualsResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("Replace equals() on Enum constants", event.getName()),
 				() -> assertEquals("Replace occurrences of equals() on Enum constants with an identity comparison (==).", event.getMessage()), 
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.EnumsWithoutEqualsResolver", event.getResolver()),
-				() -> assertEquals("MISSING == MISSING.MISSING", event.getDescription()),
+				() -> assertEquals("roundingMode == RoundingMode.UP", event.getDescription()),
 				() -> assertEquals(177, event.getOffset()),
 				() -> assertEquals(36, event.getLength()));
 	}
