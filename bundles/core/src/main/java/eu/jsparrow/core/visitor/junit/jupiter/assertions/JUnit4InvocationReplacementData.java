@@ -4,7 +4,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Type;
 
 /**
  * Stores a {@link MethodInvocation} to be replaced together with the
@@ -16,8 +15,6 @@ import org.eclipse.jdt.core.dom.Type;
 class JUnit4InvocationReplacementData {
 	private final MethodInvocation originalMethodInvocation;
 	private Supplier<MethodInvocation> methodInvocationReplacementSupplier;
-	private AssumeNotNullWithNullableArray assumptionThatEveryItemNotNull;
-	private Type typeOfThrowingRunnableToReplace;
 
 	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult,
 			Supplier<MethodInvocation> newMethodInvocationSupplier) {
@@ -27,10 +24,6 @@ class JUnit4InvocationReplacementData {
 
 	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult) {
 		this.originalMethodInvocation = jUnit4InvocationAnalysisResult.getMethodInvocation();
-		this.assumptionThatEveryItemNotNull = jUnit4InvocationAnalysisResult.getAssumeNotNullWithNullableArray()
-			.orElse(null);
-		this.typeOfThrowingRunnableToReplace = jUnit4InvocationAnalysisResult.getTypeOfThrowingRunnableToReplace()
-			.orElse(null);
 	}
 
 	MethodInvocation getOriginalMethodInvocation() {
@@ -42,13 +35,5 @@ class JUnit4InvocationReplacementData {
 			return Optional.of(methodInvocationReplacementSupplier.get());
 		}
 		return Optional.empty();
-	}
-
-	Optional<AssumeNotNullWithNullableArray> getAssumptionThatEveryItemNotNull() {
-		return Optional.ofNullable(assumptionThatEveryItemNotNull);
-	}
-
-	Optional<Type> getTypeOfThrowingRunnableToReplace() {
-		return Optional.ofNullable(typeOfThrowingRunnableToReplace);
 	}
 }

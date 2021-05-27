@@ -104,7 +104,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 				}
 			});
 
-		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, jUnit4AssertTransformationDataList);
+		transform(staticMethodImportsToRemove, newStaticAssertionMethodImports, methodInvocationAnalysisResults, jUnit4AssertTransformationDataList);
 		return false;
 	}
 
@@ -199,7 +199,9 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 
 	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
 			Set<String> newStaticAssertionMethodImports,
+			List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults,
 			List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList) {
+		
 		if (!staticAssertMethodImportsToRemove.isEmpty() || !newStaticAssertionMethodImports.isEmpty()
 				|| !jUnit4AssertTransformationDataList.isEmpty()) {
 

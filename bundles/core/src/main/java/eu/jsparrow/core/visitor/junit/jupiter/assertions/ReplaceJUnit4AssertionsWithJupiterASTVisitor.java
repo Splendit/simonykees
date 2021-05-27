@@ -47,15 +47,16 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	@Override
 	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
 			Set<String> newStaticAssertionMethodImports,
+			List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults,
 			List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList) {
 		verifyImport(getCompilationUnit(), ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE);
 
-		super.transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports,
+		super.transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports, methodInvocationAnalysisResults,
 				jUnit4AssertTransformationDataList);
 
 		AST ast = astRewrite.getAST();
-		jUnit4AssertTransformationDataList.stream()
-			.map(JUnit4InvocationReplacementData::getTypeOfThrowingRunnableToReplace)
+		methodInvocationAnalysisResults.stream()
+			.map(JUnit4InvocationReplacementAnalysis::getTypeOfThrowingRunnableToReplace)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.forEach(typeToReplace -> {

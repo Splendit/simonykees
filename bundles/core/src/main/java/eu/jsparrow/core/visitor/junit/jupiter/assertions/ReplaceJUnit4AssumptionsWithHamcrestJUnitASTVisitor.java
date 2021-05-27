@@ -54,6 +54,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	@Override
 	protected void transform(List<ImportDeclaration> staticAssertMethodImportsToRemove,
 			Set<String> newStaticAssertionMethodImports,
+			List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults,
 			List<JUnit4InvocationReplacementData> jUnit4AssertTransformationDataList) {
 
 		verifyImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS);
@@ -62,14 +63,14 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		verifyStaticMethodImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS + '.' + EVERY_ITEM);
 		verifyStaticMethodImport(getCompilationUnit(), JAVA_UTIL_ARRAYS + '.' + AS_LIST);
 
-		super.transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports,
+		super.transform(staticAssertMethodImportsToRemove, newStaticAssertionMethodImports, methodInvocationAnalysisResults,
 				jUnit4AssertTransformationDataList);
 
 		boolean qualifierNeededForAssumeThat = newStaticAssertionMethodImports.stream()
 			.noneMatch(fullyQualifiedName -> fullyQualifiedName.endsWith('.' + ASSUME_THAT));
 
-		jUnit4AssertTransformationDataList.stream()
-			.map(JUnit4InvocationReplacementData::getAssumptionThatEveryItemNotNull)
+		methodInvocationAnalysisResults.stream()
+			.map(JUnit4InvocationReplacementAnalysis::getAssumeNotNullWithNullableArray)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.forEach(data -> insertAssumptionThatEveryItemNotNull(data, qualifierNeededForAssumeThat));
