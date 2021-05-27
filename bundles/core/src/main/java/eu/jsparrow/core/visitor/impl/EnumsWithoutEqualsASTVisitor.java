@@ -83,6 +83,7 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(replacedNode, replacementNode, null);
 		saveComments(methodInvocation);
 		onRewrite();
+		addMarkerEvent(replacedNode, replacementNode);
 		return false;
 	}
 

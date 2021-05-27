@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import eu.jsparrow.core.markers.visitor.EnumsWithoutEqualsResolver;
 import eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver;
 import eu.jsparrow.core.markers.visitor.InefficientConstructorResolver;
 import eu.jsparrow.core.markers.visitor.LambdaToMethodReferenceResolver;
@@ -44,6 +45,7 @@ public class ResolverVisitorsFactory {
 		map.put(StringLiteralEqualityCheckResolver.RESOLVER_NAME, StringLiteralEqualityCheckResolver::new);
 		map.put(PrimitiveBoxedForStringResolver.RESOLVER_NAME, PrimitiveBoxedForStringResolver::new);
 		map.put(UseIsEmptyOnCollectionsResolver.RESOLVER_NAME, UseIsEmptyOnCollectionsResolver::new);
+		map.put(EnumsWithoutEqualsResolver.RESOLVER_NAME, EnumsWithoutEqualsResolver::new);
 		return Collections.unmodifiableMap(map);
 	}
 
