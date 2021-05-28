@@ -134,7 +134,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	private List<Expression> createAssumeThatListIsNotNullArguments(ASTNode context,
 			List<Expression> originalArguments, AssumeNotNullArgumentsAnalysis assumeNotNullAnalysis) {
 
-		if (assumeNotNullAnalysis.isMultipleVarargs() || assumeNotNullAnalysis.isSingleVarargArrayCreation()) {
+		if (originalArguments.isEmpty() || assumeNotNullAnalysis.isMultipleVarargs() || assumeNotNullAnalysis.isSingleVarargArrayCreation()) {
 			MethodInvocation asListInvocation = createAsListInvocation(context, originalArguments);
 			return Arrays.<Expression>asList(asListInvocation, createCoreMatchersInvocation(context, EVERY_ITEM));
 		}
