@@ -56,6 +56,14 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		super.visit(compilationUnit);
 		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
 
+		JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore;
+		if (classDeclaringJUnit4MethodReplacement.equals(ORG_J_UNIT_JUPITER_API_ASSERTIONS) ||
+				classDeclaringJUnit4MethodReplacement.equals(ORG_J_UNIT_JUPITER_API_ASSUMPTIONS)) {
+			jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(compilationUnit);
+		} else {
+			jUnitJupiterTestMethodsStore = null;
+		}
+
 		List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults = new ArrayList<>();
 		List<MethodInvocation> notTransformedJUnit4Invocations = new ArrayList<>();
 
@@ -69,8 +77,17 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 
 				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 						Expression.class);
-				if (arguments.stream()
-					.allMatch(this::isArgumentWithExplicitType)) {
+
+				boolean supportTransformation = arguments
+					.stream()
+					.allMatch(this::isArgumentWithExplicitType);
+
+				if (supportTransformation && jUnitJupiterTestMethodsStore != null) {
+					supportTransformation = jUnitJupiterTestMethodsStore
+						.isSurroundedWithJUnitJupiterTest(methodInvocation);
+				}
+
+				if (supportTransformation) {
 					result = findAnalysisResult(methodInvocation, methodBinding, arguments)
 						.orElse(null);
 				}

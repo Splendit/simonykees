@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -24,16 +23,9 @@ import org.eclipse.jdt.core.dom.SimpleType;
 public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplaceJUnit4InvocationsASTVisitor {
 
 	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
-	JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore();
 
 	public ReplaceJUnit4AssertionsWithJupiterASTVisitor() {
 		super(ORG_J_UNIT_JUPITER_API_ASSERTIONS);
-	}
-
-	@Override
-	public boolean visit(CompilationUnit compilationUnit) {
-		jUnitJupiterTestMethodsStore.collectJUnitJupiterTestMethods(compilationUnit);
-		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -56,9 +48,6 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	protected Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding, List<Expression> arguments) {
 
-		if (!jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
-			return Optional.empty();
-		}
 		JUnit4InvocationReplacementAnalysis invocationAnalyzer = new JUnit4InvocationReplacementAnalysis(
 				methodInvocation, methodBinding, arguments);
 		if (invocationAnalyzer.analyzeAssertion()) {

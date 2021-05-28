@@ -4,7 +4,6 @@ import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJ
 import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfTypes;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -43,9 +42,9 @@ class JUnitJupiterTestMethodsStore {
 			"org.junit.jupiter.api.Disabled" //$NON-NLS-1$
 	));
 
-	private List<MethodDeclaration> jUnitJupiterTestMethods = new ArrayList<>();
-
-	void collectJUnitJupiterTestMethods(CompilationUnit compilationUnit) {
+	private final List<MethodDeclaration> jUnitJupiterTestMethods;
+	
+	JUnitJupiterTestMethodsStore(CompilationUnit compilationUnit) {
 		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
 		compilationUnit.accept(methodDeclarationsCollectorVisitor);
 		jUnitJupiterTestMethods = methodDeclarationsCollectorVisitor.getMethodDeclarations()
