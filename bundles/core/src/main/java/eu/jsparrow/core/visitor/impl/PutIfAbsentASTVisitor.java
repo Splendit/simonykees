@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -15,6 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import eu.jsparrow.core.markers.common.PutIfAbsentEvent;
 import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -44,14 +44,14 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @author Hans-Jörg Schrödl
  *
  */
-public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
+public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor implements PutIfAbsentEvent {
 
 	private static final String MAP_FULLY_QUALIFIED_NAME = java.util.Map.class.getName();
 
 	private static final String PUT = "put"; //$NON-NLS-1$
 	private static final String CONTAINS_KEY = "containsKey"; //$NON-NLS-1$
 
-	private static final String PUT_IF_ABSENT = "putIfAbsent"; //$NON-NLS-1$
+	protected static final String PUT_IF_ABSENT = "putIfAbsent"; //$NON-NLS-1$
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
@@ -85,7 +85,7 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(ifStatement, statement, null);
 		getCommentRewriter().saveRelatedComments(ifStatement);
 		onRewrite();
-		addMarkerEvent(methodInvocation, createRepresentingNode(methodInvocation));
+		addMarkerEvent(methodInvocation);
 		return true;
 	}
 
@@ -170,20 +170,6 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 			.get(1));
 		MethodInvocation putIfAbsent = NodeBuilder.newMethodInvocation(methodInvocation.getAST(),
 				(Expression) astRewrite.createMoveTarget(methodInvocation.getExpression()), putIfAbsentName,
-				Arrays.asList(firstArgument, secondArgument));
-
-		return NodeBuilder.newExpressionStatement(methodInvocation.getAST(), putIfAbsent);
-	}
-	
-	private ExpressionStatement createRepresentingNode(MethodInvocation methodInvocation) {
-		AST ast = methodInvocation.getAST();
-		SimpleName putIfAbsentName = ast.newSimpleName(PUT_IF_ABSENT);
-		@SuppressWarnings("unchecked")
-		List<Expression> arguments = methodInvocation.arguments();
-		Expression firstArgument = (Expression) ASTNode.copySubtree(ast, arguments.get(0));
-		Expression secondArgument = (Expression) ASTNode.copySubtree(ast, arguments.get(1));
-		MethodInvocation putIfAbsent = NodeBuilder.newMethodInvocation(methodInvocation.getAST(),
-				(Expression) ASTNode.copySubtree(ast, methodInvocation.getExpression()), putIfAbsentName,
 				Arrays.asList(firstArgument, secondArgument));
 
 		return NodeBuilder.newExpressionStatement(methodInvocation.getAST(), putIfAbsent);

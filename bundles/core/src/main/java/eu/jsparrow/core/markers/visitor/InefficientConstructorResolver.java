@@ -4,12 +4,15 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 
+import eu.jsparrow.core.constants.ReservedNames;
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.InefficientConstructorASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -55,11 +58,45 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 	}
 
 	@Override
-	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
+	public void addMarkerEvent(Expression refactorCandidateParameter, MethodInvocation node,
+			Expression replaceParameter) {
+		MethodInvocation newNode = createRepresentingNode(node, replaceParameter);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, original,
+				javaElement, refactorCandidateParameter,
+				newNode);
+		addMarkerEvent(event);
+
+	}
+
+	@Override
+	public void addMarkerEvent(ClassInstanceCreation node, SimpleName refactorPrimitiveType,
+			Expression refactorCandidateParameter) {
+		MethodInvocation newNode = createRepresentingNode(refactorPrimitiveType, refactorCandidateParameter);
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
+				javaElement, node,
 				newNode);
 		addMarkerEvent(event);
 	}
 
+	private MethodInvocation createRepresentingNode(MethodInvocation node, Expression replaceParameter) {
+		AST ast = node.getAST();
+		MethodInvocation methodInvocation = (MethodInvocation) ASTNode.copySubtree(ast, node);
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments = methodInvocation.arguments();
+		arguments.clear();
+		arguments.add((Expression) ASTNode.copySubtree(ast, replaceParameter));
+		return methodInvocation;
+	}
+
+	private MethodInvocation createRepresentingNode(SimpleName typeName, Expression replaceParameter) {
+		AST ast = replaceParameter.getAST();
+		MethodInvocation methodInvocation = ast.newMethodInvocation();
+		methodInvocation.setName(ast.newSimpleName(ReservedNames.MI_VALUE_OF));
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments = methodInvocation.arguments();
+		arguments.add((Expression) ASTNode.copySubtree(ast, replaceParameter));
+		SimpleName typeNameCopy = (SimpleName) ASTNode.copySubtree(ast, typeName);
+		methodInvocation.setExpression(typeNameCopy);
+		return methodInvocation;
+	}
 }

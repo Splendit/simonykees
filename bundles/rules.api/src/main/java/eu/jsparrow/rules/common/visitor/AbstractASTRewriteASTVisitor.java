@@ -124,9 +124,6 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		listeners.forEach(listener -> listener.update(new ASTRewriteEvent(this.compilationUnitHandle)));
 	}
 
-	protected void addMarkerEvent(ASTNode original, ASTNode newNode) {
-	}
-
 	public void addMarkerEvent(RefactoringMarkerEvent event) {
 		refactoringMarkerListeners.forEach(listener -> listener.update(event));
 	}

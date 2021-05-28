@@ -6,7 +6,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
@@ -20,6 +19,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.constants.ReservedNames;
+import eu.jsparrow.core.markers.common.PrimitiveBoxedForStringEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -41,7 +41,8 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisitor {
+public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisitor
+		implements PrimitiveBoxedForStringEvent {
 
 	@Override
 	public boolean visit(MethodInvocation node) {
@@ -55,7 +56,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 			.getFullyQualifiedName())
 				&& 1 >= node.arguments()
 					.size()) {
-			
+
 			List<Comment> relatedComments = new ArrayList<>();
 
 			/*
@@ -104,7 +105,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 					refactorCandidateExpression = (Expression) expectedPrimitiveNumberClass.arguments()
 						.get(0);
 					refactorCandidateTypeBinding = refactorCandidateExpression.resolveTypeBinding();
-					
+
 					relatedComments = findRelatedComments(expectedPrimitiveNumberClass);
 
 					/*
@@ -141,31 +142,13 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 						relatedComments);
 
 				onRewrite();
-				MethodInvocation representation = createMarkerRepresentingNode(node.getAST(),
-						refactorCandidateExpression,
+				addMarkerEvent(node, refactorCandidateExpression,
 						node.getName(),
 						refactorPrimitiveType);
-				addMarkerEvent(node, representation);
 			}
 		}
 
 		return true;
-	}
-
-	@SuppressWarnings("unchecked")
-	private MethodInvocation createMarkerRepresentingNode(AST ast, Expression refactorCandidateExpression,
-			SimpleName methodName,
-			SimpleName primitiveType) {
-		MethodInvocation methodInvocation = ast.newMethodInvocation();
-		Expression moveTargetArgument = (Expression) ASTNode.copySubtree(ast, refactorCandidateExpression);
-		methodInvocation.arguments()
-			.add(moveTargetArgument);
-
-		SimpleName staticClassType = astRewrite.getAST()
-			.newSimpleName(primitiveType.getIdentifier());
-		methodInvocation.setExpression(staticClassType);
-		methodInvocation.setName(ast.newSimpleName(methodName.getIdentifier()));
-		return methodInvocation;
 	}
 
 	private List<Comment> findRelatedComments(ClassInstanceCreation expectedPrimitiveNumberClass) {
@@ -213,7 +196,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 
 	@Override
 	public boolean visit(StringLiteral node) {
-		
+
 		/*
 		 * i Third case: 4 + ""
 		 */
@@ -264,9 +247,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 					astRewrite.replace(node, methodInvocation, null);
 					getCommentRewriter().saveCommentsInParentStatement(node);
 					onRewrite();
-					MethodInvocation representingNode = createMarkerRepresentingNode(node.getAST(), otherSide, typeName,
-							toStringSimpleName);
-					addMarkerEvent(node, representingNode);
+					addMarkerEvent(node, otherSide, typeName, toStringSimpleName);
 				}
 			}
 		}

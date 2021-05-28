@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.Statement;
 
+import eu.jsparrow.core.markers.common.EnumsWithoutEqualsEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -29,7 +30,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @author Hans-Jörg Schrödl
  * @since 2.1.1
  */
-public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor implements EnumsWithoutEqualsEvent {
 
 	private static final String EQUALS = "equals"; //$NON-NLS-1$
 
@@ -83,10 +84,7 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(replacedNode, replacementNode, null);
 		saveComments(methodInvocation);
 		onRewrite();
-		Expression representingNode = NodeBuilder.newInfixExpression(methodInvocation.getAST(), newOperator, 
-				(Expression)ASTNode.copySubtree(methodInvocation.getAST(), expression),
-				(Expression)ASTNode.copySubtree(methodInvocation.getAST(), argument));
-		addMarkerEvent(replacedNode, representingNode);
+		addMarkerEvent(replacedNode, expression, argument, newOperator);
 		return false;
 	}
 

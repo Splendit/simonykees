@@ -3,9 +3,12 @@ package eu.jsparrow.core.markers.visitor;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
@@ -46,10 +49,27 @@ public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTV
 	}
 
 	@Override
-	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, original,
-				newNode);
+	public void addMarkerEvent(ASTNode node, Expression refactorCandidateExpression, SimpleName name,
+			SimpleName refactorPrimitiveType) {
+		MethodInvocation newNode = createRepresentingNode(refactorCandidateExpression, name, refactorPrimitiveType);
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement, node, newNode);
 		addMarkerEvent(event);
+	}
+
+	@SuppressWarnings("unchecked")
+	private MethodInvocation createRepresentingNode(Expression refactorCandidateExpression,
+			SimpleName methodName,
+			SimpleName primitiveType) {
+		AST ast = refactorCandidateExpression.getAST();
+		MethodInvocation methodInvocation = ast.newMethodInvocation();
+		Expression moveTargetArgument = (Expression) ASTNode.copySubtree(ast, refactorCandidateExpression);
+		methodInvocation.arguments()
+			.add(moveTargetArgument);
+
+		SimpleName staticClassType = astRewrite.getAST()
+			.newSimpleName(primitiveType.getIdentifier());
+		methodInvocation.setExpression(staticClassType);
+		methodInvocation.setName(ast.newSimpleName(methodName.getIdentifier()));
+		return methodInvocation;
 	}
 }

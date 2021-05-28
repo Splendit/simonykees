@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.markers.common.FunctionalInterfaceEvent;
 import eu.jsparrow.core.visitor.sub.MethodInvocationsVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDefinitionASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -57,7 +58,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @since 0.9
  *
  */
-public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor {
+public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor implements FunctionalInterfaceEvent {
 
 	Logger log = LoggerFactory.getLogger(FunctionalInterfaceASTVisitor.class);
 
@@ -317,31 +318,13 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
 						getASTRewrite().replace(parentNode, newInitializer, null);
 						onRewrite();
-						LambdaExpression representingNode = createRepresentingNode(parameteres, moveBlock);
-						addMarkerEvent(parentNode, representingNode);
+						addMarkerEvent(parentNode, parameteres, moveBlock);
 					}
 				}
 			}
 		}
 		return true;
 
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private LambdaExpression createRepresentingNode(List<SingleVariableDeclaration> parameters,
-			Block moveBlock) {
-		AST ast = moveBlock.getAST();
-		LambdaExpression lambda = ast.newLambdaExpression();
-		if (parameters != null) {
-			List lambdaParameters = lambda.parameters();
-			for (SingleVariableDeclaration parameter : parameters) {
-				SingleVariableDeclaration copy = (SingleVariableDeclaration) ASTNode.copySubtree(ast, parameter);
-				lambdaParameters.add(copy);
-			}
-		}
-		Block blockCopy = (Block) ASTNode.copySubtree(ast, moveBlock);
-		lambda.setBody(blockCopy);
-		return lambda;
 	}
 
 	private boolean hasOccurrencesOfThisKeyWord(MethodDeclaration methodDeclaration) {

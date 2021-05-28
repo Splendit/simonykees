@@ -1,14 +1,21 @@
 package eu.jsparrow.core.markers.visitor;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.PutIfAbsentASTVisitor;
+import eu.jsparrow.rules.common.builder.NodeBuilder;
 
 public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 
@@ -35,12 +42,27 @@ public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 		}
 		return false;
 	}
-
+	
 	@Override
-	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
+	public void addMarkerEvent(MethodInvocation methodInvocation) {
+		ExpressionStatement newNode = createRepresentingNode(methodInvocation);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, original,
+				javaElement, methodInvocation,
 				newNode);
 		addMarkerEvent(event);
+	}
+	
+	private ExpressionStatement createRepresentingNode(MethodInvocation methodInvocation) {
+		AST ast = methodInvocation.getAST();
+		SimpleName putIfAbsentName = ast.newSimpleName(PUT_IF_ABSENT);
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments = methodInvocation.arguments();
+		Expression firstArgument = (Expression) ASTNode.copySubtree(ast, arguments.get(0));
+		Expression secondArgument = (Expression) ASTNode.copySubtree(ast, arguments.get(1));
+		MethodInvocation putIfAbsent = NodeBuilder.newMethodInvocation(methodInvocation.getAST(),
+				(Expression) ASTNode.copySubtree(ast, methodInvocation.getExpression()), putIfAbsentName,
+				Arrays.asList(firstArgument, secondArgument));
+
+		return NodeBuilder.newExpressionStatement(methodInvocation.getAST(), putIfAbsent);
 	}
 }

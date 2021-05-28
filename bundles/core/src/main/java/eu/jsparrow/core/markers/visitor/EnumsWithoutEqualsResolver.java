@@ -3,12 +3,16 @@ package eu.jsparrow.core.markers.visitor;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.EnumsWithoutEqualsASTVisitor;
+import eu.jsparrow.rules.common.builder.NodeBuilder;
 
 public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
 
@@ -39,10 +43,21 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
 	}
 
 	@Override
-	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
+	public void addMarkerEvent(Expression replacedNode, Expression expression, Expression argument,
+			InfixExpression.Operator newOperator) {
+		Expression representingNode = createRepresentingNode(expression, argument, newOperator);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, original,
-				newNode);
+				javaElement, replacedNode,
+				representingNode);
 		addMarkerEvent(event);
+
+	}
+
+	private Expression createRepresentingNode(Expression expression, Expression argument,
+			InfixExpression.Operator newOperator) {
+		AST ast = expression.getAST();
+		return NodeBuilder.newInfixExpression(ast, newOperator,
+				(Expression) ASTNode.copySubtree(ast, expression),
+				(Expression) ASTNode.copySubtree(ast, argument));
 	}
 }

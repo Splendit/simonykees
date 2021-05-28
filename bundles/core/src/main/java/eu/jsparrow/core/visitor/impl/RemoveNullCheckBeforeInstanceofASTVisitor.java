@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.impl;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -8,8 +7,8 @@ import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
+import eu.jsparrow.core.markers.common.RemoveNullCheckBeforeInstanceofEvent;
 import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -37,7 +36,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * 
  * @since 3.8.0
  */
-public class RemoveNullCheckBeforeInstanceofASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveNullCheckBeforeInstanceofASTVisitor extends AbstractASTRewriteASTVisitor
+		implements RemoveNullCheckBeforeInstanceofEvent {
 
 	@Override
 	public boolean visit(InstanceofExpression expression) {
@@ -87,16 +87,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitor extends AbstractASTRewrit
 		ASTNode newExpression = astRewrite.createCopyTarget(expression);
 		astRewrite.replace(infixExpression, newExpression, null);
 		onRewrite();
-		ASTNode representingNode = createRepresentingNode(infixExpression, expression);
-		addMarkerEvent(infixExpression.getLeftOperand(), representingNode);
-	}
-
-	private ASTNode createRepresentingNode(InfixExpression infixExpression, Expression expression) {
-		AST ast = infixExpression.getAST();
-		StructuralPropertyDescriptor structuralProperty = infixExpression.getLocationInParent();
-		ASTNode parent = ASTNode.copySubtree(ast, infixExpression.getParent());
-		parent.setStructuralProperty(structuralProperty, (Expression)ASTNode.copySubtree(ast, expression));
-		return parent;
+		addMarkerEvent(infixExpression.getLeftOperand(), infixExpression, expression);
 	}
 
 	private PrefixExpression findNegatedPrefixExpression(Expression expression) {

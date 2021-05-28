@@ -3,7 +3,6 @@ package eu.jsparrow.core.visitor.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -13,7 +12,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import eu.jsparrow.core.constants.ReservedNames;
+import eu.jsparrow.core.markers.common.StringLiteralEqualityCheckEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -44,9 +43,10 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @author Ardit Ymeri
  * @since 1.2
  */
-public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTVisitor {
+public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTVisitor
+		implements StringLiteralEqualityCheckEvent {
 
-	private static final String EQUALS = "equals"; //$NON-NLS-1$
+	protected static final String EQUALS = "equals"; //$NON-NLS-1$
 	private static final String EQUALS_IGNORE_CASE = "equalsIgnoreCase"; //$NON-NLS-1$
 	private List<Comment> comments = new ArrayList<>();
 
@@ -94,8 +94,7 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 								astRewrite.replace(expression, newArgument, null);
 								astRewrite.replace(stringLiteral, newExpression, null);
 								onRewrite();
-								MethodInvocation representingNode = createRepresentingNode(expression, stringLiteral);
-								addMarkerEvent(stringLiteral, representingNode);
+								addMarkerEvent(stringLiteral, expression);
 							}
 						}
 					}
@@ -103,17 +102,6 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 			}
 		}
 		return true;
-	}
-
-	private MethodInvocation createRepresentingNode(Expression expression, StringLiteral stringLiteral) {
-		AST ast = expression.getAST();
-		MethodInvocation equals = ast.newMethodInvocation();
-		equals.setName(ast.newSimpleName(EQUALS));
-		equals.setExpression((Expression)ASTNode.copySubtree(ast, stringLiteral));
-		@SuppressWarnings("unchecked")
-		List<Expression>arguments = equals.arguments();
-		arguments.add((Expression)ASTNode.copySubtree(ast, expression));
-		return equals;
 	}
 
 	/**

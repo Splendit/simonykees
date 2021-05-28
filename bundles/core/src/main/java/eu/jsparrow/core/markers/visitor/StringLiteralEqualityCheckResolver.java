@@ -1,10 +1,14 @@
 package eu.jsparrow.core.markers.visitor;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
@@ -37,10 +41,22 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 	}
 
 	@Override
-	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
+	public void addMarkerEvent(StringLiteral stringLiteral, Expression expression) {
+		MethodInvocation newNode = createRepresentingNode(expression, stringLiteral);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, original,
+				javaElement, stringLiteral,
 				newNode);
 		addMarkerEvent(event);
+	}
+
+	private MethodInvocation createRepresentingNode(Expression expression, StringLiteral stringLiteral) {
+		AST ast = expression.getAST();
+		MethodInvocation equals = ast.newMethodInvocation();
+		equals.setName(ast.newSimpleName(EQUALS));
+		equals.setExpression((Expression) ASTNode.copySubtree(ast, stringLiteral));
+		@SuppressWarnings("unchecked")
+		List<Expression> arguments = equals.arguments();
+		arguments.add((Expression) ASTNode.copySubtree(ast, expression));
+		return equals;
 	}
 }

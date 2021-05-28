@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import eu.jsparrow.core.markers.common.UseComparatorMethodsEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -64,7 +65,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * 
  * @since 3.23.0
  */
-public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor {
+public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor implements UseComparatorMethodsEvent {
 	static final String JAVA_LANG_COMPARABLE = java.lang.Comparable.class.getName();
 	static final String JAVA_UTIL_COMPARATOR = java.util.Comparator.class.getName();
 
@@ -99,7 +100,7 @@ public class UseComparatorMethodsASTVisitor extends AbstractAddImportASTVisitor 
 		}
 		astRewrite.replace(lambda, lambdaReplacement, null);
 		onRewrite();
-		this.addMarkerEvent(lambda, lambdaReplacement);
+		addMarkerEvent(lambda, lambdaReplacement);
 		return true;
 	}
 

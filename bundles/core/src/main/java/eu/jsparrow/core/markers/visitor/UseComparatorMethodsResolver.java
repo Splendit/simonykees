@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.comparatormethods.UseComparatorMethodsASTVisitor;
@@ -35,12 +36,12 @@ public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor
 		}
 		return false;
 	}
-
+	
 	@Override
-	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
+	public void addMarkerEvent(LambdaExpression lambda, MethodInvocation lambdaReplacement) {
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement,
-				original,
-				newNode);
+				lambda,
+				lambdaReplacement);
 		addMarkerEvent(event);
 	}
 }

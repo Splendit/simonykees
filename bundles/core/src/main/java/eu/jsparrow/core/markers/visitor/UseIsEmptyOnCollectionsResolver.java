@@ -3,12 +3,18 @@ package eu.jsparrow.core.markers.visitor;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
+import eu.jsparrow.rules.common.builder.NodeBuilder;
 
 public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTVisitor {
 
@@ -37,10 +43,22 @@ public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTV
 	}
 
 	@Override
-	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
+	public void addMarkerEvent(InfixExpression parent, Expression varExpression) {
+		ASTNode newNode = createRepresentationNode(parent, varExpression);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, original,
+				javaElement, parent,
 				newNode);
 		addMarkerEvent(event);
+	}
+
+	private ASTNode createRepresentationNode(InfixExpression infixExpression, Expression varExpression) {
+		AST ast = infixExpression.getAST();
+		SimpleName isEmptyMethod = ast.newSimpleName("isEmpty"); //$NON-NLS-1$
+		MethodInvocation replaceNode = NodeBuilder.newMethodInvocation(ast,
+				(Expression) ASTNode.copySubtree(ast, varExpression), isEmptyMethod);
+		StructuralPropertyDescriptor locationInParent = infixExpression.getLocationInParent();
+		ASTNode parent = ASTNode.copySubtree(ast, infixExpression.getParent());
+		parent.setStructuralProperty(locationInParent, replaceNode);
+		return parent;
 	}
 }

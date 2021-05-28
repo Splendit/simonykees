@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.LambdaToMethodReferenceEvent;
 import eu.jsparrow.core.visitor.utils.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -59,7 +60,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 1.2
  *
  */
-public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisitor {
+public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisitor implements LambdaToMethodReferenceEvent {
 
 	private Set<String> newImports = new HashSet<>();
 
@@ -207,9 +208,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 					getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 					onRewrite();
 					refExpression = refExpression == null ? ref.getExpression() : refExpression;
-					ExpressionMethodReference nodeRepresentation = createNodeRepresentation(refExpression,
-							methodInvocation.getName());
-					addMarkerEvent(lambdaExpressionNode, nodeRepresentation);
+					addMarkerEvent(lambdaExpressionNode, refExpression, methodInvocation.getName());
 				}
 			}
 
@@ -263,29 +262,11 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 				astRewrite.replace(lambdaExpressionNode, ref, null);
 				getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 				onRewrite();
-				CreationReference representation = createNodeRepresentation(classInstanceCreationType);
-				addMarkerEvent(lambdaExpressionNode, representation);
+				addMarkerEvent(lambdaExpressionNode, classInstanceCreationType);
 			}
 		}
 
 		return true;
-	}
-
-	private CreationReference createNodeRepresentation(Type classInstanceCreationType) {
-		AST ast = classInstanceCreationType.getAST();
-		CreationReference creationReference = ast.newCreationReference();
-		creationReference.setType((Type) ASTNode.copySubtree(ast, classInstanceCreationType));
-		return creationReference;
-	}
-
-	private ExpressionMethodReference createNodeRepresentation(Expression expression, SimpleName name) {
-		AST ast = name.getAST();
-		ExpressionMethodReference ref = ast.newExpressionMethodReference();
-		Expression expressionCopy = (Expression) ASTNode.copySubtree(ast, expression);
-		SimpleName nameCopey = (SimpleName) ASTNode.copySubtree(ast, name);
-		ref.setExpression(expressionCopy);
-		ref.setName(nameCopey);
-		return ref;
 	}
 
 	private boolean isWrappedInOverloadedMethod(LambdaExpression lambdaExpressionNode,
@@ -672,19 +653,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 		onRewrite();
 		Type representingType = explicitParameterType != null ? explicitParameterType : type;
-		TypeMethodReference representingNode = createRepresentingNode(representingType, methodInvocation.getName());
-		addMarkerEvent(lambdaExpressionNode, representingNode);
+		addMarkerEvent(lambdaExpressionNode, representingType, methodInvocation.getName());
 
-	}
-
-	private TypeMethodReference createRepresentingNode(Type representingType, SimpleName methodName) {
-		AST ast = methodName.getAST();
-		TypeMethodReference typeMethodReference = ast.newTypeMethodReference();
-		Type newType = (Type) ASTNode.copySubtree(ast, representingType);
-		SimpleName newName = (SimpleName) ASTNode.copySubtree(ast, methodName);
-		typeMethodReference.setType(newType);
-		typeMethodReference.setName(newName);
-		return typeMethodReference;
 	}
 
 	private boolean areIncompatibleFunctionalInterfaces(IMethodBinding contextFunctionalInterface,

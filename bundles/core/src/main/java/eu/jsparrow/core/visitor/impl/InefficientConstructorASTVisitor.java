@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.constants.ReservedNames;
+import eu.jsparrow.core.markers.common.InefficientConstructorEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -31,7 +32,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisitor {
+public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisitor implements InefficientConstructorEvent {
 
 	private static final String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
 
@@ -78,33 +79,10 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
 				getCommentRewriter().saveCommentsInParentStatement(node);
 				onRewrite();
-				MethodInvocation representingNode = createRepresentingNode(node, replaceParameter);
-				addMarkerEvent(refactorCandidateParameter, representingNode);
+				addMarkerEvent(refactorCandidateParameter, node, replaceParameter);
 			}
 		}
 		return true;
-	}
-
-	private MethodInvocation createRepresentingNode(MethodInvocation node, Expression replaceParameter) {
-		AST ast = node.getAST();
-		MethodInvocation methodInvocation = (MethodInvocation)ASTNode.copySubtree(ast, node);
-		@SuppressWarnings("unchecked")
-		List<Expression> arguments = methodInvocation.arguments();
-		arguments.clear();
-		arguments.add((Expression)ASTNode.copySubtree(ast, replaceParameter));
-		return methodInvocation;
-	}
-	
-	private MethodInvocation createRepresentingNode(SimpleName typeName, Expression replaceParameter) {
-		AST ast = replaceParameter.getAST();
-		MethodInvocation methodInvocation = ast.newMethodInvocation();
-		methodInvocation.setName(ast.newSimpleName(ReservedNames.MI_VALUE_OF));
-		@SuppressWarnings("unchecked")
-		List<Expression> arguments = methodInvocation.arguments();
-		arguments.add((Expression)ASTNode.copySubtree(ast, replaceParameter));
-		SimpleName typeNameCopy = (SimpleName)ASTNode.copySubtree(ast, typeName);
-		methodInvocation.setExpression(typeNameCopy);
-		return methodInvocation;
 	}
 
 	@Override
@@ -207,12 +185,12 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				astRewrite.replace(node, replacement, null);
 				commentRewriter.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(node, Statement.class), relatedComments);
 				onRewrite();
-				addMarkerEvent(node, createRepresentingNode(refactorPrimitiveType, refactorCandidateParameter));
+				addMarkerEvent(node, refactorPrimitiveType, refactorCandidateParameter);
 			}
 		}
 		return true;
 	}
-	
+
 	private List<Comment> findRelatedComments(ClassInstanceCreation node, Expression parameter) {
 		CommentRewriter cr = getCommentRewriter();
 		List<Comment> relatedComments = cr.findRelatedComments(node);

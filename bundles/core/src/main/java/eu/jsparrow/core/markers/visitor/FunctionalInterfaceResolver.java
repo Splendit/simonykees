@@ -1,11 +1,17 @@
 package eu.jsparrow.core.markers.visitor;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
@@ -38,9 +44,28 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 	}
 
 	@Override
-	public void addMarkerEvent(ASTNode original, ASTNode newNode) {
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement, original,
-				newNode);
+	public void addMarkerEvent(ClassInstanceCreation classInstanceCreation, List<SingleVariableDeclaration> parameters,
+			Block block) {
+		LambdaExpression representingNode = createRepresentingNode(parameters, block);
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement, classInstanceCreation,
+				representingNode);
 		addMarkerEvent(event);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private LambdaExpression createRepresentingNode(List<SingleVariableDeclaration> parameters,
+			Block moveBlock) {
+		AST ast = moveBlock.getAST();
+		LambdaExpression lambda = ast.newLambdaExpression();
+		if (parameters != null) {
+			List lambdaParameters = lambda.parameters();
+			for (SingleVariableDeclaration parameter : parameters) {
+				SingleVariableDeclaration copy = (SingleVariableDeclaration) ASTNode.copySubtree(ast, parameter);
+				lambdaParameters.add(copy);
+			}
+		}
+		Block blockCopy = (Block) ASTNode.copySubtree(ast, moveBlock);
+		lambda.setBody(blockCopy);
+		return lambda;
 	}
 }
