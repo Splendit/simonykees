@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -46,7 +45,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	private static final String ASSUME_THAT = "assumeThat"; //$NON-NLS-1$
 
 	public ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor() {
-		super("org.hamcrest.junit.MatcherAssume"); //$NON-NLS-1$
+		super("org.hamcrest.junit.MatcherAssume", JUnit4InvocationReplacementAnalysis::analyzeAssumptionToHamcrest); //$NON-NLS-1$
 	}
 
 	@Override
@@ -67,18 +66,6 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		transformationDataCollections
 			.getNotNullAssumptionsOnNullableArray()
 			.forEach(data -> insertAssumptionThatEveryItemNotNull(data, qualifierNeededForAssumeThat));
-	}
-
-	@Override
-	protected Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
-			IMethodBinding methodBinding, List<Expression> arguments) {
-
-		JUnit4InvocationReplacementAnalysis invocationAnalyzer = new JUnit4InvocationReplacementAnalysis(
-				methodInvocation, methodBinding, arguments);
-		if (invocationAnalyzer.analyzeAssumptionToHamcrest()) {
-			return Optional.of(invocationAnalyzer);
-		}
-		return Optional.empty();
 	}
 
 	@Override
@@ -134,7 +121,8 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	private List<Expression> createAssumeThatListIsNotNullArguments(ASTNode context,
 			List<Expression> originalArguments, AssumeNotNullArgumentsAnalysis assumeNotNullAnalysis) {
 
-		if (originalArguments.isEmpty() || assumeNotNullAnalysis.isMultipleVarargs() || assumeNotNullAnalysis.isSingleVarargArrayCreation()) {
+		if (originalArguments.isEmpty() || assumeNotNullAnalysis.isMultipleVarargs()
+				|| assumeNotNullAnalysis.isSingleVarargArrayCreation()) {
 			MethodInvocation asListInvocation = createAsListInvocation(context, originalArguments);
 			return Arrays.<Expression>asList(asListInvocation, createCoreMatchersInvocation(context, EVERY_ITEM));
 		}

@@ -2,13 +2,8 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleType;
 
@@ -25,7 +20,7 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 	private static final String ORG_JUNIT_JUPITER_API_FUNCTION_EXECUTABLE = "org.junit.jupiter.api.function.Executable"; //$NON-NLS-1$
 
 	public ReplaceJUnit4AssertionsWithJupiterASTVisitor() {
-		super(ORG_J_UNIT_JUPITER_API_ASSERTIONS);
+		super(ORG_J_UNIT_JUPITER_API_ASSERTIONS, JUnit4InvocationReplacementAnalysis::analyzeAssertionToJupiter);
 	}
 
 	@Override
@@ -42,19 +37,6 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 				SimpleType typeReplacement = ast.newSimpleType(executableTypeName);
 				astRewrite.replace(typeToReplace, typeReplacement, null);
 			});
-	}
-
-	@Override
-	protected Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
-			IMethodBinding methodBinding, List<Expression> arguments) {
-
-		JUnit4InvocationReplacementAnalysis invocationAnalyzer = new JUnit4InvocationReplacementAnalysis(
-				methodInvocation, methodBinding, arguments);
-		if (invocationAnalyzer.analyzeAssertion()) {
-			return Optional.of(invocationAnalyzer);
-		}
-
-		return Optional.empty();
 	}
 
 	@Override

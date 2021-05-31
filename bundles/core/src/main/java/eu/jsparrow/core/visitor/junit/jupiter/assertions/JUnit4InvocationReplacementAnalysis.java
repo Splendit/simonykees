@@ -48,7 +48,7 @@ class JUnit4InvocationReplacementAnalysis {
 		this.originalMethodName = methodBinding.getName();
 	}
 
-	boolean analyzeAssertion() {
+	boolean analyzeAssertionToJupiter() {
 		if ("assertThrows".equals(originalMethodName)) { //$NON-NLS-1$
 			ThrowingRunnableArgumentAnalyzer throwingRunnableArgumentAnalyser = new ThrowingRunnableArgumentAnalyzer();
 			if (!throwingRunnableArgumentAnalyser.analyze(arguments)) {
@@ -71,7 +71,7 @@ class JUnit4InvocationReplacementAnalysis {
 		return true;
 	}
 
-	void analyzeAssumptionToJupiter() {
+	boolean analyzeAssumptionToJupiter() {
 
 		ITypeBinding[] declaredParameterTypes = methodBinding
 			.getMethodDeclaration()
@@ -79,6 +79,7 @@ class JUnit4InvocationReplacementAnalysis {
 
 		messageMovedToLastPosition = findMessageMovedDoLastPosition(arguments, declaredParameterTypes).orElse(null);
 		changingArguments = messageMovedToLastPosition != null;
+		return true;
 	}
 
 	boolean analyzeAssumptionToHamcrest() {
