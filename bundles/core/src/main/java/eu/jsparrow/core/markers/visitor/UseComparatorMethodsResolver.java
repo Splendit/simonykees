@@ -32,16 +32,17 @@ public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor
 	@Override
 	public boolean visit(LambdaExpression lambdaExpression) {
 		if (positionChecker.test(lambdaExpression)) {
-			return super.visit(lambdaExpression);
+			super.visit(lambdaExpression);
 		}
 		return false;
 	}
-	
+
 	@Override
 	public void addMarkerEvent(LambdaExpression lambda, MethodInvocation lambdaReplacement) {
+		int highlightLenght = lambdaReplacement.toString()
+			.length();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement,
-				lambda,
-				lambdaReplacement);
+				highlightLenght, lambda, lambdaReplacement);
 		addMarkerEvent(event);
 	}
 }

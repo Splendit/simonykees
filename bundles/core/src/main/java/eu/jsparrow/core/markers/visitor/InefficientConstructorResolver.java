@@ -62,18 +62,19 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 			Expression replaceParameter) {
 		MethodInvocation newNode = createRepresentingNode(node, replaceParameter);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, refactorCandidateParameter,
+				javaElement, 0, refactorCandidateParameter,
 				newNode);
 		addMarkerEvent(event);
-
 	}
 
 	@Override
 	public void addMarkerEvent(ClassInstanceCreation node, SimpleName refactorPrimitiveType,
 			Expression refactorCandidateParameter) {
 		MethodInvocation newNode = createRepresentingNode(refactorPrimitiveType, refactorCandidateParameter);
+		int highlightLenght = newNode.toString()
+			.length();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, node,
+				javaElement, highlightLenght, node,
 				newNode);
 		addMarkerEvent(event);
 	}

@@ -12,12 +12,15 @@ import eu.jsparrow.ui.Activator;
 
 public class MarkerFactory {
 
+
+
 	private static final Logger logger = LoggerFactory.getLogger(MarkerFactory.class);
 
 	public static final String JSPARROW_MARKER = "jsparrow.marker"; //$NON-NLS-1$
 	private static final String RESOLVER_KEY = "resolver"; //$NON-NLS-1$
 	private static final String NAME_KEY = "name"; //$NON-NLS-1$
 	private static final String DESCRIPTION_KEY = "description"; //$NON-NLS-1$
+	private static final String NEW_LENGTH = "newLength"; //$NON-NLS-1$
 
 	public void create(RefactoringMarkerEvent event) {
 		try {
@@ -28,15 +31,16 @@ public class MarkerFactory {
 			String message = event.getMessage();
 			int offset = event.getOffset();
 			int length = event.getLength();
+			int newLength = event.getHighlightLength();
 			String description = event.getDescription();
-			scheduleWorkspaceJob(resolver, name, message, resource, offset, length, description);
+			scheduleWorkspaceJob(resolver, name, message, resource, offset, length, newLength, description);
 		} catch (CoreException e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
 
 	private void scheduleWorkspaceJob(final String resolver, final String name, final String message,
-			final IResource resource, final int start, final int length, String description)
+			final IResource resource, final int start, final int length, final int newLength, String description)
 			throws CoreException {
 		Integer offset = Integer.valueOf(start);
 		Integer end = Integer.valueOf(start + length);
@@ -49,6 +53,7 @@ public class MarkerFactory {
 				IMarker.MESSAGE,
 				IMarker.CHAR_START,
 				IMarker.CHAR_END,
+				NEW_LENGTH,
 				DESCRIPTION_KEY,
 				IMarker.SOURCE_ID };
 		Object[] attributeValues = {
@@ -57,6 +62,7 @@ public class MarkerFactory {
 				message,
 				offset,
 				end,
+				newLength,
 				description,
 				Activator.PLUGIN_ID };
 		marker.setAttributes(markerAttributeKeys, attributeValues);

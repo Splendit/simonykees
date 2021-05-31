@@ -4,18 +4,20 @@ import org.eclipse.jdt.core.IJavaElement;
 
 public interface RefactoringMarkerEvent {
 
-	public String getResolver();
+	String getResolver();
 
-	public int getOffset();
+	int getOffset();
 
-	public int getLength();
+	int getLength();
+	
+	int getHighlightLength();
 
-	public String getName();
+	String getName();
 
-	public String getMessage();
+	String getMessage();
 
-	public String getDescription();
+	String getDescription();
 
-	public IJavaElement getJavaElement();
+	IJavaElement getJavaElement();
 
 }

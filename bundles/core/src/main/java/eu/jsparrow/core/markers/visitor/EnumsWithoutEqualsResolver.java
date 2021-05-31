@@ -46,8 +46,11 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
 	public void addMarkerEvent(Expression replacedNode, Expression expression, Expression argument,
 			InfixExpression.Operator newOperator) {
 		Expression representingNode = createRepresentingNode(expression, argument, newOperator);
+		int highlightLength = representingNode.toString()
+			.length();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, replacedNode,
+				javaElement,
+				highlightLength, replacedNode,
 				representingNode);
 		addMarkerEvent(event);
 

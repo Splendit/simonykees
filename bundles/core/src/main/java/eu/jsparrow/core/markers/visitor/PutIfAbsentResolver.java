@@ -42,16 +42,15 @@ public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public void addMarkerEvent(MethodInvocation methodInvocation) {
 		ExpressionStatement newNode = createRepresentingNode(methodInvocation);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, methodInvocation,
-				newNode);
+				javaElement, 0, methodInvocation, newNode);
 		addMarkerEvent(event);
 	}
-	
+
 	private ExpressionStatement createRepresentingNode(MethodInvocation methodInvocation) {
 		AST ast = methodInvocation.getAST();
 		SimpleName putIfAbsentName = ast.newSimpleName(PUT_IF_ABSENT);

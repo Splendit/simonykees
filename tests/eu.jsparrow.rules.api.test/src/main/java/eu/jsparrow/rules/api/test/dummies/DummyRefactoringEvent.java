@@ -47,4 +47,9 @@ public class DummyRefactoringEvent implements RefactoringMarkerEvent {
 		return null;
 	}
 
+	@Override
+	public int getHighlightLength() {
+		return 0;
+	}
+
 }

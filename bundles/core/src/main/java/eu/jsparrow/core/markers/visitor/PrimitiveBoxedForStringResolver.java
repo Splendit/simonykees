@@ -52,7 +52,14 @@ public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTV
 	public void addMarkerEvent(ASTNode node, Expression refactorCandidateExpression, SimpleName name,
 			SimpleName refactorPrimitiveType) {
 		MethodInvocation newNode = createRepresentingNode(refactorCandidateExpression, name, refactorPrimitiveType);
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement, node, newNode);
+		int highlightLenght = 0;
+		if (node.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			highlightLenght = newNode.toString()
+				.length();
+		}
+
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement, highlightLenght, node,
+				newNode);
 		addMarkerEvent(event);
 	}
 

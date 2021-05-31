@@ -46,8 +46,7 @@ public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTV
 	public void addMarkerEvent(InfixExpression parent, Expression varExpression) {
 		ASTNode newNode = createRepresentationNode(parent, varExpression);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, parent,
-				newNode);
+				javaElement, 0, parent, newNode);
 		addMarkerEvent(event);
 	}
 

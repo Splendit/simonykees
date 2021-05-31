@@ -11,18 +11,20 @@ public class RefactoringEventImpl implements RefactoringMarkerEvent {
 
 	private int offset;
 	private int length;
+	private int highlightLength;
 	private String name;
 	private String message;
 	private IJavaElement iJavaElement;
 	private String description;
 	private String resolver;
 
-	public RefactoringEventImpl(String resolver, String name, String message, IJavaElement iJavaElement,
+	public RefactoringEventImpl(String resolver, String name, String message, IJavaElement iJavaElement, int highlightLenght,
 			ASTNode original, ASTNode replacement) {
 		this.resolver = resolver;
 		this.name = name;
 		this.offset = original.getStartPosition();
 		this.length = original.getLength();
+		this.highlightLength = highlightLenght;
 		this.description = replacement.toString();
 		this.message = message;
 		this.iJavaElement = iJavaElement;
@@ -36,6 +38,11 @@ public class RefactoringEventImpl implements RefactoringMarkerEvent {
 	@Override
 	public int getLength() {
 		return length;
+	}
+	
+	@Override
+	public int getHighlightLength() {
+		return highlightLength;
 	}
 
 	@Override

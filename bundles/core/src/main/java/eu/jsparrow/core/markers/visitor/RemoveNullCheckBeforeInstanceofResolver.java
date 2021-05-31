@@ -48,8 +48,7 @@ public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBefo
 	public void addMarkerEvent(Expression leftOperand, InfixExpression infixExpression, Expression expression) {
 		ASTNode newNode = createRepresentingNode(infixExpression, expression);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, leftOperand,
-				newNode);
+				javaElement, 0, leftOperand, newNode);
 		addMarkerEvent(event);
 	}
 

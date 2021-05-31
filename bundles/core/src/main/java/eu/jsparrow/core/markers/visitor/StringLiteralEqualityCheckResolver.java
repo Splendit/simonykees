@@ -44,8 +44,7 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 	public void addMarkerEvent(StringLiteral stringLiteral, Expression expression) {
 		MethodInvocation newNode = createRepresentingNode(expression, stringLiteral);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, stringLiteral,
-				newNode);
+				javaElement, 0, stringLiteral, newNode);
 		addMarkerEvent(event);
 	}
 

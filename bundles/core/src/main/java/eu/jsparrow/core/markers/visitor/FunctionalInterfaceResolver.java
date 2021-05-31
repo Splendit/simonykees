@@ -47,7 +47,10 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 	public void addMarkerEvent(ClassInstanceCreation classInstanceCreation, List<SingleVariableDeclaration> parameters,
 			Block block) {
 		LambdaExpression representingNode = createRepresentingNode(parameters, block);
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement, classInstanceCreation,
+		int highlightLenght = representingNode.toString()
+			.length();
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement,
+				highlightLenght, classInstanceCreation,
 				representingNode);
 		addMarkerEvent(event);
 	}

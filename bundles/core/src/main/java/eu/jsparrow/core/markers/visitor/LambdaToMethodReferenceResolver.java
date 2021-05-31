@@ -47,25 +47,30 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 	@Override
 	public void addMarkerEvent(LambdaExpression lambdaExpressionNode, Expression refExpression, SimpleName name) {
 		ExpressionMethodReference newNode = createNodeRepresentation(refExpression, name);
+		int highlightLenght = newNode.toString()
+			.length();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
-				javaElement, lambdaExpressionNode,
-				newNode);
+				javaElement, highlightLenght, lambdaExpressionNode, newNode);
 		addMarkerEvent(event);
 	}
 
 	@Override
 	public void addMarkerEvent(LambdaExpression lambdaExpressionNode, Type classInstanceCreationType) {
 		CreationReference newNode = createNodeRepresentation(classInstanceCreationType);
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement, lambdaExpressionNode,
-				newNode);
+		int highlightLenght = newNode.toString()
+			.length();
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement, highlightLenght,
+				lambdaExpressionNode, newNode);
 		addMarkerEvent(event);
 	}
 
 	@Override
 	public void addMarkerEvent(LambdaExpression lambdaExpressionNode, Type representingType, SimpleName methodName) {
 		TypeMethodReference newNode = createRepresentingNode(representingType, methodName);
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement, lambdaExpressionNode,
-				newNode);
+		int highlightLenght = newNode.toString()
+				.length();
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement,
+				highlightLenght, lambdaExpressionNode, newNode);
 		addMarkerEvent(event);
 
 	}
