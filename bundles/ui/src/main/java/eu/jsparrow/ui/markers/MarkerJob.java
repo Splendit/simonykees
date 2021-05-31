@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.markers;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -11,6 +12,11 @@ import org.eclipse.ui.progress.IProgressConstants2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A job for asynchronously generating {@link IMarker}s.
+ * 
+ * @since 3.31.0
+ */
 public class MarkerJob extends WorkspaceJob {
 
 	private static final Logger logger = LoggerFactory.getLogger(MarkerJob.class);

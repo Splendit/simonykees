@@ -13,6 +13,11 @@ import org.osgi.framework.Bundle;
 
 import eu.jsparrow.ui.Activator;
 
+/**
+ * A container with predefined jSparrow icons. 
+ * 
+ * @since 3.31.0
+ */
 public final class JSparrowImages {
 
 	public static final Image JSPARROW_ACTIVE_16 = createImage("icons/jSparrow_active_icon_16.png"); //$NON-NLS-1$

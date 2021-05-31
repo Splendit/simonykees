@@ -17,6 +17,13 @@ import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.InefficientConstructorASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link InefficientConstructorASTVisitor}.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class InefficientConstructorResolver extends InefficientConstructorASTVisitor {
 
 	private static final String NAME = "Replace inefficient constructors with valueOf()"; //$NON-NLS-1$

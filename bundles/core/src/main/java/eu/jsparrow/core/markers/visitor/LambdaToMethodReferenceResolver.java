@@ -17,6 +17,13 @@ import org.eclipse.jdt.core.dom.TypeMethodReference;
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.LambdaToMethodReferenceASTVisitor;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link LambdaToMethodReferenceASTVisitor}.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTVisitor {
 
 	private static final String NAME = "Replace lambda expression with method reference"; //$NON-NLS-1$

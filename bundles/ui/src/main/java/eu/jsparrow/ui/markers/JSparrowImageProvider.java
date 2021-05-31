@@ -5,6 +5,11 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.texteditor.IAnnotationImageProvider;
 
+/**
+ * A provider for jSparrow icons. 
+ * 
+ * @since 3.31.0
+ */
 public class JSparrowImageProvider implements IAnnotationImageProvider {
 
 	@Override

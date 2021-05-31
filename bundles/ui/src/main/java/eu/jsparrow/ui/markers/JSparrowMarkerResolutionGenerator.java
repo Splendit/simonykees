@@ -10,6 +10,12 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.markers.CoreRefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 
+/**
+ * Generates resolution instances for jSparrow markers.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class JSparrowMarkerResolutionGenerator implements IMarkerResolutionGenerator2 {
 
 	private static final Logger logger = LoggerFactory.getLogger(JSparrowMarkerResolutionGenerator.class);

@@ -10,9 +10,14 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.ui.Activator;
 
+/**
+ * A factory class for creating {@link IMarker}s for the generated
+ * {@link RefactoringMarkerEvent}s.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class MarkerFactory {
-
-
 
 	private static final Logger logger = LoggerFactory.getLogger(MarkerFactory.class);
 
@@ -22,6 +27,12 @@ public class MarkerFactory {
 	private static final String DESCRIPTION_KEY = "description"; //$NON-NLS-1$
 	private static final String NEW_LENGTH = "newLength"; //$NON-NLS-1$
 
+	/**
+	 * Creates an {@link IMarker} for the given {@link RefactoringMarkerEvent}.
+	 * 
+	 * @param event
+	 *            the event to create the {@link IMarker} for.
+	 */
 	public void create(RefactoringMarkerEvent event) {
 		try {
 			IJavaElement javaElement = event.getJavaElement();

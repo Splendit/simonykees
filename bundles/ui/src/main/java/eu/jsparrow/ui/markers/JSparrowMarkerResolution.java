@@ -14,6 +14,12 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 
+/**
+ * Provides resolution for a jSparrow marker. 
+ * 
+ * @since 3.31.0
+ *
+ */
 public class JSparrowMarkerResolution implements IMarkerResolution2 {
 
 	private int offset;

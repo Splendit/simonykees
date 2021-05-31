@@ -24,6 +24,12 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * A registry for jSparrow marker resolvers implemented in this module.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class ResolverVisitorsFactory {
 
 	private static final Map<String, Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor>> registry = initRegistry();
@@ -49,6 +55,13 @@ public class ResolverVisitorsFactory {
 		return Collections.unmodifiableMap(map);
 	}
 
+	/**
+	 * 
+	 * @param checker
+	 *            a predicate for testing the relevant nodes by their position
+	 *            in the compilation unit.
+	 * @return the list of all recorded resolvers.
+	 */
 	public static List<AbstractASTRewriteASTVisitor> getAllResolvers(Predicate<ASTNode> checker) {
 		List<AbstractASTRewriteASTVisitor> resolvers = new ArrayList<>();
 		registry.forEach((name, generatingFunction) -> {
@@ -60,6 +73,14 @@ public class ResolverVisitorsFactory {
 		return resolvers;
 	}
 
+	/**
+	 * Get the registered resolvers with the given ID (i.e., the fully qualified
+	 * name).
+	 * 
+	 * @param resolverName
+	 *            the resolver name.
+	 * @return a function that gets a position function predicate and returns an instance of a registered recorder. 
+	 */
 	public static Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor> getResolverGenerator(String resolverName) {
 		return registry.getOrDefault(resolverName, p -> null);
 	}

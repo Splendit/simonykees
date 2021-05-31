@@ -17,6 +17,15 @@ import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 
+/**
+ * An engine for creating and clearing jSparrow markers based on the generated {@link RefactoringMarkerEvent}s. 
+ * The implementation is designed after jdt.spelling plugin. 
+ * 
+ * @see {@linkplain https://github.com/stuarthendren/jdt.spelling}.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class MarkerEngine extends EditorTracker implements IElementChangedListener {
 
 	private IResource currentResource;

@@ -14,6 +14,13 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.PrimitiveBoxedForStringASTVisitor;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link PrimitiveBoxedForStringASTVisitor}.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTVisitor {
 
 	private static final String NAME = "Remove boxing for String conversions"; //$NON-NLS-1$

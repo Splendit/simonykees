@@ -17,6 +17,13 @@ import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.PutIfAbsentASTVisitor;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link PutIfAbsentASTVisitor}.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 
 	private static final String NAME = "Replace put(..) with putIfAbsent(..)"; //$NON-NLS-1$

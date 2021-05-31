@@ -11,6 +11,13 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.comparatormethods.UseComparatorMethodsASTVisitor;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link UseComparatorMethodsASTVisitor}.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor {
 
 	private static final String NAME = "Use predefined comparator"; //$NON-NLS-1$

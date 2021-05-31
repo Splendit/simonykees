@@ -14,6 +14,13 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.StringLiteralEqualityCheckASTVisitor;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link StringLiteralEqualityCheckASTVisitor}.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityCheckASTVisitor {
 
 	private static final String NAME = "Reorder String equality check"; //$NON-NLS-1$

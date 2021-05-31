@@ -14,6 +14,13 @@ import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.EnumsWithoutEqualsASTVisitor;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link EnumsWithoutEqualsASTVisitor}.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
 
 	private static final String NAME = "Replace equals() on Enum constants"; //$NON-NLS-1$

@@ -10,6 +10,13 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
+/**
+ * Based on jdt.spelling plugin.
+ * 
+ * @see {@linkplain https://github.com/stuarthendren/jdt.spelling} 
+ * 
+ * @since 3.31.0
+ */
 public abstract class EditorTracker implements IWindowListener, IPageListener, IPartListener {
 	/**
 	 * <p>

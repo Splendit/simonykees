@@ -16,6 +16,13 @@ import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link UseIsEmptyOnCollectionsASTVisitor}.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTVisitor {
 
 	private static final String NAME = "Replace Equality Check with isEmpty()"; //$NON-NLS-1$

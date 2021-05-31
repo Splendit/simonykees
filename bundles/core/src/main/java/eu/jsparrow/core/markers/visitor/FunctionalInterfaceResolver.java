@@ -16,6 +16,13 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
 
+/**
+ * A visitor for resolving one issue of type
+ * {@link FunctionalInterfaceASTVisitor}.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 
 	private static final String NAME = "Replace with Lambda Expression"; //$NON-NLS-1$

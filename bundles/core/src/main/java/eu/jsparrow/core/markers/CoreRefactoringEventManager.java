@@ -18,10 +18,18 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.WorkingCopyOwnerDecorator;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.util.JdtCoreVersionBindingUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Provides functionalities for generating and resolving
+ * {@link RefactoringMarkerEvent}.
+ * 
+ * @since 3.31.0
+ *
+ */
 public class CoreRefactoringEventManager implements RefactoringEventManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(CoreRefactoringEventManager.class);
