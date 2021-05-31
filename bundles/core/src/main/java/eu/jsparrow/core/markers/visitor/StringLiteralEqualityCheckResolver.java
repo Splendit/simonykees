@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.StringLiteralEqualityCheckASTVisitor;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * A visitor for resolving one issue of type
@@ -23,8 +24,6 @@ import eu.jsparrow.core.visitor.impl.StringLiteralEqualityCheckASTVisitor;
  */
 public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityCheckASTVisitor {
 
-	private static final String NAME = "Reorder String equality check"; //$NON-NLS-1$
-	private static final String MESSAGE = "To avoid NullPointerExceptions, String literals should be placed on the left side when checking for equality."; //$NON-NLS-1$
 	public static final String ID = StringLiteralEqualityCheckResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -50,7 +49,7 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 	@Override
 	public void addMarkerEvent(StringLiteral stringLiteral, Expression expression) {
 		MethodInvocation newNode = createRepresentingNode(expression, stringLiteral);
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.StringLiteralEqualityCheckResolver_name, Messages.StringLiteralEqualityCheckResolver_message,
 				javaElement, 0, stringLiteral, newNode);
 		addMarkerEvent(event);
 	}

@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.PrimitiveBoxedForStringASTVisitor;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * A visitor for resolving one issue of type
@@ -23,8 +24,6 @@ import eu.jsparrow.core.visitor.impl.PrimitiveBoxedForStringASTVisitor;
  */
 public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTVisitor {
 
-	private static final String NAME = "Remove boxing for String conversions"; //$NON-NLS-1$
-	private static final String MESSAGE = "Avoid constructing boxed primitives by using the factory method toString"; //$NON-NLS-1$
 	public static final String ID = PrimitiveBoxedForStringResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -65,7 +64,8 @@ public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTV
 				.length();
 		}
 
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement, highlightLenght, node,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.PrimitiveBoxedForStringResolver_name,
+				Messages.PrimitiveBoxedForStringResolver_message, javaElement, highlightLenght, node,
 				newNode);
 		addMarkerEvent(event);
 	}

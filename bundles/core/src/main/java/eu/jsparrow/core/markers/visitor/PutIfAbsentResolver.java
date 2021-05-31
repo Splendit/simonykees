@@ -15,19 +15,19 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.PutIfAbsentASTVisitor;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 
 /**
- * A visitor for resolving one issue of type
- * {@link PutIfAbsentASTVisitor}.
+ * A visitor for resolving one issue of type {@link PutIfAbsentASTVisitor}.
  * 
  * @since 3.31.0
  *
  */
 public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 
-	private static final String NAME = "Replace put(..) with putIfAbsent(..)"; //$NON-NLS-1$
-	private static final String MESSAGE = "Use the Java 8 API that allows for conditionally adding entries to a map."; //$NON-NLS-1$
+	private static final String NAME = Messages.PutIfAbsentResolver_name;
+	private static final String MESSAGE = Messages.PutIfAbsentResolver_message;
 	public static final String ID = PutIfAbsentResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -53,7 +53,8 @@ public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 	@Override
 	public void addMarkerEvent(MethodInvocation methodInvocation) {
 		ExpressionStatement newNode = createRepresentingNode(methodInvocation);
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.PutIfAbsentResolver_name,
+				Messages.PutIfAbsentResolver_message,
 				javaElement, 0, methodInvocation, newNode);
 		addMarkerEvent(event);
 	}

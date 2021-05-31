@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.EnumsWithoutEqualsASTVisitor;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 
 /**
@@ -23,8 +24,6 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
  */
 public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
 
-	private static final String NAME = "Replace equals() on Enum constants"; //$NON-NLS-1$
-	private static final String MESSAGE = "Replace occurrences of equals() on Enum constants with an identity comparison (==)."; //$NON-NLS-1$
 	public static final String ID = EnumsWithoutEqualsResolver.class.getName();
 
 	private IJavaElement javaElement;
@@ -55,7 +54,8 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
 		Expression representingNode = createRepresentingNode(expression, argument, newOperator);
 		int highlightLength = representingNode.toString()
 			.length();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.EnumsWithoutEqualsResolver_name,
+				Messages.EnumsWithoutEqualsResolver_message,
 				javaElement,
 				highlightLength, replacedNode,
 				representingNode);

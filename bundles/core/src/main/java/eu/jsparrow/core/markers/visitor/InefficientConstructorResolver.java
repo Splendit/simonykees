@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import eu.jsparrow.core.constants.ReservedNames;
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.InefficientConstructorASTVisitor;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
@@ -26,8 +27,6 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class InefficientConstructorResolver extends InefficientConstructorASTVisitor {
 
-	private static final String NAME = "Replace inefficient constructors with valueOf()"; //$NON-NLS-1$
-	private static final String MESSAGE = "The factory method valueOf() is generally a better choice as it is likely to yield significantly better space and time performance."; //$NON-NLS-1$
 	public static final String ID = InefficientConstructorResolver.class.getName();
 
 	private IJavaElement javaElement;
@@ -68,7 +67,8 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 	public void addMarkerEvent(Expression refactorCandidateParameter, MethodInvocation node,
 			Expression replaceParameter) {
 		MethodInvocation newNode = createRepresentingNode(node, replaceParameter);
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.InefficientConstructorResolver_name,
+				Messages.InefficientConstructorResolver_message,
 				javaElement, 0, refactorCandidateParameter,
 				newNode);
 		addMarkerEvent(event);
@@ -80,7 +80,8 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 		MethodInvocation newNode = createRepresentingNode(refactorPrimitiveType, refactorCandidateParameter);
 		int highlightLenght = newNode.toString()
 			.length();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.InefficientConstructorResolver_name,
+				Messages.InefficientConstructorResolver_message,
 				javaElement, highlightLenght, node,
 				newNode);
 		addMarkerEvent(event);

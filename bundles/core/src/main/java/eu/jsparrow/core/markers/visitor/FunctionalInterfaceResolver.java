@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * A visitor for resolving one issue of type
@@ -25,8 +26,6 @@ import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisito
  */
 public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 
-	private static final String NAME = "Replace with Lambda Expression"; //$NON-NLS-1$
-	private static final String MESSAGE = "Anonymous class can be replaced by lambda expression"; //$NON-NLS-1$
 	public static final String ID = FunctionalInterfaceResolver.class.getName();
 
 	private IJavaElement javaElement;
@@ -56,7 +55,8 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 		LambdaExpression representingNode = createRepresentingNode(parameters, block);
 		int highlightLenght = representingNode.toString()
 			.length();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.FunctionalInterfaceResolver_name,
+				Messages.FunctionalInterfaceResolver_message, javaElement,
 				highlightLenght, classInstanceCreation,
 				representingNode);
 		addMarkerEvent(event);

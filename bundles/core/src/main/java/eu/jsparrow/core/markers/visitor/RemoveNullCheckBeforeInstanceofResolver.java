@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.RemoveNullCheckBeforeInstanceofASTVisitor;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * A visitor for resolving one issue of type
@@ -23,8 +24,6 @@ import eu.jsparrow.core.visitor.impl.RemoveNullCheckBeforeInstanceofASTVisitor;
  */
 public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBeforeInstanceofASTVisitor {
 
-	private static final String NAME = "Remove Null-Checks Before Instanceof"; //$NON-NLS-1$
-	private static final String MESSAGE = "null is not an instance of anything, therefore the null-check is redundant."; //$NON-NLS-1$
 	public static final String ID = RemoveNullCheckBeforeInstanceofResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -54,7 +53,8 @@ public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBefo
 	@Override
 	public void addMarkerEvent(Expression leftOperand, InfixExpression infixExpression, Expression expression) {
 		ASTNode newNode = createRepresentingNode(infixExpression, expression);
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.RemoveNullCheckBeforeInstanceofResolver_name,
+				Messages.RemoveNullCheckBeforeInstanceofResolver_message,
 				javaElement, 0, leftOperand, newNode);
 		addMarkerEvent(event);
 	}
@@ -63,7 +63,7 @@ public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBefo
 		AST ast = infixExpression.getAST();
 		StructuralPropertyDescriptor structuralProperty = infixExpression.getLocationInParent();
 		ASTNode parent = ASTNode.copySubtree(ast, infixExpression.getParent());
-		parent.setStructuralProperty(structuralProperty, (Expression)ASTNode.copySubtree(ast, expression));
+		parent.setStructuralProperty(structuralProperty, (Expression) ASTNode.copySubtree(ast, expression));
 		return parent;
 	}
 }

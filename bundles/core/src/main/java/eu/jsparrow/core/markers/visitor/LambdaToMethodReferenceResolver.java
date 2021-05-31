@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.TypeMethodReference;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.LambdaToMethodReferenceASTVisitor;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * A visitor for resolving one issue of type
@@ -26,8 +27,6 @@ import eu.jsparrow.core.visitor.impl.LambdaToMethodReferenceASTVisitor;
  */
 public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTVisitor {
 
-	private static final String NAME = "Replace lambda expression with method reference"; //$NON-NLS-1$
-	private static final String MESSAGE = "Simplify the lambda expression by using a method reference."; //$NON-NLS-1$
 	public static final String ID = LambdaToMethodReferenceResolver.class.getName();
 
 	private IJavaElement javaElement;
@@ -56,7 +55,8 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 		ExpressionMethodReference newNode = createNodeRepresentation(refExpression, name);
 		int highlightLenght = newNode.toString()
 			.length();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.LambdaToMethodReferenceResolver_name,
+				Messages.LambdaToMethodReferenceResolver_message,
 				javaElement, highlightLenght, lambdaExpressionNode, newNode);
 		addMarkerEvent(event);
 	}
@@ -66,7 +66,8 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 		CreationReference newNode = createNodeRepresentation(classInstanceCreationType);
 		int highlightLenght = newNode.toString()
 			.length();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement, highlightLenght,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.LambdaToMethodReferenceResolver_name,
+				Messages.LambdaToMethodReferenceResolver_message, javaElement, highlightLenght,
 				lambdaExpressionNode, newNode);
 		addMarkerEvent(event);
 	}
@@ -75,8 +76,9 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 	public void addMarkerEvent(LambdaExpression lambdaExpressionNode, Type representingType, SimpleName methodName) {
 		TypeMethodReference newNode = createRepresentingNode(representingType, methodName);
 		int highlightLenght = newNode.toString()
-				.length();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement,
+			.length();
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.LambdaToMethodReferenceResolver_name,
+				Messages.LambdaToMethodReferenceResolver_message, javaElement,
 				highlightLenght, lambdaExpressionNode, newNode);
 		addMarkerEvent(event);
 

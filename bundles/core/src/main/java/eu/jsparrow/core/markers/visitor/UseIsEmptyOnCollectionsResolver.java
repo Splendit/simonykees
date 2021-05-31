@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 
 /**
@@ -25,8 +26,6 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
  */
 public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTVisitor {
 
-	private static final String NAME = "Replace Equality Check with isEmpty()"; //$NON-NLS-1$
-	private static final String MESSAGE = "Use isEmpty() on Strings, Maps, and Collections."; //$NON-NLS-1$
 	public static final String ID = UseIsEmptyOnCollectionsResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -52,7 +51,8 @@ public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTV
 	@Override
 	public void addMarkerEvent(InfixExpression parent, Expression varExpression) {
 		ASTNode newNode = createRepresentationNode(parent, varExpression);
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.UseIsEmptyOnCollectionsResolver_name,
+				Messages.UseIsEmptyOnCollectionsResolver_message,
 				javaElement, 0, parent, newNode);
 		addMarkerEvent(event);
 	}

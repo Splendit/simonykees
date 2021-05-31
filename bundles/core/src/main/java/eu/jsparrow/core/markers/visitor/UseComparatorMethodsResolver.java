@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
 import eu.jsparrow.core.visitor.impl.comparatormethods.UseComparatorMethodsASTVisitor;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * A visitor for resolving one issue of type
@@ -20,8 +21,6 @@ import eu.jsparrow.core.visitor.impl.comparatormethods.UseComparatorMethodsASTVi
  */
 public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor {
 
-	private static final String NAME = "Use predefined comparator"; //$NON-NLS-1$
-	private static final String MESSAGE = "Lambda expression can be replaced with predefined comparator"; //$NON-NLS-1$
 	public static final String ID = UseComparatorMethodsResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -48,7 +47,8 @@ public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor
 	public void addMarkerEvent(LambdaExpression lambda, MethodInvocation lambdaReplacement) {
 		int highlightLenght = lambdaReplacement.toString()
 			.length();
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, NAME, MESSAGE, javaElement,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.UseComparatorMethodsResolver_name,
+				Messages.UseComparatorMethodsResolver_message, javaElement,
 				highlightLenght, lambda, lambdaReplacement);
 		addMarkerEvent(event);
 	}
