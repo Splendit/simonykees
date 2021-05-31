@@ -59,6 +59,7 @@ class PutIfAbsentResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("Use the Java 8 API that allows for conditionally adding entries to a map.", event.getMessage()), 
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.PutIfAbsentResolver", event.getResolver()),
 				() -> assertEquals("map.putIfAbsent(1,2);\n", event.getDescription()),
+				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(229, event.getOffset()),
 				() -> assertEquals(13, event.getLength()));
 	}

@@ -55,6 +55,7 @@ class UseComparatorMethodsResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("Lambda expression can be replaced with predefined comparator", event.getMessage()), 
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.UseComparatorMethodsResolver", event.getResolver()),
 				() -> assertEquals("Comparator.naturalOrder()", event.getDescription()),
+				() -> assertEquals(25, event.getHighlightLength()),
 				() -> assertEquals(151, event.getOffset()),
 				() -> assertEquals(32, event.getLength()));
 	}

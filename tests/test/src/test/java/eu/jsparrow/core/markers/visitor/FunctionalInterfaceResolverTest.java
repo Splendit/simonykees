@@ -63,6 +63,7 @@ class FunctionalInterfaceResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("Anonymous class can be replaced by lambda expression", event.getMessage()), 
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.FunctionalInterfaceResolver", event.getResolver()),
 				() -> assertEquals("() -> {\n  System.out.println();\n}\n", event.getDescription()),
+				() -> assertEquals(34, event.getHighlightLength()),
 				() -> assertEquals(102, event.getOffset()),
 				() -> assertEquals(132, event.getLength()));
 	}
