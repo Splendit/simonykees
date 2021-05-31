@@ -49,7 +49,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitRule
 
 	@Override
 	public String requiredLibraries() {
-		return "Hamcrest 1.3 and Hamcrest JUnit 1.0"; //$NON-NLS-1$
+		return "Hamcrest Core 1.3 and Hamcrest JUnit 1.0"; //$NON-NLS-1$
 	}
 
 	@Override
