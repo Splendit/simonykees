@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -47,6 +48,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 
 	protected final String classDeclaringJUnit4MethodReplacement;
 	private final Function<JUnit4InvocationReplacementAnalysis, Boolean> invocationAnalysisFunction;
+	private JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore;
 
 	AbstractReplaceJUnit4InvocationsASTVisitor(String classDeclaringJUnit4MethodReplacement,
 			Function<JUnit4InvocationReplacementAnalysis, Boolean> invocationAnalysisFunction) {
@@ -60,7 +62,6 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		super.visit(compilationUnit);
 		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
 
-		JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore;
 		if (classDeclaringJUnit4MethodReplacement.equals(ORG_J_UNIT_JUPITER_API_ASSERTIONS) ||
 				classDeclaringJUnit4MethodReplacement.equals(ORG_J_UNIT_JUPITER_API_ASSUMPTIONS)) {
 			jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(compilationUnit);
@@ -77,28 +78,9 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 			if (methodBinding != null && isSupportedJUnit4Method(methodBinding)) {
-				JUnit4InvocationReplacementAnalysis result = null;
 
-				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-						Expression.class);
-
-				boolean supportTransformation = arguments
-					.stream()
-					.allMatch(this::isArgumentWithExplicitType);
-
-				if (supportTransformation && jUnitJupiterTestMethodsStore != null) {
-					supportTransformation = jUnitJupiterTestMethodsStore
-						.isSurroundedWithJUnitJupiterTest(methodInvocation);
-				}
-
-				if (supportTransformation) {
-					JUnit4InvocationReplacementAnalysis analysisObject = new JUnit4InvocationReplacementAnalysis(
-							methodInvocation, methodBinding, arguments);
-					if (invocationAnalysisFunction.apply(analysisObject)
-						.booleanValue()) {
-						result = analysisObject;
-					}
-				}
+				JUnit4InvocationReplacementAnalysis result = findAnalysisResult(methodInvocation, methodBinding)
+					.orElse(null);
 
 				if (result != null) {
 					methodInvocationAnalysisResults.add(result);
@@ -113,6 +95,33 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 
 		transform(transformationDataCollections);
 		return false;
+	}
+
+	private Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
+			IMethodBinding methodBinding) {
+
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+				Expression.class);
+
+		if (!arguments.stream()
+			.allMatch(this::isArgumentWithExplicitType)) {
+			return Optional.empty();
+		}
+
+		if (jUnitJupiterTestMethodsStore != null
+				&& !jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
+			return Optional.empty();
+		}
+
+		JUnit4InvocationReplacementAnalysis analysisObject = new JUnit4InvocationReplacementAnalysis(
+				methodInvocation, methodBinding, arguments);
+
+		if (invocationAnalysisFunction.apply(analysisObject)
+			.booleanValue()) {
+			return Optional.of(analysisObject);
+		}
+		return Optional.empty();
+
 	}
 
 	private JUnit4TransformationDataCollections collectJUnit4TransformationData(CompilationUnit compilationUnit,
