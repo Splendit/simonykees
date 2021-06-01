@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,8 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * Replaces invocations of the JUnit 4 methods invocations
@@ -35,7 +38,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 		extends AbstractReplaceJUnit4InvocationsASTVisitor {
 	private static final String AS_LIST = "asList"; //$NON-NLS-1$
-	private static final String JAVA_UTIL_ARRAYS = "java.util.Arrays"; //$NON-NLS-1$
+	private static final String JAVA_UTIL_ARRAYS = java.util.Arrays.class.getName();
 	private static final String NULL_VALUE = "nullValue"; //$NON-NLS-1$
 	private static final String NOT_NULL_VALUE = "notNullValue"; //$NON-NLS-1$
 	private static final String EVERY_ITEM = "everyItem"; //$NON-NLS-1$
@@ -45,7 +48,28 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	private static final String ASSUME_THAT = "assumeThat"; //$NON-NLS-1$
 
 	public ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor() {
-		super("org.hamcrest.junit.MatcherAssume", JUnit4InvocationReplacementAnalysis::analyzeAssumptionToHamcrest); //$NON-NLS-1$
+		super("org.hamcrest.junit.MatcherAssume"); //$NON-NLS-1$
+	}
+	
+	protected Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
+			IMethodBinding methodBinding) {
+
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+				Expression.class);
+
+		if (!arguments.stream()
+			.allMatch(this::isArgumentWithExplicitType)) {
+			return Optional.empty();
+		}
+
+		JUnit4InvocationReplacementAnalysis analysisObject = new JUnit4InvocationReplacementAnalysis(
+				methodInvocation, methodBinding, arguments);
+
+		if (analysisObject.analyzeAssumptionToHamcrest()) {
+			return Optional.of(analysisObject);
+		}
+		return Optional.empty();
+
 	}
 
 	@Override

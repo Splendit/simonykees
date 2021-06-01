@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.Type;
 class JUnit4InvocationReplacementAnalysis {
 
 	private static final String ASSUME_THAT = "assumeThat"; //$NON-NLS-1$
-	private static final String JAVA_LANG_STRING = "java.lang.String"; //$NON-NLS-1$
+	private static final String JAVA_LANG_STRING = java.lang.String.class.getName();
 	private final MethodInvocation methodInvocation;
 	private final IMethodBinding methodBinding;
 	private final List<Expression> arguments;
@@ -65,7 +65,7 @@ class JUnit4InvocationReplacementAnalysis {
 			methodNameReplacement = "assertArrayEquals"; //$NON-NLS-1$
 		}
 
-		messageMovedToLastPosition = findMessageMovedDoLastPosition(arguments, declaredParameterTypes).orElse(null);
+		messageMovedToLastPosition = findMessageMovedToLastPosition(arguments, declaredParameterTypes).orElse(null);
 		changingArguments = messageMovedToLastPosition != null;
 
 		return true;
@@ -77,7 +77,7 @@ class JUnit4InvocationReplacementAnalysis {
 			.getMethodDeclaration()
 			.getParameterTypes();
 
-		messageMovedToLastPosition = findMessageMovedDoLastPosition(arguments, declaredParameterTypes).orElse(null);
+		messageMovedToLastPosition = findMessageMovedToLastPosition(arguments, declaredParameterTypes).orElse(null);
 		changingArguments = messageMovedToLastPosition != null;
 		return true;
 	}
@@ -95,7 +95,7 @@ class JUnit4InvocationReplacementAnalysis {
 		return assumeNotNullArgumentsAnalysis.analyzeNotNullAssumptionVarargs(methodInvocation, arguments);
 	}
 
-	private static Optional<Expression> findMessageMovedDoLastPosition(List<Expression> arguments,
+	private static Optional<Expression> findMessageMovedToLastPosition(List<Expression> arguments,
 			ITypeBinding[] declaredParameterTypes) {
 		if (declaredParameterTypes.length == 0) {
 			return Optional.empty();
@@ -116,19 +116,19 @@ class JUnit4InvocationReplacementAnalysis {
 		}
 
 		if (declaredParameterTypes.length == 2) {
-			return isParameterTypeObjectArray(declaredParameterTypes[0])
-					&& isParameterTypeObjectArray(declaredParameterTypes[1]);
+			return isObjectArray(declaredParameterTypes[0])
+					&& isObjectArray(declaredParameterTypes[1]);
 		}
 
 		if (declaredParameterTypes.length == 3) {
 			return isContentOfType(declaredParameterTypes[0], JAVA_LANG_STRING)
-					&& isParameterTypeObjectArray(declaredParameterTypes[1])
-					&& isParameterTypeObjectArray(declaredParameterTypes[2]);
+					&& isObjectArray(declaredParameterTypes[1])
+					&& isObjectArray(declaredParameterTypes[2]);
 		}
 		return false;
 	}
 
-	private static boolean isParameterTypeObjectArray(ITypeBinding parameterType) {
+	private static boolean isObjectArray(ITypeBinding parameterType) {
 		if (parameterType.isArray() && parameterType.getDimensions() == 1) {
 			return isContentOfType(parameterType.getComponentType(), "java.lang.Object"); //$NON-NLS-1$
 		}
@@ -164,10 +164,8 @@ class JUnit4InvocationReplacementAnalysis {
 	}
 
 	Optional<AssumeNotNullWithNullableArray> getAssumeNotNullWithNullableArray() {
-		if (assumeNotNullArgumentsAnalysis != null) {
-			return assumeNotNullArgumentsAnalysis.getAssumptionWithNullableArray();
-		}
-		return Optional.empty();
+		return Optional.ofNullable(assumeNotNullArgumentsAnalysis)
+			.flatMap(AssumeNotNullArgumentsAnalysis::getAssumptionWithNullableArray);
 	}
 
 	public boolean isChangingArguments() {

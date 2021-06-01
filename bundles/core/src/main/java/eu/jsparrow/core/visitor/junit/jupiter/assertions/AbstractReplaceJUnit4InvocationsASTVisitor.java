@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -47,13 +46,9 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 	protected static final String ORG_J_UNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 
 	protected final String classDeclaringJUnit4MethodReplacement;
-	private final Function<JUnit4InvocationReplacementAnalysis, Boolean> invocationAnalysisFunction;
-	private JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore;
 
-	AbstractReplaceJUnit4InvocationsASTVisitor(String classDeclaringJUnit4MethodReplacement,
-			Function<JUnit4InvocationReplacementAnalysis, Boolean> invocationAnalysisFunction) {
+	AbstractReplaceJUnit4InvocationsASTVisitor(String classDeclaringJUnit4MethodReplacement) {
 		this.classDeclaringJUnit4MethodReplacement = classDeclaringJUnit4MethodReplacement;
-		this.invocationAnalysisFunction = invocationAnalysisFunction;
 	}
 
 	@Override
@@ -62,15 +57,8 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		super.visit(compilationUnit);
 		verifyImport(compilationUnit, classDeclaringJUnit4MethodReplacement);
 
-		if (classDeclaringJUnit4MethodReplacement.equals(ORG_J_UNIT_JUPITER_API_ASSERTIONS) ||
-				classDeclaringJUnit4MethodReplacement.equals(ORG_J_UNIT_JUPITER_API_ASSUMPTIONS)) {
-			jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(compilationUnit);
-		} else {
-			jUnitJupiterTestMethodsStore = null;
-		}
-
 		List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults = new ArrayList<>();
-		List<MethodInvocation> notTransformedJUnit4Invocations = new ArrayList<>();
+		List<MethodInvocation> unchangedJUnit4Invocations = new ArrayList<>();
 
 		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
 		compilationUnit.accept(invocationCollectorVisitor);
@@ -85,50 +73,26 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 				if (result != null) {
 					methodInvocationAnalysisResults.add(result);
 				} else {
-					notTransformedJUnit4Invocations.add(methodInvocation);
+					unchangedJUnit4Invocations.add(methodInvocation);
 				}
 			}
 		}
 
 		JUnit4TransformationDataCollections transformationDataCollections = collectJUnit4TransformationData(
-				compilationUnit, methodInvocationAnalysisResults, notTransformedJUnit4Invocations);
+				compilationUnit, methodInvocationAnalysisResults, unchangedJUnit4Invocations);
 
 		transform(transformationDataCollections);
 		return false;
 	}
 
-	private Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
-			IMethodBinding methodBinding) {
-
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-				Expression.class);
-
-		if (!arguments.stream()
-			.allMatch(this::isArgumentWithExplicitType)) {
-			return Optional.empty();
-		}
-
-		if (jUnitJupiterTestMethodsStore != null
-				&& !jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
-			return Optional.empty();
-		}
-
-		JUnit4InvocationReplacementAnalysis analysisObject = new JUnit4InvocationReplacementAnalysis(
-				methodInvocation, methodBinding, arguments);
-
-		if (invocationAnalysisFunction.apply(analysisObject)
-			.booleanValue()) {
-			return Optional.of(analysisObject);
-		}
-		return Optional.empty();
-
-	}
+	protected abstract Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
+			IMethodBinding methodBinding);
 
 	private JUnit4TransformationDataCollections collectJUnit4TransformationData(CompilationUnit compilationUnit,
 			List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults,
-			List<MethodInvocation> notTransformedJUnit4Invocations) {
-		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticMethodImportsToRemove(compilationUnit,
-				notTransformedJUnit4Invocations);
+			List<MethodInvocation> unchangedJUnit4Invocations) {
+		List<ImportDeclaration> staticMethodImportsToRemove = collectStaticImportsToRemove(compilationUnit,
+				unchangedJUnit4Invocations);
 
 		Map<String, String> supportedStaticImportsMap = collectSupportedStaticImportsMap(staticMethodImportsToRemove,
 				methodInvocationAnalysisResults);
@@ -211,7 +175,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		return new JUnit4InvocationReplacementData(invocationData, newMethodInvocationSupplier);
 	}
 
-	private boolean isArgumentWithExplicitType(Expression expression) {
+	protected boolean isArgumentWithExplicitType(Expression expression) {
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
@@ -228,7 +192,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		return true;
 	}
 
-	protected List<ImportDeclaration> collectStaticMethodImportsToRemove(CompilationUnit compilationUnit,
+	protected List<ImportDeclaration> collectStaticImportsToRemove(CompilationUnit compilationUnit,
 			List<MethodInvocation> notTransformedJUnit4Invocations) {
 
 		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = notTransformedJUnit4Invocations
