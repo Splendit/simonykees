@@ -14,6 +14,8 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 
+import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.*;
+
 /**
  * Provides resolution for a jSparrow marker. 
  * 
@@ -25,7 +27,7 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 	private int offset;
 	private int newLength;
 	private IResource resource;
-	private String description;
+	private String codePreview;
 	private String name;
 	private String resolver;
 	private RefactoringEventManager eventGenerator;
@@ -33,11 +35,11 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 	public JSparrowMarkerResolution(IMarker marker, RefactoringEventManager eventGenerator) {
 		this.eventGenerator = eventGenerator;
 		this.offset = marker.getAttribute(IMarker.CHAR_START, 0);
-		this.newLength = marker.getAttribute("newLength", offset); //$NON-NLS-1$
-		this.name = marker.getAttribute("name", "jSparrow Quickfix"); //$NON-NLS-1$ //$NON-NLS-2$
+		this.newLength = marker.getAttribute(HIGHLIGHT_LENGTH_KEY, offset);
+		this.name = marker.getAttribute(NAME_KEY, "jSparrow Quickfix"); //$NON-NLS-1$
 		this.resource = marker.getResource();
-		this.description = marker.getAttribute("description", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		this.resolver = marker.getAttribute("resolver", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		this.codePreview = marker.getAttribute(CODE_PREVIEW_KEY, ""); //$NON-NLS-1$
+		this.resolver = marker.getAttribute(RESOLVER_KEY, ""); //$NON-NLS-1$
 	}
 
 	@Override
@@ -68,7 +70,7 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 
 	@Override
 	public String getDescription() {
-		return description;
+		return codePreview;
 	}
 
 	@Override

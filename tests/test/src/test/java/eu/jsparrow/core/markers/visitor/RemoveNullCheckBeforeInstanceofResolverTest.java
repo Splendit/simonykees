@@ -60,7 +60,7 @@ class RemoveNullCheckBeforeInstanceofResolverTest extends UsesSimpleJDTUnitFixtu
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.RemoveNullCheckBeforeInstanceofResolver", event.getResolver()),
 				() -> assertEquals("if (name instanceof String) {\n"
 						+ "  System.out.println(name);\n"
-						+ "}\n", event.getDescription()),
+						+ "}\n", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(129, event.getOffset()),
 				() -> assertEquals(12, event.getLength()));

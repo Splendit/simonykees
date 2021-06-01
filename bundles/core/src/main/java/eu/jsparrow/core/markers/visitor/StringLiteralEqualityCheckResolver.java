@@ -49,7 +49,8 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 	@Override
 	public void addMarkerEvent(StringLiteral stringLiteral, Expression expression) {
 		MethodInvocation newNode = createRepresentingNode(expression, stringLiteral);
-		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.StringLiteralEqualityCheckResolver_name, Messages.StringLiteralEqualityCheckResolver_message,
+		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.StringLiteralEqualityCheckResolver_name,
+				Messages.StringLiteralEqualityCheckResolver_message,
 				javaElement, 0, stringLiteral, newNode);
 		addMarkerEvent(event);
 	}

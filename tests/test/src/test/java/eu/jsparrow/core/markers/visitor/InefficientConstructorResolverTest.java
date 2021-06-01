@@ -47,7 +47,7 @@ class InefficientConstructorResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("Replace inefficient constructors with valueOf()", event.getName()),
 				() -> assertEquals("The factory method valueOf() is generally a better choice as it is likely to yield significantly better space and time performance.", event.getMessage()), 
 				() -> assertEquals("eu.jsparrow.core.markers.visitor.InefficientConstructorResolver", event.getResolver()),
-				() -> assertEquals("Integer.valueOf(1)", event.getDescription()),
+				() -> assertEquals("Integer.valueOf(1)", event.getCodePreview()),
 				() -> assertEquals(18, event.getHighlightLength()),
 				() -> assertEquals(101, event.getOffset()),
 				() -> assertEquals(14, event.getLength()));

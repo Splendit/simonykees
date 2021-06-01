@@ -38,7 +38,7 @@ public class DummyRefactoringEvent implements RefactoringMarkerEvent {
 	}
 
 	@Override
-	public String getDescription() {
+	public String getCodePreview() {
 		return "Do not change anything";
 	}
 

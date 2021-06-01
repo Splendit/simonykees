@@ -3,7 +3,7 @@ package eu.jsparrow.rules.common.markers;
 import org.eclipse.jdt.core.IJavaElement;
 
 /**
- * A type providing all required information for creating a jSparrow marker.
+ * A type providing all the required information for creating a jSparrow marker.
  * 
  * @since 3.31.0
  *
@@ -52,7 +52,7 @@ public interface RefactoringMarkerEvent {
 	 * 
 	 * @return the code preview of this marker.
 	 */
-	String getDescription();
+	String getCodePreview();
 
 	/**
 	 * 

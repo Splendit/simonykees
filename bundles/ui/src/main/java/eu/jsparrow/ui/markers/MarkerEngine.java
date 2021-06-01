@@ -18,8 +18,9 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 
 /**
- * An engine for creating and clearing jSparrow markers based on the generated {@link RefactoringMarkerEvent}s. 
- * The implementation is designed after jdt.spelling plugin. 
+ * An engine for creating and clearing jSparrow markers based on the generated
+ * {@link RefactoringMarkerEvent}s. The implementation is designed after
+ * jdt.spelling plugin.
  * 
  * @see {@linkplain https://github.com/stuarthendren/jdt.spelling}.
  * 
@@ -133,7 +134,7 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 		RefactoringMarkers.clear();
 		eventGenerator.discoverRefactoringEvents(cu);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
-		if (allSame(events, oldEvents)) {
+		if (oldEvents.equals(events)) {
 			return;
 		}
 		final IResource resource = cu.getResource();
@@ -144,19 +145,5 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 			}
 		});
 		job.schedule();
-	}
-
-	private boolean allSame(List<RefactoringMarkerEvent> events, List<RefactoringMarkerEvent> oldEvents) {
-		if (events.size() != oldEvents.size()) {
-			return false;
-		}
-		for (int i = 0; i < events.size(); i++) {
-			RefactoringMarkerEvent event = events.get(i);
-			RefactoringMarkerEvent oldEvent = events.get(i);
-			if (!event.equals(oldEvent)) {
-				return false;
-			}
-		}
-		return true;
 	}
 }

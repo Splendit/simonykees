@@ -79,7 +79,8 @@ public class ResolverVisitorsFactory {
 	 * 
 	 * @param resolverName
 	 *            the resolver name.
-	 * @return a function that gets a position function predicate and returns an instance of a registered recorder. 
+	 * @return a function that gets a position function predicate and returns an
+	 *         instance of a registered recorder.
 	 */
 	public static Function<Predicate<ASTNode>, AbstractASTRewriteASTVisitor> getResolverGenerator(String resolverName) {
 		return registry.getOrDefault(resolverName, p -> null);

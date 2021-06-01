@@ -10,7 +10,8 @@ public interface RefactoringMarkerListener {
 	/**
 	 * Update all listeners interested on {@link RefactoringMarkerEvent}.
 	 * 
-	 * @param event a new {@link RefactoringMarkerEvent}.
+	 * @param event
+	 *            a new {@link RefactoringMarkerEvent}.
 	 */
 	void update(RefactoringMarkerEvent event);
 }

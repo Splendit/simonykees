@@ -26,8 +26,6 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
  */
 public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 
-	private static final String NAME = Messages.PutIfAbsentResolver_name;
-	private static final String MESSAGE = Messages.PutIfAbsentResolver_message;
 	public static final String ID = PutIfAbsentResolver.class.getName();
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
