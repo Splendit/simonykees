@@ -85,8 +85,20 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		return false;
 	}
 
-	protected abstract Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
-			IMethodBinding methodBinding);
+	protected Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
+			IMethodBinding methodBinding){
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+				Expression.class);
+
+		if (!arguments.stream()
+			.allMatch(this::isArgumentWithExplicitType)) {
+			return Optional.empty();
+		}
+		
+		JUnit4InvocationReplacementAnalysis analysisObject = new JUnit4InvocationReplacementAnalysis(
+				methodInvocation, methodBinding, arguments);
+		return Optional.of(analysisObject);
+	}
 
 	private JUnit4TransformationDataCollections collectJUnit4TransformationData(CompilationUnit compilationUnit,
 			List<JUnit4InvocationReplacementAnalysis> methodInvocationAnalysisResults,
@@ -175,7 +187,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		return new JUnit4InvocationReplacementData(invocationData, newMethodInvocationSupplier);
 	}
 
-	protected boolean isArgumentWithExplicitType(Expression expression) {
+	private boolean isArgumentWithExplicitType(Expression expression) {
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();

@@ -20,8 +20,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
-
 /**
  * Replaces invocations of the JUnit 4 methods invocations
  * <ul>
@@ -50,26 +48,12 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	public ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor() {
 		super("org.hamcrest.junit.MatcherAssume"); //$NON-NLS-1$
 	}
-	
+
+	@Override
 	protected Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding) {
-
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-				Expression.class);
-
-		if (!arguments.stream()
-			.allMatch(this::isArgumentWithExplicitType)) {
-			return Optional.empty();
-		}
-
-		JUnit4InvocationReplacementAnalysis analysisObject = new JUnit4InvocationReplacementAnalysis(
-				methodInvocation, methodBinding, arguments);
-
-		if (analysisObject.analyzeAssumptionToHamcrest()) {
-			return Optional.of(analysisObject);
-		}
-		return Optional.empty();
-
+		return super.findAnalysisResult(methodInvocation, methodBinding)
+			.filter(JUnit4InvocationReplacementAnalysis::analyzeAssumptionToHamcrest);
 	}
 
 	@Override

@@ -2,14 +2,10 @@ package eu.jsparrow.core.visitor.junit.jupiter.assertions;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
-import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * Replaces the JUnit 4 method invocations {@code org.junit.Assume.assumeFalse}
@@ -24,32 +20,19 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitor extends AbstractRepla
 	public ReplaceJUnit4AssumptionsWithJupiterASTVisitor() {
 		super(ORG_J_UNIT_JUPITER_API_ASSUMPTIONS);
 	}
-	
+
 	@Override
 	protected Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
 			IMethodBinding methodBinding) {
 
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-				Expression.class);
-
-		if (!arguments.stream()
-			.allMatch(this::isArgumentWithExplicitType)) {
-			return Optional.empty();
-		}
-
-		JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(getCompilationUnit());
+		JUnitJupiterTestMethodsStore jUnitJupiterTestMethodsStore = new JUnitJupiterTestMethodsStore(
+				getCompilationUnit());
 		if (!jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
 			return Optional.empty();
 		}
 
-		JUnit4InvocationReplacementAnalysis analysisObject = new JUnit4InvocationReplacementAnalysis(
-				methodInvocation, methodBinding, arguments);
-
-		if (analysisObject.analyzeAssumptionToJupiter()) {
-			return Optional.of(analysisObject);
-		}
-		return Optional.empty();
-
+		return super.findAnalysisResult(methodInvocation, methodBinding)
+			.filter(JUnit4InvocationReplacementAnalysis::analyzeAssumptionToJupiter);
 	}
 
 	@Override
