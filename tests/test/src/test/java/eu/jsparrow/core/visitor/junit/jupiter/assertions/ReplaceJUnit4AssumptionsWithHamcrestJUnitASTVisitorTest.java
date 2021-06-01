@@ -474,4 +474,70 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitorTest
 				"import static org.hamcrest.junit.MatcherAssume.assumeThat;");
 		assertChange(original, original, expectedImports);
 	}
+
+	@Test
+	public void visit_CoreMatchersNotNullValueNeedingQualifier_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assume.assumeNotNull", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+
+		String original = "" +
+				"	Object o;\n"
+				+ "\n"
+				+ "	void notNullValue() {\n"
+				+ "	}\n"
+				+ "	@Test\n"
+				+ "	public void test() {\n"
+				+ "		assumeNotNull(o);\n"
+				+ "	}";
+		String expected = "" +
+				"	Object o;\n"
+				+ "\n"
+				+ "	void notNullValue() {\n"
+				+ "	}\n"
+				+ "	@Test\n"
+				+ "	public void test() {\n"
+				+ "		assumeThat(o,CoreMatchers.notNullValue());\n"
+				+ "	}";
+
+		List<String> expectedImports = Arrays.asList("import org.hamcrest.CoreMatchers;",
+				"import org.junit.jupiter.api.Test;",
+				"import static org.hamcrest.junit.MatcherAssume.assumeThat;");
+
+		assertChange(original, expected, expectedImports);
+	}
+
+	@Test
+	public void visit_ArraysAsListNeedingQualifier_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assume.assumeNotNull", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+
+		String original = ""
+				+ "	Object o1;\n"
+				+ "	Object o2;\n"
+				+ "\n"
+				+ "	void asList() {\n"
+				+ "	}\n"
+				+ "	@Test\n"
+				+ "	public void test() {\n"
+				+ "		assumeNotNull(o1, o2);\n"
+				+ "	}";
+		String expected = ""
+				+ "	Object o1;\n"
+				+ "	Object o2;\n"
+				+ "\n"
+				+ "	void asList() {\n"
+				+ "	}\n"
+				+ "	@Test\n"
+				+ "	public void test() {\n"
+				+ "		assumeThat(Arrays.asList(o1,o2),everyItem(notNullValue()));\n"
+				+ "	}";
+
+		List<String> expectedImports = Arrays.asList("import java.util.Arrays;",
+				"import org.junit.jupiter.api.Test;",
+				"import static org.hamcrest.CoreMatchers.everyItem;",
+				"import static org.hamcrest.CoreMatchers.notNullValue;",
+				"import static org.hamcrest.junit.MatcherAssume.assumeThat;");
+
+		assertChange(original, expected, expectedImports);
+	}
 }

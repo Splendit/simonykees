@@ -51,6 +51,7 @@ public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor
 	@Override
 	protected void transform(JUnit4TransformationDataCollections transformationDataCollections) {
 
+		verifyImport(getCompilationUnit(), JAVA_UTIL_ARRAYS);
 		verifyImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS);
 		verifyStaticMethodImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS + '.' + NULL_VALUE);
 		verifyStaticMethodImport(getCompilationUnit(), ORG_HAMCREST_CORE_MATCHERS + '.' + NOT_NULL_VALUE);
