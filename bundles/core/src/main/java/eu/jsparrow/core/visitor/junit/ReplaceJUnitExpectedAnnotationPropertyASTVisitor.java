@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+
 /**
  * This visitor replaces expected annotation property in
  * {@code @Test(expected=...)} with {@code assertThrows()}. For example, the
@@ -86,14 +88,10 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 			return false;
 		}
 
-		ExpressionsThrowingExceptionVisitor throwingExceptionsVisitor = new ExpressionsThrowingExceptionVisitor(
-				exceptionType);
-		if (!hasSingleNodeThrowingException(methodDeclaration, throwingExceptionsVisitor)) {
+		ASTNode nodeThrowingException = findNodeThrowingException(methodDeclaration, exceptionType).orElse(null);
+		if (nodeThrowingException == null) {
 			return false;
 		}
-
-		ASTNode nodeThrowingException = throwingExceptionsVisitor.getNodesThrowingExpectedException()
-			.get(0);
 		if (hasNonEffectivelyFinalVariables(nodeThrowingException)) {
 			return false;
 		}
@@ -107,12 +105,31 @@ public class ReplaceJUnitExpectedAnnotationPropertyASTVisitor extends AbstractRe
 		return true;
 	}
 
-	private boolean hasSingleNodeThrowingException(MethodDeclaration methodDeclaration,
-			ExpressionsThrowingExceptionVisitor throwingExceptionsVisitor) {
+	private Optional<ASTNode> findNodeThrowingException(MethodDeclaration methodDeclaration,
+			ITypeBinding exceptionType) {
 		Block body = methodDeclaration.getBody();
-		if (body == null) {
-			return false;
+		if(body == null) {
+			return Optional.empty();
 		}
+		List<ExpressionStatement> expressionStatements = ASTNodeUtil.returnTypedList(body.statements(),
+				ExpressionStatement.class);
+		if (expressionStatements.size() == 1) {
+			ExpressionStatement expressionStatement = expressionStatements.get(0);
+			return Optional.of(expressionStatement.getExpression());
+		}
+		ExpressionsThrowingExceptionVisitor throwingExceptionsVisitor = new ExpressionsThrowingExceptionVisitor(
+				exceptionType);
+		if (!hasSingleNodeThrowingException(body, throwingExceptionsVisitor)) {
+			return Optional.empty();
+		}
+
+		ASTNode nodeThrowingException = throwingExceptionsVisitor.getNodesThrowingExpectedException()
+			.get(0);
+		return Optional.of(nodeThrowingException);
+	}
+
+	private boolean hasSingleNodeThrowingException(Block body,
+			ExpressionsThrowingExceptionVisitor throwingExceptionsVisitor) {
 		body.accept(throwingExceptionsVisitor);
 		List<ASTNode> nodesThrowingException = throwingExceptionsVisitor.getNodesThrowingExpectedException();
 		if (nodesThrowingException.size() != 1) {
