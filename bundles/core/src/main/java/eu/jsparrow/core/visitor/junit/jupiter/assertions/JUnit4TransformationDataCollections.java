@@ -9,6 +9,14 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 
 /**
+ * Stores a separate list for each kind of data needed for the transformation of
+ * <ul>
+ * <li>JUnit 4 assertions to JUnit Jupiter or</li>
+ * <li>JUnit 4 assumptions to JUnit Jupiter or</li>
+ * <li>JUnit 4 assumptions to Hamcrest JUnit</li>
+ * </ul>
+ * which can be found in a given compilation unit.
+ * <p>
  * 
  * @since 3.31.0
  *
