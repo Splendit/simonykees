@@ -8,6 +8,11 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 
+/**
+ * 
+ * @since 3.31.0
+ *
+ */
 public class JUnit4TransformationDataCollections {
 
 	private final List<ImportDeclaration> staticAssertMethodImportsToRemove;

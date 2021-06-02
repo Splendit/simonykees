@@ -43,7 +43,7 @@ class JUnitJupiterTestMethodsStore {
 	));
 
 	private final List<MethodDeclaration> jUnitJupiterTestMethods;
-	
+
 	JUnitJupiterTestMethodsStore(CompilationUnit compilationUnit) {
 		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
 		compilationUnit.accept(methodDeclarationsCollectorVisitor);

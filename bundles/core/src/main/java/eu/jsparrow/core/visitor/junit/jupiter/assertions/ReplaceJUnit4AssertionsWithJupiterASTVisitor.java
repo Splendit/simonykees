@@ -37,9 +37,9 @@ public class ReplaceJUnit4AssertionsWithJupiterASTVisitor extends AbstractReplac
 		if (!jUnitJupiterTestMethodsStore.isSurroundedWithJUnitJupiterTest(methodInvocation)) {
 			return Optional.empty();
 		}
-		
+
 		return super.findAnalysisResult(methodInvocation, methodBinding)
-				.filter(JUnit4InvocationReplacementAnalysis::analyzeAssertionToJupiter);
+			.filter(JUnit4InvocationReplacementAnalysis::analyzeAssertionToJupiter);
 
 	}
 

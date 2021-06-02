@@ -86,7 +86,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 	}
 
 	protected Optional<JUnit4InvocationReplacementAnalysis> findAnalysisResult(MethodInvocation methodInvocation,
-			IMethodBinding methodBinding){
+			IMethodBinding methodBinding) {
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
 
@@ -94,7 +94,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 			.allMatch(this::isArgumentWithExplicitType)) {
 			return Optional.empty();
 		}
-		
+
 		JUnit4InvocationReplacementAnalysis analysisObject = new JUnit4InvocationReplacementAnalysis(
 				methodInvocation, methodBinding, arguments);
 		return Optional.of(analysisObject);
@@ -204,7 +204,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		return true;
 	}
 
-	protected List<ImportDeclaration> collectStaticImportsToRemove(CompilationUnit compilationUnit,
+	private List<ImportDeclaration> collectStaticImportsToRemove(CompilationUnit compilationUnit,
 			List<MethodInvocation> notTransformedJUnit4Invocations) {
 
 		Set<String> simpleNamesOfStaticAssertMethodImportsToKeep = notTransformedJUnit4Invocations
@@ -317,7 +317,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 	}
 
 	@SuppressWarnings({ "unchecked" })
-	protected MethodInvocation createNewInvocationWithoutQualifier(String newMethodName,
+	private MethodInvocation createNewInvocationWithoutQualifier(String newMethodName,
 			Supplier<List<Expression>> newArgumentsSupplier) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation newInvocation = ast.newMethodInvocation();
@@ -327,7 +327,7 @@ abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImp
 		return newInvocation;
 	}
 
-	protected MethodInvocation createNewInvocationWithQualifier(MethodInvocation contextForImport,
+	private MethodInvocation createNewInvocationWithQualifier(MethodInvocation contextForImport,
 			String newMethodName, Supplier<List<Expression>> newArgumentsSupplier) {
 		MethodInvocation newInvocation = createNewInvocationWithoutQualifier(newMethodName, newArgumentsSupplier);
 		Name newQualifier = addImport(classDeclaringJUnit4MethodReplacement, contextForImport);
