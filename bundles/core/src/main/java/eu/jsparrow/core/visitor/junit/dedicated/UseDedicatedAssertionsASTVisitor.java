@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.junit.dedicated;
 
+import org.eclipse.jdt.core.dom.MethodInvocation;
+
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -21,4 +23,14 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 public class UseDedicatedAssertionsASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	@Override
+	public boolean visit(MethodInvocation node) {
+		BooleanAssertionAnalyzer assertionAnalyzer = new BooleanAssertionAnalyzer();
+		DedicatedAssertionsAnalysisResult analysisResult = assertionAnalyzer.analyzeAssertInvocation(node)
+			.orElse(null);
+		if (analysisResult != null) {
+			analysisResult.toString();
+		}
+		return true;
+	}
 }
