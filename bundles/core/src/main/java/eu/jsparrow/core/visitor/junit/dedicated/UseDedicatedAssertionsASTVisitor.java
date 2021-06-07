@@ -6,9 +6,13 @@ import static eu.jsparrow.core.visitor.junit.dedicated.BooleanAssertionAnalyzer.
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
@@ -58,8 +62,26 @@ public class UseDedicatedAssertionsASTVisitor extends AbstractAddImportASTVisito
 		BooleanAssertionAnalyzer assertionAnalyzer = new BooleanAssertionAnalyzer();
 		DedicatedAssertionsAnalysisResult analysisResult = assertionAnalyzer.analyzeAssertInvocation(node)
 			.orElse(null);
+
 		if (analysisResult != null) {
-			analysisResult.toString();
+			AST ast = astRewrite.getAST();
+			MethodInvocation methodInvocationReplacement = ast.newMethodInvocation();
+			String newMethodName = analysisResult.getNewMethodName();
+			methodInvocationReplacement.setName(ast.newSimpleName(newMethodName));
+			@SuppressWarnings("unchecked")
+			List<Expression> newInvocationArguments = methodInvocationReplacement.arguments();
+			analysisResult
+				.getNewArguments()
+				.stream()
+				.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
+				.forEach(newInvocationArguments::add);
+
+			String newMethodFullyQualifiedName = analysisResult.getDeclaringClassQualifiedName() + '.' + newMethodName;
+			Optional<Name> qualifier = addImportForStaticMethod(newMethodFullyQualifiedName, node);
+			qualifier.ifPresent(methodInvocationReplacement::setExpression);
+
+			astRewrite.replace(node, methodInvocationReplacement, null);
+			onRewrite();
 		}
 		return true;
 	}
