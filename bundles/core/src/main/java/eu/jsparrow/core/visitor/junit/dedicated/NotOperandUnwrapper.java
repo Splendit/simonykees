@@ -37,8 +37,8 @@ class NotOperandUnwrapper {
 			}
 		}
 		if (expression.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
-			ParenthesizedExpression parenthesisContent = (ParenthesizedExpression) expression;
-			return unwrapExpression(parenthesisContent);
+			ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression) expression;
+			return unwrapExpression(parenthesizedExpression.getExpression());
 		}
 		return expression;
 	}
