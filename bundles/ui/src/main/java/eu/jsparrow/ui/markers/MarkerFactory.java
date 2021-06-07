@@ -1,5 +1,10 @@
 package eu.jsparrow.ui.markers;
 
+import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.CODE_PREVIEW_KEY;
+import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.HIGHLIGHT_LENGTH_KEY;
+import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.NAME_KEY;
+import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.RESOLVER_KEY;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -9,8 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.ui.Activator;
-
-import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.*;
 
 /**
  * A factory class for creating {@link IMarker}s for the generated
@@ -24,6 +27,16 @@ public class MarkerFactory {
 	private static final Logger logger = LoggerFactory.getLogger(MarkerFactory.class);
 
 	public static final String JSPARROW_MARKER = "jsparrow.marker"; //$NON-NLS-1$
+	
+	private String markerColor = "";
+	
+	public MarkerFactory() {
+		this("");
+	}
+	
+	public MarkerFactory(String markerColor) {
+		this.markerColor = markerColor; 
+	}
 
 	/**
 	 * Creates an {@link IMarker} for the given {@link RefactoringMarkerEvent}.
@@ -63,6 +76,7 @@ public class MarkerFactory {
 				IMarker.CHAR_START,
 				IMarker.CHAR_END,
 				HIGHLIGHT_LENGTH_KEY,
+				"jsparrow.marker.color",
 				CODE_PREVIEW_KEY,
 				IMarker.SOURCE_ID };
 		Object[] attributeValues = {
@@ -72,6 +86,7 @@ public class MarkerFactory {
 				offset,
 				end,
 				highlightLength,
+				markerColor,
 				codePreview,
 				Activator.PLUGIN_ID };
 		marker.setAttributes(markerAttributeKeys, attributeValues);

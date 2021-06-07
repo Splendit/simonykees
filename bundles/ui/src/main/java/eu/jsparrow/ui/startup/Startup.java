@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.startup;
 
+import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.markers.CoreRefactoringEventManager;
+import eu.jsparrow.ui.markers.HighlightColorPicker;
 import eu.jsparrow.ui.markers.MarkerEngine;
 import eu.jsparrow.ui.markers.MarkerFactory;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
@@ -65,7 +67,9 @@ public class Startup implements IStartup {
 			.getDisplay()
 			.asyncExec(() -> {
 				IWorkbench workbench = PlatformUI.getWorkbench();
-				MarkerFactory markerFactory = new MarkerFactory();
+				IThemeEngine themeService = workbench.getService(IThemeEngine.class);
+				String jSparrowMarkerHighlightColor = HighlightColorPicker.calcThemeHighlightColor(themeService);
+				MarkerFactory markerFactory = new MarkerFactory(jSparrowMarkerHighlightColor);
 				CoreRefactoringEventManager eventManager = new CoreRefactoringEventManager();
 				MarkerEngine engine = new MarkerEngine(markerFactory, eventManager);
 				engine.track(workbench);
