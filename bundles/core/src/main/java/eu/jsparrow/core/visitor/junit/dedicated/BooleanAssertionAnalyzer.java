@@ -76,9 +76,9 @@ public class BooleanAssertionAnalyzer {
 			booleanArgument = originalArguments.get(0);
 		} else if (originalArguments.size() == 2) {
 			if (usingJUnitJupiter) {
-				booleanArgument = originalArguments.get(1);
-			} else {
 				booleanArgument = originalArguments.get(0);
+			} else {
+				booleanArgument = originalArguments.get(1);
 			}
 		} else {
 			return Optional.empty();
