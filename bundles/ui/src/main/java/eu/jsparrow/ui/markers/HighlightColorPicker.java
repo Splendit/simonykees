@@ -41,12 +41,9 @@ public class HighlightColorPicker {
 	 */
 	public static String calcThemeHighlightColor(IEclipsePreferences preferences, String defaultLineColor) {
 		String currentLineColor = preferences.get("currentLineColor", defaultLineColor); //$NON-NLS-1$
-
 		try {
-
 			preferences.put(JSPARROW_MARKER_COLOR_KEY, currentLineColor);
 			preferences.flush();
-			
 		} catch (BackingStoreException e) {
 			logger.error("Cannot set the new jsparrow marker highlight color in the preference store", e); //$NON-NLS-1$
 		}
