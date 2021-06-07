@@ -1,8 +1,16 @@
 package eu.jsparrow.core.visitor.junit.dedicated;
 
+import static eu.jsparrow.core.visitor.junit.dedicated.BooleanAssertionAnalyzer.ORG_JUNIT_ASSERT;
+import static eu.jsparrow.core.visitor.junit.dedicated.BooleanAssertionAnalyzer.ORG_JUNIT_JUPITER_API_ASSERTIONS;
+import static eu.jsparrow.core.visitor.junit.dedicated.BooleanAssertionAnalyzer.*;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
  * Replaces boolean assertions by dedicated assertions, for example:
@@ -21,7 +29,29 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @since 3.32.0
  * 
  */
-public class UseDedicatedAssertionsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class UseDedicatedAssertionsASTVisitor extends AbstractAddImportASTVisitor {
+
+	@Override
+	public boolean visit(CompilationUnit compilationUnit) {
+		super.visit(compilationUnit);
+		verifyImport(compilationUnit, ORG_JUNIT_ASSERT);
+		verifyImport(compilationUnit, ORG_JUNIT_JUPITER_API_ASSERTIONS);
+
+		List<String> newMethodNames = Arrays.asList(
+				ASSERT_SAME,
+				ASSERT_NOT_SAME,
+				ASSERT_NULL,
+				ASSERT_NOT_NULL,
+				ASSERT_EQUALS,
+				ASSERT_NOT_EQUALS);
+		newMethodNames
+			.forEach(methodName -> verifyStaticMethodImport(compilationUnit, ORG_JUNIT_ASSERT + '.' + methodName));
+		newMethodNames
+			.forEach(methodName -> verifyStaticMethodImport(compilationUnit,
+					ORG_JUNIT_JUPITER_API_ASSERTIONS + '.' + methodName));
+
+		return true;
+	}
 
 	@Override
 	public boolean visit(MethodInvocation node) {

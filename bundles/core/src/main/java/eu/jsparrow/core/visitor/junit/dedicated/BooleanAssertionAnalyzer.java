@@ -26,10 +26,16 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 public class BooleanAssertionAnalyzer {
 
-	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
-	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
-	private static final String ASSERT_TRUE = "assertTrue"; //$NON-NLS-1$
-	private static final String ASSERT_FALSE = "assertFalse"; //$NON-NLS-1$
+	static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
+	static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
+	static final String ASSERT_SAME = "assertSame"; //$NON-NLS-1$
+	static final String ASSERT_NOT_SAME = "assertNotSame"; //$NON-NLS-1$
+	static final String ASSERT_NULL = "assertNull"; //$NON-NLS-1$
+	static final String ASSERT_NOT_NULL = "assertNotNull"; //$NON-NLS-1$
+	static final String ASSERT_EQUALS = "assertEquals"; //$NON-NLS-1$
+	static final String ASSERT_NOT_EQUALS = "assertNotEquals"; //$NON-NLS-1$
+	static final String ASSERT_TRUE = "assertTrue"; //$NON-NLS-1$
+	static final String ASSERT_FALSE = "assertFalse"; //$NON-NLS-1$
 
 	Optional<DedicatedAssertionsAnalysisResult> analyzeAssertInvocation(MethodInvocation methodInvocation) {
 
@@ -102,15 +108,23 @@ public class BooleanAssertionAnalyzer {
 		if (operands.size() == 2) {
 			String newMethodName;
 			if (negation) {
-				newMethodName = "assertNotEquals"; //$NON-NLS-1$
+				newMethodName = ASSERT_NOT_EQUALS;
 			} else {
-				newMethodName = "assertEquals"; //$NON-NLS-1$
+				newMethodName = ASSERT_EQUALS;
 			}
-			List<Expression> newArguments = collectExpressionsForNewArguments(operands, originalArguments,
-					usingJUnitJupiter);
-			return Optional.of(new DedicatedAssertionsAnalysisResult(newMethodName, newArguments));
+			DedicatedAssertionsAnalysisResult analysisResult = createDedicatedAssertionAnalysisResult(
+					originalArguments, operands, newMethodName, usingJUnitJupiter);
+			return Optional.of(analysisResult);
 		}
 		return Optional.empty();
+	}
+
+	private DedicatedAssertionsAnalysisResult createDedicatedAssertionAnalysisResult(List<Expression> originalArguments,
+			List<Expression> operands, String newMethodName, boolean usingJUnitJupiter) {
+		List<Expression> newArguments = collectExpressionsForNewArguments(operands, originalArguments,
+				usingJUnitJupiter);
+		String declaringClassQualifiedName = usingJUnitJupiter ? ORG_JUNIT_JUPITER_API_ASSERTIONS : ORG_JUNIT_ASSERT;
+		return new DedicatedAssertionsAnalysisResult(declaringClassQualifiedName, newMethodName, newArguments);
 	}
 
 	private List<Expression> extractOperandsFromEqualsInvocation(MethodInvocation equalsInvocation) {
@@ -168,12 +182,10 @@ public class BooleanAssertionAnalyzer {
 			} else {
 				comparingWithNull = false;
 			}
-
 			String newMethodName = getNewMethodNameForInfixComparison(comparingPrimitives, comparingWithNull, negation);
-			List<Expression> newArguments = collectExpressionsForNewArguments(operands, originalArguments,
-					usingJUnitJupiter);
-			return Optional.of(new DedicatedAssertionsAnalysisResult(newMethodName, newArguments));
-
+			DedicatedAssertionsAnalysisResult analysisResult = createDedicatedAssertionAnalysisResult(originalArguments,
+					operands, newMethodName, usingJUnitJupiter);
+			return Optional.of(analysisResult);
 		}
 		return Optional.empty();
 
@@ -212,21 +224,21 @@ public class BooleanAssertionAnalyzer {
 
 		if (comparingPrimitives) {
 			if (negation) {
-				return "assertNotEquals"; //$NON-NLS-1$
+				return ASSERT_NOT_EQUALS;
 			}
-			return "assertEquals"; //$NON-NLS-1$
+			return ASSERT_EQUALS;
 		}
 
 		if (comparingWithNull) {
 			if (negation) {
-				return "assertNotNull"; //$NON-NLS-1$
+				return ASSERT_NOT_NULL;
 			}
-			return "assertNull"; //$NON-NLS-1$
+			return ASSERT_NULL;
 		}
 
 		if (negation) {
-			return "assertNotSame"; //$NON-NLS-1$
+			return ASSERT_NOT_SAME;
 		}
-		return "assertSame"; //$NON-NLS-1$
+		return ASSERT_SAME;
 	}
 }

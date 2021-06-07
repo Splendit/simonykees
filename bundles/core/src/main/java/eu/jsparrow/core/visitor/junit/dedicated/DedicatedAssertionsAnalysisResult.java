@@ -13,13 +13,19 @@ import org.eclipse.jdt.core.dom.Expression;
  *
  */
 class DedicatedAssertionsAnalysisResult {
+	private final String declaringClassQualifiedName;
 	private final String newMethodName;
 	private final List<Expression> newArguments;
 
-	public DedicatedAssertionsAnalysisResult(String newMethodName, List<Expression> newArguments) {
-
+	public DedicatedAssertionsAnalysisResult(String declaringClassQualifiedName, String newMethodName,
+			List<Expression> newArguments) {
+		this.declaringClassQualifiedName = declaringClassQualifiedName;
 		this.newMethodName = newMethodName;
 		this.newArguments = newArguments;
+	}
+
+	public String getDeclaringClassQualifiedName() {
+		return declaringClassQualifiedName;
 	}
 
 	public String getNewMethodName() {
