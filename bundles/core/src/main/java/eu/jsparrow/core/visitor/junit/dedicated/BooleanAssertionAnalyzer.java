@@ -175,10 +175,10 @@ public class BooleanAssertionAnalyzer {
 			boolean comparingWithNull;
 			if (leftOperand.getNodeType() == ASTNode.NULL_LITERAL) {
 				comparingWithNull = true;
-				operands.remove(leftOperand);
+				operands = Arrays.asList(rightOperand);
 			} else if (rightOperand.getNodeType() == ASTNode.NULL_LITERAL) {
 				comparingWithNull = true;
-				operands.remove(rightOperand);
+				operands = Arrays.asList(leftOperand);
 			} else {
 				comparingWithNull = false;
 			}
