@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.startup;
 
-import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
@@ -67,8 +68,10 @@ public class Startup implements IStartup {
 			.getDisplay()
 			.asyncExec(() -> {
 				IWorkbench workbench = PlatformUI.getWorkbench();
-				IThemeEngine themeService = workbench.getService(IThemeEngine.class);
-				String jSparrowMarkerHighlightColor = HighlightColorPicker.calcThemeHighlightColor(themeService);
+				String currentLineColor = HighlightColorPicker.findDefaultThemeColor(workbench);
+				IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode("org.eclipse.ui.editors"); //$NON-NLS-1$
+				String jSparrowMarkerHighlightColor = HighlightColorPicker.calcThemeHighlightColor(preferences,
+						currentLineColor);
 				MarkerFactory markerFactory = new MarkerFactory(jSparrowMarkerHighlightColor);
 				CoreRefactoringEventManager eventManager = new CoreRefactoringEventManager();
 				MarkerEngine engine = new MarkerEngine(markerFactory, eventManager);

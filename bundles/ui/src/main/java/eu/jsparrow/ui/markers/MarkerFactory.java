@@ -4,6 +4,7 @@ import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.CODE_PREVIEW_KEY
 import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.HIGHLIGHT_LENGTH_KEY;
 import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.NAME_KEY;
 import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.RESOLVER_KEY;
+import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.JSPARROW_MARKER_COLOR_KEY;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -27,15 +28,11 @@ public class MarkerFactory {
 	private static final Logger logger = LoggerFactory.getLogger(MarkerFactory.class);
 
 	public static final String JSPARROW_MARKER = "jsparrow.marker"; //$NON-NLS-1$
-	
-	private String markerColor = "";
-	
-	public MarkerFactory() {
-		this("");
-	}
-	
+
+	private String markerColor;
+
 	public MarkerFactory(String markerColor) {
-		this.markerColor = markerColor; 
+		this.markerColor = markerColor;
 	}
 
 	/**
@@ -45,59 +42,47 @@ public class MarkerFactory {
 	 *            the event to create the {@link IMarker} for.
 	 */
 	public void create(RefactoringMarkerEvent event) {
-		try {
-			IJavaElement javaElement = event.getJavaElement();
-			IResource resource = javaElement.getResource();
-			String resolver = event.getResolver();
-			String name = event.getName();
-			String message = event.getMessage();
-			int offset = event.getOffset();
-			int length = event.getLength();
-			int newLength = event.getHighlightLength();
-			String codePreview = event.getCodePreview();
-			scheduleWorkspaceJob(resolver, name, message, resource, offset, length, newLength, codePreview);
-		} catch (CoreException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-
-	private void scheduleWorkspaceJob(final String resolver, final String name, final String message,
-			final IResource resource, final int start, final int length, final int highlightLength, String codePreview)
-			throws CoreException {
-		Integer offset = Integer.valueOf(start);
-		Integer end = Integer.valueOf(start + length);
-		IMarker marker = create(resource);
-		if (marker == null) {
-			return;
-		}
+		IJavaElement javaElement = event.getJavaElement();
+		IResource resource = javaElement.getResource();
+		String resolver = event.getResolver();
+		String name = event.getName();
+		String message = event.getMessage();
+		int offset = event.getOffset();
+		int length = event.getLength();
+		int highlightLength = event.getHighlightLength();
+		String codePreview = event.getCodePreview();
 		String[] markerAttributeKeys = {
 				RESOLVER_KEY, NAME_KEY,
 				IMarker.MESSAGE,
 				IMarker.CHAR_START,
 				IMarker.CHAR_END,
 				HIGHLIGHT_LENGTH_KEY,
-				"jsparrow.marker.color",
+				JSPARROW_MARKER_COLOR_KEY,
 				CODE_PREVIEW_KEY,
 				IMarker.SOURCE_ID };
 		Object[] attributeValues = {
 				resolver,
 				name,
 				message,
-				offset,
-				end,
-				highlightLength,
+				Integer.valueOf(offset),
+				Integer.valueOf(offset + length),
+				Integer.valueOf(highlightLength),
 				markerColor,
 				codePreview,
 				Activator.PLUGIN_ID };
-		marker.setAttributes(markerAttributeKeys, attributeValues);
-
+		try {
+			createWithProperties(resource, markerAttributeKeys, attributeValues);
+		} catch (CoreException e) {
+			logger.error(e.getMessage(), e);
+		}
 	}
 
-	private IMarker create(IResource resource) throws CoreException {
+	private void createWithProperties(
+			final IResource resource, String[] attributeKeys, Object[] attributeValues)
+			throws CoreException {
 		if (resource.exists()) {
-			return resource.createMarker(JSPARROW_MARKER);
-		} else {
-			return null;
+			IMarker marker = resource.createMarker(JSPARROW_MARKER);
+			marker.setAttributes(attributeKeys, attributeValues);
 		}
 	}
 

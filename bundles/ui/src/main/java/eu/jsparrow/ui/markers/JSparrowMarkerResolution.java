@@ -30,10 +30,10 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 	private String codePreview;
 	private String name;
 	private String resolver;
-	private RefactoringEventManager eventGenerator;
+	private RefactoringEventManager refactoringEventManager;
 
-	public JSparrowMarkerResolution(IMarker marker, RefactoringEventManager eventGenerator) {
-		this.eventGenerator = eventGenerator;
+	public JSparrowMarkerResolution(IMarker marker, RefactoringEventManager eventManager) {
+		this.refactoringEventManager = eventManager;
 		this.offset = marker.getAttribute(IMarker.CHAR_START, 0);
 		this.newLength = marker.getAttribute(HIGHLIGHT_LENGTH_KEY, offset);
 		this.name = marker.getAttribute(NAME_KEY, "jSparrow Quickfix"); //$NON-NLS-1$
@@ -59,7 +59,7 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 		if (icu == null) {
 			return;
 		}
-		eventGenerator.resolve(icu, this.resolver, this.offset);
+		refactoringEventManager.resolve(icu, this.resolver, this.offset);
 		IWorkbenchPage page = PlatformUI.getWorkbench()
 			.getActiveWorkbenchWindow()
 			.getActivePage();

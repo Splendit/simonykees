@@ -19,11 +19,11 @@ import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 public class JSparrowMarkerResolutionGenerator implements IMarkerResolutionGenerator2 {
 
 	private static final Logger logger = LoggerFactory.getLogger(JSparrowMarkerResolutionGenerator.class);
-	private RefactoringEventManager eventResolver;
+	private RefactoringEventManager eventManager;
 
-	public JSparrowMarkerResolutionGenerator(RefactoringEventManager eventGenerator) {
+	public JSparrowMarkerResolutionGenerator(RefactoringEventManager eventManager) {
 		super();
-		this.eventResolver = eventGenerator;
+		this.eventManager = eventManager;
 	}
 
 	public JSparrowMarkerResolutionGenerator() {
@@ -32,7 +32,7 @@ public class JSparrowMarkerResolutionGenerator implements IMarkerResolutionGener
 
 	@Override
 	public IMarkerResolution[] getResolutions(IMarker marker) {
-		return new IMarkerResolution[] { new JSparrowMarkerResolution(marker, eventResolver) };
+		return new IMarkerResolution[] { new JSparrowMarkerResolution(marker, eventManager) };
 
 	}
 
