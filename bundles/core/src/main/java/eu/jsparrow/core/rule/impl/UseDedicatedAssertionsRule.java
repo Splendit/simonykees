@@ -25,7 +25,7 @@ public class UseDedicatedAssertionsRule
 
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
-	private static final String MIN_JUNIT_4_VERSION = "4.13"; //$NON-NLS-1$
+	private static final String MIN_JUNIT_4_VERSION = "4.0"; //$NON-NLS-1$
 	private static final String MIN_JUNIT_5_VERSION = "5.0"; //$NON-NLS-1$
 
 	public UseDedicatedAssertionsRule() {
@@ -34,20 +34,20 @@ public class UseDedicatedAssertionsRule
 		this.ruleDescription = new RuleDescription(
 				Messages.UseDedicatedAssertionsRule_name,
 				Messages.UseDedicatedAssertionsRule_description,
-				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_1, Tag.TESTING));
+				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_5, Tag.TESTING));
 	}
 
 	@Override
 	protected String provideRequiredJavaVersion() {
 		/*
-		 * JUnit Jupiter Requires Java 1.
+		 * JUnit Jupiter Requires Java 5.
 		 */
-		return JavaCore.VERSION_1_1;
+		return JavaCore.VERSION_1_5;
 	}
 
 	@Override
 	public String requiredLibraries() {
-		return "JUnit 4.13 or JUnit 5.0"; //$NON-NLS-1$
+		return "JUnit 4.0 or JUnit 5.0"; //$NON-NLS-1$
 	}
 
 	@Override
