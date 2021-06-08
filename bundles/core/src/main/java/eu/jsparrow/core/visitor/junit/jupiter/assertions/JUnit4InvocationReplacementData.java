@@ -11,13 +11,13 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * @since 3.28.0
  *
  */
-class JUnit4MethodInvocationReplacementData {
+class JUnit4InvocationReplacementData {
 	private final MethodInvocation originalMethodInvocation;
 	private final Supplier<MethodInvocation> methodInvocationReplacementSupplier;
 
-	JUnit4MethodInvocationReplacementData(MethodInvocation originalMethodInvocation,
+	JUnit4InvocationReplacementData(JUnit4InvocationReplacementAnalysis jUnit4InvocationAnalysisResult,
 			Supplier<MethodInvocation> newMethodInvocationSupplier) {
-		this.originalMethodInvocation = originalMethodInvocation;
+		this.originalMethodInvocation = jUnit4InvocationAnalysisResult.getMethodInvocation();
 		this.methodInvocationReplacementSupplier = newMethodInvocationSupplier;
 	}
 

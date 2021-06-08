@@ -53,4 +53,13 @@ public class ReplaceJUnit4AssumptionsWithJupiterNegativeASTVisitorTest
 		assertNoChange(original);
 	}
 
+	@Test
+	public void visit_AssumeTrueNotInTestMethod_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assume.assumeTrue", true, false);
+		String original = ""
+				+ "	void test() {\n"
+				+ "		assumeTrue(1L == 1L);\n"
+				+ "	}";
+		assertNoChange(original);
+	}
 }
