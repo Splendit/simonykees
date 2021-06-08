@@ -21,7 +21,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * {@code assertFalse(condition)} to in order to decide whether the given
  * invocation can be transformed to a more specific one.
  * 
- * @since 3.32.0
+ * @since 3.31.0
  *
  */
 public class BooleanAssertionAnalyzer {
@@ -54,8 +54,8 @@ public class BooleanAssertionAnalyzer {
 
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		boolean usingJUnitJupiter;
-		if (ClassRelationUtil.isContentOfType(declaringClass, ORG_JUNIT_ASSERT) ||
-				ClassRelationUtil.isContentOfType(declaringClass, ORG_JUNIT_JUPITER_API_ASSERTIONS)) {
+		if (ClassRelationUtil.isContentOfTypes(declaringClass,  
+				Arrays.asList(ORG_JUNIT_ASSERT, ORG_JUNIT_JUPITER_API_ASSERTIONS ))) {
 			usingJUnitJupiter = ClassRelationUtil.isContentOfType(declaringClass, ORG_JUNIT_JUPITER_API_ASSERTIONS);
 		} else {
 			return Optional.empty();

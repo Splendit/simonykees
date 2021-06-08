@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
  * <p>
  * and a flag will indicate if a negation has been found.
  * 
- * @since 3.32.0
+ * @since 3.31.0
  */
 class NotOperandUnwrapper {
 	private boolean negationByNot;
