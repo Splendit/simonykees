@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -56,8 +57,8 @@ public class BooleanAssertionAnalyzer {
 
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		boolean usingJUnitJupiter;
-		if (ClassRelationUtil.isContentOfTypes(declaringClass,  
-				Arrays.asList(ORG_JUNIT_ASSERT, ORG_JUNIT_JUPITER_API_ASSERTIONS ))) {
+		if (ClassRelationUtil.isContentOfTypes(declaringClass,
+				Arrays.asList(ORG_JUNIT_ASSERT, ORG_JUNIT_JUPITER_API_ASSERTIONS))) {
 			usingJUnitJupiter = ClassRelationUtil.isContentOfType(declaringClass, ORG_JUNIT_JUPITER_API_ASSERTIONS);
 		} else {
 			return Optional.empty();
@@ -130,6 +131,12 @@ public class BooleanAssertionAnalyzer {
 	}
 
 	private List<Expression> extractOperandsFromEqualsInvocation(MethodInvocation equalsInvocation) {
+		String methodName = equalsInvocation.getName()
+			.getIdentifier();
+		if (!"equals".equals(methodName)) { //$NON-NLS-1$
+			return Collections.emptyList();
+		}
+
 		Expression leftOperand = equalsInvocation.getExpression();
 		if (leftOperand == null) {
 			return Collections.emptyList();
@@ -142,12 +149,16 @@ public class BooleanAssertionAnalyzer {
 		Expression rightOperand = equalsInvocationArguments.get(0);
 
 		IMethodBinding methodBinding = equalsInvocation.resolveMethodBinding();
-		if ("equals".equals(methodBinding.getName()) && //$NON-NLS-1$
-				ClassRelationUtil.isContentOfType(methodBinding.getDeclaringClass(), Object.class.getName())) {
-			return Arrays.asList(leftOperand, rightOperand);
+		if (methodBinding == null) {
+			return Collections.emptyList();
 		}
 
-		return Collections.emptyList();
+		int modifiers = methodBinding.getModifiers();
+		if (Modifier.isStatic(modifiers)) {
+			return Collections.emptyList();
+		}
+
+		return Arrays.asList(leftOperand, rightOperand);
 	}
 
 	private Optional<DedicatedAssertionsAnalysisResult> analyzeInfixExpression(InfixExpression infixExpression,

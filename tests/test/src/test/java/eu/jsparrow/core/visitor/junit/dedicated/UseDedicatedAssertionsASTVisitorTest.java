@@ -148,4 +148,14 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
+	
+	@Test
+	void visit_AssertionStringEqualsString_shouldTransform() throws Exception {
+		fixture.addImport("org.junit.Assert.assertTrue", true, false);
+
+		String original = "assertTrue(\"x\".equals(\"x\"));";
+		String expected = "assertEquals(\"x\",\"x\");";
+
+		assertChange(original, expected);
+	}
 }
