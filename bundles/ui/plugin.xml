@@ -136,7 +136,7 @@
             includeOnPreferencePage="true"
             label="jSparrow Refactor"
             overviewRulerPreferenceKey="jsparrow.marker.overview"
-            overviewRulerPreferenceValue="true"
+            overviewRulerPreferenceValue="false"
             presentationLayer="0"
             quickFixIcon="icons/jSparrow_active_icon_16.png"
             showInNextPrevDropdownToolbarAction="true"
