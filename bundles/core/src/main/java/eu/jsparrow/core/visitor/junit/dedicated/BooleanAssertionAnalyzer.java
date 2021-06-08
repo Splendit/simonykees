@@ -25,6 +25,8 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  *
  */
 public class BooleanAssertionAnalyzer {
+	private static final List<String> FLOATING_POINT_PRIMITIVES = Collections
+		.unmodifiableList(Arrays.asList("float", "double")); //$NON-NLS-1$ //$NON-NLS-2$
 
 	static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
@@ -166,6 +168,14 @@ public class BooleanAssertionAnalyzer {
 				.map(Expression::resolveTypeBinding)
 				.allMatch(ITypeBinding::isPrimitive);
 
+			if (operands
+				.stream()
+				.map(Expression::resolveTypeBinding)
+				.anyMatch(
+						typeBinding -> ClassRelationUtil.isContentOfTypes(typeBinding, FLOATING_POINT_PRIMITIVES))) {
+				return Optional.empty();
+
+			}
 			if (!comparingPrimitives && operands.stream()
 				.map(Expression::resolveTypeBinding)
 				.anyMatch(ITypeBinding::isPrimitive)) {
