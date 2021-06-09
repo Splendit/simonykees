@@ -109,7 +109,6 @@ class UseDedicatedAssertionsNegativeASTVisitorTest extends UsesSimpleJDTUnitFixt
 				+ "			}\n"
 				+ "\n"
 				+ "			void test() {\n"
-				+ "				Object o = new Object();\n"
 				+ "				assertTrue(this.equals());\n"
 				+ "			}\n"
 				+ "		}";
@@ -147,8 +146,7 @@ class UseDedicatedAssertionsNegativeASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		assertNoChange(original);
 	}
-	
-	
+
 	@Test
 	void visit_IntegerObjectInfixEqualsPrimitiveInt_shouldNotTransform() throws Exception {
 		fixture.addImport("org.junit.Assert.assertTrue", true, false);
@@ -160,12 +158,15 @@ class UseDedicatedAssertionsNegativeASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
-	void visit_UnresolvedEquals_shouldNotTransform() throws Exception {
+	void visit_UnresolvedMethodInvocationAsAssertionArgument_shouldNotTransform() throws Exception {
 		fixture.addImport("org.junit.Assert.assertTrue", true, false);
 
-		String original = "assertTrue(a.equals(a));";
+		String original = ""
+				+ "		Object a = new Object();\n"
+				+ "		Object b = a;\n"
+				+ "		assertTrue(checkEquality(a,b));";
 
 		assertNoChange(original);
 	}

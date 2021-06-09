@@ -131,8 +131,12 @@ public class BooleanAssertionAnalyzer {
 	}
 
 	private List<Expression> extractOperandsFromEqualsInvocation(MethodInvocation equalsInvocation) {
-		String methodName = equalsInvocation.getName()
-			.getIdentifier();
+		IMethodBinding methodBinding = equalsInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return Collections.emptyList();
+		}
+
+		String methodName = methodBinding.getName();
 		if (!"equals".equals(methodName)) { //$NON-NLS-1$
 			return Collections.emptyList();
 		}
@@ -147,11 +151,6 @@ public class BooleanAssertionAnalyzer {
 			return Collections.emptyList();
 		}
 		Expression rightOperand = equalsInvocationArguments.get(0);
-
-		IMethodBinding methodBinding = equalsInvocation.resolveMethodBinding();
-		if (methodBinding == null) {
-			return Collections.emptyList();
-		}
 
 		int modifiers = methodBinding.getModifiers();
 		if (Modifier.isStatic(modifiers)) {
