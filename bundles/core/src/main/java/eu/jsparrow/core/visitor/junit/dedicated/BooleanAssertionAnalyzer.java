@@ -109,17 +109,27 @@ public class BooleanAssertionAnalyzer {
 			boolean usingJUnitJupiter, boolean negation) {
 		List<Expression> operands = extractOperandsFromEqualsInvocation(equalsInvocation);
 		if (operands.size() == 2) {
-			String newMethodName;
-			if (negation) {
-				newMethodName = ASSERT_NOT_EQUALS;
-			} else {
-				newMethodName = ASSERT_EQUALS;
-			}
+			String newMethodName = getNewMethodNameForEqualsComparison(negation, operands);
 			DedicatedAssertionsAnalysisResult analysisResult = createDedicatedAssertionAnalysisResult(
 					originalArguments, operands, newMethodName, usingJUnitJupiter);
 			return Optional.of(analysisResult);
 		}
 		return Optional.empty();
+	}
+
+	private String getNewMethodNameForEqualsComparison(boolean negation, List<Expression> operands) {
+		if (operands.stream()
+			.map(Expression::resolveTypeBinding)
+			.allMatch(ITypeBinding::isArray)) {
+			if (negation) {
+				return ASSERT_NOT_SAME;
+			}
+			return ASSERT_SAME;
+		}
+		if (negation) {
+			return ASSERT_NOT_EQUALS;
+		}
+		return ASSERT_EQUALS;
 	}
 
 	private DedicatedAssertionsAnalysisResult createDedicatedAssertionAnalysisResult(List<Expression> originalArguments,

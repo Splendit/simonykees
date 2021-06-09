@@ -148,13 +148,46 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	void visit_AssertionStringEqualsString_shouldTransform() throws Exception {
 		fixture.addImport("org.junit.Assert.assertTrue", true, false);
 
 		String original = "assertTrue(\"x\".equals(\"x\"));";
 		String expected = "assertEquals(\"x\",\"x\");";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_AssertTrueArrayEqualsArray_shouldTransform() throws Exception {
+		fixture.addImport("org.junit.Assert.assertTrue", true, false);
+
+		String original = ""
+				+ "		Object[] array1 = new Object[] { new Object() };\n"
+				+ "		Object[] array2 = array1;\n"
+				+ "		assertTrue(array1.equals(array2));";
+
+		String expected = ""
+				+ "		Object[] array1 = new Object[] { new Object() };\n"
+				+ "		Object[] array2 = array1;\n"
+				+ "		assertSame(array1,array2);";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_AssertFalseArrayEqualsArray_shouldTransform() throws Exception {
+		fixture.addImport("org.junit.Assert.assertFalse", true, false);
+
+		String original = ""
+				+ "		Object[] array1 = new Object[] { new Object() };\n"
+				+ "		Object[] array2 = new Object[] { new Object() };\n"
+				+ "		assertFalse(array1.equals(array2));";
+		String expected = ""
+				+ "		Object[] array1 = new Object[] { new Object() };\n"
+				+ "		Object[] array2 = new Object[] { new Object() };\n"
+				+ "		assertNotSame(array1,array2);";
 
 		assertChange(original, expected);
 	}
