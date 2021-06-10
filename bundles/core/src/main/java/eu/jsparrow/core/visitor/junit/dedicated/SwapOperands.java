@@ -20,11 +20,11 @@ import org.eclipse.jdt.core.dom.SuperFieldAccess;
  */
 public class SwapOperands {
 
-	private static final int PRIORITY_LITERAL = 5;
-	private static final int PRIORITY_CONSTANT = 4;
-	private static final int PRIORITY_FINAL_FIELD = 3;
-	private static final int PRIORITY_FINAL_LOCAL = 2;
-	private static final int PRIORITY_NAME_CONTAINS_EXPECTED = 1;
+	private static final int PRIORITY_LITERAL = 50;
+	private static final int PRIORITY_CONSTANT = 40;
+	private static final int PRIORITY_FINAL_FIELD = 30;
+	private static final int PRIORITY_FINAL_LOCAL = 20;
+	private static final int PRIORITY_NAME_CONTAINS_EXPECTED = 10;
 	private static final int NO_PRIORITY = 0;
 
 	private SwapOperands() {
@@ -85,10 +85,13 @@ public class SwapOperands {
 			}
 			return PRIORITY_FINAL_LOCAL;
 		}
-		if (variableBinding.getName()
-			.startsWith("expected")) { //$NON-NLS-1$
+
+		String variableName = variableBinding.getName()
+			.toLowerCase();
+		if (variableName.contains("expected")) { //$NON-NLS-1$
 			return PRIORITY_NAME_CONTAINS_EXPECTED;
 		}
+
 		return NO_PRIORITY;
 	}
 }
