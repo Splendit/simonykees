@@ -129,7 +129,7 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		String expected = ""
 				+ "		long longvalue = 100L;\n"
-				+ "		assertEquals(longvalue,100L);";
+				+ "		assertEquals(100L,longvalue);";
 
 		assertChange(original, expected);
 	}
@@ -144,17 +144,35 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		String expected = ""
 				+ "		long longvalue = 100L;\n"
-				+ "		assertNotEquals(longvalue,100L);";
+				+ "		assertNotEquals(100L,longvalue);";
 
 		assertChange(original, expected);
 	}
 
 	@Test
-	void visit_AssertionStringEqualsString_shouldTransform() throws Exception {
+	void visit_AssertTrueStringEqualsString_shouldTransform() throws Exception {
 		fixture.addImport("org.junit.Assert.assertTrue", true, false);
 
-		String original = "assertTrue(\"x\".equals(\"x\"));";
-		String expected = "assertEquals(\"x\",\"x\");";
+		String original = ""
+				+ "		String s = \"value\";\n"
+				+ "		assertTrue(s.equals(\"value\"));";
+		String expected = ""
+				+ "		String s = \"value\";\n"
+				+ "		assertEquals(\"value\",s);";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_AssertFalseStringEqualsString_shouldTransform() throws Exception {
+		fixture.addImport("org.junit.Assert.assertFalse", true, false);
+
+		String original = ""
+				+ "		String s = \"value\";\n"
+				+ "		assertFalse(s.equals(\"value\"));";
+		String expected = ""
+				+ "		String s = \"value\";\n"
+				+ "		assertNotEquals(\"value\",s);";
 
 		assertChange(original, expected);
 	}

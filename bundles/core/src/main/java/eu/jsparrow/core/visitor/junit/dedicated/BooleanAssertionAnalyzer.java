@@ -167,6 +167,9 @@ public class BooleanAssertionAnalyzer {
 			return Collections.emptyList();
 		}
 
+		if (SwapOperands.swapOperands(leftOperand, rightOperand)) {
+			return Arrays.asList(rightOperand, leftOperand);
+		}
 		return Arrays.asList(leftOperand, rightOperand);
 	}
 
@@ -181,7 +184,12 @@ public class BooleanAssertionAnalyzer {
 
 			Expression leftOperand = infixExpression.getLeftOperand();
 			Expression rightOperand = infixExpression.getRightOperand();
-			List<Expression> operands = Arrays.asList(leftOperand, rightOperand);
+			List<Expression> operands;
+			if (SwapOperands.swapOperands(leftOperand, rightOperand)) {
+				operands = Arrays.asList(rightOperand, leftOperand);
+			} else {
+				operands = Arrays.asList(leftOperand, rightOperand);
+			}
 
 			boolean comparingPrimitives = operands
 				.stream()

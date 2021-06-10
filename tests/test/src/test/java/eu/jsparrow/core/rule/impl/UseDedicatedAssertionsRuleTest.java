@@ -29,6 +29,10 @@ import eu.jsparrow.rules.common.Tag;
 class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 
 	private static final String STANDARD_FILE = "UseDedicatedAssertionsRule.java";
+	private static final String COMPARISON_WITH_CONSTANT = "UseDedicatedAssertionsComparingWithConstantRule.java";
+	private static final String COMPARISON_WITH_FINAL_FIELD = "UseDedicatedAssertionsComparingWithFinalFieldRule.java";
+	private static final String COMPARISON_WITH_FINAL_SUPER_FIELD = "UseDedicatedAssertionsComparingWithFinalSuperFieldRule.java";
+	private static final String COMPARISON_WITH_FINAL_LOCAL = "UseDedicatedAssertionsComparingWithFinalLocalRule.java";
 	private static final String STATIC_EQUALS = "UseDedicatedAssertionsStaticEqualsRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "dedicatedAssertions";
 
@@ -125,7 +129,11 @@ class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 	@ParameterizedTest
 	@ValueSource(strings = {
 			STANDARD_FILE,
-			STATIC_EQUALS })
+			STATIC_EQUALS,
+			COMPARISON_WITH_CONSTANT,
+			COMPARISON_WITH_FINAL_FIELD,
+			COMPARISON_WITH_FINAL_SUPER_FIELD,
+			COMPARISON_WITH_FINAL_LOCAL })
 	void testTransformation(String preRuleFileName) throws Exception {
 
 		RulesTestUtil.addToClasspath(testProject, Arrays.asList(
