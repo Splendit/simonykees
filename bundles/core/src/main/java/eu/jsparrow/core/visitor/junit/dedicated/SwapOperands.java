@@ -10,15 +10,32 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 
-public class PriorityAsExpected {
+/**
+ * For two values in an assertion, this class finds out which of the two values
+ * represents the expected value. If the right hand side represents the expected
+ * value, then a swap of the two values is necessary.
+ * 
+ * @since 3.31.0
+ *
+ */
+public class SwapOperands {
 
 	private static final int PRIORITY_LITERAL = 5;
 	private static final int PRIORITY_CONSTANT = 4;
 	private static final int PRIORITY_FINAL_FIELD = 3;
 	private static final int PRIORITY_FINAL_LOCAL = 2;
+	private static final int PRIORITY_NAME_CONTAINS_EXPECTED = 1;
 	private static final int NO_PRIORITY = 0;
 
-	public int getPriorityAsExpectedValue(Expression expression) {
+	private SwapOperands() {
+		// hiding implicit public one
+	}
+
+	public static boolean swapOperands(Expression leftOperand, Expression rightOperand) {
+		return getPriorityAsExpectedValue(rightOperand) > getPriorityAsExpectedValue(leftOperand);
+	}
+
+	private static int getPriorityAsExpectedValue(Expression expression) {
 		int nodeType = expression.getNodeType();
 		if (nodeType == ASTNode.BOOLEAN_LITERAL ||
 				nodeType == ASTNode.CHARACTER_LITERAL ||
@@ -27,36 +44,37 @@ public class PriorityAsExpected {
 			return PRIORITY_LITERAL;
 		}
 
+		IBinding binding = null;
 		if (nodeType == ASTNode.FIELD_ACCESS) {
-			FieldAccess fieldAccess = (FieldAccess) expression;
-			return getPriorityAsExpectedValueFromBinding(fieldAccess.resolveFieldBinding());
+			binding = ((FieldAccess) expression).resolveFieldBinding();
 		}
 
 		if (nodeType == ASTNode.SUPER_FIELD_ACCESS) {
-			SuperFieldAccess superfieldAccess = (SuperFieldAccess) expression;
-			return getPriorityAsExpectedValueFromBinding(superfieldAccess.resolveFieldBinding());
+			binding = ((SuperFieldAccess) expression).resolveFieldBinding();
 		}
 
 		if (nodeType == ASTNode.QUALIFIED_NAME) {
-			QualifiedName qualifiedName = (QualifiedName) expression;
-			IBinding binding = qualifiedName.resolveBinding();
-			if (binding != null && binding.getKind() == IBinding.VARIABLE) {
-				return getPriorityAsExpectedValueFromBinding((IVariableBinding) binding);
-			}
+			binding = ((QualifiedName) expression).resolveBinding();
 		}
 
 		if (nodeType == ASTNode.SIMPLE_NAME) {
-			SimpleName simpleName = (SimpleName) expression;
-			IBinding binding = simpleName.resolveBinding();
-			if (binding != null && binding.getKind() == IBinding.VARIABLE) {
-				return getPriorityAsExpectedValueFromBinding((IVariableBinding) binding);
-			}
+			binding = ((SimpleName) expression).resolveBinding();
+		}
+
+		if (binding != null) {
+			return getPriorityAsExpectedValueFromBinding(binding);
 		}
 
 		return NO_PRIORITY;
 	}
 
-	public int getPriorityAsExpectedValueFromBinding(IVariableBinding variableBinding) {
+	private static int getPriorityAsExpectedValueFromBinding(IBinding binding) {
+		if (binding.getKind() != IBinding.VARIABLE) {
+			return NO_PRIORITY;
+		}
+
+		IVariableBinding variableBinding = (IVariableBinding) binding;
+
 		int modifiers = variableBinding.getModifiers();
 		if (Modifier.isFinal(modifiers)) {
 			if (variableBinding.isField()) {
@@ -66,6 +84,10 @@ public class PriorityAsExpected {
 				return PRIORITY_FINAL_FIELD;
 			}
 			return PRIORITY_FINAL_LOCAL;
+		}
+		if (variableBinding.getName()
+			.startsWith("expected")) { //$NON-NLS-1$
+			return PRIORITY_NAME_CONTAINS_EXPECTED;
 		}
 		return NO_PRIORITY;
 	}
