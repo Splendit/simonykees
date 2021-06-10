@@ -120,7 +120,7 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	void visit_AssertionLongInfixEqualsLong_shouldTransform() throws Exception {
+	void visit_AssertionLongInfixEqualsLongLiteral_shouldTransform() throws Exception {
 		fixture.addImport("org.junit.Assert.assertTrue", true, false);
 
 		String original = ""
@@ -135,22 +135,22 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	void visit_AssertionLongInfixNotEqualsLong_shouldTransform() throws Exception {
+	void visit_AssertionLongInfixNotEqualsLongLiteral_shouldTransform() throws Exception {
 		fixture.addImport("org.junit.Assert.assertTrue", true, false);
 
 		String original = ""
 				+ "		long longvalue = 100L;\n"
-				+ "		assertTrue(longvalue != 100L);";
+				+ "		assertTrue(longvalue != 200L);";
 
 		String expected = ""
 				+ "		long longvalue = 100L;\n"
-				+ "		assertNotEquals(100L,longvalue);";
+				+ "		assertNotEquals(200L,longvalue);";
 
 		assertChange(original, expected);
 	}
 
 	@Test
-	void visit_AssertTrueStringEqualsString_shouldTransform() throws Exception {
+	void visit_AssertTrueStringEqualsStringLiteral_shouldTransform() throws Exception {
 		fixture.addImport("org.junit.Assert.assertTrue", true, false);
 
 		String original = ""
@@ -164,15 +164,43 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
-	void visit_AssertFalseStringEqualsString_shouldTransform() throws Exception {
+	void visit_AssertFalseStringEqualsStringLiteral_shouldTransform() throws Exception {
 		fixture.addImport("org.junit.Assert.assertFalse", true, false);
 
 		String original = ""
 				+ "		String s = \"value\";\n"
-				+ "		assertFalse(s.equals(\"value\"));";
+				+ "		assertFalse(s.equals(\"otherValue\"));";
 		String expected = ""
 				+ "		String s = \"value\";\n"
-				+ "		assertNotEquals(\"value\",s);";
+				+ "		assertNotEquals(\"otherValue\",s);";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_AssertTrueCharEqualsCharLiteral_shouldTransform() throws Exception {
+		fixture.addImport("org.junit.Assert.assertTrue", true, false);
+
+		String original = ""
+				+ "		char c = 'c';\n"
+				+ "		assertTrue(c == 'c');";
+		String expected = ""
+				+ "		char c='c';\n"
+				+ "		assertEquals('c',c);";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	void visit_AssertTrueBooleanEqualsBooleanLiteral_shouldTransform() throws Exception {
+		fixture.addImport("org.junit.Assert.assertTrue", true, false);
+
+		String original = ""
+				+ "		boolean b = true;\n"
+				+ "		assertTrue(b == true);";
+		String expected = ""
+				+ "		boolean b = true;\n"
+				+ "		assertEquals(true,b);";
 
 		assertChange(original, expected);
 	}
