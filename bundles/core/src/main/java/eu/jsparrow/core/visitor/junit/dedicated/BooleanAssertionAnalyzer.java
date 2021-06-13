@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -109,8 +110,8 @@ public class BooleanAssertionAnalyzer {
 			boolean usingJUnitJupiter, boolean negation) {
 		List<Expression> operands = extractOperandsFromEqualsInvocation(equalsInvocation);
 		if (operands.size() == 2) {
-			if(!usingJUnitJupiter && comparingPrimitiveWithBoxed(operands.get(0), operands.get(1))) {
-				return  Optional.empty();
+			if (!usingJUnitJupiter && comparingPrimitiveWithBoxed(operands.get(0), operands.get(1))) {
+				return Optional.empty();
 			}
 			String newMethodName = getNewMethodNameForEqualsComparison(negation, operands);
 			DedicatedAssertionsAnalysisResult analysisResult = createDedicatedAssertionAnalysisResult(
@@ -194,22 +195,24 @@ public class BooleanAssertionAnalyzer {
 				operands = Arrays.asList(leftOperand, rightOperand);
 			}
 
-			boolean comparingPrimitives = operands
+			List<ITypeBinding> operandTypes = operands
 				.stream()
 				.map(Expression::resolveTypeBinding)
+				.collect(Collectors.toList());
+			boolean comparingPrimitives = operandTypes.stream()
 				.allMatch(ITypeBinding::isPrimitive);
 
-			if (operands
+			boolean anyFloat = operandTypes
 				.stream()
-				.map(Expression::resolveTypeBinding)
-				.anyMatch(
-						typeBinding -> ClassRelationUtil.isContentOfTypes(typeBinding, FLOATING_POINT_PRIMITIVES))) {
+				.anyMatch(typeBinding -> ClassRelationUtil.isContentOfTypes(typeBinding, FLOATING_POINT_PRIMITIVES));
+
+			if (anyFloat) {
 				return Optional.empty();
 
 			}
-			if (!comparingPrimitives && operands.stream()
-				.map(Expression::resolveTypeBinding)
-				.anyMatch(ITypeBinding::isPrimitive)) {
+			boolean anyPrimitive = operandTypes.stream()
+				.anyMatch(ITypeBinding::isPrimitive);
+			if (!comparingPrimitives && anyPrimitive) {
 				return Optional.empty();
 			}
 

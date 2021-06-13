@@ -55,9 +55,10 @@ class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.CODING_CONVENTIONS));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
-				equalTo("This rule looks for JUnit 4 and JUnit Jupiter assertions which can be replaced by more specific ones."
-						+ " For example, 'assertTrue(a.equals(b))' can be replaced by 'assertEquals(a, b)', 'assertTrue(a == b)'"
-						+ " can be replaced by 'assertSame(a, b)' and 'assertTrue(a == null)' can be replaced by 'assertNull(a)'."));
+				equalTo("Replaces boolean assertions e.g., 'assertTrue' and 'assertFalse' with the corresponding "
+						+ "dedicated assertions when testing for equality or null values. For example, 'assertTrue(a.equals(b))' "
+						+ "can be replaced by 'assertEquals(a, b)'. Similarly, 'assertSame', 'assertNull', or 'assertNotNull' can "
+						+ "be used instead of 'assertTrue'."));
 	}
 
 	@Test
