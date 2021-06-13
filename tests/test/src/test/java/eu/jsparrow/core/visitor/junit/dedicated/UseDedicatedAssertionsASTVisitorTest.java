@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.junit.dedicated;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -22,6 +23,7 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	public static Stream<Arguments> createComparingObjectsParameters() {
 		return Stream.of(
 				Arguments.of("assertTrue(a.equals(b))", "assertEquals(a,b)"),
+				Arguments.of("assertTrue(a.toString().equals(b.toString()))", "assertEquals(a.toString(),b.toString())"),
 				Arguments.of("assertTrue(!a.equals(b))", "assertNotEquals(a,b)"),
 				Arguments.of("assertTrue((a.equals(b)))", "assertEquals(a,b)"),
 				Arguments.of("assertTrue((!(!a.equals(b))))", "assertEquals(a,b)"),
@@ -234,6 +236,20 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				+ "		Object[] array1 = new Object[] { new Object() };\n"
 				+ "		Object[] array2 = new Object[] { new Object() };\n"
 				+ "		assertNotSame(array1,array2);";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_equalsComparingUnboxedWithPrimitive_shouldTransform() throws Exception {
+		fixture.addImport("org.junit.jupiter.api.Assertions.assertTrue", true, false);
+
+		String original = ""
+				+ "Integer i = 10;\n"
+				+ "assertTrue(i.equals(10));";
+		String expected = ""
+				+ "Integer i = 10;\n"
+				+ "assertEquals(10, i);";
 
 		assertChange(original, expected);
 	}

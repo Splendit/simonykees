@@ -109,6 +109,9 @@ public class BooleanAssertionAnalyzer {
 			boolean usingJUnitJupiter, boolean negation) {
 		List<Expression> operands = extractOperandsFromEqualsInvocation(equalsInvocation);
 		if (operands.size() == 2) {
+			if(!usingJUnitJupiter && comparingPrimitiveWithBoxed(operands.get(0), operands.get(1))) {
+				return  Optional.empty();
+			}
 			String newMethodName = getNewMethodNameForEqualsComparison(negation, operands);
 			DedicatedAssertionsAnalysisResult analysisResult = createDedicatedAssertionAnalysisResult(
 					originalArguments, operands, newMethodName, usingJUnitJupiter);
@@ -227,6 +230,14 @@ public class BooleanAssertionAnalyzer {
 		}
 		return Optional.empty();
 
+	}
+
+	private boolean comparingPrimitiveWithBoxed(Expression leftOperand, Expression rightOperand) {
+		boolean leftPrimitive = leftOperand.resolveTypeBinding()
+			.isPrimitive();
+		boolean rightPrimitive = rightOperand.resolveTypeBinding()
+			.isPrimitive();
+		return leftPrimitive != rightPrimitive;
 	}
 
 	private List<Expression> collectExpressionsForNewArguments(List<Expression> operands,

@@ -170,4 +170,26 @@ class UseDedicatedAssertionsNegativeASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_infixComparingUnboxedWithPrimitive_shouldNotTransform() throws Exception {
+		fixture.addImport("org.junit.Assert.assertTrue", true, false);
+
+		String original = ""
+				+ "Integer i = 10;\n"
+				+ "assertTrue(i == 10);";
+
+		assertNoChange(original);
+	}
+	
+	@Test
+	void visit_equalsComparingUnboxedWithPrimitive_shouldNotTransform() throws Exception {
+		fixture.addImport("org.junit.Assert.assertTrue", true, false);
+
+		String original = ""
+				+ "Integer i = 10;\n"
+				+ "assertTrue(i.equals(10));";
+
+		assertNoChange(original);
+	}
 }
