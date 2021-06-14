@@ -132,7 +132,7 @@
             contributesToHeader="true"
             highlightPreferenceKey="jsparrow.marker.highlight"
             highlightPreferenceValue="true"
-            icon="icons/jSparrow_active_icon_16.png"
+            icon="icons/jSparrow_bulb_bottomRight_icon_16.png"
             includeOnPreferencePage="true"
             label="jSparrow Refactor"
             overviewRulerPreferenceKey="jsparrow.marker.overview"
