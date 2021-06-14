@@ -138,7 +138,7 @@
             overviewRulerPreferenceKey="jsparrow.marker.overview"
             overviewRulerPreferenceValue="false"
             presentationLayer="0"
-            quickFixIcon="icons/jSparrow_active_icon_16.png"
+            quickFixIcon="icons/jSparrow_bulb_bottomRight_icon_16.png"
             showInNextPrevDropdownToolbarAction="true"
             textPreferenceKey="jsparrow.marker.text"
             textPreferenceValue="true"
