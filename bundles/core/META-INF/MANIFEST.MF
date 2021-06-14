@@ -41,6 +41,7 @@ Export-Package: eu.jsparrow.core;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalo
  eu.jsparrow.core.statistic.entity,
  eu.jsparrow.core.util;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
  eu.jsparrow.core.visitor;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
+ eu.jsparrow.core.markers;x-friends:="eu.jsparrow.ui",
  eu.jsparrow.core.visitor.renaming
 Bundle-ClassPath: lib/snakeyaml.jar,
  .

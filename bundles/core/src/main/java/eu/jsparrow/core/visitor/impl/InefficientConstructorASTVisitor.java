@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.constants.ReservedNames;
+import eu.jsparrow.core.markers.common.InefficientConstructorEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -30,7 +31,7 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisitor {
+public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisitor implements InefficientConstructorEvent {
 
 	private static final String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
 
@@ -77,6 +78,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
 				getCommentRewriter().saveCommentsInParentStatement(node);
 				onRewrite();
+				addMarkerEvent(refactorCandidateParameter, node, replaceParameter);
 			}
 		}
 		return true;
@@ -182,11 +184,12 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				astRewrite.replace(node, replacement, null);
 				commentRewriter.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(node, Statement.class), relatedComments);
 				onRewrite();
+				addMarkerEvent(node, refactorPrimitiveType, refactorCandidateParameter);
 			}
 		}
 		return true;
 	}
-	
+
 	private List<Comment> findRelatedComments(ClassInstanceCreation node, Expression parameter) {
 		CommentRewriter cr = getCommentRewriter();
 		List<Comment> relatedComments = cr.findRelatedComments(node);

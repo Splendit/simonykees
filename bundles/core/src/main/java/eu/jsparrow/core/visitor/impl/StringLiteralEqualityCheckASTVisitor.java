@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import eu.jsparrow.core.markers.common.StringLiteralEqualityCheckEvent;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -42,9 +43,10 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @author Ardit Ymeri
  * @since 1.2
  */
-public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTVisitor {
+public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTVisitor
+		implements StringLiteralEqualityCheckEvent {
 
-	private static final String EQUALS = "equals"; //$NON-NLS-1$
+	protected static final String EQUALS = "equals"; //$NON-NLS-1$
 	private static final String EQUALS_IGNORE_CASE = "equalsIgnoreCase"; //$NON-NLS-1$
 	private List<Comment> comments = new ArrayList<>();
 
@@ -92,6 +94,7 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 								astRewrite.replace(expression, newArgument, null);
 								astRewrite.replace(stringLiteral, newExpression, null);
 								onRewrite();
+								addMarkerEvent(stringLiteral, expression);
 							}
 						}
 					}

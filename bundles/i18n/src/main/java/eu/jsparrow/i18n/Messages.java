@@ -139,6 +139,10 @@ public class Messages extends NLS {
 	public static String EnhancedForLoopToStreamFindFirstRule_name;
 	public static String EnhancedForLoopToStreamForEachRule_description;
 	public static String EnhancedForLoopToStreamForEachRule_name;
+	public static String EnumsWithoutEqualsResolver_message;
+
+	public static String EnumsWithoutEqualsResolver_name;
+
 	public static String EnumsWithoutEqualsRule_name;
 	public static String EnumsWithoutEqualsRule_description;
 	public static String EnhancedForLoopToStreamSumRule_description;
@@ -185,6 +189,10 @@ public class Messages extends NLS {
 	public static String FlatMapInsteadOfNestedLoopsRule_name;
 	public static String ForToForEachRule_description;
 	public static String ForToForEachRule_name;
+	public static String FunctionalInterfaceResolver_message;
+
+	public static String FunctionalInterfaceResolver_name;
+
 	public static String FunctionalInterfaceRule_description;
 	public static String FunctionalInterfaceRule_name;
 	public static String GuardConditionRule_description;
@@ -195,6 +203,10 @@ public class Messages extends NLS {
 	public static String LambdaForEachIfWrapperToFilterRule_name;
 	public static String LambdaForEachMapRule_description;
 	public static String LambdaForEachMapRule_name;
+	public static String LambdaToMethodReferenceResolver_message;
+
+	public static String LambdaToMethodReferenceResolver_name;
+
 	public static String LambdaToMethodReferenceRule_description;
 	public static String LambdaToMethodReferenceRule_name;
 	public static String LicenseManager_cannot_reach_licensing_provider_on_checkin;
@@ -272,6 +284,10 @@ public class Messages extends NLS {
 	public static String ImmutableStaticFinalCollectionsRule_name;
 	public static String IndexOfToContainsRule_description;
 	public static String IndexOfToContainsRule_name;
+	public static String InefficientConstructorResolver_message;
+
+	public static String InefficientConstructorResolver_name;
+
 	public static String InefficientConstructorRule_description;
 	public static String InefficientConstructorRule_name;
 	public static String InsertBreakStatementInLoopsRule_description;
@@ -295,6 +311,10 @@ public class Messages extends NLS {
 	public static String OrganiseImportsRule_name;
 	public static String OverrideAnnotationRule_description;
 	public static String OverrideAnnotationRule_name;
+	public static String PrimitiveBoxedForStringResolver_message;
+
+	public static String PrimitiveBoxedForStringResolver_name;
+
 	public static String PrimitiveBoxedForStringRule_description;
 	public static String PrimitiveBoxedForStringRule_name;
 	public static String PrimitiveObjectUseEqualsRule_description;
@@ -388,6 +408,10 @@ public class Messages extends NLS {
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
 	public static String RemoveNewStringConstructorRule_name;
+	public static String RemoveNullCheckBeforeInstanceofResolver_message;
+
+	public static String RemoveNullCheckBeforeInstanceofResolver_name;
+
 	public static String RemoveNullCheckBeforeInstanceofRule_description;
 	public static String RemoveNullCheckBeforeInstanceofRule_name;
 	public static String RemoveRedundantTypeCastRule_description;
@@ -541,6 +565,10 @@ public class Messages extends NLS {
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;
 	public static String StringConcatToPlusRule_name;
+	public static String StringLiteralEqualityCheckResolver_message;
+
+	public static String StringLiteralEqualityCheckResolver_name;
+
 	public static String StringLiteralEqualityCheckRule_description;
 	public static String StringLiteralEqualityCheckRule_name;
 	public static String StringUtilsRule_classNotInClassPath;
@@ -571,6 +599,10 @@ public class Messages extends NLS {
 	public static String UseSecureRandomRule_name;
 	public static String UseCollectionsSingletonListRule_description;
 	public static String UseCollectionsSingletonListRule_name;
+	public static String UseComparatorMethodsResolver_message;
+
+	public static String UseComparatorMethodsResolver_name;
+
 	public static String UseComparatorMethodsRule_description;
 	public static String UseComparatorMethodsRule_name;
 	public static String UseDedicatedAssertionsRule_description;
@@ -581,6 +613,10 @@ public class Messages extends NLS {
 	public static String UseFilesBufferedWriterRule_name;
 	public static String UseFilesWriteStringRule_description;
 	public static String UseFilesWriteStringRule_name;
+	public static String UseIsEmptyOnCollectionsResolver_message;
+
+	public static String UseIsEmptyOnCollectionsResolver_name;
+
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String UseListSortRule_description;
@@ -611,6 +647,10 @@ public class Messages extends NLS {
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
 	public static String WizardMessageDialog_selectionDidNotContainAnyJavaFiles;
+	public static String PutIfAbsentResolver_message;
+
+	public static String PutIfAbsentResolver_name;
+
 	public static String PutIfAbsentRule_description;
 	public static String PutIfAbsentRule_name;
 	public static String YAMLConfigurationWrapper_configurationFileNotFoundAtPath;

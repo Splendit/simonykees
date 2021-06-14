@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.constants.ReservedNames;
+import eu.jsparrow.core.markers.common.PrimitiveBoxedForStringEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -40,7 +41,8 @@ import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisitor {
+public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisitor
+		implements PrimitiveBoxedForStringEvent {
 
 	@Override
 	public boolean visit(MethodInvocation node) {
@@ -54,7 +56,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 			.getFullyQualifiedName())
 				&& 1 >= node.arguments()
 					.size()) {
-			
+
 			List<Comment> relatedComments = new ArrayList<>();
 
 			/*
@@ -103,7 +105,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 					refactorCandidateExpression = (Expression) expectedPrimitiveNumberClass.arguments()
 						.get(0);
 					refactorCandidateTypeBinding = refactorCandidateExpression.resolveTypeBinding();
-					
+
 					relatedComments = findRelatedComments(expectedPrimitiveNumberClass);
 
 					/*
@@ -131,17 +133,19 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 				Expression moveTargetArgument = (Expression) astRewrite.createMoveTarget(refactorCandidateExpression);
 				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
 					.insertLast(moveTargetArgument, null);
-
 				CommentRewriter commentRewriter = getCommentRewriter();
-				SimpleName staticClassType = astRewrite.getAST().newSimpleName(refactorPrimitiveType.getIdentifier());
+				SimpleName staticClassType = astRewrite.getAST()
+					.newSimpleName(refactorPrimitiveType.getIdentifier());
 				relatedComments.addAll(commentRewriter.findRelatedComments(refactorPrimitiveType));
 				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, staticClassType, null);
-				
-				commentRewriter.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(node, Statement.class), relatedComments);
-				
-				onRewrite();
-			}
+				commentRewriter.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(node, Statement.class),
+						relatedComments);
 
+				onRewrite();
+				addMarkerEvent(node, refactorCandidateExpression,
+						node.getName(),
+						refactorPrimitiveType);
+			}
 		}
 
 		return true;
@@ -150,10 +154,12 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 	private List<Comment> findRelatedComments(ClassInstanceCreation expectedPrimitiveNumberClass) {
 		CommentRewriter cRewriter = getCommentRewriter();
 		List<Comment> relatedComments = cRewriter.findRelatedComments(expectedPrimitiveNumberClass);
-		List<Comment> argComments = ASTNodeUtil.convertToTypedList(expectedPrimitiveNumberClass.arguments(), Expression.class).stream()
-				.map(cRewriter::findRelatedComments)
-				.flatMap(List::stream)
-				.collect(Collectors.toList());
+		List<Comment> argComments = ASTNodeUtil
+			.convertToTypedList(expectedPrimitiveNumberClass.arguments(), Expression.class)
+			.stream()
+			.map(cRewriter::findRelatedComments)
+			.flatMap(List::stream)
+			.collect(Collectors.toList());
 		relatedComments.removeAll(argComments);
 		return relatedComments;
 	}
@@ -161,13 +167,14 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 	private List<Comment> findRemovedComments(MethodInvocation expetedValueOf) {
 		CommentRewriter cRewriter = getCommentRewriter();
 		List<Comment> relatedComments = cRewriter.findInternalComments(expetedValueOf);
-		List<Comment> argComments = ASTNodeUtil.convertToTypedList(expetedValueOf.arguments(), Expression.class).stream()
-				.map(cRewriter::findRelatedComments)
-				.flatMap(List::stream)
-				.collect(Collectors.toList());
+		List<Comment> argComments = ASTNodeUtil.convertToTypedList(expetedValueOf.arguments(), Expression.class)
+			.stream()
+			.map(cRewriter::findRelatedComments)
+			.flatMap(List::stream)
+			.collect(Collectors.toList());
 		relatedComments.removeAll(argComments);
 		relatedComments.removeAll(cRewriter.findRelatedComments(expetedValueOf.getExpression()));
-		
+
 		return relatedComments;
 	}
 
@@ -189,7 +196,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 
 	@Override
 	public boolean visit(StringLiteral node) {
-		
+
 		/*
 		 * i Third case: 4 + ""
 		 */
@@ -240,6 +247,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 					astRewrite.replace(node, methodInvocation, null);
 					getCommentRewriter().saveCommentsInParentStatement(node);
 					onRewrite();
+					addMarkerEvent(node, otherSide, typeName, toStringSimpleName);
 				}
 			}
 		}

@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import eu.jsparrow.core.markers.common.PutIfAbsentEvent;
 import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -43,14 +44,14 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @author Hans-Jörg Schrödl
  *
  */
-public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
+public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor implements PutIfAbsentEvent {
 
 	private static final String MAP_FULLY_QUALIFIED_NAME = java.util.Map.class.getName();
 
 	private static final String PUT = "put"; //$NON-NLS-1$
 	private static final String CONTAINS_KEY = "containsKey"; //$NON-NLS-1$
 
-	private static final String PUT_IF_ABSENT = "putIfAbsent"; //$NON-NLS-1$
+	protected static final String PUT_IF_ABSENT = "putIfAbsent"; //$NON-NLS-1$
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
@@ -84,7 +85,7 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(ifStatement, statement, null);
 		getCommentRewriter().saveRelatedComments(ifStatement);
 		onRewrite();
-
+		addMarkerEvent(methodInvocation);
 		return true;
 	}
 
@@ -160,7 +161,7 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 			.getNodeType() == ASTNode.IF_STATEMENT;
 	}
 
-	public ExpressionStatement createPutIfAbsent(MethodInvocation methodInvocation) {
+	private ExpressionStatement createPutIfAbsent(MethodInvocation methodInvocation) {
 		SimpleName putIfAbsentName = methodInvocation.getAST()
 			.newSimpleName(PUT_IF_ABSENT);
 		Expression firstArgument = (Expression) astRewrite.createMoveTarget((Expression) methodInvocation.arguments()
