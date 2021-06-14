@@ -2,17 +2,19 @@ package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.osgi.framework.Version;
+import org.eclipse.jdt.core.JavaModelException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.visitor.junit.dedicated.UseDedicatedAssertionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.rules.common.exception.runtime.ITypeNotFoundRuntimeException;
 
 /**
  * @see UseDedicatedAssertionsASTVisitor
@@ -23,10 +25,10 @@ import eu.jsparrow.rules.common.Tag;
 public class UseDedicatedAssertionsRule
 		extends RefactoringRuleImpl<UseDedicatedAssertionsASTVisitor> {
 
+	private static final Logger logger = LoggerFactory.getLogger(UseDedicatedAssertionsRule.class);
+
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
-	private static final String MIN_JUNIT_4_VERSION = "4.0"; //$NON-NLS-1$
-	private static final String MIN_JUNIT_5_VERSION = "5.0"; //$NON-NLS-1$
 
 	public UseDedicatedAssertionsRule() {
 		this.visitorClass = UseDedicatedAssertionsASTVisitor.class;
@@ -52,13 +54,14 @@ public class UseDedicatedAssertionsRule
 
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
-		Predicate<Version> jupiterVersionComparator = version -> version
-			.compareTo(Version.parseVersion(MIN_JUNIT_5_VERSION)) >= 0;
-		Predicate<Version> junitVersionComparator = version -> version
-			.compareTo(Version.parseVersion(MIN_JUNIT_4_VERSION)) >= 0;
-
-		return isInProjectLibraries(project, ORG_JUNIT_JUPITER_API_ASSERTIONS, jupiterVersionComparator)
-				|| isInProjectLibraries(project, ORG_JUNIT_ASSERT, junitVersionComparator);
+		boolean usesJunit;
+		try {
+			usesJunit = project.findType(ORG_JUNIT_JUPITER_API_ASSERTIONS) != null || project.findType(ORG_JUNIT_ASSERT) != null;
+		} catch (JavaModelException e) {
+			logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
+			return false;
+		}
+		return usesJunit;
 
 	}
 }
