@@ -96,6 +96,7 @@ import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseArraysStreamRule;
 import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseComparatorMethodsRule;
+import eu.jsparrow.core.rule.impl.UseDedicatedAssertionsRule;
 import eu.jsparrow.core.rule.impl.UseFilesBufferedReaderRule;
 import eu.jsparrow.core.rule.impl.UseFilesBufferedWriterRule;
 import eu.jsparrow.core.rule.impl.UseFilesWriteStringRule;
@@ -202,6 +203,7 @@ public class RulesContainer {
 				new ReplaceJUnit4CategoryWithJupiterTagRule(),
 				new ReplaceJUnit4AnnotationsWithJupiterRule(),
 				new ReplaceJUnit4AssertionsWithJupiterRule(),
+				new UseDedicatedAssertionsRule(),
 				new ReplaceJUnitAssertThatWithHamcrestRule(),
 				new ReplaceJUnit4AssumptionsWithJupiterRule(),
 				new ReplaceJUnit4AssumptionsWithHamcrestJUnitRule(),
