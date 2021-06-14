@@ -23,7 +23,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * {@code assertFalse(condition)} to in order to decide whether the given
  * invocation can be transformed to a more specific one.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class BooleanAssertionAnalyzer {

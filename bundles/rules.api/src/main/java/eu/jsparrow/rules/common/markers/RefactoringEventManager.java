@@ -6,7 +6,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
  * Implementers of this interface provide functionalities for generating and
  * resolving jSparrow markers in a compilation unit.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public interface RefactoringEventManager {

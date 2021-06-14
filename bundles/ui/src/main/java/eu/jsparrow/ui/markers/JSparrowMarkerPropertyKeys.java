@@ -6,7 +6,7 @@ import org.eclipse.core.resources.IMarker;
  * Defines jSparrow marker keys that are not part of the predefined
  * {@link IMarker} properties.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class JSparrowMarkerPropertyKeys {

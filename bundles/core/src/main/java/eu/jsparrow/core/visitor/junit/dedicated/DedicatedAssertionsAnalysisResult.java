@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.Expression;
  * {@code assertTrue(condition)} or {@code assertFalse(condition)} to an
  * invocation of a more specific assertion.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 class DedicatedAssertionsAnalysisResult {

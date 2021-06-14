@@ -19,7 +19,7 @@ import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.*;
 /**
  * Provides resolution for a jSparrow marker. 
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class JSparrowMarkerResolution implements IMarkerResolution2 {

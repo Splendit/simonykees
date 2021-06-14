@@ -16,7 +16,7 @@ import eu.jsparrow.i18n.Messages;
  * A visitor for resolving one issue of type
  * {@link UseComparatorMethodsASTVisitor}.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor {

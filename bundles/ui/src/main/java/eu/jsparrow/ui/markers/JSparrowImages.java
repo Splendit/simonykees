@@ -16,7 +16,7 @@ import eu.jsparrow.ui.Activator;
 /**
  * A container with predefined jSparrow icons. 
  * 
- * @since 3.31.0
+ * @since 4.0.0
  */
 public final class JSparrowImages {
 

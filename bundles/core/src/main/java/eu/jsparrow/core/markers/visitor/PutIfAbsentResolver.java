@@ -21,7 +21,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
 /**
  * A visitor for resolving one issue of type {@link PutIfAbsentASTVisitor}.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
