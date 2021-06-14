@@ -49,7 +49,7 @@ public class UseDedicatedAssertionsRule
 
 	@Override
 	public String requiredLibraries() {
-		return "JUnit 4.0 or JUnit 5.0"; //$NON-NLS-1$
+		return "JUnit 4 or JUnit 5"; //$NON-NLS-1$
 	}
 
 	@Override

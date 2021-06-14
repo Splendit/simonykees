@@ -20,37 +20,48 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	public static Stream<Arguments> createComparingObjectsParameters() {
+		String objectDeclarations = "" +
+				"	Object a = new Object();\n" +
+				"	Object b = a;\n";
+
 		return Stream.of(
-				Arguments.of("assertTrue(a.equals(b))", "assertEquals(a,b)"),
-				Arguments.of("assertTrue(a.toString().equals(b.toString()))", "assertEquals(a.toString(),b.toString())"),
-				Arguments.of("assertTrue(!a.equals(b))", "assertNotEquals(a,b)"),
-				Arguments.of("assertTrue((a.equals(b)))", "assertEquals(a,b)"),
-				Arguments.of("assertTrue((!(!a.equals(b))))", "assertEquals(a,b)"),
-				Arguments.of("assertFalse(a.equals(b))", "assertNotEquals(a,b)"),
-				Arguments.of("assertFalse(!a.equals(b))", "assertEquals(a,b)"),
-				Arguments.of("assertTrue(a == b)", "assertSame(a,b)"),
-				Arguments.of("assertTrue(a != b)", "assertNotSame(a,b)"),
-				Arguments.of("assertFalse(a == b)", "assertNotSame(a,b)"),
-				Arguments.of("assertFalse(a != b)", "assertSame(a,b)"),
-				Arguments.of("assertTrue(\"expected: a.equals(b)\", a.equals(b))",
-						"assertEquals(\"expected: a.equals(b)\",a,b)"),
-				Arguments.of("assertTrue(\"expected: a == b\", a == b)", "assertSame(\"expected: a == b\",a,b)"));
+				Arguments.of(objectDeclarations, "assertTrue(a.equals(b))", "assertEquals(a,b)"),
+				Arguments.of(objectDeclarations, "assertTrue(a.toString().equals(b.toString()))",
+						"assertEquals(a.toString(),b.toString())"),
+				Arguments.of(objectDeclarations, "assertTrue(!a.equals(b))", "assertNotEquals(a,b)"),
+				Arguments.of(objectDeclarations, "assertTrue((a.equals(b)))", "assertEquals(a,b)"),
+				Arguments.of(objectDeclarations, "assertTrue((!(!a.equals(b))))", "assertEquals(a,b)"),
+				Arguments.of(objectDeclarations, "assertFalse(a.equals(b))", "assertNotEquals(a,b)"),
+				Arguments.of(objectDeclarations, "assertFalse(!a.equals(b))", "assertEquals(a,b)"),
+				Arguments.of(objectDeclarations, "assertTrue(a == b)", "assertSame(a,b)"),
+				Arguments.of(objectDeclarations, "assertTrue(a != b)", "assertNotSame(a,b)"),
+				Arguments.of(objectDeclarations, "assertFalse(a == b)", "assertNotSame(a,b)"),
+				Arguments.of(objectDeclarations, "assertFalse(a != b)", "assertSame(a,b)"));
 	}
 
 	@ParameterizedTest()
 	@MethodSource("createComparingObjectsParameters")
-	void visit_AssertionsComparingObjects_shouldTransform(String originalInvocation,
-			String expectedInvocation)
-			throws Exception {
+	void visit_JUnit4AssertionsComparingObjects_shouldTransform(String objectDeclarations, String originalInvocation,
+			String expectedInvocation) throws Exception {
 		fixture.addImport("org.junit.Assert.assertFalse", true, false);
 		fixture.addImport("org.junit.Assert.assertTrue", true, false);
-		String original = "" +
-				"	Object a = new Object();\n" +
-				"	Object b = a;\n" +
+		String original = objectDeclarations +
 				"	" + originalInvocation + ";\n";
-		String expected = "" +
-				"	Object a = new Object();\n" +
-				"	Object b = a;\n" +
+		String expected = objectDeclarations +
+				"	" + expectedInvocation + ";\n";
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest()
+	@MethodSource("createComparingObjectsParameters")
+	void visit_JupiterAssertionsComparingObjects_shouldTransform(String objectDeclarations, String originalInvocation,
+			String expectedInvocation) throws Exception {
+		fixture.addImport("org.junit.jupiter.api.Assertions.assertFalse", true, false);
+		fixture.addImport("org.junit.jupiter.api.Assertions.assertTrue", true, false);
+		String original = objectDeclarations +
+				"	" + originalInvocation + ";\n";
+		String expected = objectDeclarations +
 				"	" + expectedInvocation + ";\n";
 
 		assertChange(original, expected);
@@ -85,6 +96,24 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
+	void visit_JUnit4AssertionWithMessage_shouldTransform() throws Exception {
+
+		fixture.addImport("org.junit.Assert.assertTrue", true, false);
+
+		String original = ""
+				+ "		Object a = new Object();\n"
+				+ "		Object b = a;\n"
+				+ "		assertTrue(\"expected: a == b\", a == b);";
+
+		String expected = ""
+				+ "		Object a = new Object();\n"
+				+ "		Object b = a;\n"
+				+ "		assertSame(\"expected: a == b\", a, b);";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	void visit_JupiterAssertionWithMessage_shouldTransform() throws Exception {
 
 		fixture.addImport("org.junit.jupiter.api.Assertions.assertTrue", true, false);
@@ -98,24 +127,6 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				+ "		Object a = new Object();\n"
 				+ "		Object b = a;\n"
 				+ "		assertSame(a,b,\"expected: a == b\");";
-
-		assertChange(original, expected);
-	}
-
-	@Test
-	void visit_JupiterAssertionWithoutMessage_shouldTransform() throws Exception {
-
-		fixture.addImport("org.junit.jupiter.api.Assertions.assertTrue", true, false);
-
-		String original = ""
-				+ "		Object a = new Object();\n"
-				+ "		Object b = a;\n"
-				+ "		assertTrue(a == b);";
-
-		String expected = ""
-				+ "		Object a = new Object();\n"
-				+ "		Object b = a;\n"
-				+ "		assertSame(a,b);";
 
 		assertChange(original, expected);
 	}
@@ -177,7 +188,7 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	void visit_AssertTrueCharEqualsCharLiteral_shouldTransform() throws Exception {
 		fixture.addImport("org.junit.Assert.assertTrue", true, false);
@@ -238,7 +249,7 @@ class UseDedicatedAssertionsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	void visit_equalsComparingUnboxedWithPrimitive_shouldTransform() throws Exception {
 		fixture.addImport("org.junit.jupiter.api.Assertions.assertTrue", true, false);

@@ -70,7 +70,7 @@ class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 
 		rule.calculateEnabledForProject(testProject);
 
-		assertThat(rule.requiredLibraries(), equalTo("JUnit 4.0 or JUnit 5.0"));
+		assertThat(rule.requiredLibraries(), equalTo("JUnit 4 or JUnit 5"));
 	}
 
 	@Test
