@@ -9,6 +9,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.visitor.junit.junit3.Junit3MigrationConfiguration;
+import eu.jsparrow.core.visitor.junit.junit3.Junit3MigrationConfigurationFactory;
 import eu.jsparrow.core.visitor.junit.junit3.ReplaceJUnit3TestCasesASTVisitor;
 import eu.jsparrow.core.visitor.junit.jupiter.assertions.ReplaceJUnit4AssertionsWithJupiterASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -29,7 +31,7 @@ public class ReplaceJUnit3TestCasesRule
 
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
-	private boolean transformationToJupiter;
+	private Junit3MigrationConfiguration junit3MigrationConfiguration;
 
 	public ReplaceJUnit3TestCasesRule() {
 		this.visitorClass = ReplaceJUnit3TestCasesASTVisitor.class;
@@ -58,7 +60,7 @@ public class ReplaceJUnit3TestCasesRule
 
 		try {
 			if (project.findType(ORG_JUNIT_JUPITER_API_ASSERTIONS) != null) {
-				transformationToJupiter = true;
+				junit3MigrationConfiguration = new Junit3MigrationConfigurationFactory().createJUnitJupiterConfigurationValues();
 				return true;
 			}
 		} catch (JavaModelException e) {
@@ -67,7 +69,7 @@ public class ReplaceJUnit3TestCasesRule
 
 		try {
 			if (project.findType(ORG_JUNIT_ASSERT) != null) {
-				transformationToJupiter = false;
+				junit3MigrationConfiguration = new Junit3MigrationConfigurationFactory().createJUnit4ConfigurationValues();
 				return true;
 				
 			}
@@ -80,7 +82,7 @@ public class ReplaceJUnit3TestCasesRule
 
 	@Override
 	protected ReplaceJUnit3TestCasesASTVisitor visitorFactory() throws InstantiationException, IllegalAccessException {
-		ReplaceJUnit3TestCasesASTVisitor visitor = new ReplaceJUnit3TestCasesASTVisitor(transformationToJupiter);
+		ReplaceJUnit3TestCasesASTVisitor visitor = new ReplaceJUnit3TestCasesASTVisitor(junit3MigrationConfiguration);
 		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
 		return visitor;
 	}

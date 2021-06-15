@@ -13,7 +13,9 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest
 	public void setUpVisitor() throws Exception {
 		addDependency("junit", "junit", "3.8.2");
 		addDependency("org.junit.jupiter", "junit-jupiter-api", "5.4.0");
-		setDefaultVisitor(new ReplaceJUnit3TestCasesASTVisitor(true));
+		Junit3MigrationConfiguration configuration = new Junit3MigrationConfigurationFactory()
+			.createJUnit4ConfigurationValues();
+		setDefaultVisitor(new ReplaceJUnit3TestCasesASTVisitor(configuration));
 	}
 
 	@AfterEach

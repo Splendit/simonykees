@@ -6,10 +6,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisitor {
-	private final boolean transformationToJupiter;
+	private Junit3MigrationConfiguration configuration;
 
-	public ReplaceJUnit3TestCasesASTVisitor(boolean transformationToJupiter) {
-		this.transformationToJupiter = transformationToJupiter;
+	public ReplaceJUnit3TestCasesASTVisitor(Junit3MigrationConfiguration configuration) {
+		this.configuration = configuration;
 	}
 
 	@Override
@@ -24,7 +24,4 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		return true;
 	}
 
-	public boolean isTransformationToJupiter() {
-		return transformationToJupiter;
-	}
 }
