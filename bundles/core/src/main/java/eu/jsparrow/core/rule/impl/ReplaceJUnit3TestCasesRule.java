@@ -2,11 +2,12 @@ package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.osgi.framework.Version;
+import org.eclipse.jdt.core.JavaModelException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.visitor.junit.junit3.ReplaceJUnit3TestCasesASTVisitor;
 import eu.jsparrow.core.visitor.junit.jupiter.assertions.ReplaceJUnit4AssertionsWithJupiterASTVisitor;
@@ -24,10 +25,10 @@ import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 public class ReplaceJUnit3TestCasesRule
 		extends RefactoringRuleImpl<ReplaceJUnit3TestCasesASTVisitor> {
 
+	private static final Logger logger = LoggerFactory.getLogger(ReplaceJUnit3TestCasesRule.class);
+
 	private static final String ORG_JUNIT_JUPITER_API_ASSERTIONS = "org.junit.jupiter.api.Assertions"; //$NON-NLS-1$
 	private static final String ORG_JUNIT_ASSERT = "org.junit.Assert"; //$NON-NLS-1$
-	private static final String MIN_JUNIT_4_VERSION = "4.0"; //$NON-NLS-1$
-	private static final String MIN_JUNIT_5_VERSION = "5.0"; //$NON-NLS-1$
 	private boolean transformationToJupiter;
 
 	public ReplaceJUnit3TestCasesRule() {
@@ -54,16 +55,27 @@ public class ReplaceJUnit3TestCasesRule
 
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
-		Predicate<Version> jupiterVersionComparator = version -> version
-			.compareTo(Version.parseVersion(MIN_JUNIT_5_VERSION)) >= 0;
-		if (isInProjectLibraries(project, ORG_JUNIT_JUPITER_API_ASSERTIONS, jupiterVersionComparator)) {
-			transformationToJupiter = true;
-			return true;
+
+		try {
+			if (project.findType(ORG_JUNIT_JUPITER_API_ASSERTIONS) != null) {
+				transformationToJupiter = true;
+				return true;
+			}
+		} catch (JavaModelException e) {
+			logger.debug("Cannot find type {} in the classpath.", ORG_JUNIT_JUPITER_API_ASSERTIONS, e); //$NON-NLS-1$
 		}
 
-		Predicate<Version> junitVersionComparator = version -> version
-			.compareTo(Version.parseVersion(MIN_JUNIT_4_VERSION)) >= 0;
-		return isInProjectLibraries(project, ORG_JUNIT_ASSERT, junitVersionComparator);
+		try {
+			if (project.findType(ORG_JUNIT_ASSERT) != null) {
+				transformationToJupiter = false;
+				return true;
+				
+			}
+		} catch (JavaModelException e) {
+			logger.debug("Cannot find type {} in the classpath.", ORG_JUNIT_ASSERT, e); //$NON-NLS-1$
+		}
+
+		return false;
 	}
 
 	@Override
