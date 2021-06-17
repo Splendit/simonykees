@@ -142,4 +142,34 @@ public class ReplaceJUnit4AssumptionsWithJupiterASTVisitorTest
 				"import static org.junit.jupiter.api.Assumptions.assumeTrue;");
 		assertChange(original, expected, expectedImports);
 	}
+
+	@Test
+	public void visit_needingAssumptionsQualifier_shouldTransform() throws Exception {
+		defaultFixture.addImport("org.junit.Assume.assumeTrue", true, false);
+		defaultFixture.addImport(org.junit.jupiter.api.Test.class.getName());
+		String original = "" +
+				"	void methodWithoutTestAnnotation() {\n"
+				+ "		assumeTrue(1L == 1L);\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@Test\n"
+				+ "	void test() {\n"
+				+ "		assumeTrue(1L == 1L);\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void methodWithoutTestAnnotation() {\n"
+				+ "		assumeTrue(1L == 1L);\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	@Test\n"
+				+ "	void test() {\n"
+				+ "		Assumptions.assumeTrue(1L == 1L);\n"
+				+ "	}";
+
+		List<String> expectedImports = Arrays.asList("import org.junit.jupiter.api.Assumptions;",
+				"import org.junit.jupiter.api.Test;",
+				"import static org.junit.Assume.assumeTrue;");
+		assertChange(original, expected, expectedImports);
+	}
 }

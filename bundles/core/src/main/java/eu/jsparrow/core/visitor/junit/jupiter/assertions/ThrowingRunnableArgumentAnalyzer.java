@@ -8,7 +8,6 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -29,8 +28,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 class ThrowingRunnableArgumentAnalyzer {
 	private Type localVariableTypeToReplace;
 
-	boolean analyze(MethodDeclaration surroundingMethodDeclaration,
-			List<Expression> arguments) {
+	boolean analyze(List<Expression> arguments) {
 		int throwingRunnableArgumentIndex = arguments.size() - 1;
 		Expression throwingRunnableArgument = arguments.get(throwingRunnableArgumentIndex);
 		if (isSupportedThrowingRunnableExpression(throwingRunnableArgument)) {
@@ -67,7 +65,7 @@ class ThrowingRunnableArgumentAnalyzer {
 			return false;
 		}
 		if (!analyzeThrowingRunnableUsages(variableDeclarationFragment, throwingRunnableVariableName,
-				surroundingMethodDeclaration)) {
+				variableDeclarationStatement.getParent())) {
 			return false;
 		}
 		localVariableTypeToReplace = variableDeclarationStatement.getType();
@@ -81,12 +79,11 @@ class ThrowingRunnableArgumentAnalyzer {
 	}
 
 	private boolean analyzeThrowingRunnableUsages(VariableDeclarationFragment variableDeclarationFragment,
-			SimpleName nameAsAssertionArgument,
-			MethodDeclaration surroundingMethodDeclaration) {
+			SimpleName nameAsAssertionArgument, ASTNode usageScope) {
 
 		LocalVariableUsagesVisitor localVariableUsagesVisitor = new LocalVariableUsagesVisitor(
 				nameAsAssertionArgument);
-		surroundingMethodDeclaration.accept(localVariableUsagesVisitor);
+		usageScope.accept(localVariableUsagesVisitor);
 
 		List<SimpleName> usages = localVariableUsagesVisitor.getUsages();
 		SimpleName nameAtDeclaration = variableDeclarationFragment.getName();

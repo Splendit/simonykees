@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.core.markers.common.LambdaToMethodReferenceEvent;
 import eu.jsparrow.core.visitor.utils.LambdaNodeUtil;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -59,7 +60,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * @since 1.2
  *
  */
-public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisitor {
+public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisitor implements LambdaToMethodReferenceEvent {
 
 	private Set<String> newImports = new HashSet<>();
 
@@ -140,6 +141,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 				ExpressionMethodReference ref = astRewrite.getAST()
 					.newExpressionMethodReference();
+				Expression refExpression = null;
 
 				// save type arguments
 				saveTypeArguments(methodInvocation, ref);
@@ -194,6 +196,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						Expression newMethodInvocationExpression = (Expression) astRewrite
 							.createCopyTarget(methodInvocation.getExpression());
 						ref.setExpression(newMethodInvocationExpression);
+						refExpression = methodInvocation.getExpression();
 						isReferenceExpressionSet = true;
 					}
 				}
@@ -204,6 +207,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 					astRewrite.replace(lambdaExpressionNode, ref, null);
 					getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 					onRewrite();
+					refExpression = refExpression == null ? ref.getExpression() : refExpression;
+					addMarkerEvent(lambdaExpressionNode, refExpression, methodInvocation.getName());
 				}
 			}
 
@@ -257,6 +262,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 				astRewrite.replace(lambdaExpressionNode, ref, null);
 				getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 				onRewrite();
+				addMarkerEvent(lambdaExpressionNode, classInstanceCreationType);
 			}
 		}
 
@@ -646,10 +652,13 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		astRewrite.replace(lambdaExpressionNode, ref, null);
 		getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 		onRewrite();
+		Type representingType = explicitParameterType != null ? explicitParameterType : type;
+		addMarkerEvent(lambdaExpressionNode, representingType, methodInvocation.getName());
 
 	}
 
-	private boolean areIncompatibleFunctionalInterfaces(IMethodBinding contextFunctionalInterface, IMethodBinding actualFunctionalInterface) {
+	private boolean areIncompatibleFunctionalInterfaces(IMethodBinding contextFunctionalInterface,
+			IMethodBinding actualFunctionalInterface) {
 		ITypeBinding contextReturnType = contextFunctionalInterface.getReturnType();
 		ITypeBinding actualReturnType = actualFunctionalInterface.getReturnType();
 		if (!actualReturnType.isAssignmentCompatible(contextReturnType)) {

@@ -9,6 +9,8 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
+import eu.jsparrow.rules.common.markers.RefactoringMarkerListener;
 import eu.jsparrow.rules.common.util.GeneratedNodesUtil;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
@@ -29,6 +31,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	protected String compilationUnitHandle;
 
 	protected List<ASTRewriteVisitorListener> listeners = new ArrayList<>();
+	private List<RefactoringMarkerListener> refactoringMarkerListeners = new ArrayList<>();
 
 	protected String compilationUnitSource = EMPTY_STRING;
 
@@ -120,7 +123,19 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	public void onRewrite() {
 		listeners.forEach(listener -> listener.update(new ASTRewriteEvent(this.compilationUnitHandle)));
 	}
-	
+
+	public void addMarkerEvent(RefactoringMarkerEvent event) {
+		refactoringMarkerListeners.forEach(listener -> listener.update(event));
+	}
+
+	public void addMarkerListener(RefactoringMarkerListener listener) {
+		this.refactoringMarkerListeners.add(listener);
+	}
+
+	public void clearMarkerListeners() {
+		this.refactoringMarkerListeners.clear();
+	}
+
 	protected CommentRewriter getCommentRewriter() {
 		return this.commentRewriter;
 	}

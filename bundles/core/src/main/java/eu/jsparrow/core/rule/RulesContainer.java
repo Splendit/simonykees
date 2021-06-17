@@ -76,7 +76,9 @@ import eu.jsparrow.core.rule.impl.RemoveUnusedParameterRule;
 import eu.jsparrow.core.rule.impl.ReorderModifiersRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnit4AnnotationsWithJupiterRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnit4AssertionsWithJupiterRule;
+import eu.jsparrow.core.rule.impl.ReplaceJUnit4AssumptionsWithHamcrestJUnitRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnit4AssumptionsWithJupiterRule;
+import eu.jsparrow.core.rule.impl.ReplaceJUnit4CategoryWithJupiterTagRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitAssertThatWithHamcrestRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedExceptionRule;
@@ -94,6 +96,7 @@ import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseArraysStreamRule;
 import eu.jsparrow.core.rule.impl.UseCollectionsSingletonListRule;
 import eu.jsparrow.core.rule.impl.UseComparatorMethodsRule;
+import eu.jsparrow.core.rule.impl.UseDedicatedAssertionsRule;
 import eu.jsparrow.core.rule.impl.UseFilesBufferedReaderRule;
 import eu.jsparrow.core.rule.impl.UseFilesBufferedWriterRule;
 import eu.jsparrow.core.rule.impl.UseFilesWriteStringRule;
@@ -197,14 +200,13 @@ public class RulesContainer {
 				 */
 				new ReplaceJUnitExpectedExceptionRule(), new ReplaceJUnitExpectedAnnotationPropertyRule(),
 				new ReplaceJUnitTimeoutAnnotationPropertyRule(),
-				/*
-				 * We plan to release this rule in June. 
-				 * new ReplaceJUnit4CategoryWithJupiterTagRule(),
-				 */
+				new ReplaceJUnit4CategoryWithJupiterTagRule(),
 				new ReplaceJUnit4AnnotationsWithJupiterRule(),
 				new ReplaceJUnit4AssertionsWithJupiterRule(),
+				new UseDedicatedAssertionsRule(),
 				new ReplaceJUnitAssertThatWithHamcrestRule(),
 				new ReplaceJUnit4AssumptionsWithJupiterRule(),
+				new ReplaceJUnit4AssumptionsWithHamcrestJUnitRule(),
 
 				/*
 				 * String manipulations and arithmetic expressions

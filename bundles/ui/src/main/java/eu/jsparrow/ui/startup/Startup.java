@@ -1,13 +1,21 @@
 package eu.jsparrow.ui.startup;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.markers.CoreRefactoringEventManager;
+import eu.jsparrow.ui.markers.HighlightColorPicker;
+import eu.jsparrow.ui.markers.MarkerEngine;
+import eu.jsparrow.ui.markers.MarkerFactory;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.startup.registration.RegistrationDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -31,7 +39,9 @@ public class Startup implements IStartup {
 		PlatformUI.getWorkbench()
 			.getDisplay()
 			.asyncExec(() -> {
+
 				if (!licenseUtil.isValidProLicensePresentInSecureStore() && !licenseUtil.isActiveRegistration()) {
+
 					Shell activeShell = PlatformUI.getWorkbench()
 						.getActiveWorkbenchWindow()
 						.getShell();
@@ -53,7 +63,20 @@ public class Startup implements IStartup {
 					 */
 					SimonykeesPreferenceManager.setEnableDashboard(false);
 				}
-
+			});
+		PlatformUI.getWorkbench()
+			.getDisplay()
+			.asyncExec(() -> {
+				IWorkbench workbench = PlatformUI.getWorkbench();
+				String currentLineColor = HighlightColorPicker.findDefaultThemeColor(workbench);
+				IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode("org.eclipse.ui.editors"); //$NON-NLS-1$
+				String jSparrowMarkerHighlightColor = HighlightColorPicker.calcThemeHighlightColor(preferences,
+						currentLineColor);
+				MarkerFactory markerFactory = new MarkerFactory(jSparrowMarkerHighlightColor);
+				CoreRefactoringEventManager eventManager = new CoreRefactoringEventManager();
+				MarkerEngine engine = new MarkerEngine(markerFactory, eventManager);
+				engine.track(workbench);
+				JavaCore.addElementChangedListener(engine);
 			});
 	}
 }

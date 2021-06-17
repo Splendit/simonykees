@@ -120,5 +120,64 @@
         </toolbar>
      </menuContribution>
   </extension>
+   
+ 	<!-- jSparrow Marker Annotations -->
+	<extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+		<specification
+			annotationImageProvider="eu.jsparrow.ui.markers.JSparrowImageProvider"
+			annotationType="jsparrow"
+			colorPreferenceKey="jsparrow.marker.color"
+            colorPreferenceValue="57,59,52"
+            contributesToHeader="true"
+            highlightPreferenceKey="jsparrow.marker.highlight"
+            highlightPreferenceValue="true"
+            icon="icons/jSparrow_bulb_bottomRight_icon_16.png"
+            includeOnPreferencePage="true"
+            label="jSparrow Refactor"
+            overviewRulerPreferenceKey="jsparrow.marker.overview"
+            overviewRulerPreferenceValue="false"
+            presentationLayer="0"
+            quickFixIcon="icons/jSparrow_bulb_bottomRight_icon_16.png"
+            showInNextPrevDropdownToolbarAction="true"
+            textPreferenceKey="jsparrow.marker.text"
+            textPreferenceValue="true"
+            textStylePreferenceKey="jsparrow.marker.style"
+            textStylePreferenceValue="SQUIGGLES"
+            verticalRulerPreferenceKey="jsparrow.marker.ruler"
+            verticalRulerPreferenceValue="true">
+		</specification>
+	</extension>
+	<extension
+		point="org.eclipse.ui.editors.annotationTypes">
+		<type
+			markerSeverity="0"
+			markerType="jsparrow.marker"
+			name="jsparrow">
+		</type>
+	</extension>
+	<extension
+		id="jsparrow.marker"
+		name="jSparrow"
+		point="org.eclipse.core.resources.markers">
+		<super
+			type="org.eclipse.core.resources.problemmarker">
+		</super>
+		<super
+			type="org.eclipse.core.resources.textmarker">
+		</super>
+		<persistent
+			value="false">
+		</persistent>
+	</extension>
+   
+   <!-- jSparrow Marker Resolution -->
+	<extension
+			point="org.eclipse.ui.ide.markerResolution">
+		<markerResolutionGenerator
+			class="eu.jsparrow.ui.markers.JSparrowMarkerResolutionGenerator"
+			markerType="jsparrow.marker">
+		</markerResolutionGenerator>
+	</extension>
   
 </plugin>
