@@ -19,7 +19,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
  * A visitor for resolving one issue of type
  * {@link EnumsWithoutEqualsASTVisitor}.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {

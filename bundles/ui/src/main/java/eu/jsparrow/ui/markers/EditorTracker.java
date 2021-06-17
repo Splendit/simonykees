@@ -15,7 +15,7 @@ import org.eclipse.ui.IWorkbenchWindow;
  * 
  * @see {@linkplain https://github.com/stuarthendren/jdt.spelling} 
  * 
- * @since 3.31.0
+ * @since 4.0.0
  */
 public abstract class EditorTracker implements IWindowListener, IPageListener, IPartListener {
 	/**

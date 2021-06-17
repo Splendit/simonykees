@@ -15,7 +15,7 @@ import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.JSPARROW_MARKER_
  * Finds the highlight color of jSparrow markers based on the current line
  * highlight color.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class HighlightColorPicker {

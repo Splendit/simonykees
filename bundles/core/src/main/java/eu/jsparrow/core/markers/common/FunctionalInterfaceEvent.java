@@ -12,7 +12,7 @@ import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisito
  * An interface to add {@link RefactoringMarkerEvent}s for
  * {@link FunctionalInterfaceASTVisitor}.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public interface FunctionalInterfaceEvent {

@@ -37,7 +37,7 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * </ul>
  * <p>
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 abstract class AbstractReplaceJUnit4InvocationsASTVisitor extends AbstractAddImportASTVisitor {

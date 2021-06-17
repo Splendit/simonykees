@@ -55,10 +55,10 @@ class UseDedicatedAssertionsRuleTest extends SingleRuleTest {
 				contains(Tag.JAVA_1_5, Tag.TESTING, Tag.CODING_CONVENTIONS));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
-				equalTo("Replaces boolean assertions e.g., 'assertTrue' and 'assertFalse' with the corresponding "
-						+ "dedicated assertions when testing for equality or null values. For example, 'assertTrue(a.equals(b))' "
-						+ "can be replaced by 'assertEquals(a, b)'. Similarly, 'assertSame', 'assertNull', or 'assertNotNull' can "
-						+ "be used instead of 'assertTrue'."));
+				equalTo("Replaces boolean assertions (e.g., 'assertTrue' and 'assertFalse') with the corresponding "
+						+ "dedicated assertions when testing for equality or null values. \nFor example, "
+						+ "'assertTrue(a.equals(b))' can be replaced by 'assertEquals(a, b)'. Similarly, 'assertSame', "
+						+ "'assertNotSame', 'assertNull', or 'assertNotNull' can be used instead of 'assertTrue' or 'assertFalse'."));
 	}
 
 	@Test

@@ -5,7 +5,7 @@ import org.eclipse.jdt.core.IJavaElement;
 /**
  * A type providing all the required information for creating a jSparrow marker.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public interface RefactoringMarkerEvent {

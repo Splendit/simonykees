@@ -24,7 +24,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkers;
  * 
  * @see {@linkplain https://github.com/stuarthendren/jdt.spelling}.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class MarkerEngine extends EditorTracker implements IElementChangedListener {

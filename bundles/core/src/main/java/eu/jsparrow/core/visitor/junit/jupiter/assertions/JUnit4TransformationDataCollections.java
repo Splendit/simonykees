@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.Type;
  * which can be found in a given compilation unit.
  * <p>
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class JUnit4TransformationDataCollections {

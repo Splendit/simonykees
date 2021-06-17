@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
  * by corresponding invocations of
  * {@code org.hamcrest.junit.MatcherAssume.assumeThat}.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  * 
  */
 public class ReplaceJUnit4AssumptionsWithHamcrestJUnitASTVisitor

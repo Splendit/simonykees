@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A job for asynchronously generating {@link IMarker}s.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  */
 public class MarkerJob extends WorkspaceJob {
 

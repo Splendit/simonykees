@@ -13,7 +13,7 @@ import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 /**
  * Generates resolution instances for jSparrow markers.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class JSparrowMarkerResolutionGenerator implements IMarkerResolutionGenerator2 {

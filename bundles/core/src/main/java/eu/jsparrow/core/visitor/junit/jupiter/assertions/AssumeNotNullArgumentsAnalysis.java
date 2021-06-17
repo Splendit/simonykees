@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * invocations of
  * {@code org.hamcrest.junit.MatcherAssume.assertThat(T, Matcher<T>}.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  */
 class AssumeNotNullArgumentsAnalysis {
 	private boolean multipleVarargs;

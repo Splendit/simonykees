@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
  * </pre>
  * 
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 class AssumeNotNullWithNullableArray {

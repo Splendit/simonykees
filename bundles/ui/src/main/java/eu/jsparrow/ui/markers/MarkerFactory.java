@@ -20,7 +20,7 @@ import eu.jsparrow.ui.Activator;
  * A factory class for creating {@link IMarker}s for the generated
  * {@link RefactoringMarkerEvent}s.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class MarkerFactory {

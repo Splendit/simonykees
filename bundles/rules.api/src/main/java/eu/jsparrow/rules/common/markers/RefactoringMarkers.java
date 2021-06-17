@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 /**
  * Maintains channels for {@link RefactoringMarkerEvent}s.
  *
- * @since 3.31.0
+ * @since 4.0.0
  */
 public class RefactoringMarkers implements RefactoringMarkerListener {
 
