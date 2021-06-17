@@ -1,0 +1,20 @@
+package eu.jsparrow.sample.postRule.dedicatedAssertions;
+
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+public class UseDedicatedAssertionsStaticEqualsRule {
+	
+	static class TestWithStaticEquals {
+
+		static boolean equals(int x) {
+			return true;
+		}	
+	}
+	
+	@Test
+	public void test() {
+		assertTrue(TestWithStaticEquals.equals(1));
+	}
+}

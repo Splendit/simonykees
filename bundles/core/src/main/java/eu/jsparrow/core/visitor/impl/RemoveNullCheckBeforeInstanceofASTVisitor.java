@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import eu.jsparrow.core.markers.common.RemoveNullCheckBeforeInstanceofEvent;
 import eu.jsparrow.rules.common.util.OperatorUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -35,7 +36,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * 
  * @since 3.8.0
  */
-public class RemoveNullCheckBeforeInstanceofASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RemoveNullCheckBeforeInstanceofASTVisitor extends AbstractASTRewriteASTVisitor
+		implements RemoveNullCheckBeforeInstanceofEvent {
 
 	@Override
 	public boolean visit(InstanceofExpression expression) {
@@ -85,6 +87,7 @@ public class RemoveNullCheckBeforeInstanceofASTVisitor extends AbstractASTRewrit
 		ASTNode newExpression = astRewrite.createCopyTarget(expression);
 		astRewrite.replace(infixExpression, newExpression, null);
 		onRewrite();
+		addMarkerEvent(infixExpression.getLeftOperand(), infixExpression, expression);
 	}
 
 	private PrefixExpression findNegatedPrefixExpression(Expression expression) {

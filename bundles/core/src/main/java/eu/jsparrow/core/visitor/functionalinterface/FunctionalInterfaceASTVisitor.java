@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.markers.common.FunctionalInterfaceEvent;
 import eu.jsparrow.core.visitor.sub.MethodInvocationsVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDefinitionASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -57,7 +58,7 @@ import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
  * @since 0.9
  *
  */
-public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor {
+public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor implements FunctionalInterfaceEvent {
 
 	Logger log = LoggerFactory.getLogger(FunctionalInterfaceASTVisitor.class);
 
@@ -317,6 +318,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
 						getASTRewrite().replace(parentNode, newInitializer, null);
 						onRewrite();
+						addMarkerEvent(parentNode, parameteres, moveBlock);
 					}
 				}
 			}

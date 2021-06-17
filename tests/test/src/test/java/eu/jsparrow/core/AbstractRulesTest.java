@@ -30,7 +30,6 @@ import org.junit.jupiter.api.BeforeAll;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RulesContainer;
-import eu.jsparrow.core.rule.impl.ReplaceJUnit4CategoryWithJupiterTagRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -79,8 +78,6 @@ public abstract class AbstractRulesTest {
 		options.put("system-out-print-exception", "error"); //$NON-NLS-1$ //$NON-NLS-2$
 		standardLoggerRule.activateOptions(options);
 		rulesList.add(standardLoggerRule);
-		// FIXME
-		rulesList.add(new ReplaceJUnit4CategoryWithJupiterTagRule());
 		rulesList.addAll(allRules);
 	}
 

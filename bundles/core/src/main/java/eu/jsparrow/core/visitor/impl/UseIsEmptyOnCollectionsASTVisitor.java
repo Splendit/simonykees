@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import eu.jsparrow.core.markers.common.UseIsEmptyOnCollectionsEvent;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -31,7 +32,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @author Martin Huter, Hans-Jörg Schrödl
  * @since 2.1.0
  */
-public class UseIsEmptyOnCollectionsASTVisitor extends AbstractASTRewriteASTVisitor {
+public class UseIsEmptyOnCollectionsASTVisitor extends AbstractASTRewriteASTVisitor implements UseIsEmptyOnCollectionsEvent {
 
 	private static final String STRING_FULLY_QUALIFIED_NAME = java.lang.String.class.getName();
 	private static final String COLLECTION_FULLY_QUALIFIED_NAME = java.util.Collection.class.getName();
@@ -75,6 +76,7 @@ public class UseIsEmptyOnCollectionsASTVisitor extends AbstractASTRewriteASTVisi
 		astRewrite.replace(parent, replaceNode, null);
 		getCommentRewriter().saveCommentsInParentStatement(parent);
 		onRewrite();
+		addMarkerEvent(parent, varExpression);
 		return true;
 	}
 
