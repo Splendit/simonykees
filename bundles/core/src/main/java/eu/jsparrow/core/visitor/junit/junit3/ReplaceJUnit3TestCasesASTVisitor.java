@@ -11,6 +11,8 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 	public ReplaceJUnit3TestCasesASTVisitor(Junit3MigrationConfiguration configuration) {
 		this.configuration = configuration;
 	}
+	
+	
 
 	@Override
 	public boolean visit(MethodInvocation node) {
