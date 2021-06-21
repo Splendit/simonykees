@@ -56,11 +56,9 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			.stream()
 			.map(this::createTestMethodAnnotationData)
 			.collect(Collectors.toList());
-		
+
 		return true;
 	}
-	
-	
 
 	private TestMethodAnnotationData createTestMethodAnnotationData(MethodDeclaration methodDeclaration) {
 		String methodName = methodDeclaration.getName()

@@ -121,11 +121,11 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	@Test
 	void testTransformationToJUnit4() throws Exception {
 		loadUtilities();
-		
+
 		addToClasspath(testProject, Arrays
-				.asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.12")));
-			rule.calculateEnabledForProject(testProject);
-			assertTrue(rule.isEnabled());
+			.asList(generateMavenEntryFromDepedencyString("junit", "junit", "4.12")));
+		rule.calculateEnabledForProject(testProject);
+		assertTrue(rule.isEnabled());
 
 		Path preRule = getPreRuleFile(REPLACE_WITH_J_UNIT_4);
 		Path postRule = getPostRuleFile(REPLACE_WITH_J_UNIT_4, POSTRULE_SUBDIRECTORY);
