@@ -1,18 +1,18 @@
 package eu.jsparrow.sample.postRule.migrateJUnit3;
 
 import junit.framework.TestCase;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.After;
+import org.junit.Test;
+import org.junit.Before;
 
-public class ReplaceJUnit3TestCasesWithJupiterRule extends TestCase {
+public class ReplaceJUnit3TestCasesWithJUnit4Rule extends TestCase {
 
-	@BeforeEach
+	@Before
 	@Override
 	protected void setUp() {
 	}
 
-	@AfterEach
+	@After
 	@Override
 	protected void tearDown() {
 	}

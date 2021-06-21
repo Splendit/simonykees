@@ -2,7 +2,7 @@ package eu.jsparrow.sample.preRule;
 
 import junit.framework.TestCase;
 
-public class ReplaceJUnit3TestCasesWithJupiterRule extends TestCase {
+public class ReplaceJUnit3TestCasesWithJUnit4Rule extends TestCase {
 
 	@Override
 	protected void setUp() {

@@ -25,7 +25,7 @@ import eu.jsparrow.rules.common.Tag;
 
 class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 
-	private static final String REPLACE_WITH_J_UNIT_4 = "ReplaceJUnit3TestCasesWithJnit4Rule.java";
+	private static final String REPLACE_WITH_J_UNIT_4 = "ReplaceJUnit3TestCasesWithJUnit4Rule.java";
 	private static final String REPLACE_WITH_JUPITER = "ReplaceJUnit3TestCasesWithJupiterRule.java";
 
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnit3";

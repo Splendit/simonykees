@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -57,7 +61,26 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			.map(this::createTestMethodAnnotationData)
 			.collect(Collectors.toList());
 
+		transform(assertionAnalysisResults, testMethodAnnotationDataList);
+
 		return true;
+	}
+
+	private void transform(List<JUnit3AssertionAnalysisResult> assertionAnalysisResults,
+			List<TestMethodAnnotationData> testMethodAnnotationDataList) {
+
+		testMethodAnnotationDataList.forEach(data -> {
+			MethodDeclaration methodDeclaration = data.getMethodDeclaration();
+			Name annotationName = addImport(data.getAnnotationQualifiedName(), methodDeclaration);
+			AST ast = astRewrite.getAST();
+			MarkerAnnotation testMethodAnnotation = ast.newMarkerAnnotation();
+			testMethodAnnotation.setTypeName(annotationName);
+
+			ListRewrite listRewrite = astRewrite.getListRewrite(methodDeclaration,
+					MethodDeclaration.MODIFIERS2_PROPERTY);
+			listRewrite.insertFirst(testMethodAnnotation, null);
+			onRewrite();
+		});
 	}
 
 	private TestMethodAnnotationData createTestMethodAnnotationData(MethodDeclaration methodDeclaration) {

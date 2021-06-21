@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import junit.framework.TestCase;
 
-public class ReplaceJUnit3TestCasesWithJupiterRule extends TestCase {
+public class ReplaceJUnit3TestCasesWithJUnit4Rule extends TestCase {
 
 	@BeforeEach
 	@Override
