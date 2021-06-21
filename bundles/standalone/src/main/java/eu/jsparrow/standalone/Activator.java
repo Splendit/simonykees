@@ -170,19 +170,6 @@ public class Activator implements BundleActivator {
 	 * @param context all the settings etc.
 	 */
 	private void runInDemoMode(BundleContext context) {
-		String key = getLicenseKey(context);
-		String agentUrl = getAgentUrl(context);
-		licenseService = getStandaloneLicenseUtilService();
-		try {
-			boolean validLicense = licenseService.validate(key, agentUrl);
-			if (!validLicense) {
-				String message = Messages.StandaloneActivator_noValidLicenseFound;
-				logger.error(message);
-			}
-		} catch (StandaloneException e) {
-			logger.debug(e.getMessage(), e);
-			logger.error(e.getMessage());
-		}
 		try {
 			refactoringInvoker.runInDemoMode(context);
 		} catch (StandaloneException e) {
