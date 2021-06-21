@@ -75,8 +75,8 @@ public class Activator implements BundleActivator {
 		case REFACTOR:
 			refactor(context);
 			break;
-		case DEMO:
-			runInDemoMode(context);
+		case REPORT:
+			runInReportMode(context);
 			break;
 		case LIST_RULES:
 			listRules(listRulesId);
@@ -138,7 +138,7 @@ public class Activator implements BundleActivator {
 	}
 
 	/**
-	 * @see Activator#runInDemoMode(BundleContext)
+	 * @see Activator#runInReportMode(BundleContext)
 	 * 
 	 * @param context
 	 */
@@ -169,9 +169,9 @@ public class Activator implements BundleActivator {
 	 * 
 	 * @param context all the settings etc.
 	 */
-	private void runInDemoMode(BundleContext context) {
+	private void runInReportMode(BundleContext context) {
 		try {
-			refactoringInvoker.runInDemoMode(context);
+			refactoringInvoker.runInReportMode(context);
 		} catch (StandaloneException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());

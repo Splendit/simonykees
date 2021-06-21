@@ -31,7 +31,7 @@ import eu.jsparrow.maven.util.JavaVersion;
 import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
- * Runs the jSparrow in the demo mode, i.e. computes the refactorings and
+ * Runs the jSparrow in REPORT mode, i.e. computes the refactorings and
  * generates a report with the findings. Does not change the source files.
  * Expects the same parameters as the {@code refactor} goal.
  * 
@@ -39,7 +39,7 @@ import eu.jsparrow.maven.util.ProxyUtil;
  *
  */
 @Mojo(name = "report", requiresDependencyResolution = ResolutionScope.COMPILE, defaultPhase = LifecyclePhase.INITIALIZE, aggregator = true)
-public class DemoMojo extends AbstractMojo {
+public class ReportMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession mavenSession;
@@ -125,7 +125,7 @@ public class DemoMojo extends AbstractMojo {
 			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8and11);
 		}
 
-		String mode = StandaloneMode.DEMO.name();
+		String mode = StandaloneMode.REPORT.name();
 		String start = startTime == null ? Instant.now()
 			.toString() : startTime;
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);

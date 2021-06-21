@@ -124,12 +124,12 @@ public class ActivatorTest {
 
 	@Test
 	public void start_withReportAndValidLicense_invokesRunInDemoMode() throws Exception {
-		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("DEMO"); //$NON-NLS-1$
+		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("REPORT"); //$NON-NLS-1$
 		when(context.getBundles()).thenReturn(new Bundle[] {});
 
 		activator.start(context);
 		verify(licenseService, never()).validate(anyString(), anyString());
-		verify(refactoringInvoker).runInDemoMode(any());
+		verify(refactoringInvoker).runInReportMode(any());
 	}
 
 	@Test
