@@ -2,10 +2,12 @@ package eu.jsparrow.core.visitor.junit.junit3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
@@ -23,6 +25,9 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		super.visit(compilationUnit);
 		String classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
 		verifyImport(compilationUnit, classDeclaringMethodReplacement);
+		verifyImport(compilationUnit, migrationConfiguration.getSetupAnnotationQualifiedName());
+		verifyImport(compilationUnit, migrationConfiguration.getTeardownAnnotationQualifiedName());
+		verifyImport(compilationUnit, migrationConfiguration.getTestAnnotationQualifiedName());
 
 		JUnit3TestMethodsStore testMethodStore = new JUnit3TestMethodsStore(compilationUnit);
 		JUnit3AssertionAnalyzer assertionAnalyzer = new JUnit3AssertionAnalyzer(testMethodStore,
@@ -46,7 +51,29 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 				}
 			}
 		}
+
+		List<TestMethodAnnotationData> testMethodAnnotationDataList = testMethodStore.getJUnit3TestMethods()
+			.stream()
+			.map(this::createTestMethodAnnotationData)
+			.collect(Collectors.toList());
+		
 		return true;
+	}
+	
+	
+
+	private TestMethodAnnotationData createTestMethodAnnotationData(MethodDeclaration methodDeclaration) {
+		String methodName = methodDeclaration.getName()
+			.getIdentifier();
+		String annotationQualifiedName;
+		if (methodName.equals(JUnit3TestMethodsStore.SET_UP)) {
+			annotationQualifiedName = migrationConfiguration.getSetupAnnotationQualifiedName();
+		} else if (methodName.equals(JUnit3TestMethodsStore.TEAR_DOWN)) {
+			annotationQualifiedName = migrationConfiguration.getTeardownAnnotationQualifiedName();
+		} else {
+			annotationQualifiedName = migrationConfiguration.getTestAnnotationQualifiedName();
+		}
+		return new TestMethodAnnotationData(methodDeclaration, annotationQualifiedName);
 	}
 
 	private boolean isJUnit3Method(IMethodBinding methodBinding) {

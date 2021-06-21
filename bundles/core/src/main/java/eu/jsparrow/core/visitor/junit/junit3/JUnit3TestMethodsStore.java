@@ -16,13 +16,11 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 class JUnit3TestMethodsStore {
 
-	private static final String SET_UP = "setUp"; //$NON-NLS-1$
-	private static final String TEAR_DOWN = "tearDown"; //$NON-NLS-1$
-	private static final String TEST = "test"; //$NON-NLS-1$
+	static final String SET_UP = "setUp"; //$NON-NLS-1$
+	static final String TEAR_DOWN = "tearDown"; //$NON-NLS-1$
+	static final String TEST = "test"; //$NON-NLS-1$
 
 	private final List<MethodDeclaration> jUnit3TestMethods;
-	private final List<MethodDeclaration> jUnit3SetUpMethods;
-	private final List<MethodDeclaration> jUnit3TearDownMethods;
 
 	JUnit3TestMethodsStore(CompilationUnit compilationUnit) {
 		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
@@ -31,19 +29,6 @@ class JUnit3TestMethodsStore {
 			.stream()
 			.filter(JUnit3TestMethodsStore::isJUnit3TestMethod)
 			.collect(Collectors.toList());
-
-		jUnit3SetUpMethods = jUnit3TestMethods.stream()
-			.filter(methodDeclaration -> methodDeclaration.getName()
-				.getIdentifier()
-				.equals(SET_UP))
-			.collect(Collectors.toList());
-
-		jUnit3TearDownMethods = jUnit3TestMethods.stream()
-			.filter(methodDeclaration -> methodDeclaration.getName()
-				.getIdentifier()
-				.equals(TEAR_DOWN))
-			.collect(Collectors.toList());
-
 	}
 
 	private static boolean isJUnit3TestMethod(MethodDeclaration methodDeclaration) {
@@ -92,13 +77,5 @@ class JUnit3TestMethodsStore {
 
 	public List<MethodDeclaration> getJUnit3TestMethods() {
 		return jUnit3TestMethods;
-	}
-
-	public List<MethodDeclaration> getJUnit3SetUpMethods() {
-		return jUnit3SetUpMethods;
-	}
-
-	public List<MethodDeclaration> getJUnit3TearDownMethods() {
-		return jUnit3TearDownMethods;
 	}
 }
