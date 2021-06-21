@@ -51,7 +51,15 @@ class JUnit3TestMethodsStore {
 		IMethodBinding methodBinding = methodDeclaration.resolveBinding();
 
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+
+		if (declaringClass.isLocal()) {
+			return false;
+		}
+
 		ITypeBinding declaringClassSuperType = declaringClass.getSuperclass();
+		if (declaringClassSuperType == null) {
+			return false;
+		}
 		String superClassQualifiedName = declaringClassSuperType.getQualifiedName();
 
 		if (!"junit.framework.TestCase".equals(superClassQualifiedName)) { //$NON-NLS-1$
