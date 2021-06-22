@@ -19,4 +19,8 @@ public class ReplaceJUnit3TestCasesWithJupiterRule extends TestCase {
 	public void testAssertEqualsWithMessage() throws Exception {
 		assertEquals("Expected to be {0x7fffffff}.", 0x7fffffff, Integer.MAX_VALUE);
 	}
+
+	public static void main(String[] args) {
+
+	}
 }

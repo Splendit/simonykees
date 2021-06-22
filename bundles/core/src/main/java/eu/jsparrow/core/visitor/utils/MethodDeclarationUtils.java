@@ -13,6 +13,8 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -154,6 +156,16 @@ public class MethodDeclarationUtils {
 		String javaElementName = compilationUnit.getJavaElement()
 			.getElementName();
 
-		return declaringClassQualifiedName.equals(javaElementName);
+		int indexOfFileExtension = javaElementName.lastIndexOf(".java"); //$NON-NLS-1$
+		if (indexOfFileExtension > 0) {
+			javaElementName = javaElementName.substring(0, indexOfFileExtension);
+			String fullyQualifiedCompilationUnitPackageName = compilationUnit.getPackage()
+				.getName()
+				.getFullyQualifiedName();
+
+			return declaringClassQualifiedName.equals(fullyQualifiedCompilationUnitPackageName + '.' + javaElementName);
+		}
+
+		return false;
 	}
 }
