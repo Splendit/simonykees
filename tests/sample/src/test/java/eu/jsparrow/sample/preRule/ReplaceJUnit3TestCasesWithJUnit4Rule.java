@@ -13,5 +13,10 @@ public class ReplaceJUnit3TestCasesWithJUnit4Rule extends TestCase {
 	}
 
 	public void test() throws Exception {
+		assertEquals(0x7fffffff, Integer.MAX_VALUE);
+	}
+
+	public void testAssertEqualsWithMessage() throws Exception {
+		assertEquals("Expected to be {0x7fffffff}.", 0x7fffffff, Integer.MAX_VALUE);
 	}
 }

@@ -2,7 +2,6 @@ package eu.jsparrow.core.visitor.junit.junit3;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +32,7 @@ public class JUnit3AssertionAnalyzer {
 			return Optional.empty();
 		}
 
-		if (testMethodStore.isSurroundedWithJUnit3Test(methodInvocation)) {
+		if (!testMethodStore.isSurroundedWithJUnit3Test(methodInvocation)) {
 			return Optional.empty();
 		}
 
@@ -51,16 +50,13 @@ public class JUnit3AssertionAnalyzer {
 
 		Expression messageMovedToLastPosition = findMessageMovedToLastPosition(methodBinding, assertionArguments)
 			.orElse(null);
-		if (messageMovedToLastPosition == null) {
-			return Optional.of(new JUnit3AssertionAnalysisResult(methodInvocation, assertionArguments,
-					classDeclaringMethodReplacement));
+		if (messageMovedToLastPosition != null) {
+			return Optional
+				.of(new JUnit3AssertionAnalysisResult(methodInvocation, messageMovedToLastPosition,
+						classDeclaringMethodReplacement));
+		} else {
+			return Optional.of(new JUnit3AssertionAnalysisResult(methodInvocation, classDeclaringMethodReplacement));
 		}
-		List<Expression> reArrangedArguments = new ArrayList<>(assertionArguments);
-		reArrangedArguments.remove(messageMovedToLastPosition);
-		reArrangedArguments.add(messageMovedToLastPosition);
-
-		return Optional.of(new JUnit3AssertionAnalysisResult(methodInvocation, reArrangedArguments,
-				classDeclaringMethodReplacement));
 	}
 
 	private boolean isSupportedTestCaseMethod(IMethodBinding methodBinding) {

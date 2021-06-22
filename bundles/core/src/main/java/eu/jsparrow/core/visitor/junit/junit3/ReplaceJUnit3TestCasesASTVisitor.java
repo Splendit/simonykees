@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
@@ -79,6 +81,25 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			ListRewrite listRewrite = astRewrite.getListRewrite(methodDeclaration,
 					MethodDeclaration.MODIFIERS2_PROPERTY);
 			listRewrite.insertFirst(testMethodAnnotation, null);
+			onRewrite();
+		});
+
+		assertionAnalysisResults.forEach(data -> {
+			MethodInvocation methodInvocation = data.getMethodInvocation();
+			Expression oldQualifier = methodInvocation.getExpression();
+			Name newQualifier = addImport(data.getClassDeclaringMethodReplacement(), methodInvocation);
+			if (oldQualifier != null) {
+				astRewrite.replace(oldQualifier, newQualifier, null);
+			} else {
+				astRewrite.set(methodInvocation, MethodInvocation.EXPRESSION_PROPERTY, newQualifier, null);
+			}
+			Expression messageMovingToLastPosition = data.getMessageMovingToLastPosition()
+				.orElse(null);
+			if (messageMovingToLastPosition != null) {
+				ASTNode messageMoveTarget = astRewrite.createMoveTarget(messageMovingToLastPosition);
+				astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY)
+					.insertLast(messageMoveTarget, null);
+			}
 			onRewrite();
 		});
 	}
