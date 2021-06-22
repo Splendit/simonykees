@@ -63,6 +63,11 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			.map(this::createTestMethodAnnotationData)
 			.collect(Collectors.toList());
 
+		testMethodStore.getJavaApplicationMainMethod()
+			.ifPresent(mainMethod -> {
+				astRewrite.remove(mainMethod, null);
+			});
+
 		transform(assertionAnalysisResults, testMethodAnnotationDataList);
 
 		return true;

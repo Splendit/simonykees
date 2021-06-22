@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -13,6 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
 
 class JUnit3TestMethodsStore {
 
@@ -21,6 +23,7 @@ class JUnit3TestMethodsStore {
 	static final String TEST = "test"; //$NON-NLS-1$
 
 	private final List<MethodDeclaration> jUnit3TestMethods;
+	private final MethodDeclaration javaApplicationMainMethod;
 
 	JUnit3TestMethodsStore(CompilationUnit compilationUnit) {
 		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
@@ -29,6 +32,13 @@ class JUnit3TestMethodsStore {
 			.stream()
 			.filter(JUnit3TestMethodsStore::isJUnit3TestMethod)
 			.collect(Collectors.toList());
+
+		javaApplicationMainMethod = methodDeclarationsCollectorVisitor.getMethodDeclarations()
+			.stream()
+			.filter(methodDeclaration -> MethodDeclarationUtils.isJavaApplicationMainMethod(compilationUnit,
+					methodDeclaration))
+			.findFirst()
+			.orElse(null);
 	}
 
 	private static boolean isJUnit3TestMethod(MethodDeclaration methodDeclaration) {
@@ -75,7 +85,11 @@ class JUnit3TestMethodsStore {
 		return false;
 	}
 
-	public List<MethodDeclaration> getJUnit3TestMethods() {
+	List<MethodDeclaration> getJUnit3TestMethods() {
 		return jUnit3TestMethods;
+	}
+
+	Optional<MethodDeclaration> getJavaApplicationMainMethod() {
+		return Optional.ofNullable(javaApplicationMainMethod);
 	}
 }
