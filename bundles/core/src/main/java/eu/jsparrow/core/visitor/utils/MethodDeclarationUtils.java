@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -134,5 +135,25 @@ public class MethodDeclarationUtils {
 
 		return ClassRelationUtil.isContentOfType(paramTypeBinding.getElementType(), java.lang.String.class.getName())
 				&& paramTypeBinding.getDimensions() == 1;
+	}
+
+	public static boolean isJavaApplicationMainMethod(CompilationUnit compilationUnit,
+			MethodDeclaration methodDeclaration) {
+		if (!isMainMethod(methodDeclaration)) {
+			return false;
+		}
+		IMethodBinding methodBinding = methodDeclaration.resolveBinding();
+		if (methodBinding == null) {
+			return false;
+		}
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		if (!declaringClass.isTopLevel()) {
+			return false;
+		}
+		String declaringClassQualifiedName = declaringClass.getQualifiedName();
+		String javaElementName = compilationUnit.getJavaElement()
+			.getElementName();
+
+		return declaringClassQualifiedName.equals(javaElementName);
 	}
 }
