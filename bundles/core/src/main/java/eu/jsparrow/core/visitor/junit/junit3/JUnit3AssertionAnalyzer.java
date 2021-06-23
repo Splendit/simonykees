@@ -39,8 +39,10 @@ public class JUnit3AssertionAnalyzer {
 		List<Expression> assertionArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 				Expression.class);
 
-		if (!assertionArguments.stream()
-			.allMatch(this::isArgumentWithExplicitType)) {
+		boolean allArgumentsWithExplicitType = assertionArguments
+			.stream()
+			.allMatch(this::isArgumentWithExplicitType);
+		if (!allArgumentsWithExplicitType) {
 			return Optional.empty();
 		}
 
@@ -62,7 +64,8 @@ public class JUnit3AssertionAnalyzer {
 	private boolean isSupportedTestCaseMethod(IMethodBinding methodBinding) {
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 
-		if (isContentOfType(declaringClass, "junit.framework.TestCase")) {//$NON-NLS-1$
+		if (isContentOfType(declaringClass, "junit.framework.TestCase") || //$NON-NLS-1$
+				isContentOfType(declaringClass, "junit.framework.Assert")) { //$NON-NLS-1$
 			String simpleMethodName = methodBinding.getName();
 			return simpleMethodName.startsWith("assert") || //$NON-NLS-1$
 					"fail".equals(simpleMethodName); //$NON-NLS-1$

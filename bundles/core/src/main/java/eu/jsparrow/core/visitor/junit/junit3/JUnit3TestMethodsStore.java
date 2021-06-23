@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
 
 class JUnit3TestMethodsStore {
@@ -47,7 +48,7 @@ class JUnit3TestMethodsStore {
 
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 
-		if (declaringClass.isLocal()) {
+		if (declaringClass.isLocal() || declaringClass.isAnonymous()) {
 			return false;
 		}
 
@@ -55,9 +56,8 @@ class JUnit3TestMethodsStore {
 		if (declaringClassSuperType == null) {
 			return false;
 		}
-		String superClassQualifiedName = declaringClassSuperType.getQualifiedName();
 
-		if (!"junit.framework.TestCase".equals(superClassQualifiedName)) { //$NON-NLS-1$
+		if (!ClassRelationUtil.isContentOfType(declaringClassSuperType, "junit.framework.TestCase")) { //$NON-NLS-1$
 			return false;
 		}
 
