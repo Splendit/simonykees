@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
+import static eu.jsparrow.core.visitor.junit.junit3.JUnit3ReferencesAnalyzerVisitor.isJUnit3QualifiedName;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -128,7 +130,7 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		String declaringClassQualifiedName = declaringClass
 			.getQualifiedName();
-		return declaringClassQualifiedName.startsWith("junit.extensions.") || //$NON-NLS-1$
-				declaringClassQualifiedName.startsWith("junit.framework."); //$NON-NLS-1$
+		return isJUnit3QualifiedName(declaringClassQualifiedName);
 	}
+
 }
