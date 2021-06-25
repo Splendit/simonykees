@@ -24,7 +24,7 @@ public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
 	private boolean transformationPossible = true;
 
 	static boolean isJUnit3QualifiedName(String declaringClassQualifiedName) {
-		return declaringClassQualifiedName.startsWith(JUNIT_PREFIX + '.');
+		return declaringClassQualifiedName.startsWith(JUNIT_PREFIX);
 	}
 
 	@Override
