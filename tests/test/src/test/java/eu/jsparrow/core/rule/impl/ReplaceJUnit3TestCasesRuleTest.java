@@ -27,6 +27,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 
 	private static final String REPLACE_WITH_J_UNIT_4 = "ReplaceJUnit3TestCasesWithJUnit4Rule.java";
 	private static final String REPLACE_WITH_JUPITER = "ReplaceJUnit3TestCasesWithJupiterRule.java";
+	private static final String MAIN_METHOD_NOT_REMOVED = "ReplaceJUnit3TestCasesMainMethodNotRemovedRule.java";
 
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnit3";
 
@@ -148,6 +149,24 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 
 		Path preRule = getPreRuleFile(REPLACE_WITH_JUPITER);
 		Path postRule = getPostRuleFile(REPLACE_WITH_JUPITER, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	void testMainMethodNotRemoved() throws Exception {
+		loadUtilities();
+		addToClasspath(testProject, Arrays
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
+					"5.0.0")));
+		rule.calculateEnabledForProject(testProject);
+		assertTrue(rule.isEnabled());
+
+		Path preRule = getPreRuleFile(MAIN_METHOD_NOT_REMOVED);
+		Path postRule = getPostRuleFile(MAIN_METHOD_NOT_REMOVED, POSTRULE_SUBDIRECTORY);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -17,6 +18,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.search.SearchMatch;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -36,6 +38,23 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		verifyImport(compilationUnit, migrationConfiguration.getSetupAnnotationQualifiedName());
 		verifyImport(compilationUnit, migrationConfiguration.getTeardownAnnotationQualifiedName());
 		verifyImport(compilationUnit, migrationConfiguration.getTestAnnotationQualifiedName());
+
+		JavaApplicationMainMethodStore mainMethodStore = JavaApplicationMainMethodStore
+			.findJavaApplicationMainMethodStore(compilationUnit)
+			.orElse(null);
+
+		try {
+
+			if (mainMethodStore != null) {
+				List<SearchMatch> matches = mainMethodStore.findMatches();
+				if (!matches.isEmpty()) {
+					mainMethodStore = null;
+				}
+			}
+		} catch (CoreException e) {
+			e.printStackTrace();
+			return false;
+		}
 
 		JUnit3TestMethodsStore testMethodStore = new JUnit3TestMethodsStore(compilationUnit);
 		JUnit3AssertionAnalyzer assertionAnalyzer = new JUnit3AssertionAnalyzer(testMethodStore,
@@ -60,17 +79,16 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			}
 		}
 
+		if (mainMethodStore != null) {
+			MethodDeclaration mainMethodDeclaration = mainMethodStore.getMainMethodDeclaration();
+			astRewrite.remove(mainMethodDeclaration, null);
+			onRewrite();
+		}
+
 		List<TestMethodAnnotationData> testMethodAnnotationDataList = testMethodStore.getJUnit3TestMethods()
 			.stream()
 			.map(this::createTestMethodAnnotationData)
 			.collect(Collectors.toList());
-
-		testMethodStore.getJavaApplicationMainMethod()
-			.ifPresent(mainMethod -> {
-				astRewrite.remove(mainMethod, null);
-				onRewrite();
-			});
-
 		transform(assertionAnalysisResults, testMethodAnnotationDataList);
 
 		return true;
@@ -132,5 +150,4 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			.getQualifiedName();
 		return isJUnit3QualifiedName(declaringClassQualifiedName);
 	}
-
 }

@@ -1,14 +1,13 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
-import java.util.Arrays;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.junit.jupiter.AbstractReplaceJUnit4WithJupiterASTVisitorTest;
 
-public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest
+public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 		extends AbstractReplaceJUnit4WithJupiterASTVisitorTest {
 
 	@BeforeEach
@@ -25,17 +24,18 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest
 		fixtureProject.clear();
 	}
 
+	@Disabled("Unexpected remove of main method")
 	@Test
-	public void visit_MainMethodNotReferenced_shouldTransform() throws Exception {
+	public void visit_MainMethodReferenced_shouldNotTransform() throws Exception {
 		String original = "" +
-				"	int dummy;\n"
-				+ "	public static void main(String[] args) {\n"
+				"	public static void main(String[] args) {\n"
 				+ "\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	void useMain() {\n"
+				+ "		main(new String[] {});\n"
 				+ "	}";
 
-		String expected = "" +
-				"	int dummy;\n";
-
-		assertChange(original, expected, Arrays.<String>asList());
+		assertNoChange(original);
 	}
 }
