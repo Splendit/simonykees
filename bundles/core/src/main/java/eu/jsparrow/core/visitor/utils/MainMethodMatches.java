@@ -42,7 +42,9 @@ public class MainMethodMatches {
 
 			@Override
 			public void acceptSearchMatch(SearchMatch match) throws CoreException {
-				matches.add(match);
+				if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
+					matches.add(match);
+				}
 			}
 		};
 	}
