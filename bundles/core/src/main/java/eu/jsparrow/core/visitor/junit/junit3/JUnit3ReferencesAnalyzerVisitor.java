@@ -23,7 +23,7 @@ public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
 	private static final String JUNIT_PREFIX = "junit."; //$NON-NLS-1$
 	private boolean transformationPossible = true;
 
-	static boolean isJUnit3QualifiedName(String declaringClassQualifiedName) {
+	public static boolean isJUnit3QualifiedName(String declaringClassQualifiedName) {
 		return declaringClassQualifiedName.startsWith(JUNIT_PREFIX);
 	}
 

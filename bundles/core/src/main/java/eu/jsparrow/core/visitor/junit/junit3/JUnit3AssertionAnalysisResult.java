@@ -11,13 +11,13 @@ public class JUnit3AssertionAnalysisResult {
 	private final String classDeclaringMethodReplacement;
 	private Expression messageMovingToLastPosition;
 
-	JUnit3AssertionAnalysisResult(MethodInvocation methodInvocation, Expression messageMovingToLastPosition,
+	public JUnit3AssertionAnalysisResult(MethodInvocation methodInvocation, Expression messageMovingToLastPosition,
 			String classDeclaringMethodReplacement) {
 		this(methodInvocation, classDeclaringMethodReplacement);
 		this.messageMovingToLastPosition = messageMovingToLastPosition;
 	}
 
-	JUnit3AssertionAnalysisResult(MethodInvocation methodInvocation, String classDeclaringMethodReplacement) {
+	public JUnit3AssertionAnalysisResult(MethodInvocation methodInvocation, String classDeclaringMethodReplacement) {
 		this.methodInvocation = methodInvocation;
 		this.classDeclaringMethodReplacement = classDeclaringMethodReplacement;
 	}

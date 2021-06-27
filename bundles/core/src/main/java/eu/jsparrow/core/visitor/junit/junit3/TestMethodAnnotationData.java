@@ -7,7 +7,7 @@ public class TestMethodAnnotationData {
 	private final MethodDeclaration methodDeclaration;
 	private final String annotationQualifiedName;
 
-	TestMethodAnnotationData(MethodDeclaration methodDeclaration, String annotationQualifiedName) {
+	public TestMethodAnnotationData(MethodDeclaration methodDeclaration, String annotationQualifiedName) {
 		this.methodDeclaration = methodDeclaration;
 		this.annotationQualifiedName = annotationQualifiedName;
 
