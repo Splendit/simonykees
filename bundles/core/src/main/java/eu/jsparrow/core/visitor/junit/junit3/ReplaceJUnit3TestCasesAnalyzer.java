@@ -1,6 +1,6 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
-import static eu.jsparrow.core.visitor.junit.junit3.JUnit3ReferencesAnalyzerVisitor.isJUnit3QualifiedName;
+import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +73,7 @@ public class ReplaceJUnit3TestCasesAnalyzer {
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		String declaringClassQualifiedName = declaringClass
 			.getQualifiedName();
-		return isJUnit3QualifiedName(declaringClassQualifiedName);
+		return isJUnitName(declaringClassQualifiedName);
 	}
 
 	private TestMethodAnnotationData createTestMethodAnnotationData(MethodDeclaration methodDeclaration,

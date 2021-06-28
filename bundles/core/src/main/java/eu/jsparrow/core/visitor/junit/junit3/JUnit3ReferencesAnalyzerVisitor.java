@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
+import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BreakStatement;
@@ -20,18 +22,12 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
-	private static final String JUNIT = "junit"; //$NON-NLS-1$
-	private static final String JUNIT_PREFIX = "junit."; //$NON-NLS-1$
 	MethodDeclaration meinMethodToRemove;
 	private boolean transformationPossible = true;
 
 	JUnit3ReferencesAnalyzerVisitor(UnreferencedMainMethodStore unreferencedMainMethodStore) {
 		meinMethodToRemove = unreferencedMainMethodStore.getUnreferencedMainMethod()
 			.orElse(null);
-	}
-
-	public static boolean isJUnit3QualifiedName(String declaringClassQualifiedName) {
-		return declaringClassQualifiedName.startsWith(JUNIT_PREFIX);
 	}
 
 	@Override
@@ -43,8 +39,7 @@ public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
 	public boolean visit(PackageDeclaration node) {
 		String packageName = node.resolveBinding()
 			.getName();
-		transformationPossible = !packageName.equals(JUNIT) &&
-				!isJUnit3QualifiedName(packageName);
+		transformationPossible = !isJUnitName(packageName);
 		return false;
 	}
 
@@ -106,18 +101,18 @@ public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
 		}
 
 		if (typeBinding != null) {
-			return !isJUnit3QualifiedName(typeBinding.getQualifiedName());
+			return !isJUnitName(typeBinding.getQualifiedName());
 		}
 
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
 			ITypeBinding variableTypeBinding = variableBinding.getVariableDeclaration()
 				.getType();
-			if (isJUnit3QualifiedName(variableTypeBinding.getQualifiedName())) {
+			if (isJUnitName(variableTypeBinding.getQualifiedName())) {
 				return false;
 			}
 			if (variableBinding.isField()) {
-				return !isJUnit3QualifiedName(variableBinding.getDeclaringClass()
+				return !isJUnitName(variableBinding.getDeclaringClass()
 					.getQualifiedName());
 			}
 		}
