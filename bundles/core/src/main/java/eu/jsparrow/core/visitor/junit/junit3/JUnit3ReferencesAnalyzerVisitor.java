@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -21,7 +22,13 @@ import org.eclipse.jdt.core.dom.SimpleName;
 public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
 	private static final String JUNIT = "junit"; //$NON-NLS-1$
 	private static final String JUNIT_PREFIX = "junit."; //$NON-NLS-1$
+	MethodDeclaration meinMethodToRemove;
 	private boolean transformationPossible = true;
+
+	JUnit3ReferencesAnalyzerVisitor(UnreferencedMainMethodStore unreferencedMainMethodStore) {
+		meinMethodToRemove = unreferencedMainMethodStore.getUnreferencedMainMethod()
+			.orElse(null);
+	}
 
 	public static boolean isJUnit3QualifiedName(String declaringClassQualifiedName) {
 		return declaringClassQualifiedName.startsWith(JUNIT_PREFIX);
@@ -47,6 +54,12 @@ public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(MethodDeclaration node) {
+		boolean isMainMethodToRemove = meinMethodToRemove != null && meinMethodToRemove == node;
+		return !isMainMethodToRemove;
+	}
+
+	@Override
 	public boolean visit(QualifiedName node) {
 		transformationPossible = analyzeName(node);
 		return false;
@@ -62,9 +75,7 @@ public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
 		if (name.getLocationInParent() == MethodInvocation.NAME_PROPERTY
 				|| name.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
 				|| name.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
-				|| name.getLocationInParent() == BreakStatement.LABEL_PROPERTY
-
-		) {
+				|| name.getLocationInParent() == BreakStatement.LABEL_PROPERTY) {
 			return true;
 		}
 
@@ -100,12 +111,14 @@ public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
 
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
-			ITypeBinding variableTypeBinding = variableBinding.getVariableDeclaration().getType();
-			if(isJUnit3QualifiedName(variableTypeBinding.getQualifiedName())) {
+			ITypeBinding variableTypeBinding = variableBinding.getVariableDeclaration()
+				.getType();
+			if (isJUnit3QualifiedName(variableTypeBinding.getQualifiedName())) {
 				return false;
 			}
-			if(variableBinding.isField()) {
-				return !isJUnit3QualifiedName(variableBinding.getDeclaringClass().getQualifiedName());
+			if (variableBinding.isField()) {
+				return !isJUnit3QualifiedName(variableBinding.getDeclaringClass()
+					.getQualifiedName());
 			}
 		}
 		return false;

@@ -5,11 +5,13 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -21,12 +23,17 @@ class JUnit3TestMethodsStore {
 
 	private final List<MethodDeclaration> jUnit3TestMethods;
 
-	JUnit3TestMethodsStore(List<MethodDeclaration> allMethodDeclarations) {
+	JUnit3TestMethodsStore(CompilationUnit compilationUnit,
+			UnreferencedMainMethodStore unreferencedMainMethodStore) {
+		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
+		compilationUnit.accept(methodDeclarationsCollectorVisitor);
+		List<MethodDeclaration> allMethodDeclarations = methodDeclarationsCollectorVisitor.getMethodDeclarations();
 		jUnit3TestMethods = allMethodDeclarations
 			.stream()
+			.filter(methodDeclaration -> !unreferencedMainMethodStore
+				.isSurroundedByMethodDeclaration(methodDeclaration))
 			.filter(JUnit3TestMethodsStore::isJUnit3TestMethod)
 			.collect(Collectors.toList());
-
 	}
 
 	private static boolean isJUnit3TestMethod(MethodDeclaration methodDeclaration) {

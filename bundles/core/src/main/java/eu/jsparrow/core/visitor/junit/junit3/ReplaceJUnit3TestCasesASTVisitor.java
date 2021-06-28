@@ -2,6 +2,7 @@ package eu.jsparrow.core.visitor.junit.junit3;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -31,9 +32,15 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		verifyImport(compilationUnit, migrationConfiguration.getTestAnnotationQualifiedName());
 
 		ReplaceJUnit3TestCasesAnalyzer replaceJUnit3TestCasesAnalyzer = new ReplaceJUnit3TestCasesAnalyzer();
-		ReplaceJUnit3TestCasesAnalysisData analysisData = replaceJUnit3TestCasesAnalyzer.analyzeCompilationUnit(
-				compilationUnit, migrationConfiguration, classDeclaringMethodReplacement)
-			.orElse(null);
+
+		ReplaceJUnit3TestCasesAnalysisData analysisData;
+		try {
+			analysisData = replaceJUnit3TestCasesAnalyzer.analyzeCompilationUnit(
+					compilationUnit, migrationConfiguration, classDeclaringMethodReplacement)
+				.orElse(null);
+		} catch (CoreException e) {
+			return false;
+		}
 
 		if (analysisData == null) {
 			return false;
