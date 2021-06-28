@@ -12,8 +12,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.visitor.junit.junit3.analysls.ReplaceJUnit3TestCasesAnalysisData;
-import eu.jsparrow.core.visitor.junit.junit3.analysls.ReplaceJUnit3TestCasesAnalyzer;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisitor {

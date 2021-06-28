@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.junit.junit3.analysls;
+package eu.jsparrow.core.visitor.junit.junit3;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
-import eu.jsparrow.core.visitor.junit.junit3.JUnit3AssertionAnalysisResult;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 class JUnit3AssertionAnalyzer {

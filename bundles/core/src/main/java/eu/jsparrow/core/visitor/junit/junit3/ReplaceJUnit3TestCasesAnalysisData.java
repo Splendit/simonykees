@@ -1,12 +1,9 @@
-package eu.jsparrow.core.visitor.junit.junit3.analysls;
+package eu.jsparrow.core.visitor.junit.junit3;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-
-import eu.jsparrow.core.visitor.junit.junit3.JUnit3AssertionAnalysisResult;
-import eu.jsparrow.core.visitor.junit.junit3.TestMethodAnnotationData;
 
 public class ReplaceJUnit3TestCasesAnalysisData {
 	private final List<TestMethodAnnotationData> testMethodAnnotationDataList;

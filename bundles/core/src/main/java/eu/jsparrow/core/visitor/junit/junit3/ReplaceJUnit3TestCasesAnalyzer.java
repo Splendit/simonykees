@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.junit.junit3.analysls;
+package eu.jsparrow.core.visitor.junit.junit3;
 
 import static eu.jsparrow.core.visitor.junit.junit3.JUnit3ReferencesAnalyzerVisitor.isJUnit3QualifiedName;
 import static eu.jsparrow.core.visitor.utils.MainMethodMatches.findMainMethodMatches;
@@ -16,9 +16,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import eu.jsparrow.core.visitor.junit.junit3.JUnit3AssertionAnalysisResult;
-import eu.jsparrow.core.visitor.junit.junit3.Junit3MigrationConfiguration;
-import eu.jsparrow.core.visitor.junit.junit3.TestMethodAnnotationData;
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
 import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
