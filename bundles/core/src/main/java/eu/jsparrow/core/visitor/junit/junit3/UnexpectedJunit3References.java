@@ -8,9 +8,13 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
-public class UnexpectedJunit3ReferencesAnalyzer {
+public class UnexpectedJunit3References {
 
-	public boolean hasUnexpectedJUnitReference(ITypeBinding typeBinding) {
+	private UnexpectedJunit3References() {
+		// private constructor of utility class in hiding implicit public one
+	}
+
+	static boolean hasUnexpectedJUnitReference(ITypeBinding typeBinding) {
 		if (typeBinding.isPrimitive()) {
 			return false;
 		}
@@ -22,7 +26,7 @@ public class UnexpectedJunit3ReferencesAnalyzer {
 				hasUnexpectedTypeArgument(typeBinding);
 	}
 
-	private boolean hasUnexpectedSuperType(ITypeBinding typeBinding) {
+	private static boolean hasUnexpectedSuperType(ITypeBinding typeBinding) {
 
 		List<ITypeBinding> ancestors = ClassRelationUtil.findAncestors(typeBinding);
 		for (ITypeBinding ancestor : ancestors) {
@@ -33,7 +37,7 @@ public class UnexpectedJunit3ReferencesAnalyzer {
 		return false;
 	}
 
-	private boolean hasUnexpectedTypeArgument(ITypeBinding typeBinding) {
+	private static boolean hasUnexpectedTypeArgument(ITypeBinding typeBinding) {
 		if (typeBinding.isParameterizedType()) {
 			ITypeBinding[] typeParameters = typeBinding.getTypeArguments();
 			for (ITypeBinding parameterType : typeParameters) {
@@ -45,7 +49,7 @@ public class UnexpectedJunit3ReferencesAnalyzer {
 		return false;
 	}
 
-	protected boolean isUnexpectedJUnitQualifiedName(String qualifiedName) {
+	static boolean isUnexpectedJUnitQualifiedName(String qualifiedName) {
 		return isJUnitName(qualifiedName);
 	}
 }
