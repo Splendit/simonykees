@@ -1,7 +1,5 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BreakStatement;
@@ -22,6 +20,9 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
+	
+	private final UnexpectedJunit3ReferencesAnalyzer unexpectedJUnit3ReferencesAnalyzer = new UnexpectedJunit3ReferencesAnalyzer();
+	
 	MethodDeclaration meinMethodToRemove;
 	private boolean transformationPossible = true;
 
@@ -39,7 +40,7 @@ public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
 	public boolean visit(PackageDeclaration node) {
 		String packageName = node.resolveBinding()
 			.getName();
-		transformationPossible = !isJUnitName(packageName);
+		transformationPossible = !unexpectedJUnit3ReferencesAnalyzer.isUnexpectedJUnitQualifiedName(packageName);
 		return false;
 	}
 
@@ -101,19 +102,19 @@ public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
 		}
 
 		if (typeBinding != null) {
-			return !isJUnitName(typeBinding.getQualifiedName());
+			return !unexpectedJUnit3ReferencesAnalyzer.hasUnexpectedJUnitReference(typeBinding);
 		}
 
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
 			ITypeBinding variableTypeBinding = variableBinding.getVariableDeclaration()
 				.getType();
-			if (isJUnitName(variableTypeBinding.getQualifiedName())) {
+			if (unexpectedJUnit3ReferencesAnalyzer.hasUnexpectedJUnitReference(variableTypeBinding)) {
 				return false;
 			}
 			if (variableBinding.isField()) {
-				return !isJUnitName(variableBinding.getDeclaringClass()
-					.getQualifiedName());
+				return !unexpectedJUnit3ReferencesAnalyzer
+					.hasUnexpectedJUnitReference(variableBinding.getDeclaringClass());
 			}
 		}
 		return false;
