@@ -2,7 +2,6 @@ package eu.jsparrow.core.visitor.junit.junit3;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
