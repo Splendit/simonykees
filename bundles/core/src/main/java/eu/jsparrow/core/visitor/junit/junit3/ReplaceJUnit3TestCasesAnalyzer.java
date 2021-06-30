@@ -14,8 +14,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import eu.jsparrow.core.visitor.junit.jupiter.common.MethodInvocationsCollectorVisitor;
-
 public class ReplaceJUnit3TestCasesAnalyzer {
 
 	static final String SET_UP = "setUp"; //$NON-NLS-1$
@@ -23,27 +21,25 @@ public class ReplaceJUnit3TestCasesAnalyzer {
 	static final String TEST = "test"; //$NON-NLS-1$
 
 	public Optional<ReplaceJUnit3TestCasesAnalysisData> analyzeCompilationUnit(CompilationUnit compilationUnit,
-			Junit3MigrationConfiguration migrationConfiguration, String classDeclaringMethodReplacement)
-			throws CoreException {
+			Junit3MigrationConfiguration migrationConfiguration, String classDeclaringMethodReplacement) {
 
-		UnreferencedMainMethodStore unreferencedMainMethodStore = new UnreferencedMainMethodStore();
-		unreferencedMainMethodStore.analyzeMainMethodOccurrence(compilationUnit);
+		JUnit3DataCollectorVisitor junit3DataCollectorVisitor = new JUnit3DataCollectorVisitor();
+		compilationUnit.accept(junit3DataCollectorVisitor);
 
-		JUnit3TestMethodsStore jUnitTestMethodStore = new JUnit3TestMethodsStore(compilationUnit,
-				unreferencedMainMethodStore);
+		JUnit3TestMethodsStore jUnitTestMethodStore = new JUnit3TestMethodsStore(junit3DataCollectorVisitor);
 
 		JUnit3AssertionAnalyzer assertionAnalyzer = new JUnit3AssertionAnalyzer(jUnitTestMethodStore,
 				classDeclaringMethodReplacement);
 		List<JUnit3AssertionAnalysisResult> assertionAnalysisResults = new ArrayList<>();
-		MethodInvocationsCollectorVisitor invocationCollectorVisitor = new MethodInvocationsCollectorVisitor();
-		compilationUnit.accept(invocationCollectorVisitor);
-		for (MethodInvocation methodInvocation : invocationCollectorVisitor.getMethodInvocations()) {
+
+		List<MethodInvocation> methodInvocationsToAnalyze = junit3DataCollectorVisitor.getMethodInvocationsToAnalyze();
+		for (MethodInvocation methodInvocation : methodInvocationsToAnalyze) {
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 			if (methodBinding == null) {
 				return Optional.empty();
 			}
-			if (!unreferencedMainMethodStore.isSurroundedByMethodDeclaration(methodInvocation)
-					&& isJUnit3Method(methodBinding)) {
+
+			if (isJUnit3Method(methodBinding)) {
 				JUnit3AssertionAnalysisResult assertionAnalysisResult = assertionAnalyzer
 					.findAssertionAnalysisResult(methodInvocation, methodBinding)
 					.orElse(null);
@@ -59,7 +55,7 @@ public class ReplaceJUnit3TestCasesAnalyzer {
 			.map(methodDeclaration -> this.createTestMethodAnnotationData(methodDeclaration, migrationConfiguration))
 			.collect(Collectors.toList());
 
-		MethodDeclaration mainMethodToRemove = unreferencedMainMethodStore.getUnreferencedMainMethod()
+		MethodDeclaration mainMethodToRemove = junit3DataCollectorVisitor.getMainMethodToRemove()
 			.orElse(null);
 		if (mainMethodToRemove != null) {
 			return Optional.of(new ReplaceJUnit3TestCasesAnalysisData(testMethodAnnotationDataList,

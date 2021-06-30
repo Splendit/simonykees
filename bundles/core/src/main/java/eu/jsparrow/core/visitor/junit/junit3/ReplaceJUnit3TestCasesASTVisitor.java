@@ -34,13 +34,9 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		ReplaceJUnit3TestCasesAnalyzer replaceJUnit3TestCasesAnalyzer = new ReplaceJUnit3TestCasesAnalyzer();
 
 		ReplaceJUnit3TestCasesAnalysisData analysisData;
-		try {
-			analysisData = replaceJUnit3TestCasesAnalyzer.analyzeCompilationUnit(
-					compilationUnit, migrationConfiguration, classDeclaringMethodReplacement)
-				.orElse(null);
-		} catch (CoreException e) {
-			return false;
-		}
+		analysisData = replaceJUnit3TestCasesAnalyzer.analyzeCompilationUnit(
+				compilationUnit, migrationConfiguration, classDeclaringMethodReplacement)
+			.orElse(null);
 
 		if (analysisData == null) {
 			return false;

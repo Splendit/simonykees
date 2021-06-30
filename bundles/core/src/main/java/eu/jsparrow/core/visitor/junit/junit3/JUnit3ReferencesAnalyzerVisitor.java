@@ -18,15 +18,16 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
 
 	MethodDeclaration meinMethodToRemove;
-	
+
 	private boolean transformationPossible = true;
 
-	JUnit3ReferencesAnalyzerVisitor(UnreferencedMainMethodStore unreferencedMainMethodStore) {
-		meinMethodToRemove = unreferencedMainMethodStore.getUnreferencedMainMethod()
+	JUnit3ReferencesAnalyzerVisitor(JUnit3DataCollectorVisitor junit3DataCollectorVisitor) {
+		meinMethodToRemove = junit3DataCollectorVisitor.getMainMethodToRemove()
 			.orElse(null);
 	}
 
@@ -68,6 +69,7 @@ public class JUnit3ReferencesAnalyzerVisitor extends ASTVisitor {
 
 	private boolean analyzeName(Name name) {
 		if (name.getLocationInParent() == MethodInvocation.NAME_PROPERTY
+				|| name.getLocationInParent() == TypeDeclaration.NAME_PROPERTY
 				|| name.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
 				|| name.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
 				|| name.getLocationInParent() == BreakStatement.LABEL_PROPERTY) {
