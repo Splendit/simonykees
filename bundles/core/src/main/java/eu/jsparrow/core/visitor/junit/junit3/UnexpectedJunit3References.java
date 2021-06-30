@@ -21,16 +21,13 @@ public class UnexpectedJunit3References {
 		if (typeBinding.isArray()) {
 			return hasUnexpectedJUnitReference(typeBinding.getComponentType());
 		}
-		return isUnexpectedJUnitQualifiedName(typeBinding.getQualifiedName()) ||
-				hasUnexpectedSuperType(typeBinding) ||
-				hasUnexpectedTypeArgument(typeBinding);
-	}
-
-	private static boolean hasUnexpectedSuperType(ITypeBinding typeBinding) {
+		if (isUnexpectedJUnitQualifiedName(typeBinding.getQualifiedName())) {
+			return true;
+		}
 
 		List<ITypeBinding> ancestors = ClassRelationUtil.findAncestors(typeBinding);
 		for (ITypeBinding ancestor : ancestors) {
-			if (hasUnexpectedJUnitReference(ancestor)) {
+			if (isUnexpectedJUnitQualifiedName(ancestor.getQualifiedName())) {
 				return true;
 			}
 		}
