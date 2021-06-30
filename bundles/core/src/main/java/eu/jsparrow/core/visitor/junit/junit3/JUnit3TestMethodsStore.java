@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -21,10 +22,12 @@ class JUnit3TestMethodsStore {
 
 	private final List<MethodDeclaration> jUnit3TestMethods;
 
-	JUnit3TestMethodsStore(JUnit3DataCollectorVisitor junit3DataCollectorVisitor) {
+	JUnit3TestMethodsStore(JUnit3DataCollectorVisitor junit3DataCollectorVisitor, JUnit3TestCaseAnalyzer jUnit3TestCaseAnalyzer) {
 		List<MethodDeclaration> allMethodDeclarations = junit3DataCollectorVisitor.getMethodDeclarationsToAnalyze();
+		List<TypeDeclaration> jUnit3TestCases = jUnit3TestCaseAnalyzer.getJUnit3TestCases();
 		jUnit3TestMethods = allMethodDeclarations
 			.stream()
+			.filter(methodDeclaration -> jUnit3TestCases.contains(methodDeclaration.getParent()))
 			.filter(JUnit3TestMethodsStore::isJUnit3TestMethod)
 			.collect(Collectors.toList());
 	}

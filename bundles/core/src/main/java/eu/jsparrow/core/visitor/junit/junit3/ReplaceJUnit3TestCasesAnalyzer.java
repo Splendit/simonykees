@@ -24,8 +24,11 @@ public class ReplaceJUnit3TestCasesAnalyzer {
 
 		JUnit3DataCollectorVisitor junit3DataCollectorVisitor = new JUnit3DataCollectorVisitor();
 		compilationUnit.accept(junit3DataCollectorVisitor);
-
-		JUnit3TestMethodsStore jUnitTestMethodStore = new JUnit3TestMethodsStore(junit3DataCollectorVisitor);
+		JUnit3TestCaseAnalyzer jUnit3TestCaseAnalyzer = new JUnit3TestCaseAnalyzer(junit3DataCollectorVisitor);
+		if(!jUnit3TestCaseAnalyzer.collectTestCaseDeclarationData()) {
+			return Optional.empty();
+		}
+		JUnit3TestMethodsStore jUnitTestMethodStore = new JUnit3TestMethodsStore(junit3DataCollectorVisitor, jUnit3TestCaseAnalyzer);
 
 		JUnit3AssertionAnalyzer assertionAnalyzer = new JUnit3AssertionAnalyzer(jUnitTestMethodStore,
 				classDeclaringMethodReplacement);

@@ -3,9 +3,11 @@ package eu.jsparrow.core.visitor.junit.junit3;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -14,18 +16,18 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class JUnit3TestCaseAnalyzer {
 
+	private static final String JUNIT_FRAMEWORK_TEST = "junit.framework.Test"; //$NON-NLS-1$
+	private static final String JUNIT_FRAMEWORK_ASSERT = "junit.framework.Assert"; //$NON-NLS-1$
 	private static final String JUNIT_FRAMEWORK_TEST_CASE = "junit.framework.TestCase"; //$NON-NLS-1$
 	private final JUnit3DataCollectorVisitor junit3DataCollectorVisitor;
-	private final List<TypeDeclaration> jUnit3TestCases;
-	private final List<SimpleType> jUnit3TestCaseSuperTypesToRemove;
+	private final List<TypeDeclaration> jUnit3TestCases = new ArrayList<>();
+	private final List<SimpleType> jUnit3TestCaseSuperTypesToRemove = new ArrayList<>();
 
 	JUnit3TestCaseAnalyzer(JUnit3DataCollectorVisitor junit3DataCollectorVisitor) {
 		this.junit3DataCollectorVisitor = junit3DataCollectorVisitor;
-		jUnit3TestCases = new ArrayList<>();
-		jUnit3TestCaseSuperTypesToRemove = new ArrayList<>();
 	}
 
-	boolean collectAnalysisData() {
+	boolean collectTestCaseDeclarationData() {
 		List<TypeDeclaration> typeDeclarationsToAnalyze = junit3DataCollectorVisitor.getTypeDeclarationsToAnalyze();
 		for (TypeDeclaration typeDeclaration : typeDeclarationsToAnalyze) {
 			SimpleType jUnitFrameworkTestCaseAsSuperType = findJUnitFrameworkTestCaseAsSuperType(typeDeclaration)
@@ -56,12 +58,18 @@ public class JUnit3TestCaseAnalyzer {
 			return false;
 		}
 		ITypeBinding typeBinding = typeDeclaration.resolveBinding();
+
 		List<ITypeBinding> ancestorsToAnalyze = ClassRelationUtil.findAncestors(typeBinding);
-		boolean unexpectedJUnitReference = ancestorsToAnalyze
-			.stream()
-			.filter(ancestor -> !isJUnitFrameworkTestCase(ancestor))
-			.anyMatch(UnexpectedJunit3References::hasUnexpectedJUnitReference);
-		return !unexpectedJUnitReference;
+		for (ITypeBinding ancestor : ancestorsToAnalyze) {
+			String qualifiedName = ancestor.getQualifiedName();
+			if (!qualifiedName.equals(JUNIT_FRAMEWORK_TEST_CASE) &&
+					!qualifiedName.equals(JUNIT_FRAMEWORK_ASSERT) &&
+					!qualifiedName.equals(JUNIT_FRAMEWORK_TEST) &&
+					UnexpectedJunit3References.hasUnexpectedJUnitReference(ancestor)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private Optional<SimpleType> findJUnitFrameworkTestCaseAsSuperType(TypeDeclaration node) {
