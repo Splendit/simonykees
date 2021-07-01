@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
@@ -16,13 +18,12 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 class JUnit3AssertionAnalyzer {
 	private static final String JAVA_LANG_STRING = java.lang.String.class.getName();
-	private final JUnit3TestMethodsStore testMethodStore;
+	private final List<MethodDeclaration> jUnit3TestMethods;
 	private final String classDeclaringMethodReplacement;
 
-	JUnit3AssertionAnalyzer(JUnit3TestMethodsStore testMethodStore, String classDeclaringMethodReplacement) {
-		this.testMethodStore = testMethodStore;
+	JUnit3AssertionAnalyzer(JUnit3TestMethodDeclarationsAnalyzer jUnit3TestMethodDeclarationsAnalyzer, String classDeclaringMethodReplacement) {
+		jUnit3TestMethods = jUnit3TestMethodDeclarationsAnalyzer.getJUnit3TestMethodDeclarations();
 		this.classDeclaringMethodReplacement = classDeclaringMethodReplacement;
-
 	}
 
 	Optional<JUnit3AssertionAnalysisResult> findAssertionAnalysisResult(MethodInvocation methodInvocation,
@@ -32,7 +33,7 @@ class JUnit3AssertionAnalyzer {
 			return Optional.empty();
 		}
 
-		if (!testMethodStore.isSurroundedWithJUnit3Test(methodInvocation)) {
+		if (!isSurroundedWithJUnit3Test(methodInvocation)) {
 			return Optional.empty();
 		}
 
@@ -59,6 +60,22 @@ class JUnit3AssertionAnalyzer {
 		} else {
 			return Optional.of(new JUnit3AssertionAnalysisResult(methodInvocation, classDeclaringMethodReplacement));
 		}
+	}
+
+	boolean isSurroundedWithJUnit3Test(MethodInvocation methodInvocation) {
+		BodyDeclaration bodyDeclarationAncestor = ASTNodeUtil.getSpecificAncestor(methodInvocation,
+				BodyDeclaration.class);
+		ASTNode parent = methodInvocation.getParent();
+		while (parent != null) {
+			if (parent == bodyDeclarationAncestor) {
+				return parent.getNodeType() == ASTNode.METHOD_DECLARATION && jUnit3TestMethods.contains(parent);
+			}
+			if (parent.getNodeType() == ASTNode.LAMBDA_EXPRESSION) {
+				return false;
+			}
+			parent = parent.getParent();
+		}
+		return false;
 	}
 
 	private boolean isSupportedTestCaseMethod(IMethodBinding methodBinding) {

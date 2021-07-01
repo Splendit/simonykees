@@ -4,6 +4,7 @@ import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJ
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -12,6 +13,10 @@ public class UnexpectedJunit3References {
 
 	private UnexpectedJunit3References() {
 		// private constructor of utility class in hiding implicit public one
+	}
+	
+	static boolean hasUnexpectedJUnitReference(IMethodBinding methodBinding) {
+		return hasUnexpectedJUnitReference(methodBinding.getDeclaringClass());
 	}
 
 	static boolean hasUnexpectedJUnitReference(ITypeBinding typeBinding) {

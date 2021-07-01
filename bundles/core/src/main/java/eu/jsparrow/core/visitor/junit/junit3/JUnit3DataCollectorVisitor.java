@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
@@ -28,6 +29,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	private MethodDeclaration mainMethodToRemove;
 
 	private final List<TypeDeclaration> typeDeclarationsToAnalyze = new ArrayList<>();
+	private final List<SimpleType> simpleTypesToAnalyze = new ArrayList<>();
 	private final List<MethodDeclaration> methodDeclarationsToAnalyze = new ArrayList<>();
 	private final List<MethodInvocation> methodInvocationsToAnalyze = new ArrayList<>();
 
@@ -67,6 +69,12 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		typeDeclarationsToAnalyze.add(node);
 		return true;
 	}
+	
+	@Override
+	public boolean visit(SimpleType node) {
+		simpleTypesToAnalyze.add(node);
+		return true;
+	}
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
@@ -89,6 +97,10 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	public List<TypeDeclaration> getTypeDeclarationsToAnalyze() {
 		return typeDeclarationsToAnalyze;
+	}
+
+	public List<SimpleType> getSimpleTypesToAnalyze() {
+		return simpleTypesToAnalyze;
 	}
 
 	public List<MethodDeclaration> getMethodDeclarationsToAnalyze() {

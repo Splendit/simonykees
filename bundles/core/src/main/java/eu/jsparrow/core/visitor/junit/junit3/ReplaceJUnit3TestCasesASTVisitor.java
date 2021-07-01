@@ -30,11 +30,11 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		verifyImport(compilationUnit, migrationConfiguration.getTeardownAnnotationQualifiedName());
 		verifyImport(compilationUnit, migrationConfiguration.getTestAnnotationQualifiedName());
 
-		ReplaceJUnit3TestCasesAnalyzer replaceJUnit3TestCasesAnalyzer = new ReplaceJUnit3TestCasesAnalyzer();
-
-		ReplaceJUnit3TestCasesAnalysisData analysisData;
-		analysisData = replaceJUnit3TestCasesAnalyzer.analyzeCompilationUnit(
-				compilationUnit, migrationConfiguration, classDeclaringMethodReplacement)
+		JUnit3DataCollectorVisitor junit3DataCollectorVisitor = new JUnit3DataCollectorVisitor();
+		compilationUnit.accept(junit3DataCollectorVisitor);
+		ReplaceJUnit3TestCasesAnalyzer jUnit3TestCaseAnalyzer = new ReplaceJUnit3TestCasesAnalyzer();
+		ReplaceJUnit3TestCasesAnalysisData analysisData = jUnit3TestCaseAnalyzer
+			.collectTestCaseDeclarationData(junit3DataCollectorVisitor, migrationConfiguration)
 			.orElse(null);
 
 		if (analysisData == null) {
