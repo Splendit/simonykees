@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -79,10 +80,20 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			if (assertionAnalysisResult != null) {
 				jUnit3AssertionAnalysisResults.add(assertionAnalysisResult);
 			} else if (UnexpectedJunit3References.hasUnexpectedJUnitReference(methodBinding)) {
-				// TODO: do not return false if the declaring class of the
-				// method invocation is contained in the list of the test case
-				// declarations
-				return false;
+				ASTNode declaringNode = compilationUnit.findDeclaringNode(methodBinding);
+				if (declaringNode == null) {
+					return false;
+				}
+				if (declaringNode.getNodeType() != ASTNode.METHOD_DECLARATION) {
+					return false;
+				}
+				if (declaringNode.getLocationInParent() != TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
+					return false;
+				}
+				if(!jUnit3TestCaseDeclarationsAnalyzer.getJUnit3TestCaseDeclarations()
+					.contains(declaringNode.getParent())) {
+					return false;
+				}
 			}
 		}
 		List<TestMethodAnnotationData> testMethodAnnotationDataList = jUnit3TestMethodDeclarationsAnalyzer
