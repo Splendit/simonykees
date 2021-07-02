@@ -30,6 +30,15 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		super.visit(compilationUnit);
 		String classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
 		verifyImport(compilationUnit, classDeclaringMethodReplacement);
+		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertEquals"); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertFalse"); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertTrue"); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertNotNull"); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertNull"); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertNotSame"); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertSame"); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".fail"); //$NON-NLS-1$
+
 		verifyImport(compilationUnit, migrationConfiguration.getSetupAnnotationQualifiedName());
 		verifyImport(compilationUnit, migrationConfiguration.getTeardownAnnotationQualifiedName());
 		verifyImport(compilationUnit, migrationConfiguration.getTestAnnotationQualifiedName());
