@@ -21,7 +21,6 @@ public class JUnit3TestMethodDeclarationsAnalyzer {
 			Junit3MigrationConfiguration migrationConfiguration) {
 		List<MethodDeclaration> methodDeclarationsToAnalyze = junit3DataCollectorVisitor
 			.getMethodDeclarationsToAnalyze();
-		List<TypeDeclaration> typeDeclarationsToAnalyze = junit3DataCollectorVisitor.getTypeDeclarationsToAnalyze();
 		List<TypeDeclaration> jUnit3TestCaseDeclarations = replaceJUnit3TestCasesAnalyzer
 			.getJUnit3TestCaseDeclarations();
 
@@ -30,7 +29,7 @@ public class JUnit3TestMethodDeclarationsAnalyzer {
 				jUnit3TestMethodDeclarations.add(methodDeclaration);
 				testMethodAnnotationDataList
 					.add(createTestMethodAnnotationData(methodDeclaration, migrationConfiguration));
-			} else if (isUnexpectedMethodDeclaration(typeDeclarationsToAnalyze, methodDeclaration)) {
+			} else if (isUnexpectedMethodDeclaration(jUnit3TestCaseDeclarations, methodDeclaration)) {
 				return false;
 			}
 		}

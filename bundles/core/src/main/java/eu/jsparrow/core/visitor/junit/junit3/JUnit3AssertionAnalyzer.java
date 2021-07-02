@@ -21,7 +21,8 @@ class JUnit3AssertionAnalyzer {
 	private final List<MethodDeclaration> jUnit3TestMethods;
 	private final String classDeclaringMethodReplacement;
 
-	JUnit3AssertionAnalyzer(JUnit3TestMethodDeclarationsAnalyzer jUnit3TestMethodDeclarationsAnalyzer, String classDeclaringMethodReplacement) {
+	JUnit3AssertionAnalyzer(JUnit3TestMethodDeclarationsAnalyzer jUnit3TestMethodDeclarationsAnalyzer,
+			String classDeclaringMethodReplacement) {
 		jUnit3TestMethods = jUnit3TestMethodDeclarationsAnalyzer.getJUnit3TestMethodDeclarations();
 		this.classDeclaringMethodReplacement = classDeclaringMethodReplacement;
 	}
