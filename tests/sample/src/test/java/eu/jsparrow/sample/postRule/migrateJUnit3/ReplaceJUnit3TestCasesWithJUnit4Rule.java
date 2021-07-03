@@ -1,6 +1,5 @@
 package eu.jsparrow.sample.postRule.migrateJUnit3;
 
-import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.Assert;

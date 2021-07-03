@@ -1,6 +1,5 @@
 package eu.jsparrow.sample.postRule.migrateJUnit3;
 
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
