@@ -1,8 +1,8 @@
 package eu.jsparrow.sample.postRule.migrateJUnit3;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.After;
 import org.junit.Test;
-import org.junit.Assert;
 import org.junit.Before;
 
 public class ReplaceJUnit3TestCasesWithJUnit4Rule {
@@ -17,11 +17,11 @@ public class ReplaceJUnit3TestCasesWithJUnit4Rule {
 
 	@Test
 	public void test() throws Exception {
-		Assert.assertEquals(0x7fffffff, Integer.MAX_VALUE);
+		assertEquals(0x7fffffff, Integer.MAX_VALUE);
 	}
 
 	@Test
 	public void testAssertEqualsWithMessage() throws Exception {
-		Assert.assertEquals("Expected to be {0x7fffffff}.", 0x7fffffff, Integer.MAX_VALUE);
+		assertEquals("Expected to be {0x7fffffff}.", 0x7fffffff, Integer.MAX_VALUE);
 	}
 }

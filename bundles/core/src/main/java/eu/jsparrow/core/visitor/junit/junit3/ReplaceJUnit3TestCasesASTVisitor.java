@@ -1,7 +1,10 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -33,14 +36,14 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		super.visit(compilationUnit);
 		String classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
 		verifyImport(compilationUnit, classDeclaringMethodReplacement);
-		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertEquals"); //$NON-NLS-1$
-		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertFalse"); //$NON-NLS-1$
-		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertTrue"); //$NON-NLS-1$
-		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertNotNull"); //$NON-NLS-1$
-		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertNull"); //$NON-NLS-1$
-		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertNotSame"); //$NON-NLS-1$
-		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".assertSame"); //$NON-NLS-1$
-		verifyStaticMethodImport(compilationUnit, classDeclaringMethodReplacement + ".fail"); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, getNewAssertionMethodFullyQualifiedName("assertEquals")); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, getNewAssertionMethodFullyQualifiedName("assertFalse")); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, getNewAssertionMethodFullyQualifiedName("assertTrue")); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, getNewAssertionMethodFullyQualifiedName("assertNotNull")); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, getNewAssertionMethodFullyQualifiedName("assertNull")); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, getNewAssertionMethodFullyQualifiedName("ssertNotSame")); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, getNewAssertionMethodFullyQualifiedName("assertSame")); //$NON-NLS-1$
+		verifyStaticMethodImport(compilationUnit, getNewAssertionMethodFullyQualifiedName("fail")); //$NON-NLS-1$
 
 		verifyImport(compilationUnit, migrationConfiguration.getSetupAnnotationQualifiedName());
 		verifyImport(compilationUnit, migrationConfiguration.getTeardownAnnotationQualifiedName());
@@ -99,6 +102,23 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 				}
 			}
 		}
+
+		Set<String> newAssertionStaticImports = new HashSet<>();
+		Set<String> simpleNamesWithStaticImport = new HashSet<>();
+		jUnit3AssertionAnalysisResults
+			.stream()
+			.map(JUnit3AssertionAnalysisResult::getMethodName)
+			.forEach(identifier -> {
+				String newAssertionMethodFullyQualifiedName = getNewAssertionMethodFullyQualifiedName(identifier);
+				if (canAddStaticMethodImport(newAssertionMethodFullyQualifiedName)) {
+					newAssertionStaticImports.add(newAssertionMethodFullyQualifiedName);
+					simpleNamesWithStaticImport.add(identifier);
+				}
+			});
+
+		List<JUnit3AssertionReplacementData> assertionReplacementData = collectAssertionReplacementData(
+				jUnit3AssertionAnalysisResults, simpleNamesWithStaticImport);
+
 		List<TestMethodAnnotationData> testMethodAnnotationDataList = jUnit3TestMethodDeclarationsAnalyzer
 			.getTestMethodAnnotationDataList();
 
@@ -114,13 +134,22 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		List<ImportDeclaration> importDeclarationsToRemove = collectImportDeclarationsToRemove(compilationUnit);
 
 		if (mainMethodToRemove != null) {
-			transform(testMethodAnnotationDataList, jUnit3AssertionAnalysisResults, importDeclarationsToRemove,
+			transform(newAssertionStaticImports, testMethodAnnotationDataList, assertionReplacementData,
+					jUnit3AssertionAnalysisResults,
+					importDeclarationsToRemove,
 					jUnit3TestCaseSuperTypesToRemove, overrideAnnotationsToRemove, mainMethodToRemove);
 		} else {
-			transform(testMethodAnnotationDataList, jUnit3AssertionAnalysisResults, importDeclarationsToRemove,
+			transform(newAssertionStaticImports, testMethodAnnotationDataList, assertionReplacementData,
+					jUnit3AssertionAnalysisResults,
+					importDeclarationsToRemove,
 					jUnit3TestCaseSuperTypesToRemove, overrideAnnotationsToRemove);
 		}
 		return false;
+	}
+
+	private String getNewAssertionMethodFullyQualifiedName(String assertionMethodSimpleName) {
+		String classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
+		return classDeclaringMethodReplacement + '.' + assertionMethodSimpleName;
 	}
 
 	private List<ImportDeclaration> collectImportDeclarationsToRemove(CompilationUnit compilationUnit) {
@@ -137,7 +166,10 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		return importDeclarationsToRemove;
 	}
 
-	private void transform(List<TestMethodAnnotationData> testMethodAnnotationDataList,
+	private void transform(
+			Set<String> newAssertionStaticImports,
+			List<TestMethodAnnotationData> testMethodAnnotationDataList,
+			List<JUnit3AssertionReplacementData> assertionReplacementData,
 			List<JUnit3AssertionAnalysisResult> assertionAnalysisResults,
 			List<ImportDeclaration> importDeclarationsToRemove,
 			List<SimpleType> jUnit3TestCaseSuperTypesToRemove,
@@ -146,17 +178,30 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 
 		astRewrite.remove(mainMethodToRemove, null);
 		onRewrite();
-		transform(testMethodAnnotationDataList, assertionAnalysisResults, importDeclarationsToRemove,
-				jUnit3TestCaseSuperTypesToRemove,
-				overrideAnnotationsToRemove);
+		transform(newAssertionStaticImports, testMethodAnnotationDataList, assertionReplacementData,
+				assertionAnalysisResults,
+				importDeclarationsToRemove, jUnit3TestCaseSuperTypesToRemove, overrideAnnotationsToRemove);
 
 	}
 
-	private void transform(List<TestMethodAnnotationData> testMethodAnnotationDataList,
+	private void transform(
+			Set<String> newAssertionStaticImports,
+			List<TestMethodAnnotationData> testMethodAnnotationDataList,
+			List<JUnit3AssertionReplacementData> assertionReplacementData,
 			List<JUnit3AssertionAnalysisResult> assertionAnalysisResults,
 			List<ImportDeclaration> importDeclarationsToRemove,
 			List<SimpleType> jUnit3TestCaseSuperTypesToRemove,
 			List<Annotation> overrideAnnotationsToRemove) {
+
+		newAssertionStaticImports.forEach(qualifiedName -> {
+			AST ast = astRewrite.getAST();
+			ImportDeclaration newImportDeclaration = ast.newImportDeclaration();
+			newImportDeclaration.setName(ast.newName(qualifiedName));
+			newImportDeclaration.setStatic(true);
+			ListRewrite listRewrite = astRewrite.getListRewrite(getCompilationUnit(),
+					CompilationUnit.IMPORTS_PROPERTY);
+			listRewrite.insertFirst(newImportDeclaration, null);
+		});
 
 		testMethodAnnotationDataList.forEach(data -> {
 			MethodDeclaration methodDeclaration = data.getMethodDeclaration();
@@ -171,23 +216,11 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			onRewrite();
 		});
 
-		assertionAnalysisResults.forEach(data -> {
-			MethodInvocation methodInvocation = data.getMethodInvocation();
-			Expression oldQualifier = methodInvocation.getExpression();
-			Name newQualifier = addImport(data.getClassDeclaringMethodReplacement(), methodInvocation);
-			if (oldQualifier != null) {
-				astRewrite.replace(oldQualifier, newQualifier, null);
-			} else {
-				astRewrite.set(methodInvocation, MethodInvocation.EXPRESSION_PROPERTY, newQualifier, null);
-			}
-			Expression messageMovingToLastPosition = data.getMessageMovingToLastPosition()
-				.orElse(null);
-			if (messageMovingToLastPosition != null) {
-				ASTNode messageMoveTarget = astRewrite.createMoveTarget(messageMovingToLastPosition);
-				astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY)
-					.insertLast(messageMoveTarget, null);
-			}
-			onRewrite();
+		assertionReplacementData.forEach(data -> {
+			data.getOriginalMethodInvocation();
+			data.createMethodInvocationReplecement();
+			astRewrite.replace(data.getOriginalMethodInvocation(), data.createMethodInvocationReplecement(), null);
+
 		});
 
 		importDeclarationsToRemove.forEach(importDeclarationToRemove -> {
@@ -204,6 +237,63 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			astRewrite.remove(overrideAnnotationToRemove, null);
 			onRewrite();
 		});
+	}
 
+	List<JUnit3AssertionReplacementData> collectAssertionReplacementData(
+			List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults,
+			Set<String> simpleNamesWithStaticImport) {
+
+		List<JUnit3AssertionReplacementData> replacementDataList = new ArrayList<>();
+
+		for (JUnit3AssertionAnalysisResult analysisResult : jUnit3AssertionAnalysisResults) {
+			MethodInvocation originalMethodnvocation = analysisResult.getMethodInvocation();
+
+			boolean originalInvocationQualified = originalMethodnvocation.getExpression() != null;
+			boolean newInvocationQualified = !simpleNamesWithStaticImport.contains(analysisResult.getMethodName());
+			Expression messageMovingToLastPosition = analysisResult
+				.getMessageMovingToLastPosition()
+				.orElse(null);
+			if (originalInvocationQualified || newInvocationQualified || messageMovingToLastPosition != null) {
+				List<Expression> argumentsToCopy = new ArrayList<>(analysisResult.getOriginalArguments());
+				if (messageMovingToLastPosition != null) {
+					argumentsToCopy.remove(messageMovingToLastPosition);
+					argumentsToCopy.add(messageMovingToLastPosition);
+				}
+				Supplier<MethodInvocation> newMethodInvocationSupplier;
+				if (newInvocationQualified) {
+					newMethodInvocationSupplier = () -> createQualifiedAssertion(originalMethodnvocation,
+							analysisResult.getMethodName(), argumentsToCopy);
+				} else {
+					newMethodInvocationSupplier = () -> createAssertionWithoutQualifier(analysisResult.getMethodName(),
+							argumentsToCopy);
+				}
+				replacementDataList
+					.add(new JUnit3AssertionReplacementData(originalMethodnvocation, newMethodInvocationSupplier));
+			}
+		}
+		return replacementDataList;
+	}
+
+	private MethodInvocation createQualifiedAssertion(MethodInvocation context, String methodName,
+			List<Expression> argumentsToCopy) {
+		MethodInvocation newMethodInvocation = createAssertionWithoutQualifier(methodName, argumentsToCopy);
+		String classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
+		Name qualifier = addImport(classDeclaringMethodReplacement, context);
+		newMethodInvocation.setExpression(qualifier);
+		return newMethodInvocation;
+	}
+
+	private MethodInvocation createAssertionWithoutQualifier(String methodName, List<Expression> argumentsToCopy) {
+		AST ast = astRewrite.getAST();
+		MethodInvocation newMethodInvocation = ast
+			.newMethodInvocation();
+		newMethodInvocation.setName(ast.newSimpleName(methodName));
+
+		@SuppressWarnings("unchecked")
+		List<Expression> newArguments = newMethodInvocation.arguments();
+		argumentsToCopy.stream()
+			.map(arg -> (Expression) astRewrite.createCopyTarget(arg))
+			.forEach(newArguments::add);
+		return newMethodInvocation;
 	}
 }

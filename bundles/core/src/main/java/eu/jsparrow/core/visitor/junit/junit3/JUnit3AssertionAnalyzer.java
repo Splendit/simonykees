@@ -56,10 +56,9 @@ class JUnit3AssertionAnalyzer {
 			.orElse(null);
 		if (messageMovedToLastPosition != null) {
 			return Optional
-				.of(new JUnit3AssertionAnalysisResult(methodInvocation, messageMovedToLastPosition,
-						classDeclaringMethodReplacement));
+				.of(new JUnit3AssertionAnalysisResult(methodInvocation, assertionArguments, messageMovedToLastPosition));
 		} else {
-			return Optional.of(new JUnit3AssertionAnalysisResult(methodInvocation, classDeclaringMethodReplacement));
+			return Optional.of(new JUnit3AssertionAnalysisResult(methodInvocation, assertionArguments));
 		}
 	}
 
