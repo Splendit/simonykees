@@ -5,17 +5,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
-
-public class ReplaceJUnit3TestCasesWithJUnit4Rule extends TestCase {
+public class ReplaceJUnit3TestCasesWithJUnit4Rule {
 
 	@BeforeEach
-	@Override
 	protected void setUp() {
 	}
 
 	@AfterEach
-	@Override
 	protected void tearDown() {
 	}
 

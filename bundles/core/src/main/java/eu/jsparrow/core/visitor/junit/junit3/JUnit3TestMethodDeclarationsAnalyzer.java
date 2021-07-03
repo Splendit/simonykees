@@ -1,20 +1,32 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
+
 public class JUnit3TestMethodDeclarationsAnalyzer {
+	private static final String JUNIT_FRAMEWORK_TEST_RESULT = "junit.framework.TestResult"; //$NON-NLS-1$
+	private static final String JAVA_LANG_STRING = "java.lang.String"; //$NON-NLS-1$
+	private static final String JAVA_LANG_OVERRIDE = "java.lang.Override"; //$NON-NLS-1$
 	static final String SET_UP = "setUp"; //$NON-NLS-1$
 	static final String TEAR_DOWN = "tearDown"; //$NON-NLS-1$
 	static final String TEST = "test"; //$NON-NLS-1$
 
 	private final List<MethodDeclaration> jUnit3TestMethodDeclarations = new ArrayList<>();
 	private final List<TestMethodAnnotationData> testMethodAnnotationDataList = new ArrayList<>();
+	private final List<Annotation> overrideAnnotationsToRemove = new ArrayList<>();
 
 	boolean collectMethodDeclarationAnalysisData(JUnit3DataCollectorVisitor junit3DataCollectorVisitor,
 			JUnit3TestCaseDeclarationsAnalyzer replaceJUnit3TestCasesAnalyzer,
@@ -23,6 +35,26 @@ public class JUnit3TestMethodDeclarationsAnalyzer {
 			.getMethodDeclarationsToAnalyze();
 		List<TypeDeclaration> jUnit3TestCaseDeclarations = replaceJUnit3TestCasesAnalyzer
 			.getJUnit3TestCaseDeclarations();
+
+		List<MethodDeclaration> allJUnit3TestCaseMethodDeclarations = methodDeclarationsToAnalyze
+			.stream()
+			.filter(methodDeclaration -> jUnit3TestCaseDeclarations.contains(methodDeclaration.getParent()))
+			.collect(Collectors.toList());
+
+		for (MethodDeclaration methodDeclaration : allJUnit3TestCaseMethodDeclarations) {
+			if (isOverridingJUnitFrameworkTestCaseMethod(methodDeclaration)) {
+				ASTNodeUtil
+					.convertToTypedList(methodDeclaration.modifiers(), IExtendedModifier.class)
+					.stream()
+					.filter(IExtendedModifier::isAnnotation)
+					.map(Annotation.class::cast)
+					.filter(annotation -> annotation.resolveTypeBinding()
+						.getQualifiedName()
+						.equals(JAVA_LANG_OVERRIDE))
+					.findFirst()
+					.ifPresent(overrideAnnotationsToRemove::add);
+			}
+		}
 
 		for (MethodDeclaration methodDeclaration : methodDeclarationsToAnalyze) {
 			if (isTestMethodDeclaration(jUnit3TestCaseDeclarations, methodDeclaration)) {
@@ -34,6 +66,45 @@ public class JUnit3TestMethodDeclarationsAnalyzer {
 			}
 		}
 		return true;
+	}
+
+	private static boolean isOverridingJUnitFrameworkTestCaseMethod(MethodDeclaration jUnitTestCaseMethodDeclaration) {
+		String methodDeclarationIdentifier = jUnitTestCaseMethodDeclaration.getName()
+			.getIdentifier();
+		List<SingleVariableDeclaration> parameters = ASTNodeUtil
+			.convertToTypedList(jUnitTestCaseMethodDeclaration.parameters(), SingleVariableDeclaration.class);
+		if (parameters.isEmpty()) {
+
+			return methodDeclarationIdentifier.equals(SET_UP) ||
+					methodDeclarationIdentifier.equals(TEAR_DOWN) ||
+					methodDeclarationIdentifier.equals("countTestCases") || //$NON-NLS-1$
+					methodDeclarationIdentifier.equals("createResult") || //$NON-NLS-1$
+					methodDeclarationIdentifier.equals("getName") || //$NON-NLS-1$
+					methodDeclarationIdentifier.equals("run") || //$NON-NLS-1$
+					methodDeclarationIdentifier.equals("runBare") || //$NON-NLS-1$
+					methodDeclarationIdentifier.equals("runTest"); //$NON-NLS-1$
+		}
+
+		if (methodDeclarationIdentifier.equals("setName") //$NON-NLS-1$
+				&& parameters.size() == 1) {
+			ITypeBinding parameterType = parameters.get(0)
+				.resolveBinding()
+				.getType();
+
+			return ClassRelationUtil.isContentOfType(parameterType, JAVA_LANG_STRING);
+		}
+
+		if (methodDeclarationIdentifier.equals("run") //$NON-NLS-1$
+				&& parameters.size() == 1) {
+			ITypeBinding parameterType = parameters.get(0)
+				.resolveBinding()
+				.getType();
+			return ClassRelationUtil.isContentOfType(parameterType, JUNIT_FRAMEWORK_TEST_RESULT) ||
+					ClassRelationUtil.isInheritingContentOfTypes(parameterType,
+							Collections.singletonList(JUNIT_FRAMEWORK_TEST_RESULT));
+		}
+
+		return false;
 	}
 
 	private static boolean isTestMethodDeclaration(List<TypeDeclaration> jUnit3TestCaseDeclarations,
@@ -51,7 +122,7 @@ public class JUnit3TestMethodDeclarationsAnalyzer {
 		return methodName.startsWith(TEST) || methodName.equals(SET_UP) || methodName.equals(TEAR_DOWN);
 	}
 
-	private TestMethodAnnotationData createTestMethodAnnotationData(MethodDeclaration methodDeclaration,
+	private static TestMethodAnnotationData createTestMethodAnnotationData(MethodDeclaration methodDeclaration,
 			Junit3MigrationConfiguration migrationConfiguration) {
 		String methodName = methodDeclaration.getName()
 			.getIdentifier();
@@ -73,19 +144,6 @@ public class JUnit3TestMethodDeclarationsAnalyzer {
 		if (!jUnit3TestCaseDeclarations.contains(methodDeclaration.getParent())) {
 			return UnexpectedJunit3References.hasUnexpectedJUnitReference(methodBinding);
 		}
-		// TODO:
-		// Unexpected Method declarations are Method declarations overriding the
-		// following methods of TestCase
-		//
-		// countTestCases()
-		// createResult()
-		// getName()
-		// run()
-		// run(TestResult result)
-		// runBare()
-		// runTest()
-		// setName(java.lang.String name)
-		// toString()
 
 		return false;
 	}
@@ -98,4 +156,7 @@ public class JUnit3TestMethodDeclarationsAnalyzer {
 		return testMethodAnnotationDataList;
 	}
 
+	public List<Annotation> getOverrideAnnotationsToRemove() {
+		return overrideAnnotationsToRemove;
+	}
 }

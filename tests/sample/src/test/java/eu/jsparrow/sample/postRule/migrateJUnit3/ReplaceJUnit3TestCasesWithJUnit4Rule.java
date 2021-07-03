@@ -6,15 +6,13 @@ import org.junit.Test;
 import org.junit.Assert;
 import org.junit.Before;
 
-public class ReplaceJUnit3TestCasesWithJUnit4Rule extends TestCase {
+public class ReplaceJUnit3TestCasesWithJUnit4Rule {
 
 	@Before
-	@Override
 	protected void setUp() {
 	}
 
 	@After
-	@Override
 	protected void tearDown() {
 	}
 

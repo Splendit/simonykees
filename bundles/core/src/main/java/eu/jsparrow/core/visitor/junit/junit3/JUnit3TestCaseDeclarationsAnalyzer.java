@@ -9,12 +9,8 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
-
 public class JUnit3TestCaseDeclarationsAnalyzer {
 
-	private static final String JUNIT_FRAMEWORK_TEST = "junit.framework.Test"; //$NON-NLS-1$
-	private static final String JUNIT_FRAMEWORK_ASSERT = "junit.framework.Assert"; //$NON-NLS-1$
 	private static final String JUNIT_FRAMEWORK_TEST_CASE = "junit.framework.TestCase"; //$NON-NLS-1$
 
 	private final List<TypeDeclaration> jUnit3TestCaseDeclarations = new ArrayList<>();
@@ -58,16 +54,15 @@ public class JUnit3TestCaseDeclarationsAnalyzer {
 		if (!superClassQualifiedName.equals(JUNIT_FRAMEWORK_TEST_CASE)) {
 			return false;
 		}
-		List<ITypeBinding> ancestorsToAnalyze = ClassRelationUtil.findAncestors(typeDeclaration.resolveBinding());
-		for (ITypeBinding ancestor : ancestorsToAnalyze) {
-			String qualifiedName = ancestor.getQualifiedName();
-			if (!qualifiedName.equals(JUNIT_FRAMEWORK_TEST_CASE) &&
-					!qualifiedName.equals(JUNIT_FRAMEWORK_ASSERT) &&
-					!qualifiedName.equals(JUNIT_FRAMEWORK_TEST) &&
-					UnexpectedJunit3References.isUnexpectedJUnitQualifiedName(qualifiedName)) {
+
+		ITypeBinding[] interfacesToAnalyze = typeDeclaration.resolveBinding()
+			.getInterfaces();
+		for (ITypeBinding implementedInterface : interfacesToAnalyze) {
+			if (UnexpectedJunit3References.hasUnexpectedJUnitReference(implementedInterface)) {
 				return false;
 			}
 		}
+
 		return true;
 	}
 

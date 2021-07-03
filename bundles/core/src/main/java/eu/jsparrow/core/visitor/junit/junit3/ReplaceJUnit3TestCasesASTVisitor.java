@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -90,7 +91,7 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 				if (declaringNode.getLocationInParent() != TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
 					return false;
 				}
-				if(!jUnit3TestCaseDeclarationsAnalyzer.getJUnit3TestCaseDeclarations()
+				if (!jUnit3TestCaseDeclarationsAnalyzer.getJUnit3TestCaseDeclarations()
 					.contains(declaringNode.getParent())) {
 					return false;
 				}
@@ -102,14 +103,18 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		List<SimpleType> jUnit3TestCaseSuperTypesToRemove = jUnit3TestCaseDeclarationsAnalyzer
 			.getJUnit3TestCaseSuperTypesToRemove();
 
+		List<Annotation> overrideAnnotationsToRemove = jUnit3TestMethodDeclarationsAnalyzer
+			.getOverrideAnnotationsToRemove();
+
 		MethodDeclaration mainMethodToRemove = junit3DataCollectorVisitor.getMainMethodToRemove()
 			.orElse(null);
 
 		if (mainMethodToRemove != null) {
 			transform(testMethodAnnotationDataList, jUnit3AssertionAnalysisResults, jUnit3TestCaseSuperTypesToRemove,
-					mainMethodToRemove);
+					overrideAnnotationsToRemove, mainMethodToRemove);
 		} else {
-			transform(testMethodAnnotationDataList, jUnit3AssertionAnalysisResults, jUnit3TestCaseSuperTypesToRemove);
+			transform(testMethodAnnotationDataList, jUnit3AssertionAnalysisResults, jUnit3TestCaseSuperTypesToRemove,
+					overrideAnnotationsToRemove);
 		}
 		return false;
 	}
@@ -117,17 +122,20 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 	private void transform(List<TestMethodAnnotationData> testMethodAnnotationDataList,
 			List<JUnit3AssertionAnalysisResult> assertionAnalysisResults,
 			List<SimpleType> jUnit3TestCaseSuperTypesToRemove,
+			List<Annotation> overrideAnnotationsToRemove,
 			MethodDeclaration mainMethodToRemove) {
 
 		astRewrite.remove(mainMethodToRemove, null);
 		onRewrite();
-		transform(testMethodAnnotationDataList, assertionAnalysisResults, jUnit3TestCaseSuperTypesToRemove);
+		transform(testMethodAnnotationDataList, assertionAnalysisResults, jUnit3TestCaseSuperTypesToRemove,
+				overrideAnnotationsToRemove);
 
 	}
 
 	private void transform(List<TestMethodAnnotationData> testMethodAnnotationDataList,
 			List<JUnit3AssertionAnalysisResult> assertionAnalysisResults,
-			List<SimpleType> jUnit3TestCaseSuperTypesToRemove) {
+			List<SimpleType> jUnit3TestCaseSuperTypesToRemove,
+			List<Annotation> overrideAnnotationsToRemove) {
 
 		testMethodAnnotationDataList.forEach(data -> {
 			MethodDeclaration methodDeclaration = data.getMethodDeclaration();
@@ -161,6 +169,15 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			onRewrite();
 		});
 
-		// TODO: transform jUnit3TestCaseSuperTypesToRemove
+		jUnit3TestCaseSuperTypesToRemove.forEach(supertypeToRemove -> {
+			astRewrite.remove(supertypeToRemove, null);
+			onRewrite();
+		});
+		
+		overrideAnnotationsToRemove.forEach(overrideAnnotationToRemove ->
+		{
+			astRewrite.remove(overrideAnnotationToRemove, null);
+			onRewrite();
+		});
 	}
 }
