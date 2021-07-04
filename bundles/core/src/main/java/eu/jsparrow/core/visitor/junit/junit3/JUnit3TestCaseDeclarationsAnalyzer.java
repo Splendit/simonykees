@@ -26,7 +26,7 @@ public class JUnit3TestCaseDeclarationsAnalyzer {
 			}
 		}
 
-		List<SimpleType> simpleTypesToAnalyze = junit3DataCollectorVisitor.getSimpleTypesToAnalyze();
+		List<SimpleType> simpleTypesToAnalyze = junit3DataCollectorVisitor.getSuperClassSimpleTypesToAnalyze();
 		for (SimpleType simpleType : simpleTypesToAnalyze) {
 			if (jUnit3TestCaseDeclarations.contains(simpleType.getParent())) {
 				jUnit3TestCaseSuperTypesToRemove.add(simpleType);

@@ -7,11 +7,25 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
@@ -26,10 +40,12 @@ import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
  */
 public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
+	private boolean transformationPossible = true;
+
 	private MethodDeclaration mainMethodToRemove;
 
 	private final List<TypeDeclaration> typeDeclarationsToAnalyze = new ArrayList<>();
-	private final List<SimpleType> simpleTypesToAnalyze = new ArrayList<>();
+	private final List<SimpleType> superClassSimpleTypes = new ArrayList<>();
 	private final List<MethodDeclaration> methodDeclarationsToAnalyze = new ArrayList<>();
 	private final List<MethodInvocation> methodInvocationsToAnalyze = new ArrayList<>();
 
@@ -59,9 +75,22 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean preVisit2(ASTNode node) {
+		return transformationPossible;
+	}
+
+	@Override
 	public boolean visit(CompilationUnit node) {
 		mainMethodToRemove = findMainMethodToRemove(node).orElse(null);
 		return true;
+	}
+
+	@Override
+	public boolean visit(PackageDeclaration node) {
+		String packageName = node.resolveBinding()
+			.getName();
+		transformationPossible = !UnexpectedJunit3References.isUnexpectedJUnitQualifiedName(packageName);
+		return false;
 	}
 
 	@Override
@@ -69,10 +98,12 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		typeDeclarationsToAnalyze.add(node);
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(SimpleType node) {
-		simpleTypesToAnalyze.add(node);
+		if (node.getLocationInParent() == TypeDeclaration.SUPERCLASS_TYPE_PROPERTY) {
+			superClassSimpleTypes.add(node);
+		}
 		return true;
 	}
 
@@ -91,6 +122,81 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return true;
 	}
 
+	@Override
+	public boolean visit(QualifiedName node) {
+		transformationPossible = analyzeName(node);
+		return false;
+	}
+
+	@Override
+	public boolean visit(SimpleName node) {
+		transformationPossible = analyzeName(node);
+		return false;
+	}
+
+	private boolean analyzeName(Name name) {
+		if (name.getLocationInParent() == PackageDeclaration.NAME_PROPERTY
+				|| name.getLocationInParent() == ImportDeclaration.NAME_PROPERTY
+				|| name.getLocationInParent() == TypeDeclaration.NAME_PROPERTY
+				|| (name.getLocationInParent() == SimpleType.NAME_PROPERTY && name.getParent()
+					.getLocationInParent() == TypeDeclaration.SUPERCLASS_TYPE_PROPERTY)
+				|| name.getLocationInParent() == MethodDeclaration.NAME_PROPERTY
+				|| name.getLocationInParent() == MethodInvocation.NAME_PROPERTY
+				|| name.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY
+				|| name.getLocationInParent() == LabeledStatement.LABEL_PROPERTY
+				|| name.getLocationInParent() == ContinueStatement.LABEL_PROPERTY
+				|| name.getLocationInParent() == BreakStatement.LABEL_PROPERTY) {
+			return true;
+		}
+
+		IBinding binding = name.resolveBinding();
+		if (binding == null) {
+			return false;
+		}
+
+		ITypeBinding typeBinding = null;
+		if (binding.getKind() == IBinding.METHOD) {
+			IMethodBinding methodBinding = (IMethodBinding) binding;
+			typeBinding = methodBinding.getDeclaringClass();
+		}
+
+		if (binding.getKind() == IBinding.TYPE) {
+			typeBinding = (ITypeBinding) binding;
+		}
+
+		if (binding.getKind() == IBinding.ANNOTATION) {
+			IAnnotationBinding annotationBinding = (IAnnotationBinding) binding;
+			typeBinding = annotationBinding.getAnnotationType();
+		}
+
+		if (binding.getKind() == IBinding.MEMBER_VALUE_PAIR) {
+			IMemberValuePairBinding memberValuePairBinding = (IMemberValuePairBinding) binding;
+			IMethodBinding methodBinding = memberValuePairBinding.getMethodBinding();
+			typeBinding = methodBinding.getDeclaringClass();
+		}
+
+		if (typeBinding != null) {
+			return !UnexpectedJunit3References.hasUnexpectedJUnitReference(typeBinding);
+		}
+
+		if (binding.getKind() == IBinding.VARIABLE) {
+			IVariableBinding variableBinding = (IVariableBinding) binding;
+			ITypeBinding variableTypeBinding = variableBinding.getVariableDeclaration()
+				.getType();
+			if (UnexpectedJunit3References.hasUnexpectedJUnitReference(variableTypeBinding)) {
+				return false;
+			}
+			if (variableBinding.isField()) {
+				ITypeBinding fieldDeclaringClass = variableBinding.getDeclaringClass();
+				if(UnexpectedJunit3References.hasUnexpectedJUnitReference(fieldDeclaringClass)) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
 	public Optional<MethodDeclaration> getMainMethodToRemove() {
 		return Optional.ofNullable(mainMethodToRemove);
 	}
@@ -99,8 +205,8 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return typeDeclarationsToAnalyze;
 	}
 
-	public List<SimpleType> getSimpleTypesToAnalyze() {
-		return simpleTypesToAnalyze;
+	public List<SimpleType> getSuperClassSimpleTypesToAnalyze() {
+		return superClassSimpleTypes;
 	}
 
 	public List<MethodDeclaration> getMethodDeclarationsToAnalyze() {
@@ -109,5 +215,9 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	public List<MethodInvocation> getMethodInvocationsToAnalyze() {
 		return methodInvocationsToAnalyze;
+	}
+
+	public boolean isTransformationPossible() {
+		return transformationPossible;
 	}
 }

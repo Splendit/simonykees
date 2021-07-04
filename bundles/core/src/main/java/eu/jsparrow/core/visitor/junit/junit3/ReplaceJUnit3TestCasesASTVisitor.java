@@ -51,6 +51,10 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 
 		JUnit3DataCollectorVisitor junit3DataCollectorVisitor = new JUnit3DataCollectorVisitor();
 		compilationUnit.accept(junit3DataCollectorVisitor);
+		
+		if(!junit3DataCollectorVisitor.isTransformationPossible()) {
+			return false;
+		}
 
 		JUnit3TestCaseDeclarationsAnalyzer jUnit3TestCaseDeclarationsAnalyzer = new JUnit3TestCaseDeclarationsAnalyzer();
 		boolean transformationPossible = jUnit3TestCaseDeclarationsAnalyzer
