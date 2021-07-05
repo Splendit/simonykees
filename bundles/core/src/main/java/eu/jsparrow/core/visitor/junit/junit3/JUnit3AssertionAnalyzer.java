@@ -2,39 +2,75 @@ package eu.jsparrow.core.visitor.junit.junit3;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 class JUnit3AssertionAnalyzer {
 	private static final String JAVA_LANG_STRING = java.lang.String.class.getName();
-	private final List<MethodDeclaration> jUnit3TestMethods;
-	private final String classDeclaringMethodReplacement;
+	private final List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = new ArrayList<>();
 
-	JUnit3AssertionAnalyzer(JUnit3TestMethodDeclarationsAnalyzer jUnit3TestMethodDeclarationsAnalyzer,
-			String classDeclaringMethodReplacement) {
-		jUnit3TestMethods = jUnit3TestMethodDeclarationsAnalyzer.getJUnit3TestMethodDeclarations();
-		this.classDeclaringMethodReplacement = classDeclaringMethodReplacement;
+	boolean collectAssertionAnalysisResults(CompilationUnit compilationUnit,
+			JUnit3DataCollectorVisitor junit3DataCollectorVisitor,
+			JUnit3TestCaseDeclarationsAnalyzer jUnit3TestCaseDeclarationsAnalyzer,
+			Junit3MigrationConfiguration migrationConfiguration) {
+		
+		String classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
+		List<MethodInvocation> methodInvocationsToAnalyze = junit3DataCollectorVisitor.getMethodInvocationsToAnalyze();
+
+		for (MethodInvocation methodinvocation : methodInvocationsToAnalyze) {
+			IMethodBinding methodBinding = methodinvocation.resolveMethodBinding();
+			if (methodBinding == null) {
+				return false;
+			}
+			JUnit3AssertionAnalysisResult assertionAnalysisResult = findAssertionAnalysisResult(
+					classDeclaringMethodReplacement, jUnit3TestCaseDeclarationsAnalyzer, methodinvocation,
+					methodBinding).orElse(null);
+			if (assertionAnalysisResult != null) {
+				jUnit3AssertionAnalysisResults.add(assertionAnalysisResult);
+			} else if (UnexpectedJunit3References.hasUnexpectedJUnitReference(methodBinding)) {
+				ASTNode declaringNode = compilationUnit.findDeclaringNode(methodBinding);
+				if (declaringNode == null) {
+					return false;
+				}
+				if (declaringNode.getNodeType() != ASTNode.METHOD_DECLARATION) {
+					return false;
+				}
+				if (declaringNode.getLocationInParent() != TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
+					return false;
+				}
+				if (!jUnit3TestCaseDeclarationsAnalyzer.getJUnit3TestCaseDeclarations()
+					.contains(declaringNode.getParent())) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
-	Optional<JUnit3AssertionAnalysisResult> findAssertionAnalysisResult(MethodInvocation methodInvocation,
+	private Optional<JUnit3AssertionAnalysisResult> findAssertionAnalysisResult(
+			String classDeclaringMethodReplacement,
+			JUnit3TestCaseDeclarationsAnalyzer jUnit3TestCaseDeclarationsAnalyzer,
+			MethodInvocation methodInvocation,
 			IMethodBinding methodBinding) {
 
 		if (!isSupportedTestCaseMethod(methodBinding)) {
 			return Optional.empty();
 		}
 
-		if (!isSurroundedWithJUnit3Test(methodInvocation)) {
+		if (!isSurroundedWithJUnit3Test(jUnit3TestCaseDeclarationsAnalyzer, methodInvocation)) {
 			return Optional.empty();
 		}
 
@@ -52,23 +88,30 @@ class JUnit3AssertionAnalyzer {
 			return Optional.empty();
 		}
 
-		Expression messageMovedToLastPosition = findMessageMovedToLastPosition(methodBinding, assertionArguments)
-			.orElse(null);
+		Expression messageMovedToLastPosition = null;
+		if ("org.junit.jupiter.api.Assertions".equals(classDeclaringMethodReplacement)) { //$NON-NLS-1$
+			messageMovedToLastPosition = findMessageMovedToLastPosition(methodBinding, assertionArguments)
+				.orElse(null);
+		}
 		if (messageMovedToLastPosition != null) {
 			return Optional
-				.of(new JUnit3AssertionAnalysisResult(methodInvocation, assertionArguments, messageMovedToLastPosition));
+				.of(new JUnit3AssertionAnalysisResult(methodInvocation, assertionArguments,
+						messageMovedToLastPosition));
 		} else {
 			return Optional.of(new JUnit3AssertionAnalysisResult(methodInvocation, assertionArguments));
 		}
 	}
 
-	boolean isSurroundedWithJUnit3Test(MethodInvocation methodInvocation) {
+	boolean isSurroundedWithJUnit3Test(JUnit3TestCaseDeclarationsAnalyzer jUnit3TestCaseDeclarationsAnalyzer,
+			MethodInvocation methodInvocation) {
 		BodyDeclaration bodyDeclarationAncestor = ASTNodeUtil.getSpecificAncestor(methodInvocation,
 				BodyDeclaration.class);
 		ASTNode parent = methodInvocation.getParent();
 		while (parent != null) {
 			if (parent == bodyDeclarationAncestor) {
-				return parent.getNodeType() == ASTNode.METHOD_DECLARATION && jUnit3TestMethods.contains(parent);
+				return parent.getNodeType() == ASTNode.METHOD_DECLARATION
+						&& jUnit3TestCaseDeclarationsAnalyzer.getJUnit3TestMethodDeclarations()
+							.contains(parent);
 			}
 			if (parent.getNodeType() == ASTNode.LAMBDA_EXPRESSION) {
 				return false;
@@ -133,10 +176,6 @@ class JUnit3AssertionAnalyzer {
 			return Optional.empty();
 		}
 
-		if (!"org.junit.jupiter.api.Assertions".equals(classDeclaringMethodReplacement)) { //$NON-NLS-1$
-			return Optional.empty();
-		}
-
 		if (arguments.size() == 2 && "assertEquals".equals(methodBinding.getName())) { //$NON-NLS-1$
 			boolean comparingStringArgumentsWithoutMessage = arguments.stream()
 				.map(Expression::resolveTypeBinding)
@@ -151,4 +190,9 @@ class JUnit3AssertionAnalyzer {
 		}
 		return Optional.empty();
 	}
+
+	public List<JUnit3AssertionAnalysisResult> getjUnit3AssertionAnalysisResults() {
+		return jUnit3AssertionAnalysisResults;
+	}
+
 }

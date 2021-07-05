@@ -41,9 +41,7 @@ import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
 public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	private boolean transformationPossible = true;
-
 	private MethodDeclaration mainMethodToRemove;
-
 	private final List<TypeDeclaration> typeDeclarationsToAnalyze = new ArrayList<>();
 	private final List<SimpleType> superClassSimpleTypes = new ArrayList<>();
 	private final List<MethodDeclaration> methodDeclarationsToAnalyze = new ArrayList<>();
