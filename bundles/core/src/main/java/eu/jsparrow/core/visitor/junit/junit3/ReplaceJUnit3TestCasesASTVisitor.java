@@ -221,10 +221,8 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		});
 
 		assertionReplacementData.forEach(data -> {
-			data.getOriginalMethodInvocation();
-			data.createMethodInvocationReplecement();
 			astRewrite.replace(data.getOriginalMethodInvocation(), data.createMethodInvocationReplecement(), null);
-
+			onRewrite();
 		});
 
 		importDeclarationsToRemove.forEach(importDeclarationToRemove -> {

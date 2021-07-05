@@ -1,15 +1,12 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
-import java.util.Arrays;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.junit.jupiter.AbstractReplaceJUnit4WithJupiterASTVisitorTest;
+import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
-public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest
-		extends AbstractReplaceJUnit4WithJupiterASTVisitorTest {
+public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
@@ -26,16 +23,26 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest
 	}
 
 	@Test
-	public void visit_MainMethodNotReferenced_shouldTransform() throws Exception {
-		String original = "" +
-				"	int dummy;\n"
-				+ "	public static void main(String[] args) {\n"
+	public void visit_fullyQualifiedAssertMethod_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = ""
+				+ " class MyTestcase extends TestCase {\n"
 				+ "\n"
-				+ "	}";
+				+ "	void test() {\n"
+				+ "		junit.framework.Assert.assertTrue(true);\n"
+				+ "	}\n"
+				+ "\n"
+				+ "}";
 
-		String expected = "" +
-				"	int dummy;\n";
-
-		assertChange(original, expected, Arrays.<String>asList());
+		String expected = ""
+				+ " class MyTestcase {\n"
+				+ "\n"
+				+ "	@Test\n"
+				+ "	void test() {\n"
+				+ "		assertTrue(true);\n"
+				+ "	}\n"
+				+ "\n"
+				+ "}";
+		assertChange(original, expected);
 	}
 }

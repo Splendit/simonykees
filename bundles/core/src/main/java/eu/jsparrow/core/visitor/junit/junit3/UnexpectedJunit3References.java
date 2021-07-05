@@ -14,7 +14,7 @@ public class UnexpectedJunit3References {
 	private UnexpectedJunit3References() {
 		// private constructor of utility class in hiding implicit public one
 	}
-	
+
 	static boolean hasUnexpectedJUnitReference(IMethodBinding methodBinding) {
 		return hasUnexpectedJUnitReference(methodBinding.getDeclaringClass());
 	}
@@ -34,18 +34,6 @@ public class UnexpectedJunit3References {
 		for (ITypeBinding ancestor : ancestors) {
 			if (isUnexpectedJUnitQualifiedName(ancestor.getQualifiedName())) {
 				return true;
-			}
-		}
-		return false;
-	}
-
-	private static boolean hasUnexpectedTypeArgument(ITypeBinding typeBinding) {
-		if (typeBinding.isParameterizedType()) {
-			ITypeBinding[] typeParameters = typeBinding.getTypeArguments();
-			for (ITypeBinding parameterType : typeParameters) {
-				if (hasUnexpectedJUnitReference(parameterType)) {
-					return true;
-				}
 			}
 		}
 		return false;

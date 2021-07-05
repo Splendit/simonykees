@@ -188,7 +188,8 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 			}
 			if (variableBinding.isField()) {
 				ITypeBinding fieldDeclaringClass = variableBinding.getDeclaringClass();
-				if(UnexpectedJunit3References.hasUnexpectedJUnitReference(fieldDeclaringClass)) {
+				if (fieldDeclaringClass != null
+						&& UnexpectedJunit3References.hasUnexpectedJUnitReference(fieldDeclaringClass)) {
 					return false;
 				}
 			}
