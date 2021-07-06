@@ -25,9 +25,10 @@ class JUnit3AssertionAnalyzer {
 	boolean collectAssertionAnalysisResults(CompilationUnit compilationUnit,
 			JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
 			Junit3MigrationConfiguration migrationConfiguration) {
-		
+
 		String classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
-		List<MethodInvocation> methodInvocationsToAnalyze = jUnit3DeclarationsCollectorVisitor.getMethodInvocationsToAnalyze();
+		List<MethodInvocation> methodInvocationsToAnalyze = jUnit3DeclarationsCollectorVisitor
+			.getMethodInvocationsToAnalyze();
 
 		for (MethodInvocation methodinvocation : methodInvocationsToAnalyze) {
 			IMethodBinding methodBinding = methodinvocation.resolveMethodBinding();
@@ -54,6 +55,8 @@ class JUnit3AssertionAnalyzer {
 					.contains(declaringNode.getParent())) {
 					return false;
 				}
+			} else if (UnexpectedJunit3References.hasUnexpectedJUnitReference(methodBinding.getReturnType())) {
+				return false;
 			}
 		}
 		return true;

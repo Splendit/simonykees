@@ -17,6 +17,8 @@ import java.util.Arrays;
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.core.SingleRuleTest;
 import eu.jsparrow.core.util.RulesTestUtil;
@@ -28,6 +30,8 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	private static final String REPLACE_WITH_J_UNIT_4 = "ReplaceJUnit3TestCasesWithJUnit4Rule.java";
 	private static final String REPLACE_WITH_JUPITER = "ReplaceJUnit3TestCasesWithJupiterRule.java";
 	private static final String MAIN_METHOD_NOT_REMOVED = "ReplaceJUnit3TestCasesMainMethodNotRemovedRule.java";
+	private static final String USING_J_UNIT_3_TEST_RESULT_GETTER = "ReplaceJUnit3TestCasesUsingJUnit3TestResultGetterRule.java";
+	private static final String USING_J_UNIT_3_TEST_RESULT_FIELD = "ReplaceJUnit3TestCasesUsingJUnit3TestResultFieldRule.java";
 
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnit3";
 
@@ -167,6 +171,28 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 
 		Path preRule = getPreRuleFile(MAIN_METHOD_NOT_REMOVED);
 		Path postRule = getPostRuleFile(MAIN_METHOD_NOT_REMOVED, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			USING_J_UNIT_3_TEST_RESULT_GETTER,
+			USING_J_UNIT_3_TEST_RESULT_FIELD,
+	})
+	void testUsingImplicitJUnit3TestResult(String preRuleFileName) throws Exception {
+		loadUtilities();
+		addToClasspath(testProject, Arrays
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
+					"5.0.0")));
+		rule.calculateEnabledForProject(testProject);
+		assertTrue(rule.isEnabled());
+
+		Path preRule = getPreRuleFile(preRuleFileName);
+		Path postRule = getPostRuleFile(preRuleFileName, POSTRULE_SUBDIRECTORY);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
