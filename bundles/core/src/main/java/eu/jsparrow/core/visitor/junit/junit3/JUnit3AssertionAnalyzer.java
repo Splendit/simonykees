@@ -23,12 +23,11 @@ class JUnit3AssertionAnalyzer {
 	private final List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = new ArrayList<>();
 
 	boolean collectAssertionAnalysisResults(CompilationUnit compilationUnit,
-			JUnit3DataCollectorVisitor junit3DataCollectorVisitor,
-			JUnit3TestCaseDeclarationsAnalyzer jUnit3TestCaseDeclarationsAnalyzer,
+			JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
 			Junit3MigrationConfiguration migrationConfiguration) {
 		
 		String classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
-		List<MethodInvocation> methodInvocationsToAnalyze = junit3DataCollectorVisitor.getMethodInvocationsToAnalyze();
+		List<MethodInvocation> methodInvocationsToAnalyze = jUnit3DeclarationsCollectorVisitor.getMethodInvocationsToAnalyze();
 
 		for (MethodInvocation methodinvocation : methodInvocationsToAnalyze) {
 			IMethodBinding methodBinding = methodinvocation.resolveMethodBinding();
@@ -36,7 +35,7 @@ class JUnit3AssertionAnalyzer {
 				return false;
 			}
 			JUnit3AssertionAnalysisResult assertionAnalysisResult = findAssertionAnalysisResult(
-					classDeclaringMethodReplacement, jUnit3TestCaseDeclarationsAnalyzer, methodinvocation,
+					classDeclaringMethodReplacement, jUnit3DeclarationsCollectorVisitor, methodinvocation,
 					methodBinding).orElse(null);
 			if (assertionAnalysisResult != null) {
 				jUnit3AssertionAnalysisResults.add(assertionAnalysisResult);
@@ -51,7 +50,7 @@ class JUnit3AssertionAnalyzer {
 				if (declaringNode.getLocationInParent() != TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
 					return false;
 				}
-				if (!jUnit3TestCaseDeclarationsAnalyzer.getJUnit3TestCaseDeclarations()
+				if (!jUnit3DeclarationsCollectorVisitor.getJUnit3TestCaseDeclarations()
 					.contains(declaringNode.getParent())) {
 					return false;
 				}
@@ -62,7 +61,7 @@ class JUnit3AssertionAnalyzer {
 
 	private Optional<JUnit3AssertionAnalysisResult> findAssertionAnalysisResult(
 			String classDeclaringMethodReplacement,
-			JUnit3TestCaseDeclarationsAnalyzer jUnit3TestCaseDeclarationsAnalyzer,
+			JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
 			MethodInvocation methodInvocation,
 			IMethodBinding methodBinding) {
 
@@ -70,7 +69,7 @@ class JUnit3AssertionAnalyzer {
 			return Optional.empty();
 		}
 
-		if (!isSurroundedWithJUnit3Test(jUnit3TestCaseDeclarationsAnalyzer, methodInvocation)) {
+		if (!isSurroundedWithJUnit3Test(jUnit3DeclarationsCollectorVisitor, methodInvocation)) {
 			return Optional.empty();
 		}
 
@@ -102,7 +101,7 @@ class JUnit3AssertionAnalyzer {
 		}
 	}
 
-	boolean isSurroundedWithJUnit3Test(JUnit3TestCaseDeclarationsAnalyzer jUnit3TestCaseDeclarationsAnalyzer,
+	boolean isSurroundedWithJUnit3Test(JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
 			MethodInvocation methodInvocation) {
 		BodyDeclaration bodyDeclarationAncestor = ASTNodeUtil.getSpecificAncestor(methodInvocation,
 				BodyDeclaration.class);
@@ -110,7 +109,7 @@ class JUnit3AssertionAnalyzer {
 		while (parent != null) {
 			if (parent == bodyDeclarationAncestor) {
 				return parent.getNodeType() == ASTNode.METHOD_DECLARATION
-						&& jUnit3TestCaseDeclarationsAnalyzer.getJUnit3TestMethodDeclarations()
+						&& jUnit3DeclarationsCollectorVisitor.getJUnit3TestMethodDeclarations()
 							.contains(parent);
 			}
 			if (parent.getNodeType() == ASTNode.LAMBDA_EXPRESSION) {

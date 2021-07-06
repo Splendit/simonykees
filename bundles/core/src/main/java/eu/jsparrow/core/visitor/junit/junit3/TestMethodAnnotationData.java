@@ -20,5 +20,4 @@ public class TestMethodAnnotationData {
 	public String getAnnotationQualifiedName() {
 		return annotationQualifiedName;
 	}
-
 }
