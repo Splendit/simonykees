@@ -2,13 +2,12 @@ package eu.jsparrow.core.visitor.junit.junit3;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.junit.jupiter.AbstractReplaceJUnit4WithJupiterASTVisitorTest;
+import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
 public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
-		extends AbstractReplaceJUnit4WithJupiterASTVisitorTest {
+		extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
@@ -24,18 +23,139 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 		fixtureProject.clear();
 	}
 
-	@Disabled("Unexpected remove of main method")
 	@Test
-	public void visit_MainMethodReferenced_shouldNotTransform() throws Exception {
+	public void visit_ImportOfJupiterAnnotation_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.addImport("org.junit.jupiter.api.DisplayName");
 		String original = "" +
-				"	public static void main(String[] args) {\n"
-				+ "\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	void useMain() {\n"
-				+ "		main(new String[] {});\n"
+				"	class TestWithJupiterAnnotation extends TestCase {\n" +
+				"	\n" +
+				"		@DisplayName(\"test\")\n" +
+				"		void test() {\n" +
+				"			assertNotNull(new Object());\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_SuperCountTestCases_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	public class SuperCountTestCasesInvocationTest extends TestCase {\n"
+				+ "		\n"
+				+ "		void test() {\n"
+				+ "			assertEquals(1, super.countTestCases());\n"
+				+ "		}\n"
 				+ "	}";
 
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_TestCaseClassLiteral_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	public class TestCaseClassLiteralTest extends TestCase {\n"
+				+ "\n"
+				+ "		void test() {\n"
+				+ "			assertEquals(\"junit.framework.TestCase\", TestCase.class.getName());\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_AssertNotNullMethodReference_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("java.util.function.Consumer");
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.addImport("junit.framework.Assert");
+		String original = "" +
+				"	class AssertNotNullExpressionMethodReferenceTest extends TestCase {\n"
+				+ "\n"
+				+ "		void test() {\n"
+				+ "			Consumer<Object> asserter = Assert::assertNotNull;\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_QualifiedJupiterDisabledAnnotation_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	@org.junit.jupiter.api.Disabled\n"
+				+ "	public class QualifiedJupiterDisabledAnnotationTest extends TestCase {\n"
+				+ "\n"
+				+ "		void test() {\n"
+				+ "			assertNotNull(new Object());\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_TestCaseAsTypeArgument_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("java.util.List");
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	public class TestCaseAsTypeArgument extends TestCase {\n"
+				+ "		void test() {\n"
+				+ "			List<List<TestCase>> listOfListOfTestCases = null;\n"
+				+ "			assertNull(listOfListOfTestCases);\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_TestCaseImplementingProtectable_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.Protectable");
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	public abstract class TestCaseImplementingProtectable extends TestCase implements Protectable {\n"
+				+ "		void test() {\n"
+				+ "			assertNotNull(new Object());\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ClassExtendingAssert_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.Assert");
+		String original = "" +
+				"	public class ClassExtendingAssertTest extends Assert {\n"
+				+ "		void test() {\n"
+				+ "			assertNotNull(new Object());\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	// @Test
+	// public void visit__shouldNotTransform() throws Exception {
+	// defaultFixture.addImport("junit.framework.TestCase");
+	// String original = "" +
+	// "";
+	//
+	// assertNoChange(original);
+	// }
+
+	// @Test
+	// public void visit__shouldNotTransform() throws Exception {
+	// defaultFixture.addImport("junit.framework.TestCase");
+	// String original = "" +
+	// "";
+	//
+	// assertNoChange(original);
+	// }
+
 }
