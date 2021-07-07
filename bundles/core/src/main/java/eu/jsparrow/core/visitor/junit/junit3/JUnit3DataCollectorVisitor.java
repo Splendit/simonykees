@@ -25,12 +25,15 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
@@ -49,6 +52,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	private static final String JUNIT_FRAMEWORK_TEST_RESULT = "junit.framework.TestResult"; //$NON-NLS-1$
 	private static final String JAVA_LANG_STRING = "java.lang.String"; //$NON-NLS-1$
 	private static final String JAVA_LANG_OVERRIDE = "java.lang.Override"; //$NON-NLS-1$
+	private static final String VOID = "void"; //$NON-NLS-1$
 	static final String SET_UP = "setUp"; //$NON-NLS-1$
 	static final String TEAR_DOWN = "tearDown"; //$NON-NLS-1$
 	static final String TEST = "test"; //$NON-NLS-1$
@@ -125,18 +129,11 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	}
 
 	@Override
-	public boolean visit(SimpleType node) {
-		if (node.getLocationInParent() == TypeDeclaration.SUPERCLASS_TYPE_PROPERTY) {
-			ITypeBinding typeBinding = node.resolveBinding();
-			if (typeBinding != null && typeBinding.getQualifiedName()
-				.equals(JUNIT_FRAMEWORK_TEST_CASE)) {
-				TypeDeclaration testCaseTypeDeclaration = (TypeDeclaration) node.getParent();
-				if (!testCaseTypeDeclaration.isLocalTypeDeclaration()) {
-					jUnit3TestCaseDeclarations.add(testCaseTypeDeclaration);
-					jUnit3TestCaseSuperTypesToRemove.add(node);
-				}
-				return false;
-			}
+	public boolean visit(TypeDeclaration node) {
+		SimpleType testCaseAsSuperType = findTestCaseAsSuperType(node).orElse(null);
+		if (testCaseAsSuperType != null && isValidJUnit3TestCaseSubclass(node)) {
+			jUnit3TestCaseDeclarations.add(node);
+			jUnit3TestCaseSuperTypesToRemove.add(testCaseAsSuperType);
 		}
 		return true;
 	}
@@ -176,6 +173,15 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(SuperMethodInvocation node) {
+		IMethodBinding methodBinding = node.resolveMethodBinding();
+		transformationPossible = methodBinding != null &&
+				!UnexpectedJunit3References.hasUnexpectedJUnitReference(methodBinding) &&
+				!UnexpectedJunit3References.hasUnexpectedJUnitReference(methodBinding.getReturnType());
+		return transformationPossible;
+	}
+
+	@Override
 	public boolean visit(QualifiedName node) {
 		transformationPossible = analyzeName(node);
 		return false;
@@ -187,10 +193,121 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return false;
 	}
 
+	private Optional<SimpleType> findTestCaseAsSuperType(TypeDeclaration node) {
+
+		Type superclassType = node.getSuperclassType();
+		if (superclassType != null && superclassType.getNodeType() == ASTNode.SIMPLE_TYPE) {
+			SimpleType simpleSuperClassType = (SimpleType) superclassType;
+			ITypeBinding typeBinding = simpleSuperClassType.resolveBinding();
+			String qualifiedName = typeBinding.getQualifiedName();
+			if (qualifiedName.equals(JUNIT_FRAMEWORK_TEST_CASE)) {
+				return Optional.of(simpleSuperClassType);
+			}
+		}
+		return Optional.empty();
+	}
+
+	private boolean isValidJUnit3TestCaseSubclass(TypeDeclaration testCaseSubclassDeclaration) {
+		int modifiers = testCaseSubclassDeclaration.getModifiers();
+		if (Modifier.isAbstract(modifiers)) {
+			return false;
+		}
+		if (!Modifier.isPublic(modifiers)) {
+			return false;
+		}
+		if (Modifier.isStatic(modifiers)) {
+			return true;
+		}
+		return MainTopLevelJavaClass.isMainTopLevelClass(testCaseSubclassDeclaration);
+	}
+
+	private static boolean isOverridingJUnitFrameworkTestCaseMethod(MethodDeclaration jUnitTestCaseMethodDeclaration) {
+		String methodDeclarationIdentifier = jUnitTestCaseMethodDeclaration.getName()
+			.getIdentifier();
+		List<SingleVariableDeclaration> parameters = ASTNodeUtil
+			.convertToTypedList(jUnitTestCaseMethodDeclaration.parameters(), SingleVariableDeclaration.class);
+		if (parameters.isEmpty()) {
+
+			return methodDeclarationIdentifier.equals(SET_UP) ||
+					methodDeclarationIdentifier.equals(TEAR_DOWN) ||
+					methodDeclarationIdentifier.equals("countTestCases") || //$NON-NLS-1$
+					methodDeclarationIdentifier.equals("createResult") || //$NON-NLS-1$
+					methodDeclarationIdentifier.equals("getName") || //$NON-NLS-1$
+					methodDeclarationIdentifier.equals("run") || //$NON-NLS-1$
+					methodDeclarationIdentifier.equals("runBare") || //$NON-NLS-1$
+					methodDeclarationIdentifier.equals("runTest"); //$NON-NLS-1$
+		}
+
+		if (methodDeclarationIdentifier.equals("setName") //$NON-NLS-1$
+				&& parameters.size() == 1) {
+			ITypeBinding parameterType = parameters.get(0)
+				.resolveBinding()
+				.getType();
+
+			return ClassRelationUtil.isContentOfType(parameterType, JAVA_LANG_STRING);
+		}
+
+		if (methodDeclarationIdentifier.equals("run") //$NON-NLS-1$
+				&& parameters.size() == 1) {
+			ITypeBinding parameterType = parameters.get(0)
+				.resolveBinding()
+				.getType();
+			return ClassRelationUtil.isContentOfType(parameterType, JUNIT_FRAMEWORK_TEST_RESULT) ||
+					ClassRelationUtil.isInheritingContentOfTypes(parameterType,
+							Collections.singletonList(JUNIT_FRAMEWORK_TEST_RESULT));
+		}
+
+		return false;
+	}
+
+	private static boolean isTestMethodDeclaration(MethodDeclaration junitTestCaseMethodDeclaration) {
+
+		IMethodBinding methodBinding = junitTestCaseMethodDeclaration.resolveBinding();
+		if (methodBinding.getParameterTypes().length != 0) {
+			return false;
+		}
+
+		String methodName = methodBinding.getName();
+		if (methodName.equals(SET_UP) || methodName.equals(TEAR_DOWN)) {
+			return true;
+		}
+
+		if (!methodName.startsWith(TEST)) {
+			return false;
+		}
+
+		int modifiers = methodBinding.getModifiers();
+		if (!Modifier.isPublic(modifiers)) {
+			return false;
+		}
+
+		String returnTypeQualifiedName = methodBinding.getReturnType()
+			.getQualifiedName();
+
+		return returnTypeQualifiedName.equals(VOID);
+	}
+
+	private static TestMethodAnnotationData createTestMethodAnnotationData(MethodDeclaration methodDeclaration,
+			Junit3MigrationConfiguration migrationConfiguration) {
+		String methodName = methodDeclaration.getName()
+			.getIdentifier();
+		String annotationQualifiedName;
+		if (methodName.equals(SET_UP)) {
+			annotationQualifiedName = migrationConfiguration.getSetupAnnotationQualifiedName();
+		} else if (methodName.equals(TEAR_DOWN)) {
+			annotationQualifiedName = migrationConfiguration.getTeardownAnnotationQualifiedName();
+		} else {
+			annotationQualifiedName = migrationConfiguration.getTestAnnotationQualifiedName();
+		}
+		return new TestMethodAnnotationData(methodDeclaration, annotationQualifiedName);
+	}
+
 	private boolean analyzeName(Name name) {
 		if (name.getLocationInParent() == PackageDeclaration.NAME_PROPERTY
 				|| name.getLocationInParent() == ImportDeclaration.NAME_PROPERTY
 				|| name.getLocationInParent() == TypeDeclaration.NAME_PROPERTY
+				|| (name.getLocationInParent() == SimpleType.NAME_PROPERTY
+						&& jUnit3TestCaseSuperTypesToRemove.contains(name.getParent()))
 				|| name.getLocationInParent() == MethodDeclaration.NAME_PROPERTY
 				|| name.getLocationInParent() == MethodInvocation.NAME_PROPERTY
 				|| name.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY
@@ -247,71 +364,6 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 			return true;
 		}
 		return false;
-	}
-
-	private static boolean isOverridingJUnitFrameworkTestCaseMethod(MethodDeclaration jUnitTestCaseMethodDeclaration) {
-		String methodDeclarationIdentifier = jUnitTestCaseMethodDeclaration.getName()
-			.getIdentifier();
-		List<SingleVariableDeclaration> parameters = ASTNodeUtil
-			.convertToTypedList(jUnitTestCaseMethodDeclaration.parameters(), SingleVariableDeclaration.class);
-		if (parameters.isEmpty()) {
-
-			return methodDeclarationIdentifier.equals(SET_UP) ||
-					methodDeclarationIdentifier.equals(TEAR_DOWN) ||
-					methodDeclarationIdentifier.equals("countTestCases") || //$NON-NLS-1$
-					methodDeclarationIdentifier.equals("createResult") || //$NON-NLS-1$
-					methodDeclarationIdentifier.equals("getName") || //$NON-NLS-1$
-					methodDeclarationIdentifier.equals("run") || //$NON-NLS-1$
-					methodDeclarationIdentifier.equals("runBare") || //$NON-NLS-1$
-					methodDeclarationIdentifier.equals("runTest"); //$NON-NLS-1$
-		}
-
-		if (methodDeclarationIdentifier.equals("setName") //$NON-NLS-1$
-				&& parameters.size() == 1) {
-			ITypeBinding parameterType = parameters.get(0)
-				.resolveBinding()
-				.getType();
-
-			return ClassRelationUtil.isContentOfType(parameterType, JAVA_LANG_STRING);
-		}
-
-		if (methodDeclarationIdentifier.equals("run") //$NON-NLS-1$
-				&& parameters.size() == 1) {
-			ITypeBinding parameterType = parameters.get(0)
-				.resolveBinding()
-				.getType();
-			return ClassRelationUtil.isContentOfType(parameterType, JUNIT_FRAMEWORK_TEST_RESULT) ||
-					ClassRelationUtil.isInheritingContentOfTypes(parameterType,
-							Collections.singletonList(JUNIT_FRAMEWORK_TEST_RESULT));
-		}
-
-		return false;
-	}
-
-	private static boolean isTestMethodDeclaration(MethodDeclaration junitTestCaseMethodDeclaration) {
-
-		IMethodBinding methodBinding = junitTestCaseMethodDeclaration.resolveBinding();
-		if (methodBinding.getParameterTypes().length != 0) {
-			return false;
-		}
-
-		String methodName = methodBinding.getName();
-		return methodName.startsWith(TEST) || methodName.equals(SET_UP) || methodName.equals(TEAR_DOWN);
-	}
-
-	private static TestMethodAnnotationData createTestMethodAnnotationData(MethodDeclaration methodDeclaration,
-			Junit3MigrationConfiguration migrationConfiguration) {
-		String methodName = methodDeclaration.getName()
-			.getIdentifier();
-		String annotationQualifiedName;
-		if (methodName.equals(SET_UP)) {
-			annotationQualifiedName = migrationConfiguration.getSetupAnnotationQualifiedName();
-		} else if (methodName.equals(TEAR_DOWN)) {
-			annotationQualifiedName = migrationConfiguration.getTeardownAnnotationQualifiedName();
-		} else {
-			annotationQualifiedName = migrationConfiguration.getTestAnnotationQualifiedName();
-		}
-		return new TestMethodAnnotationData(methodDeclaration, annotationQualifiedName);
 	}
 
 	public List<ImportDeclaration> getImportDeclarationsToRemove() {

@@ -25,24 +25,22 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 	@Test
 	public void visit_fullyQualifiedAssertMethod_shouldTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
-		String original = ""
-				+ " class MyTestcase extends TestCase {\n"
-				+ "\n"
-				+ "	void test() {\n"
-				+ "		junit.framework.Assert.assertTrue(true);\n"
-				+ "	}\n"
-				+ "\n"
-				+ "}";
+		String original = "" +
+				"	public static class MyTestcase extends TestCase {\n" +
+				"	\n" +
+				"		public void test() {\n" +
+				"			junit.framework.Assert.assertTrue(true);\n" +
+				"		}\n" +
+				"	}";
 
-		String expected = ""
-				+ " class MyTestcase {\n"
-				+ "\n"
-				+ "	@Test\n"
-				+ "	void test() {\n"
-				+ "		assertTrue(true);\n"
-				+ "	}\n"
-				+ "\n"
-				+ "}";
+		String expected = "" +
+				"	public static class MyTestcase {\n" +
+				"	\n" +
+				"		@Test\n" +
+				"		public void test() {\n" +
+				"			assertTrue(true);\n" +
+				"		}\n" +
+				"	}";
 		assertChange(original, expected);
 	}
 }

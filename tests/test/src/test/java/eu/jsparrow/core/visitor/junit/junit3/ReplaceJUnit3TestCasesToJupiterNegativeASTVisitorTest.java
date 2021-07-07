@@ -2,12 +2,18 @@ package eu.jsparrow.core.visitor.junit.junit3;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
 public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 		extends UsesJDTUnitFixture {
+
+	private static final String PUBLIC_VOID_TEST = "public void test";
+	private static final String PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE = "public static class ExampleTest extends TestCase";
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
@@ -28,10 +34,10 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 		defaultFixture.addImport("junit.framework.TestCase");
 		defaultFixture.addImport("org.junit.jupiter.api.DisplayName");
 		String original = "" +
-				"	class TestWithJupiterAnnotation extends TestCase {\n" +
-				"	\n" +
+				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " {\n" +
+				"\n" +
 				"		@DisplayName(\"test\")\n" +
-				"		void test() {\n" +
+				"		" + PUBLIC_VOID_TEST + "() {\n" +
 				"			assertNotNull(new Object());\n" +
 				"		}\n" +
 				"	}";
@@ -43,12 +49,12 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 	public void visit_SuperCountTestCases_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
 		String original = "" +
-				"	public class SuperCountTestCasesInvocationTest extends TestCase {\n"
-				+ "		\n"
-				+ "		void test() {\n"
-				+ "			assertEquals(1, super.countTestCases());\n"
-				+ "		}\n"
-				+ "	}";
+				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " {\n" +
+				"\n" +
+				"		" + PUBLIC_VOID_TEST + "() {\n" +
+				"			assertEquals(1, super.countTestCases());\n" +
+				"		}\n" +
+				"	}";
 
 		assertNoChange(original);
 	}
@@ -57,12 +63,12 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 	public void visit_TestCaseClassLiteral_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
 		String original = "" +
-				"	public class TestCaseClassLiteralTest extends TestCase {\n"
-				+ "\n"
-				+ "		void test() {\n"
-				+ "			assertEquals(\"junit.framework.TestCase\", TestCase.class.getName());\n"
-				+ "		}\n"
-				+ "	}";
+				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " {\n" +
+				"\n" +
+				"		" + PUBLIC_VOID_TEST + "() {\n" +
+				"			assertEquals(\"junit.framework.TestCase\", TestCase.class.getName());\n" +
+				"		}\n" +
+				"	}";
 
 		assertNoChange(original);
 	}
@@ -73,12 +79,12 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 		defaultFixture.addImport("junit.framework.TestCase");
 		defaultFixture.addImport("junit.framework.Assert");
 		String original = "" +
-				"	class AssertNotNullExpressionMethodReferenceTest extends TestCase {\n"
-				+ "\n"
-				+ "		void test() {\n"
-				+ "			Consumer<Object> asserter = Assert::assertNotNull;\n"
-				+ "		}\n"
-				+ "	}";
+				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " {\n" +
+				"\n" +
+				"		" + PUBLIC_VOID_TEST + "() {\n" +
+				"			Consumer<Object> asserter = Assert::assertNotNull;\n" +
+				"		}\n" +
+				"	}";
 
 		assertNoChange(original);
 	}
@@ -87,13 +93,13 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 	public void visit_QualifiedJupiterDisabledAnnotation_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
 		String original = "" +
-				"	@org.junit.jupiter.api.Disabled\n"
-				+ "	public class QualifiedJupiterDisabledAnnotationTest extends TestCase {\n"
-				+ "\n"
-				+ "		void test() {\n"
-				+ "			assertNotNull(new Object());\n"
-				+ "		}\n"
-				+ "	}";
+				"	@org.junit.jupiter.api.Disabled\n" +
+				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " {\n" +
+				"\n" +
+				"		" + PUBLIC_VOID_TEST + "() {\n" +
+				"			assertNotNull(new Object());\n" +
+				"		}\n" +
+				"	}";
 
 		assertNoChange(original);
 	}
@@ -103,12 +109,13 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 		defaultFixture.addImport("java.util.List");
 		defaultFixture.addImport("junit.framework.TestCase");
 		String original = "" +
-				"	public class TestCaseAsTypeArgument extends TestCase {\n"
-				+ "		void test() {\n"
-				+ "			List<List<TestCase>> listOfListOfTestCases = null;\n"
-				+ "			assertNull(listOfListOfTestCases);\n"
-				+ "		}\n"
-				+ "	}";
+				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " {\n" +
+				"\n" +
+				"		" + PUBLIC_VOID_TEST + "() {\n" +
+				"			List<List<TestCase>> listOfListOfTestCases = null;\n" +
+				"			assertNull(listOfListOfTestCases);\n" +
+				"		}\n" +
+				"	}";
 
 		assertNoChange(original);
 	}
@@ -118,11 +125,17 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 		defaultFixture.addImport("junit.framework.Protectable");
 		defaultFixture.addImport("junit.framework.TestCase");
 		String original = "" +
-				"	public abstract class TestCaseImplementingProtectable extends TestCase implements Protectable {\n"
-				+ "		void test() {\n"
-				+ "			assertNotNull(new Object());\n"
-				+ "		}\n"
-				+ "	}";
+				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " implements Protectable {\n" +
+				"\n" +
+				"		" + PUBLIC_VOID_TEST + "() {\n" +
+				"			assertNotNull(new Object());\n" +
+				"		}\n" +
+				"\n" +
+				"		@Override\n" +
+				"		public void protect() throws Throwable {\n" +
+				"\n" +
+				"		}\n" +
+				"	}";
 
 		assertNoChange(original);
 	}
@@ -131,31 +144,105 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 	public void visit_ClassExtendingAssert_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.Assert");
 		String original = "" +
-				"	public class ClassExtendingAssertTest extends Assert {\n"
-				+ "		void test() {\n"
-				+ "			assertNotNull(new Object());\n"
-				+ "		}\n"
-				+ "	}";
+				"	public static class ClassExtendingAssertTest extends Assert {\n" +
+				"	\n" +
+				"		" + PUBLIC_VOID_TEST + "() {\n" +
+				"			assertNotNull(new Object());\n" +
+				"		}\n" +
+				"	}";
 
 		assertNoChange(original);
 	}
 
-	// @Test
-	// public void visit__shouldNotTransform() throws Exception {
-	// defaultFixture.addImport("junit.framework.TestCase");
-	// String original = "" +
-	// "";
-	//
-	// assertNoChange(original);
-	// }
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"static",
+			"public",
+			"public static abstract"
+	})
+	public void visit_TestCaseModifiersNotAsRequired_shouldNotTransform(String modifiers) throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	" + modifiers + " class ExampleTestCase extends TestCase {\n" +
+				"	\n" +
+				"		" + PUBLIC_VOID_TEST + "() {\n" +
+				"			assertTrue(true);\n" +
+				"		}\n" +
+				"	}";
+		assertNoChange(original);
+	}
 
-	// @Test
-	// public void visit__shouldNotTransform() throws Exception {
-	// defaultFixture.addImport("junit.framework.TestCase");
-	// String original = "" +
-	// "";
-	//
-	// assertNoChange(original);
-	// }
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"		public void test(String s) {\n" +
+					"			assertTrue(true);\n" +
+					"		}",
+			"" +
+					"		public void isNoTest() {\n" +
+					"			assertTrue(true);\n" +
+					"		}",
+			"" +
+					"		public int test() {\n" +
+					"			assertTrue(true);\n" +
+					"			return 1;\n" +
+					"		}",
+			"" +
+					"		void test() {\n" +
+					"			assertTrue(true);\n" +
+					"		}"
+	})
+	public void visit_MethodDeclarationsNotTestMethods_shouldNotTransform(String testMethod) throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " {\n" +
+				"	\n" + testMethod + "\n" +
+				"	}";
+		assertNoChange(original);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"			Object o = new Object();\n" +
+					"			failNotEquals(\"Fails when Objects are not equal.\", o, o);",
+			"" +
+					"			Object o = new Object();\n" +
+					"			failNotSame(\"Fails when Objects are not same.\", o, o);",
+			"" +
+					"			failSame(\"Fails when both Objects are same.\");",
+			"" +
+					"			Object[] objectArray = new Object[] {};\n" +
+					"			assertEquals(\"Object arrays expected to be equal.\", objectArray, objectArray);\n",
+			"" +
+					"			Object[] objectArray = new Object[] {};\n" +
+					"			assertEquals(objectArray, objectArray);\n"
+	})
+	public void visit_NotSupportedJUnit3Assertions_shouldNotTransform(String testMethodContent) throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " {\n" +
+				"\n" +
+				"		" + PUBLIC_VOID_TEST + "() {\n" +
+				"\n" + testMethodContent + "\n" +
+				"	 	}\n" +
+				" }";
+
+		assertNoChange(original);
+	}
+
+	@Disabled("Template")
+	@Test
+	public void visit__shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	 public static class ExampleTestCase extends TestCase {\n" +
+				" \n" +
+				"	 	public void test() {\n" +
+				"		 assertTrue(true);\n" +
+				"	 	}\n" +
+				" }";
+		assertNoChange(original);
+	}
 
 }
