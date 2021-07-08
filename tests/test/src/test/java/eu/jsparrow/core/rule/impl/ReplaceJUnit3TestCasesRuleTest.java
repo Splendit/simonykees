@@ -32,6 +32,8 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	private static final String MAIN_METHOD_NOT_REMOVED = "ReplaceJUnit3TestCasesMainMethodNotRemovedRule.java";
 	private static final String USING_J_UNIT_3_TEST_RESULT_GETTER = "ReplaceJUnit3TestCasesUsingJUnit3TestResultGetterRule.java";
 	private static final String USING_J_UNIT_3_TEST_RESULT_FIELD = "ReplaceJUnit3TestCasesUsingJUnit3TestResultFieldRule.java";
+	private static final String IMPORT_OF_NOT_SUPPORTED_CONSTANT = "ReplaceJUnit3TestCasesImportOfNotSupportedConstantRule.java";
+	private static final String IMPORT_OF_NOT_SUPPORTED_STATIC_METHOD = "ReplaceJUnit3TestCasesImportOfNotSupportedStaticMethodRule.java";
 
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnit3";
 
@@ -184,6 +186,29 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 			USING_J_UNIT_3_TEST_RESULT_FIELD,
 	})
 	void testUsingImplicitJUnit3TestResult(String preRuleFileName) throws Exception {
+		loadUtilities();
+		addToClasspath(testProject, Arrays
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
+					"5.0.0")));
+		rule.calculateEnabledForProject(testProject);
+		assertTrue(rule.isEnabled());
+
+		Path preRule = getPreRuleFile(preRuleFileName);
+		Path postRule = getPostRuleFile(preRuleFileName, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+	
+	
+	@ParameterizedTest
+	@ValueSource(strings = {
+			IMPORT_OF_NOT_SUPPORTED_CONSTANT,
+			IMPORT_OF_NOT_SUPPORTED_STATIC_METHOD
+	})
+	void testUsingNotSupportedImports(String preRuleFileName) throws Exception {
 		loadUtilities();
 		addToClasspath(testProject, Arrays
 			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",

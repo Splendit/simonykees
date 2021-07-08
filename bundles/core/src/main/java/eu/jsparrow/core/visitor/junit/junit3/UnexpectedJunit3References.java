@@ -4,8 +4,11 @@ import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJ
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
@@ -13,6 +16,54 @@ public class UnexpectedJunit3References {
 
 	private UnexpectedJunit3References() {
 		// private constructor of utility class in hiding implicit public one
+	}
+
+	static boolean analyzeNameBinding(IBinding binding) {
+
+		if (binding.getKind() == IBinding.PACKAGE) {
+			IPackageBinding packageBinding = (IPackageBinding) binding;
+			return !UnexpectedJunit3References.isUnexpectedJUnitQualifiedName(packageBinding.getName());
+		}
+
+		if (binding.getKind() == IBinding.TYPE) {
+			return !UnexpectedJunit3References.hasUnexpectedJUnitReference((ITypeBinding) binding);
+		}
+
+		if (binding.getKind() == IBinding.METHOD) {
+			return !UnexpectedJunit3References.hasUnexpectedJUnitReference((IMethodBinding) binding);
+		}
+
+		if (binding.getKind() == IBinding.ANNOTATION) {
+			// Not covered, but anyway a name is not expected to have a binding
+			// of the kind IBinding.ANNOTATION
+			return false;
+		}
+
+		if (binding.getKind() == IBinding.MEMBER_VALUE_PAIR) {
+			// Not covered, but anyway a name is not expected to have a binding
+			// of the kind IBinding.MEMBER_VALUE_PAIR
+			return false;
+		}
+
+		if (binding.getKind() == IBinding.VARIABLE) {
+			IVariableBinding variableBinding = (IVariableBinding) binding;
+			ITypeBinding variableTypeBinding = variableBinding.getVariableDeclaration()
+				.getType();
+			if (UnexpectedJunit3References.hasUnexpectedJUnitReference(variableTypeBinding)) {
+				return false;
+			}
+			if (variableBinding.isField()) {
+				ITypeBinding fieldDeclaringClass = variableBinding.getDeclaringClass();
+				if (fieldDeclaringClass != null
+						&& UnexpectedJunit3References.hasUnexpectedJUnitReference(fieldDeclaringClass)) {
+					return false;
+				}
+			}
+			return true;
+		}
+		// Not covered: any other binding which is not expected for a name in
+		// connection with the migration of JUnit3
+		return false;
 	}
 
 	static boolean hasUnexpectedJUnitReference(IMethodBinding methodBinding) {

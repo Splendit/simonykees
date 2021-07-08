@@ -14,13 +14,10 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
-import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -120,12 +117,11 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	public boolean visit(ImportDeclaration node) {
 		String fullyQualifiedName = node.getName()
 			.getFullyQualifiedName();
-		if (fullyQualifiedName.startsWith("junit.")) { //$NON-NLS-1$
+		if (fullyQualifiedName.equals("junit") || fullyQualifiedName.startsWith("junit.")) { //$NON-NLS-1$ //$NON-NLS-2$
 			importDeclarationsToRemove.add(node);
-		} else if (UnexpectedJunit3References.isUnexpectedJUnitQualifiedName(fullyQualifiedName)) {
-			transformationPossible = false;
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 	@Override
@@ -304,7 +300,6 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	private boolean analyzeName(Name name) {
 		if (name.getLocationInParent() == PackageDeclaration.NAME_PROPERTY
-				|| name.getLocationInParent() == ImportDeclaration.NAME_PROPERTY
 				|| name.getLocationInParent() == TypeDeclaration.NAME_PROPERTY
 				|| (name.getLocationInParent() == SimpleType.NAME_PROPERTY
 						&& jUnit3TestCaseSuperTypesToRemove.contains(name.getParent()))
@@ -316,54 +311,12 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 				|| name.getLocationInParent() == BreakStatement.LABEL_PROPERTY) {
 			return true;
 		}
-
 		IBinding binding = name.resolveBinding();
 		if (binding == null) {
 			return false;
 		}
 
-		ITypeBinding typeBinding = null;
-		if (binding.getKind() == IBinding.METHOD) {
-			IMethodBinding methodBinding = (IMethodBinding) binding;
-			typeBinding = methodBinding.getDeclaringClass();
-		}
-
-		if (binding.getKind() == IBinding.TYPE) {
-			typeBinding = (ITypeBinding) binding;
-		}
-
-		if (binding.getKind() == IBinding.ANNOTATION) {
-			IAnnotationBinding annotationBinding = (IAnnotationBinding) binding;
-			typeBinding = annotationBinding.getAnnotationType();
-		}
-
-		if (binding.getKind() == IBinding.MEMBER_VALUE_PAIR) {
-			IMemberValuePairBinding memberValuePairBinding = (IMemberValuePairBinding) binding;
-			IMethodBinding methodBinding = memberValuePairBinding.getMethodBinding();
-			typeBinding = methodBinding.getDeclaringClass();
-		}
-
-		if (typeBinding != null) {
-			return !UnexpectedJunit3References.hasUnexpectedJUnitReference(typeBinding);
-		}
-
-		if (binding.getKind() == IBinding.VARIABLE) {
-			IVariableBinding variableBinding = (IVariableBinding) binding;
-			ITypeBinding variableTypeBinding = variableBinding.getVariableDeclaration()
-				.getType();
-			if (UnexpectedJunit3References.hasUnexpectedJUnitReference(variableTypeBinding)) {
-				return false;
-			}
-			if (variableBinding.isField()) {
-				ITypeBinding fieldDeclaringClass = variableBinding.getDeclaringClass();
-				if (fieldDeclaringClass != null
-						&& UnexpectedJunit3References.hasUnexpectedJUnitReference(fieldDeclaringClass)) {
-					return false;
-				}
-			}
-			return true;
-		}
-		return false;
+		return UnexpectedJunit3References.analyzeNameBinding(binding);
 	}
 
 	public List<ImportDeclaration> getImportDeclarationsToRemove() {
