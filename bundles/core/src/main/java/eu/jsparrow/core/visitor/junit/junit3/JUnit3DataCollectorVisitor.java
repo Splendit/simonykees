@@ -118,7 +118,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
-		if (mainMethodToRemove != null && mainMethodToRemove == node) {
+		if (mainMethodToRemove == node) {
 			return false;
 		}
 		if (node.getLocationInParent() == TypeDeclaration.BODY_DECLARATIONS_PROPERTY
@@ -317,9 +317,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 				}
 			}
 		}
-
 		return UnexpectedJunit3References.analyzeNameBinding(binding);
-
 	}
 
 	public List<ImportDeclaration> getImportDeclarationsToRemove() {
@@ -328,10 +326,6 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	public List<MethodInvocation> getMethodInvocationsToAnalyze() {
 		return methodInvocationsToAnalyze;
-	}
-
-	public boolean isTransformationPossible() {
-		return transformationPossible;
 	}
 
 	public List<TypeDeclaration> getJUnit3TestCaseDeclarations() {
@@ -356,5 +350,18 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	public Optional<MethodDeclaration> getMainMethodToRemove() {
 		return Optional.ofNullable(mainMethodToRemove);
+	}
+
+	public boolean isTransformationPossible() {
+		if (importDeclarationsToRemove.isEmpty() &&
+				jUnit3TestCaseDeclarations.isEmpty() &&
+				jUnit3TestCaseSuperTypesToRemove.isEmpty() &&
+				jUnit3TestMethodDeclarations.isEmpty() &&
+				testMethodAnnotationDataList.isEmpty() &&
+				overrideAnnotationsToRemove.isEmpty() &&
+				methodInvocationsToAnalyze.isEmpty()) {
+			return false;
+		}
+		return transformationPossible;
 	}
 }
