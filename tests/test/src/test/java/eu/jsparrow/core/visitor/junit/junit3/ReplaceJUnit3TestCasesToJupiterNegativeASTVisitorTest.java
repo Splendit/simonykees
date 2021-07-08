@@ -246,19 +246,4 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 
 		assertNoChange(original);
 	}
-
-	@Disabled("Template")
-	@Test
-	public void visit__shouldNotTransform() throws Exception {
-		defaultFixture.addImport("junit.framework.TestCase");
-		String original = "" +
-				"	 public static class ExampleTestCase extends TestCase {\n" +
-				" \n" +
-				"	 	public void test() {\n" +
-				"		 assertTrue(true);\n" +
-				"	 	}\n" +
-				" }";
-		assertNoChange(original);
-	}
-
 }

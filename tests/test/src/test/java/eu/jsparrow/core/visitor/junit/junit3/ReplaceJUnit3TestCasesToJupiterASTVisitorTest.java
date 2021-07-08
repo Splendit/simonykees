@@ -26,7 +26,7 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 	public void visit_fullyQualifiedAssertMethod_shouldTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
 		String original = "" +
-				"	public static class MyTestcase extends TestCase {\n" +
+				"	public static class ExampleTestCase extends TestCase {\n" +
 				"	\n" +
 				"		public void test() {\n" +
 				"			junit.framework.Assert.assertTrue(true);\n" +
@@ -34,7 +34,7 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 				"	}";
 
 		String expected = "" +
-				"	public static class MyTestcase {\n" +
+				"	public static class ExampleTestCase {\n" +
 				"	\n" +
 				"		@Test\n" +
 				"		public void test() {\n" +
@@ -43,4 +43,30 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 				"	}";
 		assertChange(original, expected);
 	}
+
+	@Test
+	public void visit_UnqualifiedTestCaseFieldAccess_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	public static class UnqualifiedFieldAccessTest extends TestCase {\n"
+				+ "		private int number = 1;\n"
+				+ "\n"
+				+ "		public void test() {\n"
+				+ "			assertEquals(1, number);\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	public static class UnqualifiedFieldAccessTest {\n"
+				+ "		private int number=1;\n"
+				+ "\n"
+				+ "		@Test"
+				+ "		 public void test(){\n"
+				+ "			assertEquals(1,number);\n"
+				+ "		}\n"
+				+ "	}";
+		assertChange(original, expected);
+
+	}
+
 }

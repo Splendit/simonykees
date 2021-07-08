@@ -14,10 +14,13 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -62,6 +65,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	private final List<TestMethodAnnotationData> testMethodAnnotationDataList = new ArrayList<>();
 	private final List<Annotation> overrideAnnotationsToRemove = new ArrayList<>();
 	private final List<MethodInvocation> methodInvocationsToAnalyze = new ArrayList<>();
+	private final List<FieldDeclaration> jUnit3TestCaseFieldDeclarations = new ArrayList<>();
 	private MethodDeclaration mainMethodToRemove;
 	private boolean transformationPossible = true;
 
@@ -314,6 +318,22 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		IBinding binding = name.resolveBinding();
 		if (binding == null) {
 			return false;
+		}
+
+		if (name.getNodeType() == ASTNode.SIMPLE_NAME) {
+			if (name.getLocationInParent() != FieldAccess.NAME_PROPERTY) {
+				if (binding.getKind() == IBinding.VARIABLE) {
+					IVariableBinding variableBinding = (IVariableBinding) binding;
+					if (variableBinding.isField()) {
+						return true;
+					}
+				}
+			} else {
+				FieldAccess fieldAccess = (FieldAccess)name.getParent();
+				if(fieldAccess.getExpression().getNodeType() == ASTNode.THIS_EXPRESSION) {
+					return true;
+				}
+			}			
 		}
 
 		return UnexpectedJunit3References.analyzeNameBinding(binding);
