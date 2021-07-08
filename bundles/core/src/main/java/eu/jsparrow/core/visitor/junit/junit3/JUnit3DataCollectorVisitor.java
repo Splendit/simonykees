@@ -14,8 +14,6 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -34,7 +32,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.*;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
 import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
@@ -65,7 +63,6 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	private final List<TestMethodAnnotationData> testMethodAnnotationDataList = new ArrayList<>();
 	private final List<Annotation> overrideAnnotationsToRemove = new ArrayList<>();
 	private final List<MethodInvocation> methodInvocationsToAnalyze = new ArrayList<>();
-	private final List<FieldDeclaration> jUnit3TestCaseFieldDeclarations = new ArrayList<>();
 	private MethodDeclaration mainMethodToRemove;
 	private boolean transformationPossible = true;
 
@@ -320,23 +317,28 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 			return false;
 		}
 
-		if (name.getNodeType() == ASTNode.SIMPLE_NAME) {
-			if (name.getLocationInParent() != FieldAccess.NAME_PROPERTY) {
-				if (binding.getKind() == IBinding.VARIABLE) {
-					IVariableBinding variableBinding = (IVariableBinding) binding;
-					if (variableBinding.isField()) {
-						return true;
-					}
-				}
-			} else {
-				FieldAccess fieldAccess = (FieldAccess)name.getParent();
-				if(fieldAccess.getExpression().getNodeType() == ASTNode.THIS_EXPRESSION) {
+		if (name.getNodeType() == ASTNode.SIMPLE_NAME && binding.getKind() == IBinding.VARIABLE) {
+			IVariableBinding variableBinding = (IVariableBinding) binding;
+			if (UnexpectedJunit3References.hasUnexpectedJUnitReference(variableBinding.getType())) {
+				return false;
+			}
+			if (variableBinding.isField()) {
+				if (name.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
 					return true;
 				}
-			}			
+				if (name.getLocationInParent() != FieldAccess.NAME_PROPERTY) {
+					return true;
+				}
+				FieldAccess fieldAccess = (FieldAccess) name.getParent();
+				if (fieldAccess.getExpression()
+					.getNodeType() == ASTNode.THIS_EXPRESSION) {
+					return true;
+				}
+			}
 		}
 
 		return UnexpectedJunit3References.analyzeNameBinding(binding);
+
 	}
 
 	public List<ImportDeclaration> getImportDeclarationsToRemove() {
