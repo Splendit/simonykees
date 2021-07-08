@@ -1,19 +1,17 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
-import static eu.jsparrow.core.visitor.utils.MainMethodMatches.findMainMethodMatches;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -32,7 +30,8 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
 import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
@@ -70,31 +69,6 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		this.migrationConfiguration = migrationConfiguration;
 	}
 
-	static Optional<MethodDeclaration> findMainMethodToRemove(CompilationUnit compilationUnit) {
-		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
-		compilationUnit.accept(methodDeclarationsCollectorVisitor);
-		List<MethodDeclaration> allMethodDeclarations = methodDeclarationsCollectorVisitor.getMethodDeclarations();
-		MethodDeclaration mainMethodDeclaration = allMethodDeclarations
-			.stream()
-			.filter(methodDeclaration -> MethodDeclarationUtils.isJavaApplicationMainMethod(compilationUnit,
-					methodDeclaration))
-			.findFirst()
-			.orElse(null);
-
-		if (mainMethodDeclaration != null) {
-			ITypeBinding declaringClass = mainMethodDeclaration.resolveBinding()
-				.getDeclaringClass();
-			try {
-				if (findMainMethodMatches(declaringClass).isEmpty()) {
-					return Optional.of(mainMethodDeclaration);
-				}
-			} catch (CoreException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return Optional.empty();
-	}
-
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		return transformationPossible;
@@ -102,7 +76,14 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(CompilationUnit node) {
-		mainMethodToRemove = findMainMethodToRemove(node).orElse(null);
+		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
+		node.accept(methodDeclarationsCollectorVisitor);
+		List<MethodDeclaration> allMethodDeclarations = methodDeclarationsCollectorVisitor.getMethodDeclarations();
+		mainMethodToRemove = allMethodDeclarations
+			.stream()
+			.filter(methodDeclaration -> MethodDeclarationUtils.isJavaApplicationMainMethod(node, methodDeclaration))
+			.findFirst()
+			.orElse(null);
 		return true;
 	}
 
