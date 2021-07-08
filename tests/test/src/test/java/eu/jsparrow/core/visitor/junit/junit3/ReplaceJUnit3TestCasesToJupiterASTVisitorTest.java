@@ -1,10 +1,17 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
+import static eu.jsparrow.jdtunit.Matchers.assertMatch;
+
+import java.util.Collections;
+
+import org.eclipse.jdt.core.dom.Modifier;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFixture {
 
@@ -25,22 +32,24 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 	@Test
 	public void visit_fullyQualifiedAssertMethod_shouldTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
-		String original = "" +
-				"	public static class MyTestcase extends TestCase {\n" +
-				"	\n" +
-				"		public void test() {\n" +
-				"			junit.framework.Assert.assertTrue(true);\n" +
-				"		}\n" +
-				"	}";
+		defaultFixture.setSuperClassType("TestCase");
 
 		String expected = "" +
-				"	public static class MyTestcase {\n" +
-				"	\n" +
-				"		@Test\n" +
-				"		public void test() {\n" +
-				"			assertTrue(true);\n" +
-				"		}\n" +
-				"	}";
-		assertChange(original, expected);
+				"@Test\n" +
+				"public void test() {\n" +
+				"	assertTrue(true);\n" +
+				"}";
+
+		defaultFixture.addMethod("test", "junit.framework.Assert.assertTrue(true);",
+				Collections.singletonList(Modifier.ModifierKeyword.PUBLIC_KEYWORD));
+
+		AbstractASTRewriteASTVisitor defaultVisitor = getDefaultVisitor();
+		defaultVisitor.setASTRewrite(defaultFixture.getAstRewrite());
+		defaultFixture.accept(getDefaultVisitor());
+
+		assertMatch(
+				ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, expected,
+						Collections.singletonList("public")),
+				defaultFixture.getTypeDeclaration());
 	}
 }

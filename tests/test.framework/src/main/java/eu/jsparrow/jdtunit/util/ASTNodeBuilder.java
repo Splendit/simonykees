@@ -1,5 +1,7 @@
 package eu.jsparrow.jdtunit.util;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -8,6 +10,8 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.jdtunit.JdtUnitException;
@@ -42,9 +46,17 @@ public class ASTNodeBuilder {
 		return block;
 	}
 
-	public static TypeDeclaration createTypeDeclarationFromString(String typeDeclarationName, String string)
+	public static TypeDeclaration createTypeDeclarationFromString(String typeDeclarationName, String string,
+			List<String> modifiers)
 			throws JdtUnitException {
 		TypeDeclaration typeDeclaration = prepareAstNode(string, TypeDeclaration.class);
+		AST ast = typeDeclaration.getAST();
+		@SuppressWarnings("unchecked")
+		List<Modifier> typeModifiers = typeDeclaration.modifiers();
+		modifiers.stream()
+			.map(ModifierKeyword::toKeyword)
+			.map(ast::newModifier)
+			.forEach(typeModifiers::add);
 		typeDeclaration.setName(typeDeclaration.getAST()
 			.newSimpleName(typeDeclarationName));
 		if (typeDeclaration.bodyDeclarations()
@@ -52,6 +64,11 @@ public class ASTNodeBuilder {
 			throw new JdtUnitException("Cannot create an empty type declaration. There might be syntax errors");
 		}
 		return typeDeclaration;
+	}
+
+	public static TypeDeclaration createTypeDeclarationFromString(String typeDeclarationName, String string)
+			throws JdtUnitException {
+		return createTypeDeclarationFromString(typeDeclarationName, string, Collections.emptyList());
 	}
 
 	public static CompilationUnit createCompilationUnitFromString(String string) throws JdtUnitException {

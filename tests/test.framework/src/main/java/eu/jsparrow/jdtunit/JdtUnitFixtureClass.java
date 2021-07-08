@@ -17,9 +17,12 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -165,7 +168,7 @@ public class JdtUnitFixtureClass {
 	 * @throws BadLocationException
 	 * @throws JdtUnitException
 	 */
-	public MethodDeclaration addMethod(String methodName, List<Modifier> modifiers)
+	public MethodDeclaration addMethod(String methodName, List<ModifierKeyword> modifiers)
 			throws JavaModelException, BadLocationException, JdtUnitException {
 		return addMethod(methodName, null, modifiers);
 	}
@@ -182,14 +185,15 @@ public class JdtUnitFixtureClass {
 	 * @throws BadLocationException
 	 * @throws JdtUnitException
 	 */
-	public MethodDeclaration addMethod(String methodName, String statements, List<Modifier> modifiers)
+	public MethodDeclaration addMethod(String methodName, String statements, List<ModifierKeyword> modifiers)
 			throws JavaModelException, BadLocationException, JdtUnitException {
 		MethodDeclaration methodDeclaration = ast.newMethodDeclaration();
 		methodDeclaration.setName(ast.newSimpleName(methodName));
 
 		if (modifiers != null && !modifiers.isEmpty()) {
-			methodDeclaration.modifiers()
-				.addAll(modifiers);
+			modifiers.stream()
+			.map(ast::newModifier)
+			.forEach(modifier -> methodDeclaration.modifiers().add(modifier));
 		}
 
 		typeDeclaration.bodyDeclarations()
@@ -202,6 +206,15 @@ public class JdtUnitFixtureClass {
 		methods.put(methodName, methodDeclaration);
 
 		return methodDeclaration;
+	}
+	
+	public void setSuperClassType(String simpleName) throws JavaModelException, BadLocationException {
+		SimpleName typeName = ast.newSimpleName(simpleName);
+		SimpleType type = ast.newSimpleType(typeName);
+		
+		typeDeclaration.setSuperclassType(type);
+		this.astRoot = saveChanges();
+		
 	}
 
 	/**
