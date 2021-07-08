@@ -43,7 +43,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_ImportOfJupiterOnDemand_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
@@ -245,4 +245,19 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_SuperConstructorInvocation_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	public static class ExampleTestCase extends TestCase {\n" +
+				"\n" +
+				"		public ExampleTestCase(String name) {\n" +
+				"			super(name);\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
 }

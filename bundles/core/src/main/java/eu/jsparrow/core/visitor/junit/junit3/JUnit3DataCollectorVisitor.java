@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -160,6 +161,13 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(SuperConstructorInvocation node) {
+		transformationPossible = !UnexpectedJunit3References
+			.hasUnexpectedJUnitReference(node.resolveConstructorBinding());
+		return transformationPossible;
+	}
+
+	@Override
 	public boolean visit(QualifiedName node) {
 		transformationPossible = analyzeName(node);
 		return false;
@@ -200,6 +208,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	}
 
 	private static boolean isOverridingJUnitFrameworkTestCaseMethod(MethodDeclaration jUnitTestCaseMethodDeclaration) {
+
 		String methodDeclarationIdentifier = jUnitTestCaseMethodDeclaration.getName()
 			.getIdentifier();
 		List<SingleVariableDeclaration> parameters = ASTNodeUtil

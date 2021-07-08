@@ -68,7 +68,7 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 		assertChange(original, expected);
 
 	}
-	
+
 	@Test
 	public void visit_TestCaseThisFieldAccess_shouldTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
@@ -89,6 +89,34 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 				+ "		 public void test(){\n"
 				+ "			assertEquals(1, this.number);\n"
 				+ "		}\n"
+				+ "	}";
+		assertChange(original, expected);
+
+	}
+
+	@Test
+	public void visit_SuperConstructorForObject_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	class NoTestCase {\n"
+				+ "		NoTestCase() {\n"
+				+ "			super();\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	public static class ExampleTestCase extends TestCase {\n"
+				+ "\n"
+				+ "	}";
+
+		String expected = "" +
+				"	class NoTestCase {\n"
+				+ "		NoTestCase() {\n"
+				+ "			super();\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	public static class ExampleTestCase {\n"
+				+ "\n"
 				+ "	}";
 		assertChange(original, expected);
 
