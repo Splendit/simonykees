@@ -2,14 +2,14 @@ package eu.jsparrow.core.visitor.junit.junit3;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
-import java.util.Collections;
-
-import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.text.BadLocationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
+import eu.jsparrow.jdtunit.JdtUnitException;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -39,17 +39,33 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 				"public void test() {\n" +
 				"	assertTrue(true);\n" +
 				"}";
+		String original = "" +
+				"public void test() {\n" +
+				"	junit.framework.Assert.assertTrue(true);\n" +
+				"}";
 
-		defaultFixture.addMethod("test", "junit.framework.Assert.assertTrue(true);",
-				Collections.singletonList(Modifier.ModifierKeyword.PUBLIC_KEYWORD));
+		String expectedCompilationUnitFormat = ""
+				+ "package %s;\n"
+				+ "import static org.junit.Assert.assertTrue;\n"
+				+ "import org.junit.Test;"
+				+ "public class %s {\n"
+				+ "	%s \n"
+				+ "}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+	}
+	
+	private void assertCompilationUnitMatch(String originalMethodDeclaration, String expectedMethodDeclaration, String expectedCompilationUnitFormat)
+			throws JdtUnitException, JavaModelException, BadLocationException {
+		defaultFixture.addMethodDeclarationFromString(originalMethodDeclaration);
 
 		AbstractASTRewriteASTVisitor defaultVisitor = getDefaultVisitor();
 		defaultVisitor.setASTRewrite(defaultFixture.getAstRewrite());
 		defaultFixture.accept(getDefaultVisitor());
-
+		String expectedCUSource = String.format(expectedCompilationUnitFormat, "fixturepackage", DEFAULT_TYPE_DECLARATION_NAME,
+				expectedMethodDeclaration);
 		assertMatch(
-				ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, expected,
-						Collections.singletonList("public")),
-				defaultFixture.getTypeDeclaration());
+				ASTNodeBuilder.createCompilationUnitFromString(expectedCUSource),
+				defaultFixture.getRootNode());
 	}
 }

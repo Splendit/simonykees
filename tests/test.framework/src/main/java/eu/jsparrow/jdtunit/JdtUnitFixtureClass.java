@@ -53,7 +53,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @author Hans-Jörg Schrödl
  *
  */
-@SuppressWarnings({ "unchecked"})
+@SuppressWarnings({ "unchecked" })
 public class JdtUnitFixtureClass {
 
 	private static final String DEFAULT_METHOD_FIXTURE_NAME = "FixtureMethod";
@@ -192,8 +192,9 @@ public class JdtUnitFixtureClass {
 
 		if (modifiers != null && !modifiers.isEmpty()) {
 			modifiers.stream()
-			.map(ast::newModifier)
-			.forEach(modifier -> methodDeclaration.modifiers().add(modifier));
+				.map(ast::newModifier)
+				.forEach(modifier -> methodDeclaration.modifiers()
+					.add(modifier));
 		}
 
 		typeDeclaration.bodyDeclarations()
@@ -207,14 +208,36 @@ public class JdtUnitFixtureClass {
 
 		return methodDeclaration;
 	}
-	
+
+	/**
+	 * Parses an entire {@link MethodDeclaration} from the given method declaration
+	 * source and adds it to the root type declaration.
+	 * 
+	 * @param methodDeclarationSource
+	 * @throws JdtUnitException
+	 * @throws JavaModelException
+	 * @throws BadLocationException
+	 */
+	public void addMethodDeclarationFromString(String methodDeclarationSource)
+			throws JdtUnitException, JavaModelException, BadLocationException {
+		TypeDeclaration tempType = ASTNodeBuilder.createTypeDeclarationFromString("TempType", methodDeclarationSource);
+		ASTNode methodDeclarationCopy = ASTNode.copySubtree(ast,
+				(ASTNode) tempType.bodyDeclarations()
+					.get(0));
+		MethodDeclaration methodDeclaration = (MethodDeclaration) methodDeclarationCopy;
+		typeDeclaration.bodyDeclarations()
+			.add(methodDeclaration);
+		this.astRoot = this.saveChanges();
+
+	}
+
 	public void setSuperClassType(String simpleName) throws JavaModelException, BadLocationException {
 		SimpleName typeName = ast.newSimpleName(simpleName);
 		SimpleType type = ast.newSimpleType(typeName);
-		
+
 		typeDeclaration.setSuperclassType(type);
 		this.astRoot = saveChanges();
-		
+
 	}
 
 	/**
@@ -513,5 +536,9 @@ public class JdtUnitFixtureClass {
 				ast.newSimpleName(name), parameterizedType);
 		methodDeclaration.parameters()
 			.add(parameterDeclaration);
+	}
+
+	public CompilationUnit getRootNode() {
+		return astRoot;
 	}
 }

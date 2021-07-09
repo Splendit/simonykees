@@ -46,10 +46,10 @@ public class ASTNodeBuilder {
 		return block;
 	}
 
-	public static TypeDeclaration createTypeDeclarationFromString(String typeDeclarationName, String string,
+	public static TypeDeclaration createTypeDeclarationFromString(String typeDeclarationName, String source,
 			List<String> modifiers)
 			throws JdtUnitException {
-		TypeDeclaration typeDeclaration = prepareAstNode(string, TypeDeclaration.class);
+		TypeDeclaration typeDeclaration = prepareAstNode(source, TypeDeclaration.class);
 		AST ast = typeDeclaration.getAST();
 		@SuppressWarnings("unchecked")
 		List<Modifier> typeModifiers = typeDeclaration.modifiers();
