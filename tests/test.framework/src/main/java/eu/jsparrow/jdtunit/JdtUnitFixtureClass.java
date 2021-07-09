@@ -210,8 +210,8 @@ public class JdtUnitFixtureClass {
 	}
 
 	/**
-	 * Parses an entire {@link MethodDeclaration} from the given method declaration
-	 * source and adds it to the root type declaration.
+	 * Parses an entire {@link MethodDeclaration} from the given method
+	 * declaration source and adds it to the root type declaration.
 	 * 
 	 * @param methodDeclarationSource
 	 * @throws JdtUnitException
@@ -236,6 +236,17 @@ public class JdtUnitFixtureClass {
 		SimpleType type = ast.newSimpleType(typeName);
 
 		typeDeclaration.setSuperclassType(type);
+		this.astRoot = saveChanges();
+
+	}
+
+	public void setSuperInterfaceType(String... simpleNames) throws JavaModelException, BadLocationException {
+		for (String simpleName : simpleNames) {
+			SimpleName typeName = ast.newSimpleName(simpleName);
+			SimpleType type = ast.newSimpleType(typeName);
+			typeDeclaration.superInterfaceTypes()
+				.add(type);
+		}
 		this.astRoot = saveChanges();
 
 	}

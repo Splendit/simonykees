@@ -53,7 +53,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				+ "	%s \n"
 				+ "}";
 
-		assertNoCompilationUnitMatch(original, compilationUnitFormat);
+		assertNoCompilationUnitChange(original, compilationUnitFormat);
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				+ "	%s \n"
 				+ "}";
 
-		assertNoCompilationUnitMatch(original, compilationUnitFormat);
+		assertNoCompilationUnitChange(original, compilationUnitFormat);
 
 	}
 
@@ -91,7 +91,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				+ "	%s \n"
 				+ "}";
 
-		assertNoCompilationUnitMatch(original, compilationUnitFormat);
+		assertNoCompilationUnitChange(original, compilationUnitFormat);
 	}
 
 	@Test
@@ -114,7 +114,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				+ "	%s \n"
 				+ "}";
 
-		assertNoCompilationUnitMatch(original, expectedCompilationUnitFormat);
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
 	}
 
 	@Disabled
@@ -138,8 +138,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 		defaultFixture.addImport("java.util.List");
 		defaultFixture.addImport("junit.framework.TestCase");
 		defaultFixture.setSuperClassType("TestCase");
-		String original =
-				PUBLIC_VOID_TEST + "() {\n" +
+		String original = PUBLIC_VOID_TEST + "() {\n" +
 				"	List<List<TestCase>> listOfListOfTestCases = null;\n" +
 				"	assertNull(listOfListOfTestCases);\n" +
 				"}";
@@ -152,28 +151,31 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				+ "	%s \n"
 				+ "}";
 
-		assertNoCompilationUnitMatch(original, expectedCompilationUnitFormat);
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
 	}
 
-	@Disabled
 	@Test
 	public void visit_TestCaseImplementingProtectable_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.Protectable");
 		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+		defaultFixture.setSuperInterfaceType("Protectable");
+		String protectedMethodImpl = "@Override public void protect() throws Throwable {}\n";
+		defaultFixture.addMethodDeclarationFromString(protectedMethodImpl);
 		String original = "" +
-				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " implements Protectable {\n" +
-				"\n" +
-				"		" + PUBLIC_VOID_TEST + "() {\n" +
-				"			assertNotNull(new Object());\n" +
-				"		}\n" +
-				"\n" +
-				"		@Override\n" +
-				"		public void protect() throws Throwable {\n" +
-				"\n" +
-				"		}\n" +
-				"	}";
+				PUBLIC_VOID_TEST + "() {\n" +
+				"	assertNotNull(new Object());\n" +
+				"}";
+		String expectedCompilationUnitFormat = ""
+				+ "package %s;\n"
+				+ "import junit.framework.Protectable;\n"
+				+ "import junit.framework.TestCase;\n"
+				+ "public class %s extends TestCase implements Protectable {\n"
+				+ protectedMethodImpl
+				+ "	%s \n"
+				+ "}";
 
-		assertNoChange(original);
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
 	}
 
 	@Test
@@ -192,10 +194,9 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				+ "	%s \n"
 				+ "}";
 
-		assertNoCompilationUnitMatch(original, expectedCompilationUnitFormat);
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
 	}
 
-	@Disabled
 	@ParameterizedTest
 	@ValueSource(strings = {
 			"static",
@@ -204,6 +205,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 	})
 	public void visit_TestCaseModifiersNotAsRequired_shouldNotTransform(String modifiers) throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
+		
 		String original = "" +
 				"	" + modifiers + " class ExampleTestCase extends TestCase {\n" +
 				"	\n" +
@@ -244,7 +246,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				+ "	%s \n"
 				+ "}";
 
-		assertNoCompilationUnitMatch(testMethod, expectedCompilationUnitFormat);
+		assertNoCompilationUnitChange(testMethod, expectedCompilationUnitFormat);
 	}
 
 	@ParameterizedTest
@@ -272,7 +274,6 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				"	" + testMethodContent + "\n" +
 				" }";
 
-
 		String expectedCompilationUnitFormat = ""
 				+ "package %s;\n"
 				+ "import junit.framework.TestCase;\n"
@@ -280,7 +281,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				+ "	%s \n"
 				+ "}";
 
-		assertNoCompilationUnitMatch(original, expectedCompilationUnitFormat);
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
 	}
 
 	@Disabled("Template")
@@ -296,15 +297,16 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				" }";
 		assertNoChange(original);
 	}
-	
-	private void assertNoCompilationUnitMatch(String originalMethodDeclaration, String expectedCompilationUnitFormat)
+
+	private void assertNoCompilationUnitChange(String originalMethodDeclaration, String expectedCompilationUnitFormat)
 			throws JdtUnitException, JavaModelException, BadLocationException {
 		defaultFixture.addMethodDeclarationFromString(originalMethodDeclaration);
 
 		AbstractASTRewriteASTVisitor defaultVisitor = getDefaultVisitor();
 		defaultVisitor.setASTRewrite(defaultFixture.getAstRewrite());
 		defaultFixture.accept(getDefaultVisitor());
-		String expectedCUSource = String.format(expectedCompilationUnitFormat, "fixturepackage", DEFAULT_TYPE_DECLARATION_NAME,
+		String expectedCUSource = String.format(expectedCompilationUnitFormat, "fixturepackage",
+				DEFAULT_TYPE_DECLARATION_NAME,
 				originalMethodDeclaration);
 		assertMatch(
 				ASTNodeBuilder.createCompilationUnitFromString(expectedCUSource),
