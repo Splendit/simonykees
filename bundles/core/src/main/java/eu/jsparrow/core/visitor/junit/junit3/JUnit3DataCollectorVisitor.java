@@ -379,11 +379,9 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	public boolean isTransformationPossible() {
 		if (importDeclarationsToRemove.isEmpty() &&
 				jUnit3TestCaseDeclarations.isEmpty() &&
-				jUnit3TestCaseSuperTypesToRemove.isEmpty() &&
 				jUnit3TestMethodDeclarations.isEmpty() &&
 				testMethodAnnotationDataList.isEmpty() &&
-				overrideAnnotationsToRemove.isEmpty() &&
-				methodInvocationsToAnalyze.isEmpty()) {
+				overrideAnnotationsToRemove.isEmpty()) {
 			return false;
 		}
 		return transformationPossible;
