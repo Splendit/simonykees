@@ -5,6 +5,14 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * Utility class determining whether a given Java type is the top level type
+ * which has the same name as the file storing the given compilation unit, for
+ * example:<br>
+ * In a Java file "HelloWorld.java" the class "HelloWorld" will be the main top
+ * level class
+ *
+ */
 public class MainTopLevelJavaClass {
 
 	private MainTopLevelJavaClass() {

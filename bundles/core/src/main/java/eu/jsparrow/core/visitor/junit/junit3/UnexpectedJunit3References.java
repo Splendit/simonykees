@@ -12,6 +12,11 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Utility class for detecting unexpected references to JUnit which prohibit
+ * transformation.
+ *
+ */
 public class UnexpectedJunit3References {
 
 	private UnexpectedJunit3References() {

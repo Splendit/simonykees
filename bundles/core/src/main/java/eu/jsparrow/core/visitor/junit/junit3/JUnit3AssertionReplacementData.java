@@ -4,6 +4,11 @@ import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+/**
+ * Stores all information needed to replace a JUnit 3 assertion by a JUnit 4
+ * assertion or by a JUnit Jupiter assertion.
+ *
+ */
 public class JUnit3AssertionReplacementData {
 
 	private final MethodInvocation originalMethodInvocation;
@@ -12,7 +17,6 @@ public class JUnit3AssertionReplacementData {
 
 	public JUnit3AssertionReplacementData(MethodInvocation originalMethodInvocation,
 			Supplier<MethodInvocation> newMethodInvocationSupplier) {
-		super();
 		this.originalMethodInvocation = originalMethodInvocation;
 		this.newMethodInvocationSupplier = newMethodInvocationSupplier;
 	}
@@ -21,7 +25,7 @@ public class JUnit3AssertionReplacementData {
 		return originalMethodInvocation;
 	}
 
-	public MethodInvocation createMethodInvocationReplecement() {
+	public MethodInvocation createMethodInvocationReplacement() {
 		return newMethodInvocationSupplier.get();
 	}
 }

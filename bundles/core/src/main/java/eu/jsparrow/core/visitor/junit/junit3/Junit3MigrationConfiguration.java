@@ -1,5 +1,10 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
+/**
+ * Stores all data which describe the migration of JUnit 3 to either JUnit 4 or
+ * JUnit Jupiter.
+ *
+ */
 public class Junit3MigrationConfiguration {
 
 	private final String assertionClassQualifiedName;
@@ -22,11 +27,11 @@ public class Junit3MigrationConfiguration {
 		return testAnnotationQualifiedName;
 	}
 
-	public String getSetupAnnotationQualifiedName() {
+	public String getSetUpAnnotationQualifiedName() {
 		return setupAnnotationQualifiedName;
 	}
 
-	public String getTeardownAnnotationQualifiedName() {
+	public String getTearDownAnnotationQualifiedName() {
 		return teardownAnnotationQualifiedName;
 	}
 }

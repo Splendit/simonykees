@@ -18,10 +18,25 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
+/**
+ * Analyzes JUnit3 assertions found in a given {@link CompilationUnit}.
+ * Determines whether the transformation can be carried out or is prohibited due
+ * to a JUnit3 assertion which is not supported.
+ * 
+ *
+ */
 class JUnit3AssertionAnalyzer {
 	private static final String JAVA_LANG_STRING = java.lang.String.class.getName();
 	private final List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = new ArrayList<>();
 
+	/**
+	 * Fills an internal list with all analysis data found for supported JUnit3
+	 * assertions.
+	 * 
+	 * @return {@code true} if all JUnit3 assertions can be supported and
+	 *         {@code false} as soon as the first assertion occurs which
+	 *         prohibits transformation.
+	 */
 	boolean collectAssertionAnalysisResults(CompilationUnit compilationUnit,
 			JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
 			Junit3MigrationConfiguration migrationConfiguration) {

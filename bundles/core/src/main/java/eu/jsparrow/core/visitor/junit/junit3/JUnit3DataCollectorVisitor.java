@@ -40,9 +40,17 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
- * Visitor collecting all type declarations, method declarations and method
- * invocations which will have to be analyzed. Additionally, this visitor
- * determines whether there is a main method which can be removed.
+ * Visitor collecting all declarations which affect the migration of JUnit 3
+ * assertions to either JUnit 4 or JUnit Jupiter, for example:
+ * <ul>
+ * <li>{@link ImportDeclaration}-nodes which can be removed.</li>
+ * <li>{@link TypeDeclaration}-nodes which represent JUnit3 test cases.</li>
+ * <li>{@link MethodDeclaration}-nodes which represent JUnit3 test methods or
+ * represent the {@code setup} method or the {@code tearDown} method..</li>
+ * </ul>
+ * 
+ * This visitor may find out that transformation cannot be carried out due to
+ * declarations which prohibit transformation.
  *
  */
 public class JUnit3DataCollectorVisitor extends ASTVisitor {
@@ -280,9 +288,9 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 			.getIdentifier();
 		String annotationQualifiedName;
 		if (methodName.equals(SET_UP)) {
-			annotationQualifiedName = migrationConfiguration.getSetupAnnotationQualifiedName();
+			annotationQualifiedName = migrationConfiguration.getSetUpAnnotationQualifiedName();
 		} else if (methodName.equals(TEAR_DOWN)) {
-			annotationQualifiedName = migrationConfiguration.getTeardownAnnotationQualifiedName();
+			annotationQualifiedName = migrationConfiguration.getTearDownAnnotationQualifiedName();
 		} else {
 			annotationQualifiedName = migrationConfiguration.getTestAnnotationQualifiedName();
 		}
@@ -361,6 +369,11 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return Optional.ofNullable(mainMethodToRemove);
 	}
 
+	/**
+	 * 
+	 * @return true if transformation can be carried out for the given
+	 *         {@link CompilationUnit}, otherwise false.
+	 */
 	public boolean isTransformationPossible() {
 		if (importDeclarationsToRemove.isEmpty() &&
 				jUnit3TestCaseDeclarations.isEmpty() &&

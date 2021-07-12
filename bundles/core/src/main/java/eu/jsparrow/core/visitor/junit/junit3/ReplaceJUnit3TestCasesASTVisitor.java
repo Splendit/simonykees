@@ -20,6 +20,18 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
+/**
+ * This visitor carries out re-factorings in connection with the migration of
+ * JUnit 3 test cases to either JUnit 4 or JUnit Jupiter, for example:
+ * <ul>
+ * <li>Removing {@code extends TestCase} - clauses</li>
+ * <li>Removing imports like {@code import junit.framework.TestCase; }</li>
+ * <li>Introducing static method imports like
+ * {@code import static org.junit.Assert.assertEquals;}</li>
+ * <li>Annotating test methods with {@code @Test}</li>
+ * </ul>
+ * 
+ */
 public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisitor {
 	private final Junit3MigrationConfiguration migrationConfiguration;
 
@@ -41,8 +53,8 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		verifyStaticMethodImport(compilationUnit, getNewAssertionMethodFullyQualifiedName("assertSame")); //$NON-NLS-1$
 		verifyStaticMethodImport(compilationUnit, getNewAssertionMethodFullyQualifiedName("fail")); //$NON-NLS-1$
 
-		verifyImport(compilationUnit, migrationConfiguration.getSetupAnnotationQualifiedName());
-		verifyImport(compilationUnit, migrationConfiguration.getTeardownAnnotationQualifiedName());
+		verifyImport(compilationUnit, migrationConfiguration.getSetUpAnnotationQualifiedName());
+		verifyImport(compilationUnit, migrationConfiguration.getTearDownAnnotationQualifiedName());
 		verifyImport(compilationUnit, migrationConfiguration.getTestAnnotationQualifiedName());
 
 		JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor = new JUnit3DataCollectorVisitor(
@@ -125,11 +137,12 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		});
 
 		assertionReplacementData.forEach(data -> {
-			astRewrite.replace(data.getOriginalMethodInvocation(), data.createMethodInvocationReplecement(), null);
+			astRewrite.replace(data.getOriginalMethodInvocation(), data.createMethodInvocationReplacement(), null);
 			onRewrite();
 		});
 
-		List<ImportDeclaration> importDeclarationsToRemove = jUnit3DeclarationsCollectorVisitor.getImportDeclarationsToRemove();
+		List<ImportDeclaration> importDeclarationsToRemove = jUnit3DeclarationsCollectorVisitor
+			.getImportDeclarationsToRemove();
 		importDeclarationsToRemove.forEach(importDeclarationToRemove -> {
 			astRewrite.remove(importDeclarationToRemove, null);
 			onRewrite();
