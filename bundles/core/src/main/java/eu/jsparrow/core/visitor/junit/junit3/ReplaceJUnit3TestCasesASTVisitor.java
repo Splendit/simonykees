@@ -68,7 +68,7 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		}
 
 		JUnit3AssertionAnalyzer assertionAnalyzer = new JUnit3AssertionAnalyzer();
-		if (!assertionAnalyzer.collectAssertionAnalysisResults(compilationUnit,
+		if (!assertionAnalyzer.analyzeAllMethodInvocations(compilationUnit,
 				jUnit3DeclarationsCollectorVisitor, migrationConfiguration)) {
 			return false;
 		}

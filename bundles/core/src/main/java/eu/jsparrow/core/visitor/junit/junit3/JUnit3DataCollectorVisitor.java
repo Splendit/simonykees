@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
+import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -102,7 +104,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	public boolean visit(PackageDeclaration node) {
 		String packageName = node.resolveBinding()
 			.getName();
-		transformationPossible = !UnexpectedJunit3References.isUnexpectedJUnitQualifiedName(packageName);
+		transformationPossible = !isJUnitName(packageName);
 		return false;
 	}
 
@@ -140,9 +142,8 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 					.stream()
 					.filter(IExtendedModifier::isAnnotation)
 					.map(Annotation.class::cast)
-					.filter(annotation -> annotation.resolveTypeBinding()
-						.getQualifiedName()
-						.equals(JAVA_LANG_OVERRIDE))
+					.filter(annotation -> ClassRelationUtil.isContentOfType(annotation.resolveTypeBinding(),
+							JAVA_LANG_OVERRIDE))
 					.findFirst()
 					.ifPresent(overrideAnnotationsToRemove::add);
 			}
@@ -165,15 +166,16 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
 		transformationPossible = methodBinding != null &&
-				!UnexpectedJunit3References.hasUnexpectedJUnitReference(methodBinding) &&
-				!UnexpectedJunit3References.hasUnexpectedJUnitReference(methodBinding.getReturnType());
+				!UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getDeclaringClass()) &&
+				!UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getReturnType());
 		return transformationPossible;
 	}
 
 	@Override
 	public boolean visit(SuperConstructorInvocation node) {
 		transformationPossible = !UnexpectedJunit3References
-			.hasUnexpectedJUnitReference(node.resolveConstructorBinding());
+			.isUnexpectedJUnitReference(node.resolveConstructorBinding()
+				.getDeclaringClass());
 		return transformationPossible;
 	}
 
@@ -319,7 +321,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 		if (name.getNodeType() == ASTNode.SIMPLE_NAME && binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
-			if (UnexpectedJunit3References.hasUnexpectedJUnitReference(variableBinding.getType())) {
+			if (UnexpectedJunit3References.isUnexpectedJUnitReference(variableBinding.getType())) {
 				return false;
 			}
 			if (variableBinding.isField()) {

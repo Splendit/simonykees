@@ -29,15 +29,15 @@ public class UnexpectedJunit3References {
 
 		if (binding.getKind() == IBinding.PACKAGE) {
 			IPackageBinding packageBinding = (IPackageBinding) binding;
-			return !UnexpectedJunit3References.isUnexpectedJUnitQualifiedName(packageBinding.getName());
+			return !isJUnitName(packageBinding.getName());
 		}
 
 		if (binding.getKind() == IBinding.TYPE) {
-			return !UnexpectedJunit3References.hasUnexpectedJUnitReference((ITypeBinding) binding);
+			return !isUnexpectedJUnitReference((ITypeBinding) binding);
 		}
 
 		if (binding.getKind() == IBinding.METHOD) {
-			return !UnexpectedJunit3References.hasUnexpectedJUnitReference((IMethodBinding) binding);
+			return !isUnexpectedJUnitReference(((IMethodBinding) binding).getDeclaringClass());
 		}
 
 		if (binding.getKind() == IBinding.ANNOTATION) {
@@ -56,13 +56,13 @@ public class UnexpectedJunit3References {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
 			ITypeBinding variableTypeBinding = variableBinding.getVariableDeclaration()
 				.getType();
-			if (UnexpectedJunit3References.hasUnexpectedJUnitReference(variableTypeBinding)) {
+			if (isUnexpectedJUnitReference(variableTypeBinding)) {
 				return false;
 			}
 			if (variableBinding.isField()) {
 				ITypeBinding fieldDeclaringClass = variableBinding.getDeclaringClass();
 				if (fieldDeclaringClass != null
-						&& UnexpectedJunit3References.hasUnexpectedJUnitReference(fieldDeclaringClass)) {
+						&& isUnexpectedJUnitReference(fieldDeclaringClass)) {
 					return false;
 				}
 			}
@@ -73,31 +73,23 @@ public class UnexpectedJunit3References {
 		return false;
 	}
 
-	static boolean hasUnexpectedJUnitReference(IMethodBinding methodBinding) {
-		return hasUnexpectedJUnitReference(methodBinding.getDeclaringClass());
-	}
-
-	static boolean hasUnexpectedJUnitReference(ITypeBinding typeBinding) {
+	static boolean isUnexpectedJUnitReference(ITypeBinding typeBinding) {
 		if (typeBinding.isPrimitive()) {
 			return false;
 		}
 		if (typeBinding.isArray()) {
-			return hasUnexpectedJUnitReference(typeBinding.getComponentType());
+			return isUnexpectedJUnitReference(typeBinding.getComponentType());
 		}
-		if (isUnexpectedJUnitQualifiedName(typeBinding.getQualifiedName())) {
+		if (isJUnitName(typeBinding.getQualifiedName())) {
 			return true;
 		}
 
 		List<ITypeBinding> ancestors = ClassRelationUtil.findAncestors(typeBinding);
 		for (ITypeBinding ancestor : ancestors) {
-			if (isUnexpectedJUnitQualifiedName(ancestor.getQualifiedName())) {
+			if (isJUnitName(ancestor.getQualifiedName())) {
 				return true;
 			}
 		}
 		return false;
-	}
-
-	static boolean isUnexpectedJUnitQualifiedName(String qualifiedName) {
-		return isJUnitName(qualifiedName);
 	}
 }

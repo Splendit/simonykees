@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -38,10 +39,11 @@ class JUnit3AssertionAnalyzer {
 	 *         {@code false} as soon as the first assertion occurs which
 	 *         prohibits transformation.
 	 */
-	boolean collectAssertionAnalysisResults(CompilationUnit compilationUnit,
+	boolean analyzeAllMethodInvocations(CompilationUnit compilationUnit,
 			JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
 			Junit3MigrationConfiguration migrationConfiguration) {
-
+		List<MethodDeclaration> jUnit3TestMethodDeclarations = jUnit3DeclarationsCollectorVisitor
+			.getJUnit3TestMethodDeclarations();
 		String classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
 		List<MethodInvocation> methodInvocationsToAnalyze = jUnit3DeclarationsCollectorVisitor
 			.getMethodInvocationsToAnalyze();
@@ -52,11 +54,11 @@ class JUnit3AssertionAnalyzer {
 				return false;
 			}
 			JUnit3AssertionAnalysisResult assertionAnalysisResult = findAssertionAnalysisResult(
-					classDeclaringMethodReplacement, jUnit3DeclarationsCollectorVisitor, methodinvocation,
+					classDeclaringMethodReplacement, jUnit3TestMethodDeclarations, methodinvocation,
 					methodBinding).orElse(null);
 			if (assertionAnalysisResult != null) {
 				jUnit3AssertionAnalysisResults.add(assertionAnalysisResult);
-			} else if (UnexpectedJunit3References.hasUnexpectedJUnitReference(methodBinding)) {
+			} else if (UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getDeclaringClass())) {
 				ASTNode declaringNode = compilationUnit.findDeclaringNode(methodBinding);
 				if (declaringNode == null) {
 					return false;
@@ -71,7 +73,7 @@ class JUnit3AssertionAnalyzer {
 					.contains(declaringNode.getParent())) {
 					return false;
 				}
-			} else if (UnexpectedJunit3References.hasUnexpectedJUnitReference(methodBinding.getReturnType())) {
+			} else if (UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getReturnType())) {
 				return false;
 			}
 		}
@@ -80,7 +82,7 @@ class JUnit3AssertionAnalyzer {
 
 	private Optional<JUnit3AssertionAnalysisResult> findAssertionAnalysisResult(
 			String classDeclaringMethodReplacement,
-			JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
+			List<MethodDeclaration> jUnit3TestMethodDeclarations,
 			MethodInvocation methodInvocation,
 			IMethodBinding methodBinding) {
 
@@ -88,7 +90,7 @@ class JUnit3AssertionAnalyzer {
 			return Optional.empty();
 		}
 
-		if (!isSurroundedWithJUnit3Test(jUnit3DeclarationsCollectorVisitor, methodInvocation)) {
+		if (!isSurroundedWithJUnit3Test(jUnit3TestMethodDeclarations, methodInvocation)) {
 			return Optional.empty();
 		}
 
@@ -106,21 +108,19 @@ class JUnit3AssertionAnalyzer {
 			return Optional.empty();
 		}
 
-		Expression messageMovedToLastPosition = null;
 		if ("org.junit.jupiter.api.Assertions".equals(classDeclaringMethodReplacement)) { //$NON-NLS-1$
-			messageMovedToLastPosition = findMessageMovedToLastPosition(methodBinding, assertionArguments)
-				.orElse(null);
+			JUnit3AssertionAnalysisResult analysisResultForJupiter = findMessageMovedToLastPosition(methodBinding,
+					assertionArguments)
+						.map(messageMovedToLastPosition -> new JUnit3AssertionAnalysisResult(methodInvocation,
+								assertionArguments, messageMovedToLastPosition))
+						.orElse(new JUnit3AssertionAnalysisResult(methodInvocation, assertionArguments));
+
+			return Optional.of(analysisResultForJupiter);
 		}
-		if (messageMovedToLastPosition != null) {
-			return Optional
-				.of(new JUnit3AssertionAnalysisResult(methodInvocation, assertionArguments,
-						messageMovedToLastPosition));
-		} else {
-			return Optional.of(new JUnit3AssertionAnalysisResult(methodInvocation, assertionArguments));
-		}
+		return Optional.of(new JUnit3AssertionAnalysisResult(methodInvocation, assertionArguments));
 	}
 
-	boolean isSurroundedWithJUnit3Test(JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
+	private boolean isSurroundedWithJUnit3Test(List<MethodDeclaration> jUnit3TestMethodDeclarations,
 			MethodInvocation methodInvocation) {
 		BodyDeclaration bodyDeclarationAncestor = ASTNodeUtil.getSpecificAncestor(methodInvocation,
 				BodyDeclaration.class);
@@ -128,8 +128,7 @@ class JUnit3AssertionAnalyzer {
 		while (parent != null) {
 			if (parent == bodyDeclarationAncestor) {
 				return parent.getNodeType() == ASTNode.METHOD_DECLARATION
-						&& jUnit3DeclarationsCollectorVisitor.getJUnit3TestMethodDeclarations()
-							.contains(parent);
+						&& jUnit3TestMethodDeclarations.contains(parent);
 			}
 			if (parent.getNodeType() == ASTNode.LAMBDA_EXPRESSION) {
 				return false;
