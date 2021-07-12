@@ -27,7 +27,7 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * Provides functionalities for generating and resolving
  * {@link RefactoringMarkerEvent}.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class CoreRefactoringEventManager implements RefactoringEventManager {

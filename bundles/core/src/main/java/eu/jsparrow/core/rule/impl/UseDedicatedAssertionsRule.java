@@ -19,7 +19,7 @@ import eu.jsparrow.rules.common.exception.runtime.ITypeNotFoundRuntimeException;
 /**
  * @see UseDedicatedAssertionsASTVisitor
  * 
- * @since 3.32.0
+ * @since 4.0.0
  *
  */
 public class UseDedicatedAssertionsRule

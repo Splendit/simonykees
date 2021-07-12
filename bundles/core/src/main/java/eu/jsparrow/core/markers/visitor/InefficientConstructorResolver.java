@@ -22,7 +22,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * A visitor for resolving one issue of type
  * {@link InefficientConstructorASTVisitor}.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class InefficientConstructorResolver extends InefficientConstructorASTVisitor {

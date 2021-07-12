@@ -8,7 +8,7 @@ import org.eclipse.ui.texteditor.IAnnotationImageProvider;
 /**
  * A provider for jSparrow icons. 
  * 
- * @since 3.31.0
+ * @since 4.0.0
  */
 public class JSparrowImageProvider implements IAnnotationImageProvider {
 

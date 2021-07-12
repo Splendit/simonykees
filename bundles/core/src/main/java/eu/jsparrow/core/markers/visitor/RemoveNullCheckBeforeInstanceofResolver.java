@@ -19,7 +19,7 @@ import eu.jsparrow.i18n.Messages;
  * A visitor for resolving one issue of type
  * {@link RemoveNullCheckBeforeInstanceofASTVisitor}.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBeforeInstanceofASTVisitor {

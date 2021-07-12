@@ -12,7 +12,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  * An interface to add {@link RefactoringMarkerEvent}s for
  * {@link InefficientConstructorASTVisitor}.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public interface InefficientConstructorEvent {

@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.dom.SuperFieldAccess;
  * represents the expected value. If the right hand side represents the expected
  * value, then a swap of the two values is necessary.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class SwapOperands {

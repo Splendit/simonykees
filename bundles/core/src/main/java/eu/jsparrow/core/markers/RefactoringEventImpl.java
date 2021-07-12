@@ -11,7 +11,7 @@ import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
  * A data holder for the {@link RefactoringMarkerEvent}s generated in this
  * module.
  * 
- * @since 3.31.0
+ * @since 4.0.0
  *
  */
 public class RefactoringEventImpl implements RefactoringMarkerEvent {
