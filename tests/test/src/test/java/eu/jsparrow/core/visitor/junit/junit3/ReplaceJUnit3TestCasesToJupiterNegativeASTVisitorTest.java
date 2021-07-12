@@ -57,6 +57,22 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 	}
 
 	@Test
+	public void visit_ImportOfJupiterOnDemand_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.addImport("org.junit.jupiter.api", false, true);
+		String original = "" +
+				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " {\n" +
+				"\n" +
+				"		@DisplayName(\"test\")\n" +
+				"		" + PUBLIC_VOID_TEST + "() {\n" +
+				"			assertNotNull(new Object());\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
 	public void visit_SuperCountTestCases_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
 		defaultFixture.setSuperClassType("TestCase");
@@ -284,17 +300,17 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
 	}
 
-	@Disabled("Template")
 	@Test
-	public void visit__shouldNotTransform() throws Exception {
+	public void visit_SuperConstructorInvocation_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
 		String original = "" +
-				"	 public static class ExampleTestCase extends TestCase {\n" +
-				" \n" +
-				"	 	public void test() {\n" +
-				"		 assertTrue(true);\n" +
-				"	 	}\n" +
-				" }";
+				"	public static class ExampleTestCase extends TestCase {\n" +
+				"\n" +
+				"		public ExampleTestCase(String name) {\n" +
+				"			super(name);\n" +
+				"		}\n" +
+				"	}";
+
 		assertNoChange(original);
 	}
 

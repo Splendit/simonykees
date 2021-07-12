@@ -1,23 +1,19 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
-import static eu.jsparrow.core.visitor.utils.MainMethodMatches.findMainMethodMatches;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
-import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -32,9 +28,11 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
 import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
@@ -72,31 +70,6 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		this.migrationConfiguration = migrationConfiguration;
 	}
 
-	static Optional<MethodDeclaration> findMainMethodToRemove(CompilationUnit compilationUnit) {
-		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
-		compilationUnit.accept(methodDeclarationsCollectorVisitor);
-		List<MethodDeclaration> allMethodDeclarations = methodDeclarationsCollectorVisitor.getMethodDeclarations();
-		MethodDeclaration mainMethodDeclaration = allMethodDeclarations
-			.stream()
-			.filter(methodDeclaration -> MethodDeclarationUtils.isJavaApplicationMainMethod(compilationUnit,
-					methodDeclaration))
-			.findFirst()
-			.orElse(null);
-
-		if (mainMethodDeclaration != null) {
-			ITypeBinding declaringClass = mainMethodDeclaration.resolveBinding()
-				.getDeclaringClass();
-			try {
-				if (findMainMethodMatches(declaringClass).isEmpty()) {
-					return Optional.of(mainMethodDeclaration);
-				}
-			} catch (CoreException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return Optional.empty();
-	}
-
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		return transformationPossible;
@@ -104,7 +77,14 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(CompilationUnit node) {
-		mainMethodToRemove = findMainMethodToRemove(node).orElse(null);
+		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
+		node.accept(methodDeclarationsCollectorVisitor);
+		List<MethodDeclaration> allMethodDeclarations = methodDeclarationsCollectorVisitor.getMethodDeclarations();
+		mainMethodToRemove = allMethodDeclarations
+			.stream()
+			.filter(methodDeclaration -> MethodDeclarationUtils.isJavaApplicationMainMethod(node, methodDeclaration))
+			.findFirst()
+			.orElse(null);
 		return true;
 	}
 
@@ -120,12 +100,11 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	public boolean visit(ImportDeclaration node) {
 		String fullyQualifiedName = node.getName()
 			.getFullyQualifiedName();
-		if (fullyQualifiedName.startsWith("junit.")) { //$NON-NLS-1$
+		if (fullyQualifiedName.equals("junit") || fullyQualifiedName.startsWith("junit.")) { //$NON-NLS-1$ //$NON-NLS-2$
 			importDeclarationsToRemove.add(node);
-		} else if (UnexpectedJunit3References.isUnexpectedJUnitQualifiedName(fullyQualifiedName)) {
-			transformationPossible = false;
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 	@Override
@@ -140,7 +119,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
-		if (mainMethodToRemove != null && mainMethodToRemove == node) {
+		if (mainMethodToRemove == node) {
 			return false;
 		}
 		if (node.getLocationInParent() == TypeDeclaration.BODY_DECLARATIONS_PROPERTY
@@ -178,6 +157,13 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		transformationPossible = methodBinding != null &&
 				!UnexpectedJunit3References.hasUnexpectedJUnitReference(methodBinding) &&
 				!UnexpectedJunit3References.hasUnexpectedJUnitReference(methodBinding.getReturnType());
+		return transformationPossible;
+	}
+
+	@Override
+	public boolean visit(SuperConstructorInvocation node) {
+		transformationPossible = !UnexpectedJunit3References
+			.hasUnexpectedJUnitReference(node.resolveConstructorBinding());
 		return transformationPossible;
 	}
 
@@ -222,6 +208,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	}
 
 	private static boolean isOverridingJUnitFrameworkTestCaseMethod(MethodDeclaration jUnitTestCaseMethodDeclaration) {
+
 		String methodDeclarationIdentifier = jUnitTestCaseMethodDeclaration.getName()
 			.getIdentifier();
 		List<SingleVariableDeclaration> parameters = ASTNodeUtil
@@ -304,7 +291,6 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	private boolean analyzeName(Name name) {
 		if (name.getLocationInParent() == PackageDeclaration.NAME_PROPERTY
-				|| name.getLocationInParent() == ImportDeclaration.NAME_PROPERTY
 				|| name.getLocationInParent() == TypeDeclaration.NAME_PROPERTY
 				|| (name.getLocationInParent() == SimpleType.NAME_PROPERTY
 						&& jUnit3TestCaseSuperTypesToRemove.contains(name.getParent()))
@@ -316,54 +302,31 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 				|| name.getLocationInParent() == BreakStatement.LABEL_PROPERTY) {
 			return true;
 		}
-
 		IBinding binding = name.resolveBinding();
 		if (binding == null) {
 			return false;
 		}
 
-		ITypeBinding typeBinding = null;
-		if (binding.getKind() == IBinding.METHOD) {
-			IMethodBinding methodBinding = (IMethodBinding) binding;
-			typeBinding = methodBinding.getDeclaringClass();
-		}
-
-		if (binding.getKind() == IBinding.TYPE) {
-			typeBinding = (ITypeBinding) binding;
-		}
-
-		if (binding.getKind() == IBinding.ANNOTATION) {
-			IAnnotationBinding annotationBinding = (IAnnotationBinding) binding;
-			typeBinding = annotationBinding.getAnnotationType();
-		}
-
-		if (binding.getKind() == IBinding.MEMBER_VALUE_PAIR) {
-			IMemberValuePairBinding memberValuePairBinding = (IMemberValuePairBinding) binding;
-			IMethodBinding methodBinding = memberValuePairBinding.getMethodBinding();
-			typeBinding = methodBinding.getDeclaringClass();
-		}
-
-		if (typeBinding != null) {
-			return !UnexpectedJunit3References.hasUnexpectedJUnitReference(typeBinding);
-		}
-
-		if (binding.getKind() == IBinding.VARIABLE) {
+		if (name.getNodeType() == ASTNode.SIMPLE_NAME && binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
-			ITypeBinding variableTypeBinding = variableBinding.getVariableDeclaration()
-				.getType();
-			if (UnexpectedJunit3References.hasUnexpectedJUnitReference(variableTypeBinding)) {
+			if (UnexpectedJunit3References.hasUnexpectedJUnitReference(variableBinding.getType())) {
 				return false;
 			}
 			if (variableBinding.isField()) {
-				ITypeBinding fieldDeclaringClass = variableBinding.getDeclaringClass();
-				if (fieldDeclaringClass != null
-						&& UnexpectedJunit3References.hasUnexpectedJUnitReference(fieldDeclaringClass)) {
-					return false;
+				if (name.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
+					return true;
+				}
+				if (name.getLocationInParent() != FieldAccess.NAME_PROPERTY) {
+					return true;
+				}
+				FieldAccess fieldAccess = (FieldAccess) name.getParent();
+				if (fieldAccess.getExpression()
+					.getNodeType() == ASTNode.THIS_EXPRESSION) {
+					return true;
 				}
 			}
-			return true;
 		}
-		return false;
+		return UnexpectedJunit3References.analyzeNameBinding(binding);
 	}
 
 	public List<ImportDeclaration> getImportDeclarationsToRemove() {
@@ -372,10 +335,6 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	public List<MethodInvocation> getMethodInvocationsToAnalyze() {
 		return methodInvocationsToAnalyze;
-	}
-
-	public boolean isTransformationPossible() {
-		return transformationPossible;
 	}
 
 	public List<TypeDeclaration> getJUnit3TestCaseDeclarations() {
@@ -400,5 +359,18 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	public Optional<MethodDeclaration> getMainMethodToRemove() {
 		return Optional.ofNullable(mainMethodToRemove);
+	}
+
+	public boolean isTransformationPossible() {
+		if (importDeclarationsToRemove.isEmpty() &&
+				jUnit3TestCaseDeclarations.isEmpty() &&
+				jUnit3TestCaseSuperTypesToRemove.isEmpty() &&
+				jUnit3TestMethodDeclarations.isEmpty() &&
+				testMethodAnnotationDataList.isEmpty() &&
+				overrideAnnotationsToRemove.isEmpty() &&
+				methodInvocationsToAnalyze.isEmpty()) {
+			return false;
+		}
+		return transformationPossible;
 	}
 }

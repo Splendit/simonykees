@@ -7,6 +7,10 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 public class MainTopLevelJavaClass {
 
+	private MainTopLevelJavaClass() {
+		// private constructor to hide implicit public one
+	}
+
 	public static boolean isMainTopLevelClass(TypeDeclaration typeDeclaration) {
 		CompilationUnit compilationUnit = ASTNodeUtil.getSpecificAncestor(typeDeclaration, CompilationUnit.class);
 		if (compilationUnit == null) {
