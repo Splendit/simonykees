@@ -1,18 +1,10 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
-import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jface.text.BadLocationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
-import eu.jsparrow.jdtunit.JdtUnitException;
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFixture {
 
@@ -67,14 +59,14 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 				+ "}";
 
 		String expected = ""
-				+ "@Test"
+				+ "@Test\n"
 				+ "public void test(){\n"
 				+ "	int number = 1;\n"
 				+ "	assertEquals(1,number);\n"
 				+ "}";
 		String expectedCompilationUnitFormat = ""
 				+ "package %s;\n"
-				+ "import static org.junit.Assert.assertTrue;\n"
+				+ "import static org.junit.Assert.assertEquals;\n"
 				+ "import org.junit.Test;"
 				+ "public class %s {\n"
 				+ "	%s \n"
@@ -84,7 +76,6 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 
 	}
 
-	@Disabled
 	@Test
 	public void visit_TestCaseThisFieldAccess_shouldTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
@@ -136,20 +127,5 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 				+ "	}";
 		assertChange(original, expected);
 
-	}
-
-	
-	private void assertCompilationUnitMatch(String originalMethodDeclaration, String expectedMethodDeclaration, String expectedCompilationUnitFormat)
-			throws JdtUnitException, JavaModelException, BadLocationException {
-		defaultFixture.addMethodDeclarationFromString(originalMethodDeclaration);
-
-		AbstractASTRewriteASTVisitor defaultVisitor = getDefaultVisitor();
-		defaultVisitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(getDefaultVisitor());
-		String expectedCUSource = String.format(expectedCompilationUnitFormat, "fixturepackage", DEFAULT_TYPE_DECLARATION_NAME,
-				expectedMethodDeclaration);
-		assertMatch(
-				ASTNodeBuilder.createCompilationUnitFromString(expectedCUSource),
-				defaultFixture.getRootNode());
 	}
 }

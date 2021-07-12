@@ -82,4 +82,25 @@ public abstract class UsesJDTUnitFixture {
 	protected AbstractASTRewriteASTVisitor getDefaultVisitor() {
 		return defaultVisitor;
 	}
+
+	protected void assertNoCompilationUnitChange(String originalMethodDeclaration, String expectedCompilationUnitFormat)
+			throws JdtUnitException, JavaModelException, BadLocationException {
+		assertCompilationUnitMatch(originalMethodDeclaration, originalMethodDeclaration, expectedCompilationUnitFormat);
+	}
+
+	protected void assertCompilationUnitMatch(String originalMethodDeclaration, String expectedMethodDeclaration,
+			String expectedCompilationUnitFormat)
+			throws JdtUnitException, JavaModelException, BadLocationException {
+		defaultFixture.addMethodDeclarationFromString(originalMethodDeclaration);
+
+		AbstractASTRewriteASTVisitor defaultVisitor = getDefaultVisitor();
+		defaultVisitor.setASTRewrite(defaultFixture.getAstRewrite());
+		defaultFixture.accept(getDefaultVisitor());
+		String expectedCUSource = String.format(expectedCompilationUnitFormat, "fixturepackage",
+				DEFAULT_TYPE_DECLARATION_NAME,
+				expectedMethodDeclaration);
+		assertMatch(
+				ASTNodeBuilder.createCompilationUnitFromString(expectedCUSource),
+				defaultFixture.getRootNode());
+	}
 }
