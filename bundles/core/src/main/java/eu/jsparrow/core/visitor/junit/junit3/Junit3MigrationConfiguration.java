@@ -4,6 +4,8 @@ package eu.jsparrow.core.visitor.junit.junit3;
  * Stores all data which describe the migration of JUnit 3 to either JUnit 4 or
  * JUnit Jupiter.
  *
+ * @since 4.1.0
+ *
  */
 public class Junit3MigrationConfiguration {
 

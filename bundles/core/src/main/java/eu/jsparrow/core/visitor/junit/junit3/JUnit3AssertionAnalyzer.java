@@ -23,6 +23,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * Determines whether the transformation can be carried out or is prohibited due
  * to a JUnit3 assertion which is not supported.
  * 
+ * @since 4.1.0
  *
  */
 class JUnit3AssertionAnalyzer {

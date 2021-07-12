@@ -9,6 +9,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 /**
  * Stores all analysis data which have been found by the
  * {@link JUnit3AssertionAnalyzer} for a given JUnit 3 assertion.
+ * 
+ * @since 4.1.0
  *
  */
 public class JUnit3AssertionAnalysisResult {

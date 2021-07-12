@@ -31,6 +31,8 @@ import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
  * <li>Annotating test methods with {@code @Test}</li>
  * </ul>
  * 
+ * @since 4.1.0
+ * 
  */
 public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisitor {
 	private final Junit3MigrationConfiguration migrationConfiguration;

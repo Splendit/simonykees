@@ -52,6 +52,8 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * This visitor may find out that transformation cannot be carried out due to
  * declarations which prohibit transformation.
  *
+ * @since 4.1.0
+ * 
  */
 public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	private static final String JUNIT_FRAMEWORK_TEST_CASE = "junit.framework.TestCase"; //$NON-NLS-1$

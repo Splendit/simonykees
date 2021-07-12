@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.visitor.junit.junit3.Junit3MigrationConfiguration;
 import eu.jsparrow.core.visitor.junit.junit3.Junit3MigrationConfigurationFactory;
 import eu.jsparrow.core.visitor.junit.junit3.ReplaceJUnit3TestCasesASTVisitor;
-import eu.jsparrow.core.visitor.junit.jupiter.assertions.ReplaceJUnit4AssertionsWithJupiterASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
@@ -20,9 +19,9 @@ import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
 /**
- * @see ReplaceJUnit4AssertionsWithJupiterASTVisitor
+ * @see ReplaceJUnit3TestCasesASTVisitor
  * 
- *
+ * @since 4.1.0
  */
 public class ReplaceJUnit3TestCasesRule
 		extends RefactoringRuleImpl<ReplaceJUnit3TestCasesASTVisitor> {
@@ -60,7 +59,8 @@ public class ReplaceJUnit3TestCasesRule
 
 		try {
 			if (project.findType(ORG_JUNIT_JUPITER_API_ASSERTIONS) != null) {
-				junit3MigrationConfiguration = new Junit3MigrationConfigurationFactory().createJUnitJupiterConfigurationValues();
+				junit3MigrationConfiguration = new Junit3MigrationConfigurationFactory()
+					.createJUnitJupiterConfigurationValues();
 				return true;
 			}
 		} catch (JavaModelException e) {
@@ -69,9 +69,10 @@ public class ReplaceJUnit3TestCasesRule
 
 		try {
 			if (project.findType(ORG_JUNIT_ASSERT) != null) {
-				junit3MigrationConfiguration = new Junit3MigrationConfigurationFactory().createJUnit4ConfigurationValues();
+				junit3MigrationConfiguration = new Junit3MigrationConfigurationFactory()
+					.createJUnit4ConfigurationValues();
 				return true;
-				
+
 			}
 		} catch (JavaModelException e) {
 			logger.debug("Cannot find type {} in the classpath.", ORG_JUNIT_ASSERT, e); //$NON-NLS-1$

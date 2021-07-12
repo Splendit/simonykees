@@ -6,6 +6,8 @@ package eu.jsparrow.core.visitor.junit.junit3;
  * <li>Migration of >JUnit 3 to JUnit 4</li>
  * <li>Migration of >JUnit 3 to JUnit Jupiter</li>
  * </ul>
+ * 
+ * @since 4.1.0
  *
  */
 public class Junit3MigrationConfigurationFactory {

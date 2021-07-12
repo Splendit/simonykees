@@ -15,6 +15,8 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 /**
  * Utility class for detecting unexpected references to JUnit which prohibit
  * transformation.
+ * 
+ * @since 4.1.0
  *
  */
 public class UnexpectedJunit3References {

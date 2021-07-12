@@ -12,6 +12,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * In a Java file "HelloWorld.java" the class "HelloWorld" will be the main top
  * level class
  *
+ * @since 4.1.0
  */
 public class MainTopLevelJavaClass {
 

@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
  * <li>"org.junit.jupiter.api.BeforeEach" for setUp methods</li>
  * <li>"org.junit.jupiter.api.AfterEach" for tearDown methods</li>
  * </ul>
+ * 
+ * @since 4.1.0
  *
  */
 public class TestMethodAnnotationData {
