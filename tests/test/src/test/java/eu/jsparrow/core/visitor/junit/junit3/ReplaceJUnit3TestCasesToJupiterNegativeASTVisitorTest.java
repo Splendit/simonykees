@@ -124,7 +124,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 
 		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
 	}
-	
+
 	@Test
 	public void visit_AssertNotNullInLambda_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("java.util.function.Consumer");
@@ -360,7 +360,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 
 		assertNoCompilationUnitChange(methodDeclaration, expectedCompilationUnitFormat);
 	}
-	
+
 	@Test
 	public void visit_MethodBindingNotResolved_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
@@ -379,7 +379,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 
 		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
 	}
-	
+
 	@Test
 	public void visit_AssertNotNullInInitializer_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
@@ -398,4 +398,29 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 		assertNoChange(original);
 	}
 
+	@Test
+	public void visit_AmbiguousArgumentTypes_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+		defaultFixture.addMethodDeclarationFromString("" +
+				"<RET> RET getGenericReturnValue() {\n" +
+				"	return (RET) Byte.valueOf((byte) 0);\n" +
+				"}\n");
+
+		String original = "" +
+				"public void test() {\n" +
+				"	assertEquals(getGenericReturnValue(), getGenericReturnValue());\n" +
+				"}";
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import junit.framework.TestCase;\n" +
+				"public class %s extends TestCase {\n" +
+				"	<RET>RET getGenericReturnValue(){\n" +
+				"		return (RET)Byte.valueOf((byte)0);\n" +
+				"	}\n" +
+				"	%s \n" +
+				"}";
+
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
+	}
 }
