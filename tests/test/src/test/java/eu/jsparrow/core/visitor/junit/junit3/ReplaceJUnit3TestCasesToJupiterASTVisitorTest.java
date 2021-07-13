@@ -10,7 +10,7 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 
 	@BeforeEach
 	public void setUpVisitor() throws Exception {
-		addDependency("junit", "junit", "3.8.2");
+		addDependency("junit", "junit", "4.13");
 		addDependency("org.junit.jupiter", "junit-jupiter-api", "5.4.0");
 		Junit3MigrationConfiguration configuration = new Junit3MigrationConfigurationFactory()
 			.createJUnit4ConfigurationValues();
