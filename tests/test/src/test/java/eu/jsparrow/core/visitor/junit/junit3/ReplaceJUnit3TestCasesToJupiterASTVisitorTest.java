@@ -198,4 +198,67 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 
 		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
 	}
+
+	@Test
+	public void visit_AssertEqualsForStringsWithoutMessage_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+		String original = ""
+				+ "public void test() {\n"
+				+ "	String helloWorld = \"HelloWorld!\";\n"
+				+ "	assertEquals(\"HelloWorld!\", helloWorld);\n"
+				+ "}";
+
+		String expected = ""
+				+ "@Test\n"
+				+ "public void test(){\n"
+				+ "	String helloWorld = \"HelloWorld!\";\n"
+				+ "	assertEquals(\"HelloWorld!\", helloWorld);\n"
+				+ "}";
+		String expectedCompilationUnitFormat = ""
+				+ "package %s;\n"
+				+ "import static org.junit.jupiter.api.Assertions.assertEquals;\n"
+				+ "import org.junit.jupiter.api.Test;"
+				+ "public class %s {\n"
+				+ "	%s \n"
+				+ "}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+
+	}
+
+	@Test
+	public void visit_TestCaseGetNumberInvocation_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+		defaultFixture.addMethodDeclarationFromString("" +
+				"int getNumber() {\n" +
+				"	return 1;\n" +
+				"}\n");
+
+		String original = "" +
+				"public void test() {\n" +
+				"	assertEquals(1, getNumber());\n" +
+				"}";
+
+		String expected = "" +
+				"@Test\n" +
+				"public void test() {\n" +
+				"	assertEquals(1, getNumber());\n" +
+				"}";
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import static org.junit.jupiter.api.Assertions.assertEquals;\n" +
+				"import org.junit.jupiter.api.Test;" +
+				"public class %s {\n" +
+				"	int getNumber() {\n" +
+				"		return 1;\n" +
+				"	}\n" +
+				"	%s \n" +
+				"}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+
+	}
 }
