@@ -1,6 +1,10 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -27,17 +31,28 @@ public class MainTopLevelJavaClass {
 		}
 		String javaElementName = compilationUnit.getJavaElement()
 			.getElementName();
+		List<String> rootTypeName = new ArrayList<>();
 
+		/*
+		 * This is a workaround of using compilationUnit .getTypeRoot()
+		 * .findPrimaryType() .getFullyQualifiedName() The JdtUnitFixture is not
+		 * able to provide the primary type of the compilation unit.
+		 */
 		int indexOfFileExtension = javaElementName.lastIndexOf(".java"); //$NON-NLS-1$
 		if (indexOfFileExtension > 0) {
 			javaElementName = javaElementName.substring(0, indexOfFileExtension);
-			String fullyQualifiedCompilationUnitPackageName = compilationUnit.getPackage()
-				.getName()
-				.getFullyQualifiedName();
+			PackageDeclaration packageDeclaration = compilationUnit.getPackage();
+			if (packageDeclaration != null) {
+				String fullyQualifiedCompilationUnitPackageName = packageDeclaration
+					.getName()
+					.getFullyQualifiedName();
+				rootTypeName.add(fullyQualifiedCompilationUnitPackageName);
+			}
 			String typeDeclarationQualifiedName = typeDeclaration.resolveBinding()
 				.getQualifiedName();
+			rootTypeName.add(javaElementName);
 			return typeDeclarationQualifiedName
-				.equals(fullyQualifiedCompilationUnitPackageName + '.' + javaElementName);
+				.equals(String.join(".", rootTypeName)); //$NON-NLS-1$
 		}
 
 		return false;
