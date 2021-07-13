@@ -3,6 +3,8 @@ package eu.jsparrow.core.visitor.utils;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -13,8 +15,6 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -153,19 +153,15 @@ public class MethodDeclarationUtils {
 			return false;
 		}
 		String declaringClassQualifiedName = declaringClass.getQualifiedName();
-		String javaElementName = compilationUnit.getJavaElement()
-			.getElementName();
-
-		int indexOfFileExtension = javaElementName.lastIndexOf(".java"); //$NON-NLS-1$
-		if (indexOfFileExtension > 0) {
-			javaElementName = javaElementName.substring(0, indexOfFileExtension);
-			String fullyQualifiedCompilationUnitPackageName = compilationUnit.getPackage()
-				.getName()
-				.getFullyQualifiedName();
-
-			return declaringClassQualifiedName.equals(fullyQualifiedCompilationUnitPackageName + '.' + javaElementName);
+		ITypeRoot typeRoot = compilationUnit.getTypeRoot();
+		if(typeRoot == null) {
+			return false;
 		}
-
-		return false;
+		IType primaryType = typeRoot.findPrimaryType();
+		if(primaryType == null) {
+			return false;
+		}
+		String primaryTypeQualifiedName = primaryType.getFullyQualifiedName();
+		return declaringClassQualifiedName.equals(primaryTypeQualifiedName);
 	}
 }
