@@ -58,9 +58,12 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 		assertThat(description.getName(), equalTo("Replace JUnit 3 Test Cases"));
 		assertThat(description.getTags(),
 				contains(Tag.JAVA_1_5, Tag.TESTING));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
+		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(15)));
 		assertThat(description.getDescription(),
-				equalTo("This rule replaces JUnit 3 test cases by JUnit Jupiter test cases or - if JUnit Jupiter is not available - by JUnit 4 test cases. All references to JUnit 3 are removed. For example, an invocation of 'junit.framework.Assert.assertTrue(condition)' is either transformed to 'org.junit.jupiter.api.Assertions.assertTrue(condition)' or to 'org.junit.Assert.assertTrue(condition)'."));
+				equalTo("This rule replaces JUnit 3 test cases by JUnit Jupiter test cases or - if JUnit Jupiter is "
+						+ "not available - by JUnit 4 test cases. All references to JUnit 3 are removed. For example, "
+						+ "an invocation of 'junit.framework.Assert.assertTrue(condition)' is either transformed to "
+						+ "'org.junit.jupiter.api.Assertions.assertTrue(condition)' or to 'org.junit.Assert.assertTrue(condition)'."));
 	}
 
 	@Test

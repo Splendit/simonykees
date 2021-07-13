@@ -110,7 +110,6 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		jUnit3DeclarationsCollectorVisitor.getMainMethodToRemove()
 			.ifPresent(mainMethodToRemove -> {
 				astRewrite.remove(mainMethodToRemove, null);
-				onRewrite();
 			});
 
 		newAssertionStaticImports.forEach(qualifiedName -> {
@@ -135,34 +134,30 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			ListRewrite listRewrite = astRewrite.getListRewrite(methodDeclaration,
 					MethodDeclaration.MODIFIERS2_PROPERTY);
 			listRewrite.insertFirst(testMethodAnnotation, null);
-			onRewrite();
 		});
 
 		assertionReplacementData.forEach(data -> {
 			astRewrite.replace(data.getOriginalMethodInvocation(), data.createMethodInvocationReplacement(), null);
-			onRewrite();
 		});
 
 		List<ImportDeclaration> importDeclarationsToRemove = jUnit3DeclarationsCollectorVisitor
 			.getImportDeclarationsToRemove();
 		importDeclarationsToRemove.forEach(importDeclarationToRemove -> {
 			astRewrite.remove(importDeclarationToRemove, null);
-			onRewrite();
 		});
 
 		List<SimpleType> jUnit3TestCaseSuperTypesToRemove = jUnit3DeclarationsCollectorVisitor
 			.getJUnit3TestCaseSuperTypesToRemove();
 		jUnit3TestCaseSuperTypesToRemove.forEach(supertypeToRemove -> {
 			astRewrite.remove(supertypeToRemove, null);
-			onRewrite();
 		});
 
 		List<Annotation> overrideAnnotationsToRemove = jUnit3DeclarationsCollectorVisitor
 			.getOverrideAnnotationsToRemove();
 		overrideAnnotationsToRemove.forEach(overrideAnnotationToRemove -> {
 			astRewrite.remove(overrideAnnotationToRemove, null);
-			onRewrite();
 		});
+		onRewrite();
 	}
 
 	List<JUnit3AssertionReplacementData> collectAssertionReplacementData(

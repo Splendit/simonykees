@@ -38,7 +38,7 @@ public class ReplaceJUnit3TestCasesRule
 		this.ruleDescription = new RuleDescription(
 				Messages.ReplaceJUnit3TestCasesRule_name,
 				Messages.ReplaceJUnit3TestCasesRule_description,
-				Duration.ofMinutes(2), Arrays.asList(Tag.JAVA_1_5, Tag.TESTING));
+				Duration.ofMinutes(15), Arrays.asList(Tag.JAVA_1_5, Tag.TESTING));
 	}
 
 	@Override
