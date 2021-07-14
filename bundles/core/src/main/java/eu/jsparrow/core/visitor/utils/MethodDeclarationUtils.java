@@ -3,16 +3,24 @@ package eu.jsparrow.core.visitor.utils;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class MethodDeclarationUtils {
 
@@ -91,5 +99,69 @@ public class MethodDeclarationUtils {
 			return Optional.of(parameterType);
 		}
 		return Optional.empty();
+	}
+
+	public static boolean isMainMethod(MethodDeclaration methodDeclaration) {
+		if (!"main".equals(methodDeclaration.getName() //$NON-NLS-1$
+			.getIdentifier())) {
+			return false;
+		}
+
+		@SuppressWarnings("rawtypes")
+		List modifiers = methodDeclaration.modifiers();
+		if (!ASTNodeUtil.hasModifier(modifiers, Modifier::isStatic)
+				|| !ASTNodeUtil.hasModifier(modifiers, Modifier::isPublic)) {
+			return false;
+		}
+
+		Type t = methodDeclaration.getReturnType2();
+		ITypeBinding returnTypeBinding = t.resolveBinding();
+		if (!"void".equals(returnTypeBinding.getName())) { //$NON-NLS-1$
+			return false;
+		}
+
+		List<VariableDeclaration> params = ASTNodeUtil.convertToTypedList(methodDeclaration.parameters(),
+				VariableDeclaration.class);
+
+		if (params.size() != 1) {
+			return false;
+		}
+
+		VariableDeclaration param = params.get(0);
+		IVariableBinding paramVariableBinding = param.resolveBinding();
+		ITypeBinding paramTypeBinding = paramVariableBinding.getType();
+
+		if (!paramTypeBinding.isArray()) {
+			return false;
+		}
+
+		return ClassRelationUtil.isContentOfType(paramTypeBinding.getElementType(), java.lang.String.class.getName())
+				&& paramTypeBinding.getDimensions() == 1;
+	}
+
+	public static boolean isJavaApplicationMainMethod(CompilationUnit compilationUnit,
+			MethodDeclaration methodDeclaration) {
+		if (!isMainMethod(methodDeclaration)) {
+			return false;
+		}
+		IMethodBinding methodBinding = methodDeclaration.resolveBinding();
+		if (methodBinding == null) {
+			return false;
+		}
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		if (!declaringClass.isTopLevel()) {
+			return false;
+		}
+		String declaringClassQualifiedName = declaringClass.getQualifiedName();
+		ITypeRoot typeRoot = compilationUnit.getTypeRoot();
+		if(typeRoot == null) {
+			return false;
+		}
+		IType primaryType = typeRoot.findPrimaryType();
+		if(primaryType == null) {
+			return false;
+		}
+		String primaryTypeQualifiedName = primaryType.getFullyQualifiedName();
+		return declaringClassQualifiedName.equals(primaryTypeQualifiedName);
 	}
 }
