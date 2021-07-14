@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 public enum StandaloneMode {
 	TEST,
 	REFACTOR,
-	DEMO,
+	REPORT,
 	LIST_RULES,
 	LIST_RULES_SHORT,
 	LICENSE_INFO,
@@ -23,8 +23,8 @@ public enum StandaloneMode {
 			return TEST;
 		case "REFACTOR":
 			return REFACTOR;
-		case "DEMO":
-			return DEMO;
+		case "REPORT":
+			return REPORT;
 		case "LIST_RULES":
 			return LIST_RULES;
 		case "LIST_RULES_SHORT":

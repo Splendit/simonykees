@@ -67,7 +67,7 @@ public class RefactoringInvokerTest {
 	}
 
 	@Test
-	public void runInDemoMode_shouldNotCommit() throws Exception {
+	public void runInReportMode_shouldNotCommit() throws Exception {
 		BundleContext context = mock(BundleContext.class);
 		RefactoringPipeline refactoringPipeline = mock(RefactoringPipeline.class);
 
@@ -75,7 +75,7 @@ public class RefactoringInvokerTest {
 		when(javaProject.getElementName()).thenReturn(""); //$NON-NLS-1$
 		when(refactoringPipeline.getRulesWithChangesAsString()).thenReturn(""); //$NON-NLS-1$
 
-		refactoringInvoker.runInDemoMode(context);
+		refactoringInvoker.runInReportMode(context);
 
 		verify(standaloneConfig).createRefactoringStates();
 		verify(standaloneConfig).computeRefactoring();
