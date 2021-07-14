@@ -40,18 +40,6 @@ public class UnexpectedJunit3References {
 			return !isUnexpectedJUnitReference(((IMethodBinding) binding).getDeclaringClass());
 		}
 
-		if (binding.getKind() == IBinding.ANNOTATION) {
-			// Not covered, but anyway a name is not expected to have a binding
-			// of the kind IBinding.ANNOTATION
-			return false;
-		}
-
-		if (binding.getKind() == IBinding.MEMBER_VALUE_PAIR) {
-			// Not covered, but anyway a name is not expected to have a binding
-			// of the kind IBinding.MEMBER_VALUE_PAIR
-			return false;
-		}
-
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
 			ITypeBinding variableTypeBinding = variableBinding.getVariableDeclaration()

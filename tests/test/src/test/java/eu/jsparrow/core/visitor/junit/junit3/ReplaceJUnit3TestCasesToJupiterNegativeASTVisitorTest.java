@@ -19,7 +19,7 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 		addDependency("junit", "junit", "4.13");
 		addDependency("org.junit.jupiter", "junit-jupiter-api", "5.4.0");
 		Junit3MigrationConfiguration configuration = new Junit3MigrationConfigurationFactory()
-			.createJUnit4ConfigurationValues();
+			.createJUnitJupiterConfigurationValues();
 		setDefaultVisitor(new ReplaceJUnit3TestCasesASTVisitor(configuration));
 	}
 
@@ -118,6 +118,27 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				+ "import java.util.function.Consumer;\n"
 				+ "import junit.framework.TestCase;\n"
 				+ "import junit.framework.Assert;\n"
+				+ "public class %s extends TestCase {\n"
+				+ "	%s \n"
+				+ "}";
+
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
+	}
+
+	@Test
+	public void visit_AssertNotNullInLambda_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("java.util.function.Consumer");
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+		String original = "" +
+				PUBLIC_VOID_TEST + "() {\n" +
+				"	Consumer<Object> asserter = () ->  assertNotNull();\n" +
+				"}";
+
+		String expectedCompilationUnitFormat = ""
+				+ "package %s;\n"
+				+ "import java.util.function.Consumer;\n"
+				+ "import junit.framework.TestCase;\n"
 				+ "public class %s extends TestCase {\n"
 				+ "	%s \n"
 				+ "}";
@@ -303,5 +324,103 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				"	}";
 
 		assertNoChange(original);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"@Override\n" +
+					"protected TestResult createResult() {\n" +
+					"	return null;\n" +
+					"}",
+			"" +
+					"@Override\n" +
+					"public TestResult run() {\n" +
+					"	return null;\n" +
+					"}",
+			"" +
+					"@Override\n" +
+					"public void run(TestResult result) {\n" +
+					"	\n" +
+					"}"
+	})
+	public void visit_TestCaseMethodsWithOverrideAnnotation_shouldNotTransform(String methodDeclaration)
+			throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.addImport("junit.framework.TestResult");
+		defaultFixture.setSuperClassType("TestCase");
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import junit.framework.TestCase;\n" +
+				"import junit.framework.TestResult;\n" +
+				"public class %s extends TestCase {\n" +
+				"	%s \n" +
+				"}";
+
+		assertNoCompilationUnitChange(methodDeclaration, expectedCompilationUnitFormat);
+	}
+
+	@Test
+	public void visit_MethodBindingNotResolved_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+		String original = "" +
+				PUBLIC_VOID_TEST + "() {\n" +
+				"	assertObjectNotNull(new Object());\n" +
+				"}";
+
+		String expectedCompilationUnitFormat = ""
+				+ "package %s;\n"
+				+ "import junit.framework.TestCase;\n"
+				+ "public class %s extends TestCase {\n"
+				+ "	%s \n"
+				+ "}";
+
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
+	}
+
+	@Test
+	public void visit_AssertNotNullInInitializer_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " {\n" +
+				"\n" +
+				"		{\n" +
+				"			assertNotNull(new Object());\n" +
+				"		}\n" +
+				"\n" +
+				"		" + PUBLIC_VOID_TEST + "() {\n" +
+				"			assertNotNull(new Object());\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_AmbiguousArgumentTypes_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+		defaultFixture.addMethodDeclarationFromString("" +
+				"<RET> RET getGenericReturnValue() {\n" +
+				"	return (RET) Byte.valueOf((byte) 0);\n" +
+				"}\n");
+
+		String original = "" +
+				"public void test() {\n" +
+				"	assertEquals(getGenericReturnValue(), getGenericReturnValue());\n" +
+				"}";
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import junit.framework.TestCase;\n" +
+				"public class %s extends TestCase {\n" +
+				"	<RET>RET getGenericReturnValue(){\n" +
+				"		return (RET)Byte.valueOf((byte)0);\n" +
+				"	}\n" +
+				"	%s \n" +
+				"}";
+
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
 	}
 }
