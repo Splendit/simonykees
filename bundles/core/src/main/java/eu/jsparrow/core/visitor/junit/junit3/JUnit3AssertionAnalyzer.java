@@ -7,12 +7,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -42,8 +40,7 @@ class JUnit3AssertionAnalyzer {
 	boolean analyzeAllMethodInvocations(CompilationUnit compilationUnit,
 			JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
 			Junit3MigrationConfiguration migrationConfiguration) {
-		List<MethodDeclaration> jUnit3TestMethodDeclarations = jUnit3DeclarationsCollectorVisitor
-			.getJUnit3TestMethodDeclarations();
+
 		String classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
 		List<MethodInvocation> methodInvocationsToAnalyze = jUnit3DeclarationsCollectorVisitor
 			.getMethodInvocationsToAnalyze();
@@ -54,7 +51,7 @@ class JUnit3AssertionAnalyzer {
 				return false;
 			}
 			JUnit3AssertionAnalysisResult assertionAnalysisResult = findAssertionAnalysisResult(
-					classDeclaringMethodReplacement, jUnit3TestMethodDeclarations, methodinvocation,
+					classDeclaringMethodReplacement, methodinvocation,
 					methodBinding).orElse(null);
 			if (assertionAnalysisResult != null) {
 				jUnit3AssertionAnalysisResults.add(assertionAnalysisResult);
@@ -82,15 +79,10 @@ class JUnit3AssertionAnalyzer {
 
 	private Optional<JUnit3AssertionAnalysisResult> findAssertionAnalysisResult(
 			String classDeclaringMethodReplacement,
-			List<MethodDeclaration> jUnit3TestMethodDeclarations,
 			MethodInvocation methodInvocation,
 			IMethodBinding methodBinding) {
 
 		if (!isSupportedTestCaseMethod(methodBinding)) {
-			return Optional.empty();
-		}
-
-		if (!isSurroundedWithJUnit3Test(jUnit3TestMethodDeclarations, methodInvocation)) {
 			return Optional.empty();
 		}
 
@@ -118,24 +110,6 @@ class JUnit3AssertionAnalyzer {
 			return Optional.of(analysisResultForJupiter);
 		}
 		return Optional.of(new JUnit3AssertionAnalysisResult(methodInvocation, assertionArguments));
-	}
-
-	private boolean isSurroundedWithJUnit3Test(List<MethodDeclaration> jUnit3TestMethodDeclarations,
-			MethodInvocation methodInvocation) {
-		BodyDeclaration bodyDeclarationAncestor = ASTNodeUtil.getSpecificAncestor(methodInvocation,
-				BodyDeclaration.class);
-		ASTNode parent = methodInvocation.getParent();
-		while (parent != null) {
-			if (parent == bodyDeclarationAncestor) {
-				return parent.getNodeType() == ASTNode.METHOD_DECLARATION
-						&& jUnit3TestMethodDeclarations.contains(parent);
-			}
-			if (parent.getNodeType() == ASTNode.LAMBDA_EXPRESSION) {
-				return false;
-			}
-			parent = parent.getParent();
-		}
-		return false;
 	}
 
 	private boolean isSupportedTestCaseMethod(IMethodBinding methodBinding) {

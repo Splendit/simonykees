@@ -126,27 +126,6 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 	}
 
 	@Test
-	public void visit_AssertNotNullInLambda_shouldNotTransform() throws Exception {
-		defaultFixture.addImport("java.util.function.Consumer");
-		defaultFixture.addImport("junit.framework.TestCase");
-		defaultFixture.setSuperClassType("TestCase");
-		String original = "" +
-				PUBLIC_VOID_TEST + "() {\n" +
-				"	Consumer<Object> asserter = () ->  assertNotNull();\n" +
-				"}";
-
-		String expectedCompilationUnitFormat = ""
-				+ "package %s;\n"
-				+ "import java.util.function.Consumer;\n"
-				+ "import junit.framework.TestCase;\n"
-				+ "public class %s extends TestCase {\n"
-				+ "	%s \n"
-				+ "}";
-
-		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
-	}
-
-	@Test
 	public void visit_QualifiedJupiterDisabledAnnotation_shouldNotTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
 		String original = "" +
@@ -242,39 +221,6 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				"		}\n" +
 				"	}";
 		assertNoChange(original);
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"" +
-					"		public void test(String s) {\n" +
-					"			assertTrue(true);\n" +
-					"		}",
-			"" +
-					"		public void isNoTest() {\n" +
-					"			assertTrue(true);\n" +
-					"		}",
-			"" +
-					"		public int test() {\n" +
-					"			assertTrue(true);\n" +
-					"			return 1;\n" +
-					"		}",
-			"" +
-					"		void test() {\n" +
-					"			assertTrue(true);\n" +
-					"		}"
-	})
-	public void visit_MethodDeclarationsNotTestMethods_shouldNotTransform(String testMethod) throws Exception {
-		defaultFixture.addImport("junit.framework.TestCase");
-		defaultFixture.setSuperClassType("TestCase");
-		String expectedCompilationUnitFormat = ""
-				+ "package %s;\n"
-				+ "import junit.framework.TestCase;\n"
-				+ "public class %s extends TestCase {\n"
-				+ "	%s \n"
-				+ "}";
-
-		assertNoCompilationUnitChange(testMethod, expectedCompilationUnitFormat);
 	}
 
 	@ParameterizedTest
@@ -378,24 +324,6 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 				+ "}";
 
 		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
-	}
-
-	@Test
-	public void visit_AssertNotNullInInitializer_shouldNotTransform() throws Exception {
-		defaultFixture.addImport("junit.framework.TestCase");
-		String original = "" +
-				"	" + PUBLIC_STATIC_CLASS_EXAMPLE_TEST_EXTENDS_TEST_CASE + " {\n" +
-				"\n" +
-				"		{\n" +
-				"			assertNotNull(new Object());\n" +
-				"		}\n" +
-				"\n" +
-				"		" + PUBLIC_VOID_TEST + "() {\n" +
-				"			assertNotNull(new Object());\n" +
-				"		}\n" +
-				"	}";
-
-		assertNoChange(original);
 	}
 
 	@Test
