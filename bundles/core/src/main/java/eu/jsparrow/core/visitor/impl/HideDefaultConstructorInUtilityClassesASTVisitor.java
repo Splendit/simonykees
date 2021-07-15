@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.impl;
 
+import static eu.jsparrow.core.visitor.utils.MethodDeclarationUtils.isMainMethod;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,7 +12,6 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -18,7 +19,6 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -29,8 +29,6 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
-import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -160,44 +158,6 @@ public class HideDefaultConstructorInUtilityClassesASTVisitor extends AbstractAS
 				searchScope, searchRequestor, null);
 
 		return !matches.isEmpty();
-	}
-
-	private boolean isMainMethod(MethodDeclaration methodDeclaration) {
-		if (!"main".equals(methodDeclaration.getName()
-			.getIdentifier())) {
-			return false;
-		}
-
-		@SuppressWarnings("rawtypes")
-		List modifiers = methodDeclaration.modifiers();
-		if (!ASTNodeUtil.hasModifier(modifiers, Modifier::isStatic)
-				|| !ASTNodeUtil.hasModifier(modifiers, Modifier::isPublic)) {
-			return false;
-		}
-
-		Type t = methodDeclaration.getReturnType2();
-		ITypeBinding returnTypeBinding = t.resolveBinding();
-		if (!"void".equals(returnTypeBinding.getName())) {
-			return false;
-		}
-
-		List<VariableDeclaration> params = ASTNodeUtil.convertToTypedList(methodDeclaration.parameters(),
-				VariableDeclaration.class);
-
-		if (params.size() != 1) {
-			return false;
-		}
-
-		VariableDeclaration param = params.get(0);
-		IVariableBinding paramVariableBinding = param.resolveBinding();
-		ITypeBinding paramTypeBinding = paramVariableBinding.getType();
-
-		if (!paramTypeBinding.isArray()) {
-			return false;
-		}
-
-		return ClassRelationUtil.isContentOfType(paramTypeBinding.getElementType(), java.lang.String.class.getName())
-				&& paramTypeBinding.getDimensions() == 1;
 	}
 
 	private SearchRequestor createSearchRequestor(List<SearchMatch> matches) {
