@@ -169,6 +169,8 @@ public class Messages extends NLS {
 	public static String MavenProjectImporter_startImport;
 	public static String MessageDialog_licensingError_failedToLoad;
 	public static String MessageDialog_licensingError_failedToValidate;
+	public static String ReplaceJUnit3TestCasesRule_description;
+	public static String ReplaceJUnit3TestCasesRule_name;
 	public static String ReplaceJUnit4AnnotationsWithJupiterRule_description;
 	public static String ReplaceJUnit4AnnotationsWithJupiterRule_name;
 	public static String ReplaceJUnit4AssertWithJupiterRule_description;

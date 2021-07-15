@@ -137,7 +137,7 @@ public class RefactoringInvoker {
 	 *             if the {@link StandaoneConfig} cannot be loaded or the
 	 *             refactoring cannot be computed or the
 	 */
-	public void runInDemoMode(BundleContext context) throws StandaloneException {
+	public void runInReportMode(BundleContext context) throws StandaloneException {
 		List<IJavaProject> importedProjects = importAllProjects(context);
 		loadStandaloneConfig(importedProjects, context);
 		prepareRefactoring();

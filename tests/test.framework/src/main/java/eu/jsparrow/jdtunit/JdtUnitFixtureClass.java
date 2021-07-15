@@ -17,9 +17,12 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -50,7 +53,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  * @author Hans-Jörg Schrödl
  *
  */
-@SuppressWarnings({ "unchecked"})
+@SuppressWarnings({ "unchecked" })
 public class JdtUnitFixtureClass {
 
 	private static final String DEFAULT_METHOD_FIXTURE_NAME = "FixtureMethod";
@@ -165,7 +168,7 @@ public class JdtUnitFixtureClass {
 	 * @throws BadLocationException
 	 * @throws JdtUnitException
 	 */
-	public MethodDeclaration addMethod(String methodName, List<Modifier> modifiers)
+	public MethodDeclaration addMethod(String methodName, List<ModifierKeyword> modifiers)
 			throws JavaModelException, BadLocationException, JdtUnitException {
 		return addMethod(methodName, null, modifiers);
 	}
@@ -182,14 +185,16 @@ public class JdtUnitFixtureClass {
 	 * @throws BadLocationException
 	 * @throws JdtUnitException
 	 */
-	public MethodDeclaration addMethod(String methodName, String statements, List<Modifier> modifiers)
+	public MethodDeclaration addMethod(String methodName, String statements, List<ModifierKeyword> modifiers)
 			throws JavaModelException, BadLocationException, JdtUnitException {
 		MethodDeclaration methodDeclaration = ast.newMethodDeclaration();
 		methodDeclaration.setName(ast.newSimpleName(methodName));
 
 		if (modifiers != null && !modifiers.isEmpty()) {
-			methodDeclaration.modifiers()
-				.addAll(modifiers);
+			modifiers.stream()
+				.map(ast::newModifier)
+				.forEach(modifier -> methodDeclaration.modifiers()
+					.add(modifier));
 		}
 
 		typeDeclaration.bodyDeclarations()
@@ -202,6 +207,48 @@ public class JdtUnitFixtureClass {
 		methods.put(methodName, methodDeclaration);
 
 		return methodDeclaration;
+	}
+
+	/**
+	 * Parses an entire {@link MethodDeclaration} from the given method
+	 * declaration source and adds it to the root type declaration.
+	 * 
+	 * @param methodDeclarationSource
+	 * @throws JdtUnitException
+	 * @throws JavaModelException
+	 * @throws BadLocationException
+	 */
+	public void addMethodDeclarationFromString(String methodDeclarationSource)
+			throws JdtUnitException, JavaModelException, BadLocationException {
+		TypeDeclaration tempType = ASTNodeBuilder.createTypeDeclarationFromString("TempType", methodDeclarationSource);
+		ASTNode methodDeclarationCopy = ASTNode.copySubtree(ast,
+				(ASTNode) tempType.bodyDeclarations()
+					.get(0));
+		MethodDeclaration methodDeclaration = (MethodDeclaration) methodDeclarationCopy;
+		typeDeclaration.bodyDeclarations()
+			.add(methodDeclaration);
+		this.astRoot = this.saveChanges();
+
+	}
+
+	public void setSuperClassType(String simpleName) throws JavaModelException, BadLocationException {
+		SimpleName typeName = ast.newSimpleName(simpleName);
+		SimpleType type = ast.newSimpleType(typeName);
+
+		typeDeclaration.setSuperclassType(type);
+		this.astRoot = saveChanges();
+
+	}
+
+	public void setSuperInterfaceType(String... simpleNames) throws JavaModelException, BadLocationException {
+		for (String simpleName : simpleNames) {
+			SimpleName typeName = ast.newSimpleName(simpleName);
+			SimpleType type = ast.newSimpleType(typeName);
+			typeDeclaration.superInterfaceTypes()
+				.add(type);
+		}
+		this.astRoot = saveChanges();
+
 	}
 
 	/**
@@ -500,5 +547,9 @@ public class JdtUnitFixtureClass {
 				ast.newSimpleName(name), parameterizedType);
 		methodDeclaration.parameters()
 			.add(parameterDeclaration);
+	}
+
+	public CompilationUnit getRootNode() {
+		return astRoot;
 	}
 }
