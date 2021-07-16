@@ -67,37 +67,37 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	static final String TEAR_DOWN = "tearDown"; //$NON-NLS-1$
 	static final String TEST = "test"; //$NON-NLS-1$
 
+	private final CompilationUnit compilationUnit;
 	private final Junit3MigrationConfiguration migrationConfiguration;
+	private final String classDeclaringMethodReplacement;
 	private final List<ImportDeclaration> importDeclarationsToRemove = new ArrayList<>();
 	private final List<TypeDeclaration> jUnit3TestCaseDeclarations = new ArrayList<>();
 	private final List<SimpleType> jUnit3TestCaseSuperTypesToRemove = new ArrayList<>();
 	private final List<MethodDeclaration> jUnit3TestMethodDeclarations = new ArrayList<>();
 	private final List<TestMethodAnnotationData> testMethodAnnotationDataList = new ArrayList<>();
 	private final List<Annotation> overrideAnnotationsToRemove = new ArrayList<>();
-	private final List<MethodInvocation> methodInvocationsToAnalyze = new ArrayList<>();
+	private final List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = new ArrayList<>();
 	private MethodDeclaration mainMethodToRemove;
 	private boolean transformationPossible = true;
 
-	JUnit3DataCollectorVisitor(Junit3MigrationConfiguration migrationConfiguration) {
+	JUnit3DataCollectorVisitor(Junit3MigrationConfiguration migrationConfiguration, CompilationUnit compilationUnit) {
 		this.migrationConfiguration = migrationConfiguration;
+		this.classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
+		this.compilationUnit = compilationUnit;
+		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
+		compilationUnit.accept(methodDeclarationsCollectorVisitor);
+		List<MethodDeclaration> allMethodDeclarations = methodDeclarationsCollectorVisitor.getMethodDeclarations();
+		mainMethodToRemove = allMethodDeclarations
+			.stream()
+			.filter(methodDeclaration -> MethodDeclarationUtils.isJavaApplicationMainMethod(compilationUnit,
+					methodDeclaration))
+			.findFirst()
+			.orElse(null);
 	}
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		return transformationPossible;
-	}
-
-	@Override
-	public boolean visit(CompilationUnit node) {
-		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
-		node.accept(methodDeclarationsCollectorVisitor);
-		List<MethodDeclaration> allMethodDeclarations = methodDeclarationsCollectorVisitor.getMethodDeclarations();
-		mainMethodToRemove = allMethodDeclarations
-			.stream()
-			.filter(methodDeclaration -> MethodDeclarationUtils.isJavaApplicationMainMethod(node, methodDeclaration))
-			.findFirst()
-			.orElse(null);
-		return true;
 	}
 
 	@Override
@@ -158,8 +158,14 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-		methodInvocationsToAnalyze.add(node);
-		return true;
+		JUnit3AssertionAnalyzer assertionAnalyzer = new JUnit3AssertionAnalyzer();
+		transformationPossible = assertionAnalyzer.analyzeMethodInvocation(classDeclaringMethodReplacement,
+				compilationUnit, node);
+		if (transformationPossible) {
+			assertionAnalyzer.getAssertionAnalysisResult()
+				.ifPresent(jUnit3AssertionAnalysisResults::add);
+		}
+		return transformationPossible;
 	}
 
 	@Override
@@ -345,8 +351,8 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return importDeclarationsToRemove;
 	}
 
-	public List<MethodInvocation> getMethodInvocationsToAnalyze() {
-		return methodInvocationsToAnalyze;
+	public List<JUnit3AssertionAnalysisResult> getJUnit3AssertionAnalysisResults() {
+		return jUnit3AssertionAnalysisResults;
 	}
 
 	public List<SimpleType> getJUnit3TestCaseSuperTypesToRemove() {
@@ -375,7 +381,8 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 				jUnit3TestCaseDeclarations.isEmpty() &&
 				jUnit3TestMethodDeclarations.isEmpty() &&
 				testMethodAnnotationDataList.isEmpty() &&
-				overrideAnnotationsToRemove.isEmpty()) {
+				overrideAnnotationsToRemove.isEmpty() &&
+				jUnit3AssertionAnalysisResults.isEmpty()) {
 			return false;
 		}
 		return transformationPossible;

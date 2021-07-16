@@ -2,7 +2,6 @@ package eu.jsparrow.core.visitor.junit.junit3;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +12,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -27,49 +25,31 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 class JUnit3AssertionAnalyzer {
 	private static final String JAVA_LANG_STRING = java.lang.String.class.getName();
-	private final List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = new ArrayList<>();
+	private JUnit3AssertionAnalysisResult assertionAnalysisResult;
 
-	/**
-	 * Fills an internal list with all analysis data found for supported JUnit3
-	 * assertions.
-	 * 
-	 * @return {@code true} if all JUnit3 assertions can be supported and
-	 *         {@code false} as soon as the first assertion occurs which
-	 *         prohibits transformation.
-	 */
-	boolean analyzeAllMethodInvocations(CompilationUnit compilationUnit,
-			JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
-			Junit3MigrationConfiguration migrationConfiguration) {
+	boolean analyzeMethodInvocation(String classDeclaringMethodReplacement, CompilationUnit compilationUnit,
+			MethodInvocation methodInvocation) {
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
+		assertionAnalysisResult = findAssertionAnalysisResult(classDeclaringMethodReplacement, methodInvocation,
+				methodBinding).orElse(null);
+		if (assertionAnalysisResult != null) {
+			return true;
+		}
+		if (UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getDeclaringClass())
+				|| UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getReturnType())) {
 
-		String classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
-		List<MethodInvocation> methodInvocationsToAnalyze = jUnit3DeclarationsCollectorVisitor
-			.getMethodInvocationsToAnalyze();
-
-		for (MethodInvocation methodinvocation : methodInvocationsToAnalyze) {
-			IMethodBinding methodBinding = methodinvocation.resolveMethodBinding();
-			if (methodBinding == null) {
+			ASTNode declaringNode = compilationUnit.findDeclaringNode(methodBinding);
+			if (declaringNode == null) {
 				return false;
-			}
-			JUnit3AssertionAnalysisResult assertionAnalysisResult = findAssertionAnalysisResult(
-					classDeclaringMethodReplacement, methodinvocation,
-					methodBinding).orElse(null);
-			if (assertionAnalysisResult != null) {
-				jUnit3AssertionAnalysisResults.add(assertionAnalysisResult);
-			} else {
-				if (UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getDeclaringClass())
-						|| UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getReturnType())) {
-
-					ASTNode declaringNode = compilationUnit.findDeclaringNode(methodBinding);
-					if (declaringNode == null) {
-						return false;
-					}
-				}
 			}
 		}
 		return true;
 	}
 
-	private Optional<JUnit3AssertionAnalysisResult> findAssertionAnalysisResult(
+	Optional<JUnit3AssertionAnalysisResult> findAssertionAnalysisResult(
 			String classDeclaringMethodReplacement,
 			MethodInvocation methodInvocation,
 			IMethodBinding methodBinding) {
@@ -174,8 +154,7 @@ class JUnit3AssertionAnalyzer {
 		return Optional.empty();
 	}
 
-	public List<JUnit3AssertionAnalysisResult> getjUnit3AssertionAnalysisResults() {
-		return jUnit3AssertionAnalysisResults;
+	public Optional<JUnit3AssertionAnalysisResult> getAssertionAnalysisResult() {
+		return Optional.ofNullable(assertionAnalysisResult);
 	}
-
 }

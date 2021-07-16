@@ -59,22 +59,16 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		verifyImport(compilationUnit, migrationConfiguration.getTearDownAnnotationQualifiedName());
 		verifyImport(compilationUnit, migrationConfiguration.getTestAnnotationQualifiedName());
 
-		JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor = new JUnit3DataCollectorVisitor(
-				migrationConfiguration);
-		compilationUnit.accept(jUnit3DeclarationsCollectorVisitor);
+		JUnit3DataCollectorVisitor jUnit3dataCollectorVisitor = new JUnit3DataCollectorVisitor(
+				migrationConfiguration, compilationUnit);
+		compilationUnit.accept(jUnit3dataCollectorVisitor);
 
-		if (!jUnit3DeclarationsCollectorVisitor.isTransformationPossible()) {
+		if (!jUnit3dataCollectorVisitor.isTransformationPossible()) {
 			return false;
 		}
 
-		JUnit3AssertionAnalyzer assertionAnalyzer = new JUnit3AssertionAnalyzer();
-		if (!assertionAnalyzer.analyzeAllMethodInvocations(compilationUnit,
-				jUnit3DeclarationsCollectorVisitor, migrationConfiguration)) {
-			return false;
-		}
-
-		List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = assertionAnalyzer
-			.getjUnit3AssertionAnalysisResults();
+		List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = jUnit3dataCollectorVisitor
+			.getJUnit3AssertionAnalysisResults();
 
 		Set<String> newAssertionStaticImports = new HashSet<>();
 		Set<String> simpleNamesWithStaticImport = new HashSet<>();
@@ -92,7 +86,7 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		List<JUnit3AssertionReplacementData> assertionReplacementData = collectAssertionReplacementData(
 				jUnit3AssertionAnalysisResults, simpleNamesWithStaticImport);
 
-		transform(jUnit3DeclarationsCollectorVisitor, newAssertionStaticImports, assertionReplacementData);
+		transform(jUnit3dataCollectorVisitor, newAssertionStaticImports, assertionReplacementData);
 
 		return false;
 	}
@@ -103,11 +97,11 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 	}
 
 	private void transform(
-			JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
+			JUnit3DataCollectorVisitor jUnit3dataCollectorVisitor,
 			Set<String> newAssertionStaticImports,
 			List<JUnit3AssertionReplacementData> assertionReplacementData) {
 
-		jUnit3DeclarationsCollectorVisitor.getMainMethodToRemove()
+		jUnit3dataCollectorVisitor.getMainMethodToRemove()
 			.ifPresent(mainMethodToRemove -> {
 				astRewrite.remove(mainMethodToRemove, null);
 			});
@@ -122,7 +116,7 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			listRewrite.insertFirst(newImportDeclaration, null);
 		});
 
-		List<TestMethodAnnotationData> testMethodAnnotationDataList = jUnit3DeclarationsCollectorVisitor
+		List<TestMethodAnnotationData> testMethodAnnotationDataList = jUnit3dataCollectorVisitor
 			.getTestMethodAnnotationDataList();
 		testMethodAnnotationDataList.forEach(data -> {
 			MethodDeclaration methodDeclaration = data.getMethodDeclaration();
@@ -140,19 +134,19 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			astRewrite.replace(data.getOriginalMethodInvocation(), data.createMethodInvocationReplacement(), null);
 		});
 
-		List<ImportDeclaration> importDeclarationsToRemove = jUnit3DeclarationsCollectorVisitor
+		List<ImportDeclaration> importDeclarationsToRemove = jUnit3dataCollectorVisitor
 			.getImportDeclarationsToRemove();
 		importDeclarationsToRemove.forEach(importDeclarationToRemove -> {
 			astRewrite.remove(importDeclarationToRemove, null);
 		});
 
-		List<SimpleType> jUnit3TestCaseSuperTypesToRemove = jUnit3DeclarationsCollectorVisitor
+		List<SimpleType> jUnit3TestCaseSuperTypesToRemove = jUnit3dataCollectorVisitor
 			.getJUnit3TestCaseSuperTypesToRemove();
 		jUnit3TestCaseSuperTypesToRemove.forEach(supertypeToRemove -> {
 			astRewrite.remove(supertypeToRemove, null);
 		});
 
-		List<Annotation> overrideAnnotationsToRemove = jUnit3DeclarationsCollectorVisitor
+		List<Annotation> overrideAnnotationsToRemove = jUnit3dataCollectorVisitor
 			.getOverrideAnnotationsToRemove();
 		overrideAnnotationsToRemove.forEach(overrideAnnotationToRemove -> {
 			astRewrite.remove(overrideAnnotationToRemove, null);
