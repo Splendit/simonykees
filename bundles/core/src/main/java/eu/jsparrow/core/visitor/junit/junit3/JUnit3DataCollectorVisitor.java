@@ -349,20 +349,12 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return methodInvocationsToAnalyze;
 	}
 
-	public List<TypeDeclaration> getJUnit3TestCaseDeclarations() {
-		return jUnit3TestCaseDeclarations;
-	}
-
 	public List<SimpleType> getJUnit3TestCaseSuperTypesToRemove() {
 		return jUnit3TestCaseSuperTypesToRemove;
 	}
 
 	public List<Annotation> getOverrideAnnotationsToRemove() {
 		return overrideAnnotationsToRemove;
-	}
-
-	public List<MethodDeclaration> getJUnit3TestMethodDeclarations() {
-		return jUnit3TestMethodDeclarations;
 	}
 
 	public List<TestMethodAnnotationData> getTestMethodAnnotationDataList() {

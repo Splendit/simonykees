@@ -55,23 +55,15 @@ class JUnit3AssertionAnalyzer {
 					methodBinding).orElse(null);
 			if (assertionAnalysisResult != null) {
 				jUnit3AssertionAnalysisResults.add(assertionAnalysisResult);
-			} else if (UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getDeclaringClass())) {
-				ASTNode declaringNode = compilationUnit.findDeclaringNode(methodBinding);
-				if (declaringNode == null) {
-					return false;
+			} else {
+				if (UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getDeclaringClass())
+						|| UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getReturnType())) {
+
+					ASTNode declaringNode = compilationUnit.findDeclaringNode(methodBinding);
+					if (declaringNode == null) {
+						return false;
+					}
 				}
-				if (declaringNode.getNodeType() != ASTNode.METHOD_DECLARATION) {
-					return false;
-				}
-				if (declaringNode.getLocationInParent() != TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
-					return false;
-				}
-				if (!jUnit3DeclarationsCollectorVisitor.getJUnit3TestCaseDeclarations()
-					.contains(declaringNode.getParent())) {
-					return false;
-				}
-			} else if (UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getReturnType())) {
-				return false;
 			}
 		}
 		return true;
