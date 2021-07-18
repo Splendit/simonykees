@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -101,6 +102,11 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			Set<String> newAssertionStaticImports,
 			List<JUnit3AssertionReplacementData> assertionReplacementData) {
 
+		for (ExpressionStatement superMethodInvocationToRemove : jUnit3dataCollectorVisitor
+			.getSuperMethodInvocationsToRemove()) {
+			astRewrite.remove(superMethodInvocationToRemove, null);
+		}
+
 		jUnit3dataCollectorVisitor.getMainMethodToRemove()
 			.ifPresent(mainMethodToRemove -> {
 				astRewrite.remove(mainMethodToRemove, null);
@@ -151,6 +157,7 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		overrideAnnotationsToRemove.forEach(overrideAnnotationToRemove -> {
 			astRewrite.remove(overrideAnnotationToRemove, null);
 		});
+
 		onRewrite();
 	}
 

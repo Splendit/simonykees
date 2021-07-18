@@ -10,9 +10,11 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
@@ -77,6 +79,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	private final List<TestMethodAnnotationData> testMethodAnnotationDataList = new ArrayList<>();
 	private final List<Annotation> overrideAnnotationsToRemove = new ArrayList<>();
 	private final List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = new ArrayList<>();
+	private final List<ExpressionStatement> superMethodInvocationsToRemove = new ArrayList<>();
 	private MethodDeclaration mainMethodToRemove;
 	private boolean transformationPossible = true;
 
@@ -171,8 +174,25 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
-		transformationPossible = methodBinding != null &&
-				!UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getDeclaringClass()) &&
+		if (methodBinding == null) {
+			transformationPossible = false;
+			return false;
+		}
+
+		String methodName = methodBinding.getName();
+		if (methodName.equals(SET_UP) || methodName.equals(TEAR_DOWN)) {
+			ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+			if (ClassRelationUtil.isContentOfType(declaringClass, JUNIT_FRAMEWORK_TEST_CASE)
+					&& node.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+				ExpressionStatement expressionStatement = (ExpressionStatement) node.getParent();
+				if(expressionStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
+					superMethodInvocationsToRemove.add(expressionStatement);
+					return false;
+				}
+			}
+		}
+		transformationPossible = !UnexpectedJunit3References
+			.isUnexpectedJUnitReference(methodBinding.getDeclaringClass()) &&
 				!UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getReturnType());
 		return transformationPossible;
 	}
@@ -363,6 +383,10 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return overrideAnnotationsToRemove;
 	}
 
+	public List<ExpressionStatement> getSuperMethodInvocationsToRemove() {
+		return superMethodInvocationsToRemove;
+	}
+
 	public List<TestMethodAnnotationData> getTestMethodAnnotationDataList() {
 		return testMethodAnnotationDataList;
 	}
@@ -382,7 +406,8 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 				jUnit3TestMethodDeclarations.isEmpty() &&
 				testMethodAnnotationDataList.isEmpty() &&
 				overrideAnnotationsToRemove.isEmpty() &&
-				jUnit3AssertionAnalysisResults.isEmpty()) {
+				jUnit3AssertionAnalysisResults.isEmpty() &&
+				superMethodInvocationsToRemove.isEmpty()) {
 			return false;
 		}
 		return transformationPossible;
