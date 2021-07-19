@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="eu.jsparrow.202106.feature"
+      label="jsparrow"
+      version="4.2.0.qualifier"
+      provider-name="Splendit IT-Consulting GmbH">
+
+   <description url="https://jsparrow.github.io/">
+      %description
+   </description>
+
+   <copyright url="https://jsparrow.eu/jsparrow-software-download-terms/">
+      %copyright
+   </copyright>
+
+   <license url="https://jsparrow.eu/eula">
+      %license
+   </license>
+
+   <url>
+      <update label="jSparrow Update Site" url="http://update.jsparrow.eu"/>
+   </url>
+
+   <requires>
+      <import plugin="com.github.oshi.core" version="3.4.2" match="compatible"/>
+      <import plugin="org.apache.commons.lang3" version="3.0.0" match="compatible"/>
+      <import plugin="org.apache.felix.scr"/>
+      <import plugin="org.eclipse.osgi.util"/>
+   </requires>
+
+   <plugin
+         id="eu.jsparrow.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.logging"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.license.netlicensing"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.license.api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.i18n"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.rules.api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.rules.imports"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.rules.java10"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+ 
+    <plugin
+         id="eu.jsparrow.rules.java16"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.registration"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="eu.jsparrow.crypto"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
