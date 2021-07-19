@@ -17,5 +17,6 @@
 	<modules>
 		<module>eu.jsparrow.product</module>
 		<module>eu.jsparrow.site.photon</module>
+		<module>eu.jsparrow.site.202106</module>
 	</modules>
 </project>
