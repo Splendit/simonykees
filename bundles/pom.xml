@@ -42,6 +42,7 @@
 		<!-- standalone -->
 		<module>standalone</module>
 		<module>crypto</module>
+		<module>rules.java16</module>
 	</modules>
 
 	<build>
