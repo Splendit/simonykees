@@ -261,4 +261,57 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
 
 	}
+
+	@Test
+	public void visit_SuperSetUpInvocation_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+
+		String original = "" +
+				"	@Override\n" +
+				"	protected void setUp() throws Exception {\n" +
+				"		super.setUp();\n" +
+				"	}";
+
+		String expected = "" +
+				"	@BeforeEach\n" +
+				"	protected void setUp() throws Exception {\n" +
+				"	}";
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import org.junit.jupiter.api.BeforeEach;\n" +
+				"public class %s {\n" +
+				"	%s \n" +
+				"}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+	}
+	
+	
+	@Test
+	public void visit_SuperTearDownInvocation_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+
+		String original = "" +
+				"	@Override\n" +
+				"	protected void tearDown() throws Exception {\n" +
+				"		super.tearDown();\n" +
+				"	}";
+
+		String expected = "" +
+				"	@AfterEach\n" +
+				"	protected void tearDown() throws Exception {\n" +
+				"	}";
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import org.junit.jupiter.api.AfterEach;\n" +
+				"public class %s {\n" +
+				"	%s \n" +
+				"}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+	}
 }

@@ -351,4 +351,82 @@ public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 
 		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
 	}
+
+	@Test
+	public void visit_SuperSetUpNotInBlock_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+
+		String original = "" +
+				"	@Override\n" +
+				"	protected void setUp() throws Exception {\n" +
+				"		if(true) super.setUp();\n" +
+				"	}";
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import junit.framework.TestCase;\n" +
+				"public class %s extends TestCase {\n" +
+				"	%s \n" +
+				"}";
+
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
+	}
+
+	@Test
+	public void visit_SuperCreateResult_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+
+		String original = "" +
+				"	public void test() {\n" +
+				"		assertNotNull(super.createResult());\n" +
+				"	}";
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import junit.framework.TestCase;\n" +
+				"public class %s extends TestCase {\n" +
+				"	%s \n" +
+				"}";
+
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
+	}
+	
+	
+	@Test
+	public void visit_NotResolvedSuperMethodInvocationAsArgument_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+
+		String original = "" +
+				"	public void test() {\n" +
+				"		assertNotNull(super.unknownMethod());\n" +
+				"	}";
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import junit.framework.TestCase;\n" +
+				"public class %s extends TestCase {\n" +
+				"	%s \n" +
+				"}";
+
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
+	}
+	
+	@Test
+	public void visit_NotResolvedSuperMethodInvocation_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+
+		String original = "" +
+				"	public void test() {\n" +
+				"		super.unknownMethod();\n" +
+				"	}";
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import junit.framework.TestCase;\n" +
+				"public class %s extends TestCase {\n" +
+				"	%s \n" +
+				"}";
+
+		assertNoCompilationUnitChange(original, expectedCompilationUnitFormat);
+	}
 }
