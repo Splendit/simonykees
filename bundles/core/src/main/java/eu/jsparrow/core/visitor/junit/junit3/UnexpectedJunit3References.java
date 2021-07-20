@@ -1,7 +1,5 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
-
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.IBinding;
@@ -29,7 +27,7 @@ public class UnexpectedJunit3References {
 
 		if (binding.getKind() == IBinding.PACKAGE) {
 			IPackageBinding packageBinding = (IPackageBinding) binding;
-			return !isJUnitName(packageBinding.getName());
+			return !isJUnit3Name(packageBinding.getName());
 		}
 
 		if (binding.getKind() == IBinding.TYPE) {
@@ -68,16 +66,21 @@ public class UnexpectedJunit3References {
 		if (typeBinding.isArray()) {
 			return isUnexpectedJUnitReference(typeBinding.getComponentType());
 		}
-		if (isJUnitName(typeBinding.getQualifiedName())) {
+		if (isJUnit3Name(typeBinding.getQualifiedName())) {
 			return true;
 		}
 
 		List<ITypeBinding> ancestors = ClassRelationUtil.findAncestors(typeBinding);
 		for (ITypeBinding ancestor : ancestors) {
-			if (isJUnitName(ancestor.getQualifiedName())) {
+			if (isJUnit3Name(ancestor.getQualifiedName())) {
 				return true;
 			}
 		}
 		return false;
 	}
+
+	static boolean isJUnit3Name(String fullyQualifiedName) {
+		return fullyQualifiedName.equals("junit") || fullyQualifiedName.startsWith("junit."); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
 }

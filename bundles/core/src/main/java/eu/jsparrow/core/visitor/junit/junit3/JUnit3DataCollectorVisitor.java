@@ -1,6 +1,6 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
+import static eu.jsparrow.core.visitor.junit.junit3.UnexpectedJunit3References.isJUnit3Name;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -107,7 +107,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	public boolean visit(PackageDeclaration node) {
 		String packageName = node.resolveBinding()
 			.getName();
-		transformationPossible = !isJUnitName(packageName);
+		transformationPossible = !isJUnit3Name(packageName);
 		return false;
 	}
 
@@ -115,12 +115,13 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	public boolean visit(ImportDeclaration node) {
 		String fullyQualifiedName = node.getName()
 			.getFullyQualifiedName();
-		if (fullyQualifiedName.equals("junit") || fullyQualifiedName.startsWith("junit.")) { //$NON-NLS-1$ //$NON-NLS-2$
+		if (isJUnit3Name(fullyQualifiedName)) {
 			importDeclarationsToRemove.add(node);
 			return false;
 		}
 		return true;
 	}
+
 
 	@Override
 	public boolean visit(TypeDeclaration node) {

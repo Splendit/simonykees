@@ -100,15 +100,28 @@ class JUnit3AssertionAnalyzer {
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-			return methodBinding != null && !(methodBinding.isParameterizedMethod() && methodInvocation.typeArguments()
-				.isEmpty());
+			if (methodBinding == null) {
+				return false;
+			}
+			if (methodBinding.isParameterizedMethod() && methodInvocation.typeArguments()
+				.isEmpty()) {
+				return !methodBinding.getMethodDeclaration()
+					.getReturnType()
+					.isTypeVariable();
+			}
 		}
 		if (expression.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
 			SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation) expression;
 			IMethodBinding superMethodBinding = superMethodInvocation.resolveMethodBinding();
-			return superMethodBinding != null
-					&& !(superMethodBinding.isParameterizedMethod() && superMethodInvocation.typeArguments()
-						.isEmpty());
+			if (superMethodBinding == null) {
+				return false;
+			}
+			if (superMethodBinding.isParameterizedMethod() && superMethodInvocation.typeArguments()
+				.isEmpty()) {
+				return !superMethodBinding.getMethodDeclaration()
+					.getReturnType()
+					.isTypeVariable();
+			}
 		}
 		return true;
 	}
