@@ -287,8 +287,7 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 
 		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
 	}
-	
-	
+
 	@Test
 	public void visit_SuperTearDownInvocation_shouldTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
@@ -313,5 +312,113 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 				"}";
 
 		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+	}
+
+	@Test
+	public void visit_ParameterizedMethodInvocationWithTypeArguments_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+		defaultFixture.addMethodDeclarationFromString("" +
+				"	@SuppressWarnings(\"unchecked\")\n" +
+				"	<T> T getGenericReturnValue() {\n" +
+				"		return (T) Byte.valueOf((byte) 0);\n" +
+				"	}\n");
+
+		String original = "" +
+				"public void test() {\n" +
+				"	assertEquals(this.<String>getGenericReturnValue(), this.<String>getGenericReturnValue());\n" +
+				"}";
+
+		String expected = "" +
+				"@Test\n" +
+				"public void test() {\n" +
+				"	 assertEquals(this.<String>getGenericReturnValue(),this.<String>getGenericReturnValue());\n" +
+				"}";
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import static org.junit.jupiter.api.Assertions.assertEquals;\n" +
+				"import org.junit.jupiter.api.Test;" +
+				"public class %s {\n" +
+				"  @SuppressWarnings(\"unchecked\") <T>T getGenericReturnValue(){\n" +
+				"    return (T)Byte.valueOf((byte)0);\n" +
+				"  }\n" +
+				"	%s \n" +
+				"}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+
+	}
+
+	@Test
+	public void visit_ListWithAmbiguousItemType_shouldTransform() throws Exception {
+		defaultFixture.addImport("java.util.Arrays");
+		defaultFixture.addImport("java.util.List");
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+		defaultFixture.addMethodDeclarationFromString("" +
+				"	@SuppressWarnings(\"unchecked\")\n" +
+				"	<T> List<T> getListWithAmbiguousItemType() {\n" +
+				"		return (List<T>) Arrays.asList(null);\n" +
+				"	}\n");
+
+		String original = "" +
+				"public void test() {\n" +
+				"	assertEquals(getListWithAmbiguousItemType(), getListWithAmbiguousItemType());\n" +
+				"}";
+
+		String expected = "" +
+				"@Test\n" +
+				"public void test() {\n" +
+				"	 assertEquals(getListWithAmbiguousItemType(), getListWithAmbiguousItemType());\n" +
+				"}";
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import static org.junit.jupiter.api.Assertions.assertEquals;\n" +
+				"import java.util.Arrays;\n" +
+				"import java.util.List;\n" +
+				"import org.junit.jupiter.api.Test;\n" +
+				"public class %s {\n" +
+				"  @SuppressWarnings(\"unchecked\") <T>List<T> getListWithAmbiguousItemType(){\n" +
+				"    return (List<T>)Arrays.asList(null);\n" +
+				"  }\n" +
+				"	%s \n" +
+				"}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+
+	}
+
+	@Test
+	public void visit_ImportOfJupiterOnDemand_shouldNotTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.addImport("org.junit.jupiter.api", false, true);
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+
+		String original = "" +
+				"	@DisplayName(\"test\")\n" +
+				"	public void test() {\n" +
+				"		assertEquals(1, 1);\n" +
+				"	}";
+
+		String expected = "" +
+				"	@Test" +
+				"	@DisplayName(\"test\")\n" +
+				"	public void test() {\n" +
+				"		assertEquals(1, 1);\n" +
+				"	}";
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import static org.junit.jupiter.api.Assertions.assertEquals;\n" +
+				"import org.junit.jupiter.api.*;\n" +
+				"public class %s {\n" +
+				"	%s \n" +
+				"}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+
 	}
 }

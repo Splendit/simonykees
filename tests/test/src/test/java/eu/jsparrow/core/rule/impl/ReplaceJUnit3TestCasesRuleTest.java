@@ -35,6 +35,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	private static final String QUALIFIED_NAME_OF_NOT_SUPPORTED_CONSTANT = "ReplaceJUnit3TestCasesQualifiedNameOfNotSupportedConstantRule.java";
 	private static final String IMPORT_OF_NOT_SUPPORTED_STATIC_METHOD = "ReplaceJUnit3TestCasesImportOfNotSupportedStaticMethodRule.java";
 	private static final String MAIN_METHOD_NOT_REMOVED = "ReplaceJUnit3TestCasesMainMethodNotRemovedRule.java";
+	private static final String AMBIGUOUS_SUPER_METHOD_RETURN_TYPE ="ReplaceJUnit3TestCasesAmbiguousSuperMethodReturnTypeRule.java";
 
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnit3";
 
@@ -201,6 +202,24 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 
 		Path preRule = getPreRuleFile(preRuleFileName);
 		Path postRule = getPostRuleFile(preRuleFileName, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	void testAmbiguousSuperMethodReturnType() throws Exception {
+		loadUtilities();
+		addToClasspath(testProject, Arrays
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
+					"5.0.0")));
+		rule.calculateEnabledForProject(testProject);
+		assertTrue(rule.isEnabled());
+
+		Path preRule = getPreRuleFile(AMBIGUOUS_SUPER_METHOD_RETURN_TYPE);
+		Path postRule = getPostRuleFile(AMBIGUOUS_SUPER_METHOD_RETURN_TYPE, POSTRULE_SUBDIRECTORY);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
