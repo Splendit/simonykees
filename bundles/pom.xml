@@ -29,6 +29,7 @@
 		<module>rules.api</module>
 		<module>rules.imports</module>
 		<module>rules.java10</module>
+		<module>rules.java16</module>
 
 		<!-- licensing -->
 		<module>license.api</module>
@@ -42,7 +43,6 @@
 		<!-- standalone -->
 		<module>standalone</module>
 		<module>crypto</module>
-		<module>rules.java16</module>
 	</modules>
 
 	<build>
