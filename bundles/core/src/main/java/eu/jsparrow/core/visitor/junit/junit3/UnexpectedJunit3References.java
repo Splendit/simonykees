@@ -1,7 +1,11 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
+import static eu.jsparrow.core.visitor.junit.junit3.JUnit3DataCollectorVisitor.JUNIT_FRAMEWORK_TEST_CASE;
+
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
@@ -23,7 +27,7 @@ public class UnexpectedJunit3References {
 		// private constructor of utility class in hiding implicit public one
 	}
 
-	static boolean analyzeNameBinding(IBinding binding) {
+	static boolean analyzeNameBinding(CompilationUnit compilationUnit, IBinding binding) {
 
 		if (binding.getKind() == IBinding.PACKAGE) {
 			IPackageBinding packageBinding = (IPackageBinding) binding;
@@ -31,35 +35,59 @@ public class UnexpectedJunit3References {
 		}
 
 		if (binding.getKind() == IBinding.TYPE) {
-			return !isUnexpectedJUnitReference((ITypeBinding) binding);
+			return analyzeTypeBinding(compilationUnit, (ITypeBinding) binding);
 		}
 
 		if (binding.getKind() == IBinding.METHOD) {
-			return !isUnexpectedJUnitReference(((IMethodBinding) binding).getDeclaringClass());
+			return analyzeMethodBinding(compilationUnit, ((IMethodBinding) binding));
 		}
 
 		if (binding.getKind() == IBinding.VARIABLE) {
-			IVariableBinding variableBinding = (IVariableBinding) binding;
-			ITypeBinding variableTypeBinding = variableBinding.getVariableDeclaration()
-				.getType();
-			if (isUnexpectedJUnitReference(variableTypeBinding)) {
-				return false;
-			}
-			if (variableBinding.isField()) {
-				ITypeBinding fieldDeclaringClass = variableBinding.getDeclaringClass();
-				if (fieldDeclaringClass != null
-						&& isUnexpectedJUnitReference(fieldDeclaringClass)) {
-					return false;
-				}
-			}
-			return true;
+			return analyzeVariableBinding(compilationUnit, (IVariableBinding) binding);
 		}
 		// Not covered: any other binding which is not expected for a name in
 		// connection with the migration of JUnit3
 		return false;
 	}
 
-	static boolean isUnexpectedJUnitReference(ITypeBinding typeBinding) {
+	static boolean analyzeTypeBinding(CompilationUnit compilationUnit, ITypeBinding typeBinding) {
+		if (isTestCaseSubclassDeclaredInCompilationUnit(compilationUnit, typeBinding)) {
+			return true;
+		}
+		return !isUnexpectedJUnitReference(typeBinding);
+	}
+
+	static boolean analyzeMethodBinding(CompilationUnit compilationUnit, IMethodBinding methodBinding) {
+		return analyzeTypeBinding(compilationUnit, methodBinding.getDeclaringClass())
+				&& analyzeTypeBinding(compilationUnit, methodBinding.getReturnType());
+	}
+
+	static boolean analyzeVariableBinding(CompilationUnit compilationUnit, IVariableBinding variableBinding) {
+		if (variableBinding.isField()) {
+			ITypeBinding fieldDeclaringClass = variableBinding.getDeclaringClass();
+			if (fieldDeclaringClass != null && !analyzeTypeBinding(compilationUnit, fieldDeclaringClass)) {
+				return false;
+			}
+		}
+		ITypeBinding variableTypeBinding = variableBinding.getVariableDeclaration()
+			.getType();
+
+		return analyzeTypeBinding(compilationUnit, variableTypeBinding);
+	}
+
+	static boolean isTestCaseSubclassDeclaredInCompilationUnit(CompilationUnit compilationUnit,
+			ITypeBinding typeBinding) {
+
+		if (ClassRelationUtil.isContentOfType(typeBinding.getSuperclass(), JUNIT_FRAMEWORK_TEST_CASE)) {
+			ASTNode declaringNode = compilationUnit.findDeclaringNode(typeBinding);
+			if (declaringNode != null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean isUnexpectedJUnitReference(ITypeBinding typeBinding) {
 		if (typeBinding.isPrimitive()) {
 			return false;
 		}

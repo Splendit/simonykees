@@ -60,7 +60,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * 
  */
 public class JUnit3DataCollectorVisitor extends ASTVisitor {
-	private static final String JUNIT_FRAMEWORK_TEST_CASE = "junit.framework.TestCase"; //$NON-NLS-1$
+	static final String JUNIT_FRAMEWORK_TEST_CASE = "junit.framework.TestCase"; //$NON-NLS-1$
 	private static final String JUNIT_FRAMEWORK_TEST_RESULT = "junit.framework.TestResult"; //$NON-NLS-1$
 	private static final String JAVA_LANG_STRING = "java.lang.String"; //$NON-NLS-1$
 	private static final String JAVA_LANG_OVERRIDE = "java.lang.Override"; //$NON-NLS-1$
@@ -121,7 +121,6 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		}
 		return true;
 	}
-
 
 	@Override
 	public boolean visit(TypeDeclaration node) {
@@ -186,23 +185,20 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 			if (ClassRelationUtil.isContentOfType(declaringClass, JUNIT_FRAMEWORK_TEST_CASE)
 					&& node.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
 				ExpressionStatement expressionStatement = (ExpressionStatement) node.getParent();
-				if(expressionStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
+				if (expressionStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
 					superMethodInvocationsToRemove.add(expressionStatement);
 					return false;
 				}
 			}
 		}
-		transformationPossible = !UnexpectedJunit3References
-			.isUnexpectedJUnitReference(methodBinding.getDeclaringClass()) &&
-				!UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getReturnType());
+		transformationPossible = UnexpectedJunit3References.analyzeMethodBinding(compilationUnit, methodBinding);
 		return transformationPossible;
 	}
 
 	@Override
 	public boolean visit(SuperConstructorInvocation node) {
-		transformationPossible = !UnexpectedJunit3References
-			.isUnexpectedJUnitReference(node.resolveConstructorBinding()
-				.getDeclaringClass());
+		transformationPossible = UnexpectedJunit3References.analyzeMethodBinding(compilationUnit,
+				node.resolveConstructorBinding());
 		return transformationPossible;
 	}
 
@@ -345,27 +341,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		if (binding == null) {
 			return false;
 		}
-
-		if (name.getNodeType() == ASTNode.SIMPLE_NAME && binding.getKind() == IBinding.VARIABLE) {
-			IVariableBinding variableBinding = (IVariableBinding) binding;
-			if (UnexpectedJunit3References.isUnexpectedJUnitReference(variableBinding.getType())) {
-				return false;
-			}
-			if (variableBinding.isField()) {
-				if (name.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
-					return true;
-				}
-				if (name.getLocationInParent() != FieldAccess.NAME_PROPERTY) {
-					return true;
-				}
-				FieldAccess fieldAccess = (FieldAccess) name.getParent();
-				if (fieldAccess.getExpression()
-					.getNodeType() == ASTNode.THIS_EXPRESSION) {
-					return true;
-				}
-			}
-		}
-		return UnexpectedJunit3References.analyzeNameBinding(binding);
+		return UnexpectedJunit3References.analyzeNameBinding(compilationUnit, binding);
 	}
 
 	public List<ImportDeclaration> getImportDeclarationsToRemove() {

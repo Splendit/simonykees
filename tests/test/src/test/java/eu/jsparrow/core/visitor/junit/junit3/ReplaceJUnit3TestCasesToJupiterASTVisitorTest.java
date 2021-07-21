@@ -104,6 +104,31 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
+	public void visit_UnqualifiedFieldAccess_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	public static class UnqualifiedFieldAccessTest extends TestCase {\n"
+				+ "		private int number = 1;\n"
+				+ "\n"
+				+ "		public void test() {\n"
+				+ "			assertEquals(1, number);\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	public static class UnqualifiedFieldAccessTest {\n"
+				+ "		private int number = 1;\n"
+				+ "\n"
+				+ "		@Test"
+				+ "		 public void test(){\n"
+				+ "			assertEquals(1, number);\n"
+				+ "		}\n"
+				+ "	}";
+		assertChange(original, expected);
+
+	}
+
+	@Test
 	public void visit_SuperConstructorForObject_shouldTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
 		String original = "" +
@@ -128,7 +153,6 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 				+ "\n"
 				+ "	}";
 		assertChange(original, expected);
-
 	}
 
 	@Test
@@ -391,7 +415,7 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
-	public void visit_ImportOfJupiterOnDemand_shouldNotTransform() throws Exception {
+	public void visit_ImportOfJupiterOnDemand_shouldTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
 		defaultFixture.addImport("org.junit.jupiter.api", false, true);
 		defaultFixture.addImport("junit.framework.TestCase");
@@ -419,6 +443,31 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 				"}";
 
 		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+
+	}
+
+	@Test
+	public void visit_SynchronizedStatementWithTestCaseSubclass_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"public static class SynchronizedStatementInSetupTest extends TestCase {\n" +
+				"	@Override\n" +
+				"	public void setUp() throws Exception {\n" +
+				"		synchronized (SynchronizedStatementInSetupTest.class) {\n" +
+				"		}\n" +
+				"	}\n" +
+				"}";
+
+		String expected = "" +
+				"public static class SynchronizedStatementInSetupTest {\n" +
+				"	@BeforeEach \n" +
+				"	public void setUp() throws Exception {\n" +
+				"		synchronized (SynchronizedStatementInSetupTest.class) {\n" +
+				"		}\n" +
+				"	}\n" +
+				"}";
+
+		assertChange(original, expected);
 
 	}
 }

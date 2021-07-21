@@ -38,15 +38,7 @@ class JUnit3AssertionAnalyzer {
 		if (assertionAnalysisResult != null) {
 			return true;
 		}
-		if (UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getDeclaringClass())
-				|| UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getReturnType())) {
-
-			ASTNode declaringNode = compilationUnit.findDeclaringNode(methodBinding);
-			if (declaringNode == null) {
-				return false;
-			}
-		}
-		return true;
+		return UnexpectedJunit3References.analyzeMethodBinding(compilationUnit, methodBinding);
 	}
 
 	Optional<JUnit3AssertionAnalysisResult> findAssertionAnalysisResult(
