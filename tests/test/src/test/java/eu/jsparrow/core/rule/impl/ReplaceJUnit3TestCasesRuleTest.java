@@ -35,7 +35,9 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	private static final String QUALIFIED_NAME_OF_NOT_SUPPORTED_CONSTANT = "ReplaceJUnit3TestCasesQualifiedNameOfNotSupportedConstantRule.java";
 	private static final String IMPORT_OF_NOT_SUPPORTED_STATIC_METHOD = "ReplaceJUnit3TestCasesImportOfNotSupportedStaticMethodRule.java";
 	private static final String MAIN_METHOD_NOT_REMOVED = "ReplaceJUnit3TestCasesMainMethodNotRemovedRule.java";
-	private static final String AMBIGUOUS_SUPER_METHOD_RETURN_TYPE ="ReplaceJUnit3TestCasesAmbiguousSuperMethodReturnTypeRule.java";
+	private static final String AMBIGUOUS_SUPER_METHOD_RETURN_TYPE = "ReplaceJUnit3TestCasesAmbiguousSuperMethodReturnTypeRule.java";
+	private static final String REMOVE_MAIN_WITH_RUN_TEST = "ReplaceJUnit3TestCasesRemoveMainWithRunTestRule.java";
+	private static final String REMOVE_RUN_TEST_IN_MAIN = "ReplaceJUnit3TestCasesRemoveRunTestInMainRule.java";
 
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnit3";
 
@@ -208,7 +210,7 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	void testAmbiguousSuperMethodReturnType() throws Exception {
 		loadUtilities();
@@ -245,4 +247,39 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 		assertEquals(expected, actual);
 	}
 
+	@Test
+	void testRemoveMainWithRunTest() throws Exception {
+		loadUtilities();
+		addToClasspath(testProject, Arrays
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
+					"5.0.0")));
+		rule.calculateEnabledForProject(testProject);
+		assertTrue(rule.isEnabled());
+
+		Path preRule = getPreRuleFile(REMOVE_MAIN_WITH_RUN_TEST);
+		Path postRule = getPostRuleFile(REMOVE_MAIN_WITH_RUN_TEST, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	void testRemoveRunTestInMain() throws Exception {
+		loadUtilities();
+		addToClasspath(testProject, Arrays
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
+					"5.0.0")));
+		rule.calculateEnabledForProject(testProject);
+		assertTrue(rule.isEnabled());
+
+		Path preRule = getPreRuleFile(REMOVE_RUN_TEST_IN_MAIN);
+		Path postRule = getPostRuleFile(REMOVE_RUN_TEST_IN_MAIN, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
 }

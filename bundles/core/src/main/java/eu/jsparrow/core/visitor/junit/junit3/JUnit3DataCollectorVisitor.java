@@ -15,12 +15,10 @@ import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -36,7 +34,6 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
 import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
@@ -278,7 +275,6 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 					ClassRelationUtil.isInheritingContentOfTypes(parameterType,
 							Collections.singletonList(JUNIT_FRAMEWORK_TEST_RESULT));
 		}
-
 		return false;
 	}
 
@@ -346,6 +342,10 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	public List<ImportDeclaration> getImportDeclarationsToRemove() {
 		return importDeclarationsToRemove;
+	}
+
+	public List<TypeDeclaration> getJUnit3TestCaseDeclarations() {
+		return jUnit3TestCaseDeclarations;
 	}
 
 	public List<JUnit3AssertionAnalysisResult> getJUnit3AssertionAnalysisResults() {
