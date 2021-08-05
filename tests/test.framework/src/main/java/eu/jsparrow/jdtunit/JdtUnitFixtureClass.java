@@ -36,6 +36,7 @@ import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 import eu.jsparrow.jdtunit.util.CompilationUnitBuilder;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.JdtCoreVersionBindingUtil;
 
 /**
  * <p>
@@ -437,7 +438,7 @@ public class JdtUnitFixtureClass {
 		compilationUnit = new CompilationUnitBuilder(packageFragment).setName(className + ".java")
 			.build();
 
-		ASTParser parser = ASTParser.newParser(AST.JLS11);
+		ASTParser parser = ASTParser.newParser(AST.JLS16);
 		parser.setSource(compilationUnit);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setResolveBindings(true);
@@ -477,7 +478,8 @@ public class JdtUnitFixtureClass {
 	}
 
 	private void refreshFixtures() {
-		ASTParser parser = ASTParser.newParser(AST.JLS11);
+		int astLevel = JdtCoreVersionBindingUtil.findJLSLevel(JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion());
+		ASTParser parser = ASTParser.newParser(astLevel);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(true);
 
