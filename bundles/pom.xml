@@ -75,9 +75,15 @@
 							options and libs definition in the pom -->
 						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
 						<libs>
-							<lib>${java.home}/lib/rt.jar</lib>
-							<lib>${java.home}/lib/jsse.jar</lib>
-							<lib>${java.home}/lib/jce.jar</lib>
+							<lib>${java.home}/lib/jrt-fs.jar</lib>
+							<lib>${java.home}/jmods/java.base.jmod</lib>
+							<lib>${java.home}/jmods/java.compiler.jmod</lib>
+							<lib>${java.home}/jmods/java.desktop.jmod</lib>
+							<lib>${java.home}/jmods/jdk.jfr.jmod</lib>
+							<lib>${java.home}/jmods/java.logging.jmod</lib>
+							<lib>${java.home}/jmods/java.naming.jmod</lib>
+							<lib>${java.home}/jmods/java.sql.jmod</lib>
+							<lib>${java.home}/jmods/java.xml.jmod</lib>
 						</libs>
 						<options>
 							<!-- Default parameters -->
