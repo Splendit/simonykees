@@ -9,7 +9,8 @@ import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
-public class UsePatternMatchingForInstanceofRule extends RefactoringRuleImpl<UsePatternMatchingForInstanceofASTVisitor> {
+public class UsePatternMatchingForInstanceofRule
+		extends RefactoringRuleImpl<UsePatternMatchingForInstanceofASTVisitor> {
 
 	public UsePatternMatchingForInstanceofRule() {
 		this.visitorClass = UsePatternMatchingForInstanceofASTVisitor.class;

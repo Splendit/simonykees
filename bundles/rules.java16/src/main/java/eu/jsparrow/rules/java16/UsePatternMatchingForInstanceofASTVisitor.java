@@ -5,6 +5,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
@@ -21,11 +22,13 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	private final ExpressionMatcher expressionMatcher = new ExpressionMatcher();
+
 	@Override
 	public boolean visit(InstanceofExpression instanceOf) {
 		/*
-		 * FIXME: this is only a prototype implementation. Please either drop it,
-		 * or double-check every single step of this code.
+		 * FIXME: this is only a prototype implementation. Please either drop
+		 * it, or double-check every single step of this code.
 		 */
 		if (instanceOf.getLocationInParent() == IfStatement.EXPRESSION_PROPERTY) {
 			IfStatement ifStatement = (IfStatement) instanceOf.getParent();
@@ -50,10 +53,17 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 			if (initializer == null || initializer.getNodeType() != ASTNode.CAST_EXPRESSION) {
 				return true;
 			}
+			CastExpression castExpression = (CastExpression) initializer;
+			Expression castOperand = castExpression.getExpression();
+			Expression instanceOfLeftOperand = instanceOf.getLeftOperand();
+			if (!expressionMatcher.match(castOperand, instanceOfLeftOperand)) {
+				return true;
+			}
+
 			SimpleName name = fragment.getName();
 			AST ast = instanceOf.getAST();
 			PatternInstanceofExpression patternInstanceOf = ast.newPatternInstanceofExpression();
-			patternInstanceOf.setLeftOperand((Expression) astRewrite.createCopyTarget(instanceOf.getLeftOperand()));
+			patternInstanceOf.setLeftOperand((Expression) astRewrite.createCopyTarget(instanceOfLeftOperand));
 			SingleVariableDeclaration singleVarDecl = ast.newSingleVariableDeclaration();
 			singleVarDecl.setType((Type) astRewrite.createCopyTarget(instanceOf.getRightOperand()));
 			singleVarDecl.setName((SimpleName) astRewrite.createCopyTarget(name));
@@ -64,5 +74,4 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 		}
 		return true;
 	}
-
 }
