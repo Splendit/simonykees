@@ -1,5 +1,6 @@
 package eu.jsparrow.rules.java16;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -7,6 +8,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
@@ -18,6 +20,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewriteASTVisitor {
@@ -31,6 +34,17 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 		 * it, or double-check every single step of this code.
 		 */
 		if (instanceOf.getLocationInParent() == IfStatement.EXPRESSION_PROPERTY) {
+			Expression instanceOfLeftOperand = instanceOf.getLeftOperand();
+			Type instanceOfRightOperand = instanceOf.getRightOperand();
+			String leftOperandTypeQualifiedName = instanceOfLeftOperand.resolveTypeBinding()
+				.getErasure()
+				.getQualifiedName();
+			ITypeBinding rightOperandTypeBinding = instanceOfRightOperand.resolveBinding();
+			if (!ClassRelationUtil.isInheritingContentOfTypes(rightOperandTypeBinding,
+					Collections.singletonList(leftOperandTypeQualifiedName))) {
+				return true;
+			}
+
 			IfStatement ifStatement = (IfStatement) instanceOf.getParent();
 			Statement thenStatement = ifStatement.getThenStatement();
 			if (thenStatement.getNodeType() != ASTNode.BLOCK) {
@@ -55,7 +69,7 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 			}
 			CastExpression castExpression = (CastExpression) initializer;
 			Expression castOperand = castExpression.getExpression();
-			Expression instanceOfLeftOperand = instanceOf.getLeftOperand();
+
 			if (!expressionMatcher.match(castOperand, instanceOfLeftOperand)) {
 				return true;
 			}
@@ -65,17 +79,17 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 			PatternInstanceofExpression patternInstanceOf = ast.newPatternInstanceofExpression();
 			patternInstanceOf.setLeftOperand((Expression) astRewrite.createCopyTarget(instanceOfLeftOperand));
 			SingleVariableDeclaration singleVarDecl = ast.newSingleVariableDeclaration();
-			singleVarDecl.setType((Type) astRewrite.createCopyTarget(instanceOf.getRightOperand()));
+			singleVarDecl.setType((Type) astRewrite.createCopyTarget(instanceOfRightOperand));
 			singleVarDecl.setName((SimpleName) astRewrite.createCopyTarget(name));
 			patternInstanceOf.setRightOperand(singleVarDecl);
 			astRewrite.replace(instanceOf, patternInstanceOf, null);
-			if(varDecl.fragments().size() > 1) {
+			if (varDecl.fragments()
+				.size() > 1) {
 				astRewrite.remove(fragment, null);
+			} else {
+				astRewrite.remove(varDecl, null);
 			}
-			else {
-				astRewrite.remove(varDecl, null);				
-			}
-			
+
 			onRewrite();
 		}
 		return true;

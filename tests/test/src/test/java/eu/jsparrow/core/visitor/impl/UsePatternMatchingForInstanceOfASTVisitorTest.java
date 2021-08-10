@@ -290,7 +290,7 @@ public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFi
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_ValueDeclarationWithoutInitializer_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -298,6 +298,19 @@ public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFi
 				"		Object o = \"\";\n" +
 				"		if(o instanceof String) {\n" +
 				"			String value;\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_StringVarInstanceOfString_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"		String s = \"\";\n" +
+				"		if(s instanceof String) {\n" +
+				"			String value = (String)s;\n" +
 				"		}\n" +
 				"	}";
 
