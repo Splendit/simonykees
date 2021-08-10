@@ -69,7 +69,13 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 			singleVarDecl.setName((SimpleName) astRewrite.createCopyTarget(name));
 			patternInstanceOf.setRightOperand(singleVarDecl);
 			astRewrite.replace(instanceOf, patternInstanceOf, null);
-			astRewrite.remove(varDecl, null);
+			if(varDecl.fragments().size() > 1) {
+				astRewrite.remove(fragment, null);
+			}
+			else {
+				astRewrite.remove(varDecl, null);				
+			}
+			
 			onRewrite();
 		}
 		return true;

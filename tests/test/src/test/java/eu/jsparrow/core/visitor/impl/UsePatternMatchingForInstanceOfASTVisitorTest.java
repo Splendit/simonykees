@@ -185,6 +185,30 @@ public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
+	public void visit_TwoValueVariableDeclarationFragments_shouldTransform() throws Exception {
+
+		String original = "" +
+				"	void test() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (o instanceof String) {\n" +
+				"			String value = (String) o, value1 = \"\";\n" +
+				"			System.out.println(value1);\n" +
+				"		}\n" +
+				"	}";
+
+		String expected = "" +
+				"	void test() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (o instanceof String value) {\n" +
+				"			String value1 = \"\";\n" +
+				"			System.out.println(value1);\n" +
+				"		}\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_CastingOtherVariable_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void test() {\n" +
