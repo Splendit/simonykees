@@ -316,4 +316,55 @@ public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFi
 
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_InstanceOfCharSequenceCastToString_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (o instanceof CharSequence) {\n" +
+				"			String value = (String) o;\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_InstanceOfClassCastToSubclass_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	class ExampleClass {\n" +
+				"	}\n" +
+				"\n" +
+				"	class ExampleSubClass extends ExampleClass {\n" +
+				"	}\n" +
+				"\n" +
+				"	void test() {\n" +
+				"		Object o = new ExampleSubClass();\n" +
+				"		if (o instanceof ExampleClass) {\n" +
+				"			ExampleSubClass value = (ExampleSubClass) o;\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_InstanceOfClassCastToSuperClass_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	class ExampleClass {\n" +
+				"	}\n" +
+				"\n" +
+				"	class ExampleSubClass extends ExampleClass {\n" +
+				"	}\n" +
+				"\n" +
+				"	void test() {\n" +
+				"		Object o = new ExampleSubClass();\n" +
+				"		if (o instanceof ExampleSubClass) {\n" +
+				"			ExampleClass value = (ExampleClass) o;\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
 }

@@ -40,6 +40,7 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 				.getErasure()
 				.getQualifiedName();
 			ITypeBinding rightOperandTypeBinding = instanceOfRightOperand.resolveBinding();
+			
 			if (!ClassRelationUtil.isInheritingContentOfTypes(rightOperandTypeBinding,
 					Collections.singletonList(leftOperandTypeQualifiedName))) {
 				return true;
@@ -67,6 +68,11 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 			if (initializer == null || initializer.getNodeType() != ASTNode.CAST_EXPRESSION) {
 				return true;
 			}
+			
+			if(!ClassRelationUtil.compareITypeBinding(rightOperandTypeBinding, initializer.resolveTypeBinding())) {
+				return true;
+			}
+
 			CastExpression castExpression = (CastExpression) initializer;
 			Expression castOperand = castExpression.getExpression();
 
