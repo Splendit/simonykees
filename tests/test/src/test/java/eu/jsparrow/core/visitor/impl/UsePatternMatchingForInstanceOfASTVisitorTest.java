@@ -220,4 +220,87 @@ public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFi
 
 		assertNoChange(original);
 	}
+
+	/**
+	 * Due to dropping the restriction to the first fragment, this test may fail
+	 * in the future.
+	 */
+	@Test
+	public void visit_NotFirstVariableFragment_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"		Object o = \"\", o1 = \"\";\n" +
+				"		if(o instanceof String) {\n" +
+				"			String value = \"\", value1 = (String)o;\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_NoStatementInThenBlock_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"		Object o = \"\", o1 = \"\";\n" +
+				"		if(o instanceof String) {\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ThenStatementIsNotBlock_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"		Object o = \"\";\n" +
+				"		String value;\n" +
+				"		if(o instanceof String) value = (String)o;\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	/**
+	 * Due to dropping the restriction that the variable declaration must be the
+	 * first statement, this test may fail in the future. On the other hand,
+	 * dropping of this restriction would increase complexity because of
+	 * possible corner cases like for example:
+	 * 
+	 * <pre>
+	 * Object o = "";
+	 * if (o instanceof String) {
+	 * 	o = new Object();
+	 * 	String value = (String) o;
+	 * }
+	 * 
+	 * </pre>
+	 */
+	@Test
+	public void visit_VariableDeclarationNotFirstStatement_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"		Object o = \"\";\n" +
+				"		if(o instanceof String) {\n" +
+				"			{}\n" +
+				"			String value = (String)o;\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_ValueDeclarationWithoutInitializer_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"		Object o = \"\";\n" +
+				"		if(o instanceof String) {\n" +
+				"			String value;\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
 }
