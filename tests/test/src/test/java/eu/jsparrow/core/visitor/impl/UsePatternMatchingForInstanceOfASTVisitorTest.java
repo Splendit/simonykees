@@ -209,6 +209,87 @@ public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
+	public void visit_NegatedInstanceOfWithValueInElse_shouldTransform() throws Exception {
+
+		String original = "" +
+				"	void test() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (!(o instanceof String)) {\n" +
+				"\n" +
+				"		} else {\n" +
+				"			String value = (String) o;\n" +
+				"			System.out.println(value);\n" +
+				"		}\n" +
+				"	}";
+
+		String expected = "" +
+				"	void test() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (!(o instanceof String value)) {\n" +
+				"\n" +
+				"		} else {\n" +
+				"			System.out.println(value);\n" +
+				"		}\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_IfNegatedInstanceOf_ThenReturn_shouldTransform() throws Exception {
+
+		String original = "" +
+				"	boolean test() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (!(o instanceof String))\n" +
+				"			return false;\n" +
+				"\n" +
+				"		String value = (String) o;\n" +
+				"		System.out.println(value);\n" +
+				"		return true;\n" +
+				"	}";
+
+		String expected = "" +
+				"	boolean test() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (!(o instanceof String value))\n" +
+				"			return false;\n" +
+				"\n" +
+				"		System.out.println(value);\n" +
+				"		return true;\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_IfNegatedInstanceOf_ThenBlockEndingWithReturn_shouldTransform() throws Exception {
+
+		String original = "" +
+				"	boolean test() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (!(o instanceof String)) {\n" +
+				"			return false;\n" +
+				"		}\n" +
+				"		String value = (String) o;\n" +
+				"		System.out.println(value);\n" +
+				"		return true;\n" +
+				"	}";
+
+		String expected = "" +
+				"	boolean test() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (!(o instanceof String value)) {\n" +
+				"			return false;\n" +
+				"		}\n" +
+				"		System.out.println(value);\n" +
+				"		return true;\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_CastingOtherVariable_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void test() {\n" +
@@ -367,4 +448,72 @@ public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFi
 
 		assertNoChange(original);
 	}
+
+	@Test
+	public void visit_IfNegatedInstanceOf_EmptyThenNoElse_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void testWithEmptyThenStatement() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (!(o instanceof String));\n" +
+				"		String value = (String) o;\n" +
+				"		System.out.println(value);\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_IfNegatedInstanceOf_ThenEmptyBlockNoElse_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void testWithThenEmptyBlock() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (!(o instanceof String)) {\n" +
+				"			\n" +
+				"		}\n" +
+				"		String value = (String) o;\n" +
+				"		System.out.println(value);\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_IfNegatedInstanceOf_ThenNotEndingWithReturn_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void testWithThenNotEndingWithReturn() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (!(o instanceof String)) {\n" +
+				"			System.out.println(\"o is t instanceof String\");\n" +
+				"		}\n" +
+				"		String value = (String) o;\n" +
+				"		System.out.println(value);\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void test_ElseIfNegatedInstanceOf_ThenBlockEndingWithReturn() throws Exception {
+		String original = "" +
+				"	boolean test(boolean condition) {\n"
+				+ "		Object o = \"\";\n"
+				+ "		if (condition) {\n"
+				+ "		} else if (!(o instanceof String)) {\n"
+				+ "			return false;\n"
+				+ "		}\n"
+				+ "		String value = (String) o;\n"
+				+ "		System.out.println(value);\n"
+				+ "		return true;\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	// @Test
+	// public void visit__shouldNotTransform() throws Exception {
+	// String original = "" +
+	// "";
+	//
+	// assertNoChange(original);
+	// }
 }

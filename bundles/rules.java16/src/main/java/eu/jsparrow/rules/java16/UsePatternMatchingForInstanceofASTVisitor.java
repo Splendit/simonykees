@@ -12,7 +12,9 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -28,21 +30,41 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 
 	@Override
 	public boolean visit(InstanceofExpression instanceOf) {
-		analyzeInstanceOfExpression(instanceOf).ifPresent(this::transform);
+
+		VariableDeclarationStatement variableDeclarationStatement = null;
+		if (instanceOf.getLocationInParent() == IfStatement.EXPRESSION_PROPERTY) {
+			Statement thenStatement = ((IfStatement) instanceOf.getParent()).getThenStatement();
+			variableDeclarationStatement = findVariableStatementInBlock(thenStatement).orElse(null);
+
+		} else if (instanceOf.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
+			ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression) instanceOf.getParent();
+
+			if (parenthesizedExpression.getLocationInParent() == PrefixExpression.OPERAND_PROPERTY) {
+				PrefixExpression prefixExpression = (PrefixExpression) parenthesizedExpression.getParent();
+				if (prefixExpression.getLocationInParent() == IfStatement.EXPRESSION_PROPERTY) {
+					IfStatement ifStatement = (IfStatement) prefixExpression.getParent();
+					Statement elseStatement = ifStatement.getElseStatement();
+					if (elseStatement != null) {
+						variableDeclarationStatement = findVariableStatementInBlock(elseStatement).orElse(null);
+					} else {
+						if (isThenReturnOrThenBlockEndingWithReturn(ifStatement)) {
+							variableDeclarationStatement = findVariableDeclarationAfterIfStatement(ifStatement)
+								.orElse(null);
+						}
+					}
+				}
+			}
+		}
+
+		if (variableDeclarationStatement != null) {
+			findPatternMatchingData(instanceOf, variableDeclarationStatement).ifPresent(this::transform);
+		}
+
 		return true;
 	}
 
-	private Optional<UsePatternMatchingForInstanceofData> analyzeInstanceOfExpression(InstanceofExpression instanceOf) {
-
-		if (instanceOf.getLocationInParent() != IfStatement.EXPRESSION_PROPERTY) {
-			return Optional.empty();
-		}
-
-		VariableDeclarationStatement varDecl = findVariableDeclarationStatementInThenBlock(
-				(IfStatement) instanceOf.getParent()).orElse(null);
-		if (varDecl == null) {
-			return Optional.empty();
-		}
+	private Optional<UsePatternMatchingForInstanceofData> findPatternMatchingData(InstanceofExpression instanceOf,
+			VariableDeclarationStatement varDecl) {
 
 		Expression instanceOfLeftOperand = instanceOf.getLeftOperand();
 		String leftOperandTypeQualifiedName = instanceOfLeftOperand.resolveTypeBinding()
@@ -72,14 +94,30 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 		return Optional.of(new UsePatternMatchingForInstanceofData(instanceOf, patternInstanceOfName, varDecl));
 	}
 
-	private Optional<VariableDeclarationStatement> findVariableDeclarationStatementInThenBlock(
-			IfStatement ifStatement) {
-
+	private boolean isThenReturnOrThenBlockEndingWithReturn(IfStatement ifStatement) {
 		Statement thenStatement = ifStatement.getThenStatement();
+		if (thenStatement.getNodeType() == ASTNode.RETURN_STATEMENT) {
+			return true;
+		}
 		if (thenStatement.getNodeType() != ASTNode.BLOCK) {
-			return Optional.empty();
+			return false;
 		}
 		Block block = (Block) thenStatement;
+		List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
+		if (statements.isEmpty()) {
+			return false;
+		}
+		int lastStatementIndex = statements.size() - 1;
+		Statement lastStatement = statements.get(lastStatementIndex);
+		return lastStatement.getNodeType() == ASTNode.RETURN_STATEMENT;
+	}
+
+	private Optional<VariableDeclarationStatement> findVariableStatementInBlock(
+			Statement statementExpectedAsBlock) {
+		if (statementExpectedAsBlock.getNodeType() != ASTNode.BLOCK) {
+			return Optional.empty();
+		}
+		Block block = (Block) statementExpectedAsBlock;
 		List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
 		if (statements.isEmpty()) {
 			return Optional.empty();
@@ -89,6 +127,26 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 			return Optional.empty();
 		}
 		return Optional.of((VariableDeclarationStatement) first);
+	}
+
+	private Optional<VariableDeclarationStatement> findVariableDeclarationAfterIfStatement(
+			IfStatement ifStatement) {
+		if (ifStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return Optional.empty();
+		}
+		Block block = (Block) ifStatement.getParent();
+		List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
+		int indexOfStatementAfterIf = statements.indexOf(ifStatement) + 1;
+
+		if (indexOfStatementAfterIf >= statements.size()) {
+			return Optional.empty();
+		}
+
+		Statement statementAfterIf = statements.get(indexOfStatementAfterIf);
+		if (statementAfterIf.getNodeType() != ASTNode.VARIABLE_DECLARATION_STATEMENT) {
+			return Optional.empty();
+		}
+		return Optional.of((VariableDeclarationStatement) statementAfterIf);
 	}
 
 	private boolean isFragmentWithExpectedTypeCastInitializer(VariableDeclarationFragment fragment,
