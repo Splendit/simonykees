@@ -29,10 +29,7 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 
 	@Override
 	public boolean visit(InstanceofExpression instanceOf) {
-		/*
-		 * FIXME: this is only a prototype implementation. Please either drop
-		 * it, or double-check every single step of this code.
-		 */
+
 		if (instanceOf.getLocationInParent() == IfStatement.EXPRESSION_PROPERTY) {
 			Expression instanceOfLeftOperand = instanceOf.getLeftOperand();
 			Type instanceOfRightOperand = instanceOf.getRightOperand();
@@ -40,7 +37,7 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 				.getErasure()
 				.getQualifiedName();
 			ITypeBinding rightOperandTypeBinding = instanceOfRightOperand.resolveBinding();
-			
+
 			if (!ClassRelationUtil.isInheritingContentOfTypes(rightOperandTypeBinding,
 					Collections.singletonList(leftOperandTypeQualifiedName))) {
 				return true;
@@ -68,8 +65,8 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 			if (initializer == null || initializer.getNodeType() != ASTNode.CAST_EXPRESSION) {
 				return true;
 			}
-			
-			if(!ClassRelationUtil.compareITypeBinding(rightOperandTypeBinding, initializer.resolveTypeBinding())) {
+
+			if (!ClassRelationUtil.compareITypeBinding(rightOperandTypeBinding, initializer.resolveTypeBinding())) {
 				return true;
 			}
 
@@ -80,24 +77,32 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 				return true;
 			}
 
-			SimpleName name = fragment.getName();
-			AST ast = instanceOf.getAST();
-			PatternInstanceofExpression patternInstanceOf = ast.newPatternInstanceofExpression();
-			patternInstanceOf.setLeftOperand((Expression) astRewrite.createCopyTarget(instanceOfLeftOperand));
-			SingleVariableDeclaration singleVarDecl = ast.newSingleVariableDeclaration();
-			singleVarDecl.setType((Type) astRewrite.createCopyTarget(instanceOfRightOperand));
-			singleVarDecl.setName((SimpleName) astRewrite.createCopyTarget(name));
-			patternInstanceOf.setRightOperand(singleVarDecl);
-			astRewrite.replace(instanceOf, patternInstanceOf, null);
+			ASTNode declarationNodeToRemove;
 			if (varDecl.fragments()
 				.size() > 1) {
-				astRewrite.remove(fragment, null);
+				declarationNodeToRemove = fragment;
 			} else {
-				astRewrite.remove(varDecl, null);
-			}
+				declarationNodeToRemove = varDecl;
+			}			
+			SimpleName patternInstanceOfName = fragment.getName();
 
-			onRewrite();
+			transform(instanceOf, instanceOfLeftOperand, instanceOfRightOperand, patternInstanceOfName, declarationNodeToRemove);
 		}
 		return true;
+	}
+
+	private void transform(InstanceofExpression instanceOf, Expression instanceOfLeftOperand,
+			Type instanceOfRightOperand, SimpleName patternInstanceOfName, ASTNode declarationNodeToRemove) {
+	
+		AST ast = instanceOf.getAST();
+		PatternInstanceofExpression patternInstanceOf = ast.newPatternInstanceofExpression();
+		patternInstanceOf.setLeftOperand((Expression) astRewrite.createCopyTarget(instanceOfLeftOperand));
+		SingleVariableDeclaration singleVarDecl = ast.newSingleVariableDeclaration();
+		singleVarDecl.setType((Type) astRewrite.createCopyTarget(instanceOfRightOperand));
+		singleVarDecl.setName((SimpleName) astRewrite.createCopyTarget(patternInstanceOfName));
+		patternInstanceOf.setRightOperand(singleVarDecl);
+		astRewrite.replace(instanceOf, patternInstanceOf, null);
+		astRewrite.remove(declarationNodeToRemove, null);
+		onRewrite();
 	}
 }
