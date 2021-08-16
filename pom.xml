@@ -133,7 +133,7 @@
 		<maven.resources.version>3.0.2</maven.resources.version>
 		<proguard.plugin.version>2.4.0</proguard.plugin.version>
 		<proguard.base.version>6.2.2</proguard.base.version>
-		<sonar.plugin.version>3.4.0.905</sonar.plugin.version>
+		<sonar.plugin.version>3.9.0.2155</sonar.plugin.version>
 		<jacoco.plugin.version>0.8.3</jacoco.plugin.version>
 
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
