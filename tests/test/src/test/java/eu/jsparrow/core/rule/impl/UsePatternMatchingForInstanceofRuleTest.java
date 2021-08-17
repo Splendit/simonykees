@@ -1,16 +1,11 @@
 package eu.jsparrow.core.rule.impl;
 
-import static eu.jsparrow.core.util.RulesTestUtil.addToClasspath;
-import static eu.jsparrow.core.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
-import java.util.Arrays;
 
-import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

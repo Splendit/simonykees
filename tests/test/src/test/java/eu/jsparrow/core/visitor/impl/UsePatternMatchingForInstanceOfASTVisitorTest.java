@@ -343,28 +343,13 @@ public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFi
 		assertNoChange(original);
 	}
 
-	/**
-	 * Due to dropping the restriction that the variable declaration must be the
-	 * first statement, this test may fail in the future. On the other hand,
-	 * dropping of this restriction would increase complexity because of
-	 * possible corner cases like for example:
-	 * 
-	 * <pre>
-	 * Object o = "";
-	 * if (o instanceof String) {
-	 * 	o = new Object();
-	 * 	String value = (String) o;
-	 * }
-	 * 
-	 * </pre>
-	 */
 	@Test
 	public void visit_VariableDeclarationNotFirstStatement_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void test() {\n" +
 				"		Object o = \"\";\n" +
 				"		if(o instanceof String) {\n" +
-				"			{}\n" +
+				"			o = new Object();\n" +
 				"			String value = (String)o;\n" +
 				"		}\n" +
 				"	}";
