@@ -42,33 +42,6 @@ public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
-	public void visit_GetObjectAsInstanceOfLeftOperand_shouldTransform() throws Exception {
-		String getObjectMethod = "" +
-				"	Object getObject() {\n" +
-				"		return \"\";\n" +
-				"	}";
-
-		String original = "" +
-				"	void test() {\n" +
-				"		if (getObject() instanceof String) {\n" +
-				"			String value = (String) getObject();\n" +
-				"		}\n" +
-				"	}\n" +
-				"\n" +
-				getObjectMethod;
-
-		String expected = "" +
-				"	void test() {\n" +
-				"		if (getObject() instanceof String value) {\n" +
-				"		}\n" +
-				"	}\n" +
-				"\n" +
-				getObjectMethod;
-
-		assertChange(original, expected);
-	}
-
-	@Test
 	public void visit_QualifiedNameAsInstanceOfLeftOperand_shouldTransform() throws Exception {
 		String nestedClass = "" +
 				"	class NestedClass {\n" +
@@ -142,41 +115,6 @@ public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFi
 				"	class ClassWithSuperFieldAccess extends ClassWithField{\n" +
 				"		void test() {\n" +
 				"			if (super.field instanceof String value) {\n" +
-				"			}\n" +
-				"		}\n" +
-				"	}";
-
-		assertChange(original, expected);
-	}
-
-	@Test
-	public void visit_SuperGetMethodAsInstanceOfLeftOperand_shouldTransform() throws Exception {
-
-		String original = "" +
-				"	class ClassWithGetObject {\n" +
-				"		Object getObject() {\n" +
-				"			return \"\";\n" +
-				"		}\n" +
-				"	}\n" +
-				"\n" +
-				"	class ClassUsingSuperGetObject extends ClassWithGetObject {\n" +
-				"		void test() {\n" +
-				"			if (super.getObject() instanceof String) {\n" +
-				"				String value = (String) super.getObject();\n" +
-				"			}\n" +
-				"		}\n" +
-				"	}";
-
-		String expected = "" +
-				"	class ClassWithGetObject {\n" +
-				"		Object getObject() {\n" +
-				"			return \"\";\n" +
-				"		}\n" +
-				"	}\n" +
-				"\n" +
-				"	class ClassUsingSuperGetObject extends ClassWithGetObject {\n" +
-				"		void test() {\n" +
-				"			if (super.getObject() instanceof String value) {\n" +
 				"			}\n" +
 				"		}\n" +
 				"	}";
@@ -567,11 +505,19 @@ public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFi
 		assertNoChange(original);
 	}
 
-	// @Test
-	// public void visit__shouldNotTransform() throws Exception {
-	// String original = "" +
-	// "";
-	//
-	// assertNoChange(original);
-	// }
+	@Test
+	public void visit_GetObjectAsInstanceOfLeftOperand_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test() {\n" +
+				"		if (getObject() instanceof String) {\n" +
+				"			String value = (String) getObject();\n" +
+				"		}\n" +
+				"	}\n" +
+				"\n" +
+				"	Object getObject() {\n" +
+				"		return \"\";\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
 }
