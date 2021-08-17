@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
@@ -15,8 +16,8 @@ public class UsePatternMatchingForInstanceofRule
 	public UsePatternMatchingForInstanceofRule() {
 		this.visitorClass = UsePatternMatchingForInstanceofASTVisitor.class;
 		this.id = "UsePatternMatchingForInstanceof"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription("Use PatternMatching for Instanceof ", //$NON-NLS-1$
-				"Replace instaceof expressions with Pattern matching for instance of", Duration.ofMinutes(2), //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.UsePatternMatchingForInstanceofRule_name, 
+				Messages.UsePatternMatchingForInstanceofRule_description, Duration.ofMinutes(2), 
 				Arrays.asList(Tag.JAVA_16, Tag.FORMATTING, Tag.READABILITY));
 	}
 
