@@ -31,36 +31,48 @@ public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewrit
 	@Override
 	public boolean visit(InstanceofExpression instanceOf) {
 
-		VariableDeclarationStatement variableDeclarationStatement = null;
-		if (instanceOf.getLocationInParent() == IfStatement.EXPRESSION_PROPERTY) {
-			Statement thenStatement = ((IfStatement) instanceOf.getParent()).getThenStatement();
-			variableDeclarationStatement = findVariableStatementInBlock(thenStatement).orElse(null);
+		VariableDeclarationStatement variableDeclarationForPatternMatching = findVariableDeclarationForPatternMatching(
+				instanceOf).orElse(null);
 
-		} else if (instanceOf.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
-			ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression) instanceOf.getParent();
-
-			if (parenthesizedExpression.getLocationInParent() == PrefixExpression.OPERAND_PROPERTY) {
-				PrefixExpression prefixExpression = (PrefixExpression) parenthesizedExpression.getParent();
-				if (prefixExpression.getLocationInParent() == IfStatement.EXPRESSION_PROPERTY) {
-					IfStatement ifStatement = (IfStatement) prefixExpression.getParent();
-					Statement elseStatement = ifStatement.getElseStatement();
-					if (elseStatement != null) {
-						variableDeclarationStatement = findVariableStatementInBlock(elseStatement).orElse(null);
-					} else {
-						if (isThenReturnOrThenBlockEndingWithReturn(ifStatement)) {
-							variableDeclarationStatement = findVariableDeclarationAfterIfStatement(ifStatement)
-								.orElse(null);
-						}
-					}
-				}
-			}
-		}
-
-		if (variableDeclarationStatement != null) {
-			findPatternMatchingData(instanceOf, variableDeclarationStatement).ifPresent(this::transform);
+		if (variableDeclarationForPatternMatching != null) {
+			findPatternMatchingData(instanceOf, variableDeclarationForPatternMatching).ifPresent(this::transform);
 		}
 
 		return true;
+	}
+
+	Optional<VariableDeclarationStatement> findVariableDeclarationForPatternMatching(InstanceofExpression instanceOf) {
+
+		if (instanceOf.getLocationInParent() == IfStatement.EXPRESSION_PROPERTY) {
+			Statement thenStatement = ((IfStatement) instanceOf.getParent()).getThenStatement();
+			return findVariableStatementInBlock(thenStatement);
+		}
+
+		if (instanceOf.getLocationInParent() != ParenthesizedExpression.EXPRESSION_PROPERTY) {
+			return Optional.empty();
+		}
+		ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression) instanceOf.getParent();
+
+		if (parenthesizedExpression.getLocationInParent() != PrefixExpression.OPERAND_PROPERTY) {
+			return Optional.empty();
+		}
+		PrefixExpression prefixExpression = (PrefixExpression) parenthesizedExpression.getParent();
+
+		if (prefixExpression.getLocationInParent() != IfStatement.EXPRESSION_PROPERTY) {
+			return Optional.empty();
+		}
+		IfStatement ifStatement = (IfStatement) prefixExpression.getParent();
+		Statement elseStatement = ifStatement.getElseStatement();
+
+		if (elseStatement != null) {
+			return findVariableStatementInBlock(elseStatement);
+		}
+
+		if (isThenReturnOrThenBlockEndingWithReturn(ifStatement)) {
+			return findVariableDeclarationAfterIfStatement(ifStatement);
+		}
+
+		return Optional.empty();
 	}
 
 	private Optional<UsePatternMatchingForInstanceofData> findPatternMatchingData(InstanceofExpression instanceOf,
