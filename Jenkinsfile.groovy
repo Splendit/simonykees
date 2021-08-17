@@ -147,7 +147,6 @@ timestamps {
                 default:
 
                     runStandardSteps()
-                    runSonarQubeAnalysis()
 
                     break
 
