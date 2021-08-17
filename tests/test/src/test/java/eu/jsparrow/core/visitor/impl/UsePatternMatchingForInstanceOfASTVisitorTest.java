@@ -493,18 +493,91 @@ public class UsePatternMatchingForInstanceOfASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
-	public void test_ElseIfNegatedInstanceOf_ThenBlockEndingWithReturn() throws Exception {
+	public void visit_ElseIfNegatedInstanceOf_ThenBlockEndingWithReturn_shouldNotTransform() throws Exception {
 		String original = "" +
-				"	boolean test(boolean condition) {\n"
-				+ "		Object o = \"\";\n"
-				+ "		if (condition) {\n"
-				+ "		} else if (!(o instanceof String)) {\n"
-				+ "			return false;\n"
-				+ "		}\n"
-				+ "		String value = (String) o;\n"
-				+ "		System.out.println(value);\n"
-				+ "		return true;\n"
-				+ "	}";
+				"	boolean test(boolean condition) {\n" +
+				"		Object o = \"\";\n" +
+				"		if (condition) {\n" +
+				"		} else if (!(o instanceof String)) {\n" +
+				"			return false;\n" +
+				"		}\n" +
+				"		String value = (String) o;\n" +
+				"		System.out.println(value);\n" +
+				"		return true;\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_InstanceOfStringAndCondition_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test(boolean condition) {\n" +
+				"		Object o = \"\";\n" +
+				"		if (o instanceof String && condition) {\n" +
+				"			String value = (String) o;\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ParenthesizedInstanceOfStringAndCondition_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test(boolean condition) {\n" +
+				"		Object o = \"\";\n" +
+				"		if ((o instanceof String) && condition) {\n" +
+				"			String value = (String) o;\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_NegatedParenthesizedInstanceOfStringAndCondition_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	void test(boolean condition) {\n" +
+				"		Object o = \"\";\n" +
+				"		if (!(o instanceof String) && condition) {\n" +
+				"			String value = (String) o;\n" +
+				"		}\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_IfNegatedInstanceOf_EndOfBlockAfterIf_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	boolean test_IfNegatedInstanceOf_EndOfBlockAfterIf_shouldNotTransform() {\n" +
+				"		Object o = \"\";\n" +
+				"		{\n" +
+				"			if (!(o instanceof String)) {\n" +
+				"				return false;\n" +
+				"			}\n" +
+				"		}\n" +
+				"		String value = (String) o;\n" +
+				"		return true;\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_IfNegatedInstanceOf_NoVariableDeclarationAfterIf_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	boolean test() {\n" +
+				"		Object o = \"\";\n" +
+				"		if (!(o instanceof String)) {\n" +
+				"			return false;\n" +
+				"		}\n" +
+				"		o = new Object();\n" +
+				"		String value = (String) o;\n" +
+				"		System.out.println(value);\n" +
+				"		return true;\n" +
+				"	}";
 
 		assertNoChange(original);
 	}
