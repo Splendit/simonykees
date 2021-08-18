@@ -26,6 +26,34 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * This visitor looks for {@link InstanceofExpression}-nodes which must
+ * represent either an {@code if} - condition or a negated {@code if} -
+ * condition. If possible, the given {@link InstanceofExpression}-node is
+ * replaced by a {@link PatternInstanceofExpression}-node, representing a
+ * <b>Pattern Matching for Instanceof expression</b> which is introduced in Java
+ * 16.
+ * 
+ * Example:
+ * 
+ * <pre>
+ * if (o instanceof String) {
+ * 	String value = (String) o;
+ * 	System.out.println(value);
+ * }
+ * </pre>
+ * 
+ * is transformed to
+ * 
+ * <pre>
+ * if(o instanceof String value) {
+ * 	System.out.println(value);
+ * }
+ * </pre>
+ * 
+ * @since 4.2.0
+ * 
+ */
 public class UsePatternMatchingForInstanceofASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override

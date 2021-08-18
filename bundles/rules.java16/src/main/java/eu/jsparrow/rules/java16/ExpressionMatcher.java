@@ -8,10 +8,25 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 
+/**
+ * Helper class to determine whether two instances of {@link Expression} are
+ * either representing
+ * <ul>
+ * <li>the same local variable or</li>
+ * <li>the same field</li>
+ * </ul>
+ * 
+ * @since 4.2.0
+ *
+ */
 public class ExpressionMatcher {
 
 	private final ASTMatcher astMatcher = new ASTMatcher();
 
+	/**
+	 * @return {@code true} if both expressions represent the same local
+	 *         variable or the same field, otherwise {@code false}.
+	 */
 	boolean match(Expression first, Expression second) {
 
 		if (first.getNodeType() == ASTNode.SIMPLE_NAME) {

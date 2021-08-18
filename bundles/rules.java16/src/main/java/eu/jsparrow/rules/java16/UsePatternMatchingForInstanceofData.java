@@ -4,6 +4,15 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+/**
+ * 
+ * Wrapper class for all informations which are necessary to transform an
+ * <b>instanceof expression</b> to a <b>Pattern Matching for Instanceof
+ * expression</b>
+ * 
+ * @since 4.2.0
+ *
+ */
 class UsePatternMatchingForInstanceofData {
 
 	private final InstanceofExpression instanceOf;
