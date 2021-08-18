@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/eu.jsparrow.3rd.party.feature_0.0.0.jar" id="eu.jsparrow.3rd.party.feature" version="0.0.0"/>
+   <feature id="eu.jsparrow.202106.feature">
+      <category name="202106"/>
+   </feature>
+   <category-def name="202106" label="jSparrow for Eclipse 2021-06 (4.20) and above">
+      <description>
+         Eclipse plugins by Splendit IT-Consulting GmbH
+      </description>
+   </category-def>
+</site>

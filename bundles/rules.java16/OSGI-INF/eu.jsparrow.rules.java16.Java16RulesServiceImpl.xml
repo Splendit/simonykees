@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="eu.jsparrow.rules.java16.Java16RulesServiceImpl">
+   <service>
+      <provide interface="eu.jsparrow.rules.api.RuleService"/>
+   </service>
+   <implementation class="eu.jsparrow.rules.java16.Java16RulesServiceImpl"/>
+</scr:component>

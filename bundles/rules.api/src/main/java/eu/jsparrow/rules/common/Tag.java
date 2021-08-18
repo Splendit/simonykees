@@ -30,6 +30,8 @@ public enum Tag {
 	JAVA_12("12"),
 	JAVA_13("13"),
 	JAVA_14("14"),
+	JAVA_15("15"),
+	JAVA_16("16"),
 	EMPTY(),
 	STRING_MANIPULATION("string manipulation"),
 	FORMATTING("formatting", "organize"),
