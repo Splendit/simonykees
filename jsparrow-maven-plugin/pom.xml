@@ -17,7 +17,7 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<proguard.plugin.version>2.3.1</proguard.plugin.version>
+		<proguard.plugin.version>2.4.0</proguard.plugin.version>
 		<proguard.base.version>6.2.2</proguard.base.version>
 	</properties>
 
