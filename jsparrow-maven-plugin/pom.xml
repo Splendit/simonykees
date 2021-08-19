@@ -171,8 +171,9 @@
 						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
 						<addMavenDescriptor>true</addMavenDescriptor>
 						<libs>
-							<lib>${java.home}/lib/rt.jar</lib>
-							<lib>${java.home}/lib/jsse.jar</lib>
+							<lib>${java.home}/lib/jrt-fs.jar</lib>
+							<lib>${java.home}/jmods/java.base.jmod</lib>
+							<lib>${java.home}/jmods/java.xml.jmod</lib> 
 						</libs>
 						<options>
 							<!-- Default parameters -->
