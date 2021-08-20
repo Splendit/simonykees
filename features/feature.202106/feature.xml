@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="eu.jsparrow.202106.feature"
-      label="jsparrow"
-      version="4.2.0.qualifier"
+      label="jsparrow for Eclipse 4.20 and above"
+      version="4.3.0.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
    <description url="https://jsparrow.github.io/">
@@ -90,8 +90,8 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
- 
-    <plugin
+
+   <plugin
          id="eu.jsparrow.rules.java16"
          download-size="0"
          install-size="0"
