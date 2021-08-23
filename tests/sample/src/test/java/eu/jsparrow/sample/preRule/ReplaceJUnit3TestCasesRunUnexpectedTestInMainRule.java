@@ -2,7 +2,6 @@ package eu.jsparrow.sample.preRule;
 
 import junit.framework.TestCase;
 import junit.textui.TestRunner;
-import eu.jsparrow.sample.utilities.UnexpectedTestCase;
 
 public class ReplaceJUnit3TestCasesRunUnexpectedTestInMainRule extends TestCase {
 
@@ -12,6 +11,6 @@ public class ReplaceJUnit3TestCasesRunUnexpectedTestInMainRule extends TestCase 
 
 	public static void main(String[] args) {
 		String helloWorld = "Hello World!";
-		TestRunner.run(UnexpectedTestCase.class);
+		TestRunner.run(eu.jsparrow.sample.utilities.UnexpectedTestCase.class);
 	}
 }

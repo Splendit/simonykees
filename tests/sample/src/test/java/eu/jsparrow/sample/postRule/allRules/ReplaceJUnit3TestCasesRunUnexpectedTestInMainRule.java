@@ -1,17 +1,18 @@
 package eu.jsparrow.sample.postRule.allRules;
 
-import eu.jsparrow.sample.utilities.UnexpectedTestCase;
-import junit.framework.TestCase;
-import junit.textui.TestRunner;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ReplaceJUnit3TestCasesRunUnexpectedTestInMainRule extends TestCase {
+import org.junit.jupiter.api.Test;
 
+public class ReplaceJUnit3TestCasesRunUnexpectedTestInMainRule {
+
+	@Test
 	public void testAddition() {
 		assertEquals(10, 5 + 5);
 	}
 
 	public static void main(String[] args) {
 		final String helloWorld = "Hello World!";
-		TestRunner.run(UnexpectedTestCase.class);
+		junit.textui.TestRunner.run(eu.jsparrow.sample.utilities.UnexpectedTestCase.class);
 	}
 }
