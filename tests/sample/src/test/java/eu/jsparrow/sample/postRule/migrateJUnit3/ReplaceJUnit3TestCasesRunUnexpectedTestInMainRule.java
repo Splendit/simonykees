@@ -1,10 +1,10 @@
-package eu.jsparrow.sample.preRule;
+package eu.jsparrow.sample.postRule.migrateJUnit3;
 
 import junit.framework.TestCase;
 import junit.textui.TestRunner;
 import eu.jsparrow.sample.utilities.UnexpectedTestCase;
 
-public class ReplaceJUnit3TestCasesRemoveRunTestInMainRule2 extends TestCase {
+public class ReplaceJUnit3TestCasesRunUnexpectedTestInMainRule extends TestCase {
 
 	public void testAddition() {
 		assertEquals(10, 5 + 5);
