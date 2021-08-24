@@ -1,6 +1,8 @@
 package eu.jsparrow.rules.java16.textblock;
 
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.TextBlock;
 
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
@@ -38,10 +40,36 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 public class UseTextBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	private static final String TEXT_BLOCK_TRIPLE_QUOTES = "\"\"\""; //$NON-NLS-1$
+
+	/**
+	 * Prototype without any validation.
+	 */
 	@Override
-	public boolean visit(StringLiteral stringLiteral) {
-		return true;
+	public boolean visit(InfixExpression infixExpresssion) {
+		StringConcatenationComponentsStore componentStore = new StringConcatenationComponentsStore();
 
+		componentStore.storeComponents(infixExpresssion);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(TEXT_BLOCK_TRIPLE_QUOTES);
+		sb.append('\n');
+		componentStore.getComponents()
+			.stream()
+			.filter(StringLiteral.class::isInstance)
+			.map(StringLiteral.class::cast)
+			.map(StringLiteral::getLiteralValue)
+			.forEach(sb::append);
+		sb.append(TEXT_BLOCK_TRIPLE_QUOTES);
+
+		TextBlock textBlock = astRewrite.getAST()
+			.newTextBlock();
+		String escapedValue = sb.toString();
+
+		textBlock.setEscapedValue(escapedValue);
+
+		astRewrite.replace(infixExpresssion, textBlock, null);
+		onRewrite();
+		return false;
 	}
-
 }
