@@ -58,11 +58,14 @@ public class UseTextBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		StringConcatenationComponentsStore componentStore = new StringConcatenationComponentsStore();
 
-		List<Expression> components = componentStore.collectComponents(infixExpresssion);
+		List<Expression> components = componentStore.collectConcatenationComponents(infixExpresssion);
+		if(components.isEmpty()) {
+			return false;
+		}
 		String textBlockContent = findValidTextBlockContent(components).orElse(null);
 
 		if (textBlockContent == null) {
-			return true;
+			return false;
 		}
 
 		TextBlock textBlock = astRewrite.getAST()
