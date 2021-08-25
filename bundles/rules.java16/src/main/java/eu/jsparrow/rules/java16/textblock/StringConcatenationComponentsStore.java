@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -21,34 +22,39 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 public class StringConcatenationComponentsStore {
 
-	private List<Expression> components = new ArrayList<>();
-
 	/**
 	 * Recursive Method dividing a {@link String} concatenation expression into
 	 * its components and storing them in a list.
 	 * 
-	 * @param initializer
+	 * @param unwrappedExpression
 	 *            expected to be a {@link String} concatenation expression.
 	 */
-	public void storeComponents(Expression initializer) {
-		if (initializer.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-			InfixExpression infixExpression = (InfixExpression) initializer;
+	public List<Expression> collectComponents(Expression expression) {
+		Expression unwrappedExpression = removeSurroundingParenthesis(expression);
+		List<Expression> componentList = new ArrayList<>();
+
+		if (unwrappedExpression.getNodeType() == ASTNode.INFIX_EXPRESSION) {
+			InfixExpression infixExpression = (InfixExpression) unwrappedExpression;
 			Expression left = infixExpression.getLeftOperand();
-			storeComponents(left);
+			componentList.addAll(collectComponents(left));
 			Expression right = infixExpression.getRightOperand();
-			storeComponents(right);
+			componentList.addAll(collectComponents(right));
 			if (infixExpression.hasExtendedOperands()) {
 				List<Expression> extendedOperands = ASTNodeUtil
 					.convertToTypedList(infixExpression.extendedOperands(), Expression.class);
-				extendedOperands.forEach(this::storeComponents);
+				extendedOperands.forEach(operand -> componentList.addAll(collectComponents(operand)));
 			}
 		} else {
-			components.add(initializer);
+			componentList.add(unwrappedExpression);
 		}
+		return componentList;
 	}
 
-	public List<Expression> getComponents() {
-		return components;
+	private Expression removeSurroundingParenthesis(Expression expression) {
+		if (expression.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
+			ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression) expression;
+			return removeSurroundingParenthesis(parenthesizedExpression.getExpression());
+		}
+		return expression;
 	}
-
 }
