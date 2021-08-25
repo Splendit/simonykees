@@ -9,6 +9,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.rules.java16.UseTextBlockASTVisitor;
 
 /**
  * This rule replaces concatenation expressions made up of String literals by

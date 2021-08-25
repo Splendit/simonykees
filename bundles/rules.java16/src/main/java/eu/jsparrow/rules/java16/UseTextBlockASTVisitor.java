@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.java16.textblock;
+package eu.jsparrow.rules.java16;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TextBlock;
 
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.java16.textblock.StringConcatenationComponentsStore;
 
 /**
  * 
