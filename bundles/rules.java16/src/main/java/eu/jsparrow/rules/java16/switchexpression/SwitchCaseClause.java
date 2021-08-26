@@ -16,8 +16,6 @@ public class SwitchCaseClause {
 	private List<Statement> statements;
 	private Statement breakStatement;
 	private boolean isDefaultClause;
-	private boolean withBreak;
-	private boolean withReturn;
 	
 	public SwitchCaseClause(List<Expression> expressions, List<Statement> statements, 
 			Statement breakStatement, boolean isDefaultClause) {
@@ -54,6 +52,14 @@ public class SwitchCaseClause {
 		}
 		ReturnStatement returnStatement = (ReturnStatement)last;
 		return Optional.of(returnStatement.getExpression());
+	}
+	
+	public Expression findYieldExpression() {
+		return findAssignedVariable()
+				.map(Expression::getParent)
+				.map(Assignment.class::cast)
+				.map(Assignment::getRightHandSide)
+				.orElse(findReturnedValue().orElse(null));
 	}
 
 	public List<Expression> getExpressions() {

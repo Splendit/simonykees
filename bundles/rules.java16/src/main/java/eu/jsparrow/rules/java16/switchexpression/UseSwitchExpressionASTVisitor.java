@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -46,10 +45,6 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		
 		List<SwitchCaseClause> clauses = createClauses(switchCaseBucks);
 		
-		/*
-		 * Is the switch statement exhaustive? Does it have a default clause?
-		 * We need to know that!!!!
-		 */
 		Expression switchHeaderExpression = switchStatement.getExpression();
 		AST ast = switchStatement.getAST();
 		boolean hasDefaultClause = hasDefaultClause(switchStatement);
@@ -156,7 +151,10 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 		
 		/*
-		 * What is the initializer? if it is a simple name, 
+		 * What is the initializer? if it is a simple expression (name or literal),
+		 * it is ok to replace it with a switch expression. Otherwise, the 
+		 * initializer could cause side-effects that we do not want to remove.   
+		 * 
 		 */
 		Expression initializer = fragment.getInitializer();
 		if(initializer != null && initializer.getNodeType() != ASTNode.SIMPLE_NAME 
@@ -241,15 +239,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 		return newSwitchStatement;
 	}
-	
-	/**
-	 * Please fix me. It's rather messy right now. 
-	 * 
-	 * @param ast
-	 * @param switchHeaderExpression
-	 * @param clauses
-	 * @return
-	 */
+
 	@SuppressWarnings("unchecked")
 	private SwitchExpression createSwitchExpressionWithYieldingValue(AST ast, Expression switchHeaderExpression,
 			List<SwitchCaseClause> clauses) {
@@ -267,11 +257,9 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			}
 			statements.add(switchCase);
 			List<Statement> clauseStatements = clause.getStatements();
+			Expression yieldExpression = clause.findYieldExpression();
 			if(clauseStatements.size() == 1) {
-				Statement clauseStatement = clauseStatements.get(0);
-				ExpressionStatement expressionStatement = (ExpressionStatement)clauseStatement;
-				Assignment assignment = (Assignment) expressionStatement.getExpression();
-				ExpressionStatement yieldStatement = ast.newExpressionStatement((Expression) astRewrite.createCopyTarget(assignment.getRightHandSide()));
+				ExpressionStatement yieldStatement = ast.newExpressionStatement((Expression) astRewrite.createCopyTarget(yieldExpression));
 				statements.add(yieldStatement);
 			} else {
 				Block block = ast.newBlock();
@@ -280,11 +268,8 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 					Statement newStatement = (Statement) astRewrite.createCopyTarget(clauseStatement);
 					block.statements().add(newStatement);
 				}
-				Statement lastClauseStatement = clauseStatements.get(clauseStatements.size() - 1);
-				ExpressionStatement expressionStatement = (ExpressionStatement)lastClauseStatement;
-				Assignment assignment = (Assignment) expressionStatement.getExpression();
 				YieldStatement yieldStatement = ast.newYieldStatement();
-				yieldStatement.setExpression((Expression) astRewrite.createCopyTarget(assignment.getRightHandSide()));
+				yieldStatement.setExpression((Expression) astRewrite.createCopyTarget(yieldExpression));
 				block.statements().add(yieldStatement);
 				statements.add(block);
 			}
@@ -328,9 +313,13 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	private boolean containsMultipleBreakStatements(List<Statement> buck) {
-		/*
-		 * TODO: implement me!
-		 */
+		for(Statement statement : buck) {
+			SwitchCaseBreakStatementsVisitor visitor = new SwitchCaseBreakStatementsVisitor();
+			statement.accept(visitor);
+			if(visitor.hasBreakStatements()) {
+				return true;
+			}
+		}
 		return false;
 	}
 
