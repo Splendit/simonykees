@@ -1,13 +1,10 @@
 package eu.jsparrow.core.visitor.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.rules.java16.UseTextBlockASTVisitor;
 
@@ -18,22 +15,6 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	public void setUp() {
 		setJavaVersion(JavaCore.VERSION_16);
 		setVisitor(new UseTextBlockASTVisitor());
-	}
-
-	@Test
-	public void testNumberLiteralsRegex() throws Exception {
-		Predicate<String> supportedNumericLiteralPredicate = Pattern.compile("^(0|([1-9][0-9]*))$")
-			.asPredicate();
-		assertTrue(supportedNumericLiteralPredicate.test("0"));
-		assertTrue(supportedNumericLiteralPredicate.test("1010101"));
-		assertFalse(supportedNumericLiteralPredicate.test("00"));
-		assertFalse(supportedNumericLiteralPredicate.test("010"));
-		assertFalse(supportedNumericLiteralPredicate.test("0xFFFF"));
-		assertFalse(supportedNumericLiteralPredicate.test("1010101L"));
-		assertFalse(supportedNumericLiteralPredicate.test("1010101l"));
-		assertFalse(supportedNumericLiteralPredicate.test("101.0101"));
-		assertFalse(supportedNumericLiteralPredicate.test("x101.0101"));
-
 	}
 
 	@Test
@@ -146,14 +127,14 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
-	@Test
-	public void visit_ConcatenationWithNumericLiterals_shouldTransform() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = { "0", "101259", "211", "7654", "99995" })
+	public void visit_ConcatenationWithNumericLiterals_shouldTransform(String numericToken) throws Exception {
 		String original = "" +
 				"		String exampleWithNumericLiterals = \"\" + \n" +
 				"			\"              <html>\\n\" +\n" +
 				"			\"                  <body>\\n\" +\n" +
-				"			\"                      <p> \" + 0 + \"</p>\\n\" +\n" +
-				"			\"                      <p> \" + 101259 + \"</p>\\n\" +\n" +
+				"			\"                      <p> \" + " + numericToken + " + \"</p>\\n\" +\n" +
 				"			\"                  </body>\\n\" +\n" +
 				"			\"              </html>\\n\";";
 
@@ -161,8 +142,7 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"  String exampleWithNumericLiterals=\"\"\"\n" +
 				"                              <html>\n" +
 				"                                  <body>\n" +
-				"                                      <p> 0</p>\n" +
-				"                                      <p> 101259</p>\n" +
+				"                                      <p> " + numericToken + "</p>\n" +
 				"                                  </body>\n" +
 				"                              </html>\n" +
 				"                \"\"\";";
@@ -240,16 +220,16 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertNoChange(original);
 	}
 
-	@Test
-	public void visit_ConcatenationWithNotSupportedNumericLiterals_shouldNotTransform() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = { "1L", "1l", "1.0", "1.0F", "1.0f", "1.0D", "1.0d", "00", "010", "0XFFF", "0xFFF",
+			"1000_0000" })
+	public void visit_ConcatenationWithNotSupportedNumericLiterals_shouldNotTransform(String numericToken)
+			throws Exception {
 		String original = "" +
 				"		String exampleWithNumericLiterals = \"\" + \n" +
 				"			\"              <html>\\n\" +\n" +
 				"			\"                  <body>\\n\" +\n" +
-				"			\"                      <p> \" + 1L + \"</p>\\n\" +\n" +
-				"			\"                      <p> \" + 0.0f + \"</p>\\n\" +\n" +
-				"			\"                      <p> \" + 0.0 + \"</p>\\n\" +\n" +
-				"			\"                      <p> \" + 0.0d + \"</p>\\n\" +\n" +
+				"			\"                      <p> \" + " + numericToken + " + \"</p>\\n\" +\n" +
 				"			\"                  </body>\\n\" +\n" +
 				"			\"              </html>\\n\";";
 
