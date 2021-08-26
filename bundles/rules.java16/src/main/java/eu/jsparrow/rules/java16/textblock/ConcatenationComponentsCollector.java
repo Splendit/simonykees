@@ -4,14 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
@@ -25,14 +27,19 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * @since 4.3.0
  *
  */
+@SuppressWarnings("nls")
 public class ConcatenationComponentsCollector {
+
+	private final Predicate<String> SUPPORTED_NUMERIC_LITERAL_PREDICATE = Pattern.compile("^(0|([1-9][0-9]*))$")
+		.asPredicate();
 
 	/**
 	 * @return a list of strings representing all the component(s) of a String
 	 *         concatenation expression specified by the the
 	 *         {@link InfixExpression}. An empty list s returned as soon as not
 	 *         all components can be represented in a valid way, indicating that
-	 *         the given {@link InfixExpression} cannot be transformed to a {@code TextBlock}.
+	 *         the given {@link InfixExpression} cannot be transformed to a
+	 *         {@code TextBlock}.
 	 */
 	public List<String> collectConcatenationComponents(InfixExpression infixExpression) {
 		Operator operator = infixExpression.getOperator();
@@ -70,7 +77,7 @@ public class ConcatenationComponentsCollector {
 		}
 		return componentList;
 	}
-	
+
 	private List<String> collectComponents(Expression expression) {
 		Expression unwrappedExpression = removeSurroundingParenthesis(expression);
 		if (unwrappedExpression.getNodeType() == ASTNode.INFIX_EXPRESSION) {
@@ -92,7 +99,11 @@ public class ConcatenationComponentsCollector {
 
 		if (component.getNodeType() == ASTNode.NUMBER_LITERAL) {
 			NumberLiteral numberLiteral = (NumberLiteral) component;
-			return Optional.of(numberLiteral.getToken());
+			String numericToken = numberLiteral.getToken();
+			if (SUPPORTED_NUMERIC_LITERAL_PREDICATE.test(numericToken)) {
+				return Optional.of(numericToken);
+			}
+			return Optional.empty();
 		}
 
 		if (component.getNodeType() == ASTNode.CHARACTER_LITERAL) {
