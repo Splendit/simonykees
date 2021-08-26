@@ -8,13 +8,22 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -37,71 +46,132 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		
 		List<SwitchCaseClause> clauses = createClauses(switchCaseBucks);
 		
+		/*
+		 * Is the switch statement exhaustive? Does it have a default clause?
+		 * We need to know that!!!!
+		 */
+		Expression switchHeaderExpression = switchStatement.getExpression();
+		AST ast = switchStatement.getAST();
+		boolean hasDefaultClause = hasDefaultClause(switchStatement);
+		if(!hasDefaultClause) {
+			SwitchStatement newSwitchStatement = createSwitchStatement(ast, switchHeaderExpression, clauses);
+			astRewrite.replace(switchStatement, newSwitchStatement, null);
+			onRewrite();
+			return true;
+		}
+		
 		if(areAssigningValue(clauses)) {
 			SwitchCaseClause firstClause = clauses.get(0);
 			Expression assigned = firstClause.findAssignedVariable().orElse(null);
 			if(assigned == null) {
 				return true;
 			}
-			ITypeBinding typeBinding = assigned.resolveTypeBinding();
-			int kind = typeBinding.getKind();
-			if (kind == ITypeBinding.VARIABLE) {
-				ASTNode declaringNode = getCompilationUnit().findDeclaringNode(typeBinding);
-				/*
-				 * the only question now is: should we put the switch expression on a 
-				 * assignment or on a variable declaration node. 
-				 */
+			VariableDeclarationFragment fragment = findDeclaringFragment(assigned, switchStatement).orElse(null);
+			if (fragment != null) {
+				SwitchExpression newSwitchExpression = createSwitchExpressionWithYieldingValue(ast, switchHeaderExpression, clauses);
+				astRewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, newSwitchExpression, null);
+				astRewrite.remove(switchStatement, null);
+				onRewrite();
+			} else {
+				Assignment assignment = ast.newAssignment();
+				assignment.setLeftHandSide((Expression)astRewrite.createCopyTarget(assigned));
+				SwitchExpression newSwitchExpression = createSwitchExpressionWithYieldingValue(ast, switchHeaderExpression, clauses);
+				assignment.setRightHandSide(newSwitchExpression);
+				ExpressionStatement newAssignmentStatement = ast.newExpressionStatement(assignment);
+				astRewrite.replace(switchStatement, newAssignmentStatement, null);
+				onRewrite();
 			}
-			
-			/*
-			 * 1. Find the variable declaration. 
-			 * 
-			 * 2. If it is declared right before the 
-			 * switch statement, then create a switch expression with yield statements and
-			 * use it as initializer for the variable declaration.
-			 * 
-			 * 3. If it is declared somewhere else, then make an assignment expression and put the expression statement as an initializer
-			 * in the assignment expression. Put the entire thing on an ExpressionStatement. 
-			 * 
-			 */
-			
 		} else if (areReturningValue(clauses)) {
 			/*
 			 * Similar to above. But everything has to be wrapped on a return statement. 
 			 */
+			SwitchCaseClause firstClause = clauses.get(0);
+			Expression returnedValue =  firstClause.findReturnedValue().orElse(null);
+			if(returnedValue == null) {
+				return true;
+			}
+			
+			SwitchExpression newSwitchExpression = createSwitchExpressionWithYieldingValue(ast, switchHeaderExpression, clauses);
+			
+			ReturnStatement newReturnStatement = ast.newReturnStatement();
+			newReturnStatement.setExpression(newSwitchExpression);
+			astRewrite.replace(switchStatement, newReturnStatement, null);
+			onRewrite();
+			
 		} else {
-			AST ast = switchStatement.getAST();
-			Expression switchHeaderExpression = switchStatement.getExpression();
 			SwitchStatement newSwitchStatement = createSwitchStatement(ast, switchHeaderExpression, clauses);
 			astRewrite.replace(switchStatement, newSwitchStatement, null);
 			onRewrite();
 		}
-
-		
-		/*
-		 * Consider the following: 
-		 * 1. Switch Case with break statements
-		 * 2. Switch Case with return statements. 
-		 * 
-		 * Each Switch case may have:
-		 * a) Only one statement and a break/return
-		 * b) Multiple statements ending with a break/return 
-		 * 
-		 * Consecutive Switch-case statements should be grouped together.
-		 * If a switch-case statement is not followed by a consecutive Switch-Case statement 
-		 * but does not contain its own break/return statement before the next switch-case statement
-		 * starts, then it is not possible to transform the switch statement to a switch expression. 
-		 * 
-		 * Switch Statements can be used to compute a value which can be assigned to a local variable or simply returned. 
-		 * If each switch-case 'group' is ending with an assignment or a return statement, then the switch expression can be placed on a 
-		 * variable initialization/assignment statement or on a return statement respectively. 
-		 *  
-		 * 
-		 * 
-		 */
 		return true;
 	}
 	
+	private boolean hasDefaultClause(SwitchStatement switchStatement) {
+		List<Statement> statements = ASTNodeUtil.convertToTypedList(switchStatement.statements(), Statement.class);
+		List<SwitchCase> switchCaseStatements = filterSwitchCaseStatements(statements);
+		return switchCaseStatements.stream()
+				.anyMatch(SwitchCase::isDefault);
+	}
+
+	private Optional<VariableDeclarationFragment> findDeclaringFragment(Expression assigned, SwitchStatement switchStatement) {
+		CompilationUnit compilationUnit = getCompilationUnit();
+		if(assigned.getNodeType() != ASTNode.SIMPLE_NAME) {
+			return Optional.empty();
+		}
+		SimpleName simpleName = (SimpleName)assigned;
+		
+		IBinding binding = simpleName.resolveBinding();
+		ASTNode declaringNode = compilationUnit.findDeclaringNode(binding);
+		if(declaringNode == null) {
+			return Optional.empty();
+		}
+		int declaringNodeType = declaringNode.getNodeType();
+		if(declaringNodeType != ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			return Optional.empty();
+		}
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment)declaringNode;
+		if(fragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+			return Optional.empty();
+		}
+		VariableDeclarationStatement declaraingStatement = (VariableDeclarationStatement) fragment.getParent();
+		if(declaraingStatement.fragments().size() != 1) {
+			return Optional.empty();
+		}
+		boolean areStatementsInBlock = declaraingStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY 
+				&& switchStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY;
+		if(!areStatementsInBlock) {
+			return Optional.empty();
+		}
+		Block declarationParent = (Block)declaraingStatement.getParent();
+		Block switchParent = (Block) switchStatement.getParent();
+		if(switchParent != declarationParent) {
+			return Optional.empty();
+		}
+		List<Statement> blockStatements = ASTNodeUtil.convertToTypedList(declarationParent.statements(), Statement.class);
+		int declarationIndex = blockStatements.indexOf(declaraingStatement);
+		int switchIndex = blockStatements.indexOf(switchStatement);
+		
+		if(switchIndex != declarationIndex + 1) {
+			return Optional.empty();
+		}
+		
+		/*
+		 * What is the initializer? if it is a simple name, 
+		 */
+		Expression initializer = fragment.getInitializer();
+		if(initializer != null && initializer.getNodeType() != ASTNode.SIMPLE_NAME 
+				&& initializer.getNodeType() != ASTNode.STRING_LITERAL 
+				&& initializer.getNodeType() != ASTNode.NUMBER_LITERAL
+				&& initializer.getNodeType() != ASTNode.BOOLEAN_LITERAL
+				&& initializer.getNodeType() != ASTNode.CHARACTER_LITERAL
+				&& initializer.getNodeType() != ASTNode.NULL_LITERAL
+				&& initializer.getNodeType() != ASTNode.TYPE_LITERAL) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(fragment);
+	}
+
 	private boolean areReturningValue(List<SwitchCaseClause> clauses) {
 		return clauses.stream()
 				.map(SwitchCaseClause::findReturnedValue)
@@ -168,6 +238,56 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 				statements.add(block);
 			}
 			
+		}
+		return newSwitchStatement;
+	}
+	
+	/**
+	 * Please fix me. It's rather messy right now. 
+	 * 
+	 * @param ast
+	 * @param switchHeaderExpression
+	 * @param clauses
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private SwitchExpression createSwitchExpressionWithYieldingValue(AST ast, Expression switchHeaderExpression,
+			List<SwitchCaseClause> clauses) {
+		SwitchExpression newSwitchStatement = ast.newSwitchExpression();
+		Expression newHeaderExpression = (Expression) astRewrite.createCopyTarget(switchHeaderExpression);
+		newSwitchStatement.setExpression(newHeaderExpression);
+		List<Statement>statements = newSwitchStatement.statements();
+		for(SwitchCaseClause clause : clauses) {
+			List<Expression> clauseExpressions = clause.getExpressions();
+			SwitchCase switchCase = ast.newSwitchCase();
+			switchCase.setSwitchLabeledRule(true);
+			for(Expression expression : clauseExpressions) {
+				switchCase.expressions()
+					.add((Expression) astRewrite.createCopyTarget(expression));
+			}
+			statements.add(switchCase);
+			List<Statement> clauseStatements = clause.getStatements();
+			if(clauseStatements.size() == 1) {
+				Statement clauseStatement = clauseStatements.get(0);
+				ExpressionStatement expressionStatement = (ExpressionStatement)clauseStatement;
+				Assignment assignment = (Assignment) expressionStatement.getExpression();
+				ExpressionStatement yieldStatement = ast.newExpressionStatement((Expression) astRewrite.createCopyTarget(assignment.getRightHandSide()));
+				statements.add(yieldStatement);
+			} else {
+				Block block = ast.newBlock();
+				for(int i = 0; i < clauseStatements.size() - 1; i++) {
+					Statement clauseStatement = clauseStatements.get(i);
+					Statement newStatement = (Statement) astRewrite.createCopyTarget(clauseStatement);
+					block.statements().add(newStatement);
+				}
+				Statement lastClauseStatement = clauseStatements.get(clauseStatements.size() - 1);
+				ExpressionStatement expressionStatement = (ExpressionStatement)lastClauseStatement;
+				Assignment assignment = (Assignment) expressionStatement.getExpression();
+				YieldStatement yieldStatement = ast.newYieldStatement();
+				yieldStatement.setExpression((Expression) astRewrite.createCopyTarget(assignment.getRightHandSide()));
+				block.statements().add(yieldStatement);
+				statements.add(block);
+			}
 		}
 		return newSwitchStatement;
 	}

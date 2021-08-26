@@ -56,26 +56,20 @@ public class SwitchCaseClause {
 		return Optional.of(returnStatement.getExpression());
 	}
 
-
 	public List<Expression> getExpressions() {
 		return expressions;
 	}
-
 
 	public List<Statement> getStatements() {
 		return statements;
 	}
 
-
 	public Statement getBreakStatement() {
 		return breakStatement;
 	}
 
-
 	public boolean isDefaultClause() {
 		return isDefaultClause;
 	}
-	
-	
 
 }
