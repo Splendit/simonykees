@@ -3,17 +3,11 @@ package eu.jsparrow.rules.java16;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.BooleanLiteral;
-import org.eclipse.jdt.core.dom.CharacterLiteral;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TextBlock;
 
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.rules.java16.textblock.StringConcatenationComponentsStore;
+import eu.jsparrow.rules.java16.textblock.ConcatenationComponentsCollector;
 
 /**
  * 
@@ -57,10 +51,10 @@ public class UseTextBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(InfixExpression infixExpresssion) {
 
-		StringConcatenationComponentsStore componentStore = new StringConcatenationComponentsStore();
+		ConcatenationComponentsCollector componentStore = new ConcatenationComponentsCollector();
 
-		List<Expression> components = componentStore.collectConcatenationComponents(infixExpresssion);
-		if(components.isEmpty()) {
+		List<String> components = componentStore.collectConcatenationComponents(infixExpresssion);
+		if (components.isEmpty()) {
 			return false;
 		}
 		String textBlockContent = findValidTextBlockContent(components).orElse(null);
@@ -79,32 +73,13 @@ public class UseTextBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 		return false;
 	}
 
-	private Optional<String> findValidTextBlockContent(List<Expression> components) {
+	private Optional<String> findValidTextBlockContent(List<String> components) {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append(TEXT_BLOCK_TRIPLE_QUOTES);
 		sb.append('\n');
-
-		for (Expression component : components) {
-			if (component.getNodeType() == ASTNode.STRING_LITERAL) {
-				StringLiteral stringLiteral = (StringLiteral) component;
-				sb.append(stringLiteral.getLiteralValue());
-			} else if (component.getNodeType() == ASTNode.NUMBER_LITERAL) {
-				NumberLiteral numberLiteral = (NumberLiteral) component;
-				sb.append(numberLiteral.getToken());
-			} else if (component.getNodeType() == ASTNode.CHARACTER_LITERAL) {
-				CharacterLiteral characterLiteral = (CharacterLiteral) component;
-				sb.append(characterLiteral.charValue());
-			} else if (component.getNodeType() == ASTNode.BOOLEAN_LITERAL) {
-				BooleanLiteral booleanLiteral = (BooleanLiteral) component;
-				sb.append(booleanLiteral.booleanValue());
-			} else if (component.getNodeType() == ASTNode.NULL_LITERAL) {
-				sb.append("null"); //$NON-NLS-1$
-			}
-		}
-
+		components.forEach(sb::append);
 		sb.append(TEXT_BLOCK_TRIPLE_QUOTES);
 		return Optional.of(sb.toString());
 	}
-
 }
