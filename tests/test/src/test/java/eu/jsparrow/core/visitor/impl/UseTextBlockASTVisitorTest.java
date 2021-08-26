@@ -63,17 +63,17 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	public void visit_ConcatenationWithNullLiteral_shouldTransform() throws Exception {
 		String original = "" +
 				"		String exampleWithNulLiteral = \"\" +\n" +
-				"			\"              <html>\\n\" + \n" +
-				"			\"                  <body>\\n\"+ \n" +
-				"			\"                      <p>\" +\"null == \" + null +  \"</p>\\n\" + \n" +
-				"			\"                  </body>\\n\"+\n" +
-				"			\"              </html>\\n\";";
+				"				\"              <html>\\n\" + \n" +
+				"				\"                  <body>\\n\"+ \n" +
+				"				\"                      <p>\" + null + \"</p>\\n\" + \n" +
+				"				\"                  </body>\\n\"+\n" +
+				"				\"              </html>\\n\";";
 
 		String expected = "" +
 				"  String exampleWithNulLiteral=\"\"\"\n" +
 				"                              <html>\n" +
 				"                                  <body>\n" +
-				"                                      <p>null == null</p>\n" +
+				"                                      <p>null</p>\n" +
 				"                                  </body>\n" +
 				"                              </html>\n" +
 				"                \"\"\";";
@@ -84,21 +84,21 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	public void visit_ConcatenationWithBooleanTrue_shouldTransform() throws Exception {
 		String original = "" +
-				"		String exampleWithBooleanTrue = \"\" +\n" +
-				"			\"              <html>\\n\" + \n" +
-				"			\"                  <body>\\n\"+ \n" +
-				"			\"                      <p>\" +\"true == \" + true +  \"</p>\\n\" + \n" +
-				"			\"                  </body>\\n\"+\n" +
-				"			\"              </html>\\n\";";
+				"		String exampleWithBooleanTrue = \"\" +\n"
+				+ "				\"              <html>\\n\" + \n"
+				+ "				\"                  <body>\\n\"+ \n"
+				+ "				\"                      <p>\" + true + \"</p>\\n\" + \n"
+				+ "				\"                  </body>\\n\"+\n"
+				+ "				\"              </html>\\n\";";
 
 		String expected = "" +
-				"  String exampleWithBooleanTrue=\"\"\"\n" +
-				"                              <html>\n" +
-				"                                  <body>\n" +
-				"                                      <p>true == true</p>\n" +
-				"                                  </body>\n" +
-				"                              </html>\n" +
-				"                \"\"\";";
+				"  String exampleWithBooleanTrue=\"\"\"\n"
+				+ "                              <html>\n"
+				+ "                                  <body>\n"
+				+ "                                      <p>true</p>\n"
+				+ "                                  </body>\n"
+				+ "                              </html>\n"
+				+ "                \"\"\";";
 
 		assertChange(original, expected);
 	}
@@ -106,21 +106,21 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	@Test
 	public void visit_ConcatenationWithBooleanFalse_shouldTransform() throws Exception {
 		String original = "" +
-				"		String exampleWithBooleanFalse = \"\" +\n" +
-				"			\"              <html>\\n\" + \n" +
-				"			\"                  <body>\\n\"+ \n" +
-				"			\"                      <p>\" +\"false == \" + false +  \"</p>\\n\" + \n" +
-				"			\"                  </body>\\n\"+\n" +
-				"			\"              </html>\\n\";";
+				"		String exampleWithBooleanFalse = \"\" +\n"
+				+ "				\"              <html>\\n\" + \n"
+				+ "				\"                  <body>\\n\"+ \n"
+				+ "				\"                      <p>\" + false + \"</p>\\n\" + \n"
+				+ "				\"                  </body>\\n\"+\n"
+				+ "				\"              </html>\\n\";";
 
 		String expected = "" +
-				"  String exampleWithBooleanFalse=\"\"\"\n" +
-				"                              <html>\n" +
-				"                                  <body>\n" +
-				"                                      <p>false == false</p>\n" +
-				"                                  </body>\n" +
-				"                              </html>\n" +
-				"                \"\"\";";
+				"  String exampleWithBooleanFalse=\"\"\"\n"
+				+ "                              <html>\n"
+				+ "                                  <body>\n"
+				+ "                                      <p>false</p>\n"
+				+ "                                  </body>\n"
+				+ "                              </html>\n"
+				+ "                \"\"\";";
 
 		assertChange(original, expected);
 	}
@@ -156,12 +156,82 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_IntLiteralAsFirstOperand_shouldTransform() throws Exception {
+		String original = "" +
+				"		String text = \n" +
+				"				1 + \"st line\\n\" +\n" +
+				"				2 + \"nd line\\n\" + \n" +
+				"				3 + \"rd line\\n\" + \n" +
+				"				4 + \"th line\\n\" + \n" +
+				"				5 + \"th line\\n\";";
+
+		String expected = "" +
+				"  String text=\"\"\"\n" +
+				"                1st line\n" +
+				"                2nd line\n" +
+				"                3rd line\n" +
+				"                4th line\n" +
+				"                5th line\n" +
+				"                \"\"\";";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_ConcatenationWithCharacterLiteral_shouldTransform() throws Exception {
+		String original = "" +
+				"		String exampleWithCharacterLiteral = \"\" +\n"
+				+ "				\"              <html>\\n\" + \n"
+				+ "				\"                  <body>\\n\"+ \n"
+				+ "				\"                      <p>\" + 'A' + \"</p>\\n\" + \n"
+				+ "				\"                  </body>\\n\"+\n"
+				+ "				\"              </html>\\n\";";
+
+		String expected = "" +
+				"  String exampleWithCharacterLiteral=\"\"\"\n"
+				+ "                              <html>\n"
+				+ "                                  <body>\n"
+				+ "                                      <p>A</p>\n"
+				+ "                                  </body>\n"
+				+ "                              </html>\n"
+				+ "                \"\"\";";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_ConcatenationWithParenthesizedIntAddition_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		String exampleWithParenthesizedIntAddition = \"\" + \n" +
 				"				\"              <html>\\n\" +\n" +
 				"				\"                  <body>\\n\" +\n" +
 				"				\"                      <p> \" + (1 + 1) + \"</p>\\n\" +\n" +
+				"				\"                  </body>\\n\" +\n" +
+				"				\"              </html>\\n\";";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_FirstLineSimpleName_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		String line1 = \"first line\\n\";\n" +
+				"		String text = line1 + \n" +
+				"				\"second line\\n\" + \n" +
+				"				\"third line\\n\" + \n" +
+				"				\"fourth line\\n\" + \n" +
+				"				\"last line\\n\";";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ConcatenationWithMultiplication_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		String exampleWithMultiplication = \"\" + \n" +
+				"				\"              <html>\\n\" +\n" +
+				"				\"                  <body>\\n\" +\n" +
+				"				\"                      <p> \" + 2 * 3 + \"</p>\\n\" +\n" +
 				"				\"                  </body>\\n\" +\n" +
 				"				\"              </html>\\n\";";
 
