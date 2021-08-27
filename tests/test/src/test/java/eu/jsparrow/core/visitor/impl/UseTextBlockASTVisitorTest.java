@@ -40,6 +40,28 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_ConcatenationWithoutLineBreakAtEnd_shouldTransform() throws Exception {
+		String original = "" +
+				"		String html = \"\" +\n" +
+				"				\"              <html>\\n\" + \n" +
+				"				\"                  <body>\\n\"+ \n" +
+				"				\"                      <p>Hello, world</p>\\n\" + \n" +
+				"				\"                  </body>\\n\"+\n" +
+				"				\"              </html>\";";
+
+		String expected = "" +
+				"  String html=\"\"\"\n" +
+				"                              <html>\n" +
+				"                                  <body>\n" +
+				"                                      <p>Hello, world</p>\n" +
+				"                                  </body>\n" +
+				"                              </html>\\\n" +
+				"                \"\"\";";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_ConcatenationWithParentheses_shouldTransform() throws Exception {
 		String original = "" +
 				"	String exampleWithParentheses = \"\" + //\n" +

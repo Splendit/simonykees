@@ -1,7 +1,6 @@
 package eu.jsparrow.rules.java16;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.TextBlock;
@@ -51,35 +50,39 @@ public class UseTextBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(InfixExpression infixExpresssion) {
 
-		ConcatenationComponentsCollector componentStore = new ConcatenationComponentsCollector();
+		ConcatenationComponentsCollector componentsCollector = new ConcatenationComponentsCollector();
 
-		List<String> components = componentStore.collectConcatenationComponents(infixExpresssion);
-		if (components.isEmpty()) {
-			return false;
+		List<String> components = componentsCollector.collectConcatenationComponents(infixExpresssion);
+		if (!components.isEmpty()) {
+
+			String escapedValue = createEscapedValue(components);
+
+			TextBlock textBlock = astRewrite.getAST()
+				.newTextBlock();
+
+			textBlock.setEscapedValue(escapedValue);
+
+			astRewrite.replace(infixExpresssion, textBlock, null);
+			onRewrite();
 		}
-		String textBlockContent = findValidTextBlockContent(components).orElse(null);
-
-		if (textBlockContent == null) {
-			return false;
-		}
-
-		TextBlock textBlock = astRewrite.getAST()
-			.newTextBlock();
-
-		textBlock.setEscapedValue(textBlockContent);
-
-		astRewrite.replace(infixExpresssion, textBlock, null);
-		onRewrite();
 		return false;
 	}
 
-	private Optional<String> findValidTextBlockContent(List<String> components) {
+	private String createEscapedValue(List<String> components) {
 
-		StringBuilder sb = new StringBuilder();
-		sb.append(TEXT_BLOCK_TRIPLE_QUOTES);
-		sb.append('\n');
-		components.forEach(sb::append);
-		sb.append(TEXT_BLOCK_TRIPLE_QUOTES);
-		return Optional.of(sb.toString());
+		StringBuilder sbContent = new StringBuilder();
+
+		components.forEach(sbContent::append);
+
+		int lastComponentIndex = components.size() - 1;
+		String lastComponent = components.get(lastComponentIndex);
+		if (!lastComponent.endsWith("\n")) { //$NON-NLS-1$
+			sbContent.append('\\');
+			sbContent.append('\n');
+		}
+
+		return TEXT_BLOCK_TRIPLE_QUOTES + '\n' +
+				sbContent.toString() +
+				TEXT_BLOCK_TRIPLE_QUOTES;
 	}
 }

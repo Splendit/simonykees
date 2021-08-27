@@ -30,7 +30,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 @SuppressWarnings("nls")
 public class ConcatenationComponentsCollector {
 
-	private final Predicate<String> SUPPORTED_NUMERIC_LITERAL_PREDICATE = Pattern.compile("^(0|([1-9][0-9]*))$")
+	private static final Predicate<String> SUPPORTED_NUMERIC_LITERAL_PREDICATE = Pattern.compile("^(0|([1-9][0-9]*))$")
 		.asPredicate();
 
 	/**
