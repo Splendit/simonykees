@@ -20,4 +20,5 @@ Require-Bundle: eu.jsparrow.logging,
 Service-Component: OSGI-INF/eu.jsparrow.rules.java16.Java16RulesServiceImpl.xml,
  OSGI-INF/eu.jsparrow.rules.java16.Java16RulesServiceImpl.xml
 Bundle-ActivationPolicy: lazy
-Export-Package: eu.jsparrow.rules.java16
+Export-Package: eu.jsparrow.rules.java16,
+ eu.jsparrow.rules.java16.switchexpression;x-friends:=eu.jsparrow.test
