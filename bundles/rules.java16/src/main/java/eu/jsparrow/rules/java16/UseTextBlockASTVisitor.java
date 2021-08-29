@@ -70,19 +70,16 @@ public class UseTextBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private String createEscapedValue(List<String> components) {
 
-		StringBuilder sbContent = new StringBuilder();
-
-		components.forEach(sbContent::append);
-
-		int lastComponentIndex = components.size() - 1;
-		String lastComponent = components.get(lastComponentIndex);
-		if (!lastComponent.endsWith("\n")) { //$NON-NLS-1$
-			sbContent.append('\\');
-			sbContent.append('\n');
+		
+		String content = String.join("", components); //$NON-NLS-1$
+		String lineSeparator = "\n";  //$NON-NLS-1$
+		
+		if (!content.endsWith(lineSeparator)) {
+			content = content + '\\' + lineSeparator;
 		}
 
-		return TEXT_BLOCK_TRIPLE_QUOTES + '\n' +
-				sbContent.toString() +
+		return TEXT_BLOCK_TRIPLE_QUOTES + lineSeparator +
+				content +
 				TEXT_BLOCK_TRIPLE_QUOTES;
 	}
 }
