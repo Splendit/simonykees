@@ -68,8 +68,4 @@ public class SwitchCaseClause {
 		return statements;
 	}
 
-	public Statement getBreakStatement() {
-		return breakStatement;
-	}
-
 }

@@ -52,11 +52,7 @@ public class SwitchCaseBreakStatementsVisitor extends ASTVisitor {
 		return true;
 	}
 	
-	public List<BreakStatement> getBreakStatements() {
-		return this.breakStatements;
-	}
-	
-	public boolean hasBreakStatements() {
-		return !this.breakStatements.isEmpty();
+	public boolean hasMultipleBreakStatements() {
+		return this.breakStatements.size() > 1;
 	}
 }

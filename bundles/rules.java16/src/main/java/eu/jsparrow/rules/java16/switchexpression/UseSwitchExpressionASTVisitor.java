@@ -274,23 +274,8 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			if (containsMultipleBreakStatements(buck)) {
 				return false;
 			}
-
-			if (containsSwitchCaseAndDefaultStatement(buck)) {
-				return false;
-			}
 		}
 		return true;
-	}
-
-	private boolean containsSwitchCaseAndDefaultStatement(List<Statement> buck) {
-		List<SwitchCase> switchCases = filterSwitchCaseStatements(buck);
-		if (switchCases.isEmpty()) {
-			return false;
-		}
-		SwitchCase caseStatement = switchCases.get(0);
-		boolean isDefault = caseStatement.isDefault();
-		return switchCases.size() > 1 && switchCases.stream()
-			.anyMatch(node -> node.isDefault() != isDefault);
 	}
 
 	private List<SwitchCase> filterSwitchCaseStatements(List<Statement> buck) {
@@ -301,10 +286,10 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	private boolean containsMultipleBreakStatements(List<Statement> buck) {
+		SwitchCaseBreakStatementsVisitor visitor = new SwitchCaseBreakStatementsVisitor();
 		for (Statement statement : buck) {
-			SwitchCaseBreakStatementsVisitor visitor = new SwitchCaseBreakStatementsVisitor();
 			statement.accept(visitor);
-			if (visitor.hasBreakStatements()) {
+			if (visitor.hasMultipleBreakStatements()) {
 				return true;
 			}
 		}
