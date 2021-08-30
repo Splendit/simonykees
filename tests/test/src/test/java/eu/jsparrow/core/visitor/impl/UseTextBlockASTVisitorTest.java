@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TextBlock;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -71,8 +72,9 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	/**
-	 * TODO: discuss whether cases with new line characters of other operation
-	 * systems should be transformed.
+	 * SIM-1990: This test is expected to fail as soon as the handling of line
+	 * breaks is corrected.
+	 * 
 	 */
 	@Test
 	public void visit_MacOSConcatenationWithoutLineBreakAtEnd_shouldTransform() throws Exception {
@@ -252,6 +254,38 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_RepeatedQuotationMarks_shouldTransform() throws Exception {
+		String original = "" +
+				"		String string2 = \"\" +\n" +
+				"				\"\\\"\\n\" +\n" +
+				"				\"\\\"\\\"\\n\" +\n" +
+				"				\"\\\"\\\"\\\"\\n\" +\n" +
+				"				\"\\\"\\\"\\\"\\\"\\n\" +\n" +
+				"				\"\\\"\\\"\\\"\\\"\\\"\\n\" +\n" +
+				"				\"\\\"\\\"\\\"\\\"\\\"\\\"\\n\" +\n" +
+				"				\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\n\" +\n" +
+				"				\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\n\" +\n" +
+				"				\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\n\" +\n" +
+				"				\"\\\"\\\" \\\"\\\" \\\"\\\"\\\"\\\"\\\"\\n\";";
+
+		String expected = "" +
+				"  String string2=\"\"\"\n"
+				+ "                \"\n"
+				+ "                \"\"\n"
+				+ "                \"\"\\\"\n"
+				+ "                \"\"\\\"\"\n"
+				+ "                \"\"\\\"\"\"\n"
+				+ "                \"\"\\\"\"\"\\\"\n"
+				+ "                \"\"\\\"\"\"\\\"\"\n"
+				+ "                \"\"\\\"\"\"\\\"\"\"\n"
+				+ "                \"\"\\\"\"\"\\\"\"\"\\\"\n"
+				+ "                \"\" \"\" \"\"\\\"\"\"\n"
+				+ "                \"\"\";";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_ConcatenationWithParenthesizedIntAddition_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		String exampleWithParenthesizedIntAddition = \"\" + \n" +
@@ -273,6 +307,26 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"				\"third line\\n\" + \n" +
 				"				\"fourth line\\n\" + \n" +
 				"				\"last line\\n\";";
+
+		assertNoChange(original);
+	}
+
+	/**
+	 * SIM-1990: This test is disabled. It would fail at the moment, but it will
+	 * pass as soon as transformation of concatenation is restricted to a
+	 * minimum of say, for example, 4 lines.
+	 * 
+	 */
+	@Disabled("Will pass as soon the conditions mentioned in the Java Doc.")
+	@Test
+	public void visit_CommaSeparatedConcatenations_shouldNotTransform() throws Exception {
+		fixture.addImport(java.util.Arrays.class.getName());
+		String original = "" +
+				"		List<String> list = Arrays.asList(//\n"
+				+ "				\"     AAA\" + '\\64' + '\\n', //\n"
+				+ "				\"     BBB\" + '\\065' + '\\n', //\n"
+				+ "				\"     CCC\" + '\\u0064' + '\\n', //\n"
+				+ "				\"     DDD\" + '\\u0061' + '\\n');";
 
 		assertNoChange(original);
 	}

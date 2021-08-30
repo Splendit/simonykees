@@ -42,11 +42,17 @@ import eu.jsparrow.rules.java16.textblock.ConcatenationComponentsCollector;
  */
 public class UseTextBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final String TEXT_BLOCK_TRIPLE_QUOTES = "\"\"\""; //$NON-NLS-1$
-
 	/**
-	 * Prototype without any validation.
+	 * TODO either move both {@link #TEXT_BLOCK_TRIPLE_QUOTES } and
+	 * {@link #ESCAPE_TEXTBLOCK_TRIPLE_QUOTES } to
+	 * {@link TextBlockContentAnalyzer} as soon as
+	 * {@link TextBlockContentAnalyzer} is used or move all functionalities of
+	 * {@link TextBlockContentAnalyzer} to {@link UseTextBlockASTVisitor} and
+	 * make the constants private.
 	 */
+	static final String TEXT_BLOCK_TRIPLE_QUOTES = "\"\"\""; //$NON-NLS-1$
+	static final String ESCAPE_TEXTBLOCK_TRIPLE_QUOTES = "\"\"\\\""; //$NON-NLS-1$
+
 	@Override
 	public boolean visit(InfixExpression infixExpresssion) {
 
@@ -70,10 +76,10 @@ public class UseTextBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private String createEscapedValue(List<String> components) {
 
-		
 		String content = String.join("", components); //$NON-NLS-1$
-		String lineSeparator = "\n";  //$NON-NLS-1$
+		content = content.replace(TEXT_BLOCK_TRIPLE_QUOTES, ESCAPE_TEXTBLOCK_TRIPLE_QUOTES);
 		
+		String lineSeparator = "\n"; //$NON-NLS-1$
 		if (!content.endsWith(lineSeparator)) {
 			content = content + '\\' + lineSeparator;
 		}

@@ -1,5 +1,8 @@
 package eu.jsparrow.rules.java16;
 
+import static eu.jsparrow.rules.java16.UseTextBlockASTVisitor.ESCAPE_TEXTBLOCK_TRIPLE_QUOTES;
+import static eu.jsparrow.rules.java16.UseTextBlockASTVisitor.TEXT_BLOCK_TRIPLE_QUOTES;
+
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,10 +16,10 @@ import java.util.regex.Pattern;
  *
  */
 public class TextBlockContentAnalyzer {
+
 	private static final Pattern PATTERN_LINE_SEPARATORS = Pattern.compile("([\r][\n]?)|([\n])"); //$NON-NLS-1$
 	private static final int MINIMAL_LINE_COUNT = 4;
 	private static final String SYSTEM_LS = System.lineSeparator();
-	private static final String TEXT_BLOCK_TRIPLE_QUOTES = "\"\"\""; //$NON-NLS-1$
 
 	public static Optional<String> findValidEscapedValue(String text) {
 
@@ -31,13 +34,12 @@ public class TextBlockContentAnalyzer {
 		}
 
 		String[] lines = PATTERN_LINE_SEPARATORS.split(text);
-		
-		for(String line : lines) {
-			
+
+		for (String line : lines) {
 			int length = line.length();
-			if(length > 0) {
+			if (length > 0) {
 				char lastCharacter = line.charAt(length - 1);
-				if(Character.isWhitespace(lastCharacter)) {
+				if (Character.isWhitespace(lastCharacter)) {
 					return Optional.empty();
 				}
 			}
@@ -46,6 +48,8 @@ public class TextBlockContentAnalyzer {
 		if (lines.length < MINIMAL_LINE_COUNT) {
 			return Optional.empty();
 		}
+
+		text = text.replace(TEXT_BLOCK_TRIPLE_QUOTES, ESCAPE_TEXTBLOCK_TRIPLE_QUOTES);
 
 		StringBuilder sbEscapedValue = new StringBuilder();
 		sbEscapedValue.append(TEXT_BLOCK_TRIPLE_QUOTES);
