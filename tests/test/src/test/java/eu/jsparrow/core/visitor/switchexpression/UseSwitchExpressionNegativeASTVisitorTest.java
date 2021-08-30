@@ -55,4 +55,15 @@ class UseSwitchExpressionNegativeASTVisitorTest extends UsesSimpleJDTUnitFixture
 
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_emptySwitchCase_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "int digit = 10;\n"
+				+ "String value;\n"
+				+ "switch (digit) {\n"
+				+ "}";
+
+		assertNoChange(original);
+	}
 }

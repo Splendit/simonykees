@@ -266,6 +266,9 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	private boolean areTransformableBucks(List<List<Statement>> switchCaseBucks) {
+		if(switchCaseBucks.isEmpty()) {
+			return false;
+		}
 		for (List<Statement> buck : switchCaseBucks) {
 			if (containsNonConsecutiveSwitchCases(buck)) {
 				return false;
@@ -358,8 +361,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			.filter(node -> node.getNodeType() != ASTNode.SWITCH_CASE)
 			.filter(node -> node.getNodeType() != ASTNode.BREAK_STATEMENT)
 			.collect(Collectors.toList());
-		Statement breakStatement = buck.get(buck.size() - 1);
-		return new SwitchCaseClause(caseExpressions, blockStatements, breakStatement);
+		return new SwitchCaseClause(caseExpressions, blockStatements);
 	}
 
 }

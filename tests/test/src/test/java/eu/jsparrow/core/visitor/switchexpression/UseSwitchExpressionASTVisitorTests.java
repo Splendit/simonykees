@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionASTVisitor;
 
-public class UseSwitchExpressionASTVisitorTests extends UsesSimpleJDTUnitFixture {
+class UseSwitchExpressionASTVisitorTests extends UsesSimpleJDTUnitFixture {
 	
 	@BeforeEach
 	void setUp() {
@@ -40,4 +40,136 @@ public class UseSwitchExpressionASTVisitorTests extends UsesSimpleJDTUnitFixture
 		assertChange(original, expected);
 	}
 
+	@Test
+	void visit_missingParentBlock_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "if (true)\n"
+				+ "switch (digit) {\n"
+				+ "case 1:\n"
+				+ "	value = \"one\";\n"
+				+ "	break;\n"
+				+ "case 2:\n"
+				+ "	value = \"two\";\n"
+				+ "	break;\n"
+				+ "default:\n"
+				+ "	value = \"other\";\n"
+				+ "}";
+		String expected = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "if (true)\n"
+				+ "	value = switch (digit) {\n"
+				+ "	case 1 -> \"one\";\n"
+				+ "	case 2 -> \"two\";\n"
+				+ "	default -> \"other\";\n"
+				+ "};";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_multipleStatementsInSwitchCase_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "switch (digit) {\n"
+				+ "case 1:\n"
+				+ "	value = \"one\";\n"
+				+ "	System.out.println(\"Value: \");\n"
+				+ "	System.out.println(value);\n"
+				+ "	break;\n"
+				+ "case 2:\n"
+				+ "	value = \"two\";\n"
+				+ "	break;\n"
+				+ "default:\n"
+				+ "	value = \"other\";\n"
+				+ "}";
+		String expected = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "switch (digit) {\n"
+				+ "case 1 -> {\n"
+				+ "	value = \"one\";\n"
+				+ "	System.out.println(\"Value: \");\n"
+				+ "	System.out.println(value);\n"
+				/* 
+				 * NOTE: this break statement doesn't really show up in eclipse. 
+				 * It is put here only to let this test pass.  Future Eclipse versions
+				 * may break this test.
+				 * */ 
+				+ "	break;\n"
+				+ "}\n"
+				+ "case 2 -> value = \"two\";\n"
+				+ "default -> value = \"other\";\n"
+				+ "}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_loopInSwitchCase_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "switch (digit) {\n"
+				+ "case 1: while (true) {value = \"one\"; break;}\n"
+				+ "	break;\n"
+				+ "case 2:\n"
+				+ "	value = \"two\";\n"
+				+ "	break;\n"
+				+ "default:\n"
+				+ "	value = \"other\";\n"
+				+ "}";
+		String expected = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "switch (digit) {\n"
+				+ "case 1 -> {\n"
+				+ "	while (true) {value = \"one\"; break;}\n"
+				/* 
+				 * NOTE: this break statement doesn't really show up in eclipse. 
+				 * It is put here only to let this test pass.  Future Eclipse versions
+				 * may break this test.
+				 * */ 
+				+ "	break;\n"
+				+ "}\n"
+				+ "case 2 -> value = \"two\";\n"
+				+ "default -> value = \"other\";\n"
+				+ "}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_emptySwitchCaseClauses_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "switch (digit) {\n"
+				+ "case 1:\n"
+				+ "	break;\n"
+				+ "case 2:\n"
+				+ "	break;\n"
+				+ "default:			\n"
+				+ "}";
+		String expected = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "switch (digit) {\n"
+				+ "case 1 -> {\n"
+				/* 
+				 * NOTE: these break statements doesn't really show up in eclipse. 
+				 * They are put here only to let this test pass.  Future Eclipse versions
+				 * may break this test.
+				 * */ 
+				+ "	break;\n"
+				+ "}\n"
+				+ "case 2 -> {\n"
+				+ "	break;\n"
+				+ "}\n"
+				+ "default -> {\n"
+				+ "	break;\n"
+				+ "}\n"
+				+ "}";
+		assertChange(original, expected);
+	}
 }

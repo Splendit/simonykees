@@ -44,7 +44,7 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 	
 	@Test
-	public void visit_reassignValue_shouldTransform() throws Exception {
+	void visit_reassignValue_shouldTransform() throws Exception {
 		String original = ""
 				+ "int digit = 0;\n"
 				+ "String value = \"test\";\n"
@@ -73,6 +73,143 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				+ "default -> \"other\";\n"
 				+ "};\n"
 				+ "	";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_reassignParentBlockVariable_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "if(digit > 0) {\n"
+				+ "	System.out.println(value);\n"
+				+ "	switch (digit) {\n"
+				+ "	case 1:\n"
+				+ "		value = \"one\";\n"
+				+ "		break;\n"
+				+ "	case 2:\n"
+				+ "		value = \"two\";\n"
+				+ "		break;\n"
+				+ "	default:\n"
+				+ "		value = \"other\";\n"
+				+ "	}\n"
+				+ "}";
+		String expected = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "if(digit > 0) {\n"
+				+ "	System.out.println(value);\n"
+				+ "	value = switch (digit) {\n"
+				+ "	case 1 -> \"one\";\n"
+				+ "	case 2 -> \"two\";\n"
+				+ "	default -> \"other\";\n"
+				+ "	};\n"
+				+ "}";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_methodInvocationInitializer_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\".substring(2);\n"
+				+ "switch (digit) {\n"
+				+ "case 1:\n"
+				+ "	value = \"one\";\n"
+				+ "	break;\n"
+				+ "case 2:\n"
+				+ "	value = \"two\";\n"
+				+ "	break;\n"
+				+ "default:\n"
+				+ "	value = \"other\";\n"
+				+ "}";
+		String expected = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\".substring(2);\n"
+				+ "value = switch (digit) {\n"
+				+ "case 1 -> \"one\";\n"
+				+ "case 2 -> \"two\";\n"
+				+ "default -> \"other\";\n"
+				+ "};";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_noInitializer_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 0;\n"
+				+ "String value;\n"
+				+ "switch (digit) {\n"
+				+ "case 1:\n"
+				+ "	value = \"one\";\n"
+				+ "	break;\n"
+				+ "case 2:\n"
+				+ "	value = \"two\";\n"
+				+ "	break;\n"
+				+ "default:\n"
+				+ "	value = \"other\";\n"
+				+ "}";
+		String expected = ""
+				+ "int digit = 0;\n"
+				+ "String value = switch (digit) {\n"
+				+ "case 1 -> \"one\";\n"
+				+ "case 2 -> \"two\";\n"
+				+ "default -> \"other\";\n"
+				+ "};";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_multipleFragments_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\", value2 = \"test2\";\n"
+				+ "switch (digit) {\n"
+				+ "case 1:\n"
+				+ "	value = \"one\";\n"
+				+ "	break;\n"
+				+ "case 2:\n"
+				+ "	value = \"two\";\n"
+				+ "	break;\n"
+				+ "default:\n"
+				+ "	value = \"other\";\n"
+				+ "}";
+		String expected = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\", value2 = \"test2\";\n"
+				+ "value = switch (digit) {\n"
+				+ "case 1 -> \"one\";\n"
+				+ "case 2 -> \"two\";\n"
+				+ "default -> \"other\";\n"
+				+ "};";
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_assigningDifferentVariables_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "String value2 = \"value2\";\n"
+				+ "switch (digit) {\n"
+				+ "case 1:\n"
+				+ "	value = \"one\";\n"
+				+ "	break;\n"
+				+ "case 2:\n"
+				+ "	value2= \"two\";\n"
+				+ "	break;\n"
+				+ "default:\n"
+				+ "	value = \"other\";\n"
+				+ "}";
+		String expected = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "String value2 = \"value2\";\n"
+				+ "switch (digit) {\n"
+				+ "case 1 -> value = \"one\";\n"
+				+ "case 2 -> value2= \"two\";\n"
+				+ "default -> value = \"other\";\n"
+				+ "}";
 		assertChange(original, expected);
 	}
 	

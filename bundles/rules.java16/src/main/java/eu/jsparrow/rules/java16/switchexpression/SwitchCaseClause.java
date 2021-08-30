@@ -14,13 +14,10 @@ public class SwitchCaseClause {
 
 	private List<Expression> expressions;
 	private List<Statement> statements;
-	private Statement breakStatement;
 
-	public SwitchCaseClause(List<Expression> expressions, List<Statement> statements,
-			Statement breakStatement) {
+	public SwitchCaseClause(List<Expression> expressions, List<Statement> statements) {
 		this.expressions = expressions;
 		this.statements = statements;
-		this.breakStatement = breakStatement;
 	}
 
 	public Optional<Expression> findAssignedVariable() {
