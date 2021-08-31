@@ -59,33 +59,21 @@ public class UseTextBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 		ConcatenationComponentsCollector componentsCollector = new ConcatenationComponentsCollector();
 
 		List<String> components = componentsCollector.collectConcatenationComponents(infixExpresssion);
-		if (!components.isEmpty()) {
+		if (components.size() >= 3) {
 
-			String escapedValue = createEscapedValue(components);
+			String escapedValue = TextBlockContentAnalyzer.findValidEscapedValue(String.join("", components)) //$NON-NLS-1$
+				.orElse(null);
+			if (escapedValue != null) {
 
-			TextBlock textBlock = astRewrite.getAST()
-				.newTextBlock();
+				TextBlock textBlock = astRewrite.getAST()
+					.newTextBlock();
 
-			textBlock.setEscapedValue(escapedValue);
+				textBlock.setEscapedValue(escapedValue);
 
-			astRewrite.replace(infixExpresssion, textBlock, null);
-			onRewrite();
+				astRewrite.replace(infixExpresssion, textBlock, null);
+				onRewrite();
+			}
 		}
 		return false;
-	}
-
-	private String createEscapedValue(List<String> components) {
-
-		String content = String.join("", components); //$NON-NLS-1$
-		content = content.replace(TEXT_BLOCK_TRIPLE_QUOTES, ESCAPE_TEXTBLOCK_TRIPLE_QUOTES);
-		
-		String lineSeparator = "\n"; //$NON-NLS-1$
-		if (!content.endsWith(lineSeparator)) {
-			content = content + '\\' + lineSeparator;
-		}
-
-		return TEXT_BLOCK_TRIPLE_QUOTES + lineSeparator +
-				content +
-				TEXT_BLOCK_TRIPLE_QUOTES;
 	}
 }

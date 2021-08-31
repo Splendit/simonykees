@@ -18,19 +18,24 @@ import java.util.regex.Pattern;
 public class TextBlockContentAnalyzer {
 
 	private static final Pattern PATTERN_LINE_SEPARATORS = Pattern.compile("([\r][\n]?)|([\n])"); //$NON-NLS-1$
-	private static final int MINIMAL_LINE_COUNT = 4;
+	private static final int MINIMAL_LINE_COUNT = 3;
 	private static final String SYSTEM_LS = System.lineSeparator();
 
 	public static Optional<String> findValidEscapedValue(String text) {
 
+		if (text.endsWith(TEXT_BLOCK_TRIPLE_QUOTES)) {
+			return Optional.empty();
+		}
+
 		Matcher matcher = PATTERN_LINE_SEPARATORS.matcher(text);
 
+		int lineCount = 0;
 		while (matcher.find()) {
+			lineCount++;
+		}
 
-			String lineSeparatorFound = matcher.group();
-			if (!SYSTEM_LS.equals(lineSeparatorFound)) {
-				return Optional.empty();
-			}
+		if (lineCount < MINIMAL_LINE_COUNT) {
+			return Optional.empty();
 		}
 
 		String[] lines = PATTERN_LINE_SEPARATORS.split(text);
@@ -43,10 +48,6 @@ public class TextBlockContentAnalyzer {
 					return Optional.empty();
 				}
 			}
-		}
-
-		if (lines.length < MINIMAL_LINE_COUNT) {
-			return Optional.empty();
 		}
 
 		text = text.replace(TEXT_BLOCK_TRIPLE_QUOTES, ESCAPE_TEXTBLOCK_TRIPLE_QUOTES);
