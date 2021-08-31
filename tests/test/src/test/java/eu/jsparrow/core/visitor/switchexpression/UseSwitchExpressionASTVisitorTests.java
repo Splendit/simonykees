@@ -12,7 +12,7 @@ class UseSwitchExpressionASTVisitorTests extends UsesSimpleJDTUnitFixture {
 	@BeforeEach
 	void setUp() {
 		setVisitor(new UseSwitchExpressionASTVisitor());
-		setJavaVersion(JavaCore.VERSION_16);
+		setJavaVersion(JavaCore.VERSION_14);
 	}
 	
 	@Test

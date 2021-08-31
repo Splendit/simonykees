@@ -11,7 +11,7 @@ class UseSwitchExpressionNegativeASTVisitorTest extends UsesSimpleJDTUnitFixture
 	
 	@BeforeEach
 	void setUp() {
-		setJavaVersion(JavaCore.VERSION_15);
+		setJavaVersion(JavaCore.VERSION_14);
 		setVisitor(new UseSwitchExpressionASTVisitor());
 	}
 

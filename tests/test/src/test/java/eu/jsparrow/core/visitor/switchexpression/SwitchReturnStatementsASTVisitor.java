@@ -13,7 +13,7 @@ public class SwitchReturnStatementsASTVisitor extends UsesJDTUnitFixture {
 	@BeforeEach
 	void setUp() {
 		setDefaultVisitor(new UseSwitchExpressionASTVisitor());
-		setJavaVersion(JavaCore.VERSION_16);
+		setJavaVersion(JavaCore.VERSION_14);
 	}
 	
 	@AfterEach

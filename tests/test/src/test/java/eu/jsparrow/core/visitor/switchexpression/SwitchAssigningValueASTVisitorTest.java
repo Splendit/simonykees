@@ -13,7 +13,7 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	
 	@BeforeEach
 	void setUp() {
-		setJavaVersion(JavaCore.VERSION_15);
+		setJavaVersion(JavaCore.VERSION_14);
 		setVisitor(new UseSwitchExpressionASTVisitor());
 	}
 	
@@ -283,38 +283,6 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertChange(original, expected);
 	}
 	
-	@Disabled("For some reason the expected code cannot be parsed")
-	@Test
-	void visit_switchCaseMultipleStatements_shouldTransform() throws Exception {
-		String original = ""
-				+ "int digit = 10;\n"
-				+ "String value;\n"
-				+ "switch(digit) {\n"
-				+ "case 0: \n"
-				+ "	System.out.println();\n"
-				+ "	value = \"zero\"; break;\n"
-				+ "case 1: value = \"one\"; break;\n"
-				+ "case 2: value = \"two\"; break;\n"
-				+ "default: value = \"other\";\n"
-				+ "}";
-
-		String expected = ""
-				+ "int digit = 10;\n"
-				+ "String value = switch (digit) {\n"
-				+ "case 0 -> {\n"
-				+ "	System.out.println();\n"
-				+ "	yield \"zero\";\n"
-				+ "}\n"
-				+ "case 1 -> \"one\";\n"
-				+ "case 2 -> \"two\";\n"
-				+ "default -> \"other\";\n"
-				+ "};"
-				+ "	System.out.println(value);\n"
-				+ "";
-
-		assertChange(original, expected);
-	}
-	
 	
 	@Test
 	void visit_combineCaseClauses_shouldTransform() throws Exception {
@@ -334,6 +302,29 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				+ "case 2 -> \"two\";\n"
 				+ "default -> \"other\";\n"
 				+ "};";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_reassignLoopVariable_shouldTransform() throws Exception {
+		String original = ""
+				+ "for (int i =0, j = 1; i<10; i++, j++) {\n"
+				+ "	switch(i) {\n"
+				+ "	case 1: j=0; break;\n"
+				+ "	case 2: j = 5; break;\n"
+				+ "	default: j = i-1;\n"
+				+ "	}\n"
+				+ "}";
+
+		String expected = ""
+				+ "for (int i =0, j = 1; i<10; i++, j++) {\n"
+				+ "	j = switch (i) {\n"
+				+ "	case 1 -> 0;\n"
+				+ "	case 2 -> 5;\n"
+				+ "	default -> i-1;\n"
+				+ "	};\n"
+				+ "}";
 
 		assertChange(original, expected);
 	}
