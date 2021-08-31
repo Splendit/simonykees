@@ -2,7 +2,6 @@ package eu.jsparrow.core.visitor.impl;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -302,22 +301,38 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertNoChange(original);
 	}
 
-	/**
-	 * SIM-1990: This test is disabled. It would fail at the moment, but it will
-	 * pass as soon as transformation of concatenation is restricted to a
-	 * minimum of say, for example, 4 lines.
-	 * 
-	 */
-	@Disabled("Will pass as soon the conditions mentioned in the Java Doc.")
 	@Test
-	public void visit_CommaSeparatedConcatenations_shouldNotTransform() throws Exception {
-		fixture.addImport(java.util.Arrays.class.getName());
+	public void visit_LessThanThreeLines_shouldNotTransform() throws Exception {
 		String original = "" +
-				"		List<String> list = Arrays.asList(//\n"
-				+ "				\"     AAA\" + '\\64' + '\\n', //\n"
-				+ "				\"     BBB\" + '\\065' + '\\n', //\n"
-				+ "				\"     CCC\" + '\\u0064' + '\\n', //\n"
-				+ "				\"     DDD\" + '\\u0061' + '\\n');";
+				"		String text = \"\" + \n" +
+				"				\"first line\\n\" + \n" +
+				"				\"second line\\n\";";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_TripleQuotationMarkAtEnd_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		String string2 = \"\" + //\n"
+				+ "				\"\\\"\\n\" + //\n"
+				+ "				\"\\\"\\\"\\n\" + //\n"
+				+ "				\"\\\"\\\"\\\"\\n\" + //\n"
+				+ "				\"\\\"\\\"\\\"\\\"\\n\" + //\n"
+				+ "				\"\\\"\\\" \\\"\\\"\\\"\";";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_OnlyEmptyLines_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		String text = \n" +
+				"				\"\\n\" +\n" +
+				"				\"\\n\" +\n" +
+				"				\"\\n\" +\n" +
+				"				\"\\n\" +\n" +
+				"				\"\\n\";";
 
 		assertNoChange(original);
 	}
@@ -351,22 +366,16 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertNoChange(original);
 	}
 
-	// @Test
-	// public void visit__shouldTransform() throws Exception {
-	// String original = "" +
-	// "";
-	//
-	// String expected = "" +
-	// "";
-	//
-	// assertChange(original, expected);
-	// }
+	@Test
+	public void visit_LinesWithTrailingBlanks_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		String html = \"\" +\n" +
+				"				\"              <html>                  \\n\" + \n" +
+				"				\"                  <body>\\n\"+ \n" +
+				"				\"                      <p>Hello, world</p>\\n\" + \n" +
+				"				\"                  </body>\\n\"+\n" +
+				"				\"              </html>\\n\";";
 
-	// @Test
-	// public void visit__shouldNotTransform() throws Exception {
-	// String original = "" +
-	// "";
-	//
-	// assertNoChange(original);
-	// }
+		assertNoChange(original);
+	}
 }
