@@ -319,18 +319,30 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	private List<List<Statement>> splitIntoSwitchCaseBucks(List<Statement> statements) {
+		
+		List<Statement> flatterned = new ArrayList<>();
+		for(Statement statement : statements) {
+			if(statement.getNodeType() == ASTNode.BLOCK) {
+				Block block = (Block)statement;
+				List<Statement> blockStatements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
+				flatterned.addAll(blockStatements);
+			} else {
+				flatterned.add(statement);
+			}
+		}
+		
 		List<List<Statement>> switchCaseBucks = new ArrayList<>();
 		List<Integer> breakIndexes = new ArrayList<>();
-		for (int i = 0; i < statements.size(); i++) {
-			Statement statement = statements.get(i);
+		for (int i = 0; i < flatterned.size(); i++) {
+			Statement statement = flatterned.get(i);
 			if (statement.getNodeType() == ASTNode.BREAK_STATEMENT
 					|| statement.getNodeType() == ASTNode.RETURN_STATEMENT) {
 				breakIndexes.add(i);
 			}
 		}
 		List<Statement> buck = new ArrayList<>();
-		for (int i = 0; i < statements.size(); i++) {
-			buck.add(statements.get(i));
+		for (int i = 0; i < flatterned.size(); i++) {
+			buck.add(flatterned.get(i));
 			if (breakIndexes.contains(i)) {
 				switchCaseBucks.add(buck);
 				buck = new ArrayList<>();

@@ -172,4 +172,35 @@ class UseSwitchExpressionASTVisitorTests extends UsesSimpleJDTUnitFixture {
 				+ "}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	void visit_switchCaseBlock_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = getClass().getName().length(); \n"
+				+ "String value;\n"
+				+ "switch (digit) {\n"
+				+ "case 0: {\n"
+				+ "	System.out.println();\n"
+				+ "	value = \"zero\";\n"
+				+ "	break;\n"
+				+ "}\n"
+				+ "case 1:\n"
+				+ "	value = \"one\";\n"
+				+ "	break;\n"
+				+ "\n"
+				+ "default:\n"
+				+ "	value = \"other\";\n"
+				+ "}";
+		String expected = ""
+				+ "int digit = getClass().getName().length(); \n"
+				+ "String value = switch (digit) {\n"
+				+ "case 0 -> {\n"
+				+ "	System.out.println();\n"
+				+ "	yield \"zero\";\n"
+				+ "}\n"
+				+ "case 1 -> \"one\";\n"
+				+ "default -> \"other\";\n"
+				+ "};";
+		assertChange(original, expected);
+	}
 }

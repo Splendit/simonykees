@@ -2,7 +2,6 @@ package eu.jsparrow.core.visitor.switchexpression;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
