@@ -23,6 +23,11 @@ public class TextBlockContentAnalyzer {
 
 	public static Optional<String> findValidEscapedValue(String text) {
 
+		if (text.trim()
+			.isEmpty()) {
+			return Optional.empty();
+		}
+
 		if (text.endsWith(TEXT_BLOCK_TRIPLE_QUOTES)) {
 			return Optional.empty();
 		}
