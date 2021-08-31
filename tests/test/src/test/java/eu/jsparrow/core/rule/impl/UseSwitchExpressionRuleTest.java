@@ -16,43 +16,43 @@ import eu.jsparrow.core.SingleRuleTest;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
-import eu.jsparrow.rules.java16.UsePatternMatchingForInstanceofRule;
+import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionRule;
 
-class UsePatternMatchingForInstanceofRuleTest extends SingleRuleTest {
+class UseSwitchExpressionRuleTest extends SingleRuleTest {
 
-	private UsePatternMatchingForInstanceofRule rule;
+	private UseSwitchExpressionRule rule;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		rule = new UsePatternMatchingForInstanceofRule();
+		rule = new UseSwitchExpressionRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
 	@Test
 	void test_ruleId() {
 		String ruleId = rule.getId();
-		assertThat(ruleId, equalTo("UsePatternMatchingForInstanceof"));
+		assertThat(ruleId, equalTo("UseSwitchExpression"));
 	}
 
 	@Test
 	void test_ruleDescription() {
 		RuleDescription description = rule.getRuleDescription();
-		assertThat(description.getName(), equalTo("Use Pattern Matching for Instanceof"));
+		assertThat(description.getName(), equalTo("Use Switch Expression"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
+				contains(Tag.JAVA_14, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
-				equalTo("This rule replaces instanceof expressions by Pattern Matching for instanceof introduced in Java 16. \n\nCommonly, an instanceof expression is followed by a local variable declaration initialized with a casting expression. Pattern Matching for instanceof combines three steps (i.e., type checking, variable declaration, and type casting) into a single step, thus reducing some boilerplate code and eliminating sources of errors."));
+				equalTo("Replace switch statement by switch expression from Java 14"));
 	}
 
 	@Test
 	void test_requiredJavaVersion() throws Exception {
-		assertThat(rule.getRequiredJavaVersion(), equalTo("16"));
+		assertThat(rule.getRequiredJavaVersion(), equalTo("14"));
 	}
 
 	@Test
 	void calculateEnabledForProjectShouldBeDisabled() {
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_15);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_13);
 
 		rule.calculateEnabledForProject(testProject);
 
@@ -61,7 +61,7 @@ class UsePatternMatchingForInstanceofRuleTest extends SingleRuleTest {
 
 	@Test
 	void calculateEnabledForProjectShouldBeEnabled() {
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_16);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_14);
 
 		rule.calculateEnabledForProject(testProject);
 
