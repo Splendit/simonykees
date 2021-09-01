@@ -280,6 +280,10 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			if (containsMultipleBreakStatements(buck)) {
 				return false;
 			}
+			
+			if (containsMultipleReturnStatements(buck)) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -296,6 +300,17 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		for (Statement statement : buck) {
 			statement.accept(visitor);
 			if (visitor.hasMultipleBreakStatements()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean containsMultipleReturnStatements(List<Statement> buck) {
+		SwitchCaseReturnStatementsVisitor visitor = new SwitchCaseReturnStatementsVisitor();
+		for (Statement statement : buck) {
+			statement.accept(visitor);
+			if (visitor.hasMultipleReturnStatements()) {
 				return true;
 			}
 		}

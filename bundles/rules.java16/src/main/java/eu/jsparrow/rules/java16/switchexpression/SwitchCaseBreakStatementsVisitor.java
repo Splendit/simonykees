@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.SwitchExpression;
-import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
 public class SwitchCaseBreakStatementsVisitor extends ASTVisitor {
 
@@ -46,6 +49,20 @@ public class SwitchCaseBreakStatementsVisitor extends ASTVisitor {
 		return false;
 	}
 	
+	@Override
+	public boolean visit(AnonymousClassDeclaration acd) {
+		return false;
+	}
+	
+	@Override
+	public boolean visit(LambdaExpression lambda) {
+		return false;
+	}
+	
+	@Override
+	public boolean visit(TypeDeclaration typeDeclaration) {
+		return false;
+	}
 	@Override
 	public boolean visit(BreakStatement breakStatement) {
 		breakStatements.add(breakStatement);
