@@ -51,7 +51,6 @@ public class SwitchReturnStatementsASTVisitor extends UsesJDTUnitFixture {
 		assertChange(original, expected);
 	}
 	
-	@Disabled("The expected code cannot be parsed propery. Seems like a JDT issue.")
 	@Test
 	void visit_singleReturnStatementInDefault_shouldTransform() throws Exception {
 		String original = ""
@@ -74,7 +73,7 @@ public class SwitchReturnStatementsASTVisitor extends UsesJDTUnitFixture {
 				+ "private int returningStatements() {\n"
 				+ "	int digit = 0;\n"
 				+ "	String value = \"test\";\n"
-				+ "	switch (digit){case 1 ->value = \"one\";case 2 ->value = \"two\";default ->return 0;}\n"
+				+ "	switch (digit){case 1 ->value = \"one\";case 2 ->value = \"two\";default -> { return 0;}}\n"
 				+ "	return 1;\n"
 				+ "}";
 		assertChange(original, expected);

@@ -20,18 +20,24 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.YieldStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
+import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
 
 public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(SwitchStatement switchStatement) {
 		List<Statement> statements = ASTNodeUtil.convertToTypedList(switchStatement.statements(), Statement.class);
+		if (hasLabeledSwitchCase(switchStatement)) {
+			return true;
+		}
 		List<List<Statement>> switchCaseBucks = splitIntoSwitchCaseBucks(statements);
 		if (!areTransformableBucks(switchCaseBucks)) {
 			return true;
@@ -64,6 +70,12 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			onRewrite();
 		}
 		return true;
+	}
+
+	private boolean hasLabeledSwitchCase(SwitchStatement switchStatement) {
+		return ASTNodeUtil.convertToTypedList(switchStatement.statements(), SwitchCase.class)
+			.stream()
+			.anyMatch(SwitchCase::isSwitchLabeledRule);
 	}
 
 	private void replaceBySwitchAssigningValue(Expression assigned, SwitchStatement switchStatement,
@@ -154,8 +166,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	private boolean areReturningValue(List<SwitchCaseClause> clauses) {
 		return clauses.stream()
-			.map(SwitchCaseClause::findReturnedValue)
-			.allMatch(Optional::isPresent);
+			.allMatch(SwitchCaseClause::isReturningValue);
 	}
 
 	private boolean areAssigningValue(List<SwitchCaseClause> clauses) {
@@ -192,18 +203,18 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			SwitchCase switchCase = ast.newSwitchCase();
 			switchCase.setSwitchLabeledRule(true);
 			for (Expression expression : clauseExpressions) {
+				Expression unwrappedExpression = ASTNodeUtil.unwrapParenthesizedExpression(expression);
 				switchCase.expressions()
-					.add((Expression) astRewrite.createCopyTarget(expression));
+					.add((Expression) astRewrite.createCopyTarget(unwrappedExpression));
 			}
 			statements.add(switchCase);
 
 			List<Statement> clauseStatements = clause.getStatements();
 			if (clauseStatements.size() == 1) {
 				Statement clauseStatement = clauseStatements.get(0);
-				
-				if (clauseStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT 
-						|| clauseStatement.getNodeType() == ASTNode.THROW_STATEMENT 
-						|| clauseStatement.getNodeType() == ASTNode.RETURN_STATEMENT) {
+
+				if (clauseStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT
+						|| clauseStatement.getNodeType() == ASTNode.THROW_STATEMENT) {
 					Statement newExpStatement = (Statement) astRewrite
 						.createCopyTarget(clauseStatement);
 					statements.add(newExpStatement);
@@ -240,15 +251,24 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			SwitchCase switchCase = ast.newSwitchCase();
 			switchCase.setSwitchLabeledRule(true);
 			for (Expression expression : clauseExpressions) {
+				Expression unwrappedExpression = ASTNodeUtil.unwrapParenthesizedExpression(expression);
 				switchCase.expressions()
-					.add((Expression) astRewrite.createCopyTarget(expression));
+					.add((Expression) astRewrite.createCopyTarget(unwrappedExpression));
 			}
 			statements.add(switchCase);
 			List<Statement> clauseStatements = clause.getStatements();
 			Expression yieldExpression = clause.findYieldExpression();
+			ThrowStatement throwStatement = clause.findThrowsStatement()
+				.orElse(null);
+
 			if (clauseStatements.size() == 1) {
-				ExpressionStatement yieldStatement = ast
-					.newExpressionStatement((Expression) astRewrite.createCopyTarget(yieldExpression));
+				Statement yieldStatement;
+				if (throwStatement != null) {
+					yieldStatement = (Statement) astRewrite.createCopyTarget(throwStatement);
+				} else {
+					yieldStatement = ast
+						.newExpressionStatement((Expression) astRewrite.createCopyTarget(yieldExpression));
+				}
 				statements.add(yieldStatement);
 			} else {
 				Block block = ast.newBlock();
@@ -269,9 +289,10 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	private boolean areTransformableBucks(List<List<Statement>> switchCaseBucks) {
-		if(switchCaseBucks.isEmpty()) {
+		if (switchCaseBucks.isEmpty()) {
 			return false;
 		}
+		List<SimpleName> undefinedVariables = new ArrayList<>();
 		for (List<Statement> buck : switchCaseBucks) {
 			if (containsNonConsecutiveSwitchCases(buck)) {
 				return false;
@@ -280,12 +301,66 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			if (containsMultipleBreakStatements(buck)) {
 				return false;
 			}
-			
+
 			if (containsMultipleReturnStatements(buck)) {
 				return false;
 			}
+
+			if (containsLabeledStatement(buck)) {
+				return false;
+			}
+
+			if(combinesSwitchCaseWithDefault(buck)) {
+				return false;
+			}
+			
+			if (usesUndefinedVariables(buck, undefinedVariables)) {
+				return false;
+			}
+			undefinedVariables.addAll(findVariableDeclarations(buck));
 		}
 		return true;
+	}
+
+	private boolean combinesSwitchCaseWithDefault(List<Statement> buck) {
+		List<SwitchCase> switchCases = filterSwitchCaseStatements(buck);
+		return switchCases.size() > 1 && switchCases.stream().anyMatch(SwitchCase::isDefault);
+	}
+
+	private boolean containsLabeledStatement(List<Statement> buck) {
+		LabeledBreakStatementsVisitor visitor = new LabeledBreakStatementsVisitor();
+		for (Statement statement : buck) {
+			statement.accept(visitor);
+			if (visitor.containsLabeledStatements()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private List<SimpleName> findVariableDeclarations(List<Statement> buck) {
+		VariableDeclarationsVisitor visitor = new VariableDeclarationsVisitor();
+		List<SimpleName> allDeclaredVariables = new ArrayList<>();
+		for (Statement statement : buck) {
+			statement.accept(visitor);
+			List<SimpleName> declaredVariables = visitor.getVariableDeclarationNames();
+			allDeclaredVariables.addAll(declaredVariables);
+		}
+		return allDeclaredVariables;
+	}
+
+	private boolean usesUndefinedVariables(List<Statement> buck, List<SimpleName> undefinedVariables) {
+		for (SimpleName variableName : undefinedVariables) {
+			LocalVariableUsagesVisitor visitor = new LocalVariableUsagesVisitor(variableName);
+			for (Statement statement : buck) {
+				statement.accept(visitor);
+			}
+			if (!visitor.getUsages()
+				.isEmpty()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private List<SwitchCase> filterSwitchCaseStatements(List<Statement> buck) {
@@ -337,18 +412,18 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	private List<List<Statement>> splitIntoSwitchCaseBucks(List<Statement> statements) {
-		
+
 		List<Statement> flatterned = new ArrayList<>();
-		for(Statement statement : statements) {
-			if(statement.getNodeType() == ASTNode.BLOCK) {
-				Block block = (Block)statement;
+		for (Statement statement : statements) {
+			if (statement.getNodeType() == ASTNode.BLOCK) {
+				Block block = (Block) statement;
 				List<Statement> blockStatements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
 				flatterned.addAll(blockStatements);
 			} else {
 				flatterned.add(statement);
 			}
 		}
-		
+
 		List<List<Statement>> switchCaseBucks = new ArrayList<>();
 		List<Integer> breakIndexes = new ArrayList<>();
 		for (int i = 0; i < flatterned.size(); i++) {

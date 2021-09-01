@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 
 public class SwitchCaseClause {
 
@@ -34,6 +35,9 @@ public class SwitchCaseClause {
 			return Optional.empty();
 		}
 		Assignment assignment = (Assignment) expression;
+		if(assignment.getOperator() != Assignment.Operator.ASSIGN) {
+			return Optional.empty();
+		}
 		return Optional.of(assignment.getLeftHandSide());
 	}
 
@@ -46,7 +50,19 @@ public class SwitchCaseClause {
 			return Optional.empty();
 		}
 		ReturnStatement returnStatement = (ReturnStatement) last;
-		return Optional.of(returnStatement.getExpression());
+		return Optional.ofNullable(returnStatement.getExpression());
+	}
+
+	public Optional<ThrowStatement> findThrowsStatement() {
+		if (this.statements.isEmpty()) {
+			return Optional.empty();
+		}
+		Statement last = statements.get(statements.size() - 1);
+		if (last.getNodeType() != ASTNode.THROW_STATEMENT) {
+			return Optional.empty();
+		}
+		ThrowStatement throwStatement = (ThrowStatement) last;
+		return Optional.of(throwStatement);
 	}
 
 	public Expression findYieldExpression() {
@@ -63,6 +79,14 @@ public class SwitchCaseClause {
 
 	public List<Statement> getStatements() {
 		return statements;
+	}
+
+	public boolean isReturningValue() {
+		if (findReturnedValue().isPresent()) {
+			return true;
+		}
+		
+		return findThrowsStatement().isPresent();
 	}
 
 }
