@@ -61,11 +61,6 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 		assertChange(original, expected);
 	}
 
-	/**
-	 * SIM-1990: This test is expected to fail as soon as the handling of line
-	 * breaks is corrected.
-	 * 
-	 */
 	@Test
 	public void visit_MacOSConcatenationWithoutLineBreakAtEnd_shouldTransform() throws Exception {
 		String original = "" +
