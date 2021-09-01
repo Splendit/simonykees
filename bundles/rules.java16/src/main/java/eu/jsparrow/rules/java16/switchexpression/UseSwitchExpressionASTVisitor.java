@@ -200,8 +200,11 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			List<Statement> clauseStatements = clause.getStatements();
 			if (clauseStatements.size() == 1) {
 				Statement clauseStatement = clauseStatements.get(0);
-				if (clauseStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-					ExpressionStatement newExpStatement = (ExpressionStatement) astRewrite
+				
+				if (clauseStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT 
+						|| clauseStatement.getNodeType() == ASTNode.THROW_STATEMENT 
+						|| clauseStatement.getNodeType() == ASTNode.RETURN_STATEMENT) {
+					Statement newExpStatement = (Statement) astRewrite
 						.createCopyTarget(clauseStatement);
 					statements.add(newExpStatement);
 				} else {

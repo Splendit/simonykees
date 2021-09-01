@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.switchexpression;
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
@@ -48,7 +49,35 @@ public class SwitchReturnStatementsASTVisitor extends UsesJDTUnitFixture {
 				+ "	};\n"
 				+ "}";
 		assertChange(original, expected);
-		
+	}
+	
+	@Disabled("The expected code cannot be parsed propery. Seems like a JDT issue.")
+	@Test
+	void visit_singleReturnStatementInDefault_shouldTransform() throws Exception {
+		String original = ""
+				+ "private int returningStatements() {\n"
+				+ "	int digit = 0;\n"
+				+ "	String value = \"test\";\n"
+				+ "	switch (digit) {\n"
+				+ "	case 1:\n"
+				+ "		value = \"one\";\n"
+				+ "		break;\n"
+				+ "	case 2:\n"
+				+ "		value = \"two\";\n"
+				+ "		break;\n"
+				+ "	default:\n"
+				+ "		return 0;\n"
+				+ "	}\n"
+				+ "	return 1;\n"
+				+ "}";
+		String expected = ""
+				+ "private int returningStatements() {\n"
+				+ "	int digit = 0;\n"
+				+ "	String value = \"test\";\n"
+				+ "	switch (digit){case 1 ->value = \"one\";case 2 ->value = \"two\";default ->return 0;}\n"
+				+ "	return 1;\n"
+				+ "}";
+		assertChange(original, expected);
 	}
 
 }

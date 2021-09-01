@@ -203,4 +203,30 @@ class UseSwitchExpressionASTVisitorTests extends UsesSimpleJDTUnitFixture {
 				+ "};";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	void visit_throwStatements_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "switch (digit) {\n"
+				+ "case 1:\n"
+				+ "	value = \"one\";\n"
+				+ "	break;\n"
+				+ "case 2:\n"
+				+ "	value = \"two\";\n"
+				+ "	break;\n"
+				+ "default: \n"
+				+ "	throw new RuntimeException();\n"
+				+ "}";
+		String expected = ""
+				+ "int digit = 0;\n"
+				+ "String value = \"test\";\n"
+				+ "switch (digit) {\n"
+				+ "case 1 -> value = \"one\";\n"
+				+ "case 2 -> value = \"two\";\n"
+				+ "default -> throw new RuntimeException();\n"
+				+ "}";
+		assertChange(original, expected);
+	}
 }
