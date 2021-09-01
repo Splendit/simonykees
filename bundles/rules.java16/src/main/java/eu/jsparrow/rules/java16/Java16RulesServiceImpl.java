@@ -7,7 +7,6 @@ import org.osgi.service.component.annotations.Component;
 
 import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.java16.textblock.UseTextBlockRule;
 
 /**
  * Implementor of {@link RuleService}.
