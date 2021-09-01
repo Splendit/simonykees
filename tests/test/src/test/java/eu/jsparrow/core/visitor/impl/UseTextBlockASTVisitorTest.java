@@ -84,6 +84,31 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_TextContainingEmptyLines_shouldTransform() throws Exception {
+		String original = "" +
+				"		String text = \"\" + //\n" +
+				"				\"\\n\" + //\n" +
+				"				\"     AAA\\n\" + //\n" +
+				"				\"     BBB\\n\" + //\n" +
+				"				\"\\n\" + //\n" +
+				"				\"     CCC\\n\" + //\n" +
+				"				\"     DDD\\n\\n\";";
+
+		String expected = "" +
+				"  String text=\"\"\"\n"
+				+ "\n"
+				+ "                     AAA\n"
+				+ "                     BBB\n"
+				+ "\n"
+				+ "                     CCC\n"
+				+ "                     DDD\n"
+				+ "\n"
+				+ "                \"\"\";";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_ConcatenationWithParentheses_shouldTransform() throws Exception {
 		String original = "" +
 				"	String exampleWithParentheses = \"\" + //\n" +
@@ -303,6 +328,12 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"				\"first line\\n\" + \n" +
 				"				\"second line\\n\";";
 
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_LessThanThreeOperands_shouldNotTransform() throws Exception {
+		String original = "String text = \"A\\nB\\nC\\nD\\nE\" + \"A\\nB\\nC\\nD\\nE\";";
 		assertNoChange(original);
 	}
 
