@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -116,7 +117,42 @@ class SwitchCaseBreakStatementsVisitorTest extends UsesSimpleJDTUnitFixture {
 				+ "	case \"2\" -> 2;\n"
 				+ "	default -> 0;\n"
 				+ "	};\n"
-				+ "}"
+				+ "}", 
+				
+				/* Lambda Sample*/
+				""
+				+ "Runnable r = () -> {\n"
+				+ "	switch (i) {\n"
+				+ "	case 1: break;\n"
+				+ "	case 2:\n"
+				+ "	default: break;\n"
+				+ "	}\n"
+				+ "};",
+				
+				/* Anonymous Class Sample */
+				""
+				+ "Runnable r = new Runnable() {\n"
+				+ "	@Override\n"
+				+ "	public void run() {\n"
+				+ "		switch (i) {\n"
+				+ "		case 1: break;\n"
+				+ "		case 2:\n"
+				+ "		default: break;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "};",
+				
+				/* Local Class Sample */
+				""
+				+ "class Foo {\n"
+				+ "	void foo(int i) {\n"
+				+ "		switch (i) {\n"
+				+ "		case 1: break;\n"
+				+ "		case 2:\n"
+				+ "		default: break;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "}\n"
 				);
 	}
 	
@@ -124,8 +160,66 @@ class SwitchCaseBreakStatementsVisitorTest extends UsesSimpleJDTUnitFixture {
 	@MethodSource("codeExamples")
 	void visit_breakStatementsCodeExamples_shouldReturnOneBreak(String methodBlock) throws Exception {
 		fixture.addMethodBlock(methodBlock);
-		fixture.accept(visitor);
+		Block block = fixture.getMethodBlock();
+		block.accept(visitor);
 		boolean multipleBreaks = visitor.hasMultipleBreakStatements();
 		assertFalse(multipleBreaks);
+	}
+	
+	void lambdaSample() {
+int i = 0;
+switch(i) {
+case 0: 
+	Runnable r = () -> {
+		switch (i) {
+		case 1: break;
+		case 2:
+		default: break;
+		}
+	};
+	break;
+default:
+	System.out.println("none");
+}
+	}
+	
+	void anonymousClassSample() {
+int i = 0;
+switch(i) {
+case 0: 
+	Runnable r = new Runnable() {
+		@Override
+		public void run() {
+			switch (i) {
+			case 1: break;
+			case 2:
+			default: break;
+			}
+		}
+	};
+	break;
+default:
+	System.out.println("none");
+}
+	}
+	
+	void localClassSample() {
+int i = 0;
+switch(i) {
+case 0: 
+	class Foo {
+		void foo(int i) {
+			switch (i) {
+			case 1: break;
+			case 2:
+			default: break;
+			}
+		}
+
+	}
+	break;
+default:
+	System.out.println("none");
+}
 	}
 }

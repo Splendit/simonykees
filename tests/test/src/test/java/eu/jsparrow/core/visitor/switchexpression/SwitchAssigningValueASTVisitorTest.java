@@ -327,4 +327,80 @@ class SwitchAssigningValueASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 		assertChange(original, expected);
 	}
+	
+	@Test
+	void visit_multipleBreakStatement_shouldTransform() throws Exception {
+		String original = ""
+				+ "int digit = 0;\n"
+				+ "String value;\n"
+				+ "switch (digit) {\n"
+				+ "case 1:\n"
+				+ "	value = \"one\";\n"
+				+ "	if (value.isEmpty()) {\n"
+				+ "		value = \"\";\n"
+				+ "		break;\n"
+				+ "	}\n"
+				+ "	value = \"one\";\n"
+				+ "	break;\n"
+				+ "case 2:\n"
+				+ "	value = \"two\";\n"
+				+ "	break;\n"
+				+ "default:\n"
+				+ "	value = \"none\";\n"
+				+ "	break;\n"
+				+ "}";
+
+		String expected = ""
+				+ "int digit = 0;\n"
+				+ "String value;\n"
+				+ "switch (digit) {\n"
+				+ "case 1 -> {\n"
+				+ "	value = \"one\";\n"
+				+ "	if (value.isEmpty()) {\n"
+				+ "		value = \"\";\n"
+				+ "		break;\n"
+				+ "	}\n"
+				+ "	value = \"one\";\n"
+				/* 
+				 * NOTE: this break statement doesn't really show up in eclipse. 
+				 * It is put here only to let this test pass.  Future Eclipse versions
+				 * may break this test.
+				 * */ 
+				+ "	break;\n"
+				+ "}\n"
+				+ "case 2 -> value = \"two\";\n"
+				+ "default -> value = \"none\";\n"
+				+ "}";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	void visit_plusEqualsOperand_shouldTransform() throws Exception {
+		String original = ""
+				+ "String value = \"\";\n"
+				+ "int digit = 0;\n"
+				+ "switch (value) {\n"
+				+ "case \"1\":\n"
+				+ "	digit += 1;\n"
+				+ "	break;\n"
+				+ "case \"2\":\n"
+				+ "	digit += 2;\n"
+				+ "	break;\n"
+				+ "default:\n"
+				+ "	digit += 0;\n"
+				+ "	break;\n"
+				+ "}";
+
+		String expected = ""
+				+ "String value = \"\";\n"
+				+ "int digit = 0;\n"
+				+ "switch (value) {\n"
+				+ "case \"1\" -> digit += 1;\n"
+				+ "case \"2\" -> digit += 2;\n"
+				+ "default -> digit += 0;\n"
+				+ "}";
+
+		assertChange(original, expected);
+	}
 }

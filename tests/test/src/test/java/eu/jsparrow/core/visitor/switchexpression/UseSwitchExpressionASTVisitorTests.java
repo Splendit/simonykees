@@ -229,4 +229,46 @@ class UseSwitchExpressionASTVisitorTests extends UsesSimpleJDTUnitFixture {
 				+ "}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	void visit_multipleBreakStatement_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "int digit = 0;\n"
+				+ "String value;\n"
+				+ "switch (digit) {\n"
+				+ "case 1:\n"
+				+ "	value = \"one\";\n"
+				+ "	if(value.isEmpty()) {\n"
+				+ "		value = \"\";\n"
+				+ "		break;\n"
+				+ "	}\n"
+				+ "	value = \"one\";\n"
+				+ "	break;\n"
+				+ "case 2:\n"
+				+ "	value = \"two\";\n"
+				+ "	break;\n"
+				+ "}";
+		String expected = ""
+				+ "int digit = 0;\n"
+				+ "String value;\n"
+				+ "switch (digit) {\n"
+				+ "case 1 -> {\n"
+				+ "	value = \"one\";\n"
+				+ "	if (value.isEmpty()) {\n"
+				+ "		value = \"\";\n"
+				+ "		break;\n"
+				+ "	}\n"
+				+ "	value = \"one\";\n"
+				/* 
+				 * NOTE: this break statement doesn't really show up in eclipse. 
+				 * It is put here only to let this test pass.  Future Eclipse versions
+				 * may break this test.
+				 * */ 
+				+ "	break;\n"
+				+ "}\n"
+				+ "case 2 -> value = \"two\";\n"
+				+ "}";
+		
+		assertChange(original, expected);
+	}
 }

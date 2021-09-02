@@ -3,7 +3,6 @@ package eu.jsparrow.core.visitor.switchexpression;
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
@@ -78,5 +77,71 @@ public class SwitchReturnStatementsASTVisitor extends UsesJDTUnitFixture {
 				+ "}";
 		assertChange(original, expected);
 	}
+	
+	@Test
+	void visit_multipleReturnStatements_shouldTransform() throws Exception {
+		String original = ""
+				+ "String multipleReturnStatements(int digit) {\n"
+				+ "	int i2 = 10;\n"
+				+ "	String value;\n"
+				+ "	switch (digit) {\n"
+				+ "	case 1:\n"
+				+ "		if(digit > i2) {\n"
+				+ "			return \"10\";\n"
+				+ "		}\n"
+				+ "		return \"one\";\n"
+				+ "	case 2:\n"
+				+ "		return \"two\";\n"
+				+ "	default:\n"
+				+ "		return \"other\";\n"
+				+ "	}\n"
+				+ "}";
+		String expected = ""
+				+ "String multipleReturnStatements(int digit) {\n"
+				+ "	int i2 = 10;\n"
+				+ "	String value;\n"
+				+ "	switch (digit) {\n"
+				+ "	case 1 -> {\n"
+				+ "		if(digit > i2) {\n"
+				+ "			return \"10\";\n"
+				+ "		}\n"
+				+ "		return \"one\";\n"
+				+ "	}\n"
+				+ "	case 2 -> {\n"
+				+ "		return \"two\";\n"
+				+ "	}\n"
+				+ "	default -> {\n"
+				+ "		return \"other\";\n"
+				+ "	}\n"
+				+ "	}\n"
+				+ "}";
+		assertChange(original, expected);
+	}
 
+	@Test
+	void visit_throwsStatement_shouldTransform() throws Exception {
+		String original = ""
+				+ "String usingThrowStatement(int digit) {\n"
+				+ "	switch (digit) {\n"
+				+ "	case 1:\n"
+				+ "		return \"one\";\n"
+				+ "	case 2:\n"
+				+ "		return \"two\";\n"
+				+ "	case 3:\n"
+				+ "		return \"three\";\n"
+				+ "	default:\n"
+				+ "		throw new RuntimeException(\"none\");\n"
+				+ "	}\n"
+				+ "}";
+		String expected = ""
+				+ "String usingThrowStatement(int digit) {\n"
+				+ "	return switch (digit) {\n"
+				+ "	case 1 -> \"one\";\n"
+				+ "	case 2 -> \"two\";\n"
+				+ "	case 3 -> \"three\";\n"
+				+ "	default -> throw new RuntimeException(\"none\");\n"
+				+ "	};\n"
+				+ "}";
+		assertChange(original, expected);
+	}
 }
