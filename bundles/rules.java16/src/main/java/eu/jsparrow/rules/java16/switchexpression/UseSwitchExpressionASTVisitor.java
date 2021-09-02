@@ -31,6 +31,43 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
 
+/**
+ * A visitor for replacing {@link SwitchStatement}s by {@link SwitchExpression}s
+ * or rule-labeled {@link SwitchStatement}s. For example, the following code:
+ * 
+ * 
+ * <pre>
+ * <code>
+ * 	String value = "test";
+ *	switch (digit) {
+ *	case 1:
+ *		value = "one";
+ *		break;
+ *	case 2:
+ *		value = "two";
+ *		break;
+ *	default:
+ *		value = "none";
+ *	}
+ * </code>
+ * </pre>
+ * 
+ * is transformed to:
+ * 
+ * <pre>
+ * <code> 
+ *	String value = switch (digit) {
+ *	case 1 -> "one";
+ *	case 2 -> "two";
+ *	default -> "none";
+ *	};
+ * </code>
+ * </pre>
+ * 
+ * 
+ * @since 4.3.0
+ *
+ */
 public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
@@ -153,12 +190,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		Expression initializer = fragment.getInitializer();
 		if (initializer != null && initializer.getNodeType() != ASTNode.SIMPLE_NAME
-				&& initializer.getNodeType() != ASTNode.STRING_LITERAL
-				&& initializer.getNodeType() != ASTNode.NUMBER_LITERAL
-				&& initializer.getNodeType() != ASTNode.BOOLEAN_LITERAL
-				&& initializer.getNodeType() != ASTNode.CHARACTER_LITERAL
-				&& initializer.getNodeType() != ASTNode.NULL_LITERAL
-				&& initializer.getNodeType() != ASTNode.TYPE_LITERAL) {
+				&& !ASTNodeUtil.isLiteral(initializer)) {
 			return Optional.empty();
 		}
 
@@ -169,7 +201,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		boolean isReturningValue = clauses.stream()
 			.allMatch(SwitchCaseClause::isReturningValue);
-		if(!isReturningValue) {
+		if (!isReturningValue) {
 			return false;
 		}
 		return clauses.stream()
@@ -189,8 +221,8 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 
 		boolean hasInternalBreakStatements = clauses.stream()
-				.anyMatch(SwitchCaseClause::hasInternalBreakStatements);
-		if(hasInternalBreakStatements) {
+			.anyMatch(SwitchCaseClause::hasInternalBreakStatements);
+		if (hasInternalBreakStatements) {
 			return false;
 		}
 
@@ -213,20 +245,12 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		newSwitchStatement.setExpression(newHeaderExpression);
 		List<Statement> statements = newSwitchStatement.statements();
 		for (SwitchCaseClause clause : clauses) {
-			List<Expression> clauseExpressions = clause.getExpressions();
-			SwitchCase switchCase = ast.newSwitchCase();
-			switchCase.setSwitchLabeledRule(true);
-			for (Expression expression : clauseExpressions) {
-				Expression unwrappedExpression = ASTNodeUtil.unwrapParenthesizedExpression(expression);
-				switchCase.expressions()
-					.add((Expression) astRewrite.createCopyTarget(unwrappedExpression));
-			}
+			SwitchCase switchCase = replaceWithLabeledRuleSwitchCase(ast, clause);
 			statements.add(switchCase);
 
 			List<Statement> clauseStatements = clause.getStatements();
 			if (clauseStatements.size() == 1) {
 				Statement clauseStatement = clauseStatements.get(0);
-
 				if (clauseStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT
 						|| clauseStatement.getNodeType() == ASTNode.THROW_STATEMENT) {
 					Statement newExpStatement = (Statement) astRewrite
@@ -248,9 +272,21 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 				}
 				statements.add(block);
 			}
-
 		}
 		return newSwitchStatement;
+	}
+
+	@SuppressWarnings("unchecked")
+	private SwitchCase replaceWithLabeledRuleSwitchCase(AST ast, SwitchCaseClause clause) {
+		List<Expression> clauseExpressions = clause.getExpressions();
+		SwitchCase switchCase = ast.newSwitchCase();
+		switchCase.setSwitchLabeledRule(true);
+		for (Expression expression : clauseExpressions) {
+			Expression unwrappedExpression = ASTNodeUtil.unwrapParenthesizedExpression(expression);
+			switchCase.expressions()
+				.add((Expression) astRewrite.createCopyTarget(unwrappedExpression));
+		}
+		return switchCase;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -261,14 +297,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		newSwitchStatement.setExpression(newHeaderExpression);
 		List<Statement> statements = newSwitchStatement.statements();
 		for (SwitchCaseClause clause : clauses) {
-			List<Expression> clauseExpressions = clause.getExpressions();
-			SwitchCase switchCase = ast.newSwitchCase();
-			switchCase.setSwitchLabeledRule(true);
-			for (Expression expression : clauseExpressions) {
-				Expression unwrappedExpression = ASTNodeUtil.unwrapParenthesizedExpression(expression);
-				switchCase.expressions()
-					.add((Expression) astRewrite.createCopyTarget(unwrappedExpression));
-			}
+			SwitchCase switchCase = replaceWithLabeledRuleSwitchCase(ast, clause);
 			statements.add(switchCase);
 			List<Statement> clauseStatements = clause.getStatements();
 			Expression yieldExpression = clause.findYieldExpression();
@@ -316,10 +345,10 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 				return false;
 			}
 
-			if(combinesSwitchCaseWithDefault(buck)) {
+			if (combinesSwitchCaseWithDefault(buck)) {
 				return false;
 			}
-			
+
 			if (usesUndefinedVariables(buck, undefinedVariables)) {
 				return false;
 			}
@@ -330,7 +359,8 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	private boolean combinesSwitchCaseWithDefault(List<Statement> buck) {
 		List<SwitchCase> switchCases = filterSwitchCaseStatements(buck);
-		return switchCases.size() > 1 && switchCases.stream().anyMatch(SwitchCase::isDefault);
+		return switchCases.size() > 1 && switchCases.stream()
+			.anyMatch(SwitchCase::isDefault);
 	}
 
 	private boolean containsLabeledStatement(List<Statement> buck) {
@@ -348,7 +378,7 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		VariableDeclarationsVisitor visitor = new VariableDeclarationsVisitor();
 		List<SimpleName> allDeclaredVariables = new ArrayList<>();
 		for (Statement statement : buck) {
-			if(statement.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT 
+			if (statement.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT
 					&& statement.getLocationInParent() == SwitchStatement.STATEMENTS_PROPERTY) {
 				statement.accept(visitor);
 				List<SimpleName> declaredVariables = visitor.getVariableDeclarationNames();
@@ -378,13 +408,13 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			.map(SwitchCase.class::cast)
 			.collect(Collectors.toList());
 	}
-	
+
 	private List<BreakStatement> findAllBreakStatements(List<Statement> buck) {
 		SwitchCaseBreakStatementsVisitor visitor = new SwitchCaseBreakStatementsVisitor();
 		for (Statement statement : buck) {
 			statement.accept(visitor);
 		}
-		
+
 		return visitor.getBreakStatements();
 	}
 

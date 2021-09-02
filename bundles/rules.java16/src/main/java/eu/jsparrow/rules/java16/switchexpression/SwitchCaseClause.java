@@ -10,20 +10,35 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 
-public class SwitchCaseClause {
+/**
+ * An entity providing information and functionalities for a {@link SwitchCase}
+ * statement and the {@link Statement}s belonging to it.
+ * 
+ * @since 4.3.0
+ *
+ */
+class SwitchCaseClause {
 
 	private List<Expression> expressions;
 	private List<Statement> statements;
 	private List<BreakStatement> breakStatements;
 
-	public SwitchCaseClause(List<Expression> expressions, List<Statement> statements, List<BreakStatement> breakStatements) {
+	public SwitchCaseClause(List<Expression> expressions, List<Statement> statements,
+			List<BreakStatement> breakStatements) {
 		this.expressions = expressions;
 		this.statements = statements;
 		this.breakStatements = breakStatements;
 	}
 
+	/**
+	 * Checks if the last statement of this switch-case is assigning a variable.
+	 * 
+	 * @return an expression representing the assigned variable.
+	 */
 	public Optional<Expression> findAssignedVariable() {
 		if (this.statements.isEmpty()) {
 			return Optional.empty();
@@ -38,12 +53,17 @@ public class SwitchCaseClause {
 			return Optional.empty();
 		}
 		Assignment assignment = (Assignment) expression;
-		if(assignment.getOperator() != Assignment.Operator.ASSIGN) {
+		if (assignment.getOperator() != Assignment.Operator.ASSIGN) {
 			return Optional.empty();
 		}
 		return Optional.of(assignment.getLeftHandSide());
 	}
 
+	/**
+	 * Checks if the last statement of this switch-case is returning a value.
+	 * 
+	 * @return an expression representing the returned value.
+	 */
 	public Optional<Expression> findReturnedValue() {
 		if (this.statements.isEmpty()) {
 			return Optional.empty();
@@ -56,6 +76,12 @@ public class SwitchCaseClause {
 		return Optional.ofNullable(returnStatement.getExpression());
 	}
 
+	/**
+	 * Checks if the last statement of a switch-case is a
+	 * {@link ThrowStatement}.
+	 * 
+	 * @return an Optional of the last statement or an empty optional otherwise.
+	 */
 	public Optional<ThrowStatement> findThrowsStatement() {
 		if (this.statements.isEmpty()) {
 			return Optional.empty();
@@ -68,6 +94,14 @@ public class SwitchCaseClause {
 		return Optional.of(throwStatement);
 	}
 
+	/**
+	 * Finds the expression for the {@link YieldStatement} to be created. Uses
+	 * 
+	 * @return either the assigned value returned by
+	 *         {@link #findAssignedVariable()} or the expression of the return
+	 *         statement found by {@link #indReturnedValue()}. Returns null if
+	 *         none of the aforementioned values are present.
+	 */
 	public Expression findYieldExpression() {
 		return findAssignedVariable()
 			.map(Expression::getParent)
@@ -92,7 +126,6 @@ public class SwitchCaseClause {
 		if (findReturnedValue().isPresent()) {
 			return true;
 		}
-		
 		return findThrowsStatement().isPresent();
 	}
 
