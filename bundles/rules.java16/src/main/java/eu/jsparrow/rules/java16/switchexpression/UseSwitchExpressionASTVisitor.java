@@ -165,8 +165,15 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	private boolean areReturningValue(List<SwitchCaseClause> clauses) {
-		return clauses.stream()
+
+		boolean isReturningValue = clauses.stream()
 			.allMatch(SwitchCaseClause::isReturningValue);
+		if(!isReturningValue) {
+			return false;
+		}
+		return clauses.stream()
+			.map(SwitchCaseClause::getStatements)
+			.noneMatch(this::containsMultipleReturnStatements);
 	}
 
 	private boolean areAssigningValue(List<SwitchCaseClause> clauses) {
@@ -299,10 +306,6 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			}
 
 			if (containsMultipleBreakStatements(buck)) {
-				return false;
-			}
-
-			if (containsMultipleReturnStatements(buck)) {
 				return false;
 			}
 
