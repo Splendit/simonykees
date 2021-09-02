@@ -345,9 +345,12 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 		VariableDeclarationsVisitor visitor = new VariableDeclarationsVisitor();
 		List<SimpleName> allDeclaredVariables = new ArrayList<>();
 		for (Statement statement : buck) {
-			statement.accept(visitor);
-			List<SimpleName> declaredVariables = visitor.getVariableDeclarationNames();
-			allDeclaredVariables.addAll(declaredVariables);
+			if(statement.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT 
+					&& statement.getLocationInParent() == SwitchStatement.STATEMENTS_PROPERTY) {
+				statement.accept(visitor);
+				List<SimpleName> declaredVariables = visitor.getVariableDeclarationNames();
+				allDeclaredVariables.addAll(declaredVariables);
+			}
 		}
 		return allDeclaredVariables;
 	}
