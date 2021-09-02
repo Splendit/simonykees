@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  * @since 4.3.0
  *
  */
-class SwitchCaseBreakStatementsVisitor extends ASTVisitor {
+public class SwitchCaseBreakStatementsVisitor extends ASTVisitor {
 
 	private List<BreakStatement> breakStatements = new ArrayList<>();
 
