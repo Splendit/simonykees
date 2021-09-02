@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -187,6 +188,12 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			return false;
 		}
 
+		boolean hasInternalBreakStatements = clauses.stream()
+				.anyMatch(SwitchCaseClause::hasInternalBreakStatements);
+		if(hasInternalBreakStatements) {
+			return false;
+		}
+
 		Expression firstAssigned = assignedExpressions.get(0);
 		ASTMatcher matcher = new ASTMatcher();
 		for (int i = 1; i < assignedExpressions.size(); i++) {
@@ -305,10 +312,6 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 				return false;
 			}
 
-			if (containsMultipleBreakStatements(buck)) {
-				return false;
-			}
-
 			if (containsLabeledStatement(buck)) {
 				return false;
 			}
@@ -375,16 +378,14 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			.map(SwitchCase.class::cast)
 			.collect(Collectors.toList());
 	}
-
-	private boolean containsMultipleBreakStatements(List<Statement> buck) {
+	
+	private List<BreakStatement> findAllBreakStatements(List<Statement> buck) {
 		SwitchCaseBreakStatementsVisitor visitor = new SwitchCaseBreakStatementsVisitor();
 		for (Statement statement : buck) {
 			statement.accept(visitor);
-			if (visitor.hasMultipleBreakStatements()) {
-				return true;
-			}
 		}
-		return false;
+		
+		return visitor.getBreakStatements();
 	}
 
 	private boolean containsMultipleReturnStatements(List<Statement> buck) {
@@ -472,7 +473,8 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			.filter(node -> node.getNodeType() != ASTNode.SWITCH_CASE)
 			.filter(node -> node.getNodeType() != ASTNode.BREAK_STATEMENT)
 			.collect(Collectors.toList());
-		return new SwitchCaseClause(caseExpressions, blockStatements);
+		List<BreakStatement> breakStatements = findAllBreakStatements(buck);
+		return new SwitchCaseClause(caseExpressions, blockStatements, breakStatements);
 	}
 
 }

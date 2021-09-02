@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -15,10 +16,12 @@ public class SwitchCaseClause {
 
 	private List<Expression> expressions;
 	private List<Statement> statements;
+	private List<BreakStatement> breakStatements;
 
-	public SwitchCaseClause(List<Expression> expressions, List<Statement> statements) {
+	public SwitchCaseClause(List<Expression> expressions, List<Statement> statements, List<BreakStatement> breakStatements) {
 		this.expressions = expressions;
 		this.statements = statements;
+		this.breakStatements = breakStatements;
 	}
 
 	public Optional<Expression> findAssignedVariable() {
@@ -75,6 +78,10 @@ public class SwitchCaseClause {
 
 	public List<Expression> getExpressions() {
 		return expressions;
+	}
+
+	public boolean hasInternalBreakStatements() {
+		return this.breakStatements.size() > 1;
 	}
 
 	public List<Statement> getStatements() {

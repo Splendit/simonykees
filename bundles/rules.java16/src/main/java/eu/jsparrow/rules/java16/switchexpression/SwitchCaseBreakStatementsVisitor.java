@@ -72,4 +72,8 @@ public class SwitchCaseBreakStatementsVisitor extends ASTVisitor {
 	public boolean hasMultipleBreakStatements() {
 		return this.breakStatements.size() > 1;
 	}
+	
+	public List<BreakStatement> getBreakStatements() {
+		return this.breakStatements;
+	}
 }
