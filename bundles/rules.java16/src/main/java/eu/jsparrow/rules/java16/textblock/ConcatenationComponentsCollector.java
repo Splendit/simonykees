@@ -29,7 +29,11 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 @SuppressWarnings("nls")
 public class ConcatenationComponentsCollector {
-
+	
+	/**
+	 * In a {@code TextBlock} the only valid escape sequences are  \b  \t  \n  \f  \r  \"  \'  \\
+	 */
+	private static final Pattern NOT_SUPPORTED_ESCAPE_SEQUENCE = Pattern.compile("(\\\\)([^btnfr\\\"\\\'\\\\])");
 	private static final Predicate<String> SUPPORTED_NUMERIC_LITERAL_PREDICATE = Pattern.compile("^(0|([1-9][0-9]*))$")
 		.asPredicate();
 
@@ -94,7 +98,10 @@ public class ConcatenationComponentsCollector {
 
 		if (component.getNodeType() == ASTNode.STRING_LITERAL) {
 			StringLiteral stringLiteral = (StringLiteral) component;
-			return Optional.of(stringLiteral.getLiteralValue());
+			if (checkEscapedValue(stringLiteral)) {
+				return Optional.of(stringLiteral.getLiteralValue());
+			}
+			return Optional.empty();
 		}
 
 		if (component.getNodeType() == ASTNode.NUMBER_LITERAL) {
@@ -122,6 +129,13 @@ public class ConcatenationComponentsCollector {
 		}
 
 		return Optional.empty();
+	}
+
+	private boolean checkEscapedValue(StringLiteral stringLiteral) {
+		
+		String escapedValue = stringLiteral.getEscapedValue();
+		return !NOT_SUPPORTED_ESCAPE_SEQUENCE.matcher(escapedValue)
+			.find();
 	}
 
 	private Expression removeSurroundingParenthesis(Expression expression) {
