@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.jdtunit.JdtUnitException;
+import eu.jsparrow.rules.common.util.JdtCoreVersionBindingUtil;
 
 /**
  * This utility class provides methods to convert strings into the following
@@ -88,8 +89,8 @@ public class ASTNodeBuilder {
 		Optional<Integer> kindOptional = getParserKindFromType(type);
 		int kind = kindOptional
 			.orElseThrow(() -> new JdtUnitException("There is no ASTParser kind for the given type " + type.getName()));
-
-		ASTParser astParser = ASTParser.newParser(AST.JLS11);
+		int astLevel = JdtCoreVersionBindingUtil.findJLSLevel(JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion());
+		ASTParser astParser = ASTParser.newParser(astLevel);
 		astParser.setSource(string.toCharArray());
 		astParser.setKind(kind);
 		ASTNode result = astParser.createAST(null);

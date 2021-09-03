@@ -16,7 +16,7 @@ if [ -n ${2+x} ]; then subdir="$2"/; fi
 # building the tag
 tag=`pcregrep -o1 "name='eu\.jsparrow\.photon\.feature\.feature\.group' range='\[.*,(.*-\d{4})" releng/eu.jsparrow.site.photon/target/p2content.xml`
 echo tag=$tag
-suffix=`pcregrep -o1 "name='(\w+\.\w+\.\w+\.\w+)\.feature\.group' range='\[.*,(.*-\d{4})" releng/eu.jsparrow.site.photon/target/p2content.xml`
+suffix=`pcregrep -o1 "name='(\w+\.\w+\.\w+\.\w+)\.feature\.group' range='\[.*,(.*-\d{4})" releng/eu.jsparrow.site.photon/target/p2content.xml | tr '\n' '-' | sed 's/-$/\n/'`
 echo suffix=$suffix
 completeTag=$dir$subdir$tag-$suffix
 echo completeTag=$completeTag

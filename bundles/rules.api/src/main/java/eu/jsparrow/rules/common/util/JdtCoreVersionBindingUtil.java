@@ -16,6 +16,8 @@ import org.osgi.framework.Version;
 public class JdtCoreVersionBindingUtil {
 
 	private static final String ORG_ECLIPSE_JDT_CORE = "org.eclipse.jdt.core"; //$NON-NLS-1$
+	private static final String JDT_JAVA_16_SUPPORT = "3.26.0"; //$NON-NLS-1$
+	private static final String JDT_JAVA_15_SUPPORT = "3.24.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_14_SUPPORT = "3.22.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_13_SUPPORT = "3.20.0"; //$NON-NLS-1$
 	private static final String JDT_JAVA_12_SUPPORT = "3.18.0"; //$NON-NLS-1$
@@ -75,7 +77,21 @@ public class JdtCoreVersionBindingUtil {
 	 */
 	@SuppressWarnings("deprecation")
 	public static int findJLSLevel(Version jdtVersion) {
-		if (isJava14Supported(jdtVersion)) {
+		if (isJava16Supported(jdtVersion)) {
+			/*
+			 * @since 3.27.0 -> 21-09
+			 * 
+			 * @since 3.26.0 -> 21-06
+			 */
+			return AST.JLS16;
+		} else if (isJava15Supported(jdtVersion)) {
+			/*
+			 * @since 3.25.0 -> 21-03
+			 * 
+			 * @since 3.24.0 -> 20-12
+			 */
+			return AST.JLS15;
+		} else if (isJava14Supported(jdtVersion)) {
 			/*
 			 * @since 3.23.0 -> 20-09
 			 * 
@@ -127,6 +143,14 @@ public class JdtCoreVersionBindingUtil {
 			return TryStatement.RESOURCES2_PROPERTY;
 		}
 		return TryStatement.RESOURCES_PROPERTY;
+	}
+
+	private static boolean isJava16Supported(Version jdtVersion) {
+		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_16_SUPPORT)) >= 0;
+	}
+
+	private static boolean isJava15Supported(Version jdtVersion) {
+		return jdtVersion.compareTo(Version.parseVersion(JDT_JAVA_15_SUPPORT)) >= 0;
 	}
 
 	private static boolean isJava14Supported(Version jdtVersion) {
