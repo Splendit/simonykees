@@ -296,6 +296,28 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_SupportedEscapeSequences_shouldTransform() throws Exception {
+		String original = "" +
+				"	String string2 = \"\" +\n" +
+				"			\"backslash b --\\b--\\n\" +\n" +
+				"			\"tabulator --\\t--\\n\" +\n" +
+				"			\"form feed --\\f--\\n\" +\n" +
+				"			\"simple quotation mark --\\'--\\n\" +\n" +
+				"			\"double quotation mark --\\\"--\\n\";";
+
+		String expected = "" +
+				"  String string2=\"\"\"\n"
+				+ "                backslash b --\b--\n"
+				+ "                tabulator --	--\n"
+				+ "                form feed --\f--\n"
+				+ "                simple quotation mark --'--\n"
+				+ "                double quotation mark --\"--\n"
+				+ "                \"\"\";";
+
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_ConcatenationWithParenthesizedIntAddition_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		String exampleWithParenthesizedIntAddition = \"\" + \n" +
@@ -401,6 +423,18 @@ public class UseTextBlockASTVisitorTest extends UsesSimpleJDTUnitFixture {
 				"				\"                      <p>Hello, world</p>\\n\" + \n" +
 				"				\"                  </body>\\n\"+\n" +
 				"				\"              </html>\\n\";";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_UnsupportedEscapeSequence_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		String string2 = \"\" + //\n" +
+				"				\"first line\\n\" + //\n" +
+				"				\"second line\\n\" + //\n" +
+				"				\"third line\\n\" + //\n" +
+				"				\"unsupported escape sequence --\\uFFFF--\\n\";";
 
 		assertNoChange(original);
 	}
