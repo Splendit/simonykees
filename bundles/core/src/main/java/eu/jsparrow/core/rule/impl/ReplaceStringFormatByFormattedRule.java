@@ -1,10 +1,11 @@
-package eu.jsparrow.rules.java16;
+package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import eu.jsparrow.core.visitor.impl.ReplaceStringFormatByFormattedASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;

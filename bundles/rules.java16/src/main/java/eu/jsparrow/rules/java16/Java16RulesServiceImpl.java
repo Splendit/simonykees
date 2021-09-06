@@ -1,6 +1,6 @@
 package eu.jsparrow.rules.java16;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
@@ -9,7 +9,7 @@ import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
 
 /**
- * Implementor of {@link RuleService}.
+ * Implementor of {@link RuleService}. 
  *
  * @since 4.2.0
  *
@@ -19,7 +19,8 @@ public class Java16RulesServiceImpl implements RuleService {
 
 	@Override
 	public List<RefactoringRule> loadRules() {
-		return Arrays.asList(new UsePatternMatchingForInstanceofRule(),
-				new ReplaceStringFormatByFormattedRule());
+		return Collections
+			.singletonList(new UsePatternMatchingForInstanceofRule());
 	}
+
 }
