@@ -5,12 +5,13 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.Statement;
 
 /**
  * A visitor to find {@link LabeledStatement}s and {@link BreakStatement}s with
- * a label. For example: 
+ * a label. For example:
  * 
  * {@code label_1: {Statement}} or {@code break label_1;}
  * 
@@ -31,6 +32,14 @@ class LabeledBreakStatementsVisitor extends ASTVisitor {
 	public boolean visit(BreakStatement breakStatement) {
 		if (breakStatement.getLabel() != null) {
 			this.statements.add(breakStatement);
+		}
+		return true;
+	}
+
+	@Override
+	public boolean visit(ContinueStatement continueStatement) {
+		if (continueStatement.getLabel() != null) {
+			this.statements.add(continueStatement);
 		}
 		return true;
 	}

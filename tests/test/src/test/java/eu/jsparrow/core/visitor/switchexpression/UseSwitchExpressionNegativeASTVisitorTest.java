@@ -111,4 +111,25 @@ class UseSwitchExpressionNegativeASTVisitorTest extends UsesSimpleJDTUnitFixture
 				+ "}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	void visit_continueLabeledStatement_shouldNotTransform() throws Exception {
+		String original = ""
+				+ "String value = \"\";\n"
+				+ "loop: for (int indexInner = 0; indexInner < 5; indexInner++) {\n"
+				+ "	int digit = indexInner % 2;\n"
+				+ "	switch (digit) {\n"
+				+ "	case 1:\n"
+				+ "		if (indexInner > 2) {\n"
+				+ "			// causes compilation error in transformed code\n"
+				+ "			continue loop;\n"
+				+ "		}\n"
+				+ "		value = \"one\";\n"
+				+ "		break;\n"
+				+ "	default:\n"
+				+ "		value = \"other\";\n"
+				+ "	}\n"
+				+ "}";
+		assertNoChange(original);
+	}
 }
