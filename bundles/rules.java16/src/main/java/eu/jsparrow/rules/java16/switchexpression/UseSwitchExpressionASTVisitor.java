@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -28,6 +29,7 @@ import org.eclipse.jdt.core.dom.YieldStatement;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 import eu.jsparrow.rules.common.visitor.helper.VariableDeclarationsVisitor;
 
@@ -107,6 +109,8 @@ public class UseSwitchExpressionASTVisitor extends AbstractASTRewriteASTVisitor 
 			astRewrite.replace(switchStatement, newSwitchStatement, null);
 			onRewrite();
 		}
+		CommentRewriter commentRewriter = getCommentRewriter();
+		commentRewriter.saveLeadingComment(switchStatement);
 		return true;
 	}
 
