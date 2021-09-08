@@ -3,9 +3,11 @@ package eu.jsparrow.core.rule.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.*;
 
 import java.time.Duration;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -44,5 +46,19 @@ class ReplaceStringFormatByFormattedRuleTest extends SingleRuleTest {
 	@Test
 	void test_requiredJavaVersion() throws Exception {
 		assertThat(rule.getRequiredJavaVersion(), equalTo("15"));
+	}
+
+	@Test
+	void calculateEnabledForProject_shouldReturnFalse() throws Exception {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_14);
+		rule.calculateEnabledForProject(testProject);
+		assertFalse(rule.isEnabled());
+	}
+
+	@Test
+	void calculateEnabledForProject_shouldReturnTrue() throws Exception {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_15);
+		rule.calculateEnabledForProject(testProject);
+		assertTrue(rule.isEnabled());
 	}
 }
