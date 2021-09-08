@@ -53,10 +53,10 @@ public class LicenseInfoMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		Log log = getLog();
 
-		// With version 1.0.0 of jSparrow Maven Plugin, only JDK 8 is supported.
-		if (!JavaVersion.isJava8or11()) {
-			log.warn(Messages.RefactorMojo_supportJDK8and11);
-			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8and11);
+		// Since 3.10.0, jSparrow Maven Plugin requires JDK 11.
+		if (!JavaVersion.isAtLeastJava11()) {
+			log.warn(Messages.ListAllRulesMojo_supportJDK11);
+			throw new MojoExecutionException(Messages.ListAllRulesMojo_supportJDK11);
 		}
 
 		String mode = StandaloneMode.LICENSE_INFO.name();

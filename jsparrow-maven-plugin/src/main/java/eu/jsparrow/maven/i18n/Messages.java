@@ -9,6 +9,7 @@ public class Messages extends NLS {
 	public static String BundleStarter_loadOsgiBundles;
 	public static String BundleStarter_startEquinox;
 	public static String BundleStarter_startingBundle;
+	public static String ListAllRulesMojo_supportJDK11;
 	public static String WorkingDirectory_cannotReadJSparrowLockFile;
 	public static String WorkingDirectory_cannotWriteToJSparrowLockFile;
 	public static String MavenAdapter_configurationSetUp;
