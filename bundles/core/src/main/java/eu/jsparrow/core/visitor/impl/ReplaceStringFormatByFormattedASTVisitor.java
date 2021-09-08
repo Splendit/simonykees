@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -100,6 +101,13 @@ public class ReplaceStringFormatByFormattedASTVisitor extends AbstractASTRewrite
 			return Collections.emptyList();
 		}
 
-		return ASTNodeUtil.convertToTypedList(invocation.arguments(), Expression.class);
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(invocation.arguments(), Expression.class);
+		if (!arguments.isEmpty() &&
+				arguments.get(0)
+					.getNodeType() == ASTNode.INFIX_EXPRESSION) {
+
+			return Collections.emptyList();
+		}
+		return arguments;
 	}
 }

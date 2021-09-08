@@ -96,23 +96,17 @@ public class ReplaceStringFormatByFormattedASTVisitorTest extends UsesSimpleJDTU
 		assertNoChange(original);
 	}
 
-	// @Test
-	// public void visit__shouldTransform() throws Exception {
-	// String original = "" +
-	// "";
-	//
-	// String expected = "" +
-	// "";
-	//
-	// assertChange(original, expected);
-	// }
+	@Test
+	public void visit_ConcatenatedFormatString_shouldNotTransform() throws Exception {
+		String original = "" +
+				"		String name = \"<name>\";\n"
+				+ "		String phone = \"<phone>\";\n"
+				+ "		String address = \"<address>\";\n"
+				+ "		float salary = 10000.0f;\n"
+				+ "\n"
+				+ "		String output = String.format(\"Name: %s,\" + \" Phone: %s,\" + \" Address: %s,\" + \" Salary: $%.2f\", name, phone,\n"
+				+ "				address, salary);";
 
-	// @Test
-	// public void visit__shouldNotTransform() throws
-	// Exception {
-	// String original = "" +
-	// "";
-	//
-	// assertNoChange(original);
-	// }
+		assertNoChange(original);
+	}
 }
