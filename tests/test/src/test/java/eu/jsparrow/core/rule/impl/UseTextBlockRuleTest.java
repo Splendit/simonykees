@@ -13,7 +13,7 @@ import eu.jsparrow.core.SingleRuleTest;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
-import eu.jsparrow.rules.java16.UseTextBlockRule;
+import eu.jsparrow.rules.java16.textblock.UseTextBlockRule;
 
 class UseTextBlockRuleTest extends SingleRuleTest {
 

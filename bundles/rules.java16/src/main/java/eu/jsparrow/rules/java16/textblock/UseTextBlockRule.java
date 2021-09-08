@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.java16;
+package eu.jsparrow.rules.java16.textblock;
 
 import java.time.Duration;
 import java.util.Arrays;

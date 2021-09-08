@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.java16;
+package eu.jsparrow.rules.java16.textblock;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,7 +9,6 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.TextBlock;
 
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.rules.java16.textblock.ConcatenationComponentsCollector;
 
 /**
  * 
