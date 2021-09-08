@@ -1,11 +1,13 @@
 package eu.jsparrow.core.visitor.switchexpression;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -158,11 +160,11 @@ class SwitchCaseBreakStatementsVisitorTest extends UsesSimpleJDTUnitFixture {
 	
 	@ParameterizedTest
 	@MethodSource("codeExamples")
-	void visit_breakStatementsCodeExamples_shouldReturnOneBreak(String methodBlock) throws Exception {
+	void visit_breakStatementsCodeExamples_shouldReturnNoBreaks(String methodBlock) throws Exception {
 		fixture.addMethodBlock(methodBlock);
 		Block block = fixture.getMethodBlock();
 		block.accept(visitor);
-		boolean multipleBreaks = visitor.hasMultipleBreakStatements();
-		assertFalse(multipleBreaks);
+		List<BreakStatement> breakStatements = visitor.getBreakStatements();
+		assertTrue(breakStatements.isEmpty());
 	}
 }
