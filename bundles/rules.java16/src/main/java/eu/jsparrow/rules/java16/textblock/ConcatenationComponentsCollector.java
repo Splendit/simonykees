@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
@@ -22,16 +21,17 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Helper class collecting the string representations of the components of a
- * string concatenation.
+ * string concatenation with + operator.
  * 
  * @since 4.3.0
  *
  */
 @SuppressWarnings("nls")
 public class ConcatenationComponentsCollector {
-	
+
 	/**
-	 * In a {@code TextBlock} the only valid escape sequences are  \b  \t  \n  \f  \r  \"  \'  \\
+	 * In a {@code TextBlock} the only valid escape sequences are \b \t \n \f \r
+	 * \" \' \\
 	 */
 	private static final Pattern NOT_SUPPORTED_ESCAPE_SEQUENCE = Pattern.compile("(\\\\)([^btnfr\\\"\\\'\\\\])");
 	private static final Predicate<String> SUPPORTED_NUMERIC_LITERAL_PREDICATE = Pattern.compile("^(0|([1-9][0-9]*))$")
@@ -83,7 +83,7 @@ public class ConcatenationComponentsCollector {
 	}
 
 	private List<String> collectComponents(Expression expression) {
-		Expression unwrappedExpression = removeSurroundingParenthesis(expression);
+		Expression unwrappedExpression = ASTNodeUtil.unwrapParenthesizedExpression(expression);
 		if (unwrappedExpression.getNodeType() == ASTNode.INFIX_EXPRESSION) {
 			return collectConcatenationComponents((InfixExpression) unwrappedExpression);
 		}
@@ -132,18 +132,10 @@ public class ConcatenationComponentsCollector {
 	}
 
 	private boolean checkEscapedValue(StringLiteral stringLiteral) {
-		
+
 		String escapedValue = stringLiteral.getEscapedValue();
 		return !NOT_SUPPORTED_ESCAPE_SEQUENCE.matcher(escapedValue)
 			.find();
-	}
-
-	private Expression removeSurroundingParenthesis(Expression expression) {
-		if (expression.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
-			ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression) expression;
-			return removeSurroundingParenthesis(parenthesizedExpression.getExpression());
-		}
-		return expression;
 	}
 
 	private boolean isStringOperand(Expression expression) {
