@@ -8,6 +8,16 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+/**
+ * Stores all informations in connection with
+ * <ul>
+ * <li>the removing of invocations of {@code TestRunner.run} found in the main
+ * method or alternatively,</li>
+ * <li>the removing of the entire main method declaration if this is
+ * possible.</li>
+ * </ul>
+ * 
+ */
 public class RemoveRunTestInvocationsData {
 
 	private MethodDeclaration mainMethodToRemove;
@@ -18,7 +28,7 @@ public class RemoveRunTestInvocationsData {
 		this();
 		this.mainMethodToRemove = mainMethodToRemove;
 	}
-	
+
 	public RemoveRunTestInvocationsData() {
 		this(Collections.emptyList(), Collections.emptyList());
 	}

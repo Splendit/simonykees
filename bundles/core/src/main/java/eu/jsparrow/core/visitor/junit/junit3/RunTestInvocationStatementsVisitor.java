@@ -19,6 +19,16 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+/**
+ * 
+ * Helper visitor to find all expression statements containing the invocation of
+ * {@code TestRunner.run} like for example:
+ * 
+ * <pre>
+ * TestRunner.run(ExampleJUnit3TestCases.class);
+ * </pre>
+ *
+ */
 public class RunTestInvocationStatementsVisitor extends ASTVisitor {
 
 	private final Map<ExpressionStatement, TypeLiteral> runInvocationToTypeLiteralMap = new HashMap<>();

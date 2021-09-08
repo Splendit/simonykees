@@ -24,7 +24,10 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 public class UnexpectedJunit3References {
 
 	private UnexpectedJunit3References() {
-		// private constructor of utility class in hiding implicit public one
+		/*
+		 * private constructor of utility class in order to hide implicit public
+		 * one
+		 */
 	}
 
 	static boolean analyzeNameBinding(CompilationUnit compilationUnit, IBinding binding) {
@@ -45,8 +48,11 @@ public class UnexpectedJunit3References {
 		if (binding.getKind() == IBinding.VARIABLE) {
 			return analyzeVariableBinding(compilationUnit, (IVariableBinding) binding);
 		}
-		// Not covered: any other binding which is not expected for a name in
-		// connection with the migration of JUnit3
+		/*
+		 * Not covered: any other binding which is not expected for a name in
+		 * connection with the migration of JUnit3
+		 * 
+		 */
 		return false;
 	}
 
