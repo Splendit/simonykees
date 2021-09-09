@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * possible.</li>
  * </ul>
  * 
+ * @since 4.1.0
  */
 public class RemoveRunTestInvocationsData {
 

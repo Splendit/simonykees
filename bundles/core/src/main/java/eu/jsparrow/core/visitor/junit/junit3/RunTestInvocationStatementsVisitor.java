@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * <pre>
  * TestRunner.run(ExampleJUnit3TestCases.class);
  * </pre>
+ * 
+ * @since 4.1.0
  *
  */
 public class RunTestInvocationStatementsVisitor extends ASTVisitor {
