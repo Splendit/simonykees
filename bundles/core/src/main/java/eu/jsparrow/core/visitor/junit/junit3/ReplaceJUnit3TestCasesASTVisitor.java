@@ -3,21 +3,33 @@ package eu.jsparrow.core.visitor.junit.junit3;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
@@ -59,41 +71,34 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		verifyImport(compilationUnit, migrationConfiguration.getTearDownAnnotationQualifiedName());
 		verifyImport(compilationUnit, migrationConfiguration.getTestAnnotationQualifiedName());
 
-		JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor = new JUnit3DataCollectorVisitor(
-				migrationConfiguration);
-		compilationUnit.accept(jUnit3DeclarationsCollectorVisitor);
+		JUnit3DataCollectorVisitor jUnit3dataCollectorVisitor = new JUnit3DataCollectorVisitor(
+				migrationConfiguration, compilationUnit);
+		compilationUnit.accept(jUnit3dataCollectorVisitor);
 
-		if (!jUnit3DeclarationsCollectorVisitor.isTransformationPossible()) {
-			return false;
+		if (jUnit3dataCollectorVisitor.isTransformationPossible()) {
+
+			List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = jUnit3dataCollectorVisitor
+				.getJUnit3AssertionAnalysisResults();
+
+			Set<String> newAssertionStaticImports = new HashSet<>();
+			Set<String> simpleNamesWithStaticImport = new HashSet<>();
+			jUnit3AssertionAnalysisResults
+				.stream()
+				.map(JUnit3AssertionAnalysisResult::getMethodName)
+				.forEach(identifier -> {
+					String newAssertionMethodFullyQualifiedName = getNewAssertionMethodFullyQualifiedName(identifier);
+					if (canAddStaticMethodImport(newAssertionMethodFullyQualifiedName)) {
+						newAssertionStaticImports.add(newAssertionMethodFullyQualifiedName);
+						simpleNamesWithStaticImport.add(identifier);
+					}
+				});
+
+			List<JUnit3AssertionReplacementData> assertionReplacementData = collectAssertionReplacementData(
+					jUnit3AssertionAnalysisResults, simpleNamesWithStaticImport);
+
+			transform(jUnit3dataCollectorVisitor, newAssertionStaticImports, assertionReplacementData,
+					collectRemoveRunTestInvocationsData(jUnit3dataCollectorVisitor));
 		}
-
-		JUnit3AssertionAnalyzer assertionAnalyzer = new JUnit3AssertionAnalyzer();
-		if (!assertionAnalyzer.analyzeAllMethodInvocations(compilationUnit,
-				jUnit3DeclarationsCollectorVisitor, migrationConfiguration)) {
-			return false;
-		}
-
-		List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = assertionAnalyzer
-			.getjUnit3AssertionAnalysisResults();
-
-		Set<String> newAssertionStaticImports = new HashSet<>();
-		Set<String> simpleNamesWithStaticImport = new HashSet<>();
-		jUnit3AssertionAnalysisResults
-			.stream()
-			.map(JUnit3AssertionAnalysisResult::getMethodName)
-			.forEach(identifier -> {
-				String newAssertionMethodFullyQualifiedName = getNewAssertionMethodFullyQualifiedName(identifier);
-				if (canAddStaticMethodImport(newAssertionMethodFullyQualifiedName)) {
-					newAssertionStaticImports.add(newAssertionMethodFullyQualifiedName);
-					simpleNamesWithStaticImport.add(identifier);
-				}
-			});
-
-		List<JUnit3AssertionReplacementData> assertionReplacementData = collectAssertionReplacementData(
-				jUnit3AssertionAnalysisResults, simpleNamesWithStaticImport);
-
-		transform(jUnit3DeclarationsCollectorVisitor, newAssertionStaticImports, assertionReplacementData);
-
 		return false;
 	}
 
@@ -102,15 +107,66 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 		return classDeclaringMethodReplacement + '.' + assertionMethodSimpleName;
 	}
 
-	private void transform(
-			JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
-			Set<String> newAssertionStaticImports,
-			List<JUnit3AssertionReplacementData> assertionReplacementData) {
+	private RemoveRunTestInvocationsData collectRemoveRunTestInvocationsData(
+			JUnit3DataCollectorVisitor jUnit3dataCollectorVisitor) {
+		MethodDeclaration mainMethodToRemove = jUnit3dataCollectorVisitor.getMainMethodToRemove()
+			.orElse(null);
 
-		jUnit3DeclarationsCollectorVisitor.getMainMethodToRemove()
-			.ifPresent(mainMethodToRemove -> {
-				astRewrite.remove(mainMethodToRemove, null);
+		if (mainMethodToRemove == null) {
+			return new RemoveRunTestInvocationsData();
+		}
+
+		Block body = mainMethodToRemove.getBody();
+		List<Statement> statements = ASTNodeUtil.convertToTypedList(body.statements(), Statement.class);
+		if (statements.isEmpty()) {
+			return new RemoveRunTestInvocationsData(mainMethodToRemove);
+		}
+
+		List<ITypeBinding> testCaseTypeBindings = jUnit3dataCollectorVisitor.getJUnit3TestCaseDeclarations()
+			.stream()
+			.map(AbstractTypeDeclaration::resolveBinding)
+			.collect(Collectors.toList());
+
+		RunTestInvocationStatementsVisitor runTestInvocationStatementsVisitor = new RunTestInvocationStatementsVisitor();
+		mainMethodToRemove.accept(runTestInvocationStatementsVisitor);
+		List<ExpressionStatement> expressionStatementsToRemove = new ArrayList<>();
+		List<SimpleName> invocationExpressionsToQualify = new ArrayList<>();
+		Map<ExpressionStatement, TypeLiteral> runInvocationToTypeLiteralMap = runTestInvocationStatementsVisitor
+			.getRunInvocationToTypeLiteralMap();
+		runInvocationToTypeLiteralMap
+			.forEach((expressionStatement, typeLiteral) -> {
+				ITypeBinding typeLiteralTypeBinding = typeLiteral.getType()
+					.resolveBinding();
+				boolean containedInTestCasetypeBindings = testCaseTypeBindings
+					.stream()
+					.anyMatch(
+							typeBinding -> ClassRelationUtil.compareITypeBinding(typeBinding, typeLiteralTypeBinding));
+				if (containedInTestCasetypeBindings) {
+					expressionStatementsToRemove.add(expressionStatement);
+				} else {
+					MethodInvocation methodInvocation = (MethodInvocation) expressionStatement.getExpression();
+					if (methodInvocation.getExpression()
+						.getNodeType() == ASTNode.SIMPLE_NAME) {
+						SimpleName simpleName = (SimpleName) methodInvocation.getExpression();
+						invocationExpressionsToQualify.add(simpleName);
+					}
+				}
 			});
+
+		if (statements.size() == 1) {
+			Statement onlyStatement = statements.get(0);
+			if (expressionStatementsToRemove.contains(onlyStatement)) {
+				return new RemoveRunTestInvocationsData(mainMethodToRemove);
+			}
+		}
+		return new RemoveRunTestInvocationsData(expressionStatementsToRemove, invocationExpressionsToQualify);
+	}
+
+	private void transform(
+			JUnit3DataCollectorVisitor jUnit3dataCollectorVisitor,
+			Set<String> newAssertionStaticImports,
+			List<JUnit3AssertionReplacementData> assertionReplacementData,
+			RemoveRunTestInvocationsData removeRunTestInvocationsData) {
 
 		newAssertionStaticImports.forEach(qualifiedName -> {
 			AST ast = astRewrite.getAST();
@@ -122,7 +178,7 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			listRewrite.insertFirst(newImportDeclaration, null);
 		});
 
-		List<TestMethodAnnotationData> testMethodAnnotationDataList = jUnit3DeclarationsCollectorVisitor
+		List<TestMethodAnnotationData> testMethodAnnotationDataList = jUnit3dataCollectorVisitor
 			.getTestMethodAnnotationDataList();
 		testMethodAnnotationDataList.forEach(data -> {
 			MethodDeclaration methodDeclaration = data.getMethodDeclaration();
@@ -136,27 +192,39 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			listRewrite.insertFirst(testMethodAnnotation, null);
 		});
 
-		assertionReplacementData.forEach(data -> {
-			astRewrite.replace(data.getOriginalMethodInvocation(), data.createMethodInvocationReplacement(), null);
-		});
+		assertionReplacementData.forEach(data -> astRewrite.replace(data.getOriginalMethodInvocation(),
+				data.createMethodInvocationReplacement(), null));
 
-		List<ImportDeclaration> importDeclarationsToRemove = jUnit3DeclarationsCollectorVisitor
+		List<ImportDeclaration> importDeclarationsToRemove = jUnit3dataCollectorVisitor
 			.getImportDeclarationsToRemove();
-		importDeclarationsToRemove.forEach(importDeclarationToRemove -> {
-			astRewrite.remove(importDeclarationToRemove, null);
-		});
+		importDeclarationsToRemove
+			.forEach(importDeclarationToRemove -> astRewrite.remove(importDeclarationToRemove, null));
 
-		List<SimpleType> jUnit3TestCaseSuperTypesToRemove = jUnit3DeclarationsCollectorVisitor
+		List<SimpleType> jUnit3TestCaseSuperTypesToRemove = jUnit3dataCollectorVisitor
 			.getJUnit3TestCaseSuperTypesToRemove();
-		jUnit3TestCaseSuperTypesToRemove.forEach(supertypeToRemove -> {
-			astRewrite.remove(supertypeToRemove, null);
-		});
+		jUnit3TestCaseSuperTypesToRemove.forEach(supertypeToRemove -> astRewrite.remove(supertypeToRemove, null));
 
-		List<Annotation> overrideAnnotationsToRemove = jUnit3DeclarationsCollectorVisitor
+		List<Annotation> overrideAnnotationsToRemove = jUnit3dataCollectorVisitor
 			.getOverrideAnnotationsToRemove();
-		overrideAnnotationsToRemove.forEach(overrideAnnotationToRemove -> {
-			astRewrite.remove(overrideAnnotationToRemove, null);
-		});
+		overrideAnnotationsToRemove
+			.forEach(overrideAnnotationToRemove -> astRewrite.remove(overrideAnnotationToRemove, null));
+
+		jUnit3dataCollectorVisitor.getSuperMethodInvocationsToRemove()
+			.forEach(superMethodInvocationToRemove -> astRewrite.remove(superMethodInvocationToRemove, null));
+
+		removeRunTestInvocationsData.getMainMethodToRemove()
+			.ifPresent(mainMethodToRemove -> astRewrite.remove(mainMethodToRemove, null));
+
+		removeRunTestInvocationsData.getExpressionStatementsToRemove()
+			.forEach(runTestStatementToRemove -> astRewrite.remove(runTestStatementToRemove, null));
+
+		removeRunTestInvocationsData.getInvocationExpressionsToQualify()
+			.forEach(unqualifiedInvocationExpression -> {
+				Name qualifiedInvocationExpression = astRewrite.getAST()
+					.newName("junit.textui.TestRunner"); //$NON-NLS-1$
+				astRewrite.replace(unqualifiedInvocationExpression, qualifiedInvocationExpression, null);
+			});
+
 		onRewrite();
 	}
 
