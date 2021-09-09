@@ -621,4 +621,20 @@ public class ASTNodeUtil {
 		return child;
 	}
 
+	/**
+	 * 
+	 * @param expression
+	 *            an expression to check if it represents a literal.
+	 * @return if the given expression is a literal.
+	 */
+	public static boolean isLiteral(Expression expression) {
+		int nodeType = expression.getNodeType();
+		return (nodeType == ASTNode.STRING_LITERAL
+				|| nodeType == ASTNode.NUMBER_LITERAL
+				|| nodeType == ASTNode.BOOLEAN_LITERAL
+				|| nodeType == ASTNode.CHARACTER_LITERAL
+				|| nodeType == ASTNode.NULL_LITERAL
+				|| nodeType == ASTNode.TYPE_LITERAL);
+	}
+
 }
