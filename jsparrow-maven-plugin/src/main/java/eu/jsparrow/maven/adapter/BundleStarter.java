@@ -47,7 +47,7 @@ public class BundleStarter {
 	public BundleStarter(Log log) {
 		this.log = log;
 		standaloneBundleID = 0;
-		
+
 		log.info(BannerUtil.getBanner());
 	}
 
@@ -100,7 +100,7 @@ public class BundleStarter {
 	 */
 	protected void startBundles(List<Bundle> bundles) {
 		startApacheFelixSCR(bundles);
-		
+
 		bundles.stream()
 			.filter(bundle -> bundle.getHeaders()
 				.get(Constants.FRAGMENT_HOST) == null)
@@ -127,11 +127,16 @@ public class BundleStarter {
 	}
 
 	protected void startApacheFelixSCR(List<Bundle> bundles) {
-		for (Bundle b : bundles) {
-			if (b.getSymbolicName()
-				.startsWith(ORG_APACHE_FELIX_SCR)) {
+		/*
+		 * org.apache.felix.scr has to be started before we start
+		 * eu.jsparrow.standalone and other jSparrow bundles. See also SIM-1406
+		 * and SIM-1997
+		 */
+		for (Bundle bundle : bundles) {
+			String symbolicName = bundle.getSymbolicName();
+			if (symbolicName.startsWith(ORG_APACHE_FELIX_SCR)) {
 				try {
-					b.start();
+					bundle.start();
 				} catch (BundleException e) {
 					log.debug(e.getMessage(), e);
 					log.error(e.getMessage());
@@ -160,7 +165,7 @@ public class BundleStarter {
 					String line = ""; //$NON-NLS-1$
 					while ((line = reader.readLine()) != null) {
 						InputStream fileStream = getBundleResourceInputStream(line);
-						if(!line.startsWith("org.eclipse.osgi_")) {  //$NON-NLS-1$
+						if (!line.startsWith("org.eclipse.osgi_")) { //$NON-NLS-1$
 							Bundle bundle = bundleContext.installBundle("file://" + line, fileStream); //$NON-NLS-1$
 							bundles.add(bundle);
 						}
