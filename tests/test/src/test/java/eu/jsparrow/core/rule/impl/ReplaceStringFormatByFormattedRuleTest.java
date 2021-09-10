@@ -21,7 +21,7 @@ class ReplaceStringFormatByFormattedRuleTest extends SingleRuleTest {
 	private ReplaceStringFormatByFormattedRule rule;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		rule = new ReplaceStringFormatByFormattedRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
@@ -37,10 +37,12 @@ class ReplaceStringFormatByFormattedRuleTest extends SingleRuleTest {
 		RuleDescription description = rule.getRuleDescription();
 		assertThat(description.getName(), equalTo("Replace String.format by String.formatted"));
 		assertThat(description.getTags(),
-				contains(Tag.JAVA_15, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
+				contains(Tag.JAVA_15, Tag.STRING_MANIPULATION, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
-				equalTo("This rule replaces invocations of the static method String.format(String, Object...) by invocations of the Java 15 instance method String.formatted(Object...). This way, readability of code is improved."));
+				equalTo("This rule replaces invocations of the static method String.format(String, Object...) "
+						+ "by invocations of the instance method String.formatted(Object...) introduced in Java 15. "
+						+ "This way, eliminating some code clutter."));
 	}
 
 	@Test

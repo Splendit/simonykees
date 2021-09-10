@@ -30,7 +30,7 @@ public class ReplaceStringFormatByFormattedRule
 		this.ruleDescription = new RuleDescription(Messages.ReplaceStringFormatByFormattedRule_name,
 				Messages.ReplaceStringFormatByFormattedRule_description,
 				Duration.ofMinutes(2),
-				Arrays.asList(Tag.JAVA_15, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
+				Arrays.asList(Tag.JAVA_15, Tag.STRING_MANIPULATION, Tag.READABILITY));
 	}
 
 	@Override

@@ -10,7 +10,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
@@ -54,19 +53,16 @@ public class ReplaceStringFormatByFormattedASTVisitor extends AbstractASTRewrite
 
 			Expression firstArgument = stringFormatArguments.get(0);
 			Expression stringInstanceExpression = (Expression) astRewrite.createMoveTarget(firstArgument);
-			// astRewrite.remove(firstArgument, null); // ??
 
 			formattedMethodInvocation.setExpression(stringInstanceExpression);
-			int formatArgumentsSsize = stringFormatArguments.size();
-			if (formatArgumentsSsize > 1) {
-				ListRewrite listRewrite = astRewrite.getListRewrite(formattedMethodInvocation,
-						MethodInvocation.ARGUMENTS_PROPERTY);
-
-				for (int i = 1; i < formatArgumentsSsize; i++) {
+			int formatArgumentsSize = stringFormatArguments.size();
+			if (formatArgumentsSize > 1) {
+				@SuppressWarnings("unchecked")
+				List<Expression> formattedArguments = formattedMethodInvocation.arguments();
+				for (int i = 1; i < formatArgumentsSize; i++) {
 					Expression objectArgument = stringFormatArguments.get(i);
 					Expression movedObjectArgument = (Expression) astRewrite.createMoveTarget(objectArgument);
-					// astRewrite.remove(objectArgument, null); // ??
-					listRewrite.insertLast(movedObjectArgument, null);
+					formattedArguments.add(movedObjectArgument);
 				}
 			}
 			astRewrite.replace(invocation, formattedMethodInvocation, null);
