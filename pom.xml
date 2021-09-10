@@ -180,11 +180,6 @@
 
 	<repositories>
 		<repository>
-			<id>oxygen</id>
-			<layout>p2</layout>
-			<url>http://download.eclipse.org/eclipse/updates/4.7</url>
-		</repository>
-		<repository>
 			<id>photon-updates</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/eclipse/updates/4.8</url>
