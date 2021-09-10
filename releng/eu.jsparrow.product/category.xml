@@ -12,9 +12,6 @@
    <bundle id="org.eclipse.equinox.launcher" version="1.6.200">
       <category name="splendit"/>
    </bundle>
-   <bundle id="org.eclipse.equinox.event" version="1.6.0">
-      <category name="splendit"/>
-   </bundle>
    <category-def name="splendit" label="splendit">
       <description>
          Eclipse plugins by Splendit IT-Consulting GmbH
