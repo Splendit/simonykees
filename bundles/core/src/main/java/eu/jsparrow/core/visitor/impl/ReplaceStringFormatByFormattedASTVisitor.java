@@ -76,12 +76,17 @@ public class ReplaceStringFormatByFormattedASTVisitor extends AbstractASTRewrite
 	}
 
 	private List<Expression> findStringFormatArguments(MethodInvocation invocation) {
-		IMethodBinding methodBinding = invocation.resolveMethodBinding();
-		if (methodBinding == null) {
+		SimpleName name = invocation.getName();
+		if (!"format".equals(name.getIdentifier())) { //$NON-NLS-1$
 			return Collections.emptyList();
 		}
 
-		if (!"format".equals(methodBinding.getName())) { //$NON-NLS-1$
+		if (!verifyFirstParameterType(invocation)) {
+			return Collections.emptyList();
+		}
+
+		IMethodBinding methodBinding = invocation.resolveMethodBinding();
+		if (methodBinding == null) {
 			return Collections.emptyList();
 		}
 
@@ -97,10 +102,6 @@ public class ReplaceStringFormatByFormattedASTVisitor extends AbstractASTRewrite
 			return Collections.emptyList();
 		}
 
-		if (!ClassRelationUtil.isContentOfType(parameterTypes[0], String.class.getName())) {
-			return Collections.emptyList();
-		}
-
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(invocation.arguments(), Expression.class);
 		if (!arguments.isEmpty() &&
 				arguments.get(0)
@@ -109,5 +110,15 @@ public class ReplaceStringFormatByFormattedASTVisitor extends AbstractASTRewrite
 			return Collections.emptyList();
 		}
 		return arguments;
+	}
+
+	private boolean verifyFirstParameterType(MethodInvocation invocation) {
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(invocation.arguments(), Expression.class);
+		if (arguments.isEmpty()) {
+			return false;
+		}
+		Expression first = arguments.get(0);
+		ITypeBinding firstArgType = first.resolveTypeBinding();
+		return ClassRelationUtil.isContentOfType(firstArgType, java.lang.String.class.getName());
 	}
 }

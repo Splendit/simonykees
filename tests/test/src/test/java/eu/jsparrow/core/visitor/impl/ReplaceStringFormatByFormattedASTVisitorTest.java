@@ -3,9 +3,10 @@ package eu.jsparrow.core.visitor.impl;
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-@SuppressWarnings("nls")
-public class ReplaceStringFormatByFormattedASTVisitorTest extends UsesSimpleJDTUnitFixture {
+class ReplaceStringFormatByFormattedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() {
@@ -14,7 +15,7 @@ public class ReplaceStringFormatByFormattedASTVisitorTest extends UsesSimpleJDTU
 	}
 
 	@Test
-	public void visit_StringFormatInvocation_shouldTransform() throws Exception {
+	void visit_StringFormatInvocation_shouldTransform() throws Exception {
 		String original = "" +
 				"		String name = \"<name>\";\n"
 				+ "		String phone = \"<phone>\";\n"
@@ -38,7 +39,7 @@ public class ReplaceStringFormatByFormattedASTVisitorTest extends UsesSimpleJDTU
 	}
 
 	@Test
-	public void visit_NoObjectArguments_shouldTransform() throws Exception {
+	void visit_NoObjectArguments_shouldTransform() throws Exception {
 		String original = "String output = String.format(\"line-1 %nline-2 %nline-3\");";
 		String expected = "String output = \"line-1 %nline-2 %nline-3\".formatted();";
 
@@ -46,14 +47,14 @@ public class ReplaceStringFormatByFormattedASTVisitorTest extends UsesSimpleJDTU
 	}
 
 	@Test
-	public void visit_MethodBindingNotResolved_shouldNotTransform() throws Exception {
+	void visit_MethodBindingNotResolved_shouldNotTransform() throws Exception {
 		String original = "String output = format(\"line-1 %nline-2 %nline-3\");";
 
 		assertNoChange(original);
 	}
 
 	@Test
-	public void visit_MethodNameFormatted_shouldNotTransform() throws Exception {
+	void visit_MethodNameFormatted_shouldNotTransform() throws Exception {
 		String original = ""
 				+ "		String output = \"line-1 %nline-2 %nline-3\";\n"
 				+ "		output = output.formatted();";
@@ -62,7 +63,7 @@ public class ReplaceStringFormatByFormattedASTVisitorTest extends UsesSimpleJDTU
 	}
 
 	@Test
-	public void visit_LocaleAsFirstArgument_shouldNotTransform() throws Exception {
+	void visit_LocaleAsFirstArgument_shouldNotTransform() throws Exception {
 		fixture.addImport(java.util.Locale.class.getName());
 		String original = "" +
 				"		String name = \"<name>\";\n"
@@ -79,7 +80,7 @@ public class ReplaceStringFormatByFormattedASTVisitorTest extends UsesSimpleJDTU
 	}
 
 	@Test
-	public void visit_FormatIsNoStringMethod_shouldNotTransform() throws Exception {
+	void visit_FormatIsNoStringMethod_shouldNotTransform() throws Exception {
 		fixture.addMethodDeclarationFromString(""
 				+ "	String format(String format, Object... args) {\n"
 				+ "		return \"\";\n"
@@ -97,7 +98,7 @@ public class ReplaceStringFormatByFormattedASTVisitorTest extends UsesSimpleJDTU
 	}
 
 	@Test
-	public void visit_ConcatenatedFormatString_shouldNotTransform() throws Exception {
+	void visit_ConcatenatedFormatString_shouldNotTransform() throws Exception {
 		String original = "" +
 				"		String name = \"<name>\";\n"
 				+ "		String phone = \"<phone>\";\n"
@@ -107,6 +108,12 @@ public class ReplaceStringFormatByFormattedASTVisitorTest extends UsesSimpleJDTU
 				+ "		String output = String.format(\"Name: %s,\" + \" Phone: %s,\" + \" Address: %s,\" + \" Salary: $%.2f\", name, phone,\n"
 				+ "				address, salary);";
 
+		assertNoChange(original);
+	}
+	
+	@ParameterizedTest
+	@ValueSource(strings = {"String.format(null, null);", "String.format(null);", "String.format();"})
+	void visit_nullArguments_shouldNotTransform(String original) throws Exception {
 		assertNoChange(original);
 	}
 }
