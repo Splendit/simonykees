@@ -246,7 +246,7 @@ public class RulesContainer {
 				 */
 				new CodeFormatterRule()));
 
-		if (!isStandalone && services != null) {
+		if (services != null) {
 			services.stream()
 				.forEach(service -> rules.addAll(service.loadRules()));
 		}
