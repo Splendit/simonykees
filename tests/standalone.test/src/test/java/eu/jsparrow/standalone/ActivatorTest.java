@@ -61,7 +61,6 @@ public class ActivatorTest {
 	@Test
 	public void start_withListRules_invokesListRules() throws Exception {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LIST_RULES"); //$NON-NLS-1$
-		when(context.getBundles()).thenReturn(new Bundle[] {});
 
 		activator.start(context);
 
@@ -71,7 +70,6 @@ public class ActivatorTest {
 	@Test
 	public void start_withListRulesShort_invokesListRulesShort() throws Exception {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LIST_RULES_SHORT"); //$NON-NLS-1$
-		when(context.getBundles()).thenReturn(new Bundle[] {});
 
 		activator.start(context);
 
@@ -81,7 +79,6 @@ public class ActivatorTest {
 	@Test
 	public void start_withLicenseInfo_invokesLicenseInfo() throws Exception {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LICENSE_INFO"); //$NON-NLS-1$
-		when(context.getBundles()).thenReturn(new Bundle[] {});
 
 		activator.start(context);
 
@@ -93,7 +90,6 @@ public class ActivatorTest {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LIST_RULES"); //$NON-NLS-1$
 		String ruleId = "doesntMatter"; //$NON-NLS-1$
 		when(context.getProperty(LIST_RULES_SELECTED_ID_KEY)).thenReturn(ruleId);
-		when(context.getBundles()).thenReturn(new Bundle[] {});
 
 		activator.start(context);
 
@@ -103,7 +99,6 @@ public class ActivatorTest {
 	@Test
 	public void start_withRefactorAndValidLicense_invokesRefactoringInvoker() throws Exception {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("REFACTOR"); //$NON-NLS-1$
-		when(context.getBundles()).thenReturn(new Bundle[] {});
 		when(licenseService.validate(anyString(), anyString())).thenReturn(true);
 
 		activator.start(context);
@@ -114,7 +109,6 @@ public class ActivatorTest {
 	@Test
 	public void start_withRefactorAndInvalidLicense_refactoringInvokerNotInvoked() throws Exception {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("REFACTOR"); //$NON-NLS-1$
-		when(context.getBundles()).thenReturn(new Bundle[] {});
 		when(licenseService.validate(anyString(), anyString())).thenReturn(false);
 
 		activator.start(context);
@@ -125,7 +119,6 @@ public class ActivatorTest {
 	@Test
 	public void start_withReportAndValidLicense_invokesRunInDemoMode() throws Exception {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("REPORT"); //$NON-NLS-1$
-		when(context.getBundles()).thenReturn(new Bundle[] {});
 
 		activator.start(context);
 		verify(licenseService, never()).validate(anyString(), anyString());

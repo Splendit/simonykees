@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<version>3.8.0-SNAPSHOT</version>
+	<version>3.10.0-SNAPSHOT</version>
 	<groupId>eu.jsparrow</groupId>
 	<artifactId>jsparrow-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
@@ -17,7 +17,7 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<proguard.plugin.version>2.3.1</proguard.plugin.version>
+		<proguard.plugin.version>2.4.0</proguard.plugin.version>
 		<proguard.base.version>6.2.2</proguard.base.version>
 	</properties>
 
@@ -97,16 +97,16 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
+ 		<dependency>
 			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.osgi</artifactId>
-			<version>3.13.200</version>
+			<version>3.16.300</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.maven.shared</groupId>
 			<artifactId>maven-invoker</artifactId>
-			<version>3.0.1</version>
+			<version>3.1.0</version>
 			<!-- <version>3.0.0</version> -->
 		</dependency>
 
@@ -171,8 +171,9 @@
 						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
 						<addMavenDescriptor>true</addMavenDescriptor>
 						<libs>
-							<lib>${java.home}/lib/rt.jar</lib>
-							<lib>${java.home}/lib/jsse.jar</lib>
+							<lib>${java.home}/lib/jrt-fs.jar</lib>
+							<lib>${java.home}/jmods/java.base.jmod</lib>
+							<lib>${java.home}/jmods/java.xml.jmod</lib> 
 						</libs>
 						<options>
 							<!-- Default parameters -->

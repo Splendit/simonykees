@@ -183,6 +183,11 @@ public class BundleStarterTest {
 			return resourceInputStream;
 		}
 
+		@Override
+		protected void startApacheFelixSCR(List<Bundle> bundles) {
+
+		}
+
 	}
 
 }
