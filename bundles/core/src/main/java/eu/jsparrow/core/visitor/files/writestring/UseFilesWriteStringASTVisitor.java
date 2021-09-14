@@ -73,6 +73,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		return continueVisiting;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(TryStatement tryStatement) {
 
@@ -104,9 +105,31 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			resourcesToRemove.stream()
 				.forEach(resource -> astRewrite.remove(resource, null));
 		} else {
-			TryStatement newTryStatementWithoutResources = createNewTryStatementWithoutResources(tryStatement,
-					transformationDataList);
-			astRewrite.replace(tryStatement, newTryStatementWithoutResources, null);
+			if (tryStatement.catchClauses()
+				.isEmpty() && tryStatement.getFinally() == null) {
+				if (transformationDataList.size() == 1) {
+					ExpressionStatement replacementStatement = transformationDataList.get(0)
+						.createWriteInvocationStatementReplacement(this);
+					astRewrite.replace(tryStatement, replacementStatement, null);
+				} else {
+					AST ast = astRewrite.getAST();
+					Block newBlock = ast.newBlock();
+					transformationDataList.stream()
+						.forEach(data -> {
+							ExpressionStatement replacementStatement = data
+								.createWriteInvocationStatementReplacement(this);
+							newBlock.statements()
+								.add(replacementStatement);
+						});
+
+					astRewrite.replace(tryStatement, newBlock, null);
+				}
+			} else {
+				TryStatement newTryStatementWithoutResources = createNewTryStatementWithoutResources(tryStatement,
+						transformationDataList);
+				astRewrite.replace(tryStatement, newTryStatementWithoutResources, null);
+
+			}
 			transformationDataList.stream()
 				.forEach(data -> onRewrite());
 		}
