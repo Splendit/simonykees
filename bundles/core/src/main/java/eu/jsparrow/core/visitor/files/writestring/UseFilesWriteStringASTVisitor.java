@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.impl.trycatch.TwrCommentsUtil;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
@@ -107,7 +108,18 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		} else {
 			if (tryStatement.catchClauses()
 				.isEmpty() && tryStatement.getFinally() == null) {
-				if (transformationDataList.size() == 1) {
+				if (tryStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
+					Block parentBlock = (Block) tryStatement.getParent();
+					ListRewrite listRewrite = astRewrite.getListRewrite(parentBlock, Block.STATEMENTS_PROPERTY);
+					ASTNode previousElement = tryStatement;
+					for (WriteInvocationData data : transformationDataList) {
+						ExpressionStatement replacementStatement = data
+							.createWriteInvocationStatementReplacement(this);
+						listRewrite.insertAfter(replacementStatement, previousElement, null);
+						previousElement = replacementStatement;
+					}
+					astRewrite.remove(tryStatement, null);
+				} else if (transformationDataList.size() == 1) {
 					ExpressionStatement replacementStatement = transformationDataList.get(0)
 						.createWriteInvocationStatementReplacement(this);
 					astRewrite.replace(tryStatement, replacementStatement, null);

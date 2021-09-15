@@ -257,19 +257,20 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				java.nio.file.Paths.class);
 
 		String original = "" +
-				"		String value = \"Hello World!\";\n"
-				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
-				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {\n"
-				+ "			bufferedWriter.write(value);\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
+				"		String value = \"Hello World!\";\n" +
+				"		Path path = Paths.get(\"/home/test/testpath\");\n" +
+				"		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {\n"
+				+
+				"			bufferedWriter.write(value);\n" +
+				"		} catch (Exception exception) {\n" +
+				"		}";
 		String expected = "" +
-				"		String value = \"Hello World!\";\n"
-				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
-				+ "		try {\n"
-				+ "			Files.writeString(path, value, StandardCharsets.UTF_8);\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
+				"		String value = \"Hello World!\";\n" +
+				"		Path path = Paths.get(\"/home/test/testpath\");\n" +
+				"		try {\n" +
+				"			Files.writeString(path, value, StandardCharsets.UTF_8);\n" +
+				"		} catch (Exception exception) {\n" +
+				"		}";
 		assertChange(original, expected);
 	}
 
@@ -285,25 +286,26 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				java.nio.file.StandardOpenOption.class);
 
 		String original = "" +
-				"		OpenOption openOption1 = StandardOpenOption.CREATE;\n"
-				+ "		OpenOption openOption2 = StandardOpenOption.APPEND;\n"
-				+ "		String value = \"Hello World!\";\n"
-				+ "		Charset cs = StandardCharsets.UTF_8;\n"
-				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
-				+ "		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, cs, openOption1, openOption2)) {\n"
-				+ "			bufferedWriter.write(value);\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
+				"		OpenOption openOption1 = StandardOpenOption.CREATE;\n" +
+				"		OpenOption openOption2 = StandardOpenOption.APPEND;\n" +
+				"		String value = \"Hello World!\";\n" +
+				"		Charset cs = StandardCharsets.UTF_8;\n" +
+				"		Path path = Paths.get(\"/home/test/testpath\");\n" +
+				"		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, cs, openOption1, openOption2)) {\n"
+				+
+				"			bufferedWriter.write(value);\n" +
+				"		} catch (Exception exception) {\n" +
+				"		}";
 		String expected = "" +
-				"		OpenOption openOption1 = StandardOpenOption.CREATE;\n"
-				+ "		OpenOption openOption2 = StandardOpenOption.APPEND;\n"
-				+ "		String value = \"Hello World!\";\n"
-				+ "		Charset cs = StandardCharsets.UTF_8;\n"
-				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
-				+ "		try {\n"
-				+ "			Files.writeString(path, value, cs, openOption1, openOption2);\n"
-				+ "		} catch (Exception exception) {\n"
-				+ "		}";
+				"		OpenOption openOption1 = StandardOpenOption.CREATE;\n" +
+				"		OpenOption openOption2 = StandardOpenOption.APPEND;\n" +
+				"		String value = \"Hello World!\";\n" +
+				"		Charset cs = StandardCharsets.UTF_8;\n" +
+				"		Path path = Paths.get(\"/home/test/testpath\");\n" +
+				"		try {\n" +
+				"			Files.writeString(path, value, cs, openOption1, openOption2);\n" +
+				"		} catch (Exception exception) {\n" +
+				"		}";
 		assertChange(original, expected);
 	}
 
@@ -638,7 +640,7 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	 * Bug fix SIM-1918
 	 */
 	@Test
-	public void visit_TWRUsingTwiceBufferedWritersConstructorNoCatch_shouldTransform() throws Exception {
+	public void visit_TWRUsingTwoBufferedWritersNoCatch_shouldTransform() throws Exception {
 		addImports(java.io.BufferedWriter.class,
 				java.io.FileWriter.class,
 				java.nio.file.Files.class,
@@ -654,10 +656,9 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 
 		String expected = "" +
 				"			String value = \"Hello World!\";\n"
-				+ "			{\n"
-				+ "				Files.writeString(Paths.get(\"/home/test/testpath\"), value);\n"
-				+ "				Files.writeString(Paths.get(\"/home/test/testpath-2\"), value, Charset.defaultCharset());\n"
-				+ "			}";
+				+ "			Files.writeString(Paths.get(\"/home/test/testpath\"), value);\n"
+				+ "			Files.writeString(Paths.get(\"/home/test/testpath-2\"), value, Charset.defaultCharset());\n";
+
 		assertChange(original, expected);
 	}
 
@@ -693,6 +694,64 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 	 * Bug fix SIM-1918
 	 */
 	@Test
+	public void visit_NoCatchNoTryStatementParentBlock_shouldTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class,
+				java.nio.file.Files.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class);
+
+		String original = "" +
+				"	String value = \"Hello World!\";\n" +
+				"	Charset cs = StandardCharsets.UTF_8;\n" +
+				"	Path path = Paths.get(\"/home/test/testpath\");\n" +
+				"	if(true) try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, cs)) {\n" +
+				"		bufferedWriter.write(value);\n" +
+				"	}";
+		String expected = "" +
+				"	String value = \"Hello World!\";\n" +
+				"	Charset cs = StandardCharsets.UTF_8;\n" +
+				"	Path path = Paths.get(\"/home/test/testpath\");\n" +
+				"	if(true) Files.writeString(path, value, cs);";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_NoCatchNoTryStatementParentBlockTwoBufferedWriters_shouldTransform() throws Exception {
+		addImports(java.io.BufferedWriter.class,
+				java.nio.charset.Charset.class,
+				java.nio.charset.StandardCharsets.class,
+				java.nio.file.Files.class,
+				java.nio.file.Path.class,
+				java.nio.file.Paths.class);
+
+		String original = "" +
+				"	String value = \"Hello World!\";\n" +
+				"	Charset cs = StandardCharsets.UTF_8;\n" +
+				"	Path path = Paths.get(\"/home/test/testpath\");\n" +
+				"	if(true) try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, cs);\n" +
+				"			BufferedWriter bufferedWriter2 = Files.newBufferedWriter(path, cs)) {\n" +
+				"		bufferedWriter.write(value);\n" +
+				"		bufferedWriter2.write(value);\n" +
+				"	}";
+		String expected = "" +
+				"	String value=\"Hello World!\";\n" +
+				"	Charset cs=StandardCharsets.UTF_8;\n" +
+				"	Path path=Paths.get(\"/home/test/testpath\");\n" +
+				"	if (true) {\n" +
+				"		Files.writeString(path,value,cs);\n" +
+				"		Files.writeString(path,value,cs);\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	/**
+	 * Bug fix SIM-1918
+	 */
+	@Test
 	public void visit_TWRUsingFilesNewBufferedWriterNoCatchButFinally_shouldTransform() throws Exception {
 
 		addImports(java.io.Writer.class,
@@ -702,19 +761,19 @@ public class UseFilesWriteStringASTVisitorTest extends UsesSimpleJDTUnitFixture 
 				java.nio.file.Paths.class);
 
 		String original = "" +
-				"		String text = \"Hello World!\";\n"
-				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
-				+ "		try (Writer out = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {\n"
-				+ "			out.write(text);\n"
-				+ "		} finally {\n"
-				+ "		}";
+				"		String text = \"Hello World!\";\n" +
+				"		Path path = Paths.get(\"/home/test/testpath\");\n" +
+				"		try (Writer out = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {\n" +
+				"			out.write(text);\n" +
+				"		} finally {\n" +
+				"		}";
 		String expected = "" +
-				"		String text = \"Hello World!\";\n"
-				+ "		Path path = Paths.get(\"/home/test/testpath\");\n"
-				+ "		try {\n"
-				+ "			Files.writeString(path, text, StandardCharsets.UTF_8);\n"
-				+ "		} finally {\n"
-				+ "		}";
+				"		String text = \"Hello World!\";\n" +
+				"		Path path = Paths.get(\"/home/test/testpath\");\n" +
+				"		try {\n" +
+				"			Files.writeString(path, text, StandardCharsets.UTF_8);\n" +
+				"		} finally {\n" +
+				"		}";
 
 		assertChange(original, expected);
 	}
