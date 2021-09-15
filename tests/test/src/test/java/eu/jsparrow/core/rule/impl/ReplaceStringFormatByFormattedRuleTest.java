@@ -40,7 +40,7 @@ class ReplaceStringFormatByFormattedRuleTest extends SingleRuleTest {
 				contains(Tag.JAVA_15, Tag.STRING_MANIPULATION, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
-				equalTo("This rule replaces invocations of the static method String.format(String, Object...) "
+				equalTo("This rule replaces the static invocations of String.format(String, Object...) "
 						+ "by invocations of the instance method String.formatted(Object...) introduced in Java 15. "
 						+ "This way, eliminating some code clutter."));
 	}
