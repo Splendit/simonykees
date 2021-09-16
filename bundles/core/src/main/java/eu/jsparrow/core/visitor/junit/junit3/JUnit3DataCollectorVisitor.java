@@ -4,7 +4,9 @@ import static eu.jsparrow.core.visitor.junit.junit3.UnexpectedJunit3References.i
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -14,6 +16,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
@@ -34,6 +37,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
 import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
@@ -77,6 +81,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	private final List<Annotation> overrideAnnotationsToRemove = new ArrayList<>();
 	private final List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = new ArrayList<>();
 	private final List<ExpressionStatement> superMethodInvocationsToRemove = new ArrayList<>();
+	private final Map<ExpressionStatement, TypeLiteral> runInvocationToTypeLiteralMap = new HashMap<>();
 	private MethodDeclaration mainMethodToRemove;
 	private boolean transformationPossible = true;
 
@@ -155,8 +160,15 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-		if (isMethodInvocationWithinMainMethod(node) && isTestRunnerRunMethod(node)) {
-			return false;
+		if (isMethodInvocationWithinMainMethod(node)) {
+			ExpressionStatement runTestInvocationStatement = findRunTestInvocationStatement(node).orElse(null);
+			if (runTestInvocationStatement != null) {
+				TypeLiteral runTestInvocationTypeLiteralArgument = findRunTestInvocastionTypeLiteralArgument(node).orElse(null);
+				if (runTestInvocationTypeLiteralArgument != null) {
+					runInvocationToTypeLiteralMap.put(runTestInvocationStatement, runTestInvocationTypeLiteralArgument);
+					return false;
+				}
+			}
 		}
 		JUnit3AssertionAnalyzer assertionAnalyzer = new JUnit3AssertionAnalyzer();
 		transformationPossible = assertionAnalyzer.analyzeMethodInvocation(classDeclaringMethodReplacement,
@@ -354,19 +366,48 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return false;
 	}
 
-	static boolean isTestRunnerRunMethod(MethodInvocation methodInvocation) {
+	private static Optional<ExpressionStatement> findRunTestInvocationStatement(MethodInvocation methodInvocation) {
+
+		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			return Optional.empty();
+		}
+		ExpressionStatement expressionStatement = (ExpressionStatement) methodInvocation.getParent();
+		if (expressionStatement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+			return Optional.empty();
+		}
+		return Optional.of(expressionStatement);
+	}
+
+	private static Optional<TypeLiteral> findRunTestInvocastionTypeLiteralArgument(MethodInvocation methodInvocation) {
+
 		if (!methodInvocation.getName()
 			.getIdentifier()
 			.equals("run")) { //$NON-NLS-1$
-			return false;
+			return Optional.empty();
 		}
+
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+		if (arguments.size() != 1) {
+			return Optional.empty();
+		}
+
+		Expression argument = arguments.get(0);
+		if (argument.getNodeType() != ASTNode.TYPE_LITERAL) {
+			return Optional.empty();
+		}
+
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding == null) {
-			return false;
+			return Optional.empty();
 		}
 
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-		return ClassRelationUtil.isContentOfType(declaringClass, "junit.textui.TestRunner"); //$NON-NLS-1$
+
+		if (ClassRelationUtil.isContentOfType(declaringClass, "junit.textui.TestRunner")) { //$NON-NLS-1$
+			return Optional.of((TypeLiteral) argument);
+		}
+
+		return Optional.empty();
 	}
 
 	public List<ImportDeclaration> getImportDeclarationsToRemove() {
@@ -399,6 +440,10 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	public Optional<MethodDeclaration> getMainMethodToRemove() {
 		return Optional.ofNullable(mainMethodToRemove);
+	}
+
+	public Map<ExpressionStatement, TypeLiteral> getRunInvocationToTypeLiteralMap() {
+		return runInvocationToTypeLiteralMap;
 	}
 
 	/**
