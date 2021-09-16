@@ -3,9 +3,12 @@ package eu.jsparrow.core.rule.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -45,5 +48,23 @@ class UsePatternMatchingForInstanceofRuleTest extends SingleRuleTest {
 	@Test
 	void test_requiredJavaVersion() throws Exception {
 		assertThat(rule.getRequiredJavaVersion(), equalTo("16"));
+	}
+
+	@Test
+	void calculateEnabledForProjectShouldBeDisabled() {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_15);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertFalse(rule.isEnabled());
+	}
+
+	@Test
+	void calculateEnabledForProjectShouldBeEnabled() {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_16);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertTrue(rule.isEnabled());
 	}
 }

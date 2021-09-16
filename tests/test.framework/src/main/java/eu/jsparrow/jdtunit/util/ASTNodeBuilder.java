@@ -1,9 +1,12 @@
 package eu.jsparrow.jdtunit.util;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -93,6 +96,12 @@ public class ASTNodeBuilder {
 		ASTParser astParser = ASTParser.newParser(astLevel);
 		astParser.setSource(string.toCharArray());
 		astParser.setKind(kind);
+		Map<String, String> compilerOptions = new HashMap<>();
+		String compilerLevel = Integer.toString(astLevel);
+		compilerOptions.put(JavaCore.COMPILER_COMPLIANCE, compilerLevel);
+		compilerOptions.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, compilerLevel);
+		compilerOptions.put(JavaCore.COMPILER_SOURCE, compilerLevel);
+		astParser.setCompilerOptions(compilerOptions);
 		ASTNode result = astParser.createAST(null);
 		if ((result.getFlags() & ASTNode.MALFORMED) == ASTNode.MALFORMED) {
 			throw new JdtUnitException(String.format("Failed to parse '%s'.", string));

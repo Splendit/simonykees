@@ -2,20 +2,16 @@ package eu.jsparrow.core.visitor.junit.junit3;
 
 import static eu.jsparrow.rules.common.util.ClassRelationUtil.isContentOfType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
@@ -29,68 +25,28 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
  */
 class JUnit3AssertionAnalyzer {
 	private static final String JAVA_LANG_STRING = java.lang.String.class.getName();
-	private final List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = new ArrayList<>();
+	private JUnit3AssertionAnalysisResult assertionAnalysisResult;
 
-	/**
-	 * Fills an internal list with all analysis data found for supported JUnit3
-	 * assertions.
-	 * 
-	 * @return {@code true} if all JUnit3 assertions can be supported and
-	 *         {@code false} as soon as the first assertion occurs which
-	 *         prohibits transformation.
-	 */
-	boolean analyzeAllMethodInvocations(CompilationUnit compilationUnit,
-			JUnit3DataCollectorVisitor jUnit3DeclarationsCollectorVisitor,
-			Junit3MigrationConfiguration migrationConfiguration) {
-		List<MethodDeclaration> jUnit3TestMethodDeclarations = jUnit3DeclarationsCollectorVisitor
-			.getJUnit3TestMethodDeclarations();
-		String classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
-		List<MethodInvocation> methodInvocationsToAnalyze = jUnit3DeclarationsCollectorVisitor
-			.getMethodInvocationsToAnalyze();
-
-		for (MethodInvocation methodinvocation : methodInvocationsToAnalyze) {
-			IMethodBinding methodBinding = methodinvocation.resolveMethodBinding();
-			if (methodBinding == null) {
-				return false;
-			}
-			JUnit3AssertionAnalysisResult assertionAnalysisResult = findAssertionAnalysisResult(
-					classDeclaringMethodReplacement, jUnit3TestMethodDeclarations, methodinvocation,
-					methodBinding).orElse(null);
-			if (assertionAnalysisResult != null) {
-				jUnit3AssertionAnalysisResults.add(assertionAnalysisResult);
-			} else if (UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getDeclaringClass())) {
-				ASTNode declaringNode = compilationUnit.findDeclaringNode(methodBinding);
-				if (declaringNode == null) {
-					return false;
-				}
-				if (declaringNode.getNodeType() != ASTNode.METHOD_DECLARATION) {
-					return false;
-				}
-				if (declaringNode.getLocationInParent() != TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
-					return false;
-				}
-				if (!jUnit3DeclarationsCollectorVisitor.getJUnit3TestCaseDeclarations()
-					.contains(declaringNode.getParent())) {
-					return false;
-				}
-			} else if (UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getReturnType())) {
-				return false;
-			}
+	boolean analyzeMethodInvocation(String classDeclaringMethodReplacement, CompilationUnit compilationUnit,
+			MethodInvocation methodInvocation) {
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
 		}
-		return true;
+		assertionAnalysisResult = findAssertionAnalysisResult(classDeclaringMethodReplacement, methodInvocation,
+				methodBinding).orElse(null);
+		if (assertionAnalysisResult != null) {
+			return true;
+		}
+		return UnexpectedJunit3References.analyzeMethodBinding(compilationUnit, methodBinding);
 	}
 
-	private Optional<JUnit3AssertionAnalysisResult> findAssertionAnalysisResult(
+	Optional<JUnit3AssertionAnalysisResult> findAssertionAnalysisResult(
 			String classDeclaringMethodReplacement,
-			List<MethodDeclaration> jUnit3TestMethodDeclarations,
 			MethodInvocation methodInvocation,
 			IMethodBinding methodBinding) {
 
 		if (!isSupportedTestCaseMethod(methodBinding)) {
-			return Optional.empty();
-		}
-
-		if (!isSurroundedWithJUnit3Test(jUnit3TestMethodDeclarations, methodInvocation)) {
 			return Optional.empty();
 		}
 
@@ -120,24 +76,6 @@ class JUnit3AssertionAnalyzer {
 		return Optional.of(new JUnit3AssertionAnalysisResult(methodInvocation, assertionArguments));
 	}
 
-	private boolean isSurroundedWithJUnit3Test(List<MethodDeclaration> jUnit3TestMethodDeclarations,
-			MethodInvocation methodInvocation) {
-		BodyDeclaration bodyDeclarationAncestor = ASTNodeUtil.getSpecificAncestor(methodInvocation,
-				BodyDeclaration.class);
-		ASTNode parent = methodInvocation.getParent();
-		while (parent != null) {
-			if (parent == bodyDeclarationAncestor) {
-				return parent.getNodeType() == ASTNode.METHOD_DECLARATION
-						&& jUnit3TestMethodDeclarations.contains(parent);
-			}
-			if (parent.getNodeType() == ASTNode.LAMBDA_EXPRESSION) {
-				return false;
-			}
-			parent = parent.getParent();
-		}
-		return false;
-	}
-
 	private boolean isSupportedTestCaseMethod(IMethodBinding methodBinding) {
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 
@@ -154,15 +92,28 @@ class JUnit3AssertionAnalyzer {
 		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) expression;
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-			return methodBinding != null && !(methodBinding.isParameterizedMethod() && methodInvocation.typeArguments()
-				.isEmpty());
+			if (methodBinding == null) {
+				return false;
+			}
+			if (methodBinding.isParameterizedMethod() && methodInvocation.typeArguments()
+				.isEmpty()) {
+				return !methodBinding.getMethodDeclaration()
+					.getReturnType()
+					.isTypeVariable();
+			}
 		}
 		if (expression.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
 			SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation) expression;
 			IMethodBinding superMethodBinding = superMethodInvocation.resolveMethodBinding();
-			return superMethodBinding != null
-					&& !(superMethodBinding.isParameterizedMethod() && superMethodInvocation.typeArguments()
-						.isEmpty());
+			if (superMethodBinding == null) {
+				return false;
+			}
+			if (superMethodBinding.isParameterizedMethod() && superMethodInvocation.typeArguments()
+				.isEmpty()) {
+				return !superMethodBinding.getMethodDeclaration()
+					.getReturnType()
+					.isTypeVariable();
+			}
 		}
 		return true;
 	}
@@ -208,8 +159,7 @@ class JUnit3AssertionAnalyzer {
 		return Optional.empty();
 	}
 
-	public List<JUnit3AssertionAnalysisResult> getjUnit3AssertionAnalysisResults() {
-		return jUnit3AssertionAnalysisResults;
+	public Optional<JUnit3AssertionAnalysisResult> getAssertionAnalysisResult() {
+		return Optional.ofNullable(assertionAnalysisResult);
 	}
-
 }

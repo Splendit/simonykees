@@ -1,6 +1,6 @@
 package eu.jsparrow.core.visitor.junit.junit3;
 
-import static eu.jsparrow.core.visitor.junit.jupiter.RegexJUnitQualifiedName.isJUnitName;
+import static eu.jsparrow.core.visitor.junit.junit3.UnexpectedJunit3References.isJUnit3Name;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,15 +10,15 @@ import java.util.Optional;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.visitor.junit.jupiter.common.MethodDeclarationsCollectorVisitor;
 import eu.jsparrow.core.visitor.utils.MethodDeclarationUtils;
@@ -58,7 +57,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  * 
  */
 public class JUnit3DataCollectorVisitor extends ASTVisitor {
-	private static final String JUNIT_FRAMEWORK_TEST_CASE = "junit.framework.TestCase"; //$NON-NLS-1$
+	static final String JUNIT_FRAMEWORK_TEST_CASE = "junit.framework.TestCase"; //$NON-NLS-1$
 	private static final String JUNIT_FRAMEWORK_TEST_RESULT = "junit.framework.TestResult"; //$NON-NLS-1$
 	private static final String JAVA_LANG_STRING = "java.lang.String"; //$NON-NLS-1$
 	private static final String JAVA_LANG_OVERRIDE = "java.lang.Override"; //$NON-NLS-1$
@@ -67,19 +66,33 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	static final String TEAR_DOWN = "tearDown"; //$NON-NLS-1$
 	static final String TEST = "test"; //$NON-NLS-1$
 
+	private final CompilationUnit compilationUnit;
 	private final Junit3MigrationConfiguration migrationConfiguration;
+	private final String classDeclaringMethodReplacement;
 	private final List<ImportDeclaration> importDeclarationsToRemove = new ArrayList<>();
 	private final List<TypeDeclaration> jUnit3TestCaseDeclarations = new ArrayList<>();
 	private final List<SimpleType> jUnit3TestCaseSuperTypesToRemove = new ArrayList<>();
 	private final List<MethodDeclaration> jUnit3TestMethodDeclarations = new ArrayList<>();
 	private final List<TestMethodAnnotationData> testMethodAnnotationDataList = new ArrayList<>();
 	private final List<Annotation> overrideAnnotationsToRemove = new ArrayList<>();
-	private final List<MethodInvocation> methodInvocationsToAnalyze = new ArrayList<>();
+	private final List<JUnit3AssertionAnalysisResult> jUnit3AssertionAnalysisResults = new ArrayList<>();
+	private final List<ExpressionStatement> superMethodInvocationsToRemove = new ArrayList<>();
 	private MethodDeclaration mainMethodToRemove;
 	private boolean transformationPossible = true;
 
-	JUnit3DataCollectorVisitor(Junit3MigrationConfiguration migrationConfiguration) {
+	JUnit3DataCollectorVisitor(Junit3MigrationConfiguration migrationConfiguration, CompilationUnit compilationUnit) {
 		this.migrationConfiguration = migrationConfiguration;
+		this.classDeclaringMethodReplacement = migrationConfiguration.getAssertionClassQualifiedName();
+		this.compilationUnit = compilationUnit;
+		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
+		compilationUnit.accept(methodDeclarationsCollectorVisitor);
+		List<MethodDeclaration> allMethodDeclarations = methodDeclarationsCollectorVisitor.getMethodDeclarations();
+		mainMethodToRemove = allMethodDeclarations
+			.stream()
+			.filter(methodDeclaration -> MethodDeclarationUtils.isJavaApplicationMainMethod(compilationUnit,
+					methodDeclaration))
+			.findFirst()
+			.orElse(null);
 	}
 
 	@Override
@@ -88,23 +101,10 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	}
 
 	@Override
-	public boolean visit(CompilationUnit node) {
-		MethodDeclarationsCollectorVisitor methodDeclarationsCollectorVisitor = new MethodDeclarationsCollectorVisitor();
-		node.accept(methodDeclarationsCollectorVisitor);
-		List<MethodDeclaration> allMethodDeclarations = methodDeclarationsCollectorVisitor.getMethodDeclarations();
-		mainMethodToRemove = allMethodDeclarations
-			.stream()
-			.filter(methodDeclaration -> MethodDeclarationUtils.isJavaApplicationMainMethod(node, methodDeclaration))
-			.findFirst()
-			.orElse(null);
-		return true;
-	}
-
-	@Override
 	public boolean visit(PackageDeclaration node) {
 		String packageName = node.resolveBinding()
 			.getName();
-		transformationPossible = !isJUnitName(packageName);
+		transformationPossible = !isJUnit3Name(packageName);
 		return false;
 	}
 
@@ -112,7 +112,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 	public boolean visit(ImportDeclaration node) {
 		String fullyQualifiedName = node.getName()
 			.getFullyQualifiedName();
-		if (fullyQualifiedName.equals("junit") || fullyQualifiedName.startsWith("junit.")) { //$NON-NLS-1$ //$NON-NLS-2$
+		if (isJUnit3Name(fullyQualifiedName)) {
 			importDeclarationsToRemove.add(node);
 			return false;
 		}
@@ -158,24 +158,44 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-		methodInvocationsToAnalyze.add(node);
-		return true;
+		JUnit3AssertionAnalyzer assertionAnalyzer = new JUnit3AssertionAnalyzer();
+		transformationPossible = assertionAnalyzer.analyzeMethodInvocation(classDeclaringMethodReplacement,
+				compilationUnit, node);
+		if (transformationPossible) {
+			assertionAnalyzer.getAssertionAnalysisResult()
+				.ifPresent(jUnit3AssertionAnalysisResults::add);
+		}
+		return transformationPossible;
 	}
 
 	@Override
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
-		transformationPossible = methodBinding != null &&
-				!UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getDeclaringClass()) &&
-				!UnexpectedJunit3References.isUnexpectedJUnitReference(methodBinding.getReturnType());
+		if (methodBinding == null) {
+			transformationPossible = false;
+			return false;
+		}
+
+		String methodName = methodBinding.getName();
+		if (methodName.equals(SET_UP) || methodName.equals(TEAR_DOWN)) {
+			ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+			if (ClassRelationUtil.isContentOfType(declaringClass, JUNIT_FRAMEWORK_TEST_CASE)
+					&& node.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+				ExpressionStatement expressionStatement = (ExpressionStatement) node.getParent();
+				if (expressionStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
+					superMethodInvocationsToRemove.add(expressionStatement);
+					return false;
+				}
+			}
+		}
+		transformationPossible = UnexpectedJunit3References.analyzeMethodBinding(compilationUnit, methodBinding);
 		return transformationPossible;
 	}
 
 	@Override
 	public boolean visit(SuperConstructorInvocation node) {
-		transformationPossible = !UnexpectedJunit3References
-			.isUnexpectedJUnitReference(node.resolveConstructorBinding()
-				.getDeclaringClass());
+		transformationPossible = UnexpectedJunit3References.analyzeMethodBinding(compilationUnit,
+				node.resolveConstructorBinding());
 		return transformationPossible;
 	}
 
@@ -255,7 +275,6 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 					ClassRelationUtil.isInheritingContentOfTypes(parameterType,
 							Collections.singletonList(JUNIT_FRAMEWORK_TEST_RESULT));
 		}
-
 		return false;
 	}
 
@@ -318,39 +337,19 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		if (binding == null) {
 			return false;
 		}
-
-		if (name.getNodeType() == ASTNode.SIMPLE_NAME && binding.getKind() == IBinding.VARIABLE) {
-			IVariableBinding variableBinding = (IVariableBinding) binding;
-			if (UnexpectedJunit3References.isUnexpectedJUnitReference(variableBinding.getType())) {
-				return false;
-			}
-			if (variableBinding.isField()) {
-				if (name.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
-					return true;
-				}
-				if (name.getLocationInParent() != FieldAccess.NAME_PROPERTY) {
-					return true;
-				}
-				FieldAccess fieldAccess = (FieldAccess) name.getParent();
-				if (fieldAccess.getExpression()
-					.getNodeType() == ASTNode.THIS_EXPRESSION) {
-					return true;
-				}
-			}
-		}
-		return UnexpectedJunit3References.analyzeNameBinding(binding);
+		return UnexpectedJunit3References.analyzeNameBinding(compilationUnit, binding);
 	}
 
 	public List<ImportDeclaration> getImportDeclarationsToRemove() {
 		return importDeclarationsToRemove;
 	}
 
-	public List<MethodInvocation> getMethodInvocationsToAnalyze() {
-		return methodInvocationsToAnalyze;
-	}
-
 	public List<TypeDeclaration> getJUnit3TestCaseDeclarations() {
 		return jUnit3TestCaseDeclarations;
+	}
+
+	public List<JUnit3AssertionAnalysisResult> getJUnit3AssertionAnalysisResults() {
+		return jUnit3AssertionAnalysisResults;
 	}
 
 	public List<SimpleType> getJUnit3TestCaseSuperTypesToRemove() {
@@ -361,8 +360,8 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return overrideAnnotationsToRemove;
 	}
 
-	public List<MethodDeclaration> getJUnit3TestMethodDeclarations() {
-		return jUnit3TestMethodDeclarations;
+	public List<ExpressionStatement> getSuperMethodInvocationsToRemove() {
+		return superMethodInvocationsToRemove;
 	}
 
 	public List<TestMethodAnnotationData> getTestMethodAnnotationDataList() {
@@ -383,7 +382,9 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 				jUnit3TestCaseDeclarations.isEmpty() &&
 				jUnit3TestMethodDeclarations.isEmpty() &&
 				testMethodAnnotationDataList.isEmpty() &&
-				overrideAnnotationsToRemove.isEmpty()) {
+				overrideAnnotationsToRemove.isEmpty() &&
+				jUnit3AssertionAnalysisResults.isEmpty() &&
+				superMethodInvocationsToRemove.isEmpty()) {
 			return false;
 		}
 		return transformationPossible;

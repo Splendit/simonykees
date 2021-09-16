@@ -104,6 +104,31 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 	}
 
 	@Test
+	public void visit_UnqualifiedFieldAccess_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"	public static class UnqualifiedFieldAccessTest extends TestCase {\n"
+				+ "		private int number = 1;\n"
+				+ "\n"
+				+ "		public void test() {\n"
+				+ "			assertEquals(1, number);\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	public static class UnqualifiedFieldAccessTest {\n"
+				+ "		private int number = 1;\n"
+				+ "\n"
+				+ "		@Test"
+				+ "		 public void test(){\n"
+				+ "			assertEquals(1, number);\n"
+				+ "		}\n"
+				+ "	}";
+		assertChange(original, expected);
+
+	}
+
+	@Test
 	public void visit_SuperConstructorForObject_shouldTransform() throws Exception {
 		defaultFixture.addImport("junit.framework.TestCase");
 		String original = "" +
@@ -128,7 +153,6 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 				+ "\n"
 				+ "	}";
 		assertChange(original, expected);
-
 	}
 
 	@Test
@@ -259,6 +283,191 @@ public class ReplaceJUnit3TestCasesToJupiterASTVisitorTest extends UsesJDTUnitFi
 				"}";
 
 		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+
+	}
+
+	@Test
+	public void visit_SuperSetUpInvocation_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+
+		String original = "" +
+				"	@Override\n" +
+				"	protected void setUp() throws Exception {\n" +
+				"		super.setUp();\n" +
+				"	}";
+
+		String expected = "" +
+				"	@BeforeEach\n" +
+				"	protected void setUp() throws Exception {\n" +
+				"	}";
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import org.junit.jupiter.api.BeforeEach;\n" +
+				"public class %s {\n" +
+				"	%s \n" +
+				"}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+	}
+
+	@Test
+	public void visit_SuperTearDownInvocation_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+
+		String original = "" +
+				"	@Override\n" +
+				"	protected void tearDown() throws Exception {\n" +
+				"		super.tearDown();\n" +
+				"	}";
+
+		String expected = "" +
+				"	@AfterEach\n" +
+				"	protected void tearDown() throws Exception {\n" +
+				"	}";
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import org.junit.jupiter.api.AfterEach;\n" +
+				"public class %s {\n" +
+				"	%s \n" +
+				"}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+	}
+
+	@Test
+	public void visit_ParameterizedMethodInvocationWithTypeArguments_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+		defaultFixture.addMethodDeclarationFromString("" +
+				"	@SuppressWarnings(\"unchecked\")\n" +
+				"	<T> T getGenericReturnValue() {\n" +
+				"		return (T) Byte.valueOf((byte) 0);\n" +
+				"	}\n");
+
+		String original = "" +
+				"public void test() {\n" +
+				"	assertEquals(this.<String>getGenericReturnValue(), this.<String>getGenericReturnValue());\n" +
+				"}";
+
+		String expected = "" +
+				"@Test\n" +
+				"public void test() {\n" +
+				"	 assertEquals(this.<String>getGenericReturnValue(),this.<String>getGenericReturnValue());\n" +
+				"}";
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import static org.junit.jupiter.api.Assertions.assertEquals;\n" +
+				"import org.junit.jupiter.api.Test;" +
+				"public class %s {\n" +
+				"  @SuppressWarnings(\"unchecked\") <T>T getGenericReturnValue(){\n" +
+				"    return (T)Byte.valueOf((byte)0);\n" +
+				"  }\n" +
+				"	%s \n" +
+				"}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+
+	}
+
+	@Test
+	public void visit_ListWithAmbiguousItemType_shouldTransform() throws Exception {
+		defaultFixture.addImport("java.util.Arrays");
+		defaultFixture.addImport("java.util.List");
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+		defaultFixture.addMethodDeclarationFromString("" +
+				"	@SuppressWarnings(\"unchecked\")\n" +
+				"	<T> List<T> getListWithAmbiguousItemType() {\n" +
+				"		return (List<T>) Arrays.asList(null);\n" +
+				"	}\n");
+
+		String original = "" +
+				"public void test() {\n" +
+				"	assertEquals(getListWithAmbiguousItemType(), getListWithAmbiguousItemType());\n" +
+				"}";
+
+		String expected = "" +
+				"@Test\n" +
+				"public void test() {\n" +
+				"	 assertEquals(getListWithAmbiguousItemType(), getListWithAmbiguousItemType());\n" +
+				"}";
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import static org.junit.jupiter.api.Assertions.assertEquals;\n" +
+				"import java.util.Arrays;\n" +
+				"import java.util.List;\n" +
+				"import org.junit.jupiter.api.Test;\n" +
+				"public class %s {\n" +
+				"  @SuppressWarnings(\"unchecked\") <T>List<T> getListWithAmbiguousItemType(){\n" +
+				"    return (List<T>)Arrays.asList(null);\n" +
+				"  }\n" +
+				"	%s \n" +
+				"}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+
+	}
+
+	@Test
+	public void visit_ImportOfJupiterOnDemand_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.addImport("org.junit.jupiter.api", false, true);
+		defaultFixture.addImport("junit.framework.TestCase");
+		defaultFixture.setSuperClassType("TestCase");
+
+		String original = "" +
+				"	@DisplayName(\"test\")\n" +
+				"	public void test() {\n" +
+				"		assertEquals(1, 1);\n" +
+				"	}";
+
+		String expected = "" +
+				"	@Test" +
+				"	@DisplayName(\"test\")\n" +
+				"	public void test() {\n" +
+				"		assertEquals(1, 1);\n" +
+				"	}";
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"import static org.junit.jupiter.api.Assertions.assertEquals;\n" +
+				"import org.junit.jupiter.api.*;\n" +
+				"public class %s {\n" +
+				"	%s \n" +
+				"}";
+
+		assertCompilationUnitMatch(original, expected, expectedCompilationUnitFormat);
+
+	}
+
+	@Test
+	public void visit_SynchronizedStatementWithTestCaseSubclass_shouldTransform() throws Exception {
+		defaultFixture.addImport("junit.framework.TestCase");
+		String original = "" +
+				"public static class SynchronizedStatementInSetupTest extends TestCase {\n" +
+				"	@Override\n" +
+				"	public void setUp() throws Exception {\n" +
+				"		synchronized (SynchronizedStatementInSetupTest.class) {\n" +
+				"		}\n" +
+				"	}\n" +
+				"}";
+
+		String expected = "" +
+				"public static class SynchronizedStatementInSetupTest {\n" +
+				"	@BeforeEach \n" +
+				"	public void setUp() throws Exception {\n" +
+				"		synchronized (SynchronizedStatementInSetupTest.class) {\n" +
+				"		}\n" +
+				"	}\n" +
+				"}";
+
+		assertChange(original, expected);
 
 	}
 }

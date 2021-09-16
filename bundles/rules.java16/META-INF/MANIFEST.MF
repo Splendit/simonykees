@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.rules.java16
 Bundle-ManifestVersion: 2
 Bundle-Name: jsparrow :: rules java16
 Bundle-SymbolicName: eu.jsparrow.rules.java16
-Bundle-Version: 4.2.0.qualifier
+Bundle-Version: 4.3.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Require-Bundle: eu.jsparrow.logging,
@@ -20,4 +20,6 @@ Require-Bundle: eu.jsparrow.logging,
 Service-Component: OSGI-INF/eu.jsparrow.rules.java16.Java16RulesServiceImpl.xml,
  OSGI-INF/eu.jsparrow.rules.java16.Java16RulesServiceImpl.xml
 Bundle-ActivationPolicy: lazy
-Export-Package: eu.jsparrow.rules.java16
+Export-Package: eu.jsparrow.rules.java16,
+ eu.jsparrow.rules.java16.switchexpression;x-friends:=eu.jsparrow.test,
+ eu.jsparrow.rules.java16.textblock;x-friends:=eu.jsparrow.test
