@@ -131,9 +131,6 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
-		if (mainMethodToRemove == node) {
-			return false;
-		}
 		if (node.getLocationInParent() == TypeDeclaration.BODY_DECLARATIONS_PROPERTY
 				&& jUnit3TestCaseDeclarations.contains(node.getParent())) {
 			if (isOverridingJUnitFrameworkTestCaseMethod(node)) {
@@ -158,6 +155,9 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation node) {
+		if (isMethodInvocationWithinMainMethod(node) && isTestRunnerRunMethod(node)) {
+			return false;
+		}
 		JUnit3AssertionAnalyzer assertionAnalyzer = new JUnit3AssertionAnalyzer();
 		transformationPossible = assertionAnalyzer.analyzeMethodInvocation(classDeclaringMethodReplacement,
 				compilationUnit, node);
@@ -338,6 +338,35 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 			return false;
 		}
 		return UnexpectedJunit3References.analyzeNameBinding(compilationUnit, binding);
+	}
+
+	private boolean isMethodInvocationWithinMainMethod(MethodInvocation methodInvocation) {
+		if (mainMethodToRemove == null) {
+			return false;
+		}
+		ASTNode parent = methodInvocation.getParent();
+		while (parent != null) {
+			if (parent == mainMethodToRemove) {
+				return true;
+			}
+			parent = parent.getParent();
+		}
+		return false;
+	}
+
+	static boolean isTestRunnerRunMethod(MethodInvocation methodInvocation) {
+		if (!methodInvocation.getName()
+			.getIdentifier()
+			.equals("run")) { //$NON-NLS-1$
+			return false;
+		}
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
+
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		return ClassRelationUtil.isContentOfType(declaringClass, "junit.textui.TestRunner"); //$NON-NLS-1$
 	}
 
 	public List<ImportDeclaration> getImportDeclarationsToRemove() {
