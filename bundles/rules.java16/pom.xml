@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>eu.jsparrow.rules.java16</artifactId>
+	<packaging>eclipse-plugin</packaging>
+	<name>jsparrow :: rules java16</name>
+	<description>jSparrow java 16</description>
+	<parent>
+		<groupId>at.splendit</groupId>
+		<artifactId>bundles</artifactId>
+		<version>4.3.0-SNAPSHOT</version>
+	</parent>
+
+	<properties>
+		<proguard.extra.options>
+			-injars
+			${project.basedir}/../rules.api/target/eu.jsparrow.rules.api-${project.version}_proguard_base.jar
+			-outjars ${project.build.directory}/rules.api.duplicate.jar
+			-libraryjars
+			${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
+		</proguard.extra.options>
+	</properties>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.github.wvengen</groupId>
+					<artifactId>proguard-maven-plugin</artifactId>
+					<configuration>
+						<exclusions>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.rules.api</artifactId>
+							</exclusion>
+						</exclusions>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

@@ -7,10 +7,8 @@ import java.util.Optional;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +37,6 @@ public class Activator implements BundleActivator {
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	private static final String AGENT_URL = "URL"; //$NON-NLS-1$
 
-	// SIM-1406 org.eclipse.equinox.ds has been replaced with
-	// org.apache.felix.scr
-	private static final String EQUINOX_DS_BUNDLE_NAME = "org.apache.felix.scr"; //$NON-NLS-1$
-
 	private RefactoringInvoker refactoringInvoker;
 	ListRulesUtil listRulesUtil;
 
@@ -63,7 +57,6 @@ public class Activator implements BundleActivator {
 		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
 		LoggingUtil.configureLogger(debugEnabled);
 
-		startDeclarativeServices(context);
 		// Put both together because it looks nicer
 		String startMessage = String.format("%s", Messages.Activator_start); //$NON-NLS-1$
 		logger.info(startMessage);
@@ -196,15 +189,6 @@ public class Activator implements BundleActivator {
 	private StandaloneMode parseMode(BundleContext context) {
 		String value = context.getProperty(STANDALONE_MODE_KEY);
 		return StandaloneMode.fromString(value);
-	}
-
-	private void startDeclarativeServices(BundleContext context) throws BundleException {
-		for (Bundle b : context.getBundles()) {
-			if (b.getSymbolicName()
-				.startsWith(EQUINOX_DS_BUNDLE_NAME)) {
-				b.start();
-			}
-		}
 	}
 
 	private EnvironmentInfo getEnvironmentInfo(BundleContext ctx) {

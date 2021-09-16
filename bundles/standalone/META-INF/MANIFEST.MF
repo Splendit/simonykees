@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.standalone
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Standalone
 Bundle-SymbolicName: eu.jsparrow.standalone;singleton:=true
-Bundle-Version: 4.1.0.qualifier
+Bundle-Version: 4.3.0.qualifier
 Bundle-Activator: eu.jsparrow.standalone.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
@@ -12,6 +12,7 @@ Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.core,
  eu.jsparrow.rules.api,
  eu.jsparrow.license.api,
+ eu.jsparrow.rules.java16,
  org.eclipse.jdt.core;bundle-version="[3.11.0,4.0.0)",
  org.eclipse.core.resources;bundle-version="[3.10.0,4.0.0)",
  org.eclipse.core.runtime;bundle-version="[3.11.0,4.0.0)",

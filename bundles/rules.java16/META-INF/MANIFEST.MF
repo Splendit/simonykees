@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: eu.jsparrow.rules.java16
+Bundle-ManifestVersion: 2
+Bundle-Name: jsparrow :: rules java16
+Bundle-SymbolicName: eu.jsparrow.rules.java16
+Bundle-Version: 4.3.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Vendor: Splendit IT-Consulting GmbH
+Require-Bundle: eu.jsparrow.logging,
+ eu.jsparrow.i18n,
+ eu.jsparrow.rules.api,
+ org.eclipse.osgi.services;bundle-version="[3.5.0,4.0.0)",
+ org.eclipse.jdt.core;bundle-version="[3.26.0,4.0.0)",
+ org.eclipse.text;bundle-version="[3.5.0,4.0.0)",
+ org.apache.commons.lang3;bundle-version="[3.1.0,4.0.0)",
+ org.eclipse.ltk.core.refactoring;bundle-version="[3.6.0,4.0.0)",
+ org.eclipse.jdt.ui;bundle-version="[3.14.0,4.0.0)",
+ org.eclipse.core.runtime;bundle-version="[3.11.0,4.0.0)",
+ org.eclipse.core.resources;bundle-version="[3.11.1,4.0.0)"
+Service-Component: OSGI-INF/eu.jsparrow.rules.java16.Java16RulesServiceImpl.xml,
+ OSGI-INF/eu.jsparrow.rules.java16.Java16RulesServiceImpl.xml
+Bundle-ActivationPolicy: lazy
+Export-Package: eu.jsparrow.rules.java16,
+ eu.jsparrow.rules.java16.switchexpression;x-friends:=eu.jsparrow.test,
+ eu.jsparrow.rules.java16.textblock;x-friends:=eu.jsparrow.test
