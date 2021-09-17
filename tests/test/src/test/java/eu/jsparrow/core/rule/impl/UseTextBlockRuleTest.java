@@ -42,7 +42,10 @@ class UseTextBlockRuleTest extends SingleRuleTest {
 				contains(Tag.JAVA_15, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(5)));
 		assertThat(description.getDescription(),
-				equalTo("This rule replaces concatenation expressions made up of String literals by Text Block Sting literals which have been introduced in Java 15. Thus readability of String expressions is improved."));
+				equalTo("Java 15 introduced Text Blocks to express String literals spanning several "
+						+ "lines of code and significantly reduce the need for escape sequences. \nThis rule replaces "
+						+ "multiline String concatenation expressions with Text Blocks String literals. Thus, removing "
+						+ "some boilerplate code and increasing the readability of String expressions."));
 	}
 
 	@Test
