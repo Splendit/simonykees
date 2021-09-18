@@ -163,7 +163,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		if (isMethodInvocationWithinMainMethod(node)) {
 			ExpressionStatement runTestInvocationStatement = findRunTestInvocationStatement(node).orElse(null);
 			if (runTestInvocationStatement != null) {
-				TypeLiteral runTestInvocationTypeLiteralArgument = findRunTestInvocastionTypeLiteralArgument(node).orElse(null);
+				TypeLiteral runTestInvocationTypeLiteralArgument = findRunTestInvocationTypeLiteralArgument(node).orElse(null);
 				if (runTestInvocationTypeLiteralArgument != null) {
 					runInvocationToTypeLiteralMap.put(runTestInvocationStatement, runTestInvocationTypeLiteralArgument);
 					return false;
@@ -378,7 +378,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return Optional.of(expressionStatement);
 	}
 
-	private static Optional<TypeLiteral> findRunTestInvocastionTypeLiteralArgument(MethodInvocation methodInvocation) {
+	private static Optional<TypeLiteral> findRunTestInvocationTypeLiteralArgument(MethodInvocation methodInvocation) {
 
 		if (!methodInvocation.getName()
 			.getIdentifier()
