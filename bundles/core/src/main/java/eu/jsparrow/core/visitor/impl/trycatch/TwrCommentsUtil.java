@@ -88,7 +88,8 @@ public class TwrCommentsUtil {
 		}
 		int index = 0;
 
-		for (Comment comment : unconnectedComments) {
+		for(int i = 0; i < unconnectedComments.size(); i++) {
+			Comment comment = unconnectedComments.get(i);
 			int startPos = comment.getStartPosition();
 			Integer key = keySet.get(index);
 			List<Comment> commentList = bodyComments.get(key);
