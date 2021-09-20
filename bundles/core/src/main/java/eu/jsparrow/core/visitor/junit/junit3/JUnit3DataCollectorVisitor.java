@@ -458,7 +458,8 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 				testMethodAnnotationDataList.isEmpty() &&
 				overrideAnnotationsToRemove.isEmpty() &&
 				jUnit3AssertionAnalysisResults.isEmpty() &&
-				superMethodInvocationsToRemove.isEmpty()) {
+				superMethodInvocationsToRemove.isEmpty() &&
+				runInvocationToTypeLiteralMap.isEmpty()) {
 			return false;
 		}
 		return transformationPossible;
