@@ -151,24 +151,21 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	@SuppressWarnings("unchecked")
 	private TryStatement createNewTryStatementWithoutResources(TryStatement tryStatement,
 			List<WriteInvocationData> transformationDataList) {
-		TryStatement tryStatementReplacement = getASTRewrite().getAST()
-			.newTryStatement();
+		AST ast = tryStatement.getAST();
+		TryStatement tryStatementReplacement = ast.newTryStatement();
 
 		Block oldBody = tryStatement.getBody();
 		Block newBody = (Block) ASTNode.copySubtree(tryStatement.getAST(), oldBody);
 		List<Statement> newBodyStatementsTypedList = newBody.statements();
 		Map<Integer, List<Comment>> comments = TwrCommentsUtil.findBodyComments(tryStatement, getCommentRewriter());
 		CommentRewriter commentRewriter = getCommentRewriter();
+
 		comments.forEach((key, value) -> {
 			int newBodySize = newBodyStatementsTypedList.size();
 			if (newBodySize > key) {
-				Statement statement = newBodyStatementsTypedList.get(key);
-				commentRewriter.saveBeforeStatement(statement, value);
-			} else if (!newBodyStatementsTypedList.isEmpty()) {
-				Statement statement = newBodyStatementsTypedList.get(newBodySize - 1);
-				commentRewriter.saveAfterStatement(statement, value);
-			} else {
 				commentRewriter.saveBeforeStatement(tryStatement, value);
+			} else if (!newBodyStatementsTypedList.isEmpty()) {
+				commentRewriter.saveAfterStatement(tryStatement, value);
 			}
 		});
 
