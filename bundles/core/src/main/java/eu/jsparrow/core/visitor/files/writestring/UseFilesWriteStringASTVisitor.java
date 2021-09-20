@@ -164,7 +164,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			int newBodySize = newBodyStatementsTypedList.size();
 			if (newBodySize > key) {
 				commentRewriter.saveBeforeStatement(tryStatement, value);
-			} else if (!newBodyStatementsTypedList.isEmpty()) {
+			} else {
 				commentRewriter.saveAfterStatement(tryStatement, value);
 			}
 		});
