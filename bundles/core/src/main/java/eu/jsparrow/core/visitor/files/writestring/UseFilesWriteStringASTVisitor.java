@@ -108,6 +108,12 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		} else {
 			if (tryStatement.catchClauses()
 				.isEmpty() && tryStatement.getFinally() == null) {
+
+				Map<Integer, List<Comment>> comments = TwrCommentsUtil.findBodyComments(tryStatement,
+						getCommentRewriter());
+				CommentRewriter commentRewriter = getCommentRewriter();
+				comments.forEach((key, value) -> commentRewriter.saveBeforeStatement(tryStatement, value));
+
 				if (tryStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
 					Block parentBlock = (Block) tryStatement.getParent();
 					ListRewrite listRewrite = astRewrite.getListRewrite(parentBlock, Block.STATEMENTS_PROPERTY);
