@@ -88,6 +88,7 @@ public class TwrCommentsUtil {
 		}
 		int index = 0;
 
+		List<Comment> commentToRemove = new ArrayList<>();
 		for (Comment comment : unconnectedComments) {
 			int startPos = comment.getStartPosition();
 			Integer key = keySet.get(index);
@@ -104,8 +105,9 @@ public class TwrCommentsUtil {
 			}
 
 			commentList.add(0, comment);
-			unconnectedComments.remove(comment);
+			commentToRemove.add(comment);
 		}
+		unconnectedComments.removeAll(commentToRemove);
 
 		if (unconnectedComments.isEmpty()) {
 			return;
