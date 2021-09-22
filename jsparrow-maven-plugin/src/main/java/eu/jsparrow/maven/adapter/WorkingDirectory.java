@@ -29,11 +29,15 @@ public class WorkingDirectory {
 	private File directory;
 	private Set<String> sessionRelatedProjects;
 	private Log log;
+	private String tempWorkspacePath;
 
-	public WorkingDirectory(File workingDirectory, Set<String> sessionRelatedProjects, Log log) {
+	public WorkingDirectory(File workingDirectory, Set<String> sessionRelatedProjects, String tempWorkspacePath,
+			Log log) {
 		this.directory = workingDirectory;
 		this.sessionRelatedProjects = sessionRelatedProjects;
 		this.log = log;
+		this.tempWorkspacePath = tempWorkspacePath;
+
 	}
 
 	/**
@@ -176,11 +180,16 @@ public class WorkingDirectory {
 	}
 
 	protected String calculateJsparrowLockFilePath() {
-		return calculateJsparrowTempFolderPath() + File.separator + LOCK_FILE_NAME;
+		return calculateJsparrowTempFolderPath(tempWorkspacePath) + File.separator + LOCK_FILE_NAME;
 	}
 
-	public static String calculateJsparrowTempFolderPath() {
-		String file = System.getProperty(JAVA_TMP);
+	public static String calculateJsparrowTempFolderPath(String tempWorkspacePath) {
+		String file;
+		if (tempWorkspacePath == null || tempWorkspacePath.isEmpty()) {
+			file = System.getProperty(JAVA_TMP);
+		} else {
+			file = tempWorkspacePath;
+		}
 		return file + File.separator + JSPARROW_TEMP_FOLDER;
 	}
 }
