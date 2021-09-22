@@ -187,10 +187,7 @@ public class MavenProjectImporter {
 	}
 
 	private Optional<IJavaProject> doCreateJavaProject(IProject project) throws CoreException {
-		IProjectDescription description = project.getDescription();
-		String[] natureIds = description.getNatureIds();
-		String projectNatures = Arrays.stream(natureIds).collect(Collectors.joining(",")); //$NON-NLS-1$
-		logger.debug("Project nature ids of {}: {}.", description.getName(), projectNatures); //$NON-NLS-1$
+		logProjectInfo(project);
 		String logMsg;
 		if (project.hasNature(JavaCore.NATURE_ID)) {
 			logMsg = NLS.bind(Messages.MavenProjectImporter_creatingSingleJavaProject, project.getName());
@@ -210,6 +207,13 @@ public class MavenProjectImporter {
 		}
 
 		return Optional.empty();
+	}
+
+	protected void logProjectInfo(IProject project) throws CoreException {
+		IProjectDescription description = project.getDescription();
+		String[] natureIds = description.getNatureIds();
+		String projectNatures = Arrays.stream(natureIds).collect(Collectors.joining(",")); //$NON-NLS-1$
+		logger.debug("Project nature ids of {}: {}.", description.getName(), projectNatures); //$NON-NLS-1$
 	}
 
 	public void cleanUp() {
