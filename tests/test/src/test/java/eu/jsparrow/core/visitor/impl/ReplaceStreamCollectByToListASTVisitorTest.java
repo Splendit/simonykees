@@ -1,10 +1,22 @@
 package eu.jsparrow.core.visitor.impl;
 
 import org.junit.jupiter.api.AfterEach;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("nls")
 public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixture {
+
+	private static final String TEST_METHOD_PARAMETERS = ""
+			+ "Collection<String> collection"
+			+ ", UnaryOperator<String> unaryOperator"
+			+ ", Predicate<String> predicate";
+
+	private static final String METHOD_INVOCATION_EXPRESSION = "collection.stream()\n" +
+			"				.map(unaryOperator)\n" +
+			"				.filter(predicate)\n" +
+			"				";
 
 	@BeforeEach
 	public void setUpDefaultVisitor() throws Exception {
@@ -16,11 +28,6 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 		fixtureProject.clear();
 	}
 
-	/**
-	 * SIM-2006: this test is expected to fail as soon as
-	 * {@link ReplaceStreamCollectByToListASTVisitor} will have been implemented
-	 * 
-	 */
 	@Test
 	public void visit_CollectorsToUnmodifiableList_ShouldTransformWhenImplemented() throws Exception {
 
@@ -31,22 +38,18 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
 
 		String original = "" +
-				"	List<String> testCollect(Collection<String> collection, UnaryOperator<String> unaryOperator,\n"
-				+ "			Predicate<String> predicate) {\n"
-				+ "		return collection.stream()\n"
-				+ "				.map(unaryOperator)\n"
-				+ "				.filter(predicate)\n"
-				+ "				.collect(Collectors.toUnmodifiableList());\n"
-				+ "	}";
+				"	List<String> testCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
+				"		return " + METHOD_INVOCATION_EXPRESSION + ".collect(Collectors.toUnmodifiableList());\n" +
+				"	}";
 
-		assertNoChange(original);
+		String expected = "" +
+				"	List<String> testCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
+				"		return " + METHOD_INVOCATION_EXPRESSION + ".toList();\n" +
+				"	}";
+
+		assertChange(original, expected);
 	}
 
-	/**
-	 * SIM-2006: this test is expected to fail as soon as
-	 * {@link ReplaceStreamCollectByToListASTVisitor} will have been implemented
-	 * 
-	 */
 	@Test
 	public void visit_UnmodifiableListFromCollectorsToList_ShouldTransformWhenImplemented() throws Exception {
 
@@ -58,23 +61,20 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
 
 		String original = "" +
-				"	List<String> testStreamCollect(Collection<String> collection, UnaryOperator<String> function,\n"
-				+ "			Predicate<String> predicate) {\n"
-				+ "		return Collections.unmodifiableList(collection //\n"
-				+ "				.stream() //\n"
-				+ "				.map(function) //\n"
-				+ "				.filter(predicate) //\n"
-				+ "				.collect(Collectors.toList()));\n"
-				+ "	}";
+				"	List<String> testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
+				"		return Collections.unmodifiableList(" +
+				METHOD_INVOCATION_EXPRESSION + ".collect(Collectors.toList())" + ");\n" +
+				"	}";
 
-		assertNoChange(original);
+		String expected = "" +
+				"	List<String> testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
+				"		return Collections.unmodifiableList(" +
+				METHOD_INVOCATION_EXPRESSION + ".toList()" + ");\n" +
+				"	}";
+
+		assertChange(original, expected);
 	}
 
-	/**
-	 * SIM-2006: this test is expected to fail as soon as
-	 * {@link ReplaceStreamCollectByToListASTVisitor} will have been implemented
-	 * 
-	 */
 	@Test
 	public void visit_VariableFromCollectorsToList_ShouldTransformWhenImplemented() throws Exception {
 
@@ -85,14 +85,17 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
 
 		String original = "" +
-				"	void testStreamCollect(Collection<String> collection, UnaryOperator<String> function, Predicate<String> predicate) {\n"
-				+ "		List<String> list = collection \n"
-				+ "				.stream() \n"
-				+ "				.map(function) \n"
-				+ "				.filter(predicate) \n"
-				+ "				.collect(Collectors.toList());\n"
-				+ "	}";
+				"	void testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
+				"		List<String> list = " +
+				METHOD_INVOCATION_EXPRESSION + ".collect(Collectors.toList());\n" +
+				"	}";
 
-		assertNoChange(original);
+		String expected = "" +
+				"	void testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
+				"		List<String> list = " +
+				METHOD_INVOCATION_EXPRESSION + ".toList();\n" +
+				"	}";
+
+		assertChange(original, expected);
 	}
 }
