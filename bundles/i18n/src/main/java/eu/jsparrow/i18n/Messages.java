@@ -448,6 +448,8 @@ public class Messages extends NLS {
 	public static String ReplaceJUnitTimeoutAnnotationPropertyRule_name;
 	public static String ReplaceStringFormatByFormattedRule_description;
 	public static String ReplaceStringFormatByFormattedRule_name;
+	public static String ReplaceStreamCollectByToListRule_description;
+	public static String ReplaceStreamCollectByToListRule_name;
 	public static String ReuseRandomObjectsRule_description;
 	public static String ReuseRandomObjectsRule_name;
 	public static String SelectRulesWizardHandler_allready_running;
