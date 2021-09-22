@@ -3,6 +3,7 @@ package eu.jsparrow.standalone;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -10,7 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.maven.model.Model;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
@@ -91,7 +94,7 @@ public class MavenProjectImporter {
 		try {
 
 			List<MavenProjectInfo> projectInfos = findMavenProjects(workspaceRoot, folders);
-
+			logMavenProjectInfos(projectInfos);
 			List<String> projectRootPaths = projectInfos.stream()
 				.map(i -> i.getPomFile()
 					.getParentFile()
@@ -109,6 +112,19 @@ public class MavenProjectImporter {
 		}
 	}
 
+	private void logMavenProjectInfos(List<MavenProjectInfo> projectInfos) {
+		for(MavenProjectInfo mavenProjectInfo : projectInfos) {
+			Model model = mavenProjectInfo.getModel();
+			int prefixLength = Math.min(model.toString().length() - 1, 200);
+			String modelValue = model.toString().substring(0, prefixLength) + "..."; //$NON-NLS-1$
+			logger.debug("Project model: {}", modelValue); //$NON-NLS-1$
+			
+			String pomPath = mavenProjectInfo.getPomFile().getPath();
+			logger.debug("Pom path: {}", pomPath); //$NON-NLS-1$
+		}
+		
+	}
+
 	private List<MavenProjectInfo> findMavenProjects(File workspaceRoot, List<String> folders)
 			throws InterruptedException {
 		logger.debug(Messages.MavenProjectImporter_searchingMavenProjects);
@@ -117,7 +133,6 @@ public class MavenProjectImporter {
 
 		LocalProjectScanner lps = getLocalProjectScanner(workspaceRoot, folders, false, modelManager);
 		lps.run(new NullProgressMonitor());
-
 		List<MavenProjectInfo> projects = lps.getProjects();
 
 		logger.debug(Messages.MavenProjectImporter_collectingProjectInfo);
@@ -138,10 +153,16 @@ public class MavenProjectImporter {
 
 		logger.debug(Messages.MavenProjectImporter_importingMavenProject);
 
-		ProjectImportConfiguration pic = new ProjectImportConfiguration();
-
-		List<IMavenProjectImportResult> results = getProjectConfigurationManager().importProjects(projectInfos, pic,
-				new NullProgressMonitor());
+		ProjectImportConfiguration projectImportConfig = new ProjectImportConfiguration();
+		IProjectConfigurationManager projectConfigurationManager = getProjectConfigurationManager();
+		NullProgressMonitor nullMonitor = new NullProgressMonitor();
+		
+		List<IMavenProjectImportResult> results = projectConfigurationManager.importProjects(projectInfos, projectImportConfig, nullMonitor);
+		logger.debug("Maven project import results: "); //$NON-NLS-1$
+		for(IMavenProjectImportResult result : results) {
+			MavenProjectInfo info = result.getMavenProjectInfo();
+			logger.debug("Project model: {}", info.getModel()); //$NON-NLS-1$
+		}
 
 		return results.stream()
 			.map(IMavenProjectImportResult::getProject)
@@ -150,20 +171,15 @@ public class MavenProjectImporter {
 
 	private List<IJavaProject> createJavaProjects(List<IProject> projects) throws MavenImportException {
 		try {
-
 			logger.debug(Messages.MavenProjectImporter_createingJavaProjects);
-
 			List<IJavaProject> javaProjects = new LinkedList<>();
-
 			for (IProject project : projects) {
-
 				if (!project.isOpen()) {
+					logger.debug("The project {} is not opened. Opening the project.", project.getName()); //$NON-NLS-1$
 					project.open(new NullProgressMonitor());
 				}
-
 				doCreateJavaProject(project).ifPresent(javaProjects::add);
 			}
-
 			return javaProjects;
 		} catch (CoreException e) {
 			throw new MavenImportException("The maven project could not be imported!", e); //$NON-NLS-1$
@@ -171,6 +187,10 @@ public class MavenProjectImporter {
 	}
 
 	private Optional<IJavaProject> doCreateJavaProject(IProject project) throws CoreException {
+		IProjectDescription description = project.getDescription();
+		String[] natureIds = description.getNatureIds();
+		String projectNatures = Arrays.stream(natureIds).collect(Collectors.joining(",")); //$NON-NLS-1$
+		logger.debug("Project nature ids of {}: {}.", description.getName(), projectNatures); //$NON-NLS-1$
 		String logMsg;
 		if (project.hasNature(JavaCore.NATURE_ID)) {
 			logMsg = NLS.bind(Messages.MavenProjectImporter_creatingSingleJavaProject, project.getName());
@@ -179,6 +199,7 @@ public class MavenProjectImporter {
 			IJavaProject javaProject = createJavaProject(project);
 
 			if (!javaProject.isOpen()) {
+				logger.debug("The Java Project {} is not opened. Opening the Java project.", project.getName()); //$NON-NLS-1$
 				javaProject.open(new NullProgressMonitor());
 			}
 
