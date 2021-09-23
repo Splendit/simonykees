@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.maven.model.Model;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
@@ -80,8 +81,10 @@ public class MavenProjectImporterTest {
 		when(javaProject.isOpen()).thenReturn(false);
 
 		when(mavenProjectImportResult.getProject()).thenReturn(project);
+		when(mavenProjectImportResult.getMavenProjectInfo()).thenReturn(mavenProjectInfo);
 		when(projectConfigurationManager.importProjects(any(), any(), any()))
 			.thenReturn(Collections.singletonList(mavenProjectImportResult));
+		when(mavenProjectInfo.getModel()).thenReturn(new Model());
 
 		List<IJavaProject> importedProjects = importer.importProjects(workspaceRoot, folders);
 
@@ -116,6 +119,11 @@ public class MavenProjectImporterTest {
 		@Override
 		protected IJavaProject createJavaProject(IProject project) {
 			return javaProject;
+		}
+		
+		@Override
+		protected void logProjectInfo(IProject project) {
+			
 		}
 	}
 }

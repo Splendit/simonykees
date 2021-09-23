@@ -100,6 +100,7 @@ public class BundleStarter {
 	 */
 	protected void startBundles(List<Bundle> bundles) {
 		startApacheFelixSCR(bundles);
+		startEclipseM2e(bundles);
 
 		bundles.stream()
 			.filter(bundle -> bundle.getHeaders()
@@ -136,6 +137,24 @@ public class BundleStarter {
 			String symbolicName = bundle.getSymbolicName();
 			if (symbolicName.startsWith(ORG_APACHE_FELIX_SCR)) {
 				try {
+					String message = String.format("Starting bundle %s:%s [%d]", symbolicName, bundle.getVersion(), bundle.getState());
+					log.debug(message);
+					bundle.start();
+				} catch (BundleException e) {
+					log.debug(e.getMessage(), e);
+					log.error(e.getMessage());
+				}
+			}
+		}
+	}
+	
+	protected void startEclipseM2e(List<Bundle> bundles) {
+		for (Bundle bundle : bundles) {
+			String symbolicName = bundle.getSymbolicName();
+			if (symbolicName.startsWith("org.eclipse.m2e")) {
+				try {
+					String message = String.format("Starting bundle %s:%s [%d]", symbolicName, bundle.getVersion(), bundle.getState());
+					log.debug(message);
 					bundle.start();
 				} catch (BundleException e) {
 					log.debug(e.getMessage(), e);
@@ -156,6 +175,12 @@ public class BundleStarter {
 		log.debug(Messages.BundleStarter_loadOsgiBundles);
 
 		bundleContext = getBundleContext();
+		Bundle[] alreadyLoaded = bundleContext.getBundles();
+		log.debug("Already loaded bundles:");
+		for(Bundle bundle : alreadyLoaded) {
+			String message = String.format("%s:%s", bundle.getSymbolicName(), bundle.getVersion());
+			log.debug(message);
+		}
 		final List<Bundle> bundles = new ArrayList<>();
 
 		try (InputStream is = getManifestInputStream()) {
@@ -166,6 +191,7 @@ public class BundleStarter {
 					while ((line = reader.readLine()) != null) {
 						InputStream fileStream = getBundleResourceInputStream(line);
 						if (!line.startsWith("org.eclipse.osgi_")) { //$NON-NLS-1$
+							log.debug("Installing bundle: " + line);
 							Bundle bundle = bundleContext.installBundle("file://" + line, fileStream); //$NON-NLS-1$
 							bundles.add(bundle);
 						}
