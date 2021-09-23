@@ -74,22 +74,20 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 			return false;
 		}
 
-		String collectorsInvocationMethodName = ASTNodeUtil
-			.convertToTypedList(collectInvocation.arguments(), Expression.class)
+		String supportedCollectorsMethodName = ASTNodeUtil
+			.convertToTypedList(collectInvocation.arguments(), MethodInvocation.class)
 			.stream()
-			.filter(MethodInvocation.class::isInstance)
-			.map(MethodInvocation.class::cast)
-			.filter(this::isSupportedCollectorsMethodInvocation)
+			.filter(this::isSupportedCollectorsMethod)
 			.map(MethodInvocation::getName)
 			.map(SimpleName::getIdentifier)
 			.findFirst()
 			.orElse(null);
 
-		if (collectorsInvocationMethodName == null) {
+		if (supportedCollectorsMethodName == null) {
 			return false;
 		}
 
-		if (TO_UNMODIFIABLE_LIST.equals(collectorsInvocationMethodName)) { // $NON-NLS-1$
+		if (TO_UNMODIFIABLE_LIST.equals(supportedCollectorsMethodName)) { // $NON-NLS-1$
 			return true;
 		}
 
@@ -120,7 +118,7 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 		return ClassRelationUtil.isContentOfType(parameterTypes[0], "java.util.stream.Collector"); //$NON-NLS-1$
 	}
 
-	private boolean isSupportedCollectorsMethodInvocation(MethodInvocation invocation) {
+	private boolean isSupportedCollectorsMethod(MethodInvocation invocation) {
 		String identifier = invocation.getName()
 			.getIdentifier();
 
@@ -134,24 +132,41 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 			return false;
 		}
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-		return ClassRelationUtil.isContentOfType(declaringClass, "java.util.stream.Collectors"); //$NON-NLS-1$
+		if (!ClassRelationUtil.isContentOfType(declaringClass, "java.util.stream.Collectors")) { //$NON-NLS-1$
+			return false;
+		}
+		ITypeBinding[] parameterTypes = methodBinding.getMethodDeclaration()
+			.getParameterTypes();
+
+		return parameterTypes.length == 0;
+	}
+
+	private boolean isCollectionsUnmodifiableListInvocation(MethodInvocation invocation) {
+		if (!"unmodifiableList".equals(invocation.getName() //$NON-NLS-1$
+			.getIdentifier())) {
+			return false;
+		}
+		IMethodBinding methodBinding = invocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+
+		if (!ClassRelationUtil.isContentOfType(declaringClass, "java.util.Collections")) { //$NON-NLS-1$
+			return false;
+		}
+		ITypeBinding[] parameterTypes = methodBinding.getMethodDeclaration()
+			.getParameterTypes();
+		if (parameterTypes.length != 1) {
+			return false;
+		}
+		return ClassRelationUtil.isContentOfType(parameterTypes[0], "java.util.List"); //$NON-NLS-1$
 	}
 
 	private boolean analyzeStreamCollectInvocationWithCollectorsToList(MethodInvocation collectInvocation) {
 
 		if (collectInvocation.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
-			MethodInvocation parentMethodInvocation = (MethodInvocation) collectInvocation.getParent();
-			if (!"unmodifiableList".equals(parentMethodInvocation.getName() //$NON-NLS-1$
-				.getIdentifier())) {
-				return false;
-			}
-			IMethodBinding methodBinding = parentMethodInvocation.resolveMethodBinding();
-			if (methodBinding == null) {
-				return false;
-			}
-			ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-			return ClassRelationUtil.isContentOfType(declaringClass, "java.util.Collections"); //$NON-NLS-1$
-
+			return isCollectionsUnmodifiableListInvocation((MethodInvocation) collectInvocation.getParent());
 		}
 
 		VariableDeclarationFragment variableDeclarationFragment = null;
