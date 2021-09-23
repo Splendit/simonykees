@@ -104,7 +104,7 @@ public class MavenAdapterTest {
 		when(jsparrowTempDirectory.exists()).thenReturn(false);
 		when(jsparrowTempDirectory.mkdirs()).thenReturn(false);
 
-		assertThrows(InterruptedException.class, () -> mavenAdapter.prepareWorkingDirectory());
+		assertThrows(InterruptedException.class, () -> mavenAdapter.prepareWorkingDirectory(""));
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class MavenAdapterTest {
 		when(jsparrowTempDirectory.mkdirs()).thenReturn(true);
 		when(jsparrowTempDirectory.getAbsolutePath()).thenReturn(absolutePath);
 
-		mavenAdapter.prepareWorkingDirectory();
+		mavenAdapter.prepareWorkingDirectory("");
 
 		verify(jsparrowTempDirectory).getAbsolutePath();
 		assertEquals(absolutePath, mavenAdapter.getConfiguration()
@@ -183,7 +183,7 @@ public class MavenAdapterTest {
 		}
 
 		@Override
-		protected File createJsparrowTempDirectory() {
+		protected File createJsparrowTempDirectory(String lcoation) {
 			return jsparrowTempDirectory;
 		}
 
@@ -193,7 +193,7 @@ public class MavenAdapterTest {
 		}
 
 		@Override
-		protected WorkingDirectory createWorkingDirectory(File directory) {
+		protected WorkingDirectory createWorkingDirectory(File directory, String tempWorkspaceLocation) {
 			return workingDirectory;
 		}
 	}

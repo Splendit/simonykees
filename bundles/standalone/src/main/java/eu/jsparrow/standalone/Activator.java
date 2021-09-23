@@ -7,9 +7,11 @@ import java.util.Optional;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,6 +165,7 @@ public class Activator implements BundleActivator {
 	 * @param context all the settings etc.
 	 */
 	private void runInReportMode(BundleContext context) {
+		printInstalledBundlesStatus(context);
 		try {
 			refactoringInvoker.runInReportMode(context);
 		} catch (StandaloneException e) {
@@ -170,6 +173,18 @@ public class Activator implements BundleActivator {
 			logger.error(e.getMessage());
 			setExitErrorMessageAndCleanUp(context, e.getMessage());
 		}
+	}
+
+	private void printInstalledBundlesStatus(BundleContext context) {
+		logger.debug("Available bundles: ");
+		Bundle[] bundles = context.getBundles();
+		for(Bundle bundle : bundles) {
+			String symbolicName = bundle.getSymbolicName();
+			Version version = bundle.getVersion();
+			int state = bundle.getState();
+			logger.debug("{}:{} [{}]", symbolicName, version, state);			
+		}
+		
 	}
 
 	private void registerShutdownHook(BundleContext context) {
