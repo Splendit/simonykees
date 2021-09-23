@@ -1,9 +1,10 @@
-package eu.jsparrow.core.visitor.impl;
+package eu.jsparrow.core.visitor.stream.tolist;
 
 import org.junit.jupiter.api.AfterEach;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
 @SuppressWarnings("nls")
 public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixture {
