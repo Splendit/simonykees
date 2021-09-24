@@ -99,7 +99,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 					model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate());
 		} catch (LinkageError | ClassCastException e) {
 			/* SIM-1573 Feedback Improvement
-				We where not able to reproduce the class path collision in the OSGi environment.
+				We were not able to reproduce the class path collision in the OSGi environment.
 				So we are currently creating a new exception to improve the user interaction. 
 			
 			*/

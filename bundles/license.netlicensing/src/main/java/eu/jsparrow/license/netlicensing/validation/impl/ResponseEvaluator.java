@@ -15,6 +15,7 @@ import eu.jsparrow.license.netlicensing.model.StatusDetail;
 import eu.jsparrow.license.netlicensing.validation.impl.response.Parser;
 import eu.jsparrow.license.netlicensing.validation.impl.response.model.FloatingResponse;
 import eu.jsparrow.license.netlicensing.validation.impl.response.model.MultiFeatureResponse;
+import eu.jsparrow.license.netlicensing.validation.impl.response.model.PayPerUseResponse;
 import eu.jsparrow.license.netlicensing.validation.impl.response.model.SubscriptionResponse;
 
 /**
@@ -74,6 +75,8 @@ public class ResponseEvaluator {
 	 *             derive the represented license type.
 	 */
 	private NetlicensingValidationResult evaluateExpiredLicense() throws ValidationException {
+		PayPerUseResponse payPerUse = parser.getPayPerUse();
+		
 		logger.debug("Evaluating expired license"); //$NON-NLS-1$
 		MultiFeatureResponse multiFeature = parser.getMultiFeature();
 		SubscriptionResponse subscription = parser.getSubscription();
