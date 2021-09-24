@@ -32,6 +32,7 @@ public class JSparrowMarkerResolutionGenerator implements IMarkerResolutionGener
 
 	@Override
 	public IMarkerResolution[] getResolutions(IMarker marker) {
+		// TODO: Check for license?  Is there any other license model? Is there any valid pay per use license model? 
 		return new IMarkerResolution[] { new JSparrowMarkerResolution(marker, eventManager) };
 
 	}

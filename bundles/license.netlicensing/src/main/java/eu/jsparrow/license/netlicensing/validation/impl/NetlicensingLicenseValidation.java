@@ -117,4 +117,13 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		ValidationParameters validationParameters = parametersFactory.createFloatingCheckInParameters(model);
 		validationRequest.send(model.getKey(), validationParameters);
 	}
+
+	@Override
+	public void reserveQuantity(int quantity) throws ValidationException {
+		if(model.getType() != LicenseType.PAY_PER_USE) {
+			return;
+		}
+		ValidationParameters parameters = parametersFactory.createPayPerUseReserveParameters(model, quantity);
+		validationRequest.send(model.getKey(), parameters);
+	}
 }

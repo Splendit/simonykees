@@ -13,9 +13,12 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ide.ResourceUtil;
 
+import eu.jsparrow.license.api.LicenseType;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * An engine for creating and clearing jSparrow markers based on the generated
@@ -132,6 +135,14 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 	private void handleParentSourceReference(ICompilationUnit cu) {
 		List<RefactoringMarkerEvent> oldEvents = RefactoringMarkers.getAllEvents();
 		RefactoringMarkers.clear();
+		//TODO: Make sure there is a valid license. If not, do not generate any event. 
+		LicenseUtil licenseUtil = LicenseUtil.get();
+		LicenseValidationResult validationResult = licenseUtil.getValidationResult();
+		LicenseType type = validationResult.getLicenseType();
+		boolean valid = LicenseType.DEMO != type && validationResult.isValid();
+		if(!valid) {
+			return;
+		}
 		eventGenerator.discoverRefactoringEvents(cu);
 		List<RefactoringMarkerEvent> events = RefactoringMarkers.getAllEvents();
 		if (oldEvents.equals(events)) {

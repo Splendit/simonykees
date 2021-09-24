@@ -106,4 +106,13 @@ public class NetlicensingValidationParametersFactory {
 		return parameters;
 	}
 
+	public ValidationParameters createPayPerUseReserveParameters(NetlicensingLicenseModel model, int quantity) {
+		ValidationParameters parameters = new ValidationParameters();
+		HashMap<String, String> params = new HashMap<>();
+		params.put("reserveQuantity", Integer.toString(quantity)); //$NON-NLS-1$
+		parameters.setProductModuleValidationParameters(model.getModuleNr(), params);
+		parameters.setProductNumber(model.getProductNr());
+		parameters.setLicenseeName(model.getName());
+		return parameters;
+	}
 }

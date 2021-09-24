@@ -44,4 +44,6 @@ public interface LicenseService {
 	 */
 	public boolean verifySecretKey(LicenseModel model, String secret);
 
+	public void reserveQuantity(LicenseModel model, int quantity, String endpoint) throws ValidationException;
+
 }

@@ -13,6 +13,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.*;
 
@@ -66,6 +67,11 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 		IEditorPart editor = page.getActiveEditor();
 		ITextEditor textEditor = editor.getAdapter(ITextEditor.class);
 		textEditor.selectAndReveal(this.offset, this.newLength);
+		// TODO: update the pay per use license model. Get the cost number from the marker properties?
+		LicenseUtil licenseUtil = LicenseUtil.get();
+		// TODO: run async
+		licenseUtil.reserveQuantity(1); // TODO: put the credit in marker properties
+		
 	}
 
 	@Override

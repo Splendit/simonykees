@@ -7,6 +7,9 @@ public enum StatusDetail {
 	DEMO(Messages.LicenseStatus_userMessage_FREE_REGISTERED),
 	DEMO_EXPIRED(Messages.LicenseStatus_userMessage_FREE_EXPIRED),
 
+	PAY_PER_USE("PAY-PER-USE"),
+	PAY_PER_USE_OUT_OF_CREDIT("The pay-per-use license is running out of credit."),
+	
 	NODE_LOCKED(Messages.LicenseStatus_userMessage_NODE_LOCKED_REGISTERED),
 	NODE_LOCKED_EXPIRED(Messages.LicenseStatus_userMessage_NODE_LOCKED_EXPIRED),
 	NODE_LOCKED_HARDWARE_MISMATCH(Messages.LicenseStatus_userMessage_NODE_LOCKED_HW_ID_FAILURE),

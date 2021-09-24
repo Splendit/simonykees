@@ -17,4 +17,5 @@ public interface LicenseValidation {
 	
 	default void checkIn() throws ValidationException {}
 
+	default void reserveQuantity(int quantity) throws ValidationException {}
 }

@@ -197,7 +197,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 			return false;
 		}
 		LicenseType type = result.getLicenseType();
-		return type == LicenseType.FLOATING || type == LicenseType.NODE_LOCKED;
+		return type == LicenseType.FLOATING || type == LicenseType.NODE_LOCKED || type == LicenseType.PAY_PER_USE;
 	}
 
 	@Override
@@ -251,6 +251,9 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 		}
 
+		if(validationResult.getLicenseType() == LicenseType.PAY_PER_USE) {
+			moduleNr = "MXR957GYM";//FIXME
+		}
 		LicenseModel persitModel = factoryService.createNewModel(validationResult.getKey(), secret, productNr, moduleNr,
 				validationResult.getLicenseType(), name, validationResult.getExpirationDate());
 		if (endpointEncryption.isEncryptedKey(key)) {
@@ -464,5 +467,25 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 
 	public void setShouldContinueWithSelectRules(boolean shouldContinue) {
 		shouldContinueWithSelectRules = shouldContinue;
+	}
+	
+	public void reserveQuantity(int credit) {
+		LicenseModel model = tryLoadModelFromPersistence();
+
+		Optional<String> encryptedEndpointOpt = loadEncryptedEndpointFromPersistence();
+
+		try {
+			String endpoint = ""; //$NON-NLS-1$
+			if (encryptedEndpointOpt.isPresent()) {
+				endpoint = endpointEncryption.decryptEndpoint(encryptedEndpointOpt.get());
+			}
+
+			licenseService.reserveQuantity(model, credit, endpoint);
+		} catch (ValidationException | EndpointEncryptionException e) {
+			logger.error("Failed to validate license", e); //$NON-NLS-1$
+			result = new LicenseValidationResult(model.getType(), "", false, //$NON-NLS-1$
+					NLS.bind(Messages.MessageDialog_licensingError_failedToValidate, e.getMessage()),
+					model.getExpirationDate());
+		}
 	}
 }
