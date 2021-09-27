@@ -221,7 +221,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 					NLS.bind(Messages.UpdateLicenseDialog_error_couldNotValidate, e.getMessage()));
 		}
 		String productNr = properties.getProperty("license.productNr"); //$NON-NLS-1$
-		String moduleNr = properties.getProperty("license.moduleNr"); //$NON-NLS-1$
+		String moduleNr = properties.getProperty("license.floatingModuleNr"); //$NON-NLS-1$
 
 		String licenseKey = key;
 		String endpoint = ""; //$NON-NLS-1$
@@ -252,7 +252,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 
 		if(validationResult.getLicenseType() == LicenseType.PAY_PER_USE) {
-			moduleNr = "MXR957GYM";//FIXME
+			moduleNr = properties.getProperty("license.floatingModuleNr"); //$NON-NLS-1$
 		}
 		LicenseModel persitModel = factoryService.createNewModel(validationResult.getKey(), secret, productNr, moduleNr,
 				validationResult.getLicenseType(), name, validationResult.getExpirationDate());
