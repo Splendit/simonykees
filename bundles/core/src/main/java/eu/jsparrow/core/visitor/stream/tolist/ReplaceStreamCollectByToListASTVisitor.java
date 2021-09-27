@@ -1,10 +1,14 @@
 package eu.jsparrow.core.visitor.stream.tolist;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -13,9 +17,9 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
 /**
  * This visitor looks for {@link MethodInvocation} nodes which represent
@@ -49,6 +53,11 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 
 	private static final String TO_LIST = "toList"; //$NON-NLS-1$
 	private static final String TO_UNMODIFIABLE_LIST = "toUnmodifiableList"; //$NON-NLS-1$
+	@SuppressWarnings("nls")
+	private static final List<String> NOT_MODIFYING_LIST_METHOD_NAMES = Collections.unmodifiableList(Arrays.asList(
+			"forEach", //
+			"size", "isEmpty", "contains", "toArray", "containsAll", "equals", "hashCode", "stream", "parallelStream", //
+			"indexOf", "lastIndexOf"));
 
 	@Override
 	public boolean visit(MethodInvocation node) {
@@ -151,31 +160,23 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 			return isCollectionsUnmodifiableListInvocation((MethodInvocation) collectInvocation.getParent());
 		}
 
-		VariableDeclarationFragment variableDeclarationFragment = null;
+		if (collectInvocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) collectInvocation
+				.getParent();
+			return isDeclaringEffectivelyImmutableLocalVariable(variableDeclarationFragment);
+		}
+
 		if (collectInvocation.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
 			Expression leftHandSide = ((Assignment) collectInvocation.getParent()).getLeftHandSide();
-			if (leftHandSide.getNodeType() != ASTNode.SIMPLE_NAME) {
-				return false;
+			if (leftHandSide.getNodeType() == ASTNode.SIMPLE_NAME) {
+				SimpleName simpleName = (SimpleName) leftHandSide;
+				ASTNode declaringNode = getCompilationUnit().findDeclaringNode(simpleName.resolveBinding());
+				if (declaringNode != null && declaringNode.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+					return isDeclaringEffectivelyImmutableLocalVariable((VariableDeclarationFragment) declaringNode);
+				}
 			}
-			SimpleName simpleName = (SimpleName) leftHandSide;
-			ASTNode declaringNode = getCompilationUnit().findDeclaringNode(simpleName.resolveBinding());
-			if (declaringNode != null && declaringNode.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-				variableDeclarationFragment = (VariableDeclarationFragment) declaringNode;
-			}
-		} else if (collectInvocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			variableDeclarationFragment = (VariableDeclarationFragment) collectInvocation
-				.getParent();
 		}
-
-		if (variableDeclarationFragment == null ||
-				variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-			return false;
-		}
-
-		ASTNode scopeOfVariableUsage = variableDeclarationFragment.getParent()
-			.getParent();
-		return analyzeLocalVariableUsage(variableDeclarationFragment.getName(), scopeOfVariableUsage);
-
+		return false;
 	}
 
 	private boolean isCollectionsUnmodifiableListInvocation(MethodInvocation invocation) {
@@ -200,8 +201,36 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 		return ClassRelationUtil.isContentOfType(parameterTypes[0], "java.util.List"); //$NON-NLS-1$
 	}
 
-	private boolean analyzeLocalVariableUsage(SimpleName name, ASTNode scopeOfVariableUsage) {
-		return true;
+	private boolean isDeclaringEffectivelyImmutableLocalVariable(
+			VariableDeclarationFragment variableDeclarationFragment) {
+		if (variableDeclarationFragment.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+			return false;
+		}
+		SimpleName nameAtDeclaration = variableDeclarationFragment.getName();
+		ASTNode scopeOfVariableUsage = variableDeclarationFragment.getParent()
+			.getParent();
+
+		LocalVariableUsagesVisitor localVariableUsagesVisitor = new LocalVariableUsagesVisitor(nameAtDeclaration);
+		scopeOfVariableUsage.accept(localVariableUsagesVisitor);
+		return localVariableUsagesVisitor.getUsages()
+			.stream()
+			.filter(usage -> usage != nameAtDeclaration)
+			.allMatch(this::isSupportedVariableUsage);
+	}
+
+	private boolean isSupportedVariableUsage(SimpleName usage) {
+		if (usage.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+			return isCollectionsUnmodifiableListInvocation((MethodInvocation) usage.getParent());
+		}
+
+		if (usage.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {
+			MethodInvocation listMethodInvocation = (MethodInvocation) usage.getParent();
+			return NOT_MODIFYING_LIST_METHOD_NAMES.contains(listMethodInvocation.getName()
+				.getIdentifier());
+		}
+
+		return usage.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY
+				|| usage.getLocationInParent() == EnhancedForStatement.EXPRESSION_PROPERTY;
 	}
 
 }
