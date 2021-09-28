@@ -261,8 +261,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 
 		assertNoChange(original);
 	}
-	
-	
+
 	@Test
 	public void visit_AssignCollectCollectorsToListToThisList_shouldNotTransform() throws Exception {
 
@@ -298,8 +297,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 
 		assertNoChange(original);
 	}
-	
-	
+
 	@Test
 	public void visit_ReturnCollectorsToUnmodifiableList_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -313,8 +311,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 
 		assertNoChange(original);
 	}
-	
-	
+
 	@Test
 	public void visit_CollectorsToUnmodifiableListAsArgument_shouldNotTransform() throws Exception {
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -330,6 +327,35 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 				+ "	}\n"
 				+ "";
 
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_UnresolvedCollectMethod_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.stream.Collector.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
+				"	List<String> testCollectCollectorsToList() {\n"
+				+ "		return collect(Collectors.toList());\n"
+				+ "	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_CollectNotStreamMethod_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.stream.Collector.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
+				"	void testCollectNozByStream() {\n"
+				+ "		collect(Collectors.toUnmodifiableList());\n"
+				+ "	}\n"
+				+ "	\n"
+				+ "	private void collect(Collector<Object, ?, List<Object>> unmodifiableList) {\n"
+				+ "	}";
 		assertNoChange(original);
 	}
 }
