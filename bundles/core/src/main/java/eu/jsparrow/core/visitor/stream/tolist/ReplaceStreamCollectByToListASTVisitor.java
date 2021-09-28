@@ -142,7 +142,14 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 				}
 			}
 		}
-		return false;
+		
+		if (collectInvocation.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {
+			MethodInvocation listMethodInvocation = (MethodInvocation) collectInvocation.getParent();
+			return NOT_MODIFYING_LIST_METHOD_NAMES.contains(listMethodInvocation.getName()
+				.getIdentifier());
+		}
+		
+		return collectInvocation.getLocationInParent() == EnhancedForStatement.EXPRESSION_PROPERTY;
 	}
 
 	private boolean isDeclaringEffectivelyImmutableLocalVariable(
