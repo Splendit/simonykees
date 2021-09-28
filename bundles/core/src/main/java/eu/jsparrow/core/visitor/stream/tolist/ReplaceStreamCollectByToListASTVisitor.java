@@ -78,15 +78,12 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 
 		if (COLLECTORS_TO_UNMODIFIABLE_LIST.isSignatureMatching(node, GET_PARAMETER_TYPES)) {
 			findParentStreamCollectInvocation(node).ifPresent(this::transform);
-			return false;
-		}
 
-		if (COLLECTORS_TO_LIST.isSignatureMatching(node, GET_PARAMETER_TYPES)) {
+		} else if (COLLECTORS_TO_LIST.isSignatureMatching(node, GET_PARAMETER_TYPES)) {
 			MethodInvocation parentStreamCollectInvocation = findParentStreamCollectInvocation(node).orElse(null);
 			if (parentStreamCollectInvocation != null
 					&& analyzeStreamCollectUsingCollectorsToList(parentStreamCollectInvocation)) {
 				transform(parentStreamCollectInvocation);
-				return false;
 			}
 		}
 		return true;
@@ -104,6 +101,7 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 			streamToListInvocation.setExpression(streamToListInvocationExpression);
 		}
 		astRewrite.replace(supportedStreamCollectInvocation, streamToListInvocation, null);
+		onRewrite();
 	}
 
 	private Optional<MethodInvocation> findParentStreamCollectInvocation(MethodInvocation invocation) {
@@ -123,7 +121,8 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 	private boolean analyzeStreamCollectUsingCollectorsToList(MethodInvocation collectInvocation) {
 
 		if (collectInvocation.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
-			return COLLECTIONS_UNMODIFIABLE_LIST.isSignatureMatching((MethodInvocation) collectInvocation.getParent(), GET_PARAMETER_TYPES);
+			return COLLECTIONS_UNMODIFIABLE_LIST.isSignatureMatching((MethodInvocation) collectInvocation.getParent(),
+					GET_PARAMETER_TYPES);
 		}
 
 		if (collectInvocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
@@ -142,13 +141,13 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 				}
 			}
 		}
-		
+
 		if (collectInvocation.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {
 			MethodInvocation listMethodInvocation = (MethodInvocation) collectInvocation.getParent();
 			return NOT_MODIFYING_LIST_METHOD_NAMES.contains(listMethodInvocation.getName()
 				.getIdentifier());
 		}
-		
+
 		return collectInvocation.getLocationInParent() == EnhancedForStatement.EXPRESSION_PROPERTY;
 	}
 
@@ -171,7 +170,8 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 
 	private boolean isSupportedVariableUsage(SimpleName usage) {
 		if (usage.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
-			return COLLECTIONS_UNMODIFIABLE_LIST.isSignatureMatching((MethodInvocation) usage.getParent(), GET_PARAMETER_TYPES);
+			return COLLECTIONS_UNMODIFIABLE_LIST.isSignatureMatching((MethodInvocation) usage.getParent(),
+					GET_PARAMETER_TYPES);
 		}
 
 		if (usage.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {
