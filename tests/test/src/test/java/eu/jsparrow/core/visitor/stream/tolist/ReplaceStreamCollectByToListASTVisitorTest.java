@@ -401,4 +401,26 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 				+ "	}";
 		assertNoChange(original);
 	}
+
+	/**
+	 * SIM-2006: this test is expected to fail as soon as the corresponding
+	 * corner case is fixed.
+	 */
+	@Test
+	public void visit_CornerCaseWithTypeArguments_transformsButShouldNotTransform() throws Exception {
+
+		 defaultFixture.addImport(java.util.List.class.getName());
+		 defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
+				"	void cornerCaseWithTypeArguments(List<Object> objects) {\n"
+				+ "		List<Object> objectsToString = objects.stream().map(Object::toString).collect(Collectors.toList());\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void cornerCaseWithTypeArguments(List<Object> objects) {\n"
+				+ "		List<Object> objectsToString = objects.stream().map(Object::toString).toList();\n"
+				+ "	}";
+		assertChange(original, expected);
+	}
 }
