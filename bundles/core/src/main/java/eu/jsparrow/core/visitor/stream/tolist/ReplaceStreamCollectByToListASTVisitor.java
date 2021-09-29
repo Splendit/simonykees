@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import eu.jsparrow.core.visitor.sub.SignatureData;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.LocalVariableUsagesVisitor;
 
@@ -126,20 +127,26 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 		}
 
 		if (collectInvocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+
 			VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) collectInvocation
 				.getParent();
-			return isDeclaringEffectivelyImmutableLocalVariable(variableDeclarationFragment);
+			ITypeBinding expectedType = variableDeclarationFragment.resolveBinding()
+				.getType();
+			return checkStreamExpressionElementType(expectedType, collectInvocation)
+					&& isDeclaringEffectivelyImmutableLocalVariable(variableDeclarationFragment);
 		}
 
 		if (collectInvocation.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
 			Expression leftHandSide = ((Assignment) collectInvocation.getParent()).getLeftHandSide();
-			if (leftHandSide.getNodeType() == ASTNode.SIMPLE_NAME) {
+			if (leftHandSide.getNodeType() == ASTNode.SIMPLE_NAME
+					&& checkStreamExpressionElementType(leftHandSide.resolveTypeBinding(), collectInvocation)) {
 				SimpleName simpleName = (SimpleName) leftHandSide;
 				ASTNode declaringNode = getCompilationUnit().findDeclaringNode(simpleName.resolveBinding());
 				if (declaringNode != null && declaringNode.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 					return isDeclaringEffectivelyImmutableLocalVariable((VariableDeclarationFragment) declaringNode);
 				}
 			}
+			return false;
 		}
 
 		if (collectInvocation.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {
@@ -149,6 +156,18 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 		}
 
 		return collectInvocation.getLocationInParent() == EnhancedForStatement.EXPRESSION_PROPERTY;
+	}
+
+	private boolean checkStreamExpressionElementType(ITypeBinding expectedType, MethodInvocation collectInvocation) {
+		ITypeBinding[] expectedTypeArguments = expectedType.getTypeArguments();
+		if (expectedTypeArguments.length != 1) {
+			return true;
+		}
+		ITypeBinding[] streamExpressionTypeArguments = collectInvocation.getExpression()
+			.resolveTypeBinding()
+			.getTypeArguments();
+		
+		return ClassRelationUtil.compareITypeBinding(expectedTypeArguments, streamExpressionTypeArguments);
 	}
 
 	private boolean isDeclaringEffectivelyImmutableLocalVariable(

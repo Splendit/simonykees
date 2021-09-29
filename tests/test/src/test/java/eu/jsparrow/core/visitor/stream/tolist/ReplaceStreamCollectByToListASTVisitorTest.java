@@ -402,25 +402,51 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 		assertNoChange(original);
 	}
 
-	/**
-	 * SIM-2006: this test is expected to fail as soon as the corresponding
-	 * corner case is fixed.
-	 */
 	@Test
-	public void visit_CornerCaseWithTypeArguments_transformsButShouldNotTransform() throws Exception {
+	public void visit_ChangingElementTypeInVariableInitializer_shouldNotTransform() throws Exception {
 
-		 defaultFixture.addImport(java.util.List.class.getName());
-		 defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
 
 		String original = "" +
 				"	void cornerCaseWithTypeArguments(List<Object> objects) {\n"
 				+ "		List<Object> objectsToString = objects.stream().map(Object::toString).collect(Collectors.toList());\n"
 				+ "	}";
 
-		String expected = "" +
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ChangingElementTypeInAssignmentRightHandSide_shouldNotTransform() throws Exception {
+
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
 				"	void cornerCaseWithTypeArguments(List<Object> objects) {\n"
-				+ "		List<Object> objectsToString = objects.stream().map(Object::toString).toList();\n"
+				+ "		List<Object> objectsToString = null;\n"
+				+ "		objectsToString = objects.stream().map(Object::toString).collect(Collectors.toList());\n"
 				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ChangingElementTypeInObjectVariableInitializer_shouldTransform() throws Exception {
+
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
+				"	void cornerCaseWithObjectVariableInitialization(List<Object> objects) {\n"
+				+ "		Object o = objects.stream().map(Object::toString).collect(Collectors.toList());\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void cornerCaseWithObjectVariableInitialization(List<Object> objects) {\n"
+				+ "		Object o = objects.stream().map(Object::toString).toList();\n"
+				+ "	}";
+
 		assertChange(original, expected);
 	}
 }
