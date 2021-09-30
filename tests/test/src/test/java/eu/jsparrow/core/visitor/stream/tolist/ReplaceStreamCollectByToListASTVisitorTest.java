@@ -3,6 +3,8 @@ package eu.jsparrow.core.visitor.stream.tolist;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
@@ -193,7 +195,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_SizeOfListVariable_shouldTransform() throws Exception {
+	public void visit_CollectCollectorsToListToArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(java.util.Collection.class.getName());
 		defaultFixture.addImport(java.util.Collections.class.getName());
 		defaultFixture.addImport(java.util.List.class.getName());
@@ -203,17 +205,122 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 
 		String original = "" +
 				"	void testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
-				"		List<String> list = " + METHOD_INVOCATION_EXPRESSION + ".collect(Collectors.toList());\n" +
-				"		int count = list.size();\n" +
+				"		String[] stringArray = " + METHOD_INVOCATION_EXPRESSION
+				+ ".collect(Collectors.toList()).toArray();\n" +
 				"	}";
 
 		String expected = "" +
 				"	void testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
-				"		List<String> list = " + METHOD_INVOCATION_EXPRESSION + ".toList();\n" +
-				"		int count=list.size();\n" +
+				"		String[] stringArray = " + METHOD_INVOCATION_EXPRESSION + ".toList().toArray();\n" +
 				"	}";
 
 		assertChange(original, expected);
+
+	}
+
+	@Test
+	public void visit_CollectCollectorsToListSublist_shouldNotTransform() throws Exception {
+		defaultFixture.addImport(java.util.Collection.class.getName());
+		defaultFixture.addImport(java.util.Collections.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.function.Predicate.class.getName());
+		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
+				"	void testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
+				"		List<String> sublist = " + METHOD_INVOCATION_EXPRESSION
+				+ ".collect(Collectors.toList()).subList(1,2);\n" +
+				"	}";
+
+		assertNoChange(original);
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"listCopy.hashCode();",
+			"listCopy.equals(arraysAsList);",
+			"listCopy.toString();",
+			"listCopy.forEach(s -> {});",
+			"listCopy.size();",
+			"listCopy.isEmpty();",
+			"listCopy.contains(\"1\");",
+			"listCopy.toArray();",
+			"listCopy.toArray(new String[4]);",
+			"listCopy.containsAll(Arrays.asList(\"1\", \"2\", \"3\", \"4\"));",
+			"listCopy.stream();",
+			"listCopy.parallelStream();",
+			"listCopy.indexOf(\"1\");",
+			"listCopy.lastIndexOf(\"1\");",
+			"listCopy.get(0);",
+			"try { listCopy.notify(); } catch (Exception exception) { }",
+			"try { listCopy.notifyAll(); } catch (Exception exception) { }",
+			"try { listCopy.wait(); } catch (Exception exception) { }",
+			"try { listCopy.wait(1000L); } catch (Exception exception) { }",
+			"try { listCopy.wait(1000L, 100); } catch (Exception exception) { }"
+	})
+	public void visit_InvocationOfMethodOnListVariable_shouldTransform(String methodInvocationOnList) throws Exception {
+
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
+				"	void testMethodInvocationsOnList() {" +
+				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
+				"		List<String> listCopy = list.stream().collect(Collectors.toList());\n" +
+				"		" + methodInvocationOnList + "\n" +
+				"	}";
+
+		String expected = "" +
+				"	void testMethodInvocationsOnList() {" +
+				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
+				"		List<String> listCopy = list.stream().toList();\n" +
+				"		" + methodInvocationOnList + "\n" +
+				"	}";
+
+		assertChange(original, expected);
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"listCopy.add(\"5\");",
+			"listCopy.add(0, \"0\");",
+			"listCopy.addAll(Arrays.asList(\"6\", \"7\", \"8\", \"9\"));",
+			"listCopy.addAll(1, Arrays.asList(\"1-1\", \"1-2\", \"1-3\", \"1-4\"));",
+			"listCopy.set(0, \"0\");",
+			"listCopy.remove(0);",
+			"listCopy.remove(\"2\");",
+			"listCopy.removeAll(Arrays.asList(\"1\", \"2\"));",
+			"listCopy.removeIf(\"1\"::equals);",
+			"listCopy.retainAll(Arrays.asList(\"1\", \"2\"));",
+			"listCopy.clear();",
+			"listCopy.replaceAll(s -> s + s);",
+			"listCopy.sort((s1, s2) -> s1.compareTo(s2));",
+			"listCopy.iterator();",
+			"listCopy.listIterator();",
+			"listCopy.listIterator(0);",
+			"listCopy.spliterator();",
+			"listCopy.subList(0, 1);",
+			"listCopy.getClass();"
+	})
+	public void visit_InvocationOfMethodOnListVariable_shouldNotTransform(String methodInvocationOnList)
+			throws Exception {
+
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
+				"	void testMethodInvocationsOnList() {" +
+				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
+				"		List<String> listCopy = list.stream().collect(Collectors.toList());\n" +
+				"		" + methodInvocationOnList + "\n" +
+				"	}";
+
+		assertNoChange(original);
 
 	}
 
@@ -252,8 +359,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 
 		String original = "" +
 				"	interface StringStream extends Stream<String> {\n"
-				+ "\n"
-				+ "		default List<String> toImmutableList() {\n"
+				+ ""			+ "		default List<String> toImmutableList() {\n"
 				+ "			return collect(Collectors.toUnmodifiableList());\n"
 				+ "		}\n"
 				+ "	}";

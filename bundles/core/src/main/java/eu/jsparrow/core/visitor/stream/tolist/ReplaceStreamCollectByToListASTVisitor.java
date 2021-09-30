@@ -57,9 +57,10 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 	private static final String TO_UNMODIFIABLE_LIST = "toUnmodifiableList"; //$NON-NLS-1$
 	@SuppressWarnings("nls")
 	private static final List<String> NOT_MODIFYING_LIST_METHOD_NAMES = Collections.unmodifiableList(Arrays.asList(
+			"hashCode", "equals", "toString", "notify", "notifyAll", "wait",
 			"forEach", //
-			"size", "isEmpty", "contains", "toArray", "containsAll", "equals", "hashCode", "stream", "parallelStream", //
-			"indexOf", "lastIndexOf"));
+			"size", "isEmpty", "contains", "toArray", "containsAll", "stream", "parallelStream", //
+			"indexOf", "lastIndexOf", "get"));
 	private static final SignatureData COLLECTORS_TO_UNMODIFIABLE_LIST = new SignatureData(
 			java.util.stream.Collectors.class, TO_UNMODIFIABLE_LIST);
 	private static final SignatureData COLLECTORS_TO_LIST = new SignatureData(java.util.stream.Collectors.class,
