@@ -67,9 +67,6 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 			TO_LIST);
 	private static final SignatureData STREAM_COLLECT = new SignatureData(java.util.stream.Stream.class, "collect", //$NON-NLS-1$
 			java.util.stream.Collector.class);
-	private static final SignatureData COLLECTIONS_UNMODIFIABLE_LIST = new SignatureData(java.util.Collections.class,
-			"unmodifiableList", //$NON-NLS-1$
-			java.util.List.class);
 
 	private static final Function<IMethodBinding, ITypeBinding[]> GET_PARAMETER_TYPES = methodBinding -> methodBinding
 		.getMethodDeclaration()
@@ -123,8 +120,8 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 	private boolean analyzeStreamCollectUsingCollectorsToList(MethodInvocation collectInvocation) {
 
 		if (collectInvocation.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
-			return COLLECTIONS_UNMODIFIABLE_LIST.isSignatureMatching((MethodInvocation) collectInvocation.getParent(),
-					GET_PARAMETER_TYPES);
+			return NotModifiedListArgumentAnalyzer
+				.isKeepingListArgumentUnmodified((MethodInvocation) collectInvocation.getParent());
 		}
 
 		if (collectInvocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
@@ -167,7 +164,7 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 		ITypeBinding[] streamExpressionTypeArguments = collectInvocation.getExpression()
 			.resolveTypeBinding()
 			.getTypeArguments();
-		
+
 		return ClassRelationUtil.compareITypeBinding(expectedTypeArguments, streamExpressionTypeArguments);
 	}
 
@@ -190,8 +187,8 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 
 	private boolean isSupportedVariableUsage(SimpleName usage) {
 		if (usage.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
-			return COLLECTIONS_UNMODIFIABLE_LIST.isSignatureMatching((MethodInvocation) usage.getParent(),
-					GET_PARAMETER_TYPES);
+			return NotModifiedListArgumentAnalyzer
+				.isKeepingListArgumentUnmodified((MethodInvocation) usage.getParent());
 		}
 
 		if (usage.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {

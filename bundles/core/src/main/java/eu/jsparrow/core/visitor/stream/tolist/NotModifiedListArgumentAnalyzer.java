@@ -35,6 +35,15 @@ public class NotModifiedListArgumentAnalyzer {
 		}
 
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		if (methodName.equals("copyOf")
+				&& (ClassRelationUtil.isContentOfType(declaringClass, java.util.List.class.getName()) ||
+						ClassRelationUtil.isContentOfType(declaringClass, java.util.Set.class.getName()))) {
+			ITypeBinding[] parameterTypes = methodBinding.getMethodDeclaration()
+				.getParameterTypes();
+			return parameterTypes.length == 1
+					&& ClassRelationUtil.isContentOfType(parameterTypes[0], Collection.class.getName());
+		}		
+		
 		if (ClassRelationUtil.isContentOfType(declaringClass, java.util.Collections.class.getName())) {
 			return SAFE_COLLECTIONS_METHOD_NAMES.contains(methodName);
 		}
@@ -44,14 +53,7 @@ public class NotModifiedListArgumentAnalyzer {
 			return SAFE_COLLECTION_METHOD_NAMES.contains(methodName);
 		}
 
-		if (methodName.equals("copyOf")
-				&& (ClassRelationUtil.isContentOfType(declaringClass, java.util.List.class.getName()) ||
-						ClassRelationUtil.isContentOfType(declaringClass, java.util.Set.class.getName()))) {
-			ITypeBinding[] parameterTypes = methodBinding.getMethodDeclaration()
-				.getParameterTypes();
-			return parameterTypes.length == 1
-					&& ClassRelationUtil.isContentOfType(parameterTypes[0], Collection.class.getName());
-		}
+
 		return false;
 	}
 

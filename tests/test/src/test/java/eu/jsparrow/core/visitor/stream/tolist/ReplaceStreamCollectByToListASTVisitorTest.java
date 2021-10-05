@@ -194,6 +194,145 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"Collections.min(listCopy)",
+			"Collections.min(listCopy)",
+			"Collections.min(listCopy, String::compareToIgnoreCase)",
+			"Collections.max(listCopy)",
+			"Collections.max(listCopy, String::compareToIgnoreCase)",
+			"Collections.frequency(listCopy, \"1\")",
+			"Collections.disjoint(listCopy, Arrays.asList(\"1\", \"2\", \"3\", \"4\"))",
+			"Collections.indexOfSubList(listCopy, Arrays.asList(\"2\", \"3\", \"4\"))",
+			"Collections.indexOfSubList(Arrays.asList(\"0\", \"1\", \"2\", \"3\", \"4\"), listCopy)",
+			"Collections.lastIndexOfSubList(listCopy, Arrays.asList(\"2\", \"3\", \"4\"))",
+			"Collections.lastIndexOfSubList(Arrays.asList(\"0\", \"1\", \"2\", \"3\", \"4\"), listCopy)",
+			"Collections.unmodifiableCollection(listCopy)",
+			"Collections.unmodifiableList(listCopy)"
+	})
+	public void visit_ArgumentOfStaticCollectionsMethod_shouldTransform(String collectionsMethodInvocation)
+			throws Exception {
+
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+		defaultFixture.addImport(java.util.Collections.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
+				"	void testStreamCollect() {\n" +
+				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
+				"		List<String> listCopy = list.stream().collect(Collectors.toList());\n" +
+				"		" + collectionsMethodInvocation + ";\n" +
+				"	}";
+
+		String expected = "" +
+				"	void testStreamCollect() {\n" +
+				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
+				"		List<String> listCopy = list.stream().toList();\n" +
+				"		" + collectionsMethodInvocation + ";\n" +
+				"	}";
+		assertChange(original, expected);
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"List.copyOf(listCopy)",
+			"java.util.Set.copyOf(listCopy)",
+			"list.addAll(listCopy)",
+			"list.addAll(1, listCopy)",
+			"list.containsAll(listCopy)",
+			"list.removeAll(listCopy)",
+			"list.retainAll(listCopy)"
+	})
+	public void visit_ArgumentOfCollectionMethod_shouldTransform(String listMethodInvocation)
+			throws Exception {
+
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
+				"	void testWithListMethod() {\n" +
+				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
+				"		List<String> listCopy = list.stream().collect(Collectors.toList());\n" +
+				"		" + listMethodInvocation + ";\n" +
+				"	}";
+
+		String expected = "" +
+				"	void testWithListMethod() {\n" +
+				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
+				"		List<String> listCopy = list.stream().toList();\n" +
+				"		" + listMethodInvocation + ";\n" +
+				"	}";
+		assertChange(original, expected);
+
+	}
+
+	@Test
+	public void visit_ArgumentOfEquals_shouldTransform()
+			throws Exception {
+
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
+				"	void testWithListMethod() {\n" +
+				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
+				"		List<String> listCopy = list.stream().collect(Collectors.toList());\n" +
+				"		list.equals(listCopy);\n" +
+				"	}";
+
+		String expected = "" +
+				"	void testWithListMethod() {\n" +
+				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
+				"		List<String> listCopy = list.stream().toList();\n" +
+				"		list.equals(listCopy);\n" +
+				"	}";
+		assertChange(original, expected);
+
+	}
+
+	@Test
+	public void visit_ArgumentOfUseList_shouldNotTransform()
+			throws Exception {
+
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
+				"	void testWithUseList() {\n" +
+				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
+				"		List<String> listCopy = list.stream().collect(Collectors.toList());\n" +
+				"		useList(listCopy);\n" +
+				"	}\n" +
+				"	\n" +
+				"	void useList(List<String> list) {\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_ArgumentOfUnresolvedMethod_shouldNotTransform()
+			throws Exception {
+
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+		defaultFixture.addImport(java.util.List.class.getName());
+		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+
+		String original = "" +
+				"	void testWithUseList() {\n" +
+				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
+				"		List<String> listCopy = list.stream().collect(Collectors.toList());\n" +
+				"		useList(listCopy);\n" +
+				"	}";
+
+		assertNoChange(original);
+	}
+
 	@Test
 	public void visit_CollectCollectorsToListToArray_shouldTransform() throws Exception {
 		defaultFixture.addImport(java.util.Collection.class.getName());
@@ -359,7 +498,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 
 		String original = "" +
 				"	interface StringStream extends Stream<String> {\n"
-				+ ""			+ "		default List<String> toImmutableList() {\n"
+				+ "" + "		default List<String> toImmutableList() {\n"
 				+ "			return collect(Collectors.toUnmodifiableList());\n"
 				+ "		}\n"
 				+ "	}";
