@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
@@ -160,12 +159,14 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-		if (isMethodInvocationWithinMainMethod(node)) {
-			ExpressionStatement runTestInvocationStatement = findRunTestInvocationStatement(node).orElse(null);
-			if (runTestInvocationStatement != null) {
-				TypeLiteral runTestInvocationTypeLiteralArgument = findRunTestInvocationTypeLiteralArgument(node).orElse(null);
+		if (mainMethodToRemove != null &&
+				ASTNodeUtil.getSpecificAncestor(node, MethodDeclaration.class) == mainMethodToRemove) {
+			ExpressionStatement parentExpressionStatement = findParentExpressionStatement(node).orElse(null);
+			if (parentExpressionStatement != null) {
+				TypeLiteral runTestInvocationTypeLiteralArgument = findRunTestInvocationTypeLiteralArgument(node)
+					.orElse(null);
 				if (runTestInvocationTypeLiteralArgument != null) {
-					runInvocationToTypeLiteralMap.put(runTestInvocationStatement, runTestInvocationTypeLiteralArgument);
+					runInvocationToTypeLiteralMap.put(parentExpressionStatement, runTestInvocationTypeLiteralArgument);
 					return false;
 				}
 			}
@@ -352,21 +353,7 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		return UnexpectedJunit3References.analyzeNameBinding(compilationUnit, binding);
 	}
 
-	private boolean isMethodInvocationWithinMainMethod(MethodInvocation methodInvocation) {
-		if (mainMethodToRemove == null) {
-			return false;
-		}
-		ASTNode parent = methodInvocation.getParent();
-		while (parent != null) {
-			if (parent == mainMethodToRemove) {
-				return true;
-			}
-			parent = parent.getParent();
-		}
-		return false;
-	}
-
-	private static Optional<ExpressionStatement> findRunTestInvocationStatement(MethodInvocation methodInvocation) {
+	private static Optional<ExpressionStatement> findParentExpressionStatement(MethodInvocation methodInvocation) {
 
 		if (methodInvocation.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return Optional.empty();
@@ -386,15 +373,13 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 			return Optional.empty();
 		}
 
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		if (arguments.size() != 1) {
-			return Optional.empty();
-		}
+		List<TypeLiteral> listWithExpectedTypeLiteral = ASTNodeUtil.returnTypedList(methodInvocation.arguments(),
+				TypeLiteral.class);
 
-		Expression argument = arguments.get(0);
-		if (argument.getNodeType() != ASTNode.TYPE_LITERAL) {
+		if (listWithExpectedTypeLiteral.size() != 1) {
 			return Optional.empty();
 		}
+		TypeLiteral typeLiteral = listWithExpectedTypeLiteral.get(0);
 
 		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 		if (methodBinding == null) {
@@ -402,11 +387,9 @@ public class JUnit3DataCollectorVisitor extends ASTVisitor {
 		}
 
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-
 		if (ClassRelationUtil.isContentOfType(declaringClass, "junit.textui.TestRunner")) { //$NON-NLS-1$
-			return Optional.of((TypeLiteral) argument);
+			return Optional.of(typeLiteral);
 		}
-
 		return Optional.empty();
 	}
 
