@@ -40,7 +40,8 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 	private static final String REMOVE_RUN_TEST_IN_MAIN = "ReplaceJUnit3TestCasesRemoveRunTestInMainRule.java";
 	private static final String RUN_UNEXPECTED_TEST_IN_MAIN = "ReplaceJUnit3TestCasesRunUnexpectedTestInMainRule.java";
 	private static final String MAIN_METHOD_OF_TESTCASE_NOT_CHANGED = "ReplaceJUnit3TestCasesMainMethodOfTestCaseNotChangedRule.java";
-
+	private static final String TEST_RUNNER_RUN_WITH_CLASS_VARIABLE = "ReplaceJUnit3TestCasesTestRunnerRunWithClassVariableRule.java";
+	
 	private static final String POSTRULE_SUBDIRECTORY = "migrateJUnit3";
 
 	private ReplaceJUnit3TestCasesRule rule;
@@ -322,6 +323,25 @@ class ReplaceJUnit3TestCasesRuleTest extends SingleRuleTest {
 
 		Path preRule = getPreRuleFile(MAIN_METHOD_OF_TESTCASE_NOT_CHANGED);
 		Path postRule = getPostRuleFile(MAIN_METHOD_OF_TESTCASE_NOT_CHANGED, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	void testTestRunnerRunWithClassVariable() throws Exception {
+		loadUtilities();
+		addToClasspath(testProject, Arrays
+			.asList(generateMavenEntryFromDepedencyString("org.junit.jupiter", "junit-jupiter-api",
+					"5.0.0")));
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		rule.calculateEnabledForProject(testProject);
+		assertTrue(rule.isEnabled());
+
+		Path preRule = getPreRuleFile(TEST_RUNNER_RUN_WITH_CLASS_VARIABLE);
+		Path postRule = getPostRuleFile(TEST_RUNNER_RUN_WITH_CLASS_VARIABLE, POSTRULE_SUBDIRECTORY);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
