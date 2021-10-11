@@ -12,8 +12,8 @@ public class UseJavaRecordsASTVisitorTest extends UsesJDTUnitFixture {
 
 	@BeforeEach
 	public void setUp() {
-		setJavaVersion(JavaCore.VERSION_16);
 		setDefaultVisitor(new UseJavaRecordsASTVisitor());
+		fixtureProject.setJavaVersion(JavaCore.VERSION_16);
 	}
 
 	@AfterEach
@@ -49,6 +49,24 @@ public class UseJavaRecordsASTVisitorTest extends UsesJDTUnitFixture {
 				"		}\n" +
 				"	}";
 
-		assertNoChange(original);
+		// assertNoChange(original);
+
+		String expected = "" +
+				"	public void methodWithLocalClassPoint() {\n"
+				+ "		record Point(int x, int y) {\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expectedCompilationUnitFormat = "" +
+				"package %s;\n" +
+				"public class %s {\n" +
+				" %s \n" +
+				"}";
+
+		assertCompilationUnitMatch(original, original,
+				expectedCompilationUnitFormat);
+		// assertCompilationUnitMatch(original, expected,
+		// expectedCompilationUnitFormat);
+		// assertChange(original, expected);
 	}
 }
