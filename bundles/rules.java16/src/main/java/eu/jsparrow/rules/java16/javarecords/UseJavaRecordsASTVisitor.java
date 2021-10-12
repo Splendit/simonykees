@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -14,7 +12,9 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -87,28 +87,24 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		List<RecordComponentData> recordComponentDataList = collectRecordComponentData(privateFinalInstanceFields);
 
-		List<MethodDeclaration> constructorDeclarations = methodDeclarations.stream()
-			.filter(MethodDeclaration::isConstructor)
-			.collect(Collectors.toList());
+		ConstructorDeclarationsAnalyzer constructorDeclarationsAnalyzer = new ConstructorDeclarationsAnalyzer(
+				typeDeclaration, recordComponentDataList);
 
-		CanonicalConstructorAnalyzer canonicConstructorAnalyzer = new CanonicalConstructorAnalyzer();
-		MethodDeclaration canonicConstructor = constructorDeclarations.stream()
-			.filter(constructorDeclaration -> canonicConstructorAnalyzer.isCanonicalConstructor(constructorDeclaration,
-					recordComponentDataList))
-			.findFirst()
-			.orElse(null);
-
-		if (canonicConstructor == null) {
+		if (!constructorDeclarationsAnalyzer.analyzeConstructors()) {
 			return Optional.empty();
 		}
 
-		if (!validateConstructorDeclarations(constructorDeclarations, canonicConstructor)) {
-			return Optional.empty();
-		}
-		boolean removeCanonicConstructor = canonicConstructorAnalyzer.canRemoveCanonicalConstructor();
-		List<MethodDeclaration> methodDeclarationsToKeep = methodDeclarations.stream()
-			.filter(methodDeclaration -> !removeCanonicConstructor || canonicConstructor != methodDeclaration)
-			.filter(methodDeclaration -> !isRecordGetterToRemove(methodDeclaration))
+		List<MethodDeclaration> methodDeclarationsToRemove = new ArrayList<>();
+		constructorDeclarationsAnalyzer.getCanonicalConstructorToRemove()
+			.ifPresent(methodDeclarationsToRemove::add);
+		methodDeclarations
+			.stream()
+			.filter(this::isRecordGetterToRemove)
+			.forEach(methodDeclarationsToRemove::add);
+
+		List<MethodDeclaration> methodDeclarationsToKeep = methodDeclarations
+			.stream()
+			.filter(methodDeclaration -> !methodDeclarationsToRemove.contains(methodDeclaration))
 			.collect(Collectors.toList());
 
 		return Optional
@@ -132,14 +128,6 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 		return !Modifier.isStatic(modifiers) && Modifier.isPrivate(modifiers) && Modifier.isFinal(modifiers);
 	}
 
-	/**
-	 * TODO: implement validation, each non canonic constructor must call the
-	 * canonic constructor of a record.
-	 */
-	private boolean validateConstructorDeclarations(List<MethodDeclaration> constructorDeclarations,
-			MethodDeclaration canonicConstructor) {
-		return true;
-	}
 
 	/**
 	 * TODO: implement analysis whether MethodDeclaration is a record getter
@@ -155,6 +143,6 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 	 * @return
 	 */
 	private boolean isRecordGetterToRemove(MethodDeclaration methodDeclaration) {
-		return true;
+		return !methodDeclaration.isConstructor();
 	}
 }

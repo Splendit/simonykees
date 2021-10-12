@@ -32,35 +32,31 @@ public class UseJavaRecordsASTVisitorTest extends UsesJDTUnitFixture {
 	@Test
 	public void visit_LocalClassToRecord_shouldTransform() throws Exception {
 		String original = "" +
-				"	public void methodWithLocalClassPoint() {\n"
-				+ "		if (true) {\n"
-				+ "			class Point {\n"
-				+ "				private final int x;\n"
-				+ "				private final int y;\n"
-				+ "\n"
-				+ "				Point(int x, int y) {\n"
-				+ "					this.x = x;\n"
-				+ "					this.y = y;\n"
-				+ "				}\n"
-				+ "\n"
-				+ "				public int x() {\n"
-				+ "					return x;\n"
-				+ "				}\n"
-				+ "\n"
-				+ "				public int y() {\n"
-				+ "					return y;\n"
-				+ "				}\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
+				"	public void methodWithLocalClassPoint() {\n" +
+				"		class Point {\n" +
+				"			private final int x;\n" +
+				"			private final int y;\n" +
+				"\n" +
+				"			Point(int x, int y) {\n" +
+				"				this.x = x;\n" +
+				"				this.y = y;\n" +
+				"			}\n" +
+				"\n" +
+				"			public int x() {\n" +
+				"				return x;\n" +
+				"			}\n" +
+				"\n" +
+				"			public int y() {\n" +
+				"				return y;\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}";
 
 		String expected = "" +
-				"	public void methodWithLocalClassPoint() {\n"
-				+ "		if (true) {\n"
-				+ "			record Point(int x, int y) {\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
+				"	public void methodWithLocalClassPoint() {\n" +
+				"		record Point(int x, int y) {\n" +
+				"		}\n" +
+				"	}";
 
 		assertChange(original, expected);
 	}
