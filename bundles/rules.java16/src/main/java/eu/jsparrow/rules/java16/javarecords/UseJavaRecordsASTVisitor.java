@@ -91,8 +91,9 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 			.filter(MethodDeclaration::isConstructor)
 			.collect(Collectors.toList());
 
+		CanonicalConstructorAnalyzer canonicConstructorAnalyzer = new CanonicalConstructorAnalyzer();
 		MethodDeclaration canonicConstructor = constructorDeclarations.stream()
-			.filter(constructorDeclaration -> isCanonicConstructor(constructorDeclaration,
+			.filter(constructorDeclaration -> canonicConstructorAnalyzer.isCanonicalConstructor(constructorDeclaration,
 					recordComponentDataList))
 			.findFirst()
 			.orElse(null);
@@ -104,10 +105,10 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (!validateConstructorDeclarations(constructorDeclarations, canonicConstructor)) {
 			return Optional.empty();
 		}
-
+		boolean removeCanonicConstructor = canonicConstructorAnalyzer.canRemoveCanonicalConstructor();
 		List<MethodDeclaration> methodDeclarationsToKeep = methodDeclarations.stream()
-			.filter(methodDeclaration -> canonicConstructor != methodDeclaration &&
-					!isRecordGetterToRemove(methodDeclaration))
+			.filter(methodDeclaration -> !removeCanonicConstructor || canonicConstructor != methodDeclaration)
+			.filter(methodDeclaration -> !isRecordGetterToRemove(methodDeclaration))
 			.collect(Collectors.toList());
 
 		return Optional
@@ -129,16 +130,6 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 	private boolean isPrivateFinalInstanceField(FieldDeclaration fieldDeclaration) {
 		int modifiers = fieldDeclaration.getModifiers();
 		return !Modifier.isStatic(modifiers) && Modifier.isPrivate(modifiers) && Modifier.isFinal(modifiers);
-	}
-
-	/**
-	 * TODO: implement analysis whether the given constructor declaration
-	 * fulfills the requirements on a canonic constructor declaration of a
-	 * record.
-	 */
-	private boolean isCanonicConstructor(MethodDeclaration constructorDeclaration,
-			List<RecordComponentData> recordComponentDataList) {
-		return true;
 	}
 
 	/**
