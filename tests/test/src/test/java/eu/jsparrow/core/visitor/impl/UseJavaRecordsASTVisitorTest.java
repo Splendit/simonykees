@@ -30,6 +30,68 @@ public class UseJavaRecordsASTVisitorTest extends UsesJDTUnitFixture {
 	}
 
 	@Test
+	public void visit_ComplexCanonicalConstructor_shouldTransform() throws Exception {
+		String original = "" +
+				"	public void methodWithLocalClass() {\n"
+				+ "		class LocalClass {\n"
+				+ "			private final int x, y, z;\n"
+				+ "\n"
+				+ "			public LocalClass(int x, int y, int z) {\n"
+				+ "\n"
+				+ "				if (x < 100 && y < 100 && z < 100) {\n"
+				+ "					this.x = x;\n"
+				+ "					this.y = y;\n"
+				+ "					this.z = z;\n"
+				+ "				} else {\n"
+				+ "					this.x = x / 100;\n"
+				+ "					this.y = y / 100;\n"
+				+ "					this.z = z / 100;\n"
+				+ "				}\n"
+				+ "			}\n"
+				+ "\n"
+				+ "			public LocalClass(byte x, byte y, byte z) {\n"
+				+ "				this((int) x, (int) y, (int) z);\n"
+				+ "			}\n"
+				+ "\n"
+				+ "			public LocalClass() {\n"
+				+ "				this((byte) 0, (byte) 0, (byte) 0);\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "\n"
+				+ "	}";
+
+		String expected = "" +
+				"	public void methodWithLocalClass() {\n"
+				+ "		record LocalClass(int x, int y, int z) {\n"
+				+ "			;\n" //  TODO: discuss Unexpected empty statement
+				+ "			public LocalClass(int x, int y, int z) {\n"
+				+ "\n"
+				+ "				if (x < 100 && y < 100 && z < 100) {\n"
+				+ "					this.x = x;\n"
+				+ "					this.y = y;\n"
+				+ "					this.z = z;\n"
+				+ "				} else {\n"
+				+ "					this.x = x / 100;\n"
+				+ "					this.y = y / 100;\n"
+				+ "					this.z = z / 100;\n"
+				+ "				}\n"
+				+ "			}\n"
+				+ "\n"
+				+ "			public LocalClass(byte x, byte y, byte z) {\n"
+				+ "				this((int) x, (int) y, (int) z);\n"
+				+ "			}\n"
+				+ "\n"
+				+ "			public LocalClass() {\n"
+				+ "				this((byte) 0, (byte) 0, (byte) 0);\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
 	public void visit_LocalClassToRecord_shouldTransform() throws Exception {
 		String original = "" +
 				"	public void methodWithLocalClassPoint() {\n" +

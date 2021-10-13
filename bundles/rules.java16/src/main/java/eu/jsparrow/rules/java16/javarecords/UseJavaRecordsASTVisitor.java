@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -57,6 +58,12 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 				component.setName(componentName);
 				recordComponents.add(component);
 			});
+
+		List recordBodyDeclarations = recordDeclaration.bodyDeclarations();
+		supportedBodyDeclarations.getRecordBodyDeclarations()
+			.forEach(bodyDeclaration -> {
+				recordBodyDeclarations.add(astRewrite.createCopyTarget(bodyDeclaration));
+			});
 		astRewrite.replace(typeDeclarationToReplace, recordDeclaration, null);
 		onRewrite();
 	}
@@ -94,22 +101,19 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 			return Optional.empty();
 		}
 
-		List<MethodDeclaration> methodDeclarationsToRemove = new ArrayList<>();
+		List<BodyDeclaration> recordBodyDeclarations = new ArrayList<>();
+		recordBodyDeclarations.addAll(staticFields);
+		recordBodyDeclarations.addAll(methodDeclarations);
+
 		constructorDeclarationsAnalyzer.getCanonicalConstructorToRemove()
-			.ifPresent(methodDeclarationsToRemove::add);
+			.ifPresent(recordBodyDeclarations::remove);
 		methodDeclarations
 			.stream()
 			.filter(this::isRecordGetterToRemove)
-			.forEach(methodDeclarationsToRemove::add);
-
-		List<MethodDeclaration> methodDeclarationsToKeep = methodDeclarations
-			.stream()
-			.filter(methodDeclaration -> !methodDeclarationsToRemove.contains(methodDeclaration))
-			.collect(Collectors.toList());
+			.forEach(recordBodyDeclarations::remove);
 
 		return Optional
-			.of(new SupportedBodyDeclarations(recordComponentDataList, staticFields,
-					methodDeclarationsToKeep));
+			.of(new SupportedBodyDeclarations(recordComponentDataList, recordBodyDeclarations));
 	}
 
 	private List<RecordComponentData> collectRecordComponentData(List<FieldDeclaration> privateFinalInstanceFields) {
@@ -127,7 +131,6 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 		int modifiers = fieldDeclaration.getModifiers();
 		return !Modifier.isStatic(modifiers) && Modifier.isPrivate(modifiers) && Modifier.isFinal(modifiers);
 	}
-
 
 	/**
 	 * TODO: implement analysis whether MethodDeclaration is a record getter
