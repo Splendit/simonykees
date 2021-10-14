@@ -116,6 +116,9 @@ public class ReportMojo extends AbstractMojo {
 
 	@Parameter(property = "sendStatistics")
 	private boolean sendStatistics;
+	
+	@Parameter(defaultValue = "${project.build.directory}", property = "destination")
+	private String destination;
 
 	public void execute() throws MojoExecutionException {
 		Log log = getLog();
@@ -132,6 +135,7 @@ public class ReportMojo extends AbstractMojo {
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
 				defaultConfiguration, statisticsMetadata, sendStatistics, selectedSources);
+		parameters.setReportDestinationPath(destination);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);

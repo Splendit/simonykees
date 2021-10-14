@@ -235,7 +235,7 @@ public class RefactoringInvoker {
 
 	private void printStatistics(BundleContext context, Map<StandaloneConfig, List<RefactoringRule>> rules,
 			JsparrowMetric metricData) {
-		String reportOutputPath = context.getProperty(ROOT_PROJECT_BASE_PATH);
+		String reportOutputPath = context.getProperty("REPORT.DESTINATION.PATH");
 		String jsonPath = String.join(File.separator, reportOutputPath, "jSparrowReport.json"); //$NON-NLS-1$
 		JsonUtil.writeJSON(metricData, jsonPath);
 

@@ -20,6 +20,7 @@ public class MavenParameters {
 	private StatisticsMetadata statisticsMetadata;
 	private boolean sendStatistics;
 	private String selectedSources;
+	private String reportDestinationPath;
 
 	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault,
 			StatisticsMetadata statisticsMetadata, boolean sendStatistics, String selectedSources) {
@@ -85,9 +86,16 @@ public class MavenParameters {
 	public void setSendStatistics(boolean sendStatistics) {
 		this.sendStatistics = sendStatistics;
 	}
-	
+
 	public String getSelectedSources() {
 		return this.selectedSources;
 	}
 
+	public void setReportDestinationPath(String destination) {
+		this.reportDestinationPath = destination;
+	}
+
+	public String getReportDestinationPath() {
+		return this.reportDestinationPath;
+	}
 }
