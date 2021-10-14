@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -68,10 +69,16 @@ public class BodyDeclarationsAnalyzer {
 			return Optional.empty();
 		}
 
-		if (canRemoveCanonicalConstructor(assumedCanonicalConstructor, canonicalConstructorParameters)) {
+		List<String> componentIdentifiers = canonicalConstructorParameters
+			.stream()
+			.map(SingleVariableDeclaration::getName)
+			.map(SimpleName::getIdentifier)
+			.collect(Collectors.toList());
+
+		if (canRemoveCanonicalConstructor(assumedCanonicalConstructor, componentIdentifiers)) {
 			methods.remove(assumedCanonicalConstructor);
 		}
-		methods.removeAll(collectRecordGettersToRemove(methods, canonicalConstructorParameters));
+		methods.removeAll(collectRecordGettersToRemove(methods, componentIdentifiers));
 
 		ArrayList<BodyDeclaration> recordBodyDeclarations = new ArrayList<>();
 		recordBodyDeclarations.addAll(staticFields);
@@ -135,7 +142,7 @@ public class BodyDeclarationsAnalyzer {
 	}
 
 	private boolean canRemoveCanonicalConstructor(MethodDeclaration canonicalConstructor,
-			List<SingleVariableDeclaration> formalParameters) {
+			List<String> componentIdentifiers) {
 
 		List<Assignment> assignments = ASTNodeUtil.returnTypedList(canonicalConstructor.getBody()
 			.statements(), ExpressionStatement.class)
@@ -145,14 +152,9 @@ public class BodyDeclarationsAnalyzer {
 			.map(Assignment.class::cast)
 			.collect(Collectors.toList());
 
-		if (assignments.size() != formalParameters.size()) {
+		if (assignments.size() != componentIdentifiers.size()) {
 			return false;
 		}
-		List<String> componentIdentifiers = formalParameters
-			.stream()
-			.map(SingleVariableDeclaration::getName)
-			.map(SimpleName::getIdentifier)
-			.collect(Collectors.toList());
 
 		for (String identifier : componentIdentifiers) {
 			if (assignments
@@ -188,15 +190,59 @@ public class BodyDeclarationsAnalyzer {
 	}
 
 	private List<MethodDeclaration> collectRecordGettersToRemove(List<MethodDeclaration> methodDeclarations,
-			List<SingleVariableDeclaration> formalParameters) {
-		return methodDeclarations.stream()
-			.filter(methodDeclaration -> isRecordGetterToRemove(methodDeclaration, formalParameters))
-			.collect(Collectors.toList());
+			List<String> componentIdentifiers) {
+
+		ArrayList<MethodDeclaration> recordGettersToRemove = new ArrayList<>();
+		componentIdentifiers.forEach(identifier -> {
+			methodDeclarations.stream()
+				.filter(methodDeclaration -> isRecordGetterToRemove(methodDeclaration, identifier))
+				.findFirst()
+				.ifPresent(recordGettersToRemove::add);
+		});
+		return recordGettersToRemove;
 	}
 
 	private boolean isRecordGetterToRemove(MethodDeclaration methodDeclaration,
-			List<SingleVariableDeclaration> formalParameters) {
-		return !methodDeclaration.isConstructor();
+			String componentIdentifier) {
+		if (!methodDeclaration.getName()
+			.getIdentifier()
+			.equals(componentIdentifier)) {
+			return false;
+		}
+		if (!methodDeclaration.parameters()
+			.isEmpty()) {
+			return false;
+		}
+		List<ReturnStatement> returnStatements = ASTNodeUtil.returnTypedList(methodDeclaration.getBody()
+			.statements(), ReturnStatement.class);
+		if (returnStatements.isEmpty()) {
+			return false;
+		}
+		ReturnStatement returnStatement = returnStatements.get(0);
+		Expression returnedExpression = returnStatement.getExpression();
+		if (returnedExpression == null) {
+			return false;
+		}
+
+		if (returnedExpression.getNodeType() == ASTNode.SIMPLE_NAME) {
+			return ((SimpleName) returnedExpression).getIdentifier()
+				.equals(componentIdentifier);
+		}
+
+		if (returnedExpression.getNodeType() != ASTNode.FIELD_ACCESS) {
+			return false;
+		}
+
+		FieldAccess fieldAccess = (FieldAccess) returnedExpression;
+		if (fieldAccess.getExpression()
+			.getNodeType() != ASTNode.THIS_EXPRESSION) {
+			return false;
+		}
+		String fieldNameIdentifier = fieldAccess.getName()
+			.getIdentifier();
+
+		return fieldNameIdentifier.equals(componentIdentifier);
+
 	}
 
 }
