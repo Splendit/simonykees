@@ -167,18 +167,7 @@ public class BodyDeclarationsAnalyzer {
 	}
 
 	private boolean isAssigningParameterToFieldWithSameName(Assignment assignment, String expectedIdentifier) {
-		Expression leftHandSide = assignment.getLeftHandSide();
-		if (leftHandSide.getNodeType() != ASTNode.FIELD_ACCESS) {
-			return false;
-		}
-		FieldAccess fieldAccess = (FieldAccess) leftHandSide;
-		if (fieldAccess.getExpression()
-			.getNodeType() != ASTNode.THIS_EXPRESSION) {
-			return false;
-		}
-		String fieldNameIdentifier = fieldAccess.getName()
-			.getIdentifier();
-		if (!fieldNameIdentifier.equals(expectedIdentifier)) {
+		if (!isThisFieldAccessMatchingIdentifier(assignment.getLeftHandSide(), expectedIdentifier)) {
 			return false;
 		}
 		Expression rightHandSide = assignment.getRightHandSide();
@@ -187,6 +176,21 @@ public class BodyDeclarationsAnalyzer {
 		}
 		String parameterIdentifier = ((SimpleName) rightHandSide).getIdentifier();
 		return parameterIdentifier.equals(expectedIdentifier);
+	}
+
+	private boolean isThisFieldAccessMatchingIdentifier(Expression expression, String expectedIdentifier) {
+		if (expression.getNodeType() != ASTNode.FIELD_ACCESS) {
+			return false;
+		}
+		FieldAccess fieldAccess = (FieldAccess) expression;
+		if (fieldAccess.getExpression()
+			.getNodeType() != ASTNode.THIS_EXPRESSION) {
+			return false;
+		}
+		String fieldNameIdentifier = fieldAccess.getName()
+			.getIdentifier();
+		return fieldNameIdentifier.equals(expectedIdentifier);
+
 	}
 
 	private List<MethodDeclaration> collectRecordGettersToRemove(List<MethodDeclaration> methodDeclarations,
@@ -228,21 +232,6 @@ public class BodyDeclarationsAnalyzer {
 			return ((SimpleName) returnedExpression).getIdentifier()
 				.equals(componentIdentifier);
 		}
-
-		if (returnedExpression.getNodeType() != ASTNode.FIELD_ACCESS) {
-			return false;
-		}
-
-		FieldAccess fieldAccess = (FieldAccess) returnedExpression;
-		if (fieldAccess.getExpression()
-			.getNodeType() != ASTNode.THIS_EXPRESSION) {
-			return false;
-		}
-		String fieldNameIdentifier = fieldAccess.getName()
-			.getIdentifier();
-
-		return fieldNameIdentifier.equals(componentIdentifier);
-
+		return isThisFieldAccessMatchingIdentifier(returnedExpression, componentIdentifier);
 	}
-
 }
