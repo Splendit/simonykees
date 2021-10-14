@@ -37,14 +37,9 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 		recordDeclaration.setName(recordName);
 		List recordComponents = recordDeclaration.recordComponents();
 		analysisResult.getCanonicalConstructorParameters()
-			.forEach(parameter -> {
-				SingleVariableDeclaration component = ast.newSingleVariableDeclaration();
-				Type componentType = (Type) astRewrite.createCopyTarget(parameter.getType());
-				SimpleName componentName = (SimpleName) astRewrite.createCopyTarget(parameter.getName());
-				component.setType(componentType);
-				component.setName(componentName);
-				recordComponents.add(component);
-			});
+			.stream()
+			.map(astRewrite::createCopyTarget)
+			.forEach(recordComponents::add);
 
 		List recordBodyDeclarations = recordDeclaration.bodyDeclarations();
 		analysisResult.getRecordBodyDeclarations()
