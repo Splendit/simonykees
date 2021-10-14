@@ -51,7 +51,6 @@ public class ConstructorDeclarationsAnalyzer {
 		if (canRemoveCanonicalConstructor(canonicalConstructor)) {
 			canonicalConstructorToRemove = canonicalConstructor;
 		}
-
 		return true;
 
 	}
