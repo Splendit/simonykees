@@ -21,6 +21,7 @@ public class Messages extends NLS {
 	public static String MavenAdapter_prepareWorkingDirectory;
 	public static String MavenAdapter_projectIdsSet;
 	public static String MavenAdapter_workingDirectoryPrepared;
+	public static String MavenParameters_missingReportsDestinationDirectory;
 	public static String RefactorMojo_supportJDK8and11;
 
 	static {

@@ -1,6 +1,15 @@
 package eu.jsparrow.maven.adapter;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
+
+import org.apache.maven.model.Build;
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
+
+import eu.jsparrow.maven.i18n.Messages;
 
 /**
  * A class for wrapping the parameters injected in the maven plugin.
@@ -91,6 +100,20 @@ public class MavenParameters {
 		return this.selectedSources;
 	}
 
+	public String computeValidateReportDestinationPath(MavenProject project, String providedPath, Log log) {
+		Build projectBuild = project.getBuild();
+		String target = projectBuild.getDirectory();
+		if(!providedPath.equals(target)) {
+			Path path = Paths.get(providedPath);
+			if(Files.exists(path)) {
+				return providedPath;
+			} else {
+				log.warn(Messages.MavenParameters_missingReportsDestinationDirectory);
+			}
+		}
+		return target;
+	}
+	
 	public void setReportDestinationPath(String destination) {
 		this.reportDestinationPath = destination;
 	}

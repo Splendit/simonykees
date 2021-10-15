@@ -31,9 +31,9 @@ import eu.jsparrow.maven.util.JavaVersion;
 import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
- * Runs the jSparrow in REPORT mode, i.e. computes the refactorings and
- * generates a report with the findings. Does not change the source files.
- * Expects the same parameters as the {@code refactor} goal.
+ * Runs jSparrow in REPORT mode, i.e. computes the refactorings and generates a
+ * report with the findings. Does not change the source files. Expects the same
+ * parameters as the {@code refactor} goal.
  * 
  * @since 2.20.0
  *
@@ -116,7 +116,10 @@ public class ReportMojo extends AbstractMojo {
 
 	@Parameter(property = "sendStatistics")
 	private boolean sendStatistics;
-	
+
+	/**
+	 * Specify the location to generate the reports into.
+	 */
 	@Parameter(defaultValue = "${project.build.directory}", property = "destination")
 	private String destination;
 
@@ -135,7 +138,8 @@ public class ReportMojo extends AbstractMojo {
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
 				defaultConfiguration, statisticsMetadata, sendStatistics, selectedSources);
-		parameters.setReportDestinationPath(destination);
+		String destinationPath = parameters.computeValidateReportDestinationPath(project, destination, log);
+		parameters.setReportDestinationPath(destinationPath);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);
