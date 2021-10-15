@@ -3,10 +3,10 @@ package eu.jsparrow.rules.java16.javarecords;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -22,10 +22,42 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 
-		BodyDeclarationsAnalyzer bodyDeclarationsAnalyzer = new BodyDeclarationsAnalyzer();
-		bodyDeclarationsAnalyzer.analyzeBodyDeclarations(typeDeclaration)
-			.ifPresent(this::transform);
+		if (isSupportedClassDeclaration(typeDeclaration)) {
+
+			BodyDeclarationsAnalyzer bodyDeclarationsAnalyzer = new BodyDeclarationsAnalyzer();
+			bodyDeclarationsAnalyzer.analyzeBodyDeclarations(typeDeclaration)
+				.ifPresent(this::transform);
+
+		}
 		return true;
+	}
+
+	private boolean isSupportedClassDeclaration(TypeDeclaration typeDeclaration) {
+		if (typeDeclaration.isInterface()) {
+			return false;
+		}
+
+		if (typeDeclaration.getSuperclassType() != null) {
+			return false;
+		}
+
+		ASTNode scope = null;
+		if (typeDeclaration.isLocalTypeDeclaration()) {
+			scope = typeDeclaration.getParent()
+				.getParent();
+		}
+		if (scope == null) {
+			return false;
+		}
+
+		int modifiers = typeDeclaration.getModifiers();
+		if (Modifier.isFinal(modifiers)) {
+			return true;
+		}
+
+		SubclassesVisitor subclassesVisitor = new SubclassesVisitor(typeDeclaration);
+		scope.accept(subclassesVisitor);
+		return !subclassesVisitor.isSubclassExisting();
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -43,9 +75,10 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		List recordBodyDeclarations = recordDeclaration.bodyDeclarations();
 		analysisResult.getRecordBodyDeclarations()
-			.forEach(bodyDeclaration -> {
-				recordBodyDeclarations.add(astRewrite.createCopyTarget(bodyDeclaration));
-			});
+			.stream()
+			.map(astRewrite::createCopyTarget)
+			.forEach(recordBodyDeclarations::add);
+
 		astRewrite.replace(typeDeclarationToReplace, recordDeclaration, null);
 		onRewrite();
 	}

@@ -64,7 +64,7 @@ public class BodyDeclarationsAnalyzer {
 		List<SingleVariableDeclaration> canonicalConstructorParameters = ASTNodeUtil
 			.convertToTypedList(assumedCanonicalConstructor.parameters(), SingleVariableDeclaration.class);
 
-		if (!checkInstanceFieldsMatchingConstructorParameters(privateFinalInstanceFields,
+		if (!analyzeQualificationForRecordComponents(privateFinalInstanceFields,
 				canonicalConstructorParameters)) {
 			return Optional.empty();
 		}
@@ -87,7 +87,7 @@ public class BodyDeclarationsAnalyzer {
 				recordBodyDeclarations));
 	}
 
-	private boolean checkInstanceFieldsMatchingConstructorParameters(List<FieldDeclaration> instanceFields,
+	private boolean analyzeQualificationForRecordComponents(List<FieldDeclaration> instanceFields,
 			List<SingleVariableDeclaration> formalParameters) {
 
 		Map<String, ITypeBinding> fieldNameToTypeMap = new HashMap<>();
