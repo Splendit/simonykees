@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.switchexpression;
+package org.eu.jsparrow.rules.java16.textblock;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.AfterEach;

@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.switchexpression;
+package org.eu.jsparrow.rules.java16.switchexpression;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

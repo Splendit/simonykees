@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl;
+package org.eu.jsparrow.rules.java16;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.AfterEach;
