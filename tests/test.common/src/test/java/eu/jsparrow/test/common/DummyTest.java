@@ -6,6 +6,12 @@ import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.SingleRuleTest;
 
+/**
+ * At least one test is needed by tycho surefire plugin. 
+ * 
+ * @since 4.4.0
+ *
+ */
 public class DummyTest extends SingleRuleTest {
 
 	@Test
