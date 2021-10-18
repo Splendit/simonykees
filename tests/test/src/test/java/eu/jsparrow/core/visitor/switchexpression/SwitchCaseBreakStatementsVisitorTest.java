@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
+import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.rules.java16.switchexpression.SwitchCaseBreakStatementsVisitor;
 
 class SwitchCaseBreakStatementsVisitorTest extends UsesSimpleJDTUnitFixture {
