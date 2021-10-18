@@ -1,4 +1,4 @@
-package eu.jsparrow.core.util;
+package eu.jsparrow.common.util;
 
 import java.io.File;
 import java.util.ArrayList;

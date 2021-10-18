@@ -1,4 +1,4 @@
-package eu.jsparrow.core;
+package eu.jsparrow.common;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeAll;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.util.RulesTestUtil;
+import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RefactoringRule;
 
 public abstract class SingleRuleTest {

@@ -1,7 +1,7 @@
 package eu.jsparrow.core.rule.impl;
 
-import static eu.jsparrow.core.util.RulesTestUtil.addToClasspath;
-import static eu.jsparrow.core.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
+import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
+import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import eu.jsparrow.core.SingleRuleTest;
-import eu.jsparrow.core.util.RulesTestUtil;
+import eu.jsparrow.common.SingleRuleTest;
+import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 

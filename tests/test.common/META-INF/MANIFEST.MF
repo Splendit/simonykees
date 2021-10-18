@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: eu.jsparrow.test.common
+Bundle-ManifestVersion: 2
+Bundle-Name: jSparrow :: test common
+Bundle-SymbolicName: eu.jsparrow.test.common
+Bundle-Version: 4.4.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: Splendit IT-Consulting GmbH
+Require-Bundle: eu.jsparrow.rules.api,
+ javax.annotation;bundle-version="[1.2.0,2.0.0)",
+ org.apache.commons.lang3,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.jdt.launching,
+ org.junit,
+ org.junit.platform.commons,
+ org.junit.platform.engine,
+ org.opentest4j
+Export-Package: eu.jsparrow.common, 
+ eu.jsparrow.common.util
+Import-Package: eu.jsparrow.core.refactorer,
+ org.eclipse.jdt.core,
+ org.junit.jupiter.api,
+ org.junit.jupiter.api.function,
+ org.junit.jupiter.engine.execution,
+ org.junit.jupiter.params,
+ org.junit.jupiter.params.provider
