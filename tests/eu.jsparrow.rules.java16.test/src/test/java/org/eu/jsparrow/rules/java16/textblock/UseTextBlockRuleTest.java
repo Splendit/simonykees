@@ -1,4 +1,4 @@
-package eu.jsparrow.core.rule.impl;
+package org.eu.jsparrow.rules.java16.textblock;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
