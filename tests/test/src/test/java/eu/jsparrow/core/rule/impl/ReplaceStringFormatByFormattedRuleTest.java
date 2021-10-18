@@ -59,7 +59,7 @@ class ReplaceStringFormatByFormattedRuleTest extends SingleRuleTest {
 
 	@Test
 	void calculateEnabledForProject_shouldReturnTrue() throws Exception {
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_15);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, "15");
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
 	}

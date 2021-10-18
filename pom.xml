@@ -202,12 +202,12 @@
 		<repository>
 			<id>2021-06-updates</id>
 			<layout>p2</layout>
-			<url>http://download.eclipse.org/eclipse/updates/4.20</url>
+			<url>http://download.eclipse.org/eclipse/updates/4.16</url>
 		</repository>
 		<repository>
-			<id>2021-06</id>
+			<id>2020-06</id>
 			<layout>p2</layout>
-			<url>http://download.eclipse.org/releases/2021-06/</url>
+			<url>http://download.eclipse.org/releases/2020-06/</url>
 		</repository>
 		<repository>
 			<id>orbit</id>

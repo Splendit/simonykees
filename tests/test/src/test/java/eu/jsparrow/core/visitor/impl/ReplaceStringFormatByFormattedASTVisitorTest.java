@@ -12,7 +12,7 @@ class ReplaceStringFormatByFormattedASTVisitorTest extends UsesSimpleJDTUnitFixt
 
 	@BeforeEach
 	public void setUp() {
-		setJavaVersion(JavaCore.VERSION_15);
+		setJavaVersion("15");
 		setVisitor(new ReplaceStringFormatByFormattedASTVisitor());
 	}
 

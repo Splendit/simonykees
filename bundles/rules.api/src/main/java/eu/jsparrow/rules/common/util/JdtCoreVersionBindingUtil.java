@@ -83,14 +83,14 @@ public class JdtCoreVersionBindingUtil {
 			 * 
 			 * @since 3.26.0 -> 21-06
 			 */
-			return AST.JLS16;
+			return 16;
 		} else if (isJava15Supported(jdtVersion)) {
 			/*
 			 * @since 3.25.0 -> 21-03
 			 * 
 			 * @since 3.24.0 -> 20-12
 			 */
-			return AST.JLS15;
+			return 15;
 		} else if (isJava14Supported(jdtVersion)) {
 			/*
 			 * @since 3.23.0 -> 20-09
