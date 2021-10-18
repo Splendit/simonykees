@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.rules.java10.LocalVariableTypeInferenceASTVisitor;
 
 @SuppressWarnings("nls")

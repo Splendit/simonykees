@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl;
+package eu.jsparrow.common;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 
-import eu.jsparrow.core.util.RulesTestUtil;
+import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.jdtunit.JdtUnitException;
 import eu.jsparrow.jdtunit.JdtUnitFixtureClass;
 import eu.jsparrow.jdtunit.JdtUnitFixtureProject;
