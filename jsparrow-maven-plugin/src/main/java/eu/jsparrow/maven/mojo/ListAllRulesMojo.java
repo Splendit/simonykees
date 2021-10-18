@@ -40,7 +40,7 @@ public class ListAllRulesMojo extends AbstractMojo {
 		Log log = getLog();
 		
 		// Since 3.10.0, jSparrow Maven Plugin requires JDK 11.
-		if (!JavaVersion.isAtLeastJava11()) {
+		if (!JavaVersion.isJava8or11()) {
 			log.warn(Messages.ListAllRulesMojo_supportJDK11);
 			throw new MojoExecutionException(Messages.ListAllRulesMojo_supportJDK11);
 		}
