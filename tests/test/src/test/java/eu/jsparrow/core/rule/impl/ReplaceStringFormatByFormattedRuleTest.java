@@ -9,6 +9,7 @@ import java.time.Duration;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.SingleRuleTest;
@@ -16,6 +17,7 @@ import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
+@Disabled
 class ReplaceStringFormatByFormattedRuleTest extends SingleRuleTest {
 
 	private ReplaceStringFormatByFormattedRule rule;

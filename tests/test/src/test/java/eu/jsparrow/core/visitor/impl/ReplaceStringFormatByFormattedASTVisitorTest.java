@@ -1,13 +1,14 @@
 package eu.jsparrow.core.visitor.impl;
 
-import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
+@Disabled
 class ReplaceStringFormatByFormattedASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
 	@BeforeEach
