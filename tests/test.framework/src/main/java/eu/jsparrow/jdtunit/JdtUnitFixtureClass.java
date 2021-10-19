@@ -437,8 +437,8 @@ public class JdtUnitFixtureClass {
 	private void createCompilationUnit() throws JdtUnitException {
 		compilationUnit = new CompilationUnitBuilder(packageFragment).setName(className + ".java")
 			.build();
-
-		ASTParser parser = ASTParser.newParser(AST.JLS16);
+		int astLevel = JdtCoreVersionBindingUtil.findJLSLevel(JdtCoreVersionBindingUtil.findCurrentJDTCoreVersion());
+		ASTParser parser = ASTParser.newParser(astLevel);
 		parser.setSource(compilationUnit);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setResolveBindings(true);

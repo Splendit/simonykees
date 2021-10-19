@@ -4,9 +4,6 @@
    <feature url="features/eu.jsparrow.photon.feature_0.0.0.jar" id="eu.jsparrow.photon.feature" version="0.0.0">
       <category name="photon"/>
    </feature>
-   <feature id="eu.jsparrow.202106.feature">
-      <category name="photon"/>
-   </feature>
    <category-def name="photon" label="jSparrow for Photon and above">
       <description>
          Eclipse plugins by Splendit IT-Consulting GmbH
