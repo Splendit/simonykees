@@ -41,20 +41,32 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 			return false;
 		}
 
-		ASTNode scope = null;
-		if (typeDeclaration.isLocalTypeDeclaration()) {
-			scope = typeDeclaration.getParent()
-				.getParent();
-		}
-		if (scope == null) {
-			return false;
-		}
-
 		int modifiers = typeDeclaration.getModifiers();
-		if (Modifier.isFinal(modifiers)) {
-			return true;
+		if (typeDeclaration.getParent() == getCompilationUnit()) {
+			return Modifier.isFinal(modifiers);
 		}
 
+		if (typeDeclaration.isLocalTypeDeclaration()) {
+			if (Modifier.isFinal(modifiers)) {
+				return true;
+			}
+			return isEffectivelyFinal(typeDeclaration, typeDeclaration.getParent()
+				.getParent());
+		}
+
+		if (typeDeclaration.getLocationInParent() == TypeDeclaration.BODY_DECLARATIONS_PROPERTY
+				&& Modifier.isStatic(modifiers)) {
+			if (Modifier.isFinal(modifiers)) {
+				return true;
+			}
+			return Modifier.isPrivate(modifiers) && isEffectivelyFinal(typeDeclaration, getCompilationUnit());
+		}
+
+		return false;
+
+	}
+
+	private boolean isEffectivelyFinal(TypeDeclaration typeDeclaration, ASTNode scope) {
 		SubclassesVisitor subclassesVisitor = new SubclassesVisitor(typeDeclaration);
 		scope.accept(subclassesVisitor);
 		return !subclassesVisitor.isSubclassExisting();
