@@ -21,6 +21,7 @@ import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_START_TIME;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.USER_DIR;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.USE_DEFAULT_CONFIGURATION;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.SELECTED_SOURCES;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.REPORT_DESTINATION_PATH;
 
 import java.io.File;
 import java.util.HashMap;
@@ -97,6 +98,9 @@ public class MavenAdapter {
 
 		setProjectIds(projects);
 		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
+		if(parameters.getReportDestinationPath() != null) {
+			configuration.put(REPORT_DESTINATION_PATH, parameters.getReportDestinationPath());
+		}
 
 		WorkingDirectory workingDirectory = setUpConfiguration(parameters);
 		String rootProjectIdentifier = MavenProjectUtil.findProjectIdentifier(rootProject);

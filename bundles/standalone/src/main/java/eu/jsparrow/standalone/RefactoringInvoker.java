@@ -67,6 +67,7 @@ public class RefactoringInvoker {
 	private static final String ROOT_PROJECT_BASE_PATH = "ROOT.PROJECT.BASE.PATH"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_OVERRIDE = "CONFIG.FILE.OVERRIDE"; //$NON-NLS-1$
 	private static final String FORMATTING_FILE = "formatting.file.path"; //$NON-NLS-1$
+	private static final String REPORT_DESTIATION_PATH = "REPORT.DESTINATION.PATH"; //$NON-NLS-1$
 	private static final String SELECTED_SOURCES = "SELECTED.SOURCES"; //$NON-NLS-1$
 	public static final String STATISTICS_START_TIME = "STATISTICS_START_TIME"; //$NON-NLS-1$
 	public static final String STATISTICS_REPO_OWNER = "STATISTICS_REPO_OWNER"; //$NON-NLS-1$
@@ -235,7 +236,7 @@ public class RefactoringInvoker {
 
 	private void printStatistics(BundleContext context, Map<StandaloneConfig, List<RefactoringRule>> rules,
 			JsparrowMetric metricData) {
-		String reportOutputPath = context.getProperty(ROOT_PROJECT_BASE_PATH);
+		String reportOutputPath = context.getProperty(REPORT_DESTIATION_PATH);
 		String jsonPath = String.join(File.separator, reportOutputPath, "jSparrowReport.json"); //$NON-NLS-1$
 		JsonUtil.writeJSON(metricData, jsonPath);
 
