@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -75,15 +74,24 @@ public class BodyDeclarationsAnalyzer {
 			.map(SimpleName::getIdentifier)
 			.collect(Collectors.toList());
 
-		if (canRemoveCanonicalConstructor(assumedCanonicalConstructor, componentIdentifiers)) {
-			methods.remove(assumedCanonicalConstructor);
-		}
-
 		RecordGettersAnalyzer recordGettersAnalyzer = new RecordGettersAnalyzer();
 		if (!recordGettersAnalyzer.analyzeRecordGetters(methods, canonicalConstructorParameters)) {
 			return Optional.empty();
 		}
 		methods.removeAll(recordGettersAnalyzer.getRecordGetterstoRemove());
+
+		if (canRemoveCanonicalConstructor(assumedCanonicalConstructor, componentIdentifiers)) {
+			methods.remove(assumedCanonicalConstructor);
+		}
+		methods.stream()
+			.filter(this::isEqualsMethodToRemove)
+			.findFirst()
+			.ifPresent(methods::remove);
+
+		methods.stream()
+			.filter(this::isHashCodeMethodToRemove)
+			.findFirst()
+			.ifPresent(methods::remove);
 
 		ArrayList<BodyDeclaration> recordBodyDeclarations = new ArrayList<>();
 		recordBodyDeclarations.addAll(staticFields);
@@ -195,6 +203,32 @@ public class BodyDeclarationsAnalyzer {
 		String fieldNameIdentifier = fieldAccess.getName()
 			.getIdentifier();
 		return fieldNameIdentifier.equals(expectedIdentifier);
+	}
+
+	private boolean isEqualsMethodToRemove(MethodDeclaration methodDeclaration) {
+		if (!methodDeclaration.getName()
+			.getIdentifier()
+			.equals("equals")) { //$NON-NLS-1$
+			return false;
+		}
+		List<SingleVariableDeclaration> parameters = ASTNodeUtil.convertToTypedList(methodDeclaration.parameters(),
+				SingleVariableDeclaration.class);
+		if (parameters.size() != 1) {
+			return false;
+		}
+		SingleVariableDeclaration parameter = parameters.get(0);
+		return ClassRelationUtil.isContentOfType(parameter.getType()
+			.resolveBinding(), java.lang.Object.class.getName());
+	}
+
+	private boolean isHashCodeMethodToRemove(MethodDeclaration methodDeclaration) {
+		if (!methodDeclaration.getName()
+			.getIdentifier()
+			.equals("hashCode")) { //$NON-NLS-1$
+			return false;
+		}
+		return methodDeclaration.parameters()
+			.isEmpty();
 
 	}
 }
