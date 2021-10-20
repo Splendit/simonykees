@@ -79,11 +79,9 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 			findParentStreamCollectInvocation(node).ifPresent(this::transform);
 
 		} else if (COLLECTORS_TO_LIST.isSignatureMatching(node, GET_PARAMETER_TYPES)) {
-			MethodInvocation parentStreamCollectInvocation = findParentStreamCollectInvocation(node).orElse(null);
-			if (parentStreamCollectInvocation != null
-					&& analyzeStreamCollectUsingCollectorsToList(parentStreamCollectInvocation)) {
-				transform(parentStreamCollectInvocation);
-			}
+			findParentStreamCollectInvocation(node)
+				.filter(this::analyzeStreamCollectUsingCollectorsToList)
+				.ifPresent(this::transform);
 		}
 		return true;
 	}

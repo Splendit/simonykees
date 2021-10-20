@@ -11,6 +11,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * 
+ * @since 4.4.0
+ *
+ */
 @SuppressWarnings("nls")
 public class NotModifiedListArgumentAnalyzer {
 
@@ -21,7 +26,10 @@ public class NotModifiedListArgumentAnalyzer {
 	private static final List<String> SAFE_COLLECTION_METHOD_NAMES = Collections.unmodifiableList(Arrays.asList(
 			"addAll", "containsAll", "removeAll", "retainAll"));
 
-	static boolean isKeepingListArgumentUnmodified(MethodInvocation invocationAcceptingList) {
+	private NotModifiedListArgumentAnalyzer() {
+		// hiding implicit default constructor
+	}
+
 	static boolean keepsListArgumentUnmodified(MethodInvocation invocationAcceptingList) {
 		IMethodBinding methodBinding = invocationAcceptingList.resolveMethodBinding();
 		if (methodBinding == null) {
@@ -36,15 +44,15 @@ public class NotModifiedListArgumentAnalyzer {
 		}
 
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-		if (methodName.equals("copyOf")
-				&& (ClassRelationUtil.isContentOfType(declaringClass, java.util.List.class.getName()) ||
-						ClassRelationUtil.isContentOfType(declaringClass, java.util.Set.class.getName()))) {
-			ITypeBinding[] parameterTypes = methodBinding.getMethodDeclaration()
-				.getParameterTypes();
+		boolean isListOrSet = ClassRelationUtil.isContentOfTypes(declaringClass,
+				Arrays.asList(java.util.List.class.getName(), java.util.Set.class.getName()));
+		if (methodName.equals("copyOf") && isListOrSet) {
+			IMethodBinding methodDeclaration = methodBinding.getMethodDeclaration();
+			ITypeBinding[] parameterTypes = methodDeclaration.getParameterTypes();
 			return parameterTypes.length == 1
 					&& ClassRelationUtil.isContentOfType(parameterTypes[0], Collection.class.getName());
-		}		
-		
+		}
+
 		if (ClassRelationUtil.isContentOfType(declaringClass, java.util.Collections.class.getName())) {
 			return SAFE_COLLECTIONS_METHOD_NAMES.contains(methodName);
 		}
@@ -54,12 +62,6 @@ public class NotModifiedListArgumentAnalyzer {
 			return SAFE_COLLECTION_METHOD_NAMES.contains(methodName);
 		}
 
-
 		return false;
 	}
-
-	private NotModifiedListArgumentAnalyzer() {
-		// hiding implicit default constructor
-	}
-
 }
