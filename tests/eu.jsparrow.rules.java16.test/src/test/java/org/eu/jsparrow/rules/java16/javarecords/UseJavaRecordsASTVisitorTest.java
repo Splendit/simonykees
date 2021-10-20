@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.impl;
+package org.eu.jsparrow.rules.java16.javarecords;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -10,6 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.jdtunit.JdtUnitException;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
