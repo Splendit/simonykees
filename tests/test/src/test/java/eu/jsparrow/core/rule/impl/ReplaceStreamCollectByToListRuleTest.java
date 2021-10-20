@@ -41,8 +41,11 @@ class ReplaceStreamCollectByToListRuleTest extends SingleRuleTest {
 				contains(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(2)));
 		assertThat(description.getDescription(),
-				equalTo("Java 16 introduced Stream.toList() for simplifying the conversion of a stream into a list." +
-						" For example, stream.collect(Collectors.toUnmodifiableList()) can be transformed to stream.toList()."));
+				equalTo("Java 16 introduced Stream.toList() as a shorthand converting a Stream into an unmodifiable List. "
+						+ "This rule replaces invocations of stream.collect(Collectors.toUnmodifiableList()) by stream.toList(). "
+						+ "In case Collectors.toList() is used as a collector, the rule makes additional verifications whether the "
+						+ "generated list is modified by the context or not. In the latter case stream.collect(Collectors.toList()) "
+						+ "is also replaced by stream.toList()."));
 	}
 
 	@Test
