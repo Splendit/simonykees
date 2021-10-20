@@ -8,8 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
-@SuppressWarnings("nls")
-public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixture {
+class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixture {
 
 	private static final String TEST_METHOD_PARAMETERS = ""
 			+ "Collection<String> collection"
@@ -22,24 +21,25 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 			"				";
 
 	@BeforeEach
-	public void setUpDefaultVisitor() throws Exception {
+	void setUpDefaultVisitor() throws Exception {
 		setDefaultVisitor(new ReplaceStreamCollectByToListASTVisitor());
-	}
-
-	@AfterEach
-	public void tearDown() throws Exception {
-		fixtureProject.clear();
-	}
-
-	@Test
-	public void visit_CollectorsToUnmodifiableList_shouldTransform() throws Exception {
-
 		defaultFixture.addImport(java.util.Collection.class.getName());
+		defaultFixture.addImport(java.util.Collections.class.getName());
 		defaultFixture.addImport(java.util.List.class.getName());
 		defaultFixture.addImport(java.util.function.Predicate.class.getName());
 		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
 		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+		defaultFixture.addImport(java.util.stream.Collector.class.getName());
+		defaultFixture.addImport(java.util.Arrays.class.getName());
+	}
 
+	@AfterEach
+	void tearDown() throws Exception {
+		fixtureProject.clear();
+	}
+
+	@Test
+	void visit_CollectorsToUnmodifiableList_shouldTransform() throws Exception {
 		String original = "" +
 				"	List<String> testCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		return " + METHOD_INVOCATION_EXPRESSION + ".collect(Collectors.toUnmodifiableList());\n" +
@@ -54,15 +54,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_UnmodifiableListFromCollectorsToList_shouldTransform() throws Exception {
-
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.Collections.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_UnmodifiableListFromCollectorsToList_shouldTransform() throws Exception {
 		String original = "" +
 				"	List<String> testStreamCollect (" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		return Collections.unmodifiableList (" +
@@ -79,13 +71,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_CollectFromCollectorsToListAsEnhancedForExpression_shouldTransform() throws Exception {
-
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_CollectFromCollectorsToListAsEnhancedForExpression_shouldTransform() throws Exception {
 		String original = "" +
 				"	void testStreamCollect (" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		for (String s : " + METHOD_INVOCATION_EXPRESSION + ".collect(Collectors.toList())" + ") {\n" +
@@ -102,12 +88,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_SizeOfCollectFromCollectorsToList_shouldTransform() throws Exception {
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_SizeOfCollectFromCollectorsToList_shouldTransform() throws Exception {
 		String original = "" +
 				"	int testStreamCollect (" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		return " + METHOD_INVOCATION_EXPRESSION + ".collect(Collectors.toList()).size();\n" +
@@ -122,14 +103,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_CollectCollectorsToListAsVariableInitializer_shouldTransform() throws Exception {
-
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_CollectCollectorsToListAsVariableInitializer_shouldTransform() throws Exception {
 		String original = "" +
 				"	void testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		List<String> list = " +
@@ -146,14 +120,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_CollectCollectorsToListAsAssignmentRightHandSide_shouldTransform() throws Exception {
-
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_CollectCollectorsToListAsAssignmentRightHandSide_shouldTransform() throws Exception {
 		String original = "" +
 				"	void testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		List<String> list = null;\n" +
@@ -170,14 +137,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_UnmodifiableListFromListVariable_shouldTransform() throws Exception {
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.Collections.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_UnmodifiableListFromListVariable_shouldTransform() throws Exception {
 		String original = "" +
 				"	List<String> testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		List<String> list = " + METHOD_INVOCATION_EXPRESSION + ".collect(Collectors.toList());\n" +
@@ -210,13 +170,8 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 			"Collections.unmodifiableCollection(listCopy)",
 			"Collections.unmodifiableList(listCopy)"
 	})
-	public void visit_ArgumentOfStaticCollectionsMethod_shouldTransform(String collectionsMethodInvocation)
+	void visit_ArgumentOfStaticCollectionsMethod_shouldTransform(String collectionsMethodInvocation)
 			throws Exception {
-
-		defaultFixture.addImport(java.util.Arrays.class.getName());
-		defaultFixture.addImport(java.util.Collections.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
 
 		String original = "" +
 				"	void testStreamCollect() {\n" +
@@ -245,13 +200,8 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 			"list.removeAll(listCopy)",
 			"list.retainAll(listCopy)"
 	})
-	public void visit_ArgumentOfCollectionMethod_shouldTransform(String listMethodInvocation)
+	void visit_ArgumentOfCollectionMethod_shouldTransform(String listMethodInvocation)
 			throws Exception {
-
-		defaultFixture.addImport(java.util.Arrays.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
 		String original = "" +
 				"	void testWithListMethod() {\n" +
 				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
@@ -270,13 +220,8 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_ArgumentOfEquals_shouldTransform()
+	void visit_ArgumentOfEquals_shouldTransform()
 			throws Exception {
-
-		defaultFixture.addImport(java.util.Arrays.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
 		String original = "" +
 				"	void testWithListMethod() {\n" +
 				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
@@ -295,13 +240,8 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_ArgumentOfUseList_shouldNotTransform()
+	void visit_ArgumentOfUseList_shouldNotTransform()
 			throws Exception {
-
-		defaultFixture.addImport(java.util.Arrays.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
 		String original = "" +
 				"	void testWithUseList() {\n" +
 				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
@@ -316,13 +256,8 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_ArgumentOfUnresolvedMethod_shouldNotTransform()
+	void visit_ArgumentOfUnresolvedMethod_shouldNotTransform()
 			throws Exception {
-
-		defaultFixture.addImport(java.util.Arrays.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
 		String original = "" +
 				"	void testWithUseList() {\n" +
 				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
@@ -334,14 +269,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_CollectCollectorsToListToArray_shouldTransform() throws Exception {
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.Collections.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_CollectCollectorsToListToArray_shouldTransform() throws Exception {
 		String original = "" +
 				"	void testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		String[] stringArray = " + METHOD_INVOCATION_EXPRESSION
@@ -358,14 +286,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_CollectCollectorsToListSublist_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.Collections.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_CollectCollectorsToListSublist_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		List<String> sublist = " + METHOD_INVOCATION_EXPRESSION
@@ -399,12 +320,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 			"try { listCopy.wait(1000L); } catch (Exception exception) { }",
 			"try { listCopy.wait(1000L, 100); } catch (Exception exception) { }"
 	})
-	public void visit_InvocationOfMethodOnListVariable_shouldTransform(String methodInvocationOnList) throws Exception {
-
-		defaultFixture.addImport(java.util.Arrays.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_InvocationOfMethodOnListVariable_shouldTransform(String methodInvocationOnList) throws Exception {
 		String original = "" +
 				"	void testMethodInvocationsOnList() {" +
 				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
@@ -445,13 +361,8 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 			"listCopy.subList(0, 1);",
 			"listCopy.getClass();"
 	})
-	public void visit_InvocationOfMethodOnListVariable_shouldNotTransform(String methodInvocationOnList)
+	void visit_InvocationOfMethodOnListVariable_shouldNotTransform(String methodInvocationOnList)
 			throws Exception {
-
-		defaultFixture.addImport(java.util.Arrays.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
 		String original = "" +
 				"	void testMethodInvocationsOnList() {" +
 				"		List<String> list = Arrays.asList(\"1\", \"2\", \"3\", \"4\");\n" +
@@ -464,14 +375,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_ListVariableAsEnhancedLoopExpression_shouldTransform() throws Exception {
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.Collections.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_ListVariableAsEnhancedLoopExpression_shouldTransform() throws Exception {
 		String original = "" +
 				"	void testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		List<String> list = " + METHOD_INVOCATION_EXPRESSION + ".collect(Collectors.toList());\n" +
@@ -491,9 +395,8 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_CollectInvocationWithoutExpression_shouldTransform() throws Exception {
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
+	void visit_CollectInvocationWithoutExpression_shouldTransform() throws Exception {
+		
 		defaultFixture.addImport(java.util.stream.Stream.class.getName());
 
 		String original = "" +
@@ -515,13 +418,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_ReturnListVariableFromCollectingToList_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_ReturnListVariableFromCollectingToList_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	List<String> testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		List<String> list = " + METHOD_INVOCATION_EXPRESSION + ".collect(Collectors.toList());\n" +
@@ -532,14 +429,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_AssignCollectCollectorsToListToField_shouldNotTransform() throws Exception {
-
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_AssignCollectCollectorsToListToField_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	List<String> list;\n" +
 				"\n" +
@@ -551,14 +441,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_AssignCollectCollectorsToListToThisList_shouldNotTransform() throws Exception {
-
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_AssignCollectCollectorsToListToThisList_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	List<String> list;\n" +
 				"\n" +
@@ -570,14 +453,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_ReturnCollectCollectorsToList_shouldNotTransform() throws Exception {
-
-		defaultFixture.addImport(java.util.Collection.class.getName());
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.function.Predicate.class.getName());
-		defaultFixture.addImport(java.util.function.UnaryOperator.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_ReturnCollectCollectorsToList_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	List<String> testStreamCollect(" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		return " + METHOD_INVOCATION_EXPRESSION + ".collect(Collectors.toList());\n" +
@@ -587,11 +463,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_ReturnCollectorsToUnmodifiableList_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collector.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_ReturnCollectorsToUnmodifiableList_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	List<String> returnCollectorsToUnmodifiableList (" + TEST_METHOD_PARAMETERS + ") {\n" +
 				"		return Collectors.toUnmodifiableList();\n" +
@@ -601,11 +473,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_CollectorsToUnmodifiableListAsArgument_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collector.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_CollectorsToUnmodifiableListAsArgument_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void testUseCollectorToUnmodifiableList() {\n"
 				+ "		useCollector(Collectors.toUnmodifiableList());\n"
@@ -619,11 +487,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_UnresolvedCollectMethod_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collector.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_UnresolvedCollectMethod_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	List<String> testCollectCollectorsToList() {\n"
 				+ "		return collect(Collectors.toList());\n"
@@ -632,11 +496,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_CollectNotStreamMethod_shouldNotTransform() throws Exception {
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collector.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_CollectNotStreamMethod_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void testCollectNozByStream() {\n"
 				+ "		collect(Collectors.toUnmodifiableList());\n"
@@ -648,11 +508,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_ChangingElementTypeInVariableInitializer_shouldNotTransform() throws Exception {
-
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_ChangingElementTypeInVariableInitializer_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void cornerCaseWithTypeArguments(List<Object> objects) {\n"
 				+ "		List<Object> objectsToString = objects.stream().map(Object::toString).collect(Collectors.toList());\n"
@@ -662,11 +518,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_ChangingElementTypeInAssignmentRightHandSide_shouldNotTransform() throws Exception {
-
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_ChangingElementTypeInAssignmentRightHandSide_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	void cornerCaseWithTypeArguments(List<Object> objects) {\n"
 				+ "		List<Object> objectsToString = null;\n"
@@ -677,11 +529,7 @@ public class ReplaceStreamCollectByToListASTVisitorTest extends UsesJDTUnitFixtu
 	}
 
 	@Test
-	public void visit_ChangingElementTypeInObjectVariableInitializer_shouldTransform() throws Exception {
-
-		defaultFixture.addImport(java.util.List.class.getName());
-		defaultFixture.addImport(java.util.stream.Collectors.class.getName());
-
+	void visit_ChangingElementTypeInObjectVariableInitializer_shouldTransform() throws Exception {
 		String original = "" +
 				"	void cornerCaseWithObjectVariableInitialization(List<Object> objects) {\n"
 				+ "		Object o = objects.stream().map(Object::toString).collect(Collectors.toList());\n"
