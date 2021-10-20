@@ -121,7 +121,7 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 
 		if (collectInvocation.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
 			return NotModifiedListArgumentAnalyzer
-				.isKeepingListArgumentUnmodified((MethodInvocation) collectInvocation.getParent());
+				.keepsListArgumentUnmodified((MethodInvocation) collectInvocation.getParent());
 		}
 
 		if (collectInvocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
@@ -188,7 +188,7 @@ public class ReplaceStreamCollectByToListASTVisitor extends AbstractASTRewriteAS
 	private boolean isSupportedVariableUsage(SimpleName usage) {
 		if (usage.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
 			return NotModifiedListArgumentAnalyzer
-				.isKeepingListArgumentUnmodified((MethodInvocation) usage.getParent());
+				.keepsListArgumentUnmodified((MethodInvocation) usage.getParent());
 		}
 
 		if (usage.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {

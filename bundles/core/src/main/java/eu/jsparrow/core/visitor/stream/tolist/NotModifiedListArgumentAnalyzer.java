@@ -22,6 +22,7 @@ public class NotModifiedListArgumentAnalyzer {
 			"addAll", "containsAll", "removeAll", "retainAll"));
 
 	static boolean isKeepingListArgumentUnmodified(MethodInvocation invocationAcceptingList) {
+	static boolean keepsListArgumentUnmodified(MethodInvocation invocationAcceptingList) {
 		IMethodBinding methodBinding = invocationAcceptingList.resolveMethodBinding();
 		if (methodBinding == null) {
 			return false;
