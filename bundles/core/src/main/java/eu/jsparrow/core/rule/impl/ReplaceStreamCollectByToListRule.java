@@ -3,8 +3,6 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.eclipse.jdt.core.JavaCore;
-
 import eu.jsparrow.core.visitor.stream.tolist.ReplaceStreamCollectByToListASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
@@ -35,6 +33,6 @@ public class ReplaceStreamCollectByToListRule
 
 	@Override
 	protected String provideRequiredJavaVersion() {
-		return JavaCore.VERSION_16;
+		return "16"; //$NON-NLS-1$
 	}
 }
