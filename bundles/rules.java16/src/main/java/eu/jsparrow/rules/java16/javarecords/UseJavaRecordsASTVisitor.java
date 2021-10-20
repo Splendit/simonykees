@@ -16,9 +16,6 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	/**
-	 * Prototype with incomplete validation
-	 */
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 
@@ -47,11 +44,14 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		if (typeDeclaration.isLocalTypeDeclaration()) {
-			if (Modifier.isFinal(modifiers)) {
-				return true;
+			if (Modifier.isFinal(modifiers) ||
+					isEffectivelyFinal(typeDeclaration, typeDeclaration.getParent()
+						.getParent())) {
+				NonStaticReferencesVisitor nonStaticReferencesVisitor = new NonStaticReferencesVisitor(typeDeclaration);
+				typeDeclaration.accept(nonStaticReferencesVisitor);
+				return !nonStaticReferencesVisitor.isUnsupportedReferenceExisting();
 			}
-			return isEffectivelyFinal(typeDeclaration, typeDeclaration.getParent()
-				.getParent());
+			return false;
 		}
 
 		if (typeDeclaration.getLocationInParent() == TypeDeclaration.BODY_DECLARATIONS_PROPERTY
@@ -61,9 +61,7 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 			}
 			return Modifier.isPrivate(modifiers) && isEffectivelyFinal(typeDeclaration, getCompilationUnit());
 		}
-
 		return false;
-
 	}
 
 	private boolean isEffectivelyFinal(TypeDeclaration typeDeclaration, ASTNode scope) {
