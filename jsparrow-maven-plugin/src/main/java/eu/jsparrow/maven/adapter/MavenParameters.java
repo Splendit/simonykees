@@ -30,15 +30,18 @@ public class MavenParameters {
 	private boolean sendStatistics;
 	private String selectedSources;
 	private String reportDestinationPath;
+	private String tempWorkspaceLocation;
 
 	public MavenParameters(String mode, String license, String url, String profile, boolean useDefault,
-			StatisticsMetadata statisticsMetadata, boolean sendStatistics, String selectedSources) {
+			StatisticsMetadata statisticsMetadata, boolean sendStatistics, String selectedSources,
+			String tempWorkspaceLocation) {
 		this(mode, license, url);
 		this.profile = profile;
 		this.useDefaultConfig = useDefault;
 		this.statisticsMetadata = statisticsMetadata;
 		this.sendStatistics = sendStatistics;
 		this.selectedSources = selectedSources;
+		this.tempWorkspaceLocation = tempWorkspaceLocation;
 	}
 
 	public MavenParameters(String mode, String license, String url) {
@@ -120,5 +123,9 @@ public class MavenParameters {
 
 	public String getReportDestinationPath() {
 		return this.reportDestinationPath;
+	}
+
+	public String getTempWorkspaceLocation() {
+		return this.tempWorkspaceLocation;
 	}
 }

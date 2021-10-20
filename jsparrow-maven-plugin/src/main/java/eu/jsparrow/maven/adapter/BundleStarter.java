@@ -136,6 +136,8 @@ public class BundleStarter {
 			String symbolicName = bundle.getSymbolicName();
 			if (symbolicName.startsWith(ORG_APACHE_FELIX_SCR)) {
 				try {
+					String message = String.format("Starting bundle %s:%s [%d]", symbolicName, bundle.getVersion(), bundle.getState()); //$NON-NLS-1$
+					log.debug(message);
 					bundle.start();
 				} catch (BundleException e) {
 					log.debug(e.getMessage(), e);

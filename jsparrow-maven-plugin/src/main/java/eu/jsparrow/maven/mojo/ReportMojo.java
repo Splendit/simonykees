@@ -66,6 +66,16 @@ public class ReportMojo extends AbstractMojo {
 	private File formatterFile;
 
 	/**
+	 * Specify the location for the temporal Eclipse workspace to import the
+	 * project during jSparrow execution. This should an absolute path of
+	 * an empty directory with read, write, and execute permissions. If not
+	 * provided, jSparrow will use the Java temp directory for creating the
+	 * workspace.
+	 */
+	@Parameter(defaultValue = "", property = "tempWorkspace")
+	private String tempWorkspace;
+
+	/**
 	 * Selected profile. Overrides the settings in the configuration file.
 	 */
 	@Parameter(defaultValue = "", property = "profile")
@@ -138,7 +148,7 @@ public class ReportMojo extends AbstractMojo {
 			.toString() : startTime;
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
-				defaultConfiguration, statisticsMetadata, sendStatistics, selectedSources);
+				defaultConfiguration, statisticsMetadata, sendStatistics, selectedSources, tempWorkspace);
 		String destinationPath = parameters.computeValidateReportDestinationPath(project, destination, log);
 		parameters.setReportDestinationPath(destinationPath);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);

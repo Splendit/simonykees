@@ -2,6 +2,12 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.Path;
+
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
@@ -414,6 +420,11 @@ public class RefactoringInvoker {
 			.getRoot()
 			.getLocation()
 			.toFile();
+		logger.debug("Workspace root directory: {}.", workspaceRoot.getPath()); //$NON-NLS-1$
+		logger.debug("Workspace directory permissions: read: {}, write: {}, execute: {}.", //$NON-NLS-1$
+				workspaceRoot.canRead(), workspaceRoot.canWrite(), workspaceRoot.canExecute());
+		logWorkSpaceContent(workspaceRoot);
+
 		String folder = context.getProperty(ROOT_PROJECT_BASE_PATH);
 
 		List<IJavaProject> imported;
@@ -427,6 +438,21 @@ public class RefactoringInvoker {
 		logger.info(Messages.RefactoringInvoker_mavenProjectsImported);
 
 		return imported;
+	}
+
+	private void logWorkSpaceContent(File workspaceRoot) {
+		logger.debug("Workspace contents before importing the projects:"); //$NON-NLS-1$
+		try {
+			Files.walkFileTree(workspaceRoot.toPath(), new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					logger.debug(file.toString());
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		} catch (IOException e) {
+			logger.error("Cannot log workpsace contents", e); //$NON-NLS-1$
+		}
 	}
 
 	/**
@@ -511,7 +537,7 @@ public class RefactoringInvoker {
 		}
 
 		if (standaloneConfigs.isEmpty()) {
-			throw new StandaloneException(Messages.RefactoringInvoker_error_allModulesExcluded);
+			throw new StandaloneException(Messages.RefactoringInvoker_error_noModulesCouldBeFound);
 		}
 
 		logger.info(Messages.RefactoringInvoker_configurationLoaded);
