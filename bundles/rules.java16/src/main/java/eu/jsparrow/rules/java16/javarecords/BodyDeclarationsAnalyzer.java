@@ -78,7 +78,12 @@ public class BodyDeclarationsAnalyzer {
 		if (canRemoveCanonicalConstructor(assumedCanonicalConstructor, componentIdentifiers)) {
 			methods.remove(assumedCanonicalConstructor);
 		}
-		methods.removeAll(collectRecordGettersToRemove(methods, componentIdentifiers));
+
+		RecordGettersAnalyzer recordGettersAnalyzer = new RecordGettersAnalyzer();
+		if (!recordGettersAnalyzer.analyzeRecordGetters(methods, canonicalConstructorParameters)) {
+			return Optional.empty();
+		}
+		methods.removeAll(recordGettersAnalyzer.getRecordGetterstoRemove());
 
 		ArrayList<BodyDeclaration> recordBodyDeclarations = new ArrayList<>();
 		recordBodyDeclarations.addAll(staticFields);
@@ -178,7 +183,7 @@ public class BodyDeclarationsAnalyzer {
 		return parameterIdentifier.equals(expectedIdentifier);
 	}
 
-	private boolean isThisFieldAccessMatchingIdentifier(Expression expression, String expectedIdentifier) {
+	static boolean isThisFieldAccessMatchingIdentifier(Expression expression, String expectedIdentifier) {
 		if (expression.getNodeType() != ASTNode.FIELD_ACCESS) {
 			return false;
 		}
@@ -191,47 +196,5 @@ public class BodyDeclarationsAnalyzer {
 			.getIdentifier();
 		return fieldNameIdentifier.equals(expectedIdentifier);
 
-	}
-
-	private List<MethodDeclaration> collectRecordGettersToRemove(List<MethodDeclaration> methodDeclarations,
-			List<String> componentIdentifiers) {
-
-		ArrayList<MethodDeclaration> recordGettersToRemove = new ArrayList<>();
-		componentIdentifiers.forEach(identifier -> {
-			methodDeclarations.stream()
-				.filter(methodDeclaration -> isRecordGetterToRemove(methodDeclaration, identifier))
-				.findFirst()
-				.ifPresent(recordGettersToRemove::add);
-		});
-		return recordGettersToRemove;
-	}
-
-	private boolean isRecordGetterToRemove(MethodDeclaration methodDeclaration,
-			String componentIdentifier) {
-		if (!methodDeclaration.getName()
-			.getIdentifier()
-			.equals(componentIdentifier)) {
-			return false;
-		}
-		if (!methodDeclaration.parameters()
-			.isEmpty()) {
-			return false;
-		}
-		List<ReturnStatement> returnStatements = ASTNodeUtil.returnTypedList(methodDeclaration.getBody()
-			.statements(), ReturnStatement.class);
-		if (returnStatements.isEmpty()) {
-			return false;
-		}
-		ReturnStatement returnStatement = returnStatements.get(0);
-		Expression returnedExpression = returnStatement.getExpression();
-		if (returnedExpression == null) {
-			return false;
-		}
-
-		if (returnedExpression.getNodeType() == ASTNode.SIMPLE_NAME) {
-			return ((SimpleName) returnedExpression).getIdentifier()
-				.equals(componentIdentifier);
-		}
-		return isThisFieldAccessMatchingIdentifier(returnedExpression, componentIdentifier);
 	}
 }
