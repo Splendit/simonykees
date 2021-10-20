@@ -421,10 +421,10 @@ public class RefactoringInvoker {
 			.getLocation()
 			.toFile();
 		logger.debug("Workspace root directory: {}.", workspaceRoot.getPath()); //$NON-NLS-1$
-		logger.debug("Workspace directory permissions: read: {}, write: {}, execute: {}.",  //$NON-NLS-1$
+		logger.debug("Workspace directory permissions: read: {}, write: {}, execute: {}.", //$NON-NLS-1$
 				workspaceRoot.canRead(), workspaceRoot.canWrite(), workspaceRoot.canExecute());
 		logWorkSpaceContent(workspaceRoot);
-		
+
 		String folder = context.getProperty(ROOT_PROJECT_BASE_PATH);
 
 		List<IJavaProject> imported;
@@ -441,20 +441,18 @@ public class RefactoringInvoker {
 	}
 
 	private void logWorkSpaceContent(File workspaceRoot) {
-		logger.debug("Workspace contents:"); //$NON-NLS-1$
+		logger.debug("Workspace contents before importing the projects:"); //$NON-NLS-1$
 		try {
 			Files.walkFileTree(workspaceRoot.toPath(), new SimpleFileVisitor<Path>() {
-	            @Override
-	            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-	                logger.debug(file.toString());
-	                return FileVisitResult.CONTINUE;
-	            }
-	        });
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					logger.debug(file.toString());
+					return FileVisitResult.CONTINUE;
+				}
+			});
 		} catch (IOException e) {
 			logger.error("Cannot log workpsace contents", e); //$NON-NLS-1$
 		}
-
-		
 	}
 
 	/**

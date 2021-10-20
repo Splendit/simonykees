@@ -161,7 +161,12 @@ public class Messages extends NLS {
 	public static String MavenProjectImporter_collectingProjectInfo;
 	public static String MavenProjectImporter_createingJavaProjects;
 	public static String MavenProjectImporter_creatingSingleJavaProject;
+	public static String MavenProjectImporter_eclipseIProjectNotOpened;
+	public static String MavenProjectImporter_importedMavenProjectResults;
+	public static String MavenProjectImporter_importedProjectModel;
 	public static String MavenProjectImporter_importingMavenProject;
+	public static String MavenProjectImporter_javaProjectNotOpened;
+	public static String MavenProjectImporter_projectNatureIds;
 	public static String MavenProjectImporter_searchingMavenProjects;
 	public static String MavenProjectImporter_skippingJavaProjectCreation;
 	public static String MavenProjectImporter_startImport;
