@@ -1,23 +1,14 @@
 package org.eu.jsparrow.rules.java16.javarecords;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jface.text.BadLocationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.common.UsesJDTUnitFixture;
-import eu.jsparrow.jdtunit.JdtUnitException;
-import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.java16.javarecords.UseJavaRecordsASTVisitor;
 
 @SuppressWarnings("nls")
-public class UseJavaRecordsASTVisitorTest extends UsesJDTUnitFixture {
+public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 
 	@BeforeEach
 	public void setUp() {
@@ -122,19 +113,5 @@ public class UseJavaRecordsASTVisitorTest extends UsesJDTUnitFixture {
 				"	}";
 
 		assertChange(original, expected);
-	}
-
-	@Override
-	protected void assertChange(String actual, String expected)
-			throws JdtUnitException, JavaModelException, BadLocationException {
-		defaultFixture.addTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME, actual);
-		AbstractASTRewriteASTVisitor defaultVisitor = getDefaultVisitor();
-		defaultVisitor.setASTRewrite(defaultFixture.getAstRewrite());
-		defaultFixture.accept(defaultVisitor);
-
-		TypeDeclaration expectedNode = ASTNodeBuilder.createTypeDeclarationFromString(DEFAULT_TYPE_DECLARATION_NAME,
-				expected);
-		TypeDeclaration actualNode = defaultFixture.getTypeDeclaration();
-		assertEquals(expectedNode.toString(), actualNode.toString());
 	}
 }

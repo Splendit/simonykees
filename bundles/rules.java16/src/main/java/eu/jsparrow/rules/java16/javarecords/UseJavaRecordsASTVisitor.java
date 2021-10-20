@@ -4,11 +4,14 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -39,28 +42,62 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		int modifiers = typeDeclaration.getModifiers();
-		if (typeDeclaration.getParent() == getCompilationUnit()) {
-			return Modifier.isFinal(modifiers);
+		if (Modifier.isAbstract(modifiers)) {
+			return false;
+		}
+		
+		
+		if (typeDeclaration.getParent() == getCompilationUnit() && Modifier.isFinal(modifiers)) {
+			return true;
 		}
 
-		if (typeDeclaration.isLocalTypeDeclaration()) {
-			if (Modifier.isFinal(modifiers) ||
-					isEffectivelyFinal(typeDeclaration, typeDeclaration.getParent()
-						.getParent())) {
-				NonStaticReferencesVisitor nonStaticReferencesVisitor = new NonStaticReferencesVisitor(typeDeclaration);
-				typeDeclaration.accept(nonStaticReferencesVisitor);
-				return !nonStaticReferencesVisitor.isUnsupportedReferenceExisting();
+		TypeDeclarationStatement typeDeclarationStatement = ASTNodeUtil.getSpecificAncestor(typeDeclaration,
+				TypeDeclarationStatement.class);
+		if (typeDeclarationStatement != null) {
+			if (typeDeclaration.isLocalTypeDeclaration()) {
+				if (Modifier.isFinal(modifiers) ||
+						isEffectivelyFinal(typeDeclaration, typeDeclarationStatement.getParent())) {
+					NonStaticReferencesVisitor nonStaticReferencesVisitor = new NonStaticReferencesVisitor(
+							typeDeclaration);
+					typeDeclaration.accept(nonStaticReferencesVisitor);
+					return !nonStaticReferencesVisitor.isUnsupportedReferenceExisting();
+				}
+				return false;
+			}
+			if (Modifier.isStatic(modifiers)) {
+				if (Modifier.isFinal(modifiers)) {
+					return true;
+				}
+				return isEffectivelyFinal(typeDeclaration, typeDeclarationStatement.getParent());
+			}
+			return false;
+		}
+		
+		AnonymousClassDeclaration anonymousClassDeclaration = ASTNodeUtil.getSpecificAncestor(typeDeclaration, AnonymousClassDeclaration.class);
+		if(anonymousClassDeclaration != null) {
+			if (Modifier.isStatic(modifiers)) {
+				if (Modifier.isFinal(modifiers)) {
+					return true;
+				}
+				return isEffectivelyFinal(typeDeclaration, anonymousClassDeclaration);
 			}
 			return false;
 		}
 
-		if (typeDeclaration.getLocationInParent() == TypeDeclaration.BODY_DECLARATIONS_PROPERTY
-				&& Modifier.isStatic(modifiers)) {
+		if (typeDeclaration.getLocationInParent() == TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
+			if (!Modifier.isStatic(modifiers)) {
+				return false;
+			}
 			if (Modifier.isFinal(modifiers)) {
 				return true;
 			}
-			return Modifier.isPrivate(modifiers) && isEffectivelyFinal(typeDeclaration, getCompilationUnit());
+			if (!Modifier.isPrivate(modifiers)) {
+				return false;
+			}
+			return isEffectivelyFinal(typeDeclaration, getCompilationUnit());
 		}
+
+
 		return false;
 	}
 

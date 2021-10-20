@@ -1,0 +1,306 @@
+package org.eu.jsparrow.rules.java16.javarecords;
+
+import org.eclipse.jdt.core.JavaCore;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import eu.jsparrow.rules.java16.javarecords.UseJavaRecordsASTVisitor;
+
+@SuppressWarnings("nls")
+public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRecordsTest {
+
+	private static final String BODY_DECLARATIONS = ""
+			+ "			private final int x;\n"
+			+ "			private final int y;\n"
+			+ "\n"
+			+ "			Point(int x, int y) {\n"
+			+ "				this.x = x;\n"
+			+ "				this.y = y;\n"
+			+ "			}\n"
+			+ "\n"
+			+ "			public int x() {\n"
+			+ "				return x;\n"
+			+ "			}\n"
+			+ "\n"
+			+ "			public int y() {\n"
+			+ "				return y;\n"
+			+ "			}\n";
+
+	@BeforeEach
+	public void setUp() {
+		setDefaultVisitor(new UseJavaRecordsASTVisitor());
+		fixtureProject.setJavaVersion(JavaCore.VERSION_16);
+	}
+
+	@AfterEach
+	public void tearDown() throws Exception {
+		fixtureProject.clear();
+	}
+
+	@Test
+	public void visit_FinalLocalClassPoint_shouldTransform() throws Exception {
+		String original = "" +
+				"	public void methodWithLocalClassPoint() {\n"
+				+ "		final class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	public void methodWithLocalClassPoint() {\n" +
+				"		record Point(int x, int y) {\n" +
+				"		}\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_LocalClassPoint_shouldTransform() throws Exception {
+		String original = "" +
+				"	public void methodWithLocalClassPoint() {\n"
+				+ "		class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	public void methodWithLocalClassPoint() {\n" +
+				"		record Point(int x, int y) {\n" +
+				"		}\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_PrivateStaticFinalNestedClassPoint_shouldTransform() throws Exception {
+		String original = "" +
+				"	private static final class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "	}";
+
+		String expected = "" +
+				"	record Point(int x, int y) {\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_PrivateStaticNestedClassPoint_shouldTransform() throws Exception {
+		String original = "" +
+				"	private static class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "	}";
+
+		String expected = "" +
+				"	record Point(int x, int y) {\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_StaticFinalNestedClassPoint_shouldTransform() throws Exception {
+		String original = "" +
+				"	static final class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "	}";
+
+		String expected = "" +
+				"	record Point(int x, int y) {\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_InterfacePoint_shouldNotransform() throws Exception {
+		String original = "" +
+				"	interface IPoint {\n"
+				+ "		int x();\n"
+				+ "		int y();\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_AbstractStaticNestedClassPoint_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	static abstract class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_PointExtendsSuperClass_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private static final class Point extends SuperClass {\n"
+				+ BODY_DECLARATIONS
+				+ "	}\n"
+				+ "	\n"
+				+ "	private static class SuperClass {\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_PrivateStaticNestedClassNotEffectivelyFinal_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private static class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "	}\n"
+				+ "\n"
+				+ "	private static class Point00 extends Point {\n"
+				+ "		Point00(int x, int y) {\n"
+				+ "			super(0, 0);\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_LocalClassNotEffectivelyFinal_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	public void methodWithLocalClassPoint() {\n"
+				+ "		class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "		}\n"
+				+ "		\n"
+				+ "		class Point00 extends Point {\n"
+				+ "			Point00(int x, int y) {\n"
+				+ "				super(0, 0);\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_PrivateFinalNonStaticNestedClassPoint_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private final class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_StaticNotPrivateNotFinalNestedClassPoint_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	static class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_StaticClassInLocalClass_shouldTransform() throws Exception {
+		String original = "" +
+				"	void methodWithLocalClass() {\n"
+				+ "		class LocalClassSurroundingStaticClass {\n"
+				+ "			static class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void methodWithLocalClass() {\n"
+				+ "		class LocalClassSurroundingStaticClass {\n"
+				+ "			record Point (int x, int y) {\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_StaticFinalClassInLocalClass_shouldTransform() throws Exception {
+		String original = "" +
+				"	void methodWithLocalClass() {\n"
+				+ "		class LocalClassSurroundingStaticClass {\n"
+				+ "			static final class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	void methodWithLocalClass() {\n"
+				+ "		class LocalClassSurroundingStaticClass {\n"
+				+ "			record Point (int x, int y) {\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_StaticClassInAnonymousClass_shouldTransform() throws Exception {
+		String original = "" +
+				"	Runnable runnable = new Runnable() {\n"
+				+ "\n"
+				+ "		static class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "		}\n"
+				+ "\n"
+				+ "		@Override\n"
+				+ "		public void run() {\n"
+				+ "		}\n"
+				+ "	};";
+
+		String expected = "" +
+				"	Runnable runnable = new Runnable() {\n"
+				+ "\n"
+				+ "		record Point  (int x, int y){\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		@Override\n"
+				+ "		public void run() {\n"
+				+ "		}\n"
+				+ "	};";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_StaticFinalClassInAnonymousClass_shouldTransform() throws Exception {
+		String original = "" +
+				"	Runnable runnable = new Runnable() {\n"
+				+ "\n"
+				+ "		static final class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "		}\n"
+				+ "\n"
+				+ "		@Override\n"
+				+ "		public void run() {\n"
+				+ "		}\n"
+				+ "	};";
+
+		String expected = "" +
+				"	Runnable runnable = new Runnable() {\n"
+				+ "\n"
+				+ "		record Point  (int x, int y){\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		@Override\n"
+				+ "		public void run() {\n"
+				+ "		}\n"
+				+ "	};";
+
+		assertChange(original, expected);
+	}
+}
