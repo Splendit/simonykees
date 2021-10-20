@@ -10,6 +10,7 @@ import java.time.Duration;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import eu.jsparrow.common.SingleRuleTest;
@@ -17,6 +18,7 @@ import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
+@Disabled("Code examples in tests may not be compiled in JDK 8 environment")
 class ReplaceStreamCollectByToListRuleTest extends SingleRuleTest {
 
 	private ReplaceStreamCollectByToListRule rule;
@@ -55,14 +57,14 @@ class ReplaceStreamCollectByToListRuleTest extends SingleRuleTest {
 
 	@Test
 	void calculateEnabledForProject_shouldReturnFalse() throws Exception {
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_15);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, "15");
 		rule.calculateEnabledForProject(testProject);
 		assertFalse(rule.isEnabled());
 	}
 
 	@Test
 	void calculateEnabledForProject_shouldReturnTrue() throws Exception {
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_16);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, "16");
 		rule.calculateEnabledForProject(testProject);
 		assertTrue(rule.isEnabled());
 	}
