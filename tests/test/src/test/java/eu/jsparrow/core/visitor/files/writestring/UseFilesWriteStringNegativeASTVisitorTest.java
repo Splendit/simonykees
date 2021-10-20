@@ -4,7 +4,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
+import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
 public class UseFilesWriteStringNegativeASTVisitorTest extends UsesSimpleJDTUnitFixture {
 

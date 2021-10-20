@@ -81,7 +81,8 @@ public class RefactorMojo extends AbstractMojo {
 	private String profile;
 
 	/**
-	 * Use this parameter to use the default configuration.
+	 * Use this parameter to start the jSparrow Standalone with default
+	 * configurations, thus ignoring the presence of a YML configuration file.
 	 */
 	@Parameter(property = "defaultConfiguration")
 	protected boolean defaultConfiguration;
@@ -93,7 +94,7 @@ public class RefactorMojo extends AbstractMojo {
 	private String license;
 
 	/**
-	 * Specify the glob expression patterns relative to the project root
+	 * Specify the GLOB expression patterns relative to the project root
 	 * directory for selecting the sources to refactor. Use line breaks to
 	 * specify multiple glob patterns. If not specified, all Java sources in the
 	 * project will be considered for refactoring. Examples:

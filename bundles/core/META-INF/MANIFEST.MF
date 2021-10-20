@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.jsparrow.core
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Core
 Bundle-SymbolicName: eu.jsparrow.core;singleton:=true
-Bundle-Version: 4.3.0.qualifier
+Bundle-Version: 4.4.0.qualifier
 Bundle-Activator: eu.jsparrow.core.Activator
 Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.i18n,
@@ -30,7 +30,7 @@ Export-Package: eu.jsparrow.core;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalo
  eu.jsparrow.core.config,
  eu.jsparrow.core.exception;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
  eu.jsparrow.core.http,
- eu.jsparrow.core.refactorer;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
+ eu.jsparrow.core.refactorer;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone,eu.jsparrow.test.common",
  eu.jsparrow.core.rule;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
  eu.jsparrow.core.rule.impl;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
  eu.jsparrow.core.rule.impl.logger;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
