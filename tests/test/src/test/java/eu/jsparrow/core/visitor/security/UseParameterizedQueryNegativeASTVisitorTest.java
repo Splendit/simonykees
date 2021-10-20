@@ -3,7 +3,7 @@ package eu.jsparrow.core.visitor.security;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
+import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 
 public class UseParameterizedQueryNegativeASTVisitorTest extends UsesSimpleJDTUnitFixture {
 
