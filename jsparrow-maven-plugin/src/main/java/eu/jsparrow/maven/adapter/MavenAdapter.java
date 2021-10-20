@@ -21,8 +21,15 @@ import static eu.jsparrow.maven.adapter.ConfigurationKeys.STATISTICS_START_TIME;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.USER_DIR;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.USE_DEFAULT_CONFIGURATION;
 import static eu.jsparrow.maven.adapter.ConfigurationKeys.SELECTED_SOURCES;
+import static eu.jsparrow.maven.adapter.ConfigurationKeys.REPORT_DESTINATION_PATH;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -97,6 +104,9 @@ public class MavenAdapter {
 
 		setProjectIds(projects);
 		configuration.put(PROXY_SETTINGS, ProxyUtil.getSettingsStringFrom(proxies));
+		if(parameters.getReportDestinationPath() != null) {
+			configuration.put(REPORT_DESTINATION_PATH, parameters.getReportDestinationPath());
+		}
 
 		WorkingDirectory workingDirectory = setUpConfiguration(parameters);
 		String rootProjectIdentifier = MavenProjectUtil.findProjectIdentifier(rootProject);
@@ -134,7 +144,7 @@ public class MavenAdapter {
 	 */
 	public WorkingDirectory setUpConfiguration(MavenParameters parameters) throws InterruptedException {
 		addInitialConfiguration(parameters);
-		return prepareWorkingDirectory();
+		return prepareWorkingDirectory(parameters.getTempWorkspaceLocation());
 	}
 
 	public WorkingDirectory setUpConfiguration(MavenParameters parameters, Stream<Proxy> proxies)
@@ -182,10 +192,10 @@ public class MavenAdapter {
 	 * 
 	 * @throws InterruptedException
 	 */
-	public WorkingDirectory prepareWorkingDirectory() throws InterruptedException {
+	public WorkingDirectory prepareWorkingDirectory(String tempWorkspaceLocation) throws InterruptedException {
 
 		log.debug(Messages.MavenAdapter_prepareWorkingDirectory);
-		File directory = createJsparrowTempDirectory();
+		File directory = createJsparrowTempDirectory(tempWorkspaceLocation);
 
 		if (directory.exists() || directory.mkdirs()) {
 			String directoryAbsolutePath = directory.getAbsolutePath();
@@ -197,21 +207,21 @@ public class MavenAdapter {
 		} else {
 			throw new InterruptedException(Messages.MavenAdapter_couldnotCreateTempFolder);
 		}
-
 		log.debug(Messages.MavenAdapter_workingDirectoryPrepared);
-		return createWorkingDirectory(directory);
+		logTempWorkspaceContents(directory);
+		return createWorkingDirectory(directory, tempWorkspaceLocation);
 	}
 
-	protected WorkingDirectory createWorkingDirectory(File directory) {
-		return new WorkingDirectory(directory, sessionProjects, log);
+	protected WorkingDirectory createWorkingDirectory(File directory, String tempWorkspaceLocation) {
+		return new WorkingDirectory(directory, sessionProjects, tempWorkspaceLocation, log);
 	}
 
 	protected void setSystemProperty(String key, String directoryAbsolutePath) {
 		System.setProperty(key, directoryAbsolutePath);
 	}
 
-	protected File createJsparrowTempDirectory() {
-		return new File(WorkingDirectory.calculateJsparrowTempFolderPath()).getAbsoluteFile();
+	protected File createJsparrowTempDirectory(String tempWorkspaceLocation) {
+		return new File(WorkingDirectory.calculateJsparrowTempFolderPath(tempWorkspaceLocation)).getAbsoluteFile();
 	}
 
 	public void setProjectIds(List<MavenProject> allProjects) {
@@ -228,6 +238,22 @@ public class MavenAdapter {
 
 	public Map<String, String> getConfiguration() {
 		return configuration;
+	}
+
+	private void logTempWorkspaceContents(File workspaceRoot) {
+		log.debug("Workspace directory initial contents:"); //$NON-NLS-1$
+		try {
+			Files.walkFileTree(workspaceRoot.toPath(), new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					log.debug(file.toString());
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		} catch (IOException e) {
+			log.error("Cannot log initial workpsace directory contents", e); //$NON-NLS-1$
+		}
+
 	}
 
 }
