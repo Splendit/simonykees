@@ -537,7 +537,7 @@ public class RefactoringInvoker {
 		}
 
 		if (standaloneConfigs.isEmpty()) {
-			throw new StandaloneException(Messages.RefactoringInvoker_error_allModulesExcluded);
+			throw new StandaloneException(Messages.RefactoringInvoker_error_noModulesCouldBeFound);
 		}
 
 		logger.info(Messages.RefactoringInvoker_configurationLoaded);
