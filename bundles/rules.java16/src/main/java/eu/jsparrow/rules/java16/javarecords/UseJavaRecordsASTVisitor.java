@@ -1,6 +1,7 @@
 package eu.jsparrow.rules.java16.javarecords;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -45,60 +46,57 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (Modifier.isAbstract(modifiers)) {
 			return false;
 		}
-		
-		
+
 		if (typeDeclaration.getParent() == getCompilationUnit() && Modifier.isFinal(modifiers)) {
 			return true;
 		}
 
-		TypeDeclarationStatement typeDeclarationStatement = ASTNodeUtil.getSpecificAncestor(typeDeclaration,
-				TypeDeclarationStatement.class);
-		if (typeDeclarationStatement != null) {
-			if (typeDeclaration.isLocalTypeDeclaration()) {
-				if (Modifier.isFinal(modifiers) ||
-						isEffectivelyFinal(typeDeclaration, typeDeclarationStatement.getParent())) {
-					NonStaticReferencesVisitor nonStaticReferencesVisitor = new NonStaticReferencesVisitor(
-							typeDeclaration);
-					typeDeclaration.accept(nonStaticReferencesVisitor);
-					return !nonStaticReferencesVisitor.isUnsupportedReferenceExisting();
-				}
-				return false;
-			}
-			if (Modifier.isStatic(modifiers)) {
-				if (Modifier.isFinal(modifiers)) {
-					return true;
-				}
-				return isEffectivelyFinal(typeDeclaration, typeDeclarationStatement.getParent());
-			}
-			return false;
-		}
-		
-		AnonymousClassDeclaration anonymousClassDeclaration = ASTNodeUtil.getSpecificAncestor(typeDeclaration, AnonymousClassDeclaration.class);
-		if(anonymousClassDeclaration != null) {
-			if (Modifier.isStatic(modifiers)) {
-				if (Modifier.isFinal(modifiers)) {
-					return true;
-				}
-				return isEffectivelyFinal(typeDeclaration, anonymousClassDeclaration);
+		if (typeDeclaration.isLocalTypeDeclaration()) {
+			if (Modifier.isFinal(modifiers) ||
+					isEffectivelyFinal(typeDeclaration, typeDeclaration.getParent()
+						.getParent())) {
+				NonStaticReferencesVisitor nonStaticReferencesVisitor = new NonStaticReferencesVisitor(
+						typeDeclaration);
+				typeDeclaration.accept(nonStaticReferencesVisitor);
+				return !nonStaticReferencesVisitor.isUnsupportedReferenceExisting();
 			}
 			return false;
 		}
 
-		if (typeDeclaration.getLocationInParent() == TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
-			if (!Modifier.isStatic(modifiers)) {
-				return false;
-			}
-			if (Modifier.isFinal(modifiers)) {
-				return true;
-			}
-			if (!Modifier.isPrivate(modifiers)) {
-				return false;
-			}
+		if (!Modifier.isStatic(modifiers)) {
+			return false;
+		}
+
+		if (Modifier.isFinal(modifiers)) {
+			return true;
+		}
+
+		ASTNode scopeHidingTypeDeclaration = findScopeHidingTypeDeclaration(typeDeclaration).orElse(null);
+		if (scopeHidingTypeDeclaration != null) {
+			return isEffectivelyFinal(typeDeclaration, scopeHidingTypeDeclaration);
+		}
+
+		if (Modifier.isPrivate(modifiers)) {
 			return isEffectivelyFinal(typeDeclaration, getCompilationUnit());
 		}
 
-
 		return false;
+	}
+
+	private Optional<ASTNode> findScopeHidingTypeDeclaration(TypeDeclaration typeDeclaration) {
+		TypeDeclarationStatement typeDeclarationStatement = ASTNodeUtil.getSpecificAncestor(typeDeclaration,
+				TypeDeclarationStatement.class);
+		if (typeDeclarationStatement != null) {
+			return Optional.of(typeDeclarationStatement.getParent());
+		}
+
+		AnonymousClassDeclaration anonymousClassDeclaration = ASTNodeUtil.getSpecificAncestor(typeDeclaration,
+				AnonymousClassDeclaration.class);
+		if (anonymousClassDeclaration != null) {
+			return Optional.of(anonymousClassDeclaration);
+		}
+
+		return Optional.empty();
 	}
 
 	private boolean isEffectivelyFinal(TypeDeclaration typeDeclaration, ASTNode scope) {
