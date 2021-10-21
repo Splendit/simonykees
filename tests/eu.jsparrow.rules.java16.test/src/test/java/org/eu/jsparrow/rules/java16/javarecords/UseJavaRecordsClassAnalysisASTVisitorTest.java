@@ -4,6 +4,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.rules.java16.javarecords.UseJavaRecordsASTVisitor;
 
@@ -247,7 +249,7 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_StaticClassInAnonymousClass_shouldTransform() throws Exception {
 		String original = "" +
@@ -303,4 +305,188 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 
 		assertChange(original, expected);
 	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"" +
+					"	public void methodWithLocalClass () {\n" +
+					"		int localVariableFromSurroundingMethod = 1;\n" +
+					"		class Point {\n" +
+					"%s" +
+					"			public int getLocalVariableFromSurroundingMethod() {\n" +
+					"				return localVariableFromSurroundingMethod;\n" +
+					"			}\n" +
+					"		}\n" +
+					"	}",
+			"" +
+					"	int instanceFieldOfSurroundingClass = 1;\n" +
+					"\n" +
+					"	public void methodWithLocalClass () {\n" +
+					"		class Point {\n" +
+					"%s" +
+					"			public int getInstanceFieldOfSurroundingClass() {\n" +
+					"				return instanceFieldOfSurroundingClass;\n" +
+					"			}\n" +
+					"		}\n" +
+					"	}",
+			"" +
+					"	class ExampleClass {\n"
+					+ "		int x = 1;\n"
+					+ "	}\n"
+					+ "	ExampleClass exampleClass = new ExampleClass();\n"
+					+ "\n"
+					+ "	public void methodWithLocalClassPoint() {\n"
+					+ "		class Point {\n"
+					+ "%s"
+					+ "			int getFieldOfInstanceFieldOfExampleClass() {\n"
+					+ "				return exampleClass.x;\n"
+					+ "			}\n"
+					+ "		}\n"
+					+ "	}",
+			"" +
+					"	class SurroundingClass {\n"
+					+ "		public void methodWithLocalClassPoint() {\n"
+					+ "			class Point {\n"
+					+ "%s"
+					+ "				int getSuperHashCodeOfSurroundingClass() {\n"
+					+ "					return SurroundingClass.super.hashCode();\n"
+					+ "				}\n"
+					+ "			}\n"
+					+ "		}\n"
+					+ "	}",
+			"" +
+					"	class SurroundingClass {\n"
+					+ "		public void methodWithLocalClassPoint() {\n"
+					+ "			class Point {\n"
+					+ "%s"
+					+ "				SurroundingClass getThisInstanceOfSurroundingClass() {\n"
+					+ "					return SurroundingClass.this;\n"
+					+ "				}\n"
+					+ "			}\n"
+					+ "		}\n"
+					+ "	}",
+			"" +
+					"	void instanceMethod() {\n"
+					+ "		\n"
+					+ "	}\n"
+					+ "\n"
+					+ "	public void methodWithLocalClassPoint() {\n"
+					+ "		class Point {\n"
+					+ "%s"
+					+ "			void invokeInstanceMethodOfSurroundingClass() {\n"
+					+ "				instanceMethod();\n"
+					+ "			}\n"
+					+ "		}\n"
+					+ "	}",
+			"" +
+					"	void instanceMethod() {\n"
+					+ "		\n"
+					+ "	}\n"
+					+ "\n"
+					+ "	public void methodWithLocalClassPoint() {\n"
+					+ "		class Point {\n"
+					+ "%s"
+					+ "			void invokeInstanceMethodOfSurroundingClass() {\n"
+					+ "				instanceMethod();\n"
+					+ "				instanceMethod();\n"					
+					+ "			}\n"
+					+ "		}\n"
+					+ "	}",
+			"" +
+					"	public void methodWithLocalClassPoint() {\n"
+					+ "		class Point {\n"
+					+ "%s"
+					+ "			void invokeInstanceMethodOfSurroundingClass() {\n"
+					+ "				undefinedMethod();\n"
+					+ "			}\n"
+					+ "		}\n"
+					+ "	}"
+	})
+	public void visit_UnsupportedReference_shouldNotTransform(String originalFormatstring)
+			throws Exception {
+
+		String original = String.format(originalFormatstring, BODY_DECLARATIONS);
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_AccessConstantOfSurroundingClass_shouldTransform() throws Exception {
+		String original = "" +
+				"	static final int CONSTANT_OF_SURROUNDING_CLASS = 1;\n"
+				+ "\n"
+				+ "	public void methodWithLocalClassPoint() {\n"
+				+ "		class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "			public int getConstantOfSurroundingClass() {\n"
+				+ "				return CONSTANT_OF_SURROUNDING_CLASS;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	static final int CONSTANT_OF_SURROUNDING_CLASS = 1;\n"
+				+ "\n"
+				+ "	public void methodWithLocalClassPoint() {\n"
+				+ "		record Point(int x, int y) {\n"
+				+ "			;\n"
+				+ "			public int getConstantOfSurroundingClass() {\n"
+				+ "				return CONSTANT_OF_SURROUNDING_CLASS;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_IntegerMaxValue_shouldTransform() throws Exception {
+		String original = "" +
+				"	public void methodWithLocalClassPoint() {\n"
+				+ "		class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "			public int getIntegerMaxValue() {\n"
+				+ "				return Integer.MAX_VALUE;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	public void methodWithLocalClassPoint() {\n"
+				+ "		record Point(int x, int y) {\n"
+				+ "			;\n"
+				+ "			public int getIntegerMaxValue() {\n"
+				+ "				return Integer.MAX_VALUE;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_AccessSuperHashCode_shouldTransform() throws Exception {
+		String original = "" +
+				"	public void methodWithLocalClassPoint() {\n"
+				+ "		class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "			public int getSuperHashCode() {\n"
+				+ "				return super.hashCode();\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	public void methodWithLocalClassPoint() {\n"
+				+ "		record Point(int x, int y) {\n"
+				+ "			;\n"
+				+ "			public int getSuperHashCode() {\n"
+				+ "				return super.hashCode();\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
 }
