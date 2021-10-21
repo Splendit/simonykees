@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.jdtunit.util.MethodDeclarationBuilder;
 
 @SuppressWarnings("nls")

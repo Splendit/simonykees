@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
+import eu.jsparrow.common.UsesJDTUnitFixture;
 
 public class ReplaceJUnit3TestCasesToJupiterNegativeASTVisitorTest
 		extends UsesJDTUnitFixture {

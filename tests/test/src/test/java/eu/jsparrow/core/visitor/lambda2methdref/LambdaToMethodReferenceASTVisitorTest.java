@@ -4,8 +4,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.core.visitor.impl.LambdaToMethodReferenceASTVisitor;
-import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
 public class LambdaToMethodReferenceASTVisitorTest extends UsesJDTUnitFixture {
 

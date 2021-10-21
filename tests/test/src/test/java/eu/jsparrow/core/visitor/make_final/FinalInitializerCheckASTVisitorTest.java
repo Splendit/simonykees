@@ -13,7 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
+import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 public class FinalInitializerCheckASTVisitorTest extends UsesJDTUnitFixture {

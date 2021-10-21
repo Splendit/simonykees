@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jface.text.BadLocationException;
 import org.junit.jupiter.api.Assertions;
 
-import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
+import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.jdtunit.JdtUnitException;
 
 public abstract class AbstractReplaceJUnit4WithJupiterASTVisitorTest extends UsesJDTUnitFixture {
