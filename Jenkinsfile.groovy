@@ -91,6 +91,14 @@ timestamps {
 
                     tagCommit(env.BRANCH_NAME, "main")
                     break
+                case "develop-4jdk8":
+                    runStandardSteps()
+                    // deploy test noProguard
+                    Profile profile = Profile.DEVELOP_TEST_noPROGUARD
+                    deployMavenPlugin(profile, timestamp)
+                    tagCommit(env.BRANCH_NAME, "main")
+                    break
+
                 case "master":
 
                     runStandardSteps()
@@ -115,6 +123,8 @@ timestamps {
 
                     tagCommit(env.BRANCH_NAME, "main")
                     break
+                
+                case "master-jmp-4jdk8":
                 case "master-jmp":
 
                     runStandardSteps()
@@ -143,6 +153,13 @@ timestamps {
                     uploadMappingFile(profile)
                     deployMavenPlugin(profile, timestamp)
 
+                    break
+                
+                case "release-4jdk8":
+                    runStandardSteps()
+                    // deploy test proguard
+                    Profile profile = Profile.RELEASE_TEST_PROGUARD
+                    deployMavenPlugin(profile, timestamp)
                     break
                 default:
 
@@ -203,7 +220,7 @@ void runStandardSteps() {
 
 void compileEclipsePlugin() {
     stage('Compile Eclipse Plugin') {
-        def mvnCommand = 'clean verify -DskipTests'
+        def mvnCommand = 'clean verify -B -DskipTests'
         sh "'${mvnBin()}' ${mvnCommand}"
     }
 }
@@ -232,7 +249,7 @@ void runIntegrationTests() {
         // wrap([$class: 'Xvfb']) {
         stage('Integration-Tests') {
             // Run the maven build
-            def mvnCommand = 'clean verify -fae -Dsurefire.rerunFailingTestsCount=2'
+            def mvnCommand = 'clean verify -B -fae -Dsurefire.rerunFailingTestsCount=2'
 
             // def mvnCommand = 'surefire:test -fae -Dsurefire.rerunFailingTestsCount=2'
             def statusCode = sh(returnStatus: true, script: "'${mvnBin()}' ${mvnCommand}")
@@ -241,7 +258,7 @@ void runIntegrationTests() {
             int i = 0
             int repeats = 1
             while (statusCode != 0 && i < repeats) {
-                def rerunTests = 'clean verify -fae'
+                def rerunTests = 'clean verify -B -fae'
                 statusCode = sh(returnStatus: true, script: "'${mvnBin()}' ${rerunTests}")
                 i = i + 1
             }

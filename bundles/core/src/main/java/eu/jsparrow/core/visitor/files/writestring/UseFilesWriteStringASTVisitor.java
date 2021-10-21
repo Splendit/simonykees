@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.visitor.impl.trycatch.TwrCommentsUtil;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
@@ -73,6 +74,7 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 		return continueVisiting;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(TryStatement tryStatement) {
 
@@ -104,9 +106,48 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 			resourcesToRemove.stream()
 				.forEach(resource -> astRewrite.remove(resource, null));
 		} else {
-			TryStatement newTryStatementWithoutResources = createNewTryStatementWithoutResources(tryStatement,
-					transformationDataList);
-			astRewrite.replace(tryStatement, newTryStatementWithoutResources, null);
+			if (tryStatement.catchClauses()
+				.isEmpty() && tryStatement.getFinally() == null) {
+
+				Map<Integer, List<Comment>> comments = TwrCommentsUtil.findBodyComments(tryStatement,
+						getCommentRewriter());
+				CommentRewriter commentRewriter = getCommentRewriter();
+				comments.forEach((key, value) -> commentRewriter.saveBeforeStatement(tryStatement, value));
+
+				if (tryStatement.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
+					Block parentBlock = (Block) tryStatement.getParent();
+					ListRewrite listRewrite = astRewrite.getListRewrite(parentBlock, Block.STATEMENTS_PROPERTY);
+					ASTNode previousElement = tryStatement;
+					for (WriteInvocationData data : transformationDataList) {
+						ExpressionStatement replacementStatement = data
+							.createWriteInvocationStatementReplacement(this);
+						listRewrite.insertAfter(replacementStatement, previousElement, null);
+						previousElement = replacementStatement;
+					}
+					astRewrite.remove(tryStatement, null);
+				} else if (transformationDataList.size() == 1) {
+					ExpressionStatement replacementStatement = transformationDataList.get(0)
+						.createWriteInvocationStatementReplacement(this);
+					astRewrite.replace(tryStatement, replacementStatement, null);
+				} else {
+					AST ast = astRewrite.getAST();
+					Block newBlock = ast.newBlock();
+					transformationDataList.stream()
+						.forEach(data -> {
+							ExpressionStatement replacementStatement = data
+								.createWriteInvocationStatementReplacement(this);
+							newBlock.statements()
+								.add(replacementStatement);
+						});
+
+					astRewrite.replace(tryStatement, newBlock, null);
+				}
+			} else {
+				TryStatement newTryStatementWithoutResources = createNewTryStatementWithoutResources(tryStatement,
+						transformationDataList);
+				astRewrite.replace(tryStatement, newTryStatementWithoutResources, null);
+
+			}
 			transformationDataList.stream()
 				.forEach(data -> onRewrite());
 		}
@@ -116,24 +157,21 @@ public class UseFilesWriteStringASTVisitor extends AbstractAddImportASTVisitor {
 	@SuppressWarnings("unchecked")
 	private TryStatement createNewTryStatementWithoutResources(TryStatement tryStatement,
 			List<WriteInvocationData> transformationDataList) {
-		TryStatement tryStatementReplacement = getASTRewrite().getAST()
-			.newTryStatement();
+		AST ast = tryStatement.getAST();
+		TryStatement tryStatementReplacement = ast.newTryStatement();
 
 		Block oldBody = tryStatement.getBody();
 		Block newBody = (Block) ASTNode.copySubtree(tryStatement.getAST(), oldBody);
 		List<Statement> newBodyStatementsTypedList = newBody.statements();
 		Map<Integer, List<Comment>> comments = TwrCommentsUtil.findBodyComments(tryStatement, getCommentRewriter());
 		CommentRewriter commentRewriter = getCommentRewriter();
+
 		comments.forEach((key, value) -> {
 			int newBodySize = newBodyStatementsTypedList.size();
 			if (newBodySize > key) {
-				Statement statement = newBodyStatementsTypedList.get(key);
-				commentRewriter.saveBeforeStatement(statement, value);
-			} else if (!newBodyStatementsTypedList.isEmpty()) {
-				Statement statement = newBodyStatementsTypedList.get(newBodySize - 1);
-				commentRewriter.saveAfterStatement(statement, value);
-			} else {
 				commentRewriter.saveBeforeStatement(tryStatement, value);
+			} else {
+				commentRewriter.saveAfterStatement(tryStatement, value);
 			}
 		});
 

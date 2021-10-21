@@ -31,9 +31,9 @@ import eu.jsparrow.maven.util.JavaVersion;
 import eu.jsparrow.maven.util.ProxyUtil;
 
 /**
- * Runs the jSparrow in REPORT mode, i.e. computes the refactorings and
- * generates a report with the findings. Does not change the source files.
- * Expects the same parameters as the {@code refactor} goal.
+ * Runs jSparrow in REPORT mode, i.e. computes the refactorings and generates a
+ * report with the findings. Does not change the source files. Expects the same
+ * parameters as the {@code refactor} goal.
  * 
  * @since 2.20.0
  *
@@ -82,7 +82,8 @@ public class ReportMojo extends AbstractMojo {
 	private String profile;
 
 	/**
-	 * Use this parameter to use the default configuration.
+	 * Use this parameter to start the jSparrow Standalone with default
+	 * configurations, thus ignoring the presence of a YML configuration file.
 	 */
 	@Parameter(property = "defaultConfiguration")
 	protected boolean defaultConfiguration;
@@ -94,7 +95,7 @@ public class ReportMojo extends AbstractMojo {
 	private String license;
 
 	/**
-	 * Specify the glob expression patterns relative to the project root
+	 * Specify the GLOB expression patterns relative to the project root
 	 * directory for selecting the sources to refactor. Use line breaks to
 	 * specify multiple glob patterns. If not specified, all Java sources in the
 	 * project will be considered for refactoring. Examples:
@@ -127,13 +128,19 @@ public class ReportMojo extends AbstractMojo {
 	@Parameter(property = "sendStatistics")
 	private boolean sendStatistics;
 
+	/**
+	 * Specify the location to generate the jSparrow reports into.
+	 */
+	@Parameter(defaultValue = "${project.build.directory}", property = "destination")
+	private String destination;
+
 	public void execute() throws MojoExecutionException {
 		Log log = getLog();
 
 		// Since 3.10.0, jSparrow Maven Plugin requires JDK 11.
-		if (!JavaVersion.isAtLeastJava11()) {
+		if (!JavaVersion.isJava8or11()) {
 			log.warn(Messages.ListAllRulesMojo_supportJDK11);
-			throw new MojoExecutionException(Messages.ListAllRulesMojo_supportJDK11);
+			throw new MojoExecutionException(Messages.RefactorMojo_supportJDK8and11);
 		}
 
 		String mode = StandaloneMode.REPORT.name();
@@ -142,6 +149,8 @@ public class ReportMojo extends AbstractMojo {
 		StatisticsMetadata statisticsMetadata = new StatisticsMetadata(start, repoOwner, repoName);
 		MavenParameters parameters = new MavenParameters(mode, license, url, profile,
 				defaultConfiguration, statisticsMetadata, sendStatistics, selectedSources, tempWorkspace);
+		String destinationPath = parameters.computeValidateReportDestinationPath(project, destination, log);
+		parameters.setReportDestinationPath(destinationPath);
 		MavenAdapter mavenAdapter = new MavenAdapter(project, log);
 		List<MavenProject> projects = mavenSession.getProjects();
 		BundleStarter bundleStarter = new BundleStarter(log);

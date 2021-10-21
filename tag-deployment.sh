@@ -6,7 +6,7 @@
 # second parameter is optional and allows to set a subdirector for the tag
 
 # prefix definition for develop, master and master-jmp
-if [ "$1" == "develop" ] || [ "$1" == "master" ] || [ "$1" == "master-jmp" ]; then dir=$1/; fi
+if [ "$1" == "develop" ] || [ "$1" == "develop-4jdk8" ] || [ "$1" == "master" ] || [ "$1" == "master-jmp" ]|| [ "$1" == "master-jmp-4jdk8" ]; then dir=$1/; fi
 
 if [ -z ${dir+x} ]; then echo "Executed with wrong argument '$1' or argument is unset"; exit 1; fi
 

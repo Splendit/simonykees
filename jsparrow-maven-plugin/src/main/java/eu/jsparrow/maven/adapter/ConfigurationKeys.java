@@ -31,6 +31,7 @@ public class ConfigurationKeys {
 	public static final String STATISTICS_REPO_NAME = "STATISTICS_REPO_NAME"; //$NON-NLS-1$
 	public static final String STATISTICS_SEND = "STATISTICS_SEND"; //$NON-NLS-1$
 	public static final String SELECTED_SOURCES = "SELECTED.SOURCES"; //$NON-NLS-1$
+	public static final String REPORT_DESTINATION_PATH = "REPORT.DESTINATION.PATH"; //$NON-NLS-1$
 
 	private ConfigurationKeys() {
 		/*

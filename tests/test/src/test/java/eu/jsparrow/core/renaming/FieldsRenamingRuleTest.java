@@ -12,7 +12,7 @@ import java.util.List;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.util.RulesTestUtil;
+import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 
 @SuppressWarnings("nls")

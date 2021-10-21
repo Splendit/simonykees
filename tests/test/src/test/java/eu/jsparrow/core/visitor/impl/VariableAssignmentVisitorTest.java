@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.rules.common.visitor.helper.VariableAssignmentVisitor;
 
 @SuppressWarnings("nls")

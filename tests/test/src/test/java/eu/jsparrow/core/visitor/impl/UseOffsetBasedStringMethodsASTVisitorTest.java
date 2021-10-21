@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
+
 public class UseOffsetBasedStringMethodsASTVisitorTest extends UsesSimpleJDTUnitFixture {
 	@BeforeEach
 	public void setUp() throws Exception {

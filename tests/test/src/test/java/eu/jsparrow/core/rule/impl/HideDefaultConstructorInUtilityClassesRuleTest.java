@@ -15,8 +15,8 @@ import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.SingleRuleTest;
-import eu.jsparrow.core.util.RulesTestUtil;
+import eu.jsparrow.common.SingleRuleTest;
+import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
 
