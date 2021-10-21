@@ -12,8 +12,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
-import eu.jsparrow.core.util.RulesTestUtil;
 
 /**
  * Tests IJavaProject if a specific version of a library is present. The first

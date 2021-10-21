@@ -3,7 +3,7 @@ package eu.jsparrow.core.visitor.impl.loop.fortoforeach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
+import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.core.visitor.loop.fortoforeach.ForToForEachASTVisitor;
 
 @SuppressWarnings("nls")

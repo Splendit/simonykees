@@ -1,7 +1,7 @@
 package eu.jsparrow.core.rule.impl;
 
-import static eu.jsparrow.core.util.RulesTestUtil.addToClasspath;
-import static eu.jsparrow.core.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
+import static eu.jsparrow.common.util.RulesTestUtil.addToClasspath;
+import static eu.jsparrow.common.util.RulesTestUtil.generateMavenEntryFromDepedencyString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -14,8 +14,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.SingleRuleTest;
-import eu.jsparrow.core.util.RulesTestUtil;
+import eu.jsparrow.common.SingleRuleTest;
+import eu.jsparrow.common.util.RulesTestUtil;
 
 public class ReplaceJUnit4AnnotationsWithJUnitJupiterRuleTest extends SingleRuleTest {
 

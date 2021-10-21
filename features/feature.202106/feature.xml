@@ -2,7 +2,7 @@
 <feature
       id="eu.jsparrow.202106.feature"
       label="jsparrow for Eclipse 4.20 and above"
-      version="4.3.1.qualifier"
+      version="4.4.0.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
    <description url="https://jsparrow.github.io/">

@@ -11,8 +11,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.common.SingleRuleTest;
+import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.StringConcatToPlusRule;
-import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class StringConcatToPlusRulesTest extends SingleRuleTest {

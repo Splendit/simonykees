@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.maven.model.Model;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
@@ -92,9 +91,7 @@ public class MavenProjectImporter {
 		logger.debug(logMsg);
 
 		try {
-
 			List<MavenProjectInfo> projectInfos = findMavenProjects(workspaceRoot, folders);
-			logMavenProjectInfos(projectInfos);
 			List<String> projectRootPaths = projectInfos.stream()
 				.map(i -> i.getPomFile()
 					.getParentFile()
@@ -110,19 +107,6 @@ public class MavenProjectImporter {
 		} catch (InterruptedException | CoreException | IOException e) {
 			throw new MavenImportException(e.getMessage(), e);
 		}
-	}
-
-	private void logMavenProjectInfos(List<MavenProjectInfo> projectInfos) {
-		for(MavenProjectInfo mavenProjectInfo : projectInfos) {
-			Model model = mavenProjectInfo.getModel();
-			int prefixLength = Math.min(model.toString().length() - 1, 200);
-			String modelValue = model.toString().substring(0, prefixLength) + "..."; //$NON-NLS-1$
-			logger.debug("Project model: {}", modelValue); //$NON-NLS-1$
-			
-			String pomPath = mavenProjectInfo.getPomFile().getPath();
-			logger.debug("Pom path: {}", pomPath); //$NON-NLS-1$
-		}
-		
 	}
 
 	private List<MavenProjectInfo> findMavenProjects(File workspaceRoot, List<String> folders)
@@ -158,10 +142,11 @@ public class MavenProjectImporter {
 		NullProgressMonitor nullMonitor = new NullProgressMonitor();
 		
 		List<IMavenProjectImportResult> results = projectConfigurationManager.importProjects(projectInfos, projectImportConfig, nullMonitor);
-		logger.debug("Maven project import results: "); //$NON-NLS-1$
+		logger.debug(Messages.MavenProjectImporter_importedMavenProjectResults);
 		for(IMavenProjectImportResult result : results) {
 			MavenProjectInfo info = result.getMavenProjectInfo();
-			logger.debug("Project model: {}", info.getModel()); //$NON-NLS-1$
+			String logMessage = NLS.bind(Messages.MavenProjectImporter_importedProjectModel, info.getModel());
+			logger.debug(logMessage);
 		}
 
 		return results.stream()
@@ -175,7 +160,7 @@ public class MavenProjectImporter {
 			List<IJavaProject> javaProjects = new LinkedList<>();
 			for (IProject project : projects) {
 				if (!project.isOpen()) {
-					logger.debug("The project {} is not opened. Opening the project.", project.getName()); //$NON-NLS-1$
+					logger.debug(Messages.MavenProjectImporter_eclipseIProjectNotOpened, project.getName());
 					project.open(new NullProgressMonitor());
 				}
 				doCreateJavaProject(project).ifPresent(javaProjects::add);
@@ -196,7 +181,8 @@ public class MavenProjectImporter {
 			IJavaProject javaProject = createJavaProject(project);
 
 			if (!javaProject.isOpen()) {
-				logger.debug("The Java Project {} is not opened. Opening the Java project.", project.getName()); //$NON-NLS-1$
+				logMsg = NLS.bind(Messages.MavenProjectImporter_javaProjectNotOpened, project.getName());
+				logger.debug(logMsg);
 				javaProject.open(new NullProgressMonitor());
 			}
 
@@ -213,7 +199,8 @@ public class MavenProjectImporter {
 		IProjectDescription description = project.getDescription();
 		String[] natureIds = description.getNatureIds();
 		String projectNatures = Arrays.stream(natureIds).collect(Collectors.joining(",")); //$NON-NLS-1$
-		logger.debug("Project nature ids of {}: {}.", description.getName(), projectNatures); //$NON-NLS-1$
+		String logMessage = NLS.bind(Messages.MavenProjectImporter_projectNatureIds, description.getName(), projectNatures);
+		logger.debug(logMessage);
 	}
 
 	public void cleanUp() {

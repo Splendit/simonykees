@@ -3,8 +3,8 @@ package eu.jsparrow.core.visitor.logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.common.UsesJDTUnitFixture;
 import eu.jsparrow.core.visitor.impl.AvoidConcatenationInLoggingStatementsASTVisitor;
-import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
 public class AvoidConcatenationInLoggingMessagesTest extends UsesJDTUnitFixture {
 
