@@ -77,45 +77,69 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 	}
 
 	@Test
-	public void visit_PrivateStaticFinalNestedClassPoint_shouldTransform() throws Exception {
+	public void visit_StaticClassInLocalClass_shouldTransform() throws Exception {
 		String original = "" +
-				"	private static final class Point {\n"
+				"	void methodWithLocalClass() {\n"
+				+ "		class LocalClassSurroundingStaticClass {\n"
+				+ "			static class Point {\n"
 				+ BODY_DECLARATIONS
+				+ "			}\n"
+				+ "		}\n"
 				+ "	}";
 
 		String expected = "" +
-				"	record Point(int x, int y) {\n" +
-				"	}";
+				"	void methodWithLocalClass() {\n"
+				+ "		class LocalClassSurroundingStaticClass {\n"
+				+ "			record Point (int x, int y) {\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
 
 		assertChange(original, expected);
 	}
 
 	@Test
-	public void visit_PrivateStaticNestedClassPoint_shouldTransform() throws Exception {
+	public void visit_StaticClassInAnonymousClass_shouldTransform() throws Exception {
 		String original = "" +
-				"	private static class Point {\n"
+				"	Runnable runnable = new Runnable() {\n"
+				+ "\n"
+				+ "		static class Point {\n"
 				+ BODY_DECLARATIONS
-				+ "	}";
+				+ "		}\n"
+				+ "\n"
+				+ "		@Override\n"
+				+ "		public void run() {\n"
+				+ "		}\n"
+				+ "	};";
 
 		String expected = "" +
-				"	record Point(int x, int y) {\n" +
-				"	}";
+				"	Runnable runnable = new Runnable() {\n"
+				+ "\n"
+				+ "		record Point  (int x, int y){\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		@Override\n"
+				+ "		public void run() {\n"
+				+ "		}\n"
+				+ "	};";
 
 		assertChange(original, expected);
 	}
 
-	@Test
-	public void visit_StaticFinalNestedClassPoint_shouldTransform() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"static abstract",
+			"private final",
+			"static"
+	})
+	public void visit_NestedClassPoint_shouldNotTransform(String modifiers)
+			throws Exception {
 		String original = "" +
-				"	static final class Point {\n"
+				"	" + modifiers + " class Point {\n"
 				+ BODY_DECLARATIONS
 				+ "	}";
 
-		String expected = "" +
-				"	record Point(int x, int y) {\n" +
-				"	}";
-
-		assertChange(original, expected);
+		assertNoChange(original);
 	}
 
 	@Test
@@ -124,16 +148,6 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 				"	interface IPoint {\n"
 				+ "		int x();\n"
 				+ "		int y();\n"
-				+ "	}";
-
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_AbstractStaticNestedClassPoint_shouldNotTransform() throws Exception {
-		String original = "" +
-				"	static abstract class Point {\n"
-				+ BODY_DECLARATIONS
 				+ "	}";
 
 		assertNoChange(original);
@@ -186,307 +200,24 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 		assertNoChange(original);
 	}
 
-	@Test
-	public void visit_PrivateFinalNonStaticNestedClassPoint_shouldNotTransform() throws Exception {
-		String original = "" +
-				"	private final class Point {\n"
-				+ BODY_DECLARATIONS
-				+ "	}";
-
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_StaticNotPrivateNotFinalNestedClassPoint_shouldNotTransform() throws Exception {
-		String original = "" +
-				"	static class Point {\n"
-				+ BODY_DECLARATIONS
-				+ "	}";
-
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_StaticClassInLocalClass_shouldTransform() throws Exception {
-		String original = "" +
-				"	void methodWithLocalClass() {\n"
-				+ "		class LocalClassSurroundingStaticClass {\n"
-				+ "			static class Point {\n"
-				+ BODY_DECLARATIONS
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
-		String expected = "" +
-				"	void methodWithLocalClass() {\n"
-				+ "		class LocalClassSurroundingStaticClass {\n"
-				+ "			record Point (int x, int y) {\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
-		assertChange(original, expected);
-	}
-
-	@Test
-	public void visit_StaticFinalClassInLocalClass_shouldTransform() throws Exception {
-		String original = "" +
-				"	void methodWithLocalClass() {\n"
-				+ "		class LocalClassSurroundingStaticClass {\n"
-				+ "			static final class Point {\n"
-				+ BODY_DECLARATIONS
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
-		String expected = "" +
-				"	void methodWithLocalClass() {\n"
-				+ "		class LocalClassSurroundingStaticClass {\n"
-				+ "			record Point (int x, int y) {\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
-		assertChange(original, expected);
-	}
-
-	@Test
-	public void visit_StaticClassInAnonymousClass_shouldTransform() throws Exception {
-		String original = "" +
-				"	Runnable runnable = new Runnable() {\n"
-				+ "\n"
-				+ "		static class Point {\n"
-				+ BODY_DECLARATIONS
-				+ "		}\n"
-				+ "\n"
-				+ "		@Override\n"
-				+ "		public void run() {\n"
-				+ "		}\n"
-				+ "	};";
-
-		String expected = "" +
-				"	Runnable runnable = new Runnable() {\n"
-				+ "\n"
-				+ "		record Point  (int x, int y){\n"
-				+ "		}\n"
-				+ "\n"
-				+ "		@Override\n"
-				+ "		public void run() {\n"
-				+ "		}\n"
-				+ "	};";
-
-		assertChange(original, expected);
-	}
-
-	@Test
-	public void visit_StaticFinalClassInAnonymousClass_shouldTransform() throws Exception {
-		String original = "" +
-				"	Runnable runnable = new Runnable() {\n"
-				+ "\n"
-				+ "		static final class Point {\n"
-				+ BODY_DECLARATIONS
-				+ "		}\n"
-				+ "\n"
-				+ "		@Override\n"
-				+ "		public void run() {\n"
-				+ "		}\n"
-				+ "	};";
-
-		String expected = "" +
-				"	Runnable runnable = new Runnable() {\n"
-				+ "\n"
-				+ "		record Point  (int x, int y){\n"
-				+ "		}\n"
-				+ "\n"
-				+ "		@Override\n"
-				+ "		public void run() {\n"
-				+ "		}\n"
-				+ "	};";
-
-		assertChange(original, expected);
-	}
-
 	@ParameterizedTest
 	@ValueSource(strings = {
-			"" +
-					"	public void methodWithLocalClass () {\n" +
-					"		int localVariableFromSurroundingMethod = 1;\n" +
-					"		class Point {\n" +
-					"%s" +
-					"			public int getLocalVariableFromSurroundingMethod() {\n" +
-					"				return localVariableFromSurroundingMethod;\n" +
-					"			}\n" +
-					"		}\n" +
-					"	}",
-			"" +
-					"	int instanceFieldOfSurroundingClass = 1;\n" +
-					"\n" +
-					"	public void methodWithLocalClass () {\n" +
-					"		class Point {\n" +
-					"%s" +
-					"			public int getInstanceFieldOfSurroundingClass() {\n" +
-					"				return instanceFieldOfSurroundingClass;\n" +
-					"			}\n" +
-					"		}\n" +
-					"	}",
-			"" +
-					"	class ExampleClass {\n"
-					+ "		int x = 1;\n"
-					+ "	}\n"
-					+ "	ExampleClass exampleClass = new ExampleClass();\n"
-					+ "\n"
-					+ "	public void methodWithLocalClassPoint() {\n"
-					+ "		class Point {\n"
-					+ "%s"
-					+ "			int getFieldOfInstanceFieldOfExampleClass() {\n"
-					+ "				return exampleClass.x;\n"
-					+ "			}\n"
-					+ "		}\n"
-					+ "	}",
-			"" +
-					"	class SurroundingClass {\n"
-					+ "		public void methodWithLocalClassPoint() {\n"
-					+ "			class Point {\n"
-					+ "%s"
-					+ "				int getSuperHashCodeOfSurroundingClass() {\n"
-					+ "					return SurroundingClass.super.hashCode();\n"
-					+ "				}\n"
-					+ "			}\n"
-					+ "		}\n"
-					+ "	}",
-			"" +
-					"	class SurroundingClass {\n"
-					+ "		public void methodWithLocalClassPoint() {\n"
-					+ "			class Point {\n"
-					+ "%s"
-					+ "				SurroundingClass getThisInstanceOfSurroundingClass() {\n"
-					+ "					return SurroundingClass.this;\n"
-					+ "				}\n"
-					+ "			}\n"
-					+ "		}\n"
-					+ "	}",
-			"" +
-					"	void instanceMethod() {\n"
-					+ "		\n"
-					+ "	}\n"
-					+ "\n"
-					+ "	public void methodWithLocalClassPoint() {\n"
-					+ "		class Point {\n"
-					+ "%s"
-					+ "			void invokeInstanceMethodOfSurroundingClass() {\n"
-					+ "				instanceMethod();\n"
-					+ "			}\n"
-					+ "		}\n"
-					+ "	}",
-			"" +
-					"	void instanceMethod() {\n"
-					+ "		\n"
-					+ "	}\n"
-					+ "\n"
-					+ "	public void methodWithLocalClassPoint() {\n"
-					+ "		class Point {\n"
-					+ "%s"
-					+ "			void invokeInstanceMethodOfSurroundingClass() {\n"
-					+ "				instanceMethod();\n"
-					+ "				instanceMethod();\n"					
-					+ "			}\n"
-					+ "		}\n"
-					+ "	}",
-			"" +
-					"	public void methodWithLocalClassPoint() {\n"
-					+ "		class Point {\n"
-					+ "%s"
-					+ "			void invokeInstanceMethodOfSurroundingClass() {\n"
-					+ "				undefinedMethod();\n"
-					+ "			}\n"
-					+ "		}\n"
-					+ "	}"
+			"private static final",
+			"private static",
+			"static final"
+	
 	})
-	public void visit_UnsupportedReference_shouldNotTransform(String originalFormatstring)
+	public void visit_PrivateStaticFinalNestedClassPoint_shouldTransform(String modifiers)
 			throws Exception {
-
-		String original = String.format(originalFormatstring, BODY_DECLARATIONS);
-
-		assertNoChange(original);
-	}
-
-	@Test
-	public void visit_AccessConstantOfSurroundingClass_shouldTransform() throws Exception {
 		String original = "" +
-				"	static final int CONSTANT_OF_SURROUNDING_CLASS = 1;\n"
-				+ "\n"
-				+ "	public void methodWithLocalClassPoint() {\n"
-				+ "		class Point {\n"
+				"	" + modifiers + " class Point {\n"
 				+ BODY_DECLARATIONS
-				+ "			public int getConstantOfSurroundingClass() {\n"
-				+ "				return CONSTANT_OF_SURROUNDING_CLASS;\n"
-				+ "			}\n"
-				+ "		}\n"
 				+ "	}";
-
+	
 		String expected = "" +
-				"	static final int CONSTANT_OF_SURROUNDING_CLASS = 1;\n"
-				+ "\n"
-				+ "	public void methodWithLocalClassPoint() {\n"
-				+ "		record Point(int x, int y) {\n"
-				+ "			;\n"
-				+ "			public int getConstantOfSurroundingClass() {\n"
-				+ "				return CONSTANT_OF_SURROUNDING_CLASS;\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
+				"	record Point(int x, int y) {\n" +
+				"	}";
+	
 		assertChange(original, expected);
 	}
-
-	@Test
-	public void visit_IntegerMaxValue_shouldTransform() throws Exception {
-		String original = "" +
-				"	public void methodWithLocalClassPoint() {\n"
-				+ "		class Point {\n"
-				+ BODY_DECLARATIONS
-				+ "			public int getIntegerMaxValue() {\n"
-				+ "				return Integer.MAX_VALUE;\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
-		String expected = "" +
-				"	public void methodWithLocalClassPoint() {\n"
-				+ "		record Point(int x, int y) {\n"
-				+ "			;\n"
-				+ "			public int getIntegerMaxValue() {\n"
-				+ "				return Integer.MAX_VALUE;\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
-		assertChange(original, expected);
-	}
-
-	@Test
-	public void visit_AccessSuperHashCode_shouldTransform() throws Exception {
-		String original = "" +
-				"	public void methodWithLocalClassPoint() {\n"
-				+ "		class Point {\n"
-				+ BODY_DECLARATIONS
-				+ "			public int getSuperHashCode() {\n"
-				+ "				return super.hashCode();\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
-		String expected = "" +
-				"	public void methodWithLocalClassPoint() {\n"
-				+ "		record Point(int x, int y) {\n"
-				+ "			;\n"
-				+ "			public int getSuperHashCode() {\n"
-				+ "				return super.hashCode();\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
-		assertChange(original, expected);
-	}
-
 }

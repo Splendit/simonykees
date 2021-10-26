@@ -47,8 +47,8 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 			return false;
 		}
 
-		if (typeDeclaration.getParent() == getCompilationUnit() && Modifier.isFinal(modifiers)) {
-			return true;
+		if (typeDeclaration.getParent() == getCompilationUnit()) {
+			return Modifier.isFinal(modifiers);
 		}
 
 		if (typeDeclaration.isLocalTypeDeclaration()) {
@@ -56,7 +56,7 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 					isEffectivelyFinal(typeDeclaration, typeDeclaration.getParent()
 						.getParent())) {
 				NonStaticReferencesVisitor nonStaticReferencesVisitor = new NonStaticReferencesVisitor(
-						typeDeclaration);
+						getCompilationUnit(), typeDeclaration);
 				typeDeclaration.accept(nonStaticReferencesVisitor);
 				return !nonStaticReferencesVisitor.isUnsupportedReferenceExisting();
 			}
