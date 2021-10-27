@@ -116,7 +116,7 @@ public class WorkingDirectoryTest {
 	class TestableWorkingDirectory extends WorkingDirectory {
 
 		public TestableWorkingDirectory(File workingDirectory, Set<String> sessionRelatedProjects, Log log) {
-			super(workingDirectory, sessionRelatedProjects, log);
+			super(workingDirectory, sessionRelatedProjects, "", log);
 		}
 
 		@Override

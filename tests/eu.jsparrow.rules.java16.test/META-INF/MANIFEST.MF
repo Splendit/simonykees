@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: eu.jsparrow.rules.java16.test
+Bundle-ManifestVersion: 2
+Bundle-Name: jSparrow :: test java 16 rules
+Bundle-SymbolicName: eu.jsparrow.rules.java16.test
+Bundle-Version: 4.5.0.qualifier
+Fragment-Host: eu.jsparrow.rules.java16
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: eu.jsparrow.logging,
+ eu.jsparrow.test.framework,
+ eu.jsparrow.test.common,
+ org.eclipse.jdt.junit4.runtime;bundle-version="1.1.0",
+ org.mockito;bundle-version="[2.13.0,3.0.0)",
+ org.hamcrest;bundle-version="[1.1.0,2.0.0)",
+ javax.annotation;bundle-version="[1.2.0,2.0.0)",
+ org.junit,
+ org.junit.platform.commons,
+ org.junit.platform.engine,
+ org.opentest4j
+Bundle-Vendor: Splendit IT-Consulting GmbH
+Import-Package: org.eclipse.jdt.core,
+ org.junit.jupiter.api,
+ org.junit.jupiter.api.function,
+ org.junit.jupiter.engine.execution,
+ org.junit.jupiter.params,
+ org.junit.jupiter.params.provider

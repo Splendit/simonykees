@@ -68,7 +68,7 @@ public class ExcludedModules {
 			logInfo = String.format("Excluded modules: %s ", excludedModules.stream() //$NON-NLS-1$
 				.collect(Collectors.joining(","))); //$NON-NLS-1$
 		} else {
-			logInfo = "No excluded modules were found."; //$NON-NLS-1$
+			logInfo = "No excluded modules were found in the configuration file."; //$NON-NLS-1$
 		}
 		logger.debug(logInfo);
 		return excludedModules;

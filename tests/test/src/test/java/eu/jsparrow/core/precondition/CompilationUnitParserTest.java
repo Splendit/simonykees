@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.util.RulesTestUtil;
+import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**

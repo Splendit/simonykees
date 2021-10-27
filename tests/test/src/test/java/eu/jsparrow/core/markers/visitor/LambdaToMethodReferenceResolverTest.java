@@ -9,7 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import eu.jsparrow.core.visitor.impl.UsesSimpleJDTUnitFixture;
+import eu.jsparrow.common.UsesSimpleJDTUnitFixture;
 import eu.jsparrow.rules.common.markers.RefactoringMarkerEvent;
 import eu.jsparrow.rules.common.markers.RefactoringMarkers;
 

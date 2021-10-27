@@ -84,6 +84,7 @@ import eu.jsparrow.core.rule.impl.ReplaceJUnitAssertThatWithHamcrestRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedAnnotationPropertyRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitExpectedExceptionRule;
 import eu.jsparrow.core.rule.impl.ReplaceJUnitTimeoutAnnotationPropertyRule;
+import eu.jsparrow.core.rule.impl.ReplaceStreamCollectByToListRule;
 import eu.jsparrow.core.rule.impl.ReplaceStringFormatByFormattedRule;
 import eu.jsparrow.core.rule.impl.ReuseRandomObjectsRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
@@ -232,7 +233,7 @@ public class RulesContainer {
 				new FlatMapInsteadOfNestedLoopsRule(), new EnhancedForLoopToStreamAnyMatchRule(),
 				new EnhancedForLoopToStreamFindFirstRule(), new EnhancedForLoopToStreamSumRule(),
 				new StringBuildingLoopRule(), new UseComparatorMethodsRule(), new LambdaToMethodReferenceRule(),
-				new UseArraysStreamRule(),
+				new UseArraysStreamRule(), new ReplaceStreamCollectByToListRule(),
 
 				/*
 				 * String manipulations. These rules must be applied after

@@ -9,8 +9,9 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.common.SingleRuleTest;
+import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
-import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class StringUtilsClashingOnDemandImportRuleTest extends SingleRuleTest {

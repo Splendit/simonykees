@@ -11,9 +11,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import eu.jsparrow.common.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.rule.impl.logger.SupportedLogger;
-import eu.jsparrow.core.util.RulesTestUtil;
 
 /**
  * Tests for the LoggingTypes library check.

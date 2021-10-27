@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>at.splendit</groupId>
 		<artifactId>eu.jsparrow</artifactId>
-		<version>4.4.0-SNAPSHOT</version>
+		<version>4.5.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>tests</artifactId>
@@ -19,14 +19,16 @@
 
 		<!-- all integration test modules -->
 		<module>test.framework</module>
+		<module>test.common</module>
 		<module>license.netlicensing.test</module>
 		<module>registration.test</module>
 		<module>test</module>
 		<module>ui.test</module>
+		<module>eu.jsparrow.rules.api.test</module>
+		<module>eu.jsparrow.rules.java16.test</module>
 
 		<!-- standalone -->
 		<module>standalone.test</module>
-		<module>eu.jsparrow.rules.api.test</module>
 		<module>crypto.test</module>
 	</modules>
 	

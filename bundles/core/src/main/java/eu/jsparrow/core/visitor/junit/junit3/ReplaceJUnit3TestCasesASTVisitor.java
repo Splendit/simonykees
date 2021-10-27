@@ -127,12 +127,11 @@ public class ReplaceJUnit3TestCasesASTVisitor extends AbstractAddImportASTVisito
 			.map(AbstractTypeDeclaration::resolveBinding)
 			.collect(Collectors.toList());
 
-		RunTestInvocationStatementsVisitor runTestInvocationStatementsVisitor = new RunTestInvocationStatementsVisitor();
-		mainMethodToRemove.accept(runTestInvocationStatementsVisitor);
 		List<ExpressionStatement> expressionStatementsToRemove = new ArrayList<>();
 		List<SimpleName> invocationExpressionsToQualify = new ArrayList<>();
-		Map<ExpressionStatement, TypeLiteral> runInvocationToTypeLiteralMap = runTestInvocationStatementsVisitor
+		Map<ExpressionStatement, TypeLiteral> runInvocationToTypeLiteralMap = jUnit3dataCollectorVisitor
 			.getRunInvocationToTypeLiteralMap();
+
 		runInvocationToTypeLiteralMap
 			.forEach((expressionStatement, typeLiteral) -> {
 				ITypeBinding typeLiteralTypeBinding = typeLiteral.getType()
