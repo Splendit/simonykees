@@ -190,7 +190,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 	 * Does NOT check license validity.
 	 * 
 	 * @return whether the type of the validation result is either
-	 *         {@link LicenseType#FLOATING} or {@link LicenseType#NODE_LOCKED}.
+	 *         {@link LicenseType#FLOATING}, {@link LicenseType#NODE_LOCKED}, or {@link LicenseType#PAY_PER_USE}.
 	 */
 	public boolean isProLicense() {
 		if (result == null) {
@@ -252,7 +252,7 @@ public class LicenseUtil implements LicenseUtilService, RegistrationUtilService 
 		}
 
 		if(validationResult.getLicenseType() == LicenseType.PAY_PER_USE) {
-			moduleNr = properties.getProperty("license.floatingModuleNr"); //$NON-NLS-1$
+			moduleNr = properties.getProperty("license.payPerUseModuleNr"); //$NON-NLS-1$
 		}
 		LicenseModel persitModel = factoryService.createNewModel(validationResult.getKey(), secret, productNr, moduleNr,
 				validationResult.getLicenseType(), name, validationResult.getExpirationDate());
