@@ -44,22 +44,22 @@ public class ResponseEvaluator {
 	public NetlicensingValidationResult evaluateResult(ValidationResult response) throws ValidationException {
 		logger.debug("Evaluating validation result"); //$NON-NLS-1$
 		parser.parseValidationResult(response);
-
 		PayPerUseResponse payPerUse = parser.getPayPerUse();
+		SubscriptionResponse subscription = parser.getSubscription();
+		if (subscription != null) {
+			if (subscription.isValid()) {
+				return evaluateNonExpiredLicense();
+			}
+			if (payPerUse != null && payPerUse.isValid()) {
+				return evaluatePayPerUse();
+			}
+			return evaluateExpiredLicense();
+
+		}
 		if (payPerUse != null) {
 			return evaluatePayPerUse();
 		}
-
-		SubscriptionResponse subscription = parser.getSubscription();
-
-		if (subscription == null) {
-			throw new ValidationException(ExceptionMessages.Netlicensing_validationError_noSubscriptionReceived);
-		}
-
-		if (subscription.isValid()) {
-			return evaluateNonExpiredLicense();
-		}
-		return evaluateExpiredLicense();
+		throw new ValidationException(ExceptionMessages.Netlicensing_validationError_noSubscriptionReceived);
 	}
 
 	/**
@@ -151,12 +151,14 @@ public class ResponseEvaluator {
 		logger.debug("Evaluating Pay-Per-Use license"); //$NON-NLS-1$
 		PayPerUseResponse payPerUse = parser.getPayPerUse();
 		StatusDetail status = payPerUse.isValid() ? StatusDetail.PAY_PER_USE : StatusDetail.PAY_PER_USE_OUT_OF_CREDIT;
+		ZonedDateTime expirationDate = ZonedDateTime.now()
+			.plusYears(1);
+		ZonedDateTime offlineExpiration = ZonedDateTime.now()
+			.plusMinutes(OFFLINE_VALIDITY_DURATION_MINUTES);
 		return new NetlicensingValidationResult(LicenseType.PAY_PER_USE, key, payPerUse.isValid(),
 				status.getUserMessage(),
-				ZonedDateTime.now()
-					.plusYears(1),
-				ZonedDateTime.now()
-					.plusMinutes(10));
+				expirationDate,
+				offlineExpiration);
 	}
 
 	private NetlicensingValidationResult createValidationResult(LicenseType licenseType, boolean valid,
