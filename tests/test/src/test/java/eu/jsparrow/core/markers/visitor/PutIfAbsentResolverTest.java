@@ -61,7 +61,8 @@ class PutIfAbsentResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("map.putIfAbsent(1,2);\n", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(229, event.getOffset()),
-				() -> assertEquals(13, event.getLength()));
+				() -> assertEquals(13, event.getLength()),
+				() -> assertEquals(2, event.getWeightValue()));
 	}
 	
 	@Test

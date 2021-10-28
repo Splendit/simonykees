@@ -28,6 +28,7 @@ import eu.jsparrow.i18n.Messages;
 public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTVisitor {
 
 	public static final String ID = LambdaToMethodReferenceResolver.class.getName();
+	private static final int WEIGHT_VALUE = 3;
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -57,7 +58,7 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 			.length();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.LambdaToMethodReferenceResolver_name,
 				Messages.LambdaToMethodReferenceResolver_message,
-				javaElement, highlightLenght, lambdaExpressionNode, newNode);
+				javaElement, highlightLenght, lambdaExpressionNode, newNode, WEIGHT_VALUE);
 		addMarkerEvent(event);
 	}
 
@@ -68,7 +69,7 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 			.length();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.LambdaToMethodReferenceResolver_name,
 				Messages.LambdaToMethodReferenceResolver_message, javaElement, highlightLenght,
-				lambdaExpressionNode, newNode);
+				lambdaExpressionNode, newNode, WEIGHT_VALUE);
 		addMarkerEvent(event);
 	}
 
@@ -79,7 +80,7 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 			.length();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.LambdaToMethodReferenceResolver_name,
 				Messages.LambdaToMethodReferenceResolver_message, javaElement,
-				highlightLenght, lambdaExpressionNode, newNode);
+				highlightLenght, lambdaExpressionNode, newNode, WEIGHT_VALUE);
 		addMarkerEvent(event);
 
 	}

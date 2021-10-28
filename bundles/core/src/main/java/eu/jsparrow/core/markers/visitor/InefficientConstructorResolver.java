@@ -28,6 +28,7 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 public class InefficientConstructorResolver extends InefficientConstructorASTVisitor {
 
 	public static final String ID = InefficientConstructorResolver.class.getName();
+	private static final int WEIGHT_VALUE = 2;
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -70,7 +71,7 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.InefficientConstructorResolver_name,
 				Messages.InefficientConstructorResolver_message,
 				javaElement, 0, refactorCandidateParameter,
-				newNode);
+				newNode, WEIGHT_VALUE);
 		addMarkerEvent(event);
 	}
 
@@ -83,7 +84,7 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.InefficientConstructorResolver_name,
 				Messages.InefficientConstructorResolver_message,
 				javaElement, highlightLenght, node,
-				newNode);
+				newNode, WEIGHT_VALUE);
 		addMarkerEvent(event);
 	}
 

@@ -22,6 +22,7 @@ import eu.jsparrow.i18n.Messages;
 public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor {
 
 	public static final String ID = UseComparatorMethodsResolver.class.getName();
+	private static final int WEIGHT_VALUE = 3;
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
@@ -49,7 +50,7 @@ public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor
 			.length();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.UseComparatorMethodsResolver_name,
 				Messages.UseComparatorMethodsResolver_message, javaElement,
-				highlightLenght, lambda, lambdaReplacement);
+				highlightLenght, lambda, lambdaReplacement, WEIGHT_VALUE);
 		addMarkerEvent(event);
 	}
 }

@@ -27,6 +27,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
 public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTVisitor {
 
 	public static final String ID = UseIsEmptyOnCollectionsResolver.class.getName();
+	private static final int WEIGHT_VALUE = 2;
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
@@ -53,7 +54,7 @@ public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTV
 		ASTNode newNode = createRepresentationNode(parent, varExpression);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.UseIsEmptyOnCollectionsResolver_name,
 				Messages.UseIsEmptyOnCollectionsResolver_message,
-				javaElement, 0, parent, newNode);
+				javaElement, 0, parent, newNode, WEIGHT_VALUE);
 		addMarkerEvent(event);
 	}
 

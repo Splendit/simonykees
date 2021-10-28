@@ -32,6 +32,7 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 	private String name;
 	private String resolver;
 	private RefactoringEventManager refactoringEventManager;
+	private int weightValue;
 
 	public JSparrowMarkerResolution(IMarker marker, RefactoringEventManager eventManager) {
 		this.refactoringEventManager = eventManager;
@@ -41,6 +42,8 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 		this.resource = marker.getResource();
 		this.codePreview = marker.getAttribute(CODE_PREVIEW_KEY, ""); //$NON-NLS-1$
 		this.resolver = marker.getAttribute(RESOLVER_KEY, ""); //$NON-NLS-1$
+		this.weightValue = marker.getAttribute(WEIGHT_VALUE_KEY, 1);
+		
 	}
 
 	@Override
@@ -70,7 +73,7 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 		// TODO: update the pay per use license model. Get the cost number from the marker properties?
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		// TODO: run async
-		licenseUtil.reserveQuantity(1); // TODO: put the credit in marker properties
+		licenseUtil.reserveQuantity(weightValue);
 		
 	}
 

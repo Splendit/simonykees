@@ -25,6 +25,7 @@ import eu.jsparrow.i18n.Messages;
 public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityCheckASTVisitor {
 
 	public static final String ID = StringLiteralEqualityCheckResolver.class.getName();
+	private static final int WEIGHT_VALUE = 3;
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
@@ -51,7 +52,7 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 		MethodInvocation newNode = createRepresentingNode(expression, stringLiteral);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.StringLiteralEqualityCheckResolver_name,
 				Messages.StringLiteralEqualityCheckResolver_message,
-				javaElement, 0, stringLiteral, newNode);
+				javaElement, 0, stringLiteral, newNode, WEIGHT_VALUE);
 		addMarkerEvent(event);
 	}
 

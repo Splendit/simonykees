@@ -25,6 +25,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
 public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
 
 	public static final String ID = EnumsWithoutEqualsResolver.class.getName();
+	private static final int WEIGHT_VALUE = 1;
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -58,7 +59,8 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
 				Messages.EnumsWithoutEqualsResolver_message,
 				javaElement,
 				highlightLength, replacedNode,
-				representingNode);
+				representingNode,
+				WEIGHT_VALUE);
 		addMarkerEvent(event);
 
 	}

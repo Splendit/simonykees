@@ -57,7 +57,8 @@ class UseIsEmptyOnCollectionsResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("if (s.isEmpty()) {\n}\n", event.getCodePreview()),
 				() -> assertEquals(0, event.getHighlightLength()),
 				() -> assertEquals(145, event.getOffset()),
-				() -> assertEquals(15, event.getLength()));
+				() -> assertEquals(15, event.getLength()),
+				() -> assertEquals(2, event.getWeightValue()));
 	}
 	
 	@Test

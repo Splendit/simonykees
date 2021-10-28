@@ -27,6 +27,7 @@ import eu.jsparrow.i18n.Messages;
 public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 
 	public static final String ID = FunctionalInterfaceResolver.class.getName();
+	private static final int WEIGHT_VALUE = 3;
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
@@ -58,7 +59,7 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.FunctionalInterfaceResolver_name,
 				Messages.FunctionalInterfaceResolver_message, javaElement,
 				highlightLenght, classInstanceCreation,
-				representingNode);
+				representingNode, WEIGHT_VALUE);
 		addMarkerEvent(event);
 	}
 

@@ -25,6 +25,7 @@ import eu.jsparrow.i18n.Messages;
 public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBeforeInstanceofASTVisitor {
 
 	public static final String ID = RemoveNullCheckBeforeInstanceofResolver.class.getName();
+	private static final int WEIGHT_VALUE = 1;
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
@@ -55,7 +56,7 @@ public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBefo
 		ASTNode newNode = createRepresentingNode(infixExpression, expression);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.RemoveNullCheckBeforeInstanceofResolver_name,
 				Messages.RemoveNullCheckBeforeInstanceofResolver_message,
-				javaElement, 0, leftOperand, newNode);
+				javaElement, 0, leftOperand, newNode, WEIGHT_VALUE);
 		addMarkerEvent(event);
 	}
 

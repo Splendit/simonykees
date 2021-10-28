@@ -51,7 +51,8 @@ class EnumsWithoutEqualsResolverTest extends UsesSimpleJDTUnitFixture {
 				() -> assertEquals("roundingMode == RoundingMode.UP", event.getCodePreview()),
 				() -> assertEquals(31, event.getHighlightLength()),
 				() -> assertEquals(177, event.getOffset()),
-				() -> assertEquals(36, event.getLength()));
+				() -> assertEquals(36, event.getLength()),
+				() -> assertEquals(1, event.getWeightValue()));
 	}
 	
 	@Test

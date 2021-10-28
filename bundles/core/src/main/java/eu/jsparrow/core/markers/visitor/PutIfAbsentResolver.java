@@ -27,6 +27,7 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
 public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 
 	public static final String ID = PutIfAbsentResolver.class.getName();
+	private static final int WEIGHT_VALUE = 2;
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
 
@@ -53,7 +54,7 @@ public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 		ExpressionStatement newNode = createRepresentingNode(methodInvocation);
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.PutIfAbsentResolver_name,
 				Messages.PutIfAbsentResolver_message,
-				javaElement, 0, methodInvocation, newNode);
+				javaElement, 0, methodInvocation, newNode, WEIGHT_VALUE);
 		addMarkerEvent(event);
 	}
 
