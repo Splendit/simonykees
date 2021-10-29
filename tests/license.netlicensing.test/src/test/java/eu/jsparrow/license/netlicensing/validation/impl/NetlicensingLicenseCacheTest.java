@@ -13,8 +13,7 @@ import org.junit.jupiter.api.Test;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.testhelper.NetlicensingValidationResultFactory;
 
-@SuppressWarnings("nls")
-public class NetlicensingLicenseCacheTest {
+class NetlicensingLicenseCacheTest {
 
 	private NetlicensingLicenseCache licenseCache;
 
@@ -30,12 +29,12 @@ public class NetlicensingLicenseCacheTest {
 	}
 
 	@Test
-	public void get_withNewKey_returnsNull() {
+	void get_withNewKey_returnsNull() {
 		assertNull(licenseCache.get("key"));
 	}
 
 	@Test
-	public void get_withExpiredEntry_returnsNull() {
+	void get_withExpiredEntry_returnsNull() {
 		NetlicensingValidationResult result = NetlicensingValidationResultFactory.create(ZonedDateTime.now()
 			.minusDays(5));
 		String key = "key";
@@ -46,7 +45,7 @@ public class NetlicensingLicenseCacheTest {
 	}
 
 	@Test
-	public void get_withExistingEntry_returnsEntry() {
+	void get_withExistingEntry_returnsEntry() {
 		String key = "key";
 		NetlicensingValidationResult expected = NetlicensingValidationResultFactory.create(ZonedDateTime.now()
 			.plusDays(5));
@@ -59,7 +58,7 @@ public class NetlicensingLicenseCacheTest {
 	}
 
 	@Test
-	public void update_withExistingEntry_replacesOldEntry() {
+	void update_withExistingEntry_replacesOldEntry() {
 		String key = "key";
 		licenseCache.getEntries().put(key, NetlicensingValidationResultFactory.create());
 
@@ -73,7 +72,7 @@ public class NetlicensingLicenseCacheTest {
 	}
 
 	@Test
-	public void update_withEmptyCache_addsNewEntry() {
+	void update_withEmptyCache_addsNewEntry() {
 		NetlicensingValidationResult expected = NetlicensingValidationResultFactory.create();
 
 		licenseCache.updateCache("key", expected);

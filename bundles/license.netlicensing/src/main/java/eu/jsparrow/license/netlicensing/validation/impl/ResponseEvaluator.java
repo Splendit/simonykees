@@ -155,10 +155,15 @@ public class ResponseEvaluator {
 			.plusYears(1);
 		ZonedDateTime offlineExpiration = ZonedDateTime.now()
 			.plusMinutes(OFFLINE_VALIDITY_DURATION_MINUTES);
-		return new NetlicensingValidationResult(LicenseType.PAY_PER_USE, key, payPerUse.isValid(),
-				status.getUserMessage(),
-				expirationDate,
-				offlineExpiration);
+		return new NetlicensingValidationResult.Builder()
+			.withLicenseType(LicenseType.PAY_PER_USE)
+			.withKey(key)
+			.withValid(payPerUse.isValid())
+			.withDetail(status.getUserMessage())
+			.withExpirationDate(expirationDate)
+			.withOfflineExpirationTime(offlineExpiration)
+			.withCredit(payPerUse.getRemainingQuantity())
+			.build();
 	}
 
 	private NetlicensingValidationResult createValidationResult(LicenseType licenseType, boolean valid,
@@ -173,8 +178,14 @@ public class ResponseEvaluator {
 				"Creating validation result with type={}, valid={}, expireDate={}, offlineExpire={}, statusInfo={}", //$NON-NLS-1$
 				licenseType, valid, expireDate, offlineExpire, statusInfo);
 
-		return new NetlicensingValidationResult(licenseType, key, valid, statusInfo.getUserMessage(), expireDate,
-				offlineExpire);
+		return new NetlicensingValidationResult.Builder()
+			.withLicenseType(licenseType)
+			.withKey(key)
+			.withValid(valid)
+			.withDetail(statusInfo.getUserMessage())
+			.withExpirationDate(expireDate)
+			.withOfflineExpirationTime(offlineExpire)
+			.build();
 	}
 
 }
