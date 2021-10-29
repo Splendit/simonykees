@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -22,9 +23,12 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
@@ -188,7 +192,26 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		if (licenseUtil.isFreeLicense()) {
 			return licenseUtil.isActiveRegistration()  && containsOnlyFreeRules();
 		}
-		return super.canFinish();
+		// TODO: clean me
+		int sum = refactoringPipeline.getRules()
+		.stream()
+		.mapToInt(rule -> measureWeight(rule))
+		.sum();
+		
+		LicenseValidationResult result = licenseUtil.getValidationResult();
+		int availableCredit = result.getCredit().orElse(sum);
+		// TODO: ADD a license utility function to verify credit in pay per use model.  
+		
+		boolean enoughCredit = sum <= availableCredit;
+		
+		return enoughCredit && super.canFinish();
+	}
+	
+	private int measureWeight(RefactoringRule rule) {
+		RuleApplicationCount numIssues = RuleApplicationCount.getFor(rule);
+		RuleDescription description = rule.getRuleDescription();
+		Duration duration = description.getRemediationCost(); //TODO: implement a way to get the weightValue from the rule. 
+		return numIssues.toInt() * (int) duration.toMinutes();
 	}
 
 	private boolean containsOnlyFreeRules() {
@@ -220,6 +243,12 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 			try {
 				refactoringPipeline.commitRefactoring();
+				// TODO: clean me
+				int sum = refactoringPipeline.getRules()
+				.stream()
+				.mapToInt(rule -> measureWeight(rule))
+				.sum();
+				licenseUtil.reserveQuantity(sum);
 				Activator.setRunning(false);
 			} catch (RefactoringException e) {
 				synchronizeWithUIShowError(e);
