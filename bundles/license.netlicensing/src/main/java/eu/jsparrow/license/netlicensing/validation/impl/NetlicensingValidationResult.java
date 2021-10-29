@@ -8,7 +8,7 @@ import eu.jsparrow.license.api.LicenseValidationResult;
 public class NetlicensingValidationResult extends LicenseValidationResult {
 
 	private ZonedDateTime offlineExpirationTime;
-	private Integer credit = 0;
+
 
 	public NetlicensingValidationResult(LicenseType licenseType, String key, boolean valid, String detail,
 			ZonedDateTime expirationDate) {
@@ -22,10 +22,6 @@ public class NetlicensingValidationResult extends LicenseValidationResult {
 
 	public ZonedDateTime getExpirationTime() {
 		return offlineExpirationTime;
-	}
-
-	public Integer getCredit() {
-		return this.credit;
 	}
 
 	public static class Builder {
