@@ -121,9 +121,12 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 	@Override
 	public void reserveQuantity(int quantity) throws ValidationException {
 		if(model.getType() != LicenseType.PAY_PER_USE) {
+			logger.warn("Can only reserve quantity in Pay-Per-Use license. Ignoring reserveQuantity call"); //$NON-NLS-1$
 			return;
 		}
 		ValidationParameters parameters = parametersFactory.createPayPerUseReserveParameters(model, quantity);
-		validationRequest.send(model.getKey(), parameters);
+		NetlicensingValidationResult licensingValidationResult = validationRequest.send(model.getKey(), parameters);
+		String licenseeNumber = model.getKey();
+		licenseCache.updateCache(licenseeNumber, licensingValidationResult);
 	}
 }
