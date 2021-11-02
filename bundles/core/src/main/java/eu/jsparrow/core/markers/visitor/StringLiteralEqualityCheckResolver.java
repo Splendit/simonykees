@@ -12,8 +12,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.rule.RuleDescriptionFactory;
+import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.visitor.impl.StringLiteralEqualityCheckASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RuleDescription;
 
 /**
  * A visitor for resolving one issue of type
@@ -25,12 +28,15 @@ import eu.jsparrow.i18n.Messages;
 public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityCheckASTVisitor {
 
 	public static final String ID = StringLiteralEqualityCheckResolver.class.getName();
-	private static final int WEIGHT_VALUE = 3;
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
+	private RuleDescription description;
 
 	public StringLiteralEqualityCheckResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
+		this.description = RuleDescriptionFactory
+				.findByRuleId(StringLiteralEqualityCheckRule.RULE_ID)
+				.orElseGet(() -> new StringLiteralEqualityCheckRule().getRuleDescription());
 	}
 
 	@Override
@@ -50,9 +56,10 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 	@Override
 	public void addMarkerEvent(StringLiteral stringLiteral, Expression expression) {
 		MethodInvocation newNode = createRepresentingNode(expression, stringLiteral);
+		int credit = description.getCredit();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.StringLiteralEqualityCheckResolver_name,
 				Messages.StringLiteralEqualityCheckResolver_message,
-				javaElement, 0, stringLiteral, newNode, WEIGHT_VALUE);
+				javaElement, 0, stringLiteral, newNode, credit);
 		addMarkerEvent(event);
 	}
 

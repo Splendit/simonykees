@@ -13,8 +13,11 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.rule.RuleDescriptionFactory;
+import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 
 /**
@@ -27,12 +30,15 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
 public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTVisitor {
 
 	public static final String ID = UseIsEmptyOnCollectionsResolver.class.getName();
-	private static final int WEIGHT_VALUE = 2;
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
+	private RuleDescription description;
 
 	public UseIsEmptyOnCollectionsResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
+		this.description = RuleDescriptionFactory
+				.findByRuleId(UseIsEmptyOnCollectionsRule.RULE_ID)
+				.orElseGet(() -> new UseIsEmptyOnCollectionsRule().getRuleDescription());
 	}
 
 	@Override
@@ -52,9 +58,10 @@ public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTV
 	@Override
 	public void addMarkerEvent(InfixExpression parent, Expression varExpression) {
 		ASTNode newNode = createRepresentationNode(parent, varExpression);
+		int credit = description.getCredit();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.UseIsEmptyOnCollectionsResolver_name,
 				Messages.UseIsEmptyOnCollectionsResolver_message,
-				javaElement, 0, parent, newNode, WEIGHT_VALUE);
+				javaElement, 0, parent, newNode, credit);
 		addMarkerEvent(event);
 	}
 

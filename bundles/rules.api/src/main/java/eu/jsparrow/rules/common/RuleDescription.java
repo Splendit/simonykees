@@ -2,7 +2,10 @@ package eu.jsparrow.rules.common;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -22,12 +25,25 @@ public class RuleDescription {
 	private final List<Tag> tags;
 
 	private final Duration remediationCost;
+	
+	private static final Map<Integer, Integer> remediationPriceMapping = initRemediationPriceMapping();
 
 	public RuleDescription(String name, String description, Duration remediationCost, List<Tag> tags) {
 		this.name = name;
 		this.description = description;
 		this.remediationCost = remediationCost;
 		this.tags = tags;
+	}
+
+	private static Map<Integer, Integer> initRemediationPriceMapping() {
+		Map<Integer, Integer> map = new HashMap<>();
+		map.put(1, 1);
+		map.put(2,  2);
+		map.put(5, 3);
+		map.put(10, 4);
+		map.put(15, 5);
+		map.put(30, 10);
+		return Collections.unmodifiableMap(map);
 	}
 
 	public RuleDescription(String name, String description, Duration remediationCost, Tag... tags) {
@@ -63,4 +79,9 @@ public class RuleDescription {
 		return remediationCost;
 	}
 
+	public int getCredit() {
+		int remediation = (int)remediationCost.toMinutes();
+		return remediationPriceMapping.get(remediation);
+		
+	}
 }

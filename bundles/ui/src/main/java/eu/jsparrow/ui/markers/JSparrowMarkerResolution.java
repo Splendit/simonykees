@@ -70,9 +70,7 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 		IEditorPart editor = page.getActiveEditor();
 		ITextEditor textEditor = editor.getAdapter(ITextEditor.class);
 		textEditor.selectAndReveal(this.offset, this.newLength);
-		// TODO: update the pay per use license model. Get the cost number from the marker properties?
 		LicenseUtil licenseUtil = LicenseUtil.get();
-		// TODO: run async
 		licenseUtil.reserveQuantity(weightValue);
 		
 	}

@@ -14,8 +14,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.rule.RuleDescriptionFactory;
+import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.visitor.impl.PutIfAbsentASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.builder.NodeBuilder;
 
 /**
@@ -27,12 +30,15 @@ import eu.jsparrow.rules.common.builder.NodeBuilder;
 public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 
 	public static final String ID = PutIfAbsentResolver.class.getName();
-	private static final int WEIGHT_VALUE = 2;
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
+	private RuleDescription description;
 
 	public PutIfAbsentResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
+		this.description = RuleDescriptionFactory
+				.findByRuleId(PutIfAbsentRule.RULE_ID)
+				.orElseGet(() -> new PutIfAbsentRule().getRuleDescription());
 	}
 
 	@Override
@@ -52,9 +58,10 @@ public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 	@Override
 	public void addMarkerEvent(MethodInvocation methodInvocation) {
 		ExpressionStatement newNode = createRepresentingNode(methodInvocation);
+		int credit = description.getCredit();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.PutIfAbsentResolver_name,
 				Messages.PutIfAbsentResolver_message,
-				javaElement, 0, methodInvocation, newNode, WEIGHT_VALUE);
+				javaElement, 0, methodInvocation, newNode, credit);
 		addMarkerEvent(event);
 	}
 

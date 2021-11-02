@@ -1,7 +1,6 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -192,11 +191,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		if (licenseUtil.isFreeLicense()) {
 			return licenseUtil.isActiveRegistration()  && containsOnlyFreeRules();
 		}
-		// TODO: clean me
-		int sum = refactoringPipeline.getRules()
-		.stream()
-		.mapToInt(rule -> measureWeight(rule))
-		.sum();
+		int sum = findTotalRequiredCredit();
 		
 		LicenseValidationResult result = licenseUtil.getValidationResult();
 		int availableCredit = result.getCredit().orElse(sum);
@@ -206,12 +201,18 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		
 		return enoughCredit && super.canFinish();
 	}
+
+	private int findTotalRequiredCredit() {
+		return refactoringPipeline.getRules()
+		.stream()
+		.mapToInt(this::measureWeight)
+		.sum();
+	}
 	
 	private int measureWeight(RefactoringRule rule) {
 		RuleApplicationCount numIssues = RuleApplicationCount.getFor(rule);
 		RuleDescription description = rule.getRuleDescription();
-		Duration duration = description.getRemediationCost(); //TODO: implement a way to get the weightValue from the rule. 
-		return numIssues.toInt() * (int) duration.toMinutes();
+		return numIssues.toInt() * description.getCredit();
 	}
 
 	private boolean containsOnlyFreeRules() {
@@ -243,11 +244,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 			try {
 				refactoringPipeline.commitRefactoring();
-				// TODO: clean me
-				int sum = refactoringPipeline.getRules()
-				.stream()
-				.mapToInt(rule -> measureWeight(rule))
-				.sum();
+				int sum = findTotalRequiredCredit();
 				licenseUtil.reserveQuantity(sum);
 				Activator.setRunning(false);
 			} catch (RefactoringException e) {

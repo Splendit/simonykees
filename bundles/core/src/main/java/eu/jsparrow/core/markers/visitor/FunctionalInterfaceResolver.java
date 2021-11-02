@@ -14,8 +14,12 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 import eu.jsparrow.core.markers.RefactoringEventImpl;
+import eu.jsparrow.core.rule.RuleDescriptionFactory;
+import eu.jsparrow.core.rule.impl.EnumsWithoutEqualsRule;
+import eu.jsparrow.core.rule.impl.FunctionalInterfaceRule;
 import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RuleDescription;
 
 /**
  * A visitor for resolving one issue of type
@@ -27,13 +31,15 @@ import eu.jsparrow.i18n.Messages;
 public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 
 	public static final String ID = FunctionalInterfaceResolver.class.getName();
-	private static final int WEIGHT_VALUE = 3;
 
 	private IJavaElement javaElement;
 	private Predicate<ASTNode> positionChecker;
+	private RuleDescription description;
 
 	public FunctionalInterfaceResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
+		this.description = RuleDescriptionFactory.findByRuleId(EnumsWithoutEqualsRule.RULE_ID)
+				.orElseGet(() -> new FunctionalInterfaceRule().getRuleDescription());
 	}
 
 	@Override
@@ -56,10 +62,11 @@ public class FunctionalInterfaceResolver extends FunctionalInterfaceASTVisitor {
 		LambdaExpression representingNode = createRepresentingNode(parameters, block);
 		int highlightLenght = representingNode.toString()
 			.length();
+		int credit = description.getCredit();
 		RefactoringEventImpl event = new RefactoringEventImpl(ID, Messages.FunctionalInterfaceResolver_name,
 				Messages.FunctionalInterfaceResolver_message, javaElement,
 				highlightLenght, classInstanceCreation,
-				representingNode, WEIGHT_VALUE);
+				representingNode, credit);
 		addMarkerEvent(event);
 	}
 
