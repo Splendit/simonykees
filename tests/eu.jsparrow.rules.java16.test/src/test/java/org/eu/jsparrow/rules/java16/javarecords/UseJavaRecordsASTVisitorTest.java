@@ -92,8 +92,8 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 					+ "				this.y = x;\n"
 					+ "			}",
 			""
-					+ "			this.x = Integer.MIN_VALUE;\n"
-					+ "			this.y = Integer.MAX_VALUE;",
+					+ "			this.x = 0;\n"
+					+ "			this.y = 0;",
 			""
 					+ "			this.x = y;\n"
 					+ "			this.y = x;"
@@ -122,4 +122,171 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 		assertChange(original, expected);
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = { "x", "this.x" })
+	public void visit_ComponentGetterRemoved_shouldTransform(String returnedExpression) throws Exception {
+		String original = "" +
+				"	private static final class Point {\n"
+				+ "		\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		Point(int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "		\n"
+				+ "		int x() {\n"
+				+ "			return " + returnedExpression + ";\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	record Point(int x) {\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			""
+					+ "			System.out.println(x);\n"
+					+ "			return this.x;",
+			""
+					+ "return 0;",
+			""
+					+ "return new NestedClassWithPrivateFinalIntX(0).x;"
+	})
+	public void visit_ComponentGettersNotRemoved_shouldTransform(String componentGetterStatements) throws Exception {
+		String original = "" +
+				"	private static final class NestedClassWithPrivateFinalIntX {\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		NestedClassWithPrivateFinalIntX(int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		int x() {\n"
+				+ componentGetterStatements + "\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	record NestedClassWithPrivateFinalIntX(int x) {\n"
+				+ "		;\n"
+				+ "		int x() {\n"
+				+ componentGetterStatements + "\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_EqualsMethodToRemove_shouldTransform() throws Exception {
+		String original = "" +
+				"	private static final class XWrapper {\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		XWrapper(int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "		\n"
+				+ "		public boolean equals(Object other) {\n"
+				+ "			return this == other;\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	record XWrapper(int x) {\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			""
+					+ "		public boolean equals() {\n"
+					+ "			return false;\n"
+					+ "		}",
+			""
+					+ "		public boolean equals(XWrapper other) {\n"
+					+ "			return this.x == other.x;\n"
+					+ "		}"
+	})
+	public void visit_EqualsMethodNotToRemove_shouldTransform(String equalsMethod) throws Exception {
+		String original = "" +
+				"	private static final class XWrapper {\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		XWrapper(int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "		\n"
+				+ equalsMethod + "\n"
+				+ "	}";
+
+		String expected = "" +
+				"	record XWrapper(int x) {\n"
+				+ "		;\n"
+				+ equalsMethod + "\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	
+	
+	@Test
+	public void visit_HashCodeMethodToRemove_shouldTransform() throws Exception {
+		String original = "" +
+				"	private static final class XWrapper {\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		XWrapper(int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "		\n"
+				+ "		public int hashCode() {\n"
+				+ "			return 0;\n"
+				+ "		}	\n"
+				+ "	}";
+
+		String expected = "" +
+				"	record XWrapper(int x) {\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_HashCodeMethodNotToRemove_shouldTransform() throws Exception {
+		String original = "" +
+				"	private static final class XWrapper {\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		XWrapper(int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "		\n"
+				+ "		public int hashCode(int i) {\n"
+				+ "			return i + i;\n"
+				+ "		}	\n"
+				+ "	}";
+
+		String expected = "" +
+				"	record XWrapper(int x) {\n"
+				+ "		;\n"
+				+ "		public int hashCode(int i) {\n"
+				+ "			return i + i;\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
 }
