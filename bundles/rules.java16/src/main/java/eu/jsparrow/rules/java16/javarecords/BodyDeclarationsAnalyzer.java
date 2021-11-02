@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -157,38 +158,34 @@ public class BodyDeclarationsAnalyzer {
 	private boolean canRemoveCanonicalConstructor(MethodDeclaration canonicalConstructor,
 			List<String> componentIdentifiers) {
 
-		List<Assignment> assignments = ASTNodeUtil.returnTypedList(canonicalConstructor.getBody()
-			.statements(), ExpressionStatement.class)
-			.stream()
-			.map(ExpressionStatement::getExpression)
-			.filter(Assignment.class::isInstance)
-			.map(Assignment.class::cast)
-			.collect(Collectors.toList());
+		List<Statement> statements = ASTNodeUtil.convertToTypedList(canonicalConstructor.getBody()
+			.statements(), Statement.class);
 
-		if (assignments.size() != componentIdentifiers.size()) {
+		if (statements.size() != componentIdentifiers.size()) {
 			return false;
 		}
 
-		for (String identifier : componentIdentifiers) {
-			if (assignments
-				.stream()
-				.noneMatch(assignment -> isAssigningParameterToFieldWithSameName(assignment, identifier))) {
+		for (Statement statement : statements) {
+			if (statement.getNodeType() != ASTNode.EXPRESSION_STATEMENT) {
+				return false;
+			}
+			Expression expression = ((ExpressionStatement) statement).getExpression();
+
+			if (expression.getNodeType() != ASTNode.ASSIGNMENT) {
+				return false;
+			}
+			Assignment assignment = (Assignment) expression;
+
+			Expression rightHandSide = assignment.getRightHandSide();
+			if (rightHandSide.getNodeType() != ASTNode.SIMPLE_NAME) {
+				return false;
+			}
+			String rightHandSideIdentifier = ((SimpleName) rightHandSide).getIdentifier();
+			if (!isThisFieldAccessMatchingIdentifier(assignment.getLeftHandSide(), rightHandSideIdentifier)) {
 				return false;
 			}
 		}
 		return true;
-	}
-
-	private boolean isAssigningParameterToFieldWithSameName(Assignment assignment, String expectedIdentifier) {
-		if (!isThisFieldAccessMatchingIdentifier(assignment.getLeftHandSide(), expectedIdentifier)) {
-			return false;
-		}
-		Expression rightHandSide = assignment.getRightHandSide();
-		if (rightHandSide.getNodeType() != ASTNode.SIMPLE_NAME) {
-			return false;
-		}
-		String parameterIdentifier = ((SimpleName) rightHandSide).getIdentifier();
-		return parameterIdentifier.equals(expectedIdentifier);
 	}
 
 	static boolean isThisFieldAccessMatchingIdentifier(Expression expression, String expectedIdentifier) {

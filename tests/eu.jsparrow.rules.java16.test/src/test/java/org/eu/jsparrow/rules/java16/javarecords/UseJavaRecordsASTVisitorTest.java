@@ -4,6 +4,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.rules.java16.javarecords.UseJavaRecordsASTVisitor;
 
@@ -22,96 +24,102 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 	}
 
 	@Test
-	public void visit_ComplexCanonicalConstructor_shouldTransform() throws Exception {
+	public void visit_NestedClassWithPrivateFinalIntX_shouldTransform() throws Exception {
 		String original = "" +
-				"	public void methodWithLocalClass() {\n"
-				+ "		class LocalClass {\n"
-				+ "			private final int x, y, z;\n"
+				"	private static final class NestedClassWithPrivateFinalIntX {\n"
 				+ "\n"
-				+ "			public LocalClass(int x, int y, int z) {\n"
+				+ "		private final int x;\n"
 				+ "\n"
-				+ "				if (x < 100 && y < 100 && z < 100) {\n"
-				+ "					this.x = x;\n"
-				+ "					this.y = y;\n"
-				+ "					this.z = z;\n"
-				+ "				} else {\n"
-				+ "					this.x = x / 100;\n"
-				+ "					this.y = y / 100;\n"
-				+ "					this.z = z / 100;\n"
-				+ "				}\n"
-				+ "			}\n"
-				+ "\n"
-				+ "			public LocalClass(byte x, byte y, byte z) {\n"
-				+ "				this((int) x, (int) y, (int) z);\n"
-				+ "			}\n"
-				+ "\n"
-				+ "			public LocalClass() {\n"
-				+ "				this((byte) 0, (byte) 0, (byte) 0);\n"
-				+ "			}\n"
+				+ "		NestedClassWithPrivateFinalIntX (int x) {\n"
+				+ "			this.x = x;\n"
 				+ "		}\n"
-				+ "\n"
 				+ "	}";
 
 		String expected = "" +
-				"	public void methodWithLocalClass() {\n"
-				+ "		record LocalClass(int x, int y, int z) {\n"
-				+ "			;\n" //  TODO: discuss Unexpected empty statement
-				+ "			public LocalClass(int x, int y, int z) {\n"
-				+ "\n"
-				+ "				if (x < 100 && y < 100 && z < 100) {\n"
-				+ "					this.x = x;\n"
-				+ "					this.y = y;\n"
-				+ "					this.z = z;\n"
-				+ "				} else {\n"
-				+ "					this.x = x / 100;\n"
-				+ "					this.y = y / 100;\n"
-				+ "					this.z = z / 100;\n"
-				+ "				}\n"
-				+ "			}\n"
-				+ "\n"
-				+ "			public LocalClass(byte x, byte y, byte z) {\n"
-				+ "				this((int) x, (int) y, (int) z);\n"
-				+ "			}\n"
-				+ "\n"
-				+ "			public LocalClass() {\n"
-				+ "				this((byte) 0, (byte) 0, (byte) 0);\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "\n"
+				"	record NestedClassWithPrivateFinalIntX(int x) {\n"
 				+ "	}";
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
-	public void visit_LocalClassToRecord_shouldTransform() throws Exception {
+	public void visit_NestedClassWithStaticField_shouldTransform() throws Exception {
 		String original = "" +
-				"	public void methodWithLocalClassPoint() {\n" +
-				"		class Point {\n" +
-				"			private final int x;\n" +
-				"			private final int y;\n" +
-				"\n" +
-				"			Point(int x, int y) {\n" +
-				"				this.x = x;\n" +
-				"				this.y = y;\n" +
-				"			}\n" +
-				"\n" +
-				"			public int x() {\n" +
-				"				return x;\n" +
-				"			}\n" +
-				"\n" +
-				"			public int y() {\n" +
-				"				return y;\n" +
-				"			}\n" +
-				"		}\n" +
-				"	}";
+				"	private static final class NestedClassWithPrivateFinalIntX {\n"
+				+ "		\n"
+				+ "		static final int X_MAX = 1000;\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		NestedClassWithPrivateFinalIntX(int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "	}";
 
 		String expected = "" +
-				"	public void methodWithLocalClassPoint() {\n" +
-				"		record Point(int x, int y) {\n" +
-				"		}\n" +
-				"	}";
+				"	record NestedClassWithPrivateFinalIntX (int x) {\n"
+				+ "		;\n"
+				+ "		static final int X_MAX = 1000;\n"
+				+ "	}";
 
 		assertChange(original, expected);
 	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			""
+					+ "			System.out.println(x + \",\" + y);\n"
+					+ "			this.x = x;\n"
+					+ "			this.y = y;",
+			""
+					+ "			if (x < 100) {\n"
+					+ "				this.x = x;\n"
+					+ "			} else {\n"
+					+ "				this.x = 100;\n"
+					+ "			}\n"
+					+ "			if (y < 100) {\n"
+					+ "				this.y = y;\n"
+					+ "			} else {\n"
+					+ "				this.y = 100;\n"
+					+ "			}",
+			""
+					+ "			System.out.println(x + \",\" + y);\n"
+					+ "			if (x > y) {\n"
+					+ "				this.x = x;\n"
+					+ "				this.y = y;\n"
+					+ "			} else {\n"
+					+ "				this.x = y;\n"
+					+ "				this.y = x;\n"
+					+ "			}",
+			""
+					+ "			this.x = Integer.MIN_VALUE;\n"
+					+ "			this.y = Integer.MAX_VALUE;",
+			""
+					+ "			this.x = y;\n"
+					+ "			this.y = x;"
+
+	})
+	public void visit_CanonicalConstructorNotRemoved_shouldTransform(String constructorStatements) throws Exception {
+		String original = "" +
+				"	private static final class Point {\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "		private final int y;\n"
+				+ "\n"
+				+ "		Point(int x, int y) {\n"
+				+ constructorStatements + "\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	record Point(int x, int y) {\n"
+				+ "		;\n"
+				+ "		Point(int x, int y) {\n"
+				+ constructorStatements + "\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
 }
