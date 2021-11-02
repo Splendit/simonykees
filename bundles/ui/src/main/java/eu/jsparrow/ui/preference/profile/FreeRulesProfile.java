@@ -39,26 +39,26 @@ public class FreeRulesProfile implements SimonykeesProfile {
 
 	public FreeRulesProfile() {
 		enabledRulesIds = Arrays.asList(
-				TryWithResourceRule.TRY_WITH_RESOURCE_RULE_ID,
-				OverrideAnnotationRule.OVERRIDE_ANNOTATION_RULE_ID,
-				MultiVariableDeclarationLineRule.MULTI_VARIABLE_DECLARATION_LINE_RULE_ID,
-				EnumsWithoutEqualsRule.ENUMS_WITHOUT_EQUALS_RULE_ID,
-				RemoveDoubleNegationRule.REMOVE_DOUBLE_NEGATION_RULE_ID,
+				TryWithResourceRule.RULE_ID,
+				OverrideAnnotationRule.RULE_ID,
+				MultiVariableDeclarationLineRule.RULE_ID,
+				EnumsWithoutEqualsRule.RULE_ID,
+				RemoveDoubleNegationRule.RULE_ID,
 				OptionalFilterRule.OPTIONAL_FILTER_RULE_ID,
-				RemoveNullCheckBeforeInstanceofRule.REMOVE_NULL_CHECKS_BEFORE_INSTANCE_OF_RULE_ID,
-				CollapseIfStatementsRule.COLLAPSE_IF_STATEMENTS_RULE_ID,
-				RemoveEmptyStatementRule.REMOVE_EMPTY_STATEMENT_RULE_ID,
-				RemoveUnnecessaryThrownExceptionsRule.REMOVE_UNNECESSARY_THROWN_EXCEPTIONS_RULE_ID,
-				UseSecureRandomRule.USE_SECURE_RANDOM_RULE_ID,
-				InefficientConstructorRule.INEFFICIENT_CONSTRUCTOR_RULE_ID,
-				PrimitiveBoxedForStringRule.PRIMITIVE_BOXED_FOR_STRING_RULE_ID,
-				RemoveToStringOnStringRule.REMOVE_TO_STRING_ON_STRING_RULE_ID,
-				UseOffsetBasedStringMethodsRule.USE_OFFSET_BASED_STRING_METHODS_RULE_ID,
-				StringLiteralEqualityCheckRule.STRING_LITERAL_EQUALITY_CHECK_RULE_ID,
-				UseIsEmptyOnCollectionsRule.USE_IS_EMPTY_ON_COLLECTIONS_RULE_ID,
+				RemoveNullCheckBeforeInstanceofRule.RULE_ID,
+				CollapseIfStatementsRule.RULE_ID,
+				RemoveEmptyStatementRule.RULE_ID,
+				RemoveUnnecessaryThrownExceptionsRule.RULE_ID,
+				UseSecureRandomRule.RULE_ID,
+				InefficientConstructorRule.RULE_ID,
+				PrimitiveBoxedForStringRule.RULE_ID,
+				RemoveToStringOnStringRule.RULE_ID,
+				UseOffsetBasedStringMethodsRule.RULE_ID,
+				StringLiteralEqualityCheckRule.RULE_ID,
+				UseIsEmptyOnCollectionsRule.RULE_ID,
 				ForToForEachRule.FOR_TO_FOR_EACH_RULE_ID,
-				LambdaToMethodReferenceRule.LAMBDA_TO_METHOD_REFERENCE_RULE_ID,
-				OrganiseImportsRuleBase.ORGANISE_IMPORTS_RULE_ID);
+				LambdaToMethodReferenceRule.RULE_ID,
+				OrganiseImportsRuleBase.RULE_ID);
 	}
 
 	@Override
