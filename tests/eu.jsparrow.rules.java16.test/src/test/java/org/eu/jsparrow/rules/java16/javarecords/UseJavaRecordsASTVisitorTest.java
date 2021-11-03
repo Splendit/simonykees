@@ -317,4 +317,121 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "	}";
 		assertNoChange(original);
 	}
+	
+	@Test
+	public void visit_AmbiguousCanonicConstructor_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private static final class StringWrapper {\n"
+				+ "		private final String s;\n"
+				+ "\n"
+				+ "		public StringWrapper(String s) {\n"
+				+ "			this.s = s;\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		public StringWrapper() {\n"
+				+ "			this.s = \"\";\n"
+				+ "		}\n"
+				+ "	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_InstanceInitializer_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private static final class StringWrapper {\n"
+				+ "		private final String s;\n"
+				+ "\n"
+				+ "		{\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		public StringWrapper(String s) {\n"
+				+ "			this.s = s;\n"
+				+ "		}\n"
+				+ "\n"
+				+ "	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_FinalNonPrivateInstanceField_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private static final class StringWrapper {\n"
+				+ "		final String s;\n"
+				+ "\n"
+				+ "		public StringWrapper(String s) {\n"
+				+ "			this.s = s;\n"
+				+ "		}\n"
+				+ "\n"
+				+ "	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_PrivateNonFinalInstanceField_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private static final class StringWrapper {\n"
+				+ "		private String s;\n"
+				+ "\n"
+				+ "		public StringWrapper(String s) {\n"
+				+ "			this.s = s;\n"
+				+ "		}\n"
+				+ "	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_FieldWithInitializer_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private static final class StringWrapper {\n"
+				+ "		private final String s;\n"
+				+ "		private final int i = 0;\n"
+				+ "\n"
+				+ "		public StringWrapper(String s) {\n"
+				+ "			this.s = s;\n"
+				+ "		}\n"
+				+ "	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_FormalParametersCountNotMatching_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private static final class StringWrapper {\n"
+				+ "		private final String s;\n"
+				+ "		private final int length;\n"
+				+ "\n"
+				+ "		public StringWrapper(String s) {\n"
+				+ "			this.s = s;\n"
+				+ "			this.length = s.length();\n"
+				+ "		}\n"
+				+ "	}";
+		assertNoChange(original);
+	}
+
+	
+	@Test
+	public void visit_FormalParameterNameNotMatching_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private static final class StringWrapper {\n"
+				+ "		private final String s;\n"
+				+ "\n"
+				+ "		public StringWrapper(String str) {\n"
+				+ "			this.s = str;\n"
+				+ "		}\n"
+				+ "	}";
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_FormalParameterTypeNotMatching_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private static final class StringWrapper {\n"
+				+ "		private final String s;\n"
+				+ "\n"
+				+ "		public StringWrapper(int s) {\n"
+				+ "			this.s = String.valueOf(s);\n"
+				+ "		}\n"
+				+ "	}";
+		assertNoChange(original);
+	}
 }

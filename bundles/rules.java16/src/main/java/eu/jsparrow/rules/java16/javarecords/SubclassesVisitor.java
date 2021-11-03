@@ -27,7 +27,12 @@ public class SubclassesVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(TypeDeclaration node) {
-		if (node == rootTypeDeclaration || node.isInterface()) {
+		
+		if (node == rootTypeDeclaration) {
+			return true;
+		}
+
+		if (node.isInterface()) {
 			return true;
 		}
 

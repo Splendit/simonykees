@@ -205,7 +205,7 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 			"private static final",
 			"private static",
 			"static final"
-	
+
 	})
 	public void visit_PrivateStaticFinalNestedClassPoint_shouldTransform(String modifiers)
 			throws Exception {
@@ -213,11 +213,81 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 				"	" + modifiers + " class Point {\n"
 				+ BODY_DECLARATIONS
 				+ "	}";
-	
+
 		String expected = "" +
 				"	record Point(int x, int y) {\n" +
 				"	}";
-	
+
 		assertChange(original, expected);
 	}
+
+	@Test
+	public void visit_PointImplementsInterface_shouldTransform() throws Exception {
+
+		String original = "" +
+				"	private static class Point implements IPoint {\n"
+				+ BODY_DECLARATIONS
+				+ "	}\n"
+				+ "	\n"
+				+ "	interface IPoint{\n"
+				+ "		int x();\n"
+				+ "		int y();\n"
+				+ "	}";
+
+		String expected = "" +
+				"	record Point(int x, int y) {\n"
+				+ "	}\n"
+				+ "	\n"
+				+ "	interface IPoint{\n"
+				+ "		int x();\n"
+				+ "		int y();\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+	
+	@Test
+	public void visit_SubclassNotExtendingPoint_shouldTransform() throws Exception {
+		String original = "" +
+				"	private static class Point {\n"
+				+ "		private final int x;\n"
+				+ "		private final int y;\n"
+				+ "\n"
+				+ "		Point(int x, int y) {\n"
+				+ "			this.x = x;\n"
+				+ "			this.y = y;\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		public int x() {\n"
+				+ "			return x;\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		public int y() {\n"
+				+ "			return y;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private static class SuperClass {\n"
+				+ "\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private static class SubClass extends SuperClass {\n"
+				+ "\n"
+				+ "	}";
+
+		String expected = "" +
+				"	record Point(int x, int y) {\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private static class SuperClass {\n"
+				+ "\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private static class SubClass extends SuperClass {\n"
+				+ "\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
 }
