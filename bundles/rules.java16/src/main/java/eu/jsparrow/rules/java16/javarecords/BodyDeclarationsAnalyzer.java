@@ -69,19 +69,13 @@ public class BodyDeclarationsAnalyzer {
 			return Optional.empty();
 		}
 
-		List<String> componentIdentifiers = canonicalConstructorParameters
-			.stream()
-			.map(SingleVariableDeclaration::getName)
-			.map(SimpleName::getIdentifier)
-			.collect(Collectors.toList());
-
 		RecordGettersAnalyzer recordGettersAnalyzer = new RecordGettersAnalyzer();
 		if (!recordGettersAnalyzer.analyzeRecordGetters(methods, canonicalConstructorParameters)) {
 			return Optional.empty();
 		}
 		methods.removeAll(recordGettersAnalyzer.getRecordGetterstoRemove());
 
-		if (canRemoveCanonicalConstructor(assumedCanonicalConstructor, componentIdentifiers)) {
+		if (canRemoveCanonicalConstructor(assumedCanonicalConstructor, canonicalConstructorParameters)) {
 			methods.remove(assumedCanonicalConstructor);
 		}
 		methods.stream()
@@ -156,12 +150,12 @@ public class BodyDeclarationsAnalyzer {
 	}
 
 	private boolean canRemoveCanonicalConstructor(MethodDeclaration canonicalConstructor,
-			List<String> componentIdentifiers) {
+			List<SingleVariableDeclaration> canonicalConstructorParameters) {
 
 		List<Statement> statements = ASTNodeUtil.convertToTypedList(canonicalConstructor.getBody()
 			.statements(), Statement.class);
 
-		if (statements.size() != componentIdentifiers.size()) {
+		if (statements.size() != canonicalConstructorParameters.size()) {
 			return false;
 		}
 
