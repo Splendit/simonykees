@@ -166,7 +166,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "			this.x = x;\n"
 				+ "		}\n"
 				+ "\n"
-				+ "		int x() {\n"
+				+ "		public int x() {\n"
 				+ componentGetterStatements + "\n"
 				+ "		}\n"
 				+ "	}";
@@ -174,7 +174,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 		String expected = "" +
 				"	record NestedClassWithPrivateFinalIntX(int x) {\n"
 				+ "		;\n"
-				+ "		int x() {\n"
+				+ "		public int x() {\n"
 				+ componentGetterStatements + "\n"
 				+ "		}\n"
 				+ "	}";
@@ -238,8 +238,6 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 		assertChange(original, expected);
 	}
 
-	
-	
 	@Test
 	public void visit_HashCodeMethodToRemove_shouldTransform() throws Exception {
 		String original = "" +
@@ -262,7 +260,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_HashCodeMethodNotToRemove_shouldTransform() throws Exception {
 		String original = "" +
@@ -288,5 +286,35 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "	}";
 
 		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			""
+					+ "		int x() {\n"
+					+ "			return 0;\n"
+					+ "		}",
+			""
+					+ "		public static int x() {\n"
+					+ "			return 0;\n"
+					+ "		}",
+			""
+					+ "		public String x() {\n"
+					+ "			return String.valueOf(x);\n"
+					+ "		}",
+	})
+	public void visit_InvalidComponentGetters_shouldNotTransform(String invalidComponentGetter) throws Exception {
+		String original = "" +
+				"	private static final class XWrapper {\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		XWrapper(int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "		\n"
+				+ invalidComponentGetter + "\n"
+				+ "	}";
+		assertNoChange(original);
 	}
 }

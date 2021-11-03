@@ -3,6 +3,7 @@ package eu.jsparrow.rules.java16.javarecords;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -34,15 +35,20 @@ class RecordGettersAnalyzer {
 				.orElse(null);
 
 			if (recordGetter != null) {
+				if (Modifier.isStatic(recordGetter.getModifiers())) {
+					return false;
+				}
+				if (isRecordGetterToRemove(recordGetter, parameterIdentifier)) {
+					recordGetterstoRemove.add(recordGetter);
+				} else if (!Modifier.isPublic(recordGetter.getModifiers())) {
+					return false;
+				}
 				ITypeBinding returnType = recordGetter.resolveBinding()
 					.getReturnType();
 				ITypeBinding parameterTypeBinding = parameter.getType()
 					.resolveBinding();
 				if (!ClassRelationUtil.compareITypeBinding(returnType, parameterTypeBinding)) {
 					return false;
-				}
-				if (isRecordGetterToRemove(recordGetter, parameterIdentifier)) {
-					recordGetterstoRemove.add(recordGetter);
 				}
 			}
 		}
@@ -57,7 +63,7 @@ class RecordGettersAnalyzer {
 		if (returnStatements.isEmpty()) {
 			return false;
 		}
-		
+
 		ReturnStatement returnStatement = returnStatements.get(0);
 		Expression returnedExpression = returnStatement.getExpression();
 		if (returnedExpression == null) {
