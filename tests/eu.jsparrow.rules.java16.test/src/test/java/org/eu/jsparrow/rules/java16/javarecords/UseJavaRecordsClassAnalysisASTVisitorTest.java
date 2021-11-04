@@ -1,11 +1,15 @@
 package org.eu.jsparrow.rules.java16.javarecords;
 
+import java.util.stream.Stream;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import eu.jsparrow.rules.java16.javarecords.UseJavaRecordsASTVisitor;
 
@@ -130,9 +134,11 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 	@ValueSource(strings = {
 			"static abstract",
 			"private final",
-			"static"
+			"static",
+			"public static final",
+			"protected static final"
 	})
-	public void visit_NestedClassPoint_shouldNotTransform(String modifiers)
+	public void visit_NestedClassWithNotSupportedModifiers_shouldNotTransform(String modifiers)
 			throws Exception {
 		String original = "" +
 				"	" + modifiers + " class Point {\n"
@@ -200,17 +206,35 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 		assertNoChange(original);
 	}
 
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"private static final",
-			"private static",
-			"static final"
+	public static Stream<Arguments> modifierData() throws Exception {
+		return Stream.of(
+				Arguments.of("private static final", "private"),
+				Arguments.of("private static", "private"),
+				Arguments.of("static final", ""),
+				Arguments.of("private static final strictfp", "private strictfp"));
+	}
 
-	})
-	public void visit_PrivateStaticFinalNestedClassPoint_shouldTransform(String modifiers)
+	@ParameterizedTest
+	@MethodSource("modifierData")
+	public void visit_NestedClassWithSupportedModifiers_shouldTransform(String classModifiers, String recordModifiers)
 			throws Exception {
 		String original = "" +
-				"	" + modifiers + " class Point {\n"
+				"	" + classModifiers + " class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "	}";
+
+		String expected = "" +
+				"	" + recordModifiers + " record Point(int x, int y) {\n" +
+				"	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_StaticFinalNestedClassPoint_shouldTransform()
+			throws Exception {
+		String original = "" +
+				"	static final class Point {\n"
 				+ BODY_DECLARATIONS
 				+ "	}";
 
@@ -235,7 +259,7 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 				+ "	}";
 
 		String expected = "" +
-				"	record Point(int x, int y) {\n"
+				"	private record Point(int x, int y) {\n"
 				+ "	}\n"
 				+ "	\n"
 				+ "	interface IPoint{\n"
@@ -245,7 +269,7 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 
 		assertChange(original, expected);
 	}
-	
+
 	@Test
 	public void visit_SubclassNotExtendingPoint_shouldTransform() throws Exception {
 		String original = "" +
@@ -276,7 +300,7 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 				+ "	}";
 
 		String expected = "" +
-				"	record Point(int x, int y) {\n"
+				"	private record Point(int x, int y) {\n"
 				+ "	}\n"
 				+ "\n"
 				+ "	private static class SuperClass {\n"

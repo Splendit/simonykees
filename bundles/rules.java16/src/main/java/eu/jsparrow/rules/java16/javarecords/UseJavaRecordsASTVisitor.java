@@ -2,9 +2,11 @@ package eu.jsparrow.rules.java16.javarecords;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
@@ -23,14 +25,33 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 
-		if (isSupportedClassDeclaration(typeDeclaration)) {
+		List<Modifier> classModifiers = ASTNodeUtil
+			.convertToTypedList(typeDeclaration.modifiers(), Modifier.class);
+		boolean allClassModifiersSupported = classModifiers
+			.stream()
+			.allMatch(this::isSupportedClassModifier);
+
+		if (allClassModifiersSupported && isSupportedClassDeclaration(typeDeclaration)) {
 
 			BodyDeclarationsAnalyzer bodyDeclarationsAnalyzer = new BodyDeclarationsAnalyzer();
 			bodyDeclarationsAnalyzer.analyzeBodyDeclarations(typeDeclaration)
-				.ifPresent(this::transform);
+				.ifPresent(bodyDeclarationAnalysisResult -> {
+					List<Annotation> annotations = ASTNodeUtil.convertToTypedList(typeDeclaration.modifiers(),
+							Annotation.class);
+					List<Modifier> recordModifiers = classModifiers
+						.stream()
+						.filter(modifier -> !modifier.isStatic())
+						.filter(modifier -> !modifier.isFinal())
+						.collect(Collectors.toList());
 
+					transform(annotations, recordModifiers, bodyDeclarationAnalysisResult);
+				});
 		}
 		return true;
+	}
+
+	private boolean isSupportedClassModifier(Modifier modifier) {
+		return modifier.isPrivate() || modifier.isStatic() || modifier.isFinal() || modifier.isStrictfp();
 	}
 
 	private boolean isSupportedClassDeclaration(TypeDeclaration typeDeclaration) {
@@ -43,9 +64,6 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		int modifiers = typeDeclaration.getModifiers();
-		if (Modifier.isAbstract(modifiers)) {
-			return false;
-		}
 
 		if (typeDeclaration.getParent() == getCompilationUnit()) {
 			return Modifier.isFinal(modifiers);
@@ -106,12 +124,23 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void transform(BodyDeclarationsAnalysisResult analysisResult) {
+	private void transform(List<Annotation> annotations, List<Modifier> modifiers,
+			BodyDeclarationsAnalysisResult analysisResult) {
 		TypeDeclaration typeDeclarationToReplace = analysisResult.getTypeDeclarationToReplace();
 		AST ast = astRewrite.getAST();
 		RecordDeclaration recordDeclaration = ast.newRecordDeclaration();
 		SimpleName recordName = (SimpleName) astRewrite.createCopyTarget(typeDeclarationToReplace.getName());
 		recordDeclaration.setName(recordName);
+
+		List recordModifiers = recordDeclaration.modifiers();
+		annotations.stream()
+			.map(astRewrite::createCopyTarget)
+			.forEach(recordModifiers::add);
+
+		modifiers.stream()
+			.map(astRewrite::createCopyTarget)
+			.forEach(recordModifiers::add);
+
 		List recordComponents = recordDeclaration.recordComponents();
 		analysisResult.getCanonicalConstructorParameters()
 			.stream()

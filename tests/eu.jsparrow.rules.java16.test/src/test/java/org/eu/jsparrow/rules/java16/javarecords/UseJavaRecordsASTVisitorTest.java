@@ -36,7 +36,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "	}";
 
 		String expected = "" +
-				"	record NestedClassWithPrivateFinalIntX(int x) {\n"
+				"	private record NestedClassWithPrivateFinalIntX(int x) {\n"
 				+ "	}";
 
 		assertChange(original, expected);
@@ -57,7 +57,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "	}";
 
 		String expected = "" +
-				"	record NestedClassWithPrivateFinalIntX (int x) {\n"
+				"	private record NestedClassWithPrivateFinalIntX (int x) {\n"
 				+ "		;\n"
 				+ "		static final int X_MAX = 1000;\n"
 				+ "	}";
@@ -112,7 +112,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "	}";
 
 		String expected = "" +
-				"	record Point(int x, int y) {\n"
+				"	private record Point(int x, int y) {\n"
 				+ "		;\n"
 				+ "		Point(int x, int y) {\n"
 				+ constructorStatements + "\n"
@@ -140,7 +140,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "	}";
 
 		String expected = "" +
-				"	record Point(int x) {\n"
+				"	private record Point(int x) {\n"
 				+ "	}";
 
 		assertChange(original, expected);
@@ -172,7 +172,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "	}";
 
 		String expected = "" +
-				"	record NestedClassWithPrivateFinalIntX(int x) {\n"
+				"	private record NestedClassWithPrivateFinalIntX(int x) {\n"
 				+ "		;\n"
 				+ "		public int x() {\n"
 				+ componentGetterStatements + "\n"
@@ -199,7 +199,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "	}";
 
 		String expected = "" +
-				"	record XWrapper(int x) {\n"
+				"	private record XWrapper(int x) {\n"
 				+ "	}";
 
 		assertChange(original, expected);
@@ -230,7 +230,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "	}";
 
 		String expected = "" +
-				"	record XWrapper(int x) {\n"
+				"	private record XWrapper(int x) {\n"
 				+ "		;\n"
 				+ equalsMethod + "\n"
 				+ "	}";
@@ -255,7 +255,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "	}";
 
 		String expected = "" +
-				"	record XWrapper(int x) {\n"
+				"	private record XWrapper(int x) {\n"
 				+ "	}";
 
 		assertChange(original, expected);
@@ -278,7 +278,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "	}";
 
 		String expected = "" +
-				"	record XWrapper(int x) {\n"
+				"	private record XWrapper(int x) {\n"
 				+ "		;\n"
 				+ "		public int hashCode(int i) {\n"
 				+ "			return i + i;\n"
