@@ -1,10 +1,14 @@
 package org.eu.jsparrow.rules.java16.javarecords;
 
+import java.util.stream.Stream;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import eu.jsparrow.rules.java16.javarecords.UseJavaRecordsASTVisitor;
@@ -288,6 +292,48 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 		assertChange(original, expected);
 	}
 
+	public static Stream<Arguments> recordAndConstructorVisibility() throws Exception {
+		return Stream.of(
+				Arguments.of("private ", "private "),
+				Arguments.of("private ", ""),
+				Arguments.of("", ""),
+				Arguments.of("", "protected "),
+				Arguments.of("", "public "));
+	}
+
+	@ParameterizedTest
+	@MethodSource("recordAndConstructorVisibility")
+	public void visit_CanonicalConstructorVisibilitySufficient_shouldTransform(String recordVisibility,
+			String constructorVisibility) throws Exception {
+		String original = "" +
+				"	" + recordVisibility + "static final class XWrapper {\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		" + constructorVisibility + "XWrapper(int x) {\n"
+				+ "			if (x < 100) {\n"
+				+ "				this.x = x;\n"
+				+ "			} else {\n"
+				+ "				this.x = 100;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	" + recordVisibility + "record XWrapper(int x) {\n"
+				+ "		;\n"
+				+ "		" + constructorVisibility + "XWrapper(int x) {\n"
+				+ "			if (x < 100) {\n"
+				+ "				this.x = x;\n"
+				+ "			} else {\n"
+				+ "				this.x = 100;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 			""
@@ -317,24 +363,24 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "	}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_AmbiguousCanonicConstructor_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	private static final class StringWrapper {\n"
 				+ "		private final String s;\n"
 				+ "\n"
-				+ "		public StringWrapper(String s) {\n"
+				+ "		StringWrapper(String s) {\n"
 				+ "			this.s = s;\n"
 				+ "		}\n"
 				+ "\n"
-				+ "		public StringWrapper() {\n"
+				+ "		StringWrapper() {\n"
 				+ "			this.s = \"\";\n"
 				+ "		}\n"
 				+ "	}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_InstanceInitializer_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -344,41 +390,41 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "		{\n"
 				+ "		}\n"
 				+ "\n"
-				+ "		public StringWrapper(String s) {\n"
+				+ "		StringWrapper(String s) {\n"
 				+ "			this.s = s;\n"
 				+ "		}\n"
 				+ "\n"
 				+ "	}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_FinalNonPrivateInstanceField_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	private static final class StringWrapper {\n"
 				+ "		final String s;\n"
 				+ "\n"
-				+ "		public StringWrapper(String s) {\n"
+				+ "		StringWrapper(String s) {\n"
 				+ "			this.s = s;\n"
 				+ "		}\n"
 				+ "\n"
 				+ "	}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_PrivateNonFinalInstanceField_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	private static final class StringWrapper {\n"
 				+ "		private String s;\n"
 				+ "\n"
-				+ "		public StringWrapper(String s) {\n"
+				+ "		StringWrapper(String s) {\n"
 				+ "			this.s = s;\n"
 				+ "		}\n"
 				+ "	}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_FieldWithInitializer_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -386,13 +432,13 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "		private final String s;\n"
 				+ "		private final int i = 0;\n"
 				+ "\n"
-				+ "		public StringWrapper(String s) {\n"
+				+ "		StringWrapper(String s) {\n"
 				+ "			this.s = s;\n"
 				+ "		}\n"
 				+ "	}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_FormalParametersCountNotMatching_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -400,7 +446,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "		private final String s;\n"
 				+ "		private final int length;\n"
 				+ "\n"
-				+ "		public StringWrapper(String s) {\n"
+				+ "		StringWrapper(String s) {\n"
 				+ "			this.s = s;\n"
 				+ "			this.length = s.length();\n"
 				+ "		}\n"
@@ -408,30 +454,48 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 		assertNoChange(original);
 	}
 
-	
 	@Test
 	public void visit_FormalParameterNameNotMatching_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	private static final class StringWrapper {\n"
 				+ "		private final String s;\n"
 				+ "\n"
-				+ "		public StringWrapper(String str) {\n"
+				+ "		StringWrapper(String str) {\n"
 				+ "			this.s = str;\n"
 				+ "		}\n"
 				+ "	}";
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_FormalParameterTypeNotMatching_shouldNotTransform() throws Exception {
 		String original = "" +
 				"	private static final class StringWrapper {\n"
 				+ "		private final String s;\n"
 				+ "\n"
-				+ "		public StringWrapper(int s) {\n"
+				+ "		StringWrapper(int s) {\n"
 				+ "			this.s = String.valueOf(s);\n"
 				+ "		}\n"
 				+ "	}";
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_PrivateCanonicalConstructorForPackageScopeRecord_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	static final class XWrapper {\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		private XWrapper(int x) {\n"
+				+ "			if (x < 100) {\n"
+				+ "				this.x = x;\n"
+				+ "			} else {\n"
+				+ "				this.x = 100;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
 		assertNoChange(original);
 	}
 }
