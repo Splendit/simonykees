@@ -187,6 +187,33 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 	}
 
 	@Test
+	public void visit_MethodIntXWithParameter_shouldTransform() throws Exception {
+		String original = "" +
+				"	private static final class XWrapper {\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		XWrapper(int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "		\n"
+				+ "		public int x(int value) {\n"
+				+ "			return x + value;\n"
+				+ "		}		\n"
+				+ "	}";
+		
+		String expected = "" +
+				"	private record XWrapper(int x) {\n"
+				+ "		;\n"
+				+ "		public int x(int value) {\n"
+				+ "			return x + value;\n"
+				+ "		}\n"
+				+ "	}";
+		
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_EqualsMethodToRemove_shouldTransform() throws Exception {
 		String original = "" +
 				"	private static final class XWrapper {\n"
@@ -336,6 +363,10 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 
 	@ParameterizedTest
 	@ValueSource(strings = {
+			""
+					+ "		public void x() {\n"
+					+ "			return;\n"
+					+ "		}",
 			""
 					+ "		int x() {\n"
 					+ "			return 0;\n"
