@@ -1,5 +1,7 @@
 package eu.jsparrow.rules.java16.javarecords;
 
+import java.util.ArrayList;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -29,6 +31,7 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 public class NonStaticReferencesVisitor extends ASTVisitor {
 	private final CompilationUnit compilationUnit;
 	private final TypeDeclaration typeDeclaration;
+	private final ArrayList<AbstractTypeDeclaration> surroundingTypeDeclarations;
 	private final String typeDeclarationQualifiedName;
 	private boolean unsupportedReferenceExisting;
 
@@ -38,6 +41,20 @@ public class NonStaticReferencesVisitor extends ASTVisitor {
 		this.typeDeclarationQualifiedName = typeDeclaration.resolveBinding()
 			.getErasure()
 			.getQualifiedName();
+		this.surroundingTypeDeclarations = collectSurroundingTypeDeclarations(typeDeclaration);
+	}
+
+	private static ArrayList<AbstractTypeDeclaration> collectSurroundingTypeDeclarations(
+			TypeDeclaration typeDeclaration) {
+		ArrayList<AbstractTypeDeclaration> surroundingTypeDeclarations = new ArrayList<>();
+		AbstractTypeDeclaration surroundingTypeDeclaration = ASTNodeUtil.getSpecificAncestor(typeDeclaration,
+				AbstractTypeDeclaration.class);
+		while (surroundingTypeDeclaration != null) {
+			surroundingTypeDeclarations.add(surroundingTypeDeclaration);
+			surroundingTypeDeclaration = ASTNodeUtil.getSpecificAncestor(surroundingTypeDeclaration,
+					AbstractTypeDeclaration.class);
+		}
+		return surroundingTypeDeclarations;
 	}
 
 	@Override
@@ -70,7 +87,7 @@ public class NonStaticReferencesVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(QualifiedName node) {
-		unsupportedReferenceExisting = !analyzeNameBinding(node);
+		unsupportedReferenceExisting = !analyzeQualifiedName(node);
 		return false;
 	}
 
@@ -78,6 +95,26 @@ public class NonStaticReferencesVisitor extends ASTVisitor {
 	public boolean visit(SimpleName node) {
 		unsupportedReferenceExisting = !analyzeSimpleName(node);
 		return false;
+	}
+
+	private boolean analyzeQualifiedName(QualifiedName node) {
+
+		Name qualifier = node.getQualifier();
+
+		if (qualifier.getNodeType() == ASTNode.SIMPLE_NAME) {
+			IBinding binding = qualifier.resolveBinding();
+			if (binding.getKind() == IBinding.VARIABLE) {
+				IVariableBinding variableBinding = (IVariableBinding) binding;
+				if (!variableBinding.isField()) {
+					return true;
+				}
+			}
+		}
+
+		if (qualifier.getNodeType() == ASTNode.QUALIFIED_NAME) {
+			return analyzeQualifiedName((QualifiedName) qualifier);
+		}
+		return analyzeNameBinding(qualifier);
 	}
 
 	private boolean analyzeSimpleName(SimpleName node) {
@@ -107,7 +144,10 @@ public class NonStaticReferencesVisitor extends ASTVisitor {
 
 			if (variableBinding.isField()) {
 				ITypeBinding declaringClass = variableBinding.getDeclaringClass();
-				return ClassRelationUtil.isContentOfType(declaringClass, typeDeclarationQualifiedName);
+				if (isSurroundingClass(declaringClass)) {
+					return false;
+				}
+				return true;
 			}
 			ASTNode declaringNode = compilationUnit.findDeclaringNode(variableBinding);
 			return typeDeclaration == ASTNodeUtil.getSpecificAncestor(declaringNode, AbstractTypeDeclaration.class);
@@ -116,7 +156,10 @@ public class NonStaticReferencesVisitor extends ASTVisitor {
 		if (binding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = (IMethodBinding) binding;
 			ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-			return ClassRelationUtil.isContentOfType(declaringClass, typeDeclarationQualifiedName);
+			if (isSurroundingClass(declaringClass)) {
+				return false;
+			}
+			return true;
 		}
 
 		// TODO: discuss this peace of code which causes additional, not
@@ -131,6 +174,11 @@ public class NonStaticReferencesVisitor extends ASTVisitor {
 		// return typeBinding.isTopLevel();
 		// }
 		return true;
+	}
+
+	private boolean isSurroundingClass(ITypeBinding typeBinding) {
+		ASTNode declaringNode = compilationUnit.findDeclaringNode(typeBinding);
+		return surroundingTypeDeclarations.contains(declaringNode);
 	}
 
 	public boolean isUnsupportedReferenceExisting() {

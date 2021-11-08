@@ -137,6 +137,32 @@ public class NonStaticReferencesVisitorTest extends AbstractUseJavaRecordsTest {
 	}
 
 	@Test
+	public void visit_IntegerMaxValueFullyQualifiedName_shouldTransform() throws Exception {
+		String original = ""
+				+ "	public void methodWithLocalClassPoint() {\n"
+				+ "\n"
+				+ "		class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "\n"
+				+ "			int getIntegerMaxValue() {\n"
+				+ "				return java.lang.Integer.MAX_VALUE;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+		String expected = ""
+				+ "	public void methodWithLocalClassPoint() {\n"
+				+ "\n"
+				+ "		record Point(int x, int y) {\n"
+				+ "			;\n"
+				+ "			int getIntegerMaxValue() {\n"
+				+ "				return java.lang.Integer.MAX_VALUE;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_QualifiedThisOfSameClass_shouldTransform() throws Exception {
 		String original = "" +
 				"	public void methodWithLocalClassPoint() {\n"
@@ -267,6 +293,32 @@ public class NonStaticReferencesVisitorTest extends AbstractUseJavaRecordsTest {
 	}
 
 	@Test
+	public void visit_CallToString_shouldTransform() throws Exception {
+		String original = ""
+				+ "	public void methodWithLocalClassPoint() {\n"
+				+ "\n"
+				+ "		class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "\n"
+				+ "			String callToString() {\n"
+				+ "				return toString();\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+		String expected = ""
+				+ "	public void methodWithLocalClassPoint() {\n"
+				+ "\n"
+				+ "		record Point(int x, int y) {\n"
+				+ "			;\n"
+				+ "			String callToString() {\n"
+				+ "				return toString();\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+		assertChange(original, expected);
+	}
+
+	@Test
 	public void visit_InstanceCreationOfStaticClass_shouldTransform() throws Exception {
 
 		String original = "" +
@@ -298,6 +350,32 @@ public class NonStaticReferencesVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "		}\n"
 				+ "	}";
 
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_CreateNewObject_shouldTransform() throws Exception {
+		String original = ""
+				+ "	public void methodWithLocalClassPoint() {\n"
+				+ "\n"
+				+ "		class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "\n"
+				+ "			Object  createNewObject() {\n"
+				+ "				return new Object();\n"
+				+ "			}			\n"
+				+ "		}\n"
+				+ "	}";
+		String expected = ""
+				+ "	public void methodWithLocalClassPoint() {\n"
+				+ "\n"
+				+ "		record Point(int x, int y) {\n"
+				+ "			;\n"
+				+ "			Object  createNewObject() {\n"
+				+ "				return new Object();\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
 		assertChange(original, expected);
 	}
 
