@@ -360,6 +360,31 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 
 		assertChange(original, expected);
 	}
+	
+	
+	@Test
+	public void visit_StaticInitializer_shouldTransform() throws Exception {
+		String original = "" +
+				"	private static final class StringWrapper {\n"
+				+ "		private final String s;\n"
+				+ "\n"
+				+ "		static {\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		StringWrapper(String s) {\n"
+				+ "			this.s = s;\n"
+				+ "		}\n"
+				+ "\n"
+				+ "	}";
+		
+		String expected = "" +
+				"	private record StringWrapper(String s) {\n"
+				+ "		;\n"
+				+ "		static {\n"
+				+ "		}\n"
+				+ "	}";
+		assertChange(original, expected);
+	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {
@@ -524,6 +549,24 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "			} else {\n"
 				+ "				this.x = 100;\n"
 				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+	
+	@Test
+	public void visit_NestedClassWithinNestedClass_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private static final class StringWrapper {\n"
+				+ "		private final String s;\n"
+				+ "\n"
+				+ "		public StringWrapper(String s) {\n"
+				+ "			this.s = s;\n"
+				+ "		}\n"
+				+ "		\n"
+				+ "		class NestedClassWithinStringWrapper {\n"
+				+ "			\n"
 				+ "		}\n"
 				+ "	}";
 

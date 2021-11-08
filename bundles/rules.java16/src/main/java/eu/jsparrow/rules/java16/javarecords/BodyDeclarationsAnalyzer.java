@@ -1,6 +1,7 @@
 package eu.jsparrow.rules.java16.javarecords;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,30 +37,19 @@ public class BodyDeclarationsAnalyzer {
 	private static final int VISIBILITY_PUBLIC = 3;
 
 	Optional<BodyDeclarationsAnalysisResult> analyzeBodyDeclarations(TypeDeclaration typeDeclaration) {
-
-		List<BodyDeclaration> bodyDeclarations = ASTNodeUtil
-			.convertToTypedList(typeDeclaration.bodyDeclarations(), BodyDeclaration.class);
-		ArrayList<MethodDeclaration> methods = new ArrayList<>();
-		ArrayList<FieldDeclaration> staticFields = new ArrayList<>();
-		ArrayList<FieldDeclaration> privateFinalInstanceFields = new ArrayList<>();
-
-		for (BodyDeclaration declaration : bodyDeclarations) {
-			if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
-				methods.add((MethodDeclaration) declaration);
-			} else if (declaration.getNodeType() == ASTNode.FIELD_DECLARATION) {
-				FieldDeclaration fieldDeclaration = (FieldDeclaration) declaration;
-				int modifiers = fieldDeclaration.getModifiers();
-				if (Modifier.isStatic(modifiers)) {
-					staticFields.add((FieldDeclaration) declaration);
-				} else if (Modifier.isPrivate(modifiers) && Modifier.isFinal(modifiers)) {
-					privateFinalInstanceFields.add((FieldDeclaration) declaration);
-				} else {
-					return Optional.empty();
-				}
-			} else {
-				return Optional.empty();
-			}
+		
+		List<BodyDeclaration> allSupportedBodyDeclarations = collectAllSupportedBodyDeclarations(typeDeclaration);
+		if (allSupportedBodyDeclarations.isEmpty()) {
+			return Optional.empty();
 		}
+
+		List<FieldDeclaration> privateFinalInstanceFields = collectInstanceFieldsForComponents(typeDeclaration);
+		if (privateFinalInstanceFields.isEmpty()) {
+			return Optional.empty();
+		}
+
+		List<MethodDeclaration> methods = ASTNodeUtil
+			.convertToTypedList(typeDeclaration.bodyDeclarations(), MethodDeclaration.class);
 
 		MethodDeclaration assumedCanonicalConstructor = findAssumedCanonicalConstructor(methods)
 			.orElse(null);
@@ -88,26 +78,68 @@ public class BodyDeclarationsAnalyzer {
 		if (!recordGettersAnalyzer.analyzeRecordGetters(methods, canonicalConstructorParameters)) {
 			return Optional.empty();
 		}
-		methods.removeAll(recordGettersAnalyzer.getRecordGetterstoRemove());
+		ArrayList<MethodDeclaration> methodsToRemove = new ArrayList<>();
+		methodsToRemove.addAll(recordGettersAnalyzer.getRecordGetterstoRemove());
 
 		if (canRemoveCanonicalConstructor) {
-			methods.remove(assumedCanonicalConstructor);
+			methodsToRemove.add(assumedCanonicalConstructor);
 		}
 		methods.stream()
 			.filter(this::isEqualsMethodToRemove)
 			.findFirst()
-			.ifPresent(methods::remove);
+			.ifPresent(methodsToRemove::add);
 
 		methods.stream()
 			.filter(this::isHashCodeMethodToRemove)
 			.findFirst()
-			.ifPresent(methods::remove);
+			.ifPresent(methodsToRemove::add);
 
-		ArrayList<BodyDeclaration> recordBodyDeclarations = new ArrayList<>();
-		recordBodyDeclarations.addAll(staticFields);
-		recordBodyDeclarations.addAll(methods);
+		ArrayList<BodyDeclaration> recordBodyDeclarations = new ArrayList<>(allSupportedBodyDeclarations);
+		recordBodyDeclarations.removeAll(privateFinalInstanceFields);
+		recordBodyDeclarations.removeAll(methodsToRemove);
+
 		return Optional.of(new BodyDeclarationsAnalysisResult(typeDeclaration, canonicalConstructorParameters,
 				recordBodyDeclarations));
+	}
+
+	private List<FieldDeclaration> collectInstanceFieldsForComponents(TypeDeclaration typeDeclaration) {
+
+		List<FieldDeclaration> privateFinalInstanceFields = new ArrayList<>();
+		List<FieldDeclaration> allFields = ASTNodeUtil.convertToTypedList(typeDeclaration.bodyDeclarations(),
+				FieldDeclaration.class);
+		for (FieldDeclaration field : allFields) {
+			int modifiers = field.getModifiers();
+			if (!Modifier.isStatic(modifiers)) {
+				if (Modifier.isPrivate(modifiers) && Modifier.isFinal(modifiers)) {
+					privateFinalInstanceFields.add(field);
+				} else {
+					return Collections.emptyList();
+				}
+			}
+		}
+		return privateFinalInstanceFields;
+	}
+
+	List<BodyDeclaration> collectAllSupportedBodyDeclarations(TypeDeclaration typeDeclaration) {
+		List<BodyDeclaration> bodyDeclarations = ASTNodeUtil
+			.convertToTypedList(typeDeclaration.bodyDeclarations(), BodyDeclaration.class);
+		if (bodyDeclarations.stream()
+			.allMatch(this::isSupportedBodyDeclaration)) {
+			return bodyDeclarations;
+		}
+		return Collections.emptyList();
+	}
+
+	private boolean isSupportedBodyDeclaration(BodyDeclaration declaration) {
+
+		if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION
+				|| declaration.getNodeType() == ASTNode.FIELD_DECLARATION) {
+			return true;
+		}
+		if (declaration.getNodeType() == ASTNode.INITIALIZER) {
+			return Modifier.isStatic(declaration.getModifiers());
+		}
+		return false;
 	}
 
 	private boolean analyzeQualificationForRecordComponents(List<FieldDeclaration> instanceFields,
