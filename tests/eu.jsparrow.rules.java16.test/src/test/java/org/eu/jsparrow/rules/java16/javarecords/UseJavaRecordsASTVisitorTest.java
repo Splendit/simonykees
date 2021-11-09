@@ -201,7 +201,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "			return x + value;\n"
 				+ "		}		\n"
 				+ "	}";
-		
+
 		String expected = "" +
 				"	private record XWrapper(int x) {\n"
 				+ "		;\n"
@@ -209,7 +209,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "			return x + value;\n"
 				+ "		}\n"
 				+ "	}";
-		
+
 		assertChange(original, expected);
 	}
 
@@ -360,8 +360,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 
 		assertChange(original, expected);
 	}
-	
-	
+
 	@Test
 	public void visit_StaticInitializer_shouldTransform() throws Exception {
 		String original = "" +
@@ -376,7 +375,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "		}\n"
 				+ "\n"
 				+ "	}";
-		
+
 		String expected = "" +
 				"	private record StringWrapper(String s) {\n"
 				+ "		;\n"
@@ -554,7 +553,7 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 
 		assertNoChange(original);
 	}
-	
+
 	@Test
 	public void visit_NestedClassWithinNestedClass_shouldNotTransform() throws Exception {
 		String original = "" +
@@ -567,6 +566,69 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "		\n"
 				+ "		class NestedClassWithinStringWrapper {\n"
 				+ "			\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_AnnotationOnConstructorParameter_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	@interface ExampleAnnotation {\n"
+				+ "\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private static final class XWrapper {\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		XWrapper(@ExampleAnnotation int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_AnnotationOnInstanceField_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	@interface ExampleAnnotation {\n"
+				+ "\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private static final class XWrapper {\n"
+				+ "\n"
+				+ "		@ExampleAnnotation\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		XWrapper(int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_AnnotationOnGetter_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	@interface ExampleAnnotation {\n"
+				+ "\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private static final class XWrapper {\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		XWrapper(int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		@ExampleAnnotation\n"
+				+ "		public int x() {\n"
+				+ "			return this.x;\n"
 				+ "		}\n"
 				+ "	}";
 
