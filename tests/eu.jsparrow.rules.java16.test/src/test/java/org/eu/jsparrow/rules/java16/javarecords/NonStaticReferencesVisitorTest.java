@@ -189,76 +189,6 @@ public class NonStaticReferencesVisitorTest extends AbstractUseJavaRecordsTest {
 	}
 
 	@Test
-	public void visit_InstanceFieldOfLocalVariableWithKeywordVar_shouldTransform() throws Exception {
-		String original = "" +
-				"	public void methodWithLocalClassPoint() {\n"
-				+ "		var v = new Object() {\n"
-				+ "			int x;\n"
-				+ "		};\n"
-				+ "\n"
-				+ "		class Point {\n"
-				+ BODY_DECLARATIONS
-				+ "\n"
-				+ "			int getXOfVarV() {\n"
-				+ "				return v.x;\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
-		String expected = "" +
-				"	public void methodWithLocalClassPoint() {\n"
-				+ "		var v = new Object() {\n"
-				+ "			int x;\n"
-				+ "		};\n"
-				+ "\n"
-				+ "		record Point(int x, int y) {\n"
-				+ "			;\n"
-				+ "			int getXOfVarV() {\n"
-				+ "				return v.x;\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
-		assertChange(original, expected);
-	}
-
-	@Test
-	public void visit_InstanceFieldOfLocalClass_shouldTransform() throws Exception {
-		String original = "" +
-				"	public void methodWithLocalClassPoint() {\n"
-				+ "		class LocalWrapper {\n"
-				+ "			int x;\n"
-				+ "		}\n"
-				+ "		LocalWrapper localWrapper  = new LocalWrapper();\n"
-				+ "		\n"
-				+ "		class Point {\n"
-				+ BODY_DECLARATIONS
-				+ "\n"
-				+ "			int getXOfVarV() {\n"
-				+ "				return localWrapper.x;\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
-		String expected = "" +
-				"	public void methodWithLocalClassPoint() {\n"
-				+ "		class LocalWrapper {\n"
-				+ "			int x;\n"
-				+ "		}\n"
-				+ "		LocalWrapper localWrapper  = new LocalWrapper();\n"
-				+ "		\n"
-				+ "		record Point(int x, int y) {\n"
-				+ "			;\n"
-				+ "			int getXOfVarV() {\n"
-				+ "				return localWrapper.x;\n"
-				+ "			}\n"
-				+ "		}\n"
-				+ "	}";
-
-		assertChange(original, expected);
-	}
-
-	@Test
 	public void visit_InvokeStaticMethodOfTopLevelClass_shouldTransform() throws Exception {
 		String original = "" +
 				"	static int staticMethodOfTopLevelClass() {\n"
@@ -538,6 +468,47 @@ public class NonStaticReferencesVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "\n"
 				+ "			public int getLocalVariableFromSurroundingMethod() {\n"
 				+ "				return localVariableFromSurroundingMethod;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_InstanceFieldOfLocalClass_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	public void methodWithLocalClassPoint() {\n"
+				+ "		class LocalWrapper {\n"
+				+ "			int x;\n"
+				+ "		}\n"
+				+ "		LocalWrapper localWrapper  = new LocalWrapper();\n"
+				+ "		\n"
+				+ "		class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "\n"
+				+ "			int getXOfVarV() {\n"
+				+ "				return localWrapper.x;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_LocalVariableOfTypeVarFieldX_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	public void methodWithLocalClassPoint() {\n"
+				+ "		var v = new Object() {\n"
+				+ "			int x;\n"
+				+ "		};\n"
+				+ "\n"
+				+ "		class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "\n"
+				+ "			int getXOfVarV() {\n"
+				+ "				return v.x;\n"
 				+ "			}\n"
 				+ "		}\n"
 				+ "	}";

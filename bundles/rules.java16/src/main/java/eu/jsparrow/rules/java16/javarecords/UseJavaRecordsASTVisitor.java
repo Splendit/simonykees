@@ -66,23 +66,19 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 		int modifiers = typeDeclaration.getModifiers();
 
 		if (typeDeclaration.getParent() == getCompilationUnit()) {
-			return Modifier.isFinal(modifiers);
-		}
-
-		if (typeDeclaration.isLocalTypeDeclaration()) {
-			if (Modifier.isFinal(modifiers) ||
-					isEffectivelyFinal(typeDeclaration, typeDeclaration.getParent()
-						.getParent())) {
-				NonStaticReferencesVisitor nonStaticReferencesVisitor = new NonStaticReferencesVisitor(
-						getCompilationUnit(), typeDeclaration);
-				typeDeclaration.accept(nonStaticReferencesVisitor);
-				return !nonStaticReferencesVisitor.isUnsupportedReferenceExisting();
+			if(Modifier.isFinal(modifiers)) {
+				return true;
 			}
 			return false;
 		}
 
 		if (!Modifier.isStatic(modifiers)) {
-			return false;
+			NonStaticReferencesVisitor nonStaticReferencesVisitor = new NonStaticReferencesVisitor(
+					getCompilationUnit(), typeDeclaration);
+			typeDeclaration.accept(nonStaticReferencesVisitor);
+			if(nonStaticReferencesVisitor.isUnsupportedReferenceExisting()) {
+				return false;
+			}
 		}
 
 		if (Modifier.isFinal(modifiers)) {

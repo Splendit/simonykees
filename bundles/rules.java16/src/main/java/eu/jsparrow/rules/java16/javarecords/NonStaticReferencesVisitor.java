@@ -30,14 +30,12 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 public class NonStaticReferencesVisitor extends ASTVisitor {
 	private final CompilationUnit compilationUnit;
-	private final TypeDeclaration typeDeclaration;
 	private final ArrayList<AbstractTypeDeclaration> surroundingTypeDeclarations;
 	private final String typeDeclarationQualifiedName;
 	private boolean unsupportedReferenceExisting;
 
 	public NonStaticReferencesVisitor(CompilationUnit compilationUnit, TypeDeclaration typeDeclaration) {
 		this.compilationUnit = compilationUnit;
-		this.typeDeclaration = typeDeclaration;
 		this.typeDeclarationQualifiedName = typeDeclaration.resolveBinding()
 			.getErasure()
 			.getQualifiedName();
@@ -64,9 +62,9 @@ public class NonStaticReferencesVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(ThisExpression node) {
-		if (node.getQualifier() != null) {
-			unsupportedReferenceExisting = !ClassRelationUtil.isContentOfType(node.getQualifier()
-				.resolveTypeBinding(),
+		Name thisQualifier = node.getQualifier();
+		if (thisQualifier != null) {
+			unsupportedReferenceExisting = !ClassRelationUtil.isContentOfType(thisQualifier.resolveTypeBinding(),
 					typeDeclarationQualifiedName);
 		}
 		return false;
@@ -87,7 +85,7 @@ public class NonStaticReferencesVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(QualifiedName node) {
-		unsupportedReferenceExisting = !analyzeQualifiedName(node);
+		unsupportedReferenceExisting = !analyzeNameBinding(node) || !analyzeRootQualifier(node.getQualifier());
 		return false;
 	}
 
@@ -97,22 +95,9 @@ public class NonStaticReferencesVisitor extends ASTVisitor {
 		return false;
 	}
 
-	private boolean analyzeQualifiedName(QualifiedName node) {
-
-		Name qualifier = node.getQualifier();
-
-		if (qualifier.getNodeType() == ASTNode.SIMPLE_NAME) {
-			IBinding binding = qualifier.resolveBinding();
-			if (binding.getKind() == IBinding.VARIABLE) {
-				IVariableBinding variableBinding = (IVariableBinding) binding;
-				if (!variableBinding.isField()) {
-					return true;
-				}
-			}
-		}
-
+	private boolean analyzeRootQualifier(Name qualifier) {
 		if (qualifier.getNodeType() == ASTNode.QUALIFIED_NAME) {
-			return analyzeQualifiedName((QualifiedName) qualifier);
+			return analyzeRootQualifier(((QualifiedName) qualifier).getQualifier());
 		}
 		return analyzeNameBinding(qualifier);
 	}
@@ -143,36 +128,19 @@ public class NonStaticReferencesVisitor extends ASTVisitor {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
 
 			if (variableBinding.isField()) {
-				ITypeBinding declaringClass = variableBinding.getDeclaringClass();
-				if (isSurroundingClass(declaringClass)) {
-					return false;
-				}
-				return true;
+				return !isSurroundingClass(variableBinding.getDeclaringClass());
 			}
 			ASTNode declaringNode = compilationUnit.findDeclaringNode(variableBinding);
-			return typeDeclaration == ASTNodeUtil.getSpecificAncestor(declaringNode, AbstractTypeDeclaration.class);
+			AbstractTypeDeclaration surroundingType = ASTNodeUtil.getSpecificAncestor(declaringNode,
+					AbstractTypeDeclaration.class);
+			return !surroundingTypeDeclarations.contains(surroundingType);
 		}
 
 		if (binding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = (IMethodBinding) binding;
-			ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-			if (isSurroundingClass(declaringClass)) {
-				return false;
-			}
-			return true;
+			return !isSurroundingClass(methodBinding.getDeclaringClass());
 		}
 
-		// TODO: discuss this peace of code which causes additional, not
-		// necessary restrictions
-		//
-		// if (binding.getKind() == IBinding.TYPE) {
-		// ITypeBinding typeBinding = (ITypeBinding) binding;
-		// if (ClassRelationUtil.isContentOfType(typeBinding,
-		// typeDeclarationQualifiedName)) {
-		// return true;
-		// }
-		// return typeBinding.isTopLevel();
-		// }
 		return true;
 	}
 

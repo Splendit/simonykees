@@ -133,12 +133,11 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 	@ParameterizedTest
 	@ValueSource(strings = {
 			"static abstract",
-			"private final",
 			"static",
 			"public static final",
 			"protected static final"
 	})
-	public void visit_NestedClassWithNotSupportedModifiers_shouldNotTransform(String modifiers)
+	public void visit_NestedClassWithNotSupportedSetOfModifiers_shouldNotTransform(String modifiers)
 			throws Exception {
 		String original = "" +
 				"	" + modifiers + " class Point {\n"
@@ -208,15 +207,18 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 
 	public static Stream<Arguments> modifierData() throws Exception {
 		return Stream.of(
-				Arguments.of("private static final", "private"),
+				Arguments.of("private", "private"),
 				Arguments.of("private static", "private"),
-				Arguments.of("static final", ""),
-				Arguments.of("private static final strictfp", "private strictfp"));
+				Arguments.of("private final", "private"),				
+				Arguments.of("private static final", "private"),		
+				Arguments.of("private static final strictfp", "private strictfp"),
+				Arguments.of("static final", ""));
+				
 	}
 
 	@ParameterizedTest
 	@MethodSource("modifierData")
-	public void visit_NestedClassWithSupportedModifiers_shouldTransform(String classModifiers, String recordModifiers)
+	public void visit_NestedClassWithSupportedSetOfModifiers_shouldTransform(String classModifiers, String recordModifiers)
 			throws Exception {
 		String original = "" +
 				"	" + classModifiers + " class Point {\n"
