@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -37,7 +38,7 @@ public class BodyDeclarationsAnalyzer {
 	private static final int VISIBILITY_PUBLIC = 3;
 
 	Optional<BodyDeclarationsAnalysisResult> analyzeBodyDeclarations(TypeDeclaration typeDeclaration) {
-		
+
 		List<BodyDeclaration> allSupportedBodyDeclarations = collectAllSupportedBodyDeclarations(typeDeclaration);
 		if (allSupportedBodyDeclarations.isEmpty()) {
 			return Optional.empty();
@@ -58,6 +59,12 @@ public class BodyDeclarationsAnalyzer {
 		}
 		List<SingleVariableDeclaration> canonicalConstructorParameters = ASTNodeUtil
 			.convertToTypedList(assumedCanonicalConstructor.parameters(), SingleVariableDeclaration.class);
+		for(SingleVariableDeclaration parameter : canonicalConstructorParameters) {
+			List<Annotation> annotations = ASTNodeUtil.convertToTypedList(parameter.modifiers(), Annotation.class);
+			if(!annotations.isEmpty()) {
+				return Optional.empty();
+			}
+		}
 
 		boolean canRemoveCanonicalConstructor = canRemoveCanonicalConstructor(assumedCanonicalConstructor,
 				canonicalConstructorParameters);
@@ -110,7 +117,8 @@ public class BodyDeclarationsAnalyzer {
 		for (FieldDeclaration field : allFields) {
 			int modifiers = field.getModifiers();
 			if (!Modifier.isStatic(modifiers)) {
-				if (Modifier.isPrivate(modifiers) && Modifier.isFinal(modifiers)) {
+				List<Annotation> annotations = ASTNodeUtil.convertToTypedList(field.modifiers(), Annotation.class);
+				if (annotations.isEmpty() && Modifier.isPrivate(modifiers) && Modifier.isFinal(modifiers)) {
 					privateFinalInstanceFields.add(field);
 				} else {
 					return Collections.emptyList();

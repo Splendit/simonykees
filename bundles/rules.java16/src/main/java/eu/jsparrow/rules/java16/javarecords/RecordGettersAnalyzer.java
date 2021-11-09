@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -35,6 +36,11 @@ class RecordGettersAnalyzer {
 				.orElse(null);
 
 			if (recordGetter != null) {
+				List<Annotation> annotations = ASTNodeUtil.convertToTypedList(recordGetter.modifiers(),
+						Annotation.class);
+				if (!annotations.isEmpty()) {
+					return false;
+				}
 				if (Modifier.isStatic(recordGetter.getModifiers())) {
 					return false;
 				}
