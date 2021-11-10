@@ -261,7 +261,7 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 				+ "	}";
 
 		String expected = "" +
-				"	private record Point(int x, int y) {\n"
+				"	private record Point(int x, int y) implements IPoint {\n"
 				+ "	}\n"
 				+ "	\n"
 				+ "	interface IPoint{\n"

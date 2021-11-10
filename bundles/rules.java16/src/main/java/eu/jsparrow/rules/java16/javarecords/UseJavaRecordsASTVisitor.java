@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeParameter;
@@ -131,11 +132,19 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		List<TypeParameter> classTypeParameters = ASTNodeUtil
 			.convertToTypedList(typeDeclarationToReplace.typeParameters(), TypeParameter.class);
-		
+
 		List recordTypeParameters = recordDeclaration.typeParameters();
 		classTypeParameters.stream()
 			.map(astRewrite::createCopyTarget)
 			.forEach(recordTypeParameters::add);
+
+		List<Type> classSuperInterfaces = ASTNodeUtil.convertToTypedList(typeDeclarationToReplace.superInterfaceTypes(),
+				Type.class);
+
+		List recordSuperInterfaces = recordDeclaration.superInterfaceTypes();
+		classSuperInterfaces.stream()
+			.map(astRewrite::createCopyTarget)
+			.forEach(recordSuperInterfaces::add);
 
 		List recordModifiers = recordDeclaration.modifiers();
 		annotations.stream()
