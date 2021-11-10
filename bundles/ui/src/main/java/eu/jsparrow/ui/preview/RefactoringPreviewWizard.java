@@ -22,16 +22,16 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
-import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 /**
@@ -56,6 +56,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
+	private PayPerUseCreditCalculator payPerUseCalculator = new PayPerUseCreditCalculator();
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline, StandaloneStatisticsMetadata standaloneStatisticsMetadata) {
 		this(refactoringPipeline);
@@ -191,28 +192,13 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		if (licenseUtil.isFreeLicense()) {
 			return licenseUtil.isActiveRegistration()  && containsOnlyFreeRules();
 		}
-		int sum = findTotalRequiredCredit();
 		
 		LicenseValidationResult result = licenseUtil.getValidationResult();
-		int availableCredit = result.getCredit().orElse(sum);
-		// TODO: ADD a license utility function to verify credit in pay per use model.  
-		
-		boolean enoughCredit = sum <= availableCredit;
-		
+		if (result.getLicenseType() != LicenseType.PAY_PER_USE) {
+			return super.canFinish();
+		}
+		boolean enoughCredit =  payPerUseCalculator.validateCredit(refactoringPipeline.getRules());
 		return enoughCredit && super.canFinish();
-	}
-
-	private int findTotalRequiredCredit() {
-		return refactoringPipeline.getRules()
-		.stream()
-		.mapToInt(this::measureWeight)
-		.sum();
-	}
-	
-	private int measureWeight(RefactoringRule rule) {
-		RuleApplicationCount numIssues = RuleApplicationCount.getFor(rule);
-		RuleDescription description = rule.getRuleDescription();
-		return numIssues.toInt() * description.getCredit();
 	}
 
 	private boolean containsOnlyFreeRules() {
@@ -244,7 +230,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 			try {
 				refactoringPipeline.commitRefactoring();
-				int sum = findTotalRequiredCredit();
+				int sum = payPerUseCalculator.findTotalRequiredCredit(refactoringPipeline.getRules());
 				licenseUtil.reserveQuantity(sum);
 				Activator.setRunning(false);
 			} catch (RefactoringException e) {
