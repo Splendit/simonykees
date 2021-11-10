@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.TypeParameter;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -66,7 +67,7 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 		int modifiers = typeDeclaration.getModifiers();
 
 		if (typeDeclaration.getParent() == getCompilationUnit()) {
-			if(Modifier.isFinal(modifiers)) {
+			if (Modifier.isFinal(modifiers)) {
 				return true;
 			}
 			return false;
@@ -76,7 +77,7 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 			NonStaticReferencesVisitor nonStaticReferencesVisitor = new NonStaticReferencesVisitor(
 					getCompilationUnit(), typeDeclaration);
 			typeDeclaration.accept(nonStaticReferencesVisitor);
-			if(nonStaticReferencesVisitor.isUnsupportedReferenceExisting()) {
+			if (nonStaticReferencesVisitor.isUnsupportedReferenceExisting()) {
 				return false;
 			}
 		}
@@ -127,6 +128,14 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 		RecordDeclaration recordDeclaration = ast.newRecordDeclaration();
 		SimpleName recordName = (SimpleName) astRewrite.createCopyTarget(typeDeclarationToReplace.getName());
 		recordDeclaration.setName(recordName);
+
+		List<TypeParameter> classTypeParameters = ASTNodeUtil
+			.convertToTypedList(typeDeclarationToReplace.typeParameters(), TypeParameter.class);
+		
+		List recordTypeParameters = recordDeclaration.typeParameters();
+		classTypeParameters.stream()
+			.map(astRewrite::createCopyTarget)
+			.forEach(recordTypeParameters::add);
 
 		List recordModifiers = recordDeclaration.modifiers();
 		annotations.stream()

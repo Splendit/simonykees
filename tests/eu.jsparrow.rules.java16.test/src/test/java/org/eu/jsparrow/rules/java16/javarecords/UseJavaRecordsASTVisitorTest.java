@@ -382,6 +382,25 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "		static {\n"
 				+ "		}\n"
 				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@Test
+	public void visit_WrapperWithTypeParameter_shouldTransform() throws Exception {
+		String original = "" +
+				"	private static final class ValueWrapper<V> {\n"
+				+ "\n"
+				+ "		private final V value;\n"
+				+ "\n"
+				+ "		public ValueWrapper(V value) {\n"
+				+ "			this.value = value;\n"
+				+ "		}\n"
+				+ "	} ";
+
+		String expected = "" +
+				"	private record ValueWrapper<V> (V value) {\n"
+				+ "	} ";
 		assertChange(original, expected);
 	}
 
@@ -631,6 +650,53 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "			return this.x;\n"
 				+ "		}\n"
 				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			""
+					+ "	private static final class SetWrapper<E> {\n"
+					+ "\n"
+					+ "		private final Set elements;\n"
+					+ "\n"
+					+ "		public SetWrapper(Set<E> elements) {\n"
+					+ "			this.elements = elements;\n"
+					+ "		}\n"
+					+ "	} ",
+			""
+					+ "	private static final class SetWrapper<E extends AbstractCharSequence> {\n"
+					+ "\n"
+					+ "		private final Set<? extends CharSequence> elements;\n"
+					+ "\n"
+					+ "		public SetWrapper(Set<E> elements) {\n"
+					+ "			this.elements = elements;\n"
+					+ "		}\n"
+					+ "	}\n"
+					+ "	\n"
+					+ "	abstract static  class AbstractCharSequence implements CharSequence {\n"
+					+ "		\n"
+					+ "	}",
+			""
+					+ "	private static final class SetWrapper<E extends CharSequence> {\n"
+					+ "\n"
+					+ "		private final Set<E> elements;\n"
+					+ "\n"
+					+ "		public SetWrapper(Set<E> elements) {\n"
+					+ "			this.elements = elements;\n"
+					+ "		}\n"
+					+ "\n"
+					+ "		public Set<? extends CharSequence> elements() {\n"
+					+ "			return this.elements;\n"
+					+ "		}\n"
+					+ "	}"
+
+	})
+	public void visit_PrivateFinalSetOfJokerExtendsCharSequence_shouldNotTransform(String original)
+			throws Exception {
+
+		defaultFixture.addImport(java.util.Set.class.getName());
 
 		assertNoChange(original);
 	}
