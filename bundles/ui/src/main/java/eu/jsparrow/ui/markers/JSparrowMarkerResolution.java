@@ -1,7 +1,15 @@
 package eu.jsparrow.ui.markers;
 
+import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.CODE_PREVIEW_KEY;
+import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.HIGHLIGHT_LENGTH_KEY;
+import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.NAME_KEY;
+import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.RESOLVER_KEY;
+import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.WEIGHT_VALUE_KEY;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
@@ -12,13 +20,12 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.markers.RefactoringEventManager;
 import eu.jsparrow.ui.util.LicenseUtil;
 
-import static eu.jsparrow.ui.markers.JSparrowMarkerPropertyKeys.*;
-
 /**
- * Provides resolution for a jSparrow marker. 
+ * Provides resolution for a jSparrow marker.
  * 
  * @since 4.0.0
  *
@@ -43,7 +50,7 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 		this.codePreview = marker.getAttribute(CODE_PREVIEW_KEY, ""); //$NON-NLS-1$
 		this.resolver = marker.getAttribute(RESOLVER_KEY, ""); //$NON-NLS-1$
 		this.weightValue = marker.getAttribute(WEIGHT_VALUE_KEY, 1);
-		
+
 	}
 
 	@Override
@@ -70,9 +77,8 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 		IEditorPart editor = page.getActiveEditor();
 		ITextEditor textEditor = editor.getAdapter(ITextEditor.class);
 		textEditor.selectAndReveal(this.offset, this.newLength);
-		LicenseUtil licenseUtil = LicenseUtil.get();
-		licenseUtil.reserveQuantity(weightValue);
-		
+		chargeCredit();
+
 	}
 
 	@Override
@@ -85,4 +91,14 @@ public class JSparrowMarkerResolution implements IMarkerResolution2 {
 		return JSparrowImages.JSPARROW_ACTIVE_16;
 	}
 
+	private void chargeCredit() {
+		Job job = Job.create(Messages.JSparrowMarkerResolution_reserving_payPerUseCredit, monitor -> {
+			LicenseUtil licenseUtil = LicenseUtil.get();
+			licenseUtil.reserveQuantity(weightValue);
+			return Status.OK_STATUS;
+		});
+		job.setUser(false);
+		job.setPriority(Job.SHORT);
+		job.schedule();
+	}
 }

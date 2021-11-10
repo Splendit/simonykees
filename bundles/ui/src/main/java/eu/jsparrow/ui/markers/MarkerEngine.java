@@ -135,7 +135,6 @@ public class MarkerEngine extends EditorTracker implements IElementChangedListen
 	private void handleParentSourceReference(ICompilationUnit cu) {
 		List<RefactoringMarkerEvent> oldEvents = RefactoringMarkers.getAllEvents();
 		RefactoringMarkers.clear();
-		//TODO: Make sure there is a valid license. If not, do not generate any event. 
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		LicenseValidationResult validationResult = licenseUtil.getValidationResult();
 		LicenseType type = validationResult.getLicenseType();

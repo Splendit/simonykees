@@ -295,6 +295,7 @@ public class Messages extends NLS {
 	public static String MultiVariableDeclarationLineRule_description;
 	public static String Java5Profile_profileName;
 	public static String Java7Profile_profileName;
+	public static String JSparrowMarkerResolution_reserving_payPerUseCredit;
 	public static String Netlicensing_persistenceError_failedtoLoad;
 	public static String Netlicensing_persistenceError_failedToSave;
 	public static String Netlicensing_validationResult_freeLicenseExpired0;
