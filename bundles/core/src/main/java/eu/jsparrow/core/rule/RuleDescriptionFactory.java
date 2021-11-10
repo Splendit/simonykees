@@ -2,7 +2,6 @@ package eu.jsparrow.core.rule;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import eu.jsparrow.rules.common.RefactoringRule;
@@ -24,12 +23,11 @@ public class RuleDescriptionFactory {
 		 */
 	}
 	
-	public static synchronized Optional<RuleDescription> findByRuleId(String id) {
+	public static synchronized RuleDescription findByRuleId(String id) {
 		if (descriptions == null) {
 			descriptions = createRuleDescriptions();
 		}
-		RuleDescription description = descriptions.get(id);
-		return Optional.ofNullable(description);
+		return descriptions.get(id);
 	}
 
 	private static Map<String, RuleDescription> createRuleDescriptions() {

@@ -35,8 +35,7 @@ public class StringLiteralEqualityCheckResolver extends StringLiteralEqualityChe
 	public StringLiteralEqualityCheckResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-				.findByRuleId(StringLiteralEqualityCheckRule.RULE_ID)
-				.orElseGet(() -> new StringLiteralEqualityCheckRule().getRuleDescription());
+				.findByRuleId(StringLiteralEqualityCheckRule.RULE_ID);
 	}
 
 	@Override

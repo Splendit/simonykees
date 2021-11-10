@@ -39,8 +39,7 @@ public class InefficientConstructorResolver extends InefficientConstructorASTVis
 	public InefficientConstructorResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-			.findByRuleId(InefficientConstructorRule.RULE_ID)
-			.orElseGet(() -> new InefficientConstructorRule().getRuleDescription());
+			.findByRuleId(InefficientConstructorRule.RULE_ID);
 	}
 
 	@Override

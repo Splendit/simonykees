@@ -32,8 +32,7 @@ public class UseComparatorMethodsResolver extends UseComparatorMethodsASTVisitor
 	public UseComparatorMethodsResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-				.findByRuleId(UseComparatorMethodsRule.RULE_ID)
-				.orElseGet(() -> new UseComparatorMethodsRule().getRuleDescription());
+				.findByRuleId(UseComparatorMethodsRule.RULE_ID);
 	}
 
 	@Override

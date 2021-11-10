@@ -39,8 +39,7 @@ public class LambdaToMethodReferenceResolver extends LambdaToMethodReferenceASTV
 	public LambdaToMethodReferenceResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-				.findByRuleId(LambdaToMethodReferenceRule.RULE_ID)
-				.orElseGet(() -> new LambdaToMethodReferenceRule().getRuleDescription());
+				.findByRuleId(LambdaToMethodReferenceRule.RULE_ID);
 	}
 
 	@Override

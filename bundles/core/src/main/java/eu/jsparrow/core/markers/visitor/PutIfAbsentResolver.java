@@ -37,8 +37,7 @@ public class PutIfAbsentResolver extends PutIfAbsentASTVisitor {
 	public PutIfAbsentResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-				.findByRuleId(PutIfAbsentRule.RULE_ID)
-				.orElseGet(() -> new PutIfAbsentRule().getRuleDescription());
+				.findByRuleId(PutIfAbsentRule.RULE_ID);
 	}
 
 	@Override

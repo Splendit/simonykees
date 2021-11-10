@@ -35,8 +35,7 @@ public class EnumsWithoutEqualsResolver extends EnumsWithoutEqualsASTVisitor {
 
 	public EnumsWithoutEqualsResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
-		this.description = RuleDescriptionFactory.findByRuleId(EnumsWithoutEqualsRule.RULE_ID)
-				.orElseGet(() -> new EnumsWithoutEqualsRule().getRuleDescription());
+		this.description = RuleDescriptionFactory.findByRuleId(EnumsWithoutEqualsRule.RULE_ID);
 	}
 
 	@Override

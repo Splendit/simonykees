@@ -35,8 +35,7 @@ public class PrimitiveBoxedForStringResolver extends PrimitiveBoxedForStringASTV
 	public PrimitiveBoxedForStringResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-			.findByRuleId(PrimitiveBoxedForStringRule.RULE_ID)
-			.orElseGet(() -> new PrimitiveBoxedForStringRule().getRuleDescription());
+			.findByRuleId(PrimitiveBoxedForStringRule.RULE_ID);
 	}
 
 	@Override

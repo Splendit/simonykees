@@ -35,8 +35,7 @@ public class RemoveNullCheckBeforeInstanceofResolver extends RemoveNullCheckBefo
 	public RemoveNullCheckBeforeInstanceofResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-				.findByRuleId(RemoveNullCheckBeforeInstanceofRule.RULE_ID)
-				.orElseGet(() -> new RemoveNullCheckBeforeInstanceofRule().getRuleDescription());
+				.findByRuleId(RemoveNullCheckBeforeInstanceofRule.RULE_ID);
 	}
 
 	@Override

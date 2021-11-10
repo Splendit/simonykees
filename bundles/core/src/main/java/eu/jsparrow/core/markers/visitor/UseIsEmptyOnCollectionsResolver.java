@@ -37,8 +37,7 @@ public class UseIsEmptyOnCollectionsResolver extends UseIsEmptyOnCollectionsASTV
 	public UseIsEmptyOnCollectionsResolver(Predicate<ASTNode> positionChecker) {
 		this.positionChecker = positionChecker;
 		this.description = RuleDescriptionFactory
-				.findByRuleId(UseIsEmptyOnCollectionsRule.RULE_ID)
-				.orElseGet(() -> new UseIsEmptyOnCollectionsRule().getRuleDescription());
+				.findByRuleId(UseIsEmptyOnCollectionsRule.RULE_ID);
 	}
 
 	@Override
