@@ -77,6 +77,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private CLabel techDebtLabel;
 
 	private CLabel issuesFixedLabel;
+	private CLabel requiredCredit;
+	private CLabel availableCredit;
 
 	private ICompilationUnit currentCompilationUnit;
 	private IChangePreviewViewer currentPreviewViewer;
@@ -154,6 +156,24 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		bindingContext.bindValue(hoursSavedLabelObserveValue, hoursSavedModelObserveValue, null,
 				UpdateValueStrategy.create(convertTimeSaved));
 
+		IConverter convertRequiredCredit = IConverter.create(Duration.class, String.class, x -> String
+			.format("Required credit: %s", DurationFormatUtil.formatTimeSaved((Duration) x)));
+		IObservableValue requiredCreditLabelObserveValue = WidgetProperties.text()
+			.observe(requiredCredit);
+		IObservableValue requiredCreditModelObserveValue = BeanProperties.value("requiredCredit") //$NON-NLS-1$
+			.observe(model);
+		bindingContext.bindValue(requiredCreditLabelObserveValue, requiredCreditModelObserveValue, null,
+				UpdateValueStrategy.create(convertRequiredCredit));
+
+		IConverter convertAvailableCredit = IConverter.create(Duration.class, String.class, x -> String
+			.format("Available credit: %s", DurationFormatUtil.formatTimeSaved((Duration) x)));
+		IObservableValue availableCreditLabelObserveValue = WidgetProperties.text()
+			.observe(availableCredit);
+		IObservableValue availableCreditModelObserveValue = BeanProperties.value("availableCredit") //$NON-NLS-1$
+			.observe(model);
+		bindingContext.bindValue(availableCreditLabelObserveValue, availableCreditModelObserveValue, null,
+				UpdateValueStrategy.create(convertAvailableCredit));
+
 	}
 
 	/*
@@ -196,7 +216,9 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		 * sets height relation between children to be 1:3 when it has two
 		 * children
 		 */
-		sashForm.setWeights(new int[] { 1, 3 });
+		sashForm.setWeights(1, 3);
+
+		createRemainingCreditView(container);
 
 		initializeDataBindings();
 	}
@@ -216,7 +238,28 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 		techDebtLabel = new CLabel(composite, SWT.NONE);
 		techDebtLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		techDebtLabel.setImage(ResourceHelper.createImage("icons/fa-clock.png")); //$NON-NLS-1$
+		techDebtLabel.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
+
+		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	}
+
+	private void createRemainingCreditView(Composite rootComposite) {
+		Composite composite = new Composite(rootComposite, SWT.NONE);
+		GridLayout layout = new GridLayout(2, true);
+		layout.marginHeight = 5;
+		layout.marginWidth = 10;
+		composite.setLayout(layout);
+		composite.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));
+
+		requiredCredit = new CLabel(composite, SWT.NONE);
+		requiredCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		Image inLoveImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
+		requiredCredit.setImage(inLoveImage);
+
+		availableCredit = new CLabel(composite, SWT.NONE);
+		availableCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		availableCredit.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -266,8 +309,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			.forEach(entry -> {
 				viewer.add(entry);
 				viewer.setChecked(entry,
-						(unselected.containsKey(entry.getElementName()) || unselectedChange.contains(entry)) ? false
-								: true);
+						!(unselected.containsKey(entry.getElementName()) || unselectedChange.contains(entry)));
 			});
 	}
 
@@ -359,10 +401,13 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		int timesApplied = RuleApplicationCount.getFor(getRule())
 			.getApplicationsForFiles(wizardModel.getFilesForRule(rule));
 		model.setIssuesFixed(timesApplied);
+
 		Duration timeSaved = getRule().getRuleDescription()
 			.getRemediationCost()
 			.multipliedBy(timesApplied);
 		model.setTimeSaved(timeSaved);
+		model.setRequiredCredit(timeSaved);
+		model.setAvailableCredit(timeSaved.plus(Duration.ofMinutes(100)));//TODO: put the right values here.
 
 	}
 

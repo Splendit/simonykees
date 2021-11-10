@@ -18,6 +18,9 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 	private Integer issuesFixed;
 
 	private Duration timeSaved;
+	
+	private Duration availableCredit;
+	private Duration requiredCredit;
 
 	private IObservableList<ChangedFilesModel> changedFiles = new WritableList<>();
 
@@ -25,6 +28,8 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 		setIssuesFixed(RuleApplicationCount.getFor(rule)
 			.toInt());
 		setTimeSaved(EliminatedTechnicalDebt.get(rule));
+		setRequiredCredit(EliminatedTechnicalDebt.get(rule));
+		setAvailableCredit(EliminatedTechnicalDebt.get(rule));
 		changedFiles.addAll(changes.entrySet()
 			.stream()
 			.map(x -> new ChangedFilesModel(x.getKey(), x.getValue()))
@@ -48,8 +53,23 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 		return timeSaved;
 	}
 
+	public Duration getRequiredCredit() {
+		return requiredCredit;
+	}
+
+	public Duration getAvailableCredit() {
+		return availableCredit;
+	}
+
 	public void setTimeSaved(Duration timeSaved) {
 		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved); //$NON-NLS-1$
 	}
 
+	public void setRequiredCredit(Duration requiredCredit) {
+		firePropertyChange("requiredCredit", this.requiredCredit, this.requiredCredit = requiredCredit); //$NON-NLS-1$
+	}
+	
+	public void setAvailableCredit(Duration availableCredit) {
+		firePropertyChange("availableCredit", this.availableCredit, this.availableCredit = availableCredit); //$NON-NLS-1$
+	}
 }

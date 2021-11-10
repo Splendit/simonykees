@@ -42,6 +42,7 @@ public class RuleDescription {
 		map.put(5, 3);
 		map.put(10, 4);
 		map.put(15, 5);
+		map.put(20, 5);
 		map.put(30, 10);
 		return Collections.unmodifiableMap(map);
 	}

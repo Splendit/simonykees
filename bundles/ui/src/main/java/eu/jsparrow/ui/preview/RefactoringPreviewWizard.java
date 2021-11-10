@@ -70,7 +70,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.getActiveWorkbenchWindow()
 			.getShell();
 		setNeedsProgressMonitor(true);
-		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
+		org.eclipse.jface.window.Window.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
 	}
 
 	@Override
@@ -135,7 +135,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	 *            on which are changes
 	 */
 	private void startRecalculationRunnable(RefactoringPreviewWizardPage page) {
-		IRunnableWithProgress job = recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
+		IRunnableWithProgress job = recalculateRulesAndClearChanges(page);
 
 		if (null != job) {
 			try {
