@@ -7,13 +7,13 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
-public class SubclassesVisitor extends ASTVisitor {
+class SubclassesVisitor extends ASTVisitor {
 
 	private final TypeDeclaration rootTypeDeclaration;
 	private final String rootTypeQualifiedName;
 	private boolean subclassExisting;
 
-	public SubclassesVisitor(TypeDeclaration rootTypeDeclaration) {
+	SubclassesVisitor(TypeDeclaration rootTypeDeclaration) {
 		this.rootTypeDeclaration = rootTypeDeclaration;
 		this.rootTypeQualifiedName = rootTypeDeclaration.resolveBinding()
 			.getErasure()
@@ -48,7 +48,7 @@ public class SubclassesVisitor extends ASTVisitor {
 		return true;
 	}
 
-	public boolean isSubclassExisting() {
+	boolean isSubclassExisting() {
 		return subclassExisting;
 	}
 }

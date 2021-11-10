@@ -28,13 +28,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
-public class NonStaticReferencesVisitor extends ASTVisitor {
+class NonStaticReferencesVisitor extends ASTVisitor {
 	private final CompilationUnit compilationUnit;
 	private final ArrayList<AbstractTypeDeclaration> surroundingTypeDeclarations;
 	private final String typeDeclarationQualifiedName;
 	private boolean unsupportedReferenceExisting;
 
-	public NonStaticReferencesVisitor(CompilationUnit compilationUnit, TypeDeclaration typeDeclaration) {
+	NonStaticReferencesVisitor(CompilationUnit compilationUnit, TypeDeclaration typeDeclaration) {
 		this.compilationUnit = compilationUnit;
 		this.typeDeclarationQualifiedName = typeDeclaration.resolveBinding()
 			.getErasure()
@@ -149,7 +149,7 @@ public class NonStaticReferencesVisitor extends ASTVisitor {
 		return surroundingTypeDeclarations.contains(declaringNode);
 	}
 
-	public boolean isUnsupportedReferenceExisting() {
+	boolean isUnsupportedReferenceExisting() {
 		return unsupportedReferenceExisting;
 	}
 }

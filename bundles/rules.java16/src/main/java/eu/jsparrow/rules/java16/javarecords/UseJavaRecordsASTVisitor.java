@@ -67,14 +67,7 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		int modifiers = typeDeclaration.getModifiers();
 
-		if (typeDeclaration.getParent() == getCompilationUnit()) {
-			if (Modifier.isFinal(modifiers)) {
-				return true;
-			}
-			return false;
-		}
-
-		if (!Modifier.isStatic(modifiers)) {
+		if (typeDeclaration.getParent() != getCompilationUnit() && !Modifier.isStatic(modifiers)) {
 			NonStaticReferencesVisitor nonStaticReferencesVisitor = new NonStaticReferencesVisitor(
 					getCompilationUnit(), typeDeclaration);
 			typeDeclaration.accept(nonStaticReferencesVisitor);

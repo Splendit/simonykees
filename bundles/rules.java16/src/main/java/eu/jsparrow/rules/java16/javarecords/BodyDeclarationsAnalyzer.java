@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
-public class BodyDeclarationsAnalyzer {
+class BodyDeclarationsAnalyzer {
 
 	private static final int VISIBILITY_PRIVATE = 0;
 	private static final int VISIBILITY_PACKAGE = 1;
