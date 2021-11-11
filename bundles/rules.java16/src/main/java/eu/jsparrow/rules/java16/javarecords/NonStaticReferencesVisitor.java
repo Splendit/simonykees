@@ -1,6 +1,9 @@
 package eu.jsparrow.rules.java16.javarecords;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -32,7 +35,9 @@ class NonStaticReferencesVisitor extends ASTVisitor {
 	private final CompilationUnit compilationUnit;
 	private final ArrayList<AbstractTypeDeclaration> surroundingTypeDeclarations;
 	private final String typeDeclarationQualifiedName;
+	private final Set<String> superClassesOfSurroundingClasses;
 	private boolean unsupportedReferenceExisting;
+	
 
 	NonStaticReferencesVisitor(CompilationUnit compilationUnit, TypeDeclaration typeDeclaration) {
 		this.compilationUnit = compilationUnit;
@@ -40,6 +45,7 @@ class NonStaticReferencesVisitor extends ASTVisitor {
 			.getErasure()
 			.getQualifiedName();
 		this.surroundingTypeDeclarations = collectSurroundingTypeDeclarations(typeDeclaration);
+		this.superClassesOfSurroundingClasses = collectSuperClassesOfSurroundingClasses(surroundingTypeDeclarations);
 	}
 
 	private static ArrayList<AbstractTypeDeclaration> collectSurroundingTypeDeclarations(
@@ -53,6 +59,33 @@ class NonStaticReferencesVisitor extends ASTVisitor {
 					AbstractTypeDeclaration.class);
 		}
 		return surroundingTypeDeclarations;
+	}
+	
+	private static Set<String> collectSuperClassesOfSurroundingClasses(ArrayList<AbstractTypeDeclaration> surroundingTypeDeclarations) {
+		Set<String> superClassesOfSurroundingClasses = new HashSet<>();
+		surroundingTypeDeclarations.forEach(
+				declaration -> superClassesOfSurroundingClasses
+					.addAll(collectSuperClassesOfSurroundingClass(declaration)));
+		return Collections.unmodifiableSet(superClassesOfSurroundingClasses);
+	}
+	
+	private static Set<String> collectSuperClassesOfSurroundingClass(AbstractTypeDeclaration typeDeclaration) {
+		Set<String> superClasses = new HashSet<>();
+
+		ITypeBinding typeBinding = typeDeclaration.resolveBinding();
+		ITypeBinding superClassTypeBinding = typeBinding.getSuperclass();
+
+		while (superClassTypeBinding != null) {
+			ITypeBinding superSuperClassTypeBinding = superClassTypeBinding.getSuperclass();
+			if (superSuperClassTypeBinding != null) {
+				String superClass = superClassTypeBinding.getErasure()
+					.getQualifiedName();
+				superClasses.add(superClass);
+			}
+			superClassTypeBinding = superSuperClassTypeBinding;
+		}
+
+		return superClasses;
 	}
 
 	@Override
@@ -128,7 +161,7 @@ class NonStaticReferencesVisitor extends ASTVisitor {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
 
 			if (variableBinding.isField()) {
-				return !isSurroundingClass(variableBinding.getDeclaringClass());
+				return isSupportedNonStaticReference(variableBinding.getDeclaringClass());
 			}
 			ASTNode declaringNode = compilationUnit.findDeclaringNode(variableBinding);
 			AbstractTypeDeclaration surroundingType = ASTNodeUtil.getSpecificAncestor(declaringNode,
@@ -138,7 +171,7 @@ class NonStaticReferencesVisitor extends ASTVisitor {
 
 		if (binding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = (IMethodBinding) binding;
-			return !isSurroundingClass(methodBinding.getDeclaringClass());
+			return isSupportedNonStaticReference(methodBinding.getDeclaringClass());
 		}
 
 		return true;
@@ -148,6 +181,20 @@ class NonStaticReferencesVisitor extends ASTVisitor {
 		ASTNode declaringNode = compilationUnit.findDeclaringNode(typeBinding);
 		return surroundingTypeDeclarations.contains(declaringNode);
 	}
+	
+	private boolean isSupportedNonStaticReference(ITypeBinding typeBinding) {
+		if(isSurroundingClass(typeBinding)) {
+			return false;
+		}
+		for(String superclass : superClassesOfSurroundingClasses) {
+			if(ClassRelationUtil.isContentOfType(typeBinding, superclass)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	
 
 	boolean isUnsupportedReferenceExisting() {
 		return unsupportedReferenceExisting;
