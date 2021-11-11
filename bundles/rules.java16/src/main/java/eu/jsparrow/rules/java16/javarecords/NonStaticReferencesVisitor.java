@@ -3,7 +3,9 @@ package eu.jsparrow.rules.java16.javarecords;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -33,18 +35,25 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 class NonStaticReferencesVisitor extends ASTVisitor {
 	private final CompilationUnit compilationUnit;
-	private final ArrayList<AbstractTypeDeclaration> surroundingTypeDeclarations;
 	private final String typeDeclarationQualifiedName;
+	private final List<String> surroundingClasses;
 	private final Set<String> superClassesOfSurroundingClasses;
 	private boolean unsupportedReferenceExisting;
-	
 
 	NonStaticReferencesVisitor(CompilationUnit compilationUnit, TypeDeclaration typeDeclaration) {
 		this.compilationUnit = compilationUnit;
 		this.typeDeclarationQualifiedName = typeDeclaration.resolveBinding()
 			.getErasure()
 			.getQualifiedName();
-		this.surroundingTypeDeclarations = collectSurroundingTypeDeclarations(typeDeclaration);
+
+		ArrayList<AbstractTypeDeclaration> surroundingTypeDeclarations = collectSurroundingTypeDeclarations(
+				typeDeclaration);
+		this.surroundingClasses = Collections.unmodifiableList(surroundingTypeDeclarations
+			.stream()
+			.map(AbstractTypeDeclaration::resolveBinding)
+			.map(ITypeBinding::getErasure)
+			.map(ITypeBinding::getQualifiedName)
+			.collect(Collectors.toList()));
 		this.superClassesOfSurroundingClasses = collectSuperClassesOfSurroundingClasses(surroundingTypeDeclarations);
 	}
 
@@ -60,15 +69,16 @@ class NonStaticReferencesVisitor extends ASTVisitor {
 		}
 		return surroundingTypeDeclarations;
 	}
-	
-	private static Set<String> collectSuperClassesOfSurroundingClasses(ArrayList<AbstractTypeDeclaration> surroundingTypeDeclarations) {
+
+	private static Set<String> collectSuperClassesOfSurroundingClasses(
+			ArrayList<AbstractTypeDeclaration> surroundingTypeDeclarations) {
 		Set<String> superClassesOfSurroundingClasses = new HashSet<>();
 		surroundingTypeDeclarations.forEach(
 				declaration -> superClassesOfSurroundingClasses
 					.addAll(collectSuperClassesOfSurroundingClass(declaration)));
 		return Collections.unmodifiableSet(superClassesOfSurroundingClasses);
 	}
-	
+
 	private static Set<String> collectSuperClassesOfSurroundingClass(AbstractTypeDeclaration typeDeclaration) {
 		Set<String> superClasses = new HashSet<>();
 
@@ -84,7 +94,6 @@ class NonStaticReferencesVisitor extends ASTVisitor {
 			}
 			superClassTypeBinding = superSuperClassTypeBinding;
 		}
-
 		return superClasses;
 	}
 
@@ -161,40 +170,33 @@ class NonStaticReferencesVisitor extends ASTVisitor {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
 
 			if (variableBinding.isField()) {
-				return isSupportedNonStaticReference(variableBinding.getDeclaringClass());
+				return isSupportedDeclaringClass(variableBinding.getDeclaringClass());
 			}
 			ASTNode declaringNode = compilationUnit.findDeclaringNode(variableBinding);
 			AbstractTypeDeclaration surroundingType = ASTNodeUtil.getSpecificAncestor(declaringNode,
 					AbstractTypeDeclaration.class);
-			return !surroundingTypeDeclarations.contains(surroundingType);
+			return ClassRelationUtil.isContentOfType(surroundingType.resolveBinding(), typeDeclarationQualifiedName);
 		}
 
 		if (binding.getKind() == IBinding.METHOD) {
 			IMethodBinding methodBinding = (IMethodBinding) binding;
-			return isSupportedNonStaticReference(methodBinding.getDeclaringClass());
+			return isSupportedDeclaringClass(methodBinding.getDeclaringClass());
 		}
 
 		return true;
 	}
 
-	private boolean isSurroundingClass(ITypeBinding typeBinding) {
-		ASTNode declaringNode = compilationUnit.findDeclaringNode(typeBinding);
-		return surroundingTypeDeclarations.contains(declaringNode);
-	}
-	
-	private boolean isSupportedNonStaticReference(ITypeBinding typeBinding) {
-		if(isSurroundingClass(typeBinding)) {
+	private boolean isSupportedDeclaringClass(ITypeBinding typeBinding) {
+		if (ClassRelationUtil.isContentOfTypes(typeBinding, surroundingClasses)) {
 			return false;
 		}
-		for(String superclass : superClassesOfSurroundingClasses) {
-			if(ClassRelationUtil.isContentOfType(typeBinding, superclass)) {
+		for (String superclass : superClassesOfSurroundingClasses) {
+			if (ClassRelationUtil.isContentOfType(typeBinding, superclass)) {
 				return false;
 			}
 		}
 		return true;
 	}
-	
-	
 
 	boolean isUnsupportedReferenceExisting() {
 		return unsupportedReferenceExisting;
