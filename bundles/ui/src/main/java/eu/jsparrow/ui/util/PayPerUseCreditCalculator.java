@@ -26,7 +26,7 @@ public class PayPerUseCreditCalculator {
 			.sum();
 	}
 
-	private int measureWeight(RefactoringRule rule) {
+	public int measureWeight(RefactoringRule rule) {
 		RuleApplicationCount numIssues = RuleApplicationCount.getFor(rule);
 		RuleDescription description = rule.getRuleDescription();
 		return numIssues.toInt() * description.getCredit();

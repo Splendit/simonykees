@@ -12,6 +12,8 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
+import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 
 public class RefactoringPreviewWizardPageModel extends BaseModel {
 
@@ -19,8 +21,8 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 
 	private Duration timeSaved;
 	
-	private Duration availableCredit;
-	private Duration requiredCredit;
+	private Integer availableCredit;
+	private Integer requiredCredit;
 
 	private IObservableList<ChangedFilesModel> changedFiles = new WritableList<>();
 
@@ -28,8 +30,11 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 		setIssuesFixed(RuleApplicationCount.getFor(rule)
 			.toInt());
 		setTimeSaved(EliminatedTechnicalDebt.get(rule));
-		setRequiredCredit(EliminatedTechnicalDebt.get(rule));
-		setAvailableCredit(EliminatedTechnicalDebt.get(rule));
+		PayPerUseCreditCalculator payPerUsecalculator = new PayPerUseCreditCalculator();
+		int measuredCredit = payPerUsecalculator.measureWeight(rule);
+		Integer credit = LicenseUtil.get().getValidationResult().getCredit().get();
+		setRequiredCredit(measuredCredit);
+		setAvailableCredit(credit);
 		changedFiles.addAll(changes.entrySet()
 			.stream()
 			.map(x -> new ChangedFilesModel(x.getKey(), x.getValue()))
@@ -53,11 +58,11 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 		return timeSaved;
 	}
 
-	public Duration getRequiredCredit() {
+	public Integer getRequiredCredit() {
 		return requiredCredit;
 	}
 
-	public Duration getAvailableCredit() {
+	public Integer getAvailableCredit() {
 		return availableCredit;
 	}
 
@@ -65,11 +70,11 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved); //$NON-NLS-1$
 	}
 
-	public void setRequiredCredit(Duration requiredCredit) {
+	public void setRequiredCredit(Integer requiredCredit) {
 		firePropertyChange("requiredCredit", this.requiredCredit, this.requiredCredit = requiredCredit); //$NON-NLS-1$
 	}
 	
-	public void setAvailableCredit(Duration availableCredit) {
+	public void setAvailableCredit(Integer availableCredit) {
 		firePropertyChange("availableCredit", this.availableCredit, this.availableCredit = availableCredit); //$NON-NLS-1$
 	}
 }

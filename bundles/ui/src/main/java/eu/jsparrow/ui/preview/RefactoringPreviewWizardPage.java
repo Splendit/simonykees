@@ -59,6 +59,7 @@ import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
+import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 /**
@@ -103,6 +104,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private RefactoringPreviewWizardModel wizardModel;
 
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
+	private Integer credit = licenseUtil.getValidationResult().getCredit().get();
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule, RefactoringRule rule,
 			RefactoringPreviewWizardModel wizardModel, boolean enabled) {
@@ -156,8 +158,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		bindingContext.bindValue(hoursSavedLabelObserveValue, hoursSavedModelObserveValue, null,
 				UpdateValueStrategy.create(convertTimeSaved));
 
-		IConverter convertRequiredCredit = IConverter.create(Duration.class, String.class, x -> String
-			.format("Required credit: %s", DurationFormatUtil.formatTimeSaved((Duration) x)));
+		// TODO: if the license model is not PPU, we should stop here. 
+		IConverter convertRequiredCredit = IConverter.create(Integer.class, String.class, x -> String.format("Used credit: %s", x));
 		IObservableValue requiredCreditLabelObserveValue = WidgetProperties.text()
 			.observe(requiredCredit);
 		IObservableValue requiredCreditModelObserveValue = BeanProperties.value("requiredCredit") //$NON-NLS-1$
@@ -165,8 +167,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		bindingContext.bindValue(requiredCreditLabelObserveValue, requiredCreditModelObserveValue, null,
 				UpdateValueStrategy.create(convertRequiredCredit));
 
-		IConverter convertAvailableCredit = IConverter.create(Duration.class, String.class, x -> String
-			.format("Available credit: %s", DurationFormatUtil.formatTimeSaved((Duration) x)));
+		IConverter convertAvailableCredit = IConverter.create(Integer.class, String.class, x -> String.format("Available credit: %s", x));
 		IObservableValue availableCreditLabelObserveValue = WidgetProperties.text()
 			.observe(availableCredit);
 		IObservableValue availableCreditModelObserveValue = BeanProperties.value("availableCredit") //$NON-NLS-1$
@@ -202,7 +203,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		// Create the SashForm
 		Composite sash = new Composite(container, SWT.NONE);
 		sash.setLayout(new GridLayout());
-		sash.setLayoutData(new GridData(GridData.FILL_BOTH));
+		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		SashForm sashForm = new SashForm(sash, SWT.VERTICAL);
 
 		createFileView(sashForm);
@@ -218,6 +219,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		 */
 		sashForm.setWeights(1, 3);
 
+		// TODO: if the license model is not PPU, the we should not do this. 
 		createRemainingCreditView(container);
 
 		initializeDataBindings();
@@ -247,7 +249,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private void createRemainingCreditView(Composite rootComposite) {
 		Composite composite = new Composite(rootComposite, SWT.NONE);
 		GridLayout layout = new GridLayout(2, true);
-		layout.marginHeight = 5;
+		layout.marginHeight = 0;
 		layout.marginWidth = 10;
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));
@@ -261,8 +263,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		availableCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 		availableCredit.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
 
-		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
-		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+//		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+//		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
 	private void createFileView(Composite parent) {
@@ -406,8 +408,9 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			.getRemediationCost()
 			.multipliedBy(timesApplied);
 		model.setTimeSaved(timeSaved);
-		model.setRequiredCredit(timeSaved);
-		model.setAvailableCredit(timeSaved.plus(Duration.ofMinutes(100)));//TODO: put the right values here.
+		PayPerUseCreditCalculator calculator = new PayPerUseCreditCalculator();
+		model.setRequiredCredit(calculator.measureWeight(rule));
+		model.setAvailableCredit(credit);
 
 	}
 

@@ -75,6 +75,8 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 	private CLabel labelExecutionTime;
 	private CLabel labelIssuesFixed;
 	private CLabel labelHoursSaved;
+	private CLabel labelRequiredCredit;
+	private CLabel labelAvailableCredit;
 
 	protected TableViewer fileTableViewer;
 	protected TableViewer rulesPerFileTableViewer;
@@ -187,7 +189,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 
 	protected void addHeader() {
 		Composite composite = new Composite(rootComposite, SWT.NONE);
-		GridLayout layout = new GridLayout(3, true);
+		GridLayout layout = new GridLayout(5, true);
 		layout.marginHeight = 10;
 		layout.marginWidth = 10;
 		composite.setLayout(layout);
@@ -204,6 +206,14 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 		labelHoursSaved = new CLabel(composite, SWT.NONE);
 		labelHoursSaved.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		labelHoursSaved.setImage(ResourceHelper.createImage("icons/fa-clock.png")); //$NON-NLS-1$
+
+		labelRequiredCredit = new CLabel(composite, SWT.NONE);
+		labelRequiredCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		labelRequiredCredit.setImage(ResourceHelper.createImage("icons/fa-bolt.png")); //$NON-NLS-1$
+		
+		labelAvailableCredit = new CLabel(composite, SWT.NONE);
+		labelAvailableCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		labelAvailableCredit.setImage(ResourceHelper.createImage("icons/fa-clock.png")); //$NON-NLS-1$
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -364,6 +374,24 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue,
 				null, UpdateValueStrategy.create(convertTimeSaved));
+
+		IConverter converterRequiredCredit = IConverter.create(Integer.class, String.class,
+				x -> (String.format("Required credit: %d", (Integer) x)));
+		ISWTObservableValue observeTextLabelRequiredCreditObserveWidget = WidgetProperties.text()
+			.observe(labelRequiredCredit);
+		IObservableValue<Object> requiredCreditPageModelObserveValue = BeanProperties.value("requiredCredit") //$NON-NLS-1$
+			.observe(summaryWizardPageModel);
+		bindingContext.bindValue(observeTextLabelRequiredCreditObserveWidget,
+				requiredCreditPageModelObserveValue, null, UpdateValueStrategy.create(converterRequiredCredit));
+
+		IConverter convertAvailableCredit = IConverter.create(Integer.class, String.class, 
+				x -> String.format("Available credit: %d", x));
+		ISWTObservableValue observeTextLabelAvailableCreditObserveWidget = WidgetProperties.text()
+			.observe(labelAvailableCredit);
+		IObservableValue<Object> availableCreditSummaryWizardPageModelObserveValue = BeanProperties.value("availableCredit") //$NON-NLS-1$
+			.observe(summaryWizardPageModel);
+		bindingContext.bindValue(observeTextLabelAvailableCreditObserveWidget, availableCreditSummaryWizardPageModelObserveValue,
+				null, UpdateValueStrategy.create(convertAvailableCredit));
 	}
 
 	private void setInitialFileSelection() {

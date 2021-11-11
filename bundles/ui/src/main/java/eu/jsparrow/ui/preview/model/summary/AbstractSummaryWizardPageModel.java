@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.preview.model.summary;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +18,8 @@ import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.preview.model.BaseModel;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
+import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 
 
 public abstract class AbstractSummaryWizardPageModel extends BaseModel {
@@ -28,6 +31,9 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 	private Integer issuesFixed;
 
 	private Duration timeSaved;
+	
+	private Integer availableCredit;
+	private Integer requiredCredit;
 
 	private IObservableList<RuleTimesModel> ruleTimes = new WritableList<>();
 
@@ -56,8 +62,24 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 		return this.issuesFixed;
 	}
 
+	public Integer getRequiredCredit() {
+		return this.requiredCredit;
+	}
+	
+	public Integer getAvailableCredit() {
+		return this.availableCredit;
+	}
+
 	public void setIssuesFixed(Integer issuesFixed) {
 		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed); //$NON-NLS-1$
+	}
+	
+	public void setRequiredCredit(Integer requiredCredit) {
+		firePropertyChange("requiredCredit", this.requiredCredit, this.requiredCredit = requiredCredit); //$NON-NLS-1$
+	}
+	
+	public void setAvailableCredit(Integer availableCredit) {
+		firePropertyChange("availableCredit", this.availableCredit, this.availableCredit = availableCredit); //$NON-NLS-1$
 	}
 
 	public Duration getTimeSaved() {
@@ -75,6 +97,8 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 		updateRuleTimes();
 		updateTimeSaved();
 		updateIssuesFixed();
+		updateRequiredCredit();
+		updateAvailableCredit();
 	}
 
 	protected void initialize() {
@@ -89,6 +113,8 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 		setRunDuration(StopWatchUtil.getTime());
 		setIssuesFixed(99999);
 		setTimeSaved(Duration.ofSeconds(999999999));
+		setRequiredCredit(999999);
+		setAvailableCredit(999999);
 	}
 
 	private void addRuleTimes() {
@@ -145,6 +171,18 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 			.mapToInt(RuleTimesModel::getTimes)
 			.sum();
 		setIssuesFixed(totalIssuesFixed);
+	}
+	
+	private void updateRequiredCredit() {
+		List<RefactoringRule> rules = refactoringPipeline.getRules();
+		PayPerUseCreditCalculator calculator = new PayPerUseCreditCalculator();
+		int credit = calculator.findTotalRequiredCredit(rules);
+		setRequiredCredit(credit);
+	}
+	
+	private void updateAvailableCredit() {
+		Integer credit = LicenseUtil.get().getValidationResult().getCredit().get();
+		setAvailableCredit(credit);
 	}
 
 	private void updateTimeSaved() {
