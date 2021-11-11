@@ -35,11 +35,10 @@ class RecordGettersAnalyzer {
 			SingleVariableDeclaration parameter = entry.getKey();
 			MethodDeclaration recordGetter = entry.getValue();
 
-			List<Annotation> annotations = ASTNodeUtil.convertToTypedList(recordGetter.modifiers(),
-					Annotation.class);
-			if (!annotations.isEmpty()) {
+			if (hasAnnotatioOtherThanOverride(recordGetter)) {
 				return false;
 			}
+
 			if (Modifier.isStatic(recordGetter.getModifiers())) {
 				return false;
 			}
@@ -58,6 +57,14 @@ class RecordGettersAnalyzer {
 		}
 
 		return true;
+	}
+
+	private boolean hasAnnotatioOtherThanOverride(MethodDeclaration recordGetter) {
+		return ASTNodeUtil.convertToTypedList(recordGetter.modifiers(), Annotation.class)
+			.stream()
+			.map(Annotation::resolveTypeBinding)
+			.anyMatch(
+					typeBinding -> !ClassRelationUtil.isContentOfType(typeBinding, java.lang.Override.class.getName()));
 	}
 
 	private Map<SingleVariableDeclaration, MethodDeclaration> collectParameterToRecordGetterMap(

@@ -404,6 +404,44 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 		assertChange(original, expected);
 	}
 
+	@Test
+	public void visit_OverrideAnnotationOnGetterToKeep_shouldTransform() throws Exception {
+		String original = "" +
+				"	private static final class XWrapper implements IXWrapper{\n"
+				+ "\n"
+				+ "		private final int x;\n"
+				+ "\n"
+				+ "		XWrapper(int x) {\n"
+				+ "			this.x = x;\n"
+				+ "		}\n"
+				+ "\n"
+				+ "		@Override\n"
+				+ "		public int x() {\n"
+				+ "			System.out.println(x);\n"
+				+ "			return this.x;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "	\n"
+				+ "	interface IXWrapper {\n"
+				+ "		int x();\n"
+				+ "	}";
+
+		String expected = "" +
+				"	private record XWrapper(int x) implements IXWrapper {\n"
+				+ "		;\n"
+				+ "		@Override\n"
+				+ "		public int x() {\n"
+				+ "			System.out.println(x);\n"
+				+ "			return this.x;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "	\n"
+				+ "	interface IXWrapper {\n"
+				+ "		int x();\n"
+				+ "	}";
+		assertChange(original, expected);
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 			""
