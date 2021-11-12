@@ -27,13 +27,10 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 	protected final RefactoringPipeline refactoringPipeline;
 
 	private Long runDuration;
-
 	private Integer issuesFixed;
-
 	private Duration timeSaved;
-	
-	private Integer availableCredit;
 	private Integer requiredCredit;
+	private Integer availableCredit;
 
 	private IObservableList<RuleTimesModel> ruleTimes = new WritableList<>();
 
@@ -181,7 +178,7 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 	}
 	
 	private void updateAvailableCredit() {
-		Integer credit = LicenseUtil.get().getValidationResult().getCredit().get();
+		Integer credit = LicenseUtil.get().getValidationResult().getCredit().get(); //FIXME
 		setAvailableCredit(credit);
 	}
 

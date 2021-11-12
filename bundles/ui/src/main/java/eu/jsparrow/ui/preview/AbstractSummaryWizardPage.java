@@ -190,10 +190,10 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 	protected void addHeader() {
 		Composite composite = new Composite(rootComposite, SWT.NONE);
 		GridLayout layout = new GridLayout(5, true);
-		layout.marginHeight = 10;
+		layout.marginHeight = 0;
 		layout.marginWidth = 10;
 		composite.setLayout(layout);
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 
 		labelExecutionTime = new CLabel(composite, SWT.NONE);
 		labelExecutionTime.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));

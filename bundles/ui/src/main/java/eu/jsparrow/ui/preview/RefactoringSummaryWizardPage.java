@@ -49,9 +49,9 @@ public class RefactoringSummaryWizardPage extends AbstractSummaryWizardPage<Refa
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		addHeader();
 		addRulesSection();
 		addFilesSection();
+		addHeader();
 		initializeDataBindings();
 	}
 

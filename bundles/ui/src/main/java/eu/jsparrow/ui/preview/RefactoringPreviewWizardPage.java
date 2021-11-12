@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -46,6 +47,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.statistic.DurationFormatUtil;
 import eu.jsparrow.i18n.Messages;
@@ -76,10 +78,15 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringPreviewWizardPage.class);
 
 	private CLabel techDebtLabel;
-
 	private CLabel issuesFixedLabel;
 	private CLabel requiredCredit;
+	
+	private CLabel totalExecutionTime;
+	private CLabel totalIssuesFixed;
+	private CLabel totalHoursSaved;
+	private CLabel totalRequiredCredit;
 	private CLabel availableCredit;
+
 
 	private ICompilationUnit currentCompilationUnit;
 	private IChangePreviewViewer currentPreviewViewer;
@@ -107,7 +114,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private Integer credit = licenseUtil.getValidationResult().getCredit().get();
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule, RefactoringRule rule,
-			RefactoringPreviewWizardModel wizardModel, boolean enabled) {
+			RefactoringPreviewWizardModel wizardModel, boolean enabled, List<RefactoringRule>allRules) {
 		super(rule.getRuleDescription()
 			.getName());
 		CustomTextEditChangePreviewViewer.setEnableDiffView(enabled);
@@ -119,7 +126,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			.getDescription());
 
 		this.wizardModel = wizardModel;
-		this.model = new RefactoringPreviewWizardPageModel(rule, changesForRule);
+		this.model = new RefactoringPreviewWizardPageModel(rule, changesForRule, allRules);
 		wizardModel.addRule(rule);
 		changesForRule.keySet()
 			.stream()
@@ -148,6 +155,14 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			.observe(model);
 		bindingContext.bindValue(issuesFixedLabelObserveValue, issuesFixedModelObserveValue, null,
 				UpdateValueStrategy.create(convertIssuesFixed));
+		
+		IConverter convertRequiredCredit = IConverter.create(Integer.class, String.class, x -> String.format("Used credit: %s", x));
+		IObservableValue requiredCreditLabelObserveValue = WidgetProperties.text()
+			.observe(requiredCredit);
+		IObservableValue requiredCreditModelObserveValue = BeanProperties.value("requiredCredit") //$NON-NLS-1$
+			.observe(model);
+		bindingContext.bindValue(requiredCreditLabelObserveValue, requiredCreditModelObserveValue, null,
+				UpdateValueStrategy.create(convertRequiredCredit));
 
 		IConverter convertTimeSaved = IConverter.create(Duration.class, String.class, x -> String
 			.format(Messages.DurationFormatUtil_TimeSaved, DurationFormatUtil.formatTimeSaved((Duration) x)));
@@ -159,13 +174,42 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				UpdateValueStrategy.create(convertTimeSaved));
 
 		// TODO: if the license model is not PPU, we should stop here. 
-		IConverter convertRequiredCredit = IConverter.create(Integer.class, String.class, x -> String.format("Used credit: %s", x));
-		IObservableValue requiredCreditLabelObserveValue = WidgetProperties.text()
-			.observe(requiredCredit);
-		IObservableValue requiredCreditModelObserveValue = BeanProperties.value("requiredCredit") //$NON-NLS-1$
+		
+		IConverter convertRunDuration = IConverter.create(Long.class, String.class,
+				x -> String.format("Total Run Duration: %s", DurationFormatUtil.formatRunDuration((Long) x)));
+		IObservableValue<String> observeTextLabelRunDurationObserveWidget = WidgetProperties.text()
+			.observe(totalExecutionTime);
+		IObservableValue<Object> runDurationWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
 			.observe(model);
-		bindingContext.bindValue(requiredCreditLabelObserveValue, requiredCreditModelObserveValue, null,
-				UpdateValueStrategy.create(convertRequiredCredit));
+		bindingContext.bindValue(observeTextLabelRunDurationObserveWidget,
+				runDurationWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertRunDuration));
+		
+		IConverter convertTotalIssuesFixed = IConverter.create(Integer.class, String.class,
+				x -> (String.format("Total Issues Fixed: %s", (Integer) x)));
+		ISWTObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
+			.observe(totalIssuesFixed);
+		IObservableValue<Object> issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("totalIssuesFixed") //$NON-NLS-1$
+			.observe(model);
+		bindingContext.bindValue(observeTextLabelIssuesFixedObserveWidget,
+				issuesFixedSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertTotalIssuesFixed));
+
+		IConverter convertTotalTimeSaved = IConverter.create(Duration.class, String.class, x -> String
+			.format(Messages.DurationFormatUtil_TimeSaved, DurationFormatUtil.formatTimeSaved((Duration) x)));
+		ISWTObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
+			.observe(totalHoursSaved);
+		IObservableValue<Object> hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("totalTimeSaved") //$NON-NLS-1$
+			.observe(model);
+		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue,
+				null, UpdateValueStrategy.create(convertTotalTimeSaved));
+
+		IConverter converterRequiredCredit = IConverter.create(Integer.class, String.class,
+				x -> (String.format("Required credit: %d", (Integer) x)));
+		ISWTObservableValue observeTextLabelRequiredCreditObserveWidget = WidgetProperties.text()
+			.observe(totalRequiredCredit);
+		IObservableValue<Object> requiredCreditPageModelObserveValue = BeanProperties.value("totalRequiredCredit") //$NON-NLS-1$
+			.observe(model);
+		bindingContext.bindValue(observeTextLabelRequiredCreditObserveWidget,
+				requiredCreditPageModelObserveValue, null, UpdateValueStrategy.create(converterRequiredCredit));
 
 		IConverter convertAvailableCredit = IConverter.create(Integer.class, String.class, x -> String.format("Available credit: %s", x));
 		IObservableValue availableCreditLabelObserveValue = WidgetProperties.text()
@@ -227,7 +271,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 	private void createStatisticsView(Composite rootComposite) {
 		Composite composite = new Composite(rootComposite, SWT.NONE);
-		GridLayout layout = new GridLayout(2, true);
+		GridLayout layout = new GridLayout(3, true);
 		layout.marginHeight = 10;
 		layout.marginWidth = 10;
 		composite.setLayout(layout);
@@ -237,6 +281,11 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		issuesFixedLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		Image inLoveImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
 		issuesFixedLabel.setImage(inLoveImage);
+		
+		requiredCredit = new CLabel(composite, SWT.NONE);
+		requiredCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		Image usedCreditImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
+		requiredCredit.setImage(usedCreditImage);
 
 		techDebtLabel = new CLabel(composite, SWT.NONE);
 		techDebtLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
@@ -248,23 +297,35 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 	private void createRemainingCreditView(Composite rootComposite) {
 		Composite composite = new Composite(rootComposite, SWT.NONE);
-		GridLayout layout = new GridLayout(2, true);
+		GridLayout layout = new GridLayout(5, true);
 		layout.marginHeight = 0;
 		layout.marginWidth = 10;
 		composite.setLayout(layout);
-		composite.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 
-		requiredCredit = new CLabel(composite, SWT.NONE);
-		requiredCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
-		Image inLoveImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
-		requiredCredit.setImage(inLoveImage);
+
+		totalExecutionTime = new CLabel(composite, SWT.NONE);
+		totalExecutionTime.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		totalExecutionTime.setImage(ResourceHelper.createImage("icons/fa-hourglass-half.png"));//$NON-NLS-1$
+
+		totalIssuesFixed = new CLabel(composite, SWT.NONE);
+		totalIssuesFixed.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		totalIssuesFixed.setImage(ResourceHelper.createImage("icons/fa-bolt.png"));//$NON-NLS-1$
+		
+		totalHoursSaved = new CLabel(composite, SWT.NONE);
+		totalHoursSaved.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		totalHoursSaved.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
+		
+		totalRequiredCredit = new CLabel(composite, SWT.NONE);
+		totalRequiredCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		totalRequiredCredit.setImage(ResourceHelper.createImage("icons/fa-bolt.png"));//$NON-NLS-1$
 
 		availableCredit = new CLabel(composite, SWT.NONE);
-		availableCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		availableCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		availableCredit.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
 
-//		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
-//		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
 	private void createFileView(Composite parent) {
@@ -410,7 +471,12 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		model.setTimeSaved(timeSaved);
 		PayPerUseCreditCalculator calculator = new PayPerUseCreditCalculator();
 		model.setRequiredCredit(calculator.measureWeight(rule));
-		model.setAvailableCredit(credit);
+		model.setAvailableCredit(credit);//FIXME
+		model.setRunDuration(5000L);
+		model.setTotalIssuesFixed(200000);
+		model.setTotalTimeSaved(Duration.ofMinutes(10000));
+		model.setTotalRequiredCredit(100000);
+		
 
 	}
 
