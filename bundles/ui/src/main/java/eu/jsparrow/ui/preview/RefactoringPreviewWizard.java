@@ -1,7 +1,9 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -21,15 +23,20 @@ import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
+import eu.jsparrow.core.statistic.StopWatchUtil;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
+import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
+import eu.jsparrow.ui.preview.model.StatisticsAreaPageModel;
+import eu.jsparrow.ui.preview.statistics.StatisticsArea;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
@@ -89,12 +96,13 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		 * First summary page is created to collect all initial source from
 		 * working copies
 		 */
+		StatisticsArea statisticsArea = new StatisticsArea(refactoringPipeline, createStatisticsAreaModel(refactoringPipeline.getRules()));
 		model = new RefactoringPreviewWizardModel();
 		refactoringPipeline.getRules()
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
 				if (!changes.isEmpty()) {
-					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), refactoringPipeline.getRules());
+					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), statisticsArea);
 					addPage(previewPage);
 				}
 			});
@@ -107,6 +115,24 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		}
 	}
 
+	private StatisticsAreaPageModel createStatisticsAreaModel(List<RefactoringRule> allRules) {
+		Long runDuration = StopWatchUtil.getTime();
+		int issuesFixedCount = allRules.stream()
+				.map(RuleApplicationCount::getFor)
+				.mapToInt(RuleApplicationCount::toInt)
+				.sum();
+		Duration timeSaved = allRules.stream()
+				.map(EliminatedTechnicalDebt::get)
+				.reduce(Duration.ZERO, Duration::plus);
+		
+		PayPerUseCreditCalculator calculator = new PayPerUseCreditCalculator();
+		int totalRequired = calculator.findTotalRequiredCredit(allRules);
+		
+		Integer totalAvailable = LicenseUtil.get().getValidationResult().getCredit().get(); //FIXME
+		return new StatisticsAreaPageModel(runDuration, issuesFixedCount, timeSaved, totalRequired, totalAvailable);
+		
+	}
+	
 	@Override
 	public void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RefactoringPreviewWizardPage) {
