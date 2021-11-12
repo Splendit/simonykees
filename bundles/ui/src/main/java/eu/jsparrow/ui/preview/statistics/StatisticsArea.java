@@ -135,9 +135,20 @@ public class StatisticsArea {
 			.sum();
 		Duration timeSaved = allRules.stream()
 			.map(EliminatedTechnicalDebt::get)
-			.reduce(Duration.ZERO, Duration::plus);
+			.reduce(Duration.ZERO, Duration::plus);		
 		model.setTotalIssuesFixed(issuesFixedCount);
 		model.setTotalTimeSaved(timeSaved);
 		model.setTotalRequiredCredit(requiredCredit);
+	}
+	
+	public void updateForSelected(int deltaTotalIssues, Duration deltaTimeSaved, int deltaRequiredCredit) {
+		int newTotalIssues = model.getTotalIssuesFixed() - deltaTotalIssues;
+		model.setTotalIssuesFixed(newTotalIssues);
+		
+		int newRequiredCredit = model.getTotalRequiredCredit() - deltaRequiredCredit;
+		model.setTotalRequiredCredit(newRequiredCredit);
+		
+		Duration newSavedTime = model.getTotalTimeSaved().minus(deltaTimeSaved);
+		model.setTotalTimeSaved(newSavedTime);
 	}
 }

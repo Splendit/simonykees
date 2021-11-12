@@ -379,15 +379,19 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private void updateIssuesAndTimeForSelected() {
 		int timesApplied = RuleApplicationCount.getFor(getRule())
 			.getApplicationsForFiles(wizardModel.getFilesForRule(rule));
+		int deltaTimesApplied = model.getIssuesFixed() - timesApplied;
 		model.setIssuesFixed(timesApplied);
 
 		Duration timeSaved = getRule().getRuleDescription()
 			.getRemediationCost()
 			.multipliedBy(timesApplied);
-		model.setTimeSaved(timeSaved);
-		PayPerUseCreditCalculator calculator = new PayPerUseCreditCalculator();
-		model.setRequiredCredit(calculator.measureWeight(rule));
-		this.statisticsArea.updateForSelected();
+		Duration deltaTimeSaved = model.getTimeSaved().minus(timeSaved);
+		model.setTimeSaved(timeSaved);	
+		int deltaCredit = deltaTimesApplied * rule.getRuleDescription().getCredit();
+		int newCredit = model.getRequiredCredit() - deltaCredit;
+		model.setRequiredCredit(newCredit);
+		
+		this.statisticsArea.updateForSelected(deltaTimesApplied, deltaTimeSaved, deltaCredit);
 
 	}
 

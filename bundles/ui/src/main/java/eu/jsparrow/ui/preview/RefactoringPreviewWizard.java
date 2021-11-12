@@ -60,6 +60,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	private RefactoringPreviewWizardModel model;
 	protected RefactoringSummaryWizardPage summaryPage;
+	protected StatisticsArea statisticsArea;
 	
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
@@ -72,6 +73,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
+		this.statisticsArea = new StatisticsArea(refactoringPipeline, createStatisticsAreaModel(refactoringPipeline.getRules()));
 		this.refactoringPipeline = refactoringPipeline;
 		this.shell = PlatformUI.getWorkbench()
 			.getActiveWorkbenchWindow()
@@ -96,7 +98,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		 * First summary page is created to collect all initial source from
 		 * working copies
 		 */
-		StatisticsArea statisticsArea = new StatisticsArea(refactoringPipeline, createStatisticsAreaModel(refactoringPipeline.getRules()));
+		
 		model = new RefactoringPreviewWizardModel();
 		refactoringPipeline.getRules()
 			.forEach(rule -> {
@@ -187,6 +189,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		return monitor -> {
 			try {
 				refactoringPipeline.doAdditionalRefactoring(page.getUnselectedChange(), page.getRule(), monitor);
+				this.statisticsArea.updateForSelected();
 				if (monitor.isCanceled()) {
 					refactoringPipeline.clearStates();
 				}
