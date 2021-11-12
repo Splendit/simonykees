@@ -61,6 +61,7 @@ import eu.jsparrow.ui.preview.comparator.SortableViewerComparator;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.AbstractSummaryWizardPageModel;
 import eu.jsparrow.ui.preview.model.summary.FileViewerFilter;
+import eu.jsparrow.ui.preview.statistics.StatisticsArea;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 @SuppressWarnings({ "restriction" })
@@ -72,11 +73,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 
 	protected Composite rootComposite;
 
-	private CLabel labelExecutionTime;
-	private CLabel labelIssuesFixed;
-	private CLabel labelHoursSaved;
-	private CLabel labelRequiredCredit;
-	private CLabel labelAvailableCredit;
+	private StatisticsArea statisticsArea;
 
 	protected TableViewer fileTableViewer;
 	protected TableViewer rulesPerFileTableViewer;
@@ -92,15 +89,15 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton,
-			StandaloneStatisticsMetadata statisticsMetadata) {
-		this(refactoringPipeline, wizardModel, enabledFinishButton);
+			StandaloneStatisticsMetadata statisticsMetadata, StatisticsArea statisticsArea) {
+		this(refactoringPipeline, wizardModel, enabledFinishButton, statisticsArea);
 		this.statisticsMetadata = statisticsMetadata;
 		this.endTime = Instant.now()
 			.getEpochSecond();
 	}
 
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
-			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton) {
+			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton, StatisticsArea statisticsArea) {
 		super("wizardPage"); //$NON-NLS-1$
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 
@@ -110,6 +107,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 		displayHeight = Display.getCurrent()
 			.getPrimaryMonitor()
 			.getBounds().height;
+		this.statisticsArea = statisticsArea;
 	}
 
 	protected abstract T summaryPageModelFactory(RefactoringPipeline pipeline,
@@ -188,35 +186,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 	}
 
 	protected void addHeader() {
-		Composite composite = new Composite(rootComposite, SWT.NONE);
-		GridLayout layout = new GridLayout(5, true);
-		layout.marginHeight = 0;
-		layout.marginWidth = 10;
-		composite.setLayout(layout);
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
-
-		labelExecutionTime = new CLabel(composite, SWT.NONE);
-		labelExecutionTime.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelExecutionTime.setImage(ResourceHelper.createImage("icons/fa-hourglass-half.png")); //$NON-NLS-1$
-
-		labelIssuesFixed = new CLabel(composite, SWT.NONE);
-		labelIssuesFixed.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelIssuesFixed.setImage(ResourceHelper.createImage("icons/fa-bolt.png")); //$NON-NLS-1$
-
-		labelHoursSaved = new CLabel(composite, SWT.NONE);
-		labelHoursSaved.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelHoursSaved.setImage(ResourceHelper.createImage("icons/fa-clock.png")); //$NON-NLS-1$
-
-		labelRequiredCredit = new CLabel(composite, SWT.NONE);
-		labelRequiredCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelRequiredCredit.setImage(ResourceHelper.createImage("icons/fa-bolt.png")); //$NON-NLS-1$
-		
-		labelAvailableCredit = new CLabel(composite, SWT.NONE);
-		labelAvailableCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelAvailableCredit.setImage(ResourceHelper.createImage("icons/fa-clock.png")); //$NON-NLS-1$
-
-		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
-		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		this.statisticsArea.createView(rootComposite);
 	}
 
 	protected TableViewerColumn createSortableTableViewerColumn(TableViewer tableViewer, String title,
@@ -329,10 +299,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 	}
 
 	protected void initializeDataBindings() {
-		DataBindingContext bindingContext = new DataBindingContext();
-
-		initializeHeaderDataBindings(bindingContext);
-
+		this.statisticsArea.initializeDataBindings();
 		initializeFileTableViewer();
 	}
 
@@ -344,54 +311,6 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 			statusInfo.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
 		}
 		StatusUtil.applyToStatusLine(this, statusInfo);
-	}
-
-	private void initializeHeaderDataBindings(DataBindingContext bindingContext) {
-		IConverter convertRunDuration = IConverter.create(Long.class, String.class,
-				x -> String.format(Messages.DurationFormatUtil_RunDuration,
-						DurationFormatUtil.formatRunDuration((Long) x)));
-		IObservableValue<String> observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
-			.observe(labelExecutionTime);
-		IObservableValue<Object> executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
-			.observe(summaryWizardPageModel);
-		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
-				executionTimeSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertRunDuration));
-
-		IConverter convertIssuesFixed = IConverter.create(Integer.class, String.class,
-				x -> (String.format(Messages.SummaryWizardPageModel_IssuesFixed, (Integer) x)));
-		ISWTObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
-			.observe(labelIssuesFixed);
-		IObservableValue<Object> issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed") //$NON-NLS-1$
-			.observe(summaryWizardPageModel);
-		bindingContext.bindValue(observeTextLabelIssuesFixedObserveWidget,
-				issuesFixedSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertIssuesFixed));
-
-		IConverter convertTimeSaved = IConverter.create(Duration.class, String.class, x -> String
-			.format(Messages.DurationFormatUtil_TimeSaved, DurationFormatUtil.formatTimeSaved((Duration) x)));
-		ISWTObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
-			.observe(labelHoursSaved);
-		IObservableValue<Object> hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("timeSaved") //$NON-NLS-1$
-			.observe(summaryWizardPageModel);
-		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue,
-				null, UpdateValueStrategy.create(convertTimeSaved));
-
-		IConverter converterRequiredCredit = IConverter.create(Integer.class, String.class,
-				x -> (String.format("Required credit: %d", (Integer) x)));
-		ISWTObservableValue observeTextLabelRequiredCreditObserveWidget = WidgetProperties.text()
-			.observe(labelRequiredCredit);
-		IObservableValue<Object> requiredCreditPageModelObserveValue = BeanProperties.value("requiredCredit") //$NON-NLS-1$
-			.observe(summaryWizardPageModel);
-		bindingContext.bindValue(observeTextLabelRequiredCreditObserveWidget,
-				requiredCreditPageModelObserveValue, null, UpdateValueStrategy.create(converterRequiredCredit));
-
-		IConverter convertAvailableCredit = IConverter.create(Integer.class, String.class, 
-				x -> String.format("Available credit: %d", x));
-		ISWTObservableValue observeTextLabelAvailableCreditObserveWidget = WidgetProperties.text()
-			.observe(labelAvailableCredit);
-		IObservableValue<Object> availableCreditSummaryWizardPageModelObserveValue = BeanProperties.value("availableCredit") //$NON-NLS-1$
-			.observe(summaryWizardPageModel);
-		bindingContext.bindValue(observeTextLabelAvailableCreditObserveWidget, availableCreditSummaryWizardPageModelObserveValue,
-				null, UpdateValueStrategy.create(convertAvailableCredit));
 	}
 
 	private void setInitialFileSelection() {

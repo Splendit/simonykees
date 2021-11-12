@@ -24,12 +24,13 @@ import eu.jsparrow.ui.preview.comparator.SortableViewerComparator;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedNamesInFileModel;
 import eu.jsparrow.ui.preview.model.summary.RenamingSummaryWizardPageModel;
+import eu.jsparrow.ui.preview.statistics.StatisticsArea;
 
 public class RenamingRuleSummaryWizardPage extends AbstractSummaryWizardPage<RenamingSummaryWizardPageModel> {
 
 	public RenamingRuleSummaryWizardPage(RefactoringPipeline refactoringPipeline,
-			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton) {
-		super(refactoringPipeline, wizardModel, enabledFinishButton);
+			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton, StatisticsArea statisticsArea) {
+		super(refactoringPipeline, wizardModel, enabledFinishButton, statisticsArea);
 	}
 
 	/**
