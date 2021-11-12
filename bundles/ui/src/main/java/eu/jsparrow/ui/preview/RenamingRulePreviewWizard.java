@@ -38,6 +38,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.StatisticsAreaPageModel;
 import eu.jsparrow.ui.preview.statistics.StatisticsArea;
+import eu.jsparrow.ui.preview.statistics.StatisticsAreaFactory;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -76,29 +77,10 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		this.originalDocuments = targetCompilationUnits.stream()
 			.map(ICompilationUnit::getPrimary)
 			.collect(Collectors.toMap(ICompilationUnit::getPath, this::createDocument));
-		this.statisticsArea = new StatisticsArea(refactoringPipeline, createStatisticsAreaModel(refactoringPipeline.getRules()));
+		this.statisticsArea = new StatisticsArea(refactoringPipeline, StatisticsAreaFactory.createStatisticsAreaModel(refactoringPipeline.getRules()));
 
 		this.rule = rule;
 		setNeedsProgressMonitor(true);
-	}
-
-	private StatisticsAreaPageModel createStatisticsAreaModel(List<RefactoringRule> allRules) {
-		// TODO: put this in a factory method
-		Long runDuration = StopWatchUtil.getTime();
-		int issuesFixedCount = allRules.stream()
-				.map(RuleApplicationCount::getFor)
-				.mapToInt(RuleApplicationCount::toInt)
-				.sum();
-		Duration timeSaved = allRules.stream()
-				.map(EliminatedTechnicalDebt::get)
-				.reduce(Duration.ZERO, Duration::plus);
-		
-		PayPerUseCreditCalculator calculator = new PayPerUseCreditCalculator();
-		int totalRequired = calculator.findTotalRequiredCredit(allRules);
-		
-		Integer totalAvailable = LicenseUtil.get().getValidationResult().getCredit().get(); //FIXME
-		return new StatisticsAreaPageModel(runDuration, issuesFixedCount, timeSaved, totalRequired, totalAvailable);
-		
 	}
 
 	private Document createDocument(ICompilationUnit icu) {

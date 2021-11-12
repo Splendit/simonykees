@@ -37,6 +37,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.StatisticsAreaPageModel;
 import eu.jsparrow.ui.preview.statistics.StatisticsArea;
+import eu.jsparrow.ui.preview.statistics.StatisticsAreaFactory;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
@@ -73,7 +74,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
-		this.statisticsArea = new StatisticsArea(refactoringPipeline, createStatisticsAreaModel(refactoringPipeline.getRules()));
+		this.statisticsArea = new StatisticsArea(refactoringPipeline, StatisticsAreaFactory.createStatisticsAreaModel(refactoringPipeline.getRules()));
 		this.refactoringPipeline = refactoringPipeline;
 		this.shell = PlatformUI.getWorkbench()
 			.getActiveWorkbenchWindow()
@@ -115,24 +116,6 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsMetadata, statisticsArea);
 			addPage(summaryPage);
 		}
-	}
-
-	private StatisticsAreaPageModel createStatisticsAreaModel(List<RefactoringRule> allRules) {
-		Long runDuration = StopWatchUtil.getTime();
-		int issuesFixedCount = allRules.stream()
-				.map(RuleApplicationCount::getFor)
-				.mapToInt(RuleApplicationCount::toInt)
-				.sum();
-		Duration timeSaved = allRules.stream()
-				.map(EliminatedTechnicalDebt::get)
-				.reduce(Duration.ZERO, Duration::plus);
-		
-		PayPerUseCreditCalculator calculator = new PayPerUseCreditCalculator();
-		int totalRequired = calculator.findTotalRequiredCredit(allRules);
-		
-		Integer totalAvailable = LicenseUtil.get().getValidationResult().getCredit().get(); //FIXME
-		return new StatisticsAreaPageModel(runDuration, issuesFixedCount, timeSaved, totalRequired, totalAvailable);
-		
 	}
 	
 	@Override
