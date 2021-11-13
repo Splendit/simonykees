@@ -1,5 +1,7 @@
 package eu.jsparrow.rules.java16.javarecords;
 
+import static eu.jsparrow.rules.java16.javarecords.TypeVisibilityAnalyzer.getVisibilityGrade;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,11 +33,6 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 class BodyDeclarationsAnalyzer {
-
-	private static final int VISIBILITY_PRIVATE = 0;
-	private static final int VISIBILITY_PACKAGE = 1;
-	private static final int VISIBILITY_PROTECTED = 2;
-	private static final int VISIBILITY_PUBLIC = 3;
 
 	Optional<BodyDeclarationsAnalysisResult> analyzeBodyDeclarations(TypeDeclaration typeDeclaration) {
 
@@ -69,8 +66,8 @@ class BodyDeclarationsAnalyzer {
 		boolean canRemoveCanonicalConstructor = canRemoveCanonicalConstructor(assumedCanonicalConstructor,
 				canonicalConstructorParameters);
 		if (!canRemoveCanonicalConstructor) {
-			int recordVisibility = getVisibilityAsInt(typeDeclaration);
-			int canonicalConstructorVisibility = getVisibilityAsInt(assumedCanonicalConstructor);
+			int recordVisibility = getVisibilityGrade(typeDeclaration);
+			int canonicalConstructorVisibility = getVisibilityGrade(assumedCanonicalConstructor);
 			if (canonicalConstructorVisibility < recordVisibility) {
 				return Optional.empty();
 			}
@@ -237,19 +234,6 @@ class BodyDeclarationsAnalyzer {
 		return true;
 	}
 
-	private int getVisibilityAsInt(BodyDeclaration bodyDeclaration) {
-		int modifiers = bodyDeclaration.getModifiers();
-		if (Modifier.isPrivate(modifiers)) {
-			return VISIBILITY_PRIVATE;
-		}
-		if (Modifier.isProtected(modifiers)) {
-			return VISIBILITY_PROTECTED;
-		}
-		if (Modifier.isPublic(modifiers)) {
-			return VISIBILITY_PUBLIC;
-		}
-		return VISIBILITY_PACKAGE;
-	}
 
 	static boolean isThisFieldAccessMatchingIdentifier(Expression expression, String expectedIdentifier) {
 		if (expression.getNodeType() != ASTNode.FIELD_ACCESS) {

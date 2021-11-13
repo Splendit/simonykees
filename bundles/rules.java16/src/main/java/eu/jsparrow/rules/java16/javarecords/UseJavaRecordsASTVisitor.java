@@ -27,27 +27,32 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 
-		List<Modifier> classModifiers = ASTNodeUtil
-			.convertToTypedList(typeDeclaration.modifiers(), Modifier.class);
-		boolean allClassModifiersSupported = classModifiers
-			.stream()
-			.allMatch(this::isSupportedClassModifier);
+		TypeVisibilityAnalyzer visibilityAnalyzer = new TypeVisibilityAnalyzer();
 
-		if (allClassModifiersSupported && isSupportedClassDeclaration(typeDeclaration)) {
+		if (visibilityAnalyzer.analyzeEffectiveVisibility(typeDeclaration)) {
 
-			BodyDeclarationsAnalyzer bodyDeclarationsAnalyzer = new BodyDeclarationsAnalyzer();
-			bodyDeclarationsAnalyzer.analyzeBodyDeclarations(typeDeclaration)
-				.ifPresent(bodyDeclarationAnalysisResult -> {
-					List<Annotation> annotations = ASTNodeUtil.convertToTypedList(typeDeclaration.modifiers(),
-							Annotation.class);
-					List<Modifier> recordModifiers = classModifiers
-						.stream()
-						.filter(modifier -> !modifier.isStatic())
-						.filter(modifier -> !modifier.isFinal())
-						.collect(Collectors.toList());
+			List<Modifier> classModifiers = ASTNodeUtil
+				.convertToTypedList(typeDeclaration.modifiers(), Modifier.class);
+			boolean allClassModifiersSupported = classModifiers
+				.stream()
+				.allMatch(this::isSupportedClassModifier);
 
-					transform(annotations, recordModifiers, bodyDeclarationAnalysisResult);
-				});
+			if (allClassModifiersSupported && isSupportedClassDeclaration(typeDeclaration)) {
+
+				BodyDeclarationsAnalyzer bodyDeclarationsAnalyzer = new BodyDeclarationsAnalyzer();
+				bodyDeclarationsAnalyzer.analyzeBodyDeclarations(typeDeclaration)
+					.ifPresent(bodyDeclarationAnalysisResult -> {
+						List<Annotation> annotations = ASTNodeUtil.convertToTypedList(typeDeclaration.modifiers(),
+								Annotation.class);
+						List<Modifier> recordModifiers = classModifiers
+							.stream()
+							.filter(modifier -> !modifier.isStatic())
+							.filter(modifier -> !modifier.isFinal())
+							.collect(Collectors.toList());
+
+						transform(annotations, recordModifiers, bodyDeclarationAnalysisResult);
+					});
+			}
 		}
 		return true;
 	}
