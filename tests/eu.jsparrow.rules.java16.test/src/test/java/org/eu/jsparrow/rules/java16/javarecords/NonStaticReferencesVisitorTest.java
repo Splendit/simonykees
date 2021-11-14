@@ -575,11 +575,11 @@ public class NonStaticReferencesVisitorTest extends AbstractUseJavaRecordsTest {
 	@Test
 	public void visit_InstanceFiledOfSuperClassOfSurroundingClass_shouldNotTransform() throws Exception {
 		String original = "" +
-				"	private static class SuperClassOfSurroundingClass {\n"
+				"	static class SuperClassOfSurroundingClass {\n"
 				+ "		int instanceField;\n"
 				+ "	}\n"
 				+ "\n"
-				+ "	private static class SurroundingClass extends SuperClassOfSurroundingClass {\n"
+				+ "	static class SurroundingClass extends SuperClassOfSurroundingClass {\n"
 				+ "\n"
 				+ "		private class Point {\n"
 				+ BODY_DECLARATIONS

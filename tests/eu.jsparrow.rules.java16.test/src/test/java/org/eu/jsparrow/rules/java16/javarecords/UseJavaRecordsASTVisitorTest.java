@@ -621,8 +621,8 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "			this.s = s;\n"
 				+ "		}\n"
 				+ "		\n"
-				+ "		class NestedClassWithinStringWrapper {\n"
-				+ "			\n"
+				+ "		enum NestedEnum {\n"
+				+ "			ENTRY;\n"
 				+ "		}\n"
 				+ "	}";
 
