@@ -1,7 +1,5 @@
 package eu.jsparrow.rules.java16.javarecords;
 
-import static eu.jsparrow.rules.java16.javarecords.TypeVisibilityAnalyzer.getVisibilityGrade;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,14 +61,9 @@ class BodyDeclarationsAnalyzer {
 			}
 		}
 
-		boolean canRemoveCanonicalConstructor = canRemoveCanonicalConstructor(assumedCanonicalConstructor,
-				canonicalConstructorParameters);
-		if (!canRemoveCanonicalConstructor) {
-			int recordVisibility = getVisibilityGrade(typeDeclaration);
-			int canonicalConstructorVisibility = getVisibilityGrade(assumedCanonicalConstructor);
-			if (canonicalConstructorVisibility < recordVisibility) {
-				return Optional.empty();
-			}
+		if ((Modifier.isPrivate(assumedCanonicalConstructor.getModifiers())
+				&& !Modifier.isPrivate(typeDeclaration.getModifiers()))) {
+			return Optional.empty();
 		}
 
 		if (!analyzeQualificationForRecordComponents(privateFinalInstanceFields,
@@ -85,6 +78,8 @@ class BodyDeclarationsAnalyzer {
 		ArrayList<MethodDeclaration> methodsToRemove = new ArrayList<>();
 		methodsToRemove.addAll(recordGettersAnalyzer.getRecordGetterstoRemove());
 
+		boolean canRemoveCanonicalConstructor = canRemoveCanonicalConstructor(assumedCanonicalConstructor,
+				canonicalConstructorParameters);
 		if (canRemoveCanonicalConstructor) {
 			methodsToRemove.add(assumedCanonicalConstructor);
 		}

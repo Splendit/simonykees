@@ -14,7 +14,7 @@ public class NonStaticReferencesVisitorTest extends AbstractUseJavaRecordsTest {
 			+ "			private final int x;\n"
 			+ "			private final int y;\n"
 			+ "\n"
-			+ "			Point(int x, int y) {\n"
+			+ "			public Point(int x, int y) {\n"
 			+ "				this.x = x;\n"
 			+ "				this.y = y;\n"
 			+ "			}\n"
