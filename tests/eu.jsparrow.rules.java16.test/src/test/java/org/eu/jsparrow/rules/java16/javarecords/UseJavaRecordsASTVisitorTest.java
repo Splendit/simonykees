@@ -595,16 +595,11 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 	@Test
 	public void visit_PrivateCanonicalConstructorForPackageScopeRecord_shouldNotTransform() throws Exception {
 		String original = "" +
-				"	static final class XWrapper {\n"
+				"	static final class StringWrapper {\n"
+				+ "		private final String s;\n"
 				+ "\n"
-				+ "		private final int x;\n"
-				+ "\n"
-				+ "		private XWrapper(int x) {\n"
-				+ "			if (x < 100) {\n"
-				+ "				this.x = x;\n"
-				+ "			} else {\n"
-				+ "				this.x = 100;\n"
-				+ "			}\n"
+				+ "		private StringWrapper(String s) {\n"
+				+ "			this.s = s;\n"
 				+ "		}\n"
 				+ "	}";
 
@@ -731,11 +726,20 @@ public class UseJavaRecordsASTVisitorTest extends AbstractUseJavaRecordsTest {
 					+ "	}"
 
 	})
-	public void visit_PrivateFinalSetOfJokerExtendsCharSequence_shouldNotTransform(String original)
+	public void visit_InconsistentGenerics_shouldNotTransform(String original)
 			throws Exception {
 
 		defaultFixture.addImport(java.util.Set.class.getName());
 
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_NoBodyDeclaration_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	private static final class NoBodyDeclarations {\n"
+				+ "		\n"
+				+ "	}";
 		assertNoChange(original);
 	}
 }
