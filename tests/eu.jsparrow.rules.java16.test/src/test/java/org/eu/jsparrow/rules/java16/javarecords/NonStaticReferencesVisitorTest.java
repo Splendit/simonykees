@@ -556,7 +556,7 @@ public class NonStaticReferencesVisitorTest extends AbstractUseJavaRecordsTest {
 	@Test
 	public void visit_ThisExpressionOfSurroundingClass_shouldNotTransform() throws Exception {
 		String original = "" +
-				"	static class SurroundingClass {\n"
+				"	public static class SurroundingClass {\n"
 				+ "		public void methodWithLocalClassPoint() {\n"
 				+ "\n"
 				+ "			class Point {\n"
@@ -575,11 +575,11 @@ public class NonStaticReferencesVisitorTest extends AbstractUseJavaRecordsTest {
 	@Test
 	public void visit_InstanceFiledOfSuperClassOfSurroundingClass_shouldNotTransform() throws Exception {
 		String original = "" +
-				"	static class SuperClassOfSurroundingClass {\n"
+				"	public static class SuperClassOfSurroundingClass {\n"
 				+ "		int instanceField;\n"
 				+ "	}\n"
 				+ "\n"
-				+ "	static class SurroundingClass extends SuperClassOfSurroundingClass {\n"
+				+ "	public static class SurroundingClass extends SuperClassOfSurroundingClass {\n"
 				+ "\n"
 				+ "		private class Point {\n"
 				+ BODY_DECLARATIONS
@@ -596,7 +596,7 @@ public class NonStaticReferencesVisitorTest extends AbstractUseJavaRecordsTest {
 	@Test
 	public void visit_InstanceCreationOfNonStaticClass_shouldNotTransform() throws Exception {
 		String original = "" +
-				"	class NonStaticClass {\n"
+				"	public class NonStaticClass {\n"
 				+ "		\n"
 				+ "	}\n"
 				+ "\n"

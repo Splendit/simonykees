@@ -20,7 +20,7 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 			+ "			private final int x;\n"
 			+ "			private final int y;\n"
 			+ "\n"
-			+ "			Point(int x, int y) {\n"
+			+ "			public Point(int x, int y) {\n"
 			+ "				this.x = x;\n"
 			+ "				this.y = y;\n"
 			+ "			}\n"
@@ -209,16 +209,17 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 		return Stream.of(
 				Arguments.of("private", "private"),
 				Arguments.of("private static", "private"),
-				Arguments.of("private final", "private"),				
-				Arguments.of("private static final", "private"),		
+				Arguments.of("private final", "private"),
+				Arguments.of("private static final", "private"),
 				Arguments.of("private static final strictfp", "private strictfp"),
 				Arguments.of("static final", ""));
-				
+
 	}
 
 	@ParameterizedTest
 	@MethodSource("modifierData")
-	public void visit_NestedClassWithSupportedSetOfModifiers_shouldTransform(String classModifiers, String recordModifiers)
+	public void visit_NestedClassWithSupportedSetOfModifiers_shouldTransform(String classModifiers,
+			String recordModifiers)
 			throws Exception {
 		String original = "" +
 				"	" + classModifiers + " class Point {\n"
@@ -311,6 +312,43 @@ public class UseJavaRecordsClassAnalysisASTVisitorTest extends AbstractUseJavaRe
 				+ "\n"
 				+ "	private static class SubClass extends SuperClass {\n"
 				+ "\n"
+				+ "	}";
+
+		assertChange(original, expected);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"public ",
+			"protected ",
+			""
+	})
+	public void visit_PointSurroundedByPrivateClass_shouldTransform(String visibility) throws Exception {
+		String original = "" +
+				"	private class PrivateSurrouningClass {\n"
+				+ "		" + visibility + "class Point {\n"
+				+ "			private final int x;\n"
+				+ "			private final int y;\n"
+				+ "\n"
+				+ "			public Point(int x, int y) {\n"
+				+ "				this.x = x;\n"
+				+ "				this.y = y;\n"
+				+ "			}\n"
+				+ "\n"
+				+ "			public int x() {\n"
+				+ "				return x;\n"
+				+ "			}\n"
+				+ "\n"
+				+ "			public int y() {\n"
+				+ "				return y;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		String expected = "" +
+				"	private class PrivateSurrouningClass {\n"
+				+ "		record Point(int x, int y) {\n"
+				+ "		}\n"
 				+ "	}";
 
 		assertChange(original, expected);

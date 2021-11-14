@@ -20,22 +20,25 @@ class TypeVisibilityAnalyzer {
 
 	boolean analyzeEffectiveVisibility(TypeDeclaration typeDeclaration) {
 		effectiveVisibilityGrade = getVisibilityGrade(typeDeclaration);
+		if (effectiveVisibilityGrade == VISIBILITY_PRIVATE) {
+			return true;
+		}
 		AbstractTypeDeclaration ancestorType = ASTNodeUtil.getSpecificAncestor(typeDeclaration,
 				AbstractTypeDeclaration.class);
 		while (ancestorType != null) {
 			int ancestorVisibilityGrade = getVisibilityGrade(ancestorType);
 			effectiveVisibilityGrade = Math.min(effectiveVisibilityGrade, ancestorVisibilityGrade);
-			if(ancestorVisibilityGrade == VISIBILITY_PRIVATE) {
+			if (ancestorVisibilityGrade == VISIBILITY_PRIVATE) {
 				privateAncestor = ancestorType;
-				break;
+				return true;
 			}
 			ancestorType = ASTNodeUtil.getSpecificAncestor(ancestorType, AbstractTypeDeclaration.class);
 		}
-		if(effectiveVisibilityGrade < VISIBILITY_PROTECTED) {
+		if (effectiveVisibilityGrade < VISIBILITY_PROTECTED) {
 			return true;
 		}
 		return false;
-	} 
+	}
 
 	static int getVisibilityGrade(BodyDeclaration bodyDeclaration) {
 		int modifiers = bodyDeclaration.getModifiers();
@@ -49,10 +52,6 @@ class TypeVisibilityAnalyzer {
 			return VISIBILITY_PUBLIC;
 		}
 		return VISIBILITY_PACKAGE;
-	}
-
-	int getEffectiveVisibilityGrade() {
-		return effectiveVisibilityGrade;
 	}
 
 	Optional<AbstractTypeDeclaration> getPrivateAncestor() {

@@ -56,9 +56,9 @@ class BodyDeclarationsAnalyzer {
 		}
 		List<SingleVariableDeclaration> canonicalConstructorParameters = ASTNodeUtil
 			.convertToTypedList(assumedCanonicalConstructor.parameters(), SingleVariableDeclaration.class);
-		for(SingleVariableDeclaration parameter : canonicalConstructorParameters) {
+		for (SingleVariableDeclaration parameter : canonicalConstructorParameters) {
 			List<Annotation> annotations = ASTNodeUtil.convertToTypedList(parameter.modifiers(), Annotation.class);
-			if(!annotations.isEmpty()) {
+			if (!annotations.isEmpty()) {
 				return Optional.empty();
 			}
 		}
@@ -128,7 +128,7 @@ class BodyDeclarationsAnalyzer {
 	List<BodyDeclaration> collectAllSupportedBodyDeclarations(TypeDeclaration typeDeclaration) {
 		List<BodyDeclaration> bodyDeclarations = ASTNodeUtil
 			.convertToTypedList(typeDeclaration.bodyDeclarations(), BodyDeclaration.class);
-		if (bodyDeclarations.stream()
+		if (!bodyDeclarations.isEmpty() && bodyDeclarations.stream()
 			.allMatch(this::isSupportedBodyDeclaration)) {
 			return bodyDeclarations;
 		}
@@ -233,7 +233,6 @@ class BodyDeclarationsAnalyzer {
 		}
 		return true;
 	}
-
 
 	static boolean isThisFieldAccessMatchingIdentifier(Expression expression, String expectedIdentifier) {
 		if (expression.getNodeType() != ASTNode.FIELD_ACCESS) {

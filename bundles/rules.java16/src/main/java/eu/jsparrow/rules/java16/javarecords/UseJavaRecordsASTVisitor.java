@@ -37,7 +37,7 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 				.stream()
 				.allMatch(this::isSupportedClassModifier);
 
-			if (allClassModifiersSupported && isSupportedClassDeclaration(typeDeclaration)) {
+			if (allClassModifiersSupported && isSupportedClassDeclaration(typeDeclaration, visibilityAnalyzer)) {
 
 				BodyDeclarationsAnalyzer bodyDeclarationsAnalyzer = new BodyDeclarationsAnalyzer();
 				bodyDeclarationsAnalyzer.analyzeBodyDeclarations(typeDeclaration)
@@ -48,6 +48,8 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 							.stream()
 							.filter(modifier -> !modifier.isStatic())
 							.filter(modifier -> !modifier.isFinal())
+							.filter(modifier -> !modifier.isProtected())
+							.filter(modifier -> !modifier.isPublic())
 							.collect(Collectors.toList());
 
 						transform(annotations, recordModifiers, bodyDeclarationAnalysisResult);
@@ -58,10 +60,11 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private boolean isSupportedClassModifier(Modifier modifier) {
-		return modifier.isPrivate() || modifier.isStatic() || modifier.isFinal() || modifier.isStrictfp();
+		return modifier.isPrivate() || modifier.isProtected() || modifier.isPublic() || modifier.isStatic() || modifier.isFinal() || modifier.isStrictfp();
 	}
 
-	private boolean isSupportedClassDeclaration(TypeDeclaration typeDeclaration) {
+	private boolean isSupportedClassDeclaration(TypeDeclaration typeDeclaration,
+			TypeVisibilityAnalyzer visibilityAnalyzer) {
 		if (typeDeclaration.isInterface()) {
 			return false;
 		}
@@ -85,7 +88,11 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 			return true;
 		}
 
-		ASTNode scopeHidingTypeDeclaration = findScopeHidingTypeDeclaration(typeDeclaration).orElse(null);
+		ASTNode scopeHidingTypeDeclaration = findLocalScopeHidingTypeDeclaration(typeDeclaration).orElse(null);
+		if (scopeHidingTypeDeclaration == null) {
+			scopeHidingTypeDeclaration = visibilityAnalyzer.getPrivateAncestor()
+				.orElse(null);
+		}
 		if (scopeHidingTypeDeclaration != null) {
 			return isEffectivelyFinal(typeDeclaration, scopeHidingTypeDeclaration);
 		}
@@ -97,7 +104,7 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 		return false;
 	}
 
-	private Optional<ASTNode> findScopeHidingTypeDeclaration(TypeDeclaration typeDeclaration) {
+	private Optional<ASTNode> findLocalScopeHidingTypeDeclaration(TypeDeclaration typeDeclaration) {
 		TypeDeclarationStatement typeDeclarationStatement = ASTNodeUtil.getSpecificAncestor(typeDeclaration,
 				TypeDeclarationStatement.class);
 		if (typeDeclarationStatement != null) {
