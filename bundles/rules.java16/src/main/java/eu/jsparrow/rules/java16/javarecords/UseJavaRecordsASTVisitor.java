@@ -27,7 +27,7 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 
-		TypeVisibilityAnalyzer visibilityAnalyzer = new TypeVisibilityAnalyzer();
+		EffectiveVisibilityAnalyzer visibilityAnalyzer = new EffectiveVisibilityAnalyzer();
 
 		if (visibilityAnalyzer.analyzeEffectiveVisibility(typeDeclaration)) {
 
@@ -64,7 +64,7 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private boolean isSupportedClassDeclaration(TypeDeclaration typeDeclaration,
-			TypeVisibilityAnalyzer visibilityAnalyzer) {
+			EffectiveVisibilityAnalyzer visibilityAnalyzer) {
 		if (typeDeclaration.isInterface()) {
 			return false;
 		}

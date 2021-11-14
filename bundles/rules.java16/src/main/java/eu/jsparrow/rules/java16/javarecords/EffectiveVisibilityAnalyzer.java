@@ -9,17 +9,16 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
-class TypeVisibilityAnalyzer {
+class EffectiveVisibilityAnalyzer {
 
 	static final int VISIBILITY_PRIVATE = 0;
 	static final int VISIBILITY_PACKAGE = 1;
 	static final int VISIBILITY_PROTECTED = 2;
 	static final int VISIBILITY_PUBLIC = 3;
-	private int effectiveVisibilityGrade;
 	private AbstractTypeDeclaration privateAncestor;
 
 	boolean analyzeEffectiveVisibility(TypeDeclaration typeDeclaration) {
-		effectiveVisibilityGrade = getVisibilityGrade(typeDeclaration);
+		int effectiveVisibilityGrade = getVisibilityGrade(typeDeclaration);
 		if (effectiveVisibilityGrade == VISIBILITY_PRIVATE) {
 			return true;
 		}
@@ -34,10 +33,7 @@ class TypeVisibilityAnalyzer {
 			}
 			ancestorType = ASTNodeUtil.getSpecificAncestor(ancestorType, AbstractTypeDeclaration.class);
 		}
-		if (effectiveVisibilityGrade < VISIBILITY_PROTECTED) {
-			return true;
-		}
-		return false;
+		return effectiveVisibilityGrade < VISIBILITY_PROTECTED;
 	}
 
 	static int getVisibilityGrade(BodyDeclaration bodyDeclaration) {
