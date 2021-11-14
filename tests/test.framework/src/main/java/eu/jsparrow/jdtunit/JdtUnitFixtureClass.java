@@ -358,6 +358,31 @@ public class JdtUnitFixtureClass {
 
 		this.astRoot = this.saveChanges();
 	}
+	
+	/**
+	 * Adds the body of a {@link TypeDeclaration}. This can be a string with
+	 * field and/or method declarations.
+	 * 
+	 * @param typeDeclarationName
+	 * @param typeDeclarationString
+	 * @throws JdtUnitException
+	 * @throws JavaModelException
+	 * @throws BadLocationException
+	 */
+	public void addTypeDeclarationFromString(String typeDeclarationName, String typeDeclarationString, List<String> modifiers)
+			throws JdtUnitException, JavaModelException, BadLocationException {
+		ASTNode convertedAstNodeWithMethodBody = ASTNode.copySubtree(ast,
+				ASTNodeBuilder.createTypeDeclarationFromString(typeDeclarationName, typeDeclarationString, modifiers));
+		typeDeclaration = (TypeDeclaration) convertedAstNodeWithMethodBody;
+
+		astRoot.types()
+			.clear();
+		methods.clear();
+		astRoot.types()
+			.add(typeDeclaration);
+
+		this.astRoot = this.saveChanges();
+	}
 
 	public TypeDeclaration getTypeDeclaration() {
 		return typeDeclaration;
