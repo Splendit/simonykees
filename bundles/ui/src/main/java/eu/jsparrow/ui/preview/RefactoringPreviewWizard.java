@@ -1,9 +1,7 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.Duration;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,19 +21,16 @@ import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
-import eu.jsparrow.core.statistic.StopWatchUtil;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.exception.SimonykeesException;
-import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
-import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
-import eu.jsparrow.ui.preview.model.StatisticsAreaPageModel;
+import eu.jsparrow.ui.preview.statistics.RuleStatisticsArea;
 import eu.jsparrow.ui.preview.statistics.StatisticsArea;
 import eu.jsparrow.ui.preview.statistics.StatisticsAreaFactory;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -105,7 +100,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
 				if (!changes.isEmpty()) {
-					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), statisticsArea);
+					RuleStatisticsArea ruleStats = StatisticsAreaFactory.createRuleStatisticsArea(rule);
+					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), statisticsArea, ruleStats);
 					addPage(previewPage);
 				}
 			});

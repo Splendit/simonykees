@@ -7,6 +7,8 @@ import eu.jsparrow.core.statistic.StopWatchUtil;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
+import eu.jsparrow.ui.preview.model.PayPerUseRuleStatisticsArePageModel;
+import eu.jsparrow.ui.preview.model.RuleStatisticsAreaPageModel;
 import eu.jsparrow.ui.preview.model.StatisticsAreaPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
@@ -28,12 +30,15 @@ public class StatisticsAreaFactory {
 		Duration timeSaved = allRules.stream()
 				.map(EliminatedTechnicalDebt::get)
 				.reduce(Duration.ZERO, Duration::plus);
-		
 		PayPerUseCreditCalculator calculator = new PayPerUseCreditCalculator();
 		int totalRequired = calculator.findTotalRequiredCredit(allRules);
-		
 		Integer totalAvailable = LicenseUtil.get().getValidationResult().getCredit().get(); //FIXME
 		return new StatisticsAreaPageModel(runDuration, issuesFixedCount, timeSaved, totalRequired, totalAvailable);
+		
+	}
+	
+	public static RuleStatisticsArea createRuleStatisticsArea(RefactoringRule rule) {
+		return new PayPerUseRuleStatisticsArea(new PayPerUseRuleStatisticsArePageModel(rule));
 		
 	}
 

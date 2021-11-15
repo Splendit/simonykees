@@ -1,6 +1,5 @@
 package eu.jsparrow.ui.preview.model;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -9,26 +8,11 @@ import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
-import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
-import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
-import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
-
 public class RefactoringPreviewWizardPageModel extends BaseModel {
-
-	private Integer issuesFixed;
-	private Duration timeSaved;
-	private Integer requiredCredit;
 
 	private IObservableList<ChangedFilesModel> changedFiles = new WritableList<>();
 
-	public RefactoringPreviewWizardPageModel(RefactoringRule rule, Map<ICompilationUnit, DocumentChange> changes) {
-		setIssuesFixed(RuleApplicationCount.getFor(rule)
-			.toInt());
-		setTimeSaved(EliminatedTechnicalDebt.get(rule));
-		PayPerUseCreditCalculator payPerUsecalculator = new PayPerUseCreditCalculator();
-		int measuredCredit = payPerUsecalculator.measureWeight(rule);
-		setRequiredCredit(measuredCredit);
+	public RefactoringPreviewWizardPageModel(Map<ICompilationUnit, DocumentChange> changes) {
 		changedFiles.addAll(changes.entrySet()
 			.stream()
 			.map(x -> new ChangedFilesModel(x.getKey(), x.getValue()))
@@ -38,28 +22,5 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 
 	public IObservableList<ChangedFilesModel> getChangedFiles() {
 		return changedFiles;
-	}
-
-	public Integer getIssuesFixed() {
-		return issuesFixed;
-	}
-	
-	public Duration getTimeSaved() {
-		return timeSaved;
-	}
-	
-	public Integer getRequiredCredit() {
-		return this.requiredCredit;
-	}
-
-	public void setIssuesFixed(Integer issuesFixed) {
-		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed); //$NON-NLS-1$
-	}
-	public void setTimeSaved(Duration timeSaved) {
-		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved); //$NON-NLS-1$
-	}
-
-	public void setRequiredCredit(Integer requiredCredit) {
-		firePropertyChange("requiredCredit", this.requiredCredit, this.requiredCredit = requiredCredit); //$NON-NLS-1$
 	}
 }
