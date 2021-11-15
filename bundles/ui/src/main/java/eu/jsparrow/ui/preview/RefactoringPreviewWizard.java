@@ -31,8 +31,8 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.statistics.RuleStatisticsArea;
-import eu.jsparrow.ui.preview.statistics.StatisticsArea;
 import eu.jsparrow.ui.preview.statistics.StatisticsAreaFactory;
+import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
@@ -56,7 +56,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	private RefactoringPreviewWizardModel model;
 	protected RefactoringSummaryWizardPage summaryPage;
-	protected StatisticsArea statisticsArea;
+	protected StatisticsSection statisticsArea;
+	protected StatisticsSection summaryPageStatisticsArea;
 	
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
@@ -69,7 +70,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
-		this.statisticsArea = new StatisticsArea(refactoringPipeline, StatisticsAreaFactory.createStatisticsAreaModel(refactoringPipeline.getRules()));
+		this.statisticsArea = StatisticsAreaFactory.createStatisticsArea(refactoringPipeline);
+		this.summaryPageStatisticsArea = StatisticsAreaFactory.createStatisticsAreaForSummaryPage(refactoringPipeline);
 		this.refactoringPipeline = refactoringPipeline;
 		this.shell = PlatformUI.getWorkbench()
 			.getActiveWorkbenchWindow()
@@ -109,7 +111,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.size() == 1
 				&& refactoringPipeline.getRules()
 					.get(0) instanceof StandardLoggerRule)) {
-			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsMetadata, statisticsArea);
+			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsMetadata, summaryPageStatisticsArea);
 			addPage(summaryPage);
 		}
 	}
@@ -169,6 +171,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			try {
 				refactoringPipeline.doAdditionalRefactoring(page.getUnselectedChange(), page.getRule(), monitor);
 				this.statisticsArea.updateForSelected();
+				this.summaryPageStatisticsArea.updateForSelected();
 				if (monitor.isCanceled()) {
 					refactoringPipeline.clearStates();
 				}

@@ -4,21 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.conversion.IConverter;
-import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jface.databinding.swt.ISWTObservableValue;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
@@ -27,7 +19,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
@@ -39,7 +30,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
@@ -51,7 +41,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsData;
 import eu.jsparrow.core.refactorer.StandaloneStatisticsMetadata;
-import eu.jsparrow.core.statistic.DurationFormatUtil;
 import eu.jsparrow.core.statistic.entity.JsparrowMetric;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
@@ -61,8 +50,7 @@ import eu.jsparrow.ui.preview.comparator.SortableViewerComparator;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.AbstractSummaryWizardPageModel;
 import eu.jsparrow.ui.preview.model.summary.FileViewerFilter;
-import eu.jsparrow.ui.preview.statistics.StatisticsArea;
-import eu.jsparrow.ui.util.ResourceHelper;
+import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 
 @SuppressWarnings({ "restriction" })
 public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardPageModel> extends WizardPage {
@@ -73,7 +61,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 
 	protected Composite rootComposite;
 
-	private StatisticsArea statisticsArea;
+	private StatisticsSection statisticsArea;
 
 	protected TableViewer fileTableViewer;
 	protected TableViewer rulesPerFileTableViewer;
@@ -89,7 +77,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton,
-			StandaloneStatisticsMetadata statisticsMetadata, StatisticsArea statisticsArea) {
+			StandaloneStatisticsMetadata statisticsMetadata, StatisticsSection statisticsArea) {
 		this(refactoringPipeline, wizardModel, enabledFinishButton, statisticsArea);
 		this.statisticsMetadata = statisticsMetadata;
 		this.endTime = Instant.now()
@@ -97,7 +85,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 	}
 
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
-			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton, StatisticsArea statisticsArea) {
+			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton, StatisticsSection statisticsArea) {
 		super("wizardPage"); //$NON-NLS-1$
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 

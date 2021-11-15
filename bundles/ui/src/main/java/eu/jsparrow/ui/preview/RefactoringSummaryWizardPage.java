@@ -30,7 +30,7 @@ import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
 import eu.jsparrow.ui.preview.model.summary.RuleTimesModel;
 import eu.jsparrow.ui.preview.model.summary.RulesPerFileModel;
-import eu.jsparrow.ui.preview.statistics.StatisticsArea;
+import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 
 public class RefactoringSummaryWizardPage extends AbstractSummaryWizardPage<RefactoringSummaryWizardPageModel> {
 
@@ -38,7 +38,7 @@ public class RefactoringSummaryWizardPage extends AbstractSummaryWizardPage<Refa
 
 	protected RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton,
-			StandaloneStatisticsMetadata statisticsMetadata, StatisticsArea statisticsArea) {
+			StandaloneStatisticsMetadata statisticsMetadata, StatisticsSection statisticsArea) {
 		super(refactoringPipeline, wizardModel, enabledFinishButton, statisticsMetadata, statisticsArea);
 	}
 

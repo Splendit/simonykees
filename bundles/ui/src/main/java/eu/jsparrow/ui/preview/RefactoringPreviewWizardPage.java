@@ -45,9 +45,8 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
-import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardPageModel;
 import eu.jsparrow.ui.preview.statistics.RuleStatisticsArea;
-import eu.jsparrow.ui.preview.statistics.StatisticsArea;
+import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
 
@@ -65,7 +64,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringPreviewWizardPage.class);
 
 	private RuleStatisticsArea ruleStatisticsArea;
-	private StatisticsArea statisticsArea;
+	private StatisticsSection statisticsArea;
 
 	private ICompilationUnit currentCompilationUnit;
 	private IChangePreviewViewer currentPreviewViewer;
@@ -92,7 +91,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule, RefactoringRule rule,
-			RefactoringPreviewWizardModel wizardModel, boolean enabled, StatisticsArea statisticsArea, RuleStatisticsArea ruleStatisticsArea) {
+			RefactoringPreviewWizardModel wizardModel, boolean enabled, StatisticsSection statisticsArea, RuleStatisticsArea ruleStatisticsArea) {
 		super(rule.getRuleDescription()
 			.getName());
 		CustomTextEditChangePreviewViewer.setEnableDiffView(enabled);
@@ -104,7 +103,6 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			.getDescription());
 
 		this.wizardModel = wizardModel;
-		new RefactoringPreviewWizardPageModel(changesForRule);
 		this.statisticsArea = statisticsArea;
 		wizardModel.addRule(rule);
 		changesForRule.keySet()

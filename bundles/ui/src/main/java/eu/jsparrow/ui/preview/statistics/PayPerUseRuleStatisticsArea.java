@@ -68,7 +68,7 @@ public class PayPerUseRuleStatisticsArea extends RuleStatisticsArea {
 
 	@Override
 	public void updateIssuesAndTimeForSelected(RefactoringRule rule, RefactoringPreviewWizardModel wizardModel,
-			StatisticsArea statisticsArea) {
+			StatisticsSection statisticsArea) {
 		int timesApplied = RuleApplicationCount.getFor(rule)
 			.getApplicationsForFiles(wizardModel.getFilesForRule(rule));
 		int deltaTimesApplied = model.getIssuesFixed() - timesApplied;

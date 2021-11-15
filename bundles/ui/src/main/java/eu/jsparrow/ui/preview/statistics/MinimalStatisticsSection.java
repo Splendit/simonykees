@@ -18,30 +18,28 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.statistic.DurationFormatUtil;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
-import eu.jsparrow.core.statistic.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.StatisticsAreaPageModel;
-import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
 
-public class StatisticsArea {
-
+public class MinimalStatisticsSection implements StatisticsSection {
+	
 	private RefactoringPipeline refactoringPipeline;
 	private CLabel totalExecutionTime;
 	private CLabel totalIssuesFixed;
 	private CLabel totalHoursSaved;
-	private CLabel totalRequiredCredit;
-	private CLabel availableCredit;
 
 	private StatisticsAreaPageModel model;
 
-	public StatisticsArea(RefactoringPipeline refactoringPipeline, StatisticsAreaPageModel model) {
+	public MinimalStatisticsSection(RefactoringPipeline refactoringPipeline, StatisticsAreaPageModel model) {
 		this.model = model;
 		this.refactoringPipeline = refactoringPipeline;
 	}
 
+	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
@@ -73,29 +71,12 @@ public class StatisticsArea {
 			.observe(model);
 		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue,
 				null, UpdateValueStrategy.create(convertTotalTimeSaved));
-
-		IConverter converterRequiredCredit = IConverter.create(Integer.class, String.class,
-				x -> (String.format("Required credit: %d", (Integer) x)));
-		ISWTObservableValue observeTextLabelRequiredCreditObserveWidget = WidgetProperties.text()
-			.observe(totalRequiredCredit);
-		IObservableValue<Object> requiredCreditPageModelObserveValue = BeanProperties.value("totalRequiredCredit") //$NON-NLS-1$
-			.observe(model);
-		bindingContext.bindValue(observeTextLabelRequiredCreditObserveWidget,
-				requiredCreditPageModelObserveValue, null, UpdateValueStrategy.create(converterRequiredCredit));
-
-		IConverter convertAvailableCredit = IConverter.create(Integer.class, String.class,
-				x -> String.format("Available credit: %s", x));
-		IObservableValue availableCreditLabelObserveValue = WidgetProperties.text()
-			.observe(availableCredit);
-		IObservableValue availableCreditModelObserveValue = BeanProperties.value("availableCredit") //$NON-NLS-1$
-			.observe(model);
-		bindingContext.bindValue(availableCreditLabelObserveValue, availableCreditModelObserveValue, null,
-				UpdateValueStrategy.create(convertAvailableCredit));
 	}
 
+	@Override
 	public void createView(Composite rootComposite) {
 		Composite composite = new Composite(rootComposite, SWT.NONE);
-		GridLayout layout = new GridLayout(5, true);
+		GridLayout layout = new GridLayout(3, true);
 		layout.marginHeight = 0;
 		layout.marginWidth = 10;
 		composite.setLayout(layout);
@@ -113,22 +94,13 @@ public class StatisticsArea {
 		totalHoursSaved.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		totalHoursSaved.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
 
-		totalRequiredCredit = new CLabel(composite, SWT.NONE);
-		totalRequiredCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		totalRequiredCredit.setImage(ResourceHelper.createImage("icons/fa-bolt.png"));//$NON-NLS-1$
-
-		availableCredit = new CLabel(composite, SWT.NONE);
-		availableCredit.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		availableCredit.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
-
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
+	@Override
 	public void updateForSelected() {
-		PayPerUseCreditCalculator calculator = new PayPerUseCreditCalculator();
 		List<RefactoringRule> allRules = refactoringPipeline.getRules();
-		int requiredCredit = calculator.findTotalRequiredCredit(allRules);
 		int issuesFixedCount = allRules.stream()
 			.map(RuleApplicationCount::getFor)
 			.mapToInt(RuleApplicationCount::toInt)
@@ -138,17 +110,14 @@ public class StatisticsArea {
 			.reduce(Duration.ZERO, Duration::plus);		
 		model.setTotalIssuesFixed(issuesFixedCount);
 		model.setTotalTimeSaved(timeSaved);
-		model.setTotalRequiredCredit(requiredCredit);
 	}
-	
+
+	@Override
 	public void updateForSelected(int deltaTotalIssues, Duration deltaTimeSaved, int deltaRequiredCredit) {
 		int newTotalIssues = model.getTotalIssuesFixed() - deltaTotalIssues;
 		model.setTotalIssuesFixed(newTotalIssues);
-		
-		int newRequiredCredit = model.getTotalRequiredCredit() - deltaRequiredCredit;
-		model.setTotalRequiredCredit(newRequiredCredit);
-		
 		Duration newSavedTime = model.getTotalTimeSaved().minus(deltaTimeSaved);
 		model.setTotalTimeSaved(newSavedTime);
 	}
+
 }

@@ -1,7 +1,6 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,23 +23,16 @@ import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.FieldsRenamingRule;
-import eu.jsparrow.core.statistic.StopWatchUtil;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
-import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
-import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
-import eu.jsparrow.ui.preview.model.StatisticsAreaPageModel;
-import eu.jsparrow.ui.preview.statistics.StatisticsArea;
 import eu.jsparrow.ui.preview.statistics.StatisticsAreaFactory;
-import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
+import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -64,7 +56,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	private List<ICompilationUnit> targetCompilationUnits;
 	private Map<IPath, Document> originalDocuments;
 	private RenamingRuleSummaryWizardPage summaryPage;
-	private StatisticsArea statisticsArea;
+	private StatisticsSection statisticsArea;
 
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
@@ -77,7 +69,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		this.originalDocuments = targetCompilationUnits.stream()
 			.map(ICompilationUnit::getPrimary)
 			.collect(Collectors.toMap(ICompilationUnit::getPath, this::createDocument));
-		this.statisticsArea = new StatisticsArea(refactoringPipeline, StatisticsAreaFactory.createStatisticsAreaModel(refactoringPipeline.getRules()));
+		this.statisticsArea = StatisticsAreaFactory.createStatisticsAreaForSummaryPage(refactoringPipeline);
 
 		this.rule = rule;
 		setNeedsProgressMonitor(true);
