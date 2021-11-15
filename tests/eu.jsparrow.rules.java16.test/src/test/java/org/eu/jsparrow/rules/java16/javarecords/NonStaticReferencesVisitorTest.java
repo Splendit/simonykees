@@ -584,8 +584,31 @@ public class NonStaticReferencesVisitorTest extends AbstractUseJavaRecordsTest {
 				+ "		private class Point {\n"
 				+ BODY_DECLARATIONS
 				+ "\n"
-				+ "			public int getQualifiedThisOfPoint() {\n"
+				+ "			public int accessUnsupportedReference() {\n"
 				+ "				return instanceField;\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "	}";
+
+		assertNoChange(original);
+	}
+
+	@Test
+	public void visit_InstanceMethodOfInterfaceOfSurroundingClass_shouldNotTransform() throws Exception {
+		String original = "" +
+				"	interface InterfaceImplementedBySurroundingClass {\n"
+				+ "		default int value() {\n"
+				+ "			return 0;\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	private static class SurroundingClass implements InterfaceImplementedBySurroundingClass {\n"
+				+ "\n"
+				+ "		private class Point {\n"
+				+ BODY_DECLARATIONS
+				+ "\n"
+				+ "			public int accessUnsupportedReference() {\n"
+				+ "				return value();\n"
 				+ "			}\n"
 				+ "		}\n"
 				+ "	}";
