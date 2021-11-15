@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -60,7 +61,8 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private boolean isSupportedClassModifier(Modifier modifier) {
-		return modifier.isPrivate() || modifier.isProtected() || modifier.isPublic() || modifier.isStatic() || modifier.isFinal() || modifier.isStrictfp();
+		return modifier.isPrivate() || modifier.isProtected() || modifier.isPublic() || modifier.isStatic()
+				|| modifier.isFinal() || modifier.isStrictfp();
 	}
 
 	private boolean isSupportedClassDeclaration(TypeDeclaration typeDeclaration,
@@ -172,6 +174,10 @@ public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 			.map(astRewrite::createCopyTarget)
 			.forEach(recordBodyDeclarations::add);
 
+		Javadoc javaDoc = typeDeclarationToReplace.getJavadoc();
+		if (javaDoc != null) {
+			recordDeclaration.setJavadoc((Javadoc) astRewrite.createMoveTarget(javaDoc));
+		}
 		astRewrite.replace(typeDeclarationToReplace, recordDeclaration, null);
 		onRewrite();
 	}
