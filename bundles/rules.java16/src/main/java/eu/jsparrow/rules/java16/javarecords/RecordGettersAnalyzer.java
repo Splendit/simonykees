@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -49,20 +48,19 @@ import eu.jsparrow.rules.common.util.ClassRelationUtil;
  */
 class RecordGettersAnalyzer {
 
-	private List<MethodDeclaration> recordGetterstoRemove = new ArrayList<>();
+	private List<MethodDeclaration> recordGettersToRemove = new ArrayList<>();
 
 	boolean analyzeRecordGetters(List<MethodDeclaration> methodDeclarations,
 			List<SingleVariableDeclaration> canonicalConstructorParameters) {
 
-		Set<Entry<SingleVariableDeclaration, MethodDeclaration>> parameterToRecordGetterMapEntries = collectParameterToRecordGetterMap(
-				methodDeclarations, canonicalConstructorParameters)
-					.entrySet();
+		Map<SingleVariableDeclaration, MethodDeclaration> parameterToRecordGetterMapEntries = collectParameterToRecordGetterMap(
+				methodDeclarations, canonicalConstructorParameters);
 
-		for (Entry<SingleVariableDeclaration, MethodDeclaration> entry : parameterToRecordGetterMapEntries) {
+		for (Entry<SingleVariableDeclaration, MethodDeclaration> entry : parameterToRecordGetterMapEntries.entrySet()) {
 			SingleVariableDeclaration parameter = entry.getKey();
 			MethodDeclaration recordGetter = entry.getValue();
 
-			if (hasAnnotatioOtherThanOverride(recordGetter)) {
+			if (hasAnnotationOtherThanOverride(recordGetter)) {
 				return false;
 			}
 
@@ -70,7 +68,7 @@ class RecordGettersAnalyzer {
 				return false;
 			}
 			if (isRecordGetterToRemove(recordGetter, parameter)) {
-				recordGetterstoRemove.add(recordGetter);
+				recordGettersToRemove.add(recordGetter);
 			} else if (!Modifier.isPublic(recordGetter.getModifiers())) {
 				return false;
 			}
@@ -86,7 +84,7 @@ class RecordGettersAnalyzer {
 		return true;
 	}
 
-	private boolean hasAnnotatioOtherThanOverride(MethodDeclaration recordGetter) {
+	private boolean hasAnnotationOtherThanOverride(MethodDeclaration recordGetter) {
 		return ASTNodeUtil.convertToTypedList(recordGetter.modifiers(), Annotation.class)
 			.stream()
 			.map(Annotation::resolveTypeBinding)
@@ -137,7 +135,7 @@ class RecordGettersAnalyzer {
 		return BodyDeclarationsAnalyzer.isThisFieldAccessMatchingIdentifier(returnedExpression, componentIdentifier);
 	}
 
-	List<MethodDeclaration> getRecordGetterstoRemove() {
-		return recordGetterstoRemove;
+	List<MethodDeclaration> getRecordGettersToRemove() {
+		return recordGettersToRemove;
 	}
 }

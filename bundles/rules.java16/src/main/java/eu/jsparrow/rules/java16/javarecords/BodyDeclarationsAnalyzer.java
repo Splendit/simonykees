@@ -98,7 +98,7 @@ class BodyDeclarationsAnalyzer {
 			return Optional.empty();
 		}
 		ArrayList<MethodDeclaration> methodsToRemove = new ArrayList<>();
-		methodsToRemove.addAll(recordGettersAnalyzer.getRecordGetterstoRemove());
+		methodsToRemove.addAll(recordGettersAnalyzer.getRecordGettersToRemove());
 
 		boolean canRemoveCanonicalConstructor = canRemoveCanonicalConstructor(assumedCanonicalConstructor,
 				canonicalConstructorParameters);
@@ -171,9 +171,10 @@ class BodyDeclarationsAnalyzer {
 		for (FieldDeclaration field : instanceFields) {
 			List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(field.fragments(),
 					VariableDeclarationFragment.class);
-			if (fragments.stream()
+			boolean initializerFound = fragments.stream()
 				.map(VariableDeclarationFragment::getInitializer)
-				.anyMatch(Objects::nonNull)) {
+				.anyMatch(Objects::nonNull);
+			if (initializerFound) {
 				return false;
 			}
 			fragments.stream()

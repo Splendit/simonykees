@@ -62,7 +62,7 @@ class EffectiveVisibilityAnalyzer {
 		return effectiveVisibilityGrade < VISIBILITY_PROTECTED;
 	}
 
-	static int getVisibilityGrade(BodyDeclaration bodyDeclaration) {
+	private static int getVisibilityGrade(BodyDeclaration bodyDeclaration) {
 		int modifiers = bodyDeclaration.getModifiers();
 		if (Modifier.isPrivate(modifiers)) {
 			return VISIBILITY_PRIVATE;
