@@ -7,6 +7,16 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Helper class finding out whether a non-final nested or local class
+ * declaration is effectivelsFinal or not.
+ * <p>
+ * A class declaration is effectively final if it can be excluded that it is
+ * extended by any subclass.
+ * 
+ * @since 4.5.0
+ *
+ */
 class SubclassesVisitor extends ASTVisitor {
 
 	private final TypeDeclaration rootTypeDeclaration;
@@ -27,7 +37,7 @@ class SubclassesVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(TypeDeclaration node) {
-		
+
 		if (node == rootTypeDeclaration) {
 			return true;
 		}

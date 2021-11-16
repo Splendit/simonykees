@@ -32,6 +32,18 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * A nested class declaration or a local class declaration may be enclosed by
+ * other type declarations, with the possibility of referencing the instance
+ * state of an enclosed class.
+ * <p>
+ * A class cannot be replaced by a record ads soon as a nested or local class
+ * declaration is not static and references the instance state of any
+ * surrounding type declaration.
+ * 
+ * @since 4.5.0
+ *
+ */
 class NonStaticReferencesVisitor extends ASTVisitor {
 	private final CompilationUnit compilationUnit;
 	private final String typeDeclarationQualifiedName;

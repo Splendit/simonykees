@@ -21,7 +21,34 @@ import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * @since 4.4.0
+ * 
+ * This visitor looks for immutable class declarations and replaces them by
+ * recored declarations.
+ * 
+ * <p>
+ * For example,
+ * 
+ * <pre>
+ * private static final class StringWrapper {
+ * 	private final String s;
+ * 
+ * 	public StringWrapper(String s) {
+ * 		this.s = s;
+ * 	}
+ * 	// ...
+ * }
+ * </pre>
+ * 
+ * is transformed to
+ * 
+ * <pre>
+ * private record StringWrapper(String s) {
+ * 	// ...
+ * }
+ * </pre>
+ * 
+ * @since 4.5.0
+ *
  */
 public class UseJavaRecordsASTVisitor extends AbstractASTRewriteASTVisitor {
 

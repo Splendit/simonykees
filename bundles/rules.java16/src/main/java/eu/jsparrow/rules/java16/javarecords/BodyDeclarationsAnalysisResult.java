@@ -6,6 +6,12 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+/**
+ * Wrapper class with all informations needed to replace an immutable class by a
+ * corresponding record.
+ * 
+ * @since 4.5.0
+ */
 class BodyDeclarationsAnalysisResult {
 	private final TypeDeclaration typeDeclarationToReplace;
 	private final List<SingleVariableDeclaration> canonicalConstructorParameters;

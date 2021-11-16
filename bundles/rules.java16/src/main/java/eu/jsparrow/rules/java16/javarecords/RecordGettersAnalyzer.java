@@ -20,6 +20,33 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * In a class declaration it is possible that methods are declared with the same
+ * name as one of the field of the given class.
+ * <p>
+ * For example, bothe a field like
+ * 
+ * <pre>
+ * private final int x;
+ * </pre>
+ * 
+ * and a method like
+ * 
+ * <pre>
+ * public int x() {
+ * 	// ...
+ * }
+ * </pre>
+ * 
+ * are possible in the same class.
+ * <p>
+ * Method declarations like this must fulfill certain conditions, otherwise it
+ * is not possible to replace the given class declaration by a record
+ * declaration.
+ * 
+ * @since 4.5.0
+ *
+ */
 class RecordGettersAnalyzer {
 
 	private List<MethodDeclaration> recordGetterstoRemove = new ArrayList<>();

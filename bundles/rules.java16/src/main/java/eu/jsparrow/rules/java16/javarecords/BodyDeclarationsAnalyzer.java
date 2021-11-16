@@ -30,8 +30,30 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
+/**
+ * Helper class to determine whether a class declaration can be replaced by a
+ * corresponding declaration on the base of its body declarations.
+ * 
+ * @see #analyzeBodyDeclarations(TypeDeclaration)
+ * 
+ * @since 4.5.0
+ */
 class BodyDeclarationsAnalyzer {
 
+	/**
+	 * For the replacement of a class declaration by a record declaration, there
+	 * are certain requirements on its body declarations, for example:
+	 * <ul>
+	 * <li>The class must be immutable, so only private final instance fields
+	 * are allowed.</li>
+	 * <li>The class must have a constructor where all formal parameters are
+	 * corresponding to the instance fields.</li>
+	 * <li>The class cannot contain any instance initializer.</li>
+	 * </ul>
+	 * 
+	 * @return true if all body declarations fulfill the requirements, otherwise
+	 *         false.
+	 */
 	Optional<BodyDeclarationsAnalysisResult> analyzeBodyDeclarations(TypeDeclaration typeDeclaration) {
 
 		List<BodyDeclaration> allSupportedBodyDeclarations = collectAllSupportedBodyDeclarations(typeDeclaration);
