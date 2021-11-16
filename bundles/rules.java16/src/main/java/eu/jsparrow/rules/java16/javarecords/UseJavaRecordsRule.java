@@ -28,7 +28,7 @@ public class UseJavaRecordsRule
 		this.visitorClass = UseJavaRecordsASTVisitor.class;
 		this.id = "UseJavaRecords"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.UseJavaRecordsRule_name,
-				Messages.UseJavaRecordsRule_description, Duration.ofMinutes(15),
+				Messages.UseJavaRecordsRule_description, Duration.ofMinutes(20),
 				Arrays.asList(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
 	}
 

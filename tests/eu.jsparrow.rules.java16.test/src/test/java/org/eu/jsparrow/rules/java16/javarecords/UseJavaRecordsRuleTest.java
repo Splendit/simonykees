@@ -40,7 +40,7 @@ class UseJavaRecordsRuleTest extends SingleRuleTest {
 		assertThat(description.getName(), equalTo("Use Java Records"));
 		assertThat(description.getTags(),
 				contains(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
-		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(15)));
+		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(20)));
 		assertThat(description.getDescription(),
 				equalTo("This rule replaces declarations of immutable data wrapper classes by record declarations introduced as feature in Java 16. For example, a 'class Point {...}' declaration with the two private final int fields 'x' and 'y' can be replaced by a 'record Point(int x, int y) {...}' declaration."));
 	}
