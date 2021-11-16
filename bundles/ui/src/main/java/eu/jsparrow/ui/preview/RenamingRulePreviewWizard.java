@@ -146,16 +146,12 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	@Override
 	public boolean performFinish() {
-		
 		IWizardContainer container = getContainer();
-		if (container == null) {
-			return true;
+		if (container != null) {
+			IWizardPage currentPage = container.getCurrentPage();
+			updateViewsOnNavigation(currentPage);
+			commitChanges();
 		}
-
-		IWizardPage currentPage = container.getCurrentPage();
-		updateViewsOnNavigation(currentPage);
-		
-		commitChanges();
 		return true;
 	}
 	

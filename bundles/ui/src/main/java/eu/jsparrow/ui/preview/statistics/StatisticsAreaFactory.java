@@ -71,19 +71,17 @@ public class StatisticsAreaFactory {
 		
 	}
 	
-	public static RuleStatisticsArea createRuleStatisticsArea(RefactoringRule rule) {
+	public static RuleStatisticsArea createRuleStatisticsArea(RefactoringRule rule, StatisticsSection statisticsSection) {
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		LicenseValidationResult validatoinResult = licenseUtil.getValidationResult();
 		LicenseType licenseType = validatoinResult.getLicenseType();
 		if(licenseType == LicenseType.PAY_PER_USE) {
 			PayPerUseRuleStatisticsArePageModel model = new PayPerUseRuleStatisticsArePageModel(rule);
-			PayPerUseRuleStatisticsArea ruleStatisticsArea =  new PayPerUseRuleStatisticsArea(model);
-			return ruleStatisticsArea;
+			return  new PayPerUseRuleStatisticsArea(model, statisticsSection);
 			
 		} else {
 			RuleStatisticsAreaPageModel model = new RuleStatisticsAreaPageModel(rule);
-			RuleStatisticsArea ruleStatisticsArea = new RuleStatisticsArea(model);
-			return ruleStatisticsArea;
+			return new RuleStatisticsArea(model);
 		}		
 	}
 

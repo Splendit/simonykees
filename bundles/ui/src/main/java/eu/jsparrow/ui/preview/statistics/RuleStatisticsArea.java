@@ -93,7 +93,7 @@ public class RuleStatisticsArea {
 		techDebtLabel.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
 	}
 	
-	public void updateIssuesAndTimeForSelected(RefactoringRule rule, RefactoringPreviewWizardModel wizardModel, StatisticsSection statisticsArea) {
+	public void updateIssuesAndTimeForSelected(RefactoringRule rule, RefactoringPreviewWizardModel wizardModel) {
 		int timesApplied = RuleApplicationCount.getFor(rule)
 			.getApplicationsForFiles(wizardModel.getFilesForRule(rule));
 		model.setIssuesFixed(timesApplied);

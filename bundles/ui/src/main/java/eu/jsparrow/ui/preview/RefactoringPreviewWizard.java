@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.eclipse.compare.internal.patch.PreviewPatchPage2;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -102,8 +103,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
 				if (!changes.isEmpty()) {
-					RuleStatisticsArea ruleStats = StatisticsAreaFactory.createRuleStatisticsArea(rule);
-					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), statisticsArea, ruleStats);
+					RuleStatisticsArea ruleStats = StatisticsAreaFactory.createRuleStatisticsArea(rule, statisticsArea);
+					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), ruleStats);
+					previewPage.setTotalStatisticsSection(statisticsArea);
 					addPage(previewPage);
 				}
 			});

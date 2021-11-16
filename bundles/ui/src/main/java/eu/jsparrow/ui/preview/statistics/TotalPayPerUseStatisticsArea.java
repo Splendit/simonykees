@@ -140,7 +140,8 @@ public class TotalPayPerUseStatisticsArea implements StatisticsSection {
 		model.setTotalTimeSaved(timeSaved);
 		model.setTotalRequiredCredit(requiredCredit);
 	}
-	
+
+	@Override
 	public void updateForSelected(int deltaTotalIssues, Duration deltaTimeSaved, int deltaRequiredCredit) {
 		int newTotalIssues = model.getTotalIssuesFixed() - deltaTotalIssues;
 		model.setTotalIssuesFixed(newTotalIssues);

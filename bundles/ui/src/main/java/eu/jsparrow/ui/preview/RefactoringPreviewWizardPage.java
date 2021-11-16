@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.compare.CompareViewerSwitchingPane;
@@ -64,7 +65,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringPreviewWizardPage.class);
 
 	private RuleStatisticsArea ruleStatisticsArea;
-	private StatisticsSection statisticsArea;
+	private StatisticsSection statisticsSection;
 
 	private ICompilationUnit currentCompilationUnit;
 	private IChangePreviewViewer currentPreviewViewer;
@@ -91,7 +92,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule, RefactoringRule rule,
-			RefactoringPreviewWizardModel wizardModel, boolean enabled, StatisticsSection statisticsArea, RuleStatisticsArea ruleStatisticsArea) {
+			RefactoringPreviewWizardModel wizardModel, boolean enabled, RuleStatisticsArea ruleStatisticsArea) {
 		super(rule.getRuleDescription()
 			.getName());
 		CustomTextEditChangePreviewViewer.setEnableDiffView(enabled);
@@ -103,7 +104,6 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			.getDescription());
 
 		this.wizardModel = wizardModel;
-		this.statisticsArea = statisticsArea;
 		wizardModel.addRule(rule);
 		changesForRule.keySet()
 			.stream()
@@ -120,9 +120,17 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		fSelectionStatus = new StatusInfo();
 	}
 
+	public void setTotalStatisticsSection(StatisticsSection statisticsSection) {
+		this.statisticsSection = statisticsSection;
+	}
+	
+	private Optional<StatisticsSection> getTotalStatisticsSection() {
+		return Optional.ofNullable(this.statisticsSection);
+	}
+	
 	private void initializeDataBindings() {
 		this.ruleStatisticsArea.initializeDataBindings();
-		this.statisticsArea.initializeDataBindings();
+		getTotalStatisticsSection().ifPresent(StatisticsSection::initializeDataBindings);
 
 	}
 
@@ -167,8 +175,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		 * children
 		 */
 		sashForm.setWeights(1, 3);
-
-		statisticsArea.createView(container);
+		getTotalStatisticsSection().ifPresent(statistics -> statistics.createView(container));
 
 		initializeDataBindings();
 	}
@@ -301,12 +308,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			}
 			// This method simply counts checked items in the table. Not very
 			// MVC, and should be replaced with a proper solution
-			updateIssuesAndTimeForSelected();
+			ruleStatisticsArea.updateIssuesAndTimeForSelected(rule, wizardModel);
 		};
-	}
-
-	private void updateIssuesAndTimeForSelected() {
-		this.ruleStatisticsArea.updateIssuesAndTimeForSelected(rule, wizardModel, statisticsArea);
 	}
 
 	/**

@@ -25,10 +25,12 @@ public class PayPerUseRuleStatisticsArea extends RuleStatisticsArea {
 
 	private CLabel requiredCredit;
 	private PayPerUseRuleStatisticsArePageModel payPerUseModel;
+	private StatisticsSection statisticsArea;
 
-	public PayPerUseRuleStatisticsArea(PayPerUseRuleStatisticsArePageModel model) {
+	public PayPerUseRuleStatisticsArea(PayPerUseRuleStatisticsArePageModel model, StatisticsSection statisticsArea) {
 		super(model);
 		this.payPerUseModel = model;
+		this.statisticsArea = statisticsArea;
 	}
 
 	@Override
@@ -67,8 +69,7 @@ public class PayPerUseRuleStatisticsArea extends RuleStatisticsArea {
 	}
 
 	@Override
-	public void updateIssuesAndTimeForSelected(RefactoringRule rule, RefactoringPreviewWizardModel wizardModel,
-			StatisticsSection statisticsArea) {
+	public void updateIssuesAndTimeForSelected(RefactoringRule rule, RefactoringPreviewWizardModel wizardModel) {
 		int timesApplied = RuleApplicationCount.getFor(rule)
 			.getApplicationsForFiles(wizardModel.getFilesForRule(rule));
 		int deltaTimesApplied = model.getIssuesFixed() - timesApplied;
@@ -77,7 +78,7 @@ public class PayPerUseRuleStatisticsArea extends RuleStatisticsArea {
 			.multipliedBy(timesApplied);
 		Duration deltaTimeSaved = model.getTimeSaved()
 			.minus(timeSaved);
-		super.updateIssuesAndTimeForSelected(rule, wizardModel, statisticsArea);
+		super.updateIssuesAndTimeForSelected(rule, wizardModel);
 		int deltaCredit = deltaTimesApplied * rule.getRuleDescription()
 			.getCredit();
 		int newCredit = payPerUseModel.getRequiredCredit() - deltaCredit;
