@@ -1,0 +1,73 @@
+package org.eu.jsparrow.rules.java16.javarecords;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.Duration;
+
+import org.eclipse.jdt.core.JavaCore;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import eu.jsparrow.common.SingleRuleTest;
+import eu.jsparrow.common.util.RulesTestUtil;
+import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.rules.java16.javarecords.UseJavaRecordsRule;
+
+class UseJavaRecordsRuleTest extends SingleRuleTest {
+
+	private UseJavaRecordsRule rule;
+
+	@BeforeEach
+	public void setUp() throws Exception {
+		rule = new UseJavaRecordsRule();
+		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
+	}
+
+	@Test
+	void test_ruleId() {
+		String ruleId = rule.getId();
+		assertThat(ruleId, equalTo("UseJavaRecords"));
+	}
+
+	@Test
+	void test_ruleDescription() {
+		RuleDescription description = rule.getRuleDescription();
+		assertThat(description.getName(), equalTo("Use Java Records"));
+		assertThat(description.getTags(),
+				contains(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
+		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(20)));
+		assertThat(description.getDescription(),
+				equalTo("Since Java 16, record classes are a new kind of class in the Java language. "
+						+ "Record classes help to model plain data aggregates with less ceremony than normal classes. "
+						+ "This rule replaces the declarations of local classes, inner classes, and package private "
+						+ "root classes with record class declarations."));
+	}
+
+	@Test
+	void test_requiredJavaVersion() throws Exception {
+		assertThat(rule.getRequiredJavaVersion(), equalTo("16"));
+	}
+
+	@Test
+	void calculateEnabledForProjectShouldBeDisabled() {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_15);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertFalse(rule.isEnabled());
+	}
+
+	@Test
+	void calculateEnabledForProjectShouldBeEnabled() {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_16);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertTrue(rule.isEnabled());
+	}
+}
