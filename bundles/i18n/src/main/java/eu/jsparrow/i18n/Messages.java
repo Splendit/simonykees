@@ -612,6 +612,8 @@ public class Messages extends NLS {
 	public static String UseIsEmptyOnCollectionsResolver_name;
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
+	public static String UseJavaRecordsRule_description;
+	public static String UseJavaRecordsRule_name;
 	public static String UseListSortRule_description;
 	public static String UseListSortRule_name;
 	public static String UseOffsetBasedStringMethodsRule_description;

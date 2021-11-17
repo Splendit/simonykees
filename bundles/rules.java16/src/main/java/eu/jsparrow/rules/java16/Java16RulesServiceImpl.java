@@ -9,6 +9,7 @@ import eu.jsparrow.rules.api.RuleService;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.java16.switchexpression.UseSwitchExpressionRule;
 import eu.jsparrow.rules.java16.textblock.UseTextBlockRule;
+import eu.jsparrow.rules.java16.javarecords.UseJavaRecordsRule;
 
 /**
  * Implementor of {@link RuleService}.
@@ -22,6 +23,6 @@ public class Java16RulesServiceImpl implements RuleService {
 	@Override
 	public List<RefactoringRule> loadRules() {
 		return Arrays.asList(new UsePatternMatchingForInstanceofRule(), new UseSwitchExpressionRule(),
-				new UseTextBlockRule());
+				new UseTextBlockRule(), new UseJavaRecordsRule());
 	}
 }
