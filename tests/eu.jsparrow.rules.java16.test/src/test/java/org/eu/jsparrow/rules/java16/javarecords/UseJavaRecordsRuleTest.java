@@ -42,7 +42,10 @@ class UseJavaRecordsRuleTest extends SingleRuleTest {
 				contains(Tag.JAVA_16, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY));
 		assertThat(description.getRemediationCost(), equalTo(Duration.ofMinutes(20)));
 		assertThat(description.getDescription(),
-				equalTo("This rule replaces declarations of immutable data wrapper classes by record declarations introduced as feature in Java 16. For example, a 'class Point {...}' declaration with the two private final int fields 'x' and 'y' can be replaced by a 'record Point(int x, int y) {...}' declaration."));
+				equalTo("Since Java 16, record classes are a new kind of class in the Java language. "
+						+ "Record classes help to model plain data aggregates with less ceremony than normal classes. "
+						+ "This rule replaces the declarations of local classes, inner classes, and package private "
+						+ "root classes with record class declarations."));
 	}
 
 	@Test

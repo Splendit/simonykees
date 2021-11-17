@@ -9,7 +9,6 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRuleImpl;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
-import eu.jsparrow.rules.java16.UsePatternMatchingForInstanceofASTVisitor;
 
 /**
  * This rule replaces immutable class declarations by corresponding record
