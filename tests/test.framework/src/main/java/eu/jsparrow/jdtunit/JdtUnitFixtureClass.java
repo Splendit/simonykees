@@ -1,5 +1,6 @@
 package eu.jsparrow.jdtunit;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -346,17 +347,7 @@ public class JdtUnitFixtureClass {
 	 */
 	public void addTypeDeclarationFromString(String typeDeclarationName, String typeDeclarationString)
 			throws JdtUnitException, JavaModelException, BadLocationException {
-		ASTNode convertedAstNodeWithMethodBody = ASTNode.copySubtree(ast,
-				ASTNodeBuilder.createTypeDeclarationFromString(typeDeclarationName, typeDeclarationString));
-		typeDeclaration = (TypeDeclaration) convertedAstNodeWithMethodBody;
-
-		astRoot.types()
-			.clear();
-		methods.clear();
-		astRoot.types()
-			.add(typeDeclaration);
-
-		this.astRoot = this.saveChanges();
+		addTypeDeclarationFromString(typeDeclarationName, typeDeclarationString, Collections.emptyList());
 	}
 	
 	/**
@@ -365,6 +356,7 @@ public class JdtUnitFixtureClass {
 	 * 
 	 * @param typeDeclarationName
 	 * @param typeDeclarationString
+	 * @param modifiers
 	 * @throws JdtUnitException
 	 * @throws JavaModelException
 	 * @throws BadLocationException
