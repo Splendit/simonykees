@@ -1,5 +1,6 @@
 package eu.jsparrow.jdtunit;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -346,8 +347,24 @@ public class JdtUnitFixtureClass {
 	 */
 	public void addTypeDeclarationFromString(String typeDeclarationName, String typeDeclarationString)
 			throws JdtUnitException, JavaModelException, BadLocationException {
+		addTypeDeclarationFromString(typeDeclarationName, typeDeclarationString, Collections.emptyList());
+	}
+	
+	/**
+	 * Adds the body of a {@link TypeDeclaration}. This can be a string with
+	 * field and/or method declarations.
+	 * 
+	 * @param typeDeclarationName
+	 * @param typeDeclarationString
+	 * @param modifiers
+	 * @throws JdtUnitException
+	 * @throws JavaModelException
+	 * @throws BadLocationException
+	 */
+	public void addTypeDeclarationFromString(String typeDeclarationName, String typeDeclarationString, List<String> modifiers)
+			throws JdtUnitException, JavaModelException, BadLocationException {
 		ASTNode convertedAstNodeWithMethodBody = ASTNode.copySubtree(ast,
-				ASTNodeBuilder.createTypeDeclarationFromString(typeDeclarationName, typeDeclarationString));
+				ASTNodeBuilder.createTypeDeclarationFromString(typeDeclarationName, typeDeclarationString, modifiers));
 		typeDeclaration = (TypeDeclaration) convertedAstNodeWithMethodBody;
 
 		astRoot.types()
