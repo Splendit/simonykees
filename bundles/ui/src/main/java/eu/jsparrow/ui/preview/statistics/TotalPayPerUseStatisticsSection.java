@@ -22,11 +22,11 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.core.statistic.DurationFormatUtil;
-import eu.jsparrow.ui.preview.model.StatisticsAreaPageModel;
+import eu.jsparrow.ui.preview.model.StatisticsSectionPageModel;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
 
-public class TotalPayPerUseStatisticsArea implements StatisticsSection {
+public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 
 	private RefactoringPipeline refactoringPipeline;
 	private CLabel totalExecutionTime;
@@ -35,9 +35,9 @@ public class TotalPayPerUseStatisticsArea implements StatisticsSection {
 	private CLabel totalRequiredCredit;
 	private CLabel availableCredit;
 
-	private StatisticsAreaPageModel model;
+	private StatisticsSectionPageModel model;
 
-	public TotalPayPerUseStatisticsArea(RefactoringPipeline refactoringPipeline, StatisticsAreaPageModel model) {
+	public TotalPayPerUseStatisticsSection(RefactoringPipeline refactoringPipeline, StatisticsSectionPageModel model) {
 		this.model = model;
 		this.refactoringPipeline = refactoringPipeline;
 	}

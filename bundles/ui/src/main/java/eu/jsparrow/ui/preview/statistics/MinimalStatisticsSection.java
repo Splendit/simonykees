@@ -22,7 +22,7 @@ import eu.jsparrow.core.statistic.DurationFormatUtil;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
-import eu.jsparrow.ui.preview.model.StatisticsAreaPageModel;
+import eu.jsparrow.ui.preview.model.StatisticsSectionPageModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 public class MinimalStatisticsSection implements StatisticsSection {
@@ -32,9 +32,9 @@ public class MinimalStatisticsSection implements StatisticsSection {
 	private CLabel totalIssuesFixed;
 	private CLabel totalHoursSaved;
 
-	private StatisticsAreaPageModel model;
+	private StatisticsSectionPageModel model;
 
-	public MinimalStatisticsSection(RefactoringPipeline refactoringPipeline, StatisticsAreaPageModel model) {
+	public MinimalStatisticsSection(RefactoringPipeline refactoringPipeline, StatisticsSectionPageModel model) {
 		this.model = model;
 		this.refactoringPipeline = refactoringPipeline;
 	}

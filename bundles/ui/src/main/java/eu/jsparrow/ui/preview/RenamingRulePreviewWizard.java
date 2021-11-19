@@ -31,7 +31,7 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
-import eu.jsparrow.ui.preview.statistics.StatisticsAreaFactory;
+import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
 import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
@@ -56,7 +56,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	private List<ICompilationUnit> targetCompilationUnits;
 	private Map<IPath, Document> originalDocuments;
 	private RenamingRuleSummaryWizardPage summaryPage;
-	private StatisticsSection statisticsArea;
+	private StatisticsSection statisticsSection;
 
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
@@ -69,7 +69,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		this.originalDocuments = targetCompilationUnits.stream()
 			.map(ICompilationUnit::getPrimary)
 			.collect(Collectors.toMap(ICompilationUnit::getPath, this::createDocument));
-		this.statisticsArea = StatisticsAreaFactory.createStatisticsAreaForSummaryPage(refactoringPipeline);
+		this.statisticsSection = StatisticsSectionFactory.createStatisticsSectionForSummaryPage(refactoringPipeline);
 
 		this.rule = rule;
 		setNeedsProgressMonitor(true);
@@ -124,7 +124,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		if (!privateChanges.isEmpty()) {
 			addPage(new RenamingRulePreviewWizardPage(privateChanges, originalDocuments, rule, canFinish()));
 		}
-		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsArea);
+		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsSection);
 		addPage(summaryPage);
 	}
 

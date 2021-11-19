@@ -6,12 +6,12 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
-public class RuleStatisticsAreaPageModel extends BaseModel {
+public class RuleStatisticsSectionPageModel extends BaseModel {
 
 	private Integer issuesFixed;
 	private Duration timeSaved;
 
-	public RuleStatisticsAreaPageModel(RefactoringRule rule) {
+	public RuleStatisticsSectionPageModel(RefactoringRule rule) {
 		setIssuesFixed(RuleApplicationCount.getFor(rule)
 			.toInt());
 		setTimeSaved(EliminatedTechnicalDebt.get(rule));

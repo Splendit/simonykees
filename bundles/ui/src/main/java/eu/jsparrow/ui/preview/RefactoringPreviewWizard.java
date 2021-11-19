@@ -31,8 +31,8 @@ import eu.jsparrow.rules.common.exception.SimonykeesException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
-import eu.jsparrow.ui.preview.statistics.RuleStatisticsArea;
-import eu.jsparrow.ui.preview.statistics.StatisticsAreaFactory;
+import eu.jsparrow.ui.preview.statistics.RuleStatisticsSection;
+import eu.jsparrow.ui.preview.statistics.StatisticsSectionFactory;
 import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
@@ -57,8 +57,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	private RefactoringPreviewWizardModel model;
 	protected RefactoringSummaryWizardPage summaryPage;
-	protected StatisticsSection statisticsArea;
-	protected StatisticsSection summaryPageStatisticsArea;
+	protected StatisticsSection statisticsSection;
+	protected StatisticsSection summaryPageStatisticsSection;
 	
 	private LicenseUtil licenseUtil = LicenseUtil.get();
 	private StandaloneStatisticsMetadata statisticsMetadata;
@@ -71,8 +71,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
-		this.statisticsArea = StatisticsAreaFactory.createStatisticsArea(refactoringPipeline);
-		this.summaryPageStatisticsArea = StatisticsAreaFactory.createStatisticsAreaForSummaryPage(refactoringPipeline);
+		this.statisticsSection = StatisticsSectionFactory.createStatisticsSection(refactoringPipeline);
+		this.summaryPageStatisticsSection = StatisticsSectionFactory.createStatisticsSectionForSummaryPage(refactoringPipeline);
 		this.refactoringPipeline = refactoringPipeline;
 		this.shell = PlatformUI.getWorkbench()
 			.getActiveWorkbenchWindow()
@@ -103,9 +103,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
 				if (!changes.isEmpty()) {
-					RuleStatisticsArea ruleStats = StatisticsAreaFactory.createRuleStatisticsArea(rule, statisticsArea);
+					RuleStatisticsSection ruleStats = StatisticsSectionFactory.createRuleStatisticsSection(rule, statisticsSection);
 					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), ruleStats);
-					previewPage.setTotalStatisticsSection(statisticsArea);
+					previewPage.setTotalStatisticsSection(statisticsSection);
 					addPage(previewPage);
 				}
 			});
@@ -113,7 +113,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.size() == 1
 				&& refactoringPipeline.getRules()
 					.get(0) instanceof StandardLoggerRule)) {
-			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsMetadata, summaryPageStatisticsArea);
+			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model, canFinish(), statisticsMetadata, summaryPageStatisticsSection);
 			addPage(summaryPage);
 		}
 	}
@@ -172,8 +172,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		return monitor -> {
 			try {
 				refactoringPipeline.doAdditionalRefactoring(page.getUnselectedChange(), page.getRule(), monitor);
-				this.statisticsArea.updateForSelected();
-				this.summaryPageStatisticsArea.updateForSelected();
+				this.statisticsSection.updateForSelected();
+				this.summaryPageStatisticsSection.updateForSelected();
 				if (monitor.isCanceled()) {
 					refactoringPipeline.clearStates();
 				}

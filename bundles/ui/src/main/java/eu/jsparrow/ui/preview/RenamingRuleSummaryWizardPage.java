@@ -29,8 +29,8 @@ import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 public class RenamingRuleSummaryWizardPage extends AbstractSummaryWizardPage<RenamingSummaryWizardPageModel> {
 
 	public RenamingRuleSummaryWizardPage(RefactoringPipeline refactoringPipeline,
-			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton, StatisticsSection statisticsArea) {
-		super(refactoringPipeline, wizardModel, enabledFinishButton, statisticsArea);
+			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton, StatisticsSection statisticsSection) {
+		super(refactoringPipeline, wizardModel, enabledFinishButton, statisticsSection);
 	}
 
 	/**

@@ -46,7 +46,7 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
-import eu.jsparrow.ui.preview.statistics.RuleStatisticsArea;
+import eu.jsparrow.ui.preview.statistics.RuleStatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSection;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
@@ -64,7 +64,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringPreviewWizardPage.class);
 
-	private RuleStatisticsArea ruleStatisticsArea;
+	private RuleStatisticsSection ruleStatisticsSection;
 	private StatisticsSection statisticsSection;
 
 	private ICompilationUnit currentCompilationUnit;
@@ -92,12 +92,12 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule, RefactoringRule rule,
-			RefactoringPreviewWizardModel wizardModel, boolean enabled, RuleStatisticsArea ruleStatisticsArea) {
+			RefactoringPreviewWizardModel wizardModel, boolean enabled, RuleStatisticsSection ruleStatisticsSection) {
 		super(rule.getRuleDescription()
 			.getName());
 		CustomTextEditChangePreviewViewer.setEnableDiffView(enabled);
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
-		this.ruleStatisticsArea = ruleStatisticsArea;
+		this.ruleStatisticsSection = ruleStatisticsSection;
 		setTitle(rule.getRuleDescription()
 			.getName());
 		setDescription(rule.getRuleDescription()
@@ -129,7 +129,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	}
 	
 	private void initializeDataBindings() {
-		this.ruleStatisticsArea.initializeDataBindings();
+		this.ruleStatisticsSection.initializeDataBindings();
 		getTotalStatisticsSection().ifPresent(StatisticsSection::initializeDataBindings);
 
 	}
@@ -155,7 +155,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 		setControl(container);
 
-		ruleStatisticsArea.createRuleRuleStatisticsView(container);
+		ruleStatisticsSection.createRuleRuleStatisticsView(container);
 
 		// Create the SashForm
 		Composite sash = new Composite(container, SWT.NONE);
@@ -308,7 +308,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			}
 			// This method simply counts checked items in the table. Not very
 			// MVC, and should be replaced with a proper solution
-			ruleStatisticsArea.updateIssuesAndTimeForSelected(rule, wizardModel);
+			ruleStatisticsSection.updateIssuesAndTimeForSelected(rule, wizardModel);
 		};
 	}
 

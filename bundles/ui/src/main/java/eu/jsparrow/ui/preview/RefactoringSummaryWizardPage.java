@@ -38,8 +38,8 @@ public class RefactoringSummaryWizardPage extends AbstractSummaryWizardPage<Refa
 
 	protected RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton,
-			StandaloneStatisticsMetadata statisticsMetadata, StatisticsSection statisticsArea) {
-		super(refactoringPipeline, wizardModel, enabledFinishButton, statisticsMetadata, statisticsArea);
+			StandaloneStatisticsMetadata statisticsMetadata, StatisticsSection statisticsSection) {
+		super(refactoringPipeline, wizardModel, enabledFinishButton, statisticsMetadata, statisticsSection);
 	}
 
 	/**

@@ -3,9 +3,9 @@ package eu.jsparrow.ui.preview.model;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 
-public class PayPerUseRuleStatisticsArePageModel extends RuleStatisticsAreaPageModel {
+public class PayPerUseRuleStatisticsSectionPageModel extends RuleStatisticsSectionPageModel {
 
-	public PayPerUseRuleStatisticsArePageModel(RefactoringRule rule) {
+	public PayPerUseRuleStatisticsSectionPageModel(RefactoringRule rule) {
 		super(rule);
 
 		PayPerUseCreditCalculator payPerUsecalculator = new PayPerUseCreditCalculator();

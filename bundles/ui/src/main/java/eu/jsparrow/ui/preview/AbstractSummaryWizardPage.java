@@ -61,7 +61,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 
 	protected Composite rootComposite;
 
-	private StatisticsSection statisticsArea;
+	private StatisticsSection statisticsSection;
 
 	protected TableViewer fileTableViewer;
 	protected TableViewer rulesPerFileTableViewer;
@@ -77,15 +77,15 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton,
-			StandaloneStatisticsMetadata statisticsMetadata, StatisticsSection statisticsArea) {
-		this(refactoringPipeline, wizardModel, enabledFinishButton, statisticsArea);
+			StandaloneStatisticsMetadata statisticsMetadata, StatisticsSection statisticsSection) {
+		this(refactoringPipeline, wizardModel, enabledFinishButton, statisticsSection);
 		this.statisticsMetadata = statisticsMetadata;
 		this.endTime = Instant.now()
 			.getEpochSecond();
 	}
 
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
-			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton, StatisticsSection statisticsArea) {
+			RefactoringPreviewWizardModel wizardModel, boolean enabledFinishButton, StatisticsSection statisticsSection) {
 		super("wizardPage"); //$NON-NLS-1$
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 
@@ -95,7 +95,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 		displayHeight = Display.getCurrent()
 			.getPrimaryMonitor()
 			.getBounds().height;
-		this.statisticsArea = statisticsArea;
+		this.statisticsSection = statisticsSection;
 	}
 
 	protected abstract T summaryPageModelFactory(RefactoringPipeline pipeline,
@@ -174,7 +174,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 	}
 
 	protected void addHeader() {
-		this.statisticsArea.createView(rootComposite);
+		this.statisticsSection.createView(rootComposite);
 	}
 
 	protected TableViewerColumn createSortableTableViewerColumn(TableViewer tableViewer, String title,
@@ -287,7 +287,7 @@ public abstract class AbstractSummaryWizardPage<T extends AbstractSummaryWizardP
 	}
 
 	protected void initializeDataBindings() {
-		this.statisticsArea.initializeDataBindings();
+		this.statisticsSection.initializeDataBindings();
 		initializeFileTableViewer();
 	}
 

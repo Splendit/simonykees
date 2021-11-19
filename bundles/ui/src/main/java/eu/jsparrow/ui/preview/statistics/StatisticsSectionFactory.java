@@ -10,43 +10,43 @@ import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
-import eu.jsparrow.ui.preview.model.PayPerUseRuleStatisticsArePageModel;
-import eu.jsparrow.ui.preview.model.RuleStatisticsAreaPageModel;
-import eu.jsparrow.ui.preview.model.StatisticsAreaPageModel;
+import eu.jsparrow.ui.preview.model.PayPerUseRuleStatisticsSectionPageModel;
+import eu.jsparrow.ui.preview.model.RuleStatisticsSectionPageModel;
+import eu.jsparrow.ui.preview.model.StatisticsSectionPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 
-public class StatisticsAreaFactory {
+public class StatisticsSectionFactory {
 	
-	private StatisticsAreaFactory() {
+	private StatisticsSectionFactory() {
 		/*
 		 * Hide default constructor
 		 */
 	}
 	
-	public static StatisticsSection createStatisticsArea(RefactoringPipeline refactoringPipeline) {
+	public static StatisticsSection createStatisticsSection(RefactoringPipeline refactoringPipeline) {
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		LicenseValidationResult validationResult = licenseUtil.getValidationResult();
 		LicenseType licenseType = validationResult.getLicenseType();
 		if(licenseType == LicenseType.PAY_PER_USE) {
-			return new TotalPayPerUseStatisticsArea(refactoringPipeline, StatisticsAreaFactory.createStatisticsAreaModel(refactoringPipeline.getRules()));
+			return new TotalPayPerUseStatisticsSection(refactoringPipeline, StatisticsSectionFactory.createStatisticsSectionModel(refactoringPipeline.getRules()));
 		} else {
-			return new EmptyStatisticsArea();
+			return new EmptyStatisticsSection();
 		}
 	}
 	
-	public static StatisticsSection createStatisticsAreaForSummaryPage(RefactoringPipeline refactoringPipeline) {
+	public static StatisticsSection createStatisticsSectionForSummaryPage(RefactoringPipeline refactoringPipeline) {
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		LicenseValidationResult validationResult = licenseUtil.getValidationResult();
 		LicenseType licenseType = validationResult.getLicenseType();
 		if(licenseType == LicenseType.PAY_PER_USE) {
-			return new TotalPayPerUseStatisticsArea(refactoringPipeline, StatisticsAreaFactory.createStatisticsAreaModel(refactoringPipeline.getRules()));
+			return new TotalPayPerUseStatisticsSection(refactoringPipeline, StatisticsSectionFactory.createStatisticsSectionModel(refactoringPipeline.getRules()));
 		} else {
-			return new MinimalStatisticsSection(refactoringPipeline, StatisticsAreaFactory.createStatisticsAreaModel(refactoringPipeline.getRules()));
+			return new MinimalStatisticsSection(refactoringPipeline, StatisticsSectionFactory.createStatisticsSectionModel(refactoringPipeline.getRules()));
 		}
 	}
 
-	public static StatisticsAreaPageModel createStatisticsAreaModel(List<RefactoringRule> allRules) {
+	public static StatisticsSectionPageModel createStatisticsSectionModel(List<RefactoringRule> allRules) {
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		LicenseValidationResult validationResult = licenseUtil.getValidationResult();
 		LicenseType licenseType = validationResult.getLicenseType();
@@ -62,26 +62,26 @@ public class StatisticsAreaFactory {
 			Long runDuration = StopWatchUtil.getTime();
 			PayPerUseCreditCalculator calculator = new PayPerUseCreditCalculator();
 			int totalRequired = calculator.findTotalRequiredCredit(allRules);
-			return new StatisticsAreaPageModel(runDuration, issuesFixedCount, timeSaved, totalRequired, totalAvailable);
+			return new StatisticsSectionPageModel(runDuration, issuesFixedCount, timeSaved, totalRequired, totalAvailable);
 		} else {
 			Long runDuration = StopWatchUtil.getTime();
-			return new StatisticsAreaPageModel(runDuration, issuesFixedCount, timeSaved, 0, Integer.MAX_VALUE);
+			return new StatisticsSectionPageModel(runDuration, issuesFixedCount, timeSaved, 0, Integer.MAX_VALUE);
 		}
 
 		
 	}
 	
-	public static RuleStatisticsArea createRuleStatisticsArea(RefactoringRule rule, StatisticsSection statisticsSection) {
+	public static RuleStatisticsSection createRuleStatisticsSection(RefactoringRule rule, StatisticsSection statisticsSection) {
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		LicenseValidationResult validatoinResult = licenseUtil.getValidationResult();
 		LicenseType licenseType = validatoinResult.getLicenseType();
 		if(licenseType == LicenseType.PAY_PER_USE) {
-			PayPerUseRuleStatisticsArePageModel model = new PayPerUseRuleStatisticsArePageModel(rule);
-			return  new PayPerUseRuleStatisticsArea(model, statisticsSection);
+			PayPerUseRuleStatisticsSectionPageModel model = new PayPerUseRuleStatisticsSectionPageModel(rule);
+			return  new PayPerUseRuleStatisticsSection(model, statisticsSection);
 			
 		} else {
-			RuleStatisticsAreaPageModel model = new RuleStatisticsAreaPageModel(rule);
-			return new RuleStatisticsArea(model);
+			RuleStatisticsSectionPageModel model = new RuleStatisticsSectionPageModel(rule);
+			return new RuleStatisticsSection(model);
 		}		
 	}
 

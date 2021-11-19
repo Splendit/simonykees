@@ -2,7 +2,7 @@ package eu.jsparrow.ui.preview.model;
 
 import java.time.Duration;
 
-public class StatisticsAreaPageModel extends BaseModel {
+public class StatisticsSectionPageModel extends BaseModel {
 
 	private Long runDuration;
 	private Integer totalIssuesFixed;
@@ -10,7 +10,7 @@ public class StatisticsAreaPageModel extends BaseModel {
 	private Integer totalRequiredCredit;
 	private Integer availableCredit;
 
-	public StatisticsAreaPageModel(Long runDuration, Integer totalIssuesFixed, Duration totalTimeSaved,
+	public StatisticsSectionPageModel(Long runDuration, Integer totalIssuesFixed, Duration totalTimeSaved,
 			Integer totalRequiredCredit, Integer availableCredit) {
 		setRunDuration(runDuration);
 		setTotalIssuesFixed(totalIssuesFixed);

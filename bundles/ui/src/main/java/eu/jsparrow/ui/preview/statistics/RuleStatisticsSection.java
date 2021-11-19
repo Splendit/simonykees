@@ -21,18 +21,18 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
-import eu.jsparrow.ui.preview.model.RuleStatisticsAreaPageModel;
+import eu.jsparrow.ui.preview.model.RuleStatisticsSectionPageModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
-public class RuleStatisticsArea {
+public class RuleStatisticsSection {
 	
 	protected DataBindingContext bindingContext = new DataBindingContext();
 	private CLabel techDebtLabel;
 	private CLabel issuesFixedLabel;
 	
-	protected RuleStatisticsAreaPageModel model;
+	protected RuleStatisticsSectionPageModel model;
 	
-	public RuleStatisticsArea(RuleStatisticsAreaPageModel model) {
+	public RuleStatisticsSection(RuleStatisticsSectionPageModel model) {
 		this.model = model;
 	}
 

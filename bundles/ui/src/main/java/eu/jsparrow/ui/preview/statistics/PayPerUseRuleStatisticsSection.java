@@ -17,20 +17,20 @@ import org.eclipse.swt.widgets.Label;
 
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
-import eu.jsparrow.ui.preview.model.PayPerUseRuleStatisticsArePageModel;
+import eu.jsparrow.ui.preview.model.PayPerUseRuleStatisticsSectionPageModel;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
-public class PayPerUseRuleStatisticsArea extends RuleStatisticsArea {
+public class PayPerUseRuleStatisticsSection extends RuleStatisticsSection {
 
 	private CLabel requiredCredit;
-	private PayPerUseRuleStatisticsArePageModel payPerUseModel;
-	private StatisticsSection statisticsArea;
+	private PayPerUseRuleStatisticsSectionPageModel payPerUseModel;
+	private StatisticsSection statisticsSection;
 
-	public PayPerUseRuleStatisticsArea(PayPerUseRuleStatisticsArePageModel model, StatisticsSection statisticsArea) {
+	public PayPerUseRuleStatisticsSection(PayPerUseRuleStatisticsSectionPageModel model, StatisticsSection statisticsSection) {
 		super(model);
 		this.payPerUseModel = model;
-		this.statisticsArea = statisticsArea;
+		this.statisticsSection = statisticsSection;
 	}
 
 	@Override
@@ -83,6 +83,6 @@ public class PayPerUseRuleStatisticsArea extends RuleStatisticsArea {
 			.getCredit();
 		int newCredit = payPerUseModel.getRequiredCredit() - deltaCredit;
 		payPerUseModel.setRequiredCredit(newCredit);
-		statisticsArea.updateForSelected(deltaTimesApplied, deltaTimeSaved, deltaCredit);
+		statisticsSection.updateForSelected(deltaTimesApplied, deltaTimeSaved, deltaCredit);
 	}
 }
