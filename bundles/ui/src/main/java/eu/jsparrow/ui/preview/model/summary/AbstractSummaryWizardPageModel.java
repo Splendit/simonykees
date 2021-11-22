@@ -36,7 +36,7 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 
 	private RefactoringPreviewWizardModel wizardModel;
 
-	public AbstractSummaryWizardPageModel(RefactoringPipeline refactoringPipeline,
+	protected AbstractSummaryWizardPageModel(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel) {
 		this.refactoringPipeline = refactoringPipeline;
 		this.wizardModel = wizardModel;
@@ -48,7 +48,9 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 	}
 
 	public void setRunDuration(Long runDuration) {
-		firePropertyChange("runDuration", this.runDuration, this.runDuration = runDuration); //$NON-NLS-1$
+		Long oldValue = this.runDuration;
+		this.runDuration = runDuration;
+		firePropertyChange("runDuration", oldValue, runDuration); //$NON-NLS-1$
 	}
 
 	public IObservableList<RuleTimesModel> getRuleTimes() {
@@ -68,15 +70,21 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 	}
 
 	public void setIssuesFixed(Integer issuesFixed) {
-		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed); //$NON-NLS-1$
+		Integer oldValue = this.issuesFixed;
+		this.issuesFixed = issuesFixed;
+		firePropertyChange("issuesFixed", oldValue, issuesFixed); //$NON-NLS-1$
 	}
 	
 	public void setRequiredCredit(Integer requiredCredit) {
-		firePropertyChange("requiredCredit", this.requiredCredit, this.requiredCredit = requiredCredit); //$NON-NLS-1$
+		Integer oldValue = this.requiredCredit;
+		this.requiredCredit = requiredCredit;
+		firePropertyChange("requiredCredit", oldValue, requiredCredit); //$NON-NLS-1$
 	}
 	
 	public void setAvailableCredit(Integer availableCredit) {
-		firePropertyChange("availableCredit", this.availableCredit, this.availableCredit = availableCredit); //$NON-NLS-1$
+		Integer oldValue = this.availableCredit;
+		this.availableCredit = availableCredit;
+		firePropertyChange("availableCredit", oldValue, availableCredit); //$NON-NLS-1$
 	}
 
 	public Duration getTimeSaved() {
@@ -84,7 +92,9 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 	}
 
 	public void setTimeSaved(Duration timeSaved) {
-		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved); //$NON-NLS-1$
+		Duration oldValue = this.timeSaved;
+		this.timeSaved = timeSaved;
+		firePropertyChange("timeSaved", oldValue, timeSaved); //$NON-NLS-1$
 	}
 
 	// Needed because we don't have full databinding/models yet, so we need to
@@ -178,8 +188,8 @@ public abstract class AbstractSummaryWizardPageModel extends BaseModel {
 	}
 	
 	private void updateAvailableCredit() {
-		Integer credit = LicenseUtil.get().getValidationResult().getCredit().get(); //FIXME
-		setAvailableCredit(credit);
+		LicenseUtil.get().getValidationResult().getCredit()
+			.ifPresent(this::setAvailableCredit);
 	}
 
 	private void updateTimeSaved() {

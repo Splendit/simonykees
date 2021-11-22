@@ -20,6 +20,8 @@ public class PayPerUseRuleStatisticsSectionPageModel extends RuleStatisticsSecti
 	}
 
 	public void setRequiredCredit(Integer requiredCredit) {
-		firePropertyChange("requiredCredit", this.requiredCredit, this.requiredCredit = requiredCredit); //$NON-NLS-1$
+		Integer oldValue = this.requiredCredit;
+		this.requiredCredit = requiredCredit;
+		firePropertyChange("requiredCredit", oldValue, requiredCredit); //$NON-NLS-1$
 	}
 }

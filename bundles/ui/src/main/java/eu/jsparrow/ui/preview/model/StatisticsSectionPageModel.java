@@ -20,24 +20,34 @@ public class StatisticsSectionPageModel extends BaseModel {
 	}
 
 	public void setRunDuration(Long runDuration) {
-		firePropertyChange("runDuration", this.runDuration, this.runDuration = runDuration); //$NON-NLS-1$
+		Long oldValue = this.runDuration;
+		this.runDuration = runDuration;
+		firePropertyChange("runDuration", oldValue, runDuration); //$NON-NLS-1$
 	}
 
 	public void setTotalIssuesFixed(Integer totalIssuesFixed) {
-		firePropertyChange("totalIssuesFixed", this.totalIssuesFixed, this.totalIssuesFixed = totalIssuesFixed); //$NON-NLS-1$
+		Integer oldValue = this.totalIssuesFixed;
+		this.totalIssuesFixed = totalIssuesFixed;
+		firePropertyChange("totalIssuesFixed", oldValue, totalIssuesFixed); //$NON-NLS-1$
 	}
 
 	public void setTotalTimeSaved(Duration totalTimeSaved) {
-		firePropertyChange("totalTimeSaved", this.totalTimeSaved, this.totalTimeSaved = totalTimeSaved); //$NON-NLS-1$
+		Duration oldValue = this.totalTimeSaved;
+		this.totalTimeSaved = totalTimeSaved;
+		firePropertyChange("totalTimeSaved", oldValue, totalTimeSaved); //$NON-NLS-1$
 	}
 
 	public void setTotalRequiredCredit(Integer totalRequiredCredit) {
-		firePropertyChange("totalRequiredCredit", this.totalRequiredCredit, //$NON-NLS-1$
-				this.totalRequiredCredit = totalRequiredCredit);
+		Integer oldValue = this.totalRequiredCredit;
+		this.totalRequiredCredit = totalRequiredCredit;
+		firePropertyChange("totalRequiredCredit", oldValue, totalRequiredCredit); //$NON-NLS-1$
+				
 	}
 
 	public void setAvailableCredit(Integer availableCredit) {
-		firePropertyChange("availableCredit", this.availableCredit, this.availableCredit = availableCredit); //$NON-NLS-1$
+		Integer oldValue = this.availableCredit;
+		this.availableCredit = availableCredit;
+		firePropertyChange("availableCredit", oldValue, availableCredit); //$NON-NLS-1$
 	}
 
 	public Long getRunDuration() {

@@ -26,11 +26,15 @@ public class RuleStatisticsSectionPageModel extends BaseModel {
 	}
 
 	public void setIssuesFixed(Integer issuesFixed) {
-		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed); //$NON-NLS-1$
+		Integer oldValue = this.issuesFixed;
+		this.issuesFixed = issuesFixed;
+		firePropertyChange("issuesFixed", oldValue, issuesFixed); //$NON-NLS-1$
 	}
 
 	public void setTimeSaved(Duration timeSaved) {
-		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved); //$NON-NLS-1$
+		Duration oldValue = this.timeSaved;
+		this.timeSaved = timeSaved;
+		firePropertyChange("timeSaved", oldValue, timeSaved); //$NON-NLS-1$
 	}
 
 }
