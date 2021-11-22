@@ -34,6 +34,7 @@ public class RefactoringSummaryWizardPageModel extends AbstractSummaryWizardPage
 		return changedFiles;
 	}
 
+	@Override
 	public void updateData() {
 		updateChangedFiles();
 		super.updateData();
@@ -51,9 +52,7 @@ public class RefactoringSummaryWizardPageModel extends AbstractSummaryWizardPage
 	private void addRulesPerFile() {
 		ChangedFilesModel firstFile = changedFiles.get(0);
 		firstFile.getRules()
-			.forEach(rule -> {
-				rulesPerFile.add(rule);
-			});
+			.forEach(rule -> rulesPerFile.add(rule));
 
 	}
 

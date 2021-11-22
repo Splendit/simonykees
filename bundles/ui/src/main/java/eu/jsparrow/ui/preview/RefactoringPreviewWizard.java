@@ -136,6 +136,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 				 * the view with current updated values
 				 */
 				((RefactoringPreviewWizardPage) page).populateViews(false);
+				statisticsSection.updateForSelected();
 			}
 		}
 	}

@@ -112,11 +112,4 @@ public class MinimalStatisticsSection implements StatisticsSection {
 		model.setTotalTimeSaved(timeSaved);
 	}
 
-	public void updateForSelected(int deltaTotalIssues, Duration deltaTimeSaved) {
-		int newTotalIssues = model.getTotalIssuesFixed() - deltaTotalIssues;
-		model.setTotalIssuesFixed(newTotalIssues);
-		Duration newSavedTime = model.getTotalTimeSaved().minus(deltaTimeSaved);
-		model.setTotalTimeSaved(newSavedTime);
-	}
-
 }

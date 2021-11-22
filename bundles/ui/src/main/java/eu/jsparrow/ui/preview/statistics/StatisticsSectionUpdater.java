@@ -26,8 +26,7 @@ public class StatisticsSectionUpdater {
 			updateIssuesTimeSavedAndCreditForSelected(totalStatisticsSection, totalSummary, ruleStatisticsSection, rule,
 					wizardModel);
 		} else {
-			updateIssuesAndTimeSavedForSelected((MinimalStatisticsSection) summary, ruleStatisticsSection, rule,
-					wizardModel);
+			updateIssuesAndTimeSavedForSelected(ruleStatisticsSection, rule, wizardModel);
 		}
 
 	}
@@ -44,24 +43,6 @@ public class StatisticsSectionUpdater {
 			.getRemediationCost()
 			.multipliedBy(timesApplied);
 		model.setTimeSaved(timeSaved);
-	}
-
-	public void updateIssuesAndTimeSavedForSelected(
-			MinimalStatisticsSection totalStatisticsSection,
-			RuleStatisticsSection ruleStatisticsSection,
-			RefactoringRule rule,
-			RefactoringPreviewWizardModel wizardModel) {
-		RuleStatisticsSectionPageModel model = ruleStatisticsSection.getModel();
-		int timesApplied = RuleApplicationCount.getFor(rule)
-			.getApplicationsForFiles(wizardModel.getFilesForRule(rule));
-		int deltaTimesApplied = model.getIssuesFixed() - timesApplied;
-		Duration timeSaved = rule.getRuleDescription()
-			.getRemediationCost()
-			.multipliedBy(timesApplied);
-		Duration deltaTimeSaved = model.getTimeSaved()
-			.minus(timeSaved);
-		updateIssuesAndTimeSavedForSelected(ruleStatisticsSection, rule, wizardModel);
-		totalStatisticsSection.updateForSelected(deltaTimesApplied, deltaTimeSaved);
 	}
 
 	public void updateIssuesTimeSavedAndCreditForSelected(
@@ -86,6 +67,6 @@ public class StatisticsSectionUpdater {
 		int newCredit = model.getRequiredCredit() - deltaCredit;
 		model.setRequiredCredit(newCredit);
 		totalStatisticsSection.updateForSelected(deltaTimesApplied, deltaTimeSaved, deltaCredit);
-		summary.updateForSelected(deltaTimesApplied, deltaTimeSaved, deltaCredit);
+		summary.updateForSelected();
 	}
 }
