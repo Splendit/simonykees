@@ -1,7 +1,5 @@
 package eu.jsparrow.ui.preview.statistics;
 
-import java.time.Duration;
-
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.IConverter;
@@ -15,10 +13,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.preview.model.PayPerUseRuleStatisticsSectionPageModel;
-import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 public class PayPerUseRuleStatisticsSection extends RuleStatisticsSection {
@@ -66,23 +61,5 @@ public class PayPerUseRuleStatisticsSection extends RuleStatisticsSection {
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	}
-
-	@Override
-	public void updateIssuesAndTimeForSelected(RefactoringRule rule, RefactoringPreviewWizardModel wizardModel) {
-		int timesApplied = RuleApplicationCount.getFor(rule)
-			.getApplicationsForFiles(wizardModel.getFilesForRule(rule));
-		int deltaTimesApplied = model.getIssuesFixed() - timesApplied;
-		Duration timeSaved = rule.getRuleDescription()
-			.getRemediationCost()
-			.multipliedBy(timesApplied);
-		Duration deltaTimeSaved = model.getTimeSaved()
-			.minus(timeSaved);
-		super.updateIssuesAndTimeForSelected(rule, wizardModel);
-		int deltaCredit = deltaTimesApplied * rule.getRuleDescription()
-			.getCredit();
-		int newCredit = payPerUseModel.getRequiredCredit() - deltaCredit;
-		payPerUseModel.setRequiredCredit(newCredit);
-		statisticsSection.updateForSelected(deltaTimesApplied, deltaTimeSaved, deltaCredit);
 	}
 }

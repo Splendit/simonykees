@@ -48,6 +48,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.statistics.RuleStatisticsSection;
 import eu.jsparrow.ui.preview.statistics.StatisticsSection;
+import eu.jsparrow.ui.preview.statistics.StatisticsSectionUpdater;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
 
@@ -66,6 +67,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 	private RuleStatisticsSection ruleStatisticsSection;
 	private StatisticsSection statisticsSection;
+	private StatisticsSectionUpdater statisticsUpdater;
 
 	private ICompilationUnit currentCompilationUnit;
 	private IChangePreviewViewer currentPreviewViewer;
@@ -92,9 +94,11 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private LicenseUtilService licenseUtil = LicenseUtil.get();
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule, RefactoringRule rule,
-			RefactoringPreviewWizardModel wizardModel, boolean enabled, RuleStatisticsSection ruleStatisticsSection) {
+			RefactoringPreviewWizardModel wizardModel, boolean enabled, RuleStatisticsSection ruleStatisticsSection,
+			StatisticsSectionUpdater statisticsUpdater) {
 		super(rule.getRuleDescription()
 			.getName());
+		this.statisticsUpdater = statisticsUpdater;
 		CustomTextEditChangePreviewViewer.setEnableDiffView(enabled);
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 		this.ruleStatisticsSection = ruleStatisticsSection;
@@ -308,7 +312,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			}
 			// This method simply counts checked items in the table. Not very
 			// MVC, and should be replaced with a proper solution
-			ruleStatisticsSection.updateIssuesAndTimeForSelected(rule, wizardModel);
+			statisticsUpdater.update(ruleStatisticsSection, rule, wizardModel);
 		};
 	}
 

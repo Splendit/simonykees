@@ -42,6 +42,7 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 		this.refactoringPipeline = refactoringPipeline;
 	}
 
+	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
@@ -93,6 +94,7 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 				UpdateValueStrategy.create(convertAvailableCredit));
 	}
 
+	@Override
 	public void createView(Composite rootComposite) {
 		Composite composite = new Composite(rootComposite, SWT.NONE);
 		GridLayout layout = new GridLayout(5, true);
@@ -125,6 +127,7 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
+	@Override
 	public void updateForSelected() {
 		PayPerUseCreditCalculator calculator = new PayPerUseCreditCalculator();
 		List<RefactoringRule> allRules = refactoringPipeline.getRules();
@@ -141,7 +144,6 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 		model.setTotalRequiredCredit(requiredCredit);
 	}
 
-	@Override
 	public void updateForSelected(int deltaTotalIssues, Duration deltaTimeSaved, int deltaRequiredCredit) {
 		int newTotalIssues = model.getTotalIssuesFixed() - deltaTotalIssues;
 		model.setTotalIssuesFixed(newTotalIssues);

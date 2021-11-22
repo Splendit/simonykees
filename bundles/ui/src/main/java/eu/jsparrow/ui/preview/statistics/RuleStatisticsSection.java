@@ -18,9 +18,6 @@ import org.eclipse.swt.widgets.Label;
 
 import eu.jsparrow.core.statistic.DurationFormatUtil;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
-import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.RuleStatisticsSectionPageModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
@@ -93,15 +90,7 @@ public class RuleStatisticsSection {
 		techDebtLabel.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
 	}
 	
-	public void updateIssuesAndTimeForSelected(RefactoringRule rule, RefactoringPreviewWizardModel wizardModel) {
-		int timesApplied = RuleApplicationCount.getFor(rule)
-			.getApplicationsForFiles(wizardModel.getFilesForRule(rule));
-		model.setIssuesFixed(timesApplied);
-
-		Duration timeSaved = rule.getRuleDescription()
-			.getRemediationCost()
-			.multipliedBy(timesApplied);
-		model.setTimeSaved(timeSaved);
-
+	public RuleStatisticsSectionPageModel getModel() {
+		return this.model;
 	}
 }
