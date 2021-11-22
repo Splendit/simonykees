@@ -19,13 +19,9 @@ import eu.jsparrow.ui.util.ResourceHelper;
 public class PayPerUseRuleStatisticsSection extends RuleStatisticsSection {
 
 	private CLabel requiredCredit;
-	private PayPerUseRuleStatisticsSectionPageModel payPerUseModel;
-	private StatisticsSection statisticsSection;
 
-	public PayPerUseRuleStatisticsSection(PayPerUseRuleStatisticsSectionPageModel model, StatisticsSection statisticsSection) {
+	public PayPerUseRuleStatisticsSection(PayPerUseRuleStatisticsSectionPageModel model) {
 		super(model);
-		this.payPerUseModel = model;
-		this.statisticsSection = statisticsSection;
 	}
 
 	@Override

@@ -105,7 +105,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
 				if (!changes.isEmpty()) {
-					RuleStatisticsSection ruleStats = StatisticsSectionFactory.createRuleStatisticsSection(rule, statisticsSection);
+					RuleStatisticsSection ruleStats = StatisticsSectionFactory.createRuleStatisticsSection(rule);
 					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model, canFinish(), ruleStats, updater);
 					previewPage.setTotalStatisticsSection(statisticsSection);
 					addPage(previewPage);

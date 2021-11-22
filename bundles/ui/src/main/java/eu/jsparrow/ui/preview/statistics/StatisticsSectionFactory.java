@@ -71,13 +71,13 @@ public class StatisticsSectionFactory {
 		
 	}
 	
-	public static RuleStatisticsSection createRuleStatisticsSection(RefactoringRule rule, StatisticsSection statisticsSection) {
+	public static RuleStatisticsSection createRuleStatisticsSection(RefactoringRule rule) {
 		LicenseUtil licenseUtil = LicenseUtil.get();
 		LicenseValidationResult validatoinResult = licenseUtil.getValidationResult();
 		LicenseType licenseType = validatoinResult.getLicenseType();
 		if(licenseType == LicenseType.PAY_PER_USE) {
 			PayPerUseRuleStatisticsSectionPageModel model = new PayPerUseRuleStatisticsSectionPageModel(rule);
-			return  new PayPerUseRuleStatisticsSection(model, statisticsSection);
+			return  new PayPerUseRuleStatisticsSection(model);
 			
 		} else {
 			RuleStatisticsSectionPageModel model = new RuleStatisticsSectionPageModel(rule);
