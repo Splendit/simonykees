@@ -2,6 +2,15 @@ package eu.jsparrow.ui.preview.model;
 
 import java.time.Duration;
 
+/**
+ * Encapsulates overall statistics of running jSparrow on some Java sources.
+ * These values are shown in the statistics section of the summary page. In case
+ * a Pay-Per-Use license is present, these values are shown in each page of the
+ * preview wizard.
+ * 
+ * @since 4.6.0
+ *
+ */
 public class StatisticsSectionPageModel extends BaseModel {
 
 	private Long runDuration;
@@ -41,7 +50,7 @@ public class StatisticsSectionPageModel extends BaseModel {
 		Integer oldValue = this.totalRequiredCredit;
 		this.totalRequiredCredit = totalRequiredCredit;
 		firePropertyChange("totalRequiredCredit", oldValue, totalRequiredCredit); //$NON-NLS-1$
-				
+
 	}
 
 	public void setAvailableCredit(Integer availableCredit) {

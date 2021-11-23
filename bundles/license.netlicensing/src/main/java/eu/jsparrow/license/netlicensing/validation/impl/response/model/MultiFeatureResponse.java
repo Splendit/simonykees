@@ -9,7 +9,7 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
  * {@link ValidationResult}.
  * 
  * @see <a href=
- *      "https://www.labs64.de/confluence/display/NLICPUB/Multi-Feature">Multi-Feature
+ *      "https://netlicensing.io/wiki/multi-feature">Multi-Feature
  *      License Model</a>
  *
  */

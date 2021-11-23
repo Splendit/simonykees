@@ -25,8 +25,15 @@ import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.preview.model.StatisticsSectionPageModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
+/**
+ * Creates the overall statistics section for the select rules wizard. Usually,
+ * these statistics are shown in the summary page. Does not include statistics
+ * for Pay-Per-Use license model.
+ * 
+ * @since 4.6.0
+ */
 public class MinimalStatisticsSection implements StatisticsSection {
-	
+
 	private RefactoringPipeline refactoringPipeline;
 	private CLabel totalExecutionTime;
 	private CLabel totalIssuesFixed;
@@ -107,7 +114,7 @@ public class MinimalStatisticsSection implements StatisticsSection {
 			.sum();
 		Duration timeSaved = allRules.stream()
 			.map(EliminatedTechnicalDebt::get)
-			.reduce(Duration.ZERO, Duration::plus);		
+			.reduce(Duration.ZERO, Duration::plus);
 		model.setTotalIssuesFixed(issuesFixedCount);
 		model.setTotalTimeSaved(timeSaved);
 	}

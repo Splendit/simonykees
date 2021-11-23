@@ -16,6 +16,12 @@ import org.eclipse.swt.widgets.Label;
 import eu.jsparrow.ui.preview.model.PayPerUseRuleStatisticsSectionPageModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
+/**
+ * Adds statistics related to Pay-Per-Use license model to the statistics of one
+ * single rule.
+ * 
+ * @since 4.6.0
+ */
 public class PayPerUseRuleStatisticsSection extends RuleStatisticsSection {
 
 	private CLabel requiredCredit;

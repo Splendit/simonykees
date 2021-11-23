@@ -21,14 +21,21 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.preview.model.RuleStatisticsSectionPageModel;
 import eu.jsparrow.ui.util.ResourceHelper;
 
+/**
+ * Creates UI components for displaying the statistics of a single rule in the
+ * select rule wizard.
+ * 
+ * @since 4.6.0
+ *
+ */
 public class RuleStatisticsSection {
-	
+
 	protected DataBindingContext bindingContext = new DataBindingContext();
 	private CLabel techDebtLabel;
 	private CLabel issuesFixedLabel;
-	
+
 	protected RuleStatisticsSectionPageModel model;
-	
+
 	public RuleStatisticsSection(RuleStatisticsSectionPageModel model) {
 		this.model = model;
 	}
@@ -39,7 +46,7 @@ public class RuleStatisticsSection {
 		layout.marginWidth = 10;
 		return layout;
 	}
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void initializeDataBindings() {
 
@@ -63,7 +70,6 @@ public class RuleStatisticsSection {
 
 	}
 
-	
 	public void createRuleRuleStatisticsView(Composite rootComposite) {
 		Composite composite = new Composite(rootComposite, SWT.NONE);
 		GridLayout layout = createGridLayout(2);
@@ -82,14 +88,13 @@ public class RuleStatisticsSection {
 		Image inLoveImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
 		issuesFixedLabel.setImage(inLoveImage);
 	}
-	
-	
+
 	protected void initTechDebtLabel(Composite composite) {
 		techDebtLabel = new CLabel(composite, SWT.NONE);
 		techDebtLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		techDebtLabel.setImage(ResourceHelper.createImage("icons/fa-clock.png"));//$NON-NLS-1$
 	}
-	
+
 	public RuleStatisticsSectionPageModel getModel() {
 		return this.model;
 	}

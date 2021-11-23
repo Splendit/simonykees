@@ -3,7 +3,15 @@ package eu.jsparrow.ui.preview.model;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 
+/**
+ * Adds required credit by one rule to the values encapsulated in {@link RuleStatisticsSectionPageModel}. 
+ * 
+ * @since 4.6.0
+ *
+ */
 public class PayPerUseRuleStatisticsSectionPageModel extends RuleStatisticsSectionPageModel {
+
+	private Integer requiredCredit;
 
 	public PayPerUseRuleStatisticsSectionPageModel(RefactoringRule rule) {
 		super(rule);
@@ -12,8 +20,6 @@ public class PayPerUseRuleStatisticsSectionPageModel extends RuleStatisticsSecti
 		int measuredCredit = payPerUsecalculator.measureWeight(rule);
 		setRequiredCredit(measuredCredit);
 	}
-
-	private Integer requiredCredit;
 
 	public Integer getRequiredCredit() {
 		return this.requiredCredit;

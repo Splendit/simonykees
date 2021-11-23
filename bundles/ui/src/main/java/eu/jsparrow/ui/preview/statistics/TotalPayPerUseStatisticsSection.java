@@ -26,6 +26,15 @@ import eu.jsparrow.ui.preview.model.StatisticsSectionPageModel;
 import eu.jsparrow.ui.util.PayPerUseCreditCalculator;
 import eu.jsparrow.ui.util.ResourceHelper;
 
+/**
+ * Creates the overall statistics section for the select rules wizard. Usually,
+ * these statistics are shown in the summary page. In addition to
+ * {@link MinimalStatisticsSection}, this also includes UI components for
+ * displaying statistics related to Pay-Per-Use license model.
+ * 
+ * @since 4.6.0
+ *
+ */
 public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 
 	private RefactoringPipeline refactoringPipeline;
@@ -138,7 +147,7 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 			.sum();
 		Duration timeSaved = allRules.stream()
 			.map(EliminatedTechnicalDebt::get)
-			.reduce(Duration.ZERO, Duration::plus);		
+			.reduce(Duration.ZERO, Duration::plus);
 		model.setTotalIssuesFixed(issuesFixedCount);
 		model.setTotalTimeSaved(timeSaved);
 		model.setTotalRequiredCredit(requiredCredit);
@@ -147,11 +156,12 @@ public class TotalPayPerUseStatisticsSection implements StatisticsSection {
 	public void updateForSelected(int deltaTotalIssues, Duration deltaTimeSaved, int deltaRequiredCredit) {
 		int newTotalIssues = model.getTotalIssuesFixed() - deltaTotalIssues;
 		model.setTotalIssuesFixed(newTotalIssues);
-		
+
 		int newRequiredCredit = model.getTotalRequiredCredit() - deltaRequiredCredit;
 		model.setTotalRequiredCredit(newRequiredCredit);
-		
-		Duration newSavedTime = model.getTotalTimeSaved().minus(deltaTimeSaved);
+
+		Duration newSavedTime = model.getTotalTimeSaved()
+			.minus(deltaTimeSaved);
 		model.setTotalTimeSaved(newSavedTime);
 	}
 }

@@ -8,6 +8,11 @@ import eu.jsparrow.ui.preview.model.PayPerUseRuleStatisticsSectionPageModel;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.RuleStatisticsSectionPageModel;
 
+/**
+ * This is a helper class to update the statistics sections after selecting or un-selecting changes in the preview wizard.   
+ *
+ * @since 4.6.0
+ */
 public class StatisticsSectionUpdater {
 
 	private StatisticsSection statisticsSection;
@@ -31,7 +36,7 @@ public class StatisticsSectionUpdater {
 
 	}
 
-	public void updateIssuesAndTimeSavedForSelected(RuleStatisticsSection ruleStatisticsSection,
+	private void updateIssuesAndTimeSavedForSelected(RuleStatisticsSection ruleStatisticsSection,
 			RefactoringRule rule,
 			RefactoringPreviewWizardModel wizardModel) {
 		RuleStatisticsSectionPageModel model = ruleStatisticsSection.getModel();
@@ -45,7 +50,7 @@ public class StatisticsSectionUpdater {
 		model.setTimeSaved(timeSaved);
 	}
 
-	public void updateIssuesTimeSavedAndCreditForSelected(
+	private void updateIssuesTimeSavedAndCreditForSelected(
 			TotalPayPerUseStatisticsSection totalStatisticsSection,
 			TotalPayPerUseStatisticsSection summary,
 			RuleStatisticsSection ruleStatisticsSection,

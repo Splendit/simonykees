@@ -6,6 +6,13 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
+/**
+ * Encapsulates the number of issues fixed and the duration of the time saved by
+ * one rule. These values are shown as rule statistics in the preview wizard.
+ * 
+ * @since 4.6.0
+ *
+ */
 public class RuleStatisticsSectionPageModel extends BaseModel {
 
 	private Integer issuesFixed;
