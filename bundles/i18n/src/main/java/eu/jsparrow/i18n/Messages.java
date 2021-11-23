@@ -527,6 +527,7 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_useProfileOptionRadioGroupTitle;
 	public static String SimonykeesPreferencePage_useProfileOptionSelectedProfile;
 	public static String SimonykeesPreferencePageLicense_jsparrow_free;
+	public static String SimonykeesPreferencePageLicense_jsparrow_pay_per_use_available_credit;
 	public static String SimonykeesPreferencePageLicense_jsparrow_pro_valid_until;
 	public static String SimonykeesPreferencePageLicense_jsparrow_starter;
 	public static String SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow;

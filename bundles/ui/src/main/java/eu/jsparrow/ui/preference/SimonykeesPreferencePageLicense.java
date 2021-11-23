@@ -35,6 +35,7 @@ import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -190,10 +191,19 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 					: Messages.SimonykeesPreferencePageLicense_jsparrow_free;
 		}
 
+		LicenseType licenseType = result.getLicenseType();
+		if (licenseType == LicenseType.PAY_PER_USE) {
+			Integer availableCredit = result.getCredit()
+				.orElse(0);
+			return String.format(Messages.SimonykeesPreferencePageLicense_jsparrow_pay_per_use_available_credit,
+					result.getKey(), availableCredit);
+		}
+
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 		ZonedDateTime expireDate = result.getExpirationDate();
 		String formattedExpireDate = expireDate.format(formatter);
-		return String.format(Messages.SimonykeesPreferencePageLicense_jsparrow_pro_valid_until, result.getKey(), formattedExpireDate);
+		return String.format(Messages.SimonykeesPreferencePageLicense_jsparrow_pro_valid_until, result.getKey(),
+				formattedExpireDate);
 	}
 
 	@Override
