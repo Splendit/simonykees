@@ -196,44 +196,33 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 			.map(AssertJAssertThatStatementData::getAssertThatStatement)
 			.collect(Collectors.toList());
 
-		List<InvocationChainElement> invocationChainElementList = listOfAllAssertThatData.stream()
+		List<MethodInvocation> invocationChainElementList = listOfAllAssertThatData.stream()
 			.map(AssertJAssertThatStatementData::getChainFollowingAssertThat)
 			.flatMap(List<MethodInvocation>::stream)
-			.map(this::createInvocationChainElement)
 			.collect(Collectors.toList());
 
 		return new TransformationData(block, firstAssertThatStatement, statementsToRemove, assertThatInvocation,
 				invocationChainElementList);
 	}
 
-	private InvocationChainElement createInvocationChainElement(MethodInvocation invocation) {
-		String methodName = invocation.getName()
-			.getIdentifier();
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(invocation.arguments(), Expression.class);
-		return new InvocationChainElement(methodName, arguments);
-	}
-
 	private List<MethodInvocation> collectInvocationChainElements(MethodInvocation methodInvocation) {
 		List<MethodInvocation> chainElements = new ArrayList<>();
-		MethodInvocation chainElement = methodInvocation;
-		while (chainElement != null) {
-			chainElements.add(0, chainElement);
-			chainElement = findLeftHandSideInvocation(chainElement).orElse(null);
+		chainElements.add(methodInvocation);
+		Expression expression = methodInvocation.getExpression();
+		while (expression != null) {
+			if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
+				MethodInvocation leftHandSideChainElement = (MethodInvocation) expression;
+				chainElements.add(0, leftHandSideChainElement);
+				expression = leftHandSideChainElement.getExpression();
+			} else {
+				break;
+			}
 		}
-
 		return chainElements;
 	}
 
-	private Optional<MethodInvocation> findLeftHandSideInvocation(MethodInvocation methodInvocation) {
-		Expression expression = methodInvocation.getExpression();
-		if (expression != null && expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			return Optional.of((MethodInvocation) expression);
-		}
-		return Optional.empty();
-	}
-
 	private void transform(TransformationData data) {
-		MethodInvocation newChain = createNewMethodInvocationChain(data.getAssertThatInvocation(),
+		MethodInvocation newChain = createNewMethodInvocationChain1(data.getAssertThatInvocation(),
 				data.getInvocationChainElementList());
 		AST ast = astRewrite.getAST();
 		ExpressionStatement newExpressionStatement = ast.newExpressionStatement(newChain);
@@ -244,11 +233,11 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 		onRewrite();
 	}
 
-	private MethodInvocation createNewMethodInvocationChain(MethodInvocation assertThatInvocation,
-			List<InvocationChainElement> invocationChainElementList) {
+	private MethodInvocation createNewMethodInvocationChain1(MethodInvocation assertThatInvocation,
+			List<MethodInvocation> invocationChainElementList) {
 		MethodInvocation chain = (MethodInvocation) astRewrite.createCopyTarget(assertThatInvocation);
-		for (InvocationChainElement chainElement : invocationChainElementList) {
-			MethodInvocation newMethodInvocation = createNewMethodInvocation(chainElement);
+		for (MethodInvocation chainElement : invocationChainElementList) {
+			MethodInvocation newMethodInvocation = copyMethodInvocationWithoutExpression(chainElement);
 			newMethodInvocation.setExpression(chain);
 			chain = newMethodInvocation;
 		}
@@ -256,15 +245,17 @@ public class ChainAssertJAssertThatStatementsASTVisitor extends AbstractASTRewri
 	}
 
 	@SuppressWarnings("unchecked")
-	private MethodInvocation createNewMethodInvocation(InvocationChainElement invocationChainElement) {
+	private MethodInvocation copyMethodInvocationWithoutExpression(MethodInvocation methodInvocation) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation newMethodInvocation = ast.newMethodInvocation();
-		newMethodInvocation.setName(ast.newSimpleName(invocationChainElement.getMethodName()));
-		List<Expression> newMethodArguments = newMethodInvocation.arguments();
-		invocationChainElement.getArguments()
-			.forEach(argument -> {
-				newMethodArguments.add((Expression) astRewrite.createCopyTarget(argument));
-			});
+		newMethodInvocation.setName(ast.newSimpleName(methodInvocation.getName()
+			.getIdentifier()));
+
+		List<Expression> arguments = methodInvocation.arguments();
+		List<Expression> newArguments = newMethodInvocation.arguments();
+		arguments.stream()
+			.map(argument -> (Expression) astRewrite.createCopyTarget(argument))
+			.forEach(newArguments::add);
 		return newMethodInvocation;
 	}
 }

@@ -11,11 +11,11 @@ class TransformationData {
 	private final ExpressionStatement firstAssertThatStatement;
 	private final List<ExpressionStatement> assertJAssertThatStatementsToRemove;
 	private final MethodInvocation assertThatInvocation;
-	private final List<InvocationChainElement> invocationChainElementList;
+	private final List<MethodInvocation> invocationChainElementList;
 
 	TransformationData(Block block, ExpressionStatement firstAssertThatStatement,
 			List<ExpressionStatement> assertJAssertThatStatementsToRemove, MethodInvocation assertThatInvocation,
-			List<InvocationChainElement> invocationChainElementList) {
+			List<MethodInvocation> invocationChainElementList) {
 		this.block = block;
 		this.firstAssertThatStatement = firstAssertThatStatement;
 		this.assertJAssertThatStatementsToRemove = assertJAssertThatStatementsToRemove;
@@ -39,7 +39,7 @@ class TransformationData {
 		return assertThatInvocation;
 	}
 
-	List<InvocationChainElement> getInvocationChainElementList() {
+	List<MethodInvocation> getInvocationChainElementList() {
 		return invocationChainElementList;
 	}		
 }
