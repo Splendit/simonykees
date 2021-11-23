@@ -17,7 +17,7 @@ public class PayPerUseRuleStatisticsSectionPageModel extends RuleStatisticsSecti
 		super(rule);
 
 		PayPerUseCreditCalculator payPerUsecalculator = new PayPerUseCreditCalculator();
-		int measuredCredit = payPerUsecalculator.measureWeight(rule);
+		int measuredCredit = payPerUsecalculator.measureCredit(rule);
 		setRequiredCredit(measuredCredit);
 	}
 
